@@ -24,7 +24,7 @@ an additional \code{interdep_data} class.
 }
 \examples{
 validate_interdep_data(
-  data.frame(dyad_id = c(1, 1, 2, 2), person_id = c(1,2,3,4), x = 1:4),
+  data.frame(dyad_id = c(1, 1, 2, 2), person_id = c(1, 2, 3, 4), x = 1:4),
   group = dyad_id,
   member = person_id
 )

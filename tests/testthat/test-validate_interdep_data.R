@@ -36,6 +36,32 @@ test_that("validate_interdep_data rejects duplicate members within group-time", 
   )
 })
 
+test_that("validate_interdep_data rejects groups without two unique members", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "A", "C", "D")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id),
+    "Each `group` must contain exactly two unique members.",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data rejects cross-sectional groups with more than two rows", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2),
+    person_id = c("A", "B", "A", "C", "D")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id),
+    "Each `group` must contain exactly two rows. For longitudinal data specify `time`.",
+    fixed = TRUE
+  )
+})
+
 test_that("validate_interdep_data allows one missing member within group-time", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2, 2),
