@@ -90,9 +90,19 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
   # Validating that each group x time (if provided) instance has no more than 2 rows.
   if (has_time) {
     group_time_sizes <- dplyr::count(out, .data[[group_name]], .data[[time_name]], name = 'n')[['n']]
+    group_time_member_sizes <- dplyr::count(
+      out,
+      .data[[group_name]],
+      .data[[time_name]],
+      .data[[member_name]],
+      name = 'n'
+    )[["n"]]
     n_groups <- length(unique(out[[group_name]]))
     if (any(group_time_sizes > 2)) {
-      stop("Each `group` must contain exactly one or two rows per time point.", call. = FALSE)
+      stop("Each observed `group`-`time` combination must contain at most two rows.", call. = FALSE)
+    }
+    if (any(group_time_member_sizes > 1)) {
+      stop("Each `member` must appear at most once per `group`-`time` combination.", call. = FALSE)
     }
   } else {
     group_sizes <- dplyr::count(out, .data[[group_name]], name = 'n')[['n']]
