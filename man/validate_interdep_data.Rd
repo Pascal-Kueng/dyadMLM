@@ -4,10 +4,14 @@
 \alias{validate_interdep_data}
 \title{Validate package input data (dyadi data)}
 \usage{
-validate_interdep_data(data)
+validate_interdep_data(data, group, time = NULL)
 }
 \arguments{
 \item{data}{A data frame or tibble.}
+
+\item{group}{Column identifying the dyad.}
+
+\item{time}{Column identifying time or measurement order (optional).}
 }
 \value{
 A tibble with class \code{interdep_data}.
@@ -17,5 +21,8 @@ Checks that \code{data} is a data frame or tibble and returns it as a tibble wit
 an additional \code{interdep_data} class.
 }
 \examples{
-validate_interdep_data(data.frame(x = 1:3))
+validate_interdep_data(
+  data.frame(dyad_id = c(1, 1, 2, 2), x = 1:4),
+  group = dyad_id
+)
 }
