@@ -14,7 +14,7 @@
 #'
 #' @examples
 #' validate_interdep_data(
-#'   data.frame(dyad_id = c(1, 1, 2, 2), person_id = c(1,2,3,4), x = 1:4),
+#'   data.frame(dyad_id = c(1, 1, 2, 2), person_id = c(1, 2, 3, 4), x = 1:4),
 #'   group = dyad_id,
 #'   member = person_id
 #' )
@@ -49,32 +49,31 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
   }
 
   # Validating that all variables exist.
-  if (has_time) {
-    if (!time_name %in% names(out)) {
-      stop("`time` must refer to an existing column in `data`.", call. = FALSE)
-    }
-
-    if (any(is.na(out[[time_name]]))) {
-      stop("`time` must not contain missing values.", call. = FALSE)
-    }
+  if (!group_name %in% names(out)) {
+    stop("`group` must refer to an existing column in `data`.", call. = FALSE)
   }
 
   if (!member_name %in% names(out)) {
     stop("`member` must refer to an existing column in `data`.", call. = FALSE)
   }
 
-  if (any(is.na(out[[member_name]]))) {
-    stop("`member` must not contain missing values.", call. = FALSE)
-  }
-
-  if (!group_name %in% names(out)) {
-    stop("`group` must refer to an existing column in `data`.", call. = FALSE)
+  if (has_time && !time_name %in% names(out)) {
+    stop("`time` must refer to an existing column in `data`.", call. = FALSE)
   }
 
   if (any(is.na(out[[group_name]]))) {
     stop("`group` must not contain missing values.", call. = FALSE)
   }
 
+  if (any(is.na(out[[member_name]]))) {
+    stop("`member` must not contain missing values.", call. = FALSE)
+  }
+
+  if (has_time && any(is.na(out[[time_name]]))) {
+    stop("`time` must not contain missing values.", call. = FALSE)
+  }
+
+  n_groups <- dplyr::n_distinct(out[[group_name]])
 
   # Validating that each group has exactly two members
   members_per_group <- dplyr::summarise(
@@ -97,20 +96,17 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
       name = "n"
     )[["n"]]
 
-    n_groups <- length(unique(out[[group_name]]))
-
     if (any(group_time_member_sizes > 1)) {
       stop("Each `member` must appear at most once per `group`-`time` combination.", call. = FALSE)
     }
   } else {
-    group_sizes <- dplyr::count(out, .data[[group_name]], name = 'n')[['n']]
-    n_groups <- length(group_sizes)
+    group_sizes <- dplyr::count(out, .data[[group_name]], name = "n")[["n"]]
     if (any(group_sizes != 2)) {
       stop("Each `group` must contain exactly two rows. For longitudinal data specify `time`.", call. = FALSE)
     }
   }
 
-  if (n_groups < 2 ) {
+  if (n_groups < 2) {
     stop("At least 2 groups are needed.", call. = FALSE)
   }
 
