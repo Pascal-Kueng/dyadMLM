@@ -4,12 +4,14 @@
 \alias{validate_interdep_data}
 \title{Validate package input data (dyadi data)}
 \usage{
-validate_interdep_data(data, group, time = NULL)
+validate_interdep_data(data, group, member, time = NULL)
 }
 \arguments{
 \item{data}{A data frame or tibble.}
 
 \item{group}{Column identifying the dyad.}
+
+\item{member}{Column identifying the members of the dyad (e.g., a person-id).}
 
 \item{time}{Column identifying time or measurement order (optional).}
 }
@@ -22,7 +24,8 @@ an additional \code{interdep_data} class.
 }
 \examples{
 validate_interdep_data(
-  data.frame(dyad_id = c(1, 1, 2, 2), x = 1:4),
-  group = dyad_id
+  data.frame(dyad_id = c(1, 1, 2, 2), person_id = c(1,2,3,4), x = 1:4),
+  group = dyad_id,
+  member = person_id
 )
 }
