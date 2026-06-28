@@ -35,3 +35,16 @@ test_that("validate_interdep_data rejects duplicate members within group-time", 
     fixed = TRUE
   )
 })
+
+test_that("validate_interdep_data allows one missing member within group-time", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2, 2),
+    person_id = c("A", "B", "A", "C", "D", "C"),
+    time = c(1, 1, 2, 1, 1, 2)
+  )
+
+  result <- validate_interdep_data(data, group = dyad_id, member = person_id, time = time)
+
+  expect_s3_class(result, "interdep_data")
+  expect_equal(nrow(result), 6)
+})

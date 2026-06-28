@@ -1,4 +1,4 @@
-#' Validate package input data (dyadi data)
+#' Validate package input data (dyadic data)
 #'
 #' Checks that `data` is a data frame or tibble and returns it as a tibble with
 #' an additional `interdep_data` class.
@@ -27,7 +27,7 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
 
   out <- tibble::as_tibble(data)
 
-  # Extracing variables
+  # Extracting variables
   group <- rlang::enquo(group)
   if (rlang::quo_is_missing(group)) {
     stop("`group` must be supplied.", call. = FALSE)
@@ -87,20 +87,18 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
     stop("Each `group` must contain exactly two unique members.", call. = FALSE)
   }
 
-  # Validating that each group x time (if provided) instance has no more than 2 rows.
+  # Validating that each member appears at most once per group x time instance.
   if (has_time) {
-    group_time_sizes <- dplyr::count(out, .data[[group_name]], .data[[time_name]], name = 'n')[['n']]
     group_time_member_sizes <- dplyr::count(
       out,
       .data[[group_name]],
       .data[[time_name]],
       .data[[member_name]],
-      name = 'n'
+      name = "n"
     )[["n"]]
+
     n_groups <- length(unique(out[[group_name]]))
-    if (any(group_time_sizes > 2)) {
-      stop("Each observed `group`-`time` combination must contain at most two rows.", call. = FALSE)
-    }
+
     if (any(group_time_member_sizes > 1)) {
       stop("Each `member` must appear at most once per `group`-`time` combination.", call. = FALSE)
     }

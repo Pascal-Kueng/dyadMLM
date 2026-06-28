@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate_interdep_data.R
 \name{validate_interdep_data}
 \alias{validate_interdep_data}
-\title{Validate package input data (dyadi data)}
+\title{Validate package input data (dyadic data)}
 \usage{
 validate_interdep_data(data, group, member, time = NULL)
 }
