@@ -4,7 +4,7 @@
 \alias{validate_interdep_data}
 \title{Validate dyadic input data}
 \usage{
-validate_interdep_data(data, group, member, time = NULL)
+validate_interdep_data(data, group, member, role = NULL, time = NULL)
 }
 \arguments{
 \item{data}{A long-format data frame or tibble.}
@@ -12,14 +12,17 @@ validate_interdep_data(data, group, member, time = NULL)
 \item{group}{Column identifying the dyad.}
 
 \item{member}{Column identifying the two people or members within each dyad,
-such as a person ID. Role variables, such as gender, can be kept as
-separate columns.}
+such as a person ID.}
+
+\item{role}{Optional column identifying role that can be used to distinguish
+partners within a dyad, such as gender. If no role is supplied, all dyads
+in the data are treated as exchangeable.}
 
 \item{time}{Optional column identifying time or measurement order.}
 }
 \value{
 A tibble with class \code{interdep_data} and metadata about the dyad,
-member, and optional time columns.
+member, optional role, and optional time columns.
 }
 \description{
 Checks whether \code{data} has a valid long-format dyadic structure and returns it

@@ -27,6 +27,7 @@ test_that("validate_interdep_data stores input metadata", {
     list(
       group = "dyad_id",
       member = "person_id",
+      role = NULL,
       time = NULL,
       n_dyads = 2L,
       longitudinal = FALSE
@@ -80,6 +81,12 @@ test_that("validate_interdep_data rejects missing columns", {
   )
 
   expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id, role = missing_role),
+    "`role` must refer to an existing column in `data`.",
+    fixed = TRUE
+  )
+
+  expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, time = missing_time),
     "`time` must refer to an existing column in `data`.",
     fixed = TRUE
@@ -121,6 +128,21 @@ test_that("validate_interdep_data rejects missing grouping values", {
     "`time` must not contain missing values.",
     fixed = TRUE
   )
+
+  expect_error(
+    validate_interdep_data(
+      data.frame(
+        dyad_id = c(1, 1, 2, 2),
+        person_id = c("A", "B", "C", "D"),
+        role = c("female", NA, "female", "male")
+      ),
+      group = dyad_id,
+      member = person_id,
+      role = role
+    ),
+    "`role` must not contain missing values.",
+    fixed = TRUE
+  )
 })
 
 test_that("validate_interdep_data rejects duplicate members within group-time", {
@@ -146,6 +168,52 @@ test_that("validate_interdep_data rejects groups without two unique members", {
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id),
     "Each `group` must contain exactly two unique members.",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data stores role metadata", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  result <- validate_interdep_data(data, group = dyad_id, member = person_id, role = role)
+
+  expect_equal(attr(result, "interdep")$role, "role")
+})
+
+test_that("validate_interdep_data accepts stable longitudinal roles", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2, 2),
+    person_id = c("A", "B", "A", "C", "D", "C"),
+    role = c("female", "male", "female", "female", "male", "female"),
+    time = c(1, 1, 2, 1, 1, 2)
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time
+  )
+
+  expect_equal(attr(result, "interdep")$role, "role")
+})
+
+test_that("validate_interdep_data rejects inconsistent roles within member", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2, 2),
+    person_id = c("A", "B", "A", "C", "D", "C"),
+    role = c("female", "male", "male", "female", "male", "female"),
+    time = c(1, 1, 2, 1, 1, 2)
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id, role = role, time = time),
+    "Each `member` must have exactly one `role` within each `group`.",
     fixed = TRUE
   )
 })
@@ -192,6 +260,7 @@ test_that("validate_interdep_data allows one missing member within group-time", 
     list(
       group = "dyad_id",
       member = "person_id",
+      role = NULL,
       time = "time",
       n_dyads = 2L,
       longitudinal = TRUE

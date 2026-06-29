@@ -16,7 +16,7 @@
 #' @param time Optional column identifying time or measurement order.
 #'
 #' @return A tibble with class `interdep_data` and metadata about the dyad,
-#'   member, and optional time columns.
+#'   member, optional role, and optional time columns.
 #' @importFrom rlang .data
 #' @export
 #'
@@ -133,6 +133,19 @@ validate_interdep_data <- function(data, group, member, role = NULL, time = NULL
 
   if (n_groups < 2) {
     stop("At least 2 groups are needed.", call. = FALSE)
+  }
+
+  # Validating that each member only has a single consistent role across time
+  if (has_role) {
+    roles_per_member <- dplyr::summarise(
+      dplyr::group_by(out, .data[[group_name]], .data[[member_name]]),
+      n_roles = dplyr::n_distinct(.data[[role_name]]),
+      .groups = "drop"
+    )[["n_roles"]]
+
+    if (any(roles_per_member != 1)) {
+      stop("Each `member` must have exactly one `role` within each `group`.", call. = FALSE)
+    }
   }
 
   attr(out, "interdep") <- list(
