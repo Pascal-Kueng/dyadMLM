@@ -7,11 +7,13 @@
 validate_interdep_data(data, group, member, time = NULL)
 }
 \arguments{
-\item{data}{A data frame or tibble.}
+\item{data}{A long-format data frame or tibble.}
 
 \item{group}{Column identifying the dyad.}
 
-\item{member}{Column identifying the two members within each dyad.}
+\item{member}{Column identifying the two people or members within each dyad,
+such as a person ID. Role variables, such as gender, can be kept as
+separate columns.}
 
 \item{time}{Optional column identifying time or measurement order.}
 }
@@ -20,8 +22,11 @@ A tibble with class \code{interdep_data} and metadata about the dyad,
 member, and optional time columns.
 }
 \description{
-Checks whether \code{data} has a valid dyadic structure and returns it as a tibble
-with an additional \code{interdep_data} class.
+Checks whether \code{data} has a valid long-format dyadic structure and returns it
+as a tibble with an additional \code{interdep_data} class. Cross-sectional data
+should contain one row per member within each dyad. Intensive longitudinal
+data should contain one row per member and measurement occasion within each
+dyad.
 }
 \examples{
 validate_interdep_data(

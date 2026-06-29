@@ -5,13 +5,12 @@
 \alias{example_dyadic_ILD}
 \title{Example intensive longitudinal dyadic data}
 \format{
-A data frame with 1,120 rows and 7 variables:
+A data frame with 1,120 rows and 6 variables:
 \describe{
-\item{userID}{Unique person identifier.}
+\item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}
 \item{diaryday}{Measurement day.}
 \item{gender}{Gender code used in the simulation.}
-\item{member}{Member identifier within dyad.}
 \item{closeness}{Simulated closeness outcome, with some missing values.}
 \item{provided_support}{Simulated provided support score, with some missing values.}
 }
@@ -26,6 +25,7 @@ Bayesian Multilevel Modelling} (v2.0.9). Zenodo.
 example_dyadic_ILD
 }
 \description{
-A simulated intensive longitudinal dataset for distinguishable dyads.
+A simulated intensive longitudinal long-format dataset for distinguishable
+dyads. Each dyad contributes one row per member and measurement occasion.
 }
 \keyword{datasets}

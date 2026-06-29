@@ -132,6 +132,8 @@ rtweedie_cp <- function(mu, phi, power) {
 
 dyad_data <- tibble::tibble(
   coupleID = seq_len(n_couples),
+  personID_female = as.integer(2 * seq_len(n_couples) - 1),
+  personID_male = as.integer(2 * seq_len(n_couples)),
   motivation_female = motivation_pair[, 1],
   motivation_male = motivation_pair[, 2],
   re_female = re_pair[, 1],
@@ -160,9 +162,8 @@ dyad_data <- dplyr::mutate(
 
 person_female <- dplyr::transmute(
   dyad_data,
-  userID = paste0(coupleID, "_1"),
+  personID = personID_female,
   coupleID = coupleID,
-  member = 1L,
   gender = 1L,
   motivation = motivation_female,
   physical_activity = activity_female
@@ -170,9 +171,8 @@ person_female <- dplyr::transmute(
 
 person_male <- dplyr::transmute(
   dyad_data,
-  userID = paste0(coupleID, "_2"),
+  personID = personID_male,
   coupleID = coupleID,
-  member = 2L,
   gender = 2L,
   motivation = motivation_male,
   physical_activity = activity_male
@@ -182,7 +182,7 @@ example_dyadic_crosssectional_tweedie <- dplyr::bind_rows(person_female, person_
 example_dyadic_crosssectional_tweedie <- dplyr::arrange(
   example_dyadic_crosssectional_tweedie,
   coupleID,
-  member
+  gender
 )
 
 ###############################################################################
@@ -197,7 +197,7 @@ missing_motivation_rows <- sample(
 )
 example_dyadic_crosssectional_tweedie$motivation[missing_motivation_rows] <- NA_real_
 
-# Rare person-level nonresponse. The row stays in the data with dyad/member/role
+# Rare person-level nonresponse. The row stays in the data with dyad/person/role
 # information intact, but all measured variables for that row are missing.
 n_nonresponse_rows <- 4
 available_rows <- setdiff(

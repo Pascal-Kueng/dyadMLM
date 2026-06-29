@@ -1,11 +1,16 @@
 #' Validate dyadic input data
 #'
-#' Checks whether `data` has a valid dyadic structure and returns it as a tibble
-#' with an additional `interdep_data` class.
+#' Checks whether `data` has a valid long-format dyadic structure and returns it
+#' as a tibble with an additional `interdep_data` class. Cross-sectional data
+#' should contain one row per member within each dyad. Intensive longitudinal
+#' data should contain one row per member and measurement occasion within each
+#' dyad.
 #'
-#' @param data A data frame or tibble.
+#' @param data A long-format data frame or tibble.
 #' @param group Column identifying the dyad.
-#' @param member Column identifying the two members within each dyad.
+#' @param member Column identifying the two people or members within each dyad,
+#'   such as a person ID. Role variables, such as gender, can be kept as
+#'   separate columns.
 #' @param time Optional column identifying time or measurement order.
 #'
 #' @return A tibble with class `interdep_data` and metadata about the dyad,

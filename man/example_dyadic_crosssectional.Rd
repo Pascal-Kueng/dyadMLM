@@ -5,11 +5,10 @@
 \alias{example_dyadic_crosssectional}
 \title{Example cross-sectional dyadic data}
 \format{
-A data frame with 190 rows and 6 variables:
+A data frame with 190 rows and 5 variables:
 \describe{
-\item{userID}{Unique person identifier.}
+\item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}
-\item{member}{Member identifier within dyad.}
 \item{gender}{Gender code used in the simulation.}
 \item{communication}{Simulated communication score, with some missing values.}
 \item{satisfaction}{Simulated satisfaction outcome, with some missing values.}
@@ -25,6 +24,7 @@ Bayesian Multilevel Modelling} (v2.0.9). Zenodo.
 example_dyadic_crosssectional
 }
 \description{
-A simulated cross-sectional dataset for distinguishable dyads.
+A simulated cross-sectional long-format dataset for distinguishable dyads.
+Each dyad contributes one row per member.
 }
 \keyword{datasets}

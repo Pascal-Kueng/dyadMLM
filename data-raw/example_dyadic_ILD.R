@@ -36,7 +36,7 @@ persons <- tibble::tibble(
   gender = ifelse(member == 1L, 1L, 2L),
   is_female = as.integer(gender == 1L),
   is_male = as.integer(gender == 2L),
-  userID = paste0(coupleID, "_", member)
+  personID = as.integer(2 * coupleID - 2 + member)
 )
 
 ###############################################################################
@@ -304,15 +304,14 @@ panel <- dplyr::arrange(panel, coupleID, diaryday, member)
 example_dyadic_ILD <- dplyr::mutate(panel, closeness = mu_it + e_it)
 example_dyadic_ILD <- dplyr::select(
   example_dyadic_ILD,
-  userID,
+  personID,
   coupleID,
   diaryday,
   gender,
-  member,
   closeness,
   provided_support
 )
-example_dyadic_ILD <- dplyr::arrange(example_dyadic_ILD, coupleID, member, diaryday)
+example_dyadic_ILD <- dplyr::arrange(example_dyadic_ILD, coupleID, personID, diaryday)
 
 ###############################################################################
 ### MISSING DATA: NON-STRUCTURAL VARIABLES ONLY
@@ -323,7 +322,7 @@ n_missing_support <- 20
 missing_support_rows <- sample(seq_len(nrow(example_dyadic_ILD)), n_missing_support)
 example_dyadic_ILD$provided_support[missing_support_rows] <- NA_real_
 
-# Rare diary nonresponse. The person-day row stays in the data with dyad, member,
+# Rare diary nonresponse. The person-day row stays in the data with dyad, person,
 # role, and time information intact, but all measured variables for that row are
 # missing.
 n_nonresponse_rows <- 24

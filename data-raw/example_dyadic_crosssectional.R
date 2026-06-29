@@ -100,6 +100,8 @@ resid_pair <- MASS::mvrnorm(
 
 dyad_data <- tibble::tibble(
   coupleID = seq_len(n_couples),
+  personID_female = as.integer(2 * seq_len(n_couples) - 1),
+  personID_male = as.integer(2 * seq_len(n_couples)),
   communication_female = communication_pair[, 1],
   communication_male = communication_pair[, 2],
   e_female = resid_pair[, 1],
@@ -108,9 +110,8 @@ dyad_data <- tibble::tibble(
 
 person_female <- dplyr::transmute(
   dyad_data,
-  userID = paste0(coupleID, "_1"),
+  personID = personID_female,
   coupleID = coupleID,
-  member = 1L,
   gender = 1L,
   communication = communication_female,
   communication_partner = communication_male,
@@ -119,9 +120,8 @@ person_female <- dplyr::transmute(
 
 person_male <- dplyr::transmute(
   dyad_data,
-  userID = paste0(coupleID, "_2"),
+  personID = personID_male,
   coupleID = coupleID,
-  member = 2L,
   gender = 2L,
   communication = communication_male,
   communication_partner = communication_female,
@@ -136,7 +136,7 @@ example_dyadic_crosssectional <- dplyr::bind_rows(person_female, person_male)
 example_dyadic_crosssectional <- dplyr::arrange(
   example_dyadic_crosssectional,
   coupleID,
-  member
+  gender
 )
 example_dyadic_crosssectional <- dplyr::mutate(
   example_dyadic_crosssectional,
@@ -155,9 +155,8 @@ example_dyadic_crosssectional <- dplyr::mutate(
 )
 example_dyadic_crosssectional <- dplyr::select(
   example_dyadic_crosssectional,
-  userID,
+  personID,
   coupleID,
-  member,
   gender,
   communication,
   satisfaction
@@ -172,7 +171,7 @@ n_missing_communication <- 4
 missing_communication_rows <- sample(seq_len(nrow(example_dyadic_crosssectional)), n_missing_communication)
 example_dyadic_crosssectional$communication[missing_communication_rows] <- NA_real_
 
-# Rare person-level nonresponse. The row stays in the data with dyad/member/role
+# Rare person-level nonresponse. The row stays in the data with dyad/person/role
 # information intact, but all measured variables for that row are missing.
 n_nonresponse_rows <- 3
 available_rows <- setdiff(seq_len(nrow(example_dyadic_crosssectional)), missing_communication_rows)
