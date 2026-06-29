@@ -9,8 +9,10 @@
 #' @param data A long-format data frame or tibble.
 #' @param group Column identifying the dyad.
 #' @param member Column identifying the two people or members within each dyad,
-#'   such as a person ID. Role variables, such as gender, can be kept as
-#'   separate columns.
+#'   such as a person ID.
+#' @param role Optional column identifying role that can be used to distinguish
+#'   partners within a dyad, such as gender. If no role is supplied, all dyads
+#'   in the data are treated as exchangeable.
 #' @param time Optional column identifying time or measurement order.
 #'
 #' @return A tibble with class `interdep_data` and metadata about the dyad,
@@ -24,7 +26,7 @@
 #'   group = dyad_id,
 #'   member = person_id
 #' )
-validate_interdep_data <- function(data, group, member, time = NULL) {
+validate_interdep_data <- function(data, group, member, role = NULL, time = NULL) {
 
   # Validating Dataframe
   if (!inherits(data, "data.frame")) {
@@ -46,6 +48,14 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
   }
   member_name <- rlang::as_name(member)
 
+  role <- rlang::enquo(role)
+  has_role <- !rlang::quo_is_null(role)
+  role_name <- NULL
+
+  if (has_role) {
+    role_name <- rlang::as_name(role)
+  }
+
   time <- rlang::enquo(time)
   has_time <- !rlang::quo_is_null(time)
   time_name <- NULL
@@ -63,16 +73,25 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
     stop("`member` must refer to an existing column in `data`.", call. = FALSE)
   }
 
+  if (has_role && !role_name %in% names(out)) {
+    stop("`role` must refer to an existing column in `data`.", call. = FALSE)
+  }
+
   if (has_time && !time_name %in% names(out)) {
     stop("`time` must refer to an existing column in `data`.", call. = FALSE)
   }
 
+  # Validating that structural variables are complete.
   if (any(is.na(out[[group_name]]))) {
     stop("`group` must not contain missing values.", call. = FALSE)
   }
 
   if (any(is.na(out[[member_name]]))) {
     stop("`member` must not contain missing values.", call. = FALSE)
+  }
+
+  if (has_role && any(is.na(out[[role_name]]))) {
+    stop("`role` must not contain missing values.", call. = FALSE)
   }
 
   if (has_time && any(is.na(out[[time_name]]))) {
@@ -119,6 +138,7 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
   attr(out, "interdep") <- list(
     group = group_name,
     member = member_name,
+    role = role_name,
     time = time_name,
     n_dyads = n_groups,
     longitudinal = has_time

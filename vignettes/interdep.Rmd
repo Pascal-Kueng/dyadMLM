@@ -79,6 +79,7 @@ print(head(example_dyadic_crosssectional))
 cross_data <- validate_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
+  role = gender,
   member = personID
 )
 
