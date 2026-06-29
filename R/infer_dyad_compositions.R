@@ -26,21 +26,23 @@ infer_dyad_compositions <- function(data) {
     return(data)
   }
 
+
   # If role column was provided
   group_name <- meta_data$group
   member_name <- meta_data$member
   role_name <- meta_data$role
 
-  member_roles <- dplyr::distinct(
-    data,
-    .data[[group_name]],
-    .data[[member_name]],
-    .data[[role_name]]
-  )
-
   dyad_roles <- dplyr::summarise(
-    dplyr::group_by(member_roles, .data[[group_name]]),
-    raw_composition = paste(sort(as.character(.data[[role_name]])), collapse = "-"),
+    dplyr::group_by(
+      dplyr::distinct(
+        data,
+        .data[[group_name]],
+        .data[[member_name]],
+        .data[[role_name]]
+      ),
+      .data[[group_name]]
+    ),
+    raw_composition = canonical_composition(.data[[role_name]]),
     dyad_type = ifelse(
       dplyr::n_distinct(.data[[role_name]]) == 1,
       "exchangeable",
@@ -51,9 +53,15 @@ infer_dyad_compositions <- function(data) {
 
   dyad_roles$composition <- dyad_roles$raw_composition
 
-  data[[".interdep_raw_composition"]] <- dyad_roles$raw_composition[
-    match(data[[group_name]], dyad_roles[[group_name]])
-  ]
+  data <- dplyr::left_join(
+    data,
+    dplyr::select(
+      dyad_roles,
+      dplyr::all_of(group_name),
+      .interdep_raw_composition = "raw_composition"
+    ),
+    by = group_name
+  )
 
   attr(data, "interdep")$dyad_compositions <- dplyr::count(
     dyad_roles,
