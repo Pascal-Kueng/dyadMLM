@@ -15,6 +15,8 @@ test_that("infer_dyad_compositions counts role compositions", {
   result <- infer_dyad_compositions(validated)
   expect_s3_class(result, "interdep_data")
   expect_true(".interdep_raw_composition" %in% names(result))
+  expect_true(".interdep_composition" %in% names(result))
+  expect_true(".interdep_composition_role" %in% names(result))
 
   dyad_compositions <- attr(result, "interdep")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
@@ -35,6 +37,13 @@ test_that("infer_dyad_compositions counts role compositions", {
   expect_equal(
     result$.interdep_raw_composition,
     c("female-male", "female-male", "female-male", "female-male",
+      "female-female", "female-female", "male-male", "male-male")
+  )
+  expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
+  expect_equal(
+    result$.interdep_composition_role,
+    c("female-male-female", "female-male-male",
+      "female-male-female", "female-male-male",
       "female-female", "female-female", "male-male", "male-male")
   )
 })
@@ -68,6 +77,13 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
     c("female-male", "female-male", "female-male", "female-male",
       "female-female", "female-female", "female-female", "female-female")
   )
+  expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
+  expect_equal(
+    result$.interdep_composition_role,
+    c("female-male-female", "female-male-male",
+      "female-male-female", "female-male-male",
+      "female-female", "female-female", "female-female", "female-female")
+  )
 })
 
 test_that("infer_dyad_compositions treats missing role metadata as unclassified", {
@@ -81,13 +97,21 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
 
   expect_equal(
     result$.interdep_raw_composition,
-    rep("unclassified", 4)
+    rep("assumed-exchangeable", 4)
+  )
+  expect_equal(
+    result$.interdep_composition,
+    rep("assumed-exchangeable", 4)
+  )
+  expect_equal(
+    result$.interdep_composition_role,
+    rep("assumed-exchangeable", 4)
   )
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = "unclassified",
-      composition = "unclassified",
+      raw_composition = "assumed-exchangeable",
+      composition = "assumed-exchangeable",
       dyad_type = "exchangeable",
       n_dyads = 2L
     )

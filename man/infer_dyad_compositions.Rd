@@ -10,8 +10,9 @@ infer_dyad_compositions(data)
 \item{data}{An \code{interdep_data} object returned by \code{\link[=validate_interdep_data]{validate_interdep_data()}}.}
 }
 \value{
-An \code{interdep_data} object with an added \code{.interdep_raw_composition}
-column and dyad composition metadata.
+An \code{interdep_data} object with added \code{.interdep_raw_composition},
+\code{.interdep_composition}, and \code{.interdep_composition_role} columns and dyad
+composition metadata.
 }
 \description{
 Builds a dyad-level summary of role compositions from a validated
