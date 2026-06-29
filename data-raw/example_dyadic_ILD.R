@@ -303,7 +303,10 @@ panel <- dplyr::arrange(panel, coupleID, diaryday, member)
 
 example_dyadic_ILD <- dplyr::mutate(panel, closeness = mu_it + e_it)
 example_dyadic_ILD <- dplyr::select(
-  example_dyadic_ILD,
+  dplyr::mutate(
+    example_dyadic_ILD,
+    gender = factor(gender, levels = c(1L, 2L), labels = c("female", "male"))
+  ),
   personID,
   coupleID,
   diaryday,

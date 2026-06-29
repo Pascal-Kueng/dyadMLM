@@ -7,7 +7,7 @@
 #' \describe{
 #'   \item{personID}{Unique person identifier.}
 #'   \item{coupleID}{Dyad identifier.}
-#'   \item{gender}{Gender code used in the simulation.}
+#'   \item{gender}{Gender role, with levels `female` and `male`.}
 #'   \item{communication}{Simulated communication score, with some missing values.}
 #'   \item{satisfaction}{Simulated satisfaction outcome, with some missing values.}
 #' }
@@ -27,7 +27,7 @@
 #' \describe{
 #'   \item{personID}{Unique person identifier.}
 #'   \item{coupleID}{Dyad identifier.}
-#'   \item{gender}{Gender code used in the simulation.}
+#'   \item{gender}{Gender role, with levels `female` and `male`.}
 #'   \item{motivation}{Simulated motivation predictor, with some missing values.}
 #'   \item{physical_activity}{Simulated Tweedie-like physical activity outcome, with some missing values.}
 #' }
@@ -47,7 +47,7 @@
 #'   \item{personID}{Unique person identifier.}
 #'   \item{coupleID}{Dyad identifier.}
 #'   \item{diaryday}{Measurement day.}
-#'   \item{gender}{Gender code used in the simulation.}
+#'   \item{gender}{Gender role, with levels `female` and `male`.}
 #'   \item{closeness}{Simulated closeness outcome, with some missing values.}
 #'   \item{provided_support}{Simulated provided support score, with some missing values.}
 #' }

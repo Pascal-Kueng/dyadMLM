@@ -184,6 +184,10 @@ example_dyadic_crosssectional_tweedie <- dplyr::arrange(
   coupleID,
   gender
 )
+example_dyadic_crosssectional_tweedie <- dplyr::mutate(
+  example_dyadic_crosssectional_tweedie,
+  gender = factor(gender, levels = c(1L, 2L), labels = c("female", "male"))
+)
 
 ###############################################################################
 ### MISSING DATA: NON-STRUCTURAL VARIABLES ONLY

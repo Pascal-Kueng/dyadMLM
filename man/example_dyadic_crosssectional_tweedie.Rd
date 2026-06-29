@@ -9,7 +9,7 @@ A data frame with 240 rows and 5 variables:
 \describe{
 \item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}
-\item{gender}{Gender code used in the simulation.}
+\item{gender}{Gender role, with levels \code{female} and \code{male}.}
 \item{motivation}{Simulated motivation predictor, with some missing values.}
 \item{physical_activity}{Simulated Tweedie-like physical activity outcome, with some missing values.}
 }

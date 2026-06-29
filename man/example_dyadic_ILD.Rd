@@ -10,7 +10,7 @@ A data frame with 1,120 rows and 6 variables:
 \item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}
 \item{diaryday}{Measurement day.}
-\item{gender}{Gender code used in the simulation.}
+\item{gender}{Gender role, with levels \code{female} and \code{male}.}
 \item{closeness}{Simulated closeness outcome, with some missing values.}
 \item{provided_support}{Simulated provided support score, with some missing values.}
 }
