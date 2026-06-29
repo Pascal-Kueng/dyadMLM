@@ -5,24 +5,31 @@
 #'
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #'
-#' @return A tibble with one row per dyad composition and columns:
-#' `composition`, `dyad_type`, and `n_dyads`.
+#' @return An `interdep_data` object with an added `.interdep_raw_composition`
+#'   column and dyad composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data) {
-  meta <- attr(data, "interdep")
+  meta_data <- attr(data, "interdep")
 
-  if (is.null(meta$role)) {
-    return(tibble::tibble(
+  # The case if no role column was provided
+  if (is.null(meta_data$role)) {
+    data[[".interdep_raw_composition"]] <- "unclassified"
+
+    attr(data, "interdep")$dyad_compositions <- tibble::tibble(
+      raw_composition = "unclassified",
       composition = "unclassified",
       dyad_type = "exchangeable",
-      n_dyads = meta$n_dyads
-    ))
+      n_dyads = meta_data$n_dyads
+    )
+
+    return(data)
   }
 
-  group_name <- meta$group
-  member_name <- meta$member
-  role_name <- meta$role
+  # If role column was provided
+  group_name <- meta_data$group
+  member_name <- meta_data$member
+  role_name <- meta_data$role
 
   member_roles <- dplyr::distinct(
     data,
@@ -33,7 +40,7 @@ infer_dyad_compositions <- function(data) {
 
   dyad_roles <- dplyr::summarise(
     dplyr::group_by(member_roles, .data[[group_name]]),
-    roles = paste(sort(as.character(.data[[role_name]])), collapse = "-"),
+    raw_composition = paste(sort(as.character(.data[[role_name]])), collapse = "-"),
     dyad_type = ifelse(
       dplyr::n_distinct(.data[[role_name]]) == 1,
       "exchangeable",
@@ -42,10 +49,19 @@ infer_dyad_compositions <- function(data) {
     .groups = "drop"
   )
 
-  dplyr::count(
+  dyad_roles$composition <- dyad_roles$raw_composition
+
+  data[[".interdep_raw_composition"]] <- dyad_roles$raw_composition[
+    match(data[[group_name]], dyad_roles[[group_name]])
+  ]
+
+  attr(data, "interdep")$dyad_compositions <- dplyr::count(
     dyad_roles,
-    composition = .data$roles,
+    .data$raw_composition,
+    .data$composition,
     dyad_type = .data$dyad_type,
     name = "n_dyads"
   )
+
+  data
 }

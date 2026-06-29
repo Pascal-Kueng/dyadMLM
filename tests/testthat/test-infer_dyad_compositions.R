@@ -13,17 +13,30 @@ test_that("infer_dyad_compositions counts role compositions", {
   )
 
   result <- infer_dyad_compositions(validated)
-  result <- result[order(result$composition), ]
+  expect_s3_class(result, "interdep_data")
+  expect_true(".interdep_raw_composition" %in% names(result))
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(
-    result$composition,
+    dyad_compositions$raw_composition,
     c("female-female", "female-male", "male-male")
   )
   expect_equal(
-    result$dyad_type,
+    dyad_compositions$composition,
+    c("female-female", "female-male", "male-male")
+  )
+  expect_equal(
+    dyad_compositions$dyad_type,
     c("exchangeable", "distinguishable", "exchangeable")
   )
-  expect_equal(result$n_dyads, c(1L, 2L, 1L))
+  expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
+  expect_equal(
+    result$.interdep_raw_composition,
+    c("female-male", "female-male", "female-male", "female-male",
+      "female-female", "female-female", "male-male", "male-male")
+  )
 })
 
 test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
@@ -43,11 +56,18 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   )
 
   result <- infer_dyad_compositions(validated)
-  result <- result[order(result$composition), ]
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
-  expect_equal(result$composition, c("female-female", "female-male"))
-  expect_equal(result$dyad_type, c("exchangeable", "distinguishable"))
-  expect_equal(result$n_dyads, c(1L, 1L))
+  expect_equal(dyad_compositions$raw_composition, c("female-female", "female-male"))
+  expect_equal(dyad_compositions$composition, c("female-female", "female-male"))
+  expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
+  expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
+  expect_equal(
+    result$.interdep_raw_composition,
+    c("female-male", "female-male", "female-male", "female-male",
+      "female-female", "female-female", "female-female", "female-female")
+  )
 })
 
 test_that("infer_dyad_compositions treats missing role metadata as unclassified", {
@@ -57,10 +77,16 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   )
 
   validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
+  result <- infer_dyad_compositions(validated)
 
   expect_equal(
-    infer_dyad_compositions(validated),
+    result$.interdep_raw_composition,
+    rep("unclassified", 4)
+  )
+  expect_equal(
+    attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
+      raw_composition = "unclassified",
       composition = "unclassified",
       dyad_type = "exchangeable",
       n_dyads = 2L

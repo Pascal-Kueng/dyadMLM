@@ -30,7 +30,7 @@ prepare_interdep_data <- function(data, group, member, role = NULL, time = NULL)
   )
 
   # Inferring dyad compositions
-  attr(out, "interdep")$dyad_compositions <- infer_dyad_compositions(out)
+  out <- infer_dyad_compositions(out)
 
   out
 }
