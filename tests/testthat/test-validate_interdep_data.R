@@ -14,10 +14,111 @@ test_that("validate_interdep_data returns an interdep tibble", {
   expect_equal(result$x, 1:4)
 })
 
+test_that("validate_interdep_data stores input metadata", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  result <- validate_interdep_data(data, group = dyad_id, member = person_id)
+
+  expect_equal(
+    attr(result, "interdep"),
+    list(
+      group = "dyad_id",
+      member = "person_id",
+      time = NULL,
+      n_dyads = 2L,
+      longitudinal = FALSE
+    )
+  )
+})
+
 test_that("validate_interdep_data rejects non-data-frame input", {
   expect_error(
     validate_interdep_data(1:3, group = dyad_id, member = person_id),
     "`data` must be a data frame or tibble.",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data requires group and member arguments", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  expect_error(
+    validate_interdep_data(data, member = person_id),
+    "`group` must be supplied.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id),
+    "`member` must be supplied.",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data rejects missing columns", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = missing_group, member = person_id),
+    "`group` must refer to an existing column in `data`.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = missing_member),
+    "`member` must refer to an existing column in `data`.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id, time = missing_time),
+    "`time` must refer to an existing column in `data`.",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data rejects missing grouping values", {
+  expect_error(
+    validate_interdep_data(
+      data.frame(dyad_id = c(1, NA, 2, 2), person_id = c("A", "B", "C", "D")),
+      group = dyad_id,
+      member = person_id
+    ),
+    "`group` must not contain missing values.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data.frame(dyad_id = c(1, 1, 2, 2), person_id = c("A", NA, "C", "D")),
+      group = dyad_id,
+      member = person_id
+    ),
+    "`member` must not contain missing values.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data.frame(
+        dyad_id = c(1, 1, 2, 2),
+        person_id = c("A", "B", "C", "D"),
+        time = c(1, NA, 1, 1)
+      ),
+      group = dyad_id,
+      member = person_id,
+      time = time
+    ),
+    "`time` must not contain missing values.",
     fixed = TRUE
   )
 })
@@ -49,6 +150,19 @@ test_that("validate_interdep_data rejects groups without two unique members", {
   )
 })
 
+test_that("validate_interdep_data rejects fewer than two groups", {
+  data <- data.frame(
+    dyad_id = c(1, 1),
+    person_id = c("A", "B")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id),
+    "At least 2 groups are needed.",
+    fixed = TRUE
+  )
+})
+
 test_that("validate_interdep_data rejects cross-sectional groups with more than two rows", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2),
@@ -73,4 +187,14 @@ test_that("validate_interdep_data allows one missing member within group-time", 
 
   expect_s3_class(result, "interdep_data")
   expect_equal(nrow(result), 6)
+  expect_equal(
+    attr(result, "interdep"),
+    list(
+      group = "dyad_id",
+      member = "person_id",
+      time = "time",
+      n_dyads = 2L,
+      longitudinal = TRUE
+    )
+  )
 })

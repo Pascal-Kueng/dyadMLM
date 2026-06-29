@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate_interdep_data.R
 \name{validate_interdep_data}
 \alias{validate_interdep_data}
-\title{Validate package input data (dyadic data)}
+\title{Validate dyadic input data}
 \usage{
 validate_interdep_data(data, group, member, time = NULL)
 }
@@ -11,16 +11,17 @@ validate_interdep_data(data, group, member, time = NULL)
 
 \item{group}{Column identifying the dyad.}
 
-\item{member}{Column identifying the members of the dyad (e.g., a person-id).}
+\item{member}{Column identifying the two members within each dyad.}
 
-\item{time}{Column identifying time or measurement order (optional).}
+\item{time}{Optional column identifying time or measurement order.}
 }
 \value{
-A tibble with class \code{interdep_data}.
+A tibble with class \code{interdep_data} and metadata about the dyad,
+member, and optional time columns.
 }
 \description{
-Checks that \code{data} is a data frame or tibble and returns it as a tibble with
-an additional \code{interdep_data} class.
+Checks whether \code{data} has a valid dyadic structure and returns it as a tibble
+with an additional \code{interdep_data} class.
 }
 \examples{
 validate_interdep_data(

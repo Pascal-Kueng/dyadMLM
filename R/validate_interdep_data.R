@@ -1,14 +1,15 @@
-#' Validate package input data (dyadic data)
+#' Validate dyadic input data
 #'
-#' Checks that `data` is a data frame or tibble and returns it as a tibble with
-#' an additional `interdep_data` class.
+#' Checks whether `data` has a valid dyadic structure and returns it as a tibble
+#' with an additional `interdep_data` class.
 #'
 #' @param data A data frame or tibble.
 #' @param group Column identifying the dyad.
-#' @param member Column identifying the members of the dyad (e.g., a person-id).
-#' @param time Column identifying time or measurement order (optional).
+#' @param member Column identifying the two members within each dyad.
+#' @param time Optional column identifying time or measurement order.
 #'
-#' @return A tibble with class `interdep_data`.
+#' @return A tibble with class `interdep_data` and metadata about the dyad,
+#'   member, and optional time columns.
 #' @importFrom rlang .data
 #' @export
 #'
@@ -109,6 +110,14 @@ validate_interdep_data <- function(data, group, member, time = NULL) {
   if (n_groups < 2) {
     stop("At least 2 groups are needed.", call. = FALSE)
   }
+
+  attr(out, "interdep") <- list(
+    group = group_name,
+    member = member_name,
+    time = time_name,
+    n_dyads = n_groups,
+    longitudinal = has_time
+  )
 
   class(out) <- c("interdep_data", class(out))
 
