@@ -8,14 +8,34 @@
 #'   \item{coupleID}{Dyad identifier.}
 #'   \item{member}{Member identifier within dyad.}
 #'   \item{gender}{Gender code used in the simulation.}
-#'   \item{communication}{Simulated communication score.}
-#'   \item{satisfaction}{Simulated satisfaction outcome.}
+#'   \item{communication}{Simulated communication score, with some missing values.}
+#'   \item{satisfaction}{Simulated satisfaction outcome, with some missing values.}
 #' }
 #' @source Adapted from \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}.
 #'   See Küng, P. M. (2026). \emph{Distinguishable and Exchangeable Dyads:
 #'   Bayesian Multilevel Modelling} (v2.0.9). Zenodo.
 #'   \doi{10.5281/zenodo.20720321}.
 "example_dyadic_crosssectional"
+
+#' Example cross-sectional dyadic data with a Tweedie outcome
+#'
+#' A simulated cross-sectional dataset for distinguishable dyads with a
+#' semi-continuous physical activity outcome.
+#'
+#' @format A data frame with 240 rows and 6 variables:
+#' \describe{
+#'   \item{userID}{Unique person identifier.}
+#'   \item{coupleID}{Dyad identifier.}
+#'   \item{member}{Member identifier within dyad.}
+#'   \item{gender}{Gender code used in the simulation.}
+#'   \item{motivation}{Simulated motivation predictor, with some missing values.}
+#'   \item{physical_activity}{Simulated Tweedie-like physical activity outcome, with some missing values.}
+#' }
+#' @source Adapted from \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}.
+#'   See Küng, P. M. (2026). \emph{Distinguishable and Exchangeable Dyads:
+#'   Bayesian Multilevel Modelling} (v2.0.9). Zenodo.
+#'   \doi{10.5281/zenodo.20720321}.
+"example_dyadic_crosssectional_tweedie"
 
 #' Example intensive longitudinal dyadic data
 #'
@@ -28,8 +48,8 @@
 #'   \item{diaryday}{Measurement day.}
 #'   \item{gender}{Gender code used in the simulation.}
 #'   \item{member}{Member identifier within dyad.}
-#'   \item{closeness}{Simulated closeness outcome.}
-#'   \item{provided_support}{Simulated provided support score.}
+#'   \item{closeness}{Simulated closeness outcome, with some missing values.}
+#'   \item{provided_support}{Simulated provided support score, with some missing values.}
 #' }
 #' @source Adapted from \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}.
 #'   See Küng, P. M. (2026). \emph{Distinguishable and Exchangeable Dyads:

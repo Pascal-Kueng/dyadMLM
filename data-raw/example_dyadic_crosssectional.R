@@ -164,6 +164,23 @@ example_dyadic_crosssectional <- dplyr::select(
 )
 
 ###############################################################################
+### MISSING DATA: NON-STRUCTURAL VARIABLES ONLY
+###############################################################################
+
+# Rare isolated predictor missingness.
+n_missing_communication <- 4
+missing_communication_rows <- sample(seq_len(nrow(example_dyadic_crosssectional)), n_missing_communication)
+example_dyadic_crosssectional$communication[missing_communication_rows] <- NA_real_
+
+# Rare person-level nonresponse. The row stays in the data with dyad/member/role
+# information intact, but all measured variables for that row are missing.
+n_nonresponse_rows <- 3
+available_rows <- setdiff(seq_len(nrow(example_dyadic_crosssectional)), missing_communication_rows)
+nonresponse_rows <- sample(available_rows, n_nonresponse_rows)
+example_dyadic_crosssectional$communication[nonresponse_rows] <- NA_real_
+example_dyadic_crosssectional$satisfaction[nonresponse_rows] <- NA_real_
+
+###############################################################################
 ### SAVE PACKAGE DATA
 ###############################################################################
 

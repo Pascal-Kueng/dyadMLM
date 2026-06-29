@@ -62,8 +62,25 @@ b_wp_partner_m <- 0.1
 ### PARAMETERS TO RECOVER LATER: COUPLE-LEVEL RANDOM EFFECTS
 ###############################################################################
 
-sd_re <- c(0.70, 0.80, 0.015, 0.015, 0.10, 0.08, 0.10, 0.08)
-R <- matrix(0.15, 8, 8)
+# All role-specific mean-model parameters have dyad-level random effects in one
+# correlated block: intercepts, time slopes, between-person actor/partner
+# effects, and within-person actor/partner effects.
+re_names <- c(
+  "re_b0_m",
+  "re_b0_f",
+  "re_time_m",
+  "re_time_f",
+  "re_bpA_m",
+  "re_bpP_m",
+  "re_bpA_f",
+  "re_bpP_f",
+  "re_wpA_m",
+  "re_wpP_m",
+  "re_wpA_f",
+  "re_wpP_f"
+)
+sd_re <- c(0.70, 0.80, 0.015, 0.015, 0.20, 0.15, 0.20, 0.15, 0.10, 0.08, 0.10, 0.08)
+R <- matrix(0.15, length(re_names), length(re_names))
 diag(R) <- 1
 Sigma_re <- diag(sd_re) %*% R %*% diag(sd_re)
 
@@ -71,19 +88,10 @@ Sigma_re <- diag(sd_re) %*% R %*% diag(sd_re)
 ### SIMULATE COUPLE-LEVEL RANDOM EFFECTS
 ###############################################################################
 
-RE <- MASS::mvrnorm(n_couples, mu = rep(0, 8), Sigma = Sigma_re)
+RE <- MASS::mvrnorm(n_couples, mu = rep(0, length(re_names)), Sigma = Sigma_re)
 RE <- tibble::as_tibble(
   RE,
-  .name_repair = ~ c(
-    "re_b0_m",
-    "re_b0_f",
-    "re_time_m",
-    "re_time_f",
-    "re_wpA_m",
-    "re_wpP_m",
-    "re_wpA_f",
-    "re_wpP_f"
-  )
+  .name_repair = ~ re_names
 )
 RE <- dplyr::mutate(RE, coupleID = 1:n_couples)
 
@@ -202,6 +210,8 @@ panel <- dplyr::mutate(
   fix_wp_partner = ifelse(is_male == 1L, b_wp_partner_m, b_wp_partner_f),
   re_b0 = ifelse(is_male == 1L, re_b0_m, re_b0_f),
   re_time = ifelse(is_male == 1L, re_time_m, re_time_f),
+  re_bp_actor = ifelse(is_male == 1L, re_bpA_m, re_bpA_f),
+  re_bp_part = ifelse(is_male == 1L, re_bpP_m, re_bpP_f),
   re_wp_actor = ifelse(is_male == 1L, re_wpA_m, re_wpA_f),
   re_wp_part = ifelse(is_male == 1L, re_wpP_m, re_wpP_f),
   actor_cwp = sup_cwp,
@@ -209,11 +219,12 @@ panel <- dplyr::mutate(
   actor_cbp = mu_actor - grand_mu,
   partner_cbp = mu_partner - grand_mu,
   mu_it =
-    fix_b0 + fix_time * diaryday +
-      fix_bp_actor * actor_cbp + fix_bp_partner * partner_cbp +
-      fix_wp_actor * actor_cwp + fix_wp_partner * partner_cwp +
-      re_b0 + re_time * diaryday +
-      re_wp_actor * actor_cwp + re_wp_part * partner_cwp
+    fix_b0 + re_b0 +
+      (fix_time + re_time) * diaryday +
+      (fix_bp_actor + re_bp_actor) * actor_cbp +
+      (fix_bp_partner + re_bp_part) * partner_cbp +
+      (fix_wp_actor + re_wp_actor) * actor_cwp +
+      (fix_wp_partner + re_wp_part) * partner_cwp
 )
 
 ###############################################################################
@@ -302,6 +313,24 @@ example_dyadic_ILD <- dplyr::select(
   provided_support
 )
 example_dyadic_ILD <- dplyr::arrange(example_dyadic_ILD, coupleID, member, diaryday)
+
+###############################################################################
+### MISSING DATA: NON-STRUCTURAL VARIABLES ONLY
+###############################################################################
+
+# Rare isolated predictor missingness.
+n_missing_support <- 20
+missing_support_rows <- sample(seq_len(nrow(example_dyadic_ILD)), n_missing_support)
+example_dyadic_ILD$provided_support[missing_support_rows] <- NA_real_
+
+# Rare diary nonresponse. The person-day row stays in the data with dyad, member,
+# role, and time information intact, but all measured variables for that row are
+# missing.
+n_nonresponse_rows <- 24
+available_rows <- setdiff(seq_len(nrow(example_dyadic_ILD)), missing_support_rows)
+nonresponse_rows <- sample(available_rows, n_nonresponse_rows)
+example_dyadic_ILD$provided_support[nonresponse_rows] <- NA_real_
+example_dyadic_ILD$closeness[nonresponse_rows] <- NA_real_
 
 ###############################################################################
 ### SAVE PACKAGE DATA
