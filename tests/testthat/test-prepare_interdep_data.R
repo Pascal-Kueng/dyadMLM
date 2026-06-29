@@ -26,11 +26,11 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
 
   expect_equal(
     dyad_compositions$raw_composition,
-    c("female-female", "female-male", "male-male")
+    c("female__female", "female__male", "male__male")
   )
   expect_equal(
     dyad_compositions$composition,
-    c("female-female", "female-male", "male-male")
+    c("female__female", "female__male", "male__male")
   )
   expect_equal(
     dyad_compositions$dyad_type,
@@ -39,14 +39,14 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L, 1L))
   expect_equal(
     result$.interdep_raw_composition,
-    c("female-male", "female-male", "female-female", "female-female",
-      "male-male", "male-male")
+    c("female__male", "female__male", "female__female", "female__female",
+      "male__male", "male__male")
   )
   expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
   expect_equal(
     result$.interdep_composition_role,
-    c("female-male-female", "female-male-male",
-      "female-female", "female-female", "male-male", "male-male")
+    c("female__male__female", "female__male__male",
+      "female__female", "female__female", "male__male", "male__male")
   )
 })
 

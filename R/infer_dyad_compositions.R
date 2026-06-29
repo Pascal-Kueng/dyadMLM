@@ -70,7 +70,7 @@ infer_dyad_compositions <- function(data) {
 
   data[[".interdep_composition_role"]] <- ifelse(
     data[[".interdep_dyad_type"]] == "distinguishable",
-    paste(data[[".interdep_composition"]], data[[role_name]], sep = "-"),
+    composition_role_label(data[[".interdep_composition"]], data[[role_name]]),
     data[[".interdep_composition"]]
   )
 

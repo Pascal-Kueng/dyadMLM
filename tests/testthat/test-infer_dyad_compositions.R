@@ -23,11 +23,11 @@ test_that("infer_dyad_compositions counts role compositions", {
 
   expect_equal(
     dyad_compositions$raw_composition,
-    c("female-female", "female-male", "male-male")
+    c("female__female", "female__male", "male__male")
   )
   expect_equal(
     dyad_compositions$composition,
-    c("female-female", "female-male", "male-male")
+    c("female__female", "female__male", "male__male")
   )
   expect_equal(
     dyad_compositions$dyad_type,
@@ -36,15 +36,15 @@ test_that("infer_dyad_compositions counts role compositions", {
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
     result$.interdep_raw_composition,
-    c("female-male", "female-male", "female-male", "female-male",
-      "female-female", "female-female", "male-male", "male-male")
+    c("female__male", "female__male", "female__male", "female__male",
+      "female__female", "female__female", "male__male", "male__male")
   )
   expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
   expect_equal(
     result$.interdep_composition_role,
-    c("female-male-female", "female-male-male",
-      "female-male-female", "female-male-male",
-      "female-female", "female-female", "male-male", "male-male")
+    c("female__male__female", "female__male__male",
+      "female__male__female", "female__male__male",
+      "female__female", "female__female", "male__male", "male__male")
   )
 })
 
@@ -68,21 +68,21 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   dyad_compositions <- attr(result, "interdep")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
-  expect_equal(dyad_compositions$raw_composition, c("female-female", "female-male"))
-  expect_equal(dyad_compositions$composition, c("female-female", "female-male"))
+  expect_equal(dyad_compositions$raw_composition, c("female__female", "female__male"))
+  expect_equal(dyad_compositions$composition, c("female__female", "female__male"))
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(
     result$.interdep_raw_composition,
-    c("female-male", "female-male", "female-male", "female-male",
-      "female-female", "female-female", "female-female", "female-female")
+    c("female__male", "female__male", "female__male", "female__male",
+      "female__female", "female__female", "female__female", "female__female")
   )
   expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
   expect_equal(
     result$.interdep_composition_role,
-    c("female-male-female", "female-male-male",
-      "female-male-female", "female-male-male",
-      "female-female", "female-female", "female-female", "female-female")
+    c("female__male__female", "female__male__male",
+      "female__male__female", "female__male__male",
+      "female__female", "female__female", "female__female", "female__female")
   )
 })
 

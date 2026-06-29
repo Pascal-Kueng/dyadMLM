@@ -2,12 +2,21 @@
 % Please edit documentation in R/utils-compositions.R
 \name{canonical_composition}
 \alias{canonical_composition}
+\alias{composition_role_label}
 \title{Create a canonical dyad composition label}
 \usage{
-canonical_composition(roles)
+canonical_composition(roles, sep = interdep_composition_sep)
+
+composition_role_label(composition, role, sep = interdep_composition_sep)
 }
 \arguments{
 \item{roles}{A vector of role labels.}
+
+\item{sep}{Separator used between label components.}
+
+\item{composition}{A composition label.}
+
+\item{role}{A row-level role label.}
 }
 \value{
 A single composition label.
