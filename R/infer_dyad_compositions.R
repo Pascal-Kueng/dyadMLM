@@ -9,7 +9,7 @@
 #' `composition`, `dyad_type`, and `n_dyads`.
 #'
 #' @keywords internal
-infer_dyad_composition <- function(data) {
+infer_dyad_compositions <- function(data) {
   meta <- attr(data, "interdep")
 
   if (is.null(meta$role)) {

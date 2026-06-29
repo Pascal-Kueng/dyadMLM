@@ -21,18 +21,18 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   expect_equal(meta$role, "role")
   expect_equal(meta$n_dyads, 3L)
 
-  dyad_composition <- meta$dyad_composition
-  dyad_composition <- dyad_composition[order(dyad_composition$composition), ]
+  dyad_compositions <- meta$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(
-    dyad_composition$composition,
+    dyad_compositions$composition,
     c("female-female", "female-male", "male-male")
   )
   expect_equal(
-    dyad_composition$dyad_type,
+    dyad_compositions$dyad_type,
     c("exchangeable", "distinguishable", "exchangeable")
   )
-  expect_equal(dyad_composition$n_dyads, c(1L, 1L, 1L))
+  expect_equal(dyad_compositions$n_dyads, c(1L, 1L, 1L))
 })
 
 test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {
@@ -44,7 +44,7 @@ test_that("prepare_interdep_data treats data without role as unclassified exchan
   result <- prepare_interdep_data(data, group = dyad_id, member = person_id)
 
   expect_equal(
-    attr(result, "interdep")$dyad_composition,
+    attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
       composition = "unclassified",
       dyad_type = "exchangeable",

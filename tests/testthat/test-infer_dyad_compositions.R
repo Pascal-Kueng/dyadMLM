@@ -1,4 +1,4 @@
-test_that("infer_dyad_composition counts role compositions", {
+test_that("infer_dyad_compositions counts role compositions", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2, 3, 3, 4, 4),
     person_id = c("A", "B", "C", "D", "E", "F", "G", "H"),
@@ -12,7 +12,7 @@ test_that("infer_dyad_composition counts role compositions", {
     role = role
   )
 
-  result <- infer_dyad_composition(validated)
+  result <- infer_dyad_compositions(validated)
   result <- result[order(result$composition), ]
 
   expect_equal(
@@ -26,7 +26,7 @@ test_that("infer_dyad_composition counts role compositions", {
   expect_equal(result$n_dyads, c(1L, 2L, 1L))
 })
 
-test_that("infer_dyad_composition is not inflated by longitudinal rows", {
+test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -42,7 +42,7 @@ test_that("infer_dyad_composition is not inflated by longitudinal rows", {
     time = time
   )
 
-  result <- infer_dyad_composition(validated)
+  result <- infer_dyad_compositions(validated)
   result <- result[order(result$composition), ]
 
   expect_equal(result$composition, c("female-female", "female-male"))
@@ -50,7 +50,7 @@ test_that("infer_dyad_composition is not inflated by longitudinal rows", {
   expect_equal(result$n_dyads, c(1L, 1L))
 })
 
-test_that("infer_dyad_composition treats missing role metadata as unclassified", {
+test_that("infer_dyad_compositions treats missing role metadata as unclassified", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D")
@@ -59,7 +59,7 @@ test_that("infer_dyad_composition treats missing role metadata as unclassified",
   validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
 
   expect_equal(
-    infer_dyad_composition(validated),
+    infer_dyad_compositions(validated),
     tibble::tibble(
       composition = "unclassified",
       dyad_type = "exchangeable",

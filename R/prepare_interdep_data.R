@@ -19,6 +19,8 @@
 #' @return A tibble with class `interdep_data` and metadata about the dyads.
 #' @export
 prepare_interdep_data <- function(data, group, member, role = NULL, time = NULL) {
+
+  # Validating and returning tibble with attributes
   out <- validate_interdep_data(
     data = data,
     group = {{ group }},
@@ -27,9 +29,8 @@ prepare_interdep_data <- function(data, group, member, role = NULL, time = NULL)
     time = {{ time }}
   )
 
-  # Infering stuff here...
-
-  attr(out, "interdep")$dyad_composition <- infer_dyad_composition(out)
+  # Inferring dyad compositions
+  attr(out, "interdep")$dyad_compositions <- infer_dyad_compositions(out)
 
   out
 }
