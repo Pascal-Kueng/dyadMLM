@@ -18,14 +18,8 @@
 #' @return A tibble with class `interdep_data` and metadata about the dyad,
 #'   member, optional role, and optional time columns.
 #' @importFrom rlang .data
-#' @export
 #'
-#' @examples
-#' validate_interdep_data(
-#'   data.frame(dyad_id = c(1, 1, 2, 2), person_id = c(1, 2, 3, 4), x = 1:4),
-#'   group = dyad_id,
-#'   member = person_id
-#' )
+#' @keywords internal
 validate_interdep_data <- function(data, group, member, role = NULL, time = NULL) {
 
   # Validating Dataframe

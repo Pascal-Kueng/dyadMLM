@@ -31,10 +31,4 @@ should contain one row per member within each dyad. Intensive longitudinal
 data should contain one row per member and measurement occasion within each
 dyad.
 }
-\examples{
-validate_interdep_data(
-  data.frame(dyad_id = c(1, 1, 2, 2), person_id = c(1, 2, 3, 4), x = 1:4),
-  group = dyad_id,
-  member = person_id
-)
-}
+\keyword{internal}

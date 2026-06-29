@@ -46,7 +46,7 @@ The expected structure is:
 
 
 Measured variables may contain missing values. Structural variables used for
-validation should not. `validate_interdep_data()` validates the expected
+validation should not. `prepare_interdep_data()` validates the expected
 structure, returns a tibble with class `interdep_data`, and stores the validated
 dyad, member, and time columns as metadata for later package functions.
 
@@ -76,7 +76,7 @@ print(head(example_dyadic_crosssectional))
 ```
 
 ```{r validate-cross-sectional}
-cross_data <- validate_interdep_data(
+cross_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   role = gender,
@@ -104,7 +104,7 @@ hist(example_dyadic_crosssectional_tweedie$physical_activity, breaks = 20)
 Validation works the same way because the dyadic structure is the same.
 
 ```{r validate-tweedie}
-tweedie_data <- validate_interdep_data(
+tweedie_data <- prepare_interdep_data(
   example_dyadic_crosssectional_tweedie,
   group = coupleID,
   member = personID
@@ -125,7 +125,7 @@ print(head(example_dyadic_ILD, n = 26), n = 26)
 For longitudinal data, pass the time variable as well.
 
 ```{r validate-ild}
-ild_data <- validate_interdep_data(
+ild_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
