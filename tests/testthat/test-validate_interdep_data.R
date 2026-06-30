@@ -21,18 +21,14 @@ test_that("validate_interdep_data stores input metadata", {
   )
 
   result <- validate_interdep_data(data, group = dyad_id, member = person_id)
+  meta <- attr(result, "interdep")
 
-  expect_equal(
-    attr(result, "interdep"),
-    list(
-      group = "dyad_id",
-      member = "person_id",
-      role = NULL,
-      time = NULL,
-      n_dyads = 2L,
-      longitudinal = FALSE
-    )
-  )
+  expect_equal(meta$group, "dyad_id")
+  expect_equal(meta$member, "person_id")
+  expect_null(meta$role)
+  expect_null(meta$time)
+  expect_equal(meta$n_dyads, 2L)
+  expect_false(meta$longitudinal)
 })
 
 test_that("validate_interdep_data rejects non-data-frame input", {
@@ -252,18 +248,14 @@ test_that("validate_interdep_data allows one missing member within group-time", 
   )
 
   result <- validate_interdep_data(data, group = dyad_id, member = person_id, time = time)
+  meta <- attr(result, "interdep")
 
   expect_s3_class(result, "interdep_data")
   expect_equal(nrow(result), 6)
-  expect_equal(
-    attr(result, "interdep"),
-    list(
-      group = "dyad_id",
-      member = "person_id",
-      role = NULL,
-      time = "time",
-      n_dyads = 2L,
-      longitudinal = TRUE
-    )
-  )
+  expect_equal(meta$group, "dyad_id")
+  expect_equal(meta$member, "person_id")
+  expect_null(meta$role)
+  expect_equal(meta$time, "time")
+  expect_equal(meta$n_dyads, 2L)
+  expect_true(meta$longitudinal)
 })

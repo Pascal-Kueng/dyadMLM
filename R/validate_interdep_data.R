@@ -29,6 +29,15 @@ validate_interdep_data <- function(data, group, member, role = NULL, time = NULL
 
   out <- tibble::as_tibble(data)
 
+  # Validating that package-owned columns are not already present.
+  reserved_columns <- names(out)[startsWith(names(out), ".interdep_")]
+  if (length(reserved_columns) > 0) {
+    stop(
+      "`data` must not contain columns starting with `.interdep_`; these names are reserved by interdep.",
+      call. = FALSE
+    )
+  }
+
   # Extracting variables
   group <- rlang::enquo(group)
   if (rlang::quo_is_missing(group)) {
@@ -86,6 +95,13 @@ validate_interdep_data <- function(data, group, member, role = NULL, time = NULL
 
   if (has_role && any(is.na(out[[role_name]]))) {
     stop("`role` must not contain missing values.", call. = FALSE)
+  }
+
+  if (
+    has_role &&
+      any(grepl(interdep_composition_sep, as.character(out[[role_name]]), fixed = TRUE))
+  ) {
+    stop("`role` values must not contain `__`; this separator is reserved by interdep.", call. = FALSE)
   }
 
   if (has_time && any(is.na(out[[time_name]]))) {

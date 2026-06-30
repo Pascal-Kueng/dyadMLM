@@ -10,13 +10,15 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
 Suggests: 
     knitr,
+    MASS,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    usethis
 Config/testthat/edition: 3
 Imports: 
-    dplyr,
-    rlang,
-    tibble
+    dplyr (>= 1.0.0),
+    rlang (>= 0.4.0),
+    tibble (>= 3.0.0)
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.5)

@@ -71,3 +71,31 @@ test_that("prepare_interdep_data treats data without role as unclassified exchan
     )
   )
 })
+
+test_that("prepare_interdep_data rejects reserved interdep columns", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    .interdep_composition = c("x", "x", "y", "y")
+  )
+
+  expect_error(
+    prepare_interdep_data(data, group = dyad_id, member = person_id),
+    "columns starting with `.interdep_`",
+    fixed = TRUE
+  )
+})
+
+test_that("prepare_interdep_data rejects role labels containing the internal separator", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "non__binary", "female", "male")
+  )
+
+  expect_error(
+    prepare_interdep_data(data, group = dyad_id, member = person_id, role = role),
+    "`role` values must not contain `__`",
+    fixed = TRUE
+  )
+})

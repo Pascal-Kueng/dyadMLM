@@ -17,16 +17,42 @@ observed time point.}
 \item{member}{Column identifying a person or the member within dyad.}
 
 \item{role}{Optional column identifying a stable member role, such as gender.
-If no role is supplied, all dyads are treated as the same type of
-exchangeable dyads.}
+Values must be complete, stable within each \code{group} x \code{member}, and must
+not contain \verb{__}. If no role is supplied, all dyads are treated as the same
+type of exchangeable dyads.}
 
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
 }
 \value{
-A tibble with class \code{interdep_data} and metadata about the dyads.
+The original data as a tibble with class \code{interdep_data}, reserved
+\verb{.interdep_*} composition columns, and an \code{interdep} attribute containing
+structural metadata and \code{dyad_compositions}.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata
 used by downstream interdep functions.
+}
+\details{
+Data must be in long format. Cross-sectional dyadic data must contain exactly
+one row per member within dyad. Intensive longitudinal dyadic data must
+contain at most one row per member and observed measurement occasion within
+dyad. Measured variables may contain missing values, but structural variables
+used for \code{group}, \code{member}, \code{role}, and \code{time} may not.
+}
+\examples{
+data <- data.frame(
+  dyad_id = c(1, 1, 2, 2),
+  person_id = c(1, 2, 3, 4),
+  role = c("female", "male", "female", "male")
+)
+
+prepared <- prepare_interdep_data(
+  data,
+  group = dyad_id,
+  member = person_id,
+  role = role
+)
+
+attr(prepared, "interdep")$dyad_compositions
 }

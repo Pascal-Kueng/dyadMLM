@@ -48,7 +48,10 @@ The expected structure is:
 Measured variables may contain missing values. Structural variables used for
 validation should not. `prepare_interdep_data()` validates the expected
 structure, returns a tibble with class `interdep_data`, and stores the validated
-dyad, member, and time columns as metadata for later package functions.
+dyad, member, optional role, and optional time columns as metadata for later
+package functions. It also derives dyad-composition labels used by later
+functions. Omit `role` only when partners should intentionally be treated as
+exchangeable or no stable role is available.
 
 In intensive longitudinal data, missing measurement occasions can be represented
 by absent rows, as long as the time variable preserves the observed measurement
@@ -107,6 +110,7 @@ Validation works the same way because the dyadic structure is the same.
 tweedie_data <- prepare_interdep_data(
   example_dyadic_crosssectional_tweedie,
   group = coupleID,
+  role = gender,
   member = personID
 )
 
@@ -128,6 +132,7 @@ For longitudinal data, pass the time variable as well.
 ild_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
+  role = gender,
   member = personID,
   time = diaryday
 )

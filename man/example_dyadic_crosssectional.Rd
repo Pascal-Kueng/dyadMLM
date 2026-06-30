@@ -27,4 +27,7 @@ example_dyadic_crosssectional
 A simulated cross-sectional long-format dataset for distinguishable dyads.
 Each dyad contributes one row per member.
 }
+\details{
+Prepare with \code{group = coupleID}, \code{member = personID}, and \code{role = gender}.
+}
 \keyword{datasets}

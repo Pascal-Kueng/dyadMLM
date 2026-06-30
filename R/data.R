@@ -3,6 +3,8 @@
 #' A simulated cross-sectional long-format dataset for distinguishable dyads.
 #' Each dyad contributes one row per member.
 #'
+#' Prepare with `group = coupleID`, `member = personID`, and `role = gender`.
+#'
 #' @format A data frame with 190 rows and 5 variables:
 #' \describe{
 #'   \item{personID}{Unique person identifier.}
@@ -23,6 +25,8 @@
 #' a semi-continuous physical activity outcome. Each dyad contributes one row per
 #' member.
 #'
+#' Prepare with `group = coupleID`, `member = personID`, and `role = gender`.
+#'
 #' @format A data frame with 240 rows and 5 variables:
 #' \describe{
 #'   \item{personID}{Unique person identifier.}
@@ -41,6 +45,9 @@
 #'
 #' A simulated intensive longitudinal long-format dataset for distinguishable
 #' dyads. Each dyad contributes one row per member and measurement occasion.
+#'
+#' Prepare with `group = coupleID`, `member = personID`, `role = gender`, and
+#' `time = diaryday`.
 #'
 #' @format A data frame with 1,120 rows and 6 variables:
 #' \describe{
