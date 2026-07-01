@@ -101,19 +101,25 @@ validate_interdep_data <- function(data, group, member, role = NULL, time = NULL
     has_role &&
       any(grepl(interdep_composition_sep, as.character(out[[role_name]]), fixed = TRUE))
   ) {
-    stop("`role` values must not contain `__`; this separator is reserved by interdep.", call. = FALSE)
+    stop(
+      sprintf(
+        "`role` values must not contain `%s`; this separator is reserved by interdep.",
+        interdep_composition_sep
+      ),
+      call. = FALSE
+    )
   }
 
   if (has_time && any(is.na(out[[time_name]]))) {
     stop("`time` must not contain missing values.", call. = FALSE)
   }
 
-  n_groups <- dplyr::n_distinct(out[[group_name]])
+  n_groups <- length(unique(out[[group_name]]))
 
   # Validating that each group has exactly two members
   members_per_group <- dplyr::summarise(
     dplyr::group_by(out, .data[[group_name]]),
-    n_members = dplyr::n_distinct(.data[[member_name]]),
+    n_members = length(unique(.data[[member_name]])),
     .groups = "drop"
   )[["n_members"]]
 
@@ -123,20 +129,11 @@ validate_interdep_data <- function(data, group, member, role = NULL, time = NULL
 
   # Validating that each member appears at most once per group x time instance.
   if (has_time) {
-    group_time_member_sizes <- dplyr::count(
-      out,
-      .data[[group_name]],
-      .data[[time_name]],
-      .data[[member_name]],
-      name = "n"
-    )[["n"]]
-
-    if (any(group_time_member_sizes > 1)) {
+    if (anyDuplicated(out[c(group_name, time_name, member_name)]) > 0) {
       stop("Each `member` must appear at most once per `group`-`time` combination.", call. = FALSE)
     }
   } else {
-    group_sizes <- dplyr::count(out, .data[[group_name]], name = "n")[["n"]]
-    if (any(group_sizes != 2)) {
+    if (nrow(out) != 2 * n_groups) {
       stop("Each `group` must contain exactly two rows. For longitudinal data specify `time`.", call. = FALSE)
     }
   }
@@ -147,13 +144,9 @@ validate_interdep_data <- function(data, group, member, role = NULL, time = NULL
 
   # Validating that each member only has a single consistent role across time
   if (has_role) {
-    roles_per_member <- dplyr::summarise(
-      dplyr::group_by(out, .data[[group_name]], .data[[member_name]]),
-      n_roles = dplyr::n_distinct(.data[[role_name]]),
-      .groups = "drop"
-    )[["n_roles"]]
+    unique_roles <- unique(out[c(group_name, member_name, role_name)])
 
-    if (any(roles_per_member != 1)) {
+    if (anyDuplicated(unique_roles[c(group_name, member_name)]) > 0) {
       stop("Each `member` must have exactly one `role` within each `group`.", call. = FALSE)
     }
   }
@@ -167,7 +160,7 @@ validate_interdep_data <- function(data, group, member, role = NULL, time = NULL
     longitudinal = has_time
   )
 
-  class(out) <- c("interdep_data", class(out))
+  class(out) <- unique(c("interdep_data", class(out)))
 
   out
 }

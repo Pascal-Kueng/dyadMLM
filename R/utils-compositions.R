@@ -1,3 +1,6 @@
+# Package-wide separator for composition labels.
+interdep_composition_sep <- "__"
+
 #' Create a canonical dyad composition label
 #'
 #' Sorts role labels before pasting them so composition labels do not depend on
@@ -8,7 +11,7 @@
 #'
 #' @return A single composition label.
 #' @keywords internal
-canonical_composition <- function(roles, sep = "__") {
+canonical_composition <- function(roles, sep = interdep_composition_sep) {
   paste(sort(as.character(roles)), collapse = sep)
 }
 
@@ -16,6 +19,6 @@ canonical_composition <- function(roles, sep = "__") {
 #' @param composition A composition label.
 #' @param role A row-level role label.
 #' @keywords internal
-composition_role_label <- function(composition, role, sep = "__") {
+composition_role_label <- function(composition, role, sep = interdep_composition_sep) {
   paste(as.character(composition), as.character(role), sep = sep)
 }
