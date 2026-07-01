@@ -21,6 +21,16 @@
 #'   type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
+#' @param incomplete_dyads How to handle dyads that do not contain exactly two
+#'   unique members anywhere in the data. `"error"` stops with an error,
+#'   `"drop"` removes the entire dyad, and `"keep"` retains the observed rows.
+#'   Keeping incomplete dyads can produce unknown role compositions, such as
+#'   `"female__unknown"`.
+#' @param missing_role How to handle missing values in the `role` column.
+#'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
+#'   information, and `"keep"` retains them. Keeping missing roles can produce
+#'   unknown role compositions, such as `"female__unknown"`. Ignored when no
+#'   `role` column is supplied.
 #'
 #' @return The original data as a tibble with class `interdep_data`, reserved
 #'   `.interdep_*` composition columns, and an `interdep` attribute containing
@@ -42,7 +52,18 @@
 #'
 #' attr(prepared, "interdep")$dyad_compositions
 #' @export
-prepare_interdep_data <- function(data, group, member, role = NULL, time = NULL) {
+prepare_interdep_data <- function(
+    data,
+    group,
+    member,
+    role = NULL,
+    time = NULL,
+    incomplete_dyads = c("error", "drop", "keep"),
+    missing_role = c("error", "drop", "keep")
+  ) {
+
+  incomplete_dyads <- rlang::arg_match(incomplete_dyads)
+  missing_role <- rlang::arg_match(missing_role)
 
   # Validating and returning tibble with attributes
   out <- validate_interdep_data(
@@ -50,7 +71,9 @@ prepare_interdep_data <- function(data, group, member, role = NULL, time = NULL)
     group = {{ group }},
     member = {{ member }},
     role = {{ role }},
-    time = {{ time }}
+    time = {{ time }},
+    incomplete_dyads = incomplete_dyads,
+    missing_role = missing_role
   )
 
   # Inferring dyad compositions

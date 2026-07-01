@@ -4,7 +4,15 @@
 \alias{prepare_interdep_data}
 \title{Prepare dyadic data for interdep}
 \usage{
-prepare_interdep_data(data, group, member, role = NULL, time = NULL)
+prepare_interdep_data(
+  data,
+  group,
+  member,
+  role = NULL,
+  time = NULL,
+  incomplete_dyads = c("error", "keep", "drop"),
+  missing_role = c("error", "keep", "drop")
+)
 }
 \arguments{
 \item{data}{A data frame or tibble. Data must be in long format. For
@@ -23,6 +31,18 @@ type of exchangeable dyads.}
 
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
+
+\item{incomplete_dyads}{How to handle dyads that do not contain exactly two
+unique members anywhere in the data. \code{"error"} stops with an error,
+\code{"drop"} removes the entire dyad, and \code{"keep"} retains the observed rows.
+Keeping incomplete dyads can produce unknown role compositions, such as
+\code{"female__unknown"}.}
+
+\item{missing_role}{How to handle missing values in the \code{role} column.
+\code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
+information, and \code{"keep"} retains them. Keeping missing roles can produce
+unknown role compositions, such as \code{"female__unknown"}. Ignored when no
+\code{role} column is supplied.}
 }
 \value{
 The original data as a tibble with class \code{interdep_data}, reserved
