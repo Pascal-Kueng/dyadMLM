@@ -34,6 +34,10 @@ infer_dyad_compositions <- function(data) {
   group_name <- meta_data$group
   member_name <- meta_data$member
   role_name <- meta_data$role
+  incomplete_groups <- meta_data$incomplete_dyads
+  if (is.null(incomplete_groups)) {
+    incomplete_groups <- character(0)
+  }
 
   dyad_roles <- dplyr::summarise(
     dplyr::group_by(
@@ -45,11 +49,19 @@ infer_dyad_compositions <- function(data) {
       ),
       .data[[group_name]]
     ),
-    raw_composition = canonical_composition(.data[[role_name]]),
+    raw_composition = canonical_composition(c(
+      .data[[role_name]],
+      if (.data[[group_name]][1] %in% incomplete_groups) interdep_unknown_role else character(0)
+    )),
     dyad_type = ifelse(
-      dplyr::n_distinct(.data[[role_name]]) == 1,
-      "exchangeable",
-      "distinguishable"
+      any(.data[[role_name]] == interdep_unknown_role) ||
+        .data[[group_name]][1] %in% incomplete_groups,
+      "unknown",
+      ifelse(
+        dplyr::n_distinct(.data[[role_name]]) == 1,
+        "exchangeable",
+        "distinguishable"
+      )
     ),
     .groups = "drop"
   )
@@ -69,7 +81,7 @@ infer_dyad_compositions <- function(data) {
   )
 
   data[[".interdep_composition_role"]] <- ifelse(
-    data[[".interdep_dyad_type"]] == "distinguishable",
+    data[[".interdep_dyad_type"]] %in% c("distinguishable", "unknown"),
     composition_role_label(data[[".interdep_composition"]], data[[role_name]]),
     data[[".interdep_composition"]]
   )

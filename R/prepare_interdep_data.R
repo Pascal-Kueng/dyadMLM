@@ -3,29 +3,30 @@
 #' Validates dyadic data, records the structural variables, and adds metadata
 #' used by downstream interdep functions.
 #'
-#' Data must be in long format. Cross-sectional dyadic data must contain exactly
-#' one row per member within dyad. Intensive longitudinal dyadic data must
+#' Data must be in long format. Cross-sectional dyadic data may contain at most
+#' one row per member within dyad. Intensive longitudinal dyadic data may
 #' contain at most one row per member and observed measurement occasion within
-#' dyad. Measured variables may contain missing values, but structural variables
-#' used for `group`, `member`, `role`, and `time` may not.
+#' dyad. Measured variables may contain missing values. Missing or incomplete
+#' structural information is controlled by `incomplete_dyads` and
+#' `missing_role`.
 #'
 #' @param data A data frame or tibble. Data must be in long format. For
-#' cross-sectional dyadic data, each member of each dyad has one row. For
-#' intensive longitudinal dyadic data, each member of each dyad has one row per
-#' observed time point.
+#' cross-sectional dyadic data, each observed member of each dyad has one row.
+#' For intensive longitudinal dyadic data, each observed member of each dyad has
+#' one row per observed time point.
 #' @param group Column identifying the dyad.
 #' @param member Column identifying a person or the member within dyad.
 #' @param role Optional column identifying a stable member role, such as gender.
-#'   Values must be complete, stable within each `group` x `member`, and must
-#'   not contain `__`. If no role is supplied, all dyads are treated as the same
-#'   type of exchangeable dyads.
+#'   Values must be stable within each `group` x `member` and must not contain
+#'   `__`. Missing role information is controlled by `missing_role`. If no role
+#'   is supplied, all dyads are treated as the same type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error,
 #'   `"drop"` removes the entire dyad, and `"keep"` retains the observed rows.
 #'   Keeping incomplete dyads can produce unknown role compositions, such as
-#'   `"female__unknown"`.
+#'   `"female__unknown"`, when a `role` column is supplied.
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
 #'   information, and `"keep"` retains them. Keeping missing roles can produce

@@ -90,6 +90,51 @@ class(cross_data)
 attr(cross_data, "interdep")
 ```
 
+## Incomplete dyads and missing roles
+
+By default, `prepare_interdep_data()` stops when a dyad has only one observed
+member or when a member's role is unknown in every row. These cases can also be
+kept with unknown composition labels or dropped before validation continues.
+
+```{r incomplete-keep}
+incomplete_data <- data.frame(
+  coupleID = c(1, 2, 2, 3, 3, 4, 4),
+  personID = c(1, 1, 2, 1, 2, 1, 2),
+  gender = c("female", "female", NA, "female", "female", "female", "male"),
+  satisfaction = c(5.2, 4.8, 4.9, 5.1, 5.0, 4.7, 4.6)
+)
+
+kept_data <- prepare_interdep_data(
+  incomplete_data,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  incomplete_dyads = "keep",
+  missing_role = "keep"
+)
+
+kept_data
+```
+
+With `"keep"`, the original rows are retained. The incomplete dyad and the
+missing role are represented with `unknown` in the derived composition labels.
+
+```{r incomplete-drop}
+dropped_data <- prepare_interdep_data(
+  incomplete_data,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  incomplete_dyads = "drop",
+  missing_role = "drop"
+)
+
+dropped_data
+```
+
+With `"drop"`, dyads with incomplete structure or unresolved role information
+are removed as whole dyads.
+
 
 
 ## Semi-continuous cross-sectional data

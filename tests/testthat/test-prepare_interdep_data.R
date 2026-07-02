@@ -99,3 +99,113 @@ test_that("prepare_interdep_data rejects role labels containing the internal sep
     fixed = TRUE
   )
 })
+
+test_that("prepare_interdep_data infers compositions from sparse longitudinal roles", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    role = c("female", "male", NA, NA, "female", "male", NA, NA),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time
+  )
+
+  expect_equal(result$.interdep_composition, rep("female__male", 8))
+  expect_equal(
+    result$.interdep_composition_role,
+    rep(c("female__male__female", "female__male__male"), 4)
+  )
+})
+
+test_that("prepare_interdep_data marks retained unknown roles in compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", NA, "female", "male")
+  )
+
+  expect_warning(
+    result <- prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      missing_role = "keep"
+    ),
+    "dyads: 1",
+    fixed = TRUE
+  )
+
+  expect_equal(
+    result$.interdep_composition,
+    c("female__unknown", "female__unknown", "female__male", "female__male")
+  )
+  expect_equal(
+    result$.interdep_composition_role,
+    c(
+      "female__unknown__female",
+      "female__unknown__unknown",
+      "female__male__female",
+      "female__male__male"
+    )
+  )
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
+
+  expect_equal(dyad_compositions$composition, c("female__male", "female__unknown"))
+  expect_equal(dyad_compositions$dyad_type, c("distinguishable", "unknown"))
+})
+
+test_that("prepare_interdep_data marks retained incomplete dyads in compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 2, 2, 3, 3),
+    person_id = c("A", "C", "D", "E", "F"),
+    role = c("female", "female", "male", "female", "female")
+  )
+
+  expect_warning(
+    result <- prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      incomplete_dyads = "keep"
+    ),
+    "Keeping incomplete dyads",
+    fixed = TRUE
+  )
+
+  expect_equal(
+    result$.interdep_composition,
+    c("female__unknown", "female__male", "female__male", "female__female", "female__female")
+  )
+  expect_equal(
+    result$.interdep_composition_role,
+    c(
+      "female__unknown__female",
+      "female__male__female",
+      "female__male__male",
+      "female__female",
+      "female__female"
+    )
+  )
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
+
+  expect_equal(
+    dyad_compositions$composition,
+    c("female__female", "female__male", "female__unknown")
+  )
+  expect_equal(
+    dyad_compositions$dyad_type,
+    c("exchangeable", "distinguishable", "unknown")
+  )
+})

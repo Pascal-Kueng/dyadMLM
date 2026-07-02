@@ -10,24 +10,24 @@ prepare_interdep_data(
   member,
   role = NULL,
   time = NULL,
-  incomplete_dyads = c("error", "keep", "drop"),
-  missing_role = c("error", "keep", "drop")
+  incomplete_dyads = c("error", "drop", "keep"),
+  missing_role = c("error", "drop", "keep")
 )
 }
 \arguments{
 \item{data}{A data frame or tibble. Data must be in long format. For
-cross-sectional dyadic data, each member of each dyad has one row. For
-intensive longitudinal dyadic data, each member of each dyad has one row per
-observed time point.}
+cross-sectional dyadic data, each observed member of each dyad has one row.
+For intensive longitudinal dyadic data, each observed member of each dyad has
+one row per observed time point.}
 
 \item{group}{Column identifying the dyad.}
 
 \item{member}{Column identifying a person or the member within dyad.}
 
 \item{role}{Optional column identifying a stable member role, such as gender.
-Values must be complete, stable within each \code{group} x \code{member}, and must
-not contain \verb{__}. If no role is supplied, all dyads are treated as the same
-type of exchangeable dyads.}
+Values must be stable within each \code{group} x \code{member} and must not contain
+\verb{__}. Missing role information is controlled by \code{missing_role}. If no role
+is supplied, all dyads are treated as the same type of exchangeable dyads.}
 
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
@@ -36,7 +36,7 @@ measures.}
 unique members anywhere in the data. \code{"error"} stops with an error,
 \code{"drop"} removes the entire dyad, and \code{"keep"} retains the observed rows.
 Keeping incomplete dyads can produce unknown role compositions, such as
-\code{"female__unknown"}.}
+\code{"female__unknown"}, when a \code{role} column is supplied.}
 
 \item{missing_role}{How to handle missing values in the \code{role} column.
 \code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
@@ -54,11 +54,12 @@ Validates dyadic data, records the structural variables, and adds metadata
 used by downstream interdep functions.
 }
 \details{
-Data must be in long format. Cross-sectional dyadic data must contain exactly
-one row per member within dyad. Intensive longitudinal dyadic data must
+Data must be in long format. Cross-sectional dyadic data may contain at most
+one row per member within dyad. Intensive longitudinal dyadic data may
 contain at most one row per member and observed measurement occasion within
-dyad. Measured variables may contain missing values, but structural variables
-used for \code{group}, \code{member}, \code{role}, and \code{time} may not.
+dyad. Measured variables may contain missing values. Missing or incomplete
+structural information is controlled by \code{incomplete_dyads} and
+\code{missing_role}.
 }
 \examples{
 data <- data.frame(

@@ -1,6 +1,9 @@
 # Package-wide separator for composition labels.
 interdep_composition_sep <- "__"
 
+# Role label used when a member's role is unknown but retained.
+interdep_unknown_role <- "unknown"
+
 #' Create a canonical dyad composition label
 #'
 #' Sorts role labels before pasting them so composition labels do not depend on

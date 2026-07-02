@@ -136,7 +136,7 @@ test_that("validate_interdep_data rejects missing grouping values", {
       member = person_id,
       role = role
     ),
-    "`role` must not contain missing values.",
+    "Each `member` must have at least one non-missing `role` within each `group`.",
     fixed = TRUE
   )
 })
@@ -164,6 +164,84 @@ test_that("validate_interdep_data rejects groups without two unique members", {
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id),
     "Each `group` must contain exactly two unique members.",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data handles incomplete dyads by policy", {
+  data <- data.frame(
+    dyad_id = c(1, 2, 2, 3, 3),
+    person_id = c("A", "C", "D", "E", "F"),
+    role = c("female", "female", "male", "female", "female")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
+    "Incomplete dyads were found: 1.",
+    fixed = TRUE
+  )
+
+  expect_warning(
+    kept <- validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      incomplete_dyads = "keep"
+    ),
+    "Keeping incomplete dyads",
+    fixed = TRUE
+  )
+  expect_equal(kept$dyad_id, c(1, 2, 2, 3, 3))
+  expect_equal(attr(kept, "interdep")$incomplete_dyads, 1)
+
+  expect_warning(
+    dropped <- validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      incomplete_dyads = "drop"
+    ),
+    "Dropped incomplete dyads: 1.",
+    fixed = TRUE
+  )
+  expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
+  expect_equal(attr(dropped, "interdep")$n_dyads, 2L)
+  expect_length(attr(dropped, "interdep")$incomplete_dyads, 0)
+})
+
+test_that("validate_interdep_data keeps incomplete metadata aligned after role dropping", {
+  data <- data.frame(
+    dyad_id = c(1, 2, 2, 3, 3),
+    person_id = c("A", "C", "D", "E", "F"),
+    role = c(NA, "female", "male", "female", "female")
+  )
+
+  suppressWarnings(
+    result <- validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      incomplete_dyads = "keep",
+      missing_role = "drop"
+    )
+  )
+
+  expect_equal(result$dyad_id, c(2, 2, 3, 3))
+  expect_length(attr(result, "interdep")$incomplete_dyads, 0)
+})
+
+test_that("validate_interdep_data rejects groups with more than two members", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D", "E")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id, incomplete_dyads = "keep"),
+    "Groups with more than two members were found: 1.",
     fixed = TRUE
   )
 })
@@ -199,6 +277,28 @@ test_that("validate_interdep_data accepts stable longitudinal roles", {
   expect_equal(attr(result, "interdep")$role, "role")
 })
 
+test_that("validate_interdep_data resolves sparse longitudinal roles", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    role = c("female", "male", NA, NA, "female", "male", NA, NA),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2)
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time
+  )
+
+  expect_equal(
+    result$role,
+    c("female", "male", "female", "male", "female", "male", "female", "male")
+  )
+})
+
 test_that("validate_interdep_data rejects inconsistent roles within member", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2, 2),
@@ -214,6 +314,43 @@ test_that("validate_interdep_data rejects inconsistent roles within member", {
   )
 })
 
+test_that("validate_interdep_data handles members with unknown roles by policy", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", NA, "female", "male", "female", "female")
+  )
+
+  expect_warning(
+    kept <- validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      missing_role = "keep"
+    ),
+    "dyads: 1",
+    fixed = TRUE
+  )
+
+  expect_equal(kept$role, c("female", "unknown", "female", "male", "female", "female"))
+
+  expect_warning(
+    dropped <- validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      missing_role = "drop"
+    ),
+    "Dropped dyads with incomplete role information: 1.",
+    fixed = TRUE
+  )
+
+  expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
+  expect_equal(attr(dropped, "interdep")$n_dyads, 2L)
+})
+
 test_that("validate_interdep_data rejects fewer than two groups", {
   data <- data.frame(
     dyad_id = c(1, 1),
@@ -227,7 +364,7 @@ test_that("validate_interdep_data rejects fewer than two groups", {
   )
 })
 
-test_that("validate_interdep_data rejects cross-sectional groups with more than two rows", {
+test_that("validate_interdep_data rejects duplicate cross-sectional member rows", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2),
     person_id = c("A", "B", "A", "C", "D")
@@ -235,7 +372,7 @@ test_that("validate_interdep_data rejects cross-sectional groups with more than 
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id),
-    "Each `group` must contain exactly two rows. For longitudinal data specify `time`.",
+    "Each `member` must appear at most once per `group`. For longitudinal data specify `time`.",
     fixed = TRUE
   )
 })

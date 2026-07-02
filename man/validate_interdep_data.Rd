@@ -10,8 +10,8 @@ validate_interdep_data(
   member,
   role = NULL,
   time = NULL,
-  incomplete_dyads = c("error", "keep", "drop"),
-  missing_role = c("error", "keep", "drop")
+  incomplete_dyads = c("error", "drop", "keep"),
+  missing_role = c("error", "drop", "keep")
 )
 }
 \arguments{
@@ -32,7 +32,7 @@ in the data are treated as exchangeable.}
 unique members anywhere in the data. \code{"error"} stops with an error,
 \code{"drop"} removes the entire dyad, and \code{"keep"} retains the observed rows.
 Keeping incomplete dyads can produce unknown role compositions, such as
-\code{"female__unknown"}.}
+\code{"female__unknown"}, when a \code{role} column is supplied.}
 
 \item{missing_role}{How to handle missing values in the \code{role} column.
 \code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
@@ -47,8 +47,8 @@ member, optional role, and optional time columns.
 \description{
 Checks whether \code{data} has a valid long-format dyadic structure and returns it
 as a tibble with an additional \code{interdep_data} class. Cross-sectional data
-should contain one row per member within each dyad. Intensive longitudinal
-data should contain one row per member and measurement occasion within each
-dyad.
+may contain at most one row per member within each dyad. Intensive
+longitudinal data may contain at most one row per member and measurement
+occasion within each dyad.
 }
 \keyword{internal}
