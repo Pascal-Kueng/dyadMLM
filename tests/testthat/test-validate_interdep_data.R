@@ -218,7 +218,7 @@ test_that("validate_interdep_data keeps incomplete metadata aligned after role d
     role = c(NA, "female", "male", "female", "female")
   )
 
-  suppressWarnings(
+  suppressMessages(suppressWarnings(
     result <- validate_interdep_data(
       data,
       group = dyad_id,
@@ -227,7 +227,7 @@ test_that("validate_interdep_data keeps incomplete metadata aligned after role d
       incomplete_dyads = "keep",
       missing_role = "drop"
     )
-  )
+  ))
 
   expect_equal(result$dyad_id, c(2, 2, 3, 3))
   expect_length(attr(result, "interdep")$incomplete_dyads, 0)

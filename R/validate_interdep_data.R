@@ -40,14 +40,14 @@ validate_interdep_data <- function(
     missing_role = c("error", "drop", "keep")
   ) {
 
-  # Validating Dataframe
+  # Validate data frame input.
   if (!inherits(data, "data.frame")) {
     stop("`data` must be a data frame or tibble.", call. = FALSE)
   }
 
   out <- tibble::as_tibble(data)
 
-  # Validating that package-owned columns are not already present.
+  # Validate that package-owned columns are not already present.
   reserved_columns <- names(out)[startsWith(names(out), ".interdep_")]
   if (length(reserved_columns) > 0) {
     stop(
@@ -56,7 +56,7 @@ validate_interdep_data <- function(
     )
   }
 
-  # Extracting variables
+  # Extract structural column names.
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
 
@@ -88,7 +88,7 @@ validate_interdep_data <- function(
     time_name <- rlang::as_name(time)
   }
 
-  # Validating that all variables exist.
+  # Validate that structural columns exist.
   if (!group_name %in% names(out)) {
     stop("`group` must refer to an existing column in `data`.", call. = FALSE)
   }
@@ -105,7 +105,7 @@ validate_interdep_data <- function(
     stop("`time` must refer to an existing column in `data`.", call. = FALSE)
   }
 
-  # Validating that structural variables are complete.
+  # Validate that required structural columns are complete.
   if (any(is.na(out[[group_name]]))) {
     stop("`group` must not contain missing values.", call. = FALSE)
   }
@@ -140,7 +140,7 @@ validate_interdep_data <- function(
     incomplete_groups <- incomplete_groups[incomplete_groups %in% unique(out[[group_name]])]
   }
 
-  # Validating that each member has at most one row per dyad or dyad-time.
+  # Validate that each member has at most one row per dyad or dyad-time.
   if (has_time) {
     if (anyDuplicated(out[c(group_name, time_name, member_name)]) > 0) {
       stop("Each `member` must appear at most once per `group`-`time` combination.", call. = FALSE)
@@ -174,8 +174,6 @@ validate_interdep_data <- function(
 }
 
 
-#############################################################################
-
 resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dyads) {
   group_member_counts <- dplyr::summarise(
     dplyr::group_by(out, .data[[group_name]]),
@@ -183,7 +181,7 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
     .groups = "drop"
   )
 
-  # Groups larger than 2 are never allowed
+  # Groups with more than two members are never valid dyads.
   too_large_groups <- group_member_counts[[group_name]][group_member_counts$n_members > 2]
   if (length(too_large_groups) > 0) {
     stop(
@@ -197,10 +195,10 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
     )
   }
 
-  # Incomplete groups are allowed if explicitly requested
+  # Groups with fewer than two members are handled by policy.
   incomplete_groups <- group_member_counts[[group_name]][group_member_counts$n_members < 2]
 
-  # Return early if all groups are complete
+  # Return early if all groups are complete.
   if (length(incomplete_groups) == 0) {
     return(list(data = out, incomplete_groups = incomplete_groups))
   }
@@ -239,12 +237,10 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
   }
 }
 
-##############################################################################
-
 resolve_interdep_roles <- function(out, group_name, member_name, role_name, missing_role) {
   known_roles <- out[[role_name]][!is.na(out[[role_name]])]
 
-  # check if roles use reserved "__"
+  # Reject role labels that contain the reserved composition separator.
   if (any(grepl(interdep_composition_sep, as.character(known_roles), fixed = TRUE))) {
     stop(
       sprintf(
@@ -255,8 +251,7 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
     )
   }
 
-  # Filtering out NA rows in order to not mistaken partially missing roles in one
-  # person as inconsistent! (e.g., if someone has roles c('female', 'female', NA))
+  # Ignore missing role rows when checking whether known roles are consistent.
   known_member_roles <- unique(
     out[!is.na(out[[role_name]]), c(group_name, member_name, role_name), drop = FALSE]
   )
@@ -265,18 +260,18 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
     stop("Each `member` must have exactly one `role` within each `group`.", call. = FALSE)
   }
 
-  # Rename the known role column for joining
+  # Rename the known role column before joining it back to the full data.
   known_member_roles[[".interdep_resolved_role"]] <- known_member_roles[[role_name]]
   known_member_roles[[role_name]] <- NULL
 
-  # "spread" the known role values to all applicable rows.
+  # Create a lookup table with one resolved role per observed member.
   member_roles <- dplyr::left_join(
     unique(out[c(group_name, member_name)]),
     known_member_roles,
     by = c(group_name, member_name)
   )
 
-  # Check who is unresolved (due to no known role)
+  # Find dyads where at least one member has no known role.
   missing_role_groups <- unique(
     member_roles[[group_name]][is.na(member_roles[[".interdep_resolved_role"]])]
   )
@@ -316,8 +311,10 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
     }
   }
 
+  # Join the resolved member roles back to every original row.
   out <- dplyr::left_join(out, member_roles, by = c(group_name, member_name))
 
+  # Convert unresolved roles from NA to "unknown" when requested.
   if (missing_role == "keep") {
     out[[".interdep_resolved_role"]][is.na(out[[".interdep_resolved_role"]])] <- interdep_unknown_role
   }
