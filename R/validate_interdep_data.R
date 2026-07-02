@@ -173,6 +173,73 @@ validate_interdep_data <- function(
   out
 }
 
+
+#############################################################################
+
+resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dyads) {
+  group_member_counts <- dplyr::summarise(
+    dplyr::group_by(out, .data[[group_name]]),
+    n_members = length(unique(.data[[member_name]])),
+    .groups = "drop"
+  )
+
+  # Groups larger than 2 are never allowed
+  too_large_groups <- group_member_counts[[group_name]][group_member_counts$n_members > 2]
+  if (length(too_large_groups) > 0) {
+    stop(
+      paste0(
+        "Each `group` must contain at most two unique members. ",
+        "Groups with more than two members were found: ",
+        format_group_list(too_large_groups),
+        "."
+      ),
+      call. = FALSE
+    )
+  }
+
+  # Incomplete groups are allowed if explicitly requested
+  incomplete_groups <- group_member_counts[[group_name]][group_member_counts$n_members < 2]
+
+  # Return early if all groups are complete
+  if (length(incomplete_groups) == 0) {
+    return(list(data = out, incomplete_groups = incomplete_groups))
+  }
+
+  if (incomplete_dyads == "error") {
+    stop(
+      paste0(
+        "Each `group` must contain exactly two unique members. ",
+        "Incomplete dyads were found: ",
+        format_group_list(incomplete_groups),
+        "."
+      ),
+      call. = FALSE
+    )
+  }
+
+  if (incomplete_dyads == "drop") {
+    warning(
+      paste0("Dropped incomplete dyads: ", format_group_list(incomplete_groups), "."),
+      call. = FALSE
+    )
+    out <- out[!out[[group_name]] %in% incomplete_groups, , drop = FALSE]
+    return(list(data = out, incomplete_groups = incomplete_groups[0]))
+  }
+
+  if (incomplete_dyads == "keep") {
+    warning(
+      paste0(
+        "Keeping incomplete dyads; composition labels may be unknown for dyads: ",
+        format_group_list(incomplete_groups),
+        "."
+      ),
+      call. = FALSE
+    )
+
+    return(list(data = out, incomplete_groups = incomplete_groups))
+  }
+}
+
 ##############################################################################
 
 resolve_interdep_roles <- function(out, group_name, member_name, role_name, missing_role) {
@@ -254,69 +321,4 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   out[[".interdep_resolved_role"]] <- NULL
 
   out
-}
-
-#############################################################################
-
-resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dyads) {
-  group_member_counts <- dplyr::summarise(
-    dplyr::group_by(out, .data[[group_name]]),
-    n_members = length(unique(.data[[member_name]])),
-    .groups = "drop"
-  )
-
-  too_large_groups <- group_member_counts[[group_name]][group_member_counts$n_members > 2]
-  if (length(too_large_groups) > 0) {
-    stop(
-      paste0(
-        "Each `group` must contain exactly two unique members. ",
-        "Groups with more than two members were found: ",
-        paste(as.character(too_large_groups), collapse = ", "),
-        "."
-      ),
-      call. = FALSE
-    )
-  }
-
-  incomplete_groups <- group_member_counts[[group_name]][group_member_counts$n_members < 2]
-
-  if (length(incomplete_groups) == 0) {
-    return(list(data = out, incomplete_groups = incomplete_groups))
-  }
-
-  incomplete_group_labels <- paste(as.character(incomplete_groups), collapse = ", ")
-
-  if (incomplete_dyads == "error") {
-    stop(
-      paste0(
-        "Each `group` must contain exactly two unique members. ",
-        "Incomplete dyads were found: ",
-        incomplete_group_labels,
-        "."
-      ),
-      call. = FALSE
-    )
-  }
-
-  if (incomplete_dyads == "drop") {
-    warning(
-      paste0("Dropped incomplete dyads: ", incomplete_group_labels, "."),
-      call. = FALSE
-    )
-    out <- out[!out[[group_name]] %in% incomplete_groups, , drop = FALSE]
-    return(list(data = out, incomplete_groups = incomplete_groups[0]))
-  }
-
-  if (incomplete_dyads == "keep") {
-    warning(
-      paste0(
-        "Keeping incomplete dyads; composition labels may be unknown for dyads: ",
-        incomplete_group_labels,
-        "."
-      ),
-      call. = FALSE
-    )
-
-    return(list(data = out, incomplete_groups = incomplete_groups))
-  }
 }
