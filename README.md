@@ -38,3 +38,7 @@ attr(prepared, "interdep")$dyad_compositions
 #>   <chr>           <chr>        <chr>             <int>
 #> 1 female__male    female__male distinguishable      95
 ```
+
+Use `incomplete_dyads` and `missing_role` to choose whether incomplete
+dyads or unresolved role information should error, be dropped, or be
+kept with unknown composition labels. See the vignette for examples.
