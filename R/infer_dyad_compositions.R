@@ -30,41 +30,40 @@ infer_dyad_compositions <- function(data) {
   }
 
 
-  # If role column was provided
+  # If role column **was** provided
   group_name <- meta_data$group
   member_name <- meta_data$member
   role_name <- meta_data$role
-  incomplete_groups <- meta_data$incomplete_dyads
-  if (is.null(incomplete_groups)) {
-    incomplete_groups <- character(0)
-  }
 
-  dyad_roles <- dplyr::summarise(
-    dplyr::group_by(
-      dplyr::distinct(
-        data,
-        .data[[group_name]],
-        .data[[member_name]],
-        .data[[role_name]]
-      ),
-      .data[[group_name]]
-    ),
-    raw_composition = canonical_composition(c(
-      .data[[role_name]],
-      if (.data[[group_name]][1] %in% incomplete_groups) interdep_unknown_role else character(0)
-    )),
-    dyad_type = ifelse(
-      any(.data[[role_name]] == interdep_unknown_role) ||
-        .data[[group_name]][1] %in% incomplete_groups,
-      "unknown",
-      ifelse(
-        dplyr::n_distinct(.data[[role_name]]) == 1,
-        "exchangeable",
-        "distinguishable"
-      )
-    ),
-    .groups = "drop"
-  )
+  incomplete_groups <- meta_data$incomplete_dyads
+
+  dyad_roles <- data |>
+    dplyr::distinct(
+      .data[[group_name]],
+      .data[[member_name]],
+      .data[[role_name]]
+    ) |>
+    dplyr::group_by(.data[[group_name]]) |>
+    dplyr::summarise(
+      raw_composition = canonical_composition(c(
+        .data[[role_name]],
+        if (.data[[group_name]][1] %in% incomplete_groups) {
+          interdep_unknown_role
+        } else {
+          character(0)
+        }
+      )),
+      dyad_type = ifelse(
+        any(.data[[role_name]] == interdep_unknown_role) ||
+          .data[[group_name]][[1]] %in% incomplete_groups,
+        "unknown",
+        ifelse(
+          dplyr::n_distinct(.data[[role_name]]) == 1,
+          "exchangeable",
+          "distinguishable"
+        )
+      ), .groups = "drop"
+    )
 
   dyad_roles$composition <- dyad_roles$raw_composition
 

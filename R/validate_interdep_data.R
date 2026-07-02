@@ -157,6 +157,13 @@ validate_interdep_data <- function(
     stop("At least 2 groups are needed.", call. = FALSE)
   }
 
+  # Store no incomplete dyads as an empty slice of the group column. This keeps
+  # the metadata type aligned with the user's group IDs, e.g. character,
+  # integer, or factor.
+  if (length(incomplete_groups) == 0) {
+    incomplete_groups <- out[[group_name]][0]
+  }
+
   attr(out, "interdep") <- list(
     group = group_name,
     member = member_name,
@@ -175,11 +182,13 @@ validate_interdep_data <- function(
 
 
 resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dyads) {
-  group_member_counts <- dplyr::summarise(
-    dplyr::group_by(out, .data[[group_name]]),
-    n_members = length(unique(.data[[member_name]])),
-    .groups = "drop"
-  )
+
+  group_member_counts <- out |>
+    dplyr::group_by(.data[[group_name]]) |>
+    dplyr::summarise(
+      n_members = length(unique(.data[[member_name]])),
+      .groups = "drop"
+    )
 
   # Groups with more than two members are never valid dyads.
   too_large_groups <- group_member_counts[[group_name]][group_member_counts$n_members > 2]
