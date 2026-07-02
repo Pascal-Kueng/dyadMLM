@@ -29,7 +29,7 @@
 #'   member, optional role, and optional time columns.
 #' @importFrom rlang .data
 #'
-#' @keywords internal
+#' @export
 validate_interdep_data <- function(
     data,
     group,
@@ -218,9 +218,8 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
   }
 
   if (incomplete_dyads == "drop") {
-    warning(
-      paste0("Dropped incomplete dyads: ", format_group_list(incomplete_groups), "."),
-      call. = FALSE
+    message(
+      paste0("Dropped incomplete dyads: ", format_group_list(incomplete_groups), ".")
     )
     out <- out[!out[[group_name]] %in% incomplete_groups, , drop = FALSE]
     return(list(data = out, incomplete_groups = incomplete_groups[0]))
@@ -245,6 +244,7 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
 resolve_interdep_roles <- function(out, group_name, member_name, role_name, missing_role) {
   known_roles <- out[[role_name]][!is.na(out[[role_name]])]
 
+  # check if roles use reserved "__"
   if (any(grepl(interdep_composition_sep, as.character(known_roles), fixed = TRUE))) {
     stop(
       sprintf(
@@ -255,6 +255,8 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
     )
   }
 
+  # Filtering out NA rows in order to not mistaken partially missing roles in one
+  # person as inconsistent! (e.g., if someone has roles c('female', 'female', NA))
   known_member_roles <- unique(
     out[!is.na(out[[role_name]]), c(group_name, member_name, role_name), drop = FALSE]
   )
@@ -263,26 +265,29 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
     stop("Each `member` must have exactly one `role` within each `group`.", call. = FALSE)
   }
 
-  names(known_member_roles)[names(known_member_roles) == role_name] <- ".interdep_resolved_role"
+  # Rename the known role column for joining
+  known_member_roles[[".interdep_resolved_role"]] <- known_member_roles[[role_name]]
+  known_member_roles[[role_name]] <- NULL
+
+  # "spread" the known role values to all applicable rows.
   member_roles <- dplyr::left_join(
     unique(out[c(group_name, member_name)]),
     known_member_roles,
     by = c(group_name, member_name)
   )
 
+  # Check who is unresolved (due to no known role)
   missing_role_groups <- unique(
     member_roles[[group_name]][is.na(member_roles[[".interdep_resolved_role"]])]
   )
 
   if (length(missing_role_groups) > 0) {
-    missing_role_group_labels <- paste(as.character(missing_role_groups), collapse = ", ")
-
     if (missing_role == "error") {
       stop(
         paste0(
           "Each `member` must have at least one non-missing `role` within each `group`. ",
           "Missing role information was found in dyads: ",
-          missing_role_group_labels,
+          format_group_list(missing_role_groups),
           "."
         ),
         call. = FALSE
@@ -291,20 +296,19 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
 
     if (missing_role == "drop") {
       out <- out[!out[[group_name]] %in% missing_role_groups, , drop = FALSE]
-      warning(
+      message(
         paste0(
           "Dropped dyads with incomplete role information: ",
-          missing_role_group_labels,
+          format_group_list(missing_role_groups),
           "."
-        ),
-        call. = FALSE
+        )
       )
     } else if (missing_role == "keep") {
       warning(
         paste0(
           "Keeping dyads with incomplete role information. Unknown role ",
           "compositions may be produced for dyads: ",
-          missing_role_group_labels,
+          format_group_list(missing_role_groups),
           "."
         ),
         call. = FALSE
@@ -313,11 +317,12 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   }
 
   out <- dplyr::left_join(out, member_roles, by = c(group_name, member_name))
-  resolved_role <- as.character(out[[".interdep_resolved_role"]])
+
   if (missing_role == "keep") {
-    resolved_role[is.na(resolved_role)] <- interdep_unknown_role
+    out[[".interdep_resolved_role"]][is.na(out[[".interdep_resolved_role"]])] <- interdep_unknown_role
   }
-  out[[role_name]] <- resolved_role
+
+  out[[role_name]] <- as.character(out[[".interdep_resolved_role"]])
   out[[".interdep_resolved_role"]] <- NULL
 
   out

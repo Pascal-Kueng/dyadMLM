@@ -51,4 +51,3 @@ may contain at most one row per member within each dyad. Intensive
 longitudinal data may contain at most one row per member and measurement
 occasion within each dyad.
 }
-\keyword{internal}

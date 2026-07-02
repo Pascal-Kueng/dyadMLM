@@ -195,7 +195,7 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
   expect_equal(kept$dyad_id, c(1, 2, 2, 3, 3))
   expect_equal(attr(kept, "interdep")$incomplete_dyads, 1)
 
-  expect_warning(
+  expect_message(
     dropped <- validate_interdep_data(
       data,
       group = dyad_id,
@@ -335,7 +335,7 @@ test_that("validate_interdep_data handles members with unknown roles by policy",
 
   expect_equal(kept$role, c("female", "unknown", "female", "male", "female", "female"))
 
-  expect_warning(
+  expect_message(
     dropped <- validate_interdep_data(
       data,
       group = dyad_id,
