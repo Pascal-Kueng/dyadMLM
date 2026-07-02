@@ -52,6 +52,8 @@
 #' )
 #'
 #' attr(prepared, "interdep")$dyad_compositions
+#'
+#' print(prepared)
 #' @export
 prepare_interdep_data <- function(
     data,

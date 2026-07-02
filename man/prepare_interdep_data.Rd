@@ -76,4 +76,6 @@ prepared <- prepare_interdep_data(
 )
 
 attr(prepared, "interdep")$dyad_compositions
+
+print(prepared)
 }
