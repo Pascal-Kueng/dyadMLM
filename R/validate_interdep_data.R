@@ -196,8 +196,12 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
     stop(
       paste0(
         "Each `group` must contain at most two unique members. ",
-        "Groups with more than two members were found: ",
-        format_group_list(too_large_groups),
+        "Found ",
+        format_group_count(
+          too_large_groups,
+          singular = "group with more than two members",
+          plural = "groups with more than two members"
+        ),
         "."
       ),
       call. = FALSE
@@ -216,8 +220,12 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
     stop(
       paste0(
         "Each `group` must contain exactly two unique members. ",
-        "Incomplete dyads were found: ",
-        format_group_list(incomplete_groups),
+        "Found ",
+        format_group_count(
+          incomplete_groups,
+          singular = "incomplete dyad",
+          plural = "incomplete dyads"
+        ),
         "."
       ),
       call. = FALSE
@@ -226,7 +234,15 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
 
   if (incomplete_dyads == "drop") {
     message(
-      paste0("Dropped incomplete dyads: ", format_group_list(incomplete_groups), ".")
+      paste0(
+        "Dropped ",
+        format_group_count(
+          incomplete_groups,
+          singular = "incomplete dyad",
+          plural = "incomplete dyads"
+        ),
+        "."
+      )
     )
     out <- out[!out[[group_name]] %in% incomplete_groups, , drop = FALSE]
     return(list(data = out, incomplete_groups = incomplete_groups[0]))
@@ -235,9 +251,13 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
   if (incomplete_dyads == "keep") {
     warning(
       paste0(
-        "Keeping incomplete dyads; composition labels may be unknown for dyads: ",
-        format_group_list(incomplete_groups),
-        "."
+        "Keeping ",
+        format_group_count(
+          incomplete_groups,
+          singular = "incomplete dyad",
+          plural = "incomplete dyads"
+        ),
+        ". Composition labels may be unknown."
       ),
       call. = FALSE
     )
@@ -290,8 +310,8 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
       stop(
         paste0(
           "Each `member` must have at least one non-missing `role` within each `group`. ",
-          "Missing role information was found in dyads: ",
-          format_group_list(missing_role_groups),
+          "Found incomplete role information in ",
+          format_group_count(missing_role_groups),
           "."
         ),
         call. = FALSE
@@ -302,18 +322,25 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
       out <- out[!out[[group_name]] %in% missing_role_groups, , drop = FALSE]
       message(
         paste0(
-          "Dropped dyads with incomplete role information: ",
-          format_group_list(missing_role_groups),
+          "Dropped ",
+          format_group_count(
+            missing_role_groups,
+            singular = "dyad with incomplete role information",
+            plural = "dyads with incomplete role information"
+          ),
           "."
         )
       )
     } else if (missing_role == "keep") {
       warning(
         paste0(
-          "Keeping dyads with incomplete role information. Unknown role ",
-          "compositions may be produced for dyads: ",
-          format_group_list(missing_role_groups),
-          "."
+          "Keeping ",
+          format_group_count(
+            missing_role_groups,
+            singular = "dyad with incomplete role information",
+            plural = "dyads with incomplete role information"
+          ),
+          ". Unknown role compositions may be produced."
         ),
         call. = FALSE
       )

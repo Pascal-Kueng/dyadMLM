@@ -38,6 +38,7 @@ infer_dyad_compositions <- function(data) {
   incomplete_groups <- meta_data$incomplete_dyads
 
   dyad_roles <- data |>
+    # distinct to handle ILD and get only one role per person
     dplyr::distinct(
       .data[[group_name]],
       .data[[member_name]],
@@ -45,24 +46,30 @@ infer_dyad_compositions <- function(data) {
     ) |>
     dplyr::group_by(.data[[group_name]]) |>
     dplyr::summarise(
-      raw_composition = canonical_composition(c(
-        .data[[role_name]],
+      raw_composition = {
+        roles <- .data[[role_name]]
+
+        # For incomplete dyads, add one synthetic unknown role for the missing partner.
         if (.data[[group_name]][1] %in% incomplete_groups) {
-          interdep_unknown_role
-        } else {
-          character(0)
+          roles <- c(roles, interdep_unknown_role)
         }
-      )),
-      dyad_type = ifelse(
-        any(.data[[role_name]] == interdep_unknown_role) ||
-          .data[[group_name]][[1]] %in% incomplete_groups,
-        "unknown",
-        ifelse(
-          dplyr::n_distinct(.data[[role_name]]) == 1,
-          "exchangeable",
+
+        canonical_composition(roles)
+      },
+      dyad_type = {
+        has_unknown_role <- any(.data[[role_name]] == interdep_unknown_role)
+        is_incomplete_group <- .data[[group_name]][1] %in% incomplete_groups
+        has_one_role <- dplyr::n_distinct(.data[[role_name]]) == 1
+
+        if (has_unknown_role || is_incomplete_group) {
+          interdep_unknown_role
+        } else if (has_one_role) {
+          "exchangeable"
+        } else {
           "distinguishable"
-        )
-      ), .groups = "drop"
+        }
+      },
+      .groups = "drop"
     )
 
   dyad_roles$composition <- dyad_roles$raw_composition

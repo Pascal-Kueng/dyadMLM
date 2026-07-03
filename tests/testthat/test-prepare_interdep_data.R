@@ -138,7 +138,7 @@ test_that("prepare_interdep_data marks retained unknown roles in compositions", 
       role = role,
       missing_role = "keep"
     ),
-    "dyads: 1",
+    "Keeping 1 dyad with incomplete role information, with ID: 1.",
     fixed = TRUE
   )
 
@@ -178,7 +178,7 @@ test_that("prepare_interdep_data marks retained incomplete dyads in compositions
       role = role,
       incomplete_dyads = "keep"
     ),
-    "Keeping incomplete dyads",
+    "Keeping 1 incomplete dyad, with ID: 1.",
     fixed = TRUE
   )
 

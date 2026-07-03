@@ -81,12 +81,14 @@ validated_incomplete_roles_drop <- validate_interdep_data(
 
 
 setup_infer_debug <- function(data = validated_incomplete_roles_keep) {
-  meta_data <<- attr(data, "interdep")
-  group_name <<- meta_data$group
-  member_name <<- meta_data$member
-  role_name <<- meta_data$role
-  incomplete_groups <<- meta_data$incomplete_dyads
-  data <<- data
+  meta_data <- attr(data, "interdep")
+
+  assign("data", data, envir = .GlobalEnv)
+  assign("meta_data", meta_data, envir = .GlobalEnv)
+  assign("group_name", meta_data$group, envir = .GlobalEnv)
+  assign("member_name", meta_data$member, envir = .GlobalEnv)
+  assign("role_name", meta_data$role, envir = .GlobalEnv)
+  assign("incomplete_groups", meta_data$incomplete_dyads, envir = .GlobalEnv)
 
   invisible(data)
 }

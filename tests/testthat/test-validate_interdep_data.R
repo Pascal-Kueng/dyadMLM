@@ -177,7 +177,7 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
-    "Incomplete dyads were found: 1.",
+    "Found 1 incomplete dyad, with ID: 1.",
     fixed = TRUE
   )
 
@@ -189,7 +189,7 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
       role = role,
       incomplete_dyads = "keep"
     ),
-    "Keeping incomplete dyads",
+    "Keeping 1 incomplete dyad, with ID: 1.",
     fixed = TRUE
   )
   expect_equal(kept$dyad_id, c(1, 2, 2, 3, 3))
@@ -203,7 +203,7 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
       role = role,
       incomplete_dyads = "drop"
     ),
-    "Dropped incomplete dyads: 1.",
+    "Dropped 1 incomplete dyad, with ID: 1.",
     fixed = TRUE
   )
   expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
@@ -241,7 +241,7 @@ test_that("validate_interdep_data rejects groups with more than two members", {
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, incomplete_dyads = "keep"),
-    "Groups with more than two members were found: 1.",
+    "Found 1 group with more than two members, with ID: 1.",
     fixed = TRUE
   )
 })
@@ -329,7 +329,7 @@ test_that("validate_interdep_data handles members with unknown roles by policy",
       role = role,
       missing_role = "keep"
     ),
-    "dyads: 1",
+    "Keeping 1 dyad with incomplete role information, with ID: 1.",
     fixed = TRUE
   )
 
@@ -343,7 +343,7 @@ test_that("validate_interdep_data handles members with unknown roles by policy",
       role = role,
       missing_role = "drop"
     ),
-    "Dropped dyads with incomplete role information: 1.",
+    "Dropped 1 dyad with incomplete role information, with ID: 1.",
     fixed = TRUE
   )
 

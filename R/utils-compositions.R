@@ -60,3 +60,32 @@ format_group_list <- function(groups, max = 10) {
     " more"
   )
 }
+
+
+#' Format counted group identifiers for validation messages
+#'
+#' Converts a vector of dyad or group identifiers into text that includes both
+#' the number of groups and a compact list of their identifiers.
+#'
+#' @param groups A vector of group identifiers.
+#' @param singular Singular label for one group.
+#' @param plural Plural label for multiple groups.
+#' @param max Maximum number of identifiers to show before truncating the list.
+#'
+#' @return A single character string.
+#' @keywords internal
+format_group_count <- function(groups, singular = "dyad", plural = "dyads", max = 10) {
+  n_groups <- length(groups)
+  group_label <- if (n_groups == 1) singular else plural
+  id_label <- if (n_groups == 1) "ID" else "IDs"
+
+  paste0(
+    n_groups,
+    " ",
+    group_label,
+    ", with ",
+    id_label,
+    ": ",
+    format_group_list(groups, max = max)
+  )
+}
