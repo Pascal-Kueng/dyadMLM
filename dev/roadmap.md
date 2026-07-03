@@ -16,8 +16,8 @@ model-building features.
 - Auto-detect roles, dyad compositions, and distinguishability where possible
 - Handle incomplete dyads and missing roles with explicit `error`, `drop`, and
   `keep` behavior
-- Return factor columns for `.interdep_composition` and
-  `.interdep_composition_role`
+- Return factor columns for `.i_composition` and
+  `.i_composition_role`
 - Add a print method for `interdep_data`
   - Show number of dyads, whether data are longitudinal, and inferred
     composition counts

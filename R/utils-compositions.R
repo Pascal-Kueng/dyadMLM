@@ -11,6 +11,15 @@ interdep_unknown_label <- "unknown"
 # Label used when no role column is supplied.
 interdep_assumed_exchangeable_label <- "assumed_exchangeable"
 
+# Prefix to be used for package-owned / reserved columns.
+interdep_reserved_prefix <- ".i_"
+
+# Package generated columns will use the following names consistently
+interdep_composition_col <- paste0(interdep_reserved_prefix, "composition")
+interdep_composition_role_col <- paste0(interdep_reserved_prefix, "composition_role")
+interdep_dyad_type_col <- paste0(interdep_reserved_prefix, "dyad_type")
+interdep_resolved_role_col <- paste0(interdep_reserved_prefix, "resolved_role")
+
 ############################################################################
 # HELPER FUNCTIONS
 ###########################################################################

@@ -5,9 +5,9 @@
 #'
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #'
-#' @return An `interdep_data` object with added `.interdep_composition` and
-#'   `.interdep_composition_role` factor columns, `.interdep_is_*` numeric
-#'   indicator columns, and dyad composition metadata.
+#' @return An `interdep_data` object with added `.i_composition` and
+#'   `.i_composition_role` factor columns, `.i_is_*` numeric indicator columns,
+#'   and dyad composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data) {
@@ -15,8 +15,8 @@ infer_dyad_compositions <- function(data) {
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
-    data[[".interdep_composition"]] <- interdep_assumed_exchangeable_label
-    data[[".interdep_composition_role"]] <- interdep_assumed_exchangeable_label
+    data[[interdep_composition_col]] <- interdep_assumed_exchangeable_label
+    data[[interdep_composition_role_col]] <- interdep_assumed_exchangeable_label
 
     attr(data, "interdep")$dyad_compositions <- tibble::tibble(
       raw_composition = interdep_assumed_exchangeable_label,
@@ -26,11 +26,11 @@ infer_dyad_compositions <- function(data) {
     )
 
     # return as factors!
-    data[[".interdep_composition"]] <- factor(data[[".interdep_composition"]])
-    data[[".interdep_composition_role"]] <- factor(data[[".interdep_composition_role"]])
+    data[[interdep_composition_col]] <- factor(data[[interdep_composition_col]])
+    data[[interdep_composition_role_col]] <- factor(data[[interdep_composition_role_col]])
 
     # Create indicator column. In this case it is constant and equivalent to an intercept.
-    data[[".interdep_is_assumed_exchangeable"]] <- 1
+    data[[paste0(interdep_reserved_prefix, "is_", interdep_assumed_exchangeable_label)]] <- 1
 
     return(data)
   }
@@ -80,12 +80,12 @@ infer_dyad_compositions <- function(data) {
   dyad_roles$composition <- dyad_roles$raw_composition
 
   # Create the dyad-level lookup that will be joined back to every row.
-  # The lookup uses the final `.interdep_*` column names returned to users.
+  # The lookup uses the final `.i_*` column names returned to users.
   composition_lookup <- dplyr::select(
     dyad_roles,
     dplyr::all_of(group_name),
-    .interdep_composition = "composition",
-    .interdep_dyad_type = "dyad_type"
+    !!interdep_composition_col := "composition",
+    !!interdep_dyad_type_col := "dyad_type"
   )
 
   data <- dplyr::left_join(
@@ -95,15 +95,15 @@ infer_dyad_compositions <- function(data) {
   )
 
   # Adding individual role column!
-  data[[".interdep_composition_role"]] <- ifelse(
-    data[[".interdep_dyad_type"]] %in% c("distinguishable", interdep_unknown_label),
+  data[[interdep_composition_role_col]] <- ifelse(
+    data[[interdep_dyad_type_col]] %in% c("distinguishable", interdep_unknown_label),
     # For distinguishable and unknown dyads, include the member role in the label.
-    composition_role_label(data[[".interdep_composition"]], data[[role_name]]),
+    composition_role_label(data[[interdep_composition_col]], data[[role_name]]),
     # For exchangeable dyads, the dyad composition label is sufficient.
-    data[[".interdep_composition"]]
+    data[[interdep_composition_col]]
   )
 
-  data[[".interdep_dyad_type"]] <- NULL
+  data[[interdep_dyad_type_col]] <- NULL
 
   attr(data, "interdep")$dyad_compositions <- dplyr::count(
     dyad_roles,
@@ -114,14 +114,15 @@ infer_dyad_compositions <- function(data) {
   )
 
   # return as factors!
-  data[[".interdep_composition"]] <- factor(data[[".interdep_composition"]])
-  data[[".interdep_composition_role"]] <- factor(data[[".interdep_composition_role"]])
+  data[[interdep_composition_col]] <- factor(data[[interdep_composition_col]])
+  data[[interdep_composition_role_col]] <- factor(data[[interdep_composition_role_col]])
 
   # Create numeric indicator columns for model formulas.
-  composition_role <- data[[".interdep_composition_role"]]
+  composition_role <- data[[interdep_composition_role_col]]
   dummy_matrix <- model.matrix(~ composition_role + 0)
   dummy_names <- paste0(
-    ".interdep_is_",
+    interdep_reserved_prefix,
+    "is_",
     gsub("[^[:alnum:]_]+", "_", levels(composition_role))
   )
   colnames(dummy_matrix) <- make.unique(dummy_names, sep = "_")
@@ -129,4 +130,3 @@ infer_dyad_compositions <- function(data) {
 
   data
 }
-

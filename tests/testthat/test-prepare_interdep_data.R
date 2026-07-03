@@ -37,18 +37,18 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
     c("exchangeable", "distinguishable", "exchangeable")
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L, 1L))
-  expect_false(".interdep_raw_composition" %in% names(result))
-  expect_true(is.factor(result$.interdep_composition))
-  expect_true(is.factor(result$.interdep_composition_role))
-  indicator_names <- grep("^\\.interdep_is_", names(result), value = TRUE)
+  expect_false(".i_raw_composition" %in% names(result))
+  expect_true(is.factor(result$.i_composition))
+  expect_true(is.factor(result$.i_composition_role))
+  indicator_names <- grep("^\\.i_is_", names(result), value = TRUE)
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
-    as.character(result$.interdep_composition),
+    as.character(result$.i_composition),
     c("female__male", "female__male", "female__female", "female__female",
       "male__male", "male__male")
   )
   expect_equal(
-    as.character(result$.interdep_composition_role),
+    as.character(result$.i_composition_role),
     c("female__male__female", "female__male__male",
       "female__female", "female__female", "male__male", "male__male")
   )
@@ -62,12 +62,12 @@ test_that("prepare_interdep_data treats data without role as unclassified exchan
 
   result <- prepare_interdep_data(data, group = dyad_id, member = person_id)
 
-  expect_false(".interdep_raw_composition" %in% names(result))
-  expect_true(is.factor(result$.interdep_composition))
-  expect_true(is.factor(result$.interdep_composition_role))
-  expect_equal(result$.interdep_is_assumed_exchangeable, rep(1, 4))
-  expect_equal(as.character(result$.interdep_composition), rep(interdep_assumed_exchangeable_label, 4))
-  expect_equal(as.character(result$.interdep_composition_role), rep(interdep_assumed_exchangeable_label, 4))
+  expect_false(".i_raw_composition" %in% names(result))
+  expect_true(is.factor(result$.i_composition))
+  expect_true(is.factor(result$.i_composition_role))
+  expect_equal(result$.i_is_assumed_exchangeable, rep(1, 4))
+  expect_equal(as.character(result$.i_composition), rep(interdep_assumed_exchangeable_label, 4))
+  expect_equal(as.character(result$.i_composition_role), rep(interdep_assumed_exchangeable_label, 4))
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
@@ -83,12 +83,12 @@ test_that("prepare_interdep_data rejects reserved interdep columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
-    .interdep_composition = c("x", "x", "y", "y")
+    .i_composition = c("x", "x", "y", "y")
   )
 
   expect_error(
     prepare_interdep_data(data, group = dyad_id, member = person_id),
-    "columns starting with `.interdep_`",
+    "columns starting with `.i_`",
     fixed = TRUE
   )
 })
@@ -123,9 +123,9 @@ test_that("prepare_interdep_data infers compositions from sparse longitudinal ro
     time = time
   )
 
-  expect_equal(as.character(result$.interdep_composition), rep("female__male", 8))
+  expect_equal(as.character(result$.i_composition), rep("female__male", 8))
   expect_equal(
-    as.character(result$.interdep_composition_role),
+    as.character(result$.i_composition_role),
     rep(c("female__male__female", "female__male__male"), 4)
   )
 })
@@ -150,11 +150,11 @@ test_that("prepare_interdep_data marks retained unknown roles in compositions", 
   )
 
   expect_equal(
-    as.character(result$.interdep_composition),
+    as.character(result$.i_composition),
     c("female__unknown", "female__unknown", "female__male", "female__male")
   )
   expect_equal(
-    as.character(result$.interdep_composition_role),
+    as.character(result$.i_composition_role),
     c(
       "female__unknown__female",
       "female__unknown__unknown",
@@ -190,11 +190,11 @@ test_that("prepare_interdep_data marks retained incomplete dyads in compositions
   )
 
   expect_equal(
-    as.character(result$.interdep_composition),
+    as.character(result$.i_composition),
     c("female__unknown", "female__male", "female__male", "female__female", "female__female")
   )
   expect_equal(
-    as.character(result$.interdep_composition_role),
+    as.character(result$.i_composition_role),
     c(
       "female__unknown__female",
       "female__male__female",

@@ -48,10 +48,13 @@ validate_interdep_data <- function(
   out <- tibble::as_tibble(data)
 
   # Validate that package-owned columns are not already present.
-  reserved_columns <- names(out)[startsWith(names(out), ".interdep_")]
+  reserved_columns <- names(out)[startsWith(names(out), interdep_reserved_prefix)]
   if (length(reserved_columns) > 0) {
     stop(
-      "`data` must not contain columns starting with `.interdep_`; these names are reserved by interdep.",
+      sprintf(
+        "`data` must not contain columns starting with `%s`; these names are reserved by interdep.",
+        interdep_reserved_prefix
+      ),
       call. = FALSE
     )
   }
@@ -290,7 +293,7 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   }
 
   # Rename the known role column before joining it back to the full data.
-  known_member_roles[[".interdep_resolved_role"]] <- known_member_roles[[role_name]]
+  known_member_roles[[interdep_resolved_role_col]] <- known_member_roles[[role_name]]
   known_member_roles[[role_name]] <- NULL
 
   # Create a lookup table with one resolved role per observed member.
@@ -302,7 +305,7 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
 
   # Find dyads where at least one member has no known role.
   missing_role_groups <- unique(
-    member_roles[[group_name]][is.na(member_roles[[".interdep_resolved_role"]])]
+    member_roles[[group_name]][is.na(member_roles[[interdep_resolved_role_col]])]
   )
 
   if (length(missing_role_groups) > 0) {
@@ -352,11 +355,11 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
 
   # Convert unresolved roles from NA to "unknown" when requested.
   if (missing_role == "keep") {
-    out[[".interdep_resolved_role"]][is.na(out[[".interdep_resolved_role"]])] <- interdep_unknown_label
+    out[[interdep_resolved_role_col]][is.na(out[[interdep_resolved_role_col]])] <- interdep_unknown_label
   }
 
-  out[[role_name]] <- as.character(out[[".interdep_resolved_role"]])
-  out[[".interdep_resolved_role"]] <- NULL
+  out[[role_name]] <- as.character(out[[interdep_resolved_role_col]])
+  out[[interdep_resolved_role_col]] <- NULL
 
   out
 }

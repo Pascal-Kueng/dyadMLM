@@ -46,8 +46,8 @@ unknown role compositions, such as \code{"female__unknown"}. Ignored when no
 }
 \value{
 The original data as a tibble with class \code{interdep_data},
-\code{.interdep_composition} and \code{.interdep_composition_role} factor columns,
-\verb{.interdep_is_*} numeric indicator columns, and an \code{interdep} attribute
+\code{.i_composition} and \code{.i_composition_role} factor columns,
+\verb{.i_is_*} numeric indicator columns, and an \code{interdep} attribute
 containing structural metadata and \code{dyad_compositions}.
 }
 \description{
