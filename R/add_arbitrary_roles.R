@@ -61,9 +61,11 @@ add_arbitrary_roles <- function(data, seed = NULL) {
         0
       ),
 
-      .i_is_arbitrary_role_1 = as.numeric(.i_arbitrary_role == "arbitrary_role_1"),
-
-      .i_is_arbitrary_role_2 = as.numeric(.i_arbitrary_role == "arbitrary_role_2"),
+      .i_is_arbitrary_role_2 = ifelse(
+        .i_arbitrary_role == "arbitrary_role_2",
+        1,
+        0
+      ),
 
       .i_diff = ifelse(
         .i_is_arbitrary_role_1 == 1,

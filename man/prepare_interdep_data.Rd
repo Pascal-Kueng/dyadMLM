@@ -55,8 +55,9 @@ unknown role compositions, such as \code{"female_x_unknown"}. Ignored when no
 \value{
 The original data as a tibble with class \code{interdep_data},
 \code{.i_composition} and \code{.i_composition_role} factor columns,
-\verb{.i_is_*} numeric indicator columns, and an \code{interdep} attribute
-containing structural metadata and \code{dyad_compositions}.
+\code{.i_arbitrary_role}, \verb{.i_is_*} numeric indicator columns, \code{.i_diff}, and
+an \code{interdep} attribute containing structural metadata and
+\code{dyad_compositions}.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

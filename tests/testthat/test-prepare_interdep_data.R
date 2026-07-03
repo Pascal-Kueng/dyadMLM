@@ -41,6 +41,10 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   expect_true(is.factor(result$.i_composition))
   expect_true(is.factor(result$.i_composition_role))
   indicator_names <- grep("^\\.i_is_", names(result), value = TRUE)
+  indicator_names <- setdiff(
+    indicator_names,
+    c(".i_is_arbitrary_role_1", ".i_is_arbitrary_role_2")
+  )
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
     as.character(result$.i_composition),

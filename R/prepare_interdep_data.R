@@ -39,8 +39,9 @@
 #'
 #' @return The original data as a tibble with class `interdep_data`,
 #'   `.i_composition` and `.i_composition_role` factor columns,
-#'   `.i_is_*` numeric indicator columns, and an `interdep` attribute
-#'   containing structural metadata and `dyad_compositions`.
+#'   `.i_arbitrary_role`, `.i_is_*` numeric indicator columns, `.i_diff`, and
+#'   an `interdep` attribute containing structural metadata and
+#'   `dyad_compositions`.
 #'
 #' @examples
 #' data <- data.frame(
