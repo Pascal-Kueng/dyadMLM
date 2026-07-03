@@ -18,8 +18,8 @@ knitr::opts_chunk$set(
 library(interdep)
 ```
 
-`interdep` is being developed for dyadic data analysis. The basic data
-structure is a long data frame where dyads are stacked on top of each other and
+`interdep` is being developed for dyadic data analysis with multilevel models (MLM). 
+The basic data structure is a long data frame where dyads are stacked on top of each other and
 both members of a dyad appear as separate rows. For cross-sectional data, each
 complete dyad contributes one row per member. For intensive longitudinal data,
 each complete dyad contributes one row per member and measurement occasion.
@@ -47,12 +47,8 @@ The expected structure is:
 
 Measured variables may contain missing values. The structural `group`,
 `member`, and optional `time` variables must be complete; missing or incomplete
-role and dyad information can be handled with `missing_role` and
-`incomplete_dyads`. `prepare_interdep_data()` validates the expected structure,
-returns a tibble with class `interdep_data`, and stores the validated dyad,
-member, optional role, and optional time columns as metadata for later package
-functions. It also derives dyad-composition labels used by later functions.
-Omit `role` only when partners should be treated as exchangeable.
+role and dyad information can be handled with the function arguments `missing_role` and
+`incomplete_dyads`. 
 
 In intensive longitudinal data, missing measurement occasions can be represented
 by absent rows, as long as the time variable preserves the observed measurement
@@ -70,6 +66,13 @@ occasions. For example:
 the observed measurement occasions and skips from time 1 to time 3 for that
 person, which is fine. 
 
+
+`prepare_interdep_data()` validates the expected structure,
+returns a tibble with class `interdep_data`, derives and adds dyad-composition 
+labels that are needed for modeling. 
+
+Omit `role` only when all partners should be treated as exchangeable.
+
 ## Cross-sectional dyadic data
 
 `example_dyadic_crosssectional` is a simulated cross-sectional dataset for
@@ -79,6 +82,8 @@ distinguishable dyads. Each dyad has two rows: one for each member.
 print(head(example_dyadic_crosssectional))
 ```
 
+We validate and prepare the data with the function `prepare_interdep_data()`
+
 ```{r validate-cross-sectional}
 cross_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
@@ -87,15 +92,112 @@ cross_data <- prepare_interdep_data(
   member = personID
 )
 
-attr(cross_data, "interdep")
-cross_data
+print(cross_data)
+summary(cross_data)
 ```
+
+### Example: simple dyadic model for distinguishable dyads
+
+```{r validate-cross-sectional-distinguishable}
+cross_data <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  role = gender,
+  member = personID
+)
+
+print(cross_data)
+summary(cross_data)
+```
+
+```{r estimate-distinguishable}
+library(glmmTMB)
+
+model1 <- glmmTMB(
+  satisfaction ~ 
+    # remove standard intercept and model separate intercepts for male and female
+    0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
+    
+    # gender-specific slopes for communication (no main effect)
+    .i_is_female_x_male_female:communication + .i_is_female_x_male_male:communication +
+    
+    # residual covariance in glmmTMB can be modeled with random intercepts
+    # when dispformula ~ 0. We model gender-specific residual variances and 
+    # a correlation between the partners residuals. 
+    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)
+  
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = cross_data
+)
+
+summary(model1)
+
+```
+
+### Example: simple dyadic model for exchangeable dyads
+
+We can constrain ally dyads to be exchangeable by omitting the `role` argument: 
+
+```{r validate-cross-sectional-exchangeable}
+cross_data <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  # role = gender,
+  member = personID
+)
+
+print(cross_data)
+summary(cross_data)
+```
+
+
+```{r}
+
+model2 <- glmmTMB(
+  satisfaction ~ 
+    # pooled intercept 
+    1 + 
+    
+    # pooled slope for communication
+    communication +
+    
+    # specify a single pooled residual covariance but allow for a correlation
+    # between the partners' residuals. 
+    homcs(0 + .i_is_arbitrary_role1 + .i_is_arbitrary_role2 | coupleID)
+  
+    # alternative specification with the sum-diff approach that can be rotated back.
+    # us(1 | coupleID) + us(0 + Idiff | coupleID)
+    
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = cross_data
+)
+
+summary(model2)
+
+```
+
+### Test distinguishability
+
+Aside from using a Wald-Test on the first model, we can also compare models, since
+they are nested. 
+
+```{r model-comparison}
+
+anova(model1, model2)
+
+```
+
 
 ## Incomplete dyads and missing roles
 
 By default, `prepare_interdep_data()` stops when a dyad has only one observed
 member or when a member's role is unknown in every row. These cases can also be
 kept with unknown composition labels or dropped before validation continues.
+
+With `"keep"`, the original rows are retained. The incomplete dyad and the
+missing role are represented with `unknown` in the derived composition labels.
 
 ```{r incomplete-keep}
 incomplete_data <- data.frame(
@@ -110,37 +212,18 @@ kept_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
-  incomplete_dyads = "keep",
+  incomplete_dyads = "drop",
   missing_role = "keep"
 )
 
 kept_data
 ```
 
-With `"keep"`, the original rows are retained. The incomplete dyad and the
-missing role are represented with `unknown` in the derived composition labels.
-
-```{r incomplete-drop}
-dropped_data <- prepare_interdep_data(
-  incomplete_data,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  incomplete_dyads = "drop",
-  missing_role = "drop"
-)
-
-dropped_data
-```
-
-With `"drop"`, dyads with incomplete structure or unresolved role information
-are removed as whole dyads.
-
 
 
 ## Semi-continuous cross-sectional data
 
-`example_dyadic_crosssectional_tweedie` has the same dyadic structure, but the
+`example_dyadic_crosssectional_tweedie` has the same dyadic structure as before, but the
 outcome has exact zeros and positive skewed values, as in
 some physical activity outcomes, in contrast to the Gaussian distribution from the 
 previous example. 
@@ -160,7 +243,8 @@ tweedie_data <- prepare_interdep_data(
   member = personID
 )
 
-attr(tweedie_data, "interdep")
+print(tweedie_data)
+summary(tweedie_data)
 ```
 
 ## Intensive longitudinal dyadic data
@@ -183,6 +267,6 @@ ild_data <- prepare_interdep_data(
   time = diaryday
 )
 
-class(ild_data)
-attr(ild_data, "interdep")
+print(ild_data)
+summary(ild_data)
 ```
