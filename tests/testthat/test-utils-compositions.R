@@ -20,7 +20,7 @@ test_that("canonical_composition supports a custom separator", {
 test_that("composition_role_label appends roles to composition labels", {
   expect_equal(
     composition_role_label("female_x_male", "female"),
-    "female_x_male_x_female"
+    "female_x_male_female"
   )
 
   expect_equal(
@@ -28,7 +28,7 @@ test_that("composition_role_label appends roles to composition labels", {
       c("female_x_male", "female_x_male"),
       c("female", "male")
     ),
-    c("female_x_male_x_female", "female_x_male_x_male")
+    c("female_x_male_female", "female_x_male_male")
   )
 })
 

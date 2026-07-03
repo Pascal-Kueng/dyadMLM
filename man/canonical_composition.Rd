@@ -7,7 +7,7 @@
 \usage{
 canonical_composition(roles, sep = interdep_composition_sep)
 
-composition_role_label(composition, role, sep = interdep_composition_sep)
+composition_role_label(composition, role, sep = interdep_composition_role_sep)
 }
 \arguments{
 \item{roles}{A vector of role labels.}

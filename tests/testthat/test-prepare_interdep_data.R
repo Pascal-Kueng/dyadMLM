@@ -49,7 +49,7 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   )
   expect_equal(
     as.character(result$.i_composition_role),
-    c("female_x_male_x_female", "female_x_male_x_male",
+    c("female_x_male_female", "female_x_male_male",
       "female_x_female", "female_x_female", "male_x_male", "male_x_male")
   )
 })
@@ -126,7 +126,7 @@ test_that("prepare_interdep_data infers compositions from sparse longitudinal ro
   expect_equal(as.character(result$.i_composition), rep("female_x_male", 8))
   expect_equal(
     as.character(result$.i_composition_role),
-    rep(c("female_x_male_x_female", "female_x_male_x_male"), 4)
+    rep(c("female_x_male_female", "female_x_male_male"), 4)
   )
 })
 
@@ -156,10 +156,10 @@ test_that("prepare_interdep_data marks retained unknown roles in compositions", 
   expect_equal(
     as.character(result$.i_composition_role),
     c(
-      "female_x_unknown_x_female",
-      "female_x_unknown_x_unknown",
-      "female_x_male_x_female",
-      "female_x_male_x_male"
+      "female_x_unknown_female",
+      "female_x_unknown_unknown",
+      "female_x_male_female",
+      "female_x_male_male"
     )
   )
 
@@ -196,9 +196,9 @@ test_that("prepare_interdep_data marks retained incomplete dyads in compositions
   expect_equal(
     as.character(result$.i_composition_role),
     c(
-      "female_x_unknown_x_female",
-      "female_x_male_x_female",
-      "female_x_male_x_male",
+      "female_x_unknown_female",
+      "female_x_male_female",
+      "female_x_male_male",
       "female_x_female",
       "female_x_female"
     )

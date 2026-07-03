@@ -5,6 +5,9 @@
 # Package-wide separator for composition labels.
 interdep_composition_sep <- "_x_"
 
+# Separator for appending a member role to a dyad composition label.
+interdep_composition_role_sep <- "_"
+
 # Role label used when a member's role is unknown but retained.
 interdep_unknown_label <- "unknown"
 
@@ -43,7 +46,7 @@ canonical_composition <- function(roles, sep = interdep_composition_sep) {
 #' @param composition A composition label.
 #' @param role A row-level role label.
 #' @keywords internal
-composition_role_label <- function(composition, role, sep = interdep_composition_sep) {
+composition_role_label <- function(composition, role, sep = interdep_composition_role_sep) {
   paste(as.character(composition), as.character(role), sep = sep)
 }
 

@@ -24,8 +24,8 @@ test_that("infer_dyad_compositions counts role compositions", {
     indicator_names,
     c(
       ".i_is_female_x_female",
-      ".i_is_female_x_male_x_female",
-      ".i_is_female_x_male_x_male",
+      ".i_is_female_x_male_female",
+      ".i_is_female_x_male_male",
       ".i_is_male_x_male"
     )
   )
@@ -55,8 +55,8 @@ test_that("infer_dyad_compositions counts role compositions", {
   )
   expect_equal(
     as.character(result$.i_composition_role),
-    c("female_x_male_x_female", "female_x_male_x_male",
-      "female_x_male_x_female", "female_x_male_x_male",
+    c("female_x_male_female", "female_x_male_male",
+      "female_x_male_female", "female_x_male_male",
       "female_x_female", "female_x_female", "male_x_male", "male_x_male")
   )
 })
@@ -94,8 +94,8 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   )
   expect_equal(
     as.character(result$.i_composition_role),
-    c("female_x_male_x_female", "female_x_male_x_male",
-      "female_x_male_x_female", "female_x_male_x_male",
+    c("female_x_male_female", "female_x_male_male",
+      "female_x_male_female", "female_x_male_male",
       "female_x_female", "female_x_female", "female_x_female", "female_x_female")
   )
 })
@@ -116,8 +116,8 @@ test_that("infer_dyad_compositions creates formula-friendly indicator names", {
 
   result <- infer_dyad_compositions(validated)
 
-  expect_true(".i_is_female_partner_x_male_partner_x_female_partner" %in% names(result))
-  expect_true(".i_is_female_partner_x_male_partner_x_male_partner" %in% names(result))
+  expect_true(".i_is_female_partner_x_male_partner_female_partner" %in% names(result))
+  expect_true(".i_is_female_partner_x_male_partner_male_partner" %in% names(result))
 })
 
 test_that("infer_dyad_compositions treats missing role metadata as unclassified", {

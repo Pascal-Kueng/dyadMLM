@@ -43,7 +43,6 @@ prepared <- prepare_interdep_data(
   role = gender
 )
 
-attr(prepared, "interdep")$dyad_compositions
 prepared
 ```
 

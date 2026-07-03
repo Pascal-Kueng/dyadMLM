@@ -87,8 +87,8 @@ cross_data <- prepare_interdep_data(
   member = personID
 )
 
-class(cross_data)
 attr(cross_data, "interdep")
+cross_data
 ```
 
 ## Incomplete dyads and missing roles
