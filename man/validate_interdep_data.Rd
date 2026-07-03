@@ -32,12 +32,12 @@ in the data are treated as exchangeable.}
 unique members anywhere in the data. \code{"error"} stops with an error,
 \code{"drop"} removes the entire dyad, and \code{"keep"} retains the observed rows.
 Keeping incomplete dyads can produce unknown role compositions, such as
-\code{"female__unknown"}, when a \code{role} column is supplied.}
+\code{"female_x_unknown"}, when a \code{role} column is supplied.}
 
 \item{missing_role}{How to handle missing values in the \code{role} column.
 \code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
 information, and \code{"keep"} retains them. Keeping missing roles can produce
-unknown role compositions, such as \code{"female__unknown"}. Ignored when no
+unknown role compositions, such as \code{"female_x_unknown"}. Ignored when no
 \code{role} column is supplied.}
 }
 \value{

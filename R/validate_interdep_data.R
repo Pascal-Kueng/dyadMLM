@@ -18,11 +18,11 @@
 #'   unique members anywhere in the data. `"error"` stops with an error,
 #'   `"drop"` removes the entire dyad, and `"keep"` retains the observed rows.
 #'   Keeping incomplete dyads can produce unknown role compositions, such as
-#'   `"female__unknown"`, when a `role` column is supplied.
+#'   `"female_x_unknown"`, when a `role` column is supplied.
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
 #'   information, and `"keep"` retains them. Keeping missing roles can produce
-#'   unknown role compositions, such as `"female__unknown"`. Ignored when no
+#'   unknown role compositions, such as `"female_x_unknown"`. Ignored when no
 #'   `role` column is supplied.
 #'
 #' @return A tibble with class `interdep_data` and metadata about the dyad,

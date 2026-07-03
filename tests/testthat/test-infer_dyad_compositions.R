@@ -23,10 +23,10 @@ test_that("infer_dyad_compositions counts role compositions", {
   expect_equal(
     indicator_names,
     c(
-      ".i_is_female__female",
-      ".i_is_female__male__female",
-      ".i_is_female__male__male",
-      ".i_is_male__male"
+      ".i_is_female_x_female",
+      ".i_is_female_x_male_x_female",
+      ".i_is_female_x_male_x_male",
+      ".i_is_male_x_male"
     )
   )
   expect_true(all(sapply(result[indicator_names], is.numeric)))
@@ -37,11 +37,11 @@ test_that("infer_dyad_compositions counts role compositions", {
 
   expect_equal(
     dyad_compositions$raw_composition,
-    c("female__female", "female__male", "male__male")
+    c("female_x_female", "female_x_male", "male_x_male")
   )
   expect_equal(
     dyad_compositions$composition,
-    c("female__female", "female__male", "male__male")
+    c("female_x_female", "female_x_male", "male_x_male")
   )
   expect_equal(
     dyad_compositions$dyad_type,
@@ -50,14 +50,14 @@ test_that("infer_dyad_compositions counts role compositions", {
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
     as.character(result$.i_composition),
-    c("female__male", "female__male", "female__male", "female__male",
-      "female__female", "female__female", "male__male", "male__male")
+    c("female_x_male", "female_x_male", "female_x_male", "female_x_male",
+      "female_x_female", "female_x_female", "male_x_male", "male_x_male")
   )
   expect_equal(
     as.character(result$.i_composition_role),
-    c("female__male__female", "female__male__male",
-      "female__male__female", "female__male__male",
-      "female__female", "female__female", "male__male", "male__male")
+    c("female_x_male_x_female", "female_x_male_x_male",
+      "female_x_male_x_female", "female_x_male_x_male",
+      "female_x_female", "female_x_female", "male_x_male", "male_x_male")
   )
 })
 
@@ -82,21 +82,21 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
   indicator_names <- grep("^\\.i_is_", names(result), value = TRUE)
 
-  expect_equal(dyad_compositions$raw_composition, c("female__female", "female__male"))
-  expect_equal(dyad_compositions$composition, c("female__female", "female__male"))
+  expect_equal(dyad_compositions$raw_composition, c("female_x_female", "female_x_male"))
+  expect_equal(dyad_compositions$composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
     as.character(result$.i_composition),
-    c("female__male", "female__male", "female__male", "female__male",
-      "female__female", "female__female", "female__female", "female__female")
+    c("female_x_male", "female_x_male", "female_x_male", "female_x_male",
+      "female_x_female", "female_x_female", "female_x_female", "female_x_female")
   )
   expect_equal(
     as.character(result$.i_composition_role),
-    c("female__male__female", "female__male__male",
-      "female__male__female", "female__male__male",
-      "female__female", "female__female", "female__female", "female__female")
+    c("female_x_male_x_female", "female_x_male_x_male",
+      "female_x_male_x_female", "female_x_male_x_male",
+      "female_x_female", "female_x_female", "female_x_female", "female_x_female")
   )
 })
 
@@ -116,8 +116,8 @@ test_that("infer_dyad_compositions creates formula-friendly indicator names", {
 
   result <- infer_dyad_compositions(validated)
 
-  expect_true(".i_is_female_partner__male_partner__female_partner" %in% names(result))
-  expect_true(".i_is_female_partner__male_partner__male_partner" %in% names(result))
+  expect_true(".i_is_female_partner_x_male_partner_x_female_partner" %in% names(result))
+  expect_true(".i_is_female_partner_x_male_partner_x_male_partner" %in% names(result))
 })
 
 test_that("infer_dyad_compositions treats missing role metadata as unclassified", {
@@ -135,17 +135,17 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_equal(result$.i_is_assumed_exchangeable, rep(1, 4))
   expect_equal(
     as.character(result$.i_composition),
-    rep(interdep_assumed_exchangeable_label, 4)
+    rep("assumed_exchangeable", 4)
   )
   expect_equal(
     as.character(result$.i_composition_role),
-    rep(interdep_assumed_exchangeable_label, 4)
+    rep("assumed_exchangeable", 4)
   )
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = interdep_assumed_exchangeable_label,
-      composition = interdep_assumed_exchangeable_label,
+      raw_composition = "assumed_exchangeable",
+      composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
       n_dyads = 2L
     )

@@ -26,11 +26,11 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
 
   expect_equal(
     dyad_compositions$raw_composition,
-    c("female__female", "female__male", "male__male")
+    c("female_x_female", "female_x_male", "male_x_male")
   )
   expect_equal(
     dyad_compositions$composition,
-    c("female__female", "female__male", "male__male")
+    c("female_x_female", "female_x_male", "male_x_male")
   )
   expect_equal(
     dyad_compositions$dyad_type,
@@ -44,13 +44,13 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
     as.character(result$.i_composition),
-    c("female__male", "female__male", "female__female", "female__female",
-      "male__male", "male__male")
+    c("female_x_male", "female_x_male", "female_x_female", "female_x_female",
+      "male_x_male", "male_x_male")
   )
   expect_equal(
     as.character(result$.i_composition_role),
-    c("female__male__female", "female__male__male",
-      "female__female", "female__female", "male__male", "male__male")
+    c("female_x_male_x_female", "female_x_male_x_male",
+      "female_x_female", "female_x_female", "male_x_male", "male_x_male")
   )
 })
 
@@ -66,13 +66,13 @@ test_that("prepare_interdep_data treats data without role as unclassified exchan
   expect_true(is.factor(result$.i_composition))
   expect_true(is.factor(result$.i_composition_role))
   expect_equal(result$.i_is_assumed_exchangeable, rep(1, 4))
-  expect_equal(as.character(result$.i_composition), rep(interdep_assumed_exchangeable_label, 4))
-  expect_equal(as.character(result$.i_composition_role), rep(interdep_assumed_exchangeable_label, 4))
+  expect_equal(as.character(result$.i_composition), rep("assumed_exchangeable", 4))
+  expect_equal(as.character(result$.i_composition_role), rep("assumed_exchangeable", 4))
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = interdep_assumed_exchangeable_label,
-      composition = interdep_assumed_exchangeable_label,
+      raw_composition = "assumed_exchangeable",
+      composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
       n_dyads = 2L
     )
@@ -97,12 +97,12 @@ test_that("prepare_interdep_data rejects role labels containing the internal sep
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
-    role = c("female", "non__binary", "female", "male")
+    role = c("female", "non_x_binary", "female", "male")
   )
 
   expect_error(
     prepare_interdep_data(data, group = dyad_id, member = person_id, role = role),
-    "`role` values must not contain `__`",
+    "`role` values must not contain `_x_`",
     fixed = TRUE
   )
 })
@@ -123,10 +123,10 @@ test_that("prepare_interdep_data infers compositions from sparse longitudinal ro
     time = time
   )
 
-  expect_equal(as.character(result$.i_composition), rep("female__male", 8))
+  expect_equal(as.character(result$.i_composition), rep("female_x_male", 8))
   expect_equal(
     as.character(result$.i_composition_role),
-    rep(c("female__male__female", "female__male__male"), 4)
+    rep(c("female_x_male_x_female", "female_x_male_x_male"), 4)
   )
 })
 
@@ -151,22 +151,22 @@ test_that("prepare_interdep_data marks retained unknown roles in compositions", 
 
   expect_equal(
     as.character(result$.i_composition),
-    c("female__unknown", "female__unknown", "female__male", "female__male")
+    c("female_x_unknown", "female_x_unknown", "female_x_male", "female_x_male")
   )
   expect_equal(
     as.character(result$.i_composition_role),
     c(
-      "female__unknown__female",
-      "female__unknown__unknown",
-      "female__male__female",
-      "female__male__male"
+      "female_x_unknown_x_female",
+      "female_x_unknown_x_unknown",
+      "female_x_male_x_female",
+      "female_x_male_x_male"
     )
   )
 
   dyad_compositions <- attr(result, "interdep")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
-  expect_equal(dyad_compositions$composition, c("female__male", "female__unknown"))
+  expect_equal(dyad_compositions$composition, c("female_x_male", "female_x_unknown"))
   expect_equal(dyad_compositions$dyad_type, c("distinguishable", "unknown"))
 })
 
@@ -191,16 +191,16 @@ test_that("prepare_interdep_data marks retained incomplete dyads in compositions
 
   expect_equal(
     as.character(result$.i_composition),
-    c("female__unknown", "female__male", "female__male", "female__female", "female__female")
+    c("female_x_unknown", "female_x_male", "female_x_male", "female_x_female", "female_x_female")
   )
   expect_equal(
     as.character(result$.i_composition_role),
     c(
-      "female__unknown__female",
-      "female__male__female",
-      "female__male__male",
-      "female__female",
-      "female__female"
+      "female_x_unknown_x_female",
+      "female_x_male_x_female",
+      "female_x_male_x_male",
+      "female_x_female",
+      "female_x_female"
     )
   )
 
@@ -209,7 +209,7 @@ test_that("prepare_interdep_data marks retained incomplete dyads in compositions
 
   expect_equal(
     dyad_compositions$composition,
-    c("female__female", "female__male", "female__unknown")
+    c("female_x_female", "female_x_male", "female_x_unknown")
   )
   expect_equal(
     dyad_compositions$dyad_type,

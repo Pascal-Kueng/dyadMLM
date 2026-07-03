@@ -3,7 +3,7 @@
 ############################################################################
 
 # Package-wide separator for composition labels.
-interdep_composition_sep <- "__"
+interdep_composition_sep <- "_x_"
 
 # Role label used when a member's role is unknown but retained.
 interdep_unknown_label <- "unknown"

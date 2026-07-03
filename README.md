@@ -36,7 +36,7 @@ attr(prepared, "interdep")$dyad_compositions
 #> # A tibble: 1 × 4
 #>   raw_composition composition  dyad_type       n_dyads
 #>   <chr>           <chr>        <chr>             <int>
-#> 1 female__male    female__male distinguishable      95
+#> 1 female_x_male   female_x_male distinguishable      95
 ```
 
 Use `incomplete_dyads` and `missing_role` to choose whether incomplete

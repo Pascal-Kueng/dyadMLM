@@ -18,7 +18,7 @@
 #' @param member Column identifying a person or the member within dyad.
 #' @param role Optional column identifying a stable member role, such as gender.
 #'   Values must be stable within each `group` x `member` and must not contain
-#'   `__`. Missing role information is controlled by `missing_role`. If no role
+#'   `_x_`. Missing role information is controlled by `missing_role`. If no role
 #'   is supplied, all dyads are treated as the same type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
@@ -26,11 +26,11 @@
 #'   unique members anywhere in the data. `"error"` stops with an error,
 #'   `"drop"` removes the entire dyad, and `"keep"` retains the observed rows.
 #'   Keeping incomplete dyads can produce unknown role compositions, such as
-#'   `"female__unknown"`, when a `role` column is supplied.
+#'   `"female_x_unknown"`, when a `role` column is supplied.
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
 #'   information, and `"keep"` retains them. Keeping missing roles can produce
-#'   unknown role compositions, such as `"female__unknown"`. Ignored when no
+#'   unknown role compositions, such as `"female_x_unknown"`. Ignored when no
 #'   `role` column is supplied.
 #'
 #' @return The original data as a tibble with class `interdep_data`,

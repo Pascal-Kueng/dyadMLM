@@ -44,6 +44,7 @@ prepared <- prepare_interdep_data(
 )
 
 attr(prepared, "interdep")$dyad_compositions
+prepared
 ```
 
 Use `incomplete_dyads` and `missing_role` to choose whether incomplete dyads or

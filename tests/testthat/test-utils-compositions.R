@@ -1,12 +1,12 @@
 test_that("canonical_composition creates sorted composition labels", {
   expect_equal(
     canonical_composition(c("male", "female")),
-    "female__male"
+    "female_x_male"
   )
 
   expect_equal(
     canonical_composition(c(2, 1)),
-    "1__2"
+    "1_x_2"
   )
 })
 
@@ -19,16 +19,16 @@ test_that("canonical_composition supports a custom separator", {
 
 test_that("composition_role_label appends roles to composition labels", {
   expect_equal(
-    composition_role_label("female__male", "female"),
-    "female__male__female"
+    composition_role_label("female_x_male", "female"),
+    "female_x_male_x_female"
   )
 
   expect_equal(
     composition_role_label(
-      c("female__male", "female__male"),
+      c("female_x_male", "female_x_male"),
       c("female", "male")
     ),
-    c("female__male__female", "female__male__male")
+    c("female_x_male_x_female", "female_x_male_x_male")
   )
 })
 
