@@ -17,6 +17,8 @@ test_that("infer_dyad_compositions counts role compositions", {
   expect_false(".interdep_raw_composition" %in% names(result))
   expect_true(".interdep_composition" %in% names(result))
   expect_true(".interdep_composition_role" %in% names(result))
+  expect_true(is.factor(result$.interdep_composition))
+  expect_true(is.factor(result$.interdep_composition_role))
 
   dyad_compositions <- attr(result, "interdep")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
@@ -35,12 +37,12 @@ test_that("infer_dyad_compositions counts role compositions", {
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
-    result$.interdep_composition,
+    as.character(result$.interdep_composition),
     c("female__male", "female__male", "female__male", "female__male",
       "female__female", "female__female", "male__male", "male__male")
   )
   expect_equal(
-    result$.interdep_composition_role,
+    as.character(result$.interdep_composition_role),
     c("female__male__female", "female__male__male",
       "female__male__female", "female__male__male",
       "female__female", "female__female", "male__male", "male__male")
@@ -72,12 +74,12 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(
-    result$.interdep_composition,
+    as.character(result$.interdep_composition),
     c("female__male", "female__male", "female__male", "female__male",
       "female__female", "female__female", "female__female", "female__female")
   )
   expect_equal(
-    result$.interdep_composition_role,
+    as.character(result$.interdep_composition_role),
     c("female__male__female", "female__male__male",
       "female__male__female", "female__male__male",
       "female__female", "female__female", "female__female", "female__female")
@@ -94,12 +96,14 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   result <- infer_dyad_compositions(validated)
 
   expect_false(".interdep_raw_composition" %in% names(result))
+  expect_true(is.factor(result$.interdep_composition))
+  expect_true(is.factor(result$.interdep_composition_role))
   expect_equal(
-    result$.interdep_composition,
+    as.character(result$.interdep_composition),
     rep("assumed-exchangeable", 4)
   )
   expect_equal(
-    result$.interdep_composition_role,
+    as.character(result$.interdep_composition_role),
     rep("assumed-exchangeable", 4)
   )
   expect_equal(

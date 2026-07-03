@@ -33,9 +33,9 @@
 #'   unknown role compositions, such as `"female__unknown"`. Ignored when no
 #'   `role` column is supplied.
 #'
-#' @return The original data as a tibble with class `interdep_data`, reserved
-#'   `.interdep_*` composition columns, and an `interdep` attribute containing
-#'   structural metadata and `dyad_compositions`.
+#' @return The original data as a tibble with class `interdep_data`,
+#'   `.interdep_*` composition factor columns, and an `interdep` attribute
+#'   containing structural metadata and `dyad_compositions`.
 #'
 #' @examples
 #' data <- data.frame(

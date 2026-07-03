@@ -45,9 +45,9 @@ unknown role compositions, such as \code{"female__unknown"}. Ignored when no
 \code{role} column is supplied.}
 }
 \value{
-The original data as a tibble with class \code{interdep_data}, reserved
-\verb{.interdep_*} composition columns, and an \code{interdep} attribute containing
-structural metadata and \code{dyad_compositions}.
+The original data as a tibble with class \code{interdep_data},
+\verb{.interdep_*} composition factor columns, and an \code{interdep} attribute
+containing structural metadata and \code{dyad_compositions}.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

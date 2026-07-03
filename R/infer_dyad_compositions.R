@@ -6,7 +6,7 @@
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #'
 #' @return An `interdep_data` object with added `.interdep_composition` and
-#'   `.interdep_composition_role` columns and dyad composition metadata.
+#'   `.interdep_composition_role` factor columns and dyad composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data) {
@@ -23,6 +23,10 @@ infer_dyad_compositions <- function(data) {
       dyad_type = "exchangeable",
       n_dyads = meta_data$n_dyads
     )
+
+    # return as factors!
+    data[[".interdep_composition"]] <- factor(data[[".interdep_composition"]])
+    data[[".interdep_composition_role"]] <- factor(data[[".interdep_composition_role"]])
 
     return(data)
   }
@@ -72,7 +76,8 @@ infer_dyad_compositions <- function(data) {
 
   dyad_roles$composition <- dyad_roles$raw_composition
 
-  # We basically want to create a new object like dyad_roles
+  # Create the dyad-level lookup that will be joined back to every row.
+  # The lookup uses the final `.interdep_*` column names returned to users.
   composition_lookup <- dplyr::select(
     dyad_roles,
     dplyr::all_of(group_name),
@@ -89,10 +94,9 @@ infer_dyad_compositions <- function(data) {
   # Adding individual role column!
   data[[".interdep_composition_role"]] <- ifelse(
     data[[".interdep_dyad_type"]] %in% c("distinguishable", interdep_unknown_role),
-    # if distinguishable (or unknown, since that is also somwehat distinguishable)
-    # we add the role of the person.
+    # For distinguishable and unknown dyads, include the member role in the label.
     composition_role_label(data[[".interdep_composition"]], data[[role_name]]),
-    # for indistinguishable we only return the raw composition.
+    # For exchangeable dyads, the dyad composition label is sufficient.
     data[[".interdep_composition"]]
   )
 
@@ -106,5 +110,11 @@ infer_dyad_compositions <- function(data) {
     name = "n_dyads"
   )
 
+  # return as factors!
+  data[[".interdep_composition"]] <- factor(data[[".interdep_composition"]])
+  data[[".interdep_composition_role"]] <- factor(data[[".interdep_composition_role"]])
+
   data
 }
+
+
