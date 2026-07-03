@@ -10,8 +10,10 @@ prepare_interdep_data(
   member,
   role = NULL,
   time = NULL,
+  predictors = NULL,
   incomplete_dyads = c("error", "drop", "keep"),
-  missing_role = c("error", "drop", "keep")
+  missing_role = c("error", "drop", "keep"),
+  seed = NULL
 )
 }
 \arguments{
@@ -32,6 +34,9 @@ is supplied, all dyads are treated as the same type of exchangeable dyads.}
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
 
+\item{predictors}{Optional character vector of predictor columns to transform
+into \verb{_actor} and \verb{_partner} columns for APIM analyses.}
+
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error,
 \code{"drop"} removes the entire dyad, and \code{"keep"} retains the observed rows.
@@ -43,6 +48,9 @@ Keeping incomplete dyads can produce unknown role compositions, such as
 information, and \code{"keep"} retains them. Keeping missing roles can produce
 unknown role compositions, such as \code{"female_x_unknown"}. Ignored when no
 \code{role} column is supplied.}
+
+\item{seed}{Optional seed for random arbitrary partner-role assignment. If
+\code{NULL}, the current R session's RNG state is used.}
 }
 \value{
 The original data as a tibble with class \code{interdep_data},

@@ -1,6 +1,8 @@
-# Scratch fixtures for developing infer_dyad_compositions().
+# Scratch fixtures for developing infer_dyad_compositions() and
+# add_arbitrary_roles().
 # Source this file, then call infer_dyad_compositions() on one of the
-# validated_* objects or run the setup_infer_debug() helper.
+# validated_* objects, call add_arbitrary_roles() on one of the inferred_*
+# objects, or run one of the setup_*_debug() helpers.
 
 devtools::load_all()
 
@@ -80,6 +82,19 @@ validated_incomplete_roles_drop <- validate_interdep_data(
 )
 
 
+inferred_complete_roles <- infer_dyad_compositions(validated_complete_roles)
+
+inferred_sparse_ild_roles <- infer_dyad_compositions(validated_sparse_ild_roles)
+
+inferred_missing_roles_keep <- infer_dyad_compositions(validated_missing_roles_keep)
+
+inferred_missing_roles_drop <- infer_dyad_compositions(validated_missing_roles_drop)
+
+inferred_incomplete_roles_keep <- infer_dyad_compositions(validated_incomplete_roles_keep)
+
+inferred_incomplete_roles_drop <- infer_dyad_compositions(validated_incomplete_roles_drop)
+
+
 setup_infer_debug <- function(data = validated_incomplete_roles_keep) {
   meta_data <- attr(data, "interdep")
 
@@ -89,6 +104,31 @@ setup_infer_debug <- function(data = validated_incomplete_roles_keep) {
   assign("member_name", meta_data$member, envir = .GlobalEnv)
   assign("role_name", meta_data$role, envir = .GlobalEnv)
   assign("incomplete_groups", meta_data$incomplete_dyads, envir = .GlobalEnv)
+
+  invisible(data)
+}
+
+
+setup_arbitrary_roles_debug <- function(data = inferred_incomplete_roles_keep, seed = NULL) {
+  meta_data <- attr(data, "interdep")
+
+  assign("data", data, envir = .GlobalEnv)
+  assign("seed", seed, envir = .GlobalEnv)
+  assign("meta_data", meta_data, envir = .GlobalEnv)
+  assign("group_name", meta_data$group, envir = .GlobalEnv)
+  assign("member_name", meta_data$member, envir = .GlobalEnv)
+  assign("time_name", meta_data$time, envir = .GlobalEnv)
+  assign("incomplete_groups", meta_data$incomplete_dyads, envir = .GlobalEnv)
+  assign(
+    "generated_columns",
+    c(
+      ".i_arbitrary_role",
+      ".i_is_arbitrary_role1",
+      ".i_is_arbitrary_role2",
+      ".i_diff"
+    ),
+    envir = .GlobalEnv
+  )
 
   invisible(data)
 }

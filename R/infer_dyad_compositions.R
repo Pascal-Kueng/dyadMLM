@@ -11,6 +11,10 @@
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data) {
+  if (!inherits(data, "interdep_data")) {
+    stop("`data` must be an `interdep_data` object.", call. = FALSE)
+  }
+
   meta_data <- attr(data, "interdep")
 
   # The case if no role column was provided
