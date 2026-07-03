@@ -5,9 +5,8 @@
 #'
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #'
-#' @return An `interdep_data` object with added `.interdep_raw_composition`,
-#'   `.interdep_composition`, and `.interdep_composition_role` columns and dyad
-#'   composition metadata.
+#' @return An `interdep_data` object with added `.interdep_composition` and
+#'   `.interdep_composition_role` columns and dyad composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data) {
@@ -15,7 +14,6 @@ infer_dyad_compositions <- function(data) {
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
-    data[[".interdep_raw_composition"]] <- "assumed-exchangeable"
     data[[".interdep_composition"]] <- "assumed-exchangeable"
     data[[".interdep_composition_role"]] <- "assumed-exchangeable"
 
@@ -78,7 +76,6 @@ infer_dyad_compositions <- function(data) {
   composition_lookup <- dplyr::select(
     dyad_roles,
     dplyr::all_of(group_name),
-    .interdep_raw_composition = "raw_composition",
     .interdep_composition = "composition",
     .interdep_dyad_type = "dyad_type"
   )

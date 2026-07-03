@@ -14,7 +14,7 @@ test_that("infer_dyad_compositions counts role compositions", {
 
   result <- infer_dyad_compositions(validated)
   expect_s3_class(result, "interdep_data")
-  expect_true(".interdep_raw_composition" %in% names(result))
+  expect_false(".interdep_raw_composition" %in% names(result))
   expect_true(".interdep_composition" %in% names(result))
   expect_true(".interdep_composition_role" %in% names(result))
 
@@ -35,11 +35,10 @@ test_that("infer_dyad_compositions counts role compositions", {
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
-    result$.interdep_raw_composition,
+    result$.interdep_composition,
     c("female__male", "female__male", "female__male", "female__male",
       "female__female", "female__female", "male__male", "male__male")
   )
-  expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
   expect_equal(
     result$.interdep_composition_role,
     c("female__male__female", "female__male__male",
@@ -73,11 +72,10 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(
-    result$.interdep_raw_composition,
+    result$.interdep_composition,
     c("female__male", "female__male", "female__male", "female__male",
       "female__female", "female__female", "female__female", "female__female")
   )
-  expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
   expect_equal(
     result$.interdep_composition_role,
     c("female__male__female", "female__male__male",
@@ -95,10 +93,7 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
   result <- infer_dyad_compositions(validated)
 
-  expect_equal(
-    result$.interdep_raw_composition,
-    rep("assumed-exchangeable", 4)
-  )
+  expect_false(".interdep_raw_composition" %in% names(result))
   expect_equal(
     result$.interdep_composition,
     rep("assumed-exchangeable", 4)

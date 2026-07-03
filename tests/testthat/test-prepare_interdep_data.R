@@ -37,12 +37,12 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
     c("exchangeable", "distinguishable", "exchangeable")
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L, 1L))
+  expect_false(".interdep_raw_composition" %in% names(result))
   expect_equal(
-    result$.interdep_raw_composition,
+    result$.interdep_composition,
     c("female__male", "female__male", "female__female", "female__female",
       "male__male", "male__male")
   )
-  expect_equal(result$.interdep_composition, result$.interdep_raw_composition)
   expect_equal(
     result$.interdep_composition_role,
     c("female__male__female", "female__male__male",
@@ -58,7 +58,7 @@ test_that("prepare_interdep_data treats data without role as unclassified exchan
 
   result <- prepare_interdep_data(data, group = dyad_id, member = person_id)
 
-  expect_equal(result$.interdep_raw_composition, rep("assumed-exchangeable", 4))
+  expect_false(".interdep_raw_composition" %in% names(result))
   expect_equal(result$.interdep_composition, rep("assumed-exchangeable", 4))
   expect_equal(result$.interdep_composition_role, rep("assumed-exchangeable", 4))
   expect_equal(
