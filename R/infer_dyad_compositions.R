@@ -117,15 +117,18 @@ infer_dyad_compositions <- function(data) {
   data[[interdep_composition_col]] <- factor(data[[interdep_composition_col]])
   data[[interdep_composition_role_col]] <- factor(data[[interdep_composition_role_col]])
 
-  # Create numeric indicator columns for model formulas.
-  composition_role <- data[[interdep_composition_role_col]]
-  dummy_matrix <- model.matrix(~ composition_role + 0)
-  dummy_names <- paste0(
-    interdep_reserved_prefix,
-    "is_",
-    gsub("[^[:alnum:]_]+", "_", levels(composition_role))
+  # Create numeric indicator columns for model formulas
+  # while first sanitizing the user supplied values.
+  is_ <- gsub(
+    "[^[:alnum:]_]+",
+    "_",
+    data[[interdep_composition_role_col]]
   )
-  colnames(dummy_matrix) <- make.unique(dummy_names, sep = "_")
+
+  dummy_matrix <- model.matrix(~ 0 + is_)
+
+  colnames(dummy_matrix) <- paste0(interdep_reserved_prefix, colnames(dummy_matrix))
+
   data[colnames(dummy_matrix)] <- as.data.frame(dummy_matrix)
 
   data
