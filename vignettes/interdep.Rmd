@@ -106,7 +106,6 @@ names(cross_data)[startsWith(names(cross_data), ".i_")]
 
 ### Example: simple dyadic model for distinguishable dyads
 
-The model chunks are evaluated only when `glmmTMB` is installed.
 
 ```{r estimate-distinguishable, eval = has_glmmTMB}
 library(glmmTMB)
@@ -135,7 +134,8 @@ summary(model1)
 
 ### Example: simple dyadic model for exchangeable dyads
 
-We can treat all dyads as exchangeable by omitting the `role` argument:
+We can treat all dyads as exchangeable by omitting the `role` argument. Now, 
+they get an arbitrary role that is not zero!
 
 ```{r validate-cross-sectional-exchangeable}
 exchangeable_data <- prepare_interdep_data(
@@ -207,7 +207,7 @@ Demonstrating that the models are exactly identical:
 anova(model2, model2_diff)
 
 ```
-
+Note that the p-value is not interpretable here. 
 
 ### Test distinguishability
 
@@ -226,12 +226,12 @@ anova(model1, model2)
 
 By default, `prepare_interdep_data()` stops when a dyad has only one observed
 member or when a member's role is unknown in every row. These cases can also be
-kept with unknown composition labels or dropped before validation continues.
+dropped before validation continues.
 
-With `"keep"`, the original rows are retained. The incomplete dyad and the
-missing role are represented with `unknown` in the derived composition labels.
+With `"drop"`, dyads with incomplete structure or unresolved role information
+are removed as whole dyads.
 
-```{r incomplete-keep}
+```{r incomplete-drop}
 incomplete_data <- data.frame(
   coupleID = c(1, 2, 2, 3, 3, 4, 4),
   personID = c(1, 1, 2, 1, 2, 1, 2),
@@ -239,17 +239,17 @@ incomplete_data <- data.frame(
   satisfaction = c(5.2, 4.8, 4.9, 5.1, 5.0, 4.7, 4.6)
 )
 
-kept_data <- prepare_interdep_data(
+dropped_data <- prepare_interdep_data(
   incomplete_data,
   group = coupleID,
   member = personID,
   role = gender,
-  incomplete_dyads = "keep",
-  missing_role = "keep",
+  incomplete_dyads = "drop",
+  missing_role = "drop",
   seed = 123
 )
 
-kept_data
+dropped_data
 ```
 
 

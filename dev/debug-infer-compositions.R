@@ -45,16 +45,7 @@ validated_sparse_ild_roles <- validate_interdep_data(
   group = dyad_id,
   member = person_id,
   role = role,
-  time = time,
-  missing_role = "keep"
-)
-
-validated_missing_roles_keep <- validate_interdep_data(
-  missing_roles,
-  group = dyad_id,
-  member = person_id,
-  role = role,
-  missing_role = "keep"
+  time = time
 )
 
 validated_missing_roles_drop <- validate_interdep_data(
@@ -63,14 +54,6 @@ validated_missing_roles_drop <- validate_interdep_data(
   member = person_id,
   role = role,
   missing_role = "drop"
-)
-
-validated_incomplete_roles_keep <- validate_interdep_data(
-  incomplete_roles,
-  group = dyad_id,
-  member = person_id,
-  role = role,
-  incomplete_dyads = "keep"
 )
 
 validated_incomplete_roles_drop <- validate_interdep_data(
@@ -86,16 +69,12 @@ inferred_complete_roles <- infer_dyad_compositions(validated_complete_roles)
 
 inferred_sparse_ild_roles <- infer_dyad_compositions(validated_sparse_ild_roles)
 
-inferred_missing_roles_keep <- infer_dyad_compositions(validated_missing_roles_keep)
-
 inferred_missing_roles_drop <- infer_dyad_compositions(validated_missing_roles_drop)
-
-inferred_incomplete_roles_keep <- infer_dyad_compositions(validated_incomplete_roles_keep)
 
 inferred_incomplete_roles_drop <- infer_dyad_compositions(validated_incomplete_roles_drop)
 
 
-setup_infer_debug <- function(data = validated_incomplete_roles_keep) {
+setup_infer_debug <- function(data = validated_complete_roles) {
   meta_data <- attr(data, "interdep")
 
   assign("data", data, envir = .GlobalEnv)
@@ -109,7 +88,7 @@ setup_infer_debug <- function(data = validated_incomplete_roles_keep) {
 }
 
 
-setup_arbitrary_roles_debug <- function(data = inferred_incomplete_roles_keep, seed = NULL) {
+setup_arbitrary_roles_debug <- function(data = inferred_complete_roles, seed = NULL) {
   meta_data <- attr(data, "interdep")
 
   assign("data", data, envir = .GlobalEnv)
@@ -123,8 +102,8 @@ setup_arbitrary_roles_debug <- function(data = inferred_incomplete_roles_keep, s
     "generated_columns",
     c(
       ".i_arbitrary_role",
-      ".i_is_arbitrary_role1",
-      ".i_is_arbitrary_role2",
+      ".i_is_arbitrary_role_1",
+      ".i_is_arbitrary_role_2",
       ".i_diff"
     ),
     envir = .GlobalEnv

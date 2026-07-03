@@ -56,26 +56,48 @@ test_that("add_arbitrary_roles is stable across longitudinal rows", {
   )
 })
 
-test_that("add_arbitrary_roles handles retained incomplete dyads", {
+test_that("add_arbitrary_roles zeros model columns for distinguishable dyads", {
   data <- data.frame(
-    dyad_id = c(1, 2, 2),
-    person_id = c("A", "B", "C")
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
   )
 
-  suppressWarnings(
-    validated <- validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      incomplete_dyads = "keep"
-    )
-  )
+  validated <- validate_interdep_data(data, group = dyad_id, member = person_id, role = role)
   result <- add_arbitrary_roles(infer_dyad_compositions(validated), seed = 123)
 
-  expect_equal(nrow(result), 3)
-  expect_true(result$.i_arbitrary_role[1] %in% c("arbitrary_role_1", "arbitrary_role_2"))
-  expect_equal(result$.i_is_arbitrary_role_1[1] + result$.i_is_arbitrary_role_2[1], 1)
-  expect_true(result$.i_diff[1] %in% c(-1, 1))
+  expect_equal(
+    sort(unique(result$.i_arbitrary_role)),
+    c("arbitrary_role_1", "arbitrary_role_2")
+  )
+  expect_equal(result$.i_is_arbitrary_role_1, rep(0, 4))
+  expect_equal(result$.i_is_arbitrary_role_2, rep(0, 4))
+  expect_equal(result$.i_diff, rep(0, 4))
+})
+
+test_that("add_arbitrary_roles is active only for exchangeable dyads", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "female")
+  )
+
+  validated <- validate_interdep_data(data, group = dyad_id, member = person_id, role = role)
+  result <- add_arbitrary_roles(infer_dyad_compositions(validated), seed = 123)
+
+  distinguishable_rows <- result$dyad_id == 1
+  arbitrary_rows <- result$dyad_id == 2
+
+  expect_equal(result$.i_is_arbitrary_role_1[distinguishable_rows], c(0, 0))
+  expect_equal(result$.i_is_arbitrary_role_2[distinguishable_rows], c(0, 0))
+  expect_equal(result$.i_diff[distinguishable_rows], c(0, 0))
+
+  expect_equal(
+    result$.i_is_arbitrary_role_1[arbitrary_rows] +
+      result$.i_is_arbitrary_role_2[arbitrary_rows],
+    c(1, 1)
+  )
+  expect_true(all(result$.i_diff[arbitrary_rows] %in% c(-1, 1)))
 })
 
 test_that("add_arbitrary_roles restores an existing RNG state", {

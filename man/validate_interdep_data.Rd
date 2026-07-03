@@ -10,8 +10,8 @@ validate_interdep_data(
   member,
   role = NULL,
   time = NULL,
-  incomplete_dyads = c("error", "drop", "keep"),
-  missing_role = c("error", "drop", "keep")
+  incomplete_dyads = c("error", "drop"),
+  missing_role = c("error", "drop")
 )
 }
 \arguments{
@@ -29,16 +29,12 @@ in the data are treated as exchangeable.}
 \item{time}{Optional column identifying time or measurement order.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
-unique members anywhere in the data. \code{"error"} stops with an error,
-\code{"drop"} removes the entire dyad, and \code{"keep"} retains the observed rows.
-Keeping incomplete dyads can produce unknown role compositions, such as
-\code{"female_x_unknown"}, when a \code{role} column is supplied.}
+unique members anywhere in the data. \code{"error"} stops with an error and
+\code{"drop"} removes the entire dyad.}
 
 \item{missing_role}{How to handle missing values in the \code{role} column.
 \code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
-information, and \code{"keep"} retains them. Keeping missing roles can produce
-unknown role compositions, such as \code{"female_x_unknown"}. Ignored when no
-\code{role} column is supplied.}
+information. Ignored when no \code{role} column is supplied.}
 }
 \value{
 A tibble with class \code{interdep_data} and metadata about the dyad,

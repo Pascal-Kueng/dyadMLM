@@ -25,15 +25,11 @@
 #' @param predictors Optional character vector of predictor columns to transform
 #'   into `_actor` and `_partner` columns for APIM analyses.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
-#'   unique members anywhere in the data. `"error"` stops with an error,
-#'   `"drop"` removes the entire dyad, and `"keep"` retains the observed rows.
-#'   Keeping incomplete dyads can produce unknown role compositions, such as
-#'   `"female_x_unknown"`, when a `role` column is supplied.
+#'   unique members anywhere in the data. `"error"` stops with an error and
+#'   `"drop"` removes the entire dyad.
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
-#'   information, and `"keep"` retains them. Keeping missing roles can produce
-#'   unknown role compositions, such as `"female_x_unknown"`. Ignored when no
-#'   `role` column is supplied.
+#'   information. Ignored when no `role` column is supplied.
 #' @param seed Optional seed for random arbitrary partner-role assignment. If
 #'   `NULL`, the current R session's RNG state is used.
 #'
@@ -41,7 +37,8 @@
 #'   `.i_composition` and `.i_composition_role` factor columns,
 #'   `.i_arbitrary_role`, `.i_is_*` numeric indicator columns, `.i_diff`, and
 #'   an `interdep` attribute containing structural metadata and
-#'   `dyad_compositions`.
+#'   `dyad_compositions`. Arbitrary-role indicators and `.i_diff` are active
+#'   for exchangeable dyads and zero for distinguishable dyads.
 #'
 #' @examples
 #' data <- data.frame(
@@ -68,8 +65,8 @@ prepare_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    incomplete_dyads = c("error", "drop", "keep"),
-    missing_role = c("error", "drop", "keep"),
+    incomplete_dyads = c("error", "drop"),
+    missing_role = c("error", "drop"),
     seed = NULL
   ) {
 

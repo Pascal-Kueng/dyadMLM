@@ -44,8 +44,6 @@ infer_dyad_compositions <- function(data) {
   member_name <- meta_data$member
   role_name <- meta_data$role
 
-  incomplete_groups <- meta_data$incomplete_dyads
-
   dyad_roles <- data |>
     # Collapse repeated ILD rows to one role per member.
     dplyr::distinct(
@@ -56,23 +54,12 @@ infer_dyad_compositions <- function(data) {
     dplyr::group_by(.data[[group_name]]) |>
     dplyr::summarise(
       raw_composition = {
-        roles <- .data[[role_name]]
-
-        # For incomplete dyads, add one synthetic unknown role for the missing partner.
-        if (.data[[group_name]][1] %in% incomplete_groups) {
-          roles <- c(roles, interdep_unknown_label)
-        }
-
-        canonical_composition(roles)
+        canonical_composition(.data[[role_name]])
       },
       dyad_type = {
-        has_unknown_role <- any(.data[[role_name]] == interdep_unknown_label)
-        is_incomplete_group <- .data[[group_name]][1] %in% incomplete_groups
         has_one_role <- dplyr::n_distinct(.data[[role_name]]) == 1
 
-        if (has_unknown_role || is_incomplete_group) {
-          interdep_unknown_label
-        } else if (has_one_role) {
+        if (has_one_role) {
           "exchangeable"
         } else {
           "distinguishable"
@@ -97,8 +84,8 @@ infer_dyad_compositions <- function(data) {
 
   # Adding individual role column!
   data[[interdep_composition_role_col]] <- ifelse(
-    data[[interdep_dyad_type_col]] %in% c("distinguishable", interdep_unknown_label),
-    # For distinguishable and unknown dyads, include the member role in the label.
+    data[[interdep_dyad_type_col]] == "distinguishable",
+    # For distinguishable dyads, include the member role in the label.
     composition_role_label(data[[interdep_composition_col]], data[[role_name]]),
     # For exchangeable dyads, the dyad composition label is sufficient.
     data[[interdep_composition_col]]

@@ -5,7 +5,8 @@
 #'   `NULL`, the current R session's RNG state is used.
 #'
 #' @return The input data with columns .i_arbitrary_role, .i_is_arbitrary_role_1,
-#' .i_is_arbitrary_role_2, .i_diff which can be used in models.
+#' .i_is_arbitrary_role_2, and .i_diff. The indicator and diff columns are active
+#' for exchangeable dyads and zero for distinguishable dyads.
 #' @keywords internal
 add_arbitrary_roles <- function(data, seed = NULL) {
   if (!inherits(data, "interdep_data")) {
@@ -16,6 +17,12 @@ add_arbitrary_roles <- function(data, seed = NULL) {
 
   group_name <- meta_data$group
   member_name <- meta_data$member
+  dyad_compositions <- meta_data$dyad_compositions
+
+  # check which dyads are distinguishable vs. exchangeable.
+  arbitrary_compositions <- dyad_compositions$composition[
+    dyad_compositions$dyad_type == "exchangeable"
+  ]
 
   # Handle the seed: apply it and make sure it restores when the function exits!
   if (!is.null(seed)) {
@@ -35,7 +42,7 @@ add_arbitrary_roles <- function(data, seed = NULL) {
     }, add = TRUE)
   }
 
-  # create the random roles columns we need.
+  # create the arbitrary (random) roles columns we need.
   random_member_roles <- data |>
     # Collapse repeated ILD rows to one role per member.
     dplyr::distinct(
@@ -53,24 +60,6 @@ add_arbitrary_roles <- function(data, seed = NULL) {
         # if we have a dyad where only 1 member is ever observed, we only sample
         # 1 value, otherwise both!
         size = dplyr::n()
-      ),
-
-      .i_is_arbitrary_role_1 = ifelse(
-        .i_arbitrary_role == "arbitrary_role_1",
-        1,
-        0
-      ),
-
-      .i_is_arbitrary_role_2 = ifelse(
-        .i_arbitrary_role == "arbitrary_role_2",
-        1,
-        0
-      ),
-
-      .i_diff = ifelse(
-        .i_is_arbitrary_role_1 == 1,
-        -1,
-        1
       )
     ) |>
     dplyr::ungroup()
@@ -79,6 +68,29 @@ add_arbitrary_roles <- function(data, seed = NULL) {
     data,
     random_member_roles,
     by = c(group_name, member_name)
+  )
+
+  # Only exchangeable dyads get active arbitrary-role model columns.
+  # Distinguishable dyads get zero.
+  uses_arbitrary_roles <- as.character(data[[interdep_composition_col]]) %in%
+    arbitrary_compositions
+
+  data$.i_is_arbitrary_role_1 <- ifelse(
+    uses_arbitrary_roles & data$.i_arbitrary_role == "arbitrary_role_1",
+    1,
+    0
+  )
+
+  data$.i_is_arbitrary_role_2 <- ifelse(
+    uses_arbitrary_roles & data$.i_arbitrary_role == "arbitrary_role_2",
+    1,
+    0
+  )
+
+  data$.i_diff <- ifelse(
+    uses_arbitrary_roles,
+    ifelse(data$.i_arbitrary_role == "arbitrary_role_1", -1, 1),
+    0
   )
 
   data

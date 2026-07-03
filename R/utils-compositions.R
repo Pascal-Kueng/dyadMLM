@@ -8,9 +8,6 @@ interdep_composition_sep <- "_x_"
 # Separator for appending a member role to a dyad composition label.
 interdep_composition_role_sep <- "_"
 
-# Role label used when a member's role is unknown but retained.
-interdep_unknown_label <- "unknown"
-
 # Label used when no role column is supplied.
 interdep_assumed_exchangeable_label <- "assumed_exchangeable"
 

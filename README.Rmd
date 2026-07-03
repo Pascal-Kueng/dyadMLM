@@ -47,5 +47,5 @@ prepared
 ```
 
 Use `incomplete_dyads` and `missing_role` to choose whether incomplete dyads or
-unresolved role information should error, be dropped, or be kept with unknown
-composition labels. See the vignette for examples.
+unresolved role information should error or be dropped. See the vignette for
+examples.

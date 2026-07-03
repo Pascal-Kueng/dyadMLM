@@ -11,8 +11,8 @@ prepare_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
-  incomplete_dyads = c("error", "drop", "keep"),
-  missing_role = c("error", "drop", "keep"),
+  incomplete_dyads = c("error", "drop"),
+  missing_role = c("error", "drop"),
   seed = NULL
 )
 }
@@ -38,16 +38,12 @@ measures.}
 into \verb{_actor} and \verb{_partner} columns for APIM analyses.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
-unique members anywhere in the data. \code{"error"} stops with an error,
-\code{"drop"} removes the entire dyad, and \code{"keep"} retains the observed rows.
-Keeping incomplete dyads can produce unknown role compositions, such as
-\code{"female_x_unknown"}, when a \code{role} column is supplied.}
+unique members anywhere in the data. \code{"error"} stops with an error and
+\code{"drop"} removes the entire dyad.}
 
 \item{missing_role}{How to handle missing values in the \code{role} column.
 \code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
-information, and \code{"keep"} retains them. Keeping missing roles can produce
-unknown role compositions, such as \code{"female_x_unknown"}. Ignored when no
-\code{role} column is supplied.}
+information. Ignored when no \code{role} column is supplied.}
 
 \item{seed}{Optional seed for random arbitrary partner-role assignment. If
 \code{NULL}, the current R session's RNG state is used.}
@@ -57,7 +53,8 @@ The original data as a tibble with class \code{interdep_data},
 \code{.i_composition} and \code{.i_composition_role} factor columns,
 \code{.i_arbitrary_role}, \verb{.i_is_*} numeric indicator columns, \code{.i_diff}, and
 an \code{interdep} attribute containing structural metadata and
-\code{dyad_compositions}.
+\code{dyad_compositions}. Arbitrary-role indicators and \code{.i_diff} are active
+for exchangeable dyads and zero for distinguishable dyads.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

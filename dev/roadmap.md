@@ -11,17 +11,17 @@ Goal: ship a small, reliable data-preparation workflow before adding larger
 model-building features.
 
 - Validate dyadic data and return a model-ready tibble with metadata
-- Support cross-sectional and ILD data for distinguishable, exchangeable, and
-  partially unknown dyads
+- Support cross-sectional and ILD data for distinguishable and exchangeable
+  dyads
 - Auto-detect roles, dyad compositions, and distinguishability where possible
-- Handle incomplete dyads and missing roles with explicit `error`, `drop`, and
-  `keep` behavior
+- Handle incomplete dyads and missing roles with explicit `error` and `drop`
+  behavior
 - Return factor columns for `.i_composition` and
   `.i_composition_role`
 - Add a print method for `interdep_data`
   - Show number of dyads, whether data are longitudinal, and inferred
     composition counts
-  - Make incomplete dyads, missing roles, and unknown compositions visible
+  - Make dropped incomplete dyads and missing roles visible
 - Add composition role indicator columns for cross-sectional model workflows
 - Add helper functions to rotate `.i_diff` / Idiff structures back to
   partner-level interpretations

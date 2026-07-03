@@ -181,20 +181,6 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
     fixed = TRUE
   )
 
-  expect_warning(
-    kept <- validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      role = role,
-      incomplete_dyads = "keep"
-    ),
-    "Keeping 1 incomplete dyad, with ID: 1.",
-    fixed = TRUE
-  )
-  expect_equal(kept$dyad_id, c(1, 2, 2, 3, 3))
-  expect_equal(attr(kept, "interdep")$incomplete_dyads, 1)
-
   expect_message(
     dropped <- validate_interdep_data(
       data,
@@ -211,28 +197,6 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
   expect_length(attr(dropped, "interdep")$incomplete_dyads, 0)
 })
 
-test_that("validate_interdep_data keeps incomplete metadata aligned after role dropping", {
-  data <- data.frame(
-    dyad_id = c(1, 2, 2, 3, 3),
-    person_id = c("A", "C", "D", "E", "F"),
-    role = c(NA, "female", "male", "female", "female")
-  )
-
-  suppressMessages(suppressWarnings(
-    result <- validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      role = role,
-      incomplete_dyads = "keep",
-      missing_role = "drop"
-    )
-  ))
-
-  expect_equal(result$dyad_id, c(2, 2, 3, 3))
-  expect_length(attr(result, "interdep")$incomplete_dyads, 0)
-})
-
 test_that("validate_interdep_data rejects groups with more than two members", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2),
@@ -240,7 +204,7 @@ test_that("validate_interdep_data rejects groups with more than two members", {
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, incomplete_dyads = "keep"),
+    validate_interdep_data(data, group = dyad_id, member = person_id, incomplete_dyads = "drop"),
     "Found 1 group with more than two members, with ID: 1.",
     fixed = TRUE
   )
@@ -314,26 +278,18 @@ test_that("validate_interdep_data rejects inconsistent roles within member", {
   )
 })
 
-test_that("validate_interdep_data handles members with unknown roles by policy", {
+test_that("validate_interdep_data handles missing roles by policy", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),
     role = c("female", NA, "female", "male", "female", "female")
   )
 
-  expect_warning(
-    kept <- validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      role = role,
-      missing_role = "keep"
-    ),
-    "Keeping 1 dyad with incomplete role information, with ID: 1.",
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
+    "Each `member` must have at least one non-missing `role` within each `group`.",
     fixed = TRUE
   )
-
-  expect_equal(kept$role, c("female", "unknown", "female", "male", "female", "female"))
 
   expect_message(
     dropped <- validate_interdep_data(

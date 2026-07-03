@@ -14,7 +14,8 @@ add_arbitrary_roles(data, seed = NULL)
 }
 \value{
 The input data with columns .i_arbitrary_role, .i_is_arbitrary_role_1,
-.i_is_arbitrary_role_2, .i_diff which can be used in models.
+.i_is_arbitrary_role_2, and .i_diff. The indicator and diff columns are active
+for exchangeable dyads and zero for distinguishable dyads.
 }
 \description{
 Add arbitrary dyad role columns (needed for exchangeable dyad analyses)

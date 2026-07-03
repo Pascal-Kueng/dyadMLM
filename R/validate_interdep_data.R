@@ -15,15 +15,11 @@
 #'   in the data are treated as exchangeable.
 #' @param time Optional column identifying time or measurement order.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
-#'   unique members anywhere in the data. `"error"` stops with an error,
-#'   `"drop"` removes the entire dyad, and `"keep"` retains the observed rows.
-#'   Keeping incomplete dyads can produce unknown role compositions, such as
-#'   `"female_x_unknown"`, when a `role` column is supplied.
+#'   unique members anywhere in the data. `"error"` stops with an error and
+#'   `"drop"` removes the entire dyad.
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
-#'   information, and `"keep"` retains them. Keeping missing roles can produce
-#'   unknown role compositions, such as `"female_x_unknown"`. Ignored when no
-#'   `role` column is supplied.
+#'   information. Ignored when no `role` column is supplied.
 #'
 #' @return A tibble with class `interdep_data` and metadata about the dyad,
 #'   member, optional role, and optional time columns.
@@ -36,8 +32,8 @@ validate_interdep_data <- function(
     member,
     role = NULL,
     time = NULL,
-    incomplete_dyads = c("error", "drop", "keep"),
-    missing_role = c("error", "drop", "keep")
+    incomplete_dyads = c("error", "drop"),
+    missing_role = c("error", "drop")
   ) {
 
   # Validate data frame input.
@@ -251,22 +247,7 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
     return(list(data = out, incomplete_groups = incomplete_groups[0]))
   }
 
-  if (incomplete_dyads == "keep") {
-    warning(
-      paste0(
-        "Keeping ",
-        format_group_count(
-          incomplete_groups,
-          singular = "incomplete dyad",
-          plural = "incomplete dyads"
-        ),
-        ". Composition labels may be unknown."
-      ),
-      call. = FALSE
-    )
-
-    return(list(data = out, incomplete_groups = incomplete_groups))
-  }
+  list(data = out, incomplete_groups = incomplete_groups[0])
 }
 
 resolve_interdep_roles <- function(out, group_name, member_name, role_name, missing_role) {
@@ -334,29 +315,11 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
           "."
         )
       )
-    } else if (missing_role == "keep") {
-      warning(
-        paste0(
-          "Keeping ",
-          format_group_count(
-            missing_role_groups,
-            singular = "dyad with incomplete role information",
-            plural = "dyads with incomplete role information"
-          ),
-          ". Unknown role compositions may be produced."
-        ),
-        call. = FALSE
-      )
     }
   }
 
   # Join the resolved member roles back to every original row.
   out <- dplyr::left_join(out, member_roles, by = c(group_name, member_name))
-
-  # Convert unresolved roles from NA to "unknown" when requested.
-  if (missing_role == "keep") {
-    out[[interdep_resolved_role_col]][is.na(out[[interdep_resolved_role_col]])] <- interdep_unknown_label
-  }
 
   out[[role_name]] <- as.character(out[[interdep_resolved_role_col]])
   out[[interdep_resolved_role_col]] <- NULL
