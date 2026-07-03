@@ -152,19 +152,19 @@ summary(cross_data)
 ```
 
 
-```{r}
+```{r estimate-exchangeable1}
 
 model2 <- glmmTMB(
   satisfaction ~ 
     # pooled intercept 
     1 + 
     
-    # pooled slope for communication
+    # pooled (actor) slope for communication
     communication +
     
     # specify a single pooled residual covariance but allow for a correlation
     # between the partners' residuals. 
-    homcs(0 + .i_is_arbitrary_role1 + .i_is_arbitrary_role2 | coupleID)
+    homcs(0 + .i_is_arbitrary_role_1 + .i_is_arbitrary_role_2 | coupleID)
   
     # alternative specification with the sum-diff approach that can be rotated back.
     # us(1 | coupleID) + us(0 + Idiff | coupleID)
@@ -178,6 +178,39 @@ summary(model2)
 
 ```
 
+Here is the equivalent model (note identical AIC, BIC, logLik etc.). The random effects
+could be rotated back if needed to obtain a correlation etc. 
+
+```{r estimate-exchangeable2}
+
+model2.5 <- glmmTMB(
+  satisfaction ~ 
+    # pooled intercept 
+    1 + 
+    
+    # pooled (actor) slope for communication
+    communication +
+    
+    # alternative specification.
+    us(1 | coupleID) + us(0 + .i_diff | coupleID)
+    
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = cross_data
+)
+
+summary(model2.5)
+
+```
+
+Demonstrating that the models are exactly identical:
+```{r showing-equivalence}
+
+anova(model2, model2.5)
+
+```
+
+
 ### Test distinguishability
 
 Aside from using a Wald-Test on the first model, we can also compare models, since
@@ -185,6 +218,7 @@ they are nested.
 
 ```{r model-comparison}
 
+# comparing the model for distinguishable dyads with the model for exchangeable dyads. 
 anova(model1, model2)
 
 ```

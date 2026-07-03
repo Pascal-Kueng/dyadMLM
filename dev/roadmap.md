@@ -23,6 +23,8 @@ model-building features.
     composition counts
   - Make incomplete dyads, missing roles, and unknown compositions visible
 - Add composition role indicator columns for cross-sectional model workflows
+- Add helper functions to rotate `.i_diff` / Idiff structures back to
+  partner-level interpretations
 - Constrain and pool compositions
   - Example: treat male-female dyads as exchangeable
   - Example: pool male-male and female-female dyads as same-sex
