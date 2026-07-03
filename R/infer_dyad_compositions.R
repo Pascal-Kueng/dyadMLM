@@ -38,7 +38,7 @@ infer_dyad_compositions <- function(data) {
   incomplete_groups <- meta_data$incomplete_dyads
 
   dyad_roles <- data |>
-    # distinct to handle ILD and get only one role per person
+    # Collapse repeated ILD rows to one role per member.
     dplyr::distinct(
       .data[[group_name]],
       .data[[member_name]],
@@ -74,21 +74,28 @@ infer_dyad_compositions <- function(data) {
 
   dyad_roles$composition <- dyad_roles$raw_composition
 
+  # We basically want to create a new object like dyad_roles
+  composition_lookup <- dplyr::select(
+    dyad_roles,
+    dplyr::all_of(group_name),
+    .interdep_raw_composition = "raw_composition",
+    .interdep_composition = "composition",
+    .interdep_dyad_type = "dyad_type"
+  )
+
   data <- dplyr::left_join(
     data,
-    dplyr::select(
-      dyad_roles,
-      dplyr::all_of(group_name),
-      .interdep_raw_composition = "raw_composition",
-      .interdep_composition = "composition",
-      .interdep_dyad_type = "dyad_type"
-    ),
+    composition_lookup,
     by = group_name
   )
 
+  # Adding individual role column!
   data[[".interdep_composition_role"]] <- ifelse(
-    data[[".interdep_dyad_type"]] %in% c("distinguishable", "unknown"),
+    data[[".interdep_dyad_type"]] %in% c("distinguishable", interdep_unknown_role),
+    # if distinguishable (or unknown, since that is also somwehat distinguishable)
+    # we add the role of the person.
     composition_role_label(data[[".interdep_composition"]], data[[role_name]]),
+    # for indistinguishable we only return the raw composition.
     data[[".interdep_composition"]]
   )
 
