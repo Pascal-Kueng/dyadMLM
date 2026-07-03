@@ -81,12 +81,9 @@ infer_dyad_compositions <- function(data) {
 
   # Create the dyad-level lookup that will be joined back to every row.
   # The lookup uses the final `.i_*` column names returned to users.
-  composition_lookup <- dplyr::select(
-    dyad_roles,
-    dplyr::all_of(group_name),
-    !!interdep_composition_col := "composition",
-    !!interdep_dyad_type_col := "dyad_type"
-  )
+  composition_lookup <- dyad_roles[c(group_name, "composition", "dyad_type")]
+  names(composition_lookup)[names(composition_lookup) == "composition"] <- interdep_composition_col
+  names(composition_lookup)[names(composition_lookup) == "dyad_type"] <- interdep_dyad_type_col
 
   data <- dplyr::left_join(
     data,
@@ -125,7 +122,7 @@ infer_dyad_compositions <- function(data) {
     data[[interdep_composition_role_col]]
   )
 
-  dummy_matrix <- model.matrix(~ 0 + is_)
+  dummy_matrix <- stats::model.matrix(~ 0 + is_)
 
   colnames(dummy_matrix) <- paste0(interdep_reserved_prefix, colnames(dummy_matrix))
 
