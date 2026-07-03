@@ -6,7 +6,10 @@
 interdep_composition_sep <- "__"
 
 # Role label used when a member's role is unknown but retained.
-interdep_unknown_role <- "unknown"
+interdep_unknown_label <- "unknown"
+
+# Label used when no role column is supplied.
+interdep_assumed_exchangeable_label <- "assumed_exchangeable"
 
 ############################################################################
 # HELPER FUNCTIONS

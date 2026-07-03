@@ -352,7 +352,7 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
 
   # Convert unresolved roles from NA to "unknown" when requested.
   if (missing_role == "keep") {
-    out[[".interdep_resolved_role"]][is.na(out[[".interdep_resolved_role"]])] <- interdep_unknown_role
+    out[[".interdep_resolved_role"]][is.na(out[[".interdep_resolved_role"]])] <- interdep_unknown_label
   }
 
   out[[role_name]] <- as.character(out[[".interdep_resolved_role"]])

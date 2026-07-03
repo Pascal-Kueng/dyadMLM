@@ -40,6 +40,8 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   expect_false(".interdep_raw_composition" %in% names(result))
   expect_true(is.factor(result$.interdep_composition))
   expect_true(is.factor(result$.interdep_composition_role))
+  indicator_names <- grep("^\\.interdep_is_", names(result), value = TRUE)
+  expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
     as.character(result$.interdep_composition),
     c("female__male", "female__male", "female__female", "female__female",
@@ -63,13 +65,14 @@ test_that("prepare_interdep_data treats data without role as unclassified exchan
   expect_false(".interdep_raw_composition" %in% names(result))
   expect_true(is.factor(result$.interdep_composition))
   expect_true(is.factor(result$.interdep_composition_role))
-  expect_equal(as.character(result$.interdep_composition), rep("assumed-exchangeable", 4))
-  expect_equal(as.character(result$.interdep_composition_role), rep("assumed-exchangeable", 4))
+  expect_equal(result$.interdep_is_assumed_exchangeable, rep(1, 4))
+  expect_equal(as.character(result$.interdep_composition), rep(interdep_assumed_exchangeable_label, 4))
+  expect_equal(as.character(result$.interdep_composition_role), rep(interdep_assumed_exchangeable_label, 4))
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = "assumed-exchangeable",
-      composition = "assumed-exchangeable",
+      raw_composition = interdep_assumed_exchangeable_label,
+      composition = interdep_assumed_exchangeable_label,
       dyad_type = "exchangeable",
       n_dyads = 2L
     )

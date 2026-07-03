@@ -34,7 +34,8 @@
 #'   `role` column is supplied.
 #'
 #' @return The original data as a tibble with class `interdep_data`,
-#'   `.interdep_*` composition factor columns, and an `interdep` attribute
+#'   `.interdep_composition` and `.interdep_composition_role` factor columns,
+#'   `.interdep_is_*` numeric indicator columns, and an `interdep` attribute
 #'   containing structural metadata and `dyad_compositions`.
 #'
 #' @examples

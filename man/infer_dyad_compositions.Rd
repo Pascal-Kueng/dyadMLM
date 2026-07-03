@@ -11,7 +11,8 @@ infer_dyad_compositions(data)
 }
 \value{
 An \code{interdep_data} object with added \code{.interdep_composition} and
-\code{.interdep_composition_role} factor columns and dyad composition metadata.
+\code{.interdep_composition_role} factor columns, \verb{.interdep_is_*} numeric
+indicator columns, and dyad composition metadata.
 }
 \description{
 Builds a dyad-level summary of role compositions from a validated

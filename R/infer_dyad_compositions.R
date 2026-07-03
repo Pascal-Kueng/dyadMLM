@@ -6,7 +6,8 @@
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #'
 #' @return An `interdep_data` object with added `.interdep_composition` and
-#'   `.interdep_composition_role` factor columns and dyad composition metadata.
+#'   `.interdep_composition_role` factor columns, `.interdep_is_*` numeric
+#'   indicator columns, and dyad composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data) {
@@ -14,12 +15,12 @@ infer_dyad_compositions <- function(data) {
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
-    data[[".interdep_composition"]] <- "assumed-exchangeable"
-    data[[".interdep_composition_role"]] <- "assumed-exchangeable"
+    data[[".interdep_composition"]] <- interdep_assumed_exchangeable_label
+    data[[".interdep_composition_role"]] <- interdep_assumed_exchangeable_label
 
     attr(data, "interdep")$dyad_compositions <- tibble::tibble(
-      raw_composition = "assumed-exchangeable",
-      composition = "assumed-exchangeable",
+      raw_composition = interdep_assumed_exchangeable_label,
+      composition = interdep_assumed_exchangeable_label,
       dyad_type = "exchangeable",
       n_dyads = meta_data$n_dyads
     )
@@ -28,9 +29,11 @@ infer_dyad_compositions <- function(data) {
     data[[".interdep_composition"]] <- factor(data[[".interdep_composition"]])
     data[[".interdep_composition_role"]] <- factor(data[[".interdep_composition_role"]])
 
+    # Create indicator column. In this case it is constant and equivalent to an intercept.
+    data[[".interdep_is_assumed_exchangeable"]] <- 1
+
     return(data)
   }
-
 
   # If role column **was** provided
   group_name <- meta_data$group
@@ -53,18 +56,18 @@ infer_dyad_compositions <- function(data) {
 
         # For incomplete dyads, add one synthetic unknown role for the missing partner.
         if (.data[[group_name]][1] %in% incomplete_groups) {
-          roles <- c(roles, interdep_unknown_role)
+          roles <- c(roles, interdep_unknown_label)
         }
 
         canonical_composition(roles)
       },
       dyad_type = {
-        has_unknown_role <- any(.data[[role_name]] == interdep_unknown_role)
+        has_unknown_role <- any(.data[[role_name]] == interdep_unknown_label)
         is_incomplete_group <- .data[[group_name]][1] %in% incomplete_groups
         has_one_role <- dplyr::n_distinct(.data[[role_name]]) == 1
 
         if (has_unknown_role || is_incomplete_group) {
-          interdep_unknown_role
+          interdep_unknown_label
         } else if (has_one_role) {
           "exchangeable"
         } else {
@@ -93,7 +96,7 @@ infer_dyad_compositions <- function(data) {
 
   # Adding individual role column!
   data[[".interdep_composition_role"]] <- ifelse(
-    data[[".interdep_dyad_type"]] %in% c("distinguishable", interdep_unknown_role),
+    data[[".interdep_dyad_type"]] %in% c("distinguishable", interdep_unknown_label),
     # For distinguishable and unknown dyads, include the member role in the label.
     composition_role_label(data[[".interdep_composition"]], data[[role_name]]),
     # For exchangeable dyads, the dyad composition label is sufficient.
@@ -114,7 +117,16 @@ infer_dyad_compositions <- function(data) {
   data[[".interdep_composition"]] <- factor(data[[".interdep_composition"]])
   data[[".interdep_composition_role"]] <- factor(data[[".interdep_composition_role"]])
 
+  # Create numeric indicator columns for model formulas.
+  composition_role <- data[[".interdep_composition_role"]]
+  dummy_matrix <- model.matrix(~ composition_role + 0)
+  dummy_names <- paste0(
+    ".interdep_is_",
+    gsub("[^[:alnum:]_]+", "_", levels(composition_role))
+  )
+  colnames(dummy_matrix) <- make.unique(dummy_names, sep = "_")
+  data[colnames(dummy_matrix)] <- as.data.frame(dummy_matrix)
+
   data
 }
-
 
