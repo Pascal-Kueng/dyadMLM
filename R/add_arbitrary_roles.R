@@ -18,24 +18,25 @@ add_arbitrary_roles <- function(data, seed = NULL) {
   member_name <- meta_data$member
   time_name <- meta_data$time
 
+  # Handle the seed: apply it and make sure it restores when the function exits!
   if (!is.null(seed)) {
-    # store old seed if one was set
-    if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-      old_seed <- .Random.seed
+    has_old_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    if (has_old_seed) {
+      old_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     }
 
     set.seed(seed)
 
     on.exit({
-      if (exists(old_seed)) {
+      if (has_old_seed) {
         assign(".Random.seed", old_seed, envir = .GlobalEnv)
-      } else {
+      } else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
         rm(".Random.seed", envir = .GlobalEnv)
       }
     }, add = TRUE)
   }
 
-
+  # create the random roles columns we need.
 
   data
 }
