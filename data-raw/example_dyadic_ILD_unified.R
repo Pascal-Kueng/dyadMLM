@@ -96,6 +96,51 @@ RE <- tibble::as_tibble(
 RE <- dplyr::mutate(RE, coupleID = seq_len(n_couples))
 
 ###############################################################################
+### PARAMETERS TO RECOVER LATER: STABLE MEMBER-LEVEL INTERCEPT DEVIATIONS
+###############################################################################
+
+# These stable deviations make the maximal unified ILD covariance model
+# identifiable away from the boundary. The shared dyad-level random effects
+# above induce stable non-independence; these member-level deviations allow
+# nonzero stable difference variance in exchangeable dyads.
+stable_intercept_params <- tibble::tribble(
+  ~composition,      ~sd_1, ~sd_2, ~rho,
+  "female_male",      0.70,  0.65, 0.45,
+  "female_female",    0.65,  0.65, 0.30,
+  "male_male",        0.55,  0.55, 0.25
+)
+
+simulate_stable_intercepts <- function(couple_ids, composition_label) {
+  params <- stable_intercept_params[stable_intercept_params$composition == composition_label, ]
+  Sigma_stable <- matrix(
+    c(
+      params$sd_1^2,
+      params$rho * params$sd_1 * params$sd_2,
+      params$rho * params$sd_1 * params$sd_2,
+      params$sd_2^2
+    ),
+    nrow = 2
+  )
+  stable_pairs <- MASS::mvrnorm(
+    n = length(couple_ids),
+    mu = c(0, 0),
+    Sigma = Sigma_stable
+  )
+
+  tibble::tibble(
+    coupleID = rep(couple_ids, each = 2),
+    member = rep(1:2, times = length(couple_ids)),
+    stable_intercept = c(rbind(stable_pairs[, 1], stable_pairs[, 2]))
+  )
+}
+
+stable_intercepts <- dplyr::bind_rows(
+  simulate_stable_intercepts(female_male_ids, "female_male"),
+  simulate_stable_intercepts(female_female_ids, "female_female"),
+  simulate_stable_intercepts(male_male_ids, "male_male")
+)
+
+###############################################################################
 ### PARAMETERS TO RECOVER LATER: BETWEEN-PERSON PREDICTOR DISTRIBUTION
 ###############################################################################
 
@@ -187,6 +232,7 @@ panel <- panel[order(panel$coupleID, panel$diaryday, panel$member), ]
 panel <- tibble::as_tibble(panel)
 panel <- dplyr::left_join(panel, persons, by = c("coupleID", "member"))
 panel <- dplyr::left_join(panel, support_long, by = c("coupleID", "diaryday", "member"))
+panel <- dplyr::left_join(panel, stable_intercepts, by = c("coupleID", "member"))
 
 panel <- dplyr::group_by(panel, coupleID, diaryday)
 panel <- dplyr::mutate(
@@ -218,7 +264,7 @@ panel <- dplyr::mutate(
   actor_cbp = mu_actor - grand_mu,
   partner_cbp = mu_partner - grand_mu,
   mu_it =
-    fix_b0 + re_b0 +
+    fix_b0 + re_b0 + stable_intercept +
       (fix_time + re_time) * diaryday +
       (fix_bp_actor + re_bp_actor) * actor_cbp +
       (fix_bp_partner + re_bp_partner) * partner_cbp +

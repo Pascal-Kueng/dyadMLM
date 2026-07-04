@@ -646,3 +646,145 @@ unified_cross_gaussian_model <- glmmTMB(
 summary(unified_cross_gaussian_model)
 
 ```
+
+## Unified intensive longitudinal Gaussian model
+
+`example_dyadic_ILD_unified` contains the same three dyad compositions as the
+unified cross-sectional example, but each dyad contributes repeated paired
+observations over `diaryday`.
+
+```{r unified-ild-raw}
+print(head(example_dyadic_ILD_unified, n = 26), n = 26)
+```
+
+```{r prepare-unified-ild}
+unified_ild_data <- prepare_interdep_data(
+  example_dyadic_ILD_unified,
+  group = coupleID,
+  role = gender,
+  member = personID,
+  time = diaryday,
+  seed = 123
+)
+
+print(unified_ild_data)
+summary(unified_ild_data)
+```
+
+This first unified ILD model keeps only composition-specific intercepts and
+composition-specific fixed time slopes. Actor and partner predictor effects are
+left out for now. Random time slopes are also omitted; with separate stable and
+same-day dyadic covariance blocks, random time slopes add many weakly identified
+parameters and are a likely first source of convergence problems.
+
+For this maximal covariance example, `glmmTMB`'s default optimizer can report
+false convergence even when the Hessian is positive definite. The `BFGS`
+optimizer is used here because it reaches the same solution cleanly for this
+simulated dataset.
+
+```{r fit-unified-ild-gaussian, eval = has_glmmTMB}
+
+unified_ild_gaussian_model <- glmmTMB(
+  closeness ~ 0 +
+
+    .i_is_female_x_male_female + .i_is_female_x_male_male +
+    .i_is_female_x_female + .i_is_male_x_male +
+
+    .i_is_female_x_male_female:diaryday +
+    .i_is_female_x_male_male:diaryday +
+    .i_is_female_x_female:diaryday +
+    .i_is_male_x_male:diaryday +
+
+    # stable dyad-level covariance
+    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
+    (0 + .i_is_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female | coupleID) +
+    (0 + .i_is_male_x_male | coupleID) +
+    (0 + .i_diff_male_x_male | coupleID) +
+
+    # same-day covariance
+    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
+    (0 + .i_is_female_x_female | coupleID:diaryday) +
+    (0 + .i_diff_female_x_female | coupleID:diaryday) +
+    (0 + .i_is_male_x_male | coupleID:diaryday) +
+    (0 + .i_diff_male_x_male | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = unified_ild_data
+  , control = glmmTMBControl(
+      optimizer = optim,
+      optArgs = list(method = "BFGS")
+    )
+)
+
+summary(unified_ild_gaussian_model)
+
+```
+
+## Unified intensive longitudinal Tweedie model
+
+`example_dyadic_ILD_unified_tweedie` has the same unified intensive
+longitudinal dyadic structure, but the outcome is semi-continuous.
+
+```{r unified-ild-tweedie-raw}
+print(head(example_dyadic_ILD_unified_tweedie, n = 26), n = 26)
+hist(example_dyadic_ILD_unified_tweedie$physical_activity, breaks = 20)
+```
+
+```{r prepare-unified-ild-tweedie}
+unified_ild_tweedie_data <- prepare_interdep_data(
+  example_dyadic_ILD_unified_tweedie,
+  group = coupleID,
+  role = gender,
+  member = personID,
+  time = diaryday,
+  seed = 123
+)
+
+print(unified_ild_tweedie_data)
+summary(unified_ild_tweedie_data)
+```
+
+As in the Gaussian unified ILD model, the mean model contains only
+composition-specific intercepts and fixed time slopes. The dyadic random-effect
+blocks are latent effects on the log-mean scale, not residual covariance
+parameters in the Gaussian sense.
+
+```{r fit-unified-ild-tweedie, eval = has_glmmTMB}
+
+unified_ild_tweedie_model <- glmmTMB(
+  physical_activity ~ 0 +
+
+    .i_is_female_x_male_female + .i_is_female_x_male_male +
+    .i_is_female_x_female + .i_is_male_x_male +
+
+    .i_is_female_x_male_female:diaryday +
+    .i_is_female_x_male_male:diaryday +
+    .i_is_female_x_female:diaryday +
+    .i_is_male_x_male:diaryday +
+
+    # stable dyad-level latent covariance
+    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
+    (0 + .i_is_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female | coupleID) +
+    (0 + .i_is_male_x_male | coupleID) +
+    (0 + .i_diff_male_x_male | coupleID) +
+
+    # same-day latent covariance
+    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
+    (0 + .i_is_female_x_female | coupleID:diaryday) +
+    (0 + .i_diff_female_x_female | coupleID:diaryday) +
+    (0 + .i_is_male_x_male | coupleID:diaryday) +
+    (0 + .i_diff_male_x_male | coupleID:diaryday)
+
+  , dispformula = ~ 0 +
+      .i_is_female_x_male_female + .i_is_female_x_male_male +
+      .i_is_female_x_female + .i_is_male_x_male
+  , family = tweedie()
+  , data = unified_ild_tweedie_data
+)
+
+summary(unified_ild_tweedie_model)
+
+```
