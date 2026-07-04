@@ -79,14 +79,14 @@ Omit `role` only when all partners should be treated as exchangeable.
 `example_dyadic_crosssectional` is a simulated cross-sectional dataset for
 distinguishable dyads. Each dyad has two rows: one for each member.
 
-```{r cross-sectional-data}
+```{r cross-sectional-raw}
 print(head(example_dyadic_crosssectional))
 ```
 
 We validate and prepare the data with the function `prepare_interdep_data()`
 
-```{r validate-cross-sectional}
-cross_data <- prepare_interdep_data(
+```{r prepare-cross-distinguishable}
+cross_distinguishable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   role = gender,
@@ -94,23 +94,23 @@ cross_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(cross_data)
-summary(cross_data)
+print(cross_distinguishable_data)
+summary(cross_distinguishable_data)
 ```
 
 The generated `.i_*` columns can be used directly in model formulas.
 
-```{r generated-columns}
-names(cross_data)[startsWith(names(cross_data), ".i_")]
+```{r cross-distinguishable-columns}
+names(cross_distinguishable_data)[startsWith(names(cross_distinguishable_data), ".i_")]
 ```
 
-### Example: simple dyadic model for distinguishable dyads
+### Distinguishable Gaussian APIM
 
 
-```{r estimate-distinguishable, eval = has_glmmTMB}
+```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
 library(glmmTMB)
 
-model1 <- glmmTMB(
+cross_distinguishable_model <- glmmTMB(
   satisfaction ~ 
     # remove standard intercept and model separate intercepts for male and female
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
@@ -125,35 +125,35 @@ model1 <- glmmTMB(
   
   , dispformula = ~ 0
   , family = gaussian()
-  , data = cross_data
+  , data = cross_distinguishable_data
 )
 
-summary(model1)
+summary(cross_distinguishable_model)
 
 ```
 
-### Example: simple dyadic model for exchangeable dyads
+### Exchangeable Gaussian APIM
 
 We can treat all dyads as exchangeable by omitting the `role` argument.
 Arbitrary partner labels are embedded in `.i_composition_role`, the
 corresponding `.i_is_*` columns, and `.i_diff`.
 
-```{r validate-cross-sectional-exchangeable}
-exchangeable_data <- prepare_interdep_data(
+```{r prepare-cross-exchangeable}
+cross_exchangeable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
   seed = 123
 )
 
-print(exchangeable_data)
-summary(exchangeable_data)
+print(cross_exchangeable_data)
+summary(cross_exchangeable_data)
 ```
 
 
-```{r estimate-exchangeable1, eval = has_glmmTMB}
+```{r fit-cross-exchangeable-gaussian-homcs, eval = has_glmmTMB}
 
-model2 <- glmmTMB(
+cross_exchangeable_homcs_model <- glmmTMB(
   satisfaction ~ 
     # pooled intercept 
     1 + 
@@ -173,19 +173,19 @@ model2 <- glmmTMB(
     
   , dispformula = ~ 0
   , family = gaussian()
-  , data = exchangeable_data
+  , data = cross_exchangeable_data
 )
 
-summary(model2)
+summary(cross_exchangeable_homcs_model)
 
 ```
 
 Here is the equivalent sum-diff specification. Helper functions to rotate these
 structures back to partner-level interpretations are planned.
 
-```{r estimate-exchangeable2, eval = has_glmmTMB}
+```{r fit-cross-exchangeable-gaussian-diff, eval = has_glmmTMB}
 
-model2_diff <- glmmTMB(
+cross_exchangeable_diff_model <- glmmTMB(
   satisfaction ~ 
     # pooled intercept 
     1 + 
@@ -198,17 +198,17 @@ model2_diff <- glmmTMB(
     
   , dispformula = ~ 0
   , family = gaussian()
-  , data = exchangeable_data
+  , data = cross_exchangeable_data
 )
 
-summary(model2_diff)
+summary(cross_exchangeable_diff_model)
 
 ```
 
 Demonstrating that the models are exactly identical:
-```{r showing-equivalence, eval = has_glmmTMB}
+```{r compare-cross-exchangeable-gaussian, eval = has_glmmTMB}
 
-anova(model2, model2_diff)
+anova(cross_exchangeable_homcs_model, cross_exchangeable_diff_model)
 
 ```
 Note that the p-value is not interpretable here. 
@@ -237,7 +237,7 @@ incomplete_data <- data.frame(
   satisfaction = c(5.2, 4.8, 4.9, 5.1, 5.0, 4.7, 4.6)
 )
 
-dropped_data <- prepare_interdep_data(
+incomplete_dropped_data <- prepare_interdep_data(
   incomplete_data,
   group = coupleID,
   member = personID,
@@ -247,7 +247,7 @@ dropped_data <- prepare_interdep_data(
   seed = 123
 )
 
-dropped_data
+incomplete_dropped_data
 ```
 
 
@@ -259,24 +259,99 @@ outcome has exact zeros and positive skewed values, as in
 some physical activity outcomes, in contrast to the Gaussian distribution from the 
 previous example. 
 
-```{r tweedie-data}
+```{r tweedie-raw}
 print(head(example_dyadic_crosssectional_tweedie))
 hist(example_dyadic_crosssectional_tweedie$physical_activity, breaks = 20)
 ```
 
-Validation works the same way because the dyadic structure is the same.
+Validation and modeling work the same way because the dyadic structure is the same.
+The random-effect interpretation is different from the Gaussian case: Tweedie
+random effects are latent effects on the log-mean scale, while the
+observation-level Tweedie variance remains part of the model.
 
-```{r validate-tweedie}
-tweedie_data <- prepare_interdep_data(
+### Distinguishable Tweedie APIM
+
+```{r prepare-tweedie-distinguishable}
+tweedie_distinguishable_data <- prepare_interdep_data(
   example_dyadic_crosssectional_tweedie,
   group = coupleID,
-  role = gender,
   member = personID,
+  role = gender,
   seed = 123
 )
 
-print(tweedie_data)
-summary(tweedie_data)
+print(tweedie_distinguishable_data)
+summary(tweedie_distinguishable_data)
+```
+
+
+```{r fit-tweedie-distinguishable, eval = has_glmmTMB}
+
+tweedie_distinguishable_model <- glmmTMB(
+  physical_activity ~ 
+    # remove standard intercept and model separate intercepts for male and female
+    0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
+    
+    # gender-specific slopes for motivation (no main effect)
+    .i_is_female_x_male_female:motivation + .i_is_female_x_male_male:motivation +
+    
+    # keep a simple couple-level latent effect for stable non-independence
+    
+    # important limitation: this can only induce positive partner dependence
+    (1 | coupleID) 
+  
+  # allow role-specific Tweedie dispersion
+  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
+  , family = tweedie()
+  , data = tweedie_distinguishable_data
+)
+
+summary(tweedie_distinguishable_model)
+
+```
+
+### Exchangeable Tweedie APIM
+
+```{r prepare-tweedie-exchangeable}
+tweedie_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_tweedie,
+  group = coupleID,
+  member = personID,
+  # role = gender,
+  seed = 123
+)
+
+print(tweedie_exchangeable_data)
+summary(tweedie_exchangeable_data)
+```
+
+```{r fit-tweedie-exchangeable, eval = has_glmmTMB}
+
+tweedie_exchangeable_model <- glmmTMB(
+  physical_activity ~ 
+    # pooled intercept 
+    1 + 
+    
+    # pooled (actor) slope for motivation
+    motivation +
+    
+    # exchangeable latent dyad block on the log-mean scale
+    homcs(
+      0 + .i_is_assumed_exchangeable_arbitrary_1 +
+        .i_is_assumed_exchangeable_arbitrary_2 | coupleID
+    )
+  
+    # alternative specification with the sum-diff approach:
+    # us(1 | coupleID) + us(0 + .i_diff | coupleID)
+    
+  # estimate a single pooled Tweedie dispersion parameter
+  , dispformula = ~ 1
+  , family = tweedie()
+  , data = tweedie_exchangeable_data
+)
+
+summary(tweedie_exchangeable_model)
+
 ```
 
 ## Intensive longitudinal dyadic data
@@ -284,14 +359,16 @@ summary(tweedie_data)
 `example_dyadic_ILD` is a simulated intensive longitudinal dyadic dataset. Each
 dyad has repeated observations over `diaryday`, with one row per person-day.
 
-```{r ild-data}
+```{r ild-raw}
 print(head(example_dyadic_ILD, n = 26), n = 26)
 ```
 
 For longitudinal data, pass the time variable as well.
 
-```{r validate-ild}
-ild_data <- prepare_interdep_data(
+### Distinguishable ILD APIM
+
+```{r prepare-ild-distinguishable}
+ild_distinguishable_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   role = gender,
@@ -300,6 +377,325 @@ ild_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(ild_data)
-summary(ild_data)
+print(ild_distinguishable_data)
+summary(ild_distinguishable_data)
+```
+
+For now, not within- and between-person centred. 
+
+```{r fit-ild-distinguishable, eval = has_glmmTMB}
+
+ild_distinguishable_model <- glmmTMB(
+  closeness ~ 0 + 
+    
+    .i_is_female_x_male_female + .i_is_female_x_male_male + 
+    
+    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
+    
+    # random effects for stable non-independence (means)
+    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)  +
+
+    # Same-day residual covariance
+    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) 
+
+  , dispformula = ~ 0  
+  , family = gaussian()
+  , data = ild_distinguishable_data
+)
+
+summary(ild_distinguishable_model)
+
+```
+
+### Exchangeable ILD APIM
+
+```{r prepare-ild-exchangeable}
+ild_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_ILD,
+  group = coupleID,
+  # role = gender,
+  member = personID,
+  time = diaryday,
+  seed = 123
+)
+
+print(ild_exchangeable_data)
+summary(ild_exchangeable_data)
+```
+
+For now, not within- and between-person centred. 
+
+```{r fit-ild-exchangeable, eval = has_glmmTMB}
+
+ild_exchangeable_model <- glmmTMB(
+  closeness ~ 
+    1 + 
+    
+    diaryday +
+
+    # random effects for stable non-independence (means)
+    us(1 | coupleID)  + us(0 + .i_diff | coupleID) +
+
+    # Same-day residual covariance
+    us(1 | coupleID:diaryday) + us(0 + .i_diff | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data
+)
+
+summary(ild_exchangeable_model)
+
+```
+
+## Semi-continuous intensive longitudinal dyadic data
+
+`example_dyadic_ILD_tweedie` has the same intensive longitudinal dyadic
+structure as `example_dyadic_ILD`, but the outcome is semi-continuous.
+
+```{r ild-tweedie-raw}
+print(head(example_dyadic_ILD_tweedie, n = 26), n = 26)
+hist(example_dyadic_ILD_tweedie$physical_activity, breaks = 20)
+```
+
+### Distinguishable Tweedie ILD APIM
+
+```{r prepare-ild-tweedie-distinguishable}
+ild_tweedie_distinguishable_data <- prepare_interdep_data(
+  example_dyadic_ILD_tweedie,
+  group = coupleID,
+  role = gender,
+  member = personID,
+  time = diaryday,
+  seed = 123
+)
+
+print(ild_tweedie_distinguishable_data)
+summary(ild_tweedie_distinguishable_data)
+```
+
+For now, not within- and between-person centred.
+
+For Tweedie models, the random-effect blocks are latent effects on the log-mean
+scale. They can induce partner dependence, but they are not residual covariance
+structures in the same direct sense as in Gaussian models, because the Tweedie
+observation-level variance remains part of the model.
+
+The first model uses role-specific stable couple effects and a simple same-day
+shared latent shock. This is the easier teaching model: it keeps role-specific
+Tweedie dispersion, but the same-day latent shock can only induce positive
+partner dependence.
+
+```{r fit-ild-tweedie-distinguishable-shared-day, eval = has_glmmTMB}
+
+ild_tweedie_distinguishable_shared_day_model <- glmmTMB(
+  physical_activity ~ 0 +
+
+    .i_is_female_x_male_female + .i_is_female_x_male_male +
+
+    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
+
+    # random effects for stable non-independence (means)
+    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
+
+    # same-day shared latent shock; positive dependence only
+    (1 | coupleID:diaryday)
+
+  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
+  , family = tweedie()
+  , data = ild_tweedie_distinguishable_data
+)
+
+summary(ild_tweedie_distinguishable_shared_day_model)
+
+```
+
+The second model uses a role-specific same-day latent covariance block. This is
+closer to the Gaussian ILD covariance structure and can represent positive or
+negative same-day partner dependence. In this ILD example, the repeated paired
+occasions provide enough information to also estimate role-specific Tweedie
+dispersion.
+
+```{r fit-ild-tweedie-distinguishable-latent-day-cov, eval = has_glmmTMB}
+
+ild_tweedie_distinguishable_latent_day_cov_model <- glmmTMB(
+  physical_activity ~ 0 +
+
+    .i_is_female_x_male_female + .i_is_female_x_male_male +
+
+    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
+
+    # random effects for stable non-independence (means)
+    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
+
+    # same-day role-specific latent covariance; positive or negative dependence
+    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday)
+
+  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
+  # in case of non-convergence, a first simplification could be to remove the
+  # role-specific dispersion formula
+  , family = tweedie()
+  , data = ild_tweedie_distinguishable_data
+)
+
+summary(ild_tweedie_distinguishable_latent_day_cov_model)
+
+```
+
+The fuller same-day latent covariance structure is much more fragile in the
+cross-sectional case because each dyad contributes only one paired occasion. The
+same pair of observations must inform the fixed effects, Tweedie dispersion and
+power, and the dyadic dependence structure. In ILD data, each dyad contributes
+many paired occasions, so the stable couple-level block and the same-day
+occasion-level block are informed by repeated within-dyad patterns over time.
+
+### Exchangeable Tweedie ILD APIM
+
+```{r prepare-ild-tweedie-exchangeable}
+ild_tweedie_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_ILD_tweedie,
+  group = coupleID,
+  member = personID,
+  time = diaryday,
+  seed = 123
+)
+
+print(ild_tweedie_exchangeable_data)
+summary(ild_tweedie_exchangeable_data)
+```
+
+For now, not within- and between-person centred.
+
+This is the exchangeable analogue of the fuller Tweedie ILD model above. The
+sum-diff random-effect blocks provide stable and same-day exchangeable latent
+covariance structures. The Tweedie dispersion stays pooled because the arbitrary
+partner labels are only computational labels, not substantive roles.
+
+```{r fit-ild-tweedie-exchangeable, eval = has_glmmTMB}
+
+ild_tweedie_exchangeable_model <- glmmTMB(
+  physical_activity ~
+    1 +
+
+    diaryday +
+
+    # stable exchangeable latent covariance
+    (1 | coupleID) + (0 + .i_diff | coupleID) +
+  
+    # same-day exchangeable latent covariance
+    (1 | coupleID:diaryday) + (0 + .i_diff | coupleID:diaryday)
+
+  # pooled dispersion; arbitrary labels should not define dispersion differences
+  , dispformula = ~ 1
+  , family = tweedie()
+  , data = ild_tweedie_exchangeable_data
+)
+
+summary(ild_tweedie_exchangeable_model)
+
+```
+
+## Unified cross-sectional Gaussian model
+
+`example_dyadic_crosssectional_unified` contains three dyad compositions in the
+same data object: distinguishable female-male dyads and exchangeable
+female-female and male-male dyads.
+
+```{r unified-cross-sectional-raw}
+print(head(example_dyadic_crosssectional_unified))
+```
+
+```{r prepare-unified-cross-sectional}
+unified_cross_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_unified,
+  group = coupleID,
+  role = gender,
+  member = personID,
+  seed = 123
+)
+
+unified_cross_data <- dplyr::mutate(
+  unified_cross_data,
+  .i_is_female_x_female =
+    .i_is_female_x_female_arbitrary_1 + .i_is_female_x_female_arbitrary_2,
+  .i_is_male_x_male =
+    .i_is_male_x_male_arbitrary_1 + .i_is_male_x_male_arbitrary_2,
+  .i_diff_female_x_female = .i_diff * .i_is_female_x_female,
+  .i_diff_male_x_male = .i_diff * .i_is_male_x_male
+)
+
+print(unified_cross_data)
+summary(unified_cross_data)
+```
+
+The data were simulated with the following fixed effects and residual covariance
+parameters. For exchangeable dyads, `sum_variance` and `diff_variance` imply the
+partner correlation.
+
+```{r unified-cross-sectional-targets, echo=FALSE}
+unified_cross_targets <- data.frame(
+  block = c(
+    "female_x_male",
+    "female_x_male",
+    "female_x_male",
+    "female_x_female",
+    "female_x_female",
+    "female_x_female",
+    "male_x_male",
+    "male_x_male",
+    "male_x_male"
+  ),
+  parameter = c(
+    "female_mean",
+    "male_mean",
+    "correlation",
+    "mean",
+    "sum_variance",
+    "diff_variance",
+    "mean",
+    "sum_variance",
+    "diff_variance"
+  ),
+  value = c(
+    5.50,
+    4.50,
+    -0.30,
+    5.80,
+    0.675,
+    0.325,
+    4.20,
+    0.63375,
+    1.05625
+  )
+)
+
+unified_cross_targets
+```
+
+```{r fit-unified-cross-sectional-gaussian, eval = has_glmmTMB}
+
+unified_cross_gaussian_model <- glmmTMB(
+  satisfaction ~ 0 +
+
+    .i_is_female_x_male_female + .i_is_female_x_male_male +
+    .i_is_female_x_female + .i_is_male_x_male +
+
+    # distinguishable female-male residual covariance
+    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
+
+    # exchangeable female-female residual covariance via sum-diff
+    (0 + .i_is_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female | coupleID) +
+
+    # exchangeable male-male residual covariance via sum-diff
+    (0 + .i_is_male_x_male | coupleID) +
+    (0 + .i_diff_male_x_male | coupleID)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = unified_cross_data
+)
+
+summary(unified_cross_gaussian_model)
+
 ```
