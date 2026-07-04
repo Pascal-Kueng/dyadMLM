@@ -20,6 +20,8 @@ interdep_composition_role_col <- paste0(interdep_reserved_prefix, "composition_r
 interdep_dyad_type_col <- paste0(interdep_reserved_prefix, "dyad_type")
 interdep_raw_composition_col <- paste0(interdep_reserved_prefix, "raw_composition")
 interdep_resolved_role_col <- paste0(interdep_reserved_prefix, "resolved_role")
+interdep_diff_col <- paste0(interdep_reserved_prefix, "diff")
+interdep_arbitrary_role_col <- paste0(interdep_reserved_prefix, "arbitrary_role")
 
 ############################################################################
 # HELPER FUNCTIONS

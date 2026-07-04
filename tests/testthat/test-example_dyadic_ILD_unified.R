@@ -42,8 +42,8 @@ check_unified_ild_dataset <- function(data, outcome) {
 
   female_male <- prepared$.i_composition == "female_x_male"
   exchangeable <- prepared$.i_composition != "female_x_male"
-  expect_true(all(prepared$.i_diff[female_male] == 0))
-  expect_true(all(abs(prepared$.i_diff[exchangeable]) == 1))
+  expect_true(all(prepared[[interdep_diff_col]][female_male] == 0))
+  expect_true(all(abs(prepared[[interdep_diff_col]][exchangeable]) == 1))
 
   female_female <- prepared$.i_composition == "female_x_female"
   male_male <- prepared$.i_composition == "male_x_male"

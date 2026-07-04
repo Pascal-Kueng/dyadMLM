@@ -14,11 +14,11 @@ test_that("assign_arbitrary_member_roles returns one role per member", {
 
   expect_equal(nrow(result), 4)
   expect_equal(
-    sort(unique(result$.i_arbitrary_role)),
+    sort(unique(result[[interdep_arbitrary_role_col]])),
     c("arbitrary_1", "arbitrary_2")
   )
   expect_equal(
-    dplyr::count(result, .data$dyad_id, .data$.i_arbitrary_role)$n,
+    dplyr::count(result, .data$dyad_id, .data[[interdep_arbitrary_role_col]])$n,
     rep(1L, 4)
   )
 })

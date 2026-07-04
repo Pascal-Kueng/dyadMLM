@@ -42,7 +42,7 @@ assign_arbitrary_member_roles <- function(data, group_name, member_name, seed = 
     ) |>
     dplyr::group_by(.data[[group_name]]) |>
     dplyr::mutate(
-      .i_arbitrary_role = sample(
+      "{interdep_arbitrary_role_col}" := sample(
         c("arbitrary_1", "arbitrary_2"),
         size = dplyr::n()
       )
