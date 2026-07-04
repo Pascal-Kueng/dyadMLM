@@ -4,7 +4,7 @@
 #' `interdep_data` object.
 #'
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
-#' @param seed Optional seed for random arbitrary partner-role assignment in
+#' @param seed Optional seed for random `.i_diff` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #'
 #' @return An `interdep_data` object with added `.i_composition` and
@@ -41,8 +41,10 @@ infer_dyad_compositions <- function(data, seed = NULL) {
       n_dyads = meta_data$n_dyads
     )
 
-    data$.i_diff <- ifelse(data$.i_arbitrary_role == "arbitrary_1", -1, 1)
+    data[[interdep_diff_col]] <- ifelse(data[[interdep_arbitrary_role_col]] == "arbitrary_1", -1, 1)
 
+    # convert to factors, sanitize role names, construct .i_is_{indicator} variables.
+    # remove temporary cols, create composition-specific diff cols for exchangeable dyads.
     data <- finalize_composition_columns(data)
 
     return(data)
@@ -60,10 +62,10 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     ) |>
     dplyr::group_by(.data[[group_name]]) |>
     dplyr::summarise(
-      raw_composition = {
+      .i_raw_composition = {
         canonical_composition(.data[[role_name]])
       },
-      dyad_type = {
+      .i_dyad_type = {
         has_one_role <- dplyr::n_distinct(.data[[role_name]]) == 1
 
         if (has_one_role) {
@@ -74,7 +76,16 @@ infer_dyad_compositions <- function(data, seed = NULL) {
       },
       .groups = "drop"
     ) |>
-    dplyr::mutate(composition = .data$raw_composition)
+    dplyr::mutate(.i_composition = .data$.i_raw_composition)
+
+  # attach how many dyads for each comp type we have
+  attr(data, "interdep")$dyad_compositions <- dyad_roles |>
+    dplyr::count(
+      raw_composition = .data[[interdep_raw_composition_col]],
+      composition = .data[[interdep_composition_col]],
+      dyad_type = .data[[interdep_dyad_type_col]],
+      name = "n_dyads"
+    )
 
   # attach dyad roles to data frame
   data <- dplyr::left_join(
@@ -82,9 +93,6 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     dyad_roles,
     by = group_name
   )
-
-  data[[interdep_composition_col]] <- data$composition
-  data[[interdep_dyad_type_col]] <- data$dyad_type
 
   # Only exchangeable dyads need arbitrary labels to construct idiff.
   exchangeable_data <- data[data[[interdep_dyad_type_col]] == "exchangeable", , drop = FALSE]
@@ -109,28 +117,19 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     as.character(data[[interdep_composition_col]])
   )
 
-
-  data$.i_diff <- ifelse(
+  # add i_diff column
+  data[[interdep_diff_col]] <- ifelse(
     data[[interdep_dyad_type_col]] == "exchangeable",
-    ifelse(data$.i_arbitrary_role == "arbitrary_1", -1, 1),
+    ifelse(data[[interdep_arbitrary_role_col]] == "arbitrary_1", -1, 1),
     0
   )
 
   # remove columns that are no longer needed after constructing idiff
+  data[[interdep_raw_composition_col]] <- NULL
   data[[interdep_dyad_type_col]] <- NULL
-  data$raw_composition <- NULL
-  data$composition <- NULL
-  data$dyad_type <- NULL
-
-  attr(data, "interdep")$dyad_compositions <- dplyr::count(
-    dyad_roles,
-    .data$raw_composition,
-    .data$composition,
-    dyad_type = .data$dyad_type,
-    name = "n_dyads"
-  )
 
   # convert to factors, sanitize role names, construct .i_is_{indicator} variables.
+  # remove temporary cols, create composition-specific diff cols for exchangeable dyads.
   data <- finalize_composition_columns(data)
 
   data
@@ -143,39 +142,31 @@ finalize_composition_columns <- function(data) {
   data[[interdep_composition_col]] <- factor(data[[interdep_composition_col]])
   data[[interdep_composition_role_col]] <- factor(data[[interdep_composition_role_col]])
 
-  # This was only needed for idiff construction
-  data$.i_arbitrary_role <- NULL
+  # This was only needed for idiff construction, we remove it
+  data[[interdep_arbitrary_role_col]] <- NULL
 
-  # Sanitizing user-speicified roles
-  indicator_values <- gsub(
-    "[^[:alnum:]_]+",
-    "_",
-    data[[interdep_composition_role_col]]
-  )
+  indicator_suffixes <- make_interdep_suffixes(data[[interdep_composition_role_col]])
 
-  # Create numeric indicator columns .i_is_{indicator}
-  for (indicator in sort(unique(indicator_values))) {
-    data[[paste0(interdep_reserved_prefix, "is_", indicator)]] <- ifelse(
-      indicator_values == indicator,
+  # Create numeric indicator columns .i_is_{composition_role}
+  for (label in sort(names(indicator_suffixes))) {
+    data[[paste0(interdep_reserved_prefix, "is_", indicator_suffixes[[label]])]] <- ifelse(
+      as.character(data[[interdep_composition_role_col]]) == label,
       1,
       0
     )
   }
 
   # Composition-specific diff columns let unified models target each
-  # exchangeable composition without exposing arbitrary role labels.
-  composition_values <- gsub(
-    "[^[:alnum:]_]+",
-    "_",
-    as.character(data[[interdep_composition_col]])
+  # exchangeable composition.
+  composition_suffixes <- make_interdep_suffixes(
+    data[[interdep_composition_col]][data[[interdep_diff_col]] != 0]
   )
-  exchangeable_compositions <- sort(unique(composition_values[data$.i_diff != 0]))
 
-  for (composition in exchangeable_compositions) {
-    is_composition <- composition_values == composition
-    data[[paste0(interdep_reserved_prefix, "diff_", composition)]] <- ifelse(
+  for (composition in sort(names(composition_suffixes))) {
+    is_composition <- as.character(data[[interdep_composition_col]]) == composition
+    data[[paste0(interdep_reserved_prefix, "diff_", composition_suffixes[[composition]])]] <- ifelse(
       is_composition,
-      data$.i_diff,
+      data[[interdep_diff_col]],
       0
     )
   }
