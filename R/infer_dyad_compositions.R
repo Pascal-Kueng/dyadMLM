@@ -24,17 +24,13 @@ infer_dyad_compositions <- function(data, seed = NULL) {
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
     data[[interdep_composition_col]] <- interdep_assumed_exchangeable_label
+    data[[interdep_composition_role_col]] <- interdep_assumed_exchangeable_label
 
     data <- add_arbitrary_member_roles(
       data,
       group_name = group_name,
       member_name = member_name,
       seed = seed
-    )
-
-    data[[interdep_composition_role_col]] <- composition_role_label(
-      data[[interdep_composition_col]],
-      data$.i_arbitrary_role
     )
 
     attr(data, "interdep")$dyad_compositions <- tibble::tibble(
@@ -46,7 +42,9 @@ infer_dyad_compositions <- function(data, seed = NULL) {
 
     data$.i_diff <- ifelse(data$.i_arbitrary_role == "arbitrary_1", -1, 1)
 
-    return(finalize_composition_columns(data))
+    data <- finalize_composition_columns(data)
+
+    return(data)
   }
 
   # If role column **was** provided
@@ -89,8 +87,7 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     by = group_name
   )
 
-  # Only exchangeable dyads need arbitrary labels. This keeps the random
-  # assignment independent of unrelated distinguishable dyads.
+  # Only exchangeable dyads need arbitrary labels to construct idiff.
   exchangeable_data <- data[data[[interdep_dyad_type_col]] == "exchangeable", , drop = FALSE]
   arbitrary_roles <- assign_arbitrary_member_roles(
     exchangeable_data,
@@ -106,11 +103,11 @@ infer_dyad_compositions <- function(data, seed = NULL) {
   )
 
   # Distinguishable dyads use observed member roles. Exchangeable dyads use
-  # arbitrary labels so each partner can still receive a unique model column.
+  # just the composition.
   data[[interdep_composition_role_col]] <- ifelse(
     data[[interdep_dyad_type_col]] == "distinguishable",
     composition_role_label(data[[interdep_composition_col]], data[[role_name]]),
-    composition_role_label(data[[interdep_composition_col]], data$.i_arbitrary_role)
+    composition_role_label(data[[interdep_composition_col]])
   )
 
   data$.i_diff <- ifelse(
