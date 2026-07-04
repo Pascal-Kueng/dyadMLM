@@ -34,8 +34,8 @@ is supplied, all dyads are treated as the same type of exchangeable dyads.}
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
 
-\item{predictors}{Optional character vector of predictor columns to transform
-into \verb{_actor} and \verb{_partner} columns for APIM analyses.}
+\item{predictors}{Reserved for upcoming actor-partner predictor
+transformation. Currently ignored.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and
@@ -45,8 +45,8 @@ unique members anywhere in the data. \code{"error"} stops with an error and
 \code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
 information. Ignored when no \code{role} column is supplied.}
 
-\item{seed}{Optional seed for random arbitrary partner-role assignment. If
-\code{NULL}, the current R session's RNG state is used.}
+\item{seed}{Optional seed for random \code{.i_diff} sign assignment in
+exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 }
 \value{
 The original data as a tibble with class \code{interdep_data},

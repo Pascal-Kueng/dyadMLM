@@ -9,7 +9,7 @@ infer_dyad_compositions(data, seed = NULL)
 \arguments{
 \item{data}{An \code{interdep_data} object returned by \code{\link[=validate_interdep_data]{validate_interdep_data()}}.}
 
-\item{seed}{Optional seed for random arbitrary partner-role assignment in
+\item{seed}{Optional seed for random \code{.i_diff} sign assignment in
 exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 }
 \value{

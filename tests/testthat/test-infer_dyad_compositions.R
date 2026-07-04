@@ -169,6 +169,27 @@ test_that("infer_dyad_compositions creates formula-friendly indicator names", {
   expect_true(".i_is_female_partner_x_male_partner_male_partner" %in% names(result))
 })
 
+test_that("infer_dyad_compositions rejects generated indicator name collisions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("a b", "a-b", "a b", "a-b")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_error(
+    infer_dyad_compositions(validated, seed = 123),
+    "same generated column name",
+    fixed = TRUE
+  )
+})
+
 test_that("infer_dyad_compositions treats missing role metadata as unclassified", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -184,6 +205,8 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_true(is.factor(result$.i_composition_role))
   expect_true(".i_is_assumed_exchangeable" %in% names(result))
   expect_true(".i_diff_assumed_exchangeable" %in% names(result))
+  expect_equal(abs(result$.i_diff), rep(1, 4))
+  expect_equal(result$.i_diff_assumed_exchangeable, result$.i_diff)
   expect_equal(
     as.character(result$.i_composition),
     rep("assumed_exchangeable", 4)

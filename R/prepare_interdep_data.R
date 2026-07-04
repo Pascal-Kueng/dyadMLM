@@ -22,16 +22,16 @@
 #'   is supplied, all dyads are treated as the same type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
-#' @param predictors Optional character vector of predictor columns to transform
-#'   into `_actor` and `_partner` columns for APIM analyses.
+#' @param predictors Reserved for upcoming actor-partner predictor
+#'   transformation. Currently ignored.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
 #'   information. Ignored when no `role` column is supplied.
-#' @param seed Optional seed for random arbitrary partner-role assignment. If
-#'   `NULL`, the current R session's RNG state is used.
+#' @param seed Optional seed for random `.i_diff` sign assignment in
+#'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #'
 #' @return The original data as a tibble with class `interdep_data`,
 #'   `.i_composition` and `.i_composition_role` factor columns,
