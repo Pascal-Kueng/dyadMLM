@@ -18,6 +18,7 @@ interdep_reserved_prefix <- ".i_"
 interdep_composition_col <- paste0(interdep_reserved_prefix, "composition")
 interdep_composition_role_col <- paste0(interdep_reserved_prefix, "composition_role")
 interdep_dyad_type_col <- paste0(interdep_reserved_prefix, "dyad_type")
+interdep_raw_composition_col <- paste0(interdep_reserved_prefix, "raw_composition")
 interdep_resolved_role_col <- paste0(interdep_reserved_prefix, "resolved_role")
 
 ############################################################################
@@ -45,6 +46,38 @@ canonical_composition <- function(roles, sep = interdep_composition_sep) {
 #' @keywords internal
 composition_role_label <- function(composition, role, sep = interdep_composition_role_sep) {
   paste(as.character(composition), as.character(role), sep = sep)
+}
+
+
+#' Create safe suffixes for generated interdep columns
+#'
+#' @param labels Labels that will be used to build generated column names.
+#'
+#' @return A named character vector. Names are the original labels; values are
+#'   sanitized column-name suffixes.
+#' @keywords internal
+make_interdep_suffixes <- function(labels) {
+  labels <- unique(as.character(labels))
+  suffixes <- gsub("[^[:alnum:]_]+", "_", labels)
+
+  duplicated_suffixes <- unique(suffixes[duplicated(suffixes)])
+
+  if (length(duplicated_suffixes) > 0) {
+    conflicts <- character(length(duplicated_suffixes))
+
+    for (i in seq_along(duplicated_suffixes)) {
+      conflicts[[i]] <- paste(labels[suffixes == duplicated_suffixes[[i]]], collapse = ", ")
+    }
+
+    stop(
+      "Some labels produce the same generated column name after sanitizing: ",
+      paste(conflicts, collapse = "; "),
+      ". Please rename these role or composition labels.",
+      call. = FALSE
+    )
+  }
+
+  stats::setNames(suffixes, labels)
 }
 
 
