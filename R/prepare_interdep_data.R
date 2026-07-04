@@ -35,10 +35,10 @@
 #'
 #' @return The original data as a tibble with class `interdep_data`,
 #'   `.i_composition` and `.i_composition_role` factor columns,
-#'   `.i_arbitrary_role`, `.i_is_*` numeric indicator columns, `.i_diff`, and
-#'   an `interdep` attribute containing structural metadata and
-#'   `dyad_compositions`. Arbitrary-role indicators and `.i_diff` are active
-#'   for exchangeable dyads and zero for distinguishable dyads.
+#'   `.i_is_*` numeric indicator columns, `.i_diff`, and an `interdep`
+#'   attribute containing structural metadata and `dyad_compositions`.
+#'   `.i_diff` is active for exchangeable dyads and zero for distinguishable
+#'   dyads.
 #'
 #' @examples
 #' data <- data.frame(
@@ -83,9 +83,7 @@ prepare_interdep_data <- function(
     missing_role = missing_role
   )
 
-  out <- infer_dyad_compositions(out)
-
-  out <- add_arbitrary_roles(out, seed = seed)
+  out <- infer_dyad_compositions(out, seed = seed)
 
   # out <- add_actor_partner_columns(out, variables = predictors)
 
