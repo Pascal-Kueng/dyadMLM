@@ -1,13 +1,17 @@
 
 # Roadmap for 'interdep' R-Package
 
-This package provides functions for preparing and eventually estimating dyadic
-models like APIMs, focusing on cross-sectional and intensive longitudinal (ILD)
-data.
+This package provides functions for preparing composition-aware dyadic
+multilevel models, focusing on cross-sectional and intensive longitudinal (ILD)
+data. The package should not try to replace model engines such as `glmmTMB` or
+`brms`. Its core responsibility is to make the dyadic composition logic,
+centering, indicators, constraints, interpretation helpers, and eventually model
+syntax explicit and reproducible.
 
 ## Version 0.1.0 - First CRAN Release Candidate
 
-Goal: ship a small, reliable data-preparation workflow before adding larger
+Goal: ship a small, reliable data-preparation workflow with enough ILD support
+to be useful for composition-aware dyadic MLMs before adding larger
 model-building features.
 
 - Validate dyadic data and return a model-ready tibble with metadata
@@ -18,32 +22,77 @@ model-building features.
   behavior
 - Return factor columns for `.i_composition` and
   `.i_composition_role`
+- Add within- and between-person centering for ILD data
+  - Support person-mean centering for within-person predictors
+  - Support between-person predictor columns based on person means
+  - Support grand-mean centering of person means
+  - Keep missing-data behavior explicit
 - Add a print method for `interdep_data`
   - Show number of dyads, whether data are longitudinal, and inferred
     composition counts
   - Make dropped incomplete dyads and missing roles visible
 - Add composition role indicator columns for cross-sectional model workflows
+- Add small inspection helpers
+  - Show generated `.i_*` columns by purpose
+  - Show composition counts and sparse-composition warnings
+- Keep README and vignette focused on the data-preparation workflow
+- Add citation metadata
+  - `inst/CITATION` for R users
+  - `CITATION.cff` for GitHub and future Zenodo metadata
+- Release to CRAN once checks, tests, docs, README, and vignette are clean
+  - Submit source package to CRAN without requiring a Git tag first
+  - After CRAN acceptance, tag the accepted commit as `v0.1.0`
+  - Create a GitHub release from that tag
+  - Archive the GitHub release on Zenodo
+  - Add the Zenodo concept DOI to README and citation metadata on `main`
+  - Include the DOI in the next CRAN release
+
+## Version 0.2.0
+
 - Add helper functions to rotate `.i_diff` / Idiff structures back to
   partner-level interpretations
 - Constrain and pool compositions
   - Example: treat male-female dyads as exchangeable
   - Example: pool male-male and female-female dyads as same-sex
-- Keep README and vignette focused on the data-preparation workflow
-- Release to CRAN once checks, tests, docs, README, and vignette are clean
-
-## Version 0.2.0
-
-- Add within- and between-person centering for ILD data
-  - Support grand-mean centering
-  - Support centering based on means of person means
-  - Keep missing-data behavior explicit
-- Write static code/syntax to estimate cross-sectional and ILD models using:
-  - glmmTMB
-  - brms, including priors
-  - dynamite or another MLSEM/DSEM framework
+  - Preserve clear metadata about original and modeled compositions
+- Write static model syntax for cross-sectional and ILD models
+  - `glmmTMB` first
+  - `brms`, including priors, once the `glmmTMB` syntax path is stable
+  - Consider `dynamite` or another MLSEM/DSEM framework later
+- Add tests that generated syntax matches intended estimands and model
+  structures
 
 ## Version 0.3.0
 
-- Estimation helpers for the supported packages
-- Model summaries
-- Diagnostics
+- Estimation helpers for supported model engines
+  - Prefer thin wrappers around established engines
+  - Do not add a custom Stan backend unless the package contribution becomes a
+    new estimator rather than preparation/syntax infrastructure
+- Model summaries focused on dyadic interpretation
+- Diagnostics and sparse-composition guidance
+- Optional preprint or methods note
+  - Cite the Zenodo software DOI for the implementation
+  - Use the preprint for the composition-aware dyadic MLM framework
+
+## JOSS Readiness
+
+JOSS should be a later milestone, not a first-release target. A JOSS submission
+does not require `interdep` to estimate models itself, but it should be more
+than a thin data-preparation wrapper.
+
+Target state before JOSS submission:
+
+- Public development history of at least six months
+- Tagged releases, changelog, tests, documentation, and clear contribution
+  guidance
+- Evidence of research use, ideally a preprint or applied analysis using the
+  package
+- Robust centering for ILD data
+- Composition pooling/constraining helpers
+- `.i_diff` / Idiff interpretation helpers
+- Formula or syntax generation for at least `glmmTMB`
+- Preferably `brms` syntax generation as a second modeling backend
+- Reproducible vignettes showing composition-aware dyadic MLM workflows
+- Clear statement that `interdep` supplies dyadic composition logic, centering,
+  indicators, constraints, interpretation helpers, and syntax for established
+  model engines

@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use interdep, please cite it using the metadata from this file."
+type: software
+title: "interdep: Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data"
+authors:
+  - family-names: "Küng"
+    given-names: "Pascal"
+repository-code: "https://github.com/Pascal-Kueng/interdep"
+url: "https://github.com/Pascal-Kueng/interdep"
+abstract: >-
+  interdep provides tools for validating and preparing cross-sectional and
+  intensive longitudinal dyadic data for multilevel and generalized multilevel
+  models. It derives composition metadata and formula-ready columns for
+  distinguishable, exchangeable, and mixed-composition dyads. The vignette
+  "Preparing dyadic data with interdep" demonstrates how prepared data can be
+  used to estimate dyadic models, including generalized intensive longitudinal
+  actor-partner interdependence models with multiple dyad types in a single
+  model.
+keywords:
+  - dyadic data
+  - multilevel models
+  - APIM
+  - distinguishable dyads
+  - exchangeable dyads
+  - mixed-composition dyads
+license: MIT
+version: 0.0.0.9000

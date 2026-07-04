@@ -1,8 +1,8 @@
 ---
-title: "Preparing dyadic data for APIMs with interdep"
+title: "Preparing dyadic data with interdep"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Preparing dyadic data for APIMs with interdep}
+  %\VignetteIndexEntry{Preparing dyadic data with interdep}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -19,11 +19,16 @@ library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
-`interdep` is being developed for dyadic data analysis with multilevel models (MLM). 
-The basic data structure is a long data frame where dyads are stacked on top of each other and
-both members of a dyad appear as separate rows. For cross-sectional data, each
-complete dyad contributes one row per member. For intensive longitudinal data,
-each complete dyad contributes one row per member and measurement occasion.
+`interdep` helps researchers prepare cross-sectional and intensive longitudinal
+dyadic data for statistical models. It supports common dyadic studies with one
+kind of dyad, and it also handles studies where different kinds of dyads appear
+in the same dataset, such as female-male, female-female, and male-male couples.
+
+The basic data structure is a long data frame where dyads are stacked on top of
+each other and both members of a dyad appear as separate rows. For
+cross-sectional data, each complete dyad contributes one row per member. For
+intensive longitudinal data, each complete dyad contributes one row per member
+and measurement occasion.
 
 The expected structure is:
 
@@ -73,6 +78,18 @@ returns a tibble with class `interdep_data`, derives and adds dyad-composition
 labels that are needed for modeling. 
 
 Omit `role` only when all partners should be treated as exchangeable.
+
+The examples build up from simple dyadic structures to composition-aware models:
+
+- distinguishable dyads, where member roles are modeled separately;
+- exchangeable dyads, where arbitrary member labels are handled with sum-diff
+  columns;
+- semi-continuous and intensive longitudinal outcomes;
+- mixed-composition dyadic MLMs that combine distinguishable and exchangeable
+  dyads in one model, illustrated in the
+  [unified cross-sectional](#unified-cross-sectional-gaussian-model) and
+  [unified intensive longitudinal](#unified-intensive-longitudinal-gaussian-model)
+  examples.
 
 ## Cross-sectional dyadic data
 
@@ -697,15 +714,19 @@ unified_ild_gaussian_model <- glmmTMB(
 
     # stable dyad-level covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
+    
     (0 + .i_is_female_x_female | coupleID) +
     (0 + .i_diff_female_x_female | coupleID) +
+    
     (0 + .i_is_male_x_male | coupleID) +
     (0 + .i_diff_male_x_male | coupleID) +
 
     # same-day covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
+    
     (0 + .i_is_female_x_female | coupleID:diaryday) +
     (0 + .i_diff_female_x_female | coupleID:diaryday) +
+    
     (0 + .i_is_male_x_male | coupleID:diaryday) +
     (0 + .i_diff_male_x_male | coupleID:diaryday)
 
@@ -766,18 +787,23 @@ unified_ild_tweedie_model <- glmmTMB(
 
     # stable dyad-level latent covariance
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
+    
     (0 + .i_is_female_x_female | coupleID) +
     (0 + .i_diff_female_x_female | coupleID) +
+    
     (0 + .i_is_male_x_male | coupleID) +
     (0 + .i_diff_male_x_male | coupleID) +
 
     # same-day latent covariance
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
+    
     (0 + .i_is_female_x_female | coupleID:diaryday) +
     (0 + .i_diff_female_x_female | coupleID:diaryday) +
+    
     (0 + .i_is_male_x_male | coupleID:diaryday) +
     (0 + .i_diff_male_x_male | coupleID:diaryday)
 
+    # recommended first simplification in convergence issues is to set dispfomula = ~ 1
   , dispformula = ~ 0 +
       .i_is_female_x_male_female + .i_is_female_x_male_male +
       .i_is_female_x_female + .i_is_male_x_male

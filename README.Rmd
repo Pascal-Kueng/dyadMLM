@@ -18,9 +18,32 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-`interdep` is being developed for dyadic data analysis. It currently provides a
-basic preparation function for validating long-format dyadic data and deriving
-dyad-composition metadata.
+`interdep` helps researchers prepare cross-sectional and intensive longitudinal
+dyadic data for statistical models.
+
+It supports common dyadic studies with one kind of dyad, and it also handles
+studies where different kinds of dyads appear in the same dataset, such as
+female-male, female-female, and male-male couples.
+
+The vignette "Preparing dyadic data with interdep" demonstrates how prepared
+data can be used to estimate dyadic models, including generalized intensive
+longitudinal APIMs with multiple dyad types in a single model.
+
+## Citation
+
+If you use `interdep`, please cite the package directly:
+
+```bibtex
+@Manual{interdep,
+  title = {interdep: Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data},
+  author = {Pascal Küng},
+  year = {2026},
+  note = {R package version 0.0.0.9000},
+  url = {https://github.com/Pascal-Kueng/interdep},
+}
+```
+
+An archival DOI will be added once the package has a public release archive.
 
 ## Installation
 
