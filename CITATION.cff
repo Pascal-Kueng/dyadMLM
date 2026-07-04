@@ -11,11 +11,10 @@ abstract: >-
   interdep provides tools for validating and preparing cross-sectional and
   intensive longitudinal dyadic data for multilevel and generalized multilevel
   models. It derives composition metadata and formula-ready columns for
-  distinguishable, exchangeable, and mixed-composition dyads. The vignette
-  "Preparing dyadic data with interdep" demonstrates how prepared data can be
-  used to estimate dyadic models, including generalized intensive longitudinal
-  actor-partner interdependence models with multiple dyad types in a single
-  model.
+  distinguishable, exchangeable, and mixed-composition dyads. Prepared data can
+  be used to estimate dyadic models, including generalized intensive
+  longitudinal actor-partner interdependence models with multiple dyad types in
+  a single model.
 keywords:
   - dyadic data
   - multilevel models

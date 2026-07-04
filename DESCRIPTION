@@ -9,10 +9,10 @@ Description: Helps researchers prepare cross-sectional and intensive
     combine different kinds of dyads, such as female-male, female-female, and
     male-male couples. It validates long-format dyadic data and creates the
     role, composition, and centering variables needed for multilevel models,
-    including generalized multilevel models. The vignette "Preparing dyadic data
-    with interdep" demonstrates how prepared data can be used to estimate dyadic
-    models, including generalized intensive longitudinal actor-partner
-    interdependence models with multiple dyad types in a single model.
+    including generalized multilevel models. Prepared data can be used to
+    estimate dyadic models, including generalized intensive longitudinal
+    actor-partner interdependence models with multiple dyad types in a single
+    model.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
