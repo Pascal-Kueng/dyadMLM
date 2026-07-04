@@ -9,7 +9,8 @@
 #'
 #' @return An `interdep_data` object with added `.i_composition` and
 #'   `.i_composition_role` factor columns, `.i_is_*` numeric indicator columns,
-#'   and dyad composition metadata.
+#'   composition-specific `.i_diff_*` columns for exchangeable dyads, and dyad
+#'   composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data, seed = NULL) {
@@ -75,17 +76,15 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     ) |>
     dplyr::mutate(composition = .data$raw_composition)
 
-  # Create the dyad-level lookup that will be joined back to every row.
-  # The lookup uses the final `.i_*` column names returned to users.
-  composition_lookup <- dyad_roles[c(group_name, "composition", "dyad_type")]
-  names(composition_lookup)[names(composition_lookup) == "composition"] <- interdep_composition_col
-  names(composition_lookup)[names(composition_lookup) == "dyad_type"] <- interdep_dyad_type_col
-
+  # attach dyad roles to data frame
   data <- dplyr::left_join(
     data,
-    composition_lookup,
+    dyad_roles,
     by = group_name
   )
+
+  data[[interdep_composition_col]] <- data$composition
+  data[[interdep_dyad_type_col]] <- data$dyad_type
 
   # Only exchangeable dyads need arbitrary labels to construct idiff.
   exchangeable_data <- data[data[[interdep_dyad_type_col]] == "exchangeable", , drop = FALSE]
@@ -107,8 +106,9 @@ infer_dyad_compositions <- function(data, seed = NULL) {
   data[[interdep_composition_role_col]] <- ifelse(
     data[[interdep_dyad_type_col]] == "distinguishable",
     composition_role_label(data[[interdep_composition_col]], data[[role_name]]),
-    composition_role_label(data[[interdep_composition_col]])
+    as.character(data[[interdep_composition_col]])
   )
+
 
   data$.i_diff <- ifelse(
     data[[interdep_dyad_type_col]] == "exchangeable",
@@ -116,7 +116,11 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     0
   )
 
+  # remove columns that are no longer needed after constructing idiff
   data[[interdep_dyad_type_col]] <- NULL
+  data$raw_composition <- NULL
+  data$composition <- NULL
+  data$dyad_type <- NULL
 
   attr(data, "interdep")$dyad_compositions <- dplyr::count(
     dyad_roles,
@@ -126,33 +130,55 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     name = "n_dyads"
   )
 
-  finalize_composition_columns(data)
+  # convert to factors, sanitize role names, construct .i_is_{indicator} variables.
+  data <- finalize_composition_columns(data)
+
+  data
 }
 
 
 finalize_composition_columns <- function(data) {
+
+  # convert to factors before returning
   data[[interdep_composition_col]] <- factor(data[[interdep_composition_col]])
   data[[interdep_composition_role_col]] <- factor(data[[interdep_composition_role_col]])
+
+  # This was only needed for idiff construction
   data$.i_arbitrary_role <- NULL
 
-  add_composition_role_indicators(data)
-}
-
-
-add_composition_role_indicators <- function(data) {
-  # Create numeric indicator columns for model formulas while first sanitizing
-  # the user supplied values.
-  is_ <- gsub(
+  # Sanitizing user-speicified roles
+  indicator_values <- gsub(
     "[^[:alnum:]_]+",
     "_",
     data[[interdep_composition_role_col]]
   )
 
-  dummy_matrix <- stats::model.matrix(~ 0 + is_)
+  # Create numeric indicator columns .i_is_{indicator}
+  for (indicator in sort(unique(indicator_values))) {
+    data[[paste0(interdep_reserved_prefix, "is_", indicator)]] <- ifelse(
+      indicator_values == indicator,
+      1,
+      0
+    )
+  }
 
-  colnames(dummy_matrix) <- paste0(interdep_reserved_prefix, colnames(dummy_matrix))
+  # Composition-specific diff columns let unified models target each
+  # exchangeable composition without exposing arbitrary role labels.
+  composition_values <- gsub(
+    "[^[:alnum:]_]+",
+    "_",
+    as.character(data[[interdep_composition_col]])
+  )
+  exchangeable_compositions <- sort(unique(composition_values[data$.i_diff != 0]))
 
-  data[colnames(dummy_matrix)] <- as.data.frame(dummy_matrix)
+  for (composition in exchangeable_compositions) {
+    is_composition <- composition_values == composition
+    data[[paste0(interdep_reserved_prefix, "diff_", composition)]] <- ifelse(
+      is_composition,
+      data$.i_diff,
+      0
+    )
+  }
 
   data
 }
