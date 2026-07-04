@@ -33,7 +33,7 @@ prepared <- prepare_interdep_data(
 )
 
 prepared
-#> # A tibble: 190 × 13
+#> # A tibble: 190 × 10
 #>    personID coupleID gender communication satisfaction .i_composition
 #>       <int>    <int> <chr>          <dbl>        <dbl> <fct>         
 #>  1        1        1 female          4.79         4.37 female_x_male 
@@ -47,11 +47,12 @@ prepared
 #>  9        9        5 female          6.01         7.41 female_x_male 
 #> 10       10        5 male            4.32         1.47 female_x_male 
 #> # ℹ 180 more rows
-#> # ℹ 7 more variables: .i_composition_role <fct>,
-#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_arbitrary_role <chr>, .i_is_arbitrary_role_1 <dbl>,
-#> #   .i_is_arbitrary_role_2 <dbl>, .i_diff <dbl>
+#> # ℹ 4 more variables: .i_composition_role <fct>, .i_diff <dbl>,
+#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>
 ```
+
+The prepared data includes `.i_composition_role`, formula-friendly
+`.i_is_*` indicators, and `.i_diff` for exchangeable dyads.
 
 Use `incomplete_dyads` and `missing_role` to choose whether incomplete
 dyads or unresolved role information should error or be dropped. See the

@@ -51,10 +51,10 @@ information. Ignored when no \code{role} column is supplied.}
 \value{
 The original data as a tibble with class \code{interdep_data},
 \code{.i_composition} and \code{.i_composition_role} factor columns,
-\code{.i_arbitrary_role}, \verb{.i_is_*} numeric indicator columns, \code{.i_diff}, and
-an \code{interdep} attribute containing structural metadata and
-\code{dyad_compositions}. Arbitrary-role indicators and \code{.i_diff} are active
-for exchangeable dyads and zero for distinguishable dyads.
+\verb{.i_is_*} numeric indicator columns, \code{.i_diff}, and an \code{interdep}
+attribute containing structural metadata and \code{dyad_compositions}.
+\code{.i_diff} is active for exchangeable dyads and zero for distinguishable
+dyads.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata
