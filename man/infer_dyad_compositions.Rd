@@ -15,7 +15,8 @@ exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 \value{
 An \code{interdep_data} object with added \code{.i_composition} and
 \code{.i_composition_role} factor columns, \verb{.i_is_*} numeric indicator columns,
-and dyad composition metadata.
+composition-specific \verb{.i_diff_*} columns for exchangeable dyads, and dyad
+composition metadata.
 }
 \description{
 Builds a dyad-level summary of role compositions from a validated

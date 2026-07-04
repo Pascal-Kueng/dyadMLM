@@ -51,9 +51,11 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   expect_equal(
     as.character(result$.i_composition_role),
     c("female_x_male_female", "female_x_male_male",
-      "female_x_female_arbitrary_1", "female_x_female_arbitrary_2",
-      "male_x_male_arbitrary_1", "male_x_male_arbitrary_2")
+      "female_x_female", "female_x_female",
+      "male_x_male", "male_x_male")
   )
+  expect_true(".i_diff_female_x_female" %in% names(result))
+  expect_true(".i_diff_male_x_male" %in% names(result))
 })
 
 test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {
@@ -67,17 +69,12 @@ test_that("prepare_interdep_data treats data without role as unclassified exchan
   expect_false(".i_raw_composition" %in% names(result))
   expect_true(is.factor(result$.i_composition))
   expect_true(is.factor(result$.i_composition_role))
-  expect_true(".i_is_assumed_exchangeable_arbitrary_1" %in% names(result))
-  expect_true(".i_is_assumed_exchangeable_arbitrary_2" %in% names(result))
+  expect_true(".i_is_assumed_exchangeable" %in% names(result))
+  expect_true(".i_diff_assumed_exchangeable" %in% names(result))
   expect_equal(as.character(result$.i_composition), rep("assumed_exchangeable", 4))
   expect_equal(
     as.character(result$.i_composition_role),
-    c(
-      "assumed_exchangeable_arbitrary_1",
-      "assumed_exchangeable_arbitrary_2",
-      "assumed_exchangeable_arbitrary_1",
-      "assumed_exchangeable_arbitrary_2"
-    )
+    rep("assumed_exchangeable", 4)
   )
   expect_equal(
     attr(result, "interdep")$dyad_compositions,

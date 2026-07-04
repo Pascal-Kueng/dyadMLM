@@ -35,10 +35,10 @@
 #'
 #' @return The original data as a tibble with class `interdep_data`,
 #'   `.i_composition` and `.i_composition_role` factor columns,
-#'   `.i_is_*` numeric indicator columns, `.i_diff`, and an `interdep`
-#'   attribute containing structural metadata and `dyad_compositions`.
-#'   `.i_diff` is active for exchangeable dyads and zero for distinguishable
-#'   dyads.
+#'   `.i_is_*` numeric indicator columns, `.i_diff`, composition-specific
+#'   `.i_diff_*` columns for exchangeable dyads, and an `interdep` attribute
+#'   containing structural metadata and `dyad_compositions`. `.i_diff` is
+#'   active for exchangeable dyads and zero for distinguishable dyads.
 #'
 #' @examples
 #' data <- data.frame(

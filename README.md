@@ -52,7 +52,8 @@ prepared
 ```
 
 The prepared data includes `.i_composition_role`, formula-friendly
-`.i_is_*` indicators, and `.i_diff` for exchangeable dyads.
+`.i_is_*` indicators, and `.i_diff` / `.i_diff_*` columns for
+exchangeable dyads.
 
 Use `incomplete_dyads` and `missing_role` to choose whether incomplete
 dyads or unresolved role information should error or be dropped. See the

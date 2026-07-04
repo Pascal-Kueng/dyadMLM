@@ -43,7 +43,11 @@ canonical_composition <- function(roles, sep = interdep_composition_sep) {
 #' @param composition A composition label.
 #' @param role A row-level role label.
 #' @keywords internal
-composition_role_label <- function(composition, role, sep = interdep_composition_role_sep) {
+composition_role_label <- function(composition, role = NULL, sep = interdep_composition_role_sep) {
+  if (is.null(role)) {
+    return(as.character(composition))
+  }
+
   paste(as.character(composition), as.character(role), sep = sep)
 }
 
