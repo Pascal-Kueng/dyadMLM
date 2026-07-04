@@ -28,9 +28,44 @@ model-building features.
   - Support grand-mean centering of person means
   - Keep missing-data behavior explicit
 - Add a print method for `interdep_data`
+  - Keep normal tibble/data-frame printing; add a compact interdep header above
+    the data output
   - Show number of dyads, whether data are longitudinal, and inferred
     composition counts
+  - Show structural columns: group, member, optional role, optional time
+  - Show dyad compositions with composition name, dyad type, and dyad count
+  - Show generated column families and one-line meanings:
+    `.i_composition`, `.i_composition_role`, `.i_diff`, `.i_is_*`, `.i_diff_*`
   - Make dropped incomplete dyads and missing roles visible
+  - Target display:
+    ```r
+    # interdep data
+    # Rows: 2,800 | Dyads: 100 | Longitudinal: yes
+    # Structure: group = coupleID, member = personID, role = gender, time = diaryday
+    #
+    # Dyad compositions:
+    #   female_x_male      distinguishable   40 dyads
+    #   female_x_female    exchangeable       30 dyads
+    #   male_x_male        exchangeable       30 dyads
+    #
+    # Added columns:
+    #   .i_composition       inferred dyad composition
+    #   .i_composition_role  composition-specific member role
+    #   .i_diff              sum-diff contrast for exchangeable dyads
+    #   .i_is_*              composition-role indicator columns
+    #   .i_diff_*            composition-specific diff columns
+    #
+    # Dropped incomplete dyads: 14 (IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more)
+    # A tibble: 2,800 x 14
+       personID coupleID diaryday gender closeness provided_support .i_composition ...
+          <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          ...
+     1        1        1        0 female      5.91             4.72 female_x_male  ...
+     2        1        1        1 female      6.10             5.01 female_x_male  ...
+     3        1        1        2 female      5.44             4.63 female_x_male  ...
+    # i 2,797 more rows
+    ```
+  - Do not add sparse-composition warnings to `print()` yet; thresholds are too
+    arbitrary for a compact display
 - Add composition role indicator columns for cross-sectional model workflows
 - Add small inspection helpers
   - Show generated `.i_*` columns by purpose
