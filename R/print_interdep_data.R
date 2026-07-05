@@ -1,6 +1,6 @@
 #' @export
-print.interdep_data <- function(data, ...) {
-  meta <- attr(data, "interdep")
+print.interdep_data <- function(x, ...) {
+  meta <- attr(x, "interdep")
 
   group <- meta$group
   member <- meta$member
@@ -13,19 +13,42 @@ print.interdep_data <- function(data, ...) {
   incomplete_dyads_action <- meta$incomplete_dyads_action
   dyad_compositions <- meta$dyad_compositions
 
-  # print
+  # Printing general metadata
   cat("# interdep data\n")
-  cat("# Rows: ", nrow(data), " | ",
+  cat("# Rows: ", nrow(x), " | ",
       "Dyads: ", n_dyads, " | ",
-      "Longitudinal: ", longitudinal, " | ",
-      "Model Type: placeholder | ",
-      "Centering: placeholder",
-      "\n\n", sep = "")
+      "Longitudinal: ", longitudinal,
+      "\n", sep = "")
 
-  out <- data
+  # Printing structural information
+  cat("# Structure: group = ", group,
+      ", member = ", member, sep = "")
+  if(!is.null(role)) {
+    cat(", role = ", role, sep = "")
+  }
+  if (!is.null(time)) {
+    cat(", time = ", time, sep = "")
+  }
+  cat("\n\n")
+
+
+  # Printing dropped dyads.
+  if (length(incomplete_dyads) > 0) {
+    cat("# Dropped structurally incomplete dyads: ", incomplete_dyads)
+  }
+
+  cat("# Dyad Composition: \n")
+
+  cat("\n\n")
+
+  cat("# Added Columns: \n")
+
+  cat("\n\n")
+
+  out <- x
   class(out) <- class(out)[class(out) != "interdep_data"]
   print(out, ...)
 
   # return original unchanged tibble
-  invisible(data)
+  invisible(x)
 }
