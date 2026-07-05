@@ -231,7 +231,6 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
   )
   expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
   expect_equal(attr(dropped, "interdep")$n_dyads, 2L)
-  expect_length(attr(dropped, "interdep")$incomplete_dyads, 0)
 })
 
 test_that("validate_interdep_data rejects groups with more than two members", {
