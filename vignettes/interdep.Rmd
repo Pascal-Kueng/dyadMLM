@@ -111,6 +111,8 @@ cross_distinguishable_data <- prepare_interdep_data(
   seed = 123
 )
 
+attr(cross_distinguishable_data, "interdep")
+
 print(cross_distinguishable_data, n = 20)
 summary(cross_distinguishable_data)
 ```
