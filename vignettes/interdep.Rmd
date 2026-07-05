@@ -97,7 +97,7 @@ The examples build up from simple dyadic structures to composition-aware models:
 distinguishable dyads. Each dyad has two rows: one for each member.
 
 ```{r cross-sectional-raw}
-print(head(example_dyadic_crosssectional))
+print(example_dyadic_crosssectional)
 ```
 
 We validate and prepare the data with the function `prepare_interdep_data()`
@@ -111,7 +111,7 @@ cross_distinguishable_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(cross_distinguishable_data)
+print(cross_distinguishable_data, n = 20)
 summary(cross_distinguishable_data)
 ```
 
