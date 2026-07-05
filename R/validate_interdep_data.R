@@ -142,14 +142,12 @@ validate_interdep_data <- function(
   }
 
   # Resolve dyads with fewer than two observed members.
-  dyad_resolution <- resolve_incomplete_dyads(
+  out <- resolve_incomplete_dyads(
     out = out,
     group_name = group_name,
     member_name = member_name,
     incomplete_dyads = incomplete_dyads
   )
-  out <- dyad_resolution$data
-  incomplete_groups <- dyad_resolution$incomplete_groups
 
   # Resolve sparse or missing role information.
   if (has_role) {
@@ -160,7 +158,6 @@ validate_interdep_data <- function(
       role_name = role_name,
       missing_role = missing_role
     )
-    incomplete_groups <- incomplete_groups[incomplete_groups %in% unique(out[[group_name]])]
   }
 
   # Validate that each member has at most one row per dyad or dyad-time.
@@ -180,13 +177,6 @@ validate_interdep_data <- function(
     stop("At least 2 groups are needed.", call. = FALSE)
   }
 
-  # Store no incomplete dyads as an empty slice of the group column. This keeps
-  # the metadata type aligned with the user's group IDs, e.g. character,
-  # integer, or factor.
-  if (length(incomplete_groups) == 0) {
-    incomplete_groups <- out[[group_name]][0]
-  }
-
   attr(out, "interdep") <- list(
     group = group_name,
     member = member_name,
@@ -194,9 +184,7 @@ validate_interdep_data <- function(
     time = time_name,
     predictors = predictor_names,
     n_dyads = n_groups,
-    longitudinal = has_time,
-    incomplete_dyads = incomplete_groups,
-    incomplete_dyads_action = incomplete_dyads
+    longitudinal = has_time
   )
 
   class(out) <- unique(c("interdep_data", class(out)))
@@ -237,7 +225,7 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
 
   # Return early if all groups are complete.
   if (length(incomplete_groups) == 0) {
-    return(list(data = out, incomplete_groups = incomplete_groups))
+    return(out)
   }
 
   if (incomplete_dyads == "error") {
@@ -269,10 +257,10 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
       )
     )
     out <- out[!out[[group_name]] %in% incomplete_groups, , drop = FALSE]
-    return(list(data = out, incomplete_groups = incomplete_groups[0]))
+    return(out)
   }
 
-  list(data = out, incomplete_groups = incomplete_groups[0])
+  out
 }
 
 resolve_interdep_roles <- function(out, group_name, member_name, role_name, missing_role) {

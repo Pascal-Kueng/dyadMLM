@@ -6,11 +6,8 @@ print.interdep_data <- function(x, ...) {
   member <- meta$member
   role <- meta$role
   time <- meta$time
-  predictors <- meta$predictors
   n_dyads <- meta$n_dyads
   longitudinal <- meta$longitudinal
-  incomplete_dyads <- meta$incomplete_dyads
-  incomplete_dyads_action <- meta$incomplete_dyads_action
   dyad_compositions <- meta$dyad_compositions
 
   # Printing general metadata
@@ -30,12 +27,6 @@ print.interdep_data <- function(x, ...) {
     cat(", time = ", time, sep = "")
   }
   cat("\n\n")
-
-
-  # Printing dropped dyads.
-  if (length(incomplete_dyads) > 0) {
-    cat("# Dropped structurally incomplete dyads: ", incomplete_dyads)
-  }
 
   cat("# Dyad Composition: \n")
 
