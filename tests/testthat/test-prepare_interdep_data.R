@@ -58,6 +58,27 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   expect_true(".i_diff_male_x_male" %in% names(result))
 })
 
+test_that("prepare_interdep_data stores predictor metadata", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
+    x = 1:4,
+    z = 5:8
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = c(x, z),
+    seed = 123
+  )
+
+  expect_equal(attr(result, "interdep")$predictors, c("x", "z"))
+})
+
 test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

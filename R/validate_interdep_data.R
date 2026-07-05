@@ -14,6 +14,9 @@
 #'   partners within a dyad, such as gender. If no role is supplied, all dyads
 #'   in the data are treated as exchangeable.
 #' @param time Optional column identifying time or measurement order.
+#' @param predictors Optional variables to store as metadata for upcoming
+#'   centering and model-helper functions. Currently validated and stored, but
+#'   not transformed.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -23,7 +26,7 @@
 #'
 #' @return A tibble with class `interdep_data` and metadata about the dyad,
 #'   member, optional role, and optional time columns.
-#' @importFrom rlang .data
+#' @importFrom rlang .data :=
 #'
 #' @export
 validate_interdep_data <- function(
@@ -32,6 +35,7 @@ validate_interdep_data <- function(
     member,
     role = NULL,
     time = NULL,
+    predictors = NULL,
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop")
   ) {
@@ -117,6 +121,26 @@ validate_interdep_data <- function(
     stop("`time` must not contain missing values.", call. = FALSE)
   }
 
+
+  # Extract and validate user-owned model columns.
+  predictors_quo <- rlang::enquo(predictors)
+  predictor_names <- NULL
+
+  if (!rlang::quo_is_null(predictors_quo)) {
+    selected_predictors <- tryCatch(
+      # eval_select to extract the full vector of columns.
+      tidyselect::eval_select(predictors_quo, data = out),
+      # catch any errors to throw a package-specific one.
+      error = function(e) {
+        stop(
+          "`predictors` must refer to existing columns in `data`.",
+          call. = FALSE
+        )
+      }
+    )
+    predictor_names <- names(selected_predictors)
+  }
+
   # Resolve dyads with fewer than two observed members.
   dyad_resolution <- resolve_incomplete_dyads(
     out = out,
@@ -168,6 +192,7 @@ validate_interdep_data <- function(
     member = member_name,
     role = role_name,
     time = time_name,
+    predictors = predictor_names,
     n_dyads = n_groups,
     longitudinal = has_time,
     incomplete_dyads = incomplete_groups,

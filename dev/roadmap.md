@@ -22,10 +22,13 @@ model-building features.
   behavior
 - Return factor columns for `.i_composition` and
   `.i_composition_role`
-- Add within- and between-person centering for ILD data
-  - Support person-mean centering for within-person predictors
-  - Support between-person predictor columns based on person means
-  - Support grand-mean centering of person means
+- Add temporal centering and predictor-shape helpers for ILD data
+  - Implement the `time_2l` workflow described in `dev/centering.md`
+  - Keep APIM and DIM on the same centering foundation
+  - Default to `time_2l` when both `time` and predictors are supplied, but allow
+    explicit `centering = "none"` for undecomposed or externally centered cases
+  - Support raw predictor centering first, then actor/partner columns, then
+    optional DIM mean/half-difference columns
   - Keep missing-data behavior explicit
 - Add a print method for `interdep_data`
   - Keep normal tibble/data-frame printing; add a compact interdep header above

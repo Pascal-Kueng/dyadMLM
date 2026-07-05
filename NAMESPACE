@@ -2,4 +2,5 @@
 
 export(prepare_interdep_data)
 export(validate_interdep_data)
+importFrom(rlang,":=")
 importFrom(rlang,.data)

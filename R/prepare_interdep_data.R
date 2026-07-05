@@ -22,8 +22,9 @@
 #'   is supplied, all dyads are treated as the same type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
-#' @param predictors Reserved for upcoming actor-partner predictor
-#'   transformation. Currently ignored.
+#' @param predictors Optional variables to store as metadata for upcoming
+#'   centering and model-helper functions. Currently validated and stored, but
+#'   not transformed.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -79,6 +80,7 @@ prepare_interdep_data <- function(
     member = {{ member }},
     role = {{ role }},
     time = {{ time }},
+    predictors = {{ predictors }},
     incomplete_dyads = incomplete_dyads,
     missing_role = missing_role
   )

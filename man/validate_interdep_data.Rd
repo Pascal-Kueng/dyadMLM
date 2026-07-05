@@ -10,6 +10,7 @@ validate_interdep_data(
   member,
   role = NULL,
   time = NULL,
+  predictors = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
 )
@@ -27,6 +28,10 @@ partners within a dyad, such as gender. If no role is supplied, all dyads
 in the data are treated as exchangeable.}
 
 \item{time}{Optional column identifying time or measurement order.}
+
+\item{predictors}{Optional variables to store as metadata for upcoming
+centering and model-helper functions. Currently validated and stored, but
+not transformed.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

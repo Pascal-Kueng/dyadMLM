@@ -34,8 +34,9 @@ is supplied, all dyads are treated as the same type of exchangeable dyads.}
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
 
-\item{predictors}{Reserved for upcoming actor-partner predictor
-transformation. Currently ignored.}
+\item{predictors}{Optional variables to store as metadata for upcoming
+centering and model-helper functions. Currently validated and stored, but
+not transformed.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

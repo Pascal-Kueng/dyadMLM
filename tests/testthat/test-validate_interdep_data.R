@@ -27,8 +27,34 @@ test_that("validate_interdep_data stores input metadata", {
   expect_equal(meta$member, "person_id")
   expect_null(meta$role)
   expect_null(meta$time)
+  expect_null(meta$predictors)
   expect_equal(meta$n_dyads, 2L)
   expect_false(meta$longitudinal)
+})
+
+test_that("validate_interdep_data stores predictor metadata", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = 1:4,
+    z = 5:8
+  )
+
+  single <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = x
+  )
+  expect_equal(attr(single, "interdep")$predictors, "x")
+
+  multiple <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = c(x, z)
+  )
+  expect_equal(attr(multiple, "interdep")$predictors, c("x", "z"))
 })
 
 test_that("validate_interdep_data rejects non-data-frame input", {
@@ -85,6 +111,17 @@ test_that("validate_interdep_data rejects missing columns", {
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, time = missing_time),
     "`time` must refer to an existing column in `data`.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = missing_predictor
+    ),
+    "`predictors` must refer to existing columns in `data`.",
     fixed = TRUE
   )
 })
