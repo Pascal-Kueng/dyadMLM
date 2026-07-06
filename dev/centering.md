@@ -31,9 +31,9 @@ Candidate user-facing workflow:
 
 ```r
 prepared |>
-  center(predictors = provided_support, centering = "time_2l") |>
-  make_apim(predictors = provided_support) |>
-  make_dim(predictors = provided_support)
+  center_predictors(predictors = provided_support, centering = "time_2l") |>
+  add_apim_predictors(predictors = provided_support) |>
+  add_dim_predictors(predictors = provided_support)
 ```
 
 `prepare_interdep_data()` can later call these steps when `predictors`,
@@ -49,6 +49,18 @@ If `time`, `predictors`, and `centering = "none"` are supplied, allow the
 workflow but make the behavior explicit in metadata and documentation:
 actor/partner or DIM predictors are then undecomposed over time and mix stable
 between-person differences with occasion-level fluctuations.
+
+## Implementation Order
+
+Build this in small pieces so each layer can be tested before the next one
+depends on it:
+
+1. Add centering and generated-predictor metadata to the `interdep` attribute.
+2. Implement `center_predictors()` for raw predictor decomposition.
+3. Implement `add_apim_predictors()` for actor/partner predictor columns.
+4. Implement `add_dim_predictors()` for mean and half-difference columns.
+5. Wire the optional workflow into `prepare_interdep_data()` once the standalone
+   helpers are stable.
 
 ## Step 1: `time_2l` Centering
 
@@ -146,10 +158,10 @@ workflow should remain `time_2l`.
   `time_2l`.
 - If `time`, predictors, and `centering = "none"` are supplied, allow the
   workflow but record that generated predictor columns are undecomposed.
-- `make_apim()` requires centered columns when `centering = "time_2l"` and raw
-  columns when `centering = "none"`.
-- `make_dim()` should work from existing actor/partner columns and should not
-  recompute centering.
+- `add_apim_predictors()` requires centered columns when `centering = "time_2l"`
+  and raw columns when `centering = "none"`.
+- `add_dim_predictors()` should work from existing actor/partner columns and
+  should not recompute centering.
 - Existing `.i_*` composition columns must remain unchanged.
 - Generated predictor columns should be tracked in `attr(data, "interdep")` so
   the print method can describe them.
@@ -166,4 +178,5 @@ Minimum tests for v0.1.0:
 - Partner values are matched within dyad-time.
 - DIM creates `cwp_mean`, `cwp_halfdiff`, `cbp_mean`, and `cbp_halfdiff`.
 - DIM columns equal the corresponding actor/partner sums and differences.
-- `make_dim()` does not alter existing `.i_diff` or composition metadata.
+- `add_dim_predictors()` does not alter existing `.i_diff` or composition
+  metadata.
