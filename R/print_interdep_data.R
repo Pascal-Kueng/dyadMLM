@@ -29,22 +29,24 @@ print.interdep_data <- function(x, ...) {
 
 
 
-  cat("# Dyad compositions:\n")
+  if (!is.null(dyad_compositions) && nrow(dyad_compositions) > 0) {
+    cat("# Dyad compositions:\n")
 
-  composition <- format(dyad_compositions$composition, justify = "left")
-  dyad_type <- format(dyad_compositions$dyad_type, justify = "left")
-  composition_n_dyads <- format(dyad_compositions$n_dyads, justify = "right")
+    composition <- format(dyad_compositions$composition, justify = "left")
+    dyad_type <- format(dyad_compositions$dyad_type, justify = "left")
+    composition_n_dyads <- format(dyad_compositions$n_dyads, justify = "right")
 
-  for (i in seq_len(nrow(dyad_compositions))) {
-    cat("#",
-        composition[[i]],
-        dyad_type[[i]],
-        composition_n_dyads[[i]],
-        "dyads\n",
-        sep = " ")
+    for (i in seq_len(nrow(dyad_compositions))) {
+      cat("#",
+          composition[[i]],
+          dyad_type[[i]],
+          composition_n_dyads[[i]],
+          "dyads\n",
+          sep = " ")
+    }
+
+    cat("#\n")
   }
-
-  cat("#\n")
 
   cat("# Added columns:\n")
 

@@ -28,7 +28,7 @@
 #'   member, optional role, and optional time columns.
 #' @importFrom rlang .data :=
 #'
-#' @export
+#' @keywords internal
 validate_interdep_data <- function(
     data,
     group,
