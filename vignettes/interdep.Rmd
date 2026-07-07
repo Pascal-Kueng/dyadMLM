@@ -123,7 +123,7 @@ The generated `.i_*` columns can be used directly in model formulas.
 
 ### Distinguishable Gaussian APIM
 
-Note that the current examples only includes actor effects and not partner effects.
+Note that the current examples only include actor effects and not partner effects.
 
 ```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
 library(glmmTMB)
