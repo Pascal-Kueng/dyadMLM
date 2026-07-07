@@ -31,10 +31,19 @@ center_predictors <- function(data) {
   }
 
   if (centering == "time_2l") {
+    predictor_suffixes <- make_interdep_suffixes(predictors)
+    centered_predictors <- tibble::tibble(
+      predictor = character(),
+      cwp = character(),
+      cbp = character(),
+      centering = character()
+    )
+
     for (predictor in predictors) {
       person_mean_col <- paste0(predictor, "_person_mean")
-      cwp_col <- paste0(".i_", predictor, "_cwp")
-      cbp_col <- paste0(".i_", predictor, "_cbp")
+      predictor_suffix <- predictor_suffixes[[predictor]]
+      cwp_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_cwp")
+      cbp_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_cbp")
 
       person_means <- out |>
         dplyr::group_by(.data[[group]], .data[[member]]) |>
@@ -53,7 +62,17 @@ center_predictors <- function(data) {
         )
 
       out[[person_mean_col]] <- NULL
+
+      centered_predictors <- tibble::add_row(
+        centered_predictors,
+        predictor = predictor,
+        cwp = cwp_col,
+        cbp = cbp_col,
+        centering = centering
+      )
     }
+
+    attr(out, "interdep")$centered_predictors <- centered_predictors
 
     return(out)
   }
