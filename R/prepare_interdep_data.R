@@ -29,6 +29,7 @@
 #'   predictor construction.
 #' @param model_type Predictor shape to construct. `"apim"` creates actor and
 #'   partner predictors. `"dim"` creates dyad mean and half-difference predictors.
+#'   `"apim_dim"` will return both predictor shapes.
 #' @param centering Predictor-centering strategy. `"none"` leaves predictors
 #'   undecomposed. `"time_2l"` indicates a two-level temporal decomposition into
 #'   within-person and between-person predictor components. `"auto"` resolves to
@@ -75,12 +76,17 @@ prepare_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    model_type = c("apim", "dim"),
+    model_type = c("apim", "dim", "apim_dim"),
     centering = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
     seed = NULL
   ) {
+
+  model_type <- rlang::arg_match(model_type)
+  centering <- rlang::arg_match(centering)
+  incomplete_dyads <- rlang::arg_match(incomplete_dyads)
+  missing_role <- rlang::arg_match(missing_role)
 
   out <- validate_interdep_data(
     data = data,

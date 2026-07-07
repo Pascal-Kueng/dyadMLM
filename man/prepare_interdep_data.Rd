@@ -11,7 +11,7 @@ prepare_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
-  model_type = c("apim", "dim"),
+  model_type = c("apim", "dim", "apim_dim"),
   centering = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
@@ -40,7 +40,8 @@ measures.}
 predictor construction.}
 
 \item{model_type}{Predictor shape to construct. \code{"apim"} creates actor and
-partner predictors. \code{"dim"} creates dyad mean and half-difference predictors.}
+partner predictors. \code{"dim"} creates dyad mean and half-difference predictors.
+\code{"apim_dim"} will return both predictor shapes.}
 
 \item{centering}{Predictor-centering strategy. \code{"none"} leaves predictors
 undecomposed. \code{"time_2l"} indicates a two-level temporal decomposition into

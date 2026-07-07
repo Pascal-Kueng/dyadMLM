@@ -31,15 +31,22 @@ center_predictors <- function(data) {
   centering <- meta_data$centering
 
   if (centering == "none") {
+    attr(out, "interdep")$predictor_decompositions <- tibble::tibble(
+      predictor = predictors,
+      component = "raw",
+      column = predictors,
+      centering = centering
+    )
+
     return(out)
   }
 
   if (centering == "time_2l") {
     predictor_suffixes <- make_interdep_suffixes(predictors)
-    centered_predictors <- tibble::tibble(
+    predictor_decompositions <- tibble::tibble(
       predictor = character(),
-      cwp = character(),
-      cbp = character(),
+      component = character(),
+      column = character(),
       centering = character()
     )
 
@@ -67,16 +74,16 @@ center_predictors <- function(data) {
 
       out[[person_mean_col]] <- NULL
 
-      centered_predictors <- tibble::add_row(
-        centered_predictors,
-        predictor = predictor,
-        cwp = cwp_col,
-        cbp = cbp_col,
+      predictor_decompositions <- tibble::add_row(
+        predictor_decompositions,
+        predictor = c(predictor, predictor),
+        component = c("cwp", "cbp"),
+        column = c(cwp_col, cbp_col),
         centering = centering
       )
     }
 
-    attr(out, "interdep")$centered_predictors <- centered_predictors
+    attr(out, "interdep")$predictor_decompositions <- predictor_decompositions
 
     return(out)
   }

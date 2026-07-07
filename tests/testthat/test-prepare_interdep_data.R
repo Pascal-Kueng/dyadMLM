@@ -100,12 +100,12 @@ test_that("prepare_interdep_data centers longitudinal predictors", {
   expect_true(".i_x_cbp" %in% names(result))
   expect_equal(result$.i_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
   expect_equal(
-    attr(result, "interdep")$centered_predictors,
+    attr(result, "interdep")$predictor_decompositions,
     tibble::tibble(
-      predictor = "x",
-      cwp = ".i_x_cwp",
-      cbp = ".i_x_cbp",
-      centering = "time_2l"
+      predictor = c("x", "x"),
+      component = c("cwp", "cbp"),
+      column = c(".i_x_cwp", ".i_x_cbp"),
+      centering = c("time_2l", "time_2l")
     )
   )
 })
