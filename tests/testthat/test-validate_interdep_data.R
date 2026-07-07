@@ -137,6 +137,25 @@ test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
   )
 })
 
+test_that("validate_interdep_data allows non-numeric uncentered predictors", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = factor(c("low", "high", "low", "high"))
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = x,
+    centering = "none"
+  )
+
+  expect_equal(attr(result, "interdep")$predictors, "x")
+  expect_equal(attr(result, "interdep")$centering, "none")
+})
+
 test_that("validate_interdep_data rejects non-data-frame input", {
   expect_error(
     validate_interdep_data(1:3, group = dyad_id, member = person_id),
