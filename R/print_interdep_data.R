@@ -18,12 +18,32 @@ print.interdep_data <- function(x, ...) {
       "Intensive longitudinal: ", ifelse(longitudinal, 'yes', 'no'), "\n",
       sep = "")
 
+  # Printing dropped dyads if any
+  if(length(dropped_incomplete_dyads) > 0) {
+    cat(
+      "# Dropped incomplete dyads: ",
+      format_group_count(dropped_incomplete_dyads, singular = "dyad", plural = "dyads"),
+      "\n",
+      sep = ""
+    )
+  }
+
+  if(length(dropped_missing_role_dyads) > 0) {
+    cat(
+      "# Dropped dyads with incomplete role information: ",
+      format_group_count(dropped_missing_role_dyads, singular = "dyad", plural = "dyads"),
+      "\n",
+      sep = ""
+    )
+  }
+
   # Printing structural information
   cat("# Structure: group = ", group,
       ", member = ", member, sep = "")
   if(!is.null(role)) {
     cat(", role = ", role, sep = "")
   }
+
   if (!is.null(time)) {
     cat(", time = ", time, sep = "")
   }
@@ -55,15 +75,19 @@ print.interdep_data <- function(x, ...) {
   if (interdep_composition_col %in% names(x)) {
     cat("#   .i_composition       inferred dyad composition\n")
   }
+
   if (interdep_composition_role_col %in% names(x)) {
     cat("#   .i_composition_role  composition-specific member role\n")
   }
+
   if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "is_")))) {
     cat("#   .i_is_*              composition-role indicator columns\n")
   }
+
   if (interdep_diff_col %in% names(x)) {
     cat("#   .i_diff              sum-diff contrast for exchangeable dyads\n")
   }
+
   if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))) {
     cat("#   .i_diff_*            composition-specific diff columns\n")
   }
