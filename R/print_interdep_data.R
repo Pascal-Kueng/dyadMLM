@@ -91,6 +91,14 @@ print.interdep_data <- function(x, ...) {
     cat("#   .i_diff_*            composition-specific diff columns\n")
   }
 
+
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp"))) {
+    cat("#   .i_*_cwp             within-person centred predictors\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp"))) {
+    cat("#   .i_*_cbp             between-person centred predictors\n")
+  }
+
   cat("#\n")
 
   out <- x

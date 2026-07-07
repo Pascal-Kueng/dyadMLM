@@ -103,5 +103,5 @@ prepare_interdep_data <- function(
 
   # out <- add_wb_centering(out)
 
-  out
+  return(out)
 }

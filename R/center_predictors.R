@@ -3,6 +3,10 @@
 #' Adds centered predictor columns to an `interdep_data` object. It currently
 #' supports two-level temporal centering for intensive longitudinal predictors:
 #' a within-person component and a between-person component.
+#' For two-level temporal centering, the between-person component is centered
+#' around the grand mean of person means, not the grand mean of all observed rows.
+#' This gives each person equal weight even when people have different numbers of
+#' observed measurement occasions.
 #'
 #' The function uses the structural metadata stored by
 #' [prepare_interdep_data()].

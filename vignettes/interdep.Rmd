@@ -209,8 +209,7 @@ cases can also be dropped before validation continues.
 
 The package example datasets are kept structurally complete, so this section
 uses a small artificial example instead. With `"drop"`, dyads with incomplete
-structure or unresolved role information are removed as whole dyads. The printed
-header records which dyads were removed.
+structure or unresolved role information are removed as whole dyads. The printed header records which dyads were removed.
 
 ```{r incomplete-drop}
 incomplete_data <- data.frame(
@@ -331,6 +330,9 @@ summary(tweedie_exchangeable_model)
 
 ```
 
+
+
+
 ## Intensive longitudinal dyadic data
 
 `example_dyadic_ILD` is a simulated intensive longitudinal dyadic dataset. Each
@@ -351,6 +353,7 @@ ild_distinguishable_data <- prepare_interdep_data(
   role = gender,
   member = personID,
   time = diaryday,
+  predictors = provided_support,
   seed = 123
 )
 
@@ -358,7 +361,9 @@ print(ild_distinguishable_data)
 summary(ild_distinguishable_data)
 ```
 
-For now, not within- and between-person centred. 
+Note that if we supply "predictors" as c("pred1", "pred2", ...) or a single predictor 
+like above, they will be centred automatically within and between person. 
+This behavior can be controlled via the `centering` argument. 
 
 ```{r fit-ild-distinguishable, eval = has_glmmTMB}
 
@@ -367,7 +372,16 @@ ild_distinguishable_model <- glmmTMB(
     
     .i_is_female_x_male_female + .i_is_female_x_male_male + 
     
+    # Gender specific time trends
     .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
+    
+  # Gender-specific within-person actor effects
+  .i_is_female_x_male_female:.i_provided_support_cwp + 
+  .i_is_female_x_male_male:.i_provided_support_cwp +
+    
+  # Gender-specific between-person actor effects
+  .i_is_female_x_male_female:.i_provided_support_cbp + 
+  .i_is_female_x_male_male:.i_provided_support_cbp +
     
     # random effects for stable non-independence (means)
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)  +
@@ -393,14 +407,13 @@ ild_exchangeable_data <- prepare_interdep_data(
   # role = gender,
   member = personID,
   time = diaryday,
+  predictors = provided_support,
   seed = 123
 )
 
 print(ild_exchangeable_data)
 summary(ild_exchangeable_data)
 ```
-
-For now, not within- and between-person centred. 
 
 ```{r fit-ild-exchangeable, eval = has_glmmTMB}
 
@@ -409,6 +422,10 @@ ild_exchangeable_model <- glmmTMB(
     1 + 
     
     diaryday +
+
+    # Pooled within-person and between-person actor effects
+    .i_provided_support_cwp +
+    .i_provided_support_cbp +
 
     # random effects for stable non-independence (means)
     us(1 | coupleID)  + us(0 + .i_diff_assumed_exchangeable | coupleID) +
@@ -444,14 +461,13 @@ ild_tweedie_distinguishable_data <- prepare_interdep_data(
   role = gender,
   member = personID,
   time = diaryday,
+  predictors = provided_support,
   seed = 123
 )
 
 print(ild_tweedie_distinguishable_data)
 summary(ild_tweedie_distinguishable_data)
 ```
-
-For now, not within- and between-person centred.
 
 For Tweedie models, the random-effect blocks are latent effects on the log-mean
 scale. They can induce partner dependence, but they are not residual covariance
@@ -471,6 +487,14 @@ ild_tweedie_distinguishable_shared_day_model <- glmmTMB(
     .i_is_female_x_male_female + .i_is_female_x_male_male +
 
     .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
+
+    # Gender-specific within-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cwp +
+    .i_is_female_x_male_male:.i_provided_support_cwp +
+
+    # Gender-specific between-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cbp +
+    .i_is_female_x_male_male:.i_provided_support_cbp +
 
     # random effects for stable non-independence (means)
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
@@ -501,6 +525,14 @@ ild_tweedie_distinguishable_latent_day_cov_model <- glmmTMB(
     .i_is_female_x_male_female + .i_is_female_x_male_male +
 
     .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
+
+    # Gender-specific within-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cwp +
+    .i_is_female_x_male_male:.i_provided_support_cwp +
+
+    # Gender-specific between-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cbp +
+    .i_is_female_x_male_male:.i_provided_support_cbp +
 
     # random effects for stable non-independence (means)
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
@@ -534,14 +566,13 @@ ild_tweedie_exchangeable_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   time = diaryday,
+  predictors = provided_support,
   seed = 123
 )
 
 print(ild_tweedie_exchangeable_data)
 summary(ild_tweedie_exchangeable_data)
 ```
-
-For now, not within- and between-person centred.
 
 This is the exchangeable analogue of the fuller Tweedie ILD model above. The
 sum-diff random-effect blocks provide stable and same-day exchangeable latent
@@ -555,6 +586,10 @@ ild_tweedie_exchangeable_model <- glmmTMB(
     1 +
 
     diaryday +
+
+    # Pooled within-person and between-person actor effects
+    .i_provided_support_cwp +
+    .i_provided_support_cbp +
 
     # stable exchangeable latent covariance
     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID) +
@@ -684,6 +719,7 @@ unified_ild_data <- prepare_interdep_data(
   role = gender,
   member = personID,
   time = diaryday,
+  predictors = provided_support,
   seed = 123
 )
 
@@ -714,6 +750,18 @@ unified_ild_gaussian_model <- glmmTMB(
     .i_is_female_x_male_male:diaryday +
     .i_is_female_x_female:diaryday +
     .i_is_male_x_male:diaryday +
+
+    # Composition-specific within-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cwp +
+    .i_is_female_x_male_male:.i_provided_support_cwp +
+    .i_is_female_x_female:.i_provided_support_cwp +
+    .i_is_male_x_male:.i_provided_support_cwp +
+
+    # Composition-specific between-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cbp +
+    .i_is_female_x_male_male:.i_provided_support_cbp +
+    .i_is_female_x_female:.i_provided_support_cbp +
+    .i_is_male_x_male:.i_provided_support_cbp +
 
     # stable dyad-level covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
@@ -763,6 +811,7 @@ unified_ild_tweedie_data <- prepare_interdep_data(
   role = gender,
   member = personID,
   time = diaryday,
+  predictors = provided_support,
   seed = 123
 )
 
@@ -787,6 +836,18 @@ unified_ild_tweedie_model <- glmmTMB(
     .i_is_female_x_male_male:diaryday +
     .i_is_female_x_female:diaryday +
     .i_is_male_x_male:diaryday +
+
+    # Composition-specific within-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cwp +
+    .i_is_female_x_male_male:.i_provided_support_cwp +
+    .i_is_female_x_female:.i_provided_support_cwp +
+    .i_is_male_x_male:.i_provided_support_cwp +
+
+    # Composition-specific between-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cbp +
+    .i_is_female_x_male_male:.i_provided_support_cbp +
+    .i_is_female_x_female:.i_provided_support_cbp +
+    .i_is_male_x_male:.i_provided_support_cbp +
 
     # stable dyad-level latent covariance
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
