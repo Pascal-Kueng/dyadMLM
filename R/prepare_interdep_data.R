@@ -97,6 +97,8 @@ prepare_interdep_data <- function(
 
   out <- infer_dyad_compositions(out, seed = seed)
 
+  out <- center_predictors(out)
+
   # out <- add_actor_partner_columns(out, variables = predictors)
 
   # out <- add_wb_centering(out)
