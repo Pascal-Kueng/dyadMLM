@@ -152,7 +152,7 @@ validate_interdep_data <- function(
   dropped_incomplete_dyads <- out_list$dropped_incomplete_dyads
 
   # Resolve sparse or missing role information.
-  dropped_missing_role_dyads <- NA # not applicable if no role was provided
+  dropped_missing_role_dyads <- character(0)
   if (has_role) {
     out_list <- resolve_interdep_roles(
       out = out,
@@ -232,7 +232,7 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
 
   # Return early if all groups are complete.
   if (length(incomplete_groups) == 0) {
-    return(list(out = out, droped_incomplete_dyads = incomplete_groups))
+    return(list(out = out, dropped_incomplete_dyads = incomplete_groups))
   }
 
   if (incomplete_dyads == "error") {
@@ -265,7 +265,7 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
     )
     out <- out[!out[[group_name]] %in% incomplete_groups, , drop = FALSE]
     attr(out, "interdep")[["incomplete_groups"]] <- incomplete_groups
-    return(list(out = out, droped_incomplete_dyads = incomplete_groups))
+    return(list(out = out, dropped_incomplete_dyads = incomplete_groups))
   }
 
   out
