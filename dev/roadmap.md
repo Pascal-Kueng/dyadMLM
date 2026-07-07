@@ -8,6 +8,15 @@ data. The package should not try to replace model engines such as `glmmTMB` or
 centering, indicators, constraints, interpretation helpers, and eventually model
 syntax explicit and reproducible.
 
+## Development Notes
+
+- Temporal centering and predictor-shape planning: [`centering.md`](centering.md)
+- Possible future reintroduction of inspection-only incomplete/unknown dyads:
+  [`keep-behavior-notes.md`](keep-behavior-notes.md)
+- Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
+- Composition-inference debugging scratch code:
+  [`debug-infer-compositions.R`](debug-infer-compositions.R)
+
 ## Version 0.1.0 - First CRAN Release Candidate
 
 Goal: ship a small, reliable data-preparation workflow with enough ILD support
@@ -23,7 +32,7 @@ model-building features.
 - Return factor columns for `.i_composition` and
   `.i_composition_role`
 - Add temporal centering and predictor-shape helpers for ILD data
-  - Implement the `time_2l` workflow described in `dev/centering.md`
+  - Implement the `time_2l` workflow described in [`centering.md`](centering.md)
   - Keep APIM and DIM on the same centering foundation
   - Default to `time_2l` when both `time` and predictors are supplied, but allow
     explicit `centering = "none"` for undecomposed or externally centered cases
@@ -108,9 +117,48 @@ model-building features.
     new estimator rather than preparation/syntax infrastructure
 - Model summaries focused on dyadic interpretation
 - Diagnostics and sparse-composition guidance
+- Optional wide-to-long preprocessing helper
+  - Keep `prepare_interdep_data()` strict: it should continue to validate one
+    canonical long-format dyadic structure
+  - Add reshaping only as a separate helper that converts common two-person
+    wide formats into the long structure expected by `prepare_interdep_data()`
+  - Treat this as convenience infrastructure, not part of the core validation
+    contract
 - Optional preprint or methods note
   - Cite the Zenodo software DOI for the implementation
   - Use the preprint for the composition-aware dyadic MLM framework
+
+## Version 0.4.0
+
+- Advanced ILD/EMA data infrastructure
+  - Add `time_3l` temporal decomposition only after the `time_2l` workflow is
+    stable
+  - Require an explicit day, burst, or period variable for `time_3l`
+  - Keep `time_4l` out of scope unless a concrete applied use case justifies the
+    extra API and interpretation burden
+  - Keep the terminology focused on temporal predictor decomposition, not on
+    claiming that fitted models have exactly two or three levels
+- Dynamic-data preparation groundwork for later model engines
+  - Add transition-record or dyad-occasion data helpers only if needed by the
+    model-syntax or custom-model tracks
+  - Support ragged complete dyad-days and full dyad-day gaps before attempting
+    one-partner missingness in dynamic models
+  - Keep one-partner missingness and latent-state handling out of the core
+    preparation API until a modeling layer needs them
+
+## Version 0.5.0 and Later
+
+- Evaluate a custom Stan track only after the package has stable validation,
+  centering, actor/partner helpers, syntax generation, and fit/summary
+  conventions for established engines
+- If custom Stan becomes part of the package scope, follow the staged dyadic
+  residual VAR plan in [`stan.md`](stan.md)
+  - Start with Gaussian, two-person dyadic residual VAR(1) models
+  - Start balanced, then add ragged complete dyad-days and full dyad-day gaps
+  - Keep non-Gaussian likelihoods, arbitrary DSEM features, one-partner
+    missingness, and latent centering out of the first Stan implementation
+  - Preserve the package-wide composition metadata and exchangeability
+    constraints rather than introducing a parallel dyad registry
 
 ## JOSS Readiness
 

@@ -192,6 +192,20 @@ test_that("validate_interdep_data rejects duplicate members within group-time", 
   )
 })
 
+test_that("validate_interdep_data accepts absent longitudinal occasions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 1, 1, 2, 2)
+  )
+
+  result <- validate_interdep_data(data, group = dyad_id, member = person_id, time = time)
+
+  expect_equal(nrow(result), 7L)
+  expect_true(attr(result, "interdep")$longitudinal)
+  expect_equal(attr(result, "interdep")$n_dyads, 2L)
+})
+
 test_that("validate_interdep_data rejects groups without two unique members", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

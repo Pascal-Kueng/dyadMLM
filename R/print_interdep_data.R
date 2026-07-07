@@ -13,7 +13,7 @@ print.interdep_data <- function(x, ...) {
   # Printing general metadata
   cat("# interdep data\n")
   cat("# Rows: ", nrow(x), " | ", "Dyads: ", n_dyads, " | ",
-      "Longitudinal: ", longitudinal, "\n",
+      "Intensive longitudinal: ", ifelse(longitudinal, 'yes', 'no'), "\n",
       sep = "")
 
   # Printing structural information

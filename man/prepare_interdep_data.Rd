@@ -68,6 +68,9 @@ contain at most one row per member and observed measurement occasion within
 dyad. Measured variables may contain missing values. Missing or incomplete
 structural information is controlled by \code{incomplete_dyads} and
 \code{missing_role}.
+
+Dyad composition labels are canonical: role labels are sorted alphabetically
+before being combined, so labels do not depend on row or member order.
 }
 \examples{
 data <- data.frame(

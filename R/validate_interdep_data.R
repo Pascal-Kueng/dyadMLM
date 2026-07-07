@@ -142,22 +142,27 @@ validate_interdep_data <- function(
   }
 
   # Resolve dyads with fewer than two observed members.
-  out <- resolve_incomplete_dyads(
+  out_list <- resolve_incomplete_dyads(
     out = out,
     group_name = group_name,
     member_name = member_name,
     incomplete_dyads = incomplete_dyads
   )
+  out <- out_list$out
+  dropped_incomplete_dyads <- out_list$dropped_incomplete_dyads
 
   # Resolve sparse or missing role information.
+  dropped_missing_role_dyads <- NA # not applicable if no role was provided
   if (has_role) {
-    out <- resolve_interdep_roles(
+    out_list <- resolve_interdep_roles(
       out = out,
       group_name = group_name,
       member_name = member_name,
       role_name = role_name,
       missing_role = missing_role
     )
+    out <- out_list$out
+    dropped_missing_role_dyads <- out_list$dropped_missing_role_dyads
   }
 
   # Validate that each member has at most one row per dyad or dyad-time.
@@ -184,7 +189,9 @@ validate_interdep_data <- function(
     time = time_name,
     predictors = predictor_names,
     n_dyads = n_groups,
-    longitudinal = has_time
+    longitudinal = has_time,
+    dropped_missing_role_dyads = dropped_missing_role_dyads,
+    dropped_incomplete_dyads = dropped_incomplete_dyads
   )
 
   class(out) <- unique(c("interdep_data", class(out)))
@@ -225,7 +232,7 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
 
   # Return early if all groups are complete.
   if (length(incomplete_groups) == 0) {
-    return(out)
+    return(list(out = out, droped_incomplete_dyads = incomplete_groups))
   }
 
   if (incomplete_dyads == "error") {
@@ -257,7 +264,8 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
       )
     )
     out <- out[!out[[group_name]] %in% incomplete_groups, , drop = FALSE]
-    return(out)
+    attr(out, "interdep")[["incomplete_groups"]] <- incomplete_groups
+    return(list(out = out, droped_incomplete_dyads = incomplete_groups))
   }
 
   out
@@ -337,5 +345,6 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   out[[role_name]] <- as.character(out[[interdep_resolved_role_col]])
   out[[interdep_resolved_role_col]] <- NULL
 
+  return(list(out = out, dropped_missing_role_dyads = missing_role_groups))
   out
 }

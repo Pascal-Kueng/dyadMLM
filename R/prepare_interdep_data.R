@@ -10,6 +10,9 @@
 #' structural information is controlled by `incomplete_dyads` and
 #' `missing_role`.
 #'
+#' Dyad composition labels are canonical: role labels are sorted alphabetically
+#' before being combined, so labels do not depend on row or member order.
+#'
 #' @param data A data frame or tibble. Data must be in long format. For
 #' cross-sectional dyadic data, each observed member of each dyad has one row.
 #' For intensive longitudinal dyadic data, each observed member of each dyad has

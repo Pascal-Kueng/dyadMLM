@@ -149,6 +149,32 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   expect_equal(abs(result$.i_diff_female_x_female[result$dyad_id == 2]), rep(1, 4))
 })
 
+test_that("infer_dyad_compositions handles ragged longitudinal rows", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "B", "C", "D", "C", "D"),
+    role = c("female", "male", "male", "female", "female", "female", "female"),
+    time = c(1, 1, 2, 1, 1, 2, 2)
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time
+  ) |>
+    infer_dyad_compositions(seed = 123)
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
+
+  expect_equal(dyad_compositions$composition, c("female_x_female", "female_x_male"))
+  expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
+  expect_equal(as.character(result$.i_composition[result$dyad_id == 1]), rep("female_x_male", 3))
+  expect_equal(as.character(result$.i_composition[result$dyad_id == 2]), rep("female_x_female", 4))
+})
+
 test_that("infer_dyad_compositions creates formula-friendly indicator names", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
