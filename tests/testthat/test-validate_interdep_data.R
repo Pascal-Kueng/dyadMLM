@@ -30,6 +30,8 @@ test_that("validate_interdep_data stores input metadata", {
   expect_null(meta$predictors)
   expect_equal(meta$n_dyads, 2L)
   expect_false(meta$longitudinal)
+  expect_equal(meta$dropped_incomplete_dyads, numeric(0))
+  expect_equal(meta$dropped_missing_role_dyads, numeric(0))
 })
 
 test_that("validate_interdep_data stores predictor metadata", {
@@ -245,6 +247,8 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
   )
   expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
   expect_equal(attr(dropped, "interdep")$n_dyads, 2L)
+  expect_equal(attr(dropped, "interdep")$dropped_incomplete_dyads, 1)
+  expect_equal(attr(dropped, "interdep")$dropped_missing_role_dyads, numeric(0))
 })
 
 test_that("validate_interdep_data rejects groups with more than two members", {
@@ -355,6 +359,8 @@ test_that("validate_interdep_data handles missing roles by policy", {
 
   expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
   expect_equal(attr(dropped, "interdep")$n_dyads, 2L)
+  expect_equal(attr(dropped, "interdep")$dropped_missing_role_dyads, 1)
+  expect_equal(attr(dropped, "interdep")$dropped_incomplete_dyads, numeric(0))
 })
 
 test_that("validate_interdep_data rejects fewer than two groups", {

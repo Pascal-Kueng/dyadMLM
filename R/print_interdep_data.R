@@ -9,6 +9,8 @@ print.interdep_data <- function(x, ...) {
   n_dyads <- meta$n_dyads
   longitudinal <- meta$longitudinal
   dyad_compositions <- meta$dyad_compositions
+  dropped_incomplete_dyads <- meta$dropped_incomplete_dyads
+  dropped_missing_role_dyads <- meta$dropped_missing_role_dyads
 
   # Printing general metadata
   cat("# interdep data\n")
