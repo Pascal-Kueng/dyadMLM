@@ -32,6 +32,19 @@ center_predictors <- function(data) {
 
   # Downstream predictor-construction helpers read this table instead of
   # inferring generated column names from string patterns.
+  predictor_decompositions <- tibble::tibble(
+    predictor = character(),
+    component = character(),
+    column = character(),
+    centering = character()
+  )
+
+  if (length(predictors) == 0) {
+    attr(out, "interdep")$predictor_decompositions <- predictor_decompositions
+
+    return(out)
+  }
+
   if (centering == "none") {
     attr(out, "interdep")$predictor_decompositions <- tibble::tibble(
       predictor = predictors,
@@ -45,12 +58,6 @@ center_predictors <- function(data) {
 
   if (centering == "time_2l") {
     predictor_suffixes <- make_interdep_suffixes(predictors)
-    predictor_decompositions <- tibble::tibble(
-      predictor = character(),
-      component = character(),
-      column = character(),
-      centering = character()
-    )
 
     for (predictor in predictors) {
       predictor_suffix <- predictor_suffixes[[predictor]]

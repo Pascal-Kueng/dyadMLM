@@ -44,7 +44,7 @@ validate_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    model_type = c("apim", "dim"),
+    model_type = c("apim", "dim", "apim_dim"),
     centering = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop")

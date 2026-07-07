@@ -1,127 +1,186 @@
-# Scratch fixtures for developing interdep internals.
-# Source this file, then call package functions on one of the raw_*,
-# validated_*, or inferred_* objects, or run a setup_*_debug() helper.
-
-devtools::load_all()
-
-
-raw_complete_roles <- data.frame(
-  dyad_id = c(1, 1, 2, 2, 3, 3),
-  person_id = c("a", "b", "c", "d", "e", "f"),
-  role = c("female", "male", "female", "male", "female", "female")
-)
-
-raw_sparse_ild_roles <- data.frame(
-  dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
-  person_id = c("a", "b", "a", "b", "c", "d", "c", "d"),
-  role = c("female", "male", NA, NA, "female", "female", NA, NA),
-  time = c(1, 1, 2, 2, 1, 1, 2, 2)
-)
-
-raw_missing_roles <- data.frame(
-  dyad_id = c(1, 1, 2, 2, 3, 3),
-  person_id = c("a", "b", "c", "d", "e", "f"),
-  role = c("female", "male", "female", NA, "female", "female")
-)
-
-raw_incomplete_roles <- data.frame(
-  dyad_id = c(1, 1, 2, 3, 3),
-  person_id = c("a", "b", "c", "d", "e"),
-  role = c("female", "male", "female", "female", "female")
-)
+# Scratch helpers for developing interdep internals.
+#
+# Source this file, then call one of:
+#   setup_validate_debug()
+#   setup_infer_debug()
+#   setup_center_debug()
+#   setup_add_actor_partner_debug()
+#
+# Each helper assigns `data` and the main local variables used inside the
+# corresponding internal function to the global environment. This makes it easy
+# to copy lines from the function body into the console and run them manually.
 
 
-validated_complete_roles <- validate_interdep_data(
-  raw_complete_roles,
-  group = dyad_id,
-  member = person_id,
-  role = role
-)
+load_interdep_debug_internals <- function() {
+  source("R/utils-compositions.R")
+  source("R/assign_arbitrary_member_roles.R")
+  source("R/validate_interdep_data.R")
+  source("R/infer_dyad_compositions.R")
+  source("R/center_predictors.R")
 
-validated_sparse_ild_roles <- validate_interdep_data(
-  raw_sparse_ild_roles,
-  group = dyad_id,
-  member = person_id,
-  role = role,
-  time = time
-)
+  invisible(TRUE)
+}
 
-validated_missing_roles_drop <- validate_interdep_data(
-  raw_missing_roles,
-  group = dyad_id,
-  member = person_id,
-  role = role,
-  missing_role = "drop"
-)
+load_debug_ild_data <- function(dataset = c("gaussian", "tweedie")) {
+  dataset <- rlang::arg_match(dataset)
+  data_env <- new.env(parent = emptyenv())
 
-validated_incomplete_roles_drop <- validate_interdep_data(
-  raw_incomplete_roles,
-  group = dyad_id,
-  member = person_id,
-  role = role,
-  incomplete_dyads = "drop"
-)
-
-
-inferred_complete_roles <- infer_dyad_compositions(validated_complete_roles)
-
-inferred_sparse_ild_roles <- infer_dyad_compositions(validated_sparse_ild_roles)
-
-inferred_missing_roles_drop <- infer_dyad_compositions(validated_missing_roles_drop)
-
-inferred_incomplete_roles_drop <- infer_dyad_compositions(validated_incomplete_roles_drop)
-
-
-setup_interdep_debug <- function(
-    data = validated_complete_roles,
-    seed = NULL,
-    generated_columns = character()
-  ) {
-  meta_data <- attr(data, "interdep")
-
-  assign("data", data, envir = .GlobalEnv)
-  assign("seed", seed, envir = .GlobalEnv)
-  assign("generated_columns", generated_columns, envir = .GlobalEnv)
-  assign("meta_data", meta_data, envir = .GlobalEnv)
-
-  if (!is.null(meta_data)) {
-    assign("group_name", meta_data$group, envir = .GlobalEnv)
-    assign("member_name", meta_data$member, envir = .GlobalEnv)
-    assign("role_name", meta_data$role, envir = .GlobalEnv)
-    assign("time_name", meta_data$time, envir = .GlobalEnv)
-    assign("incomplete_groups", meta_data$incomplete_dyads, envir = .GlobalEnv)
+  if (dataset == "gaussian") {
+    load("data/example_dyadic_ILD_unified.rda", envir = data_env)
+    return(data_env$example_dyadic_ILD_unified)
   }
+
+  load("data/example_dyadic_ILD_unified_tweedie.rda", envir = data_env)
+  data_env$example_dyadic_ILD_unified_tweedie
+}
+
+
+assign_debug_vars <- function(..., envir = .GlobalEnv) {
+  vars <- list(...)
+
+  for (name in names(vars)) {
+    assign(name, vars[[name]], envir = envir)
+  }
+
+  invisible(vars)
+}
+
+
+setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
+  data <- load_debug_ild_data(dataset)
+  out <- tibble::as_tibble(data)
+
+  group_name <- "coupleID"
+  member_name <- "personID"
+  role_name <- "gender"
+  time_name <- "diaryday"
+  predictor_names <- "provided_support"
+
+  has_role <- TRUE
+  has_time <- TRUE
+  model_type <- "apim"
+  centering <- "auto"
+  incomplete_dyads <- "error"
+  missing_role <- "error"
+
+  assign_debug_vars(
+    data = data,
+    out = out,
+    group_name = group_name,
+    member_name = member_name,
+    role_name = role_name,
+    time_name = time_name,
+    predictor_names = predictor_names,
+    has_role = has_role,
+    has_time = has_time,
+    model_type = model_type,
+    centering = centering,
+    incomplete_dyads = incomplete_dyads,
+    missing_role = missing_role
+  )
 
   invisible(data)
 }
 
 
-setup_validate_debug <- function(data = raw_complete_roles) {
-  setup_interdep_debug(data = data)
+setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+  load_interdep_debug_internals()
+
+  data <- validate_interdep_data(
+    load_debug_ild_data(dataset),
+    group = coupleID,
+    member = personID,
+    role = gender,
+    time = diaryday,
+    predictors = provided_support
+  )
+
+  meta_data <- attr(data, "interdep")
+  group_name <- meta_data$group
+  member_name <- meta_data$member
+  role_name <- meta_data$role
+
+  assign_debug_vars(
+    data = data,
+    seed = seed,
+    meta_data = meta_data,
+    group_name = group_name,
+    member_name = member_name,
+    role_name = role_name
+  )
+
+  invisible(data)
 }
 
 
+setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+  load_interdep_debug_internals()
 
-setup_infer_debug <- function(data = validated_complete_roles, seed = NULL) {
-  setup_interdep_debug(
-    data = data,
-    seed = seed,
-    generated_columns = c(
-      ".i_composition",
-      ".i_composition_role",
-      ".i_diff"
-    )
+  data <- validate_interdep_data(
+    load_debug_ild_data(dataset),
+    group = coupleID,
+    member = personID,
+    role = gender,
+    time = diaryday,
+    predictors = provided_support
   )
+  data <- infer_dyad_compositions(data, seed = seed)
+
+  meta_data <- attr(data, "interdep")
+  out <- data
+  group <- meta_data$group
+  member <- meta_data$member
+  predictors <- meta_data$predictors
+  centering <- meta_data$centering
+
+  assign_debug_vars(
+    data = data,
+    meta_data = meta_data,
+    out = out,
+    group = group,
+    member = member,
+    predictors = predictors,
+    centering = centering
+  )
+
+  invisible(data)
 }
 
 
-setup_assign_arbitrary_member_roles_debug <- function(
-    data = validated_complete_roles,
-    seed = NULL
-  ) {
-  setup_interdep_debug(
-    data = data,
-    seed = seed,
-    generated_columns = ".i_arbitrary_role"
+setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+  load_interdep_debug_internals()
+
+  data <- validate_interdep_data(
+    load_debug_ild_data(dataset),
+    group = coupleID,
+    member = personID,
+    role = gender,
+    time = diaryday,
+    predictors = provided_support
   )
+  data <- infer_dyad_compositions(data, seed = seed)
+  data <- center_predictors(data)
+
+  meta_data <- attr(data, "interdep")
+  out <- data
+  group <- meta_data$group
+  member <- meta_data$member
+  has_time <- meta_data$longitudinal
+  time <- meta_data$time
+  predictors <- meta_data$predictors
+  predictor_decompositions <- meta_data$predictor_decompositions
+
+  assign_debug_vars(
+    data = data,
+    meta_data = meta_data,
+    out = out,
+    group = group,
+    member = member,
+    has_time = has_time,
+    time = time,
+    predictors = predictors,
+    predictor_decompositions = predictor_decompositions
+  )
+
+  invisible(data)
 }

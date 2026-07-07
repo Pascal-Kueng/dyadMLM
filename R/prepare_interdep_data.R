@@ -105,7 +105,10 @@ prepare_interdep_data <- function(
 
   out <- center_predictors(out)
 
-  # out <- add_actor_partner_columns(out, variables = predictors)
+  # We want apim columns in most cases (later for some models maybe not anymore):
+  if (model_type %in% c("apim", "dim", "apim_dim")) {
+    out <- add_actor_partner_columns(out)
+  }
 
   # out <- add_wb_centering(out)
 
