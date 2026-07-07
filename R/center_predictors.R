@@ -44,8 +44,8 @@ center_predictors <- function(data) {
     )
 
     for (predictor in predictors) {
-      person_mean_col <- paste0(predictor, "_person_mean")
       predictor_suffix <- predictor_suffixes[[predictor]]
+      person_mean_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_person_mean")
       cwp_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_cwp")
       cbp_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_cbp")
 
@@ -56,7 +56,7 @@ center_predictors <- function(data) {
           .groups = "drop"
         )
 
-      grand_mean <- mean(person_means[[person_mean_col]], na.rm = TRUE)
+      grand_mean <- no_NaN_mean(person_means[[person_mean_col]])
 
       out <- out |>
         dplyr::left_join(person_means, by = c(group, member)) |>
@@ -80,6 +80,8 @@ center_predictors <- function(data) {
 
     return(out)
   }
+
+  stop("Unsupported `centering` value in `data` metadata.", call. = FALSE)
 }
 
 

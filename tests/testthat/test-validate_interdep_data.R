@@ -116,6 +116,27 @@ test_that("validate_interdep_data validates explicit time_2l centering", {
   )
 })
 
+test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    x = letters[1:8]
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      time = time,
+      predictors = x
+    ),
+    'Use `centering = "none"` to keep non-numeric predictors uncentered.',
+    fixed = TRUE
+  )
+})
+
 test_that("validate_interdep_data rejects non-data-frame input", {
   expect_error(
     validate_interdep_data(1:3, group = dyad_id, member = person_id),

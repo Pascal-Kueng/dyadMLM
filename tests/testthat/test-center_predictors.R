@@ -71,6 +71,29 @@ test_that("center_predictors handles missing predictor values", {
   expect_true(all(is.na(result$.i_x_cbp[5:8])))
 })
 
+test_that("center_predictors does not remove user-owned person mean columns", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    x = c(1, 3, 3, 5, 5, 7, 7, 9),
+    x_person_mean = 101:108
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = x
+  ) |>
+    center_predictors()
+
+  expect_equal(result$x_person_mean, 101:108)
+  expect_equal(result$.i_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
+  expect_false(".i_x_person_mean" %in% names(result))
+})
+
 test_that("center_predictors leaves uncentered data unchanged", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

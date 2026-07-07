@@ -212,6 +212,22 @@ validate_interdep_data <- function(
     centering <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
   }
 
+  if (centering == "time_2l") {
+    predictor_is_numeric <- vapply(out[predictor_names], is.numeric, logical(1))
+    non_numeric_predictors <- predictor_names[!predictor_is_numeric]
+
+    if (length(non_numeric_predictors) > 0) {
+      stop(
+        "`predictors` used with `centering = \"time_2l\"` must be numeric. ",
+        "Use `centering = \"none\"` to keep non-numeric predictors uncentered. ",
+        "Non-numeric predictor(s): ",
+        paste(non_numeric_predictors, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+  }
+
 
   attr(out, "interdep") <- list(
     group = group_name,
