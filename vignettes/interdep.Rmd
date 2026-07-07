@@ -361,8 +361,8 @@ print(ild_distinguishable_data)
 summary(ild_distinguishable_data)
 ```
 
-Note that if we supply "predictors" as c("pred1", "pred2", ...) or a single predictor 
-like above, they will be centred automatically within and between person. 
+Note that if we supply `predictors`, for example as `c(pred1, pred2)` or as the
+single predictor above, they will be centred automatically within and between person.
 This behavior can be controlled via the `centering` argument. 
 
 ```{r fit-ild-distinguishable, eval = has_glmmTMB}

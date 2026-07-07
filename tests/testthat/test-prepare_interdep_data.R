@@ -79,6 +79,37 @@ test_that("prepare_interdep_data stores predictor metadata", {
   expect_equal(attr(result, "interdep")$predictors, c("x", "z"))
 })
 
+test_that("prepare_interdep_data centers longitudinal predictors", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    x = c(1, 3, 3, 5, 5, 7, 7, 9)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = x,
+    seed = 123
+  )
+
+  expect_true(".i_x_cwp" %in% names(result))
+  expect_true(".i_x_cbp" %in% names(result))
+  expect_equal(result$.i_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
+  expect_equal(
+    attr(result, "interdep")$centered_predictors,
+    tibble::tibble(
+      predictor = "x",
+      cwp = ".i_x_cwp",
+      cbp = ".i_x_cbp",
+      centering = "time_2l"
+    )
+  )
+})
+
 test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

@@ -212,7 +212,6 @@ validate_interdep_data <- function(
     centering <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
   }
 
-  # Resolve model type
 
   attr(out, "interdep") <- list(
     group = group_name,
