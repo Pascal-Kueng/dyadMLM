@@ -375,13 +375,13 @@ ild_distinguishable_model <- glmmTMB(
     # Gender specific time trends
     .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
     
-  # Gender-specific within-person actor effects
-  .i_is_female_x_male_female:.i_provided_support_cwp + 
-  .i_is_female_x_male_male:.i_provided_support_cwp +
+    # Gender-specific within-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cwp + 
+    .i_is_female_x_male_male:.i_provided_support_cwp +
     
-  # Gender-specific between-person actor effects
-  .i_is_female_x_male_female:.i_provided_support_cbp + 
-  .i_is_female_x_male_male:.i_provided_support_cbp +
+    # Gender-specific between-person actor effects
+    .i_is_female_x_male_female:.i_provided_support_cbp + 
+    .i_is_female_x_male_male:.i_provided_support_cbp +
     
     # random effects for stable non-independence (means)
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)  +
@@ -727,11 +727,12 @@ print(unified_ild_data)
 summary(unified_ild_data)
 ```
 
-This first unified ILD model keeps only composition-specific intercepts and
-composition-specific fixed time slopes. Actor and partner predictor effects are
-left out for now. Random time slopes are also omitted; with separate stable and
-same-day dyadic covariance blocks, random time slopes add many weakly identified
-parameters and are a likely first source of convergence problems.
+This first unified ILD model includes composition-specific intercepts, fixed
+time slopes, and within-person and between-person actor effects. Partner
+predictor effects are left out for now. Random time slopes are also omitted;
+with separate stable and same-day dyadic covariance blocks, random time slopes
+add many weakly identified parameters and are a likely first source of
+convergence problems.
 
 For this maximal covariance example, `glmmTMB`'s default optimizer can report
 false convergence even when the Hessian is positive definite. The `BFGS`
@@ -819,10 +820,10 @@ print(unified_ild_tweedie_data)
 summary(unified_ild_tweedie_data)
 ```
 
-As in the Gaussian unified ILD model, the mean model contains only
-composition-specific intercepts and fixed time slopes. The dyadic random-effect
-blocks are latent effects on the log-mean scale, not residual covariance
-parameters in the Gaussian sense.
+As in the Gaussian unified ILD model, the mean model contains
+composition-specific intercepts, fixed time slopes, and within-person and
+between-person actor effects. The dyadic random-effect blocks are latent effects
+on the log-mean scale, not residual covariance parameters in the Gaussian sense.
 
 ```{r fit-unified-ild-tweedie, eval = has_glmmTMB}
 
