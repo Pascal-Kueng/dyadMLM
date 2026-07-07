@@ -26,7 +26,7 @@ Suggests:
     usethis
 Config/testthat/edition: 3
 Imports: 
-    dplyr (>= 1.0.0),
+    dplyr (>= 1.1.0),
     rlang (>= 0.4.0),
     tidyselect,
     tibble (>= 3.0.0)

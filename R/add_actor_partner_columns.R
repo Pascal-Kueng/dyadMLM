@@ -52,7 +52,25 @@ add_actor_partner_columns <- function(data) {
     out[[actor_col]] <- out[[source_col]]
 
     # Computing and storing the partner column
+    join_keys <- group
 
+    if (has_time) {
+      join_keys <- c(group, time)
+    }
+
+    partner_lookup <- out |>
+      dplyr::select(
+        dplyr::all_of(c(join_keys, member, source_col))
+      ) |>
+      # we simply rename the member colname to .i_partner_member and now whatever was
+      # an actor column is a partner column. So we rename those too.
+      dplyr::rename(
+        .i_partner_member = dplyr::all_of(member),
+        "{partner_col}" := dplyr::all_of(source_col)
+      )
+
+    # We join this table back with the regular data, where partner col does
+    # not match actor col!
   }
 
   return(out)
