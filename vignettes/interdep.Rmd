@@ -111,6 +111,7 @@ cross_distinguishable_data <- prepare_interdep_data(
   seed = 123
 )
 
+# We can inspect all attributes with this call
 attr(cross_distinguishable_data, "interdep")
 
 print(cross_distinguishable_data, n = 20)
@@ -119,12 +120,10 @@ summary(cross_distinguishable_data)
 
 The generated `.i_*` columns can be used directly in model formulas.
 
-```{r cross-distinguishable-columns}
-names(cross_distinguishable_data)[startsWith(names(cross_distinguishable_data), ".i_")]
-```
 
 ### Distinguishable Gaussian APIM
 
+Note that the current examples only includes actor effects and not partner effects.
 
 ```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
 library(glmmTMB)
@@ -208,8 +207,10 @@ By default, `prepare_interdep_data()` stops when a dyad has only one observed
 member or when a member's role cannot be resolved from the observed rows. These
 cases can also be dropped before validation continues.
 
-With `"drop"`, dyads with incomplete structure or unresolved role information
-are removed as whole dyads.
+The package example datasets are kept structurally complete, so this section
+uses a small artificial example instead. With `"drop"`, dyads with incomplete
+structure or unresolved role information are removed as whole dyads. The printed
+header records which dyads were removed.
 
 ```{r incomplete-drop}
 incomplete_data <- data.frame(
@@ -229,7 +230,7 @@ incomplete_dropped_data <- prepare_interdep_data(
   seed = 123
 )
 
-incomplete_dropped_data
+print(incomplete_dropped_data)
 ```
 
 

@@ -18,25 +18,6 @@ print.interdep_data <- function(x, ...) {
       "Intensive longitudinal: ", ifelse(longitudinal, 'yes', 'no'), "\n",
       sep = "")
 
-  # Printing dropped dyads if any
-  if(length(dropped_incomplete_dyads) > 0) {
-    cat(
-      "# Dropped incomplete dyads: ",
-      format_group_count(dropped_incomplete_dyads, singular = "dyad", plural = "dyads"),
-      "\n",
-      sep = ""
-    )
-  }
-
-  if(length(dropped_missing_role_dyads) > 0) {
-    cat(
-      "# Dropped dyads with incomplete role information: ",
-      format_group_count(dropped_missing_role_dyads, singular = "dyad", plural = "dyads"),
-      "\n",
-      sep = ""
-    )
-  }
-
   # Printing structural information
   cat("# Structure: group = ", group,
       ", member = ", member, sep = "")
@@ -49,8 +30,26 @@ print.interdep_data <- function(x, ...) {
   }
   cat("\n#\n")
 
+  # Printing dropped dyads if any
+  if(length(dropped_incomplete_dyads) > 0) {
+    cat(
+      "# Dropped incomplete dyads: ",
+      format_group_count(dropped_incomplete_dyads, singular = "dyad", plural = "dyads"),
+      "\n#\n",
+      sep = ""
+    )
+  }
 
+  if(length(dropped_missing_role_dyads) > 0) {
+    cat(
+      "# Dropped dyads with incomplete role information: ",
+      format_group_count(dropped_missing_role_dyads, singular = "dyad", plural = "dyads"),
+      "\n#\n",
+      sep = ""
+    )
+  }
 
+  # compositions
   if (!is.null(dyad_compositions) && nrow(dyad_compositions) > 0) {
     cat("# Dyad compositions:\n")
 
