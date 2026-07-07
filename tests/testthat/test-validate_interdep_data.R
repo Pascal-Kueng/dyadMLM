@@ -28,6 +28,8 @@ test_that("validate_interdep_data stores input metadata", {
   expect_null(meta$role)
   expect_null(meta$time)
   expect_null(meta$predictors)
+  expect_equal(meta$model_type, "apim")
+  expect_equal(meta$centering, "none")
   expect_equal(meta$n_dyads, 2L)
   expect_false(meta$longitudinal)
   expect_equal(meta$dropped_incomplete_dyads, numeric(0))
@@ -57,6 +59,61 @@ test_that("validate_interdep_data stores predictor metadata", {
     predictors = c(x, z)
   )
   expect_equal(attr(multiple, "interdep")$predictors, c("x", "z"))
+})
+
+test_that("validate_interdep_data resolves model helper metadata", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    x = 1:8
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = x,
+    model_type = "dim"
+  )
+
+  meta <- attr(result, "interdep")
+
+  expect_equal(meta$model_type, "dim")
+  expect_equal(meta$centering, "time_2l")
+})
+
+test_that("validate_interdep_data validates explicit time_2l centering", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = 1:4
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = x,
+      centering = "time_2l"
+    ),
+    '`centering = "time_2l"` requires `time` to be supplied.',
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      time = x,
+      centering = "time_2l"
+    ),
+    '`centering = "time_2l"` requires `predictors` to be supplied.',
+    fixed = TRUE
+  )
 })
 
 test_that("validate_interdep_data rejects non-data-frame input", {
