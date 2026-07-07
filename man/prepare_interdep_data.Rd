@@ -11,6 +11,8 @@ prepare_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
+  model_type = c("apim", "dim"),
+  centering = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL
@@ -34,9 +36,17 @@ is supplied, all dyads are treated as the same type of exchangeable dyads.}
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
 
-\item{predictors}{Optional variables to store as metadata for upcoming
-centering and model-helper functions. Currently validated and stored, but
-not transformed.}
+\item{predictors}{Optional variables to use for centering and model-ready
+predictor construction.}
+
+\item{model_type}{Predictor shape to construct. \code{"apim"} creates actor and
+partner predictors. \code{"dim"} creates dyad mean and half-difference predictors.}
+
+\item{centering}{Predictor-centering strategy. \code{"none"} leaves predictors
+undecomposed. \code{"time_2l"} indicates a two-level temporal decomposition into
+within-person and between-person predictor components. \code{"auto"} resolves to
+\code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and to \code{"none"}
+otherwise.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

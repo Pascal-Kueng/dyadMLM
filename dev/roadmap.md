@@ -34,8 +34,10 @@ model-building features.
 - Add temporal centering and predictor-shape helpers for ILD data
   - Implement the `time_2l` workflow described in [`centering.md`](centering.md)
   - Keep APIM and DIM on the same centering foundation
-  - Default to `time_2l` when both `time` and predictors are supplied, but allow
-    explicit `centering = "none"` for undecomposed or externally centered cases
+  - Use `centering = "auto"` by default: resolve to `time_2l` when both `time`
+    and predictors are supplied, and to `none` otherwise
+  - Allow explicit `centering = "none"` for undecomposed or externally centered
+    cases
   - Support raw predictor centering first, then actor/partner columns, then
     optional DIM mean/half-difference columns
   - Keep missing-data behavior explicit
@@ -134,6 +136,9 @@ model-building features.
   - Add `time_3l` temporal decomposition only after the `time_2l` workflow is
     stable
   - Require an explicit day, burst, or period variable for `time_3l`
+  - Do not infer `time_3l` automatically from EMA nesting or three-level random
+    effects; users should request it when the substantive predictor
+    decomposition requires it
   - Keep `time_4l` out of scope unless a concrete applied use case justifies the
     extra API and interpretation burden
   - Keep the terminology focused on temporal predictor decomposition, not on

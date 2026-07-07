@@ -17,6 +17,14 @@
 #' @param predictors Optional variables to store as metadata for upcoming
 #'   centering and model-helper functions. Currently validated and stored, but
 #'   not transformed.
+#' @param model_type Requested predictor shape for downstream construction.
+#'   `"apim"` indicates actor and partner predictors; `"dim"` indicates dyad
+#'   mean and half-difference predictors.
+#' @param centering Requested predictor-centering strategy for downstream
+#'   construction. `"none"` leaves predictors undecomposed. `"time_2l"`
+#'   indicates a two-level temporal decomposition into within-person and
+#'   between-person predictor components. `"auto"` resolves to `"time_2l"` when
+#'   both `time` and `predictors` are supplied, and to `"none"` otherwise.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -36,6 +44,8 @@ validate_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
+    model_type = c("apim", "dim"),
+    centering = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop")
   ) {

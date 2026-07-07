@@ -25,9 +25,15 @@
 #'   is supplied, all dyads are treated as the same type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
-#' @param predictors Optional variables to store as metadata for upcoming
-#'   centering and model-helper functions. Currently validated and stored, but
-#'   not transformed.
+#' @param predictors Optional variables to use for centering and model-ready
+#'   predictor construction.
+#' @param model_type Predictor shape to construct. `"apim"` creates actor and
+#'   partner predictors. `"dim"` creates dyad mean and half-difference predictors.
+#' @param centering Predictor-centering strategy. `"none"` leaves predictors
+#'   undecomposed. `"time_2l"` indicates a two-level temporal decomposition into
+#'   within-person and between-person predictor components. `"auto"` resolves to
+#'   `"time_2l"` when both `time` and `predictors` are supplied, and to `"none"`
+#'   otherwise.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -69,6 +75,8 @@ prepare_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
+    model_type = c("apim", "dim"),
+    centering = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
     seed = NULL
@@ -84,6 +92,8 @@ prepare_interdep_data <- function(
     role = {{ role }},
     time = {{ time }},
     predictors = {{ predictors }},
+    model_type = model_type,
+    centering = centering,
     incomplete_dyads = incomplete_dyads,
     missing_role = missing_role
   )

@@ -11,6 +11,8 @@ validate_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
+  model_type = c("apim", "dim"),
+  centering = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
 )
@@ -32,6 +34,16 @@ in the data are treated as exchangeable.}
 \item{predictors}{Optional variables to store as metadata for upcoming
 centering and model-helper functions. Currently validated and stored, but
 not transformed.}
+
+\item{model_type}{Requested predictor shape for downstream construction.
+\code{"apim"} indicates actor and partner predictors; \code{"dim"} indicates dyad
+mean and half-difference predictors.}
+
+\item{centering}{Requested predictor-centering strategy for downstream
+construction. \code{"none"} leaves predictors undecomposed. \code{"time_2l"}
+indicates a two-level temporal decomposition into within-person and
+between-person predictor components. \code{"auto"} resolves to \code{"time_2l"} when
+both \code{time} and \code{predictors} are supplied, and to \code{"none"} otherwise.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

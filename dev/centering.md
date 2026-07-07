@@ -10,10 +10,13 @@ actor/partner variables, not a separate centering procedure.
 Version 0.1.0 should support:
 
 - `model_type = c("apim", "dim")`
-- `centering = c("time_2l", "none")`
+- `centering = c("auto", "time_2l", "none")`
 
 Reserve `centering = "time_3l"` for a later EMA/day-level workflow with an
-explicit day or burst variable. Do not add grand-mean-only centering yet.
+explicit day or burst variable. Do not add grand-mean-only centering yet. Do not
+let `"auto"` infer `time_3l` later just because a model has three-level random
+effects or an EMA/day variable; 3-level predictor decomposition should be an
+explicit user choice.
 
 `time_2l` means a two-level temporal decomposition of repeated measures. The
 name refers to the predictor decomposition over time, not to the full nesting
@@ -39,11 +42,12 @@ prepared |>
 `prepare_interdep_data()` can later call these steps when `predictors`,
 `model_type`, and `centering` are supplied.
 
-If `time` and `predictors` are supplied, the default should be
-`centering = "time_2l"`. Do not require centering globally just because a `time`
-column exists: users may provide time only for time slopes, may have centered
-externally, may use stable predictors repeated across rows, or may intentionally
-fit undecomposed predictor effects.
+The default request should be `centering = "auto"`. Resolve `"auto"` to
+`"time_2l"` when `time` and `predictors` are supplied, and to `"none"` otherwise.
+Store the resolved value in metadata. Do not require centering globally just
+because a `time` column exists: users may provide time only for time slopes, may
+have centered externally, may use stable predictors repeated across rows, or may
+intentionally fit undecomposed predictor effects.
 
 If `time`, `predictors`, and `centering = "none"` are supplied, allow the
 workflow but make the behavior explicit in metadata and documentation:
@@ -154,8 +158,10 @@ workflow should remain `time_2l`.
 
 - `centering = "time_2l"` requires a `time` column in the `interdep` metadata.
 - `time_2l` should error if no predictors are supplied.
-- If `time` and predictors are supplied and `centering` is omitted, default to
-  `time_2l`.
+- `centering = "auto"` resolves to `time_2l` when `time` and predictors are
+  supplied, and to `none` otherwise.
+- Store the resolved centering value in metadata.
+- If `centering` is omitted, use `auto`.
 - If `time`, predictors, and `centering = "none"` are supplied, allow the
   workflow but record that generated predictor columns are undecomposed.
 - `add_apim_predictors()` requires centered columns when `centering = "time_2l"`
