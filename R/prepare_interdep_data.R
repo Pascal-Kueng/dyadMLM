@@ -82,9 +82,6 @@ prepare_interdep_data <- function(
     seed = NULL
   ) {
 
-  incomplete_dyads <- rlang::arg_match(incomplete_dyads)
-  missing_role <- rlang::arg_match(missing_role)
-
   out <- validate_interdep_data(
     data = data,
     group = {{ group }},

@@ -69,10 +69,14 @@ validate_interdep_data <- function(
     )
   }
 
-  # Extract structural column names.
+  # Extract and match (non column-based) arguments
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
 
+  model_type <- rlang::arg_match(model_type)
+  centering <- rlang::arg_match(centering)
+
+  # Extract structural column names.
   group <- rlang::enquo(group)
   if (rlang::quo_is_missing(group)) {
     stop("`group` must be supplied.", call. = FALSE)
@@ -192,6 +196,24 @@ validate_interdep_data <- function(
     stop("At least 2 groups are needed.", call. = FALSE)
   }
 
+
+  # Resolve centering
+  if (centering == "time_2l") {
+    if (!has_time) {
+      stop("`centering = \"time_2l\"` requires `time` to be supplied.", call. = FALSE)
+    }
+
+    if (length(predictor_names) == 0) {
+      stop("`centering = \"time_2l\"` requires `predictors` to be supplied.", call. = FALSE)
+    }
+  }
+
+  if (centering == "auto") {
+    centering <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
+  }
+
+  # Resolve model type
+
   attr(out, "interdep") <- list(
     group = group_name,
     member = member_name,
@@ -200,6 +222,8 @@ validate_interdep_data <- function(
     predictors = predictor_names,
     n_dyads = n_groups,
     longitudinal = has_time,
+    centering = centering,
+    model_type = model_type,
     dropped_missing_role_dyads = dropped_missing_role_dyads,
     dropped_incomplete_dyads = dropped_incomplete_dyads
   )
