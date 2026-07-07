@@ -30,6 +30,8 @@ center_predictors <- function(data) {
   predictors <- meta_data$predictors
   centering <- meta_data$centering
 
+  # Downstream predictor-construction helpers read this table instead of
+  # inferring generated column names from string patterns.
   if (centering == "none") {
     attr(out, "interdep")$predictor_decompositions <- tibble::tibble(
       predictor = predictors,
