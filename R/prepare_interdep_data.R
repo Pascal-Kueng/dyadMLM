@@ -120,8 +120,8 @@ prepare_interdep_data <- function(
   out <- center_predictors(out)
 
   if (any(model_type %in% c("dim", "undirected_dsm"))) {
-    # currently only supports exchangeable dyads (across the whole dataset)
-    validate_dim_compatibility(out)
+    # Current DIM/DSM construction supports one exchangeable composition.
+    validate_undirected_dyad_compatibility(out)
   }
 
   if ("apim" %in% model_type) {

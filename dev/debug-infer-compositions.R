@@ -19,7 +19,7 @@ load_interdep_debug_internals <- function() {
   source("R/validate_interdep_data.R")
   source("R/infer_dyad_compositions.R")
   source("R/center_predictors.R")
-  source("R/validate_dim_compatibility.R")
+  source("R/validate-model-compatibility.R")
   source("R/add_actor_partner_columns.R")
   source("R/add_dyad_individual_columns.R")
   source("R/add_undirected_dyadic_score_columns.R")

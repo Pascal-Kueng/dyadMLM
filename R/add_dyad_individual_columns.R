@@ -54,7 +54,7 @@ add_dyad_individual_columns <- function(data) {
     return(data)
   }
 
-  validate_dim_compatibility(data)
+  validate_undirected_dyad_compatibility(data)
 
   out <- data
 
