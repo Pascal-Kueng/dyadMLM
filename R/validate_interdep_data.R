@@ -18,8 +18,9 @@
 #'   centering and model-helper functions.
 #' @param model_type Requested predictor shape for downstream construction.
 #'   `"apim"` indicates actor and partner predictors, `"none"` indicates no
-#'   model-specific predictor construction, and `"dim"`/`"apim_dim"` are
-#'   accepted for upcoming DIM support.
+#'   model-specific predictor construction, `"dim"` indicates dyad-mean and
+#'   individual-deviation predictors, and `"apim_dim"` indicates both APIM and
+#'   DIM predictors.
 #' @param centering Requested predictor-centering strategy for downstream
 #'   construction. `"none"` leaves predictors undecomposed. `"time_2l"`
 #'   indicates a two-level temporal decomposition into within-person and

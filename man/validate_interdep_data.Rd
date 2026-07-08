@@ -36,8 +36,9 @@ centering and model-helper functions.}
 
 \item{model_type}{Requested predictor shape for downstream construction.
 \code{"apim"} indicates actor and partner predictors, \code{"none"} indicates no
-model-specific predictor construction, and \code{"dim"}/\code{"apim_dim"} are
-accepted for upcoming DIM support.}
+model-specific predictor construction, \code{"dim"} indicates dyad-mean and
+individual-deviation predictors, and \code{"apim_dim"} indicates both APIM and
+DIM predictors.}
 
 \item{centering}{Requested predictor-centering strategy for downstream
 construction. \code{"none"} leaves predictors undecomposed. \code{"time_2l"}

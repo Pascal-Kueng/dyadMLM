@@ -40,10 +40,10 @@ measures.}
 predictor construction.}
 
 \item{model_type}{Predictor shape to construct. \code{"apim"} creates actor and
-partner predictors. \code{"none"} skips model-specific predictor construction
-after validation, composition inference, and optional centering. \code{"dim"} and
-\code{"apim_dim"} are accepted for upcoming DIM support; currently they create
-the APIM columns used as an intermediate step.}
+partner predictors. \code{"dim"} creates dyad-mean and individual-deviation
+predictors. \code{"apim_dim"} creates both APIM and DIM predictors. \code{"none"}
+skips model-specific predictor construction after validation, composition
+inference, and optional centering.}
 
 \item{centering}{Predictor-centering strategy. \code{"none"} leaves predictors
 undecomposed. \code{"time_2l"} indicates a two-level temporal decomposition into
@@ -67,8 +67,10 @@ The original data as a tibble with class \code{interdep_data},
 \code{.i_composition} and \code{.i_composition_role} factor columns,
 \verb{.i_is_*} numeric indicator columns, \code{.i_diff}, composition-specific
 \verb{.i_diff_*} columns for exchangeable dyads, and an \code{interdep} attribute
-containing structural metadata and \code{dyad_compositions}. \code{.i_diff} is
-active for exchangeable dyads and zero for distinguishable dyads.
+containing structural metadata, \code{dyad_compositions}, and predictor metadata
+such as \code{predictor_decompositions}, \code{apim_predictors}, and
+\code{dim_predictors} when applicable. \code{.i_diff} is active for exchangeable
+dyads and zero for distinguishable dyads.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

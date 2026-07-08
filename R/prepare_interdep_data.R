@@ -28,10 +28,10 @@
 #' @param predictors Optional variables to use for centering and model-ready
 #'   predictor construction.
 #' @param model_type Predictor shape to construct. `"apim"` creates actor and
-#'   partner predictors. `"none"` skips model-specific predictor construction
-#'   after validation, composition inference, and optional centering. `"dim"` and
-#'   `"apim_dim"` are accepted for upcoming DIM support; currently they create
-#'   the APIM columns used as an intermediate step.
+#'   partner predictors. `"dim"` creates dyad-mean and individual-deviation
+#'   predictors. `"apim_dim"` creates both APIM and DIM predictors. `"none"`
+#'   skips model-specific predictor construction after validation, composition
+#'   inference, and optional centering.
 #' @param centering Predictor-centering strategy. `"none"` leaves predictors
 #'   undecomposed. `"time_2l"` indicates a two-level temporal decomposition into
 #'   within-person and between-person predictor components. `"auto"` resolves to
@@ -50,8 +50,10 @@
 #'   `.i_composition` and `.i_composition_role` factor columns,
 #'   `.i_is_*` numeric indicator columns, `.i_diff`, composition-specific
 #'   `.i_diff_*` columns for exchangeable dyads, and an `interdep` attribute
-#'   containing structural metadata and `dyad_compositions`. `.i_diff` is
-#'   active for exchangeable dyads and zero for distinguishable dyads.
+#'   containing structural metadata, `dyad_compositions`, and predictor metadata
+#'   such as `predictor_decompositions`, `apim_predictors`, and
+#'   `dim_predictors` when applicable. `.i_diff` is active for exchangeable
+#'   dyads and zero for distinguishable dyads.
 #'
 #' @examples
 #' data <- data.frame(
@@ -107,9 +109,12 @@ prepare_interdep_data <- function(
 
   out <- center_predictors(out)
 
-  # We want apim columns in most cases (later for some models maybe not anymore):
-  if (model_type %in% c("apim", "dim", "apim_dim")) {
+  if (model_type %in% c("apim", "apim_dim")) {
     out <- add_actor_partner_columns(out)
+  }
+
+  if (model_type %in% c("dim", "apim_dim")) {
+    out <- add_dyad_individual_columns(out)
   }
 
   # out <- add_wb_centering(out)

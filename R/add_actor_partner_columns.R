@@ -9,12 +9,13 @@
 #'
 #' The function will use the predictor decomposition metadata stored in
 #' `attr(data, "interdep")$predictor_decompositions`, so downstream code does
-#' not need to infer generated predictor columns from their names.
+#' not need to infer generated predictor columns from their names. It stores the
+#' constructed APIM columns in `attr(data, "interdep")$apim_predictors`.
 #'
 #' @param data An `interdep_data` object returned by [prepare_interdep_data()].
 #'
 #' @return An `interdep_data` object with actor and partner predictor columns
-#'   added.
+#'   added and APIM predictor metadata recorded.
 #'
 #' @keywords internal
 add_actor_partner_columns <- function(data) {
@@ -30,7 +31,6 @@ add_actor_partner_columns <- function(data) {
   has_time <- meta_data$longitudinal
   time <- meta_data$time
 
-  predictors <- meta_data$predictors
   predictor_decompositions <- meta_data$predictor_decompositions
 
   apim_predictors <- tibble::tibble(
