@@ -59,9 +59,10 @@ test_that("interdep data print describes generated predictor columns", {
 
   printed <- capture.output(print(result))
 
-  expect_true(any(grepl(".i_diff              sum-diff contrast; 0 for distinguishable dyads", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_raw_actor       raw actor predictor columns", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_raw_partner     raw partner predictor columns", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl("sum-diff contrast; 0 for distinguishable dyads", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_raw_actor/partner", printed, fixed = TRUE)))
+  expect_true(any(grepl("raw APIM actor/partner predictors", printed, fixed = TRUE)))
   expect_false(any(grepl(".i_*_actor           actor", printed, fixed = TRUE)))
   expect_false(any(grepl(".i_*_partner         partner", printed, fixed = TRUE)))
 })
@@ -84,8 +85,10 @@ test_that("interdep data print describes cross-sectional DIM columns", {
 
   printed <- capture.output(print(result))
 
-  expect_true(any(grepl(".i_*_raw_dyad_mean                  grand-mean centred raw dyad means", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_raw_within_dyad_deviation      person deviations from raw dyad means", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_raw_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl("grand-mean centred raw DIM dyad means", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_raw_within_dyad_deviation", printed, fixed = TRUE)))
+  expect_true(any(grepl("raw DIM within-dyad deviations", printed, fixed = TRUE)))
 })
 
 test_that("interdep data print describes longitudinal DIM columns", {
@@ -108,8 +111,12 @@ test_that("interdep data print describes longitudinal DIM columns", {
 
   printed <- capture.output(print(result))
 
-  expect_true(any(grepl(".i_*_cwp_dyad_mean                  shared momentary deviations from usual levels", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_cwp_within_dyad_deviation      person deviations from shared momentary deviations", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_cbp_dyad_mean                  shared usual predictor levels, centred across persons", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_cbp_within_dyad_deviation      person differences from dyad usual levels", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_cwp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl("DIM shared momentary deviations", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_cwp_within_dyad_deviation", printed, fixed = TRUE)))
+  expect_true(any(grepl("DIM deviations from shared momentary levels", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_cbp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl("DIM shared usual levels, centred across persons", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_cbp_within_dyad_deviation", printed, fixed = TRUE)))
+  expect_true(any(grepl("DIM deviations from dyad usual levels", printed, fixed = TRUE)))
 })

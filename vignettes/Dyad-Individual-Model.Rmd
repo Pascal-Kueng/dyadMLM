@@ -124,3 +124,52 @@ cat("From DIM model:\n")
 cat("  dyad-mean effect:              ", b_dyad_mean, "\n")
 cat("  within-dyad-deviation effect:  ", b_within_dyad, "\n")
 ```
+
+## Intensive longitudinal DIM
+
+
+```{r prepare-ild-exchangeable}
+ild_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_ILD,
+  group = coupleID,
+  # role = gender,
+  member = personID,
+  time = diaryday,
+  model_type = "apim_dim",
+  predictors = provided_support,
+  seed = 123
+)
+
+print(ild_exchangeable_data)
+```
+
+```{r fit-ild-exchangeable, eval = has_glmmTMB}
+
+dim_ILD <- glmmTMB::glmmTMB(
+  closeness ~ 
+    1 + 
+    
+    diaryday +
+
+    # Within-person DIM
+    .i_provided_support_cwp_dyad_mean +
+    .i_provided_support_cwp_within_dyad_deviation +
+
+    # Between-person DIM
+    .i_provided_support_cbp_dyad_mean +
+    .i_provided_support_cbp_within_dyad_deviation +
+
+    # random effects for stable non-independence (means)
+    us(1 | coupleID)  + us(0 + .i_diff | coupleID) +
+
+    # Same-day residual covariance
+    us(1 | coupleID:diaryday) + us(0 + .i_diff | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data
+)
+
+summary(dim_ILD)
+
+```

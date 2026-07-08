@@ -84,14 +84,12 @@ model-building features.
     #   .i_diff_*            composition-specific sum-diff contrasts
     #   .i_*_cwp             within-person centred predictors
     #   .i_*_cbp             between-person centred predictors
-    #   .i_*_cwp_actor       within-person actor predictor columns
-    #   .i_*_cwp_partner     within-person partner predictor columns
-    #   .i_*_cbp_actor       between-person actor predictor columns
-    #   .i_*_cbp_partner     between-person partner predictor columns
-    #   .i_*_cwp_dyad_mean                  shared momentary deviations from usual levels
-    #   .i_*_cwp_within_dyad_deviation      person deviations from shared momentary deviations
-    #   .i_*_cbp_dyad_mean                  shared usual predictor levels, centred across persons
-    #   .i_*_cbp_within_dyad_deviation      person differences from dyad usual levels
+    #   .i_*_cwp_actor/partner  within-person APIM actor/partner predictors
+    #   .i_*_cbp_actor/partner  between-person APIM actor/partner predictors
+    #   .i_*_cwp_dyad_mean      DIM shared momentary deviations
+    #   .i_*_cwp_within_dyad_deviation  DIM deviations from shared momentary levels
+    #   .i_*_cbp_dyad_mean      DIM shared usual levels, centred across persons
+    #   .i_*_cbp_within_dyad_deviation  DIM deviations from dyad usual levels
     #
     # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, and 4 more.
     # A tibble: 5,600 x 17

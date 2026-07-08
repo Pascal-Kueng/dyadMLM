@@ -72,72 +72,61 @@ print.interdep_data <- function(x, ...) {
   cat("# Added columns:\n")
 
   if (interdep_composition_col %in% names(x)) {
-    cat("#   .i_composition       inferred dyad composition\n")
+    print_added_column(".i_composition", "inferred dyad composition")
   }
 
   if (interdep_composition_role_col %in% names(x)) {
-    cat("#   .i_composition_role  composition-specific member role\n")
+    print_added_column(".i_composition_role", "composition-specific member role")
   }
 
   if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "is_")))) {
-    cat("#   .i_is_*              composition-role indicator columns\n")
+    print_added_column(".i_is_*", "composition-role indicator columns")
   }
 
   if (interdep_diff_col %in% names(x)) {
-    cat("#   .i_diff              sum-diff contrast; 0 for distinguishable dyads\n")
+    print_added_column(".i_diff", "sum-diff contrast; 0 for distinguishable dyads")
   }
 
   if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))) {
-    cat("#   .i_diff_*            composition-specific sum-diff contrasts\n")
+    print_added_column(".i_diff_*", "composition-specific sum-diff contrasts")
   }
-
-
-  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp"))) {
-    cat("#   .i_*_cwp             within-person centred predictors\n")
-  }
-  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp"))) {
-    cat("#   .i_*_cbp             between-person centred predictors\n")
-  }
-
 
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_actor"))) {
-    cat("#   .i_*_raw_actor       raw actor predictor columns\n")
-  }
-  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_partner"))) {
-    cat("#   .i_*_raw_partner     raw partner predictor columns\n")
+    print_added_column(".i_*_raw_actor/partner", "raw APIM actor/partner predictors")
   }
 
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_actor"))) {
-    cat("#   .i_*_cwp_actor       within-person actor predictor columns\n")
-  }
-  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_partner"))) {
-    cat("#   .i_*_cwp_partner     within-person partner predictor columns\n")
+    print_added_column(".i_*_cwp_actor/partner", "within-person APIM actor/partner predictors")
   }
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_actor"))) {
-    cat("#   .i_*_cbp_actor       between-person actor predictor columns\n")
+    print_added_column(".i_*_cbp_actor/partner", "between-person APIM actor/partner predictors")
   }
-  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_partner"))) {
-    cat("#   .i_*_cbp_partner     between-person partner predictor columns\n")
+
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp"))) {
+    print_added_column(".i_*_cwp", "within-person centred predictors")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp"))) {
+    print_added_column(".i_*_cbp", "between-person centred predictors")
   }
 
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_dyad_mean"))) {
-    cat("#   .i_*_raw_dyad_mean                  grand-mean centred raw dyad means\n")
+    print_added_column(".i_*_raw_dyad_mean", "grand-mean centred raw DIM dyad means")
   }
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_within_dyad_deviation"))) {
-    cat("#   .i_*_raw_within_dyad_deviation      person deviations from raw dyad means\n")
+    print_added_column(".i_*_raw_within_dyad_deviation", "raw DIM within-dyad deviations")
   }
 
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_dyad_mean"))) {
-    cat("#   .i_*_cwp_dyad_mean                  shared momentary deviations from usual levels\n")
+    print_added_column(".i_*_cwp_dyad_mean", "DIM shared momentary deviations")
   }
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_within_dyad_deviation"))) {
-    cat("#   .i_*_cwp_within_dyad_deviation      person deviations from shared momentary deviations\n")
+    print_added_column(".i_*_cwp_within_dyad_deviation", "DIM deviations from shared momentary levels")
   }
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_dyad_mean"))) {
-    cat("#   .i_*_cbp_dyad_mean                  shared usual predictor levels, centred across persons\n")
+    print_added_column(".i_*_cbp_dyad_mean", "DIM shared usual levels, centred across persons")
   }
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_within_dyad_deviation"))) {
-    cat("#   .i_*_cbp_within_dyad_deviation      person differences from dyad usual levels\n")
+    print_added_column(".i_*_cbp_within_dyad_deviation", "DIM deviations from dyad usual levels")
   }
 
   cat("#\n")
@@ -148,4 +137,8 @@ print.interdep_data <- function(x, ...) {
 
   # return original unchanged tibble
   invisible(x)
+}
+
+print_added_column <- function(column_family, description) {
+  cat(sprintf("#   %-34s %s\n", column_family, description))
 }
