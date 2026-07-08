@@ -6,7 +6,7 @@
 #   setup_center_debug()
 #   setup_add_actor_partner_debug()
 #   setup_add_dyad_individual_debug()
-#   setup_add_undirected_dsm_debug()
+#   setup_add_undirected_dyadic_score_debug()
 #
 # Each helper assigns `data` and the main local variables used inside the
 # corresponding internal function to the global environment. This makes it easy
@@ -260,7 +260,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 }
 
 
-setup_add_undirected_dsm_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
   dataset <- rlang::arg_match(dataset)
   load_interdep_debug_internals()
 

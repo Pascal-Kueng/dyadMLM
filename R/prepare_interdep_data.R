@@ -133,7 +133,7 @@ prepare_interdep_data <- function(
   }
 
   if ("undirected_dsm" %in% model_type) {
-    out <- add_undirected_dsm_columns(out)
+    out <- add_undirected_dyadic_score_columns(out)
   }
 
   return(out)

@@ -20,7 +20,7 @@
 #'   predictor columns added and DSM predictor metadata recorded.
 #'
 #' @keywords internal
-add_undirected_dsm_columns <- function(data) {
+add_undirected_dyadic_score_columns <- function(data) {
   if (!inherits(data, "interdep_data")) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
   }
@@ -52,4 +52,4 @@ add_undirected_dsm_columns <- function(data) {
 
 }
 
-# setup_add_undirected_dsm_debug()
+# setup_add_undirected_dyadic_score_debug()
