@@ -19,6 +19,12 @@ library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
+This vignette focuses on Dyad-Individual Model (DIM) predictor construction and
+its relationship to APIM parameterizations. For broader guidance on fitting
+dyadic models with `interdep`-prepared data, especially APIMs with multiple dyad
+types, generalized outcomes, intensive longitudinal models, and optimizer
+choices, see `vignette("interdep")`.
+
 ## Cross-Sectional Gaussian DIM
 
 The current DIM implementation prepares non-directed DIM predictors. This means
@@ -296,7 +302,8 @@ To include equivalent random slopes between the two models, the within-person
 model coefficients can be entered as slopes as such: 
 
 WARNING: careful about model convergence, the following models do not
-converge properly and should not be interpreted. 
+converge properly and should not be interpreted. They only show the conceptual 
+way of incorporating random slopes. 
 
 In the APIM:
 
@@ -327,8 +334,6 @@ apim_ILD_random <- glmmTMB::glmmTMB(
   , family = gaussian()
   , data = ild_exchangeable_data
 )
-
-summary(apim_ILD_random)
 
 ```
 
@@ -361,7 +366,5 @@ dim_ILD_random <- glmmTMB::glmmTMB(
   , family = gaussian()
   , data = ild_exchangeable_data
 )
-
-summary(dim_ILD_random)
 
 ```

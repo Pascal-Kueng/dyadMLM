@@ -24,6 +24,12 @@ dyadic data for statistical models. It supports common dyadic studies with one
 kind of dyad, and it also handles studies where different kinds of dyads appear
 in the same dataset, such as female-male, female-female, and male-male couples.
 
+This vignette focuses mainly on APIM-style actor and partner effects, especially
+models with multiple dyad types, intensive longitudinal data, and generalized
+outcomes. For the Dyad-Individual Model (DIM) parameterization, including
+dyad-mean and within-dyad-deviation predictors and their equivalence to APIM
+effects in exchangeable dyads, see `vignette("Dyad-Individual-Model")`.
+
 The basic data structure is a long data frame where dyads are stacked on top of
 each other and both members of a dyad appear as separate rows. For
 cross-sectional data, each complete dyad contributes one row per member. For
