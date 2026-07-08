@@ -142,40 +142,12 @@ validate_interdep_data <- function(
   }
 
 
-  # Extract and validate user-owned model columns.
+  # Extract and validate user-owned model columns!!!
   predictors_quo <- rlang::enquo(predictors)
-  predictor_names <- NULL
-
-  if (!rlang::quo_is_null(predictors_quo)) {
-    selected_predictors <- tryCatch(
-      # eval_select to extract the full vector of columns.
-      tidyselect::eval_select(predictors_quo, data = out),
-      # catch any errors to throw a package-specific one.
-      error = function(e) {
-        stop(
-          "`predictors` must refer to existing columns in `data`.",
-          call. = FALSE
-        )
-      }
-    )
-    predictor_names <- names(selected_predictors)
-  }
+  predictor_names <- select_interdep_columns(out, predictors_quo, "predictors")
 
   outcomes_quo <- rlang::enquo(outcomes)
-  outcome_names <- NULL
-
-  if (!rlang::quo_is_null(outcomes_quo)) {
-    selected_outcomes <- tryCatch(
-      tidyselect::eval_select(outcomes_quo, data = out),
-      error = function(e) {
-        stop(
-          "`outcomes` must refer to existing columns in `data`.",
-          call. = FALSE
-        )
-      }
-    )
-    outcome_names <- names(selected_outcomes)
-  }
+  outcome_names <- select_interdep_columns(out, outcomes_quo, "outcomes")
 
   # Resolve dyads with fewer than two observed members.
   out_list <- resolve_incomplete_dyads(

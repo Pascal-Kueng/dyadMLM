@@ -306,6 +306,17 @@ test_that("validate_interdep_data rejects missing columns", {
     "`predictors` must refer to existing columns in `data`.",
     fixed = TRUE
   )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      outcomes = missing_outcome
+    ),
+    "`outcomes` must refer to existing columns in `data`.",
+    fixed = TRUE
+  )
 })
 
 test_that("validate_interdep_data rejects missing grouping values", {

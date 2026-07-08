@@ -24,3 +24,22 @@ normalize_model_type <- function(model_type) {
 
   model_type
 }
+
+
+select_interdep_columns <- function(data, cols_quo, arg) {
+  if (rlang::quo_is_null(cols_quo)) {
+    return(NULL)
+  }
+
+  selected_columns <- tryCatch(
+    tidyselect::eval_select(cols_quo, data = data),
+    error = function(e) {
+      stop(
+        sprintf("`%s` must refer to existing columns in `data`.", arg),
+        call. = FALSE
+      )
+    }
+  )
+
+  names(selected_columns)
+}
