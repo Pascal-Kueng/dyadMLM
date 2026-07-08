@@ -62,7 +62,7 @@ test_that("interdep data print describes generated predictor columns", {
   expect_true(any(grepl(".i_diff", printed, fixed = TRUE)))
   expect_true(any(grepl("sum-diff contrast; 0 for distinguishable dyads", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_raw_actor/partner", printed, fixed = TRUE)))
-  expect_true(any(grepl("raw APIM actor/partner predictors", printed, fixed = TRUE)))
+  expect_true(any(grepl("APIM raw actor/partner predictors", printed, fixed = TRUE)))
   expect_false(any(grepl(".i_*_actor           actor", printed, fixed = TRUE)))
   expect_false(any(grepl(".i_*_partner         partner", printed, fixed = TRUE)))
 })
@@ -86,9 +86,9 @@ test_that("interdep data print describes cross-sectional DIM columns", {
   printed <- capture.output(print(result))
 
   expect_true(any(grepl(".i_*_raw_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl("grand-mean centred raw DIM dyad means", printed, fixed = TRUE)))
+  expect_true(any(grepl("DIM raw dyad means, grand-mean centred", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_raw_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_true(any(grepl("raw DIM within-dyad deviations", printed, fixed = TRUE)))
+  expect_true(any(grepl("DIM raw within-dyad deviations", printed, fixed = TRUE)))
 })
 
 test_that("interdep data print describes longitudinal DIM columns", {

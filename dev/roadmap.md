@@ -84,8 +84,8 @@ model-building features.
     #   .i_diff_*            composition-specific sum-diff contrasts
     #   .i_*_cwp             within-person centred predictors
     #   .i_*_cbp             between-person centred predictors
-    #   .i_*_cwp_actor/partner  within-person APIM actor/partner predictors
-    #   .i_*_cbp_actor/partner  between-person APIM actor/partner predictors
+    #   .i_*_cwp_actor/partner  APIM within-person actor/partner predictors
+    #   .i_*_cbp_actor/partner  APIM between-person actor/partner predictors
     #   .i_*_cwp_dyad_mean      DIM shared momentary deviations
     #   .i_*_cwp_within_dyad_deviation  DIM deviations from shared momentary levels
     #   .i_*_cbp_dyad_mean      DIM shared usual levels, centred across persons

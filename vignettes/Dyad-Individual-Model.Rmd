@@ -94,6 +94,7 @@ The coefficients relate as follows:
 $$ 
 b_{dyad\ mean} = b_{actor} + b_{partner}
 $$
+
 and 
 
 $$ 
@@ -143,7 +144,7 @@ ild_exchangeable_data <- prepare_interdep_data(
 print(ild_exchangeable_data)
 ```
 
-```{r fit-ild-exchangeable, eval = has_glmmTMB}
+```{r fit-ild-dim, eval = has_glmmTMB}
 
 dim_ILD <- glmmTMB::glmmTMB(
   closeness ~ 
@@ -171,5 +172,196 @@ dim_ILD <- glmmTMB::glmmTMB(
 )
 
 summary(dim_ILD)
+
+```
+
+Compare to the APIM on both levels: 
+
+```{r fit-ild-apim, eval = has_glmmTMB}
+
+apim_ILD <- glmmTMB::glmmTMB(
+  closeness ~ 
+    1 + 
+    
+    diaryday +
+
+    # Within-person APIM
+    .i_provided_support_cwp_actor +
+    .i_provided_support_cwp_partner +
+
+    # Between-person APIM
+    .i_provided_support_cbp_actor +
+    .i_provided_support_cbp_partner +
+
+    # random effects for stable non-independence (means)
+    us(1 | coupleID)  + us(0 + .i_diff | coupleID) +
+
+    # Same-day residual covariance
+    us(1 | coupleID:diaryday) + us(0 + .i_diff | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data
+)
+
+summary(apim_ILD)
+
+```
+
+The two ILD models again have identical fit statistics:
+
+```{r compare-ild-fit, eval = has_glmmTMB}
+data.frame(
+  model = c("DIM", "APIM"),
+  AIC = c(AIC(dim_ILD), AIC(apim_ILD)),
+  BIC = c(BIC(dim_ILD), BIC(apim_ILD)),
+  logLik = c(as.numeric(logLik(dim_ILD)), as.numeric(logLik(apim_ILD)))
+)
+```
+
+The equivalence holds separately for the within-person and between-person
+predictor components. For example:
+
+`b_.i_provided_support_cwp_actor + b_.i_provided_support_cwp_partner`
+corresponds to `b_.i_provided_support_cwp_dyad_mean`.
+
+Analogous sum and difference transformations apply to the other within-person
+and between-person components.
+
+This also means that an APIM parameterization can be used on one level and a
+DIM parameterization on the other.
+
+```{r fit-ild-apim-within-dim-between, eval = has_glmmTMB}
+
+apim_dim_ILD <- glmmTMB::glmmTMB(
+  closeness ~ 
+    1 + 
+    
+    diaryday +
+
+    # Within-person APIM
+    .i_provided_support_cwp_actor +
+    .i_provided_support_cwp_partner +
+
+    # Between-person DIM
+    .i_provided_support_cbp_dyad_mean +
+    .i_provided_support_cbp_within_dyad_deviation +
+
+    # random effects for stable non-independence (means)
+    us(1 | coupleID)  + us(0 + .i_diff | coupleID) +
+
+    # Same-day residual covariance
+    us(1 | coupleID:diaryday) + us(0 + .i_diff | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data
+)
+
+summary(apim_dim_ILD)
+
+```
+
+Which is still the same model:
+
+```{r compare-ild-all-fit, eval = has_glmmTMB}
+data.frame(
+  model = c("DIM", "APIM", "APIM within / DIM between"),
+  AIC = c(AIC(dim_ILD), AIC(apim_ILD), AIC(apim_dim_ILD)),
+  BIC = c(BIC(dim_ILD), BIC(apim_ILD), BIC(apim_dim_ILD)),
+  logLik = c(
+    as.numeric(logLik(dim_ILD)),
+    as.numeric(logLik(apim_ILD)),
+    as.numeric(logLik(apim_dim_ILD))
+  )
+)
+```
+
+## Advanced: Role-Moderated DIM Fixed Effects
+
+A possible extension is to let a distinguishable variable, such as gender,
+moderate the DIM fixed effects. Conceptually, this creates role-specific
+dyad-mean and within-dyad-deviation effects. Those role-specific DIM effects
+can then be translated back to actor and partner effects using the same sum and
+difference logic shown above.
+
+This is close to the fixed-effect interpretation of a distinguishable APIM, but
+it is not yet full distinguishable DIM support. In particular, the random-effect
+and residual structures would also need role-specific treatment before this
+could be treated as a complete distinguishable dyadic model.
+
+## Advanced: Random slopes
+
+To include equivalent random slopes between the two models, the within-person 
+model coefficients can be entered as slopes as such: 
+
+WARNING: careful about model convergence, the following models do not
+converge properly and should not be interpreted. 
+
+In the APIM:
+
+```{r fit-ild-apim-random, eval = FALSE}
+
+apim_ILD_random <- glmmTMB::glmmTMB(
+  closeness ~ 
+    1 + 
+    
+    diaryday +
+
+    # Within-person APIM
+    .i_provided_support_cwp_actor +
+    .i_provided_support_cwp_partner +
+
+    # Between-person APIM
+    .i_provided_support_cbp_actor +
+    .i_provided_support_cbp_partner +
+
+    # random effects for stable non-independence (means)
+    us(1 + .i_provided_support_cwp_actor + .i_provided_support_cwp_partner | coupleID)  + 
+    us(0 + .i_diff + .i_diff:.i_provided_support_cwp_actor + .i_diff:.i_provided_support_cwp_partner | coupleID) +
+
+    # Same-day residual covariance
+    us(1 | coupleID:diaryday) + us(0 + .i_diff | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data
+)
+
+summary(apim_ILD_random)
+
+```
+
+In the DIM: 
+
+```{r fit-ild-dim-random, eval = FALSE}
+
+dim_ILD_random <- glmmTMB::glmmTMB(
+  closeness ~ 
+    1 + 
+    
+    diaryday +
+
+    # Within-person DIM
+    .i_provided_support_cwp_dyad_mean +
+    .i_provided_support_cwp_within_dyad_deviation +
+
+    # Between-person DIM
+    .i_provided_support_cbp_dyad_mean +
+    .i_provided_support_cbp_within_dyad_deviation +
+
+    # random effects for stable non-independence (means)
+    us(1 + .i_provided_support_cwp_dyad_mean + .i_provided_support_cwp_within_dyad_deviation | coupleID)  + 
+    us(0 + .i_diff + .i_diff:.i_provided_support_cwp_dyad_mean + .i_diff:.i_provided_support_cwp_within_dyad_deviation | coupleID) +
+
+    # Same-day residual covariance
+    us(1 | coupleID:diaryday) + us(0 + .i_diff | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data
+)
+
+summary(dim_ILD_random)
 
 ```
