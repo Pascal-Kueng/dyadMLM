@@ -40,7 +40,7 @@ measures.}
 model-ready predictor construction.}
 
 \item{model_type}{Predictor shape to construct. \code{"apim"} creates actor and
-partner predictors. \code{"dim"} creates dyad-mean and individual-deviation
+partner predictors. \code{"dim"} creates dyad-mean and within-dyad-deviation
 predictors. \code{"apim_dim"} creates both APIM and DIM predictors. \code{"none"}
 skips model-specific predictor construction after validation, composition
 inference, and optional temporal decomposition.}

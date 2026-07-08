@@ -19,7 +19,7 @@
 #' @param model_type Requested predictor shape for downstream construction.
 #'   `"apim"` indicates actor and partner predictors, `"none"` indicates no
 #'   model-specific predictor construction, `"dim"` indicates dyad-mean and
-#'   individual-deviation predictors, and `"apim_dim"` indicates both APIM and
+#'   within-dyad-deviation predictors, and `"apim_dim"` indicates both APIM and
 #'   DIM predictors.
 #' @param temporal_decomposition Requested predictor temporal-decomposition
 #'   strategy for downstream construction. `"none"` leaves predictors

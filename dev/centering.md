@@ -12,7 +12,7 @@ Implemented scope:
 - `temporal_decomposition = c("auto", "time_2l", "none")`
 - two-level temporal decomposition for ILD predictors
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
-- DIM dyad-mean and individual-deviation columns
+- DIM dyad-mean and within-dyad-deviation columns
 
 Reserved for later:
 

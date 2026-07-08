@@ -37,7 +37,7 @@ temporal decomposition and model-helper functions.}
 \item{model_type}{Requested predictor shape for downstream construction.
 \code{"apim"} indicates actor and partner predictors, \code{"none"} indicates no
 model-specific predictor construction, \code{"dim"} indicates dyad-mean and
-individual-deviation predictors, and \code{"apim_dim"} indicates both APIM and
+within-dyad-deviation predictors, and \code{"apim_dim"} indicates both APIM and
 DIM predictors.}
 
 \item{temporal_decomposition}{Requested predictor temporal-decomposition

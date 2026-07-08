@@ -28,7 +28,7 @@
 #' @param predictors Optional variables to use for temporal decomposition and
 #'   model-ready predictor construction.
 #' @param model_type Predictor shape to construct. `"apim"` creates actor and
-#'   partner predictors. `"dim"` creates dyad-mean and individual-deviation
+#'   partner predictors. `"dim"` creates dyad-mean and within-dyad-deviation
 #'   predictors. `"apim_dim"` creates both APIM and DIM predictors. `"none"`
 #'   skips model-specific predictor construction after validation, composition
 #'   inference, and optional temporal decomposition.

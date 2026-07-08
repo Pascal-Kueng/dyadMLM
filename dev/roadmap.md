@@ -39,7 +39,7 @@ model-building features.
   - Allow explicit `temporal_decomposition = "none"` for undecomposed or
     externally centered cases
   - Support raw APIM columns, within-/between-person APIM columns, and DIM
-    dyad-mean / individual-deviation columns
+    dyad-mean / within-dyad-deviation columns
   - Keep missing-data behavior explicit
   - Keep `predictors` as the predictor-side API; add future `outcomes`
     metadata separately rather than turning `predictors` into a generic
