@@ -13,7 +13,7 @@
 #' within-dyad-deviation column is the person's deviation from the uncentered
 #' dyad mean.
 #'
-#' The function reads `attr(data, "interdep")$predictor_decompositions` and
+#' The function reads `attr(data, "interdep")$temporal_predictor_decompositions` and
 #' stores the constructed DIM columns in
 #' `attr(data, "interdep")$dim_predictors`.
 #'
@@ -35,7 +35,7 @@ add_dyad_individual_columns <- function(data) {
   has_time <- meta_data$longitudinal
   time <- meta_data$time
 
-  predictor_decompositions <- meta_data$predictor_decompositions
+  temporal_predictor_decompositions <- meta_data$temporal_predictor_decompositions
 
   # empty table for metadata
   dim_predictors <- tibble::tibble(
@@ -47,7 +47,7 @@ add_dyad_individual_columns <- function(data) {
     decomposition_level = character()
   )
 
-  if (nrow(predictor_decompositions) == 0) {
+  if (nrow(temporal_predictor_decompositions) == 0) {
     attr(data, "interdep")$dim_predictors <- dim_predictors
     return(data)
   }
@@ -56,14 +56,14 @@ add_dyad_individual_columns <- function(data) {
 
   out <- data
 
-  for (i in seq_len(nrow(predictor_decompositions))) {
-    predictor <- predictor_decompositions$predictor[[i]]
-    component <- predictor_decompositions$component[[i]]
-    source_col <- predictor_decompositions$column[[i]]
+  for (i in seq_len(nrow(temporal_predictor_decompositions))) {
+    predictor <- temporal_predictor_decompositions$predictor[[i]]
+    component <- temporal_predictor_decompositions$component[[i]]
+    source_col <- temporal_predictor_decompositions$column[[i]]
 
     if (has_time && !component %in% c("cwp", "cbp")) {
       stop(
-        "`model_type = \"dim\"` or model_type = \"undirected_dsm\" for longitudinal predictors requires supported centered predictor components. ",
+        "`model_type = \"dim\"` or `model_type = \"undirected_dsm\"` for longitudinal predictors requires supported centered predictor components. ",
         "Use `temporal_predictor_decomposition = \"auto\"` or `temporal_predictor_decomposition = \"time_2l\"`, or choose ",
         "`model_type = \"none\"` or a different supported model type.",
         call. = FALSE

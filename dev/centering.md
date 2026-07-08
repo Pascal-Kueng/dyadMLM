@@ -8,7 +8,7 @@ but use separate construction helpers.
 
 Implemented scope:
 
-- `model_type = c("apim", "dim", "apim_dim", "none")`
+- `model_type = c("apim", "dim", "undirected_dsm", "none")`
 - `temporal_predictor_decomposition = c("auto", "time_2l", "none")`
 - two-level temporal predictor decomposition for ILD predictors
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
@@ -18,7 +18,8 @@ Next v0.1.0 target:
 
 - `outcomes = NULL` in `prepare_interdep_data()` metadata, so DSM preparation
   can distinguish predictor-side and outcome-side transformations
-- `model_type = "dsm"` for undirected dyadic-score model data preparation
+- `model_type = "undirected_dsm"` for undirected dyadic-score model data
+  preparation
 
 Reserved for later:
 
@@ -40,8 +41,8 @@ random-effects structure of the fitted model.
 validate_interdep_data()
 infer_dyad_compositions()
 center_predictors()
-add_actor_partner_columns()      # model_type = "apim" or "apim_dim"
-add_dyad_individual_columns()    # model_type = "dim" or "apim_dim"
+add_actor_partner_columns()      # "apim" in model_type
+add_dyad_individual_columns()    # "dim" in model_type
 ```
 
 The resolved temporal predictor decomposition choice is stored in
@@ -82,14 +83,14 @@ Missing values:
 The metadata table is:
 
 ```r
-attr(data, "interdep")$predictor_decompositions
+attr(data, "interdep")$temporal_predictor_decompositions
 ```
 
 with one row per predictor component.
 
 ## APIM Columns
 
-`add_actor_partner_columns()` reads `predictor_decompositions` and creates APIM
+`add_actor_partner_columns()` reads `temporal_predictor_decompositions` and creates APIM
 columns.
 
 For raw predictors:
@@ -120,7 +121,7 @@ attr(data, "interdep")$apim_predictors
 
 ## DIM Columns
 
-`add_dyad_individual_columns()` also reads `predictor_decompositions`, but it
+`add_dyad_individual_columns()` also reads `temporal_predictor_decompositions`, but it
 does not depend on APIM actor/partner columns. DIM columns are computed directly
 from grouped dyad means.
 
@@ -166,7 +167,7 @@ dyad-time or within dyad.
 For undirected dyadic-score model data preparation, use a separate model type:
 
 ```r
-model_type = "dsm"
+model_type = "undirected_dsm"
 ```
 
 The intended split is:
@@ -210,7 +211,7 @@ attr(data, "interdep")$dsm_outcomes
 - user data may not contain package-owned `.i_` columns.
 - longitudinal raw DIM is currently rejected because it mixes within-person and
   between-person information.
-- `model_type = "dsm"` requires `outcomes`.
+- `model_type = "undirected_dsm"` requires `outcomes`.
 - DSM outcome columns use raw outcomes; `temporal_predictor_decomposition`
   applies only to predictors.
 
@@ -226,5 +227,5 @@ attr(data, "interdep")$dsm_outcomes
 - Keep APIM and temporal predictor decomposition model examples in APIM-focused
   vignettes; avoid duplicating APIM-DIM equivalence material there.
 - Keep the DIM vignette focused on DIM construction and APIM-DIM equivalence.
-- Add a separate DSM vignette only after `outcomes` and `model_type = "dsm"`
-  exist.
+- Add a separate DSM vignette only after `outcomes` and
+  `model_type = "undirected_dsm"` exist.

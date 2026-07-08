@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate_dim_compatibility.R
 \name{validate_dim_compatibility}
 \alias{validate_dim_compatibility}
-\title{Validate non-directed DIM compatibility}
+\title{Validate non-directed DIM/DSM compatibility}
 \usage{
 validate_dim_compatibility(data)
 }
@@ -14,8 +14,8 @@ Invisibly returns \code{data} when compatible.
 }
 \description{
 Checks whether an \code{interdep_data} object can be used for the currently
-supported non-directed DIM construction. Non-directed DIMs require \code{.i_diff}
-to be nonzero for every retained row, so distinguishable dyads are rejected
-until explicit role-contrast or pooling support is added.
+supported non-directed DIM or undirected DSM construction. These models
+require \code{.i_diff} to be nonzero for every retained row, so distinguishable
+dyads are rejected until explicit role-contrast or pooling support is added.
 }
 \keyword{internal}

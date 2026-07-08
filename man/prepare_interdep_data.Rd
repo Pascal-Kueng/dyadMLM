@@ -11,7 +11,8 @@ prepare_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
-  model_type = c("apim", "dim", "apim_dim", "none"),
+  outcomes = NULL,
+  model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
@@ -39,11 +40,16 @@ measures.}
 \item{predictors}{Optional variables to use for temporal predictor
 decomposition and model-ready predictor construction.}
 
-\item{model_type}{Predictor shape to construct. \code{"apim"} creates actor and
-partner predictors. \code{"dim"} creates dyad-mean and within-dyad-deviation
-predictors. \code{"apim_dim"} creates both APIM and DIM predictors. \code{"none"}
-skips model-specific predictor construction after validation, composition
-inference, and optional temporal predictor decomposition.}
+\item{outcomes}{Optional variables to use for model-ready outcome construction.
+Currently only needed for \code{model_type = "undirected_dsm"}.}
+
+\item{model_type}{Model-ready column families to construct. Can contain one
+or more of \code{"apim"}, \code{"dim"}, and \code{"undirected_dsm"}. \code{"apim"} creates
+actor and partner predictors. \code{"dim"} creates dyad-mean and
+within-dyad-deviation predictors. \code{"undirected_dsm"} creates undirected
+dyadic-score model columns. \code{"none"} skips model-specific predictor and
+outcome construction after validation, composition inference, and optional
+temporal predictor decomposition, and must be used alone.}
 
 \item{temporal_predictor_decomposition}{Temporal decomposition strategy for
 \code{predictors}.
@@ -51,9 +57,9 @@ inference, and optional temporal predictor decomposition.}
 constructed. \code{"time_2l"} indicates a two-level temporal predictor
 decomposition into within-person and between-person components. \code{"auto"}
 resolves to \code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and
-to \code{"none"} otherwise. For \code{"dim"} and \code{"apim_dim"}, raw cross-sectional
-dyad-mean columns are still centered around the grand mean of dyad means as
-part of DIM construction.}
+to \code{"none"} otherwise. For \code{"dim"} and \code{"undirected_dsm"}, raw
+cross-sectional dyad-mean columns are still centered around the grand mean
+of dyad means as part of DIM-style predictor construction.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and
@@ -72,7 +78,7 @@ The original data as a tibble with class \code{interdep_data},
 \verb{.i_is_*} numeric indicator columns, \code{.i_diff}, composition-specific
 \verb{.i_diff_*} columns for exchangeable dyads, and an \code{interdep} attribute
 containing structural metadata, \code{dyad_compositions}, and predictor metadata
-such as \code{predictor_decompositions}, \code{apim_predictors}, and
+such as \code{temporal_predictor_decompositions}, \code{apim_predictors}, and
 \code{dim_predictors} when applicable. \code{.i_diff} is active for exchangeable
 dyads and zero for distinguishable dyads.
 }

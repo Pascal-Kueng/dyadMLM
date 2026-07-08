@@ -39,7 +39,7 @@ test_that("center_predictors creates time_2l centered predictor columns", {
   )
 
   expect_equal(
-    attr(result, "interdep")$predictor_decompositions,
+    attr(result, "interdep")$temporal_predictor_decompositions,
     tibble::tibble(
       predictor = c("x", "x"),
       component = c("cwp", "cbp"),
@@ -112,7 +112,7 @@ test_that("center_predictors leaves uncentered data unchanged", {
 
   expect_equal(names(result), c("dyad_id", "person_id", "x"))
   expect_equal(
-    attr(result, "interdep")$predictor_decompositions,
+    attr(result, "interdep")$temporal_predictor_decompositions,
     tibble::tibble(
       predictor = "x",
       component = "raw",

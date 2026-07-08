@@ -39,7 +39,7 @@ cross_exchangeable_data <- prepare_interdep_data(
   member = personID,
   predictors = communication,
   # returning both apim and dim columns for comparison
-  model_type = "apim_dim",
+  model_type = c("apim", "dim"),
   seed = 123
 )
 
@@ -142,7 +142,7 @@ ild_exchangeable_data <- prepare_interdep_data(
   # role = gender,
   member = personID,
   time = diaryday,
-  model_type = "apim_dim",
+  model_type = c("apim", "dim"),
   predictors = provided_support,
   seed = 123
 )

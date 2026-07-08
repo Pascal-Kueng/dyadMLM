@@ -32,7 +32,7 @@ center_predictors <- function(data) {
 
   # Downstream predictor-construction helpers read this table instead of
   # inferring generated column names from string patterns.
-  predictor_decompositions <- tibble::tibble(
+  temporal_predictor_decompositions <- tibble::tibble(
     predictor = character(),
     component = character(),
     column = character(),
@@ -40,13 +40,13 @@ center_predictors <- function(data) {
   )
 
   if (length(predictors) == 0) {
-    attr(out, "interdep")$predictor_decompositions <- predictor_decompositions
+    attr(out, "interdep")$temporal_predictor_decompositions <- temporal_predictor_decompositions
 
     return(out)
   }
 
   if (temporal_predictor_decomposition == "none") {
-    attr(out, "interdep")$predictor_decompositions <- tibble::tibble(
+    attr(out, "interdep")$temporal_predictor_decompositions <- tibble::tibble(
       predictor = predictors,
       component = "raw",
       column = predictors,
@@ -83,8 +83,8 @@ center_predictors <- function(data) {
 
       out[[person_mean_col]] <- NULL
 
-      predictor_decompositions <- tibble::add_row(
-        predictor_decompositions,
+      temporal_predictor_decompositions <- tibble::add_row(
+        temporal_predictor_decompositions,
         predictor = c(predictor, predictor),
         component = c("cwp", "cbp"),
         column = c(cwp_col, cbp_col),
@@ -92,7 +92,7 @@ center_predictors <- function(data) {
       )
     }
 
-    attr(out, "interdep")$predictor_decompositions <- predictor_decompositions
+    attr(out, "interdep")$temporal_predictor_decompositions <- temporal_predictor_decompositions
 
     return(out)
   }

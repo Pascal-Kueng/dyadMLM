@@ -143,7 +143,7 @@ test_that("DIM construction errors for mixed distinguishable and exchangeable dy
       member = person_id,
       role = role,
       predictors = x,
-      model_type = "apim_dim",
+      model_type = c("apim", "dim"),
       temporal_predictor_decomposition = "none",
       seed = 123
     ),

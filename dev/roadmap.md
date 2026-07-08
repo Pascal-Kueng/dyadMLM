@@ -54,7 +54,7 @@ Target vignette structure:
   - role-moderated and random-slope material only as advanced/conceptual
     guidance until the implementation is more complete
 - future `Dyadic-Score-Model.Rmd`
-  - add only after `outcomes` and `model_type = "dsm"` exist
+  - add only after `outcomes` and `model_type = "undirected_dsm"` exist
   - keep DSM outcome-side semantics separate from DIM predictor construction
 
 ## Version 0.1.0 - First CRAN Release Candidate
@@ -88,7 +88,7 @@ model-building features.
 - Add minimal undirected dyadic-score model (DSM) data preparation
   - Add `outcomes = NULL` to store outcome variables separately from
     `predictors`
-  - Add `model_type = "dsm"` for undirected DSM preparation only
+  - Add `model_type = "undirected_dsm"` for undirected DSM preparation only
   - Reuse DIM construction for predictor-side dyad means/deviations
   - Add a separate outcome helper for raw dyad outcome means and within-dyad
     deviations

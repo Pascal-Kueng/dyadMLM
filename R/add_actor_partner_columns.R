@@ -8,7 +8,7 @@
 #' created by [center_predictors()].
 #'
 #' The function will use the predictor decomposition metadata stored in
-#' `attr(data, "interdep")$predictor_decompositions`, so downstream code does
+#' `attr(data, "interdep")$temporal_predictor_decompositions`, so downstream code does
 #' not need to infer generated predictor columns from their names. It stores the
 #' constructed APIM columns in `attr(data, "interdep")$apim_predictors`.
 #'
@@ -31,7 +31,7 @@ add_actor_partner_columns <- function(data) {
   has_time <- meta_data$longitudinal
   time <- meta_data$time
 
-  predictor_decompositions <- meta_data$predictor_decompositions
+  temporal_predictor_decompositions <- meta_data$temporal_predictor_decompositions
 
   apim_predictors <- tibble::tibble(
     predictor = character(),
@@ -42,17 +42,17 @@ add_actor_partner_columns <- function(data) {
   )
 
   # if no predictor was provided
-  if (nrow(predictor_decompositions) == 0) {
+  if (nrow(temporal_predictor_decompositions) == 0) {
     attr(data, "interdep")$apim_predictors <- apim_predictors
     return(data)
   }
 
   out <- data
 
-  for (i in seq_len(nrow(predictor_decompositions))) {
-    predictor <- predictor_decompositions$predictor[[i]]
-    component <- predictor_decompositions$component[[i]]
-    source_col <- predictor_decompositions$column[[i]]
+  for (i in seq_len(nrow(temporal_predictor_decompositions))) {
+    predictor <- temporal_predictor_decompositions$predictor[[i]]
+    component <- temporal_predictor_decompositions$component[[i]]
+    source_col <- temporal_predictor_decompositions$column[[i]]
 
     column_stem <- source_col
     if (component == "raw") {

@@ -28,7 +28,7 @@ within-dyad-deviation column is the person's deviation from the uncentered
 dyad mean.
 }
 \details{
-The function reads \code{attr(data, "interdep")$predictor_decompositions} and
+The function reads \code{attr(data, "interdep")$temporal_predictor_decompositions} and
 stores the constructed DIM columns in
 \code{attr(data, "interdep")$dim_predictors}.
 }

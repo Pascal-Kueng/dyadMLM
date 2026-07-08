@@ -100,7 +100,7 @@ test_that("prepare_interdep_data centers longitudinal predictors", {
   expect_true(".i_x_cbp" %in% names(result))
   expect_equal(result$.i_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
   expect_equal(
-    attr(result, "interdep")$predictor_decompositions,
+    attr(result, "interdep")$temporal_predictor_decompositions,
     tibble::tibble(
       predictor = c("x", "x"),
       component = c("cwp", "cbp"),
@@ -108,6 +108,32 @@ test_that("prepare_interdep_data centers longitudinal predictors", {
       temporal_predictor_decomposition = c("time_2l", "time_2l")
     )
   )
+})
+
+test_that("prepare_interdep_data constructs multiple requested model column families", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = 1:4
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = x,
+    model_type = c("apim", "dim"),
+    temporal_predictor_decomposition = "none",
+    seed = 123
+  )
+
+  expect_equal(attr(result, "interdep")$model_type, c("apim", "dim"))
+  expect_true(".i_x_raw_actor" %in% names(result))
+  expect_true(".i_x_raw_partner" %in% names(result))
+  expect_true(".i_x_raw_dyad_mean" %in% names(result))
+  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+  expect_s3_class(attr(result, "interdep")$apim_predictors, "tbl_df")
+  expect_s3_class(attr(result, "interdep")$dim_predictors, "tbl_df")
 })
 
 test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {

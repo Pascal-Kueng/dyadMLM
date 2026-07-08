@@ -9,7 +9,7 @@
 #' is treated the same as cross-sectional raw DIM predictors and is not temporally
 #' decomposed. Instead, a raw dyad mean and difference is created at each time-point.
 #'
-#' The function reads `attr(data, "interdep")$predictor_decompositions` and
+#' The function reads `attr(data, "interdep")$temporal_predictor_decompositions` and
 #' stores the constructed DSM columns in
 #' `attr(data, "interdep")$undirected_dsm_predictors`.
 #'
@@ -36,12 +36,19 @@ add_undirected_dsm_columns <- function(data) {
 
   # necessary or advisable to add this as atable just like the predictor decomp and temporal decomp tables??
   # Even if the DIM is likely the only model that needs decomp (but also the directed later.)?
-  outcome_decompositions <- NA
+  dsm_outcomes <- tibble::tibble(
+      outcome = character(),
+      source_column = character(),
+      mean_column = character(),
+      deviation_column = character()
+    )
 
-  for (outcome in seq_along(outcomes)) {
+  for (outcome in outcomes) {
     print(outcome)
   }
 
   return(out)
 
 }
+
+# setup_add_undirected_dsm_debug()

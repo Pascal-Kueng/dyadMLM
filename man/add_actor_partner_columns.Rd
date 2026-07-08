@@ -23,7 +23,7 @@ created by \code{\link[=center_predictors]{center_predictors()}}.
 }
 \details{
 The function will use the predictor decomposition metadata stored in
-\code{attr(data, "interdep")$predictor_decompositions}, so downstream code does
+\code{attr(data, "interdep")$temporal_predictor_decompositions}, so downstream code does
 not need to infer generated predictor columns from their names. It stores the
 constructed APIM columns in \code{attr(data, "interdep")$apim_predictors}.
 }

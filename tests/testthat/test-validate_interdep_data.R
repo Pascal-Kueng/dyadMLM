@@ -84,6 +84,67 @@ test_that("validate_interdep_data resolves model helper metadata", {
   expect_equal(meta$temporal_predictor_decomposition, "time_2l")
 })
 
+test_that("validate_interdep_data accepts multiple model types", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = 1:4
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = x,
+    model_type = c("apim", "dim")
+  )
+
+  expect_equal(attr(result, "interdep")$model_type, c("apim", "dim"))
+})
+
+test_that("validate_interdep_data validates incompatible model type requests", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = 1:4,
+    y = 5:8
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      model_type = c("apim", "none")
+    ),
+    '`model_type = "none"` cannot be combined with other model types.',
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = x,
+      model_type = "undirected_dsm"
+    ),
+    '`model_type = "undirected_dsm"` requires `outcomes` to be supplied.',
+    fixed = TRUE
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = x,
+    outcomes = y,
+    model_type = "undirected_dsm"
+  )
+
+  expect_equal(attr(result, "interdep")$outcomes, "y")
+})
+
 test_that("validate_interdep_data validates explicit time_2l temporal predictor decomposition", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

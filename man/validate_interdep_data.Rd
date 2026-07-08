@@ -11,7 +11,8 @@ validate_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
-  model_type = c("apim", "dim", "apim_dim", "none"),
+  outcomes = NULL,
+  model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
@@ -34,11 +35,13 @@ in the data are treated as exchangeable.}
 \item{predictors}{Optional variables to select and store as metadata for
 temporal predictor decomposition and model-helper functions.}
 
-\item{model_type}{Requested predictor shape for downstream construction.
-\code{"apim"} indicates actor and partner predictors, \code{"none"} indicates no
-model-specific predictor construction, \code{"dim"} indicates dyad-mean and
-within-dyad-deviation predictors, and \code{"apim_dim"} indicates both APIM and
-DIM predictors.}
+\item{outcomes}{Optional variables to select and store as metadata for
+outcome-side model-helper functions. Currently used by
+\code{model_type = "undirected_dsm"}.}
+
+\item{model_type}{Requested model-ready column families. Can contain one or
+more of \code{"apim"}, \code{"dim"}, and \code{"undirected_dsm"}. \code{"none"} indicates no
+model-specific predictor or outcome construction and must be used alone.}
 
 \item{temporal_predictor_decomposition}{Requested temporal predictor decomposition
 strategy for predictors. \code{"none"} leaves predictors undecomposed before
