@@ -120,6 +120,26 @@ print.interdep_data <- function(x, ...) {
     cat("#   .i_*_cbp_partner     between-person partner predictor columns\n")
   }
 
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_dyad_mean"))) {
+    cat("#   .i_*_raw_dyad_mean                  grand-mean centred raw dyad means\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_within_dyad_deviation"))) {
+    cat("#   .i_*_raw_within_dyad_deviation      person deviations from raw dyad means\n")
+  }
+
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_dyad_mean"))) {
+    cat("#   .i_*_cwp_dyad_mean                  shared momentary deviations from usual levels\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_within_dyad_deviation"))) {
+    cat("#   .i_*_cwp_within_dyad_deviation      person deviations from shared momentary deviations\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_dyad_mean"))) {
+    cat("#   .i_*_cbp_dyad_mean                  shared usual predictor levels, centred across persons\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_within_dyad_deviation"))) {
+    cat("#   .i_*_cbp_within_dyad_deviation      person differences from dyad usual levels\n")
+  }
+
   cat("#\n")
 
   out <- x

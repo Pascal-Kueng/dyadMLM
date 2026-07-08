@@ -78,6 +78,10 @@ model-building features.
     #   .i_*_cwp_partner     within-person partner predictor columns
     #   .i_*_cbp_actor       between-person actor predictor columns
     #   .i_*_cbp_partner     between-person partner predictor columns
+    #   .i_*_cwp_dyad_mean                  shared momentary deviations from usual levels
+    #   .i_*_cwp_within_dyad_deviation      person deviations from shared momentary deviations
+    #   .i_*_cbp_dyad_mean                  shared usual predictor levels, centred across persons
+    #   .i_*_cbp_within_dyad_deviation      person differences from dyad usual levels
     #
     # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, and 4 more.
     # A tibble: 5,600 x 17
@@ -114,10 +118,9 @@ Complete these before calling the feature set CRAN-ready:
     `deviation_column`, `decomposition_level`
   - make sure downstream print/vignette code reads metadata rather than
     guessing column names where possible
-- Decide whether `print.interdep_data()` should show DIM column families
-  - if yes, add compact descriptions for `.i_*_dyad_mean` and
-    `.i_*_within_dyad_deviation`
-  - avoid listing every generated column individually
+- Keep `print.interdep_data()` descriptions for DIM column families explicit
+  - describe raw, cwp, and cbp DIM columns separately when present
+  - avoid listing every generated predictor individually
 - Add a short DIM vignette after the DIM API is stable
   - show cross-sectional APIM-DIM equivalence
   - show ILD DIM construction from `time_2l` components

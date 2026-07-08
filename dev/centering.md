@@ -202,7 +202,8 @@ explicit option, not as the default behavior.
 ## Remaining v0.1.0 Work
 
 - Review `add_dyad_individual_columns()` carefully before treating DIM as stable.
-- Decide whether the print header should describe DIM column families.
+- Keep the print header descriptions for DIM column families explicit but
+  compact.
 - Add a focused DIM vignette once the DIM helper and metadata are final.
 - Keep APIM and temporal-decomposition examples in the main vignette; avoid
   duplicating the APIM-DIM equivalence material there.
