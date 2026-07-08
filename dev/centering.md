@@ -220,6 +220,10 @@ attr(data, "interdep")$dsm_outcomes
   compact.
 - Add `outcomes` and minimal undirected DSM preparation.
 - Add focused DSM tests for cross-sectional and ILD raw outcome scores.
-- Add a focused DIM vignette once the DIM helper and metadata are final.
-- Keep APIM and temporal-decomposition examples in the main vignette; avoid
-  duplicating the APIM-DIM equivalence material there.
+- Keep `getting-started.Rmd` focused on data preparation and move fitted-model
+  examples into model-specific vignettes.
+- Keep APIM and temporal-decomposition model examples in APIM-focused vignettes;
+  avoid duplicating APIM-DIM equivalence material there.
+- Keep the DIM vignette focused on DIM construction and APIM-DIM equivalence.
+- Add a separate DSM vignette only after `outcomes` and `model_type = "dsm"`
+  exist.

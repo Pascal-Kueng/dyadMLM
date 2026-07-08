@@ -17,6 +17,45 @@ eventually model syntax explicit and reproducible.
 - Composition-inference debugging scratch code:
   [`debug-infer-compositions.R`](debug-infer-compositions.R)
 
+## Vignette Architecture
+
+Keep the first-contact documentation short and stable. Heavy or
+convergence-sensitive model demonstrations should not live in the getting
+started vignette, because that makes onboarding harder and can make CRAN/pkgdown
+builds slow or fragile when optional modeling packages are installed.
+
+Target vignette structure:
+
+- `getting-started.Rmd`
+  - package purpose and expected long data structure
+  - `group`, `member`, `role`, and `time`
+  - distinguishable, exchangeable, and mixed dyad compositions
+  - missing structural data rules
+  - compact examples of `predictors`, `model_type`, `temporal_decomposition`,
+    print output, and metadata
+  - links to model-specific vignettes
+  - minimal or no fitted models
+- `apim.Rmd`
+  - cross-sectional APIM model construction
+  - distinguishable and exchangeable APIMs
+  - multiple dyad types in one APIM
+  - `.i_is_*`, `.i_diff`, and raw actor/partner predictor columns
+- `intensive-longitudinal-apim.Rmd`
+  - ILD APIMs with temporal predictor decomposition
+  - within-person and between-person actor/partner effects
+  - generalized outcomes, including Tweedie examples
+  - optimizer and convergence notes
+  - heavier unified ILD models shown carefully, with `eval = FALSE` where
+    needed
+- `Dyad-Individual-Model.Rmd`
+  - non-directed DIM assumptions
+  - cross-sectional and ILD APIM-DIM equivalence
+  - role-moderated and random-slope material only as advanced/conceptual
+    guidance until the implementation is more complete
+- future `Dyadic-Score-Model.Rmd`
+  - add only after `outcomes` and `model_type = "dsm"` exist
+  - keep DSM outcome-side semantics separate from DIM predictor construction
+
 ## Version 0.1.0 - First CRAN Release Candidate
 
 Goal: ship a small, reliable data-preparation workflow with enough ILD support
@@ -106,8 +145,14 @@ model-building features.
 - Add small inspection helpers
   - Show generated `.i_*` columns by purpose
   - Show composition counts and sparse-composition warnings
-- Keep README and vignette focused on the data-preparation workflow
-- Add a focused DIM vignette after reviewing the DIM helper API
+- Keep README and `getting-started.Rmd` focused on the data-preparation
+  workflow
+- Split model-fitting examples out of `getting-started.Rmd`
+  - use a cross-sectional APIM vignette for distinguishable, exchangeable, and
+    multiple-dyad-type APIM examples
+  - use a separate ILD APIM vignette for temporal decomposition, generalized
+    outcomes, optimizer notes, and heavier unified ILD examples
+- Keep the focused DIM vignette separate from APIM/ILD APIM examples
 - Add a short DSM data-preparation example after the DSM API is stable
 - Add citation metadata
   - `inst/CITATION` for R users
@@ -137,7 +182,16 @@ Complete these before calling the feature set CRAN-ready:
   - use dyad-time scores for ILD outcomes
   - store DSM outcome metadata separately from `dim_predictors`
   - add focused tests for cross-sectional and ILD DSM outcome construction
-- Add a short DIM vignette after the DIM API is stable
+- Finalize vignette split for v0.1.0
+  - shorten `getting-started.Rmd` so it is an orientation and data-prep
+    vignette, not the main modeling manual
+  - move current cross-sectional APIM model-fitting material into an APIM
+    vignette
+  - move ILD APIM, generalized outcome, optimizer, and unified ILD material into
+    an ILD APIM vignette
+  - keep heavy or convergence-sensitive examples out of `getting-started.Rmd`
+    and mark advanced examples `eval = FALSE` where needed
+- Keep the DIM vignette focused
   - show cross-sectional APIM-DIM equivalence
   - show ILD DIM construction from `time_2l` components
   - keep mixed-composition/maximal models in the APIM vignette for now
