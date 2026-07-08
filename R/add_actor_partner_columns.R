@@ -33,8 +33,17 @@ add_actor_partner_columns <- function(data) {
   predictors <- meta_data$predictors
   predictor_decompositions <- meta_data$predictor_decompositions
 
+  apim_predictors <- tibble::tibble(
+    predictor = character(),
+    component = character(),
+    source_column = character(),
+    actor_column = character(),
+    partner_column = character()
+  )
+
   # if no predictor was provided
   if (nrow(predictor_decompositions) == 0) {
+    attr(data, "interdep")$apim_predictors <- apim_predictors
     return(data)
   }
 
@@ -47,6 +56,15 @@ add_actor_partner_columns <- function(data) {
 
     actor_col <- paste0(source_col, "_actor")
     partner_col <- paste0(source_col, "_partner")
+
+    apim_predictors <- tibble::add_row(
+      apim_predictors,
+      predictor = predictor,
+      component = component,
+      source_column = source_col,
+      actor_column = actor_col,
+      partner_column = partner_col
+    )
 
     # Storing the actor column
     out[[actor_col]] <- out[[source_col]]
@@ -106,6 +124,8 @@ add_actor_partner_columns <- function(data) {
       )
 
   }
+
+  attr(out, "interdep")$apim_predictors <- apim_predictors
 
   return(out)
 }

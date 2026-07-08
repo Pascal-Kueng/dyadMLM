@@ -21,6 +21,16 @@ test_that("add_actor_partner_columns creates actor and partner columns", {
   expect_equal(result$.i_x_cbp_actor, result$.i_x_cbp)
   expect_equal(result$.i_x_cwp_partner, c(-2, -1, 2, 1, -2, -2, 2, 2))
   expect_equal(result$.i_x_cbp_partner, c(-5, -15, -5, -15, 15, 5, 15, 5))
+  expect_equal(
+    attr(result, "interdep")$apim_predictors,
+    tibble::tibble(
+      predictor = c("x", "x"),
+      component = c("cwp", "cbp"),
+      source_column = c(".i_x_cwp", ".i_x_cbp"),
+      actor_column = c(".i_x_cwp_actor", ".i_x_cbp_actor"),
+      partner_column = c(".i_x_cwp_partner", ".i_x_cbp_partner")
+    )
+  )
 })
 
 test_that("add_actor_partner_columns preserves rows with missing partner occasions", {
@@ -46,6 +56,16 @@ test_that("add_actor_partner_columns preserves rows with missing partner occasio
   expect_equal(nrow(result), nrow(data))
   expect_equal(result$x_actor, result$x)
   expect_equal(result$x_partner, c(10, 1, NA, 30, 20, 34, 24))
+  expect_equal(
+    attr(result, "interdep")$apim_predictors,
+    tibble::tibble(
+      predictor = "x",
+      component = "raw",
+      source_column = "x",
+      actor_column = "x_actor",
+      partner_column = "x_partner"
+    )
+  )
 })
 
 test_that("add_actor_partner_columns matches cross-sectional partners", {
@@ -68,6 +88,29 @@ test_that("add_actor_partner_columns matches cross-sectional partners", {
 
   expect_equal(result$x_actor, result$x)
   expect_equal(result$x_partner, c(10, 1, 30, 20))
+})
+
+test_that("add_actor_partner_columns stores empty metadata without predictors", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  result <- validate_interdep_data(data, group = dyad_id, member = person_id) |>
+    infer_dyad_compositions(seed = 123) |>
+    center_predictors() |>
+    add_actor_partner_columns()
+
+  expect_equal(
+    attr(result, "interdep")$apim_predictors,
+    tibble::tibble(
+      predictor = character(),
+      component = character(),
+      source_column = character(),
+      actor_column = character(),
+      partner_column = character()
+    )
+  )
 })
 
 test_that("add_actor_partner_columns preserves measured missingness", {
