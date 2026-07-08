@@ -28,10 +28,14 @@ We prepare the data with the `interdep::prepare_interdep_data()` function:
 cross_distinguishable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
-  role = gender,
   member = personID,
+  # role = gender, 
+  # currently, role cannot be supplied, as we need
+  # valid .i_diff columns that are -1 and 1 randomly per couple
   predictors = communication,
-  model_type = "dim",
+  
+  # we request both apim and dim variables so we can compare the models
+  model_type = "apim_dim",
   seed = 123
 )
 
@@ -43,12 +47,77 @@ print(cross_distinguishable_data, n = 20)
 
 ```{r}
 
-dim_1 <- glmmTMB(
+dim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 + 
     .i_communication_raw_dyad_mean + .i_communication_raw_within_dyad_deviation +
     
     (1 | coupleID) + (0 + .i_diff | coupleID)
+  
+  , data = cross_distinguishable_data
 )
+
+summary(dim_1)
+```
+
+This model is identical to an APIM as such: 
+
+```{r}
+
+apim_1 <- glmmTMB::glmmTMB(
+  satisfaction ~ 1 + 
+    .i_communication_raw_actor + .i_communication_raw_partner +
+    
+    (1 | coupleID) + (0 + .i_diff | coupleID)
+  
+  , data = cross_distinguishable_data
+)
+
+summary(apim_1)
+```
+
+
+Note the identical AIC, BIC, logLIK, etc. (p-value is not interpretable here): 
+
+```{r}
+anova(dim_1, apim_1)
+```
+
+This is evidence, that we are estimating the exact same model twice, just with different
+parametrizations and interpretations of the coefficients!
+
+The coefficients relate as such: 
+
+$$ 
+b_{BetweenCouple} = b_{actor} + b_{partner}
+$$
+and 
+
+$$ 
+b_{WithinCoupleDifference} = b_{actor} - b_{partner}
+$$
+
+E.g.,:
+
+```{r}
+b_actor <- round(apim_1$fit$par[[2]], 3)
+b_partner <- round(apim_1$fit$par[[3]], 3)
+
+b_between_couple <- round(dim_1$fit$par[[2]], 3)
+b_within_couple <- round(dim_1$fit$par[[3]], 3)
+
+# with: 
+cat("From APIM model: \n")
+cat(" actor effect: ", b_actor, "\n")
+cat(" partner effect: ", b_partner, "\n\n")
+
+cat(" actor effect + partner effect: ", b_actor + b_partner, "\n")
+cat(" actor effect - partner effect: ", b_actor - b_partner, "\n\n")
+
+
+# and: 
+cat("From DIM model: \n")
+cat(" between-couple effect:", b_between_couple, "\n")
+cat(" within-couple effect:", b_within_couple, "\n\n")
 
 ```
 

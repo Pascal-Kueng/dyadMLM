@@ -26,7 +26,9 @@ validate_dim_compatibility <- function(data) {
       "`model_type = \"dim\"` currently supports only non-directed DIMs. ",
       "For non-directed DIMs, `.i_diff` must be nonzero for every retained row. ",
       "Your data include distinguishable dyads, where `.i_diff` is 0 by construction. ",
-      "Use exchangeable dyads, or wait for explicit role-contrast or pooling support.",
+      "Use exchangeable dyads, for example by omitting the `role` argument when ",
+      "that matches your research question, or wait for explicit role-contrast ",
+      "or pooling support.",
       call. = FALSE
     )
   }
