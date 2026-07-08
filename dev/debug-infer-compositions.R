@@ -228,7 +228,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
   column_stem <- source_col
   mean_col <- paste0(column_stem, "_dyad_mean")
-  deviation_col <- paste0(column_stem, "_dyad_deviation")
+  deviation_col <- paste0(column_stem, "_within_dyad_deviation")
   decomposition_level <- if (component == "cwp") "dyad_time" else "dyad"
 
   assign_debug_vars(

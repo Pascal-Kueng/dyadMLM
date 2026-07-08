@@ -122,7 +122,7 @@ For within-person components, the decomposition level is dyad-time:
 
 ```r
 .i_x_cwp_dyad_mean
-.i_x_cwp_dyad_deviation
+.i_x_cwp_within_dyad_deviation
 ```
 
 For between-person components, the decomposition level is dyad. The
@@ -131,14 +131,14 @@ weighted by the number of observed days:
 
 ```r
 .i_x_cbp_dyad_mean
-.i_x_cbp_dyad_deviation
+.i_x_cbp_within_dyad_deviation
 ```
 
 For raw cross-sectional predictors:
 
 ```r
 .i_x_raw_dyad_mean
-.i_x_raw_dyad_deviation
+.i_x_raw_within_dyad_deviation
 ```
 
 DIM requires complete dyad information for the relevant component. If only one
@@ -181,7 +181,7 @@ observation-level dyad score at each time point:
 
 ```r
 .i_y_dyad_mean_t
-.i_y_dyad_deviation_t
+.i_y_within_dyad_deviation_t
 ```
 
 That is, the outcome is transformed into dyad mean and partner deviation at the

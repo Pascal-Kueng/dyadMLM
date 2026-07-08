@@ -73,7 +73,7 @@ add_dyad_individual_columns <- function(data) {
     }
 
     mean_col <- paste0(column_stem, "_dyad_mean")
-    deviation_col <- paste0(column_stem, "_dyad_deviation")
+    deviation_col <- paste0(column_stem, "_within_dyad_deviation")
 
     # Record the level at which this component is decomposed.
     decomposition_level <- "dyad"

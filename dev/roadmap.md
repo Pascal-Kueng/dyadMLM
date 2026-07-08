@@ -116,7 +116,7 @@ Complete these before calling the feature set CRAN-ready:
     guessing column names where possible
 - Decide whether `print.interdep_data()` should show DIM column families
   - if yes, add compact descriptions for `.i_*_dyad_mean` and
-    `.i_*_dyad_deviation`
+    `.i_*_within_dyad_deviation`
   - avoid listing every generated column individually
 - Add a short DIM vignette after the DIM API is stable
   - show cross-sectional APIM-DIM equivalence

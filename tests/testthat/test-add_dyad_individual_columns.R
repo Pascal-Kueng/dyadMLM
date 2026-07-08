@@ -18,9 +18,9 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
     add_dyad_individual_columns()
 
   expect_equal(result$.i_x_cwp_dyad_mean, c(-1.5, -1.5, 1.5, 1.5, -2, -2, 2, 2))
-  expect_equal(result$.i_x_cwp_dyad_deviation, c(0.5, -0.5, -0.5, 0.5, 0, 0, 0, 0))
+  expect_equal(result$.i_x_cwp_within_dyad_deviation, c(0.5, -0.5, -0.5, 0.5, 0, 0, 0, 0))
   expect_equal(result$.i_x_cbp_dyad_mean, c(-10, -10, -10, -10, 10, 10, 10, 10))
-  expect_equal(result$.i_x_cbp_dyad_deviation, c(-5, 5, -5, 5, -5, 5, -5, 5))
+  expect_equal(result$.i_x_cbp_within_dyad_deviation, c(-5, 5, -5, 5, -5, 5, -5, 5))
 
   expect_equal(
     attr(result, "interdep")$dim_predictors,
@@ -29,7 +29,7 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
       component = c("cwp", "cbp"),
       source_column = c(".i_x_cwp", ".i_x_cbp"),
       mean_column = c(".i_x_cwp_dyad_mean", ".i_x_cbp_dyad_mean"),
-      deviation_column = c(".i_x_cwp_dyad_deviation", ".i_x_cbp_dyad_deviation"),
+      deviation_column = c(".i_x_cwp_within_dyad_deviation", ".i_x_cbp_within_dyad_deviation"),
       decomposition_level = c("dyad_time", "dyad")
     )
   )
@@ -57,7 +57,7 @@ test_that("add_dyad_individual_columns requires complete dyad values for each co
   expect_false(is.na(result$.i_x_cwp_dyad_mean[1]))
   expect_true(is.na(result$.i_x_cwp_dyad_mean[3]))
   expect_true(all(is.na(result$.i_x_cbp_dyad_mean[result$dyad_id == 2])))
-  expect_true(all(is.na(result$.i_x_cbp_dyad_deviation[result$dyad_id == 2])))
+  expect_true(all(is.na(result$.i_x_cbp_within_dyad_deviation[result$dyad_id == 2])))
 })
 
 test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns", {
@@ -79,7 +79,7 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
     add_dyad_individual_columns()
 
   expect_equal(result$.i_x_raw_dyad_mean, c(-9.75, -9.75, 9.75, 9.75))
-  expect_equal(result$.i_x_raw_dyad_deviation, c(-4.5, 4.5, -5, 5))
+  expect_equal(result$.i_x_raw_within_dyad_deviation, c(-4.5, 4.5, -5, 5))
 })
 
 test_that("prepare_interdep_data creates DIM columns without APIM columns", {
