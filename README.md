@@ -14,10 +14,9 @@ It supports common dyadic studies with one kind of dyad, and it also
 handles studies where different kinds of dyads appear in the same
 dataset, such as female-male, female-female, and male-male couples.
 
-The vignette “Preparing dyadic data with interdep” demonstrates how
-prepared data can be used to estimate dyadic models, including
-generalized intensive longitudinal APIMs with multiple dyad types in a
-single model.
+The “Getting Started” vignette demonstrates how prepared data can be
+used to estimate dyadic models, including generalized intensive
+longitudinal APIMs with multiple dyad types in a single model.
 
 ## Citation
 
@@ -58,6 +57,19 @@ prepared <- prepare_interdep_data(
 )
 
 prepared
+#> # interdep data
+#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Structure: group = coupleID, member = personID, role = gender
+#> #
+#> # Dyad compositions:
+#> # female_x_male distinguishable 95 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition                     inferred dyad composition
+#> #   .i_composition_role                composition-specific member role
+#> #   .i_is_*                            composition-role indicator columns
+#> #   .i_diff                            sum-diff contrast; 0 for distinguishable dyads
+#> #
 #> # A tibble: 190 × 10
 #>    personID coupleID gender communication satisfaction .i_composition
 #>       <int>    <int> <chr>          <dbl>        <dbl> <fct>         

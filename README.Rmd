@@ -25,7 +25,7 @@ It supports common dyadic studies with one kind of dyad, and it also handles
 studies where different kinds of dyads appear in the same dataset, such as
 female-male, female-female, and male-male couples.
 
-The vignette "Preparing dyadic data with interdep" demonstrates how prepared
+The "Getting Started" vignette demonstrates how prepared
 data can be used to estimate dyadic models, including generalized intensive
 longitudinal APIMs with multiple dyad types in a single model.
 
