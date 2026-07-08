@@ -35,8 +35,7 @@ add_undirected_dyadic_score_columns <- function(data) {
   member <- meta_data$member
   outcomes <- meta_data$outcomes
 
-  # necessary or advisable to add this as atable just like the predictor decomp and temporal decomp tables??
-  # Even if the DIM is likely the only model that needs decomp (but also the directed later.)?
+  # Prepare empty tibble
   dsm_outcomes <- tibble::tibble(
       outcome = character(),
       source_column = character(),
@@ -45,8 +44,43 @@ add_undirected_dyadic_score_columns <- function(data) {
     )
 
   for (outcome in outcomes) {
-    print(outcome)
+    source_col <- outcome
+    mean_col <- paste0(interdep_reserved_prefix, outcome, "_raw_dyad_mean")
+    deviation_col <- paste0(interdep_reserved_prefix, outcome, "_raw_within_dyad_deviation")
+
+    # update tibble
+    dsm_outcomes <- tibble::add_row(
+      dsm_outcomes,
+      outcome = outcome,
+      source_column = outcome,
+      mean_column = mean_col,
+      deviation_column = deviation_col
+    )
+
+    # Create correct values
+    dyad_values <- out |>
+      dplyr::group_by(.data[[group]]) |>
+      dplyr::mutate(
+        .i_dim_n_observed = sum(!is.na(.data[[source_col]])),
+        "{mean_col}" := dplyr::if_else(
+          .data$.i_dim_n_observed == 2L,
+          no_NaN_mean(.data[[source_col]]),
+          NA_real_
+        ),
+        "{deviation_col}" := .data[[source_col]] - .data[[mean_col]]
+      ) |>
+      dplyr::ungroup()
+
+    dyad_values <- dyad_values |>
+      dplyr::select(
+        dplyr::all_of(c(group, member)),
+        dplyr::all_of(c(mean_col, deviation_col))
+      )
+
+    dplyr::left_join(out, dyad_values, by = c(group, member))
   }
+
+  attr(out, "interdep")$undirected_dsm_outcomes <- dsm_outcomes
 
   return(out)
 
