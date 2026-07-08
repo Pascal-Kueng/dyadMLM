@@ -19,7 +19,7 @@ test_that("undirected DSM creates raw cross-sectional outcome columns", {
 
   expect_equal(result$.i_y_raw_dyad_mean, c(12, 12, 22, 22))
   expect_equal(result$.i_y_raw_within_dyad_deviation, c(-2, 2, -2, 2))
-  expect_true(".i_x_raw_dyad_mean" %in% names(result))
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
 
   expect_equal(

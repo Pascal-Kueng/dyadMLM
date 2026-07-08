@@ -146,7 +146,7 @@ weighted by the number of observed days:
 For raw cross-sectional predictors:
 
 ```r
-.i_x_raw_dyad_mean
+.i_x_raw_dyad_mean_gmc
 .i_x_raw_within_dyad_deviation
 ```
 

@@ -130,7 +130,7 @@ test_that("prepare_interdep_data constructs multiple requested model column fami
   expect_equal(attr(result, "interdep")$model_type, c("apim", "dim"))
   expect_true(".i_x_raw_actor" %in% names(result))
   expect_true(".i_x_raw_partner" %in% names(result))
-  expect_true(".i_x_raw_dyad_mean" %in% names(result))
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
   expect_s3_class(attr(result, "interdep")$apim_predictors, "tbl_df")
   expect_s3_class(attr(result, "interdep")$dim_predictors, "tbl_df")

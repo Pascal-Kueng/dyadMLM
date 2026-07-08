@@ -78,8 +78,20 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
     center_predictors() |>
     add_dyad_individual_columns()
 
-  expect_equal(result$.i_x_raw_dyad_mean, c(-9.75, -9.75, 9.75, 9.75))
+  expect_equal(result$.i_x_raw_dyad_mean_gmc, c(-9.75, -9.75, 9.75, 9.75))
   expect_equal(result$.i_x_raw_within_dyad_deviation, c(-4.5, 4.5, -5, 5))
+
+  expect_equal(
+    attr(result, "interdep")$dim_predictors,
+    tibble::tibble(
+      predictor = "x",
+      component = "raw",
+      source_column = "x",
+      mean_column = ".i_x_raw_dyad_mean_gmc",
+      deviation_column = ".i_x_raw_within_dyad_deviation",
+      decomposition_level = "dyad"
+    )
+  )
 })
 
 test_that("prepare_interdep_data creates DIM columns without APIM columns", {
@@ -99,7 +111,7 @@ test_that("prepare_interdep_data creates DIM columns without APIM columns", {
     seed = 123
   )
 
-  expect_true(".i_x_raw_dyad_mean" %in% names(result))
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_false("x_actor" %in% names(result))
   expect_false("x_partner" %in% names(result))
 })

@@ -85,7 +85,7 @@ test_that("interdep data print describes cross-sectional DIM columns", {
 
   printed <- capture.output(print(result))
 
-  expect_true(any(grepl(".i_*_raw_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_raw_dyad_mean_gmc", printed, fixed = TRUE)))
   expect_true(any(grepl("DIM raw dyad means, grand-mean centred", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_raw_within_dyad_deviation", printed, fixed = TRUE)))
   expect_true(any(grepl("DIM raw within-dyad deviations", printed, fixed = TRUE)))

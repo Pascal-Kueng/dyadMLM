@@ -55,7 +55,7 @@ within-dyad random deviation indexed by `.i_diff`.
 
 dim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 +
-    .i_communication_raw_dyad_mean + .i_communication_raw_within_dyad_deviation +
+    .i_communication_raw_dyad_mean_gmc + .i_communication_raw_within_dyad_deviation +
     (1 | coupleID) + (0 + .i_diff | coupleID),
   data = cross_exchangeable_data
 )
@@ -116,7 +116,7 @@ dim_coef <- glmmTMB::fixef(dim_1)$cond
 b_actor <- round(apim_coef[[".i_communication_raw_actor"]], 3)
 b_partner <- round(apim_coef[[".i_communication_raw_partner"]], 3)
 
-b_dyad_mean <- round(dim_coef[[".i_communication_raw_dyad_mean"]], 3)
+b_dyad_mean <- round(dim_coef[[".i_communication_raw_dyad_mean_gmc"]], 3)
 b_within_dyad <- round(dim_coef[[".i_communication_raw_within_dyad_deviation"]], 3)
 
 cat("From APIM model:\n")

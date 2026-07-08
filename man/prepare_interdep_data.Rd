@@ -57,9 +57,9 @@ temporal predictor decomposition, and must be used alone.}
 constructed. \code{"time_2l"} indicates a two-level temporal predictor
 decomposition into within-person and between-person components. \code{"auto"}
 resolves to \code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and
-to \code{"none"} otherwise. For \code{"dim"} and \code{"undirected_dsm"}, raw
-cross-sectional dyad-mean columns are still centered around the grand mean
-of dyad means as part of DIM-style predictor construction.}
+to \code{"none"} otherwise. Raw cross-sectional DIM predictor dyad-mean columns
+are still centered around the grand mean of dyad means as part of DIM-style
+predictor construction.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

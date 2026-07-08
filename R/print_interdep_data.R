@@ -109,8 +109,8 @@ print.interdep_data <- function(x, ...) {
     print_added_column(".i_*_cbp_actor/partner", "APIM between-person actor/partner predictors")
   }
 
-  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_dyad_mean"))) {
-    print_added_column(".i_*_raw_dyad_mean", "DIM raw dyad means, grand-mean centred")
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_dyad_mean_gmc"))) {
+    print_added_column(".i_*_raw_dyad_mean_gmc", "DIM raw dyad means, grand-mean centred")
   }
   if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_raw_within_dyad_deviation"))) {
     print_added_column(".i_*_raw_within_dyad_deviation", "DIM raw within-dyad deviations")

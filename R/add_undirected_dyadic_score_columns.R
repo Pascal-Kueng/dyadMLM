@@ -6,9 +6,9 @@
 #' dyad composition. This means distinguishable dyads and multiple exchangeable
 #' compositions are not supported by DSM construction until explicit
 #' role-contrast, composition-specific, or pooling support is added.
-#' Predictors are constructed and treated identically to the DIM method. The outcome
-#' is treated the same as cross-sectional raw DIM predictors and is not temporally
-#' decomposed. Instead, a raw dyad mean and difference is created at each time-point.
+#' Predictors are constructed and treated identically to the DIM method.
+#' Outcomes are not temporally decomposed or grand-mean centered. Instead, a raw
+#' dyad mean and difference is created at each time-point.
 #'
 #' The function reads `attr(data, "interdep")$temporal_predictor_decompositions` and
 #' stores the constructed outcome columns in
@@ -17,7 +17,7 @@
 #' @param data An `interdep_data` object returned by [prepare_interdep_data()].
 #'
 #' @return An `interdep_data` object with dyad-mean and within-dyad-deviation
-#'   predictor columns added and DSM predictor metadata recorded.
+#'   predictor and outcome columns added and DSM outcome metadata recorded.
 #'
 #' @keywords internal
 add_undirected_dyadic_score_columns <- function(data) {
