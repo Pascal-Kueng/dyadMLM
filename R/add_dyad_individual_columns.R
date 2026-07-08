@@ -2,9 +2,11 @@
 #'
 #' Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad-deviation
 #' columns for the predictors recorded in an `interdep_data` object. For
-#' currently supported non-directed DIMs, `.i_diff` must be nonzero for every
-#' retained row. This means distinguishable dyads are not supported by DIM
-#' construction until explicit role-contrast or pooling support is added. For
+#' currently supported undirected DIMs and undirected DSMs, the data must
+#' contain one exchangeable dyad composition. This means distinguishable dyads
+#' and multiple exchangeable compositions are not supported by DIM/DSM
+#' construction until explicit role-contrast, composition-specific, or pooling
+#' support is added. For
 #' intensive longitudinal predictors decomposed by [center_predictors()], the
 #' within-person component is decomposed within each dyad-time occasion and the
 #' between-person component is decomposed once within each dyad.

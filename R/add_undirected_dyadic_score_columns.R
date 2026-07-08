@@ -2,9 +2,10 @@
 #'
 #' Adds Dyad-Score Model (DSM) style dyad-mean and within-dyad-deviation
 #' columns for the predictors and outcomes recorded in an `interdep_data` object. For
-#' currently supported non-directed DSMs, `.i_diff` must be nonzero for every
-#' retained row. This means distinguishable dyads are not supported by DSM
-#' construction until explicit role-contrast or pooling support is added.
+#' currently supported undirected DSMs, the data must contain one exchangeable
+#' dyad composition. This means distinguishable dyads and multiple exchangeable
+#' compositions are not supported by DSM construction until explicit
+#' role-contrast, composition-specific, or pooling support is added.
 #' Predictors are constructed and treated identically do the DIM method. The outcome
 #' is treated the same as cross-sectional raw DIM predictors and is not temporally
 #' decomposed. Instead, a raw dyad mean and difference is created at each time-point.

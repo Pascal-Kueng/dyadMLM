@@ -123,7 +123,7 @@ test_that("DIM construction errors for distinguishable dyads", {
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "`.i_diff` must be nonzero for every retained row",
+    "currently require one exchangeable dyad composition",
     fixed = TRUE
   )
 })
@@ -147,7 +147,31 @@ test_that("DIM construction errors for mixed distinguishable and exchangeable dy
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "Your data include distinguishable dyads",
+    "currently require one exchangeable dyad composition",
+    fixed = TRUE
+  )
+})
+
+test_that("DIM construction errors for multiple exchangeable dyad compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "male", "male"),
+    x = c(1, 10, 20, 30)
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      predictors = x,
+      model_type = "dim",
+      temporal_predictor_decomposition = "none",
+      seed = 123
+    ),
+    "currently require one exchangeable dyad composition",
     fixed = TRUE
   )
 })

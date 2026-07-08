@@ -13,6 +13,7 @@ Implemented scope:
 - two-level temporal predictor decomposition for ILD predictors
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
 - DIM dyad-mean and within-dyad-deviation columns
+- DIM currently requires one exchangeable dyad composition
 
 Next v0.1.0 target:
 
@@ -20,6 +21,7 @@ Next v0.1.0 target:
   can distinguish predictor-side and outcome-side transformations
 - `model_type = "undirected_dsm"` for undirected dyadic-score model data
   preparation
+- undirected DSM currently requires one exchangeable dyad composition
 
 Reserved for later:
 
@@ -153,6 +155,10 @@ partner has an observed value for that component, the dyad mean and deviation
 are set to missing for that dyad or dyad-time. This preserves APIM-DIM
 equivalence.
 
+The current DIM implementation requires one exchangeable dyad composition.
+Distinguishable dyads and multiple exchangeable compositions should be rejected
+until role-contrast, composition-specific, or pooling support is explicit.
+
 The metadata table is:
 
 ```r
@@ -214,6 +220,8 @@ attr(data, "interdep")$dsm_outcomes
 - `model_type = "undirected_dsm"` requires `outcomes`.
 - DSM outcome columns use raw outcomes; `temporal_predictor_decomposition`
   applies only to predictors.
+- `model_type = "dim"` and `model_type = "undirected_dsm"` currently require
+  one exchangeable dyad composition.
 
 ## Remaining v0.1.0 Work
 

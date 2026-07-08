@@ -27,7 +27,7 @@ choices, see `vignette("getting-started")`.
 
 ## Cross-Sectional Gaussian DIM
 
-The current DIM implementation prepares non-directed DIM predictors. This means
+The current DIM implementation prepares undirected DIM predictors. This means
 that the dyad members are treated as exchangeable for DIM construction. Here we
 therefore omit `role`, which makes `prepare_interdep_data()` create a valid
 `.i_diff` contrast with values `-1` and `1` within each dyad.

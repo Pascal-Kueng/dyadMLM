@@ -22,7 +22,7 @@ load_interdep_debug_internals <- function() {
   source("R/validate_dim_compatibility.R")
   source("R/add_actor_partner_columns.R")
   source("R/add_dyad_individual_columns.R")
-  source("R/add_undirected_dsm_columns.R")
+  source("R/add_undirected_dyadic_score_columns.R")
 
   invisible(TRUE)
 }

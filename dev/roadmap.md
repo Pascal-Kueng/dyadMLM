@@ -49,7 +49,7 @@ Target vignette structure:
   - heavier unified ILD models shown carefully, with `eval = FALSE` where
     needed
 - `Dyad-Individual-Model.Rmd`
-  - non-directed DIM assumptions
+  - undirected DIM assumptions
   - cross-sectional and ILD APIM-DIM equivalence
   - role-moderated and random-slope material only as advanced/conceptual
     guidance until the implementation is more complete
@@ -89,6 +89,7 @@ model-building features.
   - Add `outcomes = NULL` to store outcome variables separately from
     `predictors`
   - Add `model_type = "undirected_dsm"` for undirected DSM preparation only
+  - Require one exchangeable dyad composition for the first undirected DSM path
   - Reuse DIM construction for predictor-side dyad means/deviations
   - Add a separate outcome helper for raw dyad outcome means and within-dyad
     deviations
@@ -168,6 +169,7 @@ Complete these before calling the feature set CRAN-ready:
   - confirm direct grouped DIM construction is final
   - confirm missingness behavior for incomplete dyad components is documented
   - confirm raw cross-sectional DIM names are final
+  - keep the v0.1 scope restricted to one exchangeable dyad composition
 - Finalize DIM metadata
   - decide whether `dim_predictors` table columns are stable:
     `predictor`, `component`, `source_column`, `mean_column`,

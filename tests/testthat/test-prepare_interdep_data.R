@@ -154,6 +154,29 @@ test_that("prepare_interdep_data rejects unsupported model types", {
   )
 })
 
+test_that("prepare_interdep_data rejects unsupported dyad compositions for undirected DSM", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
+    y = c(1, 2, 3, 4)
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      outcomes = y,
+      model_type = "undirected_dsm",
+      seed = 123
+    ),
+    "currently require one exchangeable dyad composition",
+    fixed = TRUE
+  )
+})
+
 test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
