@@ -25,21 +25,22 @@
 #'   is supplied, all dyads are treated as the same type of exchangeable dyads.
 #' @param time Optional column identifying time or measurement order of repeated
 #' measures.
-#' @param predictors Optional variables to use for temporal decomposition and
-#'   model-ready predictor construction.
+#' @param predictors Optional variables to use for temporal predictor
+#'   decomposition and model-ready predictor construction.
 #' @param model_type Predictor shape to construct. `"apim"` creates actor and
 #'   partner predictors. `"dim"` creates dyad-mean and within-dyad-deviation
 #'   predictors. `"apim_dim"` creates both APIM and DIM predictors. `"none"`
 #'   skips model-specific predictor construction after validation, composition
-#'   inference, and optional temporal decomposition.
-#' @param temporal_decomposition Predictor temporal-decomposition strategy.
+#'   inference, and optional temporal predictor decomposition.
+#' @param temporal_predictor_decomposition Temporal decomposition strategy for
+#'   `predictors`.
 #'   `"none"` leaves predictors undecomposed before model-specific columns are
-#'   constructed. `"time_2l"` indicates a two-level temporal decomposition into
-#'   within-person and between-person predictor components. `"auto"` resolves to
-#'   `"time_2l"` when both `time` and `predictors` are supplied, and to `"none"`
-#'   otherwise. For `"dim"` and `"apim_dim"`, raw cross-sectional dyad-mean
-#'   columns are still centered around the grand mean of dyad means as part of
-#'   DIM construction.
+#'   constructed. `"time_2l"` indicates a two-level temporal predictor
+#'   decomposition into within-person and between-person components. `"auto"`
+#'   resolves to `"time_2l"` when both `time` and `predictors` are supplied, and
+#'   to `"none"` otherwise. For `"dim"` and `"apim_dim"`, raw cross-sectional
+#'   dyad-mean columns are still centered around the grand mean of dyad means as
+#'   part of DIM construction.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -84,14 +85,14 @@ prepare_interdep_data <- function(
     time = NULL,
     predictors = NULL,
     model_type = c("apim", "dim", "apim_dim", "none"),
-    temporal_decomposition = c("auto", "time_2l", "none"),
+    temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
     seed = NULL
   ) {
 
   model_type <- rlang::arg_match(model_type)
-  temporal_decomposition <- rlang::arg_match(temporal_decomposition)
+  temporal_predictor_decomposition <- rlang::arg_match(temporal_predictor_decomposition)
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
 
@@ -103,7 +104,7 @@ prepare_interdep_data <- function(
     time = {{ time }},
     predictors = {{ predictors }},
     model_type = model_type,
-    temporal_decomposition = temporal_decomposition,
+    temporal_predictor_decomposition = temporal_predictor_decomposition,
     incomplete_dyads = incomplete_dyads,
     missing_role = missing_role
   )

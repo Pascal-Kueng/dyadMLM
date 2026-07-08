@@ -63,9 +63,9 @@ add_dyad_individual_columns <- function(data) {
 
     if (has_time && !component %in% c("cwp", "cbp")) {
       stop(
-        "`model_type = \"dim\"` for longitudinal predictors requires supported centered predictor components. ",
-        "Use `temporal_decomposition = \"auto\"` or `temporal_decomposition = \"time_2l\"`, or choose ",
-        "`model_type = \"none\"` to skip DIM construction.",
+        "`model_type = \"dim\"` or model_type = \"undirected_dsm\" for longitudinal predictors requires supported centered predictor components. ",
+        "Use `temporal_predictor_decomposition = \"auto\"` or `temporal_predictor_decomposition = \"time_2l\"`, or choose ",
+        "`model_type = \"none\"` or a different supported model type.",
         call. = FALSE
       )
     }

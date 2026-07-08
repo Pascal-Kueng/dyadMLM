@@ -8,7 +8,7 @@ Description: Helps researchers prepare cross-sectional and intensive
     dyadic designs with one kind of dyad, while also handling studies that
     combine different kinds of dyads, such as female-male, female-female, and
     male-male couples. It validates long-format dyadic data and creates the
-    role, composition, and temporal-decomposition variables needed for
+    role, composition, and temporal predictor decomposition variables needed for
     multilevel models, including generalized multilevel models. Prepared data
     can be used to estimate dyadic models, including generalized intensive
     longitudinal actor-partner interdependence models with multiple dyad types

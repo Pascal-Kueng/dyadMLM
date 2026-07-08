@@ -72,7 +72,7 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
     group = dyad_id,
     member = person_id,
     predictors = x,
-    temporal_decomposition = "none"
+    temporal_predictor_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -95,7 +95,7 @@ test_that("prepare_interdep_data creates DIM columns without APIM columns", {
     member = person_id,
     predictors = x,
     model_type = "dim",
-    temporal_decomposition = "none",
+    temporal_predictor_decomposition = "none",
     seed = 123
   )
 
@@ -120,7 +120,7 @@ test_that("DIM construction errors for distinguishable dyads", {
       role = role,
       predictors = x,
       model_type = "dim",
-      temporal_decomposition = "none",
+      temporal_predictor_decomposition = "none",
       seed = 123
     ),
     "`.i_diff` must be nonzero for every retained row",
@@ -144,7 +144,7 @@ test_that("DIM construction errors for mixed distinguishable and exchangeable dy
       role = role,
       predictors = x,
       model_type = "apim_dim",
-      temporal_decomposition = "none",
+      temporal_predictor_decomposition = "none",
       seed = 123
     ),
     "Your data include distinguishable dyads",
@@ -168,7 +168,7 @@ test_that("longitudinal raw DIM construction errors clearly", {
       time = time,
       predictors = x,
       model_type = "dim",
-      temporal_decomposition = "none",
+      temporal_predictor_decomposition = "none",
       seed = 123
     ),
     "requires supported centered predictor components"

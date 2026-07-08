@@ -28,7 +28,7 @@ center_predictors <- function(data) {
   group <- meta_data$group
   member <- meta_data$member
   predictors <- meta_data$predictors
-  temporal_decomposition <- meta_data$temporal_decomposition
+  temporal_predictor_decomposition <- meta_data$temporal_predictor_decomposition
 
   # Downstream predictor-construction helpers read this table instead of
   # inferring generated column names from string patterns.
@@ -36,7 +36,7 @@ center_predictors <- function(data) {
     predictor = character(),
     component = character(),
     column = character(),
-    temporal_decomposition = character()
+    temporal_predictor_decomposition = character()
   )
 
   if (length(predictors) == 0) {
@@ -45,18 +45,18 @@ center_predictors <- function(data) {
     return(out)
   }
 
-  if (temporal_decomposition == "none") {
+  if (temporal_predictor_decomposition == "none") {
     attr(out, "interdep")$predictor_decompositions <- tibble::tibble(
       predictor = predictors,
       component = "raw",
       column = predictors,
-      temporal_decomposition = temporal_decomposition
+      temporal_predictor_decomposition = temporal_predictor_decomposition
     )
 
     return(out)
   }
 
-  if (temporal_decomposition == "time_2l") {
+  if (temporal_predictor_decomposition == "time_2l") {
     predictor_suffixes <- make_interdep_suffixes(predictors)
 
     for (predictor in predictors) {
@@ -88,7 +88,7 @@ center_predictors <- function(data) {
         predictor = c(predictor, predictor),
         component = c("cwp", "cbp"),
         column = c(cwp_col, cbp_col),
-        temporal_decomposition = temporal_decomposition
+        temporal_predictor_decomposition = temporal_predictor_decomposition
       )
     }
 
@@ -97,7 +97,7 @@ center_predictors <- function(data) {
     return(out)
   }
 
-  stop("Unsupported `temporal_decomposition` value in `data` metadata.", call. = FALSE)
+  stop("Unsupported `temporal_predictor_decomposition` value in `data` metadata.", call. = FALSE)
 }
 
 

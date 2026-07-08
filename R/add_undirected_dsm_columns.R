@@ -1,0 +1,47 @@
+#' Add dyadic-score model (undirected) predictor and outcome columns
+#'
+#' Adds Dyad-Score Model (DSM) style dyad-mean and within-dyad-deviation
+#' columns for the predictors and outcomes recorded in an `interdep_data` object. For
+#' currently supported non-directed DSMs, `.i_diff` must be nonzero for every
+#' retained row. This means distinguishable dyads are not supported by DSM
+#' construction until explicit role-contrast or pooling support is added.
+#' Predictors are constructed and treated identically do the DIM method. The outcome
+#' is treated the same as cross-sectional raw DIM predictors and is not temporally
+#' decomposed. Instead, a raw dyad mean and difference is created at each time-point.
+#'
+#' The function reads `attr(data, "interdep")$predictor_decompositions` and
+#' stores the constructed DSM columns in
+#' `attr(data, "interdep")$undirected_dsm_predictors`.
+#'
+#' @param data An `interdep_data` object returned by [prepare_interdep_data()].
+#'
+#' @return An `interdep_data` object with dyad-mean and within-dyad-deviation
+#'   predictor columns added and DSM predictor metadata recorded.
+#'
+#' @keywords internal
+add_undirected_dsm_columns <- function(data) {
+  if (!inherits(data, "interdep_data")) {
+    stop("`data` must be an `interdep_data` object.", call. = FALSE)
+  }
+
+  # Handle predictors
+  out <- add_dyad_individual_columns(data)
+
+  # Handle outcomes
+  meta_data <- attr(out, "interdep")
+
+  group <- meta_data$group
+  member <- meta_data$member
+  outcomes <- meta_data$outcomes
+
+  # necessary or advisable to add this as atable just like the predictor decomp and temporal decomp tables??
+  # Even if the DIM is likely the only model that needs decomp (but also the directed later.)?
+  outcome_decompositions <- NA
+
+  for (outcome in seq_along(outcomes)) {
+    print(outcome)
+  }
+
+  return(out)
+
+}

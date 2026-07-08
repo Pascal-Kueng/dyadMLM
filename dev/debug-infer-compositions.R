@@ -61,7 +61,7 @@ setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
   has_role <- TRUE
   has_time <- TRUE
   model_type <- "apim"
-  temporal_decomposition <- "auto"
+  temporal_predictor_decomposition <- "auto"
   incomplete_dyads <- "error"
   missing_role <- "error"
 
@@ -76,7 +76,7 @@ setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
     has_role = has_role,
     has_time = has_time,
     model_type = model_type,
-    temporal_decomposition = temporal_decomposition,
+    temporal_predictor_decomposition = temporal_predictor_decomposition,
     incomplete_dyads = incomplete_dyads,
     missing_role = missing_role
   )
@@ -133,7 +133,7 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
   group <- meta_data$group
   member <- meta_data$member
   predictors <- meta_data$predictors
-  temporal_decomposition <- meta_data$temporal_decomposition
+  temporal_predictor_decomposition <- meta_data$temporal_predictor_decomposition
 
   assign_debug_vars(
     data = data,
@@ -142,7 +142,7 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
     group = group,
     member = member,
     predictors = predictors,
-    temporal_decomposition = temporal_decomposition
+    temporal_predictor_decomposition = temporal_predictor_decomposition
   )
 
   invisible(data)

@@ -1,16 +1,16 @@
-# Temporal Decomposition and Predictor Construction
+# Temporal Predictor Decomposition and Predictor Construction
 
 This note records the current v0.1.0 design for predictor construction. The
-core rule is that APIM and DIM share the same temporal decomposition, but use
-separate construction helpers.
+core rule is that APIM and DIM share the same temporal predictor decomposition,
+but use separate construction helpers.
 
 ## Current Scope
 
 Implemented scope:
 
 - `model_type = c("apim", "dim", "apim_dim", "none")`
-- `temporal_decomposition = c("auto", "time_2l", "none")`
-- two-level temporal decomposition for ILD predictors
+- `temporal_predictor_decomposition = c("auto", "time_2l", "none")`
+- two-level temporal predictor decomposition for ILD predictors
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
 - DIM dyad-mean and within-dyad-deviation columns
 
@@ -22,8 +22,8 @@ Next v0.1.0 target:
 
 Reserved for later:
 
-- `temporal_decomposition = "time_3l"` for EMA/day/burst workflows with an
-  explicit higher temporal unit
+- `temporal_predictor_decomposition = "time_3l"` for EMA/day/burst workflows
+  with an explicit higher temporal unit
 - grand-mean-only centering as a separate user option
 - automatic inference of 3-level decomposition from the fitted model structure
 - directed DSM variants
@@ -44,9 +44,9 @@ add_actor_partner_columns()      # model_type = "apim" or "apim_dim"
 add_dyad_individual_columns()    # model_type = "dim" or "apim_dim"
 ```
 
-The resolved temporal-decomposition choice is stored in
-`attr(data, "interdep")$temporal_decomposition`.
-`temporal_decomposition = "auto"` resolves to `time_2l` when both `time` and
+The resolved temporal predictor decomposition choice is stored in
+`attr(data, "interdep")$temporal_predictor_decomposition`.
+`temporal_predictor_decomposition = "auto"` resolves to `time_2l` when both `time` and
 `predictors` are supplied, and to `none` otherwise.
 
 For APIM and DIM, `predictors` are the only variables transformed. DSM should
@@ -54,9 +54,10 @@ add a separate `outcomes` argument rather than broadening `predictors` into a
 generic variable list. This keeps APIM/DIM predictor construction clear while
 allowing DSM outcome construction to use different rules.
 
-`temporal_decomposition` controls predictor pre-decomposition over time. DIM may
-still apply model-specific conventions after that step; specifically, raw
-cross-sectional DIM dyad means are centered around the grand mean of dyad means.
+`temporal_predictor_decomposition` controls predictor pre-decomposition over
+time. DIM may still apply model-specific conventions after that step;
+specifically, raw cross-sectional DIM dyad means are centered around the grand
+mean of dyad means.
 
 ## Centering
 
@@ -202,16 +203,16 @@ attr(data, "interdep")$dsm_outcomes
 
 ## Validation Rules
 
-- `temporal_decomposition = "time_2l"` requires `time` and `predictors`.
-- predictors used with `temporal_decomposition = "time_2l"` must be numeric.
+- `temporal_predictor_decomposition = "time_2l"` requires `time` and `predictors`.
+- predictors used with `temporal_predictor_decomposition = "time_2l"` must be numeric.
 - non-numeric predictors can be kept undecomposed with
-  `temporal_decomposition = "none"`.
+  `temporal_predictor_decomposition = "none"`.
 - user data may not contain package-owned `.i_` columns.
 - longitudinal raw DIM is currently rejected because it mixes within-person and
   between-person information.
 - `model_type = "dsm"` requires `outcomes`.
-- DSM outcome columns use raw outcomes; `temporal_decomposition` applies only
-  to predictors.
+- DSM outcome columns use raw outcomes; `temporal_predictor_decomposition`
+  applies only to predictors.
 
 ## Remaining v0.1.0 Work
 
@@ -222,8 +223,8 @@ attr(data, "interdep")$dsm_outcomes
 - Add focused DSM tests for cross-sectional and ILD raw outcome scores.
 - Keep `getting-started.Rmd` focused on data preparation and move fitted-model
   examples into model-specific vignettes.
-- Keep APIM and temporal-decomposition model examples in APIM-focused vignettes;
-  avoid duplicating APIM-DIM equivalence material there.
+- Keep APIM and temporal predictor decomposition model examples in APIM-focused
+  vignettes; avoid duplicating APIM-DIM equivalence material there.
 - Keep the DIM vignette focused on DIM construction and APIM-DIM equivalence.
 - Add a separate DSM vignette only after `outcomes` and `model_type = "dsm"`
   exist.

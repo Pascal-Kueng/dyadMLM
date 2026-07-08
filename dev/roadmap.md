@@ -5,12 +5,13 @@ This package provides functions for preparing composition-aware dyadic
 multilevel models, focusing on cross-sectional and intensive longitudinal (ILD)
 data. The package should not try to replace model engines such as `glmmTMB` or
 `brms`. Its core responsibility is to make the dyadic composition logic,
-temporal decomposition, indicators, constraints, interpretation helpers, and
-eventually model syntax explicit and reproducible.
+temporal predictor decomposition, indicators, constraints, interpretation
+helpers, and eventually model syntax explicit and reproducible.
 
 ## Development Notes
 
-- Temporal decomposition and predictor-shape planning: [`centering.md`](centering.md)
+- Temporal predictor decomposition and predictor-shape planning:
+  [`centering.md`](centering.md)
 - Possible future reintroduction of inspection-only incomplete/unknown dyads:
   [`keep-behavior-notes.md`](keep-behavior-notes.md)
 - Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
@@ -31,7 +32,7 @@ Target vignette structure:
   - `group`, `member`, `role`, and `time`
   - distinguishable, exchangeable, and mixed dyad compositions
   - missing structural data rules
-  - compact examples of `predictors`, `model_type`, `temporal_decomposition`,
+  - compact examples of `predictors`, `model_type`, `temporal_predictor_decomposition`,
     print output, and metadata
   - links to model-specific vignettes
   - minimal or no fitted models
@@ -70,13 +71,14 @@ model-building features.
   behavior
 - Return factor columns for `.i_composition` and
   `.i_composition_role`
-- Add temporal decomposition and predictor-shape helpers for ILD data
+- Add temporal predictor decomposition and predictor-shape helpers for ILD data
   - Keep the implemented `time_2l` workflow described in [`centering.md`](centering.md)
-  - Keep APIM and DIM on the same temporal-decomposition foundation
-  - Use `temporal_decomposition = "auto"` by default: resolve to `time_2l`
-    when both `time` and predictors are supplied, and to `none` otherwise
-  - Allow explicit `temporal_decomposition = "none"` for undecomposed or
-    externally centered cases
+  - Keep APIM and DIM on the same temporal predictor decomposition foundation
+  - Use `temporal_predictor_decomposition = "auto"` by default: resolve to
+    `time_2l` when both `time` and predictors are supplied, and to `none`
+    otherwise
+  - Allow explicit `temporal_predictor_decomposition = "none"` for
+    undecomposed or externally centered cases
   - Support raw APIM columns, within-/between-person APIM columns, and DIM
     dyad-mean / within-dyad-deviation columns
   - Keep missing-data behavior explicit
@@ -150,8 +152,8 @@ model-building features.
 - Split model-fitting examples out of `getting-started.Rmd`
   - use a cross-sectional APIM vignette for distinguishable, exchangeable, and
     multiple-dyad-type APIM examples
-  - use a separate ILD APIM vignette for temporal decomposition, generalized
-    outcomes, optimizer notes, and heavier unified ILD examples
+  - use a separate ILD APIM vignette for temporal predictor decomposition,
+    generalized outcomes, optimizer notes, and heavier unified ILD examples
 - Keep the focused DIM vignette separate from APIM/ILD APIM examples
 - Add a short DSM data-preparation example after the DSM API is stable
 - Add citation metadata
@@ -261,8 +263,8 @@ Complete these before calling the feature set CRAN-ready:
 ## Version 0.4.0
 
 - Advanced ILD/EMA data infrastructure
-  - Add `time_3l` temporal decomposition only after the `time_2l` workflow is
-    stable
+  - Add `time_3l` temporal predictor decomposition only after the `time_2l`
+    workflow is stable
   - Require an explicit day, burst, or period variable for `time_3l`
   - Do not infer `time_3l` automatically from EMA nesting or three-level random
     effects; users should request it when the substantive predictor
@@ -282,8 +284,8 @@ Complete these before calling the feature set CRAN-ready:
 ## Version 0.5.0 and Later
 
 - Evaluate a custom Stan track only after the package has stable validation,
-  temporal decomposition, actor/partner helpers, syntax generation, and fit/summary
-  conventions for established engines
+  temporal predictor decomposition, actor/partner helpers, syntax generation,
+  and fit/summary conventions for established engines
 - If custom Stan becomes part of the package scope, follow the staged dyadic
   residual VAR plan in [`stan.md`](stan.md)
   - Start with Gaussian, two-person dyadic residual VAR(1) models
@@ -306,12 +308,12 @@ Target state before JOSS submission:
   guidance
 - Evidence of research use, ideally a preprint or applied analysis using the
   package
-- Robust temporal decomposition for ILD data
+- Robust temporal predictor decomposition for ILD data
 - Composition pooling/constraining helpers
 - `.i_diff` / Idiff interpretation helpers
 - Formula or syntax generation for at least `glmmTMB`
 - Preferably `brms` syntax generation as a second modeling backend
 - Reproducible vignettes showing composition-aware dyadic MLM workflows
 - Clear statement that `interdep` supplies dyadic composition logic, temporal
-  decomposition, indicators, constraints, interpretation helpers, and syntax
-  for established model engines
+  predictor decomposition, indicators, constraints, interpretation helpers, and
+  syntax for established model engines

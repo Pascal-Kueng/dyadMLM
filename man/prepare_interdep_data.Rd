@@ -12,7 +12,7 @@ prepare_interdep_data(
   time = NULL,
   predictors = NULL,
   model_type = c("apim", "dim", "apim_dim", "none"),
-  temporal_decomposition = c("auto", "time_2l", "none"),
+  temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL
@@ -36,23 +36,24 @@ is supplied, all dyads are treated as the same type of exchangeable dyads.}
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
 
-\item{predictors}{Optional variables to use for temporal decomposition and
-model-ready predictor construction.}
+\item{predictors}{Optional variables to use for temporal predictor
+decomposition and model-ready predictor construction.}
 
 \item{model_type}{Predictor shape to construct. \code{"apim"} creates actor and
 partner predictors. \code{"dim"} creates dyad-mean and within-dyad-deviation
 predictors. \code{"apim_dim"} creates both APIM and DIM predictors. \code{"none"}
 skips model-specific predictor construction after validation, composition
-inference, and optional temporal decomposition.}
+inference, and optional temporal predictor decomposition.}
 
-\item{temporal_decomposition}{Predictor temporal-decomposition strategy.
+\item{temporal_predictor_decomposition}{Temporal decomposition strategy for
+\code{predictors}.
 \code{"none"} leaves predictors undecomposed before model-specific columns are
-constructed. \code{"time_2l"} indicates a two-level temporal decomposition into
-within-person and between-person predictor components. \code{"auto"} resolves to
-\code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and to \code{"none"}
-otherwise. For \code{"dim"} and \code{"apim_dim"}, raw cross-sectional dyad-mean
-columns are still centered around the grand mean of dyad means as part of
-DIM construction.}
+constructed. \code{"time_2l"} indicates a two-level temporal predictor
+decomposition into within-person and between-person components. \code{"auto"}
+resolves to \code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and
+to \code{"none"} otherwise. For \code{"dim"} and \code{"apim_dim"}, raw cross-sectional
+dyad-mean columns are still centered around the grand mean of dyad means as
+part of DIM construction.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

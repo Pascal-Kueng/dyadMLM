@@ -29,7 +29,7 @@ test_that("validate_interdep_data stores input metadata", {
   expect_null(meta$time)
   expect_null(meta$predictors)
   expect_equal(meta$model_type, "apim")
-  expect_equal(meta$temporal_decomposition, "none")
+  expect_equal(meta$temporal_predictor_decomposition, "none")
   expect_equal(meta$n_dyads, 2L)
   expect_false(meta$longitudinal)
   expect_equal(meta$dropped_incomplete_dyads, numeric(0))
@@ -81,10 +81,10 @@ test_that("validate_interdep_data resolves model helper metadata", {
   meta <- attr(result, "interdep")
 
   expect_equal(meta$model_type, "dim")
-  expect_equal(meta$temporal_decomposition, "time_2l")
+  expect_equal(meta$temporal_predictor_decomposition, "time_2l")
 })
 
-test_that("validate_interdep_data validates explicit time_2l temporal decomposition", {
+test_that("validate_interdep_data validates explicit time_2l temporal predictor decomposition", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -97,9 +97,9 @@ test_that("validate_interdep_data validates explicit time_2l temporal decomposit
       group = dyad_id,
       member = person_id,
       predictors = x,
-      temporal_decomposition = "time_2l"
+      temporal_predictor_decomposition = "time_2l"
     ),
-    '`temporal_decomposition = "time_2l"` requires `time` to be supplied.',
+    '`temporal_predictor_decomposition = "time_2l"` requires `time` to be supplied.',
     fixed = TRUE
   )
 
@@ -109,9 +109,9 @@ test_that("validate_interdep_data validates explicit time_2l temporal decomposit
       group = dyad_id,
       member = person_id,
       time = x,
-      temporal_decomposition = "time_2l"
+      temporal_predictor_decomposition = "time_2l"
     ),
-    '`temporal_decomposition = "time_2l"` requires `predictors` to be supplied.',
+    '`temporal_predictor_decomposition = "time_2l"` requires `predictors` to be supplied.',
     fixed = TRUE
   )
 })
@@ -132,7 +132,7 @@ test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
       time = time,
       predictors = x
     ),
-    'Use `temporal_decomposition = "none"` to keep non-numeric predictors undecomposed.',
+    'Use `temporal_predictor_decomposition = "none"` to keep non-numeric predictors undecomposed.',
     fixed = TRUE
   )
 })
@@ -149,11 +149,11 @@ test_that("validate_interdep_data allows non-numeric uncentered predictors", {
     group = dyad_id,
     member = person_id,
     predictors = x,
-    temporal_decomposition = "none"
+    temporal_predictor_decomposition = "none"
   )
 
   expect_equal(attr(result, "interdep")$predictors, "x")
-  expect_equal(attr(result, "interdep")$temporal_decomposition, "none")
+  expect_equal(attr(result, "interdep")$temporal_predictor_decomposition, "none")
 })
 
 test_that("validate_interdep_data rejects non-data-frame input", {
