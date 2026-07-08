@@ -14,12 +14,12 @@
 #'   partners within a dyad, such as gender. If no role is supplied, all dyads
 #'   in the data are treated as exchangeable.
 #' @param time Optional column identifying time or measurement order.
-#' @param predictors Optional variables to store as metadata for upcoming
-#'   centering and model-helper functions. Currently validated and stored, but
-#'   not transformed.
+#' @param predictors Optional variables to select and store as metadata for
+#'   centering and model-helper functions.
 #' @param model_type Requested predictor shape for downstream construction.
-#'   `"apim"` indicates actor and partner predictors; `"dim"` indicates dyad
-#'   mean and half-difference predictors.
+#'   `"apim"` indicates actor and partner predictors, `"none"` indicates no
+#'   model-specific predictor construction, and `"dim"`/`"apim_dim"` are
+#'   accepted for upcoming DIM support.
 #' @param centering Requested predictor-centering strategy for downstream
 #'   construction. `"none"` leaves predictors undecomposed. `"time_2l"`
 #'   indicates a two-level temporal decomposition into within-person and
@@ -44,7 +44,7 @@ validate_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    model_type = c("apim", "dim", "apim_dim"),
+    model_type = c("apim", "dim", "apim_dim", "none"),
     centering = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop")

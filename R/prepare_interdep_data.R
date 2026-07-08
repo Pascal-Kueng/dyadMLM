@@ -28,8 +28,10 @@
 #' @param predictors Optional variables to use for centering and model-ready
 #'   predictor construction.
 #' @param model_type Predictor shape to construct. `"apim"` creates actor and
-#'   partner predictors. `"dim"` creates dyad mean and half-difference predictors.
-#'   `"apim_dim"` will return both predictor shapes.
+#'   partner predictors. `"none"` skips model-specific predictor construction
+#'   after validation, composition inference, and optional centering. `"dim"` and
+#'   `"apim_dim"` are accepted for upcoming DIM support; currently they create
+#'   the APIM columns used as an intermediate step.
 #' @param centering Predictor-centering strategy. `"none"` leaves predictors
 #'   undecomposed. `"time_2l"` indicates a two-level temporal decomposition into
 #'   within-person and between-person predictor components. `"auto"` resolves to
@@ -76,7 +78,7 @@ prepare_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    model_type = c("apim", "dim", "apim_dim"),
+    model_type = c("apim", "dim", "apim_dim", "none"),
     centering = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),

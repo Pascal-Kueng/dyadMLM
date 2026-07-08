@@ -69,8 +69,42 @@ add_actor_partner_columns <- function(data) {
         "{partner_col}" := dplyr::all_of(source_col)
       )
 
-    # We join this table back with the regular data, where partner col does
-    # not match actor col!
+    # We create a table with the original members' ID, then match the partner
+    # lookup to it, and filter out self-matches.
+
+    partner_values <- out |>
+      dplyr::select(
+        dplyr::all_of(c(join_keys, member))
+      ) |>
+      dplyr::rename(
+        .i_actor_member = dplyr::all_of(member)
+      ) |>
+      # Now we join the partner_lookup rows to the original member table.
+      # This leads to the partner-values of both partners being matched to both
+      # the actor IDs of both members of the dyad temporarily.
+      dplyr::left_join(
+        partner_lookup,
+        by = join_keys,
+        relationship = "many-to-many"
+      ) |>
+      # we remove the self-matches
+      dplyr::filter(.data$.i_partner_member != .data$.i_actor_member) |>
+      # We keep only the cols needed for matching and the _partner column.
+      dplyr::select(
+        dplyr::all_of(join_keys),
+        dplyr::all_of(".i_actor_member"),
+        dplyr::all_of(partner_col)
+      ) |>
+      dplyr::rename(
+        "{member}" := dplyr::all_of(".i_actor_member")
+      )
+
+    out <- out |>
+      dplyr::left_join(
+        partner_values,
+        by = c(join_keys, member)
+      )
+
   }
 
   return(out)

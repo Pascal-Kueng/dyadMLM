@@ -11,7 +11,7 @@ validate_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
-  model_type = c("apim", "dim"),
+  model_type = c("apim", "dim", "apim_dim", "none"),
   centering = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
@@ -31,13 +31,13 @@ in the data are treated as exchangeable.}
 
 \item{time}{Optional column identifying time or measurement order.}
 
-\item{predictors}{Optional variables to store as metadata for upcoming
-centering and model-helper functions. Currently validated and stored, but
-not transformed.}
+\item{predictors}{Optional variables to select and store as metadata for
+centering and model-helper functions.}
 
 \item{model_type}{Requested predictor shape for downstream construction.
-\code{"apim"} indicates actor and partner predictors; \code{"dim"} indicates dyad
-mean and half-difference predictors.}
+\code{"apim"} indicates actor and partner predictors, \code{"none"} indicates no
+model-specific predictor construction, and \code{"dim"}/\code{"apim_dim"} are
+accepted for upcoming DIM support.}
 
 \item{centering}{Requested predictor-centering strategy for downstream
 construction. \code{"none"} leaves predictors undecomposed. \code{"time_2l"}
