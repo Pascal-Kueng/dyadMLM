@@ -41,3 +41,27 @@ test_that("interdep data prints dropped incomplete dyads", {
   expect_true(any(grepl("# Dropped incomplete dyads:", printed, fixed = TRUE)))
   expect_true(any(grepl("with ID: 1", printed, fixed = TRUE)))
 })
+
+test_that("interdep data print describes generated predictor columns", {
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c(1, 2, 3, 4),
+    x = c(1, 2, 3, 4)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = x,
+    seed = 123
+  )
+
+  printed <- capture.output(print(result))
+
+  expect_true(any(grepl(".i_diff              sum-diff contrast; 0 for distinguishable dyads", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_raw_actor       raw actor predictor columns", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_*_raw_partner     raw partner predictor columns", printed, fixed = TRUE)))
+  expect_false(any(grepl(".i_*_actor           actor", printed, fixed = TRUE)))
+  expect_false(any(grepl(".i_*_partner         partner", printed, fixed = TRUE)))
+})

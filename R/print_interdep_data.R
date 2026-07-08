@@ -84,11 +84,11 @@ print.interdep_data <- function(x, ...) {
   }
 
   if (interdep_diff_col %in% names(x)) {
-    cat("#   .i_diff              sum-diff contrast for exchangeable dyads\n")
+    cat("#   .i_diff              sum-diff contrast; 0 for distinguishable dyads\n")
   }
 
   if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))) {
-    cat("#   .i_diff_*            composition-specific diff columns\n")
+    cat("#   .i_diff_*            composition-specific sum-diff contrasts\n")
   }
 
 
