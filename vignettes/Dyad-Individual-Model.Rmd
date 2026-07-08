@@ -113,13 +113,14 @@ b_dyad_mean <- round(dim_coef[[".i_communication_raw_dyad_mean"]], 3)
 b_within_dyad <- round(dim_coef[[".i_communication_raw_within_dyad_deviation"]], 3)
 
 cat("From APIM model:\n")
-cat("actor effect: ", b_actor, "\n")
-cat("partner effect:", b_partner, "\n\n")
+cat("  actor effect:                  ",  b_actor, "\n")
+cat("  partner effect:                ", b_partner, "\n\n")
 
-cat("actor effect + partner effect:", b_actor + b_partner, "\n")
-cat("actor effect - partner effect:", b_actor - b_partner, "\n\n")
+cat("  Computes to: \n")
+cat("  actor effect + partner effect: ", b_actor + b_partner, "\n")
+cat("  actor effect - partner effect: ", b_actor - b_partner, "\n\n")
 
 cat("From DIM model:\n")
-cat("dyad-mean effect:              ", b_dyad_mean, "\n")
-cat("within-dyad-deviation effect: ", b_within_dyad, "\n")
+cat("  dyad-mean effect:              ", b_dyad_mean, "\n")
+cat("  within-dyad-deviation effect:  ", b_within_dyad, "\n")
 ```
