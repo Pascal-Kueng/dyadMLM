@@ -32,14 +32,14 @@ model-building features.
 - Return factor columns for `.i_composition` and
   `.i_composition_role`
 - Add temporal centering and predictor-shape helpers for ILD data
-  - Implement the `time_2l` workflow described in [`centering.md`](centering.md)
+  - Keep the implemented `time_2l` workflow described in [`centering.md`](centering.md)
   - Keep APIM and DIM on the same centering foundation
   - Use `centering = "auto"` by default: resolve to `time_2l` when both `time`
     and predictors are supplied, and to `none` otherwise
   - Allow explicit `centering = "none"` for undecomposed or externally centered
     cases
-  - Support raw predictor centering first, then actor/partner columns, then
-    optional DIM mean/half-difference columns
+  - Support raw APIM columns, within-/between-person APIM columns, and DIM
+    dyad-mean / individual-deviation columns
   - Keep missing-data behavior explicit
 - Add a print method for `interdep_data`
   - Keep normal tibble/data-frame printing; add a compact interdep header above
@@ -49,34 +49,41 @@ model-building features.
   - Show structural columns: group, member, optional role, optional time
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
-    `.i_composition`, `.i_composition_role`, `.i_diff`, `.i_is_*`, `.i_diff_*`
+    `.i_composition`, `.i_composition_role`, `.i_diff`, `.i_is_*`, `.i_diff_*`,
+    and generated predictor-column families
   - Make dropped incomplete dyads and missing roles visible
   - Target display:
     ```r
     # interdep data
-    # Rows: 2,800 | Dyads: 100 | Longitudinal: yes
+    # Rows: 5,600 | Dyads: 200 | Intensive longitudinal: yes
     # Structure: group = coupleID, member = personID, role = gender, time = diaryday
     #
     # Dyad compositions:
-    #   female_x_male      distinguishable   40 dyads
-    #   female_x_female    exchangeable       30 dyads
-    #   male_x_male        exchangeable       30 dyads
+    # female_x_male   distinguishable 80 dyads
+    # female_x_female exchangeable    60 dyads
+    # male_x_male     exchangeable    60 dyads
     #
     # Added columns:
     #   .i_composition       inferred dyad composition
     #   .i_composition_role  composition-specific member role
-    #   .i_diff              sum-diff contrast for exchangeable dyads
     #   .i_is_*              composition-role indicator columns
-    #   .i_diff_*            composition-specific diff columns
+    #   .i_diff              sum-diff contrast; 0 for distinguishable dyads
+    #   .i_diff_*            composition-specific sum-diff contrasts
+    #   .i_*_cwp             within-person centred predictors
+    #   .i_*_cbp             between-person centred predictors
+    #   .i_*_cwp_actor       within-person actor predictor columns
+    #   .i_*_cwp_partner     within-person partner predictor columns
+    #   .i_*_cbp_actor       between-person actor predictor columns
+    #   .i_*_cbp_partner     between-person partner predictor columns
     #
-    # Dropped incomplete dyads: 14 (IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more)
-    # A tibble: 2,800 x 14
+    # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, and 4 more.
+    # A tibble: 5,600 x 17
        personID coupleID diaryday gender closeness provided_support .i_composition ...
           <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          ...
      1        1        1        0 female      5.91             4.72 female_x_male  ...
      2        1        1        1 female      6.10             5.01 female_x_male  ...
      3        1        1        2 female      5.44             4.63 female_x_male  ...
-    # i 2,797 more rows
+    # i 5,597 more rows
     ```
   - Do not add sparse-composition warnings to `print()` yet; thresholds are too
     arbitrary for a compact display
@@ -85,9 +92,47 @@ model-building features.
   - Show generated `.i_*` columns by purpose
   - Show composition counts and sparse-composition warnings
 - Keep README and vignette focused on the data-preparation workflow
+- Add a focused DIM vignette after reviewing the DIM helper API
 - Add citation metadata
   - `inst/CITATION` for R users
   - `CITATION.cff` for GitHub and future Zenodo metadata
+
+### Pre-CRAN v0.1.0 Checklist
+
+Complete these before calling the feature set CRAN-ready:
+
+- Review `add_dyad_individual_columns.R` carefully
+  - confirm direct grouped DIM construction is final
+  - confirm missingness behavior for incomplete dyad components is documented
+  - confirm raw cross-sectional DIM names are final
+- Finalize DIM metadata
+  - decide whether `dim_predictors` table columns are stable:
+    `predictor`, `component`, `source_column`, `mean_column`,
+    `deviation_column`, `grouping`
+  - make sure downstream print/vignette code reads metadata rather than
+    guessing column names where possible
+- Decide whether `print.interdep_data()` should show DIM column families
+  - if yes, add compact descriptions for `.i_*_dyad_mean` and
+    `.i_*_dyad_deviation`
+  - avoid listing every generated column individually
+- Add a short DIM vignette after the DIM API is stable
+  - show cross-sectional APIM-DIM equivalence
+  - show ILD DIM construction from `time_2l` components
+  - keep mixed-composition/maximal models in the APIM vignette for now
+- Resolve unified ILD model convergence documentation
+  - current increased simulation size improves information but does not fully
+    remove Gaussian optimizer warnings for the maximal unified ILD APIM
+  - do not present BFGS as a universal fix; document optimizer behavior only
+    where it is empirically supported by the current simulated data
+  - either simplify the vignette model deliberately or explain that the maximal
+    model is aspirational/diagnostic and may require more data or Bayesian
+    regularization
+- Run final release checks
+  - `devtools::test(reporter = "summary")`
+  - `devtools::check(args = "--no-manual", error_on = "never")`
+  - inspect README, vignette, examples, `inst/CITATION`, and package metadata
+    for CRAN-facing clarity
+
 - Release to CRAN once checks, tests, docs, README, and vignette are clean
   - Submit source package to CRAN without requiring a Git tag first
   - After CRAN acceptance, tag the accepted commit as `v0.1.0`
