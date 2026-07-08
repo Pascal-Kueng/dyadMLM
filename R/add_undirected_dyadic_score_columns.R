@@ -6,13 +6,13 @@
 #' dyad composition. This means distinguishable dyads and multiple exchangeable
 #' compositions are not supported by DSM construction until explicit
 #' role-contrast, composition-specific, or pooling support is added.
-#' Predictors are constructed and treated identically do the DIM method. The outcome
+#' Predictors are constructed and treated identically to the DIM method. The outcome
 #' is treated the same as cross-sectional raw DIM predictors and is not temporally
 #' decomposed. Instead, a raw dyad mean and difference is created at each time-point.
 #'
 #' The function reads `attr(data, "interdep")$temporal_predictor_decompositions` and
-#' stores the constructed DSM columns in
-#' `attr(data, "interdep")$undirected_dsm_predictors`.
+#' stores the constructed outcome columns in
+#' `attr(data, "interdep")$undirected_dsm_outcomes`.
 #'
 #' @param data An `interdep_data` object returned by [prepare_interdep_data()].
 #'
@@ -33,51 +33,65 @@ add_undirected_dyadic_score_columns <- function(data) {
 
   group <- meta_data$group
   member <- meta_data$member
+  has_time <- meta_data$longitudinal
+  time <- meta_data$time
   outcomes <- meta_data$outcomes
 
   # Prepare empty tibble
   dsm_outcomes <- tibble::tibble(
-      outcome = character(),
-      source_column = character(),
-      mean_column = character(),
-      deviation_column = character()
-    )
+    outcome = character(),
+    source_column = character(),
+    mean_column = character(),
+    deviation_column = character(),
+    decomposition_level = character()
+  )
 
   for (outcome in outcomes) {
     source_col <- outcome
-    mean_col <- paste0(interdep_reserved_prefix, outcome, "_raw_dyad_mean")
-    deviation_col <- paste0(interdep_reserved_prefix, outcome, "_raw_within_dyad_deviation")
+    outcome_suffix <- make_interdep_suffixes(outcome)[[outcome]]
+    column_stem <- paste0(interdep_reserved_prefix, outcome_suffix, "_raw")
+    mean_col <- paste0(column_stem, "_dyad_mean")
+    deviation_col <- paste0(column_stem, "_within_dyad_deviation")
+    decomposition_level <- "dyad"
+    if (has_time) {
+      decomposition_level <- "dyad_time"
+    }
 
     # update tibble
     dsm_outcomes <- tibble::add_row(
       dsm_outcomes,
       outcome = outcome,
-      source_column = outcome,
+      source_column = source_col,
       mean_column = mean_col,
-      deviation_column = deviation_col
+      deviation_column = deviation_col,
+      decomposition_level = decomposition_level
     )
 
-    # Create correct values
-    dyad_values <- out |>
-      dplyr::group_by(.data[[group]]) |>
-      dplyr::mutate(
-        .i_dim_n_observed = sum(!is.na(.data[[source_col]])),
-        "{mean_col}" := dplyr::if_else(
-          .data$.i_dim_n_observed == 2L,
-          no_NaN_mean(.data[[source_col]]),
-          NA_real_
-        ),
-        "{deviation_col}" := .data[[source_col]] - .data[[mean_col]]
-      ) |>
-      dplyr::ungroup()
-
-    dyad_values <- dyad_values |>
-      dplyr::select(
-        dplyr::all_of(c(group, member)),
-        dplyr::all_of(c(mean_col, deviation_col))
+    if (has_time) {
+      # from DIM constructor.
+      # does not center, in DIM we pass already centered values, so works perfectly here.
+      out <- add_dyad_time_decomposition(
+        out = out,
+        group = group,
+        member = member,
+        time = time,
+        source_col = source_col,
+        mean_col = mean_col,
+        deviation_col = deviation_col
       )
-
-    dplyr::left_join(out, dyad_values, by = c(group, member))
+    } else {
+      # from DIM constructor
+      # need to center_mean = FALSE to avoid grand-mean centering.
+      out <- add_dyad_level_decomposition(
+        out = out,
+        group = group,
+        member = member,
+        source_col = source_col,
+        mean_col = mean_col,
+        deviation_col = deviation_col,
+        center_mean = FALSE
+      )
+    }
   }
 
   attr(out, "interdep")$undirected_dsm_outcomes <- dsm_outcomes

@@ -20,13 +20,13 @@ currently supported undirected DSMs, the data must contain one exchangeable
 dyad composition. This means distinguishable dyads and multiple exchangeable
 compositions are not supported by DSM construction until explicit
 role-contrast, composition-specific, or pooling support is added.
-Predictors are constructed and treated identically do the DIM method. The outcome
+Predictors are constructed and treated identically to the DIM method. The outcome
 is treated the same as cross-sectional raw DIM predictors and is not temporally
 decomposed. Instead, a raw dyad mean and difference is created at each time-point.
 }
 \details{
 The function reads \code{attr(data, "interdep")$temporal_predictor_decompositions} and
-stores the constructed DSM columns in
-\code{attr(data, "interdep")$undirected_dsm_predictors}.
+stores the constructed outcome columns in
+\code{attr(data, "interdep")$undirected_dsm_outcomes}.
 }
 \keyword{internal}
