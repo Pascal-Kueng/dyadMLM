@@ -99,6 +99,26 @@ print.interdep_data <- function(x, ...) {
     cat("#   .i_*_cbp             between-person centred predictors\n")
   }
 
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_actor"))) {
+    cat("#   .i_*_actor           actor effect columns\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_partner"))) {
+    cat("#   .i_*_partner         partner effects columns\n")
+  }
+
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_actor"))) {
+    cat("#   .i_*_cwp_actor       within-person centred actor effect columns\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cwp_partner"))) {
+    cat("#   .i_*_cwp_partner     within-person centred partner effect columns\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_actor"))) {
+    cat("#   .i_*_cbp_actor       between-person centred actor effects column\n")
+  }
+  if (any(startsWith(names(x), interdep_reserved_prefix) & endsWith(names(x), "_cbp_partner"))) {
+    cat("#   .i_*_cbp_partner     between-person centred partner effects column\n")
+  }
+
   cat("#\n")
 
   out <- x

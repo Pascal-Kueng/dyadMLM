@@ -54,8 +54,14 @@ add_actor_partner_columns <- function(data) {
     component <- predictor_decompositions$component[[i]]
     source_col <- predictor_decompositions$column[[i]]
 
-    actor_col <- paste0(source_col, "_actor")
-    partner_col <- paste0(source_col, "_partner")
+    column_stem <- source_col
+    if (component == "raw") {
+      predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
+      column_stem <- paste0(interdep_reserved_prefix, predictor_suffix, "_raw")
+    }
+
+    actor_col <- paste0(column_stem, "_actor")
+    partner_col <- paste0(column_stem, "_partner")
 
     apim_predictors <- tibble::add_row(
       apim_predictors,

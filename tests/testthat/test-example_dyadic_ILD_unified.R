@@ -8,7 +8,7 @@ check_unified_ild_dataset <- function(data, outcome) {
     "provided_support"
   )
   expect_equal(names(data), expected_columns)
-  expect_equal(nrow(data), 2800L)
+  expect_equal(nrow(data), 5600L)
 
   structural_columns <- c("personID", "coupleID", "diaryday", "gender")
   measured_columns <- c(outcome, "provided_support")
@@ -36,7 +36,7 @@ check_unified_ild_dataset <- function(data, outcome) {
     dyad_compositions$dyad_type,
     c("exchangeable", "distinguishable", "exchangeable")
   )
-  expect_equal(dyad_compositions$n_dyads, c(30L, 40L, 30L))
+  expect_equal(dyad_compositions$n_dyads, c(60L, 80L, 60L))
   expect_true(".i_diff_female_x_female" %in% names(prepared))
   expect_true(".i_diff_male_x_male" %in% names(prepared))
 

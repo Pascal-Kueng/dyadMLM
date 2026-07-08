@@ -95,7 +95,7 @@
 #' Prepare with `group = coupleID`, `member = personID`, `role = gender`, and
 #' `time = diaryday`.
 #'
-#' @format A data frame with 2,800 rows and 6 variables:
+#' @format A data frame with 5,600 rows and 6 variables:
 #' \describe{
 #'   \item{personID}{Unique person identifier.}
 #'   \item{coupleID}{Dyad identifier.}
@@ -144,7 +144,7 @@
 #' Prepare with `group = coupleID`, `member = personID`, `role = gender`, and
 #' `time = diaryday`.
 #'
-#' @format A data frame with 2,800 rows and 6 variables:
+#' @format A data frame with 5,600 rows and 6 variables:
 #' \describe{
 #'   \item{personID}{Unique person identifier.}
 #'   \item{coupleID}{Dyad identifier.}

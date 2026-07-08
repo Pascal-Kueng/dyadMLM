@@ -5,7 +5,7 @@
 \alias{example_dyadic_ILD_unified_tweedie}
 \title{Example intensive longitudinal dyadic data with mixed dyad compositions and a Tweedie outcome}
 \format{
-A data frame with 2,800 rows and 6 variables:
+A data frame with 5,600 rows and 6 variables:
 \describe{
 \item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}

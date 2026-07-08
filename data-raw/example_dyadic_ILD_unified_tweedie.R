@@ -19,9 +19,9 @@ set.seed(128)
 ### DESIGN: SAMPLE SIZE AND MEASUREMENT OCCASIONS
 ###############################################################################
 
-n_female_male <- 40
-n_female_female <- 30
-n_male_male <- 30
+n_female_male <- 80
+n_female_female <- 60
+n_male_male <- 60
 n_couples <- n_female_male + n_female_female + n_male_male
 days <- 0:13
 T_per <- length(days)
@@ -416,14 +416,14 @@ example_dyadic_ILD_unified_tweedie <- dplyr::arrange(
 ###############################################################################
 
 # Rare isolated predictor missingness.
-n_missing_support <- 50
+n_missing_support <- 100
 missing_support_rows <- sample(seq_len(nrow(example_dyadic_ILD_unified_tweedie)), n_missing_support)
 example_dyadic_ILD_unified_tweedie$provided_support[missing_support_rows] <- NA_real_
 
 # Rare diary nonresponse. The person-day row stays in the data with dyad, person,
 # role, and time information intact, but all measured variables for that row are
 # missing.
-n_nonresponse_rows <- 60
+n_nonresponse_rows <- 120
 available_rows <- setdiff(seq_len(nrow(example_dyadic_ILD_unified_tweedie)), missing_support_rows)
 nonresponse_rows <- sample(available_rows, n_nonresponse_rows)
 example_dyadic_ILD_unified_tweedie$provided_support[nonresponse_rows] <- NA_real_
