@@ -381,7 +381,8 @@ summary(ild_distinguishable_data)
 
 Note that if we supply `predictors`, for example as `c(pred1, pred2)` or as the
 single predictor above, they will be centred automatically within and between person.
-This behavior can be controlled via the `centering` argument. 
+This temporal decomposition can be controlled via the `temporal_decomposition`
+argument. 
 
 ```{r fit-ild-distinguishable, eval = has_glmmTMB}
 

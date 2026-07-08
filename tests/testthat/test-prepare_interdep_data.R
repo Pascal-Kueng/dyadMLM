@@ -105,7 +105,7 @@ test_that("prepare_interdep_data centers longitudinal predictors", {
       predictor = c("x", "x"),
       component = c("cwp", "cbp"),
       column = c(".i_x_cwp", ".i_x_cbp"),
-      centering = c("time_2l", "time_2l")
+      temporal_decomposition = c("time_2l", "time_2l")
     )
   )
 })

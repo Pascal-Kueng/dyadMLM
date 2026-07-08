@@ -15,17 +15,20 @@
 #'   in the data are treated as exchangeable.
 #' @param time Optional column identifying time or measurement order.
 #' @param predictors Optional variables to select and store as metadata for
-#'   centering and model-helper functions.
+#'   temporal decomposition and model-helper functions.
 #' @param model_type Requested predictor shape for downstream construction.
 #'   `"apim"` indicates actor and partner predictors, `"none"` indicates no
 #'   model-specific predictor construction, `"dim"` indicates dyad-mean and
 #'   individual-deviation predictors, and `"apim_dim"` indicates both APIM and
 #'   DIM predictors.
-#' @param centering Requested predictor-centering strategy for downstream
-#'   construction. `"none"` leaves predictors undecomposed. `"time_2l"`
+#' @param temporal_decomposition Requested predictor temporal-decomposition
+#'   strategy for downstream construction. `"none"` leaves predictors
+#'   undecomposed before model-specific columns are constructed. `"time_2l"`
 #'   indicates a two-level temporal decomposition into within-person and
 #'   between-person predictor components. `"auto"` resolves to `"time_2l"` when
 #'   both `time` and `predictors` are supplied, and to `"none"` otherwise.
+#'   Model-specific helpers may apply additional conventions, such as grand-mean
+#'   centering raw cross-sectional DIM dyad means.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -46,7 +49,7 @@ validate_interdep_data <- function(
     time = NULL,
     predictors = NULL,
     model_type = c("apim", "dim", "apim_dim", "none"),
-    centering = c("auto", "time_2l", "none"),
+    temporal_decomposition = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop")
   ) {
@@ -75,7 +78,7 @@ validate_interdep_data <- function(
   missing_role <- rlang::arg_match(missing_role)
 
   model_type <- rlang::arg_match(model_type)
-  centering <- rlang::arg_match(centering)
+  temporal_decomposition <- rlang::arg_match(temporal_decomposition)
 
   # Extract structural column names.
   group <- rlang::enquo(group)
@@ -198,29 +201,29 @@ validate_interdep_data <- function(
   }
 
 
-  # Resolve centering
-  if (centering == "time_2l") {
+  # Resolve temporal decomposition.
+  if (temporal_decomposition == "time_2l") {
     if (!has_time) {
-      stop("`centering = \"time_2l\"` requires `time` to be supplied.", call. = FALSE)
+      stop("`temporal_decomposition = \"time_2l\"` requires `time` to be supplied.", call. = FALSE)
     }
 
     if (length(predictor_names) == 0) {
-      stop("`centering = \"time_2l\"` requires `predictors` to be supplied.", call. = FALSE)
+      stop("`temporal_decomposition = \"time_2l\"` requires `predictors` to be supplied.", call. = FALSE)
     }
   }
 
-  if (centering == "auto") {
-    centering <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
+  if (temporal_decomposition == "auto") {
+    temporal_decomposition <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
   }
 
-  if (centering == "time_2l") {
+  if (temporal_decomposition == "time_2l") {
     predictor_is_numeric <- vapply(out[predictor_names], is.numeric, logical(1))
     non_numeric_predictors <- predictor_names[!predictor_is_numeric]
 
     if (length(non_numeric_predictors) > 0) {
       stop(
-        "`predictors` used with `centering = \"time_2l\"` must be numeric. ",
-        "Use `centering = \"none\"` to keep non-numeric predictors uncentered. ",
+        "`predictors` used with `temporal_decomposition = \"time_2l\"` must be numeric. ",
+        "Use `temporal_decomposition = \"none\"` to keep non-numeric predictors undecomposed. ",
         "Non-numeric predictor(s): ",
         paste(non_numeric_predictors, collapse = ", "),
         ".",
@@ -238,7 +241,7 @@ validate_interdep_data <- function(
     predictors = predictor_names,
     n_dyads = n_groups,
     longitudinal = has_time,
-    centering = centering,
+    temporal_decomposition = temporal_decomposition,
     model_type = model_type,
     dropped_missing_role_dyads = dropped_missing_role_dyads,
     dropped_incomplete_dyads = dropped_incomplete_dyads

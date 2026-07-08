@@ -44,7 +44,7 @@ test_that("center_predictors creates time_2l centered predictor columns", {
       predictor = c("x", "x"),
       component = c("cwp", "cbp"),
       column = c(".i_x_cwp", ".i_x_cbp"),
-      centering = c("time_2l", "time_2l")
+      temporal_decomposition = c("time_2l", "time_2l")
     )
   )
 })
@@ -106,7 +106,7 @@ test_that("center_predictors leaves uncentered data unchanged", {
     group = dyad_id,
     member = person_id,
     predictors = x,
-    centering = "none"
+    temporal_decomposition = "none"
   ) |>
     center_predictors()
 
@@ -117,7 +117,7 @@ test_that("center_predictors leaves uncentered data unchanged", {
       predictor = "x",
       component = "raw",
       column = "x",
-      centering = "none"
+      temporal_decomposition = "none"
     )
   )
 })

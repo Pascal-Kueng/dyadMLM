@@ -86,8 +86,8 @@ add_actor_partner_columns <- function(data) {
       dplyr::select(
         dplyr::all_of(c(join_keys, member, source_col))
       ) |>
-      # we simply rename the member colname to .i_partner_member and now whatever was
-      # an actor column is a partner column. So we rename those too.
+      # Rename each row's source value so it can be matched back as the
+      # partner value for the other member in the dyad.
       dplyr::rename(
         .i_partner_member = dplyr::all_of(member),
         "{partner_col}" := dplyr::all_of(source_col)

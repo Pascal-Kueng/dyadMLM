@@ -30,7 +30,7 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
       source_column = c(".i_x_cwp", ".i_x_cbp"),
       mean_column = c(".i_x_cwp_dyad_mean", ".i_x_cbp_dyad_mean"),
       deviation_column = c(".i_x_cwp_dyad_deviation", ".i_x_cbp_dyad_deviation"),
-      grouping = c("dyad_time", "dyad")
+      decomposition_level = c("dyad_time", "dyad")
     )
   )
 })
@@ -72,7 +72,7 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
     group = dyad_id,
     member = person_id,
     predictors = x,
-    centering = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -95,7 +95,7 @@ test_that("prepare_interdep_data creates DIM columns without APIM columns", {
     member = person_id,
     predictors = x,
     model_type = "dim",
-    centering = "none",
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -120,9 +120,9 @@ test_that("longitudinal raw DIM construction errors clearly", {
       time = time,
       predictors = x,
       model_type = "dim",
-      centering = "none",
+      temporal_decomposition = "none",
       seed = 123
     ),
-    "requires centered predictor components"
+    "requires supported centered predictor components"
   )
 })

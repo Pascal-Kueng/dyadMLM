@@ -12,7 +12,7 @@ validate_interdep_data(
   time = NULL,
   predictors = NULL,
   model_type = c("apim", "dim", "apim_dim", "none"),
-  centering = c("auto", "time_2l", "none"),
+  temporal_decomposition = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
 )
@@ -32,7 +32,7 @@ in the data are treated as exchangeable.}
 \item{time}{Optional column identifying time or measurement order.}
 
 \item{predictors}{Optional variables to select and store as metadata for
-centering and model-helper functions.}
+temporal decomposition and model-helper functions.}
 
 \item{model_type}{Requested predictor shape for downstream construction.
 \code{"apim"} indicates actor and partner predictors, \code{"none"} indicates no
@@ -40,11 +40,14 @@ model-specific predictor construction, \code{"dim"} indicates dyad-mean and
 individual-deviation predictors, and \code{"apim_dim"} indicates both APIM and
 DIM predictors.}
 
-\item{centering}{Requested predictor-centering strategy for downstream
-construction. \code{"none"} leaves predictors undecomposed. \code{"time_2l"}
+\item{temporal_decomposition}{Requested predictor temporal-decomposition
+strategy for downstream construction. \code{"none"} leaves predictors
+undecomposed before model-specific columns are constructed. \code{"time_2l"}
 indicates a two-level temporal decomposition into within-person and
 between-person predictor components. \code{"auto"} resolves to \code{"time_2l"} when
-both \code{time} and \code{predictors} are supplied, and to \code{"none"} otherwise.}
+both \code{time} and \code{predictors} are supplied, and to \code{"none"} otherwise.
+Model-specific helpers may apply additional conventions, such as grand-mean
+centering raw cross-sectional DIM dyad means.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

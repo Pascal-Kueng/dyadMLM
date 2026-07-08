@@ -1,4 +1,4 @@
-# Centering and Predictor Construction
+# Temporal Decomposition and Predictor Construction
 
 This note records the current v0.1.0 design for predictor construction. The
 core rule is that APIM and DIM share the same temporal decomposition, but use
@@ -9,15 +9,18 @@ separate construction helpers.
 Implemented scope:
 
 - `model_type = c("apim", "dim", "apim_dim", "none")`
-- `centering = c("auto", "time_2l", "none")`
+- `temporal_decomposition = c("auto", "time_2l", "none")`
 - two-level temporal decomposition for ILD predictors
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
 - DIM dyad-mean and individual-deviation columns
 
 Reserved for later:
 
-- `centering = "time_3l"` for EMA/day/burst workflows with an explicit higher
-  temporal unit
+- `outcomes = NULL` in `prepare_interdep_data()` metadata, so future model
+  helpers can distinguish predictor-side and outcome-side transformations
+- `model_type = "dyadic_score"` for undirected dyadic-score models
+- `temporal_decomposition = "time_3l"` for EMA/day/burst workflows with an
+  explicit higher temporal unit
 - grand-mean-only centering as a separate user option
 - automatic inference of 3-level decomposition from the fitted model structure
 
@@ -36,9 +39,19 @@ add_actor_partner_columns()      # model_type = "apim" or "apim_dim"
 add_dyad_individual_columns()    # model_type = "dim" or "apim_dim"
 ```
 
-The resolved centering choice is stored in `attr(data, "interdep")$centering`.
-`centering = "auto"` resolves to `time_2l` when both `time` and `predictors`
-are supplied, and to `none` otherwise.
+The resolved temporal-decomposition choice is stored in
+`attr(data, "interdep")$temporal_decomposition`.
+`temporal_decomposition = "auto"` resolves to `time_2l` when both `time` and
+`predictors` are supplied, and to `none` otherwise.
+
+For now, `predictors` are the only variables transformed. Future outcome-aware
+model types should add a separate `outcomes` argument rather than broadening
+`predictors` into a generic variable list. This keeps APIM/DIM predictor
+construction clear while leaving room for dyadic-score outcome construction.
+
+`temporal_decomposition` controls predictor pre-decomposition over time. DIM may
+still apply model-specific conventions after that step; specifically, raw
+cross-sectional DIM dyad means are centered around the grand mean of dyad means.
 
 ## Centering
 
@@ -105,16 +118,16 @@ attr(data, "interdep")$apim_predictors
 does not depend on APIM actor/partner columns. DIM columns are computed directly
 from grouped dyad means.
 
-For within-person components, grouping is dyad-time:
+For within-person components, the decomposition level is dyad-time:
 
 ```r
 .i_x_cwp_dyad_mean
 .i_x_cwp_dyad_deviation
 ```
 
-For between-person components, grouping is dyad. The implementation first
-reduces to one row per dyad-member so members are not weighted by the number of
-observed days:
+For between-person components, the decomposition level is dyad. The
+implementation first reduces to one row per dyad-member so members are not
+weighted by the number of observed days:
 
 ```r
 .i_x_cbp_dyad_mean
@@ -139,11 +152,49 @@ The metadata table is:
 attr(data, "interdep")$dim_predictors
 ```
 
+with `decomposition_level` recording whether the component was decomposed within
+dyad-time or within dyad.
+
+## Future Dyadic-Score Models
+
+For a future undirected dyadic-score model, use a separate model type:
+
+```r
+model_type = "dyadic_score"
+```
+
+The intended split is:
+
+```r
+center_predictors()
+add_dyad_individual_columns()    # predictor-side dyad means/deviations
+add_dyadic_score_outcomes()      # outcome-side dyad scores
+```
+
+Predictor-side construction should reuse the current DIM path. For ILD data,
+that means predictors are first decomposed into `.i_*_cwp` and `.i_*_cbp`, then
+converted into dyad means and individual deviations.
+
+Outcome-side construction should be handled separately because the semantics are
+different. For ILD dyadic-score outcomes, the default target is the raw
+observation-level dyad score at each time point:
+
+```r
+.i_y_dyad_mean_t
+.i_y_dyad_deviation_t
+```
+
+That is, the outcome is transformed into dyad mean and partner deviation at the
+dyad-time level. It is not within-/between-person centered by default. Centered
+or change-from-usual dyadic-score outcomes can be considered later as an
+explicit option, not as the default behavior.
+
 ## Validation Rules
 
-- `centering = "time_2l"` requires `time` and `predictors`.
-- predictors used with `centering = "time_2l"` must be numeric.
-- non-numeric predictors can be kept undecomposed with `centering = "none"`.
+- `temporal_decomposition = "time_2l"` requires `time` and `predictors`.
+- predictors used with `temporal_decomposition = "time_2l"` must be numeric.
+- non-numeric predictors can be kept undecomposed with
+  `temporal_decomposition = "none"`.
 - user data may not contain package-owned `.i_` columns.
 - longitudinal raw DIM is currently rejected because it mixes within-person and
   between-person information.
@@ -153,5 +204,5 @@ attr(data, "interdep")$dim_predictors
 - Review `add_dyad_individual_columns()` carefully before treating DIM as stable.
 - Decide whether the print header should describe DIM column families.
 - Add a focused DIM vignette once the DIM helper and metadata are final.
-- Keep APIM and centering examples in the main vignette; avoid duplicating the
-  APIM-DIM equivalence material there.
+- Keep APIM and temporal-decomposition examples in the main vignette; avoid
+  duplicating the APIM-DIM equivalence material there.

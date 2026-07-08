@@ -5,12 +5,12 @@ This package provides functions for preparing composition-aware dyadic
 multilevel models, focusing on cross-sectional and intensive longitudinal (ILD)
 data. The package should not try to replace model engines such as `glmmTMB` or
 `brms`. Its core responsibility is to make the dyadic composition logic,
-centering, indicators, constraints, interpretation helpers, and eventually model
-syntax explicit and reproducible.
+temporal decomposition, indicators, constraints, interpretation helpers, and
+eventually model syntax explicit and reproducible.
 
 ## Development Notes
 
-- Temporal centering and predictor-shape planning: [`centering.md`](centering.md)
+- Temporal decomposition and predictor-shape planning: [`centering.md`](centering.md)
 - Possible future reintroduction of inspection-only incomplete/unknown dyads:
   [`keep-behavior-notes.md`](keep-behavior-notes.md)
 - Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
@@ -31,16 +31,19 @@ model-building features.
   behavior
 - Return factor columns for `.i_composition` and
   `.i_composition_role`
-- Add temporal centering and predictor-shape helpers for ILD data
+- Add temporal decomposition and predictor-shape helpers for ILD data
   - Keep the implemented `time_2l` workflow described in [`centering.md`](centering.md)
-  - Keep APIM and DIM on the same centering foundation
-  - Use `centering = "auto"` by default: resolve to `time_2l` when both `time`
-    and predictors are supplied, and to `none` otherwise
-  - Allow explicit `centering = "none"` for undecomposed or externally centered
-    cases
+  - Keep APIM and DIM on the same temporal-decomposition foundation
+  - Use `temporal_decomposition = "auto"` by default: resolve to `time_2l`
+    when both `time` and predictors are supplied, and to `none` otherwise
+  - Allow explicit `temporal_decomposition = "none"` for undecomposed or
+    externally centered cases
   - Support raw APIM columns, within-/between-person APIM columns, and DIM
     dyad-mean / individual-deviation columns
   - Keep missing-data behavior explicit
+  - Keep `predictors` as the predictor-side API; add future `outcomes`
+    metadata separately rather than turning `predictors` into a generic
+    variable list
 - Add a print method for `interdep_data`
   - Keep normal tibble/data-frame printing; add a compact interdep header above
     the data output
@@ -108,7 +111,7 @@ Complete these before calling the feature set CRAN-ready:
 - Finalize DIM metadata
   - decide whether `dim_predictors` table columns are stable:
     `predictor`, `component`, `source_column`, `mean_column`,
-    `deviation_column`, `grouping`
+    `deviation_column`, `decomposition_level`
   - make sure downstream print/vignette code reads metadata rather than
     guessing column names where possible
 - Decide whether `print.interdep_data()` should show DIM column families
@@ -145,6 +148,15 @@ Complete these before calling the feature set CRAN-ready:
 
 - Add helper functions to rotate `.i_diff` / Idiff structures back to
   partner-level interpretations
+- Add outcome-aware preparation for dyadic-score models
+  - Add `outcomes = NULL` to store outcome variables separately from
+    `predictors`
+  - Add `model_type = "dyadic_score"` for undirected dyadic-score models
+  - Reuse DIM construction for predictor-side dyad means/deviations
+  - Add a separate outcome helper for raw dyad-time outcome means and
+    deviations
+  - Do not within-/between-person center ILD outcomes by default; reserve
+    centered outcome scores for an explicit later option
 - Constrain and pool compositions
   - Example: treat male-female dyads as exchangeable
   - Example: pool male-male and female-female dyads as same-sex
@@ -199,7 +211,7 @@ Complete these before calling the feature set CRAN-ready:
 ## Version 0.5.0 and Later
 
 - Evaluate a custom Stan track only after the package has stable validation,
-  centering, actor/partner helpers, syntax generation, and fit/summary
+  temporal decomposition, actor/partner helpers, syntax generation, and fit/summary
   conventions for established engines
 - If custom Stan becomes part of the package scope, follow the staged dyadic
   residual VAR plan in [`stan.md`](stan.md)
@@ -223,12 +235,12 @@ Target state before JOSS submission:
   guidance
 - Evidence of research use, ideally a preprint or applied analysis using the
   package
-- Robust centering for ILD data
+- Robust temporal decomposition for ILD data
 - Composition pooling/constraining helpers
 - `.i_diff` / Idiff interpretation helpers
 - Formula or syntax generation for at least `glmmTMB`
 - Preferably `brms` syntax generation as a second modeling backend
 - Reproducible vignettes showing composition-aware dyadic MLM workflows
-- Clear statement that `interdep` supplies dyadic composition logic, centering,
-  indicators, constraints, interpretation helpers, and syntax for established
-  model engines
+- Clear statement that `interdep` supplies dyadic composition logic, temporal
+  decomposition, indicators, constraints, interpretation helpers, and syntax
+  for established model engines

@@ -47,7 +47,7 @@ test_that("add_actor_partner_columns preserves rows with missing partner occasio
     member = person_id,
     time = time,
     predictors = x,
-    centering = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -82,7 +82,7 @@ test_that("add_actor_partner_columns matches cross-sectional partners", {
     group = dyad_id,
     member = person_id,
     predictors = x,
-    centering = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -127,7 +127,7 @@ test_that("add_actor_partner_columns preserves measured missingness", {
     group = dyad_id,
     member = person_id,
     predictors = x,
-    centering = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -152,7 +152,7 @@ test_that("prepare_interdep_data creates actor and partner columns after droppin
       member = person_id,
       role = role,
       predictors = x,
-      centering = "none",
+      temporal_decomposition = "none",
       missing_role = "drop",
       incomplete_dyads = "drop",
       seed = 123

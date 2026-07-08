@@ -19,6 +19,9 @@ columns for the predictors recorded in an \code{interdep_data} object. For
 intensive longitudinal predictors decomposed by \code{\link[=center_predictors]{center_predictors()}}, the
 within-person component is decomposed within each dyad-time occasion and the
 between-person component is decomposed once within each dyad.
+For raw cross-sectional predictors, the dyad-mean column is centered around
+the grand mean of dyad means by DIM convention, while the individual-deviation
+column is the person's deviation from the uncentered dyad mean.
 }
 \details{
 The function reads \code{attr(data, "interdep")$predictor_decompositions} and
