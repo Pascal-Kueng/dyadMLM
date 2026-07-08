@@ -115,6 +115,28 @@ test_that("validate_interdep_data validates incompatible model type requests", {
       data,
       group = dyad_id,
       member = person_id,
+      model_type = "asdkfjakdfj"
+    ),
+    'Invalid value(s): "asdkfjakdfj".',
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      model_type = "a"
+    ),
+    'Invalid value(s): "a".',
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
       model_type = c("apim", "none")
     ),
     '`model_type = "none"` cannot be combined with other model types.',

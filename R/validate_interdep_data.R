@@ -16,11 +16,12 @@
 #' @param time Optional column identifying time or measurement order.
 #' @param predictors Optional variables to select and store as metadata for
 #'   temporal predictor decomposition and model-helper functions.
-#' @param model_type Requested predictor shape for downstream construction.
-#'   `"apim"` indicates actor and partner predictors, `"none"` indicates no
-#'   model-specific predictor construction, `"dim"` indicates dyad-mean and
-#'   within-dyad-deviation predictors, and `"apim_dim"` indicates both APIM and
-#'   DIM predictors.
+#' @param outcomes Optional variables to select and store as metadata for
+#'   outcome-side model-helper functions. Currently used by
+#'   `model_type = "undirected_dsm"`.
+#' @param model_type Requested model-ready column families. Can contain one or
+#'   more of `"apim"`, `"dim"`, and `"undirected_dsm"`. `"none"` indicates no
+#'   model-specific predictor or outcome construction and must be used alone.
 #' @param temporal_predictor_decomposition Requested temporal predictor decomposition
 #'   strategy for predictors. `"none"` leaves predictors undecomposed before
 #'   model-specific columns are constructed. `"time_2l"` indicates a two-level
@@ -48,7 +49,8 @@ validate_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    model_type = c("apim", "dim", "apim_dim", "none"),
+    outcomes = NULL,
+    model_type = "apim",
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop")
@@ -77,7 +79,7 @@ validate_interdep_data <- function(
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
 
-  model_type <- rlang::arg_match(model_type)
+  model_type <- normalize_model_type(model_type)
   temporal_predictor_decomposition <- rlang::arg_match(temporal_predictor_decomposition)
 
   # Extract structural column names.
@@ -159,6 +161,22 @@ validate_interdep_data <- function(
     predictor_names <- names(selected_predictors)
   }
 
+  outcomes_quo <- rlang::enquo(outcomes)
+  outcome_names <- NULL
+
+  if (!rlang::quo_is_null(outcomes_quo)) {
+    selected_outcomes <- tryCatch(
+      tidyselect::eval_select(outcomes_quo, data = out),
+      error = function(e) {
+        stop(
+          "`outcomes` must refer to existing columns in `data`.",
+          call. = FALSE
+        )
+      }
+    )
+    outcome_names <- names(selected_outcomes)
+  }
+
   # Resolve dyads with fewer than two observed members.
   out_list <- resolve_incomplete_dyads(
     out = out,
@@ -212,6 +230,13 @@ validate_interdep_data <- function(
     }
   }
 
+  if ("undirected_dsm" %in% model_type && length(outcome_names) == 0) {
+    stop(
+      '`model_type = "undirected_dsm"` requires `outcomes` to be supplied.',
+      call. = FALSE
+    )
+  }
+
   if (temporal_predictor_decomposition == "auto") {
     temporal_predictor_decomposition <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
   }
@@ -239,6 +264,7 @@ validate_interdep_data <- function(
     role = role_name,
     time = time_name,
     predictors = predictor_names,
+    outcomes = outcome_names,
     n_dyads = n_groups,
     longitudinal = has_time,
     temporal_predictor_decomposition = temporal_predictor_decomposition,

@@ -27,20 +27,24 @@
 #' measures.
 #' @param predictors Optional variables to use for temporal predictor
 #'   decomposition and model-ready predictor construction.
-#' @param model_type Predictor shape to construct. `"apim"` creates actor and
-#'   partner predictors. `"dim"` creates dyad-mean and within-dyad-deviation
-#'   predictors. `"apim_dim"` creates both APIM and DIM predictors. `"none"`
-#'   skips model-specific predictor construction after validation, composition
-#'   inference, and optional temporal predictor decomposition.
+#' @param outcomes Optional variables to use for model-ready outcome construction.
+#'   Currently only needed for `model_type = "undirected_dsm"`.
+#' @param model_type Model-ready column families to construct. Can contain one
+#'   or more of `"apim"`, `"dim"`, and `"undirected_dsm"`. `"apim"` creates
+#'   actor and partner predictors. `"dim"` creates dyad-mean and
+#'   within-dyad-deviation predictors. `"undirected_dsm"` creates undirected
+#'   dyadic-score model columns. `"none"` skips model-specific predictor and
+#'   outcome construction after validation, composition inference, and optional
+#'   temporal predictor decomposition, and must be used alone.
 #' @param temporal_predictor_decomposition Temporal decomposition strategy for
 #'   `predictors`.
 #'   `"none"` leaves predictors undecomposed before model-specific columns are
 #'   constructed. `"time_2l"` indicates a two-level temporal predictor
 #'   decomposition into within-person and between-person components. `"auto"`
 #'   resolves to `"time_2l"` when both `time` and `predictors` are supplied, and
-#'   to `"none"` otherwise. For `"dim"` and `"apim_dim"`, raw cross-sectional
-#'   dyad-mean columns are still centered around the grand mean of dyad means as
-#'   part of DIM construction.
+#'   to `"none"` otherwise. For `"dim"` and `"undirected_dsm"`, raw
+#'   cross-sectional dyad-mean columns are still centered around the grand mean
+#'   of dyad means as part of DIM-style predictor construction.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -55,7 +59,7 @@
 #'   `.i_is_*` numeric indicator columns, `.i_diff`, composition-specific
 #'   `.i_diff_*` columns for exchangeable dyads, and an `interdep` attribute
 #'   containing structural metadata, `dyad_compositions`, and predictor metadata
-#'   such as `predictor_decompositions`, `apim_predictors`, and
+#'   such as `temporal_predictor_decompositions`, `apim_predictors`, and
 #'   `dim_predictors` when applicable. `.i_diff` is active for exchangeable
 #'   dyads and zero for distinguishable dyads.
 #'
@@ -84,14 +88,15 @@ prepare_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    model_type = c("apim", "dim", "apim_dim", "none"),
+    outcomes = NULL,
+    model_type = "apim",
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
     seed = NULL
   ) {
 
-  model_type <- rlang::arg_match(model_type)
+  model_type <- normalize_model_type(model_type)
   temporal_predictor_decomposition <- rlang::arg_match(temporal_predictor_decomposition)
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
@@ -103,6 +108,7 @@ prepare_interdep_data <- function(
     role = {{ role }},
     time = {{ time }},
     predictors = {{ predictors }},
+    outcomes = {{ outcomes }},
     model_type = model_type,
     temporal_predictor_decomposition = temporal_predictor_decomposition,
     incomplete_dyads = incomplete_dyads,
@@ -113,19 +119,22 @@ prepare_interdep_data <- function(
 
   out <- center_predictors(out)
 
-  if (model_type %in% c("dim", "apim_dim")) {
+  if (any(model_type %in% c("dim", "undirected_dsm"))) {
+    # currently only supports exchangeable dyads (across the whole dataset)
     validate_dim_compatibility(out)
   }
 
-  if (model_type %in% c("apim", "apim_dim")) {
+  if ("apim" %in% model_type) {
     out <- add_actor_partner_columns(out)
   }
 
-  if (model_type %in% c("dim", "apim_dim")) {
+  if ("dim" %in% model_type && !"undirected_dsm" %in% model_type) {
     out <- add_dyad_individual_columns(out)
   }
 
-  # out <- add_wb_centering(out)
+  if ("undirected_dsm" %in% model_type) {
+    out <- add_undirected_dsm_columns(out)
+  }
 
   return(out)
 }

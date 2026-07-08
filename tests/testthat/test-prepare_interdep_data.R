@@ -136,6 +136,24 @@ test_that("prepare_interdep_data constructs multiple requested model column fami
   expect_s3_class(attr(result, "interdep")$dim_predictors, "tbl_df")
 })
 
+test_that("prepare_interdep_data rejects unsupported model types", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      model_type = "asdkfjakdfj"
+    ),
+    'Invalid value(s): "asdkfjakdfj".',
+    fixed = TRUE
+  )
+})
+
 test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
