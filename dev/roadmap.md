@@ -41,9 +41,19 @@ model-building features.
   - Support raw APIM columns, within-/between-person APIM columns, and DIM
     dyad-mean / within-dyad-deviation columns
   - Keep missing-data behavior explicit
-  - Keep `predictors` as the predictor-side API; add future `outcomes`
-    metadata separately rather than turning `predictors` into a generic
-    variable list
+  - Keep `predictors` as the predictor-side API; add `outcomes` separately
+    for outcome-aware preparation rather than turning `predictors` into a
+    generic variable list
+- Add minimal undirected dyadic-score model (DSM) data preparation
+  - Add `outcomes = NULL` to store outcome variables separately from
+    `predictors`
+  - Add `model_type = "dsm"` for undirected DSM preparation only
+  - Reuse DIM construction for predictor-side dyad means/deviations
+  - Add a separate outcome helper for raw dyad outcome means and within-dyad
+    deviations
+  - For ILD outcomes, compute raw dyad scores within dyad-time
+  - Do not within-/between-person center ILD outcomes by default; reserve
+    centered or directed DSM outcomes for an explicit later option
 - Add a print method for `interdep_data`
   - Keep normal tibble/data-frame printing; add a compact interdep header above
     the data output
@@ -100,6 +110,7 @@ model-building features.
   - Show composition counts and sparse-composition warnings
 - Keep README and vignette focused on the data-preparation workflow
 - Add a focused DIM vignette after reviewing the DIM helper API
+- Add a short DSM data-preparation example after the DSM API is stable
 - Add citation metadata
   - `inst/CITATION` for R users
   - `CITATION.cff` for GitHub and future Zenodo metadata
@@ -121,6 +132,13 @@ Complete these before calling the feature set CRAN-ready:
 - Keep `print.interdep_data()` descriptions for DIM column families explicit
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
+- Add minimal undirected DSM preparation
+  - validate/select `outcomes` separately from `predictors`
+  - construct DSM outcome columns from raw outcomes only
+  - use dyad-level scores for cross-sectional outcomes
+  - use dyad-time scores for ILD outcomes
+  - store DSM outcome metadata separately from `dim_predictors`
+  - add focused tests for cross-sectional and ILD DSM outcome construction
 - Add a short DIM vignette after the DIM API is stable
   - show cross-sectional APIM-DIM equivalence
   - show ILD DIM construction from `time_2l` components
@@ -151,15 +169,13 @@ Complete these before calling the feature set CRAN-ready:
 
 - Add helper functions to rotate `.i_diff` / Idiff structures back to
   partner-level interpretations
-- Add outcome-aware preparation for dyadic-score models
-  - Add `outcomes = NULL` to store outcome variables separately from
-    `predictors`
-  - Add `model_type = "dyadic_score"` for undirected dyadic-score models
-  - Reuse DIM construction for predictor-side dyad means/deviations
-  - Add a separate outcome helper for raw dyad-time outcome means and
-    deviations
-  - Do not within-/between-person center ILD outcomes by default; reserve
-    centered outcome scores for an explicit later option
+- Extend dyadic-score model support beyond the minimal v0.1.0 data-prep API
+  - Consider directed DSM variants only after the undirected data-prep path is
+    stable
+  - Consider centered or change-from-usual DSM outcome scores only as explicit
+    options
+  - Keep multivariate DSM modeling and formula/syntax generation for a later
+    modeling layer
 - Constrain and pool compositions
   - Example: treat male-female dyads as exchangeable
   - Example: pool male-male and female-female dyads as same-sex

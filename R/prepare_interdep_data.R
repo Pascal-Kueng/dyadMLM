@@ -112,6 +112,10 @@ prepare_interdep_data <- function(
 
   out <- center_predictors(out)
 
+  if (model_type %in% c("dim", "apim_dim")) {
+    validate_dim_compatibility(out)
+  }
+
   if (model_type %in% c("apim", "apim_dim")) {
     out <- add_actor_partner_columns(out)
   }

@@ -14,15 +14,20 @@ Implemented scope:
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
 - DIM dyad-mean and within-dyad-deviation columns
 
+Next v0.1.0 target:
+
+- `outcomes = NULL` in `prepare_interdep_data()` metadata, so DSM preparation
+  can distinguish predictor-side and outcome-side transformations
+- `model_type = "dsm"` for undirected dyadic-score model data preparation
+
 Reserved for later:
 
-- `outcomes = NULL` in `prepare_interdep_data()` metadata, so future model
-  helpers can distinguish predictor-side and outcome-side transformations
-- `model_type = "dyadic_score"` for undirected dyadic-score models
 - `temporal_decomposition = "time_3l"` for EMA/day/burst workflows with an
   explicit higher temporal unit
 - grand-mean-only centering as a separate user option
 - automatic inference of 3-level decomposition from the fitted model structure
+- directed DSM variants
+- centered or change-from-usual DSM outcome scores
 
 `time_2l` refers to the predictor decomposition over time, not to the full
 random-effects structure of the fitted model.
@@ -44,10 +49,10 @@ The resolved temporal-decomposition choice is stored in
 `temporal_decomposition = "auto"` resolves to `time_2l` when both `time` and
 `predictors` are supplied, and to `none` otherwise.
 
-For now, `predictors` are the only variables transformed. Future outcome-aware
-model types should add a separate `outcomes` argument rather than broadening
-`predictors` into a generic variable list. This keeps APIM/DIM predictor
-construction clear while leaving room for dyadic-score outcome construction.
+For APIM and DIM, `predictors` are the only variables transformed. DSM should
+add a separate `outcomes` argument rather than broadening `predictors` into a
+generic variable list. This keeps APIM/DIM predictor construction clear while
+allowing DSM outcome construction to use different rules.
 
 `temporal_decomposition` controls predictor pre-decomposition over time. DIM may
 still apply model-specific conventions after that step; specifically, raw
@@ -155,12 +160,12 @@ attr(data, "interdep")$dim_predictors
 with `decomposition_level` recording whether the component was decomposed within
 dyad-time or within dyad.
 
-## Future Dyadic-Score Models
+## Dyadic-Score Model Preparation
 
-For a future undirected dyadic-score model, use a separate model type:
+For undirected dyadic-score model data preparation, use a separate model type:
 
 ```r
-model_type = "dyadic_score"
+model_type = "dsm"
 ```
 
 The intended split is:
@@ -171,23 +176,29 @@ add_dyad_individual_columns()    # predictor-side dyad means/deviations
 add_dyadic_score_outcomes()      # outcome-side dyad scores
 ```
 
-Predictor-side construction should reuse the current DIM path. For ILD data,
-that means predictors are first decomposed into `.i_*_cwp` and `.i_*_cbp`, then
-converted into dyad means and individual deviations.
+Predictor-side construction should reuse the current DIM path completely. For
+ILD data, that means predictors are first decomposed into `.i_*_cwp` and
+`.i_*_cbp`, then converted into dyad means and within-dyad deviations.
 
 Outcome-side construction should be handled separately because the semantics are
 different. For ILD dyadic-score outcomes, the default target is the raw
 observation-level dyad score at each time point:
 
 ```r
-.i_y_dyad_mean_t
-.i_y_within_dyad_deviation_t
+.i_y_raw_dyad_mean
+.i_y_raw_within_dyad_deviation
 ```
 
-That is, the outcome is transformed into dyad mean and partner deviation at the
-dyad-time level. It is not within-/between-person centered by default. Centered
-or change-from-usual dyadic-score outcomes can be considered later as an
-explicit option, not as the default behavior.
+For cross-sectional data, these are computed within dyad. For ILD data, they
+are computed within dyad-time. Outcomes are not within-/between-person centered
+by default. Centered or change-from-usual dyadic-score outcomes can be
+considered later as an explicit option, not as the default behavior.
+
+Store DSM outcome metadata separately from predictor metadata, for example:
+
+```r
+attr(data, "interdep")$dsm_outcomes
+```
 
 ## Validation Rules
 
@@ -198,12 +209,17 @@ explicit option, not as the default behavior.
 - user data may not contain package-owned `.i_` columns.
 - longitudinal raw DIM is currently rejected because it mixes within-person and
   between-person information.
+- `model_type = "dsm"` requires `outcomes`.
+- DSM outcome columns use raw outcomes; `temporal_decomposition` applies only
+  to predictors.
 
 ## Remaining v0.1.0 Work
 
 - Review `add_dyad_individual_columns()` carefully before treating DIM as stable.
 - Keep the print header descriptions for DIM column families explicit but
   compact.
+- Add `outcomes` and minimal undirected DSM preparation.
+- Add focused DSM tests for cross-sectional and ILD raw outcome scores.
 - Add a focused DIM vignette once the DIM helper and metadata are final.
 - Keep APIM and temporal-decomposition examples in the main vignette; avoid
   duplicating the APIM-DIM equivalence material there.

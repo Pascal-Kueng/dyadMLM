@@ -2,6 +2,9 @@
 #'
 #' Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad-deviation
 #' columns for the predictors recorded in an `interdep_data` object. For
+#' currently supported non-directed DIMs, `.i_diff` must be nonzero for every
+#' retained row. This means distinguishable dyads are not supported by DIM
+#' construction until explicit role-contrast or pooling support is added. For
 #' intensive longitudinal predictors decomposed by [center_predictors()], the
 #' within-person component is decomposed within each dyad-time occasion and the
 #' between-person component is decomposed once within each dyad.
@@ -48,6 +51,8 @@ add_dyad_individual_columns <- function(data) {
     attr(data, "interdep")$dim_predictors <- dim_predictors
     return(data)
   }
+
+  validate_dim_compatibility(data)
 
   out <- data
 
