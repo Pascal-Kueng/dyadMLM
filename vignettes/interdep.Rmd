@@ -108,6 +108,11 @@ cross_distinguishable_data <- prepare_interdep_data(
   group = coupleID,
   role = gender,
   member = personID,
+  
+  # if we specify a predictor and a model type, we get transformed variables. 
+  # here, communication_actor and communication_partner
+  predictors = communication,
+  model_type = "apim",
   seed = 123
 )
 
@@ -130,8 +135,11 @@ cross_distinguishable_model <- glmmTMB(
     # remove standard intercept and model separate intercepts for male and female
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
     
-    # gender-specific slopes for communication (no main effect)
-    .i_is_female_x_male_female:communication + .i_is_female_x_male_male:communication +
+    # gender-specific slopes for communication actor effect (no main effect)
+    .i_is_female_x_male_female:communication_actor + .i_is_female_x_male_male:communication_actor +
+    
+    # gender-specific slopes for communication partner effect (no main effect)
+    .i_is_female_x_male_female:communication_partner + .i_is_female_x_male_male:communication_partner +
     
     # residual covariance in glmmTMB can be modeled with random intercepts
     # when dispformula ~ 0. We model gender-specific residual variances and 
@@ -158,6 +166,8 @@ cross_exchangeable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
+  predictors = communication,
+  model_type = "apim",
   seed = 123
 )
 
@@ -173,8 +183,11 @@ cross_exchangeable_diff_model <- glmmTMB(
     # pooled intercept 
     1 + 
     
-    # pooled (actor) slope for communication
-    communication +
+    # pooled actor slope for communication
+    communication_actor +
+    
+    # pooled partner slope for communication
+    communication_partner +
     
     # exchangeable residual covariance via sum-diff
     us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable | coupleID)
@@ -256,6 +269,8 @@ tweedie_distinguishable_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
+  predictors = motivation,
+  # when no model_type is specified, apim is the default.
   seed = 123
 )
 
@@ -271,11 +286,13 @@ tweedie_distinguishable_model <- glmmTMB(
     # remove standard intercept and model separate intercepts for male and female
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
     
-    # gender-specific slopes for motivation (no main effect)
-    .i_is_female_x_male_female:motivation + .i_is_female_x_male_male:motivation +
+    # gender-specific slopes for motivation actor effect
+    .i_is_female_x_male_female:motivation_actor + .i_is_female_x_male_male:motivation_actor +
+    
+    # gender-specific slopes for motivation partner effect
+    .i_is_female_x_male_female:motivation_partner + .i_is_female_x_male_male:motivation_partner +
     
     # keep a simple couple-level latent effect for stable non-independence
-    
     # important limitation: this can only induce positive partner dependence
     (1 | coupleID) 
   
@@ -297,6 +314,7 @@ tweedie_exchangeable_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   # role = gender,
+  predictors = motivation,
   seed = 123
 )
 
@@ -311,8 +329,11 @@ tweedie_exchangeable_model <- glmmTMB(
     # pooled intercept 
     1 + 
     
-    # pooled (actor) slope for motivation
-    motivation +
+    # pooled actor slope for motivation
+    motivation_actor +
+    
+    # pooled partner slope for motivation
+    motivation_partner +
     
     # exchangeable latent dyad block on the log-mean scale
     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID)
