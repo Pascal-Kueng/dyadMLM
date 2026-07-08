@@ -1,8 +1,8 @@
 ---
-title: "Dyad-Individual-Model"
+title: "Dyad-Individual Model"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Dyad-Individual-Model}
+  %\VignetteIndexEntry{Dyad-Individual Model}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -19,105 +19,107 @@ library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
-
 ## Cross-Sectional Gaussian DIM
 
-We prepare the data with the `interdep::prepare_interdep_data()` function:
+The current DIM implementation prepares non-directed DIM predictors. This means
+that the dyad members are treated as exchangeable for DIM construction. Here we
+therefore omit `role`, which makes `prepare_interdep_data()` create a valid
+`.i_diff` contrast with values `-1` and `1` within each dyad.
 
-```{r prepare-cross-distinguishable}
-cross_distinguishable_data <- prepare_interdep_data(
+```{r prepare-cross-exchangeable}
+cross_exchangeable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
-  # role = gender, 
-  # currently, role cannot be supplied, as we need
-  # valid .i_diff columns that are -1 and 1 randomly per couple
   predictors = communication,
-  
-  # we request both apim and dim variables so we can compare the models
+  # returning both apim and dim columns for comparison
   model_type = "apim_dim",
   seed = 123
 )
 
-print(cross_distinguishable_data, n = 20)
-
+print(cross_exchangeable_data, n = 20)
 ```
 
 ### Example DIM Model
 
-```{r}
+The random-effects structure contains a dyad-level random intercept and a
+within-dyad random deviation indexed by `.i_diff`.
+
+```{r fit-cross-dim, eval=has_glmmTMB}
 
 dim_1 <- glmmTMB::glmmTMB(
-  satisfaction ~ 1 + 
+  satisfaction ~ 1 +
     .i_communication_raw_dyad_mean + .i_communication_raw_within_dyad_deviation +
-    
-    (1 | coupleID) + (0 + .i_diff | coupleID)
-  
-  , data = cross_distinguishable_data
+    (1 | coupleID) + (0 + .i_diff | coupleID),
+  data = cross_exchangeable_data
 )
 
 summary(dim_1)
 ```
 
-This model is identical to an APIM as such: 
+The same model can be written in APIM form:
 
-```{r}
+```{r fit-cross-apim, eval=has_glmmTMB}
 
 apim_1 <- glmmTMB::glmmTMB(
-  satisfaction ~ 1 + 
+  satisfaction ~ 1 +
     .i_communication_raw_actor + .i_communication_raw_partner +
-    
-    (1 | coupleID) + (0 + .i_diff | coupleID)
-  
-  , data = cross_distinguishable_data
+    (1 | coupleID) + (0 + .i_diff | coupleID),
+  data = cross_exchangeable_data
 )
 
 summary(apim_1)
 ```
 
-
-Note the identical AIC, BIC, logLIK, etc. (p-value is not interpretable here): 
-
-```{r}
-anova(dim_1, apim_1)
+```{r glmmTMB-missing, eval=!has_glmmTMB}
+message("Install glmmTMB to run the fitted-model examples in this vignette.")
 ```
 
-This is evidence, that we are estimating the exact same model twice, just with different
-parametrizations and interpretations of the coefficients!
+The two models have identical fit statistics:
 
-The coefficients relate as such: 
+```{r compare-cross-fit, eval=has_glmmTMB}
+data.frame(
+  model = c("DIM", "APIM"),
+  AIC = c(AIC(dim_1), AIC(apim_1)),
+  BIC = c(BIC(dim_1), BIC(apim_1)),
+  logLik = c(as.numeric(logLik(dim_1)), as.numeric(logLik(apim_1)))
+)
+```
+
+This shows that the same statistical model is being estimated with different
+parameterizations and coefficient interpretations.
+
+The coefficients relate as follows:
 
 $$ 
-b_{BetweenCouple} = b_{actor} + b_{partner}
+b_{dyad\ mean} = b_{actor} + b_{partner}
 $$
 and 
 
 $$ 
-b_{WithinCoupleDifference} = b_{actor} - b_{partner}
+b_{within\ dyad\ deviation} = b_{actor} - b_{partner}
 $$
 
-E.g.,:
+For example:
 
-```{r}
-b_actor <- round(apim_1$fit$par[[2]], 3)
-b_partner <- round(apim_1$fit$par[[3]], 3)
+```{r compare-cross-coefficients, eval=has_glmmTMB}
+apim_coef <- glmmTMB::fixef(apim_1)$cond
+dim_coef <- glmmTMB::fixef(dim_1)$cond
 
-b_between_couple <- round(dim_1$fit$par[[2]], 3)
-b_within_couple <- round(dim_1$fit$par[[3]], 3)
+b_actor <- round(apim_coef[[".i_communication_raw_actor"]], 3)
+b_partner <- round(apim_coef[[".i_communication_raw_partner"]], 3)
 
-# with: 
-cat("From APIM model: \n")
-cat(" actor effect: ", b_actor, "\n")
-cat(" partner effect: ", b_partner, "\n\n")
+b_dyad_mean <- round(dim_coef[[".i_communication_raw_dyad_mean"]], 3)
+b_within_dyad <- round(dim_coef[[".i_communication_raw_within_dyad_deviation"]], 3)
 
-cat(" actor effect + partner effect: ", b_actor + b_partner, "\n")
-cat(" actor effect - partner effect: ", b_actor - b_partner, "\n\n")
+cat("From APIM model:\n")
+cat("actor effect: ", b_actor, "\n")
+cat("partner effect:", b_partner, "\n\n")
 
+cat("actor effect + partner effect:", b_actor + b_partner, "\n")
+cat("actor effect - partner effect:", b_actor - b_partner, "\n\n")
 
-# and: 
-cat("From DIM model: \n")
-cat(" between-couple effect:", b_between_couple, "\n")
-cat(" within-couple effect:", b_within_couple, "\n\n")
-
+cat("From DIM model:\n")
+cat("dyad-mean effect:              ", b_dyad_mean, "\n")
+cat("within-dyad-deviation effect: ", b_within_dyad, "\n")
 ```
-
