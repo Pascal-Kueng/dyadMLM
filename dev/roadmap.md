@@ -40,7 +40,7 @@ Target vignette structure:
   - cross-sectional APIM model construction
   - distinguishable and exchangeable APIMs
   - multiple dyad types in one APIM
-  - `.i_is_*`, `.i_diff`, and raw actor/partner predictor columns
+  - `.i_is_*`, `.i_diff_*`, and raw actor/partner predictor columns
 - `intensive-longitudinal-apim.Rmd`
   - ILD APIMs with temporal predictor decomposition
   - within-person and between-person actor/partner effects
@@ -105,7 +105,7 @@ model-building features.
   - Show structural columns: group, member, optional role, optional time
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
-    `.i_composition`, `.i_composition_role`, `.i_diff`, `.i_is_*`, `.i_diff_*`,
+    `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
     temporal predictor components, APIM predictor columns, DIM predictor
     columns, and undirected DSM outcome columns
   - Drive generated-column printing from `interdep_generated_columns()`, which
@@ -127,8 +127,7 @@ model-building features.
     #   .i_composition       inferred dyad composition
     #   .i_composition_role  composition-specific member role
     #   .i_is_*              composition-role indicator columns
-    #   .i_diff              sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads
-    #   .i_diff_*            composition-specific sum-diff contrasts
+    #   .i_diff_*            composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions
     #   .i_*_cwp             within-person temporal predictor components
     #   .i_*_cbp             between-person temporal predictor components, centred around grand mean of person means
     #   .i_*_cwp_actor       APIM within-person actor predictors
@@ -241,7 +240,7 @@ Complete these before calling the feature set CRAN-ready:
 
 ## Version 0.2.0
 
-- Add helper functions to rotate `.i_diff` / Idiff structures back to
+- Add helper functions to rotate `.i_diff_*` / Idiff structures back to
   partner-level interpretations
 - Extend dyadic-score model support beyond the minimal v0.1.0 data-prep API
   - Consider directed DSM variants only after the undirected data-prep path is
@@ -330,7 +329,7 @@ Target state before JOSS submission:
   package
 - Robust temporal predictor decomposition for ILD data
 - Composition pooling/constraining helpers
-- `.i_diff` / Idiff interpretation helpers
+- `.i_diff_*` / Idiff interpretation helpers
 - Formula or syntax generation for at least `glmmTMB`
 - Preferably `brms` syntax generation as a second modeling backend
 - Reproducible vignettes showing composition-aware dyadic MLM workflows

@@ -71,9 +71,8 @@ prepared
 #> #   .i_composition                     inferred dyad composition
 #> #   .i_composition_role                composition-specific member role
 #> #   .i_is_*                            composition-role indicator columns
-#> #   .i_diff                            sum-diff contrast; 0 for distinguishable dyads
 #> #
-#> # A tibble: 190 × 10
+#> # A tibble: 190 × 9
 #>    personID coupleID gender communication satisfaction .i_composition
 #>       <int>    <int> <chr>          <dbl>        <dbl> <fct>         
 #>  1        1        1 female          4.79         4.37 female_x_male 
@@ -87,12 +86,12 @@ prepared
 #>  9        9        5 female          6.01         7.41 female_x_male 
 #> 10       10        5 male            4.32         1.47 female_x_male 
 #> # ℹ 180 more rows
-#> # ℹ 4 more variables: .i_composition_role <fct>, .i_diff <dbl>,
+#> # ℹ 3 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>
 ```
 
 The prepared data includes `.i_composition_role`, formula-friendly
-`.i_is_*` indicators, and `.i_diff` / `.i_diff_*` columns for
+`.i_is_*` indicators, and composition-specific `.i_diff_*` columns for
 exchangeable dyads.
 
 Use `incomplete_dyads` and `missing_role` to choose whether incomplete

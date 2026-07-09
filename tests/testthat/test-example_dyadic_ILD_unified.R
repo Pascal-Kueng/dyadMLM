@@ -37,13 +37,9 @@ check_unified_ild_dataset <- function(data, outcome) {
     c("exchangeable", "distinguishable", "exchangeable")
   )
   expect_equal(dyad_compositions$n_dyads, c(60L, 80L, 60L))
+  expect_false(interdep_diff_col %in% names(prepared))
   expect_true(".i_diff_female_x_female" %in% names(prepared))
   expect_true(".i_diff_male_x_male" %in% names(prepared))
-
-  female_male <- prepared$.i_composition == "female_x_male"
-  exchangeable <- prepared$.i_composition != "female_x_male"
-  expect_true(all(prepared[[interdep_diff_col]][female_male] == 0))
-  expect_true(all(abs(prepared[[interdep_diff_col]][exchangeable]) == 1))
 
   female_female <- prepared$.i_composition == "female_x_female"
   male_male <- prepared$.i_composition == "male_x_male"

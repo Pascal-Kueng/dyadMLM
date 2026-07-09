@@ -71,18 +71,17 @@ unique members anywhere in the data. \code{"error"} stops with an error and
 \code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
 information. Ignored when no \code{role} column is supplied.}
 
-\item{seed}{Optional seed for random \code{.i_diff} sign assignment in
+\item{seed}{Optional seed for random \verb{.i_diff_*} sign assignment in
 exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 }
 \value{
 The original data as a tibble with class \code{interdep_data},
 \code{.i_composition} and \code{.i_composition_role} factor columns,
-\verb{.i_is_*} numeric indicator columns, \code{.i_diff}, composition-specific
+\verb{.i_is_*} numeric indicator columns, composition-specific
 \verb{.i_diff_*} columns for exchangeable dyads, and an \code{interdep} attribute
 containing structural metadata, \code{dyad_compositions}, and predictor metadata
 such as \code{temporal_predictor_decompositions}, \code{apim_predictors}, and
-\code{dim_predictors} when applicable. \code{.i_diff} is active for exchangeable
-dyads and zero for distinguishable dyads.
+\code{dim_predictors} when applicable.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

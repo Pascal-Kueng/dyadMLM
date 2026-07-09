@@ -4,7 +4,7 @@
 #' `interdep_data` object.
 #'
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
-#' @param seed Optional seed for random `.i_diff` sign assignment in
+#' @param seed Optional seed for random `.i_diff_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #'
 #' @return An `interdep_data` object with added `.i_composition` and
@@ -94,7 +94,7 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     by = group_name
   )
 
-  # Only exchangeable dyads need arbitrary labels to construct idiff.
+  # Only exchangeable dyads need arbitrary labels to construct .i_diff_*.
   exchangeable_data <- data[data[[interdep_dyad_type_col]] == "exchangeable", , drop = FALSE]
   arbitrary_roles <- assign_arbitrary_member_roles(
     exchangeable_data,
@@ -117,14 +117,15 @@ infer_dyad_compositions <- function(data, seed = NULL) {
     as.character(data[[interdep_composition_col]])
   )
 
-  # add i_diff column
+  # Add a temporary pooled contrast, then use it to create composition-specific
+  # .i_diff_* columns in finalize_composition_columns().
   data[[interdep_diff_col]] <- ifelse(
     data[[interdep_dyad_type_col]] == "exchangeable",
     ifelse(data[[interdep_arbitrary_role_col]] == "arbitrary_1", -1, 1),
     0
   )
 
-  # remove columns that are no longer needed after constructing idiff
+  # Remove columns that are no longer needed after constructing contrasts.
   data[[interdep_raw_composition_col]] <- NULL
   data[[interdep_dyad_type_col]] <- NULL
 
@@ -142,7 +143,7 @@ finalize_composition_columns <- function(data) {
   data[[interdep_composition_col]] <- factor(data[[interdep_composition_col]])
   data[[interdep_composition_role_col]] <- factor(data[[interdep_composition_role_col]])
 
-  # This was only needed for idiff construction, we remove it
+  # This was only needed for contrast construction, we remove it.
   data[[interdep_arbitrary_role_col]] <- NULL
 
   indicator_suffixes <- make_interdep_suffixes(data[[interdep_composition_role_col]])
@@ -170,6 +171,8 @@ finalize_composition_columns <- function(data) {
       0
     )
   }
+
+  data[[interdep_diff_col]] <- NULL
 
   data
 }

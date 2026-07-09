@@ -53,17 +53,16 @@
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
 #'   information. Ignored when no `role` column is supplied.
-#' @param seed Optional seed for random `.i_diff` sign assignment in
+#' @param seed Optional seed for random `.i_diff_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #'
 #' @return The original data as a tibble with class `interdep_data`,
 #'   `.i_composition` and `.i_composition_role` factor columns,
-#'   `.i_is_*` numeric indicator columns, `.i_diff`, composition-specific
+#'   `.i_is_*` numeric indicator columns, composition-specific
 #'   `.i_diff_*` columns for exchangeable dyads, and an `interdep` attribute
 #'   containing structural metadata, `dyad_compositions`, and predictor metadata
 #'   such as `temporal_predictor_decompositions`, `apim_predictors`, and
-#'   `dim_predictors` when applicable. `.i_diff` is active for exchangeable
-#'   dyads and zero for distinguishable dyads.
+#'   `dim_predictors` when applicable.
 #'
 #' @examples
 #' data <- data.frame(

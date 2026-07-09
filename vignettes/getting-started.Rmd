@@ -116,8 +116,8 @@ We validate and prepare the data with the function `prepare_interdep_data()`
 cross_distinguishable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
-  role = gender,
   member = personID,
+  role = gender,
   
   # if we specify a predictor and a model type, we get transformed variables. 
   # here, .i_communication_raw_actor and .i_communication_raw_partner
@@ -378,8 +378,8 @@ For longitudinal data, pass the time variable as well.
 ild_distinguishable_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
-  role = gender,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -444,8 +444,8 @@ summary(ild_distinguishable_model)
 ild_exchangeable_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
-  # role = gender,
   member = personID,
+  # role = gender,
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -502,8 +502,8 @@ hist(example_dyadic_ILD_tweedie$physical_activity, breaks = 20)
 ild_tweedie_distinguishable_data <- prepare_interdep_data(
   example_dyadic_ILD_tweedie,
   group = coupleID,
-  role = gender,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -685,8 +685,8 @@ print(head(example_dyadic_crosssectional_unified))
 unified_cross_data <- prepare_interdep_data(
   example_dyadic_crosssectional_unified,
   group = coupleID,
-  role = gender,
   member = personID,
+  role = gender,
   seed = 123
 )
 
@@ -780,8 +780,8 @@ print(head(example_dyadic_ILD_unified, n = 26), n = 26)
 unified_ild_data <- prepare_interdep_data(
   example_dyadic_ILD_unified,
   group = coupleID,
-  role = gender,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -898,8 +898,8 @@ hist(example_dyadic_ILD_unified_tweedie$physical_activity, breaks = 20)
 unified_ild_tweedie_data <- prepare_interdep_data(
   example_dyadic_ILD_unified_tweedie,
   group = coupleID,
-  role = gender,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = provided_support,
   seed = 123

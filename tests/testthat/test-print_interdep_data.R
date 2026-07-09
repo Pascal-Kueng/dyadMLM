@@ -71,9 +71,10 @@ test_that("interdep data print describes generated predictor columns", {
 
   printed <- capture.output(print(result))
 
-  expect_true(any(grepl(".i_diff", printed, fixed = TRUE)))
+  expect_false(any(grepl("sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_diff_*", printed, fixed = TRUE)))
   expect_true(any(grepl(
-    "sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads",
+    "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions",
     printed,
     fixed = TRUE
   )))
@@ -106,7 +107,7 @@ test_that("interdep data print does not describe removed generated model column 
 
   expect_false(any(grepl(".i_*_raw_actor", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_raw_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_diff_*", printed, fixed = TRUE)))
 })
 
 test_that("interdep data print describes longitudinal APIM columns", {

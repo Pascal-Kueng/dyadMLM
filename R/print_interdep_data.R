@@ -83,12 +83,8 @@ print.interdep_data <- function(x, ...) {
     print_added_column(".i_is_*", "composition-role indicator columns")
   }
 
-  if (interdep_diff_col %in% names(x)) {
-    print_added_column(".i_diff", "sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads")
-  }
-
   if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))) {
-    print_added_column(".i_diff_*", "composition-specific sum-diff contrasts")
+    print_added_column(".i_diff_*", "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions")
   }
 
   # Users may remove generated columns while keeping the interdep metadata.

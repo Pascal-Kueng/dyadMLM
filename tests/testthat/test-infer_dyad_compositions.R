@@ -63,13 +63,14 @@ test_that("infer_dyad_compositions counts role compositions", {
       "female_x_female", "female_x_female",
       "male_x_male", "male_x_male")
   )
-  expect_equal(result[[interdep_diff_col]][result$dyad_id %in% c(1, 2)], rep(0, 4))
-  expect_equal(abs(result[[interdep_diff_col]][result$dyad_id %in% c(3, 4)]), rep(1, 4))
+  expect_false(interdep_diff_col %in% names(result))
+  expect_equal(abs(result$.i_diff_female_x_female[result$dyad_id == 3]), rep(1, 2))
+  expect_equal(abs(result$.i_diff_male_x_male[result$dyad_id == 4]), rep(1, 2))
   expect_equal(result$.i_diff_female_x_female[result$dyad_id != 3], rep(0, 6))
   expect_equal(result$.i_diff_male_x_male[result$dyad_id != 4], rep(0, 6))
 })
 
-test_that("idiff signs do not depend on distinguishable dyads", {
+test_that("composition-specific diff signs do not depend on distinguishable dyads", {
   exchangeable_only <- data.frame(
     dyad_id = c(2, 2, 3, 3),
     person_id = c("C", "D", "E", "F"),
@@ -101,8 +102,12 @@ test_that("idiff signs do not depend on distinguishable dyads", {
     infer_dyad_compositions(seed = 123)
 
   expect_equal(
-    mixed_result[[interdep_diff_col]][mixed_result$dyad_id %in% c(2, 3)],
-    exchangeable_result[[interdep_diff_col]]
+    mixed_result$.i_diff_female_x_female[mixed_result$dyad_id == 2],
+    exchangeable_result$.i_diff_female_x_female[exchangeable_result$dyad_id == 2]
+  )
+  expect_equal(
+    mixed_result$.i_diff_male_x_male[mixed_result$dyad_id == 3],
+    exchangeable_result$.i_diff_male_x_male[exchangeable_result$dyad_id == 3]
   )
 })
 
@@ -231,8 +236,8 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_true(is.factor(result$.i_composition_role))
   expect_true(".i_is_assumed_exchangeable" %in% names(result))
   expect_true(".i_diff_assumed_exchangeable" %in% names(result))
-  expect_equal(abs(result[[interdep_diff_col]]), rep(1, 4))
-  expect_equal(result$.i_diff_assumed_exchangeable, result[[interdep_diff_col]])
+  expect_false(interdep_diff_col %in% names(result))
+  expect_equal(abs(result$.i_diff_assumed_exchangeable), rep(1, 4))
   expect_equal(
     as.character(result$.i_composition),
     rep("assumed_exchangeable", 4)
