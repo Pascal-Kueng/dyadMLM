@@ -17,9 +17,11 @@ Mixed dyad compositions are supported for composition-aware APIM-style
 preparation; current DIM and undirected DSM helpers require one
 exchangeable dyad composition.
 
-The “Getting Started” vignette demonstrates how prepared data can be
-used to estimate dyadic models, including generalized intensive
-longitudinal APIMs with multiple dyad types in a single model.
+Start with `vignette("getting-started", package = "interdep")` for the
+main workflow, including generalized intensive longitudinal APIMs with
+multiple dyad types in a single model. For Dyad-Individual Model
+predictor construction and exchangeable dyads, see
+`vignette("Dyad-Individual-Model", package = "interdep")`.
 
 ## Citation
 
@@ -95,5 +97,4 @@ The prepared data includes `.i_composition_role`, formula-friendly
 exchangeable dyads.
 
 Use `incomplete_dyads` and `missing_role` to choose whether incomplete
-dyads or unresolved role information should error or be dropped. See the
-vignette for examples.
+dyads or unresolved role information should error or be dropped.
