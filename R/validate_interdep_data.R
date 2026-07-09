@@ -225,6 +225,7 @@ validate_interdep_data <- function(
     temporal_predictor_decomposition <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
   }
 
+  # Check if predictors are numeric in certain cases where needed.
   if (temporal_predictor_decomposition == "time_2l") {
     predictor_is_numeric <- vapply(out[predictor_names], is.numeric, logical(1))
     non_numeric_predictors <- predictor_names[!predictor_is_numeric]
@@ -235,6 +236,38 @@ validate_interdep_data <- function(
         "Use `temporal_predictor_decomposition = \"none\"` to keep non-numeric predictors undecomposed. ",
         "Non-numeric predictor(s): ",
         paste(non_numeric_predictors, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+  }
+
+  if (any(model_type %in% c("dim", "undirected_dsm")) && length(predictor_names) > 0) {
+    predictor_is_numeric <- vapply(out[predictor_names], is.numeric, logical(1))
+    non_numeric_predictors <- predictor_names[!predictor_is_numeric]
+
+    if (length(non_numeric_predictors) > 0) {
+      stop(
+        "`predictors` used with `model_type = \"dim\"` or `model_type = \"undirected_dsm\"` must be numeric. ",
+        "DIM and undirected DSM predictor construction computes dyad means and within-dyad deviations. ",
+        "Non-numeric predictor(s): ",
+        paste(non_numeric_predictors, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+  }
+
+  if ("undirected_dsm" %in% model_type && length(outcome_names) > 0) {
+    outcome_is_numeric <- vapply(out[outcome_names], is.numeric, logical(1))
+    non_numeric_outcomes <- outcome_names[!outcome_is_numeric]
+
+    if (length(non_numeric_outcomes) > 0) {
+      stop(
+        "`outcomes` used with `model_type = \"undirected_dsm\"` must be numeric. ",
+        "Undirected DSM outcome construction computes dyad means and within-dyad deviations. ",
+        "Non-numeric outcome(s): ",
+        paste(non_numeric_outcomes, collapse = ", "),
         ".",
         call. = FALSE
       )
@@ -262,6 +295,9 @@ validate_interdep_data <- function(
   out
 }
 
+##########################################################################
+# End Main
+##########################################################################
 
 resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dyads) {
 

@@ -262,6 +262,40 @@ test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
   )
 })
 
+test_that("validate_interdep_data rejects non-numeric DIM and DSM variables", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = factor(c("low", "high", "low", "high")),
+    y = factor(c("low", "high", "low", "high"))
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = x,
+      model_type = "dim",
+      temporal_predictor_decomposition = "none"
+    ),
+    '`predictors` used with `model_type = "dim"` or `model_type = "undirected_dsm"` must be numeric.',
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      outcomes = y,
+      model_type = "undirected_dsm"
+    ),
+    '`outcomes` used with `model_type = "undirected_dsm"` must be numeric.',
+    fixed = TRUE
+  )
+})
+
 test_that("validate_interdep_data allows non-numeric uncentered predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

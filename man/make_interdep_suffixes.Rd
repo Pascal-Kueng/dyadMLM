@@ -4,7 +4,11 @@
 \alias{make_interdep_suffixes}
 \title{Create safe suffixes for generated interdep columns}
 \usage{
-make_interdep_suffixes(labels)
+make_interdep_suffixes(
+  labels,
+  label_type = "labels",
+  rename_hint = "role or composition labels"
+)
 }
 \arguments{
 \item{labels}{Labels that will be used to build generated column names.}
