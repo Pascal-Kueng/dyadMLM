@@ -103,6 +103,73 @@ test_that("validate_interdep_data rejects outcome suffix collisions", {
   )
 })
 
+test_that("validate_interdep_data rejects raw DSM predictor-outcome name collisions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = 1:4
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = x,
+      outcomes = x,
+      model_type = "undirected_dsm",
+      temporal_predictor_decomposition = "none"
+    ),
+    "`predictors` and `outcomes` must select different variables",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data rejects shared predictor and outcome variables generally", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = 1:4
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = x,
+      outcomes = x,
+      model_type = "apim"
+    ),
+    "`predictors` and `outcomes` must select different variables",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data rejects sanitized raw DSM predictor-outcome collisions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    "x-a" = 1:4,
+    "x a" = 5:8,
+    check.names = FALSE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = `x-a`,
+      outcomes = `x a`,
+      model_type = "undirected_dsm",
+      temporal_predictor_decomposition = "none"
+    ),
+    "would create the same generated `.i_` column names",
+    fixed = TRUE
+  )
+})
+
 test_that("validate_interdep_data resolves model helper metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),

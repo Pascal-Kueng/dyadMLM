@@ -161,6 +161,18 @@ validate_interdep_data <- function(
     rename_hint = "variables"
   )
 
+  shared_model_columns <- intersect(predictor_names, outcome_names)
+  if (length(shared_model_columns) > 0) {
+    stop(
+      "`predictors` and `outcomes` must select different variables. ",
+      "The same variable cannot be prepared as both a predictor and an outcome in one call. ",
+      "Shared variable(s): ",
+      paste(shared_model_columns, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+
   # Resolve dyads with fewer than two observed members.
   out_list <- resolve_incomplete_dyads(
     out = out,
@@ -223,6 +235,32 @@ validate_interdep_data <- function(
 
   if (temporal_predictor_decomposition == "auto") {
     temporal_predictor_decomposition <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
+  }
+
+  if ("undirected_dsm" %in% model_type &&
+      temporal_predictor_decomposition == "none" &&
+      length(predictor_names) > 0 &&
+      length(outcome_names) > 0) {
+    predictor_suffixes <- make_interdep_suffixes(predictor_names)
+    outcome_suffixes <- make_interdep_suffixes(outcome_names)
+    shared_suffixes <- intersect(unname(predictor_suffixes), unname(outcome_suffixes))
+
+    if (length(shared_suffixes) > 0) {
+      conflicting_predictors <- predictor_names[predictor_suffixes %in% shared_suffixes]
+      conflicting_outcomes <- outcome_names[outcome_suffixes %in% shared_suffixes]
+
+      stop(
+        "`predictors` and `outcomes` used with `model_type = \"undirected_dsm\"` and ",
+        "`temporal_predictor_decomposition = \"none\"` would create the same generated `.i_` column names. ",
+        "This can happen when different variable names become identical after replacing spaces or punctuation with underscores. ",
+        "Conflicting predictor(s): ",
+        paste(conflicting_predictors, collapse = ", "),
+        ". Conflicting outcome(s): ",
+        paste(conflicting_outcomes, collapse = ", "),
+        ". Use different variables, rename one of them, or use a temporal predictor decomposition that avoids raw predictor-side DSM columns.",
+        call. = FALSE
+      )
+    }
   }
 
   # Check if predictors are numeric in certain cases where needed.
