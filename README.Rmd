@@ -35,7 +35,7 @@ longitudinal APIMs with multiple dyad types in a single model.
 ## Citation
 
 If you use `interdep`, please cite the package directly:
-
+ 
 ```bibtex
 @Manual{interdep,
   title = {interdep: Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data},

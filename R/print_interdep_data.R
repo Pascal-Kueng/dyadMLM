@@ -71,21 +71,20 @@ print.interdep_data <- function(x, ...) {
 
   cat("# Added columns:\n")
 
-  if (interdep_composition_col %in% names(x)) {
-    print_added_column(".i_composition", "inferred dyad composition")
-  }
-
-  if (interdep_composition_role_col %in% names(x)) {
-    print_added_column(".i_composition_role", "composition-specific member role")
-  }
-
-  if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "is_")))) {
-    print_added_column(".i_is_*", "composition-role indicator columns")
-  }
-
-  if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))) {
-    print_added_column(".i_diff_*", "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions")
-  }
+  fixed_added_columns <- tibble::tribble(
+    ~column_pattern,        ~description,
+    ".i_composition",       "inferred dyad composition",
+    ".i_composition_role",  "composition-specific member role",
+    ".i_is_*",              "composition-role indicator columns",
+    ".i_diff_*",            "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions"
+  )
+  show_fixed_added_columns <- c(
+    interdep_composition_col %in% names(x),
+    interdep_composition_role_col %in% names(x),
+    any(startsWith(names(x), paste0(interdep_reserved_prefix, "is_"))),
+    any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))
+  )
+  added_columns <- fixed_added_columns[show_fixed_added_columns, ]
 
   # Users may remove generated columns while keeping the interdep metadata.
   # Only advertise generated model columns that are still present in the data.
@@ -100,12 +99,14 @@ print.interdep_data <- function(x, ...) {
     ) |>
     dplyr::arrange(.data$print_order)
 
-  for (i in seq_len(nrow(generated_column_specs))) {
-    print_added_column(
-      generated_column_specs$column_pattern[[i]],
-      generated_column_specs$description[[i]]
+  if (nrow(generated_column_specs) > 0) {
+    added_columns <- dplyr::bind_rows(
+      added_columns,
+      generated_column_specs[, c("column_pattern", "description")]
     )
   }
+
+  print_added_columns(added_columns)
 
   cat("#\n")
 
@@ -117,6 +118,24 @@ print.interdep_data <- function(x, ...) {
   invisible(x)
 }
 
-print_added_column <- function(column_pattern, description) {
-  cat(sprintf("#   %-34s %s\n", column_pattern, description))
+print_added_columns <- function(added_columns) {
+  if (nrow(added_columns) == 0) {
+    return(invisible(NULL))
+  }
+
+  column_width <- max(nchar(added_columns$column_pattern, type = "width")) + 2L
+
+  for (i in seq_len(nrow(added_columns))) {
+    prefix <- sprintf("#   %-*s", column_width, added_columns$column_pattern[[i]])
+    continuation_prefix <- paste0("\n#   ", strrep(" ", column_width))
+    wrap_width <- max(20L, getOption("width", 80L) - nchar(prefix, type = "width"))
+    description_lines <- strwrap(added_columns$description[[i]], width = wrap_width)
+    if (length(description_lines) == 0) {
+      description_lines <- ""
+    }
+
+    cat(prefix, paste(description_lines, collapse = continuation_prefix), "\n", sep = "")
+  }
+
+  invisible(NULL)
 }

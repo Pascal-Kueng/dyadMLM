@@ -10,6 +10,17 @@ added_column_index <- function(lines, column_pattern) {
   match(TRUE, startsWith(lines, paste0("#   ", column_pattern, " ")))
 }
 
+capture_wide_print <- function(x) {
+  old_options <- options(width = 1000)
+  on.exit(options(old_options), add = TRUE)
+  capture.output(print(x))
+}
+
+expect_added_column_description <- function(printed, column_pattern, description) {
+  expect_true(any(grepl(column_pattern, printed, fixed = TRUE)))
+  expect_true(any(grepl(description, printed, fixed = TRUE)))
+}
+
 test_that("interdep data prints a header before the tibble", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
@@ -24,7 +35,7 @@ test_that("interdep data prints a header before the tibble", {
     role = role
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl("# interdep data", printed, fixed = TRUE)))
   expect_true(any(grepl("# A tibble:", printed, fixed = TRUE)))
@@ -48,7 +59,7 @@ test_that("interdep data prints dropped incomplete dyads", {
     fixed = TRUE
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl("# Dropped incomplete dyads:", printed, fixed = TRUE)))
   expect_true(any(grepl("with ID: 1", printed, fixed = TRUE)))
@@ -69,21 +80,47 @@ test_that("interdep data print describes generated predictor columns", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_false(any(grepl("sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_diff_*", printed, fixed = TRUE)))
-  expect_true(any(grepl(
-    "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions",
+  expect_added_column_description(
     printed,
-    fixed = TRUE
-  )))
+    ".i_diff_*",
+    "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions"
+  )
   expect_true(any(grepl(".i_*_raw_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl("APIM actor predictor: actor's original predictor values", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_actor",
+    "APIM actor predictor: actor's original predictor values"
+  )
   expect_true(any(grepl(".i_*_raw_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl("APIM partner predictor: partner's original predictor values", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_partner",
+    "APIM partner predictor: partner's original predictor values"
+  )
   expect_false(any(grepl(".i_*_actor           actor", printed, fixed = TRUE)))
   expect_false(any(grepl(".i_*_partner         partner", printed, fixed = TRUE)))
+})
+
+test_that("added column descriptions align and wrap to console width", {
+  old_options <- options(width = 60)
+  on.exit(options(old_options), add = TRUE)
+
+  printed <- capture.output(print_added_columns(tibble::tibble(
+    column_pattern = c(".short", ".much_longer_column_name"),
+    description = c(
+      "short description",
+      "long description that wraps across multiple lines"
+    )
+  )))
+
+  description_column <- as.integer(regexpr("short description", printed[[1]], fixed = TRUE))
+
+  expect_equal(as.integer(regexpr("long description", printed[[2]], fixed = TRUE)), description_column)
+  expect_equal(as.integer(regexpr("across", printed[[3]], fixed = TRUE)), description_column)
 })
 
 test_that("interdep data print does not describe removed generated model column families", {
@@ -103,7 +140,7 @@ test_that("interdep data print does not describe removed generated model column 
 
   result$.i_x_raw_actor <- NULL
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_false(any(grepl(".i_*_raw_actor", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_raw_partner", printed, fixed = TRUE)))
@@ -127,16 +164,20 @@ test_that("interdep data print describes longitudinal APIM columns", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(".i_*_cwp", printed, fixed = TRUE)))
-  expect_true(any(grepl("within-person predictor: momentary deviations from each person's usual level", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_cbp", printed, fixed = TRUE)))
-  expect_true(any(grepl(
-    "between-person predictor: stable differences from the average person's usual level",
+  expect_added_column_description(
     printed,
-    fixed = TRUE
-  )))
+    ".i_*_cwp",
+    "within-person predictor: momentary deviations from each person's usual level"
+  )
+  expect_true(any(grepl(".i_*_cbp", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_cbp",
+    "between-person predictor: stable differences from the average person's usual level"
+  )
   expect_true(any(grepl(".i_*_cwp_actor", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_cwp_partner", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_cbp_actor", printed, fixed = TRUE)))
@@ -163,7 +204,7 @@ test_that("interdep data print orders generated column descriptions", {
     seed = 123
   )
 
-  lines <- added_column_lines(capture.output(print(result)))
+  lines <- added_column_lines(capture_wide_print(result))
 
   expect_lt(added_column_index(lines, ".i_*_cwp"), added_column_index(lines, ".i_*_cwp_actor"))
   expect_lt(added_column_index(lines, ".i_*_cbp"), added_column_index(lines, ".i_*_cbp_actor"))
@@ -189,7 +230,7 @@ test_that("interdep data print collapses repeated generated column types", {
     seed = 123
   )
 
-  lines <- added_column_lines(capture.output(print(result)))
+  lines <- added_column_lines(capture_wide_print(result))
 
   expect_equal(added_column_count(lines, ".i_*_cwp"), 1)
   expect_equal(added_column_count(lines, ".i_*_cbp"), 1)
@@ -218,7 +259,7 @@ test_that("interdep data print does not describe removed temporal source columns
 
   result$.i_x_cwp <- NULL
 
-  lines <- added_column_lines(capture.output(print(result)))
+  lines <- added_column_lines(capture_wide_print(result))
 
   expect_equal(added_column_count(lines, ".i_*_cwp"), 0)
   expect_equal(added_column_count(lines, ".i_*_cbp"), 1)
@@ -241,12 +282,20 @@ test_that("interdep data print describes cross-sectional DIM columns", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(".i_*_raw_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl("DIM dyad-mean predictor: dyad's average predictor level, grand-mean centred", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_dyad_mean_gmc",
+    "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centred"
+  )
   expect_true(any(grepl(".i_*_raw_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_true(any(grepl("DIM within-dyad predictor deviation: person's difference from the dyad average", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_within_dyad_deviation",
+    "DIM within-dyad predictor deviation: person's difference from the dyad average"
+  )
 })
 
 test_that("interdep data print describes longitudinal DIM columns", {
@@ -267,20 +316,32 @@ test_that("interdep data print describes longitudinal DIM columns", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(".i_*_cwp_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl("DIM within-person dyad-mean predictor: shared momentary deviations in the dyad", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_cwp_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_true(any(grepl("DIM within-person within-dyad predictor deviation: person's momentary deviation from the dyad average", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_*_cbp_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl(
-    "DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centred",
+  expect_added_column_description(
     printed,
-    fixed = TRUE
-  )))
+    ".i_*_cwp_dyad_mean",
+    "DIM within-person dyad-mean predictor: shared momentary deviations in the dyad"
+  )
+  expect_true(any(grepl(".i_*_cwp_within_dyad_deviation", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_cwp_within_dyad_deviation",
+    "DIM within-person within-dyad predictor deviation: person's momentary deviation from the dyad average"
+  )
+  expect_true(any(grepl(".i_*_cbp_dyad_mean", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_cbp_dyad_mean",
+    "DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centred"
+  )
   expect_true(any(grepl(".i_*_cbp_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_true(any(grepl("DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_cbp_within_dyad_deviation",
+    "DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level"
+  )
 })
 
 test_that("interdep data print describes undirected DSM outcome columns", {
@@ -299,12 +360,20 @@ test_that("interdep data print describes undirected DSM outcome columns", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(".i_*_raw_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl("DSM dyad-mean outcome: dyad's average outcome level", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_dyad_mean",
+    "DSM dyad-mean outcome: dyad's average outcome level"
+  )
   expect_true(any(grepl(".i_*_raw_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_true(any(grepl("DSM within-dyad outcome deviation: person's difference from the dyad average", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_within_dyad_deviation",
+    "DSM within-dyad outcome deviation: person's difference from the dyad average"
+  )
   expect_false(any(grepl(".i_*_raw_dyad_mean_gmc", printed, fixed = TRUE)))
 })
 
@@ -328,14 +397,22 @@ test_that("interdep data print describes longitudinal undirected DSM columns", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(".i_*_cwp", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_cbp", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_cwp_dyad_mean", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_cbp_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl("DSM dyad-mean outcome: dyad's average outcome level", printed, fixed = TRUE)))
-  expect_true(any(grepl("DSM within-dyad outcome deviation: person's difference from the dyad average", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_dyad_mean",
+    "DSM dyad-mean outcome: dyad's average outcome level"
+  )
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_within_dyad_deviation",
+    "DSM within-dyad outcome deviation: person's difference from the dyad average"
+  )
 })
 
 test_that("interdep data print combines APIM and DIM column descriptions", {
@@ -354,7 +431,7 @@ test_that("interdep data print combines APIM and DIM column descriptions", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(".i_*_raw_actor", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_*_raw_partner", printed, fixed = TRUE)))
@@ -380,14 +457,26 @@ test_that("interdep data print combines APIM predictors and DSM outcomes", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(".i_*_raw_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl("APIM actor predictor: actor's original predictor values", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_actor",
+    "APIM actor predictor: actor's original predictor values"
+  )
   expect_true(any(grepl(".i_*_raw_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl("DSM dyad-mean outcome: dyad's average outcome level", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_dyad_mean",
+    "DSM dyad-mean outcome: dyad's average outcome level"
+  )
   expect_true(any(grepl(".i_*_raw_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_true(any(grepl("DSM within-dyad outcome deviation: person's difference from the dyad average", printed, fixed = TRUE)))
+  expect_added_column_description(
+    printed,
+    ".i_*_raw_within_dyad_deviation",
+    "DSM within-dyad outcome deviation: person's difference from the dyad average"
+  )
 })
 
 test_that("interdep data print describes dropped dyads with missing role information", {
@@ -410,7 +499,7 @@ test_that("interdep data print describes dropped dyads with missing role informa
     fixed = TRUE
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(
     "# Dropped dyads with incomplete role information:",
@@ -436,7 +525,7 @@ test_that("interdep data print truncates many dropped incomplete dyad IDs", {
     )
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl("# Dropped incomplete dyads:", printed, fixed = TRUE)))
   expect_true(any(grepl("14 dyads, with IDs: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ... and 4 more", printed, fixed = TRUE)))
@@ -459,7 +548,7 @@ test_that("interdep data print includes role and time in structure line", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl(
     "# Structure: group = dyad_id, member = person_id, role = role, time = day",
@@ -483,7 +572,7 @@ test_that("interdep data print describes multiple dyad compositions", {
     seed = 123
   )
 
-  printed <- capture.output(print(result))
+  printed <- capture_wide_print(result)
 
   expect_true(any(grepl("# Dyad compositions:", printed, fixed = TRUE)))
   expect_true(any(grepl("female_x_male\\s+distinguishable\\s+1 dyads", printed)))

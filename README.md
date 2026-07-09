@@ -68,9 +68,9 @@ prepared
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition                     inferred dyad composition
-#> #   .i_composition_role                composition-specific member role
-#> #   .i_is_*                            composition-role indicator columns
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_*              composition-role indicator columns
 #> #
 #> # A tibble: 190 × 9
 #>    personID coupleID gender communication satisfaction .i_composition
