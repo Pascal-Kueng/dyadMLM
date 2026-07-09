@@ -32,6 +32,11 @@ that the dyad members are treated as exchangeable for DIM construction. Here we
 therefore omit `role`, which makes `prepare_interdep_data()` create a valid
 `.i_diff` contrast with values `-1` and `1` within each dyad.
 
+A supplied `role` column is also allowed when it yields exactly one
+exchangeable composition, such as all female-female dyads. DIM construction is
+currently rejected for distinguishable compositions and for multiple
+exchangeable compositions.
+
 ```{r prepare-cross-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,

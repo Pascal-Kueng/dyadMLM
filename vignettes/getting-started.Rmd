@@ -385,10 +385,10 @@ print(ild_distinguishable_data)
 summary(ild_distinguishable_data)
 ```
 
-Note that if we supply `predictors`, for example as `c(pred1, pred2)` or as the
-single predictor above, they will be centred automatically within and between person.
-This temporal predictor decomposition can be controlled via the
-`temporal_predictor_decomposition` argument.
+By default, numeric predictors in longitudinal APIM preparation are decomposed
+into within-person and between-person components. This temporal predictor
+decomposition can be controlled via the `temporal_predictor_decomposition`
+argument.
 
 ```{r fit-ild-distinguishable, eval = has_glmmTMB}
 

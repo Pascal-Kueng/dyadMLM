@@ -8,7 +8,7 @@
 #' role-contrast, composition-specific, or pooling support is added.
 #' Predictors are constructed and treated identically to the DIM method.
 #' Outcomes are not temporally decomposed or grand-mean centered. Instead, a raw
-#' dyad mean and difference is created at each time-point.
+#' dyad mean and row-level within-dyad deviation is created at each time-point.
 #'
 #' The function reads `attr(data, "interdep")$temporal_predictor_decompositions` and
 #' stores the constructed outcome columns in

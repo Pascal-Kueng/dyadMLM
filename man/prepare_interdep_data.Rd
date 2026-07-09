@@ -59,7 +59,9 @@ decomposition into within-person and between-person components. \code{"auto"}
 resolves to \code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and
 to \code{"none"} otherwise. Raw cross-sectional DIM predictor dyad-mean columns
 are still centered around the grand mean of dyad means as part of DIM-style
-predictor construction.}
+predictor construction. For longitudinal DIM or undirected DSM predictor
+construction, raw undecomposed predictors are currently rejected; use
+\code{"auto"} or \code{"time_2l"}.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

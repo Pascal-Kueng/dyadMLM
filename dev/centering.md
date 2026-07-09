@@ -221,7 +221,10 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
 - `temporal_predictor_decomposition = "time_2l"` requires `time` and `predictors`.
 - predictors used with `temporal_predictor_decomposition = "time_2l"` must be numeric.
 - non-numeric predictors can be kept undecomposed with
-  `temporal_predictor_decomposition = "none"`.
+  `temporal_predictor_decomposition = "none"` only for model types that do not
+  compute dyad means or within-dyad deviations, such as raw APIM.
+- DIM and undirected DSM predictor construction require numeric predictors.
+- Undirected DSM outcome construction requires numeric outcomes.
 - user data may not contain package-owned `.i_` columns.
 - longitudinal raw DIM is currently rejected because it mixes within-person and
   between-person information.

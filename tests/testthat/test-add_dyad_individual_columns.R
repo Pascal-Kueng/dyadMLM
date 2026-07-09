@@ -94,6 +94,54 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
   )
 })
 
+test_that("DIM construction allows one role-supplied exchangeable composition", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "female", "female"),
+    x = c(1, 10, 20, 30)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = x,
+    model_type = "dim",
+    temporal_predictor_decomposition = "none",
+    seed = 123
+  )
+
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+  expect_equal(unique(as.character(result$.i_composition)), "female_x_female")
+  expect_equal(attr(result, "interdep")$dyad_compositions$dyad_type, "exchangeable")
+})
+
+test_that("raw cross-sectional DIM requires complete dyad values", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = c(1, NA, 20, 30)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = x,
+    model_type = "dim",
+    temporal_predictor_decomposition = "none",
+    seed = 123
+  )
+
+  expect_true(all(is.na(result$.i_x_raw_dyad_mean_gmc[result$dyad_id == 1])))
+  expect_true(all(is.na(result$.i_x_raw_within_dyad_deviation[result$dyad_id == 1])))
+  expect_equal(result$.i_x_raw_dyad_mean_gmc[result$dyad_id == 2], c(0, 0))
+  expect_equal(result$.i_x_raw_within_dyad_deviation[result$dyad_id == 2], c(-5, 5))
+})
+
 test_that("prepare_interdep_data creates DIM columns without APIM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -188,7 +236,7 @@ test_that("DIM construction errors for multiple exchangeable dyad compositions",
   )
 })
 
-test_that("longitudinal raw DIM construction errors clearly", {
+test_that("longitudinal DIM rejects undecomposed raw predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),

@@ -44,7 +44,9 @@
 #'   resolves to `"time_2l"` when both `time` and `predictors` are supplied, and
 #'   to `"none"` otherwise. Raw cross-sectional DIM predictor dyad-mean columns
 #'   are still centered around the grand mean of dyad means as part of DIM-style
-#'   predictor construction.
+#'   predictor construction. For longitudinal DIM or undirected DSM predictor
+#'   construction, raw undecomposed predictors are currently rejected; use
+#'   `"auto"` or `"time_2l"`.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
