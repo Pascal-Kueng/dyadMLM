@@ -54,7 +54,8 @@ Target vignette structure:
   - role-moderated and random-slope material only as advanced/conceptual
     guidance until the implementation is more complete
 - future `Dyadic-Score-Model.Rmd`
-  - add only after `outcomes` and `model_type = "undirected_dsm"` exist
+  - add only after the current `outcomes` and
+    `model_type = "undirected_dsm"` API is reviewed
   - keep DSM outcome-side semantics separate from DIM predictor construction
 
 ## Version 0.1.0 - First CRAN Release Candidate
@@ -105,7 +106,11 @@ model-building features.
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
     `.i_composition`, `.i_composition_role`, `.i_diff`, `.i_is_*`, `.i_diff_*`,
-    and generated predictor-column families
+    temporal predictor components, APIM predictor columns, DIM predictor
+    columns, and undirected DSM outcome columns
+  - Drive generated-column printing from `interdep_generated_columns()`, which
+    normalizes temporal predictor, APIM, DIM, and undirected DSM metadata into
+    one row per concrete generated column
   - Make dropped incomplete dyads and missing roles visible
   - Target display:
     ```r
@@ -122,16 +127,20 @@ model-building features.
     #   .i_composition       inferred dyad composition
     #   .i_composition_role  composition-specific member role
     #   .i_is_*              composition-role indicator columns
-    #   .i_diff              sum-diff contrast; 0 for distinguishable dyads
+    #   .i_diff              sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads
     #   .i_diff_*            composition-specific sum-diff contrasts
-    #   .i_*_cwp             within-person centred predictors
-    #   .i_*_cbp             between-person centred predictors
-    #   .i_*_cwp_actor/partner  APIM within-person actor/partner predictors
-    #   .i_*_cbp_actor/partner  APIM between-person actor/partner predictors
-    #   .i_*_cwp_dyad_mean      DIM shared momentary deviations
-    #   .i_*_cwp_within_dyad_deviation  DIM deviations from shared momentary levels
-    #   .i_*_cbp_dyad_mean      DIM shared usual levels, centred across persons
-    #   .i_*_cbp_within_dyad_deviation  DIM deviations from dyad usual levels
+    #   .i_*_cwp             within-person temporal predictor components
+    #   .i_*_cbp             between-person temporal predictor components, centred around grand mean of person means
+    #   .i_*_cwp_actor       APIM within-person actor predictors
+    #   .i_*_cwp_partner     APIM within-person partner predictors
+    #   .i_*_cbp_actor       APIM between-person actor predictors
+    #   .i_*_cbp_partner     APIM between-person partner predictors
+    #   .i_*_cwp_dyad_mean   DIM shared momentary predictor deviations
+    #   .i_*_cwp_within_dyad_deviation  DIM person deviations from shared momentary predictor levels
+    #   .i_*_cbp_dyad_mean   DIM shared usual predictor levels, centred across persons
+    #   .i_*_cbp_within_dyad_deviation  DIM person differences from dyad usual predictor levels
+    #   .i_*_raw_dyad_mean   DSM raw outcome dyad means
+    #   .i_*_raw_within_dyad_deviation  DSM raw outcome within-dyad deviations
     #
     # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, and 4 more.
     # A tibble: 5,600 x 17
@@ -174,18 +183,27 @@ Complete these before calling the feature set CRAN-ready:
   - decide whether `dim_predictors` table columns are stable:
     `predictor`, `component`, `source_column`, `mean_column`,
     `deviation_column`, `decomposition_level`
-  - make sure downstream print/vignette code reads metadata rather than
-    guessing column names where possible
+  - keep downstream print/vignette code reading metadata rather than guessing
+    column names where possible
+- Finalize generated-column metadata
+  - keep `interdep_generated_columns()` as the single normalized table for
+    generated temporal predictor, APIM, DIM, and undirected DSM columns
+  - preserve explicit fields for `temporal_decomposition`,
+    `dyadic_decomposition`, and `column_centering`
+  - revisit whether temporal rows should keep `decomposition_level = "time_2l"`
+    or later split method and level into separate fields
 - Keep `print.interdep_data()` descriptions for DIM column families explicit
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
-- Add minimal undirected DSM preparation
-  - validate/select `outcomes` separately from `predictors`
-  - construct DSM outcome columns from raw outcomes only
-  - use dyad-level scores for cross-sectional outcomes
-  - use dyad-time scores for ILD outcomes
-  - store DSM outcome metadata separately from `dim_predictors`
-  - add focused tests for cross-sectional and ILD DSM outcome construction
+- Review minimal undirected DSM preparation
+  - confirm `outcomes` selection and validation are final for v0.1
+  - confirm raw outcome dyad means/deviations are the only v0.1 outcome scores
+  - confirm dyad-level scores for cross-sectional outcomes and dyad-time scores
+    for ILD outcomes are documented clearly
+  - keep DSM outcome metadata in `undirected_dsm_outcomes`, separate from
+    `dim_predictors`
+  - add a short DSM data-preparation vignette/example only after the API feels
+    stable
 - Finalize vignette split for v0.1.0
   - shorten `getting-started.Rmd` so it is an orientation and data-prep
     vignette, not the main modeling manual

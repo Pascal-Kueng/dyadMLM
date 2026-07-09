@@ -14,14 +14,13 @@ Implemented scope:
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
 - DIM dyad-mean and within-dyad-deviation columns
 - DIM currently requires one exchangeable dyad composition
-
-Next v0.1.0 target:
-
 - `outcomes = NULL` in `prepare_interdep_data()` metadata, so DSM preparation
   can distinguish predictor-side and outcome-side transformations
 - `model_type = "undirected_dsm"` for undirected dyadic-score model data
   preparation
 - undirected DSM currently requires one exchangeable dyad composition
+- central generated-column metadata via `interdep_generated_columns()`, with
+  one row per temporal predictor, APIM, DIM, or undirected DSM column
 
 Reserved for later:
 
@@ -45,6 +44,7 @@ infer_dyad_compositions()
 center_predictors()
 add_actor_partner_columns()      # "apim" in model_type
 add_dyad_individual_columns()    # "dim" in model_type
+add_undirected_dyadic_score_columns() # "undirected_dsm" in model_type
 ```
 
 The resolved temporal predictor decomposition choice is stored in
@@ -52,10 +52,10 @@ The resolved temporal predictor decomposition choice is stored in
 `temporal_predictor_decomposition = "auto"` resolves to `time_2l` when both `time` and
 `predictors` are supplied, and to `none` otherwise.
 
-For APIM and DIM, `predictors` are the only variables transformed. DSM should
-add a separate `outcomes` argument rather than broadening `predictors` into a
-generic variable list. This keeps APIM/DIM predictor construction clear while
-allowing DSM outcome construction to use different rules.
+For APIM and DIM, `predictors` are the only variables transformed. DSM uses a
+separate `outcomes` argument rather than broadening `predictors` into a generic
+variable list. This keeps APIM/DIM predictor construction clear while allowing
+DSM outcome construction to use different rules.
 
 `temporal_predictor_decomposition` controls predictor pre-decomposition over
 time. DIM may still apply model-specific conventions after that step;
@@ -89,6 +89,11 @@ attr(data, "interdep")$temporal_predictor_decompositions
 ```
 
 with one row per predictor component.
+
+Generated `.i_*_cwp` and `.i_*_cbp` columns also appear in the normalized
+generated-column table returned by `interdep_generated_columns()`. Raw
+undecomposed predictor records are intentionally excluded from that table
+because they are source columns, not package-generated columns.
 
 ## APIM Columns
 
@@ -176,12 +181,12 @@ For undirected dyadic-score model data preparation, use a separate model type:
 model_type = "undirected_dsm"
 ```
 
-The intended split is:
+The implemented split is:
 
 ```r
 center_predictors()
 add_dyad_individual_columns()    # predictor-side dyad means/deviations
-add_dyadic_score_outcomes()      # outcome-side dyad scores
+add_undirected_dyadic_score_columns() # outcome-side dyad scores
 ```
 
 Predictor-side construction should reuse the current DIM path completely. For
@@ -205,8 +210,11 @@ considered later as an explicit option, not as the default behavior.
 Store DSM outcome metadata separately from predictor metadata, for example:
 
 ```r
-attr(data, "interdep")$dsm_outcomes
+attr(data, "interdep")$undirected_dsm_outcomes
 ```
+
+DSM outcome columns also appear in `interdep_generated_columns()` with
+`model_family = "undirected_dsm"` and `variable_role = "outcome"`.
 
 ## Validation Rules
 
@@ -228,12 +236,14 @@ attr(data, "interdep")$dsm_outcomes
 - Review `add_dyad_individual_columns()` carefully before treating DIM as stable.
 - Keep the print header descriptions for DIM column families explicit but
   compact.
-- Add `outcomes` and minimal undirected DSM preparation.
-- Add focused DSM tests for cross-sectional and ILD raw outcome scores.
+- Review `add_undirected_dyadic_score_columns()` before treating undirected DSM
+  as stable.
+- Confirm `undirected_dsm_outcomes` metadata names and generated-column metadata
+  are final enough for v0.1.
 - Keep `getting-started.Rmd` focused on data preparation and move fitted-model
   examples into model-specific vignettes.
 - Keep APIM and temporal predictor decomposition model examples in APIM-focused
   vignettes; avoid duplicating APIM-DIM equivalence material there.
 - Keep the DIM vignette focused on DIM construction and APIM-DIM equivalence.
-- Add a separate DSM vignette only after `outcomes` and
-  `model_type = "undirected_dsm"` exist.
+- Add a separate DSM vignette or compact DSM data-preparation section only after
+  the current `outcomes` and `model_type = "undirected_dsm"` API is reviewed.
