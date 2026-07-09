@@ -155,7 +155,7 @@ attach_generated_column_specs <- function(columns) {
 
 generated_column_spec_lookup <- function() {
   tibble::tribble(
-    ~model_family,      ~variable_role, ~component, ~column_role,              ~centering,                   ~print_order, ~column_pattern,                         ~description,
+    ~model_family,    ~variable_role,  ~component, ~column_role,             ~centering,                   ~print_order, ~column_pattern,                        ~description,
     "apim",            "predictor",    "raw",      "actor",                  "none",                       10L,          ".i_*_raw_actor",                       "APIM raw actor predictors",
     "apim",            "predictor",    "raw",      "partner",                "none",                       11L,          ".i_*_raw_partner",                     "APIM raw partner predictors",
     "apim",            "predictor",    "cwp",      "actor",                  "within_person",              12L,          ".i_*_cwp_actor",                       "APIM within-person actor predictors",
