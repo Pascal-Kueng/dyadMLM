@@ -61,6 +61,14 @@ validate_interdep_data <- function(
     stop("`data` must be a data frame or tibble.", call. = FALSE)
   }
 
+  if (inherits(data, "interdep_data")) {
+    stop(
+      "`data` has already been prepared by interdep. ",
+      "`prepare_interdep_data()` expects raw data; start from the original data frame instead.",
+      call. = FALSE
+    )
+  }
+
   out <- tibble::as_tibble(data)
 
   # Validate that package-owned columns are not already present.

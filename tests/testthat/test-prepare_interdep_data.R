@@ -221,6 +221,21 @@ test_that("prepare_interdep_data rejects reserved interdep columns", {
   )
 })
 
+test_that("prepare_interdep_data rejects data that is already prepared", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  prepared <- prepare_interdep_data(data, group = dyad_id, member = person_id, seed = 123)
+
+  expect_error(
+    prepare_interdep_data(prepared, group = dyad_id, member = person_id, seed = 123),
+    "`data` has already been prepared by interdep.",
+    fixed = TRUE
+  )
+})
+
 test_that("prepare_interdep_data rejects role labels containing the internal separator", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
