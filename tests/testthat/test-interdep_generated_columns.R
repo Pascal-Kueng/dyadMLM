@@ -38,7 +38,10 @@ test_that("interdep_generated_columns collects APIM columns", {
       column_centering = c("none", "none"),
       print_order = c(10L, 11L),
       column_pattern = c(".i_*_raw_actor", ".i_*_raw_partner"),
-      description = c("APIM raw actor predictors", "APIM raw partner predictors")
+      description = c(
+        "APIM actor predictor: actor's original predictor values",
+        "APIM partner predictor: partner's original predictor values"
+      )
     )
   )
 })
@@ -129,12 +132,12 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
         ".i_*_cbp_partner"
       ),
       description = c(
-        "within-person temporal predictor components",
-        "between-person temporal predictor components, centred around grand mean of person means",
-        "APIM within-person actor predictors",
-        "APIM between-person actor predictors",
-        "APIM within-person partner predictors",
-        "APIM between-person partner predictors"
+        "within-person predictor: momentary deviations from each person's usual level",
+        "between-person predictor: stable differences from the average person's usual level",
+        "APIM within-person actor predictor: actor's momentary deviations from their usual level",
+        "APIM between-person actor predictor: actor's stable difference from the average person's usual level",
+        "APIM within-person partner predictor: partner's momentary deviations from their usual level",
+        "APIM between-person partner predictor: partner's stable difference from the average person's usual level"
       )
     )
   )
@@ -176,8 +179,8 @@ test_that("interdep_generated_columns collects DIM columns", {
       print_order = c(20L, 21L),
       column_pattern = c(".i_*_raw_dyad_mean_gmc", ".i_*_raw_within_dyad_deviation"),
       description = c(
-        "DIM raw predictor dyad means, grand-mean centred",
-        "DIM raw predictor within-dyad deviations"
+        "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centred",
+        "DIM within-dyad predictor deviation: person's difference from the dyad average"
       )
     )
   )
@@ -270,8 +273,8 @@ test_that("interdep_generated_columns collects undirected DSM outcome columns", 
       print_order = c(30L, 31L),
       column_pattern = c(".i_*_raw_dyad_mean", ".i_*_raw_within_dyad_deviation"),
       description = c(
-        "DSM raw outcome dyad means",
-        "DSM raw outcome within-dyad deviations"
+        "DSM dyad-mean outcome: dyad's average outcome level",
+        "DSM within-dyad outcome deviation: person's difference from the dyad average"
       )
     )
   )

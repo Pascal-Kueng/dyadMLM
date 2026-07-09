@@ -128,18 +128,18 @@ model-building features.
     #   .i_composition_role  composition-specific member role
     #   .i_is_*              composition-role indicator columns
     #   .i_diff_*            composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions
-    #   .i_*_cwp             within-person temporal predictor components
-    #   .i_*_cbp             between-person temporal predictor components, centred around grand mean of person means
-    #   .i_*_cwp_actor       APIM within-person actor predictors
-    #   .i_*_cwp_partner     APIM within-person partner predictors
-    #   .i_*_cbp_actor       APIM between-person actor predictors
-    #   .i_*_cbp_partner     APIM between-person partner predictors
-    #   .i_*_cwp_dyad_mean   DIM shared momentary predictor deviations
-    #   .i_*_cwp_within_dyad_deviation  DIM person deviations from shared momentary predictor levels
-    #   .i_*_cbp_dyad_mean   DIM shared usual predictor levels, centred across persons
-    #   .i_*_cbp_within_dyad_deviation  DIM person differences from dyad usual predictor levels
-    #   .i_*_raw_dyad_mean   DSM raw outcome dyad means
-    #   .i_*_raw_within_dyad_deviation  DSM raw outcome within-dyad deviations
+    #   .i_*_cwp             within-person predictor: momentary deviations from each person's usual level
+    #   .i_*_cbp             between-person predictor: stable differences from the average person's usual level
+    #   .i_*_cwp_actor       APIM within-person actor predictor: actor's momentary deviations from their usual level
+    #   .i_*_cwp_partner     APIM within-person partner predictor: partner's momentary deviations from their usual level
+    #   .i_*_cbp_actor       APIM between-person actor predictor: actor's stable difference from the average person's usual level
+    #   .i_*_cbp_partner     APIM between-person partner predictor: partner's stable difference from the average person's usual level
+    #   .i_*_cwp_dyad_mean   DIM within-person dyad-mean predictor: shared momentary deviations in the dyad
+    #   .i_*_cwp_within_dyad_deviation  DIM within-person within-dyad predictor deviation: person's momentary deviation from the dyad average
+    #   .i_*_cbp_dyad_mean   DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centred
+    #   .i_*_cbp_within_dyad_deviation  DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level
+    #   .i_*_raw_dyad_mean   DSM dyad-mean outcome: dyad's average outcome level
+    #   .i_*_raw_within_dyad_deviation  DSM within-dyad outcome deviation: person's difference from the dyad average
     #
     # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more
     # A tibble: 5,600 x 17
