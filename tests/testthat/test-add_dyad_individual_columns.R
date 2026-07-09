@@ -183,7 +183,7 @@ test_that("DIM construction errors for distinguishable dyads", {
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "currently require one exchangeable dyad composition",
+    "support only data with exactly one exchangeable dyad composition",
     fixed = TRUE
   )
 })
@@ -207,7 +207,7 @@ test_that("DIM construction errors for mixed distinguishable and exchangeable dy
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "currently require one exchangeable dyad composition",
+    "support only data with exactly one exchangeable dyad composition",
     fixed = TRUE
   )
 })
@@ -231,7 +231,7 @@ test_that("DIM construction errors for multiple exchangeable dyad compositions",
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "currently require one exchangeable dyad composition",
+    "support only data with exactly one exchangeable dyad composition",
     fixed = TRUE
   )
 })
@@ -255,6 +255,7 @@ test_that("longitudinal DIM rejects undecomposed raw predictors", {
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "requires supported centered predictor components"
+    "Predictor `x` has undecomposed component `raw`.",
+    fixed = TRUE
   )
 })

@@ -67,10 +67,11 @@ validate_interdep_data <- function(
   reserved_columns <- names(out)[startsWith(names(out), interdep_reserved_prefix)]
   if (length(reserved_columns) > 0) {
     stop(
-      sprintf(
-        "`data` must not contain columns starting with `%s`; these names are reserved by interdep.",
-        interdep_reserved_prefix
-      ),
+      "`data` must not contain columns starting with `",
+      interdep_reserved_prefix,
+      "`; these names are reserved by interdep. Reserved column(s): ",
+      paste(reserved_columns, collapse = ", "),
+      ".",
       call. = FALSE
     )
   }
@@ -204,14 +205,18 @@ validate_interdep_data <- function(
     }
   } else {
     if (anyDuplicated(out[c(group_name, member_name)]) > 0) {
-      stop("Each `member` must appear at most once per `group`. For longitudinal data specify `time`.", call. = FALSE)
+      stop(
+        "Each `member` must appear at most once per `group`. ",
+        "If these are repeated measurements, supply `time` so rows are validated within each `group`-`time` combination.",
+        call. = FALSE
+      )
     }
   }
 
   n_groups <- length(unique(out[[group_name]]))
 
   if (n_groups < 2) {
-    stop("At least 2 groups are needed.", call. = FALSE)
+    stop("At least 2 complete dyads are required after validation and any requested dropping.", call. = FALSE)
   }
 
 
@@ -257,7 +262,8 @@ validate_interdep_data <- function(
         paste(conflicting_predictors, collapse = ", "),
         ". Conflicting outcome(s): ",
         paste(conflicting_outcomes, collapse = ", "),
-        ". Use different variables, rename one of them, or use a temporal predictor decomposition that avoids raw predictor-side DSM columns.",
+        ". Use different variables or rename one of them. For longitudinal data, use ",
+        "`temporal_predictor_decomposition = \"auto\"` or `\"time_2l\"` so predictor columns are decomposed before DSM columns are generated.",
         call. = FALSE
       )
     }
@@ -271,10 +277,9 @@ validate_interdep_data <- function(
     if (length(non_numeric_predictors) > 0) {
       stop(
         "`predictors` used with `temporal_predictor_decomposition = \"time_2l\"` must be numeric. ",
-        "Use `temporal_predictor_decomposition = \"none\"` to keep non-numeric predictors undecomposed. ",
         "Non-numeric predictor(s): ",
         paste(non_numeric_predictors, collapse = ", "),
-        ".",
+        ". Use numeric predictors, or use `temporal_predictor_decomposition = \"none\"` only when the selected `model_type` allows undecomposed non-numeric predictors.",
         call. = FALSE
       )
     }
@@ -427,7 +432,11 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   )
 
   if (anyDuplicated(known_member_roles[c(group_name, member_name)]) > 0) {
-    stop("Each `member` must have exactly one `role` within each `group`.", call. = FALSE)
+    stop(
+      "Within each `group`, each `member` must have only one non-missing `role` value. ",
+      "Found at least one group-member pair with conflicting roles; check rows with the same `group` and `member`.",
+      call. = FALSE
+    )
   }
 
   # Rename the known role column before joining it back to the full data.
@@ -450,10 +459,10 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
     if (missing_role == "error") {
       stop(
         paste0(
-          "Each `member` must have at least one non-missing `role` within each `group`. ",
+          "Each `member` must have at least one non-missing `role` within each `group` so roles can be resolved across rows. ",
           "Found incomplete role information in ",
           format_group_count(missing_role_groups),
-          "."
+          ". Fill in `role` values or use `missing_role = \"drop\"` to drop these dyads."
         ),
         call. = FALSE
       )

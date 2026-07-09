@@ -226,8 +226,8 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
 - DIM and undirected DSM predictor construction require numeric predictors.
 - Undirected DSM outcome construction requires numeric outcomes.
 - user data may not contain package-owned `.i_` columns.
-- longitudinal raw DIM is currently rejected because it mixes within-person and
-  between-person information.
+- longitudinal raw DIM or undirected DSM predictor construction is currently
+  rejected because it mixes within-person and between-person information.
 - `model_type = "undirected_dsm"` requires `outcomes`.
 - DSM outcome columns use raw outcomes; `temporal_predictor_decomposition`
   applies only to predictors.

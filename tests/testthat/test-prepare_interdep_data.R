@@ -172,12 +172,12 @@ test_that("prepare_interdep_data rejects unsupported dyad compositions for undir
       model_type = "undirected_dsm",
       seed = 123
     ),
-    "currently require one exchangeable dyad composition",
+    "support only data with exactly one exchangeable dyad composition",
     fixed = TRUE
   )
 })
 
-test_that("prepare_interdep_data treats data without role as unclassified exchangeable dyads", {
+test_that("prepare_interdep_data treats data without role as assumed exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D")

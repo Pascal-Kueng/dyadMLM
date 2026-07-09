@@ -13,6 +13,9 @@ longitudinal dyadic data for statistical models.
 It supports common dyadic studies with one kind of dyad, and it also
 handles studies where different kinds of dyads appear in the same
 dataset, such as female-male, female-female, and male-male couples.
+Mixed dyad compositions are supported for composition-aware APIM-style
+preparation; current DIM and undirected DSM helpers require one
+exchangeable dyad composition.
 
 The “Getting Started” vignette demonstrates how prepared data can be
 used to estimate dyadic models, including generalized intensive

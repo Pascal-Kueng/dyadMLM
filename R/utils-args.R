@@ -35,7 +35,10 @@ select_interdep_columns <- function(data, cols_quo, arg) {
     tidyselect::eval_select(cols_quo, data = data),
     error = function(e) {
       stop(
-        sprintf("`%s` must refer to existing columns in `data`.", arg),
+        sprintf(
+          "`%s` must select columns from `data`. Check that the selected columns exist and that the tidyselect expression is valid.",
+          arg
+        ),
         call. = FALSE
       )
     }

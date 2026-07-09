@@ -183,11 +183,13 @@ attach_generated_column_specs <- function(columns) {
   if (any(missing_spec)) {
     missing_keys <- out[missing_spec, c("model_family", "variable_role", "component", "column_role")]
     stop(
-      "Internal error: missing generated-column specification for: ",
+      "Internal error: no generated-column specification exists for metadata key(s) ",
+      "`model_family`/`variable_role`/`component`/`column_role`: ",
       paste(
         apply(missing_keys, 1, paste, collapse = "/"),
         collapse = ", "
       ),
+      ". Add the missing key(s) to `generated_column_spec_lookup()`.",
       call. = FALSE
     )
   }

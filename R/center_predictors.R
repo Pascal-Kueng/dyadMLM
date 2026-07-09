@@ -97,7 +97,12 @@ center_predictors <- function(data) {
     return(out)
   }
 
-  stop("Unsupported `temporal_predictor_decomposition` value in `data` metadata.", call. = FALSE)
+  stop(
+    "Internal error: unsupported `attr(data, \"interdep\")$temporal_predictor_decomposition` value `",
+    temporal_predictor_decomposition,
+    "`. Expected one of `none` or `time_2l` after validation.",
+    call. = FALSE
+  )
 }
 
 

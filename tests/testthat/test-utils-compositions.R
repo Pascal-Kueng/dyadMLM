@@ -47,7 +47,7 @@ test_that("make_interdep_suffixes sanitizes labels and rejects collisions", {
 
   expect_error(
     make_interdep_suffixes(c("female partner", "female-partner")),
-    "same generated column name",
+    "same generated column-name suffix",
     fixed = TRUE
   )
 })

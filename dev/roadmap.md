@@ -142,7 +142,7 @@ model-building features.
     #   .i_*_raw_dyad_mean   DSM raw outcome dyad means
     #   .i_*_raw_within_dyad_deviation  DSM raw outcome within-dyad deviations
     #
-    # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, and 4 more.
+    # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more
     # A tibble: 5,600 x 17
        personID coupleID diaryday gender closeness provided_support .i_composition ...
           <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          ...

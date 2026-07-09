@@ -77,7 +77,7 @@ test_that("validate_interdep_data rejects predictor suffix collisions", {
       member = person_id,
       predictors = c(`x-a`, `x a`)
     ),
-    "Some `predictors` produce the same generated column name after sanitizing",
+    "Some `predictors` would create the same generated column-name suffix",
     fixed = TRUE
   )
 })
@@ -98,12 +98,12 @@ test_that("validate_interdep_data rejects outcome suffix collisions", {
       member = person_id,
       outcomes = c(`y-a`, `y a`)
     ),
-    "Some `outcomes` produce the same generated column name after sanitizing",
+    "Some `outcomes` would create the same generated column-name suffix",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data rejects raw DSM predictor-outcome name collisions", {
+test_that("validate_interdep_data rejects shared DSM predictor and outcome variables", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -324,7 +324,7 @@ test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
       time = time,
       predictors = x
     ),
-    'Use `temporal_predictor_decomposition = "none"` to keep non-numeric predictors undecomposed.',
+    "only when the selected `model_type` allows undecomposed non-numeric predictors.",
     fixed = TRUE
   )
 })
@@ -446,7 +446,7 @@ test_that("validate_interdep_data rejects missing columns", {
       member = person_id,
       predictors = missing_predictor
     ),
-    "`predictors` must refer to existing columns in `data`.",
+    "`predictors` must select columns from `data`.",
     fixed = TRUE
   )
 
@@ -457,7 +457,7 @@ test_that("validate_interdep_data rejects missing columns", {
       member = person_id,
       outcomes = missing_outcome
     ),
-    "`outcomes` must refer to existing columns in `data`.",
+    "`outcomes` must select columns from `data`.",
     fixed = TRUE
   )
 })
@@ -509,7 +509,7 @@ test_that("validate_interdep_data rejects missing grouping values", {
       member = person_id,
       role = role
     ),
-    "Each `member` must have at least one non-missing `role` within each `group`.",
+    "Fill in `role` values or use `missing_role = \"drop\"` to drop these dyads.",
     fixed = TRUE
   )
 })
@@ -661,7 +661,7 @@ test_that("validate_interdep_data rejects inconsistent roles within member", {
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, role = role, time = time),
-    "Each `member` must have exactly one `role` within each `group`.",
+    "Found at least one group-member pair with conflicting roles",
     fixed = TRUE
   )
 })
@@ -675,7 +675,7 @@ test_that("validate_interdep_data handles missing roles by policy", {
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
-    "Each `member` must have at least one non-missing `role` within each `group`.",
+    "Fill in `role` values or use `missing_role = \"drop\"` to drop these dyads.",
     fixed = TRUE
   )
 
@@ -705,7 +705,7 @@ test_that("validate_interdep_data rejects fewer than two groups", {
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id),
-    "At least 2 groups are needed.",
+    "At least 2 complete dyads are required after validation and any requested dropping.",
     fixed = TRUE
   )
 })
@@ -718,7 +718,7 @@ test_that("validate_interdep_data rejects duplicate cross-sectional member rows"
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id),
-    "Each `member` must appear at most once per `group`. For longitudinal data specify `time`.",
+    "If these are repeated measurements, supply `time`",
     fixed = TRUE
   )
 })

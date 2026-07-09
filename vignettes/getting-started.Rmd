@@ -23,6 +23,9 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 dyadic data for statistical models. It supports common dyadic studies with one
 kind of dyad, and it also handles studies where different kinds of dyads appear
 in the same dataset, such as female-male, female-female, and male-male couples.
+Mixed dyad compositions are supported for composition-aware APIM-style
+preparation; current DIM and undirected DSM helpers require one exchangeable
+dyad composition.
 
 This vignette focuses mainly on APIM-style actor and partner effects, especially
 models with multiple dyad types, intensive longitudinal data, and generalized
@@ -33,8 +36,9 @@ effects in exchangeable dyads, see `vignette("Dyad-Individual-Model")`.
 The basic data structure is a long data frame where dyads are stacked on top of
 each other and both members of a dyad appear as separate rows. For
 cross-sectional data, each complete dyad contributes one row per member. For
-intensive longitudinal data, each complete dyad contributes one row per member
-and measurement occasion.
+intensive longitudinal data, each observed member-occasion has at most one row.
+Dyads must contain two unique members overall, but member-occasion rows may be
+absent.
 
 The expected structure is:
 
@@ -47,7 +51,7 @@ The expected structure is:
 | 2 | 1 | 3.8 | 5.9 |
 | 2 | 2 | 4.5 | 6.8 |
 
-- intensive longitudinal: one row per `dyad x time x member`
+- intensive longitudinal: at most one row per `dyad x time x member`
 
 | dyad | time | member | x | y |
 |---:|---:|---:|---:|---:|
@@ -388,7 +392,10 @@ summary(ild_distinguishable_data)
 By default, numeric predictors in longitudinal APIM preparation are decomposed
 into within-person and between-person components. This temporal predictor
 decomposition can be controlled via the `temporal_predictor_decomposition`
-argument.
+argument. Because `auto` resolves to `time_2l` when `time` and `predictors` are
+supplied, longitudinal predictors must be numeric unless
+`temporal_predictor_decomposition = "none"` is used with a model type that does
+not compute dyad means or within-dyad deviations.
 
 ```{r fit-ild-distinguishable, eval = has_glmmTMB}
 

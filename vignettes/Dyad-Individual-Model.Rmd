@@ -139,6 +139,9 @@ cat("  within-dyad-deviation effect:  ", b_within_dyad, "\n")
 
 ## Intensive longitudinal DIM
 
+For longitudinal DIM, predictors are decomposed with `time_2l`.
+`temporal_predictor_decomposition = "none"` is currently rejected for DIM and
+undirected DSM longitudinal predictor construction.
 
 ```{r prepare-ild-exchangeable}
 ild_exchangeable_data <- prepare_interdep_data(

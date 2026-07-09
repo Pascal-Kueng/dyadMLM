@@ -211,7 +211,7 @@ test_that("infer_dyad_compositions rejects generated indicator name collisions",
 
   expect_error(
     infer_dyad_compositions(validated, seed = 123),
-    "same generated column name",
+    "same generated column-name suffix",
     fixed = TRUE
   )
 })

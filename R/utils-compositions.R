@@ -75,11 +75,11 @@ make_interdep_suffixes <- function(labels, label_type = "labels",
     stop(
       "Some ",
       label_type,
-      " produce the same generated column name after sanitizing: ",
+      " would create the same generated column-name suffix because interdep replaces spaces and punctuation with underscores: ",
       paste(conflicts, collapse = "; "),
-      ". Please rename these ",
+      ". Rename these ",
       rename_hint,
-      ".",
+      " so their generated names are unique.",
       call. = FALSE
     )
   }
