@@ -25,6 +25,8 @@ add_undirected_dyadic_score_columns <- function(data) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
   }
 
+  validate_undirected_dyad_compatibility(data)
+
   # Handle predictors
   out <- add_dyad_individual_columns(data)
 

@@ -113,3 +113,29 @@ test_that("undirected DSM requires complete outcome values within dyad unit", {
   expect_false(any(is.na(result$.i_y_raw_dyad_mean[result$dyad_id == 1 & result$time == 2])))
   expect_true(all(is.na(result$.i_y_raw_dyad_mean[result$dyad_id == 2 & result$time == 2])))
 })
+
+test_that("undirected DSM constructor enforces exchangeable compatibility without predictors", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
+    y = c(1, 2, 3, 4)
+  )
+
+  prepared <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    outcomes = y,
+    model_type = "undirected_dsm"
+  ) |>
+    infer_dyad_compositions(seed = 123) |>
+    center_predictors()
+
+  expect_error(
+    add_undirected_dyadic_score_columns(prepared),
+    "currently require one exchangeable dyad composition",
+    fixed = TRUE
+  )
+})

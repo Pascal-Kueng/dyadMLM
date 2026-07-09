@@ -30,6 +30,8 @@ add_dyad_individual_columns <- function(data) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
   }
 
+  validate_undirected_dyad_compatibility(data)
+
   meta_data <- attr(data, "interdep")
 
   group <- meta_data$group
@@ -53,8 +55,6 @@ add_dyad_individual_columns <- function(data) {
     attr(data, "interdep")$dim_predictors <- dim_predictors
     return(data)
   }
-
-  validate_undirected_dyad_compatibility(data)
 
   out <- data
 
