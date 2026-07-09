@@ -145,9 +145,21 @@ validate_interdep_data <- function(
   # Extract and validate user-owned model columns!!!
   predictors_quo <- rlang::enquo(predictors)
   predictor_names <- select_interdep_columns(out, predictors_quo, "predictors")
+  # Avoid different predictors resolving to the same sanitized name later.
+  make_interdep_suffixes(
+    predictor_names,
+    label_type = "`predictors`",
+    rename_hint = "variables"
+  )
 
   outcomes_quo <- rlang::enquo(outcomes)
   outcome_names <- select_interdep_columns(out, outcomes_quo, "outcomes")
+  # Avoid different outcomes resolving to the same sanitized name later.
+  make_interdep_suffixes(
+    outcome_names,
+    label_type = "`outcomes`",
+    rename_hint = "variables"
+  )
 
   # Resolve dyads with fewer than two observed members.
   out_list <- resolve_incomplete_dyads(

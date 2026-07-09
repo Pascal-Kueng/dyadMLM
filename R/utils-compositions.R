@@ -58,7 +58,8 @@ composition_role_label <- function(composition, role, sep = interdep_composition
 #' @return A named character vector. Names are the original labels; values are
 #'   sanitized column-name suffixes.
 #' @keywords internal
-make_interdep_suffixes <- function(labels) {
+make_interdep_suffixes <- function(labels, label_type = "labels",
+                                   rename_hint = "role or composition labels") {
   labels <- unique(as.character(labels))
   suffixes <- gsub("[^[:alnum:]_]+", "_", labels)
 
@@ -72,9 +73,13 @@ make_interdep_suffixes <- function(labels) {
     }
 
     stop(
-      "Some labels produce the same generated column name after sanitizing: ",
+      "Some ",
+      label_type,
+      " produce the same generated column name after sanitizing: ",
       paste(conflicts, collapse = "; "),
-      ". Please rename these role or composition labels.",
+      ". Please rename these ",
+      rename_hint,
+      ".",
       call. = FALSE
     )
   }

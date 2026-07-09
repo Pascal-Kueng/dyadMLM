@@ -61,6 +61,48 @@ test_that("validate_interdep_data stores predictor metadata", {
   expect_equal(attr(multiple, "interdep")$predictors, c("x", "z"))
 })
 
+test_that("validate_interdep_data rejects predictor suffix collisions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    "x-a" = 1:4,
+    "x a" = 5:8,
+    check.names = FALSE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      predictors = c(`x-a`, `x a`)
+    ),
+    "Some `predictors` produce the same generated column name after sanitizing",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data rejects outcome suffix collisions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    "y-a" = 1:4,
+    "y a" = 5:8,
+    check.names = FALSE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      outcomes = c(`y-a`, `y a`)
+    ),
+    "Some `outcomes` produce the same generated column name after sanitizing",
+    fixed = TRUE
+  )
+})
+
 test_that("validate_interdep_data resolves model helper metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
