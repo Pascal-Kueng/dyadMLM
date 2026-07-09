@@ -6,5 +6,7 @@
 ^data-raw$
 ^doc$
 ^Meta$
+^vignettes/.*\.html$
+^vignettes/.*\.R$
 ^HANDOFF\.md$
 ^CITATION\.cff$
