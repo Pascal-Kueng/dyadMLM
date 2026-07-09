@@ -2,7 +2,7 @@
 % Please edit documentation in R/interdep-generated-columns.R
 \name{interdep_generated_columns}
 \alias{interdep_generated_columns}
-\title{Collect generated model columns}
+\title{Collect interdep-generated columns}
 \usage{
 interdep_generated_columns(meta)
 }
@@ -10,12 +10,13 @@ interdep_generated_columns(meta)
 \item{meta}{The \code{interdep} metadata attribute from an \code{interdep_data} object.}
 }
 \value{
-A tibble with one row per generated APIM, DIM, or undirected DSM
-model column.
+A tibble with one row per generated temporal predictor, APIM, DIM,
+or undirected DSM column.
 }
 \description{
-Creates a normalized, one-row-per-column view over the model-specific
-metadata tables stored in an \code{interdep} attribute. This is a derived lookup
-table; the model-specific metadata tables remain the source records.
+Creates a normalized, one-row-per-column view over temporal predictor, APIM,
+DIM, and undirected DSM columns stored in an \code{interdep} attribute. This is a
+derived lookup table; the model-specific metadata tables remain the source
+records.
 }
 \keyword{internal}

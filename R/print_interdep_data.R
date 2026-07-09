@@ -84,7 +84,7 @@ print.interdep_data <- function(x, ...) {
   }
 
   if (interdep_diff_col %in% names(x)) {
-    print_added_column(".i_diff", "sum-diff contrast; 0 for distinguishable dyads")
+    print_added_column(".i_diff", "sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads")
   }
 
   if (any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))) {
