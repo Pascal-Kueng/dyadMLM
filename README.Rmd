@@ -28,17 +28,17 @@ Actor-Partner Interdependence Model (APIM) preparation. Current
 Dyad-Individual Model (DIM) and undirected Dyadic Score Model (DSM) helpers
 require one exchangeable dyad composition.
 
-Start with `vignette("getting-started", package = "interdep")` for the main
-data-preparation workflow. The package documentation is organized around the
-main modeling tasks:
+Start with the [Getting Started](vignettes/getting-started.Rmd) vignette for
+the main data-preparation workflow. The package documentation is organized
+around the main modeling tasks:
 
 | Vignette | Focus |
 |---|---|
-| `vignette("getting-started", package = "interdep")` | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| `vignette("apim", package = "interdep")` | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad compositions |
-| `vignette("intensive-longitudinal-apim", package = "interdep")` | Temporal predictor decomposition and intensive longitudinal APIM preparation |
-| `vignette("Dyad-Individual-Model", package = "interdep")` | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
-| `vignette("undirected-dyadic-score-model", package = "interdep")` | Undirected DSM outcome and predictor construction |
+| [Getting Started](vignettes/getting-started.Rmd) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
+| APIM | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad compositions |
+| Intensive Longitudinal APIM | Temporal predictor decomposition and intensive longitudinal APIM preparation |
+| [Dyad-Individual Model](vignettes/Dyad-Individual-Model.Rmd) | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
+| Undirected Dyadic Score Model | Undirected DSM outcome and predictor construction |
 
 
 ## Installation
