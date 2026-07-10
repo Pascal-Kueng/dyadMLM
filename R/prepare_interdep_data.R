@@ -47,7 +47,7 @@
 #'   predictor construction. For longitudinal DIM or undirected DSM predictor
 #'   construction, raw undecomposed predictors are currently rejected; use
 #'   `"auto"` or `"time_2l"`.
-#' @param set_compositions_exchangeable Optionally specify dyad compositions
+#' @param set_exchangeable_compositions Optionally specify dyad compositions
 #'   to treat as exchangeable, when their roles would otherwise imply distinguishability.
 #'   Requires `role`. Compositions that are already
 #'   exchangeable should not be listed. Each composition must be supplied as one
@@ -55,7 +55,7 @@
 #'   for example `"female_x_male"`, `"female-male"`, `"female_male"`, or
 #'   `"female male"`, in arbitrary order.
 #'   To set multiple compositions, use a character vector of such strings.
-#' @param composition_pooling Optionally pool exchangeable dyad compositions
+#' @param pool_compositions Optionally pool exchangeable dyad compositions
 #'   into a shared final composition label. Must be a named list where each name
 #'   is the final composition label and each value is a character vector of
 #'   composition references, for example
@@ -100,8 +100,8 @@
 #'   group = dyad_id,
 #'   member = person_id,
 #'   role = role,
-#'   set_compositions_exchangeable = "female-male",
-#'   composition_pooling = list(
+#'   set_exchangeable_compositions = "female-male",
+#'   pool_compositions = list(
 #'     same_sex_couples = c("female-female", "male-male")
 #'   )
 #' )
@@ -119,8 +119,8 @@ prepare_interdep_data <- function(
     outcomes = NULL,
     model_type = "apim",
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
-    set_compositions_exchangeable = NULL,
-    composition_pooling = NULL,
+    set_exchangeable_compositions = NULL,
+    pool_compositions = NULL,
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
     seed = NULL
@@ -148,8 +148,8 @@ prepare_interdep_data <- function(
   out <- infer_dyad_compositions(
     out,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions
   )
 
   out <- center_predictors(out)

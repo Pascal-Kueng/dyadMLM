@@ -39,11 +39,11 @@ Recently completed cleanup:
   the README
 - kept generated `docs/` and `doc/` output ignored; pkgdown should rebuild the
   site through the GitHub Pages workflow
-- added `set_compositions_exchangeable` as the first analysis-composition
+- added `set_exchangeable_compositions` as the first analysis-composition
   control, so observed distinguishable compositions can be treated as
   exchangeable for generated columns and downstream DIM/DSM compatibility
 
-Immediate next steps: implement `composition_pooling`, then cleanly split and
+Immediate next steps: implement `pool_compositions`, then cleanly split and
 polish the vignettes. The getting-started vignette should become shorter and
 more introductory; heavier APIM, ILD APIM, and DSM material should move into
 model-specific vignettes as those pages are created.
@@ -100,9 +100,9 @@ model-building features.
 - Auto-detect roles, dyad compositions, and distinguishability where possible
 - Add explicit analysis-composition controls so common mixed dyad-type analyses
   do not require external preprocessing
-  - `set_compositions_exchangeable` marks selected observed compositions as
+  - `set_exchangeable_compositions` marks selected observed compositions as
     exchangeable for downstream generated columns
-  - `composition_pooling` pools exchangeable analysis compositions under a
+  - `pool_compositions` pools exchangeable analysis compositions under a
     user-provided final composition name
   - Resolve composition references through separated composition labels such as
     `"female_x_male"`, `"female_male"`, `"female-male"`, `"male-female"`, or
@@ -110,8 +110,8 @@ model-building features.
     reference
   - Apply the steps in this order:
     1. infer canonical raw compositions and create aliases
-    2. apply `set_compositions_exchangeable`
-    3. apply `composition_pooling` only to compositions that are exchangeable
+    2. apply `set_exchangeable_compositions`
+    3. apply `pool_compositions` only to compositions that are exchangeable
        after step 2
     4. build `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
        print summaries, and metadata from the final analysis compositions
@@ -254,15 +254,15 @@ Complete these before calling the feature set CRAN-ready:
   - confirm missingness behavior for incomplete dyad components is documented
   - confirm raw cross-sectional DIM names are final
   - keep DIM/DSM construction restricted to one final exchangeable analysis
-    composition unless `composition_pooling` has explicitly produced that
+    composition unless `pool_compositions` has explicitly produced that
     analysis composition
 - Finalize analysis-composition controls
-  - keep the implemented `set_compositions_exchangeable` step before
-    `composition_pooling`
-  - keep the name `set_compositions_exchangeable` instead of a generic
+  - keep the implemented `set_exchangeable_compositions` step before
+    `pool_compositions`
+  - keep the name `set_exchangeable_compositions` instead of a generic
     "constraints" argument, because the operation is specifically about
     treating selected dyad compositions as exchangeable
-  - add `composition_pooling` as a named list, where names are final analysis
+  - add `pool_compositions` as a named list, where names are final analysis
     composition labels and values are observed or analysis composition labels
     to pool
   - normalize both arguments with the same alias resolver used for observed
@@ -352,7 +352,7 @@ Complete these before calling the feature set CRAN-ready:
 - Extend composition controls only after the v0.1 API has real examples
   - consider richer pooling diagnostics and warnings for sparse pooled groups
   - consider helpers for inspecting raw-to-analysis composition mappings
-  - avoid adding partial-pooling semantics here; `composition_pooling` is a
+  - avoid adding partial-pooling semantics here; `pool_compositions` is a
     data-preparation label operation, not a fitted-model prior structure
 - Write static model syntax for cross-sectional and ILD models
   - `glmmTMB` first
@@ -428,7 +428,7 @@ Minimum expected state:
 - stable generated-column families for compositions, temporal predictor
   components, APIM predictors, DIM predictors, and undirected DSM outcomes
 - stable analysis-composition controls:
-  `set_compositions_exchangeable` and `composition_pooling`
+  `set_exchangeable_compositions` and `pool_compositions`
 - clear metadata for raw observed compositions versus final analysis
   compositions
 - complete getting-started, APIM, ILD APIM, DIM, and DSM documentation paths

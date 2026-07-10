@@ -4,8 +4,8 @@
 #   setup_validate_debug()
 #   setup_infer_debug()
 #   setup_infer_debug(
-#     set_compositions_exchangeable = "female-male",
-#     composition_pooling = list(
+#     set_exchangeable_compositions = "female-male",
+#     pool_compositions = list(
 #       romantic_couples = c("female-female", "male-male", "female-male")
 #     )
 #   )
@@ -97,8 +97,8 @@ setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
 
 
 setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                              set_compositions_exchangeable = NULL,
-                              composition_pooling = NULL) {
+                              set_exchangeable_compositions = NULL,
+                              pool_compositions = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -144,20 +144,20 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
       .i_pool_member = NA_character_
     )
 
-  resolved_set_compositions_exchangeable <- resolve_composition_references(
-    references = set_compositions_exchangeable,
+  resolved_set_exchangeable_compositions <- resolve_composition_references(
+    references = set_exchangeable_compositions,
     observed_compositions = dyad_roles[[interdep_composition_col]],
-    arg_name = "set_compositions_exchangeable"
+    arg_name = "set_exchangeable_compositions"
   )
 
   dyad_roles_after_exchangeability <- apply_exchangeable_composition_overrides(
     dyad_roles = dyad_roles,
-    set_compositions_exchangeable = set_compositions_exchangeable
+    set_exchangeable_compositions = set_exchangeable_compositions
   )
 
-  dyad_roles_after_pooling <- apply_composition_pooling(
+  dyad_roles_after_pooling <- apply_pool_compositions(
     dyad_roles = dyad_roles_after_exchangeability,
-    composition_pooling = composition_pooling
+    pool_compositions = pool_compositions
   )
 
   dyad_compositions <- dyad_roles_after_pooling |>
@@ -189,9 +189,9 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
   assign_debug_vars(
     data = data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling,
-    resolved_set_compositions_exchangeable = resolved_set_compositions_exchangeable,
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions,
+    resolved_set_exchangeable_compositions = resolved_set_exchangeable_compositions,
     meta_data = meta_data,
     group_name = group_name,
     member_name = member_name,
@@ -208,8 +208,8 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 
 
 setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                               set_compositions_exchangeable = NULL,
-                               composition_pooling = NULL) {
+                               set_exchangeable_compositions = NULL,
+                               pool_compositions = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -223,8 +223,8 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions
   )
 
   meta_data <- attr(data, "interdep")
@@ -236,8 +236,8 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 
   assign_debug_vars(
     data = data,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling,
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -251,8 +251,8 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 
 
 setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                          set_compositions_exchangeable = NULL,
-                                          composition_pooling = NULL) {
+                                          set_exchangeable_compositions = NULL,
+                                          pool_compositions = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -266,8 +266,8 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions
   )
   data <- center_predictors(data)
 
@@ -282,8 +282,8 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
 
   assign_debug_vars(
     data = data,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling,
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -299,8 +299,8 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
 
 
 setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                            set_compositions_exchangeable = NULL,
-                                            composition_pooling = NULL) {
+                                            set_exchangeable_compositions = NULL,
+                                            pool_compositions = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -315,8 +315,8 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions
   )
   data <- center_predictors(data)
 
@@ -350,8 +350,8 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 
   assign_debug_vars(
     data = data,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling,
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -376,8 +376,8 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 
 
 setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                                    set_compositions_exchangeable = NULL,
-                                                    composition_pooling = NULL) {
+                                                    set_exchangeable_compositions = NULL,
+                                                    pool_compositions = NULL) {
   dataset <- rlang::arg_match(dataset)
   load_interdep_debug_internals()
 
@@ -395,8 +395,8 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions
   )
   data <- center_predictors(data)
   attr(data, "interdep")$outcomes <- outcome_name
@@ -427,8 +427,8 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
   assign_debug_vars(
     raw_data = raw_data,
     data = data,
-    set_compositions_exchangeable = set_compositions_exchangeable,
-    composition_pooling = composition_pooling,
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions,
     meta_data = meta_data,
     out = out,
     group = group,

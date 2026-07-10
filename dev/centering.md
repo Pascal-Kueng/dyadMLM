@@ -258,7 +258,7 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
 - Add a separate DSM vignette or compact DSM data-preparation section only after
   the current `outcomes` and `model_type = "undirected_dsm"` API is reviewed.
 - Analysis-composition controls should run before DIM/DSM compatibility checks.
-  The implemented `set_compositions_exchangeable` step runs first; planned
-  `composition_pooling` should run after it. DIM/DSM should continue to require
+  The implemented `set_exchangeable_compositions` step runs first; planned
+  `pool_compositions` should run after it. DIM/DSM should continue to require
   one final exchangeable analysis composition, but that composition may be
   produced explicitly by pooling exchangeable analysis compositions.

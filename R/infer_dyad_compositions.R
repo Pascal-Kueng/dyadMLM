@@ -6,9 +6,9 @@
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #' @param seed Optional seed for random `.i_diff_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
-#' @param set_compositions_exchangeable Optional dyad compositions to treat as
+#' @param set_exchangeable_compositions Optional dyad compositions to treat as
 #'   exchangeable for analysis.
-#' @param composition_pooling Optional named list that pools exchangeable dyad
+#' @param pool_compositions Optional named list that pools exchangeable dyad
 #'   compositions into user-named final composition labels.
 #'
 #' @return An `interdep_data` object with added `.i_composition` and
@@ -17,8 +17,8 @@
 #'   composition metadata.
 #'
 #' @keywords internal
-infer_dyad_compositions <- function(data, seed = NULL, set_compositions_exchangeable = NULL,
-                                    composition_pooling = NULL) {
+infer_dyad_compositions <- function(data, seed = NULL, set_exchangeable_compositions = NULL,
+                                    pool_compositions = NULL) {
   if (!inherits(data, "interdep_data")) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
   }
@@ -29,19 +29,19 @@ infer_dyad_compositions <- function(data, seed = NULL, set_compositions_exchange
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
-    if (length(set_compositions_exchangeable) > 0) {
+    if (length(set_exchangeable_compositions) > 0) {
       stop(
-        "`set_compositions_exchangeable` requires `role` to be supplied. ",
+        "`set_exchangeable_compositions` requires `role` to be supplied. ",
         "Without `role`, all dyads are already treated as one exchangeable composition.",
-        " Either remove `set_compositions_exchangeable` argument or supply `role`.",
+        " Either remove `set_exchangeable_compositions` argument or supply `role`.",
         call. = FALSE
       )
     }
-    if (length(composition_pooling) > 0) {
+    if (length(pool_compositions) > 0) {
       stop(
-        "`composition_pooling` requires `role` to be supplied. ",
+        "`pool_compositions` requires `role` to be supplied. ",
         "Without `role`, all dyads are already treated as one exchangeable composition.",
-        " Either remove `composition_pooling` or supply `role`.",
+        " Either remove `pool_compositions` or supply `role`.",
         call. = FALSE
       )
     }
@@ -109,13 +109,13 @@ infer_dyad_compositions <- function(data, seed = NULL, set_compositions_exchange
   # Apply any user-requested exchangeability overrides.
   dyad_roles <- apply_exchangeable_composition_overrides(
     dyad_roles = dyad_roles,
-    set_compositions_exchangeable = set_compositions_exchangeable
+    set_exchangeable_compositions = set_exchangeable_compositions
   )
 
   # Apply any user-requested composition pooling
-  dyad_roles <- apply_composition_pooling(
+  dyad_roles <- apply_pool_compositions(
     dyad_roles = dyad_roles,
-    composition_pooling = composition_pooling
+    pool_compositions = pool_compositions
   )
 
   # Summarize dyad compositions and attach to attributes.
@@ -196,22 +196,22 @@ infer_dyad_compositions <- function(data, seed = NULL, set_compositions_exchange
 }
 
 
-apply_exchangeable_composition_overrides <- function(dyad_roles, set_compositions_exchangeable) {
-  set_compositions_exchangeable_resolved <- resolve_composition_references(
-    references = set_compositions_exchangeable,
+apply_exchangeable_composition_overrides <- function(dyad_roles, set_exchangeable_compositions) {
+  set_exchangeable_compositions_resolved <- resolve_composition_references(
+    references = set_exchangeable_compositions,
     observed_compositions = dyad_roles[[interdep_composition_col]],
-    arg_name = "set_compositions_exchangeable"
+    arg_name = "set_exchangeable_compositions"
   )
 
   # Checks if argument is needed and allowed
-  if (length(set_compositions_exchangeable_resolved) == 0) {
+  if (length(set_exchangeable_compositions_resolved) == 0) {
     return(dyad_roles)
   }
 
   already_exchangeable_rows <- dyad_roles |>
     dplyr::filter(
       # filter those that are requested to be set exchangeable
-      .data[[interdep_composition_col]] %in% set_compositions_exchangeable_resolved,
+      .data[[interdep_composition_col]] %in% set_exchangeable_compositions_resolved,
       # and those that are already inferred to as exchangeable
       .data[[interdep_dyad_type_col]] == "exchangeable"
     )
@@ -222,7 +222,7 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_composition
       unique()
 
     stop(
-      "`set_compositions_exchangeable` can only contain compositions that are otherwise not already inferred as exchangeable. ",
+      "`set_exchangeable_compositions` can only contain compositions that are otherwise not already inferred as exchangeable. ",
       "Already exchangeable composition(s): ",
       paste(sort(already_exchangeable_compositions), collapse = ", "),
       ".",
@@ -235,12 +235,12 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_composition
   dyad_roles_constrained <- dyad_roles |>
     dplyr::mutate(
       "{interdep_dyad_type_col}" := dplyr::if_else(
-        .data[[interdep_composition_col]] %in% set_compositions_exchangeable_resolved,
+        .data[[interdep_composition_col]] %in% set_exchangeable_compositions_resolved,
         "exchangeable",
         .data[[interdep_dyad_type_col]]
       ),
       "{interdep_dyad_type_source_col}" := dplyr::if_else(
-        .data[[interdep_composition_col]] %in% set_compositions_exchangeable_resolved,
+        .data[[interdep_composition_col]] %in% set_exchangeable_compositions_resolved,
         "set_by_user",
         .data[[interdep_dyad_type_source_col]]
       )
@@ -252,23 +252,23 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_composition
 
 
 
-apply_composition_pooling <- function(dyad_roles, composition_pooling) {
-  if (is.null(composition_pooling) || length(composition_pooling) == 0) {
+apply_pool_compositions <- function(dyad_roles, pool_compositions) {
+  if (is.null(pool_compositions) || length(pool_compositions) == 0) {
     return(dyad_roles)
   }
 
-  if (!is.list(composition_pooling) || is.null(names(composition_pooling))) {
+  if (!is.list(pool_compositions) || is.null(names(pool_compositions))) {
     stop(
-      "`composition_pooling` must be a named list, for example ",
+      "`pool_compositions` must be a named list, for example ",
       "`list(romantic_couples = c(\"female-female\", \"male-male\"))`.",
       call. = FALSE
     )
   }
 
-  pool_names <- trimws(names(composition_pooling))
+  pool_names <- trimws(names(pool_compositions))
   if (any(is.na(pool_names)) || any(pool_names == "")) {
     stop(
-      "All `composition_pooling` elements must have non-empty names. ",
+      "All `pool_compositions` elements must have non-empty names. ",
       "Use names for the final pooled compositions, for example ",
       "`list(romantic_couples = c(\"female-female\", \"male-male\"))`.",
       call. = FALSE
@@ -276,7 +276,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
   }
   if (any(duplicated(pool_names))) {
     stop(
-      "`composition_pooling` names must be unique.",
+      "`pool_compositions` names must be unique.",
       call. = FALSE
     )
   }
@@ -284,13 +284,13 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
   observed_compositions <- dyad_roles[[interdep_composition_col]]
   already_pooled_compositions <- character()
 
-  for (i in seq_along(composition_pooling)) { # for each requested pool
+  for (i in seq_along(pool_compositions)) { # for each requested pool
     pool_name <- pool_names[[i]]
-    references_to_pool <- composition_pooling[[i]]
+    references_to_pool <- pool_compositions[[i]]
 
     if (!is.character(references_to_pool) || length(references_to_pool) == 0) {
       stop(
-        "Each `composition_pooling` element must be a non-empty character vector of dyad compositions, ",
+        "Each `pool_compositions` element must be a non-empty character vector of dyad compositions, ",
         "for example `c(\"female-female\", \"male-male\")`.",
         call. = FALSE
       )
@@ -299,7 +299,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     resolved_compositions_to_pool <- resolve_composition_references(
       references = references_to_pool,
       observed_compositions = observed_compositions,
-      arg_name = "composition_pooling"
+      arg_name = "pool_compositions"
     )
 
     # While still looping, check whether any composition has already been
@@ -307,7 +307,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     duplicated_compositions <- intersect(resolved_compositions_to_pool, already_pooled_compositions)
     if (length(duplicated_compositions) > 0) {
       stop(
-        "`composition_pooling` cannot assign the same composition to more than one pool. ",
+        "`pool_compositions` cannot assign the same composition to more than one pool. ",
         "Repeated composition(s): ",
         paste(sort(duplicated_compositions), collapse = ", "),
         ".",
@@ -318,7 +318,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     pool_name_collision <- pool_name %in% setdiff(observed_compositions, resolved_compositions_to_pool)
     if (pool_name_collision) {
       stop(
-        "`composition_pooling` names must not match observed compositions that are not part of that pool. ",
+        "`pool_compositions` names must not match observed compositions that are not part of that pool. ",
         "Conflicting name(s): ",
         pool_name,
         ". Choose a different pool name, or include the matching observed composition in that pool.",
@@ -339,8 +339,8 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
         unique()
 
       stop(
-        "`composition_pooling` can only pool exchangeable compositions. ",
-        "Set distinguishable compositions exchangeable first with `set_compositions_exchangeable`. ",
+        "`pool_compositions` can only pool exchangeable compositions. ",
+        "Set distinguishable compositions exchangeable first with `set_exchangeable_compositions`. ",
         "Non-exchangeable composition(s): ",
         paste(sort(non_exchangeable_compositions), collapse = ", "),
         ".",

@@ -53,7 +53,15 @@ print.interdep_data <- function(x, ...) {
   if (!is.null(dyad_compositions) && nrow(dyad_compositions) > 0) {
     cat("# Dyad compositions:\n")
 
-    composition <- format(dyad_compositions$composition, justify = "left")
+    pooled_from <- rep(NA_character_, nrow(dyad_compositions))
+    if ("pooled_from" %in% names(dyad_compositions)) {
+      pooled_from <- dyad_compositions$pooled_from
+    }
+
+    has_pooled_members <- !is.na(pooled_from)
+    composition_label <- as.character(dyad_compositions$composition)
+    composition_label[has_pooled_members] <- paste0(composition_label[has_pooled_members], " (pooled)")
+    composition <- format(composition_label, justify = "left")
 
     dyad_type_label <- dyad_compositions$dyad_type
     dyad_type_label <- ifelse(
@@ -64,22 +72,20 @@ print.interdep_data <- function(x, ...) {
 
     dyad_type <- format(dyad_type_label, justify = "left")
     composition_n_dyads <- format(dyad_compositions$n_dyads, justify = "right")
-    pooled_suffix <- rep("", nrow(dyad_compositions))
-    if ("pooled_from" %in% names(dyad_compositions)) {
-      pooled_suffix <- ifelse(
-        !is.na(dyad_compositions$pooled_from),
-        paste0(" | pooled: ", dyad_compositions$pooled_from),
-        ""
-      )
-    }
+    dyad_count_label <- ifelse(dyad_compositions$n_dyads == 1L, "dyad", "dyads")
 
     for (i in seq_len(nrow(dyad_compositions))) {
       cat("#",
           composition[[i]],
           dyad_type[[i]],
           composition_n_dyads[[i]],
-          paste0("dyads", pooled_suffix[[i]], "\n"),
+          paste0(dyad_count_label[[i]], "\n"),
           sep = " ")
+
+      if (has_pooled_members[[i]]) {
+        pooled_members <- strsplit(pooled_from[[i]], ",\\s*")[[1]]
+        cat(paste0("#   ", pooled_members, "\n"), sep = "")
+      }
     }
 
     cat("#\n")

@@ -575,9 +575,9 @@ test_that("interdep data print describes mixed dyad types", {
   printed <- capture_wide_print(result)
 
   expect_true(any(grepl("# Dyad compositions:", printed, fixed = TRUE)))
-  expect_true(any(grepl("female_x_male\\s+distinguishable\\s+1 dyads", printed)))
-  expect_true(any(grepl("female_x_female\\s+exchangeable\\s+1 dyads", printed)))
-  expect_true(any(grepl("male_x_male\\s+exchangeable\\s+1 dyads", printed)))
+  expect_true(any(grepl("female_x_male\\s+distinguishable\\s+1 dyad", printed)))
+  expect_true(any(grepl("female_x_female\\s+exchangeable\\s+1 dyad", printed)))
+  expect_true(any(grepl("male_x_male\\s+exchangeable\\s+1 dyad", printed)))
 })
 
 test_that("interdep data print marks dyad types set by user", {
@@ -592,7 +592,7 @@ test_that("interdep data print marks dyad types set by user", {
     group = dyad_id,
     member = person_id,
     role = role,
-    set_compositions_exchangeable = "female-male",
+    set_exchangeable_compositions = "female-male",
     seed = 123
   )
 
@@ -616,14 +616,16 @@ test_that("interdep data print describes pooled compositions", {
     group = dyad_id,
     member = person_id,
     role = role,
-    composition_pooling = list(same_sex = c("female-female", "male-male")),
+    pool_compositions = list(same_sex = c("female-female", "male-male")),
     seed = 123
   )
 
   printed <- capture_wide_print(result)
 
   expect_true(any(grepl(
-    "same_sex\\s+exchangeable\\s+2 dyads \\| pooled: female_x_female, male_x_male",
+    "same_sex \\(pooled\\)\\s+exchangeable\\s+2 dyads",
     printed
   )))
+  expect_true(any(grepl("#   female_x_female", printed, fixed = TRUE)))
+  expect_true(any(grepl("#   male_x_male", printed, fixed = TRUE)))
 })

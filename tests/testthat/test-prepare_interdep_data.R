@@ -197,7 +197,7 @@ test_that("prepare_interdep_data can set a distinguishable composition exchangea
     predictors = x,
     model_type = "dim",
     temporal_predictor_decomposition = "none",
-    set_compositions_exchangeable = "male-female",
+    set_exchangeable_compositions = "male-female",
     seed = 123
   )
 
@@ -223,8 +223,8 @@ test_that("prepare_interdep_data can pool exchangeable compositions for DIM", {
     predictors = x,
     model_type = "dim",
     temporal_predictor_decomposition = "none",
-    set_compositions_exchangeable = "female-male",
-    composition_pooling = list(romantic_couples = c("female-female", "male-male", "female-male")),
+    set_exchangeable_compositions = "female-male",
+    pool_compositions = list(romantic_couples = c("female-female", "male-male", "female-male")),
     seed = 123
   )
 
@@ -285,10 +285,10 @@ test_that("prepare_interdep_data errors when setting compositions exchangeable w
       data,
       group = dyad_id,
       member = person_id,
-      set_compositions_exchangeable = "female-male",
+      set_exchangeable_compositions = "female-male",
       seed = 123
     ),
-    "`set_compositions_exchangeable` requires `role` to be supplied.",
+    "`set_exchangeable_compositions` requires `role` to be supplied.",
     fixed = TRUE
   )
 })
@@ -304,10 +304,10 @@ test_that("prepare_interdep_data errors when pooling compositions without role",
       data,
       group = dyad_id,
       member = person_id,
-      composition_pooling = list(couples = "female-male"),
+      pool_compositions = list(couples = "female-male"),
       seed = 123
     ),
-    "`composition_pooling` requires `role` to be supplied.",
+    "`pool_compositions` requires `role` to be supplied.",
     fixed = TRUE
   )
 })

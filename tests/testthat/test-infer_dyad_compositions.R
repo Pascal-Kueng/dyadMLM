@@ -132,7 +132,7 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
   result <- infer_dyad_compositions(
     validated,
     seed = 123,
-    set_compositions_exchangeable = "male-female"
+    set_exchangeable_compositions = "male-female"
   )
 
   expect_true(".i_is_female_x_male" %in% names(result))
@@ -175,22 +175,22 @@ test_that("infer_dyad_compositions accepts separated composition references", {
   result_hyphen <- validated |>
     infer_dyad_compositions(
       seed = 123,
-      set_compositions_exchangeable = "female-male"
+      set_exchangeable_compositions = "female-male"
     )
   result_underscore <- validated |>
     infer_dyad_compositions(
       seed = 123,
-      set_compositions_exchangeable = "female_male"
+      set_exchangeable_compositions = "female_male"
     )
   result_space <- validated |>
     infer_dyad_compositions(
       seed = 123,
-      set_compositions_exchangeable = "female male"
+      set_exchangeable_compositions = "female male"
     )
   result_canonical <- validated |>
     infer_dyad_compositions(
       seed = 123,
-      set_compositions_exchangeable = "female_x_male"
+      set_exchangeable_compositions = "female_x_male"
     )
 
   expect_equal(attr(result_hyphen, "interdep")$dyad_compositions$dyad_type, "exchangeable")
@@ -214,7 +214,7 @@ test_that("infer_dyad_compositions accepts a vector of separated composition ref
   ) |>
     infer_dyad_compositions(
       seed = 123,
-      set_compositions_exchangeable = c("female-male", "older younger")
+      set_exchangeable_compositions = c("female-male", "older younger")
     )
 
   dyad_compositions <- attr(result, "interdep")$dyad_compositions
@@ -240,7 +240,7 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
   ) |>
     infer_dyad_compositions(
       seed = 123,
-      composition_pooling = list(same_sex = c("female-female", "male male"))
+      pool_compositions = list(same_sex = c("female-female", "male male"))
     )
 
   expect_true(".i_is_same_sex" %in% names(result))
@@ -277,8 +277,8 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
   ) |>
     infer_dyad_compositions(
       seed = 123,
-      set_compositions_exchangeable = "female-male",
-      composition_pooling = list(romantic_couples = c("female-female", "male-male", "female-male"))
+      set_exchangeable_compositions = "female-male",
+      pool_compositions = list(romantic_couples = c("female-female", "male-male", "female-male"))
     )
 
   dyad_compositions <- attr(result, "interdep")$dyad_compositions
@@ -313,7 +313,7 @@ test_that("infer_dyad_compositions rejects pooling distinguishable compositions"
     infer_dyad_compositions(
       validated,
       seed = 123,
-      composition_pooling = list(couples = c("female-female", "female-male"))
+      pool_compositions = list(couples = c("female-female", "female-male"))
     ),
     "can only pool exchangeable compositions",
     fixed = TRUE
@@ -335,19 +335,19 @@ test_that("infer_dyad_compositions validates composition pooling input", {
   )
 
   expect_error(
-    infer_dyad_compositions(validated, composition_pooling = c("female-female")),
+    infer_dyad_compositions(validated, pool_compositions = c("female-female")),
     "must be a named list",
     fixed = TRUE
   )
   expect_error(
-    infer_dyad_compositions(validated, composition_pooling = list(pool = character())),
+    infer_dyad_compositions(validated, pool_compositions = list(pool = character())),
     "non-empty character vector",
     fixed = TRUE
   )
   expect_error(
     infer_dyad_compositions(
       validated,
-      composition_pooling = list(pool_a = "female-female", pool_b = "female female")
+      pool_compositions = list(pool_a = "female-female", pool_b = "female female")
     ),
     "same composition to more than one pool",
     fixed = TRUE
@@ -355,15 +355,15 @@ test_that("infer_dyad_compositions validates composition pooling input", {
   expect_error(
     infer_dyad_compositions(
       validated,
-      composition_pooling = list(pool = "female-male")
+      pool_compositions = list(pool = "female-male")
     ),
-    "`composition_pooling` contains unknown dyad composition",
+    "`pool_compositions` contains unknown dyad composition",
     fixed = TRUE
   )
   expect_error(
     infer_dyad_compositions(
       validated,
-      composition_pooling = list(male_x_male = "female-female")
+      pool_compositions = list(male_x_male = "female-female")
     ),
     "names must not match observed compositions",
     fixed = TRUE
@@ -388,9 +388,9 @@ test_that("infer_dyad_compositions does not treat role vectors as one compositio
     infer_dyad_compositions(
       validated,
       seed = 123,
-      set_compositions_exchangeable = c("female", "male")
+      set_exchangeable_compositions = c("female", "male")
     ),
-    "`set_compositions_exchangeable` contains unknown dyad composition",
+    "`set_exchangeable_compositions` contains unknown dyad composition",
     fixed = TRUE
   )
 })
@@ -413,9 +413,9 @@ test_that("infer_dyad_compositions errors for unknown composition references", {
     infer_dyad_compositions(
       validated,
       seed = 123,
-      set_compositions_exchangeable = "female-female"
+      set_exchangeable_compositions = "female-female"
     ),
-    "`set_compositions_exchangeable` contains unknown dyad composition",
+    "`set_exchangeable_compositions` contains unknown dyad composition",
     fixed = TRUE
   )
 })
@@ -438,7 +438,7 @@ test_that("infer_dyad_compositions errors when setting already exchangeable comp
     infer_dyad_compositions(
       validated,
       seed = 123,
-      set_compositions_exchangeable = "female-female"
+      set_exchangeable_compositions = "female-female"
     ),
     "Already exchangeable composition\\(s\\): female_x_female"
   )
@@ -462,9 +462,9 @@ test_that("infer_dyad_compositions treats unsplittable aliases as unknown compos
     infer_dyad_compositions(
       validated,
       seed = 123,
-      set_compositions_exchangeable = "a_b_c"
+      set_exchangeable_compositions = "a_b_c"
     ),
-    "`set_compositions_exchangeable` contains unknown dyad composition",
+    "`set_exchangeable_compositions` contains unknown dyad composition",
     fixed = TRUE
   )
 })
@@ -629,7 +629,7 @@ test_that("infer_dyad_compositions treats empty exchangeability overrides as no 
     infer_dyad_compositions(
       validated,
       seed = 123,
-      set_compositions_exchangeable = character()
+      set_exchangeable_compositions = character()
     )
   )
 })
