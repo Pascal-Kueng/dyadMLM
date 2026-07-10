@@ -1,4 +1,40 @@
 url: https://pascal-kueng.github.io/interdep/
+
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left: [reference, articles]
+    right: [search, github]
+  components:
+    articles:
+      text: Vignettes
+      menu:
+      - text: Getting Started
+        href: articles/getting-started.html
+      - text: Dyad-Individual Model
+        href: articles/Dyad-Individual-Model.html
+    github:
+      icon: fa-github
+      href: https://github.com/Pascal-Kueng/interdep
+      aria-label: GitHub
+
+articles:
+- title: Start here
+  desc: Core data requirements and the main preparation workflow.
+  contents:
+  - getting-started
+- title: Model-specific preparation
+  desc: Details for specific dyadic model parameterizations.
+  contents:
+  - Dyad-Individual-Model
+
+reference:
+- title: Main function
+  contents:
+  - prepare_interdep_data
+
+- title: Example data
+  contents:
+  - starts_with("example_dyadic_")

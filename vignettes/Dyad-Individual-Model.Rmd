@@ -1,5 +1,8 @@
 ---
 title: "Dyad-Individual Model"
+description: >
+  Construction and interpretation of DIM predictors, including their
+  relationship to APIM effects in exchangeable dyads.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Dyad-Individual Model}

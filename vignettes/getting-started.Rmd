@@ -1,5 +1,8 @@
 ---
 title: "Getting Started"
+description: >
+  Core workflow for validating dyadic data, identifying dyad compositions, and
+  preparing APIM-ready columns.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Getting Started}
