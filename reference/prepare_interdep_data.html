@@ -56,8 +56,8 @@ used by downstream interdep functions.</p>
 <span>  outcomes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
-<span>  set_compositions_exchangeable <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  composition_pooling <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pool_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  incomplete_dyads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  missing_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -129,7 +129,7 @@ construction, raw undecomposed predictors are currently rejected; use
 <code>"auto"</code> or <code>"time_2l"</code>.</p></dd>
 
 
-<dt id="arg-set-compositions-exchangeable">set_compositions_exchangeable<a class="anchor" aria-label="anchor" href="#arg-set-compositions-exchangeable"></a></dt>
+<dt id="arg-set-exchangeable-compositions">set_exchangeable_compositions<a class="anchor" aria-label="anchor" href="#arg-set-exchangeable-compositions"></a></dt>
 <dd><p>Optionally specify dyad compositions
 to treat as exchangeable, when their roles would otherwise imply distinguishability.
 Requires <code>role</code>. Compositions that are already
@@ -140,7 +140,7 @@ for example <code>"female_x_male"</code>, <code>"female-male"</code>, <code>"fem
 To set multiple compositions, use a character vector of such strings.</p></dd>
 
 
-<dt id="arg-composition-pooling">composition_pooling<a class="anchor" aria-label="anchor" href="#arg-composition-pooling"></a></dt>
+<dt id="arg-pool-compositions">pool_compositions<a class="anchor" aria-label="anchor" href="#arg-pool-compositions"></a></dt>
 <dd><p>Optionally pool exchangeable dyad compositions
 into a shared final composition label. Must be a named list where each name
 is the final composition label and each value is a character vector of
@@ -209,9 +209,9 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Structure: group = dyad_id, member = person_id, role = role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dyad compositions:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_female exchangeable    1 dyads</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_male   distinguishable 1 dyads</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # male_x_male     exchangeable    1 dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_female exchangeable    1 dyad</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_male   distinguishable 1 dyad</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # male_x_male     exchangeable    1 dyad</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
@@ -241,8 +241,8 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-in"><span>  group <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
 <span class="r-in"><span>  member <span class="op">=</span> <span class="va">person_id</span>,</span></span>
 <span class="r-in"><span>  role <span class="op">=</span> <span class="va">role</span>,</span></span>
-<span class="r-in"><span>  set_compositions_exchangeable <span class="op">=</span> <span class="st">"female-male"</span>,</span></span>
-<span class="r-in"><span>  composition_pooling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span></span>
+<span class="r-in"><span>  pool_compositions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    same_sex_couples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female-female"</span>, <span class="st">"male-male"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
@@ -253,8 +253,10 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Structure: group = dyad_id, member = person_id, role = role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dyad compositions:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_male    exchangeable (set by user) 1 dyads</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # same_sex_couples exchangeable               2 dyads | pooled: female_x_female, male_x_male</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_male             exchangeable (set by user) 1 dyad</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # same_sex_couples (pooled) exchangeable               2 dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   female_x_female</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   male_x_male</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>

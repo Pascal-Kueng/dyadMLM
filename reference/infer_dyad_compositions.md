@@ -9,8 +9,8 @@ Builds a dyad-level summary of role compositions from a validated
 infer_dyad_compositions(
   data,
   seed = NULL,
-  set_compositions_exchangeable = NULL,
-  composition_pooling = NULL
+  set_exchangeable_compositions = NULL,
+  pool_compositions = NULL
 )
 ```
 
@@ -26,11 +26,11 @@ infer_dyad_compositions(
   Optional seed for random `.i_diff_*` sign assignment in exchangeable
   dyads. If `NULL`, the current R session's RNG state is used.
 
-- set_compositions_exchangeable:
+- set_exchangeable_compositions:
 
   Optional dyad compositions to treat as exchangeable for analysis.
 
-- composition_pooling:
+- pool_compositions:
 
   Optional named list that pools exchangeable dyad compositions into
   user-named final composition labels.

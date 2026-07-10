@@ -16,8 +16,8 @@ prepare_interdep_data(
   outcomes = NULL,
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
-  set_compositions_exchangeable = NULL,
-  composition_pooling = NULL,
+  set_exchangeable_compositions = NULL,
+  pool_compositions = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL
@@ -88,7 +88,7 @@ prepare_interdep_data(
   undirected DSM predictor construction, raw undecomposed predictors are
   currently rejected; use `"auto"` or `"time_2l"`.
 
-- set_compositions_exchangeable:
+- set_exchangeable_compositions:
 
   Optionally specify dyad compositions to treat as exchangeable, when
   their roles would otherwise imply distinguishability. Requires `role`.
@@ -99,7 +99,7 @@ prepare_interdep_data(
   `"female male"`, in arbitrary order. To set multiple compositions, use
   a character vector of such strings.
 
-- composition_pooling:
+- pool_compositions:
 
   Optionally pool exchangeable dyad compositions into a shared final
   composition label. Must be a named list where each name is the final
@@ -170,9 +170,9 @@ print(prepared)
 #> # Structure: group = dyad_id, member = person_id, role = role
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable    1 dyads
-#> # female_x_male   distinguishable 1 dyads
-#> # male_x_male     exchangeable    1 dyads
+#> # female_x_female exchangeable    1 dyad
+#> # female_x_male   distinguishable 1 dyad
+#> # male_x_male     exchangeable    1 dyad
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -202,8 +202,8 @@ pooled <- prepare_interdep_data(
   group = dyad_id,
   member = person_id,
   role = role,
-  set_compositions_exchangeable = "female-male",
-  composition_pooling = list(
+  set_exchangeable_compositions = "female-male",
+  pool_compositions = list(
     same_sex_couples = c("female-female", "male-male")
   )
 )
@@ -214,8 +214,10 @@ print(pooled)
 #> # Structure: group = dyad_id, member = person_id, role = role
 #> #
 #> # Dyad compositions:
-#> # female_x_male    exchangeable (set by user) 1 dyads
-#> # same_sex_couples exchangeable               2 dyads | pooled: female_x_female, male_x_male
+#> # female_x_male             exchangeable (set by user) 1 dyad
+#> # same_sex_couples (pooled) exchangeable               2 dyads
+#> #   female_x_female
+#> #   male_x_male
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
