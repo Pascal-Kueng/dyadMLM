@@ -267,7 +267,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     stop("`composition_pooling` names must be unique.", call. = FALSE)
   }
 
-  pooled_compositions <- character()
+  resolved_compositions <- character()
   composition_pool_map <- character()
 
   for (i in seq_along(composition_pooling)) {
@@ -284,11 +284,11 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       arg_name = "composition_pooling"
     )
 
-    pooled_compositions <- c(pooled_compositions, resolved)
+    resolved_compositions <- c(resolved_compositions, resolved)
     composition_pool_map[resolved] <- pool_name
   }
 
-  duplicated_compositions <- unique(pooled_compositions[duplicated(pooled_compositions)])
+  duplicated_compositions <- unique(resolved_compositions[duplicated(resolved_compositions)])
   if (length(duplicated_compositions) > 0) {
     stop(
       "`composition_pooling` cannot assign the same composition to more than one pool. ",
@@ -299,6 +299,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     )
   }
 
+  pooled_compositions <- names(composition_pool_map)
   unpooled_compositions <- setdiff(dyad_roles[[interdep_composition_col]], pooled_compositions)
   pool_name_collisions <- intersect(pool_names, unpooled_compositions)
   if (length(pool_name_collisions) > 0) {
@@ -332,21 +333,13 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     )
   }
 
-  pooled_compositions <- names(composition_pool_map)
+  composition <- dyad_roles[[interdep_composition_col]]
+  is_pooled <- composition %in% pooled_compositions
 
-  dyad_roles |>
-    dplyr::mutate(
-      "{interdep_pool_member_col}" := dplyr::if_else(
-        .data[[interdep_composition_col]] %in% pooled_compositions,
-        .data[[interdep_composition_col]],
-        .data[[interdep_pool_member_col]]
-      ),
-      "{interdep_composition_col}" := dplyr::if_else(
-        .data[[interdep_pool_member_col]] %in% pooled_compositions,
-        unname(composition_pool_map[.data[[interdep_pool_member_col]]]),
-        .data[[interdep_composition_col]]
-      )
-    )
+  dyad_roles[[interdep_pool_member_col]][is_pooled] <- composition[is_pooled]
+  dyad_roles[[interdep_composition_col]][is_pooled] <- unname(composition_pool_map[composition[is_pooled]])
+
+  dyad_roles
 }
 
 
