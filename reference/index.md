@@ -3,7 +3,7 @@
 ## Main function
 
 - [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-  : Prepare dyadic data for interdep
+  : Prepare dyadic data for multilevel models
 
 ## Example data
 

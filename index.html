@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data • interdep</title>
+<title>Prepare Dyadic Data for Multilevel Models • interdep</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data">
-<meta name="description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for statistical models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, and temporal predictor decomposition variables needed for multilevel models, including generalized multilevel models. Prepared data can be used to estimate dyadic models, including generalized intensive longitudinal actor-partner interdependence models with multiple dyad types in a single model.">
-<meta property="og:description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for statistical models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, and temporal predictor decomposition variables needed for multilevel models, including generalized multilevel models. Prepared data can be used to estimate dyadic models, including generalized intensive longitudinal actor-partner interdependence models with multiple dyad types in a single model.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Prepare Dyadic Data for Multilevel Models">
+<meta name="description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, temporal predictor decomposition, and model-ready columns needed for dyadic multilevel model parameterizations such as APIM, DIM, and undirected DSM. Prepared data can be used with multilevel model engines such as glmmTMB.">
+<meta property="og:description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, temporal predictor decomposition, and model-ready columns needed for dyadic multilevel model parameterizations such as APIM, DIM, and undirected DSM. Prepared data can be used with multilevel model engines such as glmmTMB.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -57,8 +57,8 @@
 </h1></div>
 <!-- badges: start -->
 
-<p><code>interdep</code> helps researchers prepare cross-sectional and intensive longitudinal dyadic data for statistical models.</p>
-<p>It supports dyadic datasets with distinguishable dyads, exchangeable dyads, or mixed dyad types in the same data, such as female-male, female-female, and male-male couples. Mixed dyad types are supported for Actor-Partner Interdependence Model (APIM) preparation. Current Dyad-Individual Model (DIM) and undirected Dyadic Score Model (DSM) helpers require one exchangeable dyad composition.</p>
+<p><code>interdep</code> helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models.</p>
+<p>It supports dyadic datasets with distinguishable dyads, exchangeable dyads, or mixed dyad types in the same data, such as female-male, female-female, and male-male couples. It creates composition-aware, model-ready columns for dyadic multilevel model parameterizations such as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model (DIM), and undirected Dyadic Score Model (DSM). Current DIM and undirected DSM helpers require one exchangeable dyad composition.</p>
 <p>Start with the <a href="https://pascal-kueng.github.io/interdep/articles/getting-started.html">Getting Started</a> vignette for the main data-preparation workflow. The <a href="https://pascal-kueng.github.io/interdep/">documentation site</a> also includes the <a href="https://pascal-kueng.github.io/interdep/reference/index.html">function reference</a>. The documentation is being split around the main modeling tasks:</p>
 <table class="table">
 <colgroup>
@@ -190,7 +190,7 @@
 </h2>
 <p>If you use <code>interdep</code>, please cite the package directly:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">interdep</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">title</span> = {interdep: Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data},</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">title</span> = {interdep: Prepare Dyadic Data for Multilevel Models},</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">author</span> = {Pascal Küng},</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">year</span> = {2026},</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">note</span> = {R package version 0.0.0.9000},</span>

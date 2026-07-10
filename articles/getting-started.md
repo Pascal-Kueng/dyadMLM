@@ -7,19 +7,21 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 `interdep` helps researchers prepare cross-sectional and intensive
-longitudinal dyadic data for statistical models. It supports common
-dyadic studies with one kind of dyad, and it also handles studies where
-different kinds of dyads appear in the same dataset, such as
-female-male, female-female, and male-male couples. Mixed dyad types are
-supported for composition-aware APIM-style preparation; current DIM and
-undirected DSM helpers require one exchangeable dyad composition.
+longitudinal dyadic data for multilevel models, including generalized
+multilevel models. It supports common dyadic studies with one kind of
+dyad, and it also handles studies where different kinds of dyads appear
+in the same dataset, such as female-male, female-female, and male-male
+couples. It creates composition-aware, model-ready columns for dyadic
+multilevel model parameterizations such as APIM, DIM, and undirected
+DSM. Current DIM and undirected DSM helpers require one exchangeable
+dyad composition.
 
-This vignette focuses mainly on APIM-style actor and partner effects,
-especially models with multiple dyad types, intensive longitudinal data,
-and generalized outcomes. For the Dyad-Individual Model (DIM)
-parameterization, including dyad-mean and within-dyad-deviation
-predictors and their equivalence to APIM effects in exchangeable dyads,
-see the [Dyad-Individual Model
+This vignette focuses mainly on APIM-style actor and partner effects in
+multilevel model formulas, especially models with multiple dyad types,
+intensive longitudinal data, and generalized outcomes. For the
+Dyad-Individual Model (DIM) parameterization, including dyad-mean and
+within-dyad-deviation predictors and their equivalence to APIM effects
+in exchangeable dyads, see the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.md).
 
 The basic data structure is a long data frame where dyads are stacked on
@@ -72,8 +74,8 @@ time 3 for that person, which is fine.
 
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
 validates the expected structure, returns a tibble with class
-`interdep_data`, derives and adds dyad-composition labels that are
-needed for modeling.
+`interdep_data`, and adds the dyad-composition labels and model-ready
+columns needed for dyadic multilevel model formulas.
 
 Omit `role` only when all partners should be treated as exchangeable.
 

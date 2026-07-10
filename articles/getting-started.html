@@ -11,9 +11,9 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started">
-<meta name="description" content="Core workflow for validating dyadic data, identifying dyad compositions, and preparing APIM-ready columns.
+<meta name="description" content="Core workflow for validating dyadic data, identifying dyad compositions, and preparing model-ready columns for dyadic multilevel models.
 ">
-<meta property="og:description" content="Core workflow for validating dyadic data, identifying dyad compositions, and preparing APIM-ready columns.
+<meta property="og:description" content="Core workflow for validating dyadic data, identifying dyad compositions, and preparing model-ready columns for dyadic multilevel models.
 ">
 </head>
 <body>
@@ -73,18 +73,20 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span>
 <span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><code>interdep</code> helps researchers prepare cross-sectional and
-intensive longitudinal dyadic data for statistical models. It supports
-common dyadic studies with one kind of dyad, and it also handles studies
-where different kinds of dyads appear in the same dataset, such as
-female-male, female-female, and male-male couples. Mixed dyad types are
-supported for composition-aware APIM-style preparation; current DIM and
-undirected DSM helpers require one exchangeable dyad composition.</p>
-<p>This vignette focuses mainly on APIM-style actor and partner effects,
-especially models with multiple dyad types, intensive longitudinal data,
-and generalized outcomes. For the Dyad-Individual Model (DIM)
-parameterization, including dyad-mean and within-dyad-deviation
-predictors and their equivalence to APIM effects in exchangeable dyads,
-see the <a href="Dyad-Individual-Model.html">Dyad-Individual Model
+intensive longitudinal dyadic data for multilevel models, including
+generalized multilevel models. It supports common dyadic studies with
+one kind of dyad, and it also handles studies where different kinds of
+dyads appear in the same dataset, such as female-male, female-female,
+and male-male couples. It creates composition-aware, model-ready columns
+for dyadic multilevel model parameterizations such as APIM, DIM, and
+undirected DSM. Current DIM and undirected DSM helpers require one
+exchangeable dyad composition.</p>
+<p>This vignette focuses mainly on APIM-style actor and partner effects
+in multilevel model formulas, especially models with multiple dyad
+types, intensive longitudinal data, and generalized outcomes. For the
+Dyad-Individual Model (DIM) parameterization, including dyad-mean and
+within-dyad-deviation predictors and their equivalence to APIM effects
+in exchangeable dyads, see the <a href="Dyad-Individual-Model.html">Dyad-Individual Model
 vignette</a>.</p>
 <p>The basic data structure is a long data frame where dyads are stacked
 on top of each other and both members of a dyad appear as separate rows.
@@ -233,9 +235,9 @@ observed measurement occasions. For example:</p>
 variable still uses the observed measurement occasions and skips from
 time 1 to time 3 for that person, which is fine.</p>
 <p><code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code> validates the expected
-structure, returns a tibble with class <code>interdep_data</code>,
-derives and adds dyad-composition labels that are needed for
-modeling.</p>
+structure, returns a tibble with class <code>interdep_data</code>, and
+adds the dyad-composition labels and model-ready columns needed for
+dyadic multilevel model formulas.</p>
 <p>Omit <code>role</code> only when all partners should be treated as
 exchangeable.</p>
 <p>The examples build up from simple dyadic structures to

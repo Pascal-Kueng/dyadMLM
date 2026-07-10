@@ -8,7 +8,8 @@ Core data requirements and the main preparation workflow.
   Started](https://pascal-kueng.github.io/interdep/articles/getting-started.md):
 
   Core workflow for validating dyadic data, identifying dyad
-  compositions, and preparing APIM-ready columns.
+  compositions, and preparing model-ready columns for dyadic multilevel
+  models.
 
 ### Model-specific preparation
 
@@ -18,4 +19,5 @@ Details for specific dyadic model parameterizations.
   Model](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.md):
 
   Construction and interpretation of DIM predictors, including their
-  relationship to APIM effects in exchangeable dyads.
+  relationship to APIM effects in dyadic multilevel models for
+  exchangeable dyads.

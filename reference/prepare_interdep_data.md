@@ -1,7 +1,8 @@
-# Prepare dyadic data for interdep
+# Prepare dyadic data for multilevel models
 
 Validates dyadic data, records the structural variables, and adds
-metadata used by downstream interdep functions.
+metadata and model-ready columns for dyadic multilevel model
+parameterizations.
 
 ## Usage
 
@@ -154,14 +155,17 @@ member order.
 data <- data.frame(
   dyad_id = c(1, 1, 2, 2, 3, 3),
   person_id = c(1, 2, 3, 4, 5, 6),
-  role = c("female", "male", "female", "female", "male", "male")
+  role = c("female", "male", "female", "female", "male", "male"),
+  x = c(4, 7, 5, 6, 3, 8)
 )
 
 prepared <- prepare_interdep_data(
   data,
   group = dyad_id,
   member = person_id,
-  role = role
+  role = role,
+  predictors = x,
+  model_type = "apim"
 )
 
 print(prepared)
@@ -181,30 +185,35 @@ print(prepared)
 #> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
 #> #                        distinguishable dyads or other exchangeable
 #> #                        compositions
+#> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
+#> #                        values
 #> #
-#> # A tibble: 6 × 11
-#>   dyad_id person_id role   .i_composition  .i_composition_role 
-#>     <dbl>     <dbl> <chr>  <fct>           <fct>               
-#> 1       1         1 female female_x_male   female_x_male_female
-#> 2       1         2 male   female_x_male   female_x_male_male  
-#> 3       2         3 female female_x_female female_x_female     
-#> 4       2         4 female female_x_female female_x_female     
-#> 5       3         5 male   male_x_male     male_x_male         
-#> 6       3         6 male   male_x_male     male_x_male         
-#> # ℹ 6 more variables: .i_is_female_x_female <dbl>,
+#> # A tibble: 6 × 14
+#>   dyad_id person_id role       x .i_composition  .i_composition_role 
+#>     <dbl>     <dbl> <chr>  <dbl> <fct>           <fct>               
+#> 1       1         1 female     4 female_x_male   female_x_male_female
+#> 2       1         2 male       7 female_x_male   female_x_male_male  
+#> 3       2         3 female     5 female_x_female female_x_female     
+#> 4       2         4 female     6 female_x_female female_x_female     
+#> 5       3         5 male       3 male_x_male     male_x_male         
+#> 6       3         6 male       8 male_x_male     male_x_male         
+#> # ℹ 8 more variables: .i_is_female_x_female <dbl>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
-#> #   .i_diff_male_x_male <dbl>
-
+#> #   .i_diff_male_x_male <dbl>, .i_x_raw_actor <dbl>, .i_x_raw_partner <dbl>
 
 pooled <- prepare_interdep_data(
   data,
   group = dyad_id,
   member = person_id,
   role = role,
+  predictors = x,
+  model_type = "apim",
   set_exchangeable_compositions = "female-male",
   pool_compositions = list(
-    same_sex_couples = c("female-female", "male-male")
+    romantic_couples = c("female-female", "male-male", "female-male")
   )
 )
 
@@ -214,9 +223,9 @@ print(pooled)
 #> # Structure: group = dyad_id, member = person_id, role = role
 #> #
 #> # Dyad compositions:
-#> # female_x_male             exchangeable (set by user) 1 dyad
-#> # same_sex_couples (pooled) exchangeable               2 dyads
+#> # romantic_couples (pooled) exchangeable 3 dyads
 #> #   female_x_female
+#> #   female_x_male
 #> #   male_x_male
 #> #
 #> # Added columns:
@@ -226,16 +235,83 @@ print(pooled)
 #> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
 #> #                        distinguishable dyads or other exchangeable
 #> #                        compositions
+#> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
+#> #                        values
 #> #
-#> # A tibble: 6 × 9
-#>   dyad_id person_id role  .i_composition .i_composition_role .i_is_female_x_male
-#>     <dbl>     <dbl> <chr> <fct>          <fct>                             <dbl>
-#> 1       1         1 fema… female_x_male  female_x_male                         1
-#> 2       1         2 male  female_x_male  female_x_male                         1
-#> 3       2         3 fema… same_sex_coup… same_sex_couples                      0
-#> 4       2         4 fema… same_sex_coup… same_sex_couples                      0
-#> 5       3         5 male  same_sex_coup… same_sex_couples                      0
-#> 6       3         6 male  same_sex_coup… same_sex_couples                      0
-#> # ℹ 3 more variables: .i_is_same_sex_couples <dbl>,
-#> #   .i_diff_female_x_male <dbl>, .i_diff_same_sex_couples <dbl>
+#> # A tibble: 6 × 10
+#>   dyad_id person_id role       x .i_composition   .i_composition_role
+#>     <dbl>     <dbl> <chr>  <dbl> <fct>            <fct>              
+#> 1       1         1 female     4 romantic_couples romantic_couples   
+#> 2       1         2 male       7 romantic_couples romantic_couples   
+#> 3       2         3 female     5 romantic_couples romantic_couples   
+#> 4       2         4 female     6 romantic_couples romantic_couples   
+#> 5       3         5 male       3 romantic_couples romantic_couples   
+#> 6       3         6 male       8 romantic_couples romantic_couples   
+#> # ℹ 4 more variables: .i_is_romantic_couples <dbl>,
+#> #   .i_diff_romantic_couples <dbl>, .i_x_raw_actor <dbl>,
+#> #   .i_x_raw_partner <dbl>
+
+ild_data <- data.frame(
+  dyad_id = rep(c(1, 2), each = 4),
+  person_id = rep(c(1, 2), times = 4),
+  time = rep(c(1, 1, 2, 2), times = 2),
+  x = c(4, 7, 5, 8, 3, 6, 4, 7)
+)
+
+ild_prepared <- prepare_interdep_data(
+  ild_data,
+  group = dyad_id,
+  member = person_id,
+  time = time,
+  predictors = x,
+  model_type = "apim",
+  seed = 123
+)
+
+print(ild_prepared)
+#> # interdep data
+#> # Rows: 8 | Dyads: 2 | Intensive longitudinal: yes
+#> # Structure: group = dyad_id, member = person_id, time = time
+#> #
+#> # Dyad compositions:
+#> # assumed_exchangeable exchangeable 2 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_*              composition-role indicator columns
+#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
+#> #                        distinguishable dyads or other exchangeable
+#> #                        compositions
+#> #   .i_*_cwp             within-person predictor: momentary deviations from
+#> #                        each person's usual level
+#> #   .i_*_cbp             between-person predictor: stable differences from the
+#> #                        average person's usual level
+#> #   .i_*_cwp_actor       APIM within-person actor predictor: actor's momentary
+#> #                        deviations from their usual level
+#> #   .i_*_cwp_partner     APIM within-person partner predictor: partner's
+#> #                        momentary deviations from their usual level
+#> #   .i_*_cbp_actor       APIM between-person actor predictor: actor's stable
+#> #                        difference from the average person's usual level
+#> #   .i_*_cbp_partner     APIM between-person partner predictor: partner's
+#> #                        stable difference from the average person's usual
+#> #                        level
+#> #
+#> # A tibble: 8 × 14
+#>   dyad_id person_id  time     x .i_composition       .i_composition_role 
+#>     <dbl>     <dbl> <dbl> <dbl> <fct>                <fct>               
+#> 1       1         1     1     4 assumed_exchangeable assumed_exchangeable
+#> 2       1         2     1     7 assumed_exchangeable assumed_exchangeable
+#> 3       1         1     2     5 assumed_exchangeable assumed_exchangeable
+#> 4       1         2     2     8 assumed_exchangeable assumed_exchangeable
+#> 5       2         1     1     3 assumed_exchangeable assumed_exchangeable
+#> 6       2         2     1     6 assumed_exchangeable assumed_exchangeable
+#> 7       2         1     2     4 assumed_exchangeable assumed_exchangeable
+#> 8       2         2     2     7 assumed_exchangeable assumed_exchangeable
+#> # ℹ 8 more variables: .i_is_assumed_exchangeable <dbl>,
+#> #   .i_diff_assumed_exchangeable <dbl>, .i_x_cwp <dbl>, .i_x_cbp <dbl>,
+#> #   .i_x_cwp_actor <dbl>, .i_x_cwp_partner <dbl>, .i_x_cbp_actor <dbl>,
+#> #   .i_x_cbp_partner <dbl>
 ```

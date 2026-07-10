@@ -1,14 +1,16 @@
 # interdep
 
 `interdep` helps researchers prepare cross-sectional and intensive
-longitudinal dyadic data for statistical models.
+longitudinal dyadic data for multilevel models, including generalized
+multilevel models.
 
 It supports dyadic datasets with distinguishable dyads, exchangeable
 dyads, or mixed dyad types in the same data, such as female-male,
-female-female, and male-male couples. Mixed dyad types are supported for
-Actor-Partner Interdependence Model (APIM) preparation. Current
-Dyad-Individual Model (DIM) and undirected Dyadic Score Model (DSM)
-helpers require one exchangeable dyad composition.
+female-female, and male-male couples. It creates composition-aware,
+model-ready columns for dyadic multilevel model parameterizations such
+as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model
+(DIM), and undirected Dyadic Score Model (DSM). Current DIM and
+undirected DSM helpers require one exchangeable dyad composition.
 
 Start with the [Getting
 Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html)
@@ -128,7 +130,7 @@ If you use `interdep`, please cite the package directly:
 
 ``` bibtex
 @Manual{interdep,
-  title = {interdep: Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data},
+  title = {interdep: Prepare Dyadic Data for Multilevel Models},
   author = {Pascal Küng},
   year = {2026},
   note = {R package version 0.0.0.9000},
