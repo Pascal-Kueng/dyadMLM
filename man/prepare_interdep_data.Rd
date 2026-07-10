@@ -14,6 +14,7 @@ prepare_interdep_data(
   outcomes = NULL,
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
+  set_compositions_exchangeable = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL
@@ -62,6 +63,15 @@ are still centered around the grand mean of dyad means as part of DIM-style
 predictor construction. For longitudinal DIM or undirected DSM predictor
 construction, raw undecomposed predictors are currently rejected; use
 \code{"auto"} or \code{"time_2l"}.}
+
+\item{set_compositions_exchangeable}{Optionally specify dyad compositions
+to treat as exchangeable, when their roles would otherwise make them
+distinguishable. Requires \code{role}; compositions that are already
+exchangeable should not be listed. Each composition must be supplied as one
+string, using \verb{_x_}, \code{-}, \verb{_}, or whitespace between the two role labels,
+for example \code{"female_x_male"}, \code{"female-male"}, \code{"female_male"}, or
+\code{"female male"}. To set multiple compositions, use a character vector of
+such strings.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

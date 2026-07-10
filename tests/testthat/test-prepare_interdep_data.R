@@ -37,6 +37,10 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
     dyad_compositions$dyad_type,
     c("exchangeable", "distinguishable", "exchangeable")
   )
+  expect_equal(
+    dyad_compositions$dyad_type_source,
+    c("inferred", "inferred", "inferred")
+  )
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L, 1L))
   expect_false(".i_raw_composition" %in% names(result))
   expect_true(is.factor(result$.i_composition))
@@ -177,6 +181,32 @@ test_that("prepare_interdep_data rejects unsupported dyad compositions for undir
   )
 })
 
+test_that("prepare_interdep_data can set a distinguishable composition exchangeable for DIM", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
+    x = c(1, 2, 3, 4)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = x,
+    model_type = "dim",
+    temporal_predictor_decomposition = "none",
+    set_compositions_exchangeable = "male-female",
+    seed = 123
+  )
+
+  expect_equal(attr(result, "interdep")$dyad_compositions$dyad_type, "exchangeable")
+  expect_true(".i_diff_female_x_male" %in% names(result))
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+})
+
 test_that("prepare_interdep_data treats data without role as assumed exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -202,8 +232,28 @@ test_that("prepare_interdep_data treats data without role as assumed exchangeabl
       raw_composition = "assumed_exchangeable",
       composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
+      dyad_type_source = "assumed_no_role",
       n_dyads = 2L
     )
+  )
+})
+
+test_that("prepare_interdep_data errors when setting compositions exchangeable without role", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      set_compositions_exchangeable = "female-male",
+      seed = 123
+    ),
+    "`set_compositions_exchangeable` requires `role` to be supplied.",
+    fixed = TRUE
   )
 })
 

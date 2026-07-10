@@ -39,11 +39,14 @@ Recently completed cleanup:
   the README
 - kept generated `docs/` and `doc/` output ignored; pkgdown should rebuild the
   site through the GitHub Pages workflow
+- added `set_compositions_exchangeable` as the first analysis-composition
+  control, so observed distinguishable compositions can be treated as
+  exchangeable for generated columns and downstream DIM/DSM compatibility
 
-Immediate next steps: implement the explicit analysis-composition controls,
-then cleanly split and polish the vignettes. The getting-started vignette should
-become shorter and more introductory; heavier APIM, ILD APIM, and DSM material
-should move into model-specific vignettes as those pages are created.
+Immediate next steps: implement `composition_pooling`, then cleanly split and
+polish the vignettes. The getting-started vignette should become shorter and
+more introductory; heavier APIM, ILD APIM, and DSM material should move into
+model-specific vignettes as those pages are created.
 
 ## Vignette Architecture
 
@@ -101,9 +104,10 @@ model-building features.
     exchangeable for downstream generated columns
   - `composition_pooling` pools exchangeable analysis compositions under a
     user-provided final composition name
-  - Resolve composition references through aliases based on observed roles, so
-    users can write inputs such as `"female_x_male"`, `"female_male"`,
-    `"female-male"`, `"male-female"`, or `c("female", "male")`
+  - Resolve composition references through separated composition labels such as
+    `"female_x_male"`, `"female_male"`, `"female-male"`, `"male-female"`, or
+    `"female male"`; do not treat `c("female", "male")` as one composition
+    reference
   - Apply the steps in this order:
     1. infer canonical raw compositions and create aliases
     2. apply `set_compositions_exchangeable`
@@ -253,7 +257,8 @@ Complete these before calling the feature set CRAN-ready:
     composition unless `composition_pooling` has explicitly produced that
     analysis composition
 - Finalize analysis-composition controls
-  - add `set_compositions_exchangeable` before `composition_pooling`
+  - keep the implemented `set_compositions_exchangeable` step before
+    `composition_pooling`
   - keep the name `set_compositions_exchangeable` instead of a generic
     "constraints" argument, because the operation is specifically about
     treating selected dyad compositions as exchangeable

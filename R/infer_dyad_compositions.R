@@ -6,6 +6,8 @@
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #' @param seed Optional seed for random `.i_diff_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
+#' @param set_compositions_exchangeable Optional dyad compositions to treat as
+#'   exchangeable for analysis.
 #'
 #' @return An `interdep_data` object with added `.i_composition` and
 #'   `.i_composition_role` factor columns, `.i_is_*` numeric indicator columns,
@@ -13,7 +15,7 @@
 #'   composition metadata.
 #'
 #' @keywords internal
-infer_dyad_compositions <- function(data, seed = NULL) {
+infer_dyad_compositions <- function(data, seed = NULL, set_compositions_exchangeable = NULL) {
   if (!inherits(data, "interdep_data")) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
   }
@@ -24,6 +26,15 @@ infer_dyad_compositions <- function(data, seed = NULL) {
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
+    if (length(set_compositions_exchangeable) > 0) {
+      stop(
+        "`set_compositions_exchangeable` requires `role` to be supplied. ",
+        "Without `role`, all dyads are already treated as one exchangeable composition.",
+        " Either remove `set_compositions_exchangeable` argument or supply `role`.",
+        call. = FALSE
+      )
+    }
+
     data[[interdep_composition_col]] <- interdep_assumed_exchangeable_label
     data[[interdep_composition_role_col]] <- interdep_assumed_exchangeable_label
 
@@ -38,6 +49,7 @@ infer_dyad_compositions <- function(data, seed = NULL) {
       raw_composition = interdep_assumed_exchangeable_label,
       composition = interdep_assumed_exchangeable_label,
       dyad_type = "exchangeable",
+      dyad_type_source = "assumed_no_role",
       n_dyads = meta_data$n_dyads
     )
 
@@ -74,9 +86,16 @@ infer_dyad_compositions <- function(data, seed = NULL) {
           "distinguishable"
         }
       },
+      .i_dyad_type_source = "inferred",
       .groups = "drop"
     ) |>
     dplyr::mutate(.i_composition = .data$.i_raw_composition)
+
+  # Apply any user-requested exchangeability overrides.
+    dyad_roles <- apply_exchangeable_composition_overrides(
+      dyad_roles = dyad_roles,
+      set_compositions_exchangeable = set_compositions_exchangeable
+    )
 
   # attach how many dyads for each comp type we have
   attr(data, "interdep")$dyad_compositions <- dyad_roles |>
@@ -84,6 +103,7 @@ infer_dyad_compositions <- function(data, seed = NULL) {
       raw_composition = .data[[interdep_raw_composition_col]],
       composition = .data[[interdep_composition_col]],
       dyad_type = .data[[interdep_dyad_type_col]],
+      dyad_type_source = .data[[interdep_dyad_type_source_col]],
       name = "n_dyads"
     )
 
@@ -128,12 +148,67 @@ infer_dyad_compositions <- function(data, seed = NULL) {
   # Remove columns that are no longer needed after constructing contrasts.
   data[[interdep_raw_composition_col]] <- NULL
   data[[interdep_dyad_type_col]] <- NULL
+  data[[interdep_dyad_type_source_col]] <- NULL
 
   # convert to factors, sanitize role names, construct .i_is_{indicator} variables.
   # remove temporary cols, create composition-specific diff cols for exchangeable dyads.
   data <- finalize_composition_columns(data)
 
   data
+}
+
+
+apply_exchangeable_composition_overrides <- function(dyad_roles, set_compositions_exchangeable) {
+  set_compositions_exchangeable_resolved <- resolve_composition_references(
+    references = set_compositions_exchangeable,
+    observed_compositions = dyad_roles[[interdep_composition_col]],
+    arg_name = "set_compositions_exchangeable"
+  )
+
+  # Checks if argument is needed and allowed
+  if (length(set_compositions_exchangeable_resolved) == 0) {
+    return(dyad_roles)
+  }
+
+  already_exchangeable_rows <- dyad_roles |>
+    dplyr::filter(
+      # filter those that are mentioned to be restricted to be exchangeable
+      .data[[interdep_composition_col]] %in% set_compositions_exchangeable_resolved,
+      # and those that are already inferred to as exchangeable
+      .data[[interdep_dyad_type_col]] == "exchangeable"
+    )
+
+  if (nrow(already_exchangeable_rows) > 0) {
+    already_exchangeable_compositions <- already_exchangeable_rows |>
+      dplyr::pull(.data[[interdep_composition_col]]) |>
+      unique()
+
+    stop(
+      "`set_compositions_exchangeable` can only contain compositions that are otherwise not already inferred as exchangeable. ",
+      "Already exchangeable composition(s): ",
+      paste(sort(already_exchangeable_compositions), collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+
+  # Actually "constraining" the roles by simply changing .i_dyad_type from
+  # the inferred "distinguishable" to "exchangeable". (Apply the requested exchangeability override)
+  dyad_roles_constrained <- dyad_roles |>
+    dplyr::mutate(
+      "{interdep_dyad_type_col}" := dplyr::if_else(
+        .data[[interdep_composition_col]] %in% set_compositions_exchangeable_resolved,
+        "exchangeable",
+        .data[[interdep_dyad_type_col]]
+      ),
+      "{interdep_dyad_type_source_col}" := dplyr::if_else(
+        .data[[interdep_composition_col]] %in% set_compositions_exchangeable_resolved,
+        "set_by_user",
+        .data[[interdep_dyad_type_source_col]]
+      )
+    )
+
+  return(dyad_roles_constrained)
 }
 
 

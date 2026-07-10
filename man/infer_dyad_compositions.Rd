@@ -4,13 +4,20 @@
 \alias{infer_dyad_compositions}
 \title{Infer dyad compositions}
 \usage{
-infer_dyad_compositions(data, seed = NULL)
+infer_dyad_compositions(
+  data,
+  seed = NULL,
+  set_compositions_exchangeable = NULL
+)
 }
 \arguments{
 \item{data}{An \code{interdep_data} object returned by \code{\link[=validate_interdep_data]{validate_interdep_data()}}.}
 
 \item{seed}{Optional seed for random \verb{.i_diff_*} sign assignment in
 exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
+
+\item{set_compositions_exchangeable}{Optional dyad compositions to treat as
+exchangeable for analysis.}
 }
 \value{
 An \code{interdep_data} object with added \code{.i_composition} and

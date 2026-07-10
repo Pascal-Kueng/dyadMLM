@@ -14,6 +14,7 @@
 
 
 load_interdep_debug_internals <- function() {
+  source("R/utils-args.R")
   source("R/utils-compositions.R")
   source("R/assign_arbitrary_member_roles.R")
   source("R/validate_interdep_data.R")
@@ -89,7 +90,8 @@ setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
 }
 
 
-setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
+                              set_compositions_exchangeable = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -105,21 +107,58 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
   group_name <- meta_data$group
   member_name <- meta_data$member
   role_name <- meta_data$role
+  has_role <- !is.null(role_name)
+
+  dyad_roles <- data |>
+    dplyr::distinct(
+      .data[[group_name]],
+      .data[[member_name]],
+      .data[[role_name]]
+    ) |>
+    dplyr::group_by(.data[[group_name]]) |>
+    dplyr::summarise(
+      .i_raw_composition = {
+        canonical_composition(.data[[role_name]])
+      },
+      .i_dyad_type = {
+        has_one_role <- dplyr::n_distinct(.data[[role_name]]) == 1
+
+        if (has_one_role) {
+          "exchangeable"
+        } else {
+          "distinguishable"
+        }
+      },
+      .i_dyad_type_source = "inferred",
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(.i_composition = .data$.i_raw_composition)
+
+  resolved_set_compositions_exchangeable <- resolve_composition_references(
+    references = set_compositions_exchangeable,
+    observed_compositions = dyad_roles[[interdep_composition_col]],
+    arg_name = "set_compositions_exchangeable"
+  )
 
   assign_debug_vars(
     data = data,
     seed = seed,
+    set_compositions_exchangeable = set_compositions_exchangeable,
+    resolved_set_compositions_exchangeable = resolved_set_compositions_exchangeable,
     meta_data = meta_data,
     group_name = group_name,
     member_name = member_name,
-    role_name = role_name
+    role_name = role_name,
+    has_role = has_role,
+    dyad_roles = dyad_roles
   )
 
   invisible(data)
 }
 
 
-setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
+                               set_compositions_exchangeable = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -130,7 +169,11 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
     time = diaryday,
     predictors = provided_support
   )
-  data <- infer_dyad_compositions(data, seed = seed)
+  data <- infer_dyad_compositions(
+    data,
+    seed = seed,
+    set_compositions_exchangeable = set_compositions_exchangeable
+  )
 
   meta_data <- attr(data, "interdep")
   out <- data
@@ -141,6 +184,7 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
 
   assign_debug_vars(
     data = data,
+    set_compositions_exchangeable = set_compositions_exchangeable,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -153,7 +197,8 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
 }
 
 
-setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
+                                          set_compositions_exchangeable = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -164,7 +209,11 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
     time = diaryday,
     predictors = provided_support
   )
-  data <- infer_dyad_compositions(data, seed = seed)
+  data <- infer_dyad_compositions(
+    data,
+    seed = seed,
+    set_compositions_exchangeable = set_compositions_exchangeable
+  )
   data <- center_predictors(data)
 
   meta_data <- attr(data, "interdep")
@@ -178,6 +227,7 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
 
   assign_debug_vars(
     data = data,
+    set_compositions_exchangeable = set_compositions_exchangeable,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -192,7 +242,8 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
 }
 
 
-setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
+                                            set_compositions_exchangeable = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -204,7 +255,11 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
     predictors = provided_support,
     model_type = "dim"
   )
-  data <- infer_dyad_compositions(data, seed = seed)
+  data <- infer_dyad_compositions(
+    data,
+    seed = seed,
+    set_compositions_exchangeable = set_compositions_exchangeable
+  )
   data <- center_predictors(data)
 
   meta_data <- attr(data, "interdep")
@@ -237,6 +292,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 
   assign_debug_vars(
     data = data,
+    set_compositions_exchangeable = set_compositions_exchangeable,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -260,7 +316,8 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 }
 
 
-setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123) {
+setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
+                                                    set_compositions_exchangeable = NULL) {
   dataset <- rlang::arg_match(dataset)
   load_interdep_debug_internals()
 
@@ -275,7 +332,11 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
     predictors = provided_support,
     model_type = "dim"
   )
-  data <- infer_dyad_compositions(data, seed = seed)
+  data <- infer_dyad_compositions(
+    data,
+    seed = seed,
+    set_compositions_exchangeable = set_compositions_exchangeable
+  )
   data <- center_predictors(data)
   attr(data, "interdep")$outcomes <- outcome_name
 
@@ -305,6 +366,7 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
   assign_debug_vars(
     raw_data = raw_data,
     data = data,
+    set_compositions_exchangeable = set_compositions_exchangeable,
     meta_data = meta_data,
     out = out,
     group = group,

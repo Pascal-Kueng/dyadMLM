@@ -50,6 +50,10 @@ test_that("infer_dyad_compositions counts role compositions", {
     dyad_compositions$dyad_type,
     c("exchangeable", "distinguishable", "exchangeable")
   )
+  expect_equal(
+    dyad_compositions$dyad_type_source,
+    c("inferred", "inferred", "inferred")
+  )
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
     as.character(result$.i_composition),
@@ -111,6 +115,215 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
   )
 })
 
+test_that("infer_dyad_compositions can set distinguishable compositions exchangeable", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  result <- infer_dyad_compositions(
+    validated,
+    seed = 123,
+    set_compositions_exchangeable = "male-female"
+  )
+
+  expect_true(".i_is_female_x_male" %in% names(result))
+  expect_false(".i_is_female_x_male_female" %in% names(result))
+  expect_false(".i_is_female_x_male_male" %in% names(result))
+  expect_true(".i_diff_female_x_male" %in% names(result))
+  expect_equal(abs(result$.i_diff_female_x_male), rep(1, 4))
+  expect_equal(as.character(result$.i_composition), rep("female_x_male", 4))
+  expect_equal(as.character(result$.i_composition_role), rep("female_x_male", 4))
+  expect_equal(
+    attr(result, "interdep")$dyad_compositions,
+    tibble::tibble(
+      raw_composition = "female_x_male",
+      composition = "female_x_male",
+      dyad_type = "exchangeable",
+      dyad_type_source = "set_by_user",
+      n_dyads = 2L
+    )
+  )
+  expect_equal(
+    attr(result, "interdep")$dyad_compositions$dyad_type_source,
+    "set_by_user"
+  )
+})
+
+test_that("infer_dyad_compositions accepts separated composition references", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  result_hyphen <- validated |>
+    infer_dyad_compositions(
+      seed = 123,
+      set_compositions_exchangeable = "female-male"
+    )
+  result_underscore <- validated |>
+    infer_dyad_compositions(
+      seed = 123,
+      set_compositions_exchangeable = "female_male"
+    )
+  result_space <- validated |>
+    infer_dyad_compositions(
+      seed = 123,
+      set_compositions_exchangeable = "female male"
+    )
+  result_canonical <- validated |>
+    infer_dyad_compositions(
+      seed = 123,
+      set_compositions_exchangeable = "female_x_male"
+    )
+
+  expect_equal(attr(result_hyphen, "interdep")$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(attr(result_underscore, "interdep")$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(attr(result_space, "interdep")$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(attr(result_canonical, "interdep")$dyad_compositions$dyad_type, "exchangeable")
+})
+
+test_that("infer_dyad_compositions accepts a vector of separated composition references", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "younger", "older")
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  ) |>
+    infer_dyad_compositions(
+      seed = 123,
+      set_compositions_exchangeable = c("female-male", "older younger")
+    )
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
+
+  expect_equal(dyad_compositions$composition, c("female_x_male", "older_x_younger"))
+  expect_equal(dyad_compositions$dyad_type, c("exchangeable", "exchangeable"))
+  expect_equal(dyad_compositions$dyad_type_source, c("set_by_user", "set_by_user"))
+})
+
+test_that("infer_dyad_compositions does not treat role vectors as one composition reference", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      seed = 123,
+      set_compositions_exchangeable = c("female", "male")
+    ),
+    "`set_compositions_exchangeable` contains unknown dyad composition",
+    fixed = TRUE
+  )
+})
+
+test_that("infer_dyad_compositions errors for unknown composition references", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      seed = 123,
+      set_compositions_exchangeable = "female-female"
+    ),
+    "`set_compositions_exchangeable` contains unknown dyad composition",
+    fixed = TRUE
+  )
+})
+
+test_that("infer_dyad_compositions errors when setting already exchangeable compositions exchangeable", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "female", "male")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      seed = 123,
+      set_compositions_exchangeable = "female-female"
+    ),
+    "Already exchangeable composition\\(s\\): female_x_female"
+  )
+})
+
+test_that("infer_dyad_compositions treats unsplittable aliases as unknown compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("a_b", "c", "a", "b_c")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      seed = 123,
+      set_compositions_exchangeable = "a_b_c"
+    ),
+    "`set_compositions_exchangeable` contains unknown dyad composition",
+    fixed = TRUE
+  )
+})
+
 test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
@@ -135,6 +348,7 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   expect_equal(dyad_compositions$raw_composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
+  expect_equal(dyad_compositions$dyad_type_source, c("inferred", "inferred"))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
@@ -252,7 +466,25 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
       raw_composition = "assumed_exchangeable",
       composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
+      dyad_type_source = "assumed_no_role",
       n_dyads = 2L
+    )
+  )
+})
+
+test_that("infer_dyad_compositions treats empty exchangeability overrides as no request without role", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
+
+  expect_no_error(
+    infer_dyad_compositions(
+      validated,
+      seed = 123,
+      set_compositions_exchangeable = character()
     )
   )
 })

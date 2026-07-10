@@ -18,6 +18,7 @@ interdep_reserved_prefix <- ".i_"
 interdep_composition_col <- paste0(interdep_reserved_prefix, "composition")
 interdep_composition_role_col <- paste0(interdep_reserved_prefix, "composition_role")
 interdep_dyad_type_col <- paste0(interdep_reserved_prefix, "dyad_type")
+interdep_dyad_type_source_col <- paste0(interdep_reserved_prefix, "dyad_type_source")
 interdep_raw_composition_col <- paste0(interdep_reserved_prefix, "raw_composition")
 interdep_resolved_role_col <- paste0(interdep_reserved_prefix, "resolved_role")
 interdep_diff_col <- paste0(interdep_reserved_prefix, "diff")
@@ -85,6 +86,69 @@ make_interdep_suffixes <- function(labels, label_type = "labels",
   }
 
   stats::setNames(suffixes, labels)
+}
+
+
+#' Resolve user-supplied composition references
+#'
+#' @param references A character vector of composition references.
+#' @param observed_compositions Canonical composition labels observed in the
+#'   data.
+#' @param arg_name Name of the user-facing argument for error messages.
+#'
+#' @return Canonical observed composition labels.
+#' @keywords internal
+resolve_composition_references <- function(references, observed_compositions, arg_name) {
+  if (is.null(references)) {
+    return(character())
+  }
+
+  observed_compositions <- unique(as.character(observed_compositions))
+  if (!is.character(references)) {
+    stop("Composition references must be a character vector.", call. = FALSE)
+  }
+
+  # initiate empty character vector of same length as references
+  reference_values <- character(length(references))
+  # try to split correctly!
+  for (i in seq_along(references)) {
+    reference <- trimws(references[[i]])
+
+    if (grepl(interdep_composition_sep, reference, fixed = TRUE)) {
+      roles <- strsplit(reference, interdep_composition_sep, fixed = TRUE)[[1]]
+    } else if (grepl("-", reference, fixed = TRUE)) {
+      roles <- strsplit(reference, "-", fixed = TRUE)[[1]]
+    } else if (grepl("_", reference, fixed = TRUE)) {
+      roles <- strsplit(reference, "_", fixed = TRUE)[[1]]
+    } else if (grepl("[[:space:]]", reference)) {
+      roles <- strsplit(reference, "[[:space:]]+")[[1]]
+    } else {
+      roles <- reference
+    }
+
+    # build cannonical string
+    reference_values[[i]] <- canonical_composition(trimws(roles))
+  }
+
+  reference_values <- unique(reference_values)
+
+  if (length(reference_values) == 0) {
+    return(character())
+  }
+
+  unknown_references <- setdiff(reference_values, observed_compositions)
+  if (length(unknown_references) > 0) {
+    stop(
+      "`", arg_name, "` contains unknown dyad composition(s): ",
+      paste(unknown_references, collapse = ", "),
+      ". Use observed compositions: ",
+      paste(observed_compositions, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+
+  reference_values
 }
 
 

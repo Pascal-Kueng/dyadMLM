@@ -904,6 +904,7 @@ mixed_ild_tweedie_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
+  set_compositions_exchangeable = 'male female',
   time = diaryday,
   predictors = provided_support,
   seed = 123
