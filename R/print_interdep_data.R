@@ -46,9 +46,9 @@ print.interdep_data <- function(x, ...) {
         label = label,
         fields = format_group_count(dropped, singular = "dyad", plural = "dyads"),
         exdent = 2L,
-        style = "negative"
+        label_style = "negative"
       )
-      cat(pillar::style_neg("#\n"))
+      cat("#\n")
     }
   }
 
@@ -177,21 +177,25 @@ print_added_columns <- function(added_columns) {
 }
 
 print_wrapped_comment_fields <- function(fields, label = NULL, sep = ", ", exdent = 2L,
-                                         style = c("plain", "subtle", "negative")) {
+                                         style = c("plain", "subtle", "negative"),
+                                         label_style = c("plain", "subtle", "negative")) {
   style <- rlang::arg_match(style)
+  label_style <- rlang::arg_match(label_style)
   wrap_width <- max(20L, getOption("width", 80L) - nchar("# ", type = "width"))
   continuation_prefix <- strrep(" ", exdent)
 
   lines <- character()
+  label_prefix <- NULL
   if (is.null(label)) {
     current <- fields[[1]]
   } else {
-    full_line <- paste0(label, ": ", paste(fields, collapse = sep))
+    label_prefix <- paste0(label, ":")
+    full_line <- paste(label_prefix, paste(fields, collapse = sep))
     if (nchar(full_line, type = "width") <= wrap_width) {
       lines <- full_line
       current <- NULL
     } else {
-      lines <- paste0(label, ":")
+      lines <- label_prefix
       current <- paste0(continuation_prefix, fields[[1]])
     }
   }
@@ -225,6 +229,20 @@ print_wrapped_comment_fields <- function(fields, label = NULL, sep = ", ", exden
     out <- pillar::style_subtle(out)
   } else if (style == "negative") {
     out <- pillar::style_neg(out)
+  } else if (!is.null(label_prefix) && label_style != "plain") {
+    styled_label <- label_prefix
+    if (label_style == "subtle") {
+      styled_label <- pillar::style_subtle(label_prefix)
+    } else if (label_style == "negative") {
+      styled_label <- pillar::style_neg(label_prefix)
+    }
+
+    out <- sub(
+      paste0("# ", label_prefix),
+      paste0("# ", styled_label),
+      out,
+      fixed = TRUE
+    )
   }
 
   cat(out, sep = "")

@@ -93,6 +93,28 @@ test_that("interdep data prints dropped incomplete dyads", {
   expect_true(any(grepl("with ID: 1", printed, fixed = TRUE)))
 })
 
+test_that("comment field label styling is limited to the label", {
+  old_options <- options(cli.num_colors = 256)
+  on.exit(options(old_options), add = TRUE)
+
+  printed <- capture.output(
+    print_wrapped_comment_fields(
+      label = "Dropped incomplete dyads",
+      fields = "1 dyad, with ID: 1",
+      label_style = "negative"
+    )
+  )
+
+  expect_equal(
+    printed,
+    paste0(
+      "# ",
+      pillar::style_neg("Dropped incomplete dyads:"),
+      " 1 dyad, with ID: 1"
+    )
+  )
+})
+
 test_that("interdep data print describes generated predictor columns", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),

@@ -146,7 +146,9 @@ library(glmmTMB)
 cross_distinguishable_model <- glmmTMB(
   satisfaction ~ 
     # remove standard intercept and model separate intercepts for male and female
-    0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
+    0 + 
+    .i_is_female_x_male_female + 
+    .i_is_female_x_male_male + 
     
     # gender-specific slopes for communication actor effect (no main effect)
     .i_is_female_x_male_female:.i_communication_raw_actor + 
@@ -159,7 +161,10 @@ cross_distinguishable_model <- glmmTMB(
     # residual covariance in glmmTMB can be modeled with random intercepts
     # when dispformula ~ 0. We model gender-specific residual variances and 
     # a correlation between the partners' residuals. 
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)
+    us(0 + 
+         .i_is_female_x_male_female + 
+         .i_is_female_x_male_male 
+       | coupleID)
   
   , dispformula = ~ 0 
   , family = gaussian()
@@ -175,9 +180,9 @@ See the vignette !TODO insert link to APIM vignette.
 
 ### Exchangeable Gaussian APIM
 
-We can treat all dyads as exchangeable by omitting the `role` argument.
-The prepared data contains a composition indicator and a sum-diff contrast for
-the assumed exchangeable dyads.
+We can treat **all dyads** as the same type of exchangeable dyads by simply 
+omitting the `role` argument. The prepared data contains a composition indicator 
+and a sum-diff contrast for the assumed exchangeable dyads.
 
 ```{r prepare-cross-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
@@ -190,7 +195,6 @@ cross_exchangeable_data <- prepare_interdep_data(
 )
 
 print(cross_exchangeable_data)
-summary(cross_exchangeable_data)
 ```
 
 
@@ -208,7 +212,8 @@ cross_exchangeable_diff_model <- glmmTMB(
     .i_communication_raw_partner +
     
     # exchangeable residual covariance via sum-diff
-    us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable | coupleID)
+    us(1 | coupleID) + 
+    us(0 + .i_diff_assumed_exchangeable | coupleID)
     
   , dispformula = ~ 0
   , family = gaussian()
@@ -265,7 +270,7 @@ dyad has repeated observations over `diaryday`, with one row per person-day.
 print(head(example_dyadic_ILD, n = 26), n = 26)
 ```
 
-For longitudinal data, pass the time variable as well.
+For longitudinal data, simply pass the `time` variable as well.
 
 ### Distinguishable ILD APIM
 
@@ -281,74 +286,35 @@ ild_distinguishable_data <- prepare_interdep_data(
 )
 
 print(ild_distinguishable_data)
-summary(ild_distinguishable_data)
+
 ```
 
 By default, numeric predictors in longitudinal APIM preparation are decomposed
 into within-person and between-person components. This temporal predictor
 decomposition can be controlled via the `temporal_predictor_decomposition`
-argument. Because `auto` resolves to `time_2l` when `time` and `predictors` are
-supplied, longitudinal predictors must be numeric unless
-`temporal_predictor_decomposition = "none"` is used with a model type that does
-not compute dyad means or within-dyad deviations.
+argument. Usually for ILD, the `time_2l` option is the correct one. 
 
-```{r fit-ild-distinguishable, eval = FALSE}
-
-ild_distinguishable_model <- glmmTMB(
-  closeness ~ 0 + 
-    
-    .i_is_female_x_male_female + .i_is_female_x_male_male + 
-    
-    # Gender specific time trends
-    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
-    
-    # Gender-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-
-    # Gender-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-    
-    # Gender-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-
-    # Gender-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-    
-    # random effects for stable non-independence (means)
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)  +
-
-    # Same-day residual covariance
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) 
-
-  , dispformula = ~ 0  
-  , family = gaussian()
-  , data = ild_distinguishable_data
-)
-
-summary(ild_distinguishable_model)
-
-```
-
-### Exchangeable ILD APIM
+Example of an exchangeable ILD APIM. Note that *instead of omitting the role variable here*, 
+we use a different method and set the dyad-type explicitly to exchangeable. 
 
 ```{r prepare-ild-exchangeable}
 ild_exchangeable_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
-  # role = gender,
+  role = gender,
+  set_exchangeable_compositions = c('male-female'), 
   time = diaryday,
   predictors = provided_support,
   seed = 123
 )
 
 print(ild_exchangeable_data)
-summary(ild_exchangeable_data)
 ```
+
+Note that whenever you need to refer to a dyad-type, the order of members does not matter
+(e.g., 'male-female' and 'female-male' will both work), and you can use different separators 
+like 'male_female', 'male_x_female' or even 'male female'. 
 
 ```{r fit-ild-exchangeable, eval = FALSE}
 
@@ -367,10 +333,10 @@ ild_exchangeable_model <- glmmTMB(
     .i_provided_support_cbp_partner +
 
     # random effects for stable non-independence (means)
-    us(1 | coupleID)  + us(0 + .i_diff_assumed_exchangeable | coupleID) +
+    us(1 | coupleID)  + us(0 + .i_diff_female_x_male | coupleID) +
 
     # Same-day residual covariance
-    us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
+    us(1 | coupleID:diaryday) + us(0 + .i_diff_female_x_male  | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -381,200 +347,23 @@ summary(ild_exchangeable_model)
 
 ```
 
-## Semi-continuous intensive longitudinal dyadic data
 
-`example_dyadic_ILD_tweedie` has the same intensive longitudinal dyadic
-structure as `example_dyadic_ILD`, but the outcome is semi-continuous.
-
-```{r ild-tweedie-raw}
-print(head(example_dyadic_ILD_tweedie, n = 26), n = 26)
-hist(example_dyadic_ILD_tweedie$physical_activity, breaks = 20)
-```
-
-### Distinguishable Tweedie ILD APIM
-
-```{r prepare-ild-tweedie-distinguishable}
-ild_tweedie_distinguishable_data <- prepare_interdep_data(
-  example_dyadic_ILD_tweedie,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  time = diaryday,
-  predictors = provided_support,
-  seed = 123
-)
-
-print(ild_tweedie_distinguishable_data)
-summary(ild_tweedie_distinguishable_data)
-```
-
-For Tweedie models, the random-effect blocks are latent effects on the log-mean
-scale. They can induce partner dependence, but they are not residual covariance
-structures in the same direct sense as in Gaussian models, because the Tweedie
-observation-level variance remains part of the model.
-
-The first model uses role-specific stable couple effects and a simple same-day
-shared latent shock. This is the easier teaching model: it keeps role-specific
-Tweedie dispersion, but the same-day latent shock can only induce positive
-partner dependence.
-
-```{r fit-ild-tweedie-distinguishable-shared-day, eval = FALSE}
-
-ild_tweedie_distinguishable_shared_day_model <- glmmTMB(
-  physical_activity ~ 0 +
-
-    .i_is_female_x_male_female + .i_is_female_x_male_male +
-
-    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
-
-    # Gender-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-
-    # Gender-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-
-    # Gender-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-
-    # Gender-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-
-    # random effects for stable non-independence (means)
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-
-    # same-day shared latent shock; positive dependence only
-    (1 | coupleID:diaryday)
-
-  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-  , family = tweedie()
-  , data = ild_tweedie_distinguishable_data
-)
-
-summary(ild_tweedie_distinguishable_shared_day_model)
-
-```
-
-The second model uses a role-specific same-day latent covariance block. This is
-closer to the Gaussian ILD covariance structure and can represent positive or
-negative same-day partner dependence. In this ILD example, the repeated paired
-occasions provide enough information to also estimate role-specific Tweedie
-dispersion.
-
-```{r fit-ild-tweedie-distinguishable-latent-day-cov, eval = FALSE}
-
-ild_tweedie_distinguishable_latent_day_cov_model <- glmmTMB(
-  physical_activity ~ 0 +
-
-    .i_is_female_x_male_female + .i_is_female_x_male_male +
-
-    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
-
-    # Gender-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-
-    # Gender-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-
-    # Gender-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-
-    # Gender-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-
-    # random effects for stable non-independence (means)
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-
-    # same-day role-specific latent covariance; positive or negative dependence
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday)
-
-  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-  # in case of non-convergence, a first simplification could be to remove the
-  # role-specific dispersion formula
-  , family = tweedie()
-  , data = ild_tweedie_distinguishable_data
-)
-
-summary(ild_tweedie_distinguishable_latent_day_cov_model)
-
-```
-
-The fuller same-day latent covariance structure is much more fragile in the
-cross-sectional case because each dyad contributes only one paired occasion. The
-same pair of observations must inform the fixed effects, Tweedie dispersion and
-power, and the dyadic dependence structure. In ILD data, each dyad contributes
-many paired occasions, so the stable couple-level block and the same-day
-occasion-level block are informed by repeated within-dyad patterns over time.
-
-### Exchangeable Tweedie ILD APIM
-
-```{r prepare-ild-tweedie-exchangeable}
-ild_tweedie_exchangeable_data <- prepare_interdep_data(
-  example_dyadic_ILD_tweedie,
-  group = coupleID,
-  member = personID,
-  time = diaryday,
-  predictors = provided_support,
-  seed = 123
-)
-
-print(ild_tweedie_exchangeable_data)
-summary(ild_tweedie_exchangeable_data)
-```
-
-This is the exchangeable analogue of the fuller Tweedie ILD model above. The
-sum-diff random-effect blocks provide stable and same-day exchangeable latent
-covariance structures. The Tweedie dispersion stays pooled because the
-sum-diff signs identify exchangeable positions, not substantive roles.
-
-```{r fit-ild-tweedie-exchangeable, eval = FALSE}
-
-ild_tweedie_exchangeable_model <- glmmTMB(
-  physical_activity ~
-    1 +
-
-    diaryday +
-
-    # Pooled within-person actor and partner effects
-    .i_provided_support_cwp_actor +
-    .i_provided_support_cwp_partner +
-
-    # Pooled between-person actor and partner effects
-    .i_provided_support_cbp_actor +
-    .i_provided_support_cbp_partner +
-
-    # stable exchangeable latent covariance
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID) +
-  
-    # same-day exchangeable latent covariance
-    (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
-
-  # pooled dispersion; exchangeable positions should not define dispersion differences
-  , dispformula = ~ 1
-  , family = tweedie()
-  , data = ild_tweedie_exchangeable_data
-)
-
-summary(ild_tweedie_exchangeable_model)
-
-```
-
-## Mixed-composition cross-sectional Gaussian model
+## Mixed-composition dyads
 
 `example_dyadic_crosssectional_mixed` contains three dyad compositions in the
 same data object: distinguishable female-male dyads and exchangeable
 female-female and male-male dyads.
 
+Here, we focus on the preparation steps that are possible with `interdep`. For example 
+models for multilevel models with multiple different types of distinguishable 
+and indistinguishable dyads and a discussion, check the vignette here: !TODO add link.
+
+
 ```{r mixed-cross-sectional-raw}
-print(head(example_dyadic_crosssectional_mixed))
+print(example_dyadic_crosssectional_mixed)
 ```
+
+Letting the `interdep` package just infer the compositions automatically: 
 
 ```{r prepare-mixed-cross-sectional}
 mixed_cross_data <- prepare_interdep_data(
@@ -586,341 +375,32 @@ mixed_cross_data <- prepare_interdep_data(
 )
 
 print(mixed_cross_data)
-summary(mixed_cross_data)
 ```
 
-The data were simulated with the following fixed effects and residual covariance
-parameters. For exchangeable dyads, `sum_variance` and `diff_variance` imply the
-partner correlation.
+We can use this data to model these dyad types as separate (see Vignette X). ! TODO
 
-```{r mixed-cross-sectional-targets, echo=FALSE}
-mixed_cross_targets <- data.frame(
-  block = c(
-    "female_x_male",
-    "female_x_male",
-    "female_x_male",
-    "female_x_female",
-    "female_x_female",
-    "female_x_female",
-    "male_x_male",
-    "male_x_male",
-    "male_x_male"
-  ),
-  parameter = c(
-    "female_mean",
-    "male_mean",
-    "correlation",
-    "mean",
-    "sum_variance",
-    "diff_variance",
-    "mean",
-    "sum_variance",
-    "diff_variance"
-  ),
-  value = c(
-    5.50,
-    4.50,
-    -0.30,
-    5.80,
-    0.675,
-    0.325,
-    4.20,
-    0.63375,
-    1.05625
-  )
-)
+However, sometimes for theoretical or practical reasons, we may want to pool 
+different exchangeable dyads and analyze them as if they were one. 
+This also allows to test various constraints via model comparisons. 
 
-mixed_cross_targets
-```
+For instance, let's pool `male-male` and `female-female` dyads
+and name them `same-sex` dyads: 
 
-```{r fit-mixed-cross-sectional-gaussian, eval = FALSE}
-
-mixed_cross_gaussian_model <- glmmTMB(
-  satisfaction ~ 0 +
-
-    .i_is_female_x_male_female + .i_is_female_x_male_male +
-    .i_is_female_x_female + .i_is_male_x_male +
-
-    # distinguishable female-male residual covariance
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-
-    # exchangeable female-female residual covariance via sum-diff
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female | coupleID) +
-
-    # exchangeable male-male residual covariance via sum-diff
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male | coupleID)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = mixed_cross_data
-)
-
-summary(mixed_cross_gaussian_model)
-
-```
-
-### Single versus separate mixed-composition fits
-
-The mixed-composition models in this vignette fit all dyad compositions in one
-model call. That is useful when the goal is to
-compare effects across compositions, test equality constraints, keep one
-model-based covariance matrix for those comparisons, or intentionally share
-parameters such as a common Tweedie power parameter.
-
-A fixed-effect formula with all compositions in one model call does not, by
-itself, create partial pooling across dyad compositions. The
-composition-specific intercepts and slopes above are ordinary fixed effects, so
-estimates for female-female or male-male dyads are not automatically shrunk
-toward estimates from the other dyad types. If every mean, variance, and
-covariance parameter is composition-specific, the likelihood largely factorizes
-by composition. In the cross-sectional Gaussian example, the single
-mixed-composition fit and three separate composition-specific fits give the same
-log-likelihood and fixed-effect estimates up to numerical tolerance.
-
-Partial pooling requires a different model specification, such as a common effect
-plus composition deviations with a hierarchical prior, or a random dyad-type
-effect. With only a few dyad types, frequentist random dyad-type variance
-components are usually weakly identified. Complete pooling, where a slope is
-constrained to be identical across compositions, can be more stable and more
-powerful when the constraint is substantively correct, but it is biased when the
-dyad compositions truly differ.
-
-## Mixed-composition intensive longitudinal Gaussian model
-
-`example_dyadic_ILD_mixed` contains the same three dyad compositions as the
-mixed-composition cross-sectional example, but each dyad contributes repeated paired
-observations over `diaryday`.
-
-```{r mixed-ild-raw}
-print(head(example_dyadic_ILD_mixed, n = 26), n = 26)
-```
-
-```{r prepare-mixed-ild}
-mixed_ild_data <- prepare_interdep_data(
-  example_dyadic_ILD_mixed,
+```{r prepare-mixed-cross-sectional}
+mixed_cross_data_pooled <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
   role = gender,
-  time = diaryday,
-  predictors = provided_support,
+  pool_compositions = list(
+    'same-sex' = c('male-male', 'female-female')
+  ),
   seed = 123
 )
 
-print(mixed_ild_data)
-summary(mixed_ild_data)
+print(mixed_cross_data)
 ```
 
-This first mixed-composition ILD model includes composition-specific intercepts, fixed
-time slopes, and within-person and between-person actor and partner effects.
-Random time slopes are omitted; with separate stable and same-day dyadic
-covariance blocks, random time slopes add many weakly identified parameters and
-are a likely first source of convergence problems.
+Note that you way use 'male-male', 'male_male', 'male_x_male' (what the package uses), or 'male male'. 
 
-This maximal covariance model is a demanding all-in-one likelihood. In this
-simulated example, separate composition-specific fits recover the same
-fixed-effect solution cleanly, while the all-in-one mixed-composition fit can
-report false convergence even when it reaches the same likelihood and has a
-positive definite Hessian.
-Treat convergence diagnostics, Hessian diagnostics, and comparison with simpler
-or separate fits as part of the workflow. If the all-in-one fit is not clean, fit
-the composition-specific models separately for estimation, or simplify the
-same-day and stable covariance blocks before adding more random effects.
 
-```{r fit-mixed-ild-gaussian, eval = FALSE}
-
-mixed_ild_gaussian_model <- glmmTMB(
-  closeness ~ 0 +
-
-    # Composition-specific intercepts
-    .i_is_female_x_male_female + .i_is_female_x_male_male +
-    
-    .i_is_female_x_female + 
-    .i_is_male_x_male +
-
-    # Composition-specific time trends
-    .i_is_female_x_male_female:diaryday +
-    .i_is_female_x_male_male:diaryday +
-    
-    .i_is_female_x_female:diaryday +
-    
-    .i_is_male_x_male:diaryday +
-
-    # Composition-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-    
-    .i_is_female_x_female:.i_provided_support_cwp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_actor +
-
-    # Composition-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-    
-    .i_is_female_x_female:.i_provided_support_cwp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_partner +
-
-    # Composition-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-    
-    .i_is_female_x_female:.i_provided_support_cbp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_actor +
-
-    # Composition-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-    
-    .i_is_female_x_female:.i_provided_support_cbp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_partner +
-
-    # stable dyad-level covariance
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-    
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female | coupleID) +
-    
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male | coupleID) +
-
-    # same-day covariance
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
-    
-    (0 + .i_is_female_x_female | coupleID:diaryday) +
-    (0 + .i_diff_female_x_female | coupleID:diaryday) +
-    
-    (0 + .i_is_male_x_male | coupleID:diaryday) +
-    (0 + .i_diff_male_x_male | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = mixed_ild_data
-)
-
-summary(mixed_ild_gaussian_model)
-
-```
-
-## Mixed-composition intensive longitudinal Tweedie model
-
-`example_dyadic_ILD_mixed_tweedie` has the same mixed-composition intensive
-longitudinal dyadic structure, but the outcome is semi-continuous.
-
-```{r mixed-ild-tweedie-raw}
-print(head(example_dyadic_ILD_mixed_tweedie, n = 26), n = 26)
-hist(example_dyadic_ILD_mixed_tweedie$physical_activity, breaks = 20)
-```
-
-```{r prepare-mixed-ild-tweedie}
-mixed_ild_tweedie_data <- prepare_interdep_data(
-  example_dyadic_ILD_mixed_tweedie,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  time = diaryday,
-  predictors = provided_support,
-  seed = 123
-)
-
-print(mixed_ild_tweedie_data)
-summary(mixed_ild_tweedie_data)
-```
-
-As in the Gaussian mixed-composition ILD model, the mean model contains
-composition-specific intercepts, fixed time slopes, and within-person and
-between-person actor and partner effects. The dyadic random-effect blocks are
-latent effects on the log-mean scale, not residual covariance parameters in the
-Gaussian sense. This is the most fragile example in the vignette because it
-combines composition-specific mean effects, composition-specific latent dyadic
-dependence, composition-specific dispersion, and a common Tweedie power
-parameter. A practical workflow is to fit separate Gaussian or simpler Tweedie
-models first, then add shared-parameter constraints only when they answer a
-specific comparison question.
-
-```{r fit-mixed-ild-tweedie, eval = FALSE}
-
-mixed_ild_tweedie_model <- glmmTMB(
-  physical_activity ~ 0 +
-
-    # Intercepts for each composition_role
-    .i_is_female_x_male_female + 
-    .i_is_female_x_male_male +
-    
-    .i_is_female_x_female + 
-    
-    .i_is_male_x_male +
-
-    # C-specific specific time trends
-    .i_is_female_x_male_female:diaryday + 
-    .i_is_female_x_male_male:diaryday +
-    
-    .i_is_female_x_female:diaryday +
-    
-    .i_is_male_x_male:diaryday +
-
-    # Composition-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-    
-    .i_is_female_x_female:.i_provided_support_cwp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_actor +
-
-    # Composition-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-    
-    .i_is_female_x_female:.i_provided_support_cwp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_partner +
-
-    # Composition-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-    
-    .i_is_female_x_female:.i_provided_support_cbp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_actor +
-
-    # Composition-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-    
-    .i_is_female_x_female:.i_provided_support_cbp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_partner +
-
-    # stable dyad-level latent covariance
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-    
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female | coupleID) +
-    
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male | coupleID) +
-
-    # same-day latent covariance
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
-    
-    (0 + .i_is_female_x_female | coupleID:diaryday) +
-    (0 + .i_diff_female_x_female | coupleID:diaryday) +
-    
-    (0 + .i_is_male_x_male | coupleID:diaryday) +
-    (0 + .i_diff_male_x_male | coupleID:diaryday)
-
-    # recommended first simplification in convergence issues is to set dispfomula = ~ 1
-  , dispformula = ~ 0 +
-      .i_is_female_x_male_female + .i_is_female_x_male_male +
-      .i_is_female_x_female + .i_is_male_x_male
-  , family = tweedie()
-  , data = mixed_ild_tweedie_data
-)
-
-summary(mixed_ild_tweedie_model)
-
-```
