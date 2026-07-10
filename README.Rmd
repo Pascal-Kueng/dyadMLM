@@ -102,35 +102,6 @@ simple_apim <- glmmTMB::glmmTMB(
 ```
 
 
-## Brief ILD example
-
-For intensive longitudinal data, provide a `time` variable. Predictor columns
-are decomposed into within-person and between-person components before APIM
-actor and partner columns are created.
-
-```{r intensive-longitudinal-prep, eval = TRUE}
-ild_data <- prepare_interdep_data(
-  example_dyadic_ILD_unified_tweedie,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  time = diaryday,
-  predictors = c(provided_support, physical_activity),
-  model_type = "apim"
-)
-
-print(ild_data)
-```
-
-This example dataset contains mixed dyad compositions: female-male dyads are
-distinguishable, while female-female and male-male dyads are exchangeable.
-`interdep` creates composition-specific indicators and `.i_diff_*` columns so
-these dyad types can be modeled together. The APIM vignette covers these mixed
-composition models in more detail.
-
-For DIM and undirected DSM preparation, see the dedicated vignettes listed
-above.
-
 ## Citation
 
 If you use `interdep`, please cite the package directly:
