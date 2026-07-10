@@ -128,8 +128,8 @@ infer_dyad_compositions <- function(data, seed = NULL, set_compositions_exchange
       dyad_type = dplyr::first(.data[[interdep_dyad_type_col]]), # always identical per composition, so use first.
       dyad_type_source = ifelse(
         # Check whether all are either inferred or set by user, otherwise use mixed
-        dplyr::first(.data[[interdep_dyad_type_source_col]]),
         dplyr::n_distinct(.data[[interdep_dyad_type_source_col]]) == 1L,
+        dplyr::first(.data[[interdep_dyad_type_source_col]]),
         "mixed"
       ),
       pooled_from = {
