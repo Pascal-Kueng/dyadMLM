@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/Pascal-Kueng/interdep/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pascal-Kueng/interdep/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `interdep` helps researchers prepare cross-sectional and intensive
