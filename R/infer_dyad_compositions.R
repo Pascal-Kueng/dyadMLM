@@ -112,7 +112,7 @@ infer_dyad_compositions <- function(data, seed = NULL, set_compositions_exchange
     set_compositions_exchangeable = set_compositions_exchangeable
   )
 
-  # Apply any user-requested role-pooling
+  # Apply any user-requested composition pooling
   dyad_roles <- apply_composition_pooling(
     dyad_roles = dyad_roles,
     composition_pooling = composition_pooling
@@ -210,7 +210,7 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_composition
 
   already_exchangeable_rows <- dyad_roles |>
     dplyr::filter(
-      # filter those that are mentioned to be restricted to be exchangeable
+      # filter those that are requested to be set exchangeable
       .data[[interdep_composition_col]] %in% set_compositions_exchangeable_resolved,
       # and those that are already inferred to as exchangeable
       .data[[interdep_dyad_type_col]] == "exchangeable"
@@ -284,11 +284,11 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
   observed_compositions <- dyad_roles[[interdep_composition_col]]
   already_pooled_compositions <- character()
 
-  for (i in seq_along(composition_pooling)) { # for each composition to pool
+  for (i in seq_along(composition_pooling)) { # for each requested pool
     pool_name <- pool_names[[i]]
     references_to_pool <- composition_pooling[[i]]
 
-    if (!is.character(references) || length(references) == 0) {
+    if (!is.character(references_to_pool) || length(references_to_pool) == 0) {
       stop(
         "Each `composition_pooling` element must be a non-empty character vector of dyad compositions, ",
         "for example `c(\"female-female\", \"male-male\")`.",
@@ -296,15 +296,15 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       )
     }
 
-    resolved_cannonical_references_to_pool <- resolve_composition_references(
+    resolved_compositions_to_pool <- resolve_composition_references(
       references = references_to_pool,
       observed_compositions = observed_compositions,
       arg_name = "composition_pooling"
     )
 
-    # When looping through, pooled we check if we already saw tha same
-    # resolved_cannonical_reference_to_pool ealier, now stored in pooled composition
-    duplicated_compositions <- intersect(resolved_cannonical_references_to_pool, already_pooled_compositions)
+    # While still looping, check whether any composition has already been
+    # assigned to a previous pool. To avoid duplications
+    duplicated_compositions <- intersect(resolved_compositions_to_pool, already_pooled_compositions)
     if (length(duplicated_compositions) > 0) {
       stop(
         "`composition_pooling` cannot assign the same composition to more than one pool. ",
@@ -315,7 +315,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       )
     }
 
-    pool_name_collision <- pool_name %in% setdiff(observed_compositions, resolved_cannonical_references_to_pool)
+    pool_name_collision <- pool_name %in% setdiff(observed_compositions, resolved_compositions_to_pool)
     if (pool_name_collision) {
       stop(
         "`composition_pooling` names must not match observed compositions that are not part of that pool. ",
@@ -329,7 +329,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     # check if user tries to pool distinguishable dyads
     non_exchangeable_rows <- dyad_roles |>
       dplyr::filter(
-        .data[[interdep_composition_col]] %in% resolved_cannonical_references_to_pool,
+        .data[[interdep_composition_col]] %in% resolved_compositions_to_pool,
         .data[[interdep_dyad_type_col]] != "exchangeable"
       )
 
@@ -350,13 +350,15 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
 
     # Actual pooling
     ## subsetting all rows **within the current pooling step**.
-    is_pooled <- dyad_roles[[interdep_composition_col]] %in% resolved_cannonical_references_to_pool
+    is_pooled <- dyad_roles[[interdep_composition_col]] %in% resolved_compositions_to_pool
 
-    #
+    # Before overwriting .i_composition, copy the old composition into .i_pool_member.
     dyad_roles[[interdep_pool_member_col]][is_pooled] <- dyad_roles[[interdep_composition_col]][is_pooled]
+
+    # Now replace the current composition with the pool name.
     dyad_roles[[interdep_composition_col]][is_pooled] <- pool_name
 
-    already_pooled_compositions <- c(already_pooled_compositions, resolved_cannonical_references_to_pool)
+    already_pooled_compositions <- c(already_pooled_compositions, resolved_compositions_to_pool)
   }
 
   dyad_roles
