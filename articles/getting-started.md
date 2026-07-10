@@ -20,8 +20,8 @@ especially models with multiple dyad types, intensive longitudinal data,
 and generalized outcomes. For the Dyad-Individual Model (DIM)
 parameterization, including dyad-mean and within-dyad-deviation
 predictors and their equivalence to APIM effects in exchangeable dyads,
-see
-[`vignette("Dyad-Individual-Model")`](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.md).
+see the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.md).
 
 The basic data structure is a long data frame where dyads are stacked on
 top of each other and both members of a dyad appear as separate rows.

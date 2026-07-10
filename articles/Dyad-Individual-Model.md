@@ -10,8 +10,9 @@ This vignette focuses on Dyad-Individual Model (DIM) predictor
 construction and its relationship to APIM parameterizations. For broader
 guidance on fitting dyadic models with `interdep`-prepared data,
 especially APIMs with multiple dyad types, generalized outcomes,
-intensive longitudinal models, and optimizer choices, see
-[`vignette("getting-started")`](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
+intensive longitudinal models, and optimizer choices, see the [Getting
+Started
+vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
 
 ## Cross-Sectional Gaussian DIM
 
