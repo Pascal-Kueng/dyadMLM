@@ -250,6 +250,8 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_composition
 }
 
 
+
+
 apply_composition_pooling <- function(dyad_roles, composition_pooling) {
   if (is.null(composition_pooling) || length(composition_pooling) == 0) {
     return(dyad_roles)
@@ -279,8 +281,8 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     )
   }
 
-  resolved_compositions <- character()
-  composition_pool_map <- character()
+  observed_compositions <- dyad_roles[[interdep_composition_col]]
+  pooled_compositions <- character()
 
   for (i in seq_along(composition_pooling)) {
     pool_name <- pool_names[[i]]
@@ -296,64 +298,59 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
 
     resolved <- resolve_composition_references(
       references = references,
-      observed_compositions = dyad_roles[[interdep_composition_col]],
+      observed_compositions = observed_compositions,
       arg_name = "composition_pooling"
     )
 
-    resolved_compositions <- c(resolved_compositions, resolved)
-    composition_pool_map[resolved] <- pool_name
+    duplicated_compositions <- intersect(resolved, pooled_compositions)
+    if (length(duplicated_compositions) > 0) {
+      stop(
+        "`composition_pooling` cannot assign the same composition to more than one pool. ",
+        "Repeated composition(s): ",
+        paste(sort(duplicated_compositions), collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+
+    pool_name_collision <- pool_name %in% setdiff(observed_compositions, resolved)
+    if (pool_name_collision) {
+      stop(
+        "`composition_pooling` names must not match observed compositions that are not part of that pool. ",
+        "Conflicting name(s): ",
+        pool_name,
+        ". Choose a different pool name, or include the matching observed composition in that pool.",
+        call. = FALSE
+      )
+    }
+
+    non_exchangeable_rows <- dyad_roles |>
+      dplyr::filter(
+        .data[[interdep_composition_col]] %in% resolved,
+        .data[[interdep_dyad_type_col]] != "exchangeable"
+      )
+
+    if (nrow(non_exchangeable_rows) > 0) {
+      non_exchangeable_compositions <- non_exchangeable_rows |>
+        dplyr::pull(.data[[interdep_composition_col]]) |>
+        unique()
+
+      stop(
+        "`composition_pooling` can only pool exchangeable compositions. ",
+        "Set distinguishable compositions exchangeable first with `set_compositions_exchangeable`. ",
+        "Non-exchangeable composition(s): ",
+        paste(sort(non_exchangeable_compositions), collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+
+    is_pooled <- dyad_roles[[interdep_composition_col]] %in% resolved
+    dyad_roles[[interdep_pool_member_col]][is_pooled] <- dyad_roles[[interdep_composition_col]][is_pooled]
+    dyad_roles[[interdep_composition_col]][is_pooled] <- pool_name
+
+    pooled_compositions <- c(pooled_compositions, resolved)
   }
-
-  duplicated_compositions <- unique(resolved_compositions[duplicated(resolved_compositions)])
-  if (length(duplicated_compositions) > 0) {
-    stop(
-      "`composition_pooling` cannot assign the same composition to more than one pool. ",
-      "Repeated composition(s): ",
-      paste(sort(duplicated_compositions), collapse = ", "),
-      ".",
-      call. = FALSE
-    )
-  }
-
-  pooled_compositions <- names(composition_pool_map)
-  unpooled_compositions <- setdiff(dyad_roles[[interdep_composition_col]], pooled_compositions)
-  pool_name_collisions <- intersect(pool_names, unpooled_compositions)
-  if (length(pool_name_collisions) > 0) {
-    stop(
-      "`composition_pooling` names must not match observed compositions that are not part of that pool. ",
-      "Conflicting name(s): ",
-      paste(sort(pool_name_collisions), collapse = ", "),
-      ". Choose a different pool name, or include the matching observed composition in that pool.",
-      call. = FALSE
-    )
-  }
-
-  non_exchangeable_rows <- dyad_roles |>
-    dplyr::filter(
-      .data[[interdep_composition_col]] %in% pooled_compositions,
-      .data[[interdep_dyad_type_col]] != "exchangeable"
-    )
-
-  if (nrow(non_exchangeable_rows) > 0) {
-    non_exchangeable_compositions <- non_exchangeable_rows |>
-      dplyr::pull(.data[[interdep_composition_col]]) |>
-      unique()
-
-    stop(
-      "`composition_pooling` can only pool exchangeable compositions. ",
-      "Set distinguishable compositions exchangeable first with `set_compositions_exchangeable`. ",
-      "Non-exchangeable composition(s): ",
-      paste(sort(non_exchangeable_compositions), collapse = ", "),
-      ".",
-      call. = FALSE
-    )
-  }
-
-  composition <- dyad_roles[[interdep_composition_col]]
-  is_pooled <- composition %in% pooled_compositions
-
-  dyad_roles[[interdep_pool_member_col]][is_pooled] <- composition[is_pooled]
-  dyad_roles[[interdep_composition_col]][is_pooled] <- unname(composition_pool_map[composition[is_pooled]])
 
   dyad_roles
 }
