@@ -48,7 +48,7 @@ add_dyad_individual_columns <- function(data) {
     source_column = character(),
     mean_column = character(),
     deviation_column = character(),
-    decomposition_level = character()
+    dyad_decomposition_level = character()
   )
 
   if (nrow(temporal_predictor_decompositions) == 0) {
@@ -86,10 +86,10 @@ add_dyad_individual_columns <- function(data) {
     }
     deviation_col <- paste0(column_stem, "_within_dyad_deviation")
 
-    # Record the level at which this component is decomposed.
-    decomposition_level <- "dyad"
+    # Record the dyadic unit at which this component is decomposed.
+    dyad_decomposition_level <- "dyad"
     if (component == "cwp") {
-      decomposition_level <- "dyad_time"
+      dyad_decomposition_level <- "dyad_time"
     }
 
     # update table with metadata of the current looping component.
@@ -100,7 +100,7 @@ add_dyad_individual_columns <- function(data) {
       source_column = source_col,
       mean_column = mean_col,
       deviation_column = deviation_col,
-      decomposition_level = decomposition_level
+      dyad_decomposition_level = dyad_decomposition_level
     )
 
     # only within-person components need special handling

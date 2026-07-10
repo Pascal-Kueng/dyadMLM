@@ -45,7 +45,7 @@ add_undirected_dyadic_score_columns <- function(data) {
     source_column = character(),
     mean_column = character(),
     deviation_column = character(),
-    decomposition_level = character()
+    dyad_decomposition_level = character()
   )
 
   for (outcome in outcomes) {
@@ -54,9 +54,9 @@ add_undirected_dyadic_score_columns <- function(data) {
     column_stem <- paste0(interdep_reserved_prefix, outcome_suffix, "_raw")
     mean_col <- paste0(column_stem, "_dyad_mean")
     deviation_col <- paste0(column_stem, "_within_dyad_deviation")
-    decomposition_level <- "dyad"
+    dyad_decomposition_level <- "dyad"
     if (has_time) {
-      decomposition_level <- "dyad_time"
+      dyad_decomposition_level <- "dyad_time"
     }
 
     # update tibble
@@ -66,7 +66,7 @@ add_undirected_dyadic_score_columns <- function(data) {
       source_column = source_col,
       mean_column = mean_col,
       deviation_column = deviation_col,
-      decomposition_level = decomposition_level
+      dyad_decomposition_level = dyad_decomposition_level
     )
 
     if (has_time) {

@@ -31,7 +31,6 @@ empty_generated_columns <- function() {
     column_role = character(),
     column = character(),
     source_column = character(),
-    decomposition_level = character(),
     temporal_decomposition = character(),
     dyadic_decomposition = character(),
     column_centering = character(),
@@ -64,8 +63,7 @@ temporal_predictor_generated_columns <- function(temporal_predictor_decompositio
     component = temporal_predictor_decompositions$component,
     column_role = "temporal_component",
     column = temporal_predictor_decompositions$column,
-    source_column = temporal_predictor_decompositions$predictor,
-    decomposition_level = temporal_predictor_decompositions$temporal_predictor_decomposition
+    source_column = temporal_predictor_decompositions$predictor
   )
 
   attach_generated_column_specs(columns)
@@ -84,8 +82,7 @@ apim_generated_columns <- function(apim_predictors) {
       component = apim_predictors$component,
       column_role = "actor",
       column = apim_predictors$actor_column,
-      source_column = apim_predictors$source_column,
-      decomposition_level = "none"
+      source_column = apim_predictors$source_column
     ),
     tibble::tibble(
       model_family = "apim",
@@ -94,8 +91,7 @@ apim_generated_columns <- function(apim_predictors) {
       component = apim_predictors$component,
       column_role = "partner",
       column = apim_predictors$partner_column,
-      source_column = apim_predictors$source_column,
-      decomposition_level = "none"
+      source_column = apim_predictors$source_column
     )
   )
 
@@ -115,8 +111,7 @@ dim_generated_columns <- function(dim_predictors) {
       component = dim_predictors$component,
       column_role = "dyad_mean",
       column = dim_predictors$mean_column,
-      source_column = dim_predictors$source_column,
-      decomposition_level = dim_predictors$decomposition_level
+      source_column = dim_predictors$source_column
     ),
     tibble::tibble(
       model_family = "dim",
@@ -125,8 +120,7 @@ dim_generated_columns <- function(dim_predictors) {
       component = dim_predictors$component,
       column_role = "within_dyad_deviation",
       column = dim_predictors$deviation_column,
-      source_column = dim_predictors$source_column,
-      decomposition_level = dim_predictors$decomposition_level
+      source_column = dim_predictors$source_column
     )
   )
 
@@ -146,8 +140,7 @@ undirected_dsm_generated_columns <- function(undirected_dsm_outcomes) {
       component = "raw",
       column_role = "dyad_mean",
       column = undirected_dsm_outcomes$mean_column,
-      source_column = undirected_dsm_outcomes$source_column,
-      decomposition_level = undirected_dsm_outcomes$decomposition_level
+      source_column = undirected_dsm_outcomes$source_column
     ),
     tibble::tibble(
       model_family = "undirected_dsm",
@@ -156,8 +149,7 @@ undirected_dsm_generated_columns <- function(undirected_dsm_outcomes) {
       component = "raw",
       column_role = "within_dyad_deviation",
       column = undirected_dsm_outcomes$deviation_column,
-      source_column = undirected_dsm_outcomes$source_column,
-      decomposition_level = undirected_dsm_outcomes$decomposition_level
+      source_column = undirected_dsm_outcomes$source_column
     )
   )
 

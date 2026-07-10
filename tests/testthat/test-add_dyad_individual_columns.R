@@ -30,7 +30,7 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
       source_column = c(".i_x_cwp", ".i_x_cbp"),
       mean_column = c(".i_x_cwp_dyad_mean", ".i_x_cbp_dyad_mean"),
       deviation_column = c(".i_x_cwp_within_dyad_deviation", ".i_x_cbp_within_dyad_deviation"),
-      decomposition_level = c("dyad_time", "dyad")
+      dyad_decomposition_level = c("dyad_time", "dyad")
     )
   )
 })
@@ -89,7 +89,7 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
       source_column = "x",
       mean_column = ".i_x_raw_dyad_mean_gmc",
       deviation_column = ".i_x_raw_within_dyad_deviation",
-      decomposition_level = "dyad"
+      dyad_decomposition_level = "dyad"
     )
   )
 })

@@ -233,7 +233,7 @@ Complete these before calling the feature set CRAN-ready:
 - Finalize DIM metadata
   - treat the current `dim_predictors` table columns as stable for v0.1:
     `predictor`, `component`, `source_column`, `mean_column`,
-    `deviation_column`, `decomposition_level`
+    `deviation_column`, `dyad_decomposition_level`
   - keep downstream print/vignette code reading metadata rather than guessing
     column names where possible
 - Finalize generated-column metadata
@@ -244,10 +244,9 @@ Complete these before calling the feature set CRAN-ready:
     consider a public wrapper later only if users need programmatic inspection
   - preserve explicit fields for `temporal_decomposition`,
     `dyadic_decomposition`, and `column_centering`
-  - before release, make `decomposition_level` mean the computational unit
-    consistently; prefer moving temporal rows away from
-    `decomposition_level = "time_2l"` because `time_2l` is a method, not a
-    unit
+  - keep source-metadata fields such as `dim_predictors$dyad_decomposition_level`
+    out of the normalized generated-column interpretation table unless they
+    answer a user-facing interpretation question
 - Keep `print.interdep_data()` descriptions for DIM column families explicit
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually

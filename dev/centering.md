@@ -170,8 +170,8 @@ The metadata table is:
 attr(data, "interdep")$dim_predictors
 ```
 
-with `decomposition_level` recording whether the component was decomposed within
-dyad-time or within dyad.
+with `dyad_decomposition_level` recording whether the component was decomposed
+within dyad-time or within dyad.
 
 ## Dyadic-Score Model Preparation
 
@@ -246,10 +246,10 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
 - Keep `interdep_generated_columns()` internal for v0.1. It is the normalized
   table used by `print.interdep_data()` and documentation-facing summaries, not
   a public inspection API.
-- Make `decomposition_level` in normalized generated-column metadata mean the
-  computational unit consistently. `dyad` and `dyad_time` already have this
-  meaning for DIM/DSM rows; temporal rows should not use `time_2l` there because
-  that records the decomposition method rather than the unit.
+- Keep normalized generated-column interpretation focused on
+  `temporal_decomposition`, `dyadic_decomposition`, and `column_centering`.
+  Source metadata can still record implementation details such as whether a DIM
+  or DSM component was computed within dyad or dyad-time.
 - Keep `getting-started.Rmd` focused on data preparation and move fitted-model
   examples into model-specific vignettes.
 - Keep APIM and temporal predictor decomposition model examples in APIM-focused

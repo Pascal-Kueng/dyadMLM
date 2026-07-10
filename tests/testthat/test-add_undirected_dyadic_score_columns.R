@@ -29,7 +29,7 @@ test_that("undirected DSM creates raw cross-sectional outcome columns", {
       source_column = "y",
       mean_column = ".i_y_raw_dyad_mean",
       deviation_column = ".i_y_raw_within_dyad_deviation",
-      decomposition_level = "dyad"
+      dyad_decomposition_level = "dyad"
     )
   )
 })
@@ -86,7 +86,7 @@ test_that("undirected DSM creates raw longitudinal outcome columns by dyad-time"
       source_column = "y",
       mean_column = ".i_y_raw_dyad_mean",
       deviation_column = ".i_y_raw_within_dyad_deviation",
-      decomposition_level = "dyad_time"
+      dyad_decomposition_level = "dyad_time"
     )
   )
 })

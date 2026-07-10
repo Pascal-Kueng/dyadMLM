@@ -221,7 +221,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
     source_column = character(),
     mean_column = character(),
     deviation_column = character(),
-    decomposition_level = character()
+    dyad_decomposition_level = character()
   )
 
   i <- 1L
@@ -233,7 +233,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   column_stem <- source_col
   mean_col <- paste0(column_stem, "_dyad_mean")
   deviation_col <- paste0(column_stem, "_within_dyad_deviation")
-  decomposition_level <- if (component == "cwp") "dyad_time" else "dyad"
+  dyad_decomposition_level <- if (component == "cwp") "dyad_time" else "dyad"
 
   assign_debug_vars(
     data = data,
@@ -253,7 +253,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
     column_stem = column_stem,
     mean_col = mean_col,
     deviation_col = deviation_col,
-    decomposition_level = decomposition_level
+    dyad_decomposition_level = dyad_decomposition_level
   )
 
   invisible(data)
@@ -300,7 +300,7 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
   column_stem <- paste0(interdep_reserved_prefix, outcome_suffix, "_raw")
   mean_col <- paste0(column_stem, "_dyad_mean")
   deviation_col <- paste0(column_stem, "_within_dyad_deviation")
-  decomposition_level <- if (has_time) "dyad_time" else "dyad"
+  dyad_decomposition_level <- if (has_time) "dyad_time" else "dyad"
 
   assign_debug_vars(
     raw_data = raw_data,
@@ -319,7 +319,7 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
     column_stem = column_stem,
     mean_col = mean_col,
     deviation_col = deviation_col,
-    decomposition_level = decomposition_level
+    dyad_decomposition_level = dyad_decomposition_level
   )
 
   invisible(data)
