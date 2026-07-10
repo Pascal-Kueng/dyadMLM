@@ -1,18 +1,17 @@
 Package: interdep
-Title: Tools for Cross-Sectional and Intensive Longitudinal Dyadic Data
+Title: Prepare Dyadic Data for Multilevel Models
 Version: 0.0.0.9000
 Authors@R: 
     person("Pascal", "Küng", , "kueng.pascal@gmail.com", role = c("aut", "cre"))
 Description: Helps researchers prepare cross-sectional and intensive
-    longitudinal dyadic data for statistical models. The package supports common
-    dyadic designs with one kind of dyad, while also handling studies that
-    combine different kinds of dyads, such as female-male, female-female, and
-    male-male couples. It validates long-format dyadic data and creates the
-    role, composition, and temporal predictor decomposition variables needed for
-    multilevel models, including generalized multilevel models. Prepared data
-    can be used to estimate dyadic models, including generalized intensive
-    longitudinal actor-partner interdependence models with multiple dyad types
-    in a single model.
+    longitudinal dyadic data for multilevel models, including generalized
+    multilevel models. The package supports common dyadic designs with one kind
+    of dyad, while also handling studies that combine different kinds of dyads,
+    such as female-male, female-female, and male-male couples. It validates
+    long-format dyadic data and creates the role, composition, temporal
+    predictor decomposition, and model-ready columns needed for dyadic
+    multilevel model parameterizations such as APIM, DIM, and undirected DSM.
+    Prepared data can be used with multilevel model engines such as 'glmmTMB'.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

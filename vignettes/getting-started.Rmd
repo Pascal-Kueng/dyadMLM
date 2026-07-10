@@ -2,7 +2,7 @@
 title: "Getting Started"
 description: >
   Core workflow for validating dyadic data, identifying dyad compositions, and
-  preparing APIM-ready columns.
+  preparing model-ready columns for dyadic multilevel models.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Getting Started}
@@ -23,16 +23,18 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 `interdep` helps researchers prepare cross-sectional and intensive longitudinal
-dyadic data for statistical models. It supports common dyadic studies with one
-kind of dyad, and it also handles studies where different kinds of dyads appear
-in the same dataset, such as female-male, female-female, and male-male couples.
-Mixed dyad types are supported for composition-aware APIM-style
-preparation; current DIM and undirected DSM helpers require one exchangeable
-dyad composition.
+dyadic data for multilevel models, including generalized multilevel models. It
+supports common dyadic studies with one kind of dyad, and it also handles
+studies where different kinds of dyads appear in the same dataset, such as
+female-male, female-female, and male-male couples. It creates
+composition-aware, model-ready columns for dyadic multilevel model
+parameterizations such as APIM, DIM, and undirected DSM. Current DIM and
+undirected DSM helpers require one exchangeable dyad composition.
 
-This vignette focuses mainly on APIM-style actor and partner effects, especially
-models with multiple dyad types, intensive longitudinal data, and generalized
-outcomes. For the Dyad-Individual Model (DIM) parameterization, including
+This vignette focuses mainly on APIM-style actor and partner effects in
+multilevel model formulas, especially models with multiple dyad types,
+intensive longitudinal data, and generalized outcomes. For the Dyad-Individual
+Model (DIM) parameterization, including
 dyad-mean and within-dyad-deviation predictors and their equivalence to APIM
 effects in exchangeable dyads, see the
 [Dyad-Individual Model vignette](Dyad-Individual-Model.html).
@@ -87,9 +89,9 @@ the observed measurement occasions and skips from time 1 to time 3 for that
 person, which is fine. 
 
 
-`prepare_interdep_data()` validates the expected structure,
-returns a tibble with class `interdep_data`, derives and adds dyad-composition 
-labels that are needed for modeling. 
+`prepare_interdep_data()` validates the expected structure, returns a tibble
+with class `interdep_data`, and adds the dyad-composition labels and
+model-ready columns needed for dyadic multilevel model formulas.
 
 Omit `role` only when all partners should be treated as exchangeable.
 

@@ -42,11 +42,19 @@ Recently completed cleanup:
 - added `set_exchangeable_compositions` as the first analysis-composition
   control, so observed distinguishable compositions can be treated as
   exchangeable for generated columns and downstream DIM/DSM compatibility
+- added `pool_compositions`, so exchangeable analysis compositions can be
+  pooled under a user-provided final composition label without external
+  preprocessing
+- reviewed the DIM and undirected DSM preparation paths for the current v0.1
+  scope
+- accepted the current composition metadata shape for v0.1: returned data use
+  final analysis compositions, while pooling metadata records the pooled source
+  compositions in a compact `pooled_from` summary
 
-Immediate next steps: implement `pool_compositions`, then cleanly split and
-polish the vignettes. The getting-started vignette should become shorter and
-more introductory; heavier APIM, ILD APIM, and DSM material should move into
-model-specific vignettes as those pages are created.
+Immediate next step: cleanly split and polish the vignettes. The
+getting-started vignette should become shorter and more introductory; heavier
+APIM, ILD APIM, and DSM material should move into model-specific vignettes as
+those pages are created.
 
 ## Vignette Architecture
 
@@ -84,8 +92,7 @@ Target vignette structure:
   - role-moderated and random-slope material only as advanced/conceptual
     guidance until the implementation is more complete
 - future `Dyadic-Score-Model.Rmd`
-  - add only after the current `outcomes` and
-    `model_type = "undirected_dsm"` API is reviewed
+  - add after the getting-started and APIM/ILD APIM split is stable
   - keep DSM outcome-side semantics separate from DIM predictor construction
 
 ## Version 0.1.0 - First CRAN Release Candidate
@@ -116,7 +123,7 @@ model-building features.
     4. build `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
        print summaries, and metadata from the final analysis compositions
   - Keep raw observed compositions out of the returned data columns, but
-    preserve a raw-to-analysis mapping in `attr(data, "interdep")`
+    preserve pooling provenance in `attr(data, "interdep")$dyad_compositions`
   - Error clearly for unknown aliases, ambiguous aliases, overlapping pooling
     definitions, or pooling requests that include non-exchangeable compositions
 - Handle incomplete dyads and missing roles with explicit `error` and `drop`
@@ -225,9 +232,12 @@ model-building features.
   - Do not add sparse-composition warnings to `print()` yet; thresholds are too
     arbitrary for a compact display
 - Add composition role indicator columns for cross-sectional model workflows
-- Add small inspection helpers
-  - Show generated `.i_*` columns by purpose
-  - Show composition counts and sparse-composition warnings
+- Keep generated-column inspection internal for v0.1
+  - `interdep_generated_columns()` remains the internal normalized table used by
+    printing
+  - generated-column meanings are exposed through `print.interdep_data()`
+  - public inspection helpers and sparse-composition diagnostics are deferred
+    until there is a concrete user need
 - Keep README and `getting-started.Rmd` focused on the data-preparation
   workflow
 - Split model-fitting examples out of `getting-started.Rmd`
@@ -249,38 +259,31 @@ Complete these before calling the feature set CRAN-ready:
   - run `devtools::document()`
   - render `README.Rmd`
   - build pkgdown locally when changing vignette structure or `_pkgdown.yml`
-- Review `add_dyad_individual_columns.R` carefully
-  - confirm direct grouped DIM construction is final
-  - confirm missingness behavior for incomplete dyad components is documented
-  - confirm raw cross-sectional DIM names are final
-  - keep DIM/DSM construction restricted to one final exchangeable analysis
-    composition unless `pool_compositions` has explicitly produced that
+- DIM and undirected DSM preparation review: done for the current v0.1 scope
+  - direct grouped DIM construction is accepted
+  - raw cross-sectional DIM names are accepted
+  - DIM/DSM construction remains restricted to one final exchangeable analysis
+    composition, unless `pool_compositions` has explicitly produced that
     analysis composition
-- Finalize analysis-composition controls
-  - keep the implemented `set_exchangeable_compositions` step before
-    `pool_compositions`
-  - keep the name `set_exchangeable_compositions` instead of a generic
-    "constraints" argument, because the operation is specifically about
-    treating selected dyad compositions as exchangeable
-  - add `pool_compositions` as a named list, where names are final analysis
+- Analysis-composition controls: done for v0.1
+  - `set_exchangeable_compositions` runs before `pool_compositions`
+  - the name `set_exchangeable_compositions` is intentionally specific; avoid
+    generic "constraints" wording
+  - `pool_compositions` is a named list where names are final analysis
     composition labels and values are observed or analysis composition labels
     to pool
-  - normalize both arguments with the same alias resolver used for observed
-    canonical compositions
-  - make pooled composition labels go through the same suffix-collision checks
-    as role and composition labels
-  - record metadata columns for raw composition, analysis composition,
-    exchangeability source, pooling group, dyad type, and dyad count
-  - keep returned data limited to final analysis columns, not extra raw
+  - both arguments use the same composition-reference resolver
+  - returned data are limited to final analysis columns, not extra raw
     composition columns
-- Finalize DIM metadata
-  - treat the current `dim_predictors` table columns as stable for v0.1:
+  - pooling provenance is recorded in `dyad_compositions$pooled_from`
+- DIM metadata: done for v0.1
+  - the current `dim_predictors` table columns are stable for v0.1:
     `predictor`, `component`, `source_column`, `mean_column`,
     `deviation_column`, `dyad_decomposition_level`
   - keep downstream print/vignette code reading metadata rather than guessing
     column names where possible
-- Finalize generated-column metadata
-  - keep `interdep_generated_columns()` internal as the single normalized table
+- Generated-column metadata: done for v0.1
+  - `interdep_generated_columns()` stays internal as the single normalized table
     used by printing and documentation-facing summaries of generated temporal
     predictor, APIM, DIM, and undirected DSM columns
   - expose generated-column meanings through `print.interdep_data()` for v0.1;
@@ -290,18 +293,17 @@ Complete these before calling the feature set CRAN-ready:
   - keep source-metadata fields such as `dim_predictors$dyad_decomposition_level`
     out of the normalized generated-column interpretation table unless they
     answer a user-facing interpretation question
-- Keep `print.interdep_data()` descriptions for DIM column families explicit
+- `print.interdep_data()` descriptions for DIM column families: done for v0.1
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
-- Review minimal undirected DSM preparation
-  - confirm `outcomes` selection and validation are final for v0.1
-  - confirm raw outcome dyad means/deviations are the only v0.1 outcome scores
-  - confirm dyad-level scores for cross-sectional outcomes and dyad-time scores
-    for ILD outcomes are documented clearly
-  - keep DSM outcome metadata in `undirected_dsm_outcomes`, separate from
+- Minimal undirected DSM preparation: done for the current v0.1 scope
+  - `outcomes` selection and validation are accepted
+  - raw outcome dyad means/deviations are the only v0.1 outcome scores
+  - cross-sectional outcomes use dyad-level scores; ILD outcomes use dyad-time
+    scores
+  - DSM outcome metadata stays in `undirected_dsm_outcomes`, separate from
     `dim_predictors`
-  - add a short DSM data-preparation vignette/example only after the API feels
-    stable
+  - add a short DSM data-preparation vignette/example during vignette cleanup
 - Finalize vignette split for v0.1.0
   - shorten `getting-started.Rmd` so it is an orientation and data-prep
     vignette, not the main modeling manual
@@ -323,7 +325,9 @@ Complete these before calling the feature set CRAN-ready:
   - either simplify the vignette model deliberately or explain that the maximal
     model is aspirational/diagnostic and may require more data or Bayesian
     regularization
-- Run final release checks
+- Rerun final release checks after vignette/doc cleanup
+  - release checks have already been run during development, but must be run
+    again after building and polishing the vignettes
   - `devtools::test(reporter = "summary")`
   - `devtools::check(args = "--no-manual", error_on = "never")`
   - inspect the pkgdown site after the GitHub Pages workflow completes

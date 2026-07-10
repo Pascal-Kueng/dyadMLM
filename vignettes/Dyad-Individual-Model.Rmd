@@ -2,7 +2,8 @@
 title: "Dyad-Individual Model"
 description: >
   Construction and interpretation of DIM predictors, including their
-  relationship to APIM effects in exchangeable dyads.
+  relationship to APIM effects in dyadic multilevel models for exchangeable
+  dyads.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Dyad-Individual Model}
@@ -22,11 +23,11 @@ library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
-This vignette focuses on Dyad-Individual Model (DIM) predictor construction and
-its relationship to APIM parameterizations. For broader guidance on fitting
-dyadic models with `interdep`-prepared data, especially APIMs with multiple dyad
-types, generalized outcomes, intensive longitudinal models, and optimizer
-choices, see the
+This vignette focuses on Dyad-Individual Model (DIM) predictor construction for
+dyadic multilevel models and its relationship to APIM parameterizations. For
+broader guidance on fitting dyadic multilevel models with `interdep`-prepared
+data, especially APIMs with multiple dyad types, generalized outcomes,
+intensive longitudinal models, and optimizer choices, see the
 [Getting Started vignette](getting-started.html).
 
 ## Cross-Sectional Gaussian DIM

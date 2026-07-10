@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare_interdep_data.R
 \name{prepare_interdep_data}
 \alias{prepare_interdep_data}
-\title{Prepare dyadic data for interdep}
+\title{Prepare dyadic data for multilevel models}
 \usage{
 prepare_interdep_data(
   data,
@@ -103,7 +103,7 @@ such as \code{temporal_predictor_decompositions}, \code{apim_predictors}, and
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata
-used by downstream interdep functions.
+and model-ready columns for dyadic multilevel model parameterizations.
 }
 \details{
 Data must be in long format. Cross-sectional dyadic data may contain at most
@@ -120,30 +120,53 @@ before being combined, so labels do not depend on row or member order.
 data <- data.frame(
   dyad_id = c(1, 1, 2, 2, 3, 3),
   person_id = c(1, 2, 3, 4, 5, 6),
-  role = c("female", "male", "female", "female", "male", "male")
+  role = c("female", "male", "female", "female", "male", "male"),
+  x = c(4, 7, 5, 6, 3, 8)
 )
 
 prepared <- prepare_interdep_data(
   data,
   group = dyad_id,
   member = person_id,
-  role = role
+  role = role,
+  predictors = x,
+  model_type = "apim"
 )
 
 print(prepared)
-
 
 pooled <- prepare_interdep_data(
   data,
   group = dyad_id,
   member = person_id,
   role = role,
+  predictors = x,
+  model_type = "apim",
   set_exchangeable_compositions = "female-male",
   pool_compositions = list(
-    same_sex_couples = c("female-female", "male-male")
+    romantic_couples = c("female-female", "male-male", "female-male")
   )
 )
 
 print(pooled)
+
+ild_data <- data.frame(
+  dyad_id = rep(c(1, 2), each = 4),
+  person_id = rep(c(1, 2), times = 4),
+  time = rep(c(1, 1, 2, 2), times = 2),
+  x = c(4, 7, 5, 8, 3, 6, 4, 7)
+)
+
+ild_prepared <- prepare_interdep_data(
+  ild_data,
+  group = dyad_id,
+  member = person_id,
+  time = time,
+  predictors = x,
+  model_type = "apim",
+  seed = 123
+)
+
+print(ild_prepared)
 
 }
