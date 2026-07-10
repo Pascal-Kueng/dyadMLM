@@ -1909,6 +1909,34 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_cross_gaussian_model</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="unified-versus-separate-mixed-composition-fits">Unified versus separate mixed-composition fits<a class="anchor" aria-label="anchor" href="#unified-versus-separate-mixed-composition-fits"></a>
+</h3>
+<p>The mixed-composition models in this vignette are unified in the
+sense that all dyad compositions are fit in one model call. That is
+useful when the goal is to compare effects across compositions, test
+equality constraints, keep one model-based covariance matrix for those
+comparisons, or intentionally share parameters such as a common Tweedie
+power parameter.</p>
+<p>A unified fixed-effect formula does not, by itself, create partial
+pooling across dyad compositions. The composition-specific intercepts
+and slopes above are ordinary fixed effects, so estimates for
+female-female or male-male dyads are not automatically shrunk toward
+estimates from the other dyad types. If every mean, variance, and
+covariance parameter is composition-specific, the likelihood largely
+factorizes by composition. In the cross-sectional Gaussian example, the
+unified model and three separate composition-specific models give the
+same log-likelihood and fixed-effect estimates up to numerical
+tolerance.</p>
+<p>Partial pooling requires a different model specification, such as a
+common effect plus composition deviations with a hierarchical prior, or
+a random dyad-type effect. With only a few dyad types, frequentist
+random dyad-type variance components are usually weakly identified.
+Complete pooling, where a slope is constrained to be identical across
+compositions, can be more stable and more powerful when the constraint
+is substantively correct, but it is biased when the dyad compositions
+truly differ.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="mixed-composition-intensive-longitudinal-gaussian-model">Mixed-composition intensive longitudinal Gaussian model<a class="anchor" aria-label="anchor" href="#mixed-composition-intensive-longitudinal-gaussian-model"></a>
@@ -2073,10 +2101,16 @@ actor and partner effects. Random time slopes are omitted; with separate
 stable and same-day dyadic covariance blocks, random time slopes add
 many weakly identified parameters and are a likely first source of
 convergence problems.</p>
-<p>For this maximal covariance example, <code>glmmTMB</code>’s default
-optimizer can report false convergence even when the Hessian is positive
-definite. The <code>BFGS</code> optimizer is used here because it
-reaches the same solution cleanly for this simulated dataset.</p>
+<p>This maximal covariance model is a demanding all-in-one likelihood.
+In this simulated example, separate composition-specific fits recover
+the same fixed-effect solution cleanly, while the unified fit can report
+false convergence even when it reaches the same likelihood and has a
+positive definite Hessian. Treat convergence diagnostics, Hessian
+diagnostics, and comparison with simpler or separate fits as part of the
+workflow. If the unified model is not clean, fit the
+composition-specific models separately for estimation, or simplify the
+same-day and stable covariance blocks before adding more random
+effects.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mixed_ild_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -2149,10 +2183,6 @@ reaches the same solution cleanly for this simulated dataset.</p>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">mixed_ild_data</span></span>
-<span>  , control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
-<span>      optimizer <span class="op">=</span> <span class="va">optim</span>,</span>
-<span>      optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_gaussian_model</span><span class="op">)</span></span></code></pre></div>
@@ -2202,7 +2232,6 @@ outcome is semi-continuous.</p>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  set_compositions_exchangeable <span class="op">=</span> <span class="st">'male female'</span>,</span>
 <span>  time <span class="op">=</span> <span class="va">diaryday</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
@@ -2214,9 +2243,9 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female exchangeable 60 dyads</span></span>
-<span><span class="co">#&gt; # female_x_male   exchangeable 80 dyads</span></span>
-<span><span class="co">#&gt; # male_x_male     exchangeable 60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_female exchangeable    60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male   distinguishable 80 dyads</span></span>
+<span><span class="co">#&gt; # male_x_male     exchangeable    60 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -2254,9 +2283,9 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female              5.59             4.41</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,590 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_female &lt;dbl&gt;, .i_is_female_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_female &lt;dbl&gt;, .i_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_male_x_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_tweedie_data</span><span class="op">)</span></span>
@@ -2276,22 +2305,22 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt;  3rd Qu.: 16.163   3rd Qu.: 5.611992                         </span></span>
 <span><span class="co">#&gt;  Max.   :158.087   Max.   : 8.401539                         </span></span>
 <span><span class="co">#&gt;  NAs    :120       NAs    :220                               </span></span>
-<span><span class="co">#&gt;       .i_composition_role .i_is_female_x_female .i_is_female_x_male</span></span>
-<span><span class="co">#&gt;  female_x_female:1680     Min.   :0.0           Min.   :0.0        </span></span>
-<span><span class="co">#&gt;  female_x_male  :2240     1st Qu.:0.0           1st Qu.:0.0        </span></span>
-<span><span class="co">#&gt;  male_x_male    :1680     Median :0.0           Median :0.0        </span></span>
-<span><span class="co">#&gt;                           Mean   :0.3           Mean   :0.4        </span></span>
-<span><span class="co">#&gt;                           3rd Qu.:1.0           3rd Qu.:1.0        </span></span>
-<span><span class="co">#&gt;                           Max.   :1.0           Max.   :1.0        </span></span>
+<span><span class="co">#&gt;            .i_composition_role .i_is_female_x_female .i_is_female_x_male_female</span></span>
+<span><span class="co">#&gt;  female_x_female     :1680     Min.   :0.0           Min.   :0.0               </span></span>
+<span><span class="co">#&gt;  female_x_male_female:1120     1st Qu.:0.0           1st Qu.:0.0               </span></span>
+<span><span class="co">#&gt;  female_x_male_male  :1120     Median :0.0           Median :0.0               </span></span>
+<span><span class="co">#&gt;  male_x_male         :1680     Mean   :0.3           Mean   :0.2               </span></span>
+<span><span class="co">#&gt;                                3rd Qu.:1.0           3rd Qu.:0.0               </span></span>
+<span><span class="co">#&gt;                                Max.   :1.0           Max.   :1.0               </span></span>
+<span><span class="co">#&gt;                                                                                </span></span>
+<span><span class="co">#&gt;  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female</span></span>
+<span><span class="co">#&gt;  Min.   :0.0              Min.   :0.0       Min.   :-1             </span></span>
+<span><span class="co">#&gt;  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0             </span></span>
+<span><span class="co">#&gt;  Median :0.0              Median :0.0       Median : 0             </span></span>
+<span><span class="co">#&gt;  Mean   :0.2              Mean   :0.3       Mean   : 0             </span></span>
+<span><span class="co">#&gt;  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0             </span></span>
+<span><span class="co">#&gt;  Max.   :1.0              Max.   :1.0       Max.   : 1             </span></span>
 <span><span class="co">#&gt;                                                                    </span></span>
-<span><span class="co">#&gt;  .i_is_male_x_male .i_diff_female_x_female .i_diff_female_x_male</span></span>
-<span><span class="co">#&gt;  Min.   :0.0       Min.   :-1              Min.   :-1           </span></span>
-<span><span class="co">#&gt;  1st Qu.:0.0       1st Qu.: 0              1st Qu.: 0           </span></span>
-<span><span class="co">#&gt;  Median :0.0       Median : 0              Median : 0           </span></span>
-<span><span class="co">#&gt;  Mean   :0.3       Mean   : 0              Mean   : 0           </span></span>
-<span><span class="co">#&gt;  3rd Qu.:1.0       3rd Qu.: 0              3rd Qu.: 0           </span></span>
-<span><span class="co">#&gt;  Max.   :1.0       Max.   : 1              Max.   : 1           </span></span>
-<span><span class="co">#&gt;                                                                 </span></span>
 <span><span class="co">#&gt;  .i_diff_male_x_male .i_provided_support_cwp .i_provided_support_cbp</span></span>
 <span><span class="co">#&gt;  Min.   :-1          Min.   :-2.488131       Min.   :-2.6707037     </span></span>
 <span><span class="co">#&gt;  1st Qu.: 0          1st Qu.:-0.507787       1st Qu.:-0.6189091     </span></span>
@@ -2320,7 +2349,13 @@ outcome is semi-continuous.</p>
 contains composition-specific intercepts, fixed time slopes, and
 within-person and between-person actor and partner effects. The dyadic
 random-effect blocks are latent effects on the log-mean scale, not
-residual covariance parameters in the Gaussian sense.</p>
+residual covariance parameters in the Gaussian sense. This is the most
+fragile example in the vignette because it combines composition-specific
+mean effects, composition-specific latent dyadic dependence,
+composition-specific dispersion, and a common Tweedie power parameter. A
+practical workflow is to fit separate Gaussian or simpler Tweedie models
+first, then add the unified constraints only when they answer a specific
+comparison question.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mixed_ild_tweedie_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>

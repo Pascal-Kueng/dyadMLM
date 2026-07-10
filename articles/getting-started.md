@@ -1812,6 +1812,35 @@ mixed_cross_gaussian_model <- glmmTMB(
 summary(mixed_cross_gaussian_model)
 ```
 
+### Unified versus separate mixed-composition fits
+
+The mixed-composition models in this vignette are unified in the sense
+that all dyad compositions are fit in one model call. That is useful
+when the goal is to compare effects across compositions, test equality
+constraints, keep one model-based covariance matrix for those
+comparisons, or intentionally share parameters such as a common Tweedie
+power parameter.
+
+A unified fixed-effect formula does not, by itself, create partial
+pooling across dyad compositions. The composition-specific intercepts
+and slopes above are ordinary fixed effects, so estimates for
+female-female or male-male dyads are not automatically shrunk toward
+estimates from the other dyad types. If every mean, variance, and
+covariance parameter is composition-specific, the likelihood largely
+factorizes by composition. In the cross-sectional Gaussian example, the
+unified model and three separate composition-specific models give the
+same log-likelihood and fixed-effect estimates up to numerical
+tolerance.
+
+Partial pooling requires a different model specification, such as a
+common effect plus composition deviations with a hierarchical prior, or
+a random dyad-type effect. With only a few dyad types, frequentist
+random dyad-type variance components are usually weakly identified.
+Complete pooling, where a slope is constrained to be identical across
+compositions, can be more stable and more powerful when the constraint
+is substantively correct, but it is biased when the dyad compositions
+truly differ.
+
 ## Mixed-composition intensive longitudinal Gaussian model
 
 `example_dyadic_ILD_mixed` contains the same three dyad compositions as
@@ -1981,10 +2010,15 @@ stable and same-day dyadic covariance blocks, random time slopes add
 many weakly identified parameters and are a likely first source of
 convergence problems.
 
-For this maximal covariance example, `glmmTMB`’s default optimizer can
-report false convergence even when the Hessian is positive definite. The
-`BFGS` optimizer is used here because it reaches the same solution
-cleanly for this simulated dataset.
+This maximal covariance model is a demanding all-in-one likelihood. In
+this simulated example, separate composition-specific fits recover the
+same fixed-effect solution cleanly, while the unified fit can report
+false convergence even when it reaches the same likelihood and has a
+positive definite Hessian. Treat convergence diagnostics, Hessian
+diagnostics, and comparison with simpler or separate fits as part of the
+workflow. If the unified model is not clean, fit the
+composition-specific models separately for estimation, or simplify the
+same-day and stable covariance blocks before adding more random effects.
 
 ``` r
 
@@ -2059,10 +2093,6 @@ mixed_ild_gaussian_model <- glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = mixed_ild_data
-  , control = glmmTMBControl(
-      optimizer = optim,
-      optArgs = list(method = "BFGS")
-    )
 )
 
 summary(mixed_ild_gaussian_model)
@@ -2118,7 +2148,6 @@ mixed_ild_tweedie_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
-  set_compositions_exchangeable = 'male female',
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -2130,9 +2159,9 @@ print(mixed_ild_tweedie_data)
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable 60 dyads
-#> # female_x_male   exchangeable 80 dyads
-#> # male_x_male     exchangeable 60 dyads
+#> # female_x_female exchangeable    60 dyads
+#> # female_x_male   distinguishable 80 dyads
+#> # male_x_male     exchangeable    60 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -2170,9 +2199,9 @@ print(mixed_ild_tweedie_data)
 #> 10        1        1        9 female              5.59             4.41
 #> # ℹ 5,590 more rows
 #> # ℹ 14 more variables: .i_composition <fct>, .i_composition_role <fct>,
-#> #   .i_is_female_x_female <dbl>, .i_is_female_x_male <dbl>,
-#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
-#> #   .i_diff_female_x_male <dbl>, .i_diff_male_x_male <dbl>,
+#> #   .i_is_female_x_female <dbl>, .i_is_female_x_male_female <dbl>,
+#> #   .i_is_female_x_male_male <dbl>, .i_is_male_x_male <dbl>,
+#> #   .i_diff_female_x_female <dbl>, .i_diff_male_x_male <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, …
 summary(mixed_ild_tweedie_data)
@@ -2192,22 +2221,22 @@ summary(mixed_ild_tweedie_data)
 #>  3rd Qu.: 16.163   3rd Qu.: 5.611992                         
 #>  Max.   :158.087   Max.   : 8.401539                         
 #>  NAs    :120       NAs    :220                               
-#>       .i_composition_role .i_is_female_x_female .i_is_female_x_male
-#>  female_x_female:1680     Min.   :0.0           Min.   :0.0        
-#>  female_x_male  :2240     1st Qu.:0.0           1st Qu.:0.0        
-#>  male_x_male    :1680     Median :0.0           Median :0.0        
-#>                           Mean   :0.3           Mean   :0.4        
-#>                           3rd Qu.:1.0           3rd Qu.:1.0        
-#>                           Max.   :1.0           Max.   :1.0        
+#>            .i_composition_role .i_is_female_x_female .i_is_female_x_male_female
+#>  female_x_female     :1680     Min.   :0.0           Min.   :0.0               
+#>  female_x_male_female:1120     1st Qu.:0.0           1st Qu.:0.0               
+#>  female_x_male_male  :1120     Median :0.0           Median :0.0               
+#>  male_x_male         :1680     Mean   :0.3           Mean   :0.2               
+#>                                3rd Qu.:1.0           3rd Qu.:0.0               
+#>                                Max.   :1.0           Max.   :1.0               
+#>                                                                                
+#>  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female
+#>  Min.   :0.0              Min.   :0.0       Min.   :-1             
+#>  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0             
+#>  Median :0.0              Median :0.0       Median : 0             
+#>  Mean   :0.2              Mean   :0.3       Mean   : 0             
+#>  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0             
+#>  Max.   :1.0              Max.   :1.0       Max.   : 1             
 #>                                                                    
-#>  .i_is_male_x_male .i_diff_female_x_female .i_diff_female_x_male
-#>  Min.   :0.0       Min.   :-1              Min.   :-1           
-#>  1st Qu.:0.0       1st Qu.: 0              1st Qu.: 0           
-#>  Median :0.0       Median : 0              Median : 0           
-#>  Mean   :0.3       Mean   : 0              Mean   : 0           
-#>  3rd Qu.:1.0       3rd Qu.: 0              3rd Qu.: 0           
-#>  Max.   :1.0       Max.   : 1              Max.   : 1           
-#>                                                                 
 #>  .i_diff_male_x_male .i_provided_support_cwp .i_provided_support_cbp
 #>  Min.   :-1          Min.   :-2.488131       Min.   :-2.6707037     
 #>  1st Qu.: 0          1st Qu.:-0.507787       1st Qu.:-0.6189091     
@@ -2238,7 +2267,13 @@ As in the Gaussian mixed-composition ILD model, the mean model contains
 composition-specific intercepts, fixed time slopes, and within-person
 and between-person actor and partner effects. The dyadic random-effect
 blocks are latent effects on the log-mean scale, not residual covariance
-parameters in the Gaussian sense.
+parameters in the Gaussian sense. This is the most fragile example in
+the vignette because it combines composition-specific mean effects,
+composition-specific latent dyadic dependence, composition-specific
+dispersion, and a common Tweedie power parameter. A practical workflow
+is to fit separate Gaussian or simpler Tweedie models first, then add
+the unified constraints only when they answer a specific comparison
+question.
 
 ``` r
 
