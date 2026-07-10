@@ -579,3 +579,27 @@ test_that("interdep data print describes mixed dyad types", {
   expect_true(any(grepl("female_x_female\\s+exchangeable\\s+1 dyads", printed)))
   expect_true(any(grepl("male_x_male\\s+exchangeable\\s+1 dyads", printed)))
 })
+
+test_that("interdep data print marks dyad types set by user", {
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    set_compositions_exchangeable = "female-male",
+    seed = 123
+  )
+
+  printed <- capture_wide_print(result)
+
+  expect_true(any(grepl(
+    "female_x_male\\s+exchangeable \\(set by user\\)\\s+2 dyads",
+    printed
+  )))
+})

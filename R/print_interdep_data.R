@@ -54,7 +54,15 @@ print.interdep_data <- function(x, ...) {
     cat("# Dyad compositions:\n")
 
     composition <- format(dyad_compositions$composition, justify = "left")
-    dyad_type <- format(dyad_compositions$dyad_type, justify = "left")
+
+    dyad_type_label <- dyad_compositions$dyad_type
+    dyad_type_label <- ifelse(
+      dyad_compositions$dyad_type_source == "set_by_user",
+      paste0(dyad_type_label, " (set by user)"),
+      dyad_type_label
+    )
+
+    dyad_type <- format(dyad_type_label, justify = "left")
     composition_n_dyads <- format(dyad_compositions$n_dyads, justify = "right")
 
     for (i in seq_len(nrow(dyad_compositions))) {
