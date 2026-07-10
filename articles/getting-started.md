@@ -350,8 +350,8 @@ attr(cross_distinguishable_data, "interdep")
 #> $dyad_compositions
 #> # A tibble: 1 × 5
 #>   composition   dyad_type       dyad_type_source pooled_from n_dyads
-#>   <chr>         <chr>           <lgl>            <chr>         <int>
-#> 1 female_x_male distinguishable NA               NA               95
+#>   <chr>         <chr>           <chr>            <chr>         <int>
+#> 1 female_x_male distinguishable inferred         NA               95
 #> 
 #> $temporal_predictor_decompositions
 #> # A tibble: 1 × 4
@@ -371,7 +371,7 @@ print(cross_distinguishable_data, n = 20)
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_male NA 95 dyads
+#> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -643,8 +643,8 @@ print(incomplete_dropped_data)
 #> # Dropped dyads with incomplete role information: 1 dyad, with ID: 2
 #> #
 #> # Dyad compositions:
-#> # female_x_female NA 1 dyads
-#> # female_x_male   NA 1 dyads
+#> # female_x_female exchangeable    1 dyads
+#> # female_x_male   distinguishable 1 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -716,7 +716,7 @@ print(tweedie_distinguishable_data)
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_male NA 120 dyads
+#> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -979,7 +979,7 @@ print(ild_distinguishable_data)
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_male NA 40 dyads
+#> # female_x_male distinguishable 40 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -1325,7 +1325,7 @@ print(ild_tweedie_distinguishable_data)
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_male NA 40 dyads
+#> # female_x_male distinguishable 40 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -1708,9 +1708,9 @@ print(mixed_cross_data)
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_female NA 100 dyads
-#> # female_x_male   NA 120 dyads
-#> # male_x_male     NA 100 dyads
+#> # female_x_female exchangeable    100 dyads
+#> # female_x_male   distinguishable 120 dyads
+#> # male_x_male     exchangeable    100 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -1899,9 +1899,9 @@ print(mixed_ild_data)
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_female NA 60 dyads
-#> # female_x_male   NA 80 dyads
-#> # male_x_male     NA 60 dyads
+#> # female_x_female exchangeable    60 dyads
+#> # female_x_male   distinguishable 80 dyads
+#> # male_x_male     exchangeable    60 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -2159,9 +2159,9 @@ print(mixed_ild_tweedie_data)
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_female NA 60 dyads
-#> # female_x_male   NA 80 dyads
-#> # male_x_male     NA 60 dyads
+#> # female_x_female exchangeable    60 dyads
+#> # female_x_male   distinguishable 80 dyads
+#> # male_x_male     exchangeable    60 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition

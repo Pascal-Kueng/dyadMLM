@@ -507,8 +507,8 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; $dyad_compositions</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 5</span></span></span>
 <span><span class="co">#&gt;   composition   dyad_type       dyad_type_source pooled_from n_dyads</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> female_x_male distinguishable <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>               95</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> female_x_male distinguishable inferred         <span style="color: #BB0000;">NA</span>               95</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $temporal_predictor_decompositions</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
@@ -528,7 +528,7 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_male NA 95 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male distinguishable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -792,8 +792,8 @@ dyads were removed.</p>
 <span><span class="co">#&gt; # Dropped dyads with incomplete role information: 1 dyad, with ID: 2</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female NA 1 dyads</span></span>
-<span><span class="co">#&gt; # female_x_male   NA 1 dyads</span></span>
+<span><span class="co">#&gt; # female_x_female exchangeable    1 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male   distinguishable 1 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -859,7 +859,7 @@ part of the model.</p>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_male NA 120 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -1111,7 +1111,7 @@ dyadic dataset. Each dyad has repeated observations over
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_male NA 40 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male distinguishable 40 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -1448,7 +1448,7 @@ the outcome is semi-continuous.</p>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_male NA 40 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male distinguishable 40 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -1812,9 +1812,9 @@ and exchangeable female-female and male-male dyads.</p>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female NA 100 dyads</span></span>
-<span><span class="co">#&gt; # female_x_male   NA 120 dyads</span></span>
-<span><span class="co">#&gt; # male_x_male     NA 100 dyads</span></span>
+<span><span class="co">#&gt; # female_x_female exchangeable    100 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male   distinguishable 120 dyads</span></span>
+<span><span class="co">#&gt; # male_x_male     exchangeable    100 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -1993,9 +1993,9 @@ dyad contributes repeated paired observations over
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female NA 60 dyads</span></span>
-<span><span class="co">#&gt; # female_x_male   NA 80 dyads</span></span>
-<span><span class="co">#&gt; # male_x_male     NA 60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_female exchangeable    60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male   distinguishable 80 dyads</span></span>
+<span><span class="co">#&gt; # male_x_male     exchangeable    60 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -2243,9 +2243,9 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female NA 60 dyads</span></span>
-<span><span class="co">#&gt; # female_x_male   NA 80 dyads</span></span>
-<span><span class="co">#&gt; # male_x_male     NA 60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_female exchangeable    60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male   distinguishable 80 dyads</span></span>
+<span><span class="co">#&gt; # male_x_male     exchangeable    60 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>

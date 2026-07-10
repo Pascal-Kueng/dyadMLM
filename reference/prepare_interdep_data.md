@@ -170,9 +170,9 @@ print(prepared)
 #> # Structure: group = dyad_id, member = person_id, role = role
 #> #
 #> # Dyad compositions:
-#> # female_x_female NA 1 dyads
-#> # female_x_male   NA 1 dyads
-#> # male_x_male     NA 1 dyads
+#> # female_x_female exchangeable    1 dyads
+#> # female_x_male   distinguishable 1 dyads
+#> # male_x_male     exchangeable    1 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -214,8 +214,8 @@ print(pooled)
 #> # Structure: group = dyad_id, member = person_id, role = role
 #> #
 #> # Dyad compositions:
-#> # female_x_male    NA 1 dyads
-#> # same_sex_couples NA 2 dyads | pooled: female_x_female, male_x_male
+#> # female_x_male    exchangeable (set by user) 1 dyads
+#> # same_sex_couples exchangeable               2 dyads | pooled: female_x_female, male_x_male
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
