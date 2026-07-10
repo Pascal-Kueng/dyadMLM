@@ -1,6 +1,11 @@
 # Package index
 
-## All functions
+## Main function
+
+- [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+  : Prepare dyadic data for interdep
+
+## Example data
 
 - [`example_dyadic_ILD`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_ILD.md)
   : Example intensive longitudinal dyadic data
@@ -18,5 +23,3 @@
   : Example cross-sectional dyadic data with a Tweedie outcome
 - [`example_dyadic_crosssectional_unified`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_crosssectional_unified.md)
   : Example cross-sectional dyadic data with mixed dyad compositions
-- [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-  : Prepare dyadic data for interdep

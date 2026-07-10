@@ -1,8 +1,21 @@
 # Articles
 
-### All vignettes
+### Start here
+
+Core data requirements and the main preparation workflow.
+
+- [Getting
+  Started](https://pascal-kueng.github.io/interdep/articles/getting-started.md):
+
+  Core workflow for validating dyadic data, identifying dyad
+  compositions, and preparing APIM-ready columns.
+
+### Model-specific preparation
+
+Details for specific dyadic model parameterizations.
 
 - [Dyad-Individual
   Model](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.md):
-- [Getting
-  Started](https://pascal-kueng.github.io/interdep/articles/getting-started.md):
+
+  Construction and interpretation of DIM predictors, including their
+  relationship to APIM effects in exchangeable dyads.

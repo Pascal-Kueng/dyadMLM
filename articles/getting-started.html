@@ -11,6 +11,10 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started">
+<meta name="description" content="Core workflow for validating dyadic data, identifying dyad compositions, and preparing APIM-ready columns.
+">
+<meta property="og:description" content="Core workflow for validating dyadic data, identifying dyad compositions, and preparing APIM-ready columns.
+">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,10 +35,10 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/Dyad-Individual-Model.html">Dyad-Individual Model</a></li>
-    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
+<li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
+    <li><a class="dropdown-item" href="../articles/Dyad-Individual-Model.html">Dyad-Individual Model</a></li>
   </ul>
 </li>
       </ul>
@@ -42,6 +46,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Pascal-Kueng/interdep" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -1409,8 +1414,8 @@ deviations.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                                             Estimate Std. Error</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female                                  5.486940   0.163761</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male                                    4.669917   0.165249</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female                                  5.486939   0.163761</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male                                    4.669918   0.165249</span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                         0.011902   0.007568</span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                          -0.027344   0.011919</span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.385208   0.040954</span></span>
@@ -1913,6 +1918,8 @@ also estimate role-specific Tweedie dispersion.</p>
 <span>  , data <span class="op">=</span> <span class="va">ild_tweedie_distinguishable_data</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
+<span><span class="co">#&gt; problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')</span></span>
+<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
 <span><span class="co">#&gt; problem; singular convergence (7). See vignette('troubleshooting'),</span></span>
 <span><span class="co">#&gt; help('diagnose')</span></span>
 <span></span>
@@ -1937,7 +1944,7 @@ also estimate role-specific Tweedie dispersion.</p>
 <span><span class="co">#&gt; Data: ild_tweedie_distinguishable_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;    6956.2    7060.0   -3457.1    6914.2      1015 </span></span>
+<span><span class="co">#&gt;        NA        NA        NA        NA      1015 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -2621,69 +2628,69 @@ reaches the same solution cleanly for this simulated dataset.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;  Groups              Name                       Variance  Std.Dev.  Corr  </span></span>
-<span><span class="co">#&gt;  coupleID            .i_is_female_x_male_female 1.979e-45 4.449e-23       </span></span>
-<span><span class="co">#&gt;                      .i_is_female_x_male_male   5.524e-01 7.432e-01 -1.00 </span></span>
-<span><span class="co">#&gt;  coupleID.1          .i_is_female_x_female      2.047e+00 1.431e+00       </span></span>
-<span><span class="co">#&gt;  coupleID.2          .i_diff_female_x_female    1.538e-01 3.921e-01       </span></span>
-<span><span class="co">#&gt;  coupleID.3          .i_is_male_x_male          1.528e+00 1.236e+00       </span></span>
-<span><span class="co">#&gt;  coupleID.4          .i_diff_male_x_male        2.912e-50 1.706e-25       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   .i_is_female_x_male_female 5.375e+01 7.331e+00       </span></span>
-<span><span class="co">#&gt;                      .i_is_female_x_male_male   1.434e+02 1.197e+01 0.97  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .i_is_female_x_female      2.972e-01 5.452e-01       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.2 .i_diff_female_x_female    1.910e-01 4.371e-01       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.3 .i_is_male_x_male          4.633e-01 6.807e-01       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.4 .i_diff_male_x_male        6.868e-01 8.287e-01       </span></span>
+<span><span class="co">#&gt;  coupleID            .i_is_female_x_male_female 5.805e-47 7.619e-24       </span></span>
+<span><span class="co">#&gt;                      .i_is_female_x_male_male   2.010e+00 1.418e+00 -1.00 </span></span>
+<span><span class="co">#&gt;  coupleID.1          .i_is_female_x_female      3.570e+02 1.890e+01       </span></span>
+<span><span class="co">#&gt;  coupleID.2          .i_diff_female_x_female    6.226e-01 7.891e-01       </span></span>
+<span><span class="co">#&gt;  coupleID.3          .i_is_male_x_male          1.136e+01 3.371e+00       </span></span>
+<span><span class="co">#&gt;  coupleID.4          .i_diff_male_x_male        5.103e-50 2.259e-25       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   .i_is_female_x_male_female 5.173e+01 7.193e+00       </span></span>
+<span><span class="co">#&gt;                      .i_is_female_x_male_male   1.167e+02 1.080e+01 0.97  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .i_is_female_x_female      3.791e-01 6.157e-01       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.2 .i_diff_female_x_female    1.968e-01 4.437e-01       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.3 .i_is_male_x_male          5.932e-01 7.702e-01       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.4 .i_diff_male_x_male        8.381e-01 9.155e-01       </span></span>
 <span><span class="co">#&gt; Number of obs: 5174, groups:  coupleID, 200; coupleID:diaryday, 2587</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                                             Estimate Std. Error</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female                                 14.883148        NaN</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male                                   21.858384        NaN</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female                                       5.101654        NaN</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male                                           5.700959        NaN</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                        -0.791278   0.015674</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                          -1.558541        NaN</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:diaryday                              0.002877   0.004868</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:diaryday                                 -0.027771   0.006129</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor   -0.032343   0.302524</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.038512   0.455309</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor         0.344676   0.024320</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_actor             0.204488   0.039941</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner -0.115368   0.264339</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner   -0.304685   0.517916</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner       0.128465   0.024320</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner           0.009516   0.039941</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_actor    1.275536   0.334026</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_actor      1.788396   0.470972</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_actor         1.867298        NaN</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_actor             1.352352        NaN</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner  0.947416   0.271515</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner    0.316405   0.559025</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_partner       1.110095        NaN</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_partner           1.534160        NaN</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female                                 12.939733        NaN</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male                                   16.531583        NaN</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female                                       4.212880   2.689101</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male                                           7.956903        NaN</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                        -0.615660        NaN</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                          -1.051362        NaN</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:diaryday                              0.003883   0.005499</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:diaryday                                 -0.044356   0.007109</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.069546   0.319883</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.811243   0.466394</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor         0.155634   0.027460</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_actor             0.088021   0.045156</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.543383   0.310803</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner   -0.151248   0.488922</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner       0.268629   0.027460</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner           0.186969   0.045156</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_actor    0.864110   0.326638</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_actor      1.756251   0.412704</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_actor        -9.255501        NaN</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_actor             3.736442        NaN</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner  1.388071   0.214863</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner   -0.785092   0.546831</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_partner      -9.991265        NaN</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_partner           3.023806        NaN</span></span>
 <span><span class="co">#&gt;                                                            z value Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_female                                     NaN      NaN    </span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_male                                       NaN      NaN    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_female                                          NaN      NaN    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_female                                        1.567  0.11720    </span></span>
 <span><span class="co">#&gt; .i_is_male_x_male                                              NaN      NaN    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                         -50.48  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                            NaN      NaN    </span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                              NaN      NaN    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:diaryday                                0.59 0.554530    </span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:diaryday                                   -4.53 5.87e-06 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor     -0.11 0.914859    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_actor        0.08 0.932592    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor          14.17  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_actor               5.12 3.06e-07 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner   -0.44 0.662518    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner     -0.59 0.556336    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner         5.28 1.28e-07 ***</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner             0.24 0.811691    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_actor      3.82 0.000134 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_actor        3.80 0.000146 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:diaryday                               0.706  0.48009    </span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:diaryday                                  -6.240 4.39e-10 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor     0.217  0.82789    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_actor       1.739  0.08197 .  </span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor          5.668 1.45e-08 ***</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_actor              1.949  0.05126 .  </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner   1.748  0.08041 .  </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner    -0.309  0.75705    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner        9.783  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner            4.141 3.47e-05 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_actor     2.645  0.00816 ** </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_actor       4.255 2.09e-05 ***</span></span>
 <span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_actor            NaN      NaN    </span></span>
 <span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_actor                NaN      NaN    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner    3.49 0.000484 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner      0.57 0.571398    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner   6.460 1.05e-10 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner    -1.436  0.15108    </span></span>
 <span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_partner          NaN      NaN    </span></span>
 <span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_partner              NaN      NaN    </span></span>
 <span><span class="co">#&gt; ---</span></span>
@@ -2969,80 +2976,80 @@ parameters in the Gaussian sense.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;  Groups              Name                       Variance  Std.Dev.  Corr  </span></span>
-<span><span class="co">#&gt;  coupleID            .i_is_female_x_male_female 1.683e-01 0.4102671       </span></span>
-<span><span class="co">#&gt;                      .i_is_female_x_male_male   1.392e-01 0.3730635 0.80  </span></span>
-<span><span class="co">#&gt;  coupleID.1          .i_is_female_x_female      9.964e-02 0.3156589       </span></span>
-<span><span class="co">#&gt;  coupleID.2          .i_diff_female_x_female    2.471e-02 0.1571835       </span></span>
-<span><span class="co">#&gt;  coupleID.3          .i_is_male_x_male          1.301e-01 0.3607323       </span></span>
-<span><span class="co">#&gt;  coupleID.4          .i_diff_male_x_male        1.541e-02 0.1241375       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   .i_is_female_x_male_female 9.453e-02 0.3074570       </span></span>
-<span><span class="co">#&gt;                      .i_is_female_x_male_male   3.668e-02 0.1915098 -0.53 </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .i_is_female_x_female      4.048e-02 0.2011862       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.2 .i_diff_female_x_female    2.501e-02 0.1581420       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.3 .i_is_male_x_male          7.442e-08 0.0002728       </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.4 .i_diff_male_x_male        2.824e-02 0.1680557       </span></span>
+<span><span class="co">#&gt;  coupleID            .i_is_female_x_male_female 1.683e-01 0.4102650       </span></span>
+<span><span class="co">#&gt;                      .i_is_female_x_male_male   1.392e-01 0.3730660 0.80  </span></span>
+<span><span class="co">#&gt;  coupleID.1          .i_is_female_x_female      9.964e-02 0.3156524       </span></span>
+<span><span class="co">#&gt;  coupleID.2          .i_diff_female_x_female    2.471e-02 0.1571871       </span></span>
+<span><span class="co">#&gt;  coupleID.3          .i_is_male_x_male          1.301e-01 0.3607278       </span></span>
+<span><span class="co">#&gt;  coupleID.4          .i_diff_male_x_male        1.541e-02 0.1241346       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   .i_is_female_x_male_female 9.451e-02 0.3074260       </span></span>
+<span><span class="co">#&gt;                      .i_is_female_x_male_male   3.667e-02 0.1914832 -0.53 </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .i_is_female_x_female      4.048e-02 0.2011845       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.2 .i_diff_female_x_female    2.501e-02 0.1581430       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.3 .i_is_male_x_male          9.803e-08 0.0003131       </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.4 .i_diff_male_x_male        2.824e-02 0.1680486       </span></span>
 <span><span class="co">#&gt; Number of obs: 5162, groups:  coupleID, 200; coupleID:diaryday, 2581</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                                             Estimate Std. Error</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female                                  2.114491   0.085564</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male                                    2.474636   0.083229</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female                                       2.013236   0.072675</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female                                  2.114490   0.085565</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male                                    2.474648   0.083228</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female                                       2.013241   0.072674</span></span>
 <span><span class="co">#&gt; .i_is_male_x_male                                           2.446370   0.072992</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                         0.010611   0.008062</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                          -0.013021   0.008249</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:diaryday                              0.003966   0.006468</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                         0.010613   0.008062</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                          -0.013020   0.008249</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:diaryday                              0.003965   0.006468</span></span>
 <span><span class="co">#&gt; .i_is_male_x_male:diaryday                                  0.002396   0.006461</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.200686   0.047821</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.219750   0.045707</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor         0.180584   0.036501</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_actor             0.119032   0.038922</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.062662   0.044309</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner    0.070461   0.048916</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner       0.035352   0.036386</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner           0.024997   0.038809</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_actor    0.233588   0.073247</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_actor      0.313343   0.059314</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_actor         0.327366   0.046754</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_actor             0.211307   0.058345</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner  0.149781   0.062802</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner   -0.095491   0.068594</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_partner       0.135343   0.046658</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_partner           0.043555   0.057741</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.200675   0.047820</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.219743   0.045707</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor         0.180580   0.036501</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_actor             0.119027   0.038922</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.062675   0.044308</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner    0.070466   0.048916</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner       0.035356   0.036386</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner           0.025004   0.038809</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_actor    0.233587   0.073246</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_actor      0.313337   0.059314</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_actor         0.327373   0.046754</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_actor             0.211319   0.058345</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner  0.149787   0.062802</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner   -0.095483   0.068594</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_partner       0.135340   0.046658</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_partner           0.043546   0.057741</span></span>
 <span><span class="co">#&gt;                                                            z value Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_female                                   24.71  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_male                                     29.73  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; .i_is_female_x_female                                        27.70  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; .i_is_male_x_male                                            33.52  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                           1.32 0.188095    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                            -1.58 0.114465    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:diaryday                                0.61 0.539756    </span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:diaryday                                    0.37 0.710766    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:diaryday                           1.32 0.187987    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:diaryday                            -1.58 0.114467    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:diaryday                                0.61 0.539842    </span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:diaryday                                    0.37 0.710748    </span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_actor      4.20 2.71e-05 ***</span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_actor        4.81 1.53e-06 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor           4.95 7.52e-07 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_actor           4.95 7.53e-07 ***</span></span>
 <span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_actor               3.06 0.002227 ** </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner    1.41 0.157299    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner      1.44 0.149739    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner         0.97 0.331261    </span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner             0.64 0.519509    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cwp_partner    1.41 0.157210    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cwp_partner      1.44 0.149708    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cwp_partner         0.97 0.331207    </span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cwp_partner             0.64 0.519385    </span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_actor      3.19 0.001427 ** </span></span>
 <span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_actor        5.28 1.27e-07 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_actor           7.00 2.53e-12 ***</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_actor               3.62 0.000293 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner    2.38 0.017081 *  </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner     -1.39 0.163885    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_partner         2.90 0.003723 ** </span></span>
-<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_partner             0.75 0.450660    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_actor           7.00 2.52e-12 ***</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_actor               3.62 0.000292 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female:.i_provided_support_cbp_partner    2.39 0.017076 *  </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male:.i_provided_support_cbp_partner     -1.39 0.163918    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_female:.i_provided_support_cbp_partner         2.90 0.003724 ** </span></span>
+<span><span class="co">#&gt; .i_is_male_x_male:.i_provided_support_cbp_partner             0.75 0.450755    </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dispersion model:</span></span>
 <span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female  1.08808    0.04807   22.63   &lt;2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male    1.27034    0.04641   27.37   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female  1.08810    0.04808   22.63   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male    1.27034    0.04640   27.38   &lt;2e-16 ***</span></span>
 <span><span class="co">#&gt; .i_is_female_x_female       1.04998    0.04061   25.86   &lt;2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_is_male_x_male           1.26996    0.03298   38.51   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male           1.26997    0.03298   38.51   &lt;2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 </div>
