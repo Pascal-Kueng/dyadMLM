@@ -76,10 +76,9 @@
 intensive longitudinal dyadic data for statistical models. It supports
 common dyadic studies with one kind of dyad, and it also handles studies
 where different kinds of dyads appear in the same dataset, such as
-female-male, female-female, and male-male couples. Mixed dyad
-compositions are supported for composition-aware APIM-style preparation;
-current DIM and undirected DSM helpers require one exchangeable dyad
-composition.</p>
+female-male, female-female, and male-male couples. Mixed dyad types are
+supported for composition-aware APIM-style preparation; current DIM and
+undirected DSM helpers require one exchangeable dyad composition.</p>
 <p>This vignette focuses mainly on APIM-style actor and partner effects,
 especially models with multiple dyad types, intensive longitudinal data,
 and generalized outcomes. For the Dyad-Individual Model (DIM)
@@ -248,9 +247,9 @@ separately;</li>
 sum-diff columns;</li>
 <li>semi-continuous and intensive longitudinal outcomes;</li>
 <li>mixed-composition dyadic MLMs that combine distinguishable and
-exchangeable dyads in one model, illustrated in the <a href="#unified-cross-sectional-gaussian-model">unified
-cross-sectional</a> and <a href="#unified-intensive-longitudinal-gaussian-model">unified intensive
-longitudinal</a> examples.</li>
+exchangeable dyads in one model, illustrated in the <a href="#mixed-cross-sectional-gaussian-model">mixed-composition
+cross-sectional</a> and <a href="#mixed-intensive-longitudinal-gaussian-model">mixed-composition
+intensive longitudinal</a> examples.</li>
 </ul>
 <div class="section level2">
 <h2 id="cross-sectional-dyadic-data">Cross-sectional dyadic data<a class="anchor" aria-label="anchor" href="#cross-sectional-dyadic-data"></a>
@@ -2181,13 +2180,13 @@ substantive roles.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="unified-cross-sectional-gaussian-model">Unified cross-sectional Gaussian model<a class="anchor" aria-label="anchor" href="#unified-cross-sectional-gaussian-model"></a>
+<h2 id="mixed-composition-cross-sectional-gaussian-model">Mixed-composition cross-sectional Gaussian model<a class="anchor" aria-label="anchor" href="#mixed-composition-cross-sectional-gaussian-model"></a>
 </h2>
-<p><code>example_dyadic_crosssectional_unified</code> contains three
-dyad compositions in the same data object: distinguishable female-male
-dyads and exchangeable female-female and male-male dyads.</p>
+<p><code>example_dyadic_crosssectional_mixed</code> contains three dyad
+compositions in the same data object: distinguishable female-male dyads
+and exchangeable female-female and male-male dyads.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_crosssectional_unified</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_crosssectional_mixed</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender satisfaction</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -2198,15 +2197,15 @@ dyads and exchangeable female-female and male-male dyads.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>        5        3 female         6.40</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        6        3 male           3.45</span></span></code></pre></div>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">unified_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
-<span>  <span class="va">example_dyadic_crosssectional_unified</span>,</span>
+<code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">unified_cross_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mixed_cross_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # interdep data</span></span>
 <span><span class="co">#&gt; # Rows: 640 | Dyads: 320 | Intensive longitudinal: no</span></span>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span>
@@ -2242,7 +2241,7 @@ dyads and exchangeable female-female and male-male dyads.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">unified_cross_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_cross_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID        coupleID            gender     satisfaction   </span></span>
 <span><span class="co">#&gt;  Min.   :  1.0   Min.   :  1.00   Length   :640   Min.   :0.5594  </span></span>
 <span><span class="co">#&gt;  1st Qu.:160.8   1st Qu.: 80.75   N.unique :  2   1st Qu.:4.1091  </span></span>
@@ -2286,7 +2285,7 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span><span class="co">#&gt; 9     male_x_male diff_variance  1.05625</span></span></code></pre>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">unified_cross_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span><span class="va">mixed_cross_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
@@ -2305,10 +2304,10 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  , data <span class="op">=</span> <span class="va">unified_cross_data</span></span>
+<span>  , data <span class="op">=</span> <span class="va">mixed_cross_data</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">unified_cross_gaussian_model</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_cross_gaussian_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  </span></span>
@@ -2317,7 +2316,7 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span><span class="co">#&gt;     coupleID) + (0 + .i_diff_female_x_female | coupleID) + (0 +  </span></span>
 <span><span class="co">#&gt;     .i_is_male_x_male | coupleID) + (0 + .i_diff_male_x_male |      coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
-<span><span class="co">#&gt; Data: unified_cross_data</span></span>
+<span><span class="co">#&gt; Data: mixed_cross_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
 <span><span class="co">#&gt;    2009.9    2059.0    -994.0    1987.9       629 </span></span>
@@ -2344,13 +2343,14 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="unified-intensive-longitudinal-gaussian-model">Unified intensive longitudinal Gaussian model<a class="anchor" aria-label="anchor" href="#unified-intensive-longitudinal-gaussian-model"></a>
+<h2 id="mixed-composition-intensive-longitudinal-gaussian-model">Mixed-composition intensive longitudinal Gaussian model<a class="anchor" aria-label="anchor" href="#mixed-composition-intensive-longitudinal-gaussian-model"></a>
 </h2>
-<p><code>example_dyadic_ILD_unified</code> contains the same three dyad
-compositions as the unified cross-sectional example, but each dyad
-contributes repeated paired observations over <code>diaryday</code>.</p>
+<p><code>example_dyadic_ILD_mixed</code> contains the same three dyad
+compositions as the mixed-composition cross-sectional example, but each
+dyad contributes repeated paired observations over
+<code>diaryday</code>.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_unified</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_mixed</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 26 × 6</span></span></span>
 <span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support</span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -2381,8 +2381,8 @@ contributes repeated paired observations over <code>diaryday</code>.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">25</span>        2        1       10 male        3.37             3.37</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">26</span>        2        1       11 male        3.61             5.30</span></span></code></pre></div>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">unified_ild_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
-<span>  <span class="va">example_dyadic_ILD_unified</span>,</span>
+<code class="sourceCode R"><span><span class="va">mixed_ild_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_ILD_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
@@ -2391,7 +2391,7 @@ contributes repeated paired observations over <code>diaryday</code>.</p>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">unified_ild_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mixed_ild_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # interdep data</span></span>
 <span><span class="co">#&gt; # Rows: 5600 | Dyads: 200 | Intensive longitudinal: yes</span></span>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
@@ -2442,7 +2442,7 @@ contributes repeated paired observations over <code>diaryday</code>.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;, .i_provided_support_cwp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp &lt;dbl&gt;, .i_provided_support_cwp_actor &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_partner &lt;dbl&gt;, …</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">unified_ild_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID        coupleID         diaryday          gender    </span></span>
 <span><span class="co">#&gt;  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   Length   :5600  </span></span>
 <span><span class="co">#&gt;  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   N.unique :   2  </span></span>
@@ -2499,7 +2499,7 @@ contributes repeated paired observations over <code>diaryday</code>.</p>
 <span><span class="co">#&gt;  3rd Qu.: 0.46008              3rd Qu.: 0.46008               </span></span>
 <span><span class="co">#&gt;  Max.   : 2.42921              Max.   : 2.42921               </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
-<p>This first unified ILD model includes composition-specific
+<p>This first mixed-composition ILD model includes composition-specific
 intercepts, fixed time slopes, and within-person and between-person
 actor and partner effects. Random time slopes are omitted; with separate
 stable and same-day dyadic covariance blocks, random time slopes add
@@ -2511,7 +2511,7 @@ definite. The <code>BFGS</code> optimizer is used here because it
 reaches the same solution cleanly for this simulated dataset.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">unified_ild_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span><span class="va">mixed_ild_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Composition-specific intercepts</span></span>
@@ -2580,7 +2580,7 @@ reaches the same solution cleanly for this simulated dataset.</p>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  , data <span class="op">=</span> <span class="va">unified_ild_data</span></span>
+<span>  , data <span class="op">=</span> <span class="va">mixed_ild_data</span></span>
 <span>  , control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
 <span>      optimizer <span class="op">=</span> <span class="va">optim</span>,</span>
 <span>      optArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"BFGS"</span><span class="op">)</span></span>
@@ -2591,7 +2591,7 @@ reaches the same solution cleanly for this simulated dataset.</p>
 <span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
 <span><span class="co">#&gt; problem; . See vignette('troubleshooting'), help('diagnose')</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">unified_ild_gaussian_model</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_gaussian_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in sqrt(diag(vcovs)): NaNs produced</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
@@ -2619,7 +2619,7 @@ reaches the same solution cleanly for this simulated dataset.</p>
 <span><span class="co">#&gt;     coupleID:diaryday) + (0 + .i_is_male_x_male | coupleID:diaryday) +  </span></span>
 <span><span class="co">#&gt;     (0 + .i_diff_male_x_male | coupleID:diaryday)</span></span>
 <span><span class="co">#&gt; Dispersion:                 ~0</span></span>
-<span><span class="co">#&gt; Data: unified_ild_data</span></span>
+<span><span class="co">#&gt; Data: mixed_ild_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
 <span><span class="co">#&gt;        NA        NA        NA        NA      5136 </span></span>
@@ -2697,13 +2697,13 @@ reaches the same solution cleanly for this simulated dataset.</p>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="unified-intensive-longitudinal-tweedie-model">Unified intensive longitudinal Tweedie model<a class="anchor" aria-label="anchor" href="#unified-intensive-longitudinal-tweedie-model"></a>
+<h2 id="mixed-composition-intensive-longitudinal-tweedie-model">Mixed-composition intensive longitudinal Tweedie model<a class="anchor" aria-label="anchor" href="#mixed-composition-intensive-longitudinal-tweedie-model"></a>
 </h2>
-<p><code>example_dyadic_ILD_unified_tweedie</code> has the same unified
-intensive longitudinal dyadic structure, but the outcome is
-semi-continuous.</p>
+<p><code>example_dyadic_ILD_mixed_tweedie</code> has the same
+mixed-composition intensive longitudinal dyadic structure, but the
+outcome is semi-continuous.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_unified_tweedie</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_mixed_tweedie</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 26 × 6</span></span></span>
 <span><span class="co">#&gt;    personID coupleID diaryday gender physical_activity provided_support</span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -2733,11 +2733,11 @@ semi-continuous.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">24</span>        2        1        9 male                8.64             5.64</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">25</span>        2        1       10 male                0                4.54</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">26</span>        2        1       11 male               20.6              5.03</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_unified_tweedie</span><span class="op">$</span><span class="va">physical_activity</span>, breaks <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
-<p><img src="getting-started_files/figure-html/unified-ild-tweedie-raw-1.png" class="r-plt" alt="" width="700"></p>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_mixed_tweedie</span><span class="op">$</span><span class="va">physical_activity</span>, breaks <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/mixed-ild-tweedie-raw-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">unified_ild_tweedie_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
-<span>  <span class="va">example_dyadic_ILD_unified_tweedie</span>,</span>
+<code class="sourceCode R"><span><span class="va">mixed_ild_tweedie_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_ILD_mixed_tweedie</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
@@ -2746,7 +2746,7 @@ semi-continuous.</p>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">unified_ild_tweedie_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mixed_ild_tweedie_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # interdep data</span></span>
 <span><span class="co">#&gt; # Rows: 5600 | Dyads: 200 | Intensive longitudinal: yes</span></span>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
@@ -2797,7 +2797,7 @@ semi-continuous.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">unified_ild_tweedie_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_tweedie_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID        coupleID         diaryday          gender    </span></span>
 <span><span class="co">#&gt;  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   Length   :5600  </span></span>
 <span><span class="co">#&gt;  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   N.unique :   2  </span></span>
@@ -2854,14 +2854,14 @@ semi-continuous.</p>
 <span><span class="co">#&gt;  3rd Qu.: 0.6169207            3rd Qu.: 0.6169207             </span></span>
 <span><span class="co">#&gt;  Max.   : 2.1738733            Max.   : 2.1738733             </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
-<p>As in the Gaussian unified ILD model, the mean model contains
-composition-specific intercepts, fixed time slopes, and within-person
-and between-person actor and partner effects. The dyadic random-effect
-blocks are latent effects on the log-mean scale, not residual covariance
-parameters in the Gaussian sense.</p>
+<p>As in the Gaussian mixed-composition ILD model, the mean model
+contains composition-specific intercepts, fixed time slopes, and
+within-person and between-person actor and partner effects. The dyadic
+random-effect blocks are latent effects on the log-mean scale, not
+residual covariance parameters in the Gaussian sense.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">unified_ild_tweedie_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span><span class="va">mixed_ild_tweedie_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">physical_activity</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Intercepts for each composition_role</span></span>
@@ -2935,10 +2935,10 @@ parameters in the Gaussian sense.</p>
 <span>      <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
 <span>      <span class="va">.i_is_female_x_female</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/nbinom2.html" class="external-link">tweedie</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  , data <span class="op">=</span> <span class="va">unified_ild_tweedie_data</span></span>
+<span>  , data <span class="op">=</span> <span class="va">mixed_ild_tweedie_data</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">unified_ild_tweedie_model</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_tweedie_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: tweedie  ( log )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; physical_activity ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  </span></span>
@@ -2967,7 +2967,7 @@ parameters in the Gaussian sense.</p>
 <span><span class="co">#&gt; Dispersion:                         </span></span>
 <span><span class="co">#&gt; ~0 + .i_is_female_x_male_female + .i_is_female_x_male_male + </span></span>
 <span><span class="co">#&gt;     .i_is_female_x_female + .i_is_male_x_male</span></span>
-<span><span class="co">#&gt; Data: unified_ild_tweedie_data</span></span>
+<span><span class="co">#&gt; Data: mixed_ild_tweedie_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
 <span><span class="co">#&gt;   35082.3   35363.9  -17498.1   34996.3      5119 </span></span>

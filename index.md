@@ -4,11 +4,11 @@
 longitudinal dyadic data for statistical models.
 
 It supports dyadic datasets with distinguishable dyads, exchangeable
-dyads, or mixed dyad compositions in the same data, such as female-male,
-female-female, and male-male couples. Mixed dyad compositions are
-supported for Actor-Partner Interdependence Model (APIM) preparation.
-Current Dyad-Individual Model (DIM) and undirected Dyadic Score Model
-(DSM) helpers require one exchangeable dyad composition.
+dyads, or mixed dyad types in the same data, such as female-male,
+female-female, and male-male couples. Mixed dyad types are supported for
+Actor-Partner Interdependence Model (APIM) preparation. Current
+Dyad-Individual Model (DIM) and undirected Dyadic Score Model (DSM)
+helpers require one exchangeable dyad composition.
 
 Start with the [Getting
 Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html)
@@ -21,7 +21,7 @@ The package documentation is organized around the main modeling tasks:
 | Vignette | Focus |
 |----|----|
 | [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| APIM | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad compositions |
+| APIM | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad types |
 | Intensive Longitudinal APIM | Temporal predictor decomposition and intensive longitudinal APIM preparation |
 | [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.html) | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
 | Undirected Dyadic Score Model | Undirected DSM outcome and predictor construction |

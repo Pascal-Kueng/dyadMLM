@@ -10,10 +10,9 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 longitudinal dyadic data for statistical models. It supports common
 dyadic studies with one kind of dyad, and it also handles studies where
 different kinds of dyads appear in the same dataset, such as
-female-male, female-female, and male-male couples. Mixed dyad
-compositions are supported for composition-aware APIM-style preparation;
-current DIM and undirected DSM helpers require one exchangeable dyad
-composition.
+female-male, female-female, and male-male couples. Mixed dyad types are
+supported for composition-aware APIM-style preparation; current DIM and
+undirected DSM helpers require one exchangeable dyad composition.
 
 This vignette focuses mainly on APIM-style actor and partner effects,
 especially models with multiple dyad types, intensive longitudinal data,
@@ -86,11 +85,10 @@ models:
   sum-diff columns;
 - semi-continuous and intensive longitudinal outcomes;
 - mixed-composition dyadic MLMs that combine distinguishable and
-  exchangeable dyads in one model, illustrated in the [unified
-  cross-sectional](#unified-cross-sectional-gaussian-model) and [unified
-  intensive
-  longitudinal](#unified-intensive-longitudinal-gaussian-model)
-  examples.
+  exchangeable dyads in one model, illustrated in the [mixed-composition
+  cross-sectional](#mixed-cross-sectional-gaussian-model) and
+  [mixed-composition intensive
+  longitudinal](#mixed-intensive-longitudinal-gaussian-model) examples.
 
 ## Cross-sectional dyadic data
 
@@ -2073,15 +2071,15 @@ summary(ild_tweedie_exchangeable_model)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-## Unified cross-sectional Gaussian model
+## Mixed-composition cross-sectional Gaussian model
 
-`example_dyadic_crosssectional_unified` contains three dyad compositions
+`example_dyadic_crosssectional_mixed` contains three dyad compositions
 in the same data object: distinguishable female-male dyads and
 exchangeable female-female and male-male dyads.
 
 ``` r
 
-print(head(example_dyadic_crosssectional_unified))
+print(head(example_dyadic_crosssectional_mixed))
 #> # A tibble: 6 × 4
 #>   personID coupleID gender satisfaction
 #>      <int>    <int> <fct>         <dbl>
@@ -2095,15 +2093,15 @@ print(head(example_dyadic_crosssectional_unified))
 
 ``` r
 
-unified_cross_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_unified,
+mixed_cross_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
   role = gender,
   seed = 123
 )
 
-print(unified_cross_data)
+print(mixed_cross_data)
 #> # interdep data
 #> # Rows: 640 | Dyads: 320 | Intensive longitudinal: no
 #> # Structure: group = coupleID, member = personID, role = gender
@@ -2139,7 +2137,7 @@ print(unified_cross_data)
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
 #> #   .i_diff_male_x_male <dbl>
-summary(unified_cross_data)
+summary(mixed_cross_data)
 #>     personID        coupleID            gender     satisfaction   
 #>  Min.   :  1.0   Min.   :  1.00   Length   :640   Min.   :0.5594  
 #>  1st Qu.:160.8   1st Qu.: 80.75   N.unique :  2   1st Qu.:4.1091  
@@ -2188,7 +2186,7 @@ covariance parameters. For exchangeable dyads, `sum_variance` and
 ``` r
 
 
-unified_cross_gaussian_model <- glmmTMB(
+mixed_cross_gaussian_model <- glmmTMB(
   satisfaction ~ 0 +
 
     .i_is_female_x_male_female + .i_is_female_x_male_male +
@@ -2207,10 +2205,10 @@ unified_cross_gaussian_model <- glmmTMB(
 
   , dispformula = ~ 0
   , family = gaussian()
-  , data = unified_cross_data
+  , data = mixed_cross_data
 )
 
-summary(unified_cross_gaussian_model)
+summary(mixed_cross_gaussian_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
@@ -2219,7 +2217,7 @@ summary(unified_cross_gaussian_model)
 #>     coupleID) + (0 + .i_diff_female_x_female | coupleID) + (0 +  
 #>     .i_is_male_x_male | coupleID) + (0 + .i_diff_male_x_male |      coupleID)
 #> Dispersion:                    ~0
-#> Data: unified_cross_data
+#> Data: mixed_cross_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
 #>    2009.9    2059.0    -994.0    1987.9       629 
@@ -2246,15 +2244,15 @@ summary(unified_cross_gaussian_model)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-## Unified intensive longitudinal Gaussian model
+## Mixed-composition intensive longitudinal Gaussian model
 
-`example_dyadic_ILD_unified` contains the same three dyad compositions
-as the unified cross-sectional example, but each dyad contributes
+`example_dyadic_ILD_mixed` contains the same three dyad compositions as
+the mixed-composition cross-sectional example, but each dyad contributes
 repeated paired observations over `diaryday`.
 
 ``` r
 
-print(head(example_dyadic_ILD_unified, n = 26), n = 26)
+print(head(example_dyadic_ILD_mixed, n = 26), n = 26)
 #> # A tibble: 26 × 6
 #>    personID coupleID diaryday gender closeness provided_support
 #>       <int>    <int>    <int> <fct>      <dbl>            <dbl>
@@ -2288,8 +2286,8 @@ print(head(example_dyadic_ILD_unified, n = 26), n = 26)
 
 ``` r
 
-unified_ild_data <- prepare_interdep_data(
-  example_dyadic_ILD_unified,
+mixed_ild_data <- prepare_interdep_data(
+  example_dyadic_ILD_mixed,
   group = coupleID,
   member = personID,
   role = gender,
@@ -2298,7 +2296,7 @@ unified_ild_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(unified_ild_data)
+print(mixed_ild_data)
 #> # interdep data
 #> # Rows: 5600 | Dyads: 200 | Intensive longitudinal: yes
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
@@ -2349,7 +2347,7 @@ print(unified_ild_data)
 #> #   .i_diff_male_x_male <dbl>, .i_provided_support_cwp <dbl>,
 #> #   .i_provided_support_cbp <dbl>, .i_provided_support_cwp_actor <dbl>,
 #> #   .i_provided_support_cwp_partner <dbl>, …
-summary(unified_ild_data)
+summary(mixed_ild_data)
 #>     personID        coupleID         diaryday          gender    
 #>  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   Length   :5600  
 #>  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   N.unique :   2  
@@ -2408,11 +2406,11 @@ summary(unified_ild_data)
 #> 
 ```
 
-This first unified ILD model includes composition-specific intercepts,
-fixed time slopes, and within-person and between-person actor and
-partner effects. Random time slopes are omitted; with separate stable
-and same-day dyadic covariance blocks, random time slopes add many
-weakly identified parameters and are a likely first source of
+This first mixed-composition ILD model includes composition-specific
+intercepts, fixed time slopes, and within-person and between-person
+actor and partner effects. Random time slopes are omitted; with separate
+stable and same-day dyadic covariance blocks, random time slopes add
+many weakly identified parameters and are a likely first source of
 convergence problems.
 
 For this maximal covariance example, `glmmTMB`’s default optimizer can
@@ -2423,7 +2421,7 @@ cleanly for this simulated dataset.
 ``` r
 
 
-unified_ild_gaussian_model <- glmmTMB(
+mixed_ild_gaussian_model <- glmmTMB(
   closeness ~ 0 +
 
     # Composition-specific intercepts
@@ -2492,7 +2490,7 @@ unified_ild_gaussian_model <- glmmTMB(
 
   , dispformula = ~ 0
   , family = gaussian()
-  , data = unified_ild_data
+  , data = mixed_ild_data
   , control = glmmTMBControl(
       optimizer = optim,
       optArgs = list(method = "BFGS")
@@ -2503,7 +2501,7 @@ unified_ild_gaussian_model <- glmmTMB(
 #> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
 #> problem; . See vignette('troubleshooting'), help('diagnose')
 
-summary(unified_ild_gaussian_model)
+summary(mixed_ild_gaussian_model)
 #> Warning in sqrt(diag(vcovs)): NaNs produced
 #>  Family: gaussian  ( identity )
 #> Formula:          
@@ -2531,7 +2529,7 @@ summary(unified_ild_gaussian_model)
 #>     coupleID:diaryday) + (0 + .i_is_male_x_male | coupleID:diaryday) +  
 #>     (0 + .i_diff_male_x_male | coupleID:diaryday)
 #> Dispersion:                 ~0
-#> Data: unified_ild_data
+#> Data: mixed_ild_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
 #>        NA        NA        NA        NA      5136 
@@ -2609,14 +2607,15 @@ summary(unified_ild_gaussian_model)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-## Unified intensive longitudinal Tweedie model
+## Mixed-composition intensive longitudinal Tweedie model
 
-`example_dyadic_ILD_unified_tweedie` has the same unified intensive
-longitudinal dyadic structure, but the outcome is semi-continuous.
+`example_dyadic_ILD_mixed_tweedie` has the same mixed-composition
+intensive longitudinal dyadic structure, but the outcome is
+semi-continuous.
 
 ``` r
 
-print(head(example_dyadic_ILD_unified_tweedie, n = 26), n = 26)
+print(head(example_dyadic_ILD_mixed_tweedie, n = 26), n = 26)
 #> # A tibble: 26 × 6
 #>    personID coupleID diaryday gender physical_activity provided_support
 #>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
@@ -2646,15 +2645,15 @@ print(head(example_dyadic_ILD_unified_tweedie, n = 26), n = 26)
 #> 24        2        1        9 male                8.64             5.64
 #> 25        2        1       10 male                0                4.54
 #> 26        2        1       11 male               20.6              5.03
-hist(example_dyadic_ILD_unified_tweedie$physical_activity, breaks = 20)
+hist(example_dyadic_ILD_mixed_tweedie$physical_activity, breaks = 20)
 ```
 
-![](getting-started_files/figure-html/unified-ild-tweedie-raw-1.png)
+![](getting-started_files/figure-html/mixed-ild-tweedie-raw-1.png)
 
 ``` r
 
-unified_ild_tweedie_data <- prepare_interdep_data(
-  example_dyadic_ILD_unified_tweedie,
+mixed_ild_tweedie_data <- prepare_interdep_data(
+  example_dyadic_ILD_mixed_tweedie,
   group = coupleID,
   member = personID,
   role = gender,
@@ -2663,7 +2662,7 @@ unified_ild_tweedie_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(unified_ild_tweedie_data)
+print(mixed_ild_tweedie_data)
 #> # interdep data
 #> # Rows: 5600 | Dyads: 200 | Intensive longitudinal: yes
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
@@ -2714,7 +2713,7 @@ print(unified_ild_tweedie_data)
 #> #   .i_diff_female_x_female <dbl>, .i_diff_male_x_male <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, …
-summary(unified_ild_tweedie_data)
+summary(mixed_ild_tweedie_data)
 #>     personID        coupleID         diaryday          gender    
 #>  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   Length   :5600  
 #>  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   N.unique :   2  
@@ -2773,7 +2772,7 @@ summary(unified_ild_tweedie_data)
 #> 
 ```
 
-As in the Gaussian unified ILD model, the mean model contains
+As in the Gaussian mixed-composition ILD model, the mean model contains
 composition-specific intercepts, fixed time slopes, and within-person
 and between-person actor and partner effects. The dyadic random-effect
 blocks are latent effects on the log-mean scale, not residual covariance
@@ -2782,7 +2781,7 @@ parameters in the Gaussian sense.
 ``` r
 
 
-unified_ild_tweedie_model <- glmmTMB(
+mixed_ild_tweedie_model <- glmmTMB(
   physical_activity ~ 0 +
 
     # Intercepts for each composition_role
@@ -2856,10 +2855,10 @@ unified_ild_tweedie_model <- glmmTMB(
       .i_is_female_x_male_female + .i_is_female_x_male_male +
       .i_is_female_x_female + .i_is_male_x_male
   , family = tweedie()
-  , data = unified_ild_tweedie_data
+  , data = mixed_ild_tweedie_data
 )
 
-summary(unified_ild_tweedie_model)
+summary(mixed_ild_tweedie_model)
 #>  Family: tweedie  ( log )
 #> Formula:          
 #> physical_activity ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
@@ -2888,7 +2887,7 @@ summary(unified_ild_tweedie_model)
 #> Dispersion:                         
 #> ~0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
 #>     .i_is_female_x_female + .i_is_male_x_male
-#> Data: unified_ild_tweedie_data
+#> Data: mixed_ild_tweedie_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
 #>   35082.3   35363.9  -17498.1   34996.3      5119 
