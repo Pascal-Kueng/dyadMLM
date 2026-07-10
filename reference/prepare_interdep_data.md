@@ -17,6 +17,7 @@ prepare_interdep_data(
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   set_compositions_exchangeable = NULL,
+  composition_pooling = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL
@@ -90,13 +91,22 @@ prepare_interdep_data(
 - set_compositions_exchangeable:
 
   Optionally specify dyad compositions to treat as exchangeable, when
-  their roles would otherwise make them distinguishable. Requires
-  `role`; compositions that are already exchangeable should not be
-  listed. Each composition must be supplied as one string, using `_x_`,
-  `-`, `_`, or whitespace between the two role labels, for example
+  their roles would otherwise imply distinguishability. Requires `role`.
+  Compositions that are already exchangeable should not be listed. Each
+  composition must be supplied as one string, using `_x_`, `-`, `_`, or
+  whitespace (` `) between the two role labels, for example
   `"female_x_male"`, `"female-male"`, `"female_male"`, or
-  `"female male"`. To set multiple compositions, use a character vector
-  of such strings.
+  `"female male"`, in arbitrary order. To set multiple compositions, use
+  a character vector of such strings.
+
+- composition_pooling:
+
+  Optionally pool exchangeable dyad compositions into a shared final
+  composition label. Must be a named list where each name is the final
+  composition label and each value is a character vector of composition
+  references, for example
+  `list(same_sex_couples = c("female-female", "male-male"))`. Only
+  exchangeable compositions can be pooled.
 
 - incomplete_dyads:
 
@@ -142,9 +152,9 @@ member order.
 
 ``` r
 data <- data.frame(
-  dyad_id = c(1, 1, 2, 2),
-  person_id = c(1, 2, 3, 4),
-  role = c("female", "male", "female", "male")
+  dyad_id = c(1, 1, 2, 2, 3, 3),
+  person_id = c(1, 2, 3, 4, 5, 6),
+  role = c("female", "male", "female", "female", "male", "male")
 )
 
 prepared <- prepare_interdep_data(
@@ -154,32 +164,76 @@ prepared <- prepare_interdep_data(
   role = role
 )
 
-attr(prepared, "interdep")$dyad_compositions
-#> # A tibble: 1 × 5
-#>   raw_composition composition   dyad_type       dyad_type_source n_dyads
-#>   <chr>           <chr>         <chr>           <chr>              <int>
-#> 1 female_x_male   female_x_male distinguishable inferred               2
-
 print(prepared)
 #> # interdep data
-#> # Rows: 4 | Dyads: 2 | Intensive longitudinal: no
+#> # Rows: 6 | Dyads: 3 | Intensive longitudinal: no
 #> # Structure: group = dyad_id, member = person_id, role = role
 #> #
 #> # Dyad compositions:
-#> # female_x_male distinguishable 2 dyads
+#> # female_x_female NA 1 dyads
+#> # female_x_male   NA 1 dyads
+#> # male_x_male     NA 1 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
+#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
+#> #                        distinguishable dyads or other exchangeable
+#> #                        compositions
 #> #
-#> # A tibble: 4 × 7
-#>   dyad_id person_id role   .i_composition .i_composition_role 
-#>     <dbl>     <dbl> <chr>  <fct>          <fct>               
-#> 1       1         1 female female_x_male  female_x_male_female
-#> 2       1         2 male   female_x_male  female_x_male_male  
-#> 3       2         3 female female_x_male  female_x_male_female
-#> 4       2         4 male   female_x_male  female_x_male_male  
-#> # ℹ 2 more variables: .i_is_female_x_male_female <dbl>,
-#> #   .i_is_female_x_male_male <dbl>
+#> # A tibble: 6 × 11
+#>   dyad_id person_id role   .i_composition  .i_composition_role 
+#>     <dbl>     <dbl> <chr>  <fct>           <fct>               
+#> 1       1         1 female female_x_male   female_x_male_female
+#> 2       1         2 male   female_x_male   female_x_male_male  
+#> 3       2         3 female female_x_female female_x_female     
+#> 4       2         4 female female_x_female female_x_female     
+#> 5       3         5 male   male_x_male     male_x_male         
+#> 6       3         6 male   male_x_male     male_x_male         
+#> # ℹ 6 more variables: .i_is_female_x_female <dbl>,
+#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
+#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
+#> #   .i_diff_male_x_male <dbl>
+
+
+pooled <- prepare_interdep_data(
+  data,
+  group = dyad_id,
+  member = person_id,
+  role = role,
+  set_compositions_exchangeable = "female-male",
+  composition_pooling = list(
+    same_sex_couples = c("female-female", "male-male")
+  )
+)
+
+print(pooled)
+#> # interdep data
+#> # Rows: 6 | Dyads: 3 | Intensive longitudinal: no
+#> # Structure: group = dyad_id, member = person_id, role = role
+#> #
+#> # Dyad compositions:
+#> # female_x_male    NA 1 dyads
+#> # same_sex_couples NA 2 dyads | pooled: female_x_female, male_x_male
+#> #
+#> # Added columns:
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_*              composition-role indicator columns
+#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
+#> #                        distinguishable dyads or other exchangeable
+#> #                        compositions
+#> #
+#> # A tibble: 6 × 9
+#>   dyad_id person_id role  .i_composition .i_composition_role .i_is_female_x_male
+#>     <dbl>     <dbl> <chr> <fct>          <fct>                             <dbl>
+#> 1       1         1 fema… female_x_male  female_x_male                         1
+#> 2       1         2 male  female_x_male  female_x_male                         1
+#> 3       2         3 fema… same_sex_coup… same_sex_couples                      0
+#> 4       2         4 fema… same_sex_coup… same_sex_couples                      0
+#> 5       3         5 male  same_sex_coup… same_sex_couples                      0
+#> 6       3         6 male  same_sex_coup… same_sex_couples                      0
+#> # ℹ 3 more variables: .i_is_same_sex_couples <dbl>,
+#> #   .i_diff_female_x_male <dbl>, .i_diff_same_sex_couples <dbl>
 ```

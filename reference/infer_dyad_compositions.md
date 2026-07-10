@@ -9,7 +9,8 @@ Builds a dyad-level summary of role compositions from a validated
 infer_dyad_compositions(
   data,
   seed = NULL,
-  set_compositions_exchangeable = NULL
+  set_compositions_exchangeable = NULL,
+  composition_pooling = NULL
 )
 ```
 
@@ -28,6 +29,11 @@ infer_dyad_compositions(
 - set_compositions_exchangeable:
 
   Optional dyad compositions to treat as exchangeable for analysis.
+
+- composition_pooling:
+
+  Optional named list that pools exchangeable dyad compositions into
+  user-named final composition labels.
 
 ## Value
 

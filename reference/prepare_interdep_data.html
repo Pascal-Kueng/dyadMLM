@@ -57,6 +57,7 @@ used by downstream interdep functions.</p>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  set_compositions_exchangeable <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  composition_pooling <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  incomplete_dyads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  missing_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -130,13 +131,22 @@ construction, raw undecomposed predictors are currently rejected; use
 
 <dt id="arg-set-compositions-exchangeable">set_compositions_exchangeable<a class="anchor" aria-label="anchor" href="#arg-set-compositions-exchangeable"></a></dt>
 <dd><p>Optionally specify dyad compositions
-to treat as exchangeable, when their roles would otherwise make them
-distinguishable. Requires <code>role</code>; compositions that are already
+to treat as exchangeable, when their roles would otherwise imply distinguishability.
+Requires <code>role</code>. Compositions that are already
 exchangeable should not be listed. Each composition must be supplied as one
-string, using <code>_x_</code>, <code>-</code>, <code>_</code>, or whitespace between the two role labels,
+string, using <code>_x_</code>, <code>-</code>, <code>_</code>, or whitespace (<code> </code>) between the two role labels,
 for example <code>"female_x_male"</code>, <code>"female-male"</code>, <code>"female_male"</code>, or
-<code>"female male"</code>. To set multiple compositions, use a character vector of
-such strings.</p></dd>
+<code>"female male"</code>, in arbitrary order.
+To set multiple compositions, use a character vector of such strings.</p></dd>
+
+
+<dt id="arg-composition-pooling">composition_pooling<a class="anchor" aria-label="anchor" href="#arg-composition-pooling"></a></dt>
+<dd><p>Optionally pool exchangeable dyad compositions
+into a shared final composition label. Must be a named list where each name
+is the final composition label and each value is a character vector of
+composition references, for example
+<code>list(same_sex_couples = c("female-female", "male-male"))</code>. Only
+exchangeable compositions can be pooled.</p></dd>
 
 
 <dt id="arg-incomplete-dyads">incomplete_dyads<a class="anchor" aria-label="anchor" href="#arg-incomplete-dyads"></a></dt>
@@ -181,9 +191,9 @@ before being combined, so labels do not depend on row or member order.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  dyad_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  person_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span>, <span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  dyad_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  person_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span>, <span class="st">"female"</span>, <span class="st">"female"</span>, <span class="st">"male"</span>, <span class="st">"male"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">prepared</span> <span class="op">&lt;-</span> <span class="fu">prepare_interdep_data</span><span class="op">(</span></span></span>
@@ -193,34 +203,79 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-in"><span>  role <span class="op">=</span> <span class="va">role</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">prepared</span>, <span class="st">"interdep"</span><span class="op">)</span><span class="op">$</span><span class="va">dyad_compositions</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   raw_composition composition   dyad_type       dyad_type_source n_dyads</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> female_x_male   female_x_male distinguishable inferred               2</span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prepared</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # interdep data</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # Rows: 4 | Dyads: 2 | Intensive longitudinal: no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Rows: 6 | Dyads: 3 | Intensive longitudinal: no</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Structure: group = dyad_id, member = person_id, role = role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dyad compositions:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_male distinguishable 2 dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_female NA 1 dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_male   NA 1 dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # male_x_male     NA 1 dyads</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        distinguishable dyads or other exchangeable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        compositions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id role   .i_composition .i_composition_role </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       1         1 female female_x_male  female_x_male_female</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>       1         2 male   female_x_male  female_x_male_male  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>       2         3 female female_x_male  female_x_male_female</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>       2         4 male   female_x_male  female_x_male_male  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: .i_is_female_x_male_female &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 11</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id role   .i_composition  .i_composition_role </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       1         1 female female_x_male   female_x_male_female</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>       1         2 male   female_x_male   female_x_male_male  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>       2         3 female female_x_female female_x_female     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>       2         4 female female_x_female female_x_female     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>       3         5 male   male_x_male     male_x_male         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       3         6 male   male_x_male     male_x_male         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">pooled</span> <span class="op">&lt;-</span> <span class="fu">prepare_interdep_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">data</span>,</span></span>
+<span class="r-in"><span>  group <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
+<span class="r-in"><span>  member <span class="op">=</span> <span class="va">person_id</span>,</span></span>
+<span class="r-in"><span>  role <span class="op">=</span> <span class="va">role</span>,</span></span>
+<span class="r-in"><span>  set_compositions_exchangeable <span class="op">=</span> <span class="st">"female-male"</span>,</span></span>
+<span class="r-in"><span>  composition_pooling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    same_sex_couples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female-female"</span>, <span class="st">"male-male"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pooled</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # interdep data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Rows: 6 | Dyads: 3 | Intensive longitudinal: no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Structure: group = dyad_id, member = person_id, role = role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Dyad compositions:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_male    NA 1 dyads</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # same_sex_couples NA 2 dyads | pooled: female_x_female, male_x_male</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        distinguishable dyads or other exchangeable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id role  .i_composition .i_composition_role .i_is_female_x_male</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       1         1 fema… female_x_male  female_x_male                         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>       1         2 male  female_x_male  female_x_male                         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>       2         3 fema… same_sex_coup… same_sex_couples                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>       2         4 fema… same_sex_coup… same_sex_couples                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>       3         5 male  same_sex_coup… same_sex_couples                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       3         6 male  same_sex_coup… same_sex_couples                      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 3 more variables: .i_is_same_sex_couples &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_female_x_male &lt;dbl&gt;, .i_diff_same_sex_couples &lt;dbl&gt;</span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
