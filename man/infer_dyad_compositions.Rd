@@ -7,7 +7,8 @@
 infer_dyad_compositions(
   data,
   seed = NULL,
-  set_compositions_exchangeable = NULL
+  set_compositions_exchangeable = NULL,
+  composition_pooling = NULL
 )
 }
 \arguments{
@@ -18,6 +19,9 @@ exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 
 \item{set_compositions_exchangeable}{Optional dyad compositions to treat as
 exchangeable for analysis.}
+
+\item{composition_pooling}{Optional named list that pools exchangeable dyad
+compositions into user-named final composition labels.}
 }
 \value{
 An \code{interdep_data} object with added \code{.i_composition} and

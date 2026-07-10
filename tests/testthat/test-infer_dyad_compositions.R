@@ -54,6 +54,10 @@ test_that("infer_dyad_compositions counts role compositions", {
     dyad_compositions$dyad_type_source,
     c("inferred", "inferred", "inferred")
   )
+  expect_equal(
+    dyad_compositions$composition_source,
+    c("inferred", "inferred", "inferred")
+  )
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
     as.character(result$.i_composition),
@@ -149,6 +153,7 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
       composition = "female_x_male",
       dyad_type = "exchangeable",
       dyad_type_source = "set_by_user",
+      composition_source = "inferred",
       n_dyads = 2L
     )
   )
@@ -223,6 +228,149 @@ test_that("infer_dyad_compositions accepts a vector of separated composition ref
   expect_equal(dyad_compositions$composition, c("female_x_male", "older_x_younger"))
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "exchangeable"))
   expect_equal(dyad_compositions$dyad_type_source, c("set_by_user", "set_by_user"))
+})
+
+test_that("infer_dyad_compositions pools exchangeable compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "male", "male")
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  ) |>
+    infer_dyad_compositions(
+      seed = 123,
+      composition_pooling = list(same_sex = c("female-female", "male male"))
+    )
+
+  expect_true(".i_is_same_sex" %in% names(result))
+  expect_true(".i_diff_same_sex" %in% names(result))
+  expect_false(".i_diff_female_x_female" %in% names(result))
+  expect_false(".i_diff_male_x_male" %in% names(result))
+  expect_equal(as.character(result$.i_composition), rep("same_sex", 4))
+  expect_equal(as.character(result$.i_composition_role), rep("same_sex", 4))
+
+  expect_equal(
+    attr(result, "interdep")$dyad_compositions,
+    tibble::tibble(
+      raw_composition = "female_x_female, male_x_male",
+      composition = "same_sex",
+      dyad_type = "exchangeable",
+      dyad_type_source = "inferred",
+      composition_source = "pooled_by_user",
+      n_dyads = 2L
+    )
+  )
+})
+
+test_that("infer_dyad_compositions pools after setting compositions exchangeable", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", "female", "male", "male", "female", "male")
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  ) |>
+    infer_dyad_compositions(
+      seed = 123,
+      set_compositions_exchangeable = "female-male",
+      composition_pooling = list(romantic_couples = c("female-female", "male-male", "female-male"))
+    )
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+
+  expect_equal(dyad_compositions$composition, "romantic_couples")
+  expect_equal(dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(dyad_compositions$dyad_type_source, "inferred, set_by_user")
+  expect_equal(dyad_compositions$composition_source, "pooled_by_user")
+  expect_equal(dyad_compositions$n_dyads, 3L)
+  expect_true(".i_is_romantic_couples" %in% names(result))
+  expect_true(".i_diff_romantic_couples" %in% names(result))
+})
+
+test_that("infer_dyad_compositions rejects pooling distinguishable compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "female", "male")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      seed = 123,
+      composition_pooling = list(couples = c("female-female", "female-male"))
+    ),
+    "can only pool exchangeable compositions",
+    fixed = TRUE
+  )
+})
+
+test_that("infer_dyad_compositions validates composition pooling input", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "male", "male")
+  )
+
+  validated <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_error(
+    infer_dyad_compositions(validated, composition_pooling = c("female-female")),
+    "must be a named list",
+    fixed = TRUE
+  )
+  expect_error(
+    infer_dyad_compositions(validated, composition_pooling = list(pool = character())),
+    "non-empty character vector",
+    fixed = TRUE
+  )
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      composition_pooling = list(pool_a = "female-female", pool_b = "female female")
+    ),
+    "same composition to more than one pool",
+    fixed = TRUE
+  )
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      composition_pooling = list(pool = "female-male")
+    ),
+    "`composition_pooling` contains unknown dyad composition",
+    fixed = TRUE
+  )
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      composition_pooling = list(male_x_male = "female-female")
+    ),
+    "names must not match observed compositions",
+    fixed = TRUE
+  )
 })
 
 test_that("infer_dyad_compositions does not treat role vectors as one composition reference", {
@@ -349,6 +497,7 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   expect_equal(dyad_compositions$composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
   expect_equal(dyad_compositions$dyad_type_source, c("inferred", "inferred"))
+  expect_equal(dyad_compositions$composition_source, c("inferred", "inferred"))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
@@ -467,6 +616,7 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
       composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
       dyad_type_source = "assumed_no_role",
+      composition_source = "assumed_no_role",
       n_dyads = 2L
     )
   )

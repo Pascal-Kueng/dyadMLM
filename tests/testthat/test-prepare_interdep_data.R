@@ -41,6 +41,10 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
     dyad_compositions$dyad_type_source,
     c("inferred", "inferred", "inferred")
   )
+  expect_equal(
+    dyad_compositions$composition_source,
+    c("inferred", "inferred", "inferred")
+  )
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L, 1L))
   expect_false(".i_raw_composition" %in% names(result))
   expect_true(is.factor(result$.i_composition))
@@ -207,6 +211,38 @@ test_that("prepare_interdep_data can set a distinguishable composition exchangea
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
 })
 
+test_that("prepare_interdep_data can pool exchangeable compositions for DIM", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", "female", "male", "male", "female", "male"),
+    x = c(1, 2, 3, 4, 5, 6)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = x,
+    model_type = "dim",
+    temporal_predictor_decomposition = "none",
+    set_compositions_exchangeable = "female-male",
+    composition_pooling = list(romantic_couples = c("female-female", "male-male", "female-male")),
+    seed = 123
+  )
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+
+  expect_equal(nrow(dyad_compositions), 1L)
+  expect_equal(dyad_compositions$composition, "romantic_couples")
+  expect_equal(dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(dyad_compositions$composition_source, "pooled_by_user")
+  expect_true(".i_diff_romantic_couples" %in% names(result))
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+})
+
 test_that("prepare_interdep_data treats data without role as assumed exchangeable dyads", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -233,6 +269,7 @@ test_that("prepare_interdep_data treats data without role as assumed exchangeabl
       composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
       dyad_type_source = "assumed_no_role",
+      composition_source = "assumed_no_role",
       n_dyads = 2L
     )
   )
@@ -253,6 +290,25 @@ test_that("prepare_interdep_data errors when setting compositions exchangeable w
       seed = 123
     ),
     "`set_compositions_exchangeable` requires `role` to be supplied.",
+    fixed = TRUE
+  )
+})
+
+test_that("prepare_interdep_data errors when pooling compositions without role", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      composition_pooling = list(couples = "female-male"),
+      seed = 123
+    ),
+    "`composition_pooling` requires `role` to be supplied.",
     fixed = TRUE
   )
 })

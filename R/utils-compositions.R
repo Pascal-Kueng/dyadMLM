@@ -17,6 +17,7 @@ interdep_reserved_prefix <- ".i_"
 # Package generated columns will use the following names consistently
 interdep_composition_col <- paste0(interdep_reserved_prefix, "composition")
 interdep_composition_role_col <- paste0(interdep_reserved_prefix, "composition_role")
+interdep_composition_source_col <- paste0(interdep_reserved_prefix, "composition_source")
 interdep_dyad_type_col <- paste0(interdep_reserved_prefix, "dyad_type")
 interdep_dyad_type_source_col <- paste0(interdep_reserved_prefix, "dyad_type_source")
 interdep_raw_composition_col <- paste0(interdep_reserved_prefix, "raw_composition")
@@ -106,6 +107,14 @@ resolve_composition_references <- function(references, observed_compositions, ar
   observed_compositions <- unique(as.character(observed_compositions))
   if (!is.character(references)) {
     stop("Composition references must be a character vector.", call. = FALSE)
+  }
+  if (any(is.na(references)) || any(trimws(references) == "")) {
+    stop(
+      "`",
+      arg_name,
+      "` must contain non-empty dyad composition references.",
+      call. = FALSE
+    )
   }
 
   # initiate empty character vector of same length as references

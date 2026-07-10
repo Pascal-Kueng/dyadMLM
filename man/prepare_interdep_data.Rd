@@ -15,6 +15,7 @@ prepare_interdep_data(
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   set_compositions_exchangeable = NULL,
+  composition_pooling = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL
@@ -65,13 +66,20 @@ construction, raw undecomposed predictors are currently rejected; use
 \code{"auto"} or \code{"time_2l"}.}
 
 \item{set_compositions_exchangeable}{Optionally specify dyad compositions
-to treat as exchangeable, when their roles would otherwise make them
-distinguishable. Requires \code{role}; compositions that are already
+to treat as exchangeable, when their roles would otherwise imply distinguishability.
+Requires \code{role}. Compositions that are already
 exchangeable should not be listed. Each composition must be supplied as one
-string, using \verb{_x_}, \code{-}, \verb{_}, or whitespace between the two role labels,
+string, using \verb{_x_}, \code{-}, \verb{_}, or whitespace (\verb{ }) between the two role labels,
 for example \code{"female_x_male"}, \code{"female-male"}, \code{"female_male"}, or
-\code{"female male"}. To set multiple compositions, use a character vector of
-such strings.}
+\code{"female male"}, in arbitrary order.
+To set multiple compositions, use a character vector of such strings.}
+
+\item{composition_pooling}{Optionally pool exchangeable dyad compositions
+into a shared final composition label. Must be a named list where each name
+is the final composition label and each value is a character vector of
+composition references, for example
+\code{list(same_sex_couples = c("female-female", "male-male"))}. Only
+exchangeable compositions can be pooled.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and
@@ -110,9 +118,9 @@ before being combined, so labels do not depend on row or member order.
 }
 \examples{
 data <- data.frame(
-  dyad_id = c(1, 1, 2, 2),
-  person_id = c(1, 2, 3, 4),
-  role = c("female", "male", "female", "male")
+  dyad_id = c(1, 1, 2, 2, 3, 3),
+  person_id = c(1, 2, 3, 4, 5, 6),
+  role = c("female", "male", "female", "female", "male", "male")
 )
 
 prepared <- prepare_interdep_data(
@@ -122,7 +130,20 @@ prepared <- prepare_interdep_data(
   role = role
 )
 
-attr(prepared, "interdep")$dyad_compositions
-
 print(prepared)
+
+
+pooled <- prepare_interdep_data(
+  data,
+  group = dyad_id,
+  member = person_id,
+  role = role,
+  set_compositions_exchangeable = "female-male",
+  composition_pooling = list(
+    same_sex_couples = c("female-female", "male-male")
+  )
+)
+
+print(pooled)
+
 }

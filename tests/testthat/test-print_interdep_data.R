@@ -603,3 +603,27 @@ test_that("interdep data print marks dyad types set by user", {
     printed
   )))
 })
+
+test_that("interdep data print describes pooled compositions", {
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "male", "male")
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    composition_pooling = list(same_sex = c("female-female", "male-male")),
+    seed = 123
+  )
+
+  printed <- capture_wide_print(result)
+
+  expect_true(any(grepl(
+    "same_sex\\s+exchangeable\\s+2 dyads \\| pooled: female_x_female, male_x_male",
+    printed
+  )))
+})

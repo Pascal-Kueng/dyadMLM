@@ -51,3 +51,15 @@ test_that("make_interdep_suffixes sanitizes labels and rejects collisions", {
     fixed = TRUE
   )
 })
+
+test_that("resolve_composition_references rejects empty references", {
+  expect_error(
+    resolve_composition_references(
+      references = c("female-male", ""),
+      observed_compositions = "female_x_male",
+      arg_name = "test_arg"
+    ),
+    "`test_arg` must contain non-empty dyad composition references.",
+    fixed = TRUE
+  )
+})

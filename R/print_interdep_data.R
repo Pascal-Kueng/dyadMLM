@@ -64,13 +64,21 @@ print.interdep_data <- function(x, ...) {
 
     dyad_type <- format(dyad_type_label, justify = "left")
     composition_n_dyads <- format(dyad_compositions$n_dyads, justify = "right")
+    pooled_suffix <- rep("", nrow(dyad_compositions))
+    if ("composition_source" %in% names(dyad_compositions)) {
+      pooled_suffix <- ifelse(
+        dyad_compositions$composition_source == "pooled_by_user",
+        paste0(" | pooled: ", dyad_compositions$raw_composition),
+        ""
+      )
+    }
 
     for (i in seq_len(nrow(dyad_compositions))) {
       cat("#",
           composition[[i]],
           dyad_type[[i]],
           composition_n_dyads[[i]],
-          "dyads\n",
+          paste0("dyads", pooled_suffix[[i]], "\n"),
           sep = " ")
     }
 
