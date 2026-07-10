@@ -31,7 +31,8 @@ This vignette focuses mainly on APIM-style actor and partner effects, especially
 models with multiple dyad types, intensive longitudinal data, and generalized
 outcomes. For the Dyad-Individual Model (DIM) parameterization, including
 dyad-mean and within-dyad-deviation predictors and their equivalence to APIM
-effects in exchangeable dyads, see `vignette("Dyad-Individual-Model")`.
+effects in exchangeable dyads, see the
+[Dyad-Individual Model vignette](Dyad-Individual-Model.html).
 
 The basic data structure is a long data frame where dyads are stacked on top of
 each other and both members of a dyad appear as separate rows. For
