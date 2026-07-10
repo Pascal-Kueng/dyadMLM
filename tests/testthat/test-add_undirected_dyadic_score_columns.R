@@ -3,7 +3,8 @@ test_that("undirected DSM creates raw cross-sectional outcome columns", {
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     x = c(1, 10, 20, 30),
-    y = c(10, 14, 20, 24)
+    y = c(10, 14, 20, 24),
+    z = c(2, 6, 30, 40)
   )
 
   result <- prepare_interdep_data(
@@ -11,7 +12,7 @@ test_that("undirected DSM creates raw cross-sectional outcome columns", {
     group = dyad_id,
     member = person_id,
     predictors = x,
-    outcomes = y,
+    outcomes = c(y, z),
     model_type = "undirected_dsm",
     temporal_predictor_decomposition = "none",
     seed = 123
@@ -19,17 +20,19 @@ test_that("undirected DSM creates raw cross-sectional outcome columns", {
 
   expect_equal(result$.i_y_raw_dyad_mean, c(12, 12, 22, 22))
   expect_equal(result$.i_y_raw_within_dyad_deviation, c(-2, 2, -2, 2))
+  expect_equal(result$.i_z_raw_dyad_mean, c(4, 4, 35, 35))
+  expect_equal(result$.i_z_raw_within_dyad_deviation, c(-2, 2, -5, 5))
   expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
 
   expect_equal(
     attr(result, "interdep")$undirected_dsm_outcomes,
     tibble::tibble(
-      outcome = "y",
-      source_column = "y",
-      mean_column = ".i_y_raw_dyad_mean",
-      deviation_column = ".i_y_raw_within_dyad_deviation",
-      dyad_decomposition_level = "dyad"
+      outcome = c("y", "z"),
+      source_column = c("y", "z"),
+      mean_column = c(".i_y_raw_dyad_mean", ".i_z_raw_dyad_mean"),
+      deviation_column = c(".i_y_raw_within_dyad_deviation", ".i_z_raw_within_dyad_deviation"),
+      dyad_decomposition_level = c("dyad", "dyad")
     )
   )
 })
@@ -51,7 +54,7 @@ test_that("undirected DSM does not grand-mean center outcome dyad means", {
   )
 
   expect_equal(result$.i_y_raw_dyad_mean, c(12, 12, 22, 22))
-  expect_false(isTRUE(all.equal(result$.i_y_raw_dyad_mean, c(-5, -5, 5, 5))))
+  expect_false(".i_y_raw_dyad_mean_gmc" %in% names(result))
 })
 
 test_that("undirected DSM creates raw longitudinal outcome columns by dyad-time", {

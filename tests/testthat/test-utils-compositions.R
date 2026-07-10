@@ -52,14 +52,53 @@ test_that("make_interdep_suffixes sanitizes labels and rejects collisions", {
   )
 })
 
+test_that("resolve_composition_references accepts supported composition aliases", {
+  expect_equal(
+    resolve_composition_references(
+      references = c(
+        "male-female",
+        "female_male",
+        " female   male ",
+        "female_x_male",
+        "older younger"
+      ),
+      observed_compositions = c("female_x_male", "older_x_younger"),
+      arg_name = "set_exchangeable_compositions"
+    ),
+    c("female_x_male", "older_x_younger")
+  )
+})
+
+test_that("resolve_composition_references uses the supplied argument name in errors", {
+  expect_error(
+    resolve_composition_references(
+      references = list("female-male"),
+      observed_compositions = "female_x_male",
+      arg_name = "set_exchangeable_compositions"
+    ),
+    "`set_exchangeable_compositions` must be a character vector",
+    fixed = TRUE
+  )
+
+  expect_error(
+    resolve_composition_references(
+      references = "female-female",
+      observed_compositions = "female_x_male",
+      arg_name = "pool_compositions"
+    ),
+    "`pool_compositions` contains unknown dyad composition(s): female_x_female",
+    fixed = TRUE
+  )
+})
+
 test_that("resolve_composition_references rejects empty references", {
   expect_error(
     resolve_composition_references(
       references = c("female-male", ""),
       observed_compositions = "female_x_male",
-      arg_name = "test_arg"
+      arg_name = "set_exchangeable_compositions"
     ),
-    "`test_arg` must contain non-empty dyad composition references.",
+    "`set_exchangeable_compositions` must contain non-empty dyad composition references.",
     fixed = TRUE
   )
 })

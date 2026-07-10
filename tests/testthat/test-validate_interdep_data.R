@@ -390,6 +390,35 @@ test_that("validate_interdep_data rejects non-data-frame input", {
   )
 })
 
+test_that("validate_interdep_data rejects already validated input", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
+
+  expect_error(
+    validate_interdep_data(validated, group = dyad_id, member = person_id),
+    "`data` has already been prepared by interdep.",
+    fixed = TRUE
+  )
+})
+
+test_that("validate_interdep_data rejects reserved interdep columns", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    .i_composition = c("x", "x", "y", "y")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id),
+    "columns starting with `.i_`",
+    fixed = TRUE
+  )
+})
+
 test_that("validate_interdep_data requires group and member arguments", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -608,6 +637,20 @@ test_that("validate_interdep_data stores role metadata", {
   result <- validate_interdep_data(data, group = dyad_id, member = person_id, role = role)
 
   expect_equal(attr(result, "interdep")$role, "role")
+})
+
+test_that("validate_interdep_data rejects role labels with reserved separator", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female_x_male", "other", "female", "male")
+  )
+
+  expect_error(
+    validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
+    "`role` values must not contain `_x_`",
+    fixed = TRUE
+  )
 })
 
 test_that("validate_interdep_data accepts stable longitudinal roles", {

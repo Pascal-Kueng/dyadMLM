@@ -262,6 +262,46 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
   )
 })
 
+test_that("infer_dyad_compositions preserves unpooled exchangeable compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", "female", "male", "male", "friend", "friend")
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  ) |>
+    infer_dyad_compositions(
+      seed = 123,
+      pool_compositions = list(same_sex = c("female-female", "male male"))
+    )
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
+
+  expect_equal(dyad_compositions$composition, c("friend_x_friend", "same_sex"))
+  expect_equal(
+    dyad_compositions$pooled_from,
+    c(NA_character_, "female_x_female, male_x_male")
+  )
+  expect_equal(dyad_compositions$n_dyads, c(1L, 2L))
+  expect_equal(
+    as.character(result$.i_composition),
+    c(rep("same_sex", 4), rep("friend_x_friend", 2))
+  )
+  expect_equal(
+    as.character(result$.i_composition_role),
+    c(rep("same_sex", 4), rep("friend_x_friend", 2))
+  )
+  expect_true(".i_diff_friend_x_friend" %in% names(result))
+  expect_false(".i_diff_female_x_female" %in% names(result))
+  expect_false(".i_diff_male_x_male" %in% names(result))
+})
+
 test_that("infer_dyad_compositions pools after setting compositions exchangeable", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2, 3, 3),

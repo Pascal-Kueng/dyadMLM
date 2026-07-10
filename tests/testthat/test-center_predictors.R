@@ -49,6 +49,27 @@ test_that("center_predictors creates time_2l centered predictor columns", {
   )
 })
 
+test_that("center_predictors weights people equally for between-person centering", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2),
+    person_id = c("A", "A", "A", "B", "C", "D"),
+    time = c(1, 2, 3, 1, 1, 1),
+    x = c(0, 0, 30, 20, 40, 60)
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = x
+  ) |>
+    center_predictors()
+
+  expect_equal(result$.i_x_cwp, c(-10, -10, 20, 0, 0, 0))
+  expect_equal(result$.i_x_cbp, c(-22.5, -22.5, -22.5, -12.5, 7.5, 27.5))
+})
+
 test_that("center_predictors handles missing predictor values", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),

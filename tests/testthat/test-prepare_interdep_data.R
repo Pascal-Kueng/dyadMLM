@@ -255,7 +255,7 @@ test_that("prepare_interdep_data treats data without role as assumed exchangeabl
   expect_true(is.factor(result$.i_composition))
   expect_true(is.factor(result$.i_composition_role))
   expect_true(".i_is_assumed_exchangeable" %in% names(result))
-  expect_false(interdep_diff_col %in% names(result))
+  expect_false(".i_diff" %in% names(result))
   expect_true(".i_diff_assumed_exchangeable" %in% names(result))
   expect_equal(as.character(result$.i_composition), rep("assumed_exchangeable", 4))
   expect_equal(

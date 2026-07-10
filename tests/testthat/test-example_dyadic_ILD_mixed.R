@@ -1,4 +1,4 @@
-check_mixed_ild_dataset <- function(data, outcome) {
+check_mixed_dyad_type_ild_dataset <- function(data, outcome) {
   expected_columns <- c(
     "personID",
     "coupleID",
@@ -49,16 +49,14 @@ check_mixed_ild_dataset <- function(data, outcome) {
   expect_true(all(prepared$.i_diff_male_x_male[!male_male] == 0))
 }
 
-test_that("mixed-composition ILD Gaussian example data has expected structure", {
+test_that("ILD Gaussian example data with mixed dyad types has expected structure", {
   data("example_dyadic_ILD_mixed", package = "interdep")
 
-  expect_true(exists("example_dyadic_ILD_mixed"))
-  check_mixed_ild_dataset(example_dyadic_ILD_mixed, "closeness")
+  check_mixed_dyad_type_ild_dataset(example_dyadic_ILD_mixed, "closeness")
 })
 
-test_that("mixed-composition ILD Tweedie example data has expected structure", {
+test_that("ILD Tweedie example data with mixed dyad types has expected structure", {
   data("example_dyadic_ILD_mixed_tweedie", package = "interdep")
 
-  expect_true(exists("example_dyadic_ILD_mixed_tweedie"))
-  check_mixed_ild_dataset(example_dyadic_ILD_mixed_tweedie, "physical_activity")
+  check_mixed_dyad_type_ild_dataset(example_dyadic_ILD_mixed_tweedie, "physical_activity")
 })

@@ -23,6 +23,37 @@ test_that("assign_arbitrary_member_roles returns one role per member", {
   )
 })
 
+test_that("add_arbitrary_member_roles preserves repeated member rows", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    outcome = seq_len(8)
+  )
+
+  result <- add_arbitrary_member_roles(
+    data,
+    group_name = "dyad_id",
+    member_name = "person_id",
+    seed = 123
+  )
+
+  expect_equal(nrow(result), nrow(data))
+  expect_equal(result$outcome, data$outcome)
+  expect_equal(
+    dplyr::count(result, .data$dyad_id, .data$person_id, .data[[interdep_arbitrary_role_col]])$n,
+    rep(2L, 4)
+  )
+  expect_equal(
+    dplyr::count(
+      dplyr::distinct(result, .data$dyad_id, .data$person_id, .data[[interdep_arbitrary_role_col]]),
+      .data$dyad_id,
+      .data[[interdep_arbitrary_role_col]]
+    )$n,
+    rep(1L, 4)
+  )
+})
+
 test_that("assign_arbitrary_member_roles restores an existing RNG state", {
   old_seed_exists <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
   if (old_seed_exists) {

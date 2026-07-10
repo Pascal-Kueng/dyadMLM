@@ -4,6 +4,23 @@ test_that("interdep_generated_columns returns empty metadata without model colum
   expect_equal(result, empty_generated_columns())
 })
 
+test_that("interdep_generated_columns errors when generated column specs are missing", {
+  meta <- list(
+    apim_predictors = tibble::tibble(
+      predictor = "x",
+      component = "unsupported",
+      source_column = "x",
+      actor_column = ".i_x_unsupported_actor",
+      partner_column = ".i_x_unsupported_partner"
+    )
+  )
+
+  expect_error(
+    interdep_generated_columns(meta),
+    "no generated-column specification.*apim/predictor/unsupported/actor"
+  )
+})
+
 test_that("interdep_generated_columns collects APIM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

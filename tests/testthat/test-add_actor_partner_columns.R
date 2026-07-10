@@ -92,6 +92,39 @@ test_that("add_actor_partner_columns matches cross-sectional partners", {
   expect_equal(result$.i_x_raw_partner, c(10, 1, 30, 20))
 })
 
+test_that("add_actor_partner_columns uses generated names for raw predictors", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    check.names = FALSE
+  )
+  data[["stress level"]] <- c(1, 10, 20, 30)
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    predictors = `stress level`,
+    temporal_predictor_decomposition = "none"
+  ) |>
+    infer_dyad_compositions(seed = 123) |>
+    center_predictors() |>
+    add_actor_partner_columns()
+
+  expect_equal(result$.i_stress_level_raw_actor, result[["stress level"]])
+  expect_equal(result$.i_stress_level_raw_partner, c(10, 1, 30, 20))
+  expect_equal(
+    attr(result, "interdep")$apim_predictors,
+    tibble::tibble(
+      predictor = "stress level",
+      component = "raw",
+      source_column = "stress level",
+      actor_column = ".i_stress_level_raw_actor",
+      partner_column = ".i_stress_level_raw_partner"
+    )
+  )
+})
+
 test_that("add_actor_partner_columns stores empty metadata without predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
