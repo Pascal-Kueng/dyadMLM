@@ -282,11 +282,11 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
   }
 
   observed_compositions <- dyad_roles[[interdep_composition_col]]
-  pooled_compositions <- character()
+  already_pooled_compositions <- character()
 
-  for (i in seq_along(composition_pooling)) {
+  for (i in seq_along(composition_pooling)) { # for each composition to pool
     pool_name <- pool_names[[i]]
-    references <- composition_pooling[[i]]
+    references_to_pool <- composition_pooling[[i]]
 
     if (!is.character(references) || length(references) == 0) {
       stop(
@@ -296,13 +296,15 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       )
     }
 
-    resolved <- resolve_composition_references(
-      references = references,
+    resolved_cannonical_references_to_pool <- resolve_composition_references(
+      references = references_to_pool,
       observed_compositions = observed_compositions,
       arg_name = "composition_pooling"
     )
 
-    duplicated_compositions <- intersect(resolved, pooled_compositions)
+    # When looping through, pooled we check if we already saw tha same
+    # resolved_cannonical_reference_to_pool ealier, now stored in pooled composition
+    duplicated_compositions <- intersect(resolved_cannonical_references_to_pool, already_pooled_compositions)
     if (length(duplicated_compositions) > 0) {
       stop(
         "`composition_pooling` cannot assign the same composition to more than one pool. ",
@@ -313,7 +315,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       )
     }
 
-    pool_name_collision <- pool_name %in% setdiff(observed_compositions, resolved)
+    pool_name_collision <- pool_name %in% setdiff(observed_compositions, resolved_cannonical_references_to_pool)
     if (pool_name_collision) {
       stop(
         "`composition_pooling` names must not match observed compositions that are not part of that pool. ",
@@ -324,9 +326,10 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       )
     }
 
+    # check if user tries to pool distinguishable dyads
     non_exchangeable_rows <- dyad_roles |>
       dplyr::filter(
-        .data[[interdep_composition_col]] %in% resolved,
+        .data[[interdep_composition_col]] %in% resolved_cannonical_references_to_pool,
         .data[[interdep_dyad_type_col]] != "exchangeable"
       )
 
@@ -345,11 +348,15 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       )
     }
 
-    is_pooled <- dyad_roles[[interdep_composition_col]] %in% resolved
+    # Actual pooling
+    ## subsetting all rows **within the current pooling step**.
+    is_pooled <- dyad_roles[[interdep_composition_col]] %in% resolved_cannonical_references_to_pool
+
+    #
     dyad_roles[[interdep_pool_member_col]][is_pooled] <- dyad_roles[[interdep_composition_col]][is_pooled]
     dyad_roles[[interdep_composition_col]][is_pooled] <- pool_name
 
-    pooled_compositions <- c(pooled_compositions, resolved)
+    already_pooled_compositions <- c(already_pooled_compositions, resolved_cannonical_references_to_pool)
   }
 
   dyad_roles
