@@ -474,44 +474,6 @@ cross_distinguishable_model <- glmmTMB(
 )
 
 summary(cross_distinguishable_model)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_male_female:.i_communication_raw_actor + .i_is_female_x_male_male:.i_communication_raw_actor +  
-#>     .i_is_female_x_male_female:.i_communication_raw_partner +  
-#>     .i_is_female_x_male_male:.i_communication_raw_partner + us(0 +  
-#>     .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)
-#> Dispersion:                    ~0
-#> Data: cross_distinguishable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     589.5     618.0    -285.7     571.5       167 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups   Name                       Variance Std.Dev. Corr  
-#>  coupleID .i_is_female_x_male_female 1.311    1.145          
-#>           .i_is_female_x_male_male   1.792    1.339    -0.19 
-#> Number of obs: 176, groups:  coupleID, 88
-#> 
-#> Conditional model:
-#>                                                         Estimate Std. Error
-#> .i_is_female_x_male_female                              -4.36874    0.59416
-#> .i_is_female_x_male_male                                -6.03808    0.69452
-#> .i_is_female_x_male_female:.i_communication_raw_actor    1.67170    0.10089
-#> .i_is_female_x_male_male:.i_communication_raw_actor      1.80495    0.10562
-#> .i_is_female_x_male_female:.i_communication_raw_partner  0.24930    0.09035
-#> .i_is_female_x_male_male:.i_communication_raw_partner    0.25453    0.11793
-#>                                                         z value Pr(>|z|)    
-#> .i_is_female_x_male_female                               -7.353 1.94e-13 ***
-#> .i_is_female_x_male_male                                 -8.694  < 2e-16 ***
-#> .i_is_female_x_male_female:.i_communication_raw_actor    16.570  < 2e-16 ***
-#> .i_is_female_x_male_male:.i_communication_raw_actor      17.090  < 2e-16 ***
-#> .i_is_female_x_male_female:.i_communication_raw_partner   2.759  0.00579 ** 
-#> .i_is_female_x_male_male:.i_communication_raw_partner     2.158  0.03090 *  
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ### Exchangeable Gaussian APIM
@@ -626,31 +588,6 @@ cross_exchangeable_diff_model <- glmmTMB(
 )
 
 summary(cross_exchangeable_diff_model)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> satisfaction ~ 1 + .i_communication_raw_actor + .i_communication_raw_partner +  
-#>     us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable |      coupleID)
-#> Dispersion:                    ~0
-#> Data: cross_exchangeable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     604.0     619.8    -297.0     594.0       171 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups     Name                         Variance Std.Dev.
-#>  coupleID   (Intercept)                  0.6346   0.7966  
-#>  coupleID.1 .i_diff_assumed_exchangeable 1.1532   1.0739  
-#> Number of obs: 176, groups:  coupleID, 88
-#> 
-#> Conditional model:
-#>                              Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                   -5.2330     0.4103 -12.754  < 2e-16 ***
-#> .i_communication_raw_actor     1.7578     0.0819  21.461  < 2e-16 ***
-#> .i_communication_raw_partner   0.2379     0.0819   2.904  0.00368 ** 
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 Helper functions to rotate these structures back to partner-level
@@ -867,50 +804,6 @@ tweedie_distinguishable_model <- glmmTMB(
 )
 
 summary(tweedie_distinguishable_model)
-#>  Family: tweedie  ( log )
-#> Formula:          
-#> physical_activity ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_male_female:.i_motivation_raw_actor + .i_is_female_x_male_male:.i_motivation_raw_actor +  
-#>     .i_is_female_x_male_female:.i_motivation_raw_partner + .i_is_female_x_male_male:.i_motivation_raw_partner +  
-#>     (1 | coupleID)
-#> Dispersion:                         
-#> ~0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-#> Data: tweedie_distinguishable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    1533.9    1568.1    -757.0    1513.9       214 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups   Name        Variance  Std.Dev. 
-#>  coupleID (Intercept) 1.022e-08 0.0001011
-#> Number of obs: 224, groups:  coupleID, 112
-#> 
-#> Conditional model:
-#>                                                      Estimate Std. Error
-#> .i_is_female_x_male_female                            2.28287    0.09079
-#> .i_is_female_x_male_male                              2.39714    0.11046
-#> .i_is_female_x_male_female:.i_motivation_raw_actor    0.42816    0.10062
-#> .i_is_female_x_male_male:.i_motivation_raw_actor      0.35843    0.12231
-#> .i_is_female_x_male_female:.i_motivation_raw_partner  0.08225    0.09609
-#> .i_is_female_x_male_male:.i_motivation_raw_partner    0.13526    0.13205
-#>                                                      z value Pr(>|z|)    
-#> .i_is_female_x_male_female                            25.143  < 2e-16 ***
-#> .i_is_female_x_male_male                              21.702  < 2e-16 ***
-#> .i_is_female_x_male_female:.i_motivation_raw_actor     4.255 2.09e-05 ***
-#> .i_is_female_x_male_male:.i_motivation_raw_actor       2.931  0.00338 ** 
-#> .i_is_female_x_male_female:.i_motivation_raw_partner   0.856  0.39200    
-#> .i_is_female_x_male_male:.i_motivation_raw_partner     1.024  0.30571    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Dispersion model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> .i_is_female_x_male_female   0.9880     0.1104   8.947   <2e-16 ***
-#> .i_is_female_x_male_male     1.4410     0.1039  13.876   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ### Exchangeable Tweedie APIM
@@ -1022,32 +915,6 @@ tweedie_exchangeable_model <- glmmTMB(
 )
 
 summary(tweedie_exchangeable_model)
-#>  Family: tweedie  ( log )
-#> Formula:          
-#> physical_activity ~ 1 + .i_motivation_raw_actor + .i_motivation_raw_partner +  
-#>     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID)
-#> Data: tweedie_exchangeable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    1538.2    1562.1    -762.1    1524.2       217 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups     Name                         Variance  Std.Dev. 
-#>  coupleID   (Intercept)                  2.481e-07 0.0004981
-#>  coupleID.1 .i_diff_assumed_exchangeable 4.550e-02 0.2133006
-#> Number of obs: 224, groups:  coupleID, 112
-#> 
-#> Dispersion parameter for tweedie family ():  3.4 
-#> 
-#> Conditional model:
-#>                           Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                2.32049    0.08431  27.524  < 2e-16 ***
-#> .i_motivation_raw_actor    0.39178    0.08052   4.866 1.14e-06 ***
-#> .i_motivation_raw_partner  0.10806    0.08132   1.329    0.184    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ## Intensive longitudinal dyadic data
@@ -1250,66 +1117,6 @@ ild_distinguishable_model <- glmmTMB(
 )
 
 summary(ild_distinguishable_model)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> closeness ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_partner +  
-#>     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
-#>         coupleID) + us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
-#>     coupleID:diaryday)
-#> Dispersion:                 ~0
-#> Data: ild_distinguishable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2846.0    2934.9   -1405.0    2810.0      1016 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups            Name                       Variance Std.Dev. Corr  
-#>  coupleID          .i_is_female_x_male_female 0.9347   0.9668         
-#>                    .i_is_female_x_male_male   0.7545   0.8686   0.25  
-#>  coupleID:diaryday .i_is_female_x_male_female 0.4684   0.6844         
-#>                    .i_is_female_x_male_male   1.1625   1.0782   -0.24 
-#> Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517
-#> 
-#> Conditional model:
-#>                                                             Estimate Std. Error
-#> .i_is_female_x_male_female                                  5.486939   0.163761
-#> .i_is_female_x_male_male                                    4.669918   0.165249
-#> .i_is_female_x_male_female:diaryday                         0.011902   0.007568
-#> .i_is_female_x_male_male:diaryday                          -0.027344   0.011919
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.385208   0.040954
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.140585   0.070268
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.284027   0.044610
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner    0.156317   0.064511
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor    1.257746   0.224540
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor      0.974052   0.204953
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner  0.562668   0.219747
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner    0.226989   0.209494
-#>                                                            z value Pr(>|z|)    
-#> .i_is_female_x_male_female                                   33.51  < 2e-16 ***
-#> .i_is_female_x_male_male                                     28.26  < 2e-16 ***
-#> .i_is_female_x_male_female:diaryday                           1.57   0.1158    
-#> .i_is_female_x_male_male:diaryday                            -2.29   0.0218 *  
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor      9.41  < 2e-16 ***
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor        2.00   0.0454 *  
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner    6.37 1.93e-10 ***
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner      2.42   0.0154 *  
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor      5.60 2.13e-08 ***
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor        4.75 2.01e-06 ***
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner    2.56   0.0105 *  
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner      1.08   0.2786    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ### Exchangeable ILD APIM
@@ -1454,39 +1261,6 @@ ild_exchangeable_model <- glmmTMB(
 )
 
 summary(ild_exchangeable_model)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> closeness ~ 1 + diaryday + .i_provided_support_cwp_actor + .i_provided_support_cwp_partner +  
-#>     .i_provided_support_cbp_actor + .i_provided_support_cbp_partner +  
-#>     us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable |  
-#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable |  
-#>     coupleID:diaryday)
-#> Dispersion:                 ~0
-#> Data: ild_exchangeable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2977.2    3026.6   -1478.6    2957.2      1024 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups              Name                         Variance Std.Dev.
-#>  coupleID            (Intercept)                  0.5254   0.7248  
-#>  coupleID.1          .i_diff_assumed_exchangeable 0.6416   0.8010  
-#>  coupleID.diaryday   (Intercept)                  0.3185   0.5643  
-#>  coupleID.diaryday.1 .i_diff_assumed_exchangeable 0.5184   0.7200  
-#> Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517
-#> 
-#> Conditional model:
-#>                                  Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                      5.079989   0.124223   40.89  < 2e-16 ***
-#> diaryday                        -0.008077   0.006234   -1.30   0.1951    
-#> .i_provided_support_cwp_actor    0.271077   0.041683    6.50 7.86e-11 ***
-#> .i_provided_support_cwp_partner  0.216075   0.041683    5.18 2.17e-07 ***
-#> .i_provided_support_cbp_actor    1.143686   0.179784    6.36 2.00e-10 ***
-#> .i_provided_support_cbp_partner  0.367013   0.179784    2.04   0.0412 *  
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ## Semi-continuous intensive longitudinal dyadic data
@@ -1690,72 +1464,6 @@ ild_tweedie_distinguishable_shared_day_model <- glmmTMB(
 )
 
 summary(ild_tweedie_distinguishable_shared_day_model)
-#>  Family: tweedie  ( log )
-#> Formula:          
-#> physical_activity ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_partner +  
-#>     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
-#>         coupleID) + (1 | coupleID:diaryday)
-#> Dispersion:                         
-#> ~0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-#> Data: ild_tweedie_distinguishable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    6962.2    7056.2   -3462.1    6924.2      1017 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups            Name                       Variance  Std.Dev. Corr 
-#>  coupleID          .i_is_female_x_male_female 1.340e-01 0.366054      
-#>                    .i_is_female_x_male_male   1.492e-01 0.386290 0.37 
-#>  coupleID:diaryday (Intercept)                1.587e-08 0.000126      
-#> Number of obs: 1036, groups:  coupleID, 40; coupleID:diaryday, 518
-#> 
-#> Conditional model:
-#>                                                             Estimate Std. Error
-#> .i_is_female_x_male_female                                  2.097346   0.107131
-#> .i_is_female_x_male_male                                    2.173432   0.119507
-#> .i_is_female_x_male_female:diaryday                         0.008115   0.010490
-#> .i_is_female_x_male_male:diaryday                           0.016390   0.012241
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.242326   0.060967
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.132711   0.063811
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.078938   0.055540
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner   -0.002616   0.073437
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor    0.311508   0.119266
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor      0.287136   0.114588
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner -0.194908   0.102250
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner    0.006398   0.131226
-#>                                                            z value Pr(>|z|)    
-#> .i_is_female_x_male_female                                  19.577  < 2e-16 ***
-#> .i_is_female_x_male_male                                    18.187  < 2e-16 ***
-#> .i_is_female_x_male_female:diaryday                          0.774   0.4392    
-#> .i_is_female_x_male_male:diaryday                            1.339   0.1806    
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor     3.975 7.05e-05 ***
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor       2.080   0.0375 *  
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner   1.421   0.1552    
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner    -0.036   0.9716    
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor     2.612   0.0090 ** 
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor       2.506   0.0122 *  
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner  -1.906   0.0566 .  
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner     0.049   0.9611    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Dispersion model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> .i_is_female_x_male_female  0.98548    0.05344   18.44   <2e-16 ***
-#> .i_is_female_x_male_male    1.30137    0.04853   26.81   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 The second model uses a role-specific same-day latent covariance block.
@@ -1802,81 +1510,8 @@ ild_tweedie_distinguishable_latent_day_cov_model <- glmmTMB(
   , family = tweedie()
   , data = ild_tweedie_distinguishable_data
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; singular convergence (7). See vignette('troubleshooting'),
-#> help('diagnose')
 
 summary(ild_tweedie_distinguishable_latent_day_cov_model)
-#>  Family: tweedie  ( log )
-#> Formula:          
-#> physical_activity ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_partner +  
-#>     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
-#>         coupleID) + (0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
-#>     coupleID:diaryday)
-#> Dispersion:                         
-#> ~0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-#> Data: ild_tweedie_distinguishable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>        NA        NA        NA        NA      1015 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups            Name                       Variance Std.Dev. Corr  
-#>  coupleID          .i_is_female_x_male_female 0.13628  0.3692         
-#>                    .i_is_female_x_male_male   0.13407  0.3662   0.41  
-#>  coupleID:diaryday .i_is_female_x_male_female 0.01647  0.1283         
-#>                    .i_is_female_x_male_male   0.42205  0.6497   -1.00 
-#> Number of obs: 1036, groups:  coupleID, 40; coupleID:diaryday, 518
-#> 
-#> Conditional model:
-#>                                                             Estimate Std. Error
-#> .i_is_female_x_male_female                                  2.081892   0.106824
-#> .i_is_female_x_male_male                                    2.002686   0.138123
-#> .i_is_female_x_male_female:diaryday                         0.009036   0.010290
-#> .i_is_female_x_male_male:diaryday                           0.012999   0.013619
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.246792   0.059727
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.128362   0.070654
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.077370   0.054445
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner    0.003591   0.081558
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor    0.310515   0.119142
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor      0.289403   0.115924
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner -0.195607   0.102187
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner    0.012876   0.132678
-#>                                                            z value Pr(>|z|)    
-#> .i_is_female_x_male_female                                  19.489  < 2e-16 ***
-#> .i_is_female_x_male_male                                    14.499  < 2e-16 ***
-#> .i_is_female_x_male_female:diaryday                          0.878  0.37985    
-#> .i_is_female_x_male_male:diaryday                            0.954  0.33984    
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor     4.132  3.6e-05 ***
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor       1.817  0.06925 .  
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner   1.421  0.15530    
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner     0.044  0.96488    
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor     2.606  0.00915 ** 
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor       2.496  0.01254 *  
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner  -1.914  0.05559 .  
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner     0.097  0.92269    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Dispersion model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> .i_is_female_x_male_female  1.00955    0.05555   18.17   <2e-16 ***
-#> .i_is_female_x_male_male    1.13602    0.07868   14.44   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 The fuller same-day latent covariance structure is much more fragile in
@@ -2035,40 +1670,6 @@ ild_tweedie_exchangeable_model <- glmmTMB(
 )
 
 summary(ild_tweedie_exchangeable_model)
-#>  Family: tweedie  ( log )
-#> Formula:          
-#> physical_activity ~ 1 + diaryday + .i_provided_support_cwp_actor +  
-#>     .i_provided_support_cwp_partner + .i_provided_support_cbp_actor +  
-#>     .i_provided_support_cbp_partner + (1 | coupleID) + (0 + .i_diff_assumed_exchangeable |  
-#>     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable |  
-#>     coupleID:diaryday)
-#> Data: ild_tweedie_exchangeable_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    6969.7    7029.1   -3472.9    6945.7      1024 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups              Name                         Variance Std.Dev.
-#>  coupleID            (Intercept)                  0.09883  0.3144  
-#>  coupleID.1          .i_diff_assumed_exchangeable 0.04339  0.2083  
-#>  coupleID.diaryday   (Intercept)                  0.04094  0.2023  
-#>  coupleID.diaryday.1 .i_diff_assumed_exchangeable 0.12094  0.3478  
-#> Number of obs: 1036, groups:  coupleID, 40; coupleID:diaryday, 518
-#> 
-#> Dispersion parameter for tweedie family (): 3.01 
-#> 
-#> Conditional model:
-#>                                  Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                      2.083490   0.088192  23.624  < 2e-16 ***
-#> diaryday                         0.012181   0.008072   1.509 0.131308    
-#> .i_provided_support_cwp_actor    0.178878   0.046172   3.874 0.000107 ***
-#> .i_provided_support_cwp_partner  0.047492   0.047095   1.008 0.313246    
-#> .i_provided_support_cbp_actor    0.281176   0.076666   3.668 0.000245 ***
-#> .i_provided_support_cbp_partner -0.087807   0.075553  -1.162 0.245155    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ## Mixed-composition cross-sectional Gaussian model
@@ -2209,39 +1810,6 @@ mixed_cross_gaussian_model <- glmmTMB(
 )
 
 summary(mixed_cross_gaussian_model)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_female + .i_is_male_x_male + us(0 + .i_is_female_x_male_female +  
-#>     .i_is_female_x_male_male | coupleID) + (0 + .i_is_female_x_female |  
-#>     coupleID) + (0 + .i_diff_female_x_female | coupleID) + (0 +  
-#>     .i_is_male_x_male | coupleID) + (0 + .i_diff_male_x_male |      coupleID)
-#> Dispersion:                    ~0
-#> Data: mixed_cross_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2009.9    2059.0    -994.0    1987.9       629 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups     Name                       Variance Std.Dev. Corr  
-#>  coupleID   .i_is_female_x_male_female 1.1999   1.0954         
-#>             .i_is_female_x_male_male   1.9437   1.3942   -0.30 
-#>  coupleID.1 .i_is_female_x_female      0.6682   0.8175         
-#>  coupleID.2 .i_diff_female_x_female    0.3217   0.5672         
-#>  coupleID.3 .i_is_male_x_male          0.6274   0.7921         
-#>  coupleID.4 .i_diff_male_x_male        1.0457   1.0226         
-#> Number of obs: 640, groups:  coupleID, 320
-#> 
-#> Conditional model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> .i_is_female_x_male_female  5.50000    0.10000   55.00   <2e-16 ***
-#> .i_is_female_x_male_male    4.50000    0.12727   35.36   <2e-16 ***
-#> .i_is_female_x_female       5.80000    0.08175   70.95   <2e-16 ***
-#> .i_is_male_x_male           4.20000    0.07921   53.02   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ## Mixed-composition intensive longitudinal Gaussian model
@@ -2496,115 +2064,8 @@ mixed_ild_gaussian_model <- glmmTMB(
       optArgs = list(method = "BFGS")
     )
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; . See vignette('troubleshooting'), help('diagnose')
 
 summary(mixed_ild_gaussian_model)
-#> Warning in sqrt(diag(vcovs)): NaNs produced
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> closeness ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_female + .i_is_male_x_male + .i_is_female_x_male_female:diaryday +  
-#>     .i_is_female_x_male_male:diaryday + .i_is_female_x_female:diaryday +  
-#>     .i_is_male_x_male:diaryday + .i_is_female_x_male_female:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_female:.i_provided_support_cwp_actor + .i_is_male_x_male:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_female:.i_provided_support_cwp_partner + .i_is_male_x_male:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_female:.i_provided_support_cbp_actor + .i_is_male_x_male:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_partner +  
-#>     .i_is_female_x_female:.i_provided_support_cbp_partner + .i_is_male_x_male:.i_provided_support_cbp_partner +  
-#>     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
-#>         coupleID) + (0 + .i_is_female_x_female | coupleID) +  
-#>     (0 + .i_diff_female_x_female | coupleID) + (0 + .i_is_male_x_male |  
-#>     coupleID) + (0 + .i_diff_male_x_male | coupleID) + us(0 +  
-#>     .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +  
-#>     (0 + .i_is_female_x_female | coupleID:diaryday) + (0 + .i_diff_female_x_female |  
-#>     coupleID:diaryday) + (0 + .i_is_male_x_male | coupleID:diaryday) +  
-#>     (0 + .i_diff_male_x_male | coupleID:diaryday)
-#> Dispersion:                 ~0
-#> Data: mixed_ild_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>        NA        NA        NA        NA      5136 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups              Name                       Variance  Std.Dev.  Corr  
-#>  coupleID            .i_is_female_x_male_female 5.805e-47 7.619e-24       
-#>                      .i_is_female_x_male_male   2.010e+00 1.418e+00 -1.00 
-#>  coupleID.1          .i_is_female_x_female      3.570e+02 1.890e+01       
-#>  coupleID.2          .i_diff_female_x_female    6.226e-01 7.891e-01       
-#>  coupleID.3          .i_is_male_x_male          1.136e+01 3.371e+00       
-#>  coupleID.4          .i_diff_male_x_male        5.103e-50 2.259e-25       
-#>  coupleID.diaryday   .i_is_female_x_male_female 5.173e+01 7.193e+00       
-#>                      .i_is_female_x_male_male   1.167e+02 1.080e+01 0.97  
-#>  coupleID.diaryday.1 .i_is_female_x_female      3.791e-01 6.157e-01       
-#>  coupleID.diaryday.2 .i_diff_female_x_female    1.968e-01 4.437e-01       
-#>  coupleID.diaryday.3 .i_is_male_x_male          5.932e-01 7.702e-01       
-#>  coupleID.diaryday.4 .i_diff_male_x_male        8.381e-01 9.155e-01       
-#> Number of obs: 5174, groups:  coupleID, 200; coupleID:diaryday, 2587
-#> 
-#> Conditional model:
-#>                                                             Estimate Std. Error
-#> .i_is_female_x_male_female                                 12.939733        NaN
-#> .i_is_female_x_male_male                                   16.531583        NaN
-#> .i_is_female_x_female                                       4.212880   2.689101
-#> .i_is_male_x_male                                           7.956903        NaN
-#> .i_is_female_x_male_female:diaryday                        -0.615660        NaN
-#> .i_is_female_x_male_male:diaryday                          -1.051362        NaN
-#> .i_is_female_x_female:diaryday                              0.003883   0.005499
-#> .i_is_male_x_male:diaryday                                 -0.044356   0.007109
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.069546   0.319883
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.811243   0.466394
-#> .i_is_female_x_female:.i_provided_support_cwp_actor         0.155634   0.027460
-#> .i_is_male_x_male:.i_provided_support_cwp_actor             0.088021   0.045156
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.543383   0.310803
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner   -0.151248   0.488922
-#> .i_is_female_x_female:.i_provided_support_cwp_partner       0.268629   0.027460
-#> .i_is_male_x_male:.i_provided_support_cwp_partner           0.186969   0.045156
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor    0.864110   0.326638
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor      1.756251   0.412704
-#> .i_is_female_x_female:.i_provided_support_cbp_actor        -9.255501        NaN
-#> .i_is_male_x_male:.i_provided_support_cbp_actor             3.736442        NaN
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner  1.388071   0.214863
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner   -0.785092   0.546831
-#> .i_is_female_x_female:.i_provided_support_cbp_partner      -9.991265        NaN
-#> .i_is_male_x_male:.i_provided_support_cbp_partner           3.023806        NaN
-#>                                                            z value Pr(>|z|)    
-#> .i_is_female_x_male_female                                     NaN      NaN    
-#> .i_is_female_x_male_male                                       NaN      NaN    
-#> .i_is_female_x_female                                        1.567  0.11720    
-#> .i_is_male_x_male                                              NaN      NaN    
-#> .i_is_female_x_male_female:diaryday                            NaN      NaN    
-#> .i_is_female_x_male_male:diaryday                              NaN      NaN    
-#> .i_is_female_x_female:diaryday                               0.706  0.48009    
-#> .i_is_male_x_male:diaryday                                  -6.240 4.39e-10 ***
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor     0.217  0.82789    
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor       1.739  0.08197 .  
-#> .i_is_female_x_female:.i_provided_support_cwp_actor          5.668 1.45e-08 ***
-#> .i_is_male_x_male:.i_provided_support_cwp_actor              1.949  0.05126 .  
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner   1.748  0.08041 .  
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner    -0.309  0.75705    
-#> .i_is_female_x_female:.i_provided_support_cwp_partner        9.783  < 2e-16 ***
-#> .i_is_male_x_male:.i_provided_support_cwp_partner            4.141 3.47e-05 ***
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor     2.645  0.00816 ** 
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor       4.255 2.09e-05 ***
-#> .i_is_female_x_female:.i_provided_support_cbp_actor            NaN      NaN    
-#> .i_is_male_x_male:.i_provided_support_cbp_actor                NaN      NaN    
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner   6.460 1.05e-10 ***
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner    -1.436  0.15108    
-#> .i_is_female_x_female:.i_provided_support_cbp_partner          NaN      NaN    
-#> .i_is_male_x_male:.i_provided_support_cbp_partner              NaN      NaN    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ## Mixed-composition intensive longitudinal Tweedie model
@@ -2859,117 +2320,4 @@ mixed_ild_tweedie_model <- glmmTMB(
 )
 
 summary(mixed_ild_tweedie_model)
-#>  Family: tweedie  ( log )
-#> Formula:          
-#> physical_activity ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_female + .i_is_male_x_male + .i_is_female_x_male_female:diaryday +  
-#>     .i_is_female_x_male_male:diaryday + .i_is_female_x_female:diaryday +  
-#>     .i_is_male_x_male:diaryday + .i_is_female_x_male_female:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_female:.i_provided_support_cwp_actor + .i_is_male_x_male:.i_provided_support_cwp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_female:.i_provided_support_cwp_partner + .i_is_male_x_male:.i_provided_support_cwp_partner +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_female:.i_provided_support_cbp_actor + .i_is_male_x_male:.i_provided_support_cbp_actor +  
-#>     .i_is_female_x_male_female:.i_provided_support_cbp_partner +  
-#>     .i_is_female_x_male_male:.i_provided_support_cbp_partner +  
-#>     .i_is_female_x_female:.i_provided_support_cbp_partner + .i_is_male_x_male:.i_provided_support_cbp_partner +  
-#>     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
-#>         coupleID) + (0 + .i_is_female_x_female | coupleID) +  
-#>     (0 + .i_diff_female_x_female | coupleID) + (0 + .i_is_male_x_male |  
-#>     coupleID) + (0 + .i_diff_male_x_male | coupleID) + (0 + .i_is_female_x_male_female +  
-#>     .i_is_female_x_male_male | coupleID:diaryday) + (0 + .i_is_female_x_female |  
-#>     coupleID:diaryday) + (0 + .i_diff_female_x_female | coupleID:diaryday) +  
-#>     (0 + .i_is_male_x_male | coupleID:diaryday) + (0 + .i_diff_male_x_male |  
-#>     coupleID:diaryday)
-#> Dispersion:                         
-#> ~0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
-#>     .i_is_female_x_female + .i_is_male_x_male
-#> Data: mixed_ild_tweedie_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>   35082.3   35363.9  -17498.1   34996.3      5119 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups              Name                       Variance  Std.Dev.  Corr  
-#>  coupleID            .i_is_female_x_male_female 1.683e-01 0.4102650       
-#>                      .i_is_female_x_male_male   1.392e-01 0.3730660 0.80  
-#>  coupleID.1          .i_is_female_x_female      9.964e-02 0.3156524       
-#>  coupleID.2          .i_diff_female_x_female    2.471e-02 0.1571871       
-#>  coupleID.3          .i_is_male_x_male          1.301e-01 0.3607278       
-#>  coupleID.4          .i_diff_male_x_male        1.541e-02 0.1241346       
-#>  coupleID.diaryday   .i_is_female_x_male_female 9.451e-02 0.3074260       
-#>                      .i_is_female_x_male_male   3.667e-02 0.1914832 -0.53 
-#>  coupleID.diaryday.1 .i_is_female_x_female      4.048e-02 0.2011845       
-#>  coupleID.diaryday.2 .i_diff_female_x_female    2.501e-02 0.1581430       
-#>  coupleID.diaryday.3 .i_is_male_x_male          9.803e-08 0.0003131       
-#>  coupleID.diaryday.4 .i_diff_male_x_male        2.824e-02 0.1680486       
-#> Number of obs: 5162, groups:  coupleID, 200; coupleID:diaryday, 2581
-#> 
-#> Conditional model:
-#>                                                             Estimate Std. Error
-#> .i_is_female_x_male_female                                  2.114490   0.085565
-#> .i_is_female_x_male_male                                    2.474648   0.083228
-#> .i_is_female_x_female                                       2.013241   0.072674
-#> .i_is_male_x_male                                           2.446370   0.072992
-#> .i_is_female_x_male_female:diaryday                         0.010613   0.008062
-#> .i_is_female_x_male_male:diaryday                          -0.013020   0.008249
-#> .i_is_female_x_female:diaryday                              0.003965   0.006468
-#> .i_is_male_x_male:diaryday                                  0.002396   0.006461
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor    0.200675   0.047820
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor      0.219743   0.045707
-#> .i_is_female_x_female:.i_provided_support_cwp_actor         0.180580   0.036501
-#> .i_is_male_x_male:.i_provided_support_cwp_actor             0.119027   0.038922
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner  0.062675   0.044308
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner    0.070466   0.048916
-#> .i_is_female_x_female:.i_provided_support_cwp_partner       0.035356   0.036386
-#> .i_is_male_x_male:.i_provided_support_cwp_partner           0.025004   0.038809
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor    0.233587   0.073246
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor      0.313337   0.059314
-#> .i_is_female_x_female:.i_provided_support_cbp_actor         0.327373   0.046754
-#> .i_is_male_x_male:.i_provided_support_cbp_actor             0.211319   0.058345
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner  0.149787   0.062802
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner   -0.095483   0.068594
-#> .i_is_female_x_female:.i_provided_support_cbp_partner       0.135340   0.046658
-#> .i_is_male_x_male:.i_provided_support_cbp_partner           0.043546   0.057741
-#>                                                            z value Pr(>|z|)    
-#> .i_is_female_x_male_female                                   24.71  < 2e-16 ***
-#> .i_is_female_x_male_male                                     29.73  < 2e-16 ***
-#> .i_is_female_x_female                                        27.70  < 2e-16 ***
-#> .i_is_male_x_male                                            33.52  < 2e-16 ***
-#> .i_is_female_x_male_female:diaryday                           1.32 0.187987    
-#> .i_is_female_x_male_male:diaryday                            -1.58 0.114467    
-#> .i_is_female_x_female:diaryday                                0.61 0.539842    
-#> .i_is_male_x_male:diaryday                                    0.37 0.710748    
-#> .i_is_female_x_male_female:.i_provided_support_cwp_actor      4.20 2.71e-05 ***
-#> .i_is_female_x_male_male:.i_provided_support_cwp_actor        4.81 1.53e-06 ***
-#> .i_is_female_x_female:.i_provided_support_cwp_actor           4.95 7.53e-07 ***
-#> .i_is_male_x_male:.i_provided_support_cwp_actor               3.06 0.002227 ** 
-#> .i_is_female_x_male_female:.i_provided_support_cwp_partner    1.41 0.157210    
-#> .i_is_female_x_male_male:.i_provided_support_cwp_partner      1.44 0.149708    
-#> .i_is_female_x_female:.i_provided_support_cwp_partner         0.97 0.331207    
-#> .i_is_male_x_male:.i_provided_support_cwp_partner             0.64 0.519385    
-#> .i_is_female_x_male_female:.i_provided_support_cbp_actor      3.19 0.001427 ** 
-#> .i_is_female_x_male_male:.i_provided_support_cbp_actor        5.28 1.27e-07 ***
-#> .i_is_female_x_female:.i_provided_support_cbp_actor           7.00 2.52e-12 ***
-#> .i_is_male_x_male:.i_provided_support_cbp_actor               3.62 0.000292 ***
-#> .i_is_female_x_male_female:.i_provided_support_cbp_partner    2.39 0.017076 *  
-#> .i_is_female_x_male_male:.i_provided_support_cbp_partner     -1.39 0.163918    
-#> .i_is_female_x_female:.i_provided_support_cbp_partner         2.90 0.003724 ** 
-#> .i_is_male_x_male:.i_provided_support_cbp_partner             0.75 0.450755    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Dispersion model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> .i_is_female_x_male_female  1.08810    0.04808   22.63   <2e-16 ***
-#> .i_is_female_x_male_male    1.27034    0.04640   27.38   <2e-16 ***
-#> .i_is_female_x_female       1.04998    0.04061   25.86   <2e-16 ***
-#> .i_is_male_x_male           1.26997    0.03298   38.51   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

@@ -60,7 +60,7 @@ print(cross_exchangeable_data, n = 20)
 #> #   .i_*_raw_partner                APIM partner predictor: partner's original
 #> #                                   predictor values
 #> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
-#> #                                   predictor level, grand-mean centred
+#> #                                   predictor level, grand-mean centered
 #> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
 #> #                                   person's difference from the dyad average
 #> #
@@ -316,7 +316,7 @@ print(ild_exchangeable_data)
 #> #                                   from the dyad average
 #> #   .i_*_cbp_dyad_mean              DIM between-person dyad-mean predictor:
 #> #                                   dyad's stable usual level, grand-mean
-#> #                                   centred
+#> #                                   centered
 #> #   .i_*_cbp_within_dyad_deviation  DIM between-person within-dyad predictor
 #> #                                   deviation: person's stable difference from
 #> #                                   the dyad's usual level
