@@ -86,7 +86,7 @@ Target vignette structure:
   - optimizer and convergence notes
   - heavier mixed-composition ILD models shown carefully, with `eval = FALSE` where
     needed
-- `Dyad-Individual-Model.Rmd`
+- `dim.Rmd`
   - undirected DIM assumptions
   - cross-sectional and ILD APIM-DIM equivalence
   - role-moderated and random-slope material only as advanced/conceptual

@@ -1,0 +1,19 @@
+---
+title: "Undirected Dyadic Score Model (DSM)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Undirected Dyadic Score Model (DSM)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(interdep)
+```
