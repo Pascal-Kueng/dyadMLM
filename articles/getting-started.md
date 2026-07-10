@@ -976,7 +976,8 @@ ild_distinguishable_data <- prepare_interdep_data(
 print(ild_distinguishable_data)
 #> # interdep data
 #> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
-#> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
+#> # Structure: group = coupleID, member = personID, role = gender, time =
+#> # diaryday
 #> #
 #> # Dyad compositions:
 #> # female_x_male distinguishable 40 dyads
@@ -1322,7 +1323,8 @@ ild_tweedie_distinguishable_data <- prepare_interdep_data(
 print(ild_tweedie_distinguishable_data)
 #> # interdep data
 #> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
-#> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
+#> # Structure: group = coupleID, member = personID, role = gender, time =
+#> # diaryday
 #> #
 #> # Dyad compositions:
 #> # female_x_male distinguishable 40 dyads
@@ -1896,7 +1898,8 @@ mixed_ild_data <- prepare_interdep_data(
 print(mixed_ild_data)
 #> # interdep data
 #> # Rows: 5600 | Dyads: 200 | Intensive longitudinal: yes
-#> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
+#> # Structure: group = coupleID, member = personID, role = gender, time =
+#> # diaryday
 #> #
 #> # Dyad compositions:
 #> # female_x_female exchangeable    60 dyads
@@ -2149,10 +2152,6 @@ mixed_ild_tweedie_data <- prepare_interdep_data(
   member = personID,
   role = gender,
   time = diaryday,
-  set_exchangeable_compositions = c('female-male'),
-  pool_compositions = list(
-    'same-sex' = c('male-male', 'female_female')
-  ),
   predictors = provided_support,
   seed = 123
 )
@@ -2160,13 +2159,13 @@ mixed_ild_tweedie_data <- prepare_interdep_data(
 print(mixed_ild_tweedie_data)
 #> # interdep data
 #> # Rows: 5600 | Dyads: 200 | Intensive longitudinal: yes
-#> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
+#> # Structure: group = coupleID, member = personID, role = gender, time =
+#> # diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_male     exchangeable (set by user)  80 dyads
-#> # same-sex (pooled) exchangeable               120 dyads
-#> #   female_x_female
-#> #   male_x_male
+#> # female_x_female exchangeable    60 dyads
+#> # female_x_male   distinguishable 80 dyads
+#> # male_x_male     exchangeable    60 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -2189,7 +2188,7 @@ print(mixed_ild_tweedie_data)
 #> #                        stable difference from the average person's usual
 #> #                        level
 #> #
-#> # A tibble: 5,600 × 18
+#> # A tibble: 5,600 × 20
 #>    personID coupleID diaryday gender physical_activity provided_support
 #>       <int>    <int>    <int> <chr>              <dbl>            <dbl>
 #>  1        1        1        0 female             11.4              3.92
@@ -2203,12 +2202,12 @@ print(mixed_ild_tweedie_data)
 #>  9        1        1        8 female              0                4.06
 #> 10        1        1        9 female              5.59             4.41
 #> # ℹ 5,590 more rows
-#> # ℹ 12 more variables: .i_composition <fct>, .i_composition_role <fct>,
-#> #   .i_is_female_x_male <dbl>, .i_is_same_sex <dbl>,
-#> #   .i_diff_female_x_male <dbl>, .i_diff_same_sex <dbl>,
+#> # ℹ 14 more variables: .i_composition <fct>, .i_composition_role <fct>,
+#> #   .i_is_female_x_female <dbl>, .i_is_female_x_male_female <dbl>,
+#> #   .i_is_female_x_male_male <dbl>, .i_is_male_x_male <dbl>,
+#> #   .i_diff_female_x_female <dbl>, .i_diff_male_x_male <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
-#> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
-#> #   .i_provided_support_cbp_actor <dbl>, …
+#> #   .i_provided_support_cwp_actor <dbl>, …
 summary(mixed_ild_tweedie_data)
 #>     personID        coupleID         diaryday          gender    
 #>  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   Length   :5600  
@@ -2218,53 +2217,53 @@ summary(mixed_ild_tweedie_data)
 #>  3rd Qu.:300.2   3rd Qu.:150.25   3rd Qu.:10.0   Max.nchar:   6  
 #>  Max.   :400.0   Max.   :200.00   Max.   :13.0                   
 #>                                                                  
-#>  physical_activity provided_support          .i_composition
-#>  Min.   :  0.000   Min.   :-0.009341   female_x_male:2240  
-#>  1st Qu.:  1.725   1st Qu.: 4.028752   same-sex     :3360  
-#>  Median :  6.974   Median : 4.836293                       
-#>  Mean   : 11.366   Mean   : 4.821283                       
-#>  3rd Qu.: 16.163   3rd Qu.: 5.611992                       
-#>  Max.   :158.087   Max.   : 8.401539                       
-#>  NAs    :120       NAs    :220                             
-#>     .i_composition_role .i_is_female_x_male .i_is_same_sex
-#>  female_x_male:2240     Min.   :0.0         Min.   :0.0   
-#>  same-sex     :3360     1st Qu.:0.0         1st Qu.:0.0   
-#>                         Median :0.0         Median :1.0   
-#>                         Mean   :0.4         Mean   :0.6   
-#>                         3rd Qu.:1.0         3rd Qu.:1.0   
-#>                         Max.   :1.0         Max.   :1.0   
-#>                                                           
-#>  .i_diff_female_x_male .i_diff_same_sex .i_provided_support_cwp
-#>  Min.   :-1            Min.   :-1       Min.   :-2.488131      
-#>  1st Qu.: 0            1st Qu.:-1       1st Qu.:-0.507787      
-#>  Median : 0            Median : 0       Median :-0.002168      
-#>  Mean   : 0            Mean   : 0       Mean   : 0.000000      
-#>  3rd Qu.: 0            3rd Qu.: 1       3rd Qu.: 0.502352      
-#>  Max.   : 1            Max.   : 1       Max.   : 2.764062      
-#>                                         NAs    :220            
-#>  .i_provided_support_cbp .i_provided_support_cwp_actor
-#>  Min.   :-2.6707037      Min.   :-2.488131            
-#>  1st Qu.:-0.6189091      1st Qu.:-0.507787            
-#>  Median : 0.0002432      Median :-0.002168            
-#>  Mean   : 0.0000000      Mean   : 0.000000            
-#>  3rd Qu.: 0.6169207      3rd Qu.: 0.502352            
-#>  Max.   : 2.1738733      Max.   : 2.764062            
-#>                          NAs    :220                  
-#>  .i_provided_support_cwp_partner .i_provided_support_cbp_actor
-#>  Min.   :-2.488131               Min.   :-2.6707037           
-#>  1st Qu.:-0.507787               1st Qu.:-0.6189091           
-#>  Median :-0.002168               Median : 0.0002432           
-#>  Mean   : 0.000000               Mean   : 0.0000000           
-#>  3rd Qu.: 0.502352               3rd Qu.: 0.6169207           
-#>  Max.   : 2.764062               Max.   : 2.1738733           
-#>  NAs    :220                                                  
-#>  .i_provided_support_cbp_partner
-#>  Min.   :-2.6707037             
-#>  1st Qu.:-0.6189091             
-#>  Median : 0.0002432             
-#>  Mean   : 0.0000000             
-#>  3rd Qu.: 0.6169207             
-#>  Max.   : 2.1738733             
+#>  physical_activity provided_support            .i_composition
+#>  Min.   :  0.000   Min.   :-0.009341   female_x_female:1680  
+#>  1st Qu.:  1.725   1st Qu.: 4.028752   female_x_male  :2240  
+#>  Median :  6.974   Median : 4.836293   male_x_male    :1680  
+#>  Mean   : 11.366   Mean   : 4.821283                         
+#>  3rd Qu.: 16.163   3rd Qu.: 5.611992                         
+#>  Max.   :158.087   Max.   : 8.401539                         
+#>  NAs    :120       NAs    :220                               
+#>            .i_composition_role .i_is_female_x_female .i_is_female_x_male_female
+#>  female_x_female     :1680     Min.   :0.0           Min.   :0.0               
+#>  female_x_male_female:1120     1st Qu.:0.0           1st Qu.:0.0               
+#>  female_x_male_male  :1120     Median :0.0           Median :0.0               
+#>  male_x_male         :1680     Mean   :0.3           Mean   :0.2               
+#>                                3rd Qu.:1.0           3rd Qu.:0.0               
+#>                                Max.   :1.0           Max.   :1.0               
+#>                                                                                
+#>  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female
+#>  Min.   :0.0              Min.   :0.0       Min.   :-1             
+#>  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0             
+#>  Median :0.0              Median :0.0       Median : 0             
+#>  Mean   :0.2              Mean   :0.3       Mean   : 0             
+#>  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0             
+#>  Max.   :1.0              Max.   :1.0       Max.   : 1             
+#>                                                                    
+#>  .i_diff_male_x_male .i_provided_support_cwp .i_provided_support_cbp
+#>  Min.   :-1          Min.   :-2.488131       Min.   :-2.6707037     
+#>  1st Qu.: 0          1st Qu.:-0.507787       1st Qu.:-0.6189091     
+#>  Median : 0          Median :-0.002168       Median : 0.0002432     
+#>  Mean   : 0          Mean   : 0.000000       Mean   : 0.0000000     
+#>  3rd Qu.: 0          3rd Qu.: 0.502352       3rd Qu.: 0.6169207     
+#>  Max.   : 1          Max.   : 2.764062       Max.   : 2.1738733     
+#>                      NAs    :220                                    
+#>  .i_provided_support_cwp_actor .i_provided_support_cwp_partner
+#>  Min.   :-2.488131             Min.   :-2.488131              
+#>  1st Qu.:-0.507787             1st Qu.:-0.507787              
+#>  Median :-0.002168             Median :-0.002168              
+#>  Mean   : 0.000000             Mean   : 0.000000              
+#>  3rd Qu.: 0.502352             3rd Qu.: 0.502352              
+#>  Max.   : 2.764062             Max.   : 2.764062              
+#>  NAs    :220                   NAs    :220                    
+#>  .i_provided_support_cbp_actor .i_provided_support_cbp_partner
+#>  Min.   :-2.6707037            Min.   :-2.6707037             
+#>  1st Qu.:-0.6189091            1st Qu.:-0.6189091             
+#>  Median : 0.0002432            Median : 0.0002432             
+#>  Mean   : 0.0000000            Mean   : 0.0000000             
+#>  3rd Qu.: 0.6169207            3rd Qu.: 0.6169207             
+#>  Max.   : 2.1738733            Max.   : 2.1738733             
 #> 
 ```
 
