@@ -106,7 +106,13 @@ resolve_composition_references <- function(references, observed_compositions, ar
 
   observed_compositions <- unique(as.character(observed_compositions))
   if (!is.character(references)) {
-    stop("Composition references must be a character vector.", call. = FALSE)
+    stop(
+      "`",
+      arg_name,
+      "` must be a character vector with one string per dyad composition, ",
+      "for example `\"female-male\"` or `c(\"female-female\", \"male-male\")`.",
+      call. = FALSE
+    )
   }
   if (any(is.na(references)) || any(trimws(references) == "")) {
     stop(

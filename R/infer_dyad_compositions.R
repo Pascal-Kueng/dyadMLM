@@ -256,15 +256,27 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
   }
 
   if (!is.list(composition_pooling) || is.null(names(composition_pooling))) {
-    stop("`composition_pooling` must be a named list.", call. = FALSE)
+    stop(
+      "`composition_pooling` must be a named list, for example ",
+      "`list(romantic_couples = c(\"female-female\", \"male-male\"))`.",
+      call. = FALSE
+    )
   }
 
   pool_names <- trimws(names(composition_pooling))
   if (any(is.na(pool_names)) || any(pool_names == "")) {
-    stop("All `composition_pooling` elements must have non-empty names.", call. = FALSE)
+    stop(
+      "All `composition_pooling` elements must have non-empty names. ",
+      "Use names for the final pooled compositions, for example ",
+      "`list(romantic_couples = c(\"female-female\", \"male-male\"))`.",
+      call. = FALSE
+    )
   }
   if (any(duplicated(pool_names))) {
-    stop("`composition_pooling` names must be unique.", call. = FALSE)
+    stop(
+      "`composition_pooling` names must be unique.",
+      call. = FALSE
+    )
   }
 
   resolved_compositions <- character()
@@ -275,7 +287,11 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
     references <- composition_pooling[[i]]
 
     if (!is.character(references) || length(references) == 0) {
-      stop("Each `composition_pooling` element must be a non-empty character vector.", call. = FALSE)
+      stop(
+        "Each `composition_pooling` element must be a non-empty character vector of dyad compositions, ",
+        "for example `c(\"female-female\", \"male-male\")`.",
+        call. = FALSE
+      )
     }
 
     resolved <- resolve_composition_references(
@@ -307,7 +323,7 @@ apply_composition_pooling <- function(dyad_roles, composition_pooling) {
       "`composition_pooling` names must not match observed compositions that are not part of that pool. ",
       "Conflicting name(s): ",
       paste(sort(pool_name_collisions), collapse = ", "),
-      ".",
+      ". Choose a different pool name, or include the matching observed composition in that pool.",
       call. = FALSE
     )
   }
