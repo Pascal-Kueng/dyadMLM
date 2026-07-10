@@ -41,6 +41,34 @@ test_that("interdep data prints a header before the tibble", {
   expect_true(any(grepl("# A tibble:", printed, fixed = TRUE)))
 })
 
+test_that("interdep data header and structure wrap to console width", {
+  old_options <- options(width = 46)
+  on.exit(options(old_options), add = TRUE)
+
+  data <- tibble::tibble(
+    very_long_dyad_identifier = c(1, 1, 2, 2),
+    very_long_member_identifier = c(1, 2, 3, 4),
+    very_long_role_identifier = c("female", "male", "female", "female")
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = very_long_dyad_identifier,
+    member = very_long_member_identifier,
+    role = very_long_role_identifier,
+    seed = 123
+  )
+
+  printed <- capture.output(print(result, n = 0))
+
+  expect_true(any(grepl("# Rows: 4 | Dyads: 2", printed, fixed = TRUE)))
+  expect_true(any(grepl("#       Intensive longitudinal: no", printed, fixed = TRUE)))
+  expect_true(any(grepl("# Structure:", printed, fixed = TRUE)))
+  expect_true(any(grepl("#   group = very_long_dyad_identifier", printed, fixed = TRUE)))
+  expect_true(any(grepl("#   member = very_long_member_identifier", printed, fixed = TRUE)))
+  expect_true(any(grepl("#   role = very_long_role_identifier", printed, fixed = TRUE)))
+})
+
 test_that("interdep data prints dropped incomplete dyads", {
   data <- tibble::tibble(
     dyad_id = c(1, 2, 2, 3, 3),
@@ -606,9 +634,9 @@ test_that("interdep data print marks dyad types set by user", {
 
 test_that("interdep data print describes pooled compositions", {
   data <- tibble::tibble(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    role = c("female", "female", "male", "male")
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", "male", "female", "female", "male", "male")
   )
 
   result <- prepare_interdep_data(
@@ -616,16 +644,21 @@ test_that("interdep data print describes pooled compositions", {
     group = dyad_id,
     member = person_id,
     role = role,
-    pool_compositions = list(same_sex = c("female-female", "male-male")),
+    set_exchangeable_compositions = "female-male",
+    pool_compositions = list(ss = c("female-female", "male-male")),
     seed = 123
   )
 
   printed <- capture_wide_print(result)
 
   expect_true(any(grepl(
-    "same_sex \\(pooled\\)\\s+exchangeable\\s+2 dyads",
+    "ss \\(pooled\\)\\s+exchangeable\\s+2 dyads",
     printed
   )))
   expect_true(any(grepl("#   female_x_female", printed, fixed = TRUE)))
   expect_true(any(grepl("#   male_x_male", printed, fixed = TRUE)))
+
+  composition_lines <- printed[grepl("female_x_male|ss \\(pooled\\)", printed)]
+  exchangeable_start <- regexpr("exchangeable", composition_lines)
+  expect_equal(exchangeable_start[[1]], exchangeable_start[[2]])
 })

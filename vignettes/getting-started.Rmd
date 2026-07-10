@@ -930,10 +930,6 @@ mixed_ild_tweedie_data <- prepare_interdep_data(
   member = personID,
   role = gender,
   time = diaryday,
-  set_exchangeable_compositions = c('female-male'),
-  pool_compositions = list(
-    'same-sex' = c('male-male', 'female_female')
-  ),
   predictors = provided_support,
   seed = 123
 )
