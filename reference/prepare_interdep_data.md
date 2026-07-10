@@ -1,0 +1,173 @@
+# Prepare dyadic data for interdep
+
+Validates dyadic data, records the structural variables, and adds
+metadata used by downstream interdep functions.
+
+## Usage
+
+``` r
+prepare_interdep_data(
+  data,
+  group,
+  member,
+  role = NULL,
+  time = NULL,
+  predictors = NULL,
+  outcomes = NULL,
+  model_type = "apim",
+  temporal_predictor_decomposition = c("auto", "time_2l", "none"),
+  incomplete_dyads = c("error", "drop"),
+  missing_role = c("error", "drop"),
+  seed = NULL
+)
+```
+
+## Arguments
+
+- data:
+
+  A data frame or tibble. Data must be in long format. For
+  cross-sectional dyadic data, each observed member of each dyad has one
+  row. For intensive longitudinal dyadic data, each observed member of
+  each dyad has one row per observed time point.
+
+- group:
+
+  Column identifying the dyad.
+
+- member:
+
+  Column identifying a person or the member within dyad.
+
+- role:
+
+  Optional column identifying a stable member role, such as gender.
+  Values must be stable within each `group` x `member` and must not
+  contain `_x_`. Missing role information is controlled by
+  `missing_role`. If no role is supplied, all dyads are treated as the
+  same type of exchangeable dyads.
+
+- time:
+
+  Optional column identifying time or measurement order of repeated
+  measures.
+
+- predictors:
+
+  Optional variables to use for temporal predictor decomposition and
+  model-ready predictor construction.
+
+- outcomes:
+
+  Optional variables to use for model-ready outcome construction.
+  Currently only needed for `model_type = "undirected_dsm"`.
+
+- model_type:
+
+  Model-ready column families to construct. Can contain one or more of
+  `"apim"`, `"dim"`, and `"undirected_dsm"`. `"apim"` creates actor and
+  partner predictors. `"dim"` creates dyad-mean and
+  within-dyad-deviation predictors. `"undirected_dsm"` creates
+  undirected dyadic-score model columns. `"none"` skips model-specific
+  predictor and outcome construction after validation, composition
+  inference, and optional temporal predictor decomposition, and must be
+  used alone.
+
+- temporal_predictor_decomposition:
+
+  Temporal decomposition strategy for `predictors`. `"none"` leaves
+  predictors undecomposed before model-specific columns are constructed.
+  `"time_2l"` indicates a two-level temporal predictor decomposition
+  into within-person and between-person components. `"auto"` resolves to
+  `"time_2l"` when both `time` and `predictors` are supplied, and to
+  `"none"` otherwise. Raw cross-sectional DIM predictor dyad-mean
+  columns are still centered around the grand mean of dyad means as part
+  of DIM-style predictor construction. For longitudinal DIM or
+  undirected DSM predictor construction, raw undecomposed predictors are
+  currently rejected; use `"auto"` or `"time_2l"`.
+
+- incomplete_dyads:
+
+  How to handle dyads that do not contain exactly two unique members
+  anywhere in the data. `"error"` stops with an error and `"drop"`
+  removes the entire dyad.
+
+- missing_role:
+
+  How to handle missing values in the `role` column. `"error"` stops
+  with an error, `"drop"` removes dyads with incomplete role
+  information. Ignored when no `role` column is supplied.
+
+- seed:
+
+  Optional seed for random `.i_diff_*` sign assignment in exchangeable
+  dyads. If `NULL`, the current R session's RNG state is used.
+
+## Value
+
+The original data as a tibble with class `interdep_data`,
+`.i_composition` and `.i_composition_role` factor columns, `.i_is_*`
+numeric indicator columns, composition-specific `.i_diff_*` columns for
+exchangeable dyads, and an `interdep` attribute containing structural
+metadata, `dyad_compositions`, and predictor metadata such as
+`temporal_predictor_decompositions`, `apim_predictors`, and
+`dim_predictors` when applicable.
+
+## Details
+
+Data must be in long format. Cross-sectional dyadic data may contain at
+most one row per member within dyad. Intensive longitudinal dyadic data
+may contain at most one row per member and observed measurement occasion
+within dyad. Measured variables may contain missing values. Missing or
+incomplete structural information is controlled by `incomplete_dyads`
+and `missing_role`.
+
+Dyad composition labels are canonical: role labels are sorted
+alphabetically before being combined, so labels do not depend on row or
+member order.
+
+## Examples
+
+``` r
+data <- data.frame(
+  dyad_id = c(1, 1, 2, 2),
+  person_id = c(1, 2, 3, 4),
+  role = c("female", "male", "female", "male")
+)
+
+prepared <- prepare_interdep_data(
+  data,
+  group = dyad_id,
+  member = person_id,
+  role = role
+)
+
+attr(prepared, "interdep")$dyad_compositions
+#> # A tibble: 1 × 4
+#>   raw_composition composition   dyad_type       n_dyads
+#>   <chr>           <chr>         <chr>             <int>
+#> 1 female_x_male   female_x_male distinguishable       2
+
+print(prepared)
+#> # interdep data
+#> # Rows: 4 | Dyads: 2 | Intensive longitudinal: no
+#> # Structure: group = dyad_id, member = person_id, role = role
+#> #
+#> # Dyad compositions:
+#> # female_x_male distinguishable 2 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_*              composition-role indicator columns
+#> #
+#> # A tibble: 4 × 7
+#>   dyad_id person_id role   .i_composition .i_composition_role 
+#>     <dbl>     <dbl> <chr>  <fct>          <fct>               
+#> 1       1         1 female female_x_male  female_x_male_female
+#> 2       1         2 male   female_x_male  female_x_male_male  
+#> 3       2         3 female female_x_male  female_x_male_female
+#> 4       2         4 male   female_x_male  female_x_male_male  
+#> # ℹ 2 more variables: .i_is_female_x_male_female <dbl>,
+#> #   .i_is_female_x_male_male <dbl>
+```

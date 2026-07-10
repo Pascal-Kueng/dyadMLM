@@ -1,0 +1,41 @@
+# Add dyad-individual predictor columns
+
+Adds Dyad-Individual Model (DIM) style dyad-mean and
+within-dyad-deviation columns for the predictors recorded in an
+`interdep_data` object. For currently supported undirected DIMs and
+undirected DSMs, the data must contain one exchangeable dyad
+composition. This means distinguishable dyads and multiple exchangeable
+compositions are not supported by DIM/DSM construction until explicit
+role-contrast, composition-specific, or pooling support is added. For
+intensive longitudinal predictors decomposed by
+[`center_predictors()`](https://pascal-kueng.github.io/interdep/reference/center_predictors.md),
+the within-person component is decomposed within each dyad-time occasion
+and the between-person component is decomposed once within each dyad.
+For raw cross-sectional predictors, the dyad-mean column is centered
+around the grand mean of dyad means by DIM convention, while the
+within-dyad-deviation column is the person's deviation from the
+uncentered dyad mean.
+
+## Usage
+
+``` r
+add_dyad_individual_columns(data)
+```
+
+## Arguments
+
+- data:
+
+  An `interdep_data` object returned by
+  [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
+
+## Value
+
+An `interdep_data` object with dyad-mean and within-dyad-deviation
+predictor columns added and DIM predictor metadata recorded.
+
+## Details
+
+The function reads
+`attr(data, "interdep")$temporal_predictor_decompositions` and stores
+the constructed DIM columns in `attr(data, "interdep")$dim_predictors`.
