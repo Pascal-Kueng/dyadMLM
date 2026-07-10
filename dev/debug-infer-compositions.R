@@ -3,6 +3,12 @@
 # Source this file, then call one of:
 #   setup_validate_debug()
 #   setup_infer_debug()
+#   setup_infer_debug(
+#     set_compositions_exchangeable = "female-male",
+#     composition_pooling = list(
+#       romantic_couples = c("female-female", "male-male", "female-male")
+#     )
+#   )
 #   setup_center_debug()
 #   setup_add_actor_partner_debug()
 #   setup_add_dyad_individual_debug()
@@ -91,7 +97,8 @@ setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
 
 
 setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                              set_compositions_exchangeable = NULL) {
+                              set_compositions_exchangeable = NULL,
+                              composition_pooling = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -132,7 +139,10 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
       .i_dyad_type_source = "inferred",
       .groups = "drop"
     ) |>
-    dplyr::mutate(.i_composition = .data$.i_raw_composition)
+    dplyr::mutate(
+      .i_composition = .data$.i_raw_composition,
+      .i_pool_member = NA_character_
+    )
 
   resolved_set_compositions_exchangeable <- resolve_composition_references(
     references = set_compositions_exchangeable,
@@ -140,17 +150,57 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
     arg_name = "set_compositions_exchangeable"
   )
 
+  dyad_roles_after_exchangeability <- apply_exchangeable_composition_overrides(
+    dyad_roles = dyad_roles,
+    set_compositions_exchangeable = set_compositions_exchangeable
+  )
+
+  dyad_roles_after_pooling <- apply_composition_pooling(
+    dyad_roles = dyad_roles_after_exchangeability,
+    composition_pooling = composition_pooling
+  )
+
+  dyad_compositions <- dyad_roles_after_pooling |>
+    dplyr::group_by(
+      composition = .data[[interdep_composition_col]]
+    ) |>
+    dplyr::summarise(
+      dyad_type = dplyr::first(.data[[interdep_dyad_type_col]]),
+      dyad_type_source = ifelse(
+        dplyr::n_distinct(.data[[interdep_dyad_type_source_col]]) == 1L,
+        dplyr::first(.data[[interdep_dyad_type_source_col]]),
+        "mixed"
+      ),
+      pooled_from = paste(sort(unique(stats::na.omit(.data[[interdep_pool_member_col]]))), collapse = ", "),
+      n_dyads = dplyr::n(),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      pooled_from = dplyr::na_if(.data$pooled_from, "")
+    ) |>
+    dplyr::select(
+      "composition",
+      "dyad_type",
+      "dyad_type_source",
+      "pooled_from",
+      "n_dyads"
+    )
+
   assign_debug_vars(
     data = data,
     seed = seed,
     set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling,
     resolved_set_compositions_exchangeable = resolved_set_compositions_exchangeable,
     meta_data = meta_data,
     group_name = group_name,
     member_name = member_name,
     role_name = role_name,
     has_role = has_role,
-    dyad_roles = dyad_roles
+    dyad_roles = dyad_roles,
+    dyad_roles_after_exchangeability = dyad_roles_after_exchangeability,
+    dyad_roles_after_pooling = dyad_roles_after_pooling,
+    dyad_compositions = dyad_compositions
   )
 
   invisible(data)
@@ -158,7 +208,8 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 
 
 setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                               set_compositions_exchangeable = NULL) {
+                               set_compositions_exchangeable = NULL,
+                               composition_pooling = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -172,7 +223,8 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable
+    set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling
   )
 
   meta_data <- attr(data, "interdep")
@@ -185,6 +237,7 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
   assign_debug_vars(
     data = data,
     set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -198,7 +251,8 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 
 
 setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                          set_compositions_exchangeable = NULL) {
+                                          set_compositions_exchangeable = NULL,
+                                          composition_pooling = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -212,7 +266,8 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable
+    set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling
   )
   data <- center_predictors(data)
 
@@ -228,6 +283,7 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
   assign_debug_vars(
     data = data,
     set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -243,7 +299,8 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
 
 
 setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                            set_compositions_exchangeable = NULL) {
+                                            set_compositions_exchangeable = NULL,
+                                            composition_pooling = NULL) {
   load_interdep_debug_internals()
 
   data <- validate_interdep_data(
@@ -258,7 +315,8 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable
+    set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling
   )
   data <- center_predictors(data)
 
@@ -293,6 +351,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   assign_debug_vars(
     data = data,
     set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling,
     meta_data = meta_data,
     out = out,
     group = group,
@@ -317,7 +376,8 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 
 
 setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                                    set_compositions_exchangeable = NULL) {
+                                                    set_compositions_exchangeable = NULL,
+                                                    composition_pooling = NULL) {
   dataset <- rlang::arg_match(dataset)
   load_interdep_debug_internals()
 
@@ -335,7 +395,8 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    set_compositions_exchangeable = set_compositions_exchangeable
+    set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling
   )
   data <- center_predictors(data)
   attr(data, "interdep")$outcomes <- outcome_name
@@ -367,6 +428,7 @@ setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "twe
     raw_data = raw_data,
     data = data,
     set_compositions_exchangeable = set_compositions_exchangeable,
+    composition_pooling = composition_pooling,
     meta_data = meta_data,
     out = out,
     group = group,

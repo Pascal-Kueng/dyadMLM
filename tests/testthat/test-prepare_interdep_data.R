@@ -26,10 +26,6 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(
-    dyad_compositions$raw_composition,
-    c("female_x_female", "female_x_male", "male_x_male")
-  )
-  expect_equal(
     dyad_compositions$composition,
     c("female_x_female", "female_x_male", "male_x_male")
   )
@@ -42,8 +38,8 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
     c("inferred", "inferred", "inferred")
   )
   expect_equal(
-    dyad_compositions$composition_source,
-    c("inferred", "inferred", "inferred")
+    dyad_compositions$pooled_from,
+    c(NA_character_, NA_character_, NA_character_)
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L, 1L))
   expect_false(".i_raw_composition" %in% names(result))
@@ -237,7 +233,11 @@ test_that("prepare_interdep_data can pool exchangeable compositions for DIM", {
   expect_equal(nrow(dyad_compositions), 1L)
   expect_equal(dyad_compositions$composition, "romantic_couples")
   expect_equal(dyad_compositions$dyad_type, "exchangeable")
-  expect_equal(dyad_compositions$composition_source, "pooled_by_user")
+  expect_equal(dyad_compositions$dyad_type_source, "mixed")
+  expect_equal(
+    dyad_compositions$pooled_from,
+    "female_x_female, female_x_male, male_x_male"
+  )
   expect_true(".i_diff_romantic_couples" %in% names(result))
   expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
@@ -265,11 +265,10 @@ test_that("prepare_interdep_data treats data without role as assumed exchangeabl
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = "assumed_exchangeable",
       composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
       dyad_type_source = "assumed_no_role",
-      composition_source = "assumed_no_role",
+      pooled_from = NA_character_,
       n_dyads = 2L
     )
   )

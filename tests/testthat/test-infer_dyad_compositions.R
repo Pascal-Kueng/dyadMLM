@@ -39,10 +39,6 @@ test_that("infer_dyad_compositions counts role compositions", {
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(
-    dyad_compositions$raw_composition,
-    c("female_x_female", "female_x_male", "male_x_male")
-  )
-  expect_equal(
     dyad_compositions$composition,
     c("female_x_female", "female_x_male", "male_x_male")
   )
@@ -55,8 +51,8 @@ test_that("infer_dyad_compositions counts role compositions", {
     c("inferred", "inferred", "inferred")
   )
   expect_equal(
-    dyad_compositions$composition_source,
-    c("inferred", "inferred", "inferred")
+    dyad_compositions$pooled_from,
+    c(NA_character_, NA_character_, NA_character_)
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
@@ -149,11 +145,10 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = "female_x_male",
       composition = "female_x_male",
       dyad_type = "exchangeable",
       dyad_type_source = "set_by_user",
-      composition_source = "inferred",
+      pooled_from = NA_character_,
       n_dyads = 2L
     )
   )
@@ -258,11 +253,10 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = "female_x_female, male_x_male",
       composition = "same_sex",
       dyad_type = "exchangeable",
       dyad_type_source = "inferred",
-      composition_source = "pooled_by_user",
+      pooled_from = "female_x_female, male_x_male",
       n_dyads = 2L
     )
   )
@@ -291,8 +285,11 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
 
   expect_equal(dyad_compositions$composition, "romantic_couples")
   expect_equal(dyad_compositions$dyad_type, "exchangeable")
-  expect_equal(dyad_compositions$dyad_type_source, "inferred, set_by_user")
-  expect_equal(dyad_compositions$composition_source, "pooled_by_user")
+  expect_equal(dyad_compositions$dyad_type_source, "mixed")
+  expect_equal(
+    dyad_compositions$pooled_from,
+    "female_x_female, female_x_male, male_x_male"
+  )
   expect_equal(dyad_compositions$n_dyads, 3L)
   expect_true(".i_is_romantic_couples" %in% names(result))
   expect_true(".i_diff_romantic_couples" %in% names(result))
@@ -493,11 +490,10 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
   indicator_names <- grep("^\\.i_is_", names(result), value = TRUE)
 
-  expect_equal(dyad_compositions$raw_composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
   expect_equal(dyad_compositions$dyad_type_source, c("inferred", "inferred"))
-  expect_equal(dyad_compositions$composition_source, c("inferred", "inferred"))
+  expect_equal(dyad_compositions$pooled_from, c(NA_character_, NA_character_))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
@@ -612,11 +608,10 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_equal(
     attr(result, "interdep")$dyad_compositions,
     tibble::tibble(
-      raw_composition = "assumed_exchangeable",
       composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
       dyad_type_source = "assumed_no_role",
-      composition_source = "assumed_no_role",
+      pooled_from = NA_character_,
       n_dyads = 2L
     )
   )

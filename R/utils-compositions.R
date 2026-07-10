@@ -17,10 +17,10 @@ interdep_reserved_prefix <- ".i_"
 # Package generated columns will use the following names consistently
 interdep_composition_col <- paste0(interdep_reserved_prefix, "composition")
 interdep_composition_role_col <- paste0(interdep_reserved_prefix, "composition_role")
-interdep_composition_source_col <- paste0(interdep_reserved_prefix, "composition_source")
 interdep_dyad_type_col <- paste0(interdep_reserved_prefix, "dyad_type")
 interdep_dyad_type_source_col <- paste0(interdep_reserved_prefix, "dyad_type_source")
 interdep_raw_composition_col <- paste0(interdep_reserved_prefix, "raw_composition")
+interdep_pool_member_col <- paste0(interdep_reserved_prefix, "pool_member")
 interdep_resolved_role_col <- paste0(interdep_reserved_prefix, "resolved_role")
 interdep_diff_col <- paste0(interdep_reserved_prefix, "diff")
 interdep_arbitrary_role_col <- paste0(interdep_reserved_prefix, "arbitrary_role")
