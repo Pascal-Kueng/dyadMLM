@@ -19,7 +19,7 @@
 #'   \doi{10.5281/zenodo.20720321}.
 "example_dyadic_crosssectional"
 
-#' Example cross-sectional dyadic data with mixed dyad compositions
+#' Example cross-sectional dyadic data with mixed dyad types
 #'
 #' A simulated cross-sectional long-format dataset containing distinguishable
 #' female-male dyads and exchangeable female-female and male-male dyads. Each
@@ -38,7 +38,7 @@
 #'   See Küng, P. M. (2026). \emph{Distinguishable and Exchangeable Dyads:
 #'   Bayesian Multilevel Modelling} (v2.0.9). Zenodo.
 #'   \doi{10.5281/zenodo.20720321}.
-"example_dyadic_crosssectional_unified"
+"example_dyadic_crosssectional_mixed"
 
 #' Example cross-sectional dyadic data with a Tweedie outcome
 #'
@@ -85,7 +85,7 @@
 #'   \doi{10.5281/zenodo.20720321}.
 "example_dyadic_ILD"
 
-#' Example intensive longitudinal dyadic data with mixed dyad compositions
+#' Example intensive longitudinal dyadic data with mixed dyad types
 #'
 #' A simulated intensive longitudinal long-format dataset containing
 #' distinguishable female-male dyads and exchangeable female-female and
@@ -108,7 +108,7 @@
 #'   See Küng, P. M. (2026). \emph{Distinguishable and Exchangeable Dyads:
 #'   Bayesian Multilevel Modelling} (v2.0.9). Zenodo.
 #'   \doi{10.5281/zenodo.20720321}.
-"example_dyadic_ILD_unified"
+"example_dyadic_ILD_mixed"
 
 #' Example intensive longitudinal dyadic data with a Tweedie outcome
 #'
@@ -134,7 +134,7 @@
 #'   \doi{10.5281/zenodo.20720321}.
 "example_dyadic_ILD_tweedie"
 
-#' Example intensive longitudinal dyadic data with mixed dyad compositions and a Tweedie outcome
+#' Example intensive longitudinal dyadic data with mixed dyad types and a Tweedie outcome
 #'
 #' A simulated intensive longitudinal long-format dataset containing
 #' distinguishable female-male dyads and exchangeable female-female and
@@ -157,4 +157,4 @@
 #'   See Küng, P. M. (2026). \emph{Distinguishable and Exchangeable Dyads:
 #'   Bayesian Multilevel Modelling} (v2.0.9). Zenodo.
 #'   \doi{10.5281/zenodo.20720321}.
-"example_dyadic_ILD_unified_tweedie"
+"example_dyadic_ILD_mixed_tweedie"

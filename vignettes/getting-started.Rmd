@@ -26,7 +26,7 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 dyadic data for statistical models. It supports common dyadic studies with one
 kind of dyad, and it also handles studies where different kinds of dyads appear
 in the same dataset, such as female-male, female-female, and male-male couples.
-Mixed dyad compositions are supported for composition-aware APIM-style
+Mixed dyad types are supported for composition-aware APIM-style
 preparation; current DIM and undirected DSM helpers require one exchangeable
 dyad composition.
 
@@ -101,8 +101,8 @@ The examples build up from simple dyadic structures to composition-aware models:
 - semi-continuous and intensive longitudinal outcomes;
 - mixed-composition dyadic MLMs that combine distinguishable and exchangeable
   dyads in one model, illustrated in the
-  [unified cross-sectional](#unified-cross-sectional-gaussian-model) and
-  [unified intensive longitudinal](#unified-intensive-longitudinal-gaussian-model)
+  [mixed-composition cross-sectional](#mixed-cross-sectional-gaussian-model) and
+  [mixed-composition intensive longitudinal](#mixed-intensive-longitudinal-gaussian-model)
   examples.
 
 ## Cross-sectional dyadic data
@@ -675,35 +675,35 @@ summary(ild_tweedie_exchangeable_model)
 
 ```
 
-## Unified cross-sectional Gaussian model
+## Mixed-composition cross-sectional Gaussian model
 
-`example_dyadic_crosssectional_unified` contains three dyad compositions in the
+`example_dyadic_crosssectional_mixed` contains three dyad compositions in the
 same data object: distinguishable female-male dyads and exchangeable
 female-female and male-male dyads.
 
-```{r unified-cross-sectional-raw}
-print(head(example_dyadic_crosssectional_unified))
+```{r mixed-cross-sectional-raw}
+print(head(example_dyadic_crosssectional_mixed))
 ```
 
-```{r prepare-unified-cross-sectional}
-unified_cross_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_unified,
+```{r prepare-mixed-cross-sectional}
+mixed_cross_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
   role = gender,
   seed = 123
 )
 
-print(unified_cross_data)
-summary(unified_cross_data)
+print(mixed_cross_data)
+summary(mixed_cross_data)
 ```
 
 The data were simulated with the following fixed effects and residual covariance
 parameters. For exchangeable dyads, `sum_variance` and `diff_variance` imply the
 partner correlation.
 
-```{r unified-cross-sectional-targets, echo=FALSE}
-unified_cross_targets <- data.frame(
+```{r mixed-cross-sectional-targets, echo=FALSE}
+mixed_cross_targets <- data.frame(
   block = c(
     "female_x_male",
     "female_x_male",
@@ -739,12 +739,12 @@ unified_cross_targets <- data.frame(
   )
 )
 
-unified_cross_targets
+mixed_cross_targets
 ```
 
-```{r fit-unified-cross-sectional-gaussian, eval = has_glmmTMB}
+```{r fit-mixed-cross-sectional-gaussian, eval = has_glmmTMB}
 
-unified_cross_gaussian_model <- glmmTMB(
+mixed_cross_gaussian_model <- glmmTMB(
   satisfaction ~ 0 +
 
     .i_is_female_x_male_female + .i_is_female_x_male_male +
@@ -763,26 +763,26 @@ unified_cross_gaussian_model <- glmmTMB(
 
   , dispformula = ~ 0
   , family = gaussian()
-  , data = unified_cross_data
+  , data = mixed_cross_data
 )
 
-summary(unified_cross_gaussian_model)
+summary(mixed_cross_gaussian_model)
 
 ```
 
-## Unified intensive longitudinal Gaussian model
+## Mixed-composition intensive longitudinal Gaussian model
 
-`example_dyadic_ILD_unified` contains the same three dyad compositions as the
-unified cross-sectional example, but each dyad contributes repeated paired
+`example_dyadic_ILD_mixed` contains the same three dyad compositions as the
+mixed-composition cross-sectional example, but each dyad contributes repeated paired
 observations over `diaryday`.
 
-```{r unified-ild-raw}
-print(head(example_dyadic_ILD_unified, n = 26), n = 26)
+```{r mixed-ild-raw}
+print(head(example_dyadic_ILD_mixed, n = 26), n = 26)
 ```
 
-```{r prepare-unified-ild}
-unified_ild_data <- prepare_interdep_data(
-  example_dyadic_ILD_unified,
+```{r prepare-mixed-ild}
+mixed_ild_data <- prepare_interdep_data(
+  example_dyadic_ILD_mixed,
   group = coupleID,
   member = personID,
   role = gender,
@@ -791,11 +791,11 @@ unified_ild_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(unified_ild_data)
-summary(unified_ild_data)
+print(mixed_ild_data)
+summary(mixed_ild_data)
 ```
 
-This first unified ILD model includes composition-specific intercepts, fixed
+This first mixed-composition ILD model includes composition-specific intercepts, fixed
 time slopes, and within-person and between-person actor and partner effects.
 Random time slopes are omitted; with separate stable and same-day dyadic
 covariance blocks, random time slopes add many weakly identified parameters and
@@ -806,9 +806,9 @@ false convergence even when the Hessian is positive definite. The `BFGS`
 optimizer is used here because it reaches the same solution cleanly for this
 simulated dataset.
 
-```{r fit-unified-ild-gaussian, eval = has_glmmTMB}
+```{r fit-mixed-ild-gaussian, eval = has_glmmTMB}
 
-unified_ild_gaussian_model <- glmmTMB(
+mixed_ild_gaussian_model <- glmmTMB(
   closeness ~ 0 +
 
     # Composition-specific intercepts
@@ -877,30 +877,30 @@ unified_ild_gaussian_model <- glmmTMB(
 
   , dispformula = ~ 0
   , family = gaussian()
-  , data = unified_ild_data
+  , data = mixed_ild_data
   , control = glmmTMBControl(
       optimizer = optim,
       optArgs = list(method = "BFGS")
     )
 )
 
-summary(unified_ild_gaussian_model)
+summary(mixed_ild_gaussian_model)
 
 ```
 
-## Unified intensive longitudinal Tweedie model
+## Mixed-composition intensive longitudinal Tweedie model
 
-`example_dyadic_ILD_unified_tweedie` has the same unified intensive
+`example_dyadic_ILD_mixed_tweedie` has the same mixed-composition intensive
 longitudinal dyadic structure, but the outcome is semi-continuous.
 
-```{r unified-ild-tweedie-raw}
-print(head(example_dyadic_ILD_unified_tweedie, n = 26), n = 26)
-hist(example_dyadic_ILD_unified_tweedie$physical_activity, breaks = 20)
+```{r mixed-ild-tweedie-raw}
+print(head(example_dyadic_ILD_mixed_tweedie, n = 26), n = 26)
+hist(example_dyadic_ILD_mixed_tweedie$physical_activity, breaks = 20)
 ```
 
-```{r prepare-unified-ild-tweedie}
-unified_ild_tweedie_data <- prepare_interdep_data(
-  example_dyadic_ILD_unified_tweedie,
+```{r prepare-mixed-ild-tweedie}
+mixed_ild_tweedie_data <- prepare_interdep_data(
+  example_dyadic_ILD_mixed_tweedie,
   group = coupleID,
   member = personID,
   role = gender,
@@ -909,19 +909,19 @@ unified_ild_tweedie_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(unified_ild_tweedie_data)
-summary(unified_ild_tweedie_data)
+print(mixed_ild_tweedie_data)
+summary(mixed_ild_tweedie_data)
 ```
 
-As in the Gaussian unified ILD model, the mean model contains
+As in the Gaussian mixed-composition ILD model, the mean model contains
 composition-specific intercepts, fixed time slopes, and within-person and
 between-person actor and partner effects. The dyadic random-effect blocks are
 latent effects on the log-mean scale, not residual covariance parameters in the
 Gaussian sense.
 
-```{r fit-unified-ild-tweedie, eval = has_glmmTMB}
+```{r fit-mixed-ild-tweedie, eval = has_glmmTMB}
 
-unified_ild_tweedie_model <- glmmTMB(
+mixed_ild_tweedie_model <- glmmTMB(
   physical_activity ~ 0 +
 
     # Intercepts for each composition_role
@@ -995,9 +995,9 @@ unified_ild_tweedie_model <- glmmTMB(
       .i_is_female_x_male_female + .i_is_female_x_male_male +
       .i_is_female_x_female + .i_is_male_x_male
   , family = tweedie()
-  , data = unified_ild_tweedie_data
+  , data = mixed_ild_tweedie_data
 )
 
-summary(unified_ild_tweedie_model)
+summary(mixed_ild_tweedie_model)
 
 ```

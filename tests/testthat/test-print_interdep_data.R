@@ -557,7 +557,7 @@ test_that("interdep data print includes role and time in structure line", {
   )))
 })
 
-test_that("interdep data print describes multiple dyad compositions", {
+test_that("interdep data print describes mixed dyad types", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),

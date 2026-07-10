@@ -32,12 +32,12 @@ load_debug_ild_data <- function(dataset = c("gaussian", "tweedie")) {
   data_env <- new.env(parent = emptyenv())
 
   if (dataset == "gaussian") {
-    load("data/example_dyadic_ILD_unified.rda", envir = data_env)
-    return(data_env$example_dyadic_ILD_unified)
+    load("data/example_dyadic_ILD_mixed.rda", envir = data_env)
+    return(data_env$example_dyadic_ILD_mixed)
   }
 
-  load("data/example_dyadic_ILD_unified_tweedie.rda", envir = data_env)
-  data_env$example_dyadic_ILD_unified_tweedie
+  load("data/example_dyadic_ILD_mixed_tweedie.rda", envir = data_env)
+  data_env$example_dyadic_ILD_mixed_tweedie
 }
 
 

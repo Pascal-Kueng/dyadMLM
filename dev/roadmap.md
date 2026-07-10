@@ -30,7 +30,7 @@ Target vignette structure:
 - `getting-started.Rmd`
   - package purpose and expected long data structure
   - `group`, `member`, `role`, and `time`
-  - distinguishable, exchangeable, and mixed dyad compositions
+  - distinguishable, exchangeable, and mixed dyad types
   - missing structural data rules
   - compact examples of `predictors`, `model_type`, `temporal_predictor_decomposition`,
     print output, and metadata
@@ -46,7 +46,7 @@ Target vignette structure:
   - within-person and between-person actor/partner effects
   - generalized outcomes, including Tweedie examples
   - optimizer and convergence notes
-  - heavier unified ILD models shown carefully, with `eval = FALSE` where
+  - heavier mixed-composition ILD models shown carefully, with `eval = FALSE` where
     needed
 - `Dyad-Individual-Model.Rmd`
   - undirected DIM assumptions
@@ -183,7 +183,7 @@ model-building features.
   - use a cross-sectional APIM vignette for distinguishable, exchangeable, and
     multiple-dyad-type APIM examples
   - use a separate ILD APIM vignette for temporal predictor decomposition,
-    generalized outcomes, optimizer notes, and heavier unified ILD examples
+    generalized outcomes, optimizer notes, and heavier mixed-composition ILD examples
 - Keep the focused DIM vignette separate from APIM/ILD APIM examples
 - Add a short DSM data-preparation example after the DSM API is stable
 - Add citation metadata
@@ -229,7 +229,7 @@ Complete these before calling the feature set CRAN-ready:
     vignette, not the main modeling manual
   - move current cross-sectional APIM model-fitting material into an APIM
     vignette
-  - move ILD APIM, generalized outcome, optimizer, and unified ILD material into
+  - move ILD APIM, generalized outcome, optimizer, and mixed-composition ILD material into
     an ILD APIM vignette
   - keep heavy or convergence-sensitive examples out of `getting-started.Rmd`
     and mark advanced examples `eval = FALSE` where needed
@@ -237,9 +237,9 @@ Complete these before calling the feature set CRAN-ready:
   - show cross-sectional APIM-DIM equivalence
   - show ILD DIM construction from `time_2l` components
   - keep mixed-composition/maximal models in the APIM vignette for now
-- Resolve unified ILD model convergence documentation
+- Resolve mixed-composition ILD model convergence documentation
   - current increased simulation size improves information but does not fully
-    remove Gaussian optimizer warnings for the maximal unified ILD APIM
+    remove Gaussian optimizer warnings for the maximal mixed-composition ILD APIM
   - do not present BFGS as a universal fix; document optimizer behavior only
     where it is empirically supported by the current simulated data
   - either simplify the vignette model deliberately or explain that the maximal

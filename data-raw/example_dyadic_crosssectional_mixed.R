@@ -1,4 +1,4 @@
-# Example cross-sectional dyadic data with multiple dyad compositions.
+# Example cross-sectional dyadic data with mixed dyad types.
 #
 # Adapted from:
 # https://github.com/Pascal-Kueng/05DyadicDataAnalysis
@@ -153,28 +153,28 @@ male_male_data <- make_dyad_rows(
   residuals = male_male_resid
 )
 
-example_dyadic_crosssectional_unified <- dplyr::bind_rows(
+example_dyadic_crosssectional_mixed <- dplyr::bind_rows(
   female_male_data,
   female_female_data,
   male_male_data
 )
 
-example_dyadic_crosssectional_unified <- dplyr::mutate(
-  example_dyadic_crosssectional_unified,
+example_dyadic_crosssectional_mixed <- dplyr::mutate(
+  example_dyadic_crosssectional_mixed,
   personID = as.integer(2 * coupleID - 2 + member),
   gender = factor(gender, levels = c(1L, 2L), labels = c("female", "male"))
 )
 
-example_dyadic_crosssectional_unified <- dplyr::select(
-  example_dyadic_crosssectional_unified,
+example_dyadic_crosssectional_mixed <- dplyr::select(
+  example_dyadic_crosssectional_mixed,
   personID,
   coupleID,
   gender,
   satisfaction
 )
 
-example_dyadic_crosssectional_unified <- dplyr::arrange(
-  example_dyadic_crosssectional_unified,
+example_dyadic_crosssectional_mixed <- dplyr::arrange(
+  example_dyadic_crosssectional_mixed,
   coupleID,
   personID
 )
@@ -183,4 +183,4 @@ example_dyadic_crosssectional_unified <- dplyr::arrange(
 ### SAVE PACKAGE DATA
 ###############################################################################
 
-usethis::use_data(example_dyadic_crosssectional_unified, overwrite = TRUE)
+usethis::use_data(example_dyadic_crosssectional_mixed, overwrite = TRUE)

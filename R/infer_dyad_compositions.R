@@ -157,7 +157,7 @@ finalize_composition_columns <- function(data) {
     )
   }
 
-  # Composition-specific diff columns let unified models target each
+  # Composition-specific diff columns let mixed-composition models target each
   # exchangeable composition.
   composition_suffixes <- make_interdep_suffixes(
     data[[interdep_composition_col]][data[[interdep_diff_col]] != 0]

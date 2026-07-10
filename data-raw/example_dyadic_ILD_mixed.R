@@ -1,5 +1,4 @@
-# Example intensive longitudinal dyadic data with multiple dyad compositions and
-# a Tweedie outcome.
+# Example intensive longitudinal dyadic data with mixed dyad types.
 #
 # Adapted from:
 # https://github.com/Pascal-Kueng/05DyadicDataAnalysis
@@ -9,11 +8,11 @@
 # Multilevel Modelling (v2.0.9). Zenodo.
 # https://doi.org/10.5281/zenodo.20720321
 #
-# This uses the same unified longitudinal dyadic structure as
-# example_dyadic_ILD_unified. The outcome is semi-continuous and generated from
-# a Tweedie distribution.
+# This extends example_dyadic_ILD to a mixed-composition dyadic setting with
+# distinguishable female-male dyads and exchangeable female-female and
+# male-male dyads.
 
-set.seed(128)
+set.seed(127)
 
 ###############################################################################
 ### DESIGN: SAMPLE SIZE AND MEASUREMENT OCCASIONS
@@ -66,10 +65,10 @@ persons <- dplyr::mutate(
 
 fixed_effects <- tibble::tribble(
   ~role_key,              ~fix_b0, ~fix_time, ~fix_bp_actor, ~fix_bp_partner, ~fix_wp_actor, ~fix_wp_partner,
-  "female_male_female",      2.10,     0.004,          0.34,            0.10,          0.16,            0.05,
-  "female_male_male",        2.32,    -0.002,          0.28,            0.08,          0.13,            0.04,
-  "female_female",           2.05,     0.003,          0.31,            0.09,          0.15,            0.05,
-  "male_male",               2.40,    -0.001,          0.25,            0.07,          0.12,            0.04
+  "female_male_female",      5.50,     0.010,          1.40,            0.45,          0.38,            0.18,
+  "female_male_male",        4.70,    -0.005,          1.05,            0.28,          0.22,            0.10,
+  "female_female",           5.80,     0.006,          1.25,            0.40,          0.32,            0.16,
+  "male_male",               4.35,    -0.002,          0.95,            0.24,          0.20,            0.08
 )
 
 ###############################################################################
@@ -84,8 +83,8 @@ re_names <- c(
   "re_wp_actor",
   "re_wp_partner"
 )
-sd_re <- c(0.28, 0.005, 0.07, 0.05, 0.04, 0.03)
-R <- matrix(0.10, length(re_names), length(re_names))
+sd_re <- c(0.75, 0.012, 0.16, 0.12, 0.08, 0.06)
+R <- matrix(0.12, length(re_names), length(re_names))
 diag(R) <- 1
 Sigma_re <- diag(sd_re) %*% R %*% diag(sd_re)
 
@@ -100,15 +99,15 @@ RE <- dplyr::mutate(RE, coupleID = seq_len(n_couples))
 ### PARAMETERS TO RECOVER LATER: STABLE MEMBER-LEVEL INTERCEPT DEVIATIONS
 ###############################################################################
 
-# These stable deviations make the maximal unified ILD covariance model
+# These stable deviations make the maximal mixed-composition ILD covariance model
 # identifiable away from the boundary. The shared dyad-level random effects
 # above induce stable non-independence; these member-level deviations allow
 # nonzero stable difference variance in exchangeable dyads.
 stable_intercept_params <- tibble::tribble(
   ~composition,      ~sd_1, ~sd_2, ~rho,
-  "female_male",      0.22,  0.24, 0.45,
-  "female_female",    0.20,  0.20, 0.35,
-  "male_male",        0.23,  0.23, 0.30
+  "female_male",      0.70,  0.65, 0.45,
+  "female_female",    0.65,  0.65, 0.30,
+  "male_male",        0.55,  0.55, 0.25
 )
 
 simulate_stable_intercepts <- function(couple_ids, composition_label) {
@@ -253,7 +252,7 @@ panel <- dplyr::left_join(panel, mu_partner_tbl, by = c("coupleID", "member"))
 grand_mu <- mean(mu_df$mu_sup)
 
 ###############################################################################
-### GENERATE CONDITIONAL LOG-MEAN OF THE OUTCOME
+### GENERATE CONDITIONAL MEAN OF THE OUTCOME
 ###############################################################################
 
 panel <- dplyr::left_join(panel, fixed_effects, by = "role_key")
@@ -264,7 +263,7 @@ panel <- dplyr::mutate(
   partner_cwp = sup_cwp_partner,
   actor_cbp = mu_actor - grand_mu,
   partner_cbp = mu_partner - grand_mu,
-  eta_mean =
+  mu_it =
     fix_b0 + re_b0 + stable_intercept +
       (fix_time + re_time) * diaryday +
       (fix_bp_actor + re_bp_actor) * actor_cbp +
@@ -274,18 +273,18 @@ panel <- dplyr::mutate(
 )
 
 ###############################################################################
-### PARAMETERS TO RECOVER LATER: LATENT AR(1) OUTCOME PROCESS
+### PARAMETERS TO RECOVER LATER: RESIDUAL AR(1) PROCESS
 ###############################################################################
 
-latent_params <- tibble::tribble(
+residual_params <- tibble::tribble(
   ~composition,      ~phi_1, ~phi_2, ~sd_1, ~sd_2, ~rho,
-  "female_male",      0.13,   0.05,  0.23,  0.28, -0.20,
-  "female_female",    0.10,   0.10,  0.24,  0.24,  0.25,
-  "male_male",        0.07,   0.07,  0.28,  0.28, -0.12
+  "female_male",      0.15,   0.05,  0.70,  1.10, -0.25,
+  "female_female",    0.12,   0.12,  0.75,  0.75,  0.30,
+  "male_male",        0.08,   0.08,  1.00,  1.00, -0.15
 )
 
 simulate_pair_ar1 <- function(couple_id, composition_label) {
-  params <- latent_params[latent_params$composition == composition_label, ]
+  params <- residual_params[residual_params$composition == composition_label, ]
   sd_eta_1 <- sqrt(params$sd_1^2 * (1 - params$phi_1^2))
   sd_eta_2 <- sqrt(params$sd_2^2 * (1 - params$phi_2^2))
   cov_eta <- params$rho * sd_eta_1 * sd_eta_2
@@ -343,73 +342,26 @@ eps_2 <- dplyr::mutate(eps_2, member = 2L)
 eps_long <- dplyr::bind_rows(eps_1, eps_2)
 
 panel <- dplyr::left_join(panel, eps_long, by = c("coupleID", "diaryday", "member"))
-panel <- dplyr::mutate(panel, eta_it = eta_mean + e_it, mu_it = exp(eta_it))
 panel <- dplyr::arrange(panel, coupleID, diaryday, member)
-
-###############################################################################
-### SIMULATE TWEEDIE OUTCOMES
-###############################################################################
-
-rtweedie_cp <- function(mu, phi, power) {
-  phi <- rep(phi, length.out = length(mu))
-  power <- rep(power, length.out = length(mu))
-
-  if (any(power <= 1 | power >= 2)) {
-    stop("`power` must be between 1 and 2.", call. = FALSE)
-  }
-
-  lambda <- mu^(2 - power) / (phi * (2 - power))
-  gamma_shape <- (2 - power) / (power - 1)
-  gamma_scale <- phi * (power - 1) * mu^(power - 1)
-
-  n_events <- stats::rpois(length(mu), lambda)
-  out <- numeric(length(mu))
-  positive <- n_events > 0
-  out[positive] <- stats::rgamma(
-    sum(positive),
-    shape = n_events[positive] * gamma_shape[positive],
-    scale = gamma_scale[positive]
-  )
-  out
-}
-
-tweedie_params <- tibble::tribble(
-  ~role_key,              ~tweedie_phi,
-  "female_male_female",          3.00,
-  "female_male_male",            3.40,
-  "female_female",               2.85,
-  "male_male",                   3.60
-)
-tweedie_power <- 1.50
-
-panel <- dplyr::left_join(panel, tweedie_params, by = "role_key")
-panel <- dplyr::mutate(
-  panel,
-  physical_activity = rtweedie_cp(mu_it, tweedie_phi, tweedie_power)
-)
 
 ###############################################################################
 ### ASSEMBLE FINAL PACKAGE DATA
 ###############################################################################
 
-example_dyadic_ILD_unified_tweedie <- dplyr::select(
+example_dyadic_ILD_mixed <- dplyr::mutate(panel, closeness = mu_it + e_it)
+example_dyadic_ILD_mixed <- dplyr::select(
   dplyr::mutate(
-    panel,
+    example_dyadic_ILD_mixed,
     gender = factor(gender, levels = c(1L, 2L), labels = c("female", "male"))
   ),
   personID,
   coupleID,
   diaryday,
   gender,
-  physical_activity,
+  closeness,
   provided_support
 )
-example_dyadic_ILD_unified_tweedie <- dplyr::arrange(
-  example_dyadic_ILD_unified_tweedie,
-  coupleID,
-  personID,
-  diaryday
-)
+example_dyadic_ILD_mixed <- dplyr::arrange(example_dyadic_ILD_mixed, coupleID, personID, diaryday)
 
 ###############################################################################
 ### MISSING DATA: NON-STRUCTURAL VARIABLES ONLY
@@ -417,20 +369,20 @@ example_dyadic_ILD_unified_tweedie <- dplyr::arrange(
 
 # Rare isolated predictor missingness.
 n_missing_support <- 100
-missing_support_rows <- sample(seq_len(nrow(example_dyadic_ILD_unified_tweedie)), n_missing_support)
-example_dyadic_ILD_unified_tweedie$provided_support[missing_support_rows] <- NA_real_
+missing_support_rows <- sample(seq_len(nrow(example_dyadic_ILD_mixed)), n_missing_support)
+example_dyadic_ILD_mixed$provided_support[missing_support_rows] <- NA_real_
 
 # Rare diary nonresponse. The person-day row stays in the data with dyad, person,
 # role, and time information intact, but all measured variables for that row are
 # missing.
 n_nonresponse_rows <- 120
-available_rows <- setdiff(seq_len(nrow(example_dyadic_ILD_unified_tweedie)), missing_support_rows)
+available_rows <- setdiff(seq_len(nrow(example_dyadic_ILD_mixed)), missing_support_rows)
 nonresponse_rows <- sample(available_rows, n_nonresponse_rows)
-example_dyadic_ILD_unified_tweedie$provided_support[nonresponse_rows] <- NA_real_
-example_dyadic_ILD_unified_tweedie$physical_activity[nonresponse_rows] <- NA_real_
+example_dyadic_ILD_mixed$provided_support[nonresponse_rows] <- NA_real_
+example_dyadic_ILD_mixed$closeness[nonresponse_rows] <- NA_real_
 
 ###############################################################################
 ### SAVE PACKAGE DATA
 ###############################################################################
 
-usethis::use_data(example_dyadic_ILD_unified_tweedie, overwrite = TRUE)
+usethis::use_data(example_dyadic_ILD_mixed, overwrite = TRUE)

@@ -19,7 +19,7 @@ The target model family is a **Gaussian dyadic residual VAR(1)** model. It combi
 - same-day **innovation covariance** between partners;
 - exchangeability constraints for indistinguishable dyads;
 - role-specific dynamics for distinguishable dyads;
-- eventually, unified models with several dyad types in one likelihood.
+- eventually, mixed-composition models with several dyad types in one likelihood.
 
 The recommended development order is:
 
@@ -28,8 +28,8 @@ The recommended development order is:
 3. Add predictors and random slopes for exchangeable dyads.
 4. Implement the distinguishable Gaussian balanced model.
 5. Build a transition-record data layer for ragged complete dyad-days and full dyad-day gaps.
-6. Implement unified models with multiple dyad types but no partial pooling.
-7. Add partial pooling across dyad types only after the separate-parameter unified model is validated.
+6. Implement mixed-composition models with multiple dyad types but no partial pooling.
+7. Add partial pooling across dyad types only after the separate-parameter mixed-composition model is validated.
 8. Add one-partner missingness and DSEM-style extensions only after the core package is stable.
 
 The central corrections and design choices are:
@@ -57,7 +57,7 @@ The package should cover a class of models that high-level interfaces such as `b
 
 - exchangeable or indistinguishable dyads, such as same-gender couples, friends, siblings, or same-role pairs;
 - distinguishable dyads, such as female--male couples, mother--child dyads, therapist--client dyads, or patient--caregiver dyads;
-- unified datasets containing several dyad types in one likelihood;
+- mixed-composition datasets containing several dyad types in one likelihood;
 - actor inertia and partner carryover in a residual VAR(1) process;
 - same-day innovation correlation between partners;
 - role-specific or exchangeability-constrained random effects;
@@ -318,7 +318,7 @@ The first implementation should prioritize:
 5. transparent post-processing;
 6. package-safe code generation.
 
-Do not try to implement arbitrary high-order formula syntax, non-Gaussian families, random VAR parameters, one-partner missingness, partial pooling, and unified dyad types all at once.
+Do not try to implement arbitrary high-order formula syntax, non-Gaussian families, random VAR parameters, one-partner missingness, partial pooling, and mixed dyad types all at once.
 
 ---
 
@@ -821,7 +821,7 @@ sigma   ~ exponential(1);
 rho_raw ~ normal(0, 0.75);
 ```
 
-For a unified covariance implementation, a Cholesky correlation parameterization can also be used.
+For a mixed-composition covariance implementation, a Cholesky correlation parameterization can also be used.
 
 ---
 
@@ -1150,11 +1150,11 @@ Partner carryover should usually be shrunk more strongly than actor inertia beca
 
 ---
 
-# 6. Unified dyad model
+# 6. Mixed-composition dyad model
 
 ## 6.1 Purpose
 
-The unified model combines exchangeable and distinguishable dyad types in one likelihood.
+The mixed-composition model combines exchangeable and distinguishable dyad types in one likelihood.
 
 Example:
 
@@ -1200,9 +1200,9 @@ For distinguishable dyads, the registry defines role order.
 
 For exchangeable dyads, the registry defines role class but not a meaningful member order.
 
-## 6.3 Unified likelihood structure
+## 6.3 Mixed-composition likelihood structure
 
-For the first unified model, keep type-specific parameters separate.
+For the first mixed-composition model, keep type-specific parameters separate.
 
 Stan-like pseudocode:
 
@@ -1232,7 +1232,7 @@ for (i in 1:N_distinguishable_dyads) {
 
 The likelihood factors by dyad conditional on global parameters and dyad-level random effects, so later versions can parallelize across dyads using Stan's `reduce_sum`.
 
-## 6.4 Unified dynamic parameters
+## 6.4 Mixed-composition dynamic parameters
 
 For each exchangeable dyad type \(g\):
 
@@ -1282,9 +1282,9 @@ A_g
 
 ## 6.5 Partial pooling across dyad types
 
-Do not include partial pooling in the first unified model.
+Do not include partial pooling in the first mixed-composition model.
 
-The first unified model should prove that:
+The first mixed-composition model should prove that:
 
 ```text
 multiple dyad types can be fit in one Stan likelihood
@@ -1825,7 +1825,7 @@ exchangeable_fixed_x.stan
 exchangeable_random_intercept.stan
 exchangeable_random_slope.stan
 distinguishable_basic.stan
-unified_basic.stan
+mixed_composition_basic.stan
 ```
 
 Avoid building a fully general Stan-code generator before the statistical core has been validated.
@@ -1910,7 +1910,7 @@ Functions:
 ```r
 generate_stan_exchangeable()
 generate_stan_distinguishable()
-generate_stan_unified()
+generate_stan_mixed_composition()
 write_stan_file()
 ```
 
@@ -2021,7 +2021,7 @@ parameter_class
 estimate/draw
 ```
 
-For unified models, use long tidy output:
+For mixed-composition models, use long tidy output:
 
 ```text
 draw
@@ -2200,7 +2200,7 @@ Deliverables:
 ```r
 simulate_exchangeable_var()
 simulate_distinguishable_var()
-simulate_unified_var()
+simulate_mixed_composition_var()
 check_parameter_recovery()
 check_label_invariance()
 check_stationarity()
@@ -2309,7 +2309,7 @@ missingness reports
 
 Still exclude one-partner missingness.
 
-## Version 0.5: unified model without partial pooling
+## Version 0.5: mixed-composition model without partial pooling
 
 Features:
 
@@ -2318,7 +2318,7 @@ multiple dyad types
 mix of exchangeable and distinguishable dyads
 separate type-specific parameters
 single Stan model
-unified post-processing
+mixed-composition post-processing
 common actor/partner output format
 ```
 
@@ -2450,7 +2450,7 @@ Then combine:
 one exchangeable type + one distinguishable type
 separate type-specific parameters
 single Stan model
-unified post-processing
+mixed-composition post-processing
 ```
 
 ## 13.4 Package-safety principle
@@ -2498,7 +2498,7 @@ inst/stan/templates/
   exchangeable_random_intercept.stan
   exchangeable_random_slope.stan
   distinguishable_basic.stan
-  unified_basic.stan
+  mixed_composition_basic.stan
 
 inst/stan/functions/
   ar1_helpers.stan
@@ -2519,7 +2519,7 @@ tests/testthat/
 vignettes/
   exchangeable-dyads.Rmd
   distinguishable-dyads.Rmd
-  unified-dyad-types.Rmd
+  mixed-dyad-types.Rmd
   simulation-recovery.Rmd
   priors-and-diagnostics.Rmd
 ```
@@ -2542,8 +2542,8 @@ The core implementation path is:
 7. Use block-diagonal shared/difference random-effect covariance for exchangeable dyads.
 8. Implement distinguishable role-ordered VAR with regularizing priors and posterior stationarity checks.
 9. Build transition-record preprocessing before serious missing-data support.
-10. Implement unified models without partial pooling.
-11. Add partial pooling only after separate type-specific unified models are validated.
+10. Implement mixed-composition models without partial pooling.
+11. Add partial pooling only after separate type-specific mixed-composition models are validated.
 12. Add one-partner missingness and DSEM-style extensions only after the core package is stable.
 ```
 
@@ -2562,7 +2562,7 @@ distinguishable dyads:
   role-specific random effects
   role-ordered data representation
 
-unified models:
+mixed-composition models:
   dyad-type registry determines which constraints apply
   type-specific parameters first
   partial pooling later
