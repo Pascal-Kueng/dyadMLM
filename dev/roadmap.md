@@ -40,10 +40,10 @@ Recently completed cleanup:
 - kept generated `docs/` and `doc/` output ignored; pkgdown should rebuild the
   site through the GitHub Pages workflow
 
-Immediate next step: cleanly split and polish the vignettes. The getting-started
-vignette should become shorter and more introductory; heavier APIM, ILD APIM,
-and DSM material should move into model-specific vignettes as those pages are
-created.
+Immediate next steps: implement the explicit analysis-composition controls,
+then cleanly split and polish the vignettes. The getting-started vignette should
+become shorter and more introductory; heavier APIM, ILD APIM, and DSM material
+should move into model-specific vignettes as those pages are created.
 
 ## Vignette Architecture
 
@@ -95,6 +95,26 @@ model-building features.
 - Support cross-sectional and ILD data for distinguishable and exchangeable
   dyads
 - Auto-detect roles, dyad compositions, and distinguishability where possible
+- Add explicit analysis-composition controls so common mixed dyad-type analyses
+  do not require external preprocessing
+  - `set_compositions_exchangeable` marks selected observed compositions as
+    exchangeable for downstream generated columns
+  - `composition_pooling` pools exchangeable analysis compositions under a
+    user-provided final composition name
+  - Resolve composition references through aliases based on observed roles, so
+    users can write inputs such as `"female_x_male"`, `"female_male"`,
+    `"female-male"`, `"male-female"`, or `c("female", "male")`
+  - Apply the steps in this order:
+    1. infer canonical raw compositions and create aliases
+    2. apply `set_compositions_exchangeable`
+    3. apply `composition_pooling` only to compositions that are exchangeable
+       after step 2
+    4. build `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
+       print summaries, and metadata from the final analysis compositions
+  - Keep raw observed compositions out of the returned data columns, but
+    preserve a raw-to-analysis mapping in `attr(data, "interdep")`
+  - Error clearly for unknown aliases, ambiguous aliases, overlapping pooling
+    definitions, or pooling requests that include non-exchangeable compositions
 - Handle incomplete dyads and missing roles with explicit `error` and `drop`
   behavior
 - Return factor columns for `.i_composition` and
@@ -229,7 +249,25 @@ Complete these before calling the feature set CRAN-ready:
   - confirm direct grouped DIM construction is final
   - confirm missingness behavior for incomplete dyad components is documented
   - confirm raw cross-sectional DIM names are final
-  - keep the v0.1 scope restricted to one exchangeable dyad composition
+  - keep DIM/DSM construction restricted to one final exchangeable analysis
+    composition unless `composition_pooling` has explicitly produced that
+    analysis composition
+- Finalize analysis-composition controls
+  - add `set_compositions_exchangeable` before `composition_pooling`
+  - keep the name `set_compositions_exchangeable` instead of a generic
+    "constraints" argument, because the operation is specifically about
+    treating selected dyad compositions as exchangeable
+  - add `composition_pooling` as a named list, where names are final analysis
+    composition labels and values are observed or analysis composition labels
+    to pool
+  - normalize both arguments with the same alias resolver used for observed
+    canonical compositions
+  - make pooled composition labels go through the same suffix-collision checks
+    as role and composition labels
+  - record metadata columns for raw composition, analysis composition,
+    exchangeability source, pooling group, dyad type, and dyad count
+  - keep returned data limited to final analysis columns, not extra raw
+    composition columns
 - Finalize DIM metadata
   - treat the current `dim_predictors` table columns as stable for v0.1:
     `predictor`, `component`, `source_column`, `mean_column`,
@@ -306,10 +344,11 @@ Complete these before calling the feature set CRAN-ready:
     options
   - Keep multivariate DSM modeling and formula/syntax generation for a later
     modeling layer
-- Constrain and pool compositions
-  - Example: treat male-female dyads as exchangeable
-  - Example: pool male-male and female-female dyads as same-sex
-  - Preserve clear metadata about original and modeled compositions
+- Extend composition controls only after the v0.1 API has real examples
+  - consider richer pooling diagnostics and warnings for sparse pooled groups
+  - consider helpers for inspecting raw-to-analysis composition mappings
+  - avoid adding partial-pooling semantics here; `composition_pooling` is a
+    data-preparation label operation, not a fitted-model prior structure
 - Write static model syntax for cross-sectional and ILD models
   - `glmmTMB` first
   - `brms`, including priors, once the `glmmTMB` syntax path is stable
@@ -370,6 +409,28 @@ Complete these before calling the feature set CRAN-ready:
     missingness, and latent centering out of the first Stan implementation
   - Preserve the package-wide composition metadata and exchangeability
     constraints rather than introducing a parallel dyad registry
+
+## Version 1.0.0 - Stable User-Facing API
+
+Treat `1.0.0` as an API-stability milestone, not as the first useful release.
+By this point, the core preparation functions should be stable enough that
+scripts written against the public arguments and generated-column semantics do
+not need routine breaking changes.
+
+Minimum expected state:
+
+- stable `prepare_interdep_data()` argument names and semantics
+- stable generated-column families for compositions, temporal predictor
+  components, APIM predictors, DIM predictors, and undirected DSM outcomes
+- stable analysis-composition controls:
+  `set_compositions_exchangeable` and `composition_pooling`
+- clear metadata for raw observed compositions versus final analysis
+  compositions
+- complete getting-started, APIM, ILD APIM, DIM, and DSM documentation paths
+- interpretation helpers for `.i_diff_*` structures
+- syntax generation for at least one primary model engine, preferably
+  `glmmTMB`, with tests that protect intended estimands
+- CRAN release history and pkgdown documentation that match the current API
 
 ## JOSS Readiness
 
