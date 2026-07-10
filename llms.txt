@@ -25,7 +25,7 @@ The documentation is being split around the main modeling tasks:
 | [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | available | Data structure, validation, dyad compositions, generated columns, and basic preparation |
 | APIM | planned | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad types |
 | Intensive Longitudinal APIM | planned | Temporal predictor decomposition and intensive longitudinal APIM preparation |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.html) | available | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | available | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
 | Undirected Dyadic Score Model | planned | Undirected DSM outcome and predictor construction |
 
 ## Installation
@@ -183,9 +183,15 @@ Core data requirements and the main preparation workflow.
 
 Details for specific dyadic model parameterizations.
 
+- [Actor-Partner Interdependence Model
+  (APIM)](https://pascal-kueng.github.io/interdep/articles/apim.md):
+
 - [Dyad-Individual
-  Model](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.md):
+  Model](https://pascal-kueng.github.io/interdep/articles/dim.md):
 
   Construction and interpretation of DIM predictors, including their
   relationship to APIM effects in dyadic multilevel models for
   exchangeable dyads.
+
+- [Undirected Dyadic Score Model
+  (DSM)](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md):

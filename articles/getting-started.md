@@ -22,7 +22,7 @@ intensive longitudinal data, and generalized outcomes. For the
 Dyad-Individual Model (DIM) parameterization, including dyad-mean and
 within-dyad-deviation predictors and their equivalence to APIM effects
 in exchangeable dyads, see the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.md).
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
 
 The basic data structure is a long data frame where dyads are stacked on
 top of each other and both members of a dyad appear as separate rows.
@@ -311,62 +311,6 @@ cross_distinguishable_data <- prepare_interdep_data(
   seed = 123
 )
 
-# We can inspect all attributes with this call
-attr(cross_distinguishable_data, "interdep")
-#> $group
-#> [1] "coupleID"
-#> 
-#> $member
-#> [1] "personID"
-#> 
-#> $role
-#> [1] "gender"
-#> 
-#> $time
-#> NULL
-#> 
-#> $predictors
-#> [1] "communication"
-#> 
-#> $outcomes
-#> NULL
-#> 
-#> $n_dyads
-#> [1] 95
-#> 
-#> $longitudinal
-#> [1] FALSE
-#> 
-#> $temporal_predictor_decomposition
-#> [1] "none"
-#> 
-#> $model_type
-#> [1] "apim"
-#> 
-#> $dropped_missing_role_dyads
-#> integer(0)
-#> 
-#> $dropped_incomplete_dyads
-#> integer(0)
-#> 
-#> $dyad_compositions
-#> # A tibble: 1 × 5
-#>   composition   dyad_type       dyad_type_source pooled_from n_dyads
-#>   <chr>         <chr>           <chr>            <chr>         <int>
-#> 1 female_x_male distinguishable inferred         NA               95
-#> 
-#> $temporal_predictor_decompositions
-#> # A tibble: 1 × 4
-#>   predictor     component column        temporal_predictor_decomposition
-#>   <chr>         <chr>     <chr>         <chr>                           
-#> 1 communication raw       communication none                            
-#> 
-#> $apim_predictors
-#> # A tibble: 1 × 5
-#>   predictor     component source_column actor_column              partner_column
-#>   <chr>         <chr>     <chr>         <chr>                     <chr>         
-#> 1 communication raw       communication .i_communication_raw_act… .i_communicat…
-
 print(cross_distinguishable_data, n = 20)
 #> # interdep data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
@@ -411,39 +355,6 @@ print(cross_distinguishable_data, n = 20)
 #> # ℹ 5 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_communication_raw_actor <dbl>, .i_communication_raw_partner <dbl>
-summary(cross_distinguishable_data)
-#>     personID         coupleID           gender    communication  
-#>  Min.   :  1.00   Min.   : 1.00   Length   :190   Min.   :1.203  
-#>  1st Qu.: 48.25   1st Qu.:24.25   N.unique :  2   1st Qu.:4.192  
-#>  Median : 95.50   Median :48.00   N.blank  :  0   Median :5.058  
-#>  Mean   : 95.50   Mean   :48.00   Min.nchar:  4   Mean   :5.131  
-#>  3rd Qu.:142.75   3rd Qu.:71.75   Max.nchar:  6   3rd Qu.:6.078  
-#>  Max.   :190.00   Max.   :95.00                   Max.   :9.291  
-#>                                                   NAs    :7      
-#>   satisfaction          .i_composition           .i_composition_role
-#>  Min.   :-3.144   female_x_male:190    female_x_male_female:95      
-#>  1st Qu.: 3.209                        female_x_male_male  :95      
-#>  Median : 5.025                                                     
-#>  Mean   : 4.964                                                     
-#>  3rd Qu.: 6.781                                                     
-#>  Max.   :12.429                                                     
-#>  NAs    :3                                                          
-#>  .i_is_female_x_male_female .i_is_female_x_male_male .i_communication_raw_actor
-#>  Min.   :0.0                Min.   :0.0              Min.   :1.203             
-#>  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:4.192             
-#>  Median :0.5                Median :0.5              Median :5.058             
-#>  Mean   :0.5                Mean   :0.5              Mean   :5.131             
-#>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.:6.078             
-#>  Max.   :1.0                Max.   :1.0              Max.   :9.291             
-#>                                                      NAs    :7                 
-#>  .i_communication_raw_partner
-#>  Min.   :1.203               
-#>  1st Qu.:4.192               
-#>  Median :5.058               
-#>  Mean   :5.131               
-#>  3rd Qu.:6.078               
-#>  Max.   :9.291               
-#>  NAs    :7
 ```
 
 The generated `.i_*` columns can be used directly in model formulas.
@@ -460,10 +371,12 @@ cross_distinguishable_model <- glmmTMB(
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
     
     # gender-specific slopes for communication actor effect (no main effect)
-    .i_is_female_x_male_female:.i_communication_raw_actor + .i_is_female_x_male_male:.i_communication_raw_actor +
+    .i_is_female_x_male_female:.i_communication_raw_actor + 
+    .i_is_female_x_male_male:.i_communication_raw_actor +
     
     # gender-specific slopes for communication partner effect (no main effect)
-    .i_is_female_x_male_female:.i_communication_raw_partner + .i_is_female_x_male_male:.i_communication_raw_partner +
+    .i_is_female_x_male_female:.i_communication_raw_partner + 
+    .i_is_female_x_male_male:.i_communication_raw_partner +
     
     # residual covariance in glmmTMB can be modeled with random intercepts
     # when dispformula ~ 0. We model gender-specific residual variances and 
@@ -477,6 +390,9 @@ cross_distinguishable_model <- glmmTMB(
 
 summary(cross_distinguishable_model)
 ```
+
+Note that models are not run and summarized in this vignette. For more
+infos See the vignette !TODO insert link to APIM vignette.
 
 ### Exchangeable Gaussian APIM
 
@@ -593,13 +509,7 @@ summary(cross_exchangeable_diff_model)
 ```
 
 Helper functions to rotate these structures back to partner-level
-interpretations are planned.
-
-### Test distinguishability
-
-Aside from using a Wald test on the first model, nested model
-comparisons require models fit to the same prepared data object. Helpers
-for creating those constrained columns are planned.
+interpretations are planned for v.0.0.1.500
 
 ## Incomplete dyads and missing roles
 
@@ -617,10 +527,10 @@ whole dyads. The printed header records which dyads were removed.
 ``` r
 
 incomplete_data <- data.frame(
-  coupleID = c(1, 2, 2, 3, 3, 4, 4),
-  personID = c(1, 1, 2, 1, 2, 1, 2),
-  gender = c("female", "female", NA, "female", "female", "female", "male"),
-  satisfaction = c(5.2, 4.8, 4.9, 5.1, 5.0, 4.7, 4.6)
+  coupleID = c(1, 2, 2, 3, 3, 4, 4, 5),
+  personID = c(1, 3, 4, 5, 6, 7, 8, 10),
+  gender = c("female", "female", NA, "female", "female", "female", "male", NA),
+  satisfaction = c(5.2, 4.8, 4.9, 5.1, 5.0, 4.7, 4.6, 3.0)
 )
 
 incomplete_dropped_data <- prepare_interdep_data(
@@ -632,7 +542,7 @@ incomplete_dropped_data <- prepare_interdep_data(
   missing_role = "drop",
   seed = 123
 )
-#> Dropped 1 incomplete dyad, with ID: 1.
+#> Dropped 2 incomplete dyads, with IDs: 1, 5.
 #> Dropped 1 dyad with incomplete role information, with ID: 2.
 
 print(incomplete_dropped_data)
@@ -640,7 +550,7 @@ print(incomplete_dropped_data)
 #> # Rows: 4 | Dyads: 2 | Intensive longitudinal: no
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
-#> # Dropped incomplete dyads: 1 dyad, with ID: 1
+#> # Dropped incomplete dyads: 2 dyads, with IDs: 1, 5
 #> #
 #> # Dropped dyads with incomplete role information: 1 dyad, with ID: 2
 #> #
@@ -659,264 +569,13 @@ print(incomplete_dropped_data)
 #> # A tibble: 4 × 10
 #>   coupleID personID gender satisfaction .i_composition  .i_composition_role 
 #>      <dbl>    <dbl> <chr>         <dbl> <fct>           <fct>               
-#> 1        3        1 female          5.1 female_x_female female_x_female     
-#> 2        3        2 female          5   female_x_female female_x_female     
-#> 3        4        1 female          4.7 female_x_male   female_x_male_female
-#> 4        4        2 male            4.6 female_x_male   female_x_male_male  
+#> 1        3        5 female          5.1 female_x_female female_x_female     
+#> 2        3        6 female          5   female_x_female female_x_female     
+#> 3        4        7 female          4.7 female_x_male   female_x_male_female
+#> 4        4        8 male            4.6 female_x_male   female_x_male_male  
 #> # ℹ 4 more variables: .i_is_female_x_female <dbl>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_diff_female_x_female <dbl>
-```
-
-## Semi-continuous cross-sectional data
-
-`example_dyadic_crosssectional_tweedie` has the same dyadic structure as
-before, but the outcome has exact zeros and positive skewed values, as
-in some physical activity outcomes, in contrast to the Gaussian
-distribution from the previous example.
-
-``` r
-
-print(head(example_dyadic_crosssectional_tweedie))
-#> # A tibble: 6 × 5
-#>   personID coupleID gender motivation physical_activity
-#>      <int>    <int> <fct>       <dbl>             <dbl>
-#> 1        1        1 female     -1.34               4.03
-#> 2        2        1 male       -0.938              3.43
-#> 3        3        2 female     -0.637              3.08
-#> 4        4        2 male        0.700             13.7 
-#> 5        5        3 female     -0.608              7.81
-#> 6        6        3 male       -0.646              7.08
-hist(example_dyadic_crosssectional_tweedie$physical_activity, breaks = 20)
-```
-
-![](getting-started_files/figure-html/tweedie-raw-1.png)
-
-Validation and modeling work the same way because the dyadic structure
-is the same. The random-effect interpretation is different from the
-Gaussian case: Tweedie random effects are latent effects on the log-mean
-scale, while the observation-level Tweedie variance remains part of the
-model.
-
-### Distinguishable Tweedie APIM
-
-``` r
-
-tweedie_distinguishable_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_tweedie,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = motivation,
-  # when no model_type is specified, apim is the default.
-  seed = 123
-)
-
-print(tweedie_distinguishable_data)
-#> # interdep data
-#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
-#> #
-#> # Dyad compositions:
-#> # female_x_male distinguishable 120 dyads
-#> #
-#> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
-#> #                        values
-#> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
-#> #                        values
-#> #
-#> # A tibble: 240 × 11
-#>    personID coupleID gender motivation physical_activity .i_composition
-#>       <int>    <int> <chr>       <dbl>             <dbl> <fct>         
-#>  1        1        1 female    -1.34                4.03 female_x_male 
-#>  2        2        1 male      -0.938               3.43 female_x_male 
-#>  3        3        2 female    -0.637               3.08 female_x_male 
-#>  4        4        2 male       0.700              13.7  female_x_male 
-#>  5        5        3 female    -0.608               7.81 female_x_male 
-#>  6        6        3 male      -0.646               7.08 female_x_male 
-#>  7        7        4 female    -0.0316              1.45 female_x_male 
-#>  8        8        4 male       0.380              23.3  female_x_male 
-#>  9        9        5 female     0.575               3.98 female_x_male 
-#> 10       10        5 male       1.77               20.1  female_x_male 
-#> # ℹ 230 more rows
-#> # ℹ 5 more variables: .i_composition_role <fct>,
-#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
-summary(tweedie_distinguishable_data)
-#>     personID         coupleID            gender      motivation       
-#>  Min.   :  1.00   Min.   :  1.00   Length   :240   Min.   :-2.320532  
-#>  1st Qu.: 60.75   1st Qu.: 30.75   N.unique :  2   1st Qu.:-0.580126  
-#>  Median :120.50   Median : 60.50   N.blank  :  0   Median :-0.032795  
-#>  Mean   :120.50   Mean   : 60.50   Min.nchar:  4   Mean   :-0.008869  
-#>  3rd Qu.:180.25   3rd Qu.: 90.25   Max.nchar:  6   3rd Qu.: 0.537262  
-#>  Max.   :240.00   Max.   :120.00                   Max.   : 2.423337  
-#>                                                    NAs    :9          
-#>  physical_activity       .i_composition           .i_composition_role
-#>  Min.   : 0.000    female_x_male:240    female_x_male_female:120     
-#>  1st Qu.: 1.445                         female_x_male_male  :120     
-#>  Median : 7.855                                                      
-#>  Mean   :11.026                                                      
-#>  3rd Qu.:15.147                                                      
-#>  Max.   :85.043                                                      
-#>  NAs    :4                                                           
-#>  .i_is_female_x_male_female .i_is_female_x_male_male .i_motivation_raw_actor
-#>  Min.   :0.0                Min.   :0.0              Min.   :-2.320532      
-#>  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.580126      
-#>  Median :0.5                Median :0.5              Median :-0.032795      
-#>  Mean   :0.5                Mean   :0.5              Mean   :-0.008869      
-#>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.537262      
-#>  Max.   :1.0                Max.   :1.0              Max.   : 2.423337      
-#>                                                      NAs    :9              
-#>  .i_motivation_raw_partner
-#>  Min.   :-2.320532        
-#>  1st Qu.:-0.580126        
-#>  Median :-0.032795        
-#>  Mean   :-0.008869        
-#>  3rd Qu.: 0.537262        
-#>  Max.   : 2.423337        
-#>  NAs    :9
-```
-
-``` r
-
-
-tweedie_distinguishable_model <- glmmTMB(
-  physical_activity ~ 
-    # remove standard intercept and model separate intercepts for male and female
-    0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
-    
-    # gender-specific slopes for motivation actor effect
-    .i_is_female_x_male_female:.i_motivation_raw_actor + .i_is_female_x_male_male:.i_motivation_raw_actor +
-    
-    # gender-specific slopes for motivation partner effect
-    .i_is_female_x_male_female:.i_motivation_raw_partner + .i_is_female_x_male_male:.i_motivation_raw_partner +
-    
-    # keep a simple couple-level latent effect for stable non-independence
-    # important limitation: this can only induce positive partner dependence
-    (1 | coupleID) 
-  
-  # allow role-specific Tweedie dispersion
-  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-  , family = tweedie()
-  , data = tweedie_distinguishable_data
-)
-
-summary(tweedie_distinguishable_model)
-```
-
-### Exchangeable Tweedie APIM
-
-``` r
-
-tweedie_exchangeable_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_tweedie,
-  group = coupleID,
-  member = personID,
-  # role = gender,
-  predictors = motivation,
-  seed = 123
-)
-
-print(tweedie_exchangeable_data)
-#> # interdep data
-#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID
-#> #
-#> # Dyad compositions:
-#> # assumed_exchangeable exchangeable 120 dyads
-#> #
-#> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
-#> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
-#> #                        values
-#> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
-#> #                        values
-#> #
-#> # A tibble: 240 × 11
-#>    personID coupleID gender motivation physical_activity .i_composition      
-#>       <int>    <int> <fct>       <dbl>             <dbl> <fct>               
-#>  1        1        1 female    -1.34                4.03 assumed_exchangeable
-#>  2        2        1 male      -0.938               3.43 assumed_exchangeable
-#>  3        3        2 female    -0.637               3.08 assumed_exchangeable
-#>  4        4        2 male       0.700              13.7  assumed_exchangeable
-#>  5        5        3 female    -0.608               7.81 assumed_exchangeable
-#>  6        6        3 male      -0.646               7.08 assumed_exchangeable
-#>  7        7        4 female    -0.0316              1.45 assumed_exchangeable
-#>  8        8        4 male       0.380              23.3  assumed_exchangeable
-#>  9        9        5 female     0.575               3.98 assumed_exchangeable
-#> 10       10        5 male       1.77               20.1  assumed_exchangeable
-#> # ℹ 230 more rows
-#> # ℹ 5 more variables: .i_composition_role <fct>,
-#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_assumed_exchangeable <dbl>,
-#> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
-summary(tweedie_exchangeable_data)
-#>     personID         coupleID         gender      motivation       
-#>  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  
-#>  1st Qu.: 60.75   1st Qu.: 30.75   male  :120   1st Qu.:-0.580126  
-#>  Median :120.50   Median : 60.50                Median :-0.032795  
-#>  Mean   :120.50   Mean   : 60.50                Mean   :-0.008869  
-#>  3rd Qu.:180.25   3rd Qu.: 90.25                3rd Qu.: 0.537262  
-#>  Max.   :240.00   Max.   :120.00                Max.   : 2.423337  
-#>                                                 NAs    :9          
-#>  physical_activity              .i_composition           .i_composition_role
-#>  Min.   : 0.000    assumed_exchangeable:240    assumed_exchangeable:240     
-#>  1st Qu.: 1.445                                                             
-#>  Median : 7.855                                                             
-#>  Mean   :11.026                                                             
-#>  3rd Qu.:15.147                                                             
-#>  Max.   :85.043                                                             
-#>  NAs    :4                                                                  
-#>  .i_is_assumed_exchangeable .i_diff_assumed_exchangeable
-#>  Min.   :1                  Min.   :-1                  
-#>  1st Qu.:1                  1st Qu.:-1                  
-#>  Median :1                  Median : 0                  
-#>  Mean   :1                  Mean   : 0                  
-#>  3rd Qu.:1                  3rd Qu.: 1                  
-#>  Max.   :1                  Max.   : 1                  
-#>                                                         
-#>  .i_motivation_raw_actor .i_motivation_raw_partner
-#>  Min.   :-2.320532       Min.   :-2.320532        
-#>  1st Qu.:-0.580126       1st Qu.:-0.580126        
-#>  Median :-0.032795       Median :-0.032795        
-#>  Mean   :-0.008869       Mean   :-0.008869        
-#>  3rd Qu.: 0.537262       3rd Qu.: 0.537262        
-#>  Max.   : 2.423337       Max.   : 2.423337        
-#>  NAs    :9               NAs    :9
-```
-
-``` r
-
-
-tweedie_exchangeable_model <- glmmTMB(
-  physical_activity ~ 
-    # pooled intercept 
-    1 + 
-    
-    # pooled actor slope for motivation
-    .i_motivation_raw_actor +
-    
-    # pooled partner slope for motivation
-    .i_motivation_raw_partner +
-    
-    # exchangeable latent dyad block on the log-mean scale
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID)
-    
-  # estimate a single pooled Tweedie dispersion parameter
-  , dispformula = ~ 1
-  , family = tweedie()
-  , data = tweedie_exchangeable_data
-)
-
-summary(tweedie_exchangeable_model)
 ```
 
 ## Intensive longitudinal dyadic data
@@ -1816,25 +1475,24 @@ mixed_cross_gaussian_model <- glmmTMB(
 summary(mixed_cross_gaussian_model)
 ```
 
-### Unified versus separate mixed-composition fits
+### Single versus separate mixed-composition fits
 
-The mixed-composition models in this vignette are unified in the sense
-that all dyad compositions are fit in one model call. That is useful
-when the goal is to compare effects across compositions, test equality
-constraints, keep one model-based covariance matrix for those
-comparisons, or intentionally share parameters such as a common Tweedie
-power parameter.
+The mixed-composition models in this vignette fit all dyad compositions
+in one model call. That is useful when the goal is to compare effects
+across compositions, test equality constraints, keep one model-based
+covariance matrix for those comparisons, or intentionally share
+parameters such as a common Tweedie power parameter.
 
-A unified fixed-effect formula does not, by itself, create partial
-pooling across dyad compositions. The composition-specific intercepts
-and slopes above are ordinary fixed effects, so estimates for
-female-female or male-male dyads are not automatically shrunk toward
-estimates from the other dyad types. If every mean, variance, and
-covariance parameter is composition-specific, the likelihood largely
-factorizes by composition. In the cross-sectional Gaussian example, the
-unified model and three separate composition-specific models give the
-same log-likelihood and fixed-effect estimates up to numerical
-tolerance.
+A fixed-effect formula with all compositions in one model call does not,
+by itself, create partial pooling across dyad compositions. The
+composition-specific intercepts and slopes above are ordinary fixed
+effects, so estimates for female-female or male-male dyads are not
+automatically shrunk toward estimates from the other dyad types. If
+every mean, variance, and covariance parameter is composition-specific,
+the likelihood largely factorizes by composition. In the cross-sectional
+Gaussian example, the single mixed-composition fit and three separate
+composition-specific fits give the same log-likelihood and fixed-effect
+estimates up to numerical tolerance.
 
 Partial pooling requires a different model specification, such as a
 common effect plus composition deviations with a hierarchical prior, or
@@ -2017,13 +1675,14 @@ convergence problems.
 
 This maximal covariance model is a demanding all-in-one likelihood. In
 this simulated example, separate composition-specific fits recover the
-same fixed-effect solution cleanly, while the unified fit can report
-false convergence even when it reaches the same likelihood and has a
-positive definite Hessian. Treat convergence diagnostics, Hessian
-diagnostics, and comparison with simpler or separate fits as part of the
-workflow. If the unified model is not clean, fit the
-composition-specific models separately for estimation, or simplify the
-same-day and stable covariance blocks before adding more random effects.
+same fixed-effect solution cleanly, while the all-in-one
+mixed-composition fit can report false convergence even when it reaches
+the same likelihood and has a positive definite Hessian. Treat
+convergence diagnostics, Hessian diagnostics, and comparison with
+simpler or separate fits as part of the workflow. If the all-in-one fit
+is not clean, fit the composition-specific models separately for
+estimation, or simplify the same-day and stable covariance blocks before
+adding more random effects.
 
 ``` r
 
@@ -2278,7 +1937,7 @@ the vignette because it combines composition-specific mean effects,
 composition-specific latent dyadic dependence, composition-specific
 dispersion, and a common Tweedie power parameter. A practical workflow
 is to fit separate Gaussian or simpler Tweedie models first, then add
-the unified constraints only when they answer a specific comparison
+shared-parameter constraints only when they answer a specific comparison
 question.
 
 ``` r
