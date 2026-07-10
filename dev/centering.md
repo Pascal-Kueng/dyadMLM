@@ -241,8 +241,15 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
   compact.
 - Review `add_undirected_dyadic_score_columns()` before treating undirected DSM
   as stable.
-- Confirm `undirected_dsm_outcomes` metadata names and generated-column metadata
-  are final enough for v0.1.
+- Treat `dim_predictors` and `undirected_dsm_outcomes` metadata names as stable
+  for v0.1 unless the final DIM/DSM review finds a concrete problem.
+- Keep `interdep_generated_columns()` internal for v0.1. It is the normalized
+  table used by `print.interdep_data()` and documentation-facing summaries, not
+  a public inspection API.
+- Make `decomposition_level` in normalized generated-column metadata mean the
+  computational unit consistently. `dyad` and `dyad_time` already have this
+  meaning for DIM/DSM rows; temporal rows should not use `time_2l` there because
+  that records the decomposition method rather than the unit.
 - Keep `getting-started.Rmd` focused on data preparation and move fitted-model
   examples into model-specific vignettes.
 - Keep APIM and temporal predictor decomposition model examples in APIM-focused

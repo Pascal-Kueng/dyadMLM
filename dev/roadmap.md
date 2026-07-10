@@ -231,18 +231,23 @@ Complete these before calling the feature set CRAN-ready:
   - confirm raw cross-sectional DIM names are final
   - keep the v0.1 scope restricted to one exchangeable dyad composition
 - Finalize DIM metadata
-  - decide whether `dim_predictors` table columns are stable:
+  - treat the current `dim_predictors` table columns as stable for v0.1:
     `predictor`, `component`, `source_column`, `mean_column`,
     `deviation_column`, `decomposition_level`
   - keep downstream print/vignette code reading metadata rather than guessing
     column names where possible
 - Finalize generated-column metadata
-  - keep `interdep_generated_columns()` as the single normalized table for
-    generated temporal predictor, APIM, DIM, and undirected DSM columns
+  - keep `interdep_generated_columns()` internal as the single normalized table
+    used by printing and documentation-facing summaries of generated temporal
+    predictor, APIM, DIM, and undirected DSM columns
+  - expose generated-column meanings through `print.interdep_data()` for v0.1;
+    consider a public wrapper later only if users need programmatic inspection
   - preserve explicit fields for `temporal_decomposition`,
     `dyadic_decomposition`, and `column_centering`
-  - revisit whether temporal rows should keep `decomposition_level = "time_2l"`
-    or later split method and level into separate fields
+  - before release, make `decomposition_level` mean the computational unit
+    consistently; prefer moving temporal rows away from
+    `decomposition_level = "time_2l"` because `time_2l` is a method, not a
+    unit
 - Keep `print.interdep_data()` descriptions for DIM column families explicit
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
