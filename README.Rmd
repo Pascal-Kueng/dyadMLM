@@ -33,15 +33,15 @@ Start with the [Getting Started](https://pascal-kueng.github.io/interdep/article
 vignette for the main data-preparation workflow. The
 [documentation site](https://pascal-kueng.github.io/interdep/) also includes
 the [function reference](https://pascal-kueng.github.io/interdep/reference/index.html).
-The package documentation is organized around the main modeling tasks:
+The documentation is being split around the main modeling tasks:
 
-| Vignette | Focus |
-|---|---|
-| [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| APIM | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad types |
-| Intensive Longitudinal APIM | Temporal predictor decomposition and intensive longitudinal APIM preparation |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.html) | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
-| Undirected Dyadic Score Model | Undirected DSM outcome and predictor construction |
+| Vignette | Status | Focus |
+|---|---|---|
+| [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | available | Data structure, validation, dyad compositions, generated columns, and basic preparation |
+| APIM | planned | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad types |
+| Intensive Longitudinal APIM | planned | Temporal predictor decomposition and intensive longitudinal APIM preparation |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/Dyad-Individual-Model.html) | available | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
+| Undirected Dyadic Score Model | planned | Undirected DSM outcome and predictor construction |
 
 
 ## Installation

@@ -179,7 +179,7 @@ test_that("interdep_generated_columns collects DIM columns", {
       print_order = c(20L, 21L),
       column_pattern = c(".i_*_raw_dyad_mean_gmc", ".i_*_raw_within_dyad_deviation"),
       description = c(
-        "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centred",
+        "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centered",
         "DIM within-dyad predictor deviation: person's difference from the dyad average"
       )
     )

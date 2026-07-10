@@ -18,6 +18,33 @@ helpers, and eventually model syntax explicit and reproducible.
 - Composition-inference debugging scratch code:
   [`debug-infer-compositions.R`](debug-infer-compositions.R)
 
+## Current State
+
+The package is currently in a public development state, not a CRAN-ready release
+state. The core data-preparation API is implemented and covered by tests, the
+README links to the pkgdown site, and GitHub Actions are configured for
+R CMD check and pkgdown publishing.
+
+Recently completed cleanup:
+
+- replaced the old combined-model wording with "mixed dyad types" or
+  "mixed-composition" wording
+- renamed the mixed example datasets to:
+  - `example_dyadic_crosssectional_mixed`
+  - `example_dyadic_ILD_mixed`
+  - `example_dyadic_ILD_mixed_tweedie`
+- kept `LICENSE` for R/CRAN's `MIT + file LICENSE` convention and
+  `LICENSE.md` as the full human-readable MIT license
+- added GitHub Pages/pkgdown infrastructure and linked available vignettes from
+  the README
+- kept generated `docs/` and `doc/` output ignored; pkgdown should rebuild the
+  site through the GitHub Pages workflow
+
+Immediate next step: cleanly split and polish the vignettes. The getting-started
+vignette should become shorter and more introductory; heavier APIM, ILD APIM,
+and DSM material should move into model-specific vignettes as those pages are
+created.
+
 ## Vignette Architecture
 
 Keep the first-contact documentation short and stable. Heavy or
@@ -34,12 +61,12 @@ Target vignette structure:
   - missing structural data rules
   - compact examples of `predictors`, `model_type`, `temporal_predictor_decomposition`,
     print output, and metadata
-  - links to model-specific vignettes
+  - links to available model-specific vignettes
   - minimal or no fitted models
 - `apim.Rmd`
   - cross-sectional APIM model construction
   - distinguishable and exchangeable APIMs
-  - multiple dyad types in one APIM
+  - mixed dyad types in one APIM
   - `.i_is_*`, `.i_diff_*`, and raw actor/partner predictor columns
 - `intensive-longitudinal-apim.Rmd`
   - ILD APIMs with temporal predictor decomposition
@@ -153,7 +180,7 @@ model-building features.
     #                                   from the dyad average
     #   .i_*_cbp_dyad_mean              DIM between-person dyad-mean predictor:
     #                                   dyad's stable usual level, grand-mean
-    #                                   centred
+    #                                   centered
     #   .i_*_cbp_within_dyad_deviation  DIM between-person within-dyad predictor
     #                                   deviation: person's stable difference from
     #                                   the dyad's usual level
@@ -194,6 +221,10 @@ model-building features.
 
 Complete these before calling the feature set CRAN-ready:
 
+- Rebuild and inspect generated documentation
+  - run `devtools::document()`
+  - render `README.Rmd`
+  - build pkgdown locally when changing vignette structure or `_pkgdown.yml`
 - Review `add_dyad_individual_columns.R` carefully
   - confirm direct grouped DIM construction is final
   - confirm missingness behavior for incomplete dyad components is documented
@@ -248,6 +279,7 @@ Complete these before calling the feature set CRAN-ready:
 - Run final release checks
   - `devtools::test(reporter = "summary")`
   - `devtools::check(args = "--no-manual", error_on = "never")`
+  - inspect the pkgdown site after the GitHub Pages workflow completes
   - inspect README, vignette, examples, `inst/CITATION`, and package metadata
     for CRAN-facing clarity
 

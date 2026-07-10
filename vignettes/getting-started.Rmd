@@ -141,7 +141,7 @@ The generated `.i_*` columns can be used directly in model formulas.
 
 ### Distinguishable Gaussian APIM
 
-```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
+```{r fit-cross-distinguishable-gaussian, eval = FALSE}
 library(glmmTMB)
 
 cross_distinguishable_model <- glmmTMB(
@@ -190,7 +190,7 @@ summary(cross_exchangeable_data)
 ```
 
 
-```{r fit-cross-exchangeable-gaussian-diff, eval = has_glmmTMB}
+```{r fit-cross-exchangeable-gaussian-diff, eval = FALSE}
 
 cross_exchangeable_diff_model <- glmmTMB(
   satisfaction ~ 
@@ -293,7 +293,7 @@ summary(tweedie_distinguishable_data)
 ```
 
 
-```{r fit-tweedie-distinguishable, eval = has_glmmTMB}
+```{r fit-tweedie-distinguishable, eval = FALSE}
 
 tweedie_distinguishable_model <- glmmTMB(
   physical_activity ~ 
@@ -336,7 +336,7 @@ print(tweedie_exchangeable_data)
 summary(tweedie_exchangeable_data)
 ```
 
-```{r fit-tweedie-exchangeable, eval = has_glmmTMB}
+```{r fit-tweedie-exchangeable, eval = FALSE}
 
 tweedie_exchangeable_model <- glmmTMB(
   physical_activity ~ 
@@ -401,7 +401,7 @@ supplied, longitudinal predictors must be numeric unless
 `temporal_predictor_decomposition = "none"` is used with a model type that does
 not compute dyad means or within-dyad deviations.
 
-```{r fit-ild-distinguishable, eval = has_glmmTMB}
+```{r fit-ild-distinguishable, eval = FALSE}
 
 ild_distinguishable_model <- glmmTMB(
   closeness ~ 0 + 
@@ -459,7 +459,7 @@ print(ild_exchangeable_data)
 summary(ild_exchangeable_data)
 ```
 
-```{r fit-ild-exchangeable, eval = has_glmmTMB}
+```{r fit-ild-exchangeable, eval = FALSE}
 
 ild_exchangeable_model <- glmmTMB(
   closeness ~ 
@@ -527,7 +527,7 @@ shared latent shock. This is the easier teaching model: it keeps role-specific
 Tweedie dispersion, but the same-day latent shock can only induce positive
 partner dependence.
 
-```{r fit-ild-tweedie-distinguishable-shared-day, eval = has_glmmTMB}
+```{r fit-ild-tweedie-distinguishable-shared-day, eval = FALSE}
 
 ild_tweedie_distinguishable_shared_day_model <- glmmTMB(
   physical_activity ~ 0 +
@@ -573,7 +573,7 @@ negative same-day partner dependence. In this ILD example, the repeated paired
 occasions provide enough information to also estimate role-specific Tweedie
 dispersion.
 
-```{r fit-ild-tweedie-distinguishable-latent-day-cov, eval = has_glmmTMB}
+```{r fit-ild-tweedie-distinguishable-latent-day-cov, eval = FALSE}
 
 ild_tweedie_distinguishable_latent_day_cov_model <- glmmTMB(
   physical_activity ~ 0 +
@@ -643,7 +643,7 @@ sum-diff random-effect blocks provide stable and same-day exchangeable latent
 covariance structures. The Tweedie dispersion stays pooled because the
 sum-diff signs identify exchangeable positions, not substantive roles.
 
-```{r fit-ild-tweedie-exchangeable, eval = has_glmmTMB}
+```{r fit-ild-tweedie-exchangeable, eval = FALSE}
 
 ild_tweedie_exchangeable_model <- glmmTMB(
   physical_activity ~
@@ -742,7 +742,7 @@ mixed_cross_targets <- data.frame(
 mixed_cross_targets
 ```
 
-```{r fit-mixed-cross-sectional-gaussian, eval = has_glmmTMB}
+```{r fit-mixed-cross-sectional-gaussian, eval = FALSE}
 
 mixed_cross_gaussian_model <- glmmTMB(
   satisfaction ~ 0 +
@@ -806,7 +806,7 @@ false convergence even when the Hessian is positive definite. The `BFGS`
 optimizer is used here because it reaches the same solution cleanly for this
 simulated dataset.
 
-```{r fit-mixed-ild-gaussian, eval = has_glmmTMB}
+```{r fit-mixed-ild-gaussian, eval = FALSE}
 
 mixed_ild_gaussian_model <- glmmTMB(
   closeness ~ 0 +
@@ -919,7 +919,7 @@ between-person actor and partner effects. The dyadic random-effect blocks are
 latent effects on the log-mean scale, not residual covariance parameters in the
 Gaussian sense.
 
-```{r fit-mixed-ild-tweedie, eval = has_glmmTMB}
+```{r fit-mixed-ild-tweedie, eval = FALSE}
 
 mixed_ild_tweedie_model <- glmmTMB(
   physical_activity ~ 0 +

@@ -288,7 +288,7 @@ test_that("interdep data print describes cross-sectional DIM columns", {
   expect_added_column_description(
     printed,
     ".i_*_raw_dyad_mean_gmc",
-    "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centred"
+    "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centered"
   )
   expect_true(any(grepl(".i_*_raw_within_dyad_deviation", printed, fixed = TRUE)))
   expect_added_column_description(
@@ -334,7 +334,7 @@ test_that("interdep data print describes longitudinal DIM columns", {
   expect_added_column_description(
     printed,
     ".i_*_cbp_dyad_mean",
-    "DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centred"
+    "DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered"
   )
   expect_true(any(grepl(".i_*_cbp_within_dyad_deviation", printed, fixed = TRUE)))
   expect_added_column_description(
