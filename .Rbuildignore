@@ -10,3 +10,7 @@
 ^vignettes/.*\.R$
 ^HANDOFF\.md$
 ^CITATION\.cff$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$

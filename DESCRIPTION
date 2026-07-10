@@ -34,3 +34,4 @@ VignetteBuilder: knitr
 Depends: 
     R (>= 4.1)
 LazyData: true
+URL: https://pascal-kueng.github.io/interdep/
