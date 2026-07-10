@@ -46,7 +46,11 @@ interdep_data object."></head><body>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">infer_dyad_compositions</span><span class="op">(</span><span class="va">data</span>, seed <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">infer_dyad_compositions</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  set_compositions_exchangeable <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -60,6 +64,11 @@ interdep_data object."></head><body>
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional seed for random <code>.i_diff_*</code> sign assignment in
 exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
+
+
+<dt id="arg-set-compositions-exchangeable">set_compositions_exchangeable<a class="anchor" aria-label="anchor" href="#arg-set-compositions-exchangeable"></a></dt>
+<dd><p>Optional dyad compositions to treat as
+exchangeable for analysis.</p></dd>
 
 </dl></div>
     <div class="section level2">

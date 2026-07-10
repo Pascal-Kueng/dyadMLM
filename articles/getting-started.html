@@ -505,10 +505,10 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; integer(0)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $dyad_compositions</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
-<span><span class="co">#&gt;   raw_composition composition   dyad_type       n_dyads</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> female_x_male   female_x_male distinguishable      95</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 5</span></span></span>
+<span><span class="co">#&gt;   raw_composition composition   dyad_type       dyad_type_source n_dyads</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> female_x_male   female_x_male distinguishable inferred              95</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $temporal_predictor_decompositions</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
@@ -2202,6 +2202,7 @@ outcome is semi-continuous.</p>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  set_compositions_exchangeable <span class="op">=</span> <span class="st">'male female'</span>,</span>
 <span>  time <span class="op">=</span> <span class="va">diaryday</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
@@ -2213,9 +2214,9 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; # Structure: group = coupleID, member = personID, role = gender, time = diaryday</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female exchangeable    60 dyads</span></span>
-<span><span class="co">#&gt; # female_x_male   distinguishable 80 dyads</span></span>
-<span><span class="co">#&gt; # male_x_male     exchangeable    60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_female exchangeable 60 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male   exchangeable 80 dyads</span></span>
+<span><span class="co">#&gt; # male_x_male     exchangeable 60 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
@@ -2253,9 +2254,9 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female              5.59             4.41</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,590 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_female &lt;dbl&gt;, .i_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_male_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_female &lt;dbl&gt;, .i_is_female_x_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_tweedie_data</span><span class="op">)</span></span>
@@ -2275,22 +2276,22 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt;  3rd Qu.: 16.163   3rd Qu.: 5.611992                         </span></span>
 <span><span class="co">#&gt;  Max.   :158.087   Max.   : 8.401539                         </span></span>
 <span><span class="co">#&gt;  NAs    :120       NAs    :220                               </span></span>
-<span><span class="co">#&gt;            .i_composition_role .i_is_female_x_female .i_is_female_x_male_female</span></span>
-<span><span class="co">#&gt;  female_x_female     :1680     Min.   :0.0           Min.   :0.0               </span></span>
-<span><span class="co">#&gt;  female_x_male_female:1120     1st Qu.:0.0           1st Qu.:0.0               </span></span>
-<span><span class="co">#&gt;  female_x_male_male  :1120     Median :0.0           Median :0.0               </span></span>
-<span><span class="co">#&gt;  male_x_male         :1680     Mean   :0.3           Mean   :0.2               </span></span>
-<span><span class="co">#&gt;                                3rd Qu.:1.0           3rd Qu.:0.0               </span></span>
-<span><span class="co">#&gt;                                Max.   :1.0           Max.   :1.0               </span></span>
-<span><span class="co">#&gt;                                                                                </span></span>
-<span><span class="co">#&gt;  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female</span></span>
-<span><span class="co">#&gt;  Min.   :0.0              Min.   :0.0       Min.   :-1             </span></span>
-<span><span class="co">#&gt;  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0             </span></span>
-<span><span class="co">#&gt;  Median :0.0              Median :0.0       Median : 0             </span></span>
-<span><span class="co">#&gt;  Mean   :0.2              Mean   :0.3       Mean   : 0             </span></span>
-<span><span class="co">#&gt;  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0             </span></span>
-<span><span class="co">#&gt;  Max.   :1.0              Max.   :1.0       Max.   : 1             </span></span>
+<span><span class="co">#&gt;       .i_composition_role .i_is_female_x_female .i_is_female_x_male</span></span>
+<span><span class="co">#&gt;  female_x_female:1680     Min.   :0.0           Min.   :0.0        </span></span>
+<span><span class="co">#&gt;  female_x_male  :2240     1st Qu.:0.0           1st Qu.:0.0        </span></span>
+<span><span class="co">#&gt;  male_x_male    :1680     Median :0.0           Median :0.0        </span></span>
+<span><span class="co">#&gt;                           Mean   :0.3           Mean   :0.4        </span></span>
+<span><span class="co">#&gt;                           3rd Qu.:1.0           3rd Qu.:1.0        </span></span>
+<span><span class="co">#&gt;                           Max.   :1.0           Max.   :1.0        </span></span>
 <span><span class="co">#&gt;                                                                    </span></span>
+<span><span class="co">#&gt;  .i_is_male_x_male .i_diff_female_x_female .i_diff_female_x_male</span></span>
+<span><span class="co">#&gt;  Min.   :0.0       Min.   :-1              Min.   :-1           </span></span>
+<span><span class="co">#&gt;  1st Qu.:0.0       1st Qu.: 0              1st Qu.: 0           </span></span>
+<span><span class="co">#&gt;  Median :0.0       Median : 0              Median : 0           </span></span>
+<span><span class="co">#&gt;  Mean   :0.3       Mean   : 0              Mean   : 0           </span></span>
+<span><span class="co">#&gt;  3rd Qu.:1.0       3rd Qu.: 0              3rd Qu.: 0           </span></span>
+<span><span class="co">#&gt;  Max.   :1.0       Max.   : 1              Max.   : 1           </span></span>
+<span><span class="co">#&gt;                                                                 </span></span>
 <span><span class="co">#&gt;  .i_diff_male_x_male .i_provided_support_cwp .i_provided_support_cbp</span></span>
 <span><span class="co">#&gt;  Min.   :-1          Min.   :-2.488131       Min.   :-2.6707037     </span></span>
 <span><span class="co">#&gt;  1st Qu.: 0          1st Qu.:-0.507787       1st Qu.:-0.6189091     </span></span>

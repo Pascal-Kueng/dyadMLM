@@ -6,7 +6,11 @@ Builds a dyad-level summary of role compositions from a validated
 ## Usage
 
 ``` r
-infer_dyad_compositions(data, seed = NULL)
+infer_dyad_compositions(
+  data,
+  seed = NULL,
+  set_compositions_exchangeable = NULL
+)
 ```
 
 ## Arguments
@@ -20,6 +24,10 @@ infer_dyad_compositions(data, seed = NULL)
 
   Optional seed for random `.i_diff_*` sign assignment in exchangeable
   dyads. If `NULL`, the current R session's RNG state is used.
+
+- set_compositions_exchangeable:
+
+  Optional dyad compositions to treat as exchangeable for analysis.
 
 ## Value
 

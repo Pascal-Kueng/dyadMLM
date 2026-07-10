@@ -16,6 +16,7 @@ prepare_interdep_data(
   outcomes = NULL,
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
+  set_compositions_exchangeable = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL
@@ -86,6 +87,17 @@ prepare_interdep_data(
   undirected DSM predictor construction, raw undecomposed predictors are
   currently rejected; use `"auto"` or `"time_2l"`.
 
+- set_compositions_exchangeable:
+
+  Optionally specify dyad compositions to treat as exchangeable, when
+  their roles would otherwise make them distinguishable. Requires
+  `role`; compositions that are already exchangeable should not be
+  listed. Each composition must be supplied as one string, using `_x_`,
+  `-`, `_`, or whitespace between the two role labels, for example
+  `"female_x_male"`, `"female-male"`, `"female_male"`, or
+  `"female male"`. To set multiple compositions, use a character vector
+  of such strings.
+
 - incomplete_dyads:
 
   How to handle dyads that do not contain exactly two unique members
@@ -143,10 +155,10 @@ prepared <- prepare_interdep_data(
 )
 
 attr(prepared, "interdep")$dyad_compositions
-#> # A tibble: 1 × 4
-#>   raw_composition composition   dyad_type       n_dyads
-#>   <chr>           <chr>         <chr>             <int>
-#> 1 female_x_male   female_x_male distinguishable       2
+#> # A tibble: 1 × 5
+#>   raw_composition composition   dyad_type       dyad_type_source n_dyads
+#>   <chr>           <chr>         <chr>           <chr>              <int>
+#> 1 female_x_male   female_x_male distinguishable inferred               2
 
 print(prepared)
 #> # interdep data

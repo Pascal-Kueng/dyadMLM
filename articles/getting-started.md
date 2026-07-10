@@ -348,10 +348,10 @@ attr(cross_distinguishable_data, "interdep")
 #> integer(0)
 #> 
 #> $dyad_compositions
-#> # A tibble: 1 × 4
-#>   raw_composition composition   dyad_type       n_dyads
-#>   <chr>           <chr>         <chr>             <int>
-#> 1 female_x_male   female_x_male distinguishable      95
+#> # A tibble: 1 × 5
+#>   raw_composition composition   dyad_type       dyad_type_source n_dyads
+#>   <chr>           <chr>         <chr>           <chr>              <int>
+#> 1 female_x_male   female_x_male distinguishable inferred              95
 #> 
 #> $temporal_predictor_decompositions
 #> # A tibble: 1 × 4
@@ -2118,6 +2118,7 @@ mixed_ild_tweedie_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
+  set_compositions_exchangeable = 'male female',
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -2129,9 +2130,9 @@ print(mixed_ild_tweedie_data)
 #> # Structure: group = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable    60 dyads
-#> # female_x_male   distinguishable 80 dyads
-#> # male_x_male     exchangeable    60 dyads
+#> # female_x_female exchangeable 60 dyads
+#> # female_x_male   exchangeable 80 dyads
+#> # male_x_male     exchangeable 60 dyads
 #> #
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
@@ -2169,9 +2170,9 @@ print(mixed_ild_tweedie_data)
 #> 10        1        1        9 female              5.59             4.41
 #> # ℹ 5,590 more rows
 #> # ℹ 14 more variables: .i_composition <fct>, .i_composition_role <fct>,
-#> #   .i_is_female_x_female <dbl>, .i_is_female_x_male_female <dbl>,
-#> #   .i_is_female_x_male_male <dbl>, .i_is_male_x_male <dbl>,
-#> #   .i_diff_female_x_female <dbl>, .i_diff_male_x_male <dbl>,
+#> #   .i_is_female_x_female <dbl>, .i_is_female_x_male <dbl>,
+#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
+#> #   .i_diff_female_x_male <dbl>, .i_diff_male_x_male <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, …
 summary(mixed_ild_tweedie_data)
@@ -2191,22 +2192,22 @@ summary(mixed_ild_tweedie_data)
 #>  3rd Qu.: 16.163   3rd Qu.: 5.611992                         
 #>  Max.   :158.087   Max.   : 8.401539                         
 #>  NAs    :120       NAs    :220                               
-#>            .i_composition_role .i_is_female_x_female .i_is_female_x_male_female
-#>  female_x_female     :1680     Min.   :0.0           Min.   :0.0               
-#>  female_x_male_female:1120     1st Qu.:0.0           1st Qu.:0.0               
-#>  female_x_male_male  :1120     Median :0.0           Median :0.0               
-#>  male_x_male         :1680     Mean   :0.3           Mean   :0.2               
-#>                                3rd Qu.:1.0           3rd Qu.:0.0               
-#>                                Max.   :1.0           Max.   :1.0               
-#>                                                                                
-#>  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female
-#>  Min.   :0.0              Min.   :0.0       Min.   :-1             
-#>  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0             
-#>  Median :0.0              Median :0.0       Median : 0             
-#>  Mean   :0.2              Mean   :0.3       Mean   : 0             
-#>  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0             
-#>  Max.   :1.0              Max.   :1.0       Max.   : 1             
+#>       .i_composition_role .i_is_female_x_female .i_is_female_x_male
+#>  female_x_female:1680     Min.   :0.0           Min.   :0.0        
+#>  female_x_male  :2240     1st Qu.:0.0           1st Qu.:0.0        
+#>  male_x_male    :1680     Median :0.0           Median :0.0        
+#>                           Mean   :0.3           Mean   :0.4        
+#>                           3rd Qu.:1.0           3rd Qu.:1.0        
+#>                           Max.   :1.0           Max.   :1.0        
 #>                                                                    
+#>  .i_is_male_x_male .i_diff_female_x_female .i_diff_female_x_male
+#>  Min.   :0.0       Min.   :-1              Min.   :-1           
+#>  1st Qu.:0.0       1st Qu.: 0              1st Qu.: 0           
+#>  Median :0.0       Median : 0              Median : 0           
+#>  Mean   :0.3       Mean   : 0              Mean   : 0           
+#>  3rd Qu.:1.0       3rd Qu.: 0              3rd Qu.: 0           
+#>  Max.   :1.0       Max.   : 1              Max.   : 1           
+#>                                                                 
 #>  .i_diff_male_x_male .i_provided_support_cwp .i_provided_support_cbp
 #>  Min.   :-1          Min.   :-2.488131       Min.   :-2.6707037     
 #>  1st Qu.: 0          1st Qu.:-0.507787       1st Qu.:-0.6189091     
