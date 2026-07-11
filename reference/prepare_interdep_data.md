@@ -107,7 +107,9 @@ prepare_interdep_data(
   composition label and each value is a character vector of composition
   references, for example
   `list(same_sex_couples = c("female-female", "male-male"))`. Only
-  exchangeable compositions can be pooled.
+  exchangeable compositions can be pooled. Each pool must contain at
+  least two distinct observed compositions after composition references
+  are resolved.
 
 - incomplete_dyads:
 

@@ -33,7 +33,8 @@ infer_dyad_compositions(
 - pool_compositions:
 
   Optional named list that pools exchangeable dyad compositions into
-  user-named final composition labels.
+  user-named final composition labels. Each pool must resolve to at
+  least two distinct observed compositions.
 
 ## Value
 
