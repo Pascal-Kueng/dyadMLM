@@ -29,3 +29,11 @@ within-dyad-deviation predictors, see the
 This vignette is under construction. It is included now so the documentation
 site already reflects the intended structure; fuller DSM preparation examples
 will be added before the alpha feedback round.
+
+For an in-depth tutorial covering data preparation, model fitting, diagnostics,
+and assumption checks, see
+[Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
+It uses `interdep` for cross-sectional and intensive longitudinal APIM and DIM
+workflows, with models fitted primarily using `brms`
+([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
+[DOI](https://doi.org/10.5281/zenodo.17400655)).

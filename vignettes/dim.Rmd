@@ -237,10 +237,23 @@ $$
 \beta_{\text{actor}} - \beta_{\text{partner}}
 $$
 
-Conversely, the actor effect is half the sum of the two DIM effects, and the
-partner effect is half their difference. The DIM and APIM intercepts are not
-expected to be equal because the DIM dyad mean is grand-mean centered, whereas
-the APIM predictors retain their original scale.
+Conversely:
+
+$$
+\beta_{\text{actor}} =
+\frac{\beta_{\text{dyad mean}} + \beta_{\text{within-dyad deviation}}}{2}
+$$
+
+and
+
+$$
+\beta_{\text{partner}} =
+\frac{\beta_{\text{dyad mean}} - \beta_{\text{within-dyad deviation}}}{2}
+$$
+
+The DIM and APIM intercepts are not expected to be equal because the DIM dyad
+mean is grand-mean centered, whereas the APIM predictors retain their original
+scale.
 
 In this example:
 
@@ -575,3 +588,11 @@ score outcomes, see the
 [Undirected Dyadic Score Model vignette](undirected-dsm.html). For the broader
 data-preparation workflow, return to the
 [Getting Started vignette](getting-started.html).
+
+For an in-depth tutorial covering data preparation, model fitting, diagnostics,
+and assumption checks, see
+[Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
+It uses `interdep` for cross-sectional and intensive longitudinal APIM and DIM
+workflows, with models fitted primarily using `brms`
+([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
+[DOI](https://doi.org/10.5281/zenodo.17400655)).
