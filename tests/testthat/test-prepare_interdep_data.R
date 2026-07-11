@@ -417,6 +417,42 @@ test_that("prepare_interdep_data filters included compositions before finalizing
   )
 })
 
+test_that("prepare_interdep_data applies include_compositions before constraining and pooling", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", "female", "male", "male", "female", "male")
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      include_compositions = c("female-female", "male-male"),
+      set_exchangeable_compositions = "female-male",
+      seed = 123
+    ),
+    "`set_exchangeable_compositions` contains unknown dyad composition",
+    fixed = TRUE
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      include_compositions = c("female-female", "male-male"),
+      pool_compositions = list(couples = c("female-female", "female-male")),
+      seed = 123
+    ),
+    "`pool_compositions` contains unknown dyad composition",
+    fixed = TRUE
+  )
+})
+
 test_that("prepare_interdep_data rejects reserved interdep columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
