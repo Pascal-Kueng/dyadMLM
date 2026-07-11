@@ -67,36 +67,36 @@ The package should cover a class of models that high-level interfaces such as `b
 
 For dyad \(c\), member \(m \in \{1,2\}\), and time \(t\), the observed outcome is:
 
-\[
+$$
 y_{cmt} = \mu_{cmt} + r_{cmt}.
-\]
+$$
 
 The mean model \(\mu_{cmt}\) captures fixed effects, predictors, role differences, and hierarchical random effects. The residual vector is:
 
-\[
+$$
 \mathbf r_{ct}
 =
 \begin{pmatrix}
 r_{c1t} \\
 r_{c2t}
 \end{pmatrix}.
-\]
+$$
 
 The dynamic model is:
 
-\[
+$$
 \mathbf r_{ct}
 =
 A_{g(c)}\mathbf r_{c,t-1}
 +
 \boldsymbol\epsilon_{ct},
-\]
+$$
 
-\[
+$$
 \boldsymbol\epsilon_{ct}
 \sim
 MVN(0, \Sigma_{\epsilon,g(c)}),
-\]
+$$
 
 where \(g(c)\) indexes dyad type.
 
@@ -132,9 +132,9 @@ This restricted scope is deliberate. The statistical core must be validated befo
 
 The general decomposition is:
 
-\[
+$$
 y_{cmt} = \mu_{cmt} + r_{cmt}.
-\]
+$$
 
 The mean model should eventually support:
 
@@ -155,9 +155,9 @@ However, the implementation should begin with simple mean models, because dynami
 
 The dynamic process should always be applied to residuals:
 
-\[
+$$
 r_{cmt} = y_{cmt} - \mu_{cmt}.
-\]
+$$
 
 This separation is important because it makes the model modular:
 
@@ -168,13 +168,13 @@ This separation is important because it makes the model modular:
 
 For each dyad:
 
-\[
+$$
 \mathbf r_{ct}
 =
 A_{g(c)}\mathbf r_{c,t-1}
 +
 \boldsymbol\epsilon_{ct}.
-\]
+$$
 
 The form of \(A_g\) depends on whether the dyad type is distinguishable or exchangeable.
 
@@ -182,14 +182,14 @@ The form of \(A_g\) depends on whether the dyad type is distinguishable or excha
 
 For distinguishable dyads, the transition matrix can be fully directional:
 
-\[
+$$
 A_g
 =
 \begin{pmatrix}
 \phi_{1 \leftarrow 1,g} & \phi_{1 \leftarrow 2,g} \\
 \phi_{2 \leftarrow 1,g} & \phi_{2 \leftarrow 2,g}
 \end{pmatrix}.
-\]
+$$
 
 Interpretation:
 
@@ -202,14 +202,14 @@ Interpretation:
 
 For exchangeable dyads, member labels are arbitrary. Therefore, the residual transition matrix must be invariant under swapping labels:
 
-\[
+$$
 A_g
 =
 \begin{pmatrix}
 \phi_{A,g} & \phi_{P,g} \\
 \phi_{P,g} & \phi_{A,g}
 \end{pmatrix}.
-\]
+$$
 
 Interpretation:
 
@@ -226,18 +226,18 @@ The covariance matrix \(\Sigma_\epsilon\) describes the covariance of **innovati
 
 For distinguishable dyads:
 
-\[
+$$
 \Sigma_\epsilon
 =
 \begin{pmatrix}
 \sigma_1^2 & \rho_\epsilon\sigma_1\sigma_2 \\
 \rho_\epsilon\sigma_1\sigma_2 & \sigma_2^2
 \end{pmatrix}.
-\]
+$$
 
 For exchangeable dyads:
 
-\[
+$$
 \Sigma_\epsilon
 =
 \sigma^2
@@ -245,7 +245,7 @@ For exchangeable dyads:
 1 & \rho_\epsilon \\
 \rho_\epsilon & 1
 \end{pmatrix}.
-\]
+$$
 
 The parameter \(\rho_\epsilon\) should be called:
 
@@ -261,11 +261,11 @@ innovation correlation
 
 It should not simply be called the residual correlation. In a stationary VAR model, the marginal residual covariance is affected by both \(\Sigma_\epsilon\) and the transition matrix \(A\):
 
-\[
+$$
 \Gamma_0
 =
 A\Gamma_0 A^\top + \Sigma_\epsilon.
-\]
+$$
 
 Therefore, the package should distinguish:
 
@@ -406,81 +406,81 @@ Later versions should use transition records rather than relying on rectangular 
 
 Use the orthonormal transform internally:
 
-\[
+$$
 U_{ct}
 =
 \frac{r_{c1t}+r_{c2t}}{\sqrt{2}},
-\]
+$$
 
-\[
+$$
 V_{ct}
 =
 \frac{r_{c1t}-r_{c2t}}{\sqrt{2}}.
-\]
+$$
 
 This is preferable to the half-scaled transform:
 
-\[
+$$
 S_{ct}=\frac{r_{c1t}+r_{c2t}}{2},
 \quad
 D_{ct}=\frac{r_{c1t}-r_{c2t}}{2},
-\]
+$$
 
 because the orthonormal transform has determinant 1 and avoids constant-Jacobian bookkeeping in exact log-likelihood calculations.
 
 The exchangeable transition matrix diagonalizes under this transform:
 
-\[
+$$
 U_{ct}
 =
 \phi_S U_{c,t-1}
 +
 \epsilon_{U,ct},
-\]
+$$
 
-\[
+$$
 V_{ct}
 =
 \phi_D V_{c,t-1}
 +
 \epsilon_{V,ct}.
-\]
+$$
 
 The sum and difference dynamics are:
 
-\[
+$$
 \phi_S = \phi_A + \phi_P,
-\]
+$$
 
-\[
+$$
 \phi_D = \phi_A - \phi_P.
-\]
+$$
 
 The actor and partner parameters are recovered as:
 
-\[
+$$
 \phi_A = \frac{\phi_S+\phi_D}{2},
-\]
+$$
 
-\[
+$$
 \phi_P = \frac{\phi_S-\phi_D}{2}.
-\]
+$$
 
 Stationarity is simple:
 
-\[
+$$
 |\phi_S| < 1,
-\]
+$$
 
-\[
+$$
 |\phi_D| < 1.
-\]
+$$
 
 ## 4.4 Exchangeable innovation covariance
 
 In raw member space:
 
-\[
+$$
 \Sigma_\epsilon
 =
 \sigma^2
@@ -488,49 +488,49 @@ In raw member space:
 1 & \rho_\epsilon \\
 \rho_\epsilon & 1
 \end{pmatrix}.
-\]
+$$
 
 Under the orthonormal transform:
 
-\[
+$$
 Var(\epsilon_U)
 =
 \sigma^2(1+\rho_\epsilon),
-\]
+$$
 
-\[
+$$
 Var(\epsilon_V)
 =
 \sigma^2(1-\rho_\epsilon),
-\]
+$$
 
-\[
+$$
 Cov(\epsilon_U,\epsilon_V)=0.
-\]
+$$
 
 Thus:
 
-\[
+$$
 \sigma_U = \sigma\sqrt{1+\rho_\epsilon},
-\]
+$$
 
-\[
+$$
 \sigma_V = \sigma\sqrt{1-\rho_\epsilon}.
-\]
+$$
 
 The exchangeable likelihood can be implemented as two independent AR(1) likelihoods for \(U\) and \(V\):
 
-\[
+$$
 U_t \mid U_{t-1}
 \sim
 N(\phi_S U_{t-1}, \sigma_U),
-\]
+$$
 
-\[
+$$
 V_t \mid V_{t-1}
 \sim
 N(\phi_D V_{t-1}, \sigma_V).
-\]
+$$
 
 ## 4.5 Exchangeable marginal residual correlation
 
@@ -538,51 +538,51 @@ The package should report the marginal residual correlation implied by the stati
 
 For the exchangeable model:
 
-\[
+$$
 Var(U)
 =
 \frac{\sigma^2(1+\rho_\epsilon)}{1-\phi_S^2},
-\]
+$$
 
-\[
+$$
 Var(V)
 =
 \frac{\sigma^2(1-\rho_\epsilon)}{1-\phi_D^2}.
-\]
+$$
 
 Because:
 
-\[
+$$
 r_1 = \frac{U+V}{\sqrt{2}},
-\]
+$$
 
-\[
+$$
 r_2 = \frac{U-V}{\sqrt{2}},
-\]
+$$
 
 the stationary marginal covariance is:
 
-\[
+$$
 Cov(r_1,r_2)
 =
 \frac{Var(U)-Var(V)}{2}.
-\]
+$$
 
 The stationary marginal variance is:
 
-\[
+$$
 Var(r_1)=Var(r_2)
 =
 \frac{Var(U)+Var(V)}{2}.
-\]
+$$
 
 Therefore:
 
-\[
+$$
 \rho_{marginal}
 =
 \frac{Var(U)-Var(V)}{Var(U)+Var(V)}.
-\]
+$$
 
 Generated quantities should include:
 
@@ -603,7 +603,7 @@ This prevents users from interpreting the innovation correlation as the total sa
 
 A minimal exchangeable mean model is:
 
-\[
+$$
 y_{cmt}
 =
 \beta_0
@@ -613,7 +613,7 @@ b^{(S)}_{0,c}
 idiff_{cm} b^{(D)}_{0,c}
 +
 r_{cmt}.
-\]
+$$
 
 Here:
 
@@ -623,7 +623,7 @@ Here:
 
 With one predictor:
 
-\[
+$$
 y_{cmt}
 =
 \beta_0
@@ -639,11 +639,11 @@ idiff_{cm} b^{(D)}_{0,c}
 idiff_{cm} b^{(D)}_{1,c}x_{cmt}
 +
 r_{cmt}.
-\]
+$$
 
 Actor and partner predictors can be allowed, but their fixed effects must not depend on arbitrary member labels:
 
-\[
+$$
 \mu_{cmt}
 =
 \beta_0
@@ -653,7 +653,7 @@ Actor and partner predictors can be allowed, but their fixed effects must not de
 \beta_P x_{cj t}
 +
 \ldots,
-\]
+$$
 
 where \(j\) is the partner of member \(m\).
 
@@ -663,37 +663,37 @@ For truly exchangeable dyads, the random-effect covariance structure must preser
 
 A shared effect is invariant under label swapping:
 
-\[
+$$
 b^{(S)} \rightarrow b^{(S)}.
-\]
+$$
 
 A difference effect changes sign:
 
-\[
+$$
 b^{(D)} \rightarrow -b^{(D)}.
-\]
+$$
 
 Therefore, a covariance such as:
 
-\[
+$$
 Cov(b^{(S)}, b^{(D)})
-\]
+$$
 
 also changes sign under label swapping. The only label-invariant value is zero.
 
 So the recommended random-effect structure is block diagonal:
 
-\[
+$$
 \mathbf b^{(S)}_c \sim MVN(0, \Sigma_S),
-\]
+$$
 
-\[
+$$
 \mathbf b^{(D)}_c \sim MVN(0, \Sigma_D),
-\]
+$$
 
-\[
+$$
 Cov(\mathbf b^{(S)}_c, \mathbf b^{(D)}_c) = 0.
-\]
+$$
 
 Allowed:
 
@@ -725,23 +725,23 @@ A full shared--difference covariance should require an explicit advanced option 
 
 For the exchangeable model, use the stationary initial distribution by default:
 
-\[
+$$
 U_{c1}
 \sim
 N\left(
 0,
 \frac{\sigma_U}{\sqrt{1-\phi_S^2}}
 \right),
-\]
+$$
 
-\[
+$$
 V_{c1}
 \sim
 N\left(
 0,
 \frac{\sigma_V}{\sqrt{1-\phi_D^2}}
 \right).
-\]
+$$
 
 A conditional likelihood starting at \(t=2\) is acceptable for early debugging, but the package default should be stationary because the stationary initial distribution is simple and exact in the exchangeable case.
 
@@ -877,7 +877,7 @@ y[c, t, 2] = role 2 outcome
 
 A simple role-specific mean model:
 
-\[
+$$
 \mu_{1,ct}
 =
 \beta_{0,1}
@@ -885,9 +885,9 @@ A simple role-specific mean model:
 b_{0,1,c}
 +
 (\beta_{1,1}+b_{1,1,c})x_{1,ct},
-\]
+$$
 
-\[
+$$
 \mu_{2,ct}
 =
 \beta_{0,2}
@@ -895,11 +895,11 @@ b_{0,1,c}
 b_{0,2,c}
 +
 (\beta_{1,2}+b_{1,2,c})x_{2,ct}.
-\]
+$$
 
 With actor and partner predictors:
 
-\[
+$$
 \mu_{1,ct}
 =
 \beta_{0,1}
@@ -909,9 +909,9 @@ With actor and partner predictors:
 \beta_{P,1}x_{2,ct}
 +
 b_{0,1,c},
-\]
+$$
 
-\[
+$$
 \mu_{2,ct}
 =
 \beta_{0,2}
@@ -921,11 +921,11 @@ b_{0,1,c},
 \beta_{P,2}x_{1,ct}
 +
 b_{0,2,c}.
-\]
+$$
 
 For one random slope, the random-effect vector is:
 
-\[
+$$
 \mathbf b_c
 =
 \begin{pmatrix}
@@ -936,7 +936,7 @@ b_{1,2,c}
 \end{pmatrix}
 \sim
 MVN(0,\Sigma_b).
-\]
+$$
 
 This maps to the design-matrix idea:
 
@@ -956,14 +956,14 @@ Use a non-centered Cholesky parameterization for these role-specific random effe
 
 The distinguishable transition matrix is:
 
-\[
+$$
 A
 =
 \begin{pmatrix}
 \phi_{1 \leftarrow 1} & \phi_{1 \leftarrow 2} \\
 \phi_{2 \leftarrow 1} & \phi_{2 \leftarrow 2}
 \end{pmatrix}.
-\]
+$$
 
 Interpretation:
 
@@ -976,14 +976,14 @@ phi_2_from_1 = partner carryover from role 1 to role 2
 
 Innovation covariance:
 
-\[
+$$
 \Sigma_\epsilon
 =
 \begin{pmatrix}
 \sigma_1^2 & \rho_\epsilon\sigma_1\sigma_2 \\
 \rho_\epsilon\sigma_1\sigma_2 & \sigma_2^2
 \end{pmatrix}.
-\]
+$$
 
 Again, the package should label \(\rho_\epsilon\) as an innovation correlation.
 
@@ -991,43 +991,43 @@ Again, the package should label \(\rho_\epsilon\) as an innovation correlation.
 
 For a free \(2 \times 2\) matrix \(A\), stationarity requires all eigenvalues to lie inside the unit circle:
 
-\[
+$$
 \rho(A) < 1.
-\]
+$$
 
 For:
 
-\[
+$$
 A =
 \begin{pmatrix}
 a & b \\
 c & d
 \end{pmatrix},
-\]
+$$
 
 define:
 
-\[
+$$
 tr = a+d,
-\]
+$$
 
-\[
+$$
 det = ad-bc.
-\]
+$$
 
 The VAR is stable if the Jury conditions hold:
 
-\[
+$$
 1 - det > 0,
-\]
+$$
 
-\[
+$$
 1 - tr + det > 0,
-\]
+$$
 
-\[
+$$
 1 + tr + det > 0.
-\]
+$$
 
 For the first distinguishable implementation, use regularizing priors and posterior stationarity checks rather than a hard stationarity constraint. Hard rejection or exact stable parameterization can create sampling pathologies and should not be the first implementation.
 
@@ -1081,40 +1081,40 @@ If a meaningful proportion of posterior draws is nonstationary, print a diagnost
 
 Start with a conditional likelihood:
 
-\[
+$$
 \mathbf r_{ct}
 \mid
 \mathbf r_{c,t-1}
 \sim
 MVN(A\mathbf r_{c,t-1}, \Sigma_\epsilon),
 \qquad t \ge 2.
-\]
+$$
 
 This is easiest and avoids needing an exact stationary covariance before the distinguishable model is stable.
 
 Later, add the stationary initial distribution:
 
-\[
+$$
 \mathbf r_{c1}
 \sim
 MVN(0,\Gamma_0),
-\]
+$$
 
 where:
 
-\[
+$$
 \Gamma_0
 =
 A\Gamma_0 A^\top + \Sigma_\epsilon.
-\]
+$$
 
 Equivalently:
 
-\[
+$$
 vec(\Gamma_0)
 =
 (I - A \otimes A)^{-1} vec(\Sigma_\epsilon).
-\]
+$$
 
 This should only be used when the draw is stationary.
 
@@ -1236,7 +1236,7 @@ The likelihood factors by dyad conditional on global parameters and dyad-level r
 
 For each exchangeable dyad type \(g\):
 
-\[
+$$
 \phi_{S,g},
 \quad
 \phi_{D,g},
@@ -1244,41 +1244,41 @@ For each exchangeable dyad type \(g\):
 \sigma_g,
 \quad
 \rho_{\epsilon,g}.
-\]
+$$
 
 Derived:
 
-\[
+$$
 \phi_{A,g}
 =
 \frac{\phi_{S,g}+\phi_{D,g}}{2},
-\]
+$$
 
-\[
+$$
 \phi_{P,g}
 =
 \frac{\phi_{S,g}-\phi_{D,g}}{2}.
-\]
+$$
 
 For each distinguishable dyad type \(g\):
 
-\[
+$$
 A_g
 =
 \begin{pmatrix}
 \phi_{1 \leftarrow 1,g} & \phi_{1 \leftarrow 2,g} \\
 \phi_{2 \leftarrow 1,g} & \phi_{2 \leftarrow 2,g}
 \end{pmatrix},
-\]
+$$
 
-\[
+$$
 \Sigma_{\epsilon,g}
 =
 \begin{pmatrix}
 \sigma_{1,g}^2 & \rho_{\epsilon,g}\sigma_{1,g}\sigma_{2,g} \\
 \rho_{\epsilon,g}\sigma_{1,g}\sigma_{2,g} & \sigma_{2,g}^2
 \end{pmatrix}.
-\]
+$$
 
 ## 6.5 Partial pooling across dyad types
 
@@ -1435,7 +1435,7 @@ stage 5:
 
 For full dyad-day gaps in exchangeable models:
 
-\[
+$$
 z_t
 \mid
 z_{t-\Delta}
@@ -1446,13 +1446,13 @@ N
 \sigma^2
 \sum_{k=0}^{\Delta-1}\phi^{2k}
 \right),
-\]
+$$
 
 where \(z\) is either \(U\) or \(V\).
 
 For distinguishable models:
 
-\[
+$$
 \mathbf r_t
 \mid
 \mathbf r_{t-\Delta}
@@ -1462,16 +1462,16 @@ MVN
 A^\Delta \mathbf r_{t-\Delta},
 \Sigma_\Delta
 \right),
-\]
+$$
 
 where:
 
-\[
+$$
 \Sigma_\Delta
 =
 \sum_{k=0}^{\Delta-1}
 A^k\Sigma_\epsilon(A^k)^\top.
-\]
+$$
 
 One-partner missingness should not be included early. In a dynamic dyadic VAR, a missing partner outcome is not merely an omitted outcome; it is part of the latent state that predicts later observations.
 
