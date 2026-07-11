@@ -15,6 +15,7 @@ prepare_interdep_data(
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   set_exchangeable_compositions = NULL,
+  include_compositions = NULL,
   pool_compositions = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
@@ -73,6 +74,10 @@ string, using \verb{_x_}, \code{-}, \verb{_}, or whitespace (\verb{ }) between t
 for example \code{"female_x_male"}, \code{"female-male"}, \code{"female_male"}, or
 \code{"female male"}, in arbitrary order.
 To set multiple compositions, use a character vector of such strings.}
+
+\item{include_compositions}{Optional observed dyad compositions to keep
+before exchangeability overrides and pooling. Requires \code{role}. Composition
+references use the same format as \code{set_exchangeable_compositions}.}
 
 \item{pool_compositions}{Optionally pool exchangeable dyad compositions
 into a shared final composition label. Must be a named list where each name

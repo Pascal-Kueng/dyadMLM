@@ -285,6 +285,18 @@ test_that("prepare_interdep_data errors when setting compositions exchangeable w
       data,
       group = dyad_id,
       member = person_id,
+      include_compositions = "female-male",
+      seed = 123
+    ),
+    "`include_compositions` requires `role` to be supplied.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
       set_exchangeable_compositions = "female-male",
       seed = 123
     ),
@@ -308,6 +320,50 @@ test_that("prepare_interdep_data errors when pooling compositions without role",
       seed = 123
     ),
     "`pool_compositions` requires `role` to be supplied.",
+    fixed = TRUE
+  )
+})
+
+test_that("prepare_interdep_data validates include_compositions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      include_compositions = character()
+    ),
+    "`include_compositions` must contain at least one dyad composition.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      include_compositions = list("female-male")
+    ),
+    "`include_compositions` must be a character vector",
+    fixed = TRUE
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      include_compositions = "female-female"
+    ),
+    "`include_compositions` contains unknown dyad composition",
     fixed = TRUE
   )
 })

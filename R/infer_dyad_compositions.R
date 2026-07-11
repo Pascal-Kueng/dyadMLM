@@ -6,6 +6,8 @@
 #' @param data An `interdep_data` object returned by [validate_interdep_data()].
 #' @param seed Optional seed for random `.i_diff_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
+#' @param include_compositions Optional observed dyad compositions to keep
+#'   before exchangeability overrides and pooling.
 #' @param set_exchangeable_compositions Optional dyad compositions to treat as
 #'   exchangeable for analysis.
 #' @param pool_compositions Optional named list that pools exchangeable dyad
@@ -18,7 +20,8 @@
 #'   composition metadata.
 #'
 #' @keywords internal
-infer_dyad_compositions <- function(data, seed = NULL, set_exchangeable_compositions = NULL,
+infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NULL,
+                                    set_exchangeable_compositions = NULL,
                                     pool_compositions = NULL) {
   if (!inherits(data, "interdep_data")) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
@@ -30,6 +33,13 @@ infer_dyad_compositions <- function(data, seed = NULL, set_exchangeable_composit
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
+    if (!is.null(include_compositions)) {
+      stop(
+        "`include_compositions` requires `role` to be supplied. ",
+        "Without `role`, there are no observed role compositions to include.",
+        call. = FALSE
+      )
+    }
     if (length(set_exchangeable_compositions) > 0) {
       stop(
         "`set_exchangeable_compositions` requires `role` to be supplied. ",
@@ -106,6 +116,16 @@ infer_dyad_compositions <- function(data, seed = NULL, set_exchangeable_composit
       .i_composition = .data$.i_raw_composition,
       .i_pool_member = NA_character_
     )
+
+  # Filter and only include requested compositions, if filtering was requested!
+  include_result <- apply_include_compositions(
+    data = data,
+    dyad_roles = dyad_roles,
+    include_compositions = include_compositions,
+    group_name = group_name
+  )
+  data <- include_result$data
+  dyad_roles <- include_result$dyad_roles
 
   # Apply any user-requested exchangeability overrides.
   dyad_roles <- apply_exchangeable_composition_overrides(
@@ -194,6 +214,36 @@ infer_dyad_compositions <- function(data, seed = NULL, set_exchangeable_composit
   data <- finalize_composition_columns(data)
 
   data
+}
+
+
+apply_include_compositions <- function(data, dyad_roles, include_compositions, group_name) {
+  if (is.null(include_compositions)) {
+    return(list(data = data, dyad_roles = dyad_roles))
+  }
+
+  if (length(include_compositions) == 0) {
+    stop(
+      "`include_compositions` must contain at least one dyad composition. Otherwise,
+      it must be `NULL` (default).",
+      call. = FALSE
+    )
+  }
+
+  resolve_composition_references(
+    references = include_compositions,
+    observed_compositions = dyad_roles[[interdep_composition_col]],
+    arg_name = "include_compositions"
+  )
+
+  # TODO: filter whole dyads by raw observed composition here, before
+  # `set_exchangeable_compositions` and `pool_compositions`.
+  stop(
+    "`include_compositions` validation is in place, but composition filtering is not implemented yet.",
+    call. = FALSE
+  )
+
+  list(data = data, dyad_roles = dyad_roles)
 }
 
 

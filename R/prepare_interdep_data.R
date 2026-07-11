@@ -55,6 +55,9 @@
 #'   for example `"female_x_male"`, `"female-male"`, `"female_male"`, or
 #'   `"female male"`, in arbitrary order.
 #'   To set multiple compositions, use a character vector of such strings.
+#' @param include_compositions Optional observed dyad compositions to keep
+#'   before exchangeability overrides and pooling. Requires `role`. Composition
+#'   references use the same format as `set_exchangeable_compositions`.
 #' @param pool_compositions Optionally pool exchangeable dyad compositions
 #'   into a shared final composition label. Must be a named list where each name
 #'   is the final composition label and each value is a character vector of
@@ -145,6 +148,7 @@ prepare_interdep_data <- function(
     model_type = "apim",
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     set_exchangeable_compositions = NULL,
+    include_compositions = NULL,
     pool_compositions = NULL,
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
@@ -173,6 +177,7 @@ prepare_interdep_data <- function(
   out <- infer_dyad_compositions(
     out,
     seed = seed,
+    include_compositions = include_compositions,
     set_exchangeable_compositions = set_exchangeable_compositions,
     pool_compositions = pool_compositions
   )

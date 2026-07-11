@@ -7,6 +7,7 @@
 infer_dyad_compositions(
   data,
   seed = NULL,
+  include_compositions = NULL,
   set_exchangeable_compositions = NULL,
   pool_compositions = NULL
 )
@@ -16,6 +17,9 @@ infer_dyad_compositions(
 
 \item{seed}{Optional seed for random \verb{.i_diff_*} sign assignment in
 exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
+
+\item{include_compositions}{Optional observed dyad compositions to keep
+before exchangeability overrides and pooling.}
 
 \item{set_exchangeable_compositions}{Optional dyad compositions to treat as
 exchangeable for analysis.}
