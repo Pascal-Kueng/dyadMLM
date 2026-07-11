@@ -18,6 +18,7 @@ prepare_interdep_data(
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   set_exchangeable_compositions = NULL,
+  include_compositions = NULL,
   pool_compositions = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
@@ -99,6 +100,12 @@ prepare_interdep_data(
   `"female_x_male"`, `"female-male"`, `"female_male"`, or
   `"female male"`, in arbitrary order. To set multiple compositions, use
   a character vector of such strings.
+
+- include_compositions:
+
+  Optional observed dyad compositions to keep before exchangeability
+  overrides and pooling. Requires `role`. Composition references use the
+  same format as `set_exchangeable_compositions`.
 
 - pool_compositions:
 

@@ -51,6 +51,7 @@ interdep_data object."></head><body>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">infer_dyad_compositions</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  include_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pool_compositions <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -67,6 +68,11 @@ interdep_data object."></head><body>
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional seed for random <code>.i_diff_*</code> sign assignment in
 exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
+
+
+<dt id="arg-include-compositions">include_compositions<a class="anchor" aria-label="anchor" href="#arg-include-compositions"></a></dt>
+<dd><p>Optional observed dyad compositions to keep
+before exchangeability overrides and pooling.</p></dd>
 
 
 <dt id="arg-set-exchangeable-compositions">set_exchangeable_compositions<a class="anchor" aria-label="anchor" href="#arg-set-exchangeable-compositions"></a></dt>

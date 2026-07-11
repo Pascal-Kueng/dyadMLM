@@ -59,6 +59,7 @@ and model-ready columns for dyadic multilevel model parameterizations.</p>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  include_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pool_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  incomplete_dyads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  missing_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
@@ -140,6 +141,12 @@ string, using <code>_x_</code>, <code>-</code>, <code>_</code>, or whitespace (<
 for example <code>"female_x_male"</code>, <code>"female-male"</code>, <code>"female_male"</code>, or
 <code>"female male"</code>, in arbitrary order.
 To set multiple compositions, use a character vector of such strings.</p></dd>
+
+
+<dt id="arg-include-compositions">include_compositions<a class="anchor" aria-label="anchor" href="#arg-include-compositions"></a></dt>
+<dd><p>Optional observed dyad compositions to keep
+before exchangeability overrides and pooling. Requires <code>role</code>. Composition
+references use the same format as <code>set_exchangeable_compositions</code>.</p></dd>
 
 
 <dt id="arg-pool-compositions">pool_compositions<a class="anchor" aria-label="anchor" href="#arg-pool-compositions"></a></dt>
