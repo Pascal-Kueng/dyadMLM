@@ -152,7 +152,7 @@ print(cross_same_sex_pooled_data, n = 4)
 #> #
 #> # A tibble: 400 × 12
 #>   personID coupleID gender satisfaction .i_composition   .i_composition_role
-#>      <int>    <int> <chr>         <dbl> <fct>            <fct>              
+#>      <int>    <int> <fct>         <dbl> <fct>            <fct>              
 #> 1      241      121 female         5.32 same-sex-couples same-sex-couples   
 #> 2      242      121 female         5.37 same-sex-couples same-sex-couples   
 #> 3      243      122 female         5.99 same-sex-couples same-sex-couples   
@@ -207,7 +207,7 @@ print(cross_male_female_exchangeable_data, n = 4)
 #> #
 #> # A tibble: 240 × 12
 #>   personID coupleID gender satisfaction .i_composition .i_composition_role
-#>      <int>    <int> <chr>         <dbl> <fct>          <fct>              
+#>      <int>    <int> <fct>         <dbl> <fct>          <fct>              
 #> 1        1        1 female         4.95 female_x_male  female_x_male      
 #> 2        2        1 male           5.26 female_x_male  female_x_male      
 #> 3        3        2 female         5.14 female_x_male  female_x_male      

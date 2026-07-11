@@ -145,7 +145,7 @@ print(cross_distinguishable_data, n = 4)
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .i_composition
-#>      <int>    <int> <chr>          <dbl>        <dbl> <fct>         
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
 #> 1        1        1 female          4.79         4.37 female_x_male 
 #> 2        2        1 male            3.80         2.34 female_x_male 
 #> 3        3        2 female          2.91         2.44 female_x_male 
@@ -276,7 +276,7 @@ print(cross_exchangeable_data, n = 4)
 #> #
 #> # A tibble: 190 × 9
 #>   personID coupleID gender communication satisfaction .i_composition
-#>      <int>    <int> <chr>          <dbl>        <dbl> <fct>         
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
 #> 1        1        1 female          4.79         4.37 female_x_male 
 #> 2        2        1 male            3.80         2.34 female_x_male 
 #> 3        3        2 female          2.91         2.44 female_x_male 
@@ -502,7 +502,7 @@ print(ild_apim_data)
 #> #
 #> # A tibble: 1,120 × 16
 #>    personID coupleID diaryday gender closeness provided_support .i_composition
-#>       <int>    <int>    <int> <chr>      <dbl>            <dbl> <fct>         
+#>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>         
 #>  1        1        1        0 female      5.03             4.30 female_x_male 
 #>  2        1        1        1 female      5.64             4.24 female_x_male 
 #>  3        1        1        2 female      5.49             3.54 female_x_male 
@@ -566,7 +566,7 @@ print(mixed_cross_data, n = 4)
 #> #
 #> # A tibble: 640 × 12
 #>   personID coupleID gender satisfaction .i_composition .i_composition_role 
-#>      <int>    <int> <chr>         <dbl> <fct>          <fct>               
+#>      <int>    <int> <fct>         <dbl> <fct>          <fct>               
 #> 1        1        1 female         4.95 female_x_male  female_x_male_female
 #> 2        2        1 male           5.26 female_x_male  female_x_male_male  
 #> 3        3        2 female         5.14 female_x_male  female_x_male_female
@@ -622,7 +622,7 @@ print(mixed_cross_data_included, n = 4)
 #> #
 #> # A tibble: 400 × 10
 #>   personID coupleID gender satisfaction .i_composition  .i_composition_role
-#>      <int>    <int> <chr>         <dbl> <fct>           <fct>              
+#>      <int>    <int> <fct>         <dbl> <fct>           <fct>              
 #> 1      241      121 female         5.32 female_x_female female_x_female    
 #> 2      242      121 female         5.37 female_x_female female_x_female    
 #> 3      243      122 female         5.99 female_x_female female_x_female    
@@ -673,7 +673,7 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> #
 #> # A tibble: 640 × 12
 #>   personID coupleID gender satisfaction .i_composition .i_composition_role
-#>      <int>    <int> <chr>         <dbl> <fct>          <fct>              
+#>      <int>    <int> <fct>         <dbl> <fct>          <fct>              
 #> 1        1        1 female         4.95 female_x_male  female_x_male      
 #> 2        2        1 male           5.26 female_x_male  female_x_male      
 #> 3        3        2 female         5.14 female_x_male  female_x_male      
@@ -728,7 +728,7 @@ print(mixed_cross_data_pooled)
 #> #
 #> # A tibble: 640 × 10
 #>    personID coupleID gender satisfaction .i_composition .i_composition_role 
-#>       <int>    <int> <chr>         <dbl> <fct>          <fct>               
+#>       <int>    <int> <fct>         <dbl> <fct>          <fct>               
 #>  1        1        1 female         4.95 female_x_male  female_x_male_female
 #>  2        2        1 male           5.26 female_x_male  female_x_male_male  
 #>  3        3        2 female         5.14 female_x_male  female_x_male_female
@@ -784,7 +784,7 @@ print(mixed_cross_data_pooled_constrained)
 #> #
 #> # A tibble: 640 × 10
 #>    personID coupleID gender satisfaction .i_composition .i_composition_role
-#>       <int>    <int> <chr>         <dbl> <fct>          <fct>              
+#>       <int>    <int> <fct>         <dbl> <fct>          <fct>              
 #>  1        1        1 female         4.95 same-sex       same-sex           
 #>  2        2        1 male           5.26 same-sex       same-sex           
 #>  3        3        2 female         5.14 same-sex       same-sex           

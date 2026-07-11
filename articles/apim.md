@@ -82,7 +82,7 @@ print(tweedie_distinguishable_data)
 #> #
 #> # A tibble: 240 × 11
 #>    personID coupleID gender motivation physical_activity .i_composition
-#>       <int>    <int> <chr>       <dbl>             <dbl> <fct>         
+#>       <int>    <int> <fct>       <dbl>             <dbl> <fct>         
 #>  1        1        1 female    -1.34                4.03 female_x_male 
 #>  2        2        1 male      -0.938               3.43 female_x_male 
 #>  3        3        2 female    -0.637               3.08 female_x_male 
@@ -98,14 +98,14 @@ print(tweedie_distinguishable_data)
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
 summary(tweedie_distinguishable_data)
-#>     personID         coupleID            gender      motivation       
-#>  Min.   :  1.00   Min.   :  1.00   Length   :240   Min.   :-2.320532  
-#>  1st Qu.: 60.75   1st Qu.: 30.75   N.unique :  2   1st Qu.:-0.580126  
-#>  Median :120.50   Median : 60.50   N.blank  :  0   Median :-0.032795  
-#>  Mean   :120.50   Mean   : 60.50   Min.nchar:  4   Mean   :-0.008869  
-#>  3rd Qu.:180.25   3rd Qu.: 90.25   Max.nchar:  6   3rd Qu.: 0.537262  
-#>  Max.   :240.00   Max.   :120.00                   Max.   : 2.423337  
-#>                                                    NAs    :9          
+#>     personID         coupleID         gender      motivation       
+#>  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  
+#>  1st Qu.: 60.75   1st Qu.: 30.75   male  :120   1st Qu.:-0.580126  
+#>  Median :120.50   Median : 60.50                Median :-0.032795  
+#>  Mean   :120.50   Mean   : 60.50                Mean   :-0.008869  
+#>  3rd Qu.:180.25   3rd Qu.: 90.25                3rd Qu.: 0.537262  
+#>  Max.   :240.00   Max.   :120.00                Max.   : 2.423337  
+#>                                                 NAs    :9          
 #>  physical_activity       .i_composition           .i_composition_role
 #>  Min.   : 0.000    female_x_male:240    female_x_male_female:120     
 #>  1st Qu.: 1.445                         female_x_male_male  :120     
@@ -408,7 +408,7 @@ print(ild_tweedie_distinguishable_data)
 #> #
 #> # A tibble: 1,120 × 16
 #>    personID coupleID diaryday gender physical_activity provided_support
-#>       <int>    <int>    <int> <chr>              <dbl>            <dbl>
+#>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
 #>  1        1        1        0 female              4.29             4.73
 #>  2        1        1        1 female              9.52             4.46
 #>  3        1        1        2 female             10.5              3.79
@@ -426,53 +426,53 @@ print(ild_tweedie_distinguishable_data)
 #> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
 #> #   .i_provided_support_cbp_actor <dbl>, .i_provided_support_cbp_partner <dbl>
 summary(ild_tweedie_distinguishable_data)
-#>     personID        coupleID        diaryday          gender    
-#>  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   Length   :1120  
-#>  1st Qu.:20.75   1st Qu.:10.75   1st Qu.: 3.0   N.unique :   2  
-#>  Median :40.50   Median :20.50   Median : 6.5   N.blank  :   0  
-#>  Mean   :40.50   Mean   :20.50   Mean   : 6.5   Min.nchar:   4  
-#>  3rd Qu.:60.25   3rd Qu.:30.25   3rd Qu.:10.0   Max.nchar:   6  
-#>  Max.   :80.00   Max.   :40.00   Max.   :13.0                   
-#>                                                                 
-#>  physical_activity provided_support       .i_composition
-#>  Min.   :  0.000   Min.   :1.813    female_x_male:1120  
-#>  1st Qu.:  1.481   1st Qu.:4.435                        
-#>  Median :  6.750   Median :5.070                        
-#>  Mean   : 10.346   Mean   :5.111                        
-#>  3rd Qu.: 14.635   3rd Qu.:5.821                        
-#>  Max.   :108.626   Max.   :8.271                        
-#>  NAs    :24        NAs    :44                           
-#>            .i_composition_role .i_is_female_x_male_female
-#>  female_x_male_female:560      Min.   :0.0               
-#>  female_x_male_male  :560      1st Qu.:0.0               
-#>                                Median :0.5               
-#>                                Mean   :0.5               
-#>                                3rd Qu.:1.0               
-#>                                Max.   :1.0               
-#>                                                          
-#>  .i_is_female_x_male_male .i_provided_support_cwp .i_provided_support_cbp
-#>  Min.   :0.0              Min.   :-2.66098        Min.   :-1.4073        
-#>  1st Qu.:0.0              1st Qu.:-0.50775        1st Qu.:-0.4913        
-#>  Median :0.5              Median :-0.03176        Median :-0.0164        
-#>  Mean   :0.5              Mean   : 0.00000        Mean   : 0.0000        
-#>  3rd Qu.:1.0              3rd Qu.: 0.52731        3rd Qu.: 0.4968        
-#>  Max.   :1.0              Max.   : 2.42077        Max.   : 1.6645        
-#>                           NAs    :44                                     
-#>  .i_provided_support_cwp_actor .i_provided_support_cwp_partner
-#>  Min.   :-2.66098              Min.   :-2.66098               
-#>  1st Qu.:-0.50775              1st Qu.:-0.50775               
-#>  Median :-0.03176              Median :-0.03176               
-#>  Mean   : 0.00000              Mean   : 0.00000               
-#>  3rd Qu.: 0.52731              3rd Qu.: 0.52731               
-#>  Max.   : 2.42077              Max.   : 2.42077               
-#>  NAs    :44                    NAs    :44                     
-#>  .i_provided_support_cbp_actor .i_provided_support_cbp_partner
-#>  Min.   :-1.4073               Min.   :-1.4073                
-#>  1st Qu.:-0.4913               1st Qu.:-0.4913                
-#>  Median :-0.0164               Median :-0.0164                
-#>  Mean   : 0.0000               Mean   : 0.0000                
-#>  3rd Qu.: 0.4968               3rd Qu.: 0.4968                
-#>  Max.   : 1.6645               Max.   : 1.6645                
+#>     personID        coupleID        diaryday       gender    physical_activity
+#>  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  
+#>  1st Qu.:20.75   1st Qu.:10.75   1st Qu.: 3.0   male  :560   1st Qu.:  1.481  
+#>  Median :40.50   Median :20.50   Median : 6.5                Median :  6.750  
+#>  Mean   :40.50   Mean   :20.50   Mean   : 6.5                Mean   : 10.346  
+#>  3rd Qu.:60.25   3rd Qu.:30.25   3rd Qu.:10.0                3rd Qu.: 14.635  
+#>  Max.   :80.00   Max.   :40.00   Max.   :13.0                Max.   :108.626  
+#>                                                              NAs    :24       
+#>  provided_support       .i_composition           .i_composition_role
+#>  Min.   :1.813    female_x_male:1120   female_x_male_female:560     
+#>  1st Qu.:4.435                         female_x_male_male  :560     
+#>  Median :5.070                                                      
+#>  Mean   :5.111                                                      
+#>  3rd Qu.:5.821                                                      
+#>  Max.   :8.271                                                      
+#>  NAs    :44                                                         
+#>  .i_is_female_x_male_female .i_is_female_x_male_male .i_provided_support_cwp
+#>  Min.   :0.0                Min.   :0.0              Min.   :-2.66098       
+#>  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.50775       
+#>  Median :0.5                Median :0.5              Median :-0.03176       
+#>  Mean   :0.5                Mean   :0.5              Mean   : 0.00000       
+#>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.52731       
+#>  Max.   :1.0                Max.   :1.0              Max.   : 2.42077       
+#>                                                      NAs    :44             
+#>  .i_provided_support_cbp .i_provided_support_cwp_actor
+#>  Min.   :-1.4073         Min.   :-2.66098             
+#>  1st Qu.:-0.4913         1st Qu.:-0.50775             
+#>  Median :-0.0164         Median :-0.03176             
+#>  Mean   : 0.0000         Mean   : 0.00000             
+#>  3rd Qu.: 0.4968         3rd Qu.: 0.52731             
+#>  Max.   : 1.6645         Max.   : 2.42077             
+#>                          NAs    :44                   
+#>  .i_provided_support_cwp_partner .i_provided_support_cbp_actor
+#>  Min.   :-2.66098                Min.   :-1.4073              
+#>  1st Qu.:-0.50775                1st Qu.:-0.4913              
+#>  Median :-0.03176                Median :-0.0164              
+#>  Mean   : 0.00000                Mean   : 0.0000              
+#>  3rd Qu.: 0.52731                3rd Qu.: 0.4968              
+#>  Max.   : 2.42077                Max.   : 1.6645              
+#>  NAs    :44                                                   
+#>  .i_provided_support_cbp_partner
+#>  Min.   :-1.4073                
+#>  1st Qu.:-0.4913                
+#>  Median :-0.0164                
+#>  Mean   : 0.0000                
+#>  3rd Qu.: 0.4968                
+#>  Max.   : 1.6645                
 #> 
 ```
 
@@ -780,7 +780,7 @@ print(mixed_cross_data)
 #> #
 #> # A tibble: 640 × 12
 #>    personID coupleID gender satisfaction .i_composition .i_composition_role 
-#>       <int>    <int> <chr>         <dbl> <fct>          <fct>               
+#>       <int>    <int> <fct>         <dbl> <fct>          <fct>               
 #>  1        1        1 female         4.95 female_x_male  female_x_male_female
 #>  2        2        1 male           5.26 female_x_male  female_x_male_male  
 #>  3        3        2 female         5.14 female_x_male  female_x_male_female
@@ -908,7 +908,7 @@ print(mixed_ild_data)
 #> #
 #> # A tibble: 5,600 × 20
 #>    personID coupleID diaryday gender closeness provided_support .i_composition
-#>       <int>    <int>    <int> <chr>      <dbl>            <dbl> <fct>         
+#>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>         
 #>  1        1        1        0 female      3.79             4.85 female_x_male 
 #>  2        1        1        1 female      2.89             4.13 female_x_male 
 #>  3        1        1        2 female      4.20             4.62 female_x_male 
@@ -1113,7 +1113,7 @@ print(mixed_ild_tweedie_data)
 #> #
 #> # A tibble: 5,600 × 20
 #>    personID coupleID diaryday gender physical_activity provided_support
-#>       <int>    <int>    <int> <chr>              <dbl>            <dbl>
+#>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
 #>  1        1        1        0 female             11.4              3.92
 #>  2        1        1        1 female              2.24             3.86
 #>  3        1        1        2 female              8.14             4.15
@@ -1132,14 +1132,14 @@ print(mixed_ild_tweedie_data)
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, …
 summary(mixed_ild_tweedie_data)
-#>     personID        coupleID         diaryday          gender    
-#>  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   Length   :5600  
-#>  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   N.unique :   2  
-#>  Median :200.5   Median :100.50   Median : 6.5   N.blank  :   0  
-#>  Mean   :200.5   Mean   :100.50   Mean   : 6.5   Min.nchar:   4  
-#>  3rd Qu.:300.2   3rd Qu.:150.25   3rd Qu.:10.0   Max.nchar:   6  
-#>  Max.   :400.0   Max.   :200.00   Max.   :13.0                   
-#>                                                                  
+#>     personID        coupleID         diaryday       gender    
+#>  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   female:2800  
+#>  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   male  :2800  
+#>  Median :200.5   Median :100.50   Median : 6.5                
+#>  Mean   :200.5   Mean   :100.50   Mean   : 6.5                
+#>  3rd Qu.:300.2   3rd Qu.:150.25   3rd Qu.:10.0                
+#>  Max.   :400.0   Max.   :200.00   Max.   :13.0                
+#>                                                               
 #>  physical_activity provided_support            .i_composition
 #>  Min.   :  0.000   Min.   :-0.009341   female_x_female:1680  
 #>  1st Qu.:  1.725   1st Qu.: 4.028752   female_x_male  :2240  
