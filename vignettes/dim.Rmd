@@ -28,14 +28,9 @@ models and its relationship to the Actor-Partner Interdependence Model (APIM).
 The DIM separates a predictor into the dyad's shared level and each member's
 deviation from that level.
 
-The DIM is just a reparametrization of the exchangeable APIM. This means, that
-the ranom effects structure can be identical. For guidance for random effects
-in various circumstances, please refer to the APIM vignette (!TODO: link) that discusses
-generalized cross-sectional and ILD models.
-
 For broader guidance on using this package for data preparation for various
-dyadic model types, especially APIMs with multiple dyad types, generalized outcomes,
-intensive longitudinal models, and optimizer choices, see the
+dyadic model types, especially APIMs with multiple dyad types, generalized
+outcomes, intensive longitudinal models, and optimizer choices, see the
 [Getting Started vignette](getting-started.html) and the
 [Actor-Partner Interdependence Model vignette](apim.html). For undirected
 dyadic score outcomes, see the
@@ -114,7 +109,9 @@ cross_male_female_exchangeable_data <- prepare_interdep_data(
 print(cross_male_female_exchangeable_data, n = 4)
 ```
 
-Pooling compositions constrains them to share DIM effects. These are substantive modeling decisions, not only data-processing choices, and should follow the research question.
+Pooling compositions constrains them to share DIM effects. These are substantive
+modeling decisions, not only data-processing choices, and should follow the
+research question.
 
 ### Example DIM Model
 
@@ -140,6 +137,12 @@ difference contrast indexed by `.i_diff_assumed_exchangeable`. In `glmmTMB`,
 with `dispformula = ~ 0`, these random effects represent the two members'
 Gaussian residual variance and covariance.
 
+The intercept and difference contrast are specified as separate random-effects
+terms, which constrains their correlation to zero. This preserves
+exchangeability: swapping the arbitrary member labels leaves the intercept term
+unchanged but reverses the difference contrast. A nonzero correlation between
+them would therefore make the random-effects distribution depend on the
+arbitrary labeling.
 
 ```{r fit-cross-dim, eval=has_glmmTMB}
 
@@ -170,22 +173,22 @@ summary(dim_1)
 message("Install glmmTMB to run the fitted-model examples in this vignette.")
 ```
 
-Because this Gaussian model uses an identity link, fixed coefficients are interpreted
-in units of "satisfaction":
+Because this Gaussian model uses an identity link, fixed coefficients are
+interpreted in satisfaction units:
 
 - The intercept (about 5.04) is the expected satisfaction
-for a member whose communication equals the mean of a dyad with average
-communication.
+  for a member whose communication equals the mean of a dyad with average
+  communication.
 
 - The dyad-mean estimate (about 2.00) means that a shared one-point
-difference in both members' communication is associated with a two-point
-difference in expected satisfaction, holding their difference constant.
+  difference in both members' communication is associated with a two-point
+  difference in expected satisfaction, holding their difference constant.
 
-- The within-dyad-deviation estimate (about 1.52) is the expected outcome change when
-a member's communication is one point higher relative to the dyad mean, holding
-that mean constant. Equivalently, it is the expected satisfaction difference
-between the two members per one-point within-dyad difference in communication.
-
+- The within-dyad-deviation estimate (about 1.52) means that the member whose
+  communication is one point higher than their partner's is expected to report
+  satisfaction 1.52 points higher, holding the other model terms constant. This
+  is a within-dyad association, not the expected change from increasing only one
+  member's communication, which would also change the dyad mean.
 
 The same model can be written in APIM form. Since we have requested both sets of
 variables from `prepare_interdep_data`, we can fit one directly. For more
@@ -271,11 +274,11 @@ between-person components before the dyadic decomposition. The default `"auto"`
 strategy selects `"time_2l"` when both `time` and `predictors` are supplied:
 
 1. The `cwp` dyad mean captures a shared occasion-specific shift from the two
-   members' usual levels (dyad-level variations).
+   members' usual levels (shared occasion-level variation).
 2. The `cwp` within-dyad deviation captures which member is further above or
    below their own usual level on that occasion.
 3. The `cbp` dyad mean captures the dyad's shared usual level relative to the
-   sample's grand mean (dyad-level stability).
+   sample's grand mean (stable between-dyad differences).
 4. The `cbp` within-dyad deviation captures each member's stable difference
    from the dyad's usual level.
 
@@ -329,16 +332,22 @@ summary(dim_ILD)
 
 ```
 
-The fitted coefficients follow those interpretations. For example: 
+The fitted coefficients can be interpreted as:
 
-- the `cwp` dyad-mean estimate (about 0.49) describes the expected change in closeness
-when both members are one point above their respective usual support levels.
+- The `cwp` dyad-mean estimate (about 0.49) describes the expected change in
+  closeness when both members are one point above their respective usual support
+  levels.
 
 - The `cbp` dyad-mean estimate (about 1.51) instead compares dyads whose members'
-usual support levels differ by one point. 
+  average usual support levels differ by one point.
 
-- The corresponding within-dyad estimates (about 0.06 and 0.78) describe 
-momentary and stable relative differences between members, respectively. 
+- The `cwp` within-dyad estimate (about 0.06) describes the expected closeness
+  difference associated with a one-point difference between members in their
+  momentary deviations from usual support.
+
+- The `cbp` within-dyad estimate (about 0.78) describes the expected closeness
+  difference associated with a one-point difference between members in their
+  usual support levels.
 
 The equivalent APIM uses actor and partner effects on both levels:
 
@@ -461,8 +470,23 @@ data.frame(
 Random-slope DIM and APIM parameterizations can be written analogously by adding
 the corresponding within-person effects to the stable dyad-level random-effect
 blocks. These larger models do not converge cleanly with the example data, so
-the chunks are not evaluated. Such models can be fit when the study design, 
-data, and convergence diagnostics support the added complexity. 
+the chunks are not evaluated. Such models can be fit when the study design,
+data, and convergence diagnostics support the added complexity.
+
+A random-slope standard deviation describes how much the corresponding
+association varies across dyads around its fixed effect. Correlations within a
+random-effects block describe how its latent dyad-specific effects co-vary; they
+are not correlations between observed predictors or partners. Separate
+random-effects terms define separate covariance blocks, so correlations across
+those blocks are constrained to zero, preserving the exchangeability condition
+described above.
+
+For an exchangeable APIM, the sum-difference random-effects representation
+involving `.i_diff_*` can be rotated back to a constrained actor-partner
+representation. This can make actor and partner random effects easier to
+interpret, while offering no analogous interpretive advantage for the DIM. The
+[APIM vignette](apim.html) describes this rotation and the constraints required
+to preserve exchangeability.
 
 In the APIM:
 
