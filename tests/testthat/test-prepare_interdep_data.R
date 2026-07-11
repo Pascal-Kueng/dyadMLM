@@ -176,8 +176,7 @@ test_that("prepare_interdep_data rejects unsupported dyad compositions for undir
       model_type = "undirected_dsm",
       seed = 123
     ),
-    "support only data with exactly one exchangeable dyad composition",
-    fixed = TRUE
+    "female_x_male \\(distinguishable, n_dyads = 2\\)"
   )
 })
 

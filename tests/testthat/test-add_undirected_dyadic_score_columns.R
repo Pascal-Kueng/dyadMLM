@@ -138,7 +138,6 @@ test_that("undirected DSM constructor enforces exchangeable compatibility withou
 
   expect_error(
     add_undirected_dyadic_score_columns(prepared),
-    "support only data with exactly one exchangeable dyad composition",
-    fixed = TRUE
+    "female_x_male \\(distinguishable, n_dyads = 2\\)"
   )
 })

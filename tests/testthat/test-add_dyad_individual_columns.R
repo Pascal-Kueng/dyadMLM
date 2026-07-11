@@ -183,8 +183,7 @@ test_that("DIM construction errors for distinguishable dyads", {
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "support only data with exactly one exchangeable dyad composition",
-    fixed = TRUE
+    "female_x_male \\(distinguishable, n_dyads = 2\\)"
   )
 })
 
@@ -207,8 +206,7 @@ test_that("DIM construction errors for mixed distinguishable and exchangeable dy
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "support only data with exactly one exchangeable dyad composition",
-    fixed = TRUE
+    "female_x_female \\(exchangeable, n_dyads = 1\\).*female_x_male \\(distinguishable, n_dyads = 1\\).*male_x_male \\(exchangeable, n_dyads = 1\\)"
   )
 })
 
@@ -231,8 +229,7 @@ test_that("DIM construction errors for multiple exchangeable dyad compositions",
       temporal_predictor_decomposition = "none",
       seed = 123
     ),
-    "support only data with exactly one exchangeable dyad composition",
-    fixed = TRUE
+    "female_x_female \\(exchangeable, n_dyads = 1\\).*male_x_male \\(exchangeable, n_dyads = 1\\)"
   )
 })
 
