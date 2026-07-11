@@ -1,5 +1,13 @@
 normalize_model_type <- function(model_type) {
   choices <- c("apim", "dim", "undirected_dsm", "none")
+
+  if (!is.character(model_type) || length(model_type) == 0 || anyNA(model_type)) {
+    stop(
+      "`model_type` must be a non-empty character vector without missing values.",
+      call. = FALSE
+    )
+  }
+
   invalid_model_types <- setdiff(model_type, choices)
 
   if (length(invalid_model_types) > 0) {

@@ -495,7 +495,7 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   # Join the resolved member roles back to every original row.
   out <- dplyr::left_join(out, member_roles, by = c(group_name, member_name))
 
-  out[[role_name]] <- as.character(out[[interdep_resolved_role_col]])
+  out[[role_name]] <- out[[interdep_resolved_role_col]]
   out[[interdep_resolved_role_col]] <- NULL
 
   return(list(out = out, dropped_missing_role_dyads = missing_role_groups))

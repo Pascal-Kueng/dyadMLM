@@ -255,10 +255,11 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
 - Keep APIM and temporal predictor decomposition model examples in APIM-focused
   vignettes; avoid duplicating APIM-DIM equivalence material there.
 - Keep the DIM vignette focused on DIM construction and APIM-DIM equivalence.
-- Add a separate DSM vignette or compact DSM data-preparation section only after
-  the current `outcomes` and `model_type = "undirected_dsm"` API is reviewed.
+- Expand the DSM placeholder vignette after the current
+  `outcomes` and `model_type = "undirected_dsm"` API is reviewed.
 - Analysis-composition controls should run before DIM/DSM compatibility checks.
-  The implemented `set_exchangeable_compositions` step runs first; planned
-  `pool_compositions` should run after it. DIM/DSM should continue to require
-  one final exchangeable analysis composition, but that composition may be
-  produced explicitly by pooling exchangeable analysis compositions.
+  The implemented order is `include_compositions`, then
+  `set_exchangeable_compositions`, then `pool_compositions`. DIM/DSM should
+  continue to require one final exchangeable analysis composition, but that
+  composition may be produced explicitly by filtering, setting exchangeability,
+  and pooling exchangeable analysis compositions.

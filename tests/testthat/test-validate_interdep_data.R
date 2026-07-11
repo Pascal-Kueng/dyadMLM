@@ -224,6 +224,50 @@ test_that("validate_interdep_data validates incompatible model type requests", {
       data,
       group = dyad_id,
       member = person_id,
+      model_type = NULL
+    ),
+    "`model_type` must be a non-empty character vector without missing values.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      model_type = character()
+    ),
+    "`model_type` must be a non-empty character vector without missing values.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      model_type = NA_character_
+    ),
+    "`model_type` must be a non-empty character vector without missing values.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      model_type = 1
+    ),
+    "`model_type` must be a non-empty character vector without missing values.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
       model_type = "asdkfjakdfj"
     ),
     'Invalid value(s): "asdkfjakdfj".',
@@ -692,6 +736,48 @@ test_that("validate_interdep_data resolves sparse longitudinal roles", {
     result$role,
     c("female", "male", "female", "male", "female", "male", "female", "male")
   )
+})
+
+test_that("validate_interdep_data preserves the role column type", {
+  factor_data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    role = ordered(
+      c("junior", "senior", NA, NA, "junior", "senior", NA, NA),
+      levels = c("junior", "senior")
+    ),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2)
+  )
+
+  factor_result <- validate_interdep_data(
+    factor_data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time
+  )
+
+  expect_identical(class(factor_result$role), class(factor_data$role))
+  expect_identical(levels(factor_result$role), levels(factor_data$role))
+  expect_equal(
+    as.character(factor_result$role),
+    c("junior", "senior", "junior", "senior", "junior", "senior", "junior", "senior")
+  )
+
+  date_data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = as.Date(c("2026-01-01", "2026-01-02", "2026-01-01", "2026-01-02"))
+  )
+
+  date_result <- validate_interdep_data(
+    date_data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  expect_identical(date_result$role, date_data$role)
 })
 
 test_that("validate_interdep_data rejects inconsistent roles within member", {

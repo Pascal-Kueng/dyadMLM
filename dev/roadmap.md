@@ -39,22 +39,25 @@ Recently completed cleanup:
   the README
 - kept generated `docs/` and `doc/` output ignored; pkgdown should rebuild the
   site through the GitHub Pages workflow
-- added `set_exchangeable_compositions` as the first analysis-composition
-  control, so observed distinguishable compositions can be treated as
-  exchangeable for generated columns and downstream DIM/DSM compatibility
+- added `set_exchangeable_compositions`, so observed distinguishable
+  compositions can be treated as exchangeable for generated columns and
+  downstream DIM/DSM compatibility
 - added `pool_compositions`, so exchangeable analysis compositions can be
   pooled under a user-provided final composition label without external
   preprocessing
+- added `include_compositions`, so analyses can keep selected observed dyad
+  compositions before exchangeability overrides, pooling, and DIM/DSM
+  compatibility checks
 - reviewed the DIM and undirected DSM preparation paths for the current v0.1
   scope
 - accepted the current composition metadata shape for v0.1: returned data use
   final analysis compositions, while pooling metadata records the pooled source
   compositions in a compact `pooled_from` summary
 
-Immediate next step: cleanly split and polish the vignettes. The
-getting-started vignette should become shorter and more introductory; heavier
-APIM, ILD APIM, and DSM material should move into model-specific vignettes as
-those pages are created.
+Immediate next step: finish vignette and release-facing polish. The
+getting-started and DIM vignettes have had recent production-polish passes.
+APIM and DSM still need careful review, and DSM is currently a placeholder page
+that announces the intended documentation structure.
 
 ## Vignette Architecture
 
@@ -91,8 +94,9 @@ Target vignette structure:
   - cross-sectional and ILD APIM-DIM equivalence
   - role-moderated and random-slope material only as advanced/conceptual
     guidance until the implementation is more complete
-- future `Dyadic-Score-Model.Rmd`
-  - add after the getting-started and APIM/ILD APIM split is stable
+- `undirected-dsm.Rmd`
+  - currently an under-construction placeholder
+  - add fuller examples before the alpha feedback round
   - keep DSM outcome-side semantics separate from DIM predictor construction
 
 ## Version 0.1.0 - First CRAN Release Candidate
@@ -107,8 +111,8 @@ model-building features.
 - Auto-detect roles, dyad compositions, and distinguishability where possible
 - Add explicit analysis-composition controls so common mixed dyad-type analyses
   do not require external preprocessing
-  - Add `include_compositions = NULL` as an observed-composition pre-filter
-    before exchangeability overrides and pooling. This should be a narrow
+  - `include_compositions = NULL` is implemented as an observed-composition
+    pre-filter before exchangeability overrides and pooling. It is a narrow
     dyad-level filter, not a general row filter:
     - require `role`; without observed roles, there are no observed
       compositions to include or exclude
@@ -122,15 +126,13 @@ model-building features.
       dyads and drop all rows for excluded dyads
     - update `attr(data, "interdep")$n_dyads` and all downstream
       `dyad_compositions` metadata to describe only the retained dyads
-    - store a compact excluded-composition summary in metadata, such as
-      `excluded_dyad_compositions`, with raw composition labels and dyad counts;
-      optionally show this in `print.interdep_data()` near the existing dropped
-      dyad summaries
+    - excluded-composition metadata and print summaries are intentionally not
+      part of the current minimal implementation
     - after filtering, resolve `set_exchangeable_compositions` and
       `pool_compositions` only against retained compositions, so excluded
       compositions cannot be constrained or pooled accidentally
-    - cover cross-sectional and ILD behavior in tests; ILD filtering must retain
-      all observed time rows for included dyads
+    - cross-sectional and ILD behavior are covered by tests; ILD filtering must
+      retain all observed time rows for included dyads
   - `set_exchangeable_compositions` marks selected observed compositions as
     exchangeable for downstream generated columns
   - `pool_compositions` pools exchangeable analysis compositions under a
@@ -292,17 +294,19 @@ Complete these before calling the feature set CRAN-ready:
     composition, unless `pool_compositions` has explicitly produced that
     analysis composition
 - Analysis-composition controls: done for v0.1
-  - consider adding `include_compositions` before finalizing v0.1; it should be
-    implemented as a raw observed-composition dyad filter before
-    `set_exchangeable_compositions` and `pool_compositions`, with metadata and
-    print visibility for excluded compositions
+  - `include_compositions` is implemented as a raw observed-composition dyad
+    filter before `set_exchangeable_compositions` and `pool_compositions`
+  - `include_compositions` updates retained dyads and downstream metadata; a
+    separate excluded-composition metadata table or print summary is deferred
+    unless users need it
   - `set_exchangeable_compositions` runs before `pool_compositions`
   - the name `set_exchangeable_compositions` is intentionally specific; avoid
     generic "constraints" wording
   - `pool_compositions` is a named list where names are final analysis
     composition labels and values are observed or analysis composition labels
     to pool
-  - both arguments use the same composition-reference resolver
+  - `include_compositions`, `set_exchangeable_compositions`, and
+    `pool_compositions` use the same composition-reference resolver
   - returned data are limited to final analysis columns, not extra raw
     composition columns
   - pooling provenance is recorded in `dyad_compositions$pooled_from`
@@ -333,14 +337,14 @@ Complete these before calling the feature set CRAN-ready:
     scores
   - DSM outcome metadata stays in `undirected_dsm_outcomes`, separate from
     `dim_predictors`
-  - add a short DSM data-preparation vignette/example during vignette cleanup
-- Finalize vignette split for v0.1.0
-  - shorten `getting-started.Rmd` so it is an orientation and data-prep
-    vignette, not the main modeling manual
-  - move current cross-sectional APIM model-fitting material into an APIM
-    vignette
-  - move ILD APIM, generalized outcome, optimizer, and mixed-composition ILD material into
-    an ILD APIM vignette
+  - expand the DSM placeholder vignette before the alpha feedback round
+- Finalize vignette polish for v0.1.0
+  - keep `getting-started.Rmd` as an orientation and data-prep vignette, not the
+    main modeling manual
+  - review and polish `apim.Rmd`
+  - decide whether ILD APIM, generalized outcome, optimizer, and
+    mixed-composition ILD material should stay in `apim.Rmd` for now or move
+    into an ILD APIM vignette
   - keep heavy or convergence-sensitive examples out of `getting-started.Rmd`
     and mark advanced examples `eval = FALSE` where needed
 - Keep the DIM vignette focused
@@ -462,7 +466,8 @@ Minimum expected state:
 - stable generated-column families for compositions, temporal predictor
   components, APIM predictors, DIM predictors, and undirected DSM outcomes
 - stable analysis-composition controls:
-  `set_exchangeable_compositions` and `pool_compositions`
+  `include_compositions`, `set_exchangeable_compositions`, and
+  `pool_compositions`
 - clear metadata for raw observed compositions versus final analysis
   compositions
 - complete getting-started, APIM, ILD APIM, DIM, and DSM documentation paths
@@ -485,7 +490,7 @@ Target state before JOSS submission:
 - Evidence of research use, ideally a preprint or applied analysis using the
   package
 - Robust temporal predictor decomposition for ILD data
-- Composition pooling/constraining helpers
+- Composition filtering, exchangeability, and pooling helpers
 - `.i_diff_*` / Idiff interpretation helpers
 - Formula or syntax generation for at least `glmmTMB`
 - Preferably `brms` syntax generation as a second modeling backend
