@@ -6,12 +6,14 @@ library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
-This vignette focuses on Dyad-Individual Model (DIM) predictor
-construction for dyadic multilevel models and its relationship to APIM
-parameterizations. For broader guidance on fitting dyadic multilevel
-models with `interdep`-prepared data, especially APIMs with multiple
-dyad types, generalized outcomes, intensive longitudinal models, and
-optimizer choices, see the [Getting Started
+This vignette focuses on the Dyad-Individual Model (DIM) for dyadic
+multilevel models and its relationship to the Actor-Partner
+Interdependence Model (APIM) parameterizations.
+
+For broader guidance on using this package for data preparation for
+various dyadic model types, especially APIMs with multiple dyad types,
+generalized outcomes, intensive longitudinal models, and optimizer
+choices, see the [Getting Started
 vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md)
 and the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
@@ -21,16 +23,9 @@ vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 ## Cross-Sectional Gaussian DIM
 
 The current DIM implementation prepares undirected DIM predictors. This
-means that the dyad members are treated as exchangeable for DIM
-construction. Here we therefore omit `role`, which makes
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-create a valid `.i_diff_assumed_exchangeable` contrast with values `-1`
-and `1` within each dyad.
-
-A supplied `role` column is also allowed when it yields exactly one
-exchangeable composition, such as all female-female dyads. DIM
-construction is currently rejected for distinguishable compositions and
-for multiple exchangeable compositions.
+means that the dyad members are treated as exchangeable. One way to
+achieve this is to omit `role` from `prepare_interdep_data`, which then
+assumes all dyads are the same type of exchangeable dyads.
 
 ``` r
 
@@ -39,11 +34,12 @@ cross_exchangeable_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   predictors = communication,
-  # returning both apim and dim columns for comparison
+  # Create both APIM and DIM columns for comparison.
   model_type = c("apim", "dim"),
   seed = 123
 )
 
+# printing the first couple
 print(cross_exchangeable_data, n = 20)
 #> # interdep data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
@@ -99,20 +95,171 @@ print(cross_exchangeable_data, n = 20)
 #> #   .i_communication_raw_within_dyad_deviation <dbl>
 ```
 
+Passing a `role` is also possible when it leads to exactly one
+exchangeable composition (e.g., only female-female dyads).
+
+Other datasets need a preparation step that produces exactly one
+exchangeable composition before DIM columns can be constructed. In a
+dataset with mixed dyad types, the right preparation depends on the
+analysis goal.
+
+For instance, we can filter dyads and keep only male-male and
+female-female dyads. Because DIM currently supports a single type of
+exchangeable dyad, we would pool those like this:
+
+``` r
+
+cross_same_sex_pooled_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = satisfaction,
+  model_type = c("apim", "dim"),
+  # removing "male-female" dyads
+  include_compositions = c("male-male", "female-female"),
+  pool_compositions = list(
+    "same-sex-couples" = c("male-male", "female-female")
+  ),
+  seed = 123
+)
+
+print(cross_same_sex_pooled_data, n = 4)
+#> # interdep data
+#> # Rows: 400 | Dyads: 200 | Intensive longitudinal: no
+#> # Structure: group = coupleID, member = personID, role = gender
+#> #
+#> # Dyad compositions:
+#> # same-sex-couples (pooled) exchangeable 200 dyads
+#> #   female_x_female
+#> #   male_x_male
+#> #
+#> # Added columns:
+#> #   .i_composition                  inferred dyad composition
+#> #   .i_composition_role             composition-specific member role
+#> #   .i_is_*                         composition-role indicator columns
+#> #   .i_diff_*                       composition-specific sum-diff contrasts; 0
+#> #                                   for distinguishable dyads or other
+#> #                                   exchangeable compositions
+#> #   .i_*_raw_actor                  APIM actor predictor: actor's original
+#> #                                   predictor values
+#> #   .i_*_raw_partner                APIM partner predictor: partner's original
+#> #                                   predictor values
+#> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
+#> #                                   predictor level, grand-mean centered
+#> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
+#> #                                   person's difference from the dyad average
+#> #
+#> # A tibble: 400 × 12
+#>   personID coupleID gender satisfaction .i_composition   .i_composition_role
+#>      <int>    <int> <chr>         <dbl> <fct>            <fct>              
+#> 1      241      121 female         5.32 same-sex-couples same-sex-couples   
+#> 2      242      121 female         5.37 same-sex-couples same-sex-couples   
+#> 3      243      122 female         5.99 same-sex-couples same-sex-couples   
+#> 4      244      122 female         6.93 same-sex-couples same-sex-couples   
+#> # ℹ 396 more rows
+#> # ℹ 6 more variables: .i_is_same_sex_couples <dbl>,
+#> #   .i_diff_same_sex_couples <dbl>, .i_satisfaction_raw_actor <dbl>,
+#> #   .i_satisfaction_raw_partner <dbl>, .i_satisfaction_raw_dyad_mean_gmc <dbl>,
+#> #   .i_satisfaction_raw_within_dyad_deviation <dbl>
+```
+
+If we want to include, for instance, only male-female couples and treat
+those as exchangeable, we can do:
+
+``` r
+
+cross_male_female_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = satisfaction,
+  model_type = c("apim", "dim"),
+  include_compositions = "male-female",
+  set_exchangeable_compositions = "male-female",
+  seed = 123
+)
+
+print(cross_male_female_exchangeable_data, n = 4)
+#> # interdep data
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
+#> # Structure: group = coupleID, member = personID, role = gender
+#> #
+#> # Dyad compositions:
+#> # female_x_male exchangeable (set by user) 120 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition                  inferred dyad composition
+#> #   .i_composition_role             composition-specific member role
+#> #   .i_is_*                         composition-role indicator columns
+#> #   .i_diff_*                       composition-specific sum-diff contrasts; 0
+#> #                                   for distinguishable dyads or other
+#> #                                   exchangeable compositions
+#> #   .i_*_raw_actor                  APIM actor predictor: actor's original
+#> #                                   predictor values
+#> #   .i_*_raw_partner                APIM partner predictor: partner's original
+#> #                                   predictor values
+#> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
+#> #                                   predictor level, grand-mean centered
+#> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
+#> #                                   person's difference from the dyad average
+#> #
+#> # A tibble: 240 × 12
+#>   personID coupleID gender satisfaction .i_composition .i_composition_role
+#>      <int>    <int> <chr>         <dbl> <fct>          <fct>              
+#> 1        1        1 female         4.95 female_x_male  female_x_male      
+#> 2        2        1 male           5.26 female_x_male  female_x_male      
+#> 3        3        2 female         5.14 female_x_male  female_x_male      
+#> 4        4        2 male           3.11 female_x_male  female_x_male      
+#> # ℹ 236 more rows
+#> # ℹ 6 more variables: .i_is_female_x_male <dbl>, .i_diff_female_x_male <dbl>,
+#> #   .i_satisfaction_raw_actor <dbl>, .i_satisfaction_raw_partner <dbl>,
+#> #   .i_satisfaction_raw_dyad_mean_gmc <dbl>,
+#> #   .i_satisfaction_raw_within_dyad_deviation <dbl>
+```
+
+This allows full control over which dyads are included, how they are
+treated, and which are pooled.
+
 ### Example DIM Model
 
-The random-effects structure contains a dyad-level random intercept and
-a within-dyad random deviation indexed by
-`.i_diff_assumed_exchangeable`.
+The variables that enter the DIM in the fixed effects include:
+
+1.  A dyad-mean variable that is grand-mean centered. This describes a
+    couple’s shared level compared to all other couples.
+2.  A within-dyad variable describing each partner’s deviation from the
+    couple mean, equivalently half the signed difference between
+    partners.
+
+The random-effects structure is equivalent to an APIM for exchangeable
+dyads, because the APIM and the DIM are just reparametrizations of the
+same model. The random effects thus contain a dyad-level intercept and a
+within-dyad deviation indexed by `.i_diff_assumed_exchangeable`. In
+glmmTMB, with `dispformula = ~ 0`, these dyad-level random effects model
+the Gaussian residual covariance.
 
 ``` r
 
 
 dim_1 <- glmmTMB::glmmTMB(
-  satisfaction ~ 1 +
-    .i_communication_raw_dyad_mean_gmc + .i_communication_raw_within_dyad_deviation +
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID),
-  data = cross_exchangeable_data
+  satisfaction ~
+
+    # Pooled fixed intercept
+    1 +
+
+    # Between-couple effect
+    .i_communication_raw_dyad_mean_gmc +
+
+    # Within-couple effect
+    .i_communication_raw_within_dyad_deviation +
+
+    # Residual Gaussian variance-covariance
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable | coupleID)
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = cross_exchangeable_data
 )
 
 summary(dim_1)
@@ -120,27 +267,25 @@ summary(dim_1)
 #> Formula:          
 #> satisfaction ~ 1 + .i_communication_raw_dyad_mean_gmc + .i_communication_raw_within_dyad_deviation +  
 #>     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID)
+#> Dispersion:                    ~0
 #> Data: cross_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>       606       625      -297       594       170 
+#>     604.0     619.8    -297.0     594.0       171 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups     Name                         Variance Std.Dev.
-#>  coupleID   (Intercept)                  0.2582   0.5081  
-#>  coupleID.1 .i_diff_assumed_exchangeable 0.7768   0.8814  
-#>  Residual                                0.7528   0.8676  
+#>  coupleID   (Intercept)                  0.6346   0.7966  
+#>  coupleID.1 .i_diff_assumed_exchangeable 1.1532   1.0739  
 #> Number of obs: 176, groups:  coupleID, 88
-#> 
-#> Dispersion estimate for gaussian family (sigma^2): 0.753 
 #> 
 #> Conditional model:
 #>                                            Estimate Std. Error z value Pr(>|z|)
 #> (Intercept)                                 5.04066    0.08492   59.36   <2e-16
-#> .i_communication_raw_dyad_mean_gmc          1.99562    0.07797   25.59   <2e-16
-#> .i_communication_raw_within_dyad_deviation  1.51987    0.14406   10.55   <2e-16
+#> .i_communication_raw_dyad_mean_gmc          1.99563    0.07797   25.59   <2e-16
+#> .i_communication_raw_within_dyad_deviation  1.51989    0.14406   10.55   <2e-16
 #>                                               
 #> (Intercept)                                ***
 #> .i_communication_raw_dyad_mean_gmc         ***
@@ -149,7 +294,16 @@ summary(dim_1)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-The same model can be written in APIM form:
+``` r
+
+message("Install glmmTMB to run the fitted-model examples in this vignette.")
+```
+
+The same model can be written in APIM form. Since we have requested both
+sets of variables from `prepare_interdep_data`, we can fit one directly.
+For more guidance on APIM specifications and different models, see the
+[Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
 
 ``` r
 
@@ -157,8 +311,11 @@ The same model can be written in APIM form:
 apim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 +
     .i_communication_raw_actor + .i_communication_raw_partner +
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID),
-  data = cross_exchangeable_data
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable | coupleID)
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = cross_exchangeable_data
 )
 
 summary(apim_1)
@@ -166,34 +323,27 @@ summary(apim_1)
 #> Formula:          
 #> satisfaction ~ 1 + .i_communication_raw_actor + .i_communication_raw_partner +  
 #>     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID)
+#> Dispersion:                    ~0
 #> Data: cross_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>       606       625      -297       594       170 
+#>     604.0     619.8    -297.0     594.0       171 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups     Name                         Variance Std.Dev.
-#>  coupleID   (Intercept)                  0.2500   0.5000  
-#>  coupleID.1 .i_diff_assumed_exchangeable 0.7687   0.8768  
-#>  Residual                                0.7691   0.8770  
+#>  coupleID   (Intercept)                  0.6346   0.7966  
+#>  coupleID.1 .i_diff_assumed_exchangeable 1.1532   1.0739  
 #> Number of obs: 176, groups:  coupleID, 88
-#> 
-#> Dispersion estimate for gaussian family (sigma^2): 0.769 
 #> 
 #> Conditional model:
 #>                              Estimate Std. Error z value Pr(>|z|)    
 #> (Intercept)                   -5.2330     0.4103 -12.754  < 2e-16 ***
-#> .i_communication_raw_actor     1.7577     0.0819  21.461  < 2e-16 ***
+#> .i_communication_raw_actor     1.7578     0.0819  21.461  < 2e-16 ***
 #> .i_communication_raw_partner   0.2379     0.0819   2.904  0.00368 ** 
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
-
-``` r
-
-message("Install glmmTMB to run the fitted-model examples in this vignette.")
 ```
 
 The two models have identical fit statistics:
@@ -207,28 +357,28 @@ data.frame(
   logLik = c(as.numeric(logLik(dim_1)), as.numeric(logLik(apim_1)))
 )
 #>   model      AIC      BIC    logLik
-#> 1   DIM 605.9834 625.0063 -296.9917
-#> 2  APIM 605.9834 625.0063 -296.9917
+#> 1   DIM 603.9834 619.8358 -296.9917
+#> 2  APIM 603.9834 619.8358 -296.9917
 ```
 
-This shows that the same statistical model is being estimated with
-different parameterizations and coefficient interpretations.
+This demonstrates that the same statistical model is being estimated
+with different parameterizations and coefficient interpretations.
 
 The coefficients relate as follows:
 
 ``` math
- 
-b_{dyad\ mean} = b_{actor} + b_{partner}
+\beta_{\text{dyad mean}} =
+\beta_{\text{actor}} + \beta_{\text{partner}}
 ```
 
 and
 
 ``` math
- 
-b_{within\ dyad\ deviation} = b_{actor} - b_{partner}
+\beta_{\text{within-dyad deviation}} =
+\beta_{\text{actor}} - \beta_{\text{partner}}
 ```
 
-For example:
+In this example:
 
 ``` r
 
@@ -248,8 +398,8 @@ cat("  actor effect:                  ",  b_actor, "\n")
 cat("  partner effect:                ", b_partner, "\n\n")
 #>   partner effect:                 0.238
 
-cat("  Computes to: \n")
-#>   Computes to:
+cat("  DIM transformation:\n")
+#>   DIM transformation:
 cat("  actor effect + partner effect: ", b_actor + b_partner, "\n")
 #>   actor effect + partner effect:  1.996
 cat("  actor effect - partner effect: ", b_actor - b_partner, "\n\n")
@@ -265,7 +415,8 @@ cat("  within-dyad-deviation effect:  ", b_within_dyad, "\n")
 
 ## Intensive longitudinal DIM
 
-For longitudinal DIM, predictors are decomposed with `time_2l`.
+For longitudinal DIM, predictors are decomposed into within-person and
+between-person components with `time_2l`.
 `temporal_predictor_decomposition = "none"` is currently rejected for
 DIM and undirected DSM longitudinal predictor construction.
 
@@ -275,7 +426,6 @@ ild_exchangeable_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
-  # role = gender,
   time = diaryday,
   predictors = provided_support,
   model_type = c("apim", "dim"),
@@ -351,9 +501,9 @@ print(ild_exchangeable_data)
 
 
 dim_ILD <- glmmTMB::glmmTMB(
-  closeness ~ 
-    1 + 
-    
+  closeness ~
+    1 +
+
     diaryday +
 
     # Within-person DIM
@@ -364,11 +514,13 @@ dim_ILD <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_dyad_mean +
     .i_provided_support_cbp_within_dyad_deviation +
 
-    # random effects for stable non-independence (means)
-    us(1 | coupleID)  + us(0 + .i_diff_assumed_exchangeable | coupleID) +
+    # Stable exchangeable dyad-level covariance
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable | coupleID) +
 
-    # Same-day residual covariance
-    us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
+    # Residual (same-day) exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -380,10 +532,9 @@ summary(dim_ILD)
 #> Formula:          
 #> closeness ~ 1 + diaryday + .i_provided_support_cwp_dyad_mean +  
 #>     .i_provided_support_cwp_within_dyad_deviation + .i_provided_support_cbp_dyad_mean +  
-#>     .i_provided_support_cbp_within_dyad_deviation + us(1 | coupleID) +  
-#>     us(0 + .i_diff_assumed_exchangeable | coupleID) + us(1 |  
-#>     coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable |  
-#>     coupleID:diaryday)
+#>     .i_provided_support_cbp_within_dyad_deviation + (1 | coupleID) +  
+#>     (0 + .i_diff_assumed_exchangeable | coupleID) + (1 | coupleID:diaryday) +  
+#>     (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_exchangeable_data
 #> 
@@ -419,15 +570,15 @@ summary(dim_ILD)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-Compare to the APIM on both levels:
+The equivalent APIM uses actor and partner effects on both levels:
 
 ``` r
 
 
 apim_ILD <- glmmTMB::glmmTMB(
-  closeness ~ 
-    1 + 
-    
+  closeness ~
+    1 +
+
     diaryday +
 
     # Within-person APIM
@@ -438,11 +589,12 @@ apim_ILD <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_actor +
     .i_provided_support_cbp_partner +
 
-    # random effects for stable non-independence (means)
-    us(1 | coupleID)  + us(0 + .i_diff_assumed_exchangeable | coupleID) +
+    # Stable exchangeable dyad-level covariance
+    (1 | coupleID)  + (0 + .i_diff_assumed_exchangeable | coupleID) +
 
-    # Same-day residual covariance
-    us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
+    # Residual (same-day) exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -454,8 +606,8 @@ summary(apim_ILD)
 #> Formula:          
 #> closeness ~ 1 + diaryday + .i_provided_support_cwp_actor + .i_provided_support_cwp_partner +  
 #>     .i_provided_support_cbp_actor + .i_provided_support_cbp_partner +  
-#>     us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable |  
-#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable |  
+#>     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID) +  
+#>     (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_exchangeable_data
@@ -500,25 +652,42 @@ data.frame(
 #> 2  APIM 2977.225 3026.637 -1478.613
 ```
 
-The equivalence holds separately for the within-person and
-between-person predictor components. For example:
+The equivalence holds separately for the within-person (`cwp`) and
+between-person (`cbp`) predictor components. For the within-person
+component:
 
-`b_.i_provided_support_cwp_actor + b_.i_provided_support_cwp_partner`
-corresponds to `b_.i_provided_support_cwp_dyad_mean`.
+``` math
+\beta_{\text{cwp dyad mean}} =
+\beta_{\text{cwp actor}} + \beta_{\text{cwp partner}}
+```
 
-Analogous sum and difference transformations apply to the other
-within-person and between-person components.
+``` math
+\beta_{\text{cwp within-dyad deviation}} =
+\beta_{\text{cwp actor}} - \beta_{\text{cwp partner}}
+```
+
+For the between-person component:
+
+``` math
+\beta_{\text{cbp dyad mean}} =
+\beta_{\text{cbp actor}} + \beta_{\text{cbp partner}}
+```
+
+``` math
+\beta_{\text{cbp within-dyad deviation}} =
+\beta_{\text{cbp actor}} - \beta_{\text{cbp partner}}
+```
 
 This also means that an APIM parameterization can be used on one level
-and a DIM parameterization on the other.
+and a DIM parameterization on the other. For example:
 
 ``` r
 
 
 apim_dim_ILD <- glmmTMB::glmmTMB(
-  closeness ~ 
-    1 + 
-    
+  closeness ~
+    1 +
+
     diaryday +
 
     # Within-person APIM
@@ -529,11 +698,12 @@ apim_dim_ILD <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_dyad_mean +
     .i_provided_support_cbp_within_dyad_deviation +
 
-    # random effects for stable non-independence (means)
-    us(1 | coupleID)  + us(0 + .i_diff_assumed_exchangeable | coupleID) +
+    # Stable exchangeable dyad-level covariance
+    (1 | coupleID)  + (0 + .i_diff_assumed_exchangeable | coupleID) +
 
-    # Same-day residual covariance
-    us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -545,8 +715,8 @@ summary(apim_dim_ILD)
 #> Formula:          
 #> closeness ~ 1 + diaryday + .i_provided_support_cwp_actor + .i_provided_support_cwp_partner +  
 #>     .i_provided_support_cbp_dyad_mean + .i_provided_support_cbp_within_dyad_deviation +  
-#>     us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable |  
-#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable |  
+#>     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID) +  
+#>     (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_exchangeable_data
@@ -583,12 +753,12 @@ summary(apim_dim_ILD)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-Which is still the same model:
+This mixed parameterization still estimates the same model:
 
 ``` r
 
 data.frame(
-  model = c("DIM", "APIM", "APIM within / DIM between"),
+  model = c("DIM within / DIM between", "APIM within / APIM between", "APIM within / DIM between"),
   AIC = c(AIC(dim_ILD), AIC(apim_ILD), AIC(apim_dim_ILD)),
   BIC = c(BIC(dim_ILD), BIC(apim_ILD), BIC(apim_dim_ILD)),
   logLik = c(
@@ -597,34 +767,20 @@ data.frame(
     as.numeric(logLik(apim_dim_ILD))
   )
 )
-#>                       model      AIC      BIC    logLik
-#> 1                       DIM 2977.225 3026.637 -1478.613
-#> 2                      APIM 2977.225 3026.637 -1478.613
-#> 3 APIM within / DIM between 2977.225 3026.637 -1478.613
+#>                        model      AIC      BIC    logLik
+#> 1   DIM within / DIM between 2977.225 3026.637 -1478.613
+#> 2 APIM within / APIM between 2977.225 3026.637 -1478.613
+#> 3  APIM within / DIM between 2977.225 3026.637 -1478.613
 ```
 
-## Advanced: Role-Moderated DIM Fixed Effects
+## Including random slopes
 
-A possible extension is to let a distinguishable variable, such as
-gender, moderate the DIM fixed effects. Conceptually, this creates
-role-specific dyad-mean and within-dyad-deviation effects. Those
-role-specific DIM effects can then be translated back to actor and
-partner effects using the same sum and difference logic shown above.
-
-This is close to the fixed-effect interpretation of a distinguishable
-APIM, but it is not yet full distinguishable DIM support. In particular,
-the random-effect and residual structures would also need role-specific
-treatment before this could be treated as a complete distinguishable
-dyadic model.
-
-## Advanced: Random slopes
-
-To include equivalent random slopes between the two models, the
-within-person model coefficients can be entered as slopes as such:
-
-WARNING: careful about model convergence, the following models do not
-converge properly and should not be interpreted. They only show the
-conceptual way of incorporating random slopes.
+Random-slope DIM and APIM parameterizations can be written analogously
+by adding the corresponding within-person effects to the stable
+dyad-level random-effect blocks. In the example data below these larger
+models do not converge cleanly, so the chunks are not evaluated and
+should absolutely **not be interpreted**. This structure can be
+reasonable if convergence diagnostics are clean.
 
 In the APIM:
 
@@ -632,9 +788,9 @@ In the APIM:
 
 
 apim_ILD_random <- glmmTMB::glmmTMB(
-  closeness ~ 
-    1 + 
-    
+  closeness ~
+    1 +
+
     diaryday +
 
     # Within-person APIM
@@ -645,12 +801,20 @@ apim_ILD_random <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_actor +
     .i_provided_support_cbp_partner +
 
-    # random effects for stable non-independence (means)
-    us(1 + .i_provided_support_cwp_actor + .i_provided_support_cwp_partner | coupleID)  + 
-    us(0 + .i_diff_assumed_exchangeable + .i_diff_assumed_exchangeable:.i_provided_support_cwp_actor + .i_diff_assumed_exchangeable:.i_provided_support_cwp_partner | coupleID) +
+    # Stable dyad-level covariance with within-person random slopes
+    (1 +
+         .i_provided_support_cwp_actor +
+         .i_provided_support_cwp_partner
+       | coupleID)  +
+    (0 +
+         .i_diff_assumed_exchangeable +
+         .i_diff_assumed_exchangeable:.i_provided_support_cwp_actor +
+         .i_diff_assumed_exchangeable:.i_provided_support_cwp_partner
+       | coupleID) +
 
-    # Same-day residual covariance
-    us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -664,9 +828,9 @@ In the DIM:
 
 
 dim_ILD_random <- glmmTMB::glmmTMB(
-  closeness ~ 
-    1 + 
-    
+  closeness ~
+    1 +
+
     diaryday +
 
     # Within-person DIM
@@ -677,15 +841,32 @@ dim_ILD_random <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_dyad_mean +
     .i_provided_support_cbp_within_dyad_deviation +
 
-    # random effects for stable non-independence (means)
-    us(1 + .i_provided_support_cwp_dyad_mean + .i_provided_support_cwp_within_dyad_deviation | coupleID)  + 
-    us(0 + .i_diff_assumed_exchangeable + .i_diff_assumed_exchangeable:.i_provided_support_cwp_dyad_mean + .i_diff_assumed_exchangeable:.i_provided_support_cwp_within_dyad_deviation | coupleID) +
+    # Stable dyad-level covariance with within-person random slopes
+    (1 +
+       .i_provided_support_cwp_dyad_mean +
+       .i_provided_support_cwp_within_dyad_deviation
+     | coupleID)  +
+    (0 +
+       .i_diff_assumed_exchangeable +
+       .i_diff_assumed_exchangeable:.i_provided_support_cwp_dyad_mean +
+       .i_diff_assumed_exchangeable:.i_provided_support_cwp_within_dyad_deviation
+     | coupleID) +
 
-    # Same-day residual covariance
-    us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_exchangeable_data
 )
 ```
+
+For APIM formulas with distinguishable, exchangeable, generalized, and
+mixed-composition dyads, see the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
+undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+For the broader data-preparation workflow, return to the [Getting
+Started
+vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
