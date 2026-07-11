@@ -577,6 +577,55 @@ same model; the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md)
 shows both mixed-composition formulas and practical convergence notes.
 
+### Keeping only selected dyad compositions (filtering)
+
+Sometimes a mixed dataset contains dyad compositions that should not be
+part of a given analysis. Use `include_compositions` to keep only dyads
+whose *observed* composition matches the requested labels. The filtering
+happens before exchangeability constraints and pooling, so
+`set_exchangeable_compositions` and `pool_compositions` arguments can
+only refer to retained types of dyads.
+
+``` r
+
+mixed_cross_data_included <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  include_compositions = c("female-female", "male-male"),
+  seed = 123
+)
+
+print(mixed_cross_data_included, n = 4)
+#> # interdep data
+#> # Rows: 400 | Dyads: 200 | Intensive longitudinal: no
+#> # Structure: group = coupleID, member = personID, role = gender
+#> #
+#> # Dyad compositions:
+#> # female_x_female exchangeable 100 dyads
+#> # male_x_male     exchangeable 100 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_*              composition-role indicator columns
+#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
+#> #                        distinguishable dyads or other exchangeable
+#> #                        compositions
+#> #
+#> # A tibble: 400 × 10
+#>   personID coupleID gender satisfaction .i_composition  .i_composition_role
+#>      <int>    <int> <chr>         <dbl> <fct>           <fct>              
+#> 1      241      121 female         5.32 female_x_female female_x_female    
+#> 2      242      121 female         5.37 female_x_female female_x_female    
+#> 3      243      122 female         5.99 female_x_female female_x_female    
+#> 4      244      122 female         6.93 female_x_female female_x_female    
+#> # ℹ 396 more rows
+#> # ℹ 4 more variables: .i_is_female_x_female <dbl>, .i_is_male_x_male <dbl>,
+#> #   .i_diff_female_x_female <dbl>, .i_diff_male_x_male <dbl>
+```
+
 ### Setting distinguishable dyads to be treated as exchangeable
 
 As mentioned earlier, omitting the `role` argument treated all dyads as
@@ -744,10 +793,6 @@ print(mixed_cross_data_pooled_constrained)
 #> # ℹ 4 more variables: .i_is_female_x_female <dbl>, .i_is_same_sex <dbl>,
 #> #   .i_diff_female_x_female <dbl>, .i_diff_same_sex <dbl>
 ```
-
-If you want to exclude some dyad compositions completely, filter them
-before preparation. A dedicated composition-inclusion argument is
-planned.
 
 For model formulas and interpretation, continue with the [Actor-Partner
 Interdependence Model
