@@ -109,15 +109,15 @@ We validate and prepare the data with the function `prepare_interdep_data()`
 
 This is the minimal call: 
 
-```{r prepare-cross-distinguishable}
-cross_distinguishable_data <- prepare_interdep_data(
+```{r prepare-cross-exchangeable-basic}
+cross_exchangeable_data <- prepare_interdep_data(
   data = example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
   seed = 123
 )
 
-print(cross_distinguishable_data, n = 20)
+print(cross_exchangeable_data, n = 20)
 
 ```
 
@@ -225,10 +225,10 @@ print(head(example_dyadic_ILD, n = 26), n = 26)
 
 For longitudinal data, simply pass the `time` variable as well.
 
-### Distinguishable ILD APIM
+### Exchangeable ILD preparation
 
-```{r prepare-ild-distinguishable}
-ild_distinguishable_data <- prepare_interdep_data(
+```{r prepare-ild-exchangeable-dim}
+ild_exchangeable_data <- prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -236,19 +236,20 @@ ild_distinguishable_data <- prepare_interdep_data(
   predictors = provided_support,
   
   # This time we request DIM-style variables. This only works
-  # for exchangeable dyads, which is why we omitt the `role` variable here. 
+  # for exchangeable dyads, which is why we omit the `role` variable here. 
   model_type = 'dim',
   seed = 123
 )
 
-print(ild_distinguishable_data)
+print(ild_exchangeable_data)
 
 ```
 
-By default, numeric predictors in longitudinal APIM preparation are decomposed
-into within-person and between-person components. This temporal predictor
-decomposition can be controlled via the `temporal_predictor_decomposition`
-argument. Usually for ILD, the `time_2l` option is the correct one. 
+By default, numeric predictors in longitudinal model-ready preparation are
+decomposed into within-person and between-person components. This temporal
+predictor decomposition can be controlled via the
+`temporal_predictor_decomposition` argument. Usually for ILD, the `time_2l`
+option is the correct one. 
 
 ## Data with multiple and mixed-composition dyads
 
@@ -263,8 +264,8 @@ print(example_dyadic_crosssectional_mixed)
 
 Letting the `interdep` package just infer the compositions automatically: 
 
-```{r prepare-mixed-cross-sectional}
-mixed_cross_data <- prepare_interdep_data(
+```{r prepare-mixed-cross-sectional-exchangeable}
+mixed_cross_exchangeable_data <- prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
@@ -301,11 +302,12 @@ mixed_cross_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(mixed_cross_data)
+print(mixed_cross_exchangeable_data)
 ```
 
-This specification avoids loosing the differentiation between the kinds of dyads
-(e.g., male-male vs. female-female vs. male-female, all now treated as exchangeable. 
+This specification keeps the differentiation between the kinds of dyads
+(`male-male`, `female-female`, and `male-female`), while treating the
+`male-female` composition as exchangeable.
 
 
 ### Pooling different dyad-compositions
