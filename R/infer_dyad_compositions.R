@@ -244,6 +244,13 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions, g
     dplyr::pull(.data[[group_name]]) |>
     unique() # probably not needed, as it should be unique already, but leave as safeguard
 
+  if (length(keep_dyads) < 2) {
+    stop(
+      "`include_compositions` must leave at least two complete dyads after filtering.",
+      call. = FALSE
+    )
+  }
+
   # Filter dyad-roles lookup table
   dyad_roles <- dyad_roles |>
     dplyr::filter(.data[[group_name]] %in% keep_dyads)
@@ -251,6 +258,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions, g
   # Also filter actual dataframe so later joins will work properly
   data <- data |>
     dplyr::filter(.data[[group_name]] %in% keep_dyads)
+  attr(data, "interdep")$n_dyads <- length(keep_dyads)
 
   return(list(data = data, dyad_roles = dyad_roles))
 }

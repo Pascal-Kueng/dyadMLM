@@ -368,6 +368,55 @@ test_that("prepare_interdep_data validates include_compositions", {
   )
 })
 
+test_that("prepare_interdep_data filters included compositions before finalizing metadata", {
+  data <- data.frame(
+    dyad_id = rep(1:3, each = 4),
+    person_id = rep(c("A", "B", "A", "B"), times = 3),
+    time = rep(c(1, 1, 2, 2), times = 3),
+    role = c(
+      rep(c("female", "female"), times = 2),
+      rep(c("male", "male"), times = 2),
+      rep(c("female", "male"), times = 2)
+    )
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time,
+    include_compositions = c("female-female", "male-male"),
+    seed = 123
+  )
+
+  expect_equal(unique(result$dyad_id), c(1L, 2L))
+  expect_equal(attr(result, "interdep")$n_dyads, 2L)
+  expect_equal(nrow(result), 8L)
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
+
+  expect_equal(
+    dyad_compositions$composition,
+    c("female_x_female", "male_x_male")
+  )
+  expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      time = time,
+      include_compositions = "female-female"
+    ),
+    "`include_compositions` must leave at least two complete dyads after filtering.",
+    fixed = TRUE
+  )
+})
+
 test_that("prepare_interdep_data rejects reserved interdep columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
