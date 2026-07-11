@@ -386,7 +386,7 @@ This also allows to test various constraints via model comparisons.
 For instance, let's pool `male-male` and `female-female` dyads
 and name them `same-sex` dyads: 
 
-```{r prepare-mixed-cross-sectional}
+```{r prepare-mixed-cross-sectional_pooled}
 mixed_cross_data_pooled <- prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
@@ -406,7 +406,7 @@ you could treat female-male as exchangeable:
 
 
 
-```{r prepare-mixed-cross-sectional}
+```{r prepare-mixed-cross-sectional_pooled_constrained}
 mixed_cross_data_pooled_constrained <- prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
@@ -422,13 +422,4 @@ mixed_cross_data_pooled_constrained <- prepare_interdep_data(
 print(mixed_cross_data_pooled_constrained)
 ```
 
-If you want to exclude some dyad compositions completely, it is currently recommended
-to filter them after creation. Note that the metadata is then not correct anymore.
-
-```{r prepare-mixed-cross-sectional}
-
-data <- mixed_cross_data_pooled_constrained
-
-
-
-```
+If you want to exclude some dyad compositions completely, you may filter them. !TODO feature coming.

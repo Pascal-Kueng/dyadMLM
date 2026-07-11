@@ -107,6 +107,30 @@ model-building features.
 - Auto-detect roles, dyad compositions, and distinguishability where possible
 - Add explicit analysis-composition controls so common mixed dyad-type analyses
   do not require external preprocessing
+  - Add `include_compositions = NULL` as an observed-composition pre-filter
+    before exchangeability overrides and pooling. This should be a narrow
+    dyad-level filter, not a general row filter:
+    - require `role`; without observed roles, there are no observed
+      compositions to include or exclude
+    - accept the same composition reference aliases as the other composition
+      controls, for example `"female_x_female"`, `"female-female"`,
+      `"female female"`, or `"female_female"`
+    - reject `character(0)`, non-character values, unknown references, and
+      filters that leave fewer than two complete dyads
+    - infer canonical raw compositions first, resolve `include_compositions`
+      against those raw observed compositions, then keep all rows for retained
+      dyads and drop all rows for excluded dyads
+    - update `attr(data, "interdep")$n_dyads` and all downstream
+      `dyad_compositions` metadata to describe only the retained dyads
+    - store a compact excluded-composition summary in metadata, such as
+      `excluded_dyad_compositions`, with raw composition labels and dyad counts;
+      optionally show this in `print.interdep_data()` near the existing dropped
+      dyad summaries
+    - after filtering, resolve `set_exchangeable_compositions` and
+      `pool_compositions` only against retained compositions, so excluded
+      compositions cannot be constrained or pooled accidentally
+    - cover cross-sectional and ILD behavior in tests; ILD filtering must retain
+      all observed time rows for included dyads
   - `set_exchangeable_compositions` marks selected observed compositions as
     exchangeable for downstream generated columns
   - `pool_compositions` pools exchangeable analysis compositions under a
@@ -117,10 +141,12 @@ model-building features.
     reference
   - Apply the steps in this order:
     1. infer canonical raw compositions and create aliases
-    2. apply `set_exchangeable_compositions`
-    3. apply `pool_compositions` only to compositions that are exchangeable
-       after step 2
-    4. build `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
+    2. apply `include_compositions`, if supplied, as a whole-dyad raw
+       composition filter
+    3. apply `set_exchangeable_compositions`
+    4. apply `pool_compositions` only to compositions that are exchangeable
+       after step 3
+    5. build `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
        print summaries, and metadata from the final analysis compositions
   - Keep raw observed compositions out of the returned data columns, but
     preserve pooling provenance in `attr(data, "interdep")$dyad_compositions`
@@ -266,6 +292,10 @@ Complete these before calling the feature set CRAN-ready:
     composition, unless `pool_compositions` has explicitly produced that
     analysis composition
 - Analysis-composition controls: done for v0.1
+  - consider adding `include_compositions` before finalizing v0.1; it should be
+    implemented as a raw observed-composition dyad filter before
+    `set_exchangeable_compositions` and `pool_compositions`, with metadata and
+    print visibility for excluded compositions
   - `set_exchangeable_compositions` runs before `pool_compositions`
   - the name `set_exchangeable_compositions` is intentionally specific; avoid
     generic "constraints" wording
