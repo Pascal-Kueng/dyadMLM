@@ -264,8 +264,8 @@ print(example_dyadic_crosssectional_mixed)
 
 Letting the `interdep` package just infer the compositions automatically: 
 
-```{r prepare-mixed-cross-sectional-exchangeable}
-mixed_cross_exchangeable_data <- prepare_interdep_data(
+```{r prepare-mixed-cross-sectional}
+mixed_cross_data <- prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
@@ -292,8 +292,8 @@ Note that whenever you need to refer to a dyad-type, the order of members does n
 like 'male_female', 'male_x_female' or even 'male female'. 
 
 
-```{r prepare-mixed-cross-sectional}
-mixed_cross_data <- prepare_interdep_data(
+```{r prepare-mixed-cross-sectional-exchangeable}
+mixed_cross_exchangeable_data <- prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
