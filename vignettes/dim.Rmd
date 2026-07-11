@@ -60,12 +60,13 @@ print(cross_exchangeable_data, n = 20)
 Passing a `role` is also possible when it leads to exactly one
 exchangeable composition (e.g., only female-female dyads).
 
-In a dataset with mixed dyad types, we have a couple of options, depending on
-our goal.
+Other datasets need a preparation step that produces exactly one exchangeable
+composition before DIM columns can be constructed. In a dataset with mixed dyad
+types, the right preparation depends on the analysis goal.
 
 For instance, we can filter dyads and keep only male-male and female-female
-dyads. Currently, DIM only supports one type of exchangeable dyad,
-so we would pool those like this:
+dyads. Because DIM currently supports a single type of exchangeable dyad, we
+would pool those like this:
 
 ```{r prepare-cross-filter-pool-same-sex}
 cross_same_sex_pooled_data <- prepare_interdep_data(
@@ -75,6 +76,7 @@ cross_same_sex_pooled_data <- prepare_interdep_data(
   role = gender,
   predictors = satisfaction,
   model_type = c("apim", "dim"),
+  # removing "male-female" dyads
   include_compositions = c("male-male", "female-female"),
   pool_compositions = list(
     "same-sex-couples" = c("male-male", "female-female")
@@ -111,9 +113,9 @@ and which are pooled.
 
 The variables that enter the DIM in the fixed effects include:
 
-1. a dyad-mean variable that is grand-mean centered. This describes a couple's
+1. A dyad-mean variable that is grand-mean centered. This describes a couple's
 shared level compared to all other couples.
-2. a within-dyad variable describing each partner's deviation from the couple
+2. A within-dyad variable describing each partner's deviation from the couple
 mean, equivalently half the signed difference between partners.
 
 The random-effects structure is equivalent to an APIM for exchangeable dyads,
@@ -182,20 +184,22 @@ data.frame(
 )
 ```
 
-This shows that the same statistical model is being estimated with different
+This demonstrates that the same statistical model is being estimated with different
 parameterizations and coefficient interpretations.
 
 The coefficients relate as follows:
 
-$$
-b_{dyad\ mean} = b_{actor} + b_{partner}
-$$
+\[
+\beta_{\text{dyad mean}} =
+\beta_{\text{actor}} + \beta_{\text{partner}}
+\]
 
 and
 
-$$
-b_{within\ dyad\ deviation} = b_{actor} - b_{partner}
-$$
+\[
+\beta_{\text{within-dyad deviation}} =
+\beta_{\text{actor}} - \beta_{\text{partner}}
+\]
 
 In this example:
 
@@ -321,14 +325,30 @@ data.frame(
 )
 ```
 
-The equivalence holds separately for the within-person and between-person
-predictor components. For example:
+The equivalence holds separately for the within-person (`cwp`) and
+between-person (`cbp`) predictor components. For the within-person component:
 
-`b_.i_provided_support_cwp_actor + b_.i_provided_support_cwp_partner`
-corresponds to `b_.i_provided_support_cwp_dyad_mean`.
+\[
+\beta_{\text{cwp dyad mean}} =
+\beta_{\text{cwp actor}} + \beta_{\text{cwp partner}}
+\]
 
-Analogous sum and difference transformations apply to the other within-person
-and between-person components.
+\[
+\beta_{\text{cwp within-dyad deviation}} =
+\beta_{\text{cwp actor}} - \beta_{\text{cwp partner}}
+\]
+
+For the between-person component:
+
+\[
+\beta_{\text{cbp dyad mean}} =
+\beta_{\text{cbp actor}} + \beta_{\text{cbp partner}}
+\]
+
+\[
+\beta_{\text{cbp within-dyad deviation}} =
+\beta_{\text{cbp actor}} - \beta_{\text{cbp partner}}
+\]
 
 This also means that an APIM parameterization can be used on one level and a
 DIM parameterization on the other. For example:
@@ -467,3 +487,11 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 )
 
 ```
+
+For APIM formulas with distinguishable, exchangeable, generalized, and
+mixed-composition dyads, see the
+[Actor-Partner Interdependence Model vignette](apim.html). For undirected dyadic
+score outcomes, see the
+[Undirected Dyadic Score Model vignette](undirected-dsm.html). For the broader
+data-preparation workflow, return to the
+[Getting Started vignette](getting-started.html).
