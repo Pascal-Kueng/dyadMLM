@@ -230,20 +230,29 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions, g
     )
   }
 
-  resolve_composition_references(
+  # get cannonical composition-labels
+  include_compositions_resolved <- resolve_composition_references(
     references = include_compositions,
     observed_compositions = dyad_roles[[interdep_composition_col]],
     arg_name = "include_compositions"
   )
 
-  # TODO: filter whole dyads by raw observed composition here, before
-  # `set_exchangeable_compositions` and `pool_compositions`.
-  stop(
-    "`include_compositions` validation is in place, but composition filtering is not implemented yet.",
-    call. = FALSE
-  )
+  # Get dyad-ids that we keep
+  keep_dyads <- dyad_roles |>
+    dplyr::filter(.data[[interdep_composition_col]] %in% include_compositions_resolved) |>
+    # extract ids with pull (vector)
+    dplyr::pull(.data[[group_name]]) |>
+    unique() # probably not needed, as it should be unique already, but leave as safeguard
 
-  list(data = data, dyad_roles = dyad_roles)
+  # Filter dyad-roles lookup table
+  dyad_roles <- dyad_roles |>
+    dplyr::filter(.data[[group_name]] %in% keep_dyads)
+
+  # Also filter actual dataframe so later joins will work properly
+  data <- data |>
+    dplyr::filter(.data[[group_name]] %in% keep_dyads)
+
+  return(list(data = data, dyad_roles = dyad_roles))
 }
 
 
