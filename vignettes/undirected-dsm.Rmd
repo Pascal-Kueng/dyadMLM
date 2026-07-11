@@ -17,3 +17,15 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(interdep)
 ```
+
+This vignette focuses on undirected Dyadic Score Model (DSM) preparation. For
+the main data requirements and validation workflow, start with the
+[Getting Started vignette](getting-started.html). For actor-partner
+predictor preparation, see the
+[Actor-Partner Interdependence Model vignette](apim.html). For dyad-mean and
+within-dyad-deviation predictors, see the
+[Dyad-Individual Model vignette](dim.html).
+
+This vignette is under construction. It is included now so the documentation
+site already reflects the intended structure; fuller DSM preparation examples
+will be added before the alpha feedback round.

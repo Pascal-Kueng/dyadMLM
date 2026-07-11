@@ -26,15 +26,14 @@ vignette for the main data-preparation workflow. The [documentation
 site](https://pascal-kueng.github.io/interdep/) also includes the
 [function
 reference](https://pascal-kueng.github.io/interdep/reference/index.html).
-The documentation is being split around the main modeling tasks:
+The current vignette structure is:
 
-| Vignette | Status | Focus |
-|----|----|----|
-| [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | available | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| APIM | planned | Cross-sectional APIM preparation for distinguishable, exchangeable, and mixed dyad types |
-| Intensive Longitudinal APIM | planned | Temporal predictor decomposition and intensive longitudinal APIM preparation |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | available | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
-| Undirected Dyadic Score Model | planned | Undirected DSM outcome and predictor construction |
+| Vignette | Focus |
+|----|----|
+| [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
+| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable, exchangeable, generalized, intensive longitudinal, and mixed-composition dyads |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
+| [Undirected Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html) | Undirected DSM outcome and predictor construction |
 
 ## Installation
 
