@@ -195,8 +195,7 @@ reference</a>.</p>
 </table>
 <p>Measured variables may contain missing values. The structural
 <code>group</code>, <code>member</code>, and optional <code>time</code>
-variables must be complete when observed (no missing values are
-allowed).</p>
+variables must not contain missing values.</p>
 <p>In intensive longitudinal data, missing measurement occasions can be
 represented by absent rows, as long as the time variable preserves the
 observed measurement occasions. For example:</p>
@@ -246,10 +245,11 @@ observed measurement occasions. For example:</p>
 </tr>
 </tbody>
 </table>
-<p>In this example, note that the row for person 1 at time 2 is absent.
-The time variable still uses the observed measurement occasions and
-skips from time 1 to time 3 for that person, which is fine and gives the
-models all the information they need.</p>
+<p>In this example, the row for person 1 at time 2 is absent. The time
+variable preserves the observed measurement occasions and skips from
+time 1 to time 3 for that person. <code>interdep</code> accepts this
+structure without requiring a placeholder row for the missing
+occasion.</p>
 </div>
 <div class="section level2">
 <h2 id="data-preparation-for-distinguishable-dyads">Data preparation for distinguishable dyads<a class="anchor" aria-label="anchor" href="#data-preparation-for-distinguishable-dyads"></a>
@@ -274,8 +274,8 @@ rows: one for each member.</p>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  </span>
-<span>  <span class="co"># In this example, we optionally specify a predictor variable </span></span>
+<span></span>
+<span>  <span class="co"># In this example, we optionally specify a predictor variable</span></span>
 <span>  <span class="co"># and a model type to generate the columns needed for that model type.</span></span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span></span>
@@ -318,44 +318,43 @@ formulas.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/glmmTMB/glmmTMB" class="external-link">glmmTMB</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cross_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
-<span>  <span class="va">satisfaction</span> <span class="op">~</span> </span>
+<span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific intercepts</span></span>
-<span>    <span class="fl">0</span> <span class="op">+</span> </span>
-<span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> </span>
-<span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span> </span>
-<span>    </span>
+<span>    <span class="fl">0</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
+<span></span>
 <span>    <span class="co"># Gender-specific actor effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_raw_actor</span> <span class="op">+</span> </span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_raw_actor</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_raw_actor</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="co"># Gender-specific partner effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_raw_partner</span> <span class="op">+</span> </span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_raw_partner</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_raw_partner</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="co"># Dyad-level unstructured random effects represent the two partner</span></span>
 <span>    <span class="co"># residual variances and their covariance when dispformula = ~ 0.</span></span>
 <span>    <span class="co"># This is glmmTMB-specific syntax! lme4 and brms use different syntax.</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> </span>
-<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> </span>
-<span>         <span class="va">.i_is_female_x_male_male</span> </span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_is_female_x_male_male</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span></span>
-<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> </span>
+<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">cross_distinguishable_data</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cross_distinguishable_model</span><span class="op">)</span></span></code></pre></div>
-<p>Models are not run and summarized in this vignette. For fitted APIM
-examples, see the <a href="apim.html">Actor-Partner Interdependence
+<span><span class="op">)</span></span></code></pre></div>
+<p>The model is fitted when <code>glmmTMB</code> is installed, but its
+output is omitted here to keep the focus on data preparation. For fitted
+APIM examples, see the <a href="apim.html">Actor-Partner Interdependence
 Model vignette</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="data-preparation-for-exchangeable-dyads">Data preparation for exchangeable dyads<a class="anchor" aria-label="anchor" href="#data-preparation-for-exchangeable-dyads"></a>
 </h2>
 <p>For a dataset with only one type of dyad that should be treated as
-exchangeable, we can simply omit the <code>role</code> argument:</p>
+exchangeable, omit the <code>role</code> argument:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -390,6 +389,9 @@ exchangeable, we can simply omit the <code>role</code> argument:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_assumed_exchangeable &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The <code>seed</code> makes the random <code>.i_diff_*</code> sign
+assignment reproducible. We use a fixed seed in all exchangeable-dyad
+examples below for consistent results.</p>
 <p>Alternatively, for more control, we can explicitly set dyad types to
 exchangeable:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -429,9 +431,10 @@ exchangeable:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: .i_composition_role &lt;fct&gt;, .i_is_female_x_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
 <p><em>Note</em> that whenever you need to refer to a dyad type, the
-order of members does not matter (e.g., ‘male-female’ and ‘female-male’
-will both work), and you can use different separators like
-‘male_female’, ‘male_x_female’ or even ‘male female’.</p>
+order of members does not matter (e.g., <code>male-female</code> and
+<code>female-male</code> will both work), and you can use different
+separators like <code>male_female</code>, <code>male_x_female</code>, or
+<code>male female</code>.</p>
 <p>For exchangeable dyads, we can also request DIM and undirected DSM
 columns. This works here because omitting <code>role</code> treats all
 dyads as a single type of exchangeable dyads, and DIM and undirected DSM
@@ -587,8 +590,8 @@ dyadic dataset. Each dyad has repeated observations over
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">25</span>        2        1       10 male        2.92             5.33</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">26</span>        2        1       11 male        3.18             4.30</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,094 more rows</span></span></span></code></pre></div>
-<p>To prepare intensive longitudinal data, simply pass the
-<code>time</code> variable to <code>prepare_interdep_data</code>.</p>
+<p>To prepare intensive longitudinal data, pass the <code>time</code>
+variable to <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>.</p>
 <div class="section level3">
 <h3 id="ild-apim-preparation">ILD APIM preparation<a class="anchor" aria-label="anchor" href="#ild-apim-preparation"></a>
 </h3>
@@ -653,8 +656,9 @@ dyadic dataset. Each dyad has repeated observations over
 <p>By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This
 temporal predictor decomposition can be controlled via the
-<code>temporal_predictor_decomposition</code> argument. Usually for ILD,
-the <code>time_2l</code> option is the correct one.</p>
+<code>temporal_predictor_decomposition</code> argument. Use
+<code>time_2l</code> when within-person and between-person associations
+should be estimated separately.</p>
 </div>
 </div>
 <div class="section level2">
@@ -663,8 +667,7 @@ the <code>time_2l</code> option is the correct one.</p>
 <p><code>example_dyadic_crosssectional_mixed</code> contains three dyad
 compositions in the same data object: distinguishable female-male dyads
 and exchangeable female-female and male-male dyads.</p>
-<p>Letting the <code>interdep</code> package just infer the compositions
-automatically:</p>
+<p>Let <code>interdep</code> infer the compositions automatically:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
@@ -761,11 +764,11 @@ types of dyads.</p>
 </h3>
 <p>As mentioned earlier, omitting the <code>role</code> argument treated
 all dyads as one exchangeable composition, effectively pooling them.</p>
-<p>For more control, it is possible to separately set each
-distinguishable dyad composition in a mixed dataset to be treated as
-exchangeable. This specification keeps the differentiation between the
-kinds of dyads (e.g., <code>male-male</code>,
-<code>female-female</code>, and <code>male-female</code>).</p>
+<p>For more control, a distinguishable dyad composition in a mixed
+dataset can be treated as exchangeable. This specification keeps the
+differentiation between the kinds of dyads (e.g.,
+<code>male-male</code>, <code>female-female</code>, and
+<code>male-female</code>).</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
@@ -864,9 +867,9 @@ dyads:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_same_sex &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Note that you cannot pool distinguishable dyads. If we want to pool
-<code>female-male</code> with <code>male-male</code> for some reason, we
-first have to treat <code>female-male</code> as exchangeable:</p>
+<p>Note that you cannot pool distinguishable dyads. To pool
+<code>female-male</code> with <code>male-male</code>, we first have to
+treat <code>female-male</code> as exchangeable:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
@@ -875,7 +878,7 @@ first have to treat <code>female-male</code> as exchangeable:</p>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"male_x_female"</span>,</span>
 <span>  pool_compositions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    <span class="st">"same-sex"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male-male"</span>, <span class="st">"male_female"</span><span class="op">)</span></span>
+<span>    <span class="st">"pooled_exchangeable"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male-male"</span>, <span class="st">"male_female"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
@@ -886,8 +889,8 @@ first have to treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female          exchangeable 100 dyads</span></span>
-<span><span class="co">#&gt; # same-sex (pooled)        exchangeable 220 dyads</span></span>
+<span><span class="co">#&gt; # female_x_female              exchangeable 100 dyads</span></span>
+<span><span class="co">#&gt; # pooled_exchangeable (pooled) exchangeable 220 dyads</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   female_x_male</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #   male_x_male</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span>#</span></span>
@@ -900,23 +903,31 @@ first have to treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co">#&gt; #                        compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 640 × 10</span></span></span>
-<span><span class="co">#&gt;    personID coupleID gender satisfaction .i_composition .i_composition_role</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female         4.95 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male           5.26 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female         5.14 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male           3.11 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female         6.40 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male           3.45 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female         4.16 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male           6.47 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female         5.97 same-sex       same-sex           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male           5.44 same-sex       same-sex           </span></span>
+<span><span class="co">#&gt;    personID coupleID gender satisfaction .i_composition      .i_composition_role</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female         4.95 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male           5.26 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female         5.14 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male           3.11 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female         6.40 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male           3.45 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female         4.16 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male           6.47 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female         5.97 pooled_exchangeable pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male           5.44 pooled_exchangeable pooled_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 630 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;, .i_is_same_sex &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;, .i_diff_same_sex &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_pooled_exchangeable &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_pooled_exchangeable &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For model formulas and interpretation, continue with the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>, <a href="dim.html">Dyad-Individual Model vignette</a>, or <a href="undirected-dsm.html">Undirected Dyadic Score Model
 vignette</a>.</p>
+<p>For an in-depth tutorial covering data preparation, model fitting,
+diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
+and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses
+<code>interdep</code> for cross-sectional and intensive longitudinal
+APIM and DIM workflows, with models fitted primarily using
+<code>brms</code> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>,
+<a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

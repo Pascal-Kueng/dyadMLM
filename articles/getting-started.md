@@ -72,8 +72,7 @@ reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
 |    1 |    2 |      2 | 5.3 | 6.6 |
 
 Measured variables may contain missing values. The structural `group`,
-`member`, and optional `time` variables must be complete when observed
-(no missing values are allowed).
+`member`, and optional `time` variables must not contain missing values.
 
 In intensive longitudinal data, missing measurement occasions can be
 represented by absent rows, as long as the time variable preserves the
@@ -87,10 +86,10 @@ observed measurement occasions. For example:
 |    1 |        2 |    2 | 4.7 | 6.1 |
 |    1 |        2 |    3 | 5.1 | 6.4 |
 
-In this example, note that the row for person 1 at time 2 is absent. The
-time variable still uses the observed measurement occasions and skips
-from time 1 to time 3 for that person, which is fine and gives the
-models all the information they need.
+In this example, the row for person 1 at time 2 is absent. The time
+variable preserves the observed measurement occasions and skips from
+time 1 to time 3 for that person. `interdep` accepts this structure
+without requiring a placeholder row for the missing occasion.
 
 ## Data preparation for distinguishable dyads
 
@@ -119,8 +118,8 @@ cross_distinguishable_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
-  
-  # In this example, we optionally specify a predictor variable 
+
+  # In this example, we optionally specify a predictor variable
   # and a model type to generate the columns needed for that model type.
   predictors = communication,
   model_type = "apim"
@@ -167,45 +166,44 @@ Here is a simple example:
 library(glmmTMB)
 
 cross_distinguishable_model <- glmmTMB(
-  satisfaction ~ 
+  satisfaction ~
 
     # Gender-specific intercepts
-    0 + 
-    .i_is_female_x_male_female + 
-    .i_is_female_x_male_male + 
-    
+    0 +
+    .i_is_female_x_male_female +
+    .i_is_female_x_male_male +
+
     # Gender-specific actor effects
-    .i_is_female_x_male_female:.i_communication_raw_actor + 
+    .i_is_female_x_male_female:.i_communication_raw_actor +
     .i_is_female_x_male_male:.i_communication_raw_actor +
-    
+
     # Gender-specific partner effects
-    .i_is_female_x_male_female:.i_communication_raw_partner + 
+    .i_is_female_x_male_female:.i_communication_raw_partner +
     .i_is_female_x_male_male:.i_communication_raw_partner +
-    
+
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
     # This is glmmTMB-specific syntax! lme4 and brms use different syntax.
-    us(0 + 
-         .i_is_female_x_male_female + 
-         .i_is_female_x_male_male 
+    us(0 +
+         .i_is_female_x_male_female +
+         .i_is_female_x_male_male
        | coupleID)
 
-  , dispformula = ~ 0 
+  , dispformula = ~ 0
   , family = gaussian()
   , data = cross_distinguishable_data
 )
-
-summary(cross_distinguishable_model)
 ```
 
-Models are not run and summarized in this vignette. For fitted APIM
+The model is fitted when `glmmTMB` is installed, but its output is
+omitted here to keep the focus on data preparation. For fitted APIM
 examples, see the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
 
 ## Data preparation for exchangeable dyads
 
 For a dataset with only one type of dyad that should be treated as
-exchangeable, we can simply omit the `role` argument:
+exchangeable, omit the `role` argument:
 
 ``` r
 
@@ -243,6 +241,10 @@ print(cross_exchangeable_data, n = 4)
 #> # ℹ 3 more variables: .i_composition_role <fct>,
 #> #   .i_is_assumed_exchangeable <dbl>, .i_diff_assumed_exchangeable <dbl>
 ```
+
+The `seed` makes the random `.i_diff_*` sign assignment reproducible. We
+use a fixed seed in all exchangeable-dyad examples below for consistent
+results.
 
 Alternatively, for more control, we can explicitly set dyad types to
 exchangeable:
@@ -287,9 +289,9 @@ print(cross_exchangeable_data, n = 4)
 ```
 
 *Note* that whenever you need to refer to a dyad type, the order of
-members does not matter (e.g., ‘male-female’ and ‘female-male’ will both
-work), and you can use different separators like ‘male_female’,
-‘male_x_female’ or even ‘male female’.
+members does not matter (e.g., `male-female` and `female-male` will both
+work), and you can use different separators like `male_female`,
+`male_x_female`, or `male female`.
 
 For exchangeable dyads, we can also request DIM and undirected DSM
 columns. This works here because omitting `role` treats all dyads as a
@@ -455,8 +457,8 @@ print(example_dyadic_ILD, n = 26)
 #> # ℹ 1,094 more rows
 ```
 
-To prepare intensive longitudinal data, simply pass the `time` variable
-to `prepare_interdep_data`.
+To prepare intensive longitudinal data, pass the `time` variable to
+[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
 
 ### ILD APIM preparation
 
@@ -524,8 +526,9 @@ print(ild_apim_data)
 By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This
 temporal predictor decomposition can be controlled via the
-`temporal_predictor_decomposition` argument. Usually for ILD, the
-`time_2l` option is the correct one.
+`temporal_predictor_decomposition` argument. Use `time_2l` when
+within-person and between-person associations should be estimated
+separately.
 
 ## Data with multiple and mixed-composition dyads
 
@@ -533,8 +536,7 @@ temporal predictor decomposition can be controlled via the
 in the same data object: distinguishable female-male dyads and
 exchangeable female-female and male-male dyads.
 
-Letting the `interdep` package just infer the compositions
-automatically:
+Let `interdep` infer the compositions automatically:
 
 ``` r
 
@@ -637,10 +639,10 @@ print(mixed_cross_data_included, n = 4)
 As mentioned earlier, omitting the `role` argument treated all dyads as
 one exchangeable composition, effectively pooling them.
 
-For more control, it is possible to separately set each distinguishable
-dyad composition in a mixed dataset to be treated as exchangeable. This
-specification keeps the differentiation between the kinds of dyads
-(e.g., `male-male`, `female-female`, and `male-female`).
+For more control, a distinguishable dyad composition in a mixed dataset
+can be treated as exchangeable. This specification keeps the
+differentiation between the kinds of dyads (e.g., `male-male`,
+`female-female`, and `male-female`).
 
 ``` r
 
@@ -745,9 +747,8 @@ print(mixed_cross_data_pooled)
 #> #   .i_diff_same_sex <dbl>
 ```
 
-Note that you cannot pool distinguishable dyads. If we want to pool
-`female-male` with `male-male` for some reason, we first have to treat
-`female-male` as exchangeable:
+Note that you cannot pool distinguishable dyads. To pool `female-male`
+with `male-male`, we first have to treat `female-male` as exchangeable:
 
 ``` r
 
@@ -758,7 +759,7 @@ mixed_cross_data_pooled_constrained <- prepare_interdep_data(
   role = gender,
   set_exchangeable_compositions = "male_x_female",
   pool_compositions = list(
-    "same-sex" = c("male-male", "male_female")
+    "pooled_exchangeable" = c("male-male", "male_female")
   ),
   seed = 123
 )
@@ -769,8 +770,8 @@ print(mixed_cross_data_pooled_constrained)
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_female          exchangeable 100 dyads
-#> # same-sex (pooled)        exchangeable 220 dyads
+#> # female_x_female              exchangeable 100 dyads
+#> # pooled_exchangeable (pooled) exchangeable 220 dyads
 #> #   female_x_male
 #> #   male_x_male
 #> #
@@ -783,21 +784,22 @@ print(mixed_cross_data_pooled_constrained)
 #> #                        compositions
 #> #
 #> # A tibble: 640 × 10
-#>    personID coupleID gender satisfaction .i_composition .i_composition_role
-#>       <int>    <int> <fct>         <dbl> <fct>          <fct>              
-#>  1        1        1 female         4.95 same-sex       same-sex           
-#>  2        2        1 male           5.26 same-sex       same-sex           
-#>  3        3        2 female         5.14 same-sex       same-sex           
-#>  4        4        2 male           3.11 same-sex       same-sex           
-#>  5        5        3 female         6.40 same-sex       same-sex           
-#>  6        6        3 male           3.45 same-sex       same-sex           
-#>  7        7        4 female         4.16 same-sex       same-sex           
-#>  8        8        4 male           6.47 same-sex       same-sex           
-#>  9        9        5 female         5.97 same-sex       same-sex           
-#> 10       10        5 male           5.44 same-sex       same-sex           
+#>    personID coupleID gender satisfaction .i_composition      .i_composition_role
+#>       <int>    <int> <fct>         <dbl> <fct>               <fct>              
+#>  1        1        1 female         4.95 pooled_exchangeable pooled_exchangeable
+#>  2        2        1 male           5.26 pooled_exchangeable pooled_exchangeable
+#>  3        3        2 female         5.14 pooled_exchangeable pooled_exchangeable
+#>  4        4        2 male           3.11 pooled_exchangeable pooled_exchangeable
+#>  5        5        3 female         6.40 pooled_exchangeable pooled_exchangeable
+#>  6        6        3 male           3.45 pooled_exchangeable pooled_exchangeable
+#>  7        7        4 female         4.16 pooled_exchangeable pooled_exchangeable
+#>  8        8        4 male           6.47 pooled_exchangeable pooled_exchangeable
+#>  9        9        5 female         5.97 pooled_exchangeable pooled_exchangeable
+#> 10       10        5 male           5.44 pooled_exchangeable pooled_exchangeable
 #> # ℹ 630 more rows
-#> # ℹ 4 more variables: .i_is_female_x_female <dbl>, .i_is_same_sex <dbl>,
-#> #   .i_diff_female_x_female <dbl>, .i_diff_same_sex <dbl>
+#> # ℹ 4 more variables: .i_is_female_x_female <dbl>,
+#> #   .i_is_pooled_exchangeable <dbl>, .i_diff_female_x_female <dbl>,
+#> #   .i_diff_pooled_exchangeable <dbl>
 ```
 
 For model formulas and interpretation, continue with the [Actor-Partner
@@ -807,3 +809,12 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
 [Undirected Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+
+For an in-depth tutorial covering data preparation, model fitting,
+diagnostics, and assumption checks, see [Distinguishable and
+Exchangeable Dyads: Bayesian Multilevel
+Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
+uses `interdep` for cross-sectional and intensive longitudinal APIM and
+DIM workflows, with models fitted primarily using `brms`
+([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
+[DOI](https://doi.org/10.5281/zenodo.17400655)).

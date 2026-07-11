@@ -27,6 +27,15 @@ The current vignette structure is:
 | [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
 | [Undirected Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html) | Undirected DSM outcome and predictor construction |
 
+For an in-depth tutorial covering data preparation, model fitting,
+diagnostics, and assumption checks, see [Distinguishable and
+Exchangeable Dyads: Bayesian Multilevel
+Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
+uses `interdep` for cross-sectional and intensive longitudinal APIM and
+DIM workflows, with models fitted primarily using `brms`
+([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
+[DOI](https://doi.org/10.5281/zenodo.17400655)).
+
 ## Installation
 
 You can install the development version of `interdep` from GitHub with:
@@ -73,7 +82,7 @@ print(prepared_data)
 #> #
 #> # A tibble: 190 × 11
 #>    personID coupleID gender communication satisfaction .i_composition
-#>       <int>    <int> <chr>          <dbl>        <dbl> <fct>         
+#>       <int>    <int> <fct>          <dbl>        <dbl> <fct>
 #>  1        1        1 female          4.79         4.37 female_x_male 
 #>  2        2        1 male            3.80         2.34 female_x_male 
 #>  3        3        2 female          2.91         2.44 female_x_male 

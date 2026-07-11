@@ -76,7 +76,8 @@
 <span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>This vignette focuses on the Dyad-Individual Model (DIM) for dyadic
 multilevel models and its relationship to the Actor-Partner
-Interdependence Model (APIM) parameterizations.</p>
+Interdependence Model (APIM). The DIM separates a predictor into the
+dyad’s shared level and each member’s deviation from that level.</p>
 <p>For broader guidance on using this package for data preparation for
 various dyadic model types, especially APIMs with multiple dyad types,
 generalized outcomes, intensive longitudinal models, and optimizer
@@ -87,11 +88,12 @@ vignette</a>.</p>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dim">Cross-Sectional Gaussian DIM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dim"></a>
 </h2>
-<p>The current DIM implementation prepares undirected DIM predictors.
-This means that the dyad members are treated as exchangeable. One way to
-achieve this is to omit <code>role</code> from
-<code>prepare_interdep_data</code>, which then assumes all dyads are the
-same type of exchangeable dyads.</p>
+<p>The current DIM implementation prepares predictors for one
+exchangeable dyad composition. Exchangeability means that swapping the
+two member labels does not change the model. One way to make this
+assumption is to omit <code>role</code> from
+<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>, which treats all dyads as the same
+exchangeable composition.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -103,8 +105,8 @@ same type of exchangeable dyads.</p>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># printing the first couple</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="co"># Print the first two dyads.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 190 | Dyads: 95 | Intensive longitudinal: no</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID</span></span></span>
@@ -129,43 +131,28 @@ same type of exchangeable dyads.</p>
 <span><span class="co">#&gt; #                                   person's difference from the dyad average</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 13</span></span></span>
-<span><span class="co">#&gt;    personID coupleID gender communication satisfaction .i_composition      </span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female          4.79        4.37  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male            3.80        2.34  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female          2.91        2.44  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male            6.51        6.08  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female          5.70        5.87  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male            8.22        9.66  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female          5.28        6.50  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male            4.89        3.08  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female          6.01        7.41  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male            4.32        1.47  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>       11        6 female          7.74        7.85  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>       12        6 male            6.57        9.84  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>       13        7 female          5.37        4.82  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>       14        7 male            5.79        6.15  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>       15        8 female          3.62        2.33  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>       16        8 male            3.21       -<span style="color: #BB0000;">1.35</span>  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>       17        9 female          4.42        4.96  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span>       18        9 male            3.85        1.56  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">19</span>       19       10 female          5.22        4.23  assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">20</span>       20       10 male            3.66       -<span style="color: #BB0000;">0.496</span> assumed_exchangeable</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 170 more rows</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition      </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_actor &lt;dbl&gt;, .i_communication_raw_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The fixed <code>seed</code> makes the arbitrary member labels used to
+construct the exchangeable-dyad difference contrast
+<code>.i_diff_*</code> reproducible.</p>
 <p>Passing a <code>role</code> is also possible when it leads to exactly
 one exchangeable composition (e.g., only female-female dyads).</p>
-<p>Other datasets need a preparation step that produces exactly one
-exchangeable composition before DIM columns can be constructed. In a
-dataset with mixed dyad types, the right preparation depends on the
-analysis goal.</p>
+<p>In a dataset with mixed dyad types, the right preparation depends on
+the analysis goal.</p>
 <p>For instance, we can filter dyads and keep only male-male and
 female-female dyads. Because DIM currently supports a single type of
-exchangeable dyad, we would pool those like this:</p>
+exchangeable dyad, we might pool those like this:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_same_sex_pooled_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
@@ -174,7 +161,7 @@ exchangeable dyad, we would pool those like this:</p>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">satisfaction</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"apim"</span>, <span class="st">"dim"</span><span class="op">)</span>,</span>
-<span>  <span class="co"># removing "male-female" dyads</span></span>
+<span>  <span class="co"># Remove male-female dyads.</span></span>
 <span>  include_compositions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male-male"</span>, <span class="st">"female-female"</span><span class="op">)</span>,</span>
 <span>  pool_compositions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    <span class="st">"same-sex-couples"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male-male"</span>, <span class="st">"female-female"</span><span class="op">)</span></span>
@@ -220,8 +207,8 @@ exchangeable dyad, we would pool those like this:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex_couples &lt;dbl&gt;, .i_satisfaction_raw_actor &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_partner &lt;dbl&gt;, .i_satisfaction_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>If we want to include, for instance, only male-female couples and
-treat those as exchangeable, we can do:</p>
+<p>If we want to include only male-female couples and treat those as
+exchangeable, we can do:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_male_female_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
@@ -271,12 +258,24 @@ treat those as exchangeable, we can do:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_actor &lt;dbl&gt;, .i_satisfaction_raw_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>This allows full control over which dyads are included, how they are
-treated, and which are pooled.</p>
+<p>Pooling compositions constrains them to share DIM effects. These are
+substantive modeling decisions, not only data-processing choices, and
+should follow the research question.</p>
 <div class="section level3">
 <h3 id="example-dim-model">Example DIM Model<a class="anchor" aria-label="anchor" href="#example-dim-model"></a>
 </h3>
-<p>The variables that enter the DIM in the fixed effects include:</p>
+<p>For members
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">j \in \{1, 2\}</annotation></semantics></math>
+of dyad
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+the DIM decomposition is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>x</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>x</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\bar{x}_i = \frac{x_{i1} + x_{i2}}{2}, \qquad
+d_{ij} = x_{ij} - \bar{x}_i.
+</annotation></semantics></math></p>
+<p>The two deviations have equal magnitude and opposite signs:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>=</mo><mi>−</mi><msub><mi>d</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub></mrow><annotation encoding="application/x-tex">d_{i1} = -d_{i2}</annotation></semantics></math>.
+The variables that enter the DIM fixed effects are:</p>
 <ol style="list-style-type: decimal">
 <li>A dyad-mean variable that is grand-mean centered. This describes a
 couple’s shared level compared to all other couples.</li>
@@ -284,13 +283,19 @@ couple’s shared level compared to all other couples.</li>
 couple mean, equivalently half the signed difference between
 partners.</li>
 </ol>
-<p>The random-effects structure is equivalent to an APIM for
-exchangeable dyads, because the APIM and the DIM are just
-reparametrizations of the same model. The random effects thus contain a
-dyad-level intercept and a within-dyad deviation indexed by
-<code>.i_diff_assumed_exchangeable</code>. In glmmTMB, with
-<code>dispformula = ~ 0</code>, these dyad-level random effects model
-the Gaussian residual covariance.</p>
+<p>The fixed effects are a reparameterization of the APIM actor and
+partner effects. The same random-effects structure can therefore be used
+for both fixed-effect parameterizations: a dyad-level intercept and a
+dyad-level difference contrast indexed by
+<code>.i_diff_assumed_exchangeable</code>. In <code>glmmTMB</code>, with
+<code>dispformula = ~ 0</code>, these random effects represent the two
+members’ Gaussian residual variance and covariance.</p>
+<p>The intercept and difference contrast are specified as separate
+random-effects terms, which constrains their correlation to zero. This
+preserves exchangeability: swapping the arbitrary member labels leaves
+the intercept term unchanged but reverses the difference contrast. A
+nonzero correlation between them would therefore make the random-effects
+distribution depend on the arbitrary labeling.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_1</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -343,14 +348,29 @@ the Gaussian residual covariance.</p>
 <span><span class="co">#&gt; .i_communication_raw_within_dyad_deviation ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Install glmmTMB to run the fitted-model examples in this vignette."</span><span class="op">)</span></span></code></pre></div>
+<p>Because this Gaussian model uses an identity link, fixed coefficients
+are interpreted in satisfaction units:</p>
+<ul>
+<li><p>The intercept (about 5.04) is the expected satisfaction for a
+member whose communication equals the mean of a dyad with average
+communication.</p></li>
+<li><p>The dyad-mean estimate (about 2.00) means that a shared one-point
+difference in both members’ communication is associated with a two-point
+difference in expected satisfaction, holding their difference
+constant.</p></li>
+<li><p>The within-dyad-deviation estimate (about 1.52) means that the
+member whose communication is one point higher than their partner’s is
+expected to report satisfaction 1.52 points higher, holding the other
+model terms constant. This is a within-dyad association, not the
+expected change from increasing only one member’s communication, which
+would also change the dyad mean.</p></li>
+</ul>
 <p>The same model can be written in APIM form. Since we have requested
 both sets of variables from <code>prepare_interdep_data</code>, we can
 fit one directly. For more guidance on APIM specifications and different
 models, see the <a href="apim.html">Actor-Partner Interdependence Model
 vignette</a>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">apim_1</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
@@ -360,36 +380,9 @@ vignette</a>.</p>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">cross_exchangeable_data</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_raw_actor + .i_communication_raw_partner +  </span></span>
-<span><span class="co">#&gt;     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID)</span></span>
-<span><span class="co">#&gt; Dispersion:                    ~0</span></span>
-<span><span class="co">#&gt; Data: cross_exchangeable_data</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;     604.0     619.8    -297.0     594.0       171 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Random effects:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups     Name                         Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID   (Intercept)                  0.6346   0.7966  </span></span>
-<span><span class="co">#&gt;  coupleID.1 .i_diff_assumed_exchangeable 1.1532   1.0739  </span></span>
-<span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                              Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                   -5.2330     0.4103 -12.754  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_raw_actor     1.7578     0.0819  21.461  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_raw_partner   0.2379     0.0819   2.904  0.00368 ** </span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The two models have identical fit statistics:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM"</span>, <span class="st">"APIM"</span><span class="op">)</span>,</span>
 <span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -401,7 +394,7 @@ vignette</a>.</p>
 <span><span class="co">#&gt; 2  APIM 603.9834 619.8358 -296.9917</span></span></code></pre></div>
 <p>This demonstrates that the same statistical model is being estimated
 with different parameterizations and coefficient interpretations.</p>
-<p>The coefficients relate as follows:</p>
+<p>The slope coefficients relate as follows:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">dyad mean</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">actor</mtext></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">partner</mtext></msub></mrow><annotation encoding="application/x-tex">
 \beta_{\text{dyad mean}} =
 \beta_{\text{actor}} + \beta_{\text{partner}}
@@ -411,48 +404,75 @@ with different parameterizations and coefficient interpretations.</p>
 \beta_{\text{within-dyad deviation}} =
 \beta_{\text{actor}} - \beta_{\text{partner}}
 </annotation></semantics></math></p>
+<p>Conversely:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">actor</mtext></msub><mo>=</mo><mfrac><mrow><msub><mi>β</mi><mtext mathvariant="normal">dyad mean</mtext></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">within-dyad deviation</mtext></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">
+\beta_{\text{actor}} =
+\frac{\beta_{\text{dyad mean}} + \beta_{\text{within-dyad deviation}}}{2}
+</annotation></semantics></math></p>
+<p>and</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">partner</mtext></msub><mo>=</mo><mfrac><mrow><msub><mi>β</mi><mtext mathvariant="normal">dyad mean</mtext></msub><mo>−</mo><msub><mi>β</mi><mtext mathvariant="normal">within-dyad deviation</mtext></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">
+\beta_{\text{partner}} =
+\frac{\beta_{\text{dyad mean}} - \beta_{\text{within-dyad deviation}}}{2}
+</annotation></semantics></math></p>
+<p>The DIM and APIM intercepts are not expected to be equal because the
+DIM dyad mean is grand-mean centered, whereas the APIM predictors retain
+their original scale.</p>
 <p>In this example:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
 <span><span class="va">dim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
 <span></span>
-<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_actor"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_partner"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_actor"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_partner"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">b_dyad_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">b_within_dyad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_within_dyad_deviation"</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">b_dyad_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_within_dyad</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_within_dyad_deviation"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"From APIM model:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; From APIM model:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  actor effect:                  "</span>,  <span class="va">b_actor</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  actor effect:                  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   actor effect:                   1.758</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  partner effect:                "</span>, <span class="va">b_partner</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  partner effect:                "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   partner effect:                 0.238</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  DIM transformation:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   DIM transformation:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  actor effect + partner effect: "</span>, <span class="va">b_actor</span> <span class="op">+</span> <span class="va">b_partner</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  actor effect + partner effect: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">+</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   actor effect + partner effect:  1.996</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  actor effect - partner effect: "</span>, <span class="va">b_actor</span> <span class="op">-</span> <span class="va">b_partner</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  actor effect - partner effect: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">-</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   actor effect - partner effect:  1.52</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"From DIM model:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; From DIM model:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  dyad-mean effect:              "</span>, <span class="va">b_dyad_mean</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  dyad-mean effect:              "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_dyad_mean</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   dyad-mean effect:               1.996</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  within-dyad-deviation effect:  "</span>, <span class="va">b_within_dyad</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  within-dyad-deviation effect:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_within_dyad</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   within-dyad-deviation effect:   1.52</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="intensive-longitudinal-dim">Intensive longitudinal DIM<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dim"></a>
+<h2 id="intensive-longitudinal-dim">Intensive Longitudinal DIM<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dim"></a>
 </h2>
 <p>For longitudinal DIM, predictors are decomposed into within-person
-and between-person components with <code>time_2l</code>.
-<code>temporal_predictor_decomposition = "none"</code> is currently
-rejected for DIM and undirected DSM longitudinal predictor
+and between-person components before the dyadic decomposition. The
+default <code>"auto"</code> strategy selects <code>"time_2l"</code> when
+both <code>time</code> and <code>predictors</code> are supplied:</p>
+<ol style="list-style-type: decimal">
+<li>The <code>cwp</code> dyad mean captures a shared occasion-specific
+shift from the two members’ usual levels (shared occasion-level
+variation).</li>
+<li>The <code>cwp</code> within-dyad deviation captures which member is
+further above or below their own usual level on that occasion.</li>
+<li>The <code>cbp</code> dyad mean captures the dyad’s shared usual
+level relative to the sample’s grand mean (stable between-dyad
+differences).</li>
+<li>The <code>cbp</code> within-dyad deviation captures each member’s
+stable difference from the dyad’s usual level.</li>
+</ol>
+<p><code>temporal_predictor_decomposition = "none"</code> is not
+available for longitudinal DIM or undirected DSM predictor
 construction.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -526,7 +546,7 @@ construction.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, .i_provided_support_cbp_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
@@ -596,9 +616,25 @@ construction.</p>
 <span><span class="co">#&gt; .i_provided_support_cbp_within_dyad_deviation   0.0103 *  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<p>The fitted coefficients can be interpreted as:</p>
+<ul>
+<li><p>The <code>cwp</code> dyad-mean estimate (about 0.49) describes
+the expected change in closeness when both members are one point above
+their respective usual support levels.</p></li>
+<li><p>The <code>cbp</code> dyad-mean estimate (about 1.51) instead
+compares dyads whose members’ average usual support levels differ by one
+point.</p></li>
+<li><p>The <code>cwp</code> within-dyad estimate (about 0.06) describes
+the expected closeness difference associated with a one-point difference
+between members in their momentary deviations from usual
+support.</p></li>
+<li><p>The <code>cbp</code> within-dyad estimate (about 0.78) describes
+the expected closeness difference associated with a one-point difference
+between members in their usual support levels.</p></li>
+</ul>
 <p>The equivalent APIM uses actor and partner effects on both
 levels:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">apim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
@@ -624,44 +660,9 @@ levels:</p>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; closeness ~ 1 + diaryday + .i_provided_support_cwp_actor + .i_provided_support_cwp_partner +  </span></span>
-<span><span class="co">#&gt;     .i_provided_support_cbp_actor + .i_provided_support_cbp_partner +  </span></span>
-<span><span class="co">#&gt;     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID) +  </span></span>
-<span><span class="co">#&gt;     (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable |  </span></span>
-<span><span class="co">#&gt;     coupleID:diaryday)</span></span>
-<span><span class="co">#&gt; Dispersion:                 ~0</span></span>
-<span><span class="co">#&gt; Data: ild_exchangeable_data</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;    2977.2    3026.6   -1478.6    2957.2      1024 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Random effects:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups              Name                         Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID            (Intercept)                  0.5254   0.7248  </span></span>
-<span><span class="co">#&gt;  coupleID.1          .i_diff_assumed_exchangeable 0.6416   0.8010  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                  0.3185   0.5643  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .i_diff_assumed_exchangeable 0.5184   0.7200  </span></span>
-<span><span class="co">#&gt; Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                  Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                      5.079989   0.124223   40.89  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; diaryday                        -0.008077   0.006234   -1.30   0.1951    </span></span>
-<span><span class="co">#&gt; .i_provided_support_cwp_actor    0.271077   0.041683    6.50 7.86e-11 ***</span></span>
-<span><span class="co">#&gt; .i_provided_support_cwp_partner  0.216075   0.041683    5.18 2.17e-07 ***</span></span>
-<span><span class="co">#&gt; .i_provided_support_cbp_actor    1.143686   0.179784    6.36 2.00e-10 ***</span></span>
-<span><span class="co">#&gt; .i_provided_support_cbp_partner  0.367013   0.179784    2.04   0.0412 *  </span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The two ILD models again have identical fit statistics:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM"</span>, <span class="st">"APIM"</span><span class="op">)</span>,</span>
 <span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -693,7 +694,7 @@ components. For the within-person component:</p>
 </annotation></semantics></math></p>
 <p>This also means that an APIM parameterization can be used on one
 level and a DIM parameterization on the other. For example:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">apim_dim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
@@ -719,51 +720,9 @@ level and a DIM parameterization on the other. For example:</p>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; closeness ~ 1 + diaryday + .i_provided_support_cwp_actor + .i_provided_support_cwp_partner +  </span></span>
-<span><span class="co">#&gt;     .i_provided_support_cbp_dyad_mean + .i_provided_support_cbp_within_dyad_deviation +  </span></span>
-<span><span class="co">#&gt;     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID) +  </span></span>
-<span><span class="co">#&gt;     (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable |  </span></span>
-<span><span class="co">#&gt;     coupleID:diaryday)</span></span>
-<span><span class="co">#&gt; Dispersion:                 ~0</span></span>
-<span><span class="co">#&gt; Data: ild_exchangeable_data</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;    2977.2    3026.6   -1478.6    2957.2      1024 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Random effects:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups              Name                         Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID            (Intercept)                  0.5254   0.7249  </span></span>
-<span><span class="co">#&gt;  coupleID.1          .i_diff_assumed_exchangeable 0.6416   0.8010  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                  0.3185   0.5643  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .i_diff_assumed_exchangeable 0.5184   0.7200  </span></span>
-<span><span class="co">#&gt; Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                                Estimate Std. Error z value</span></span>
-<span><span class="co">#&gt; (Intercept)                                    5.079996   0.124224   40.89</span></span>
-<span><span class="co">#&gt; diaryday                                      -0.008078   0.006234   -1.30</span></span>
-<span><span class="co">#&gt; .i_provided_support_cwp_actor                  0.271072   0.041683    6.50</span></span>
-<span><span class="co">#&gt; .i_provided_support_cwp_partner                0.216077   0.041683    5.18</span></span>
-<span><span class="co">#&gt; .i_provided_support_cbp_dyad_mean              1.510702   0.193895    7.79</span></span>
-<span><span class="co">#&gt; .i_provided_support_cbp_within_dyad_deviation  0.776668   0.302809    2.56</span></span>
-<span><span class="co">#&gt;                                               Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                                    &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; diaryday                                        0.1951    </span></span>
-<span><span class="co">#&gt; .i_provided_support_cwp_actor                 7.86e-11 ***</span></span>
-<span><span class="co">#&gt; .i_provided_support_cwp_partner               2.17e-07 ***</span></span>
-<span><span class="co">#&gt; .i_provided_support_cbp_dyad_mean             6.63e-15 ***</span></span>
-<span><span class="co">#&gt; .i_provided_support_cbp_within_dyad_deviation   0.0103 *  </span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>This mixed parameterization still estimates the same model:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM within / DIM between"</span>, <span class="st">"APIM within / APIM between"</span>, <span class="st">"APIM within / DIM between"</span><span class="op">)</span>,</span>
 <span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -780,16 +739,31 @@ level and a DIM parameterization on the other. For example:</p>
 <span><span class="co">#&gt; 3  APIM within / DIM between 2977.225 3026.637 -1478.613</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="including-random-slopes">Including random slopes<a class="anchor" aria-label="anchor" href="#including-random-slopes"></a>
+<h2 id="including-random-slopes">Including Random Slopes<a class="anchor" aria-label="anchor" href="#including-random-slopes"></a>
 </h2>
 <p>Random-slope DIM and APIM parameterizations can be written
 analogously by adding the corresponding within-person effects to the
-stable dyad-level random-effect blocks. In the example data below these
-larger models do not converge cleanly, so the chunks are not evaluated
-and should absolutely <strong>not be interpreted</strong>. This
-structure can be reasonable if convergence diagnostics are clean.</p>
+stable dyad-level random-effect blocks. These larger models do not
+converge cleanly with the example data, so the chunks are not evaluated.
+Such models can be fit when the study design, data, and convergence
+diagnostics support the added complexity.</p>
+<p>A random-slope standard deviation describes how much the
+corresponding association varies across dyads around its fixed effect.
+Correlations within a random-effects block describe how its latent
+dyad-specific effects co-vary; they are not correlations between
+observed predictors or partners. Separate random-effects terms define
+separate covariance blocks, so correlations across those blocks are
+constrained to zero, preserving the exchangeability condition described
+above.</p>
+<p>For an exchangeable APIM, the sum-difference random-effects
+representation involving <code>.i_diff_*</code> can be rotated back to a
+constrained actor-partner representation. This can make actor and
+partner random effects easier to interpret, while offering no analogous
+interpretive advantage for the DIM. The <a href="apim.html">APIM
+vignette</a> describes this rotation and the constraints required to
+preserve exchangeability.</p>
 <p>In the APIM:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">apim_ILD_random</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
@@ -825,7 +799,7 @@ structure can be reasonable if convergence diagnostics are clean.</p>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>In the DIM:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_ILD_random</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
@@ -866,6 +840,13 @@ Interdependence Model vignette</a>. For undirected dyadic score
 outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score
 Model vignette</a>. For the broader data-preparation workflow, return to
 the <a href="getting-started.html">Getting Started vignette</a>.</p>
+<p>For an in-depth tutorial covering data preparation, model fitting,
+diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
+and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses
+<code>interdep</code> for cross-sectional and intensive longitudinal
+APIM and DIM workflows, with models fitted primarily using
+<code>brms</code> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>,
+<a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

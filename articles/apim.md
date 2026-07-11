@@ -1284,3 +1284,12 @@ mixed_ild_tweedie_model <- glmmTMB(
 
 summary(mixed_ild_tweedie_model)
 ```
+
+For an in-depth tutorial covering data preparation, model fitting,
+diagnostics, and assumption checks, see [Distinguishable and
+Exchangeable Dyads: Bayesian Multilevel
+Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
+uses `interdep` for cross-sectional and intensive longitudinal APIM and
+DIM workflows, with models fitted primarily using `brms`
+([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
+[DOI](https://doi.org/10.5281/zenodo.17400655)).
