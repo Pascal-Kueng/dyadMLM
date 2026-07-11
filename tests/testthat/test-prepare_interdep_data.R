@@ -402,6 +402,13 @@ test_that("prepare_interdep_data filters included compositions before finalizing
     c("female_x_female", "male_x_male")
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
+  expect_equal(levels(result$.i_composition), c("female_x_female", "male_x_male"))
+  expect_equal(levels(result$.i_composition_role), c("female_x_female", "male_x_male"))
+  expect_true(".i_is_female_x_female" %in% names(result))
+  expect_true(".i_is_male_x_male" %in% names(result))
+  expect_true(".i_diff_female_x_female" %in% names(result))
+  expect_true(".i_diff_male_x_male" %in% names(result))
+  expect_false(any(grepl("female_x_male", names(result), fixed = TRUE)))
 
   expect_error(
     prepare_interdep_data(
@@ -415,6 +422,89 @@ test_that("prepare_interdep_data filters included compositions before finalizing
     "`include_compositions` must leave at least two complete dyads after filtering.",
     fixed = TRUE
   )
+})
+
+test_that("prepare_interdep_data filters before DIM and DSM compatibility checks", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", "female", "female", "female", "male", "male"),
+    x = c(1, 2, 3, 4, 5, 6),
+    y = c(6, 5, 4, 3, 2, 1)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = x,
+    outcomes = y,
+    model_type = c("dim", "undirected_dsm"),
+    temporal_predictor_decomposition = "none",
+    include_compositions = "female-female",
+    seed = 123
+  )
+
+  meta <- attr(result, "interdep")
+
+  expect_equal(unique(result$dyad_id), c(1, 2))
+  expect_equal(nrow(result), 4L)
+  expect_equal(meta$n_dyads, 2L)
+  expect_equal(meta$dyad_compositions$composition, "female_x_female")
+  expect_equal(meta$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(meta$dyad_compositions$n_dyads, 2L)
+  expect_equal(levels(result$.i_composition), "female_x_female")
+  expect_false(any(grepl("male_x_male", names(result), fixed = TRUE)))
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+  expect_true(".i_y_raw_dyad_mean" %in% names(result))
+  expect_true(".i_y_raw_within_dyad_deviation" %in% names(result))
+  expect_equal(meta$dim_predictors$predictor, "x")
+  expect_equal(meta$undirected_dsm_outcomes$outcome, "y")
+})
+
+test_that("prepare_interdep_data can filter, constrain, and pool in one call", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2, 3, 3, 4, 4),
+    person_id = c("A", "B", "C", "D", "E", "F", "G", "H"),
+    role = c("female", "female", "male", "male", "female", "male", "nonbinary", "nonbinary"),
+    x = c(1, 2, 3, 4, 5, 6, 7, 8)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = x,
+    model_type = "dim",
+    temporal_predictor_decomposition = "none",
+    include_compositions = c("female-female", "male-male", "female-male"),
+    set_exchangeable_compositions = "female-male",
+    pool_compositions = list(
+      romantic_couples = c("female-female", "male-male", "female-male")
+    ),
+    seed = 123
+  )
+
+  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+
+  expect_equal(unique(result$dyad_id), c(1, 2, 3))
+  expect_equal(nrow(result), 6L)
+  expect_equal(attr(result, "interdep")$n_dyads, 3L)
+  expect_equal(nrow(dyad_compositions), 1L)
+  expect_equal(dyad_compositions$composition, "romantic_couples")
+  expect_equal(dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(dyad_compositions$dyad_type_source, "mixed")
+  expect_equal(dyad_compositions$pooled_from, "female_x_female, female_x_male, male_x_male")
+  expect_equal(dyad_compositions$n_dyads, 3L)
+  expect_equal(levels(result$.i_composition), "romantic_couples")
+  expect_false(any(grepl("nonbinary", names(result), fixed = TRUE)))
+  expect_true(".i_diff_romantic_couples" %in% names(result))
+  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+  expect_equal(attr(result, "interdep")$dim_predictors$predictor, "x")
 })
 
 test_that("prepare_interdep_data applies include_compositions before constraining and pooling", {
