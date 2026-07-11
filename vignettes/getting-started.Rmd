@@ -318,6 +318,27 @@ We can use this data to model these dyad types as separate or in the same model;
 the [Actor-Partner Interdependence Model vignette](apim.html) shows both
 mixed-composition formulas and practical convergence notes.
 
+### Keeping only selected dyad compositions (filtering)
+
+Sometimes a mixed dataset contains dyad compositions that should not be part of
+a given analysis. Use `include_compositions` to keep only dyads whose *observed*
+composition matches the requested labels. The filtering happens before exchangeability
+constraints and pooling, so `set_exchangeable_compositions` and
+`pool_compositions` arguments can only refer to retained types of dyads.
+
+```{r prepare-mixed-cross-sectional-included}
+mixed_cross_data_included <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  include_compositions = c("female-female", "male-male"),
+  seed = 123
+)
+
+print(mixed_cross_data_included, n = 4)
+```
+
 ### Setting distinguishable dyads to be treated as exchangeable
 
 As mentioned earlier, omitting the `role` argument treated all
@@ -388,9 +409,6 @@ mixed_cross_data_pooled_constrained <- prepare_interdep_data(
 print(mixed_cross_data_pooled_constrained)
 ```
 
-
-If you want to exclude some dyad compositions completely, filter them before
-preparation. A dedicated composition-inclusion argument is planned.
 
 For model formulas and interpretation, continue with the
 [Actor-Partner Interdependence Model vignette](apim.html),

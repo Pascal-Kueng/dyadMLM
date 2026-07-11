@@ -117,11 +117,13 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
       .i_pool_member = NA_character_
     )
 
-  # Filter and only include requested compositions, if filtering was requested!
+  # Apply composition filtering before exchangeability overrides and pooling.
   include_result <- apply_include_compositions(
     data = data,
     dyad_roles = dyad_roles,
     include_compositions = include_compositions,
+    set_exchangeable_compositions = set_exchangeable_compositions,
+    pool_compositions = pool_compositions,
     group_name = group_name
   )
   data <- include_result$data
@@ -217,7 +219,9 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
 }
 
 
-apply_include_compositions <- function(data, dyad_roles, include_compositions, group_name) {
+apply_include_compositions <- function(data, dyad_roles, include_compositions,
+                                       set_exchangeable_compositions,
+                                       pool_compositions, group_name) {
   if (is.null(include_compositions)) {
     return(list(data = data, dyad_roles = dyad_roles))
   }
@@ -230,12 +234,43 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions, g
     )
   }
 
-  # get cannonical composition-labels
+  # Get canonical composition labels for the filter.
   include_compositions_resolved <- resolve_composition_references(
     references = include_compositions,
     observed_compositions = dyad_roles[[interdep_composition_col]],
     arg_name = "include_compositions"
   )
+
+  # Resolve later composition references so we can catch references removed by
+  # the filter and provide a clearer error.
+  set_exchangeable_compositions_resolved <- resolve_composition_references(
+    references = set_exchangeable_compositions,
+    observed_compositions = dyad_roles[[interdep_composition_col]],
+    arg_name = "set_exchangeable_compositions"
+  )
+
+  pool_composition_references <- NULL
+  if (is.list(pool_compositions)) {
+    pool_composition_references <- unlist(pool_compositions, use.names = FALSE)
+  }
+  pool_compositions_resolved <- resolve_composition_references(
+    references = pool_composition_references,
+    observed_compositions = dyad_roles[[interdep_composition_col]],
+    arg_name = "pool_compositions"
+  )
+
+  # Check if later arguments refer to compositions removed by the filter.
+  referenced_later <- c(set_exchangeable_compositions_resolved, pool_compositions_resolved)
+  if (!all(referenced_later %in% include_compositions_resolved)) {
+    references_removed_by_include <- setdiff(referenced_later, include_compositions_resolved)
+    stop(
+      "`include_compositions` filters out composition(s) that are later referenced by ",
+      "`set_exchangeable_compositions` or `pool_compositions`: ",
+      paste(sort(references_removed_by_include), collapse = ", "),
+      ". Add them to `include_compositions` or remove them from the later argument.",
+      call. = FALSE
+    )
+  }
 
   # Get dyad-ids that we keep
   keep_dyads <- dyad_roles |>

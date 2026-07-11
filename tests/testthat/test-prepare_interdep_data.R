@@ -434,7 +434,7 @@ test_that("prepare_interdep_data applies include_compositions before constrainin
       set_exchangeable_compositions = "female-male",
       seed = 123
     ),
-    "`set_exchangeable_compositions` contains unknown dyad composition",
+    "`include_compositions` filters out composition(s) that are later referenced by `set_exchangeable_compositions` or `pool_compositions`: female_x_male. Add them to `include_compositions` or remove them from the later argument.",
     fixed = TRUE
   )
 
@@ -448,7 +448,7 @@ test_that("prepare_interdep_data applies include_compositions before constrainin
       pool_compositions = list(couples = c("female-female", "female-male")),
       seed = 123
     ),
-    "`pool_compositions` contains unknown dyad composition",
+    "`include_compositions` filters out composition(s) that are later referenced by `set_exchangeable_compositions` or `pool_compositions`: female_x_male. Add them to `include_compositions` or remove them from the later argument.",
     fixed = TRUE
   )
 })
