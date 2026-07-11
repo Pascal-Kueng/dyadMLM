@@ -85,13 +85,13 @@ of dyads appear in the same dataset, such as female-male, female-female,
 and male-male couples.</p>
 <p>It automatically creates model-ready columns for dyadic multilevel
 model parameterizations such as Actor-Partner Interdependence Models
-(APIM), Dyad-Individual Modles (DIM), and undirected Dyadic Score Models
+(APIM), Dyad-Individual Models (DIM), and undirected Dyadic Score Models
 (DSM). Current DIM and undirected DSM helpers require a single type of
 exchangeable dyad composition.</p>
 <p>This vignette focuses on the automatic data preparation step.</p>
 <p>For guidance and examples on how to use the prepared data to estimate
 various APIM models from simple Gaussian cross-sectional to generalized
-intensive longitudinal (ILD) models with mutliple dyad types, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>.</p>
+intensive longitudinal (ILD) models with multiple dyad types, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>.</p>
 <p>For guidance on how to use the Dyad-Individual Model (DIM)
 parameterization, including dyad-mean and within-dyad-deviation
 predictors and their equivalence to APIM effects in exchangeable dyads,
@@ -104,7 +104,7 @@ vignette</a>.</p>
 </h2>
 <p>The basic data structure needed for <code>interdep</code> is a long
 data frame where dyads are stacked on top of each other and both members
-of a dyad appear as separate rows. Roughtly, the expected structure
+of a dyad appear as separate rows. Roughly, the expected structure
 is:</p>
 <ul>
 <li>For cross-sectional data: one row per
@@ -191,7 +191,7 @@ is:</p>
 </table>
 <p>Measured variables may contain missing values. The structural
 <code>group</code>, <code>member</code>, and optional <code>time</code>
-variables must be complete, or not observed (e.g., no NA values are
+variables must be complete when observed (no missing values are
 allowed).</p>
 <p>In intensive longitudinal data, missing measurement occasions can be
 represented by absent rows, as long as the time variable preserves the
@@ -325,8 +325,8 @@ we do:</p>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  </span>
-<span>  <span class="co"># In this example, we also add predictors and a model-type to get </span></span>
-<span>  <span class="co"># model-ready columns for this model-type</span></span>
+<span>  <span class="co"># In this example, we also add predictors and a model type to get </span></span>
+<span>  <span class="co"># model-ready columns for this model type</span></span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
@@ -516,79 +516,71 @@ dyadic dataset. Each dyad has repeated observations over
 <p>For longitudinal data, simply pass the <code>time</code> variable as
 well.</p>
 <div class="section level3">
-<h3 id="exchangeable-ild-preparation">Exchangeable ILD preparation<a class="anchor" aria-label="anchor" href="#exchangeable-ild-preparation"></a>
+<h3 id="ild-apim-preparation">ILD APIM preparation<a class="anchor" aria-label="anchor" href="#ild-apim-preparation"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ild_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">ild_apim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  time <span class="op">=</span> <span class="va">diaryday</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
-<span>  </span>
-<span>  <span class="co"># This time we request DIM-style variables. This only works</span></span>
-<span>  <span class="co"># for exchangeable dyads, which is why we omit the `role` variable here. </span></span>
-<span>  model_type <span class="op">=</span> <span class="st">'dim'</span>,</span>
+<span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ild_exchangeable_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ild_apim_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, time = diaryday</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender, time =</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # diaryday</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
-<span><span class="co">#&gt; # assumed_exchangeable exchangeable 40 dyads</span></span>
+<span><span class="co">#&gt; # female_x_male distinguishable 40 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition                  inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role             composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_*                         composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*                       composition-specific sum-diff contrasts; 0</span></span>
-<span><span class="co">#&gt; #                                   for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                   exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_*_cwp                        within-person predictor: momentary</span></span>
-<span><span class="co">#&gt; #                                   deviations from each person's usual level</span></span>
-<span><span class="co">#&gt; #   .i_*_cbp                        between-person predictor: stable</span></span>
-<span><span class="co">#&gt; #                                   differences from the average person's usual</span></span>
-<span><span class="co">#&gt; #                                   level</span></span>
-<span><span class="co">#&gt; #   .i_*_cwp_dyad_mean              DIM within-person dyad-mean predictor:</span></span>
-<span><span class="co">#&gt; #                                   shared momentary deviations in the dyad</span></span>
-<span><span class="co">#&gt; #   .i_*_cwp_within_dyad_deviation  DIM within-person within-dyad predictor</span></span>
-<span><span class="co">#&gt; #                                   deviation: person's momentary deviation</span></span>
-<span><span class="co">#&gt; #                                   from the dyad average</span></span>
-<span><span class="co">#&gt; #   .i_*_cbp_dyad_mean              DIM between-person dyad-mean predictor:</span></span>
-<span><span class="co">#&gt; #                                   dyad's stable usual level, grand-mean</span></span>
-<span><span class="co">#&gt; #                                   centered</span></span>
-<span><span class="co">#&gt; #   .i_*_cbp_within_dyad_deviation  DIM between-person within-dyad predictor</span></span>
-<span><span class="co">#&gt; #                                   deviation: person's stable difference from</span></span>
-<span><span class="co">#&gt; #                                   the dyad's usual level</span></span>
+<span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_*_cwp             within-person predictor: momentary deviations from</span></span>
+<span><span class="co">#&gt; #                        each person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_*_cbp             between-person predictor: stable differences from the</span></span>
+<span><span class="co">#&gt; #                        average person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_*_cwp_actor       APIM within-person actor predictor: actor's momentary</span></span>
+<span><span class="co">#&gt; #                        deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .i_*_cwp_partner     APIM within-person partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                        momentary deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .i_*_cbp_actor       APIM between-person actor predictor: actor's stable</span></span>
+<span><span class="co">#&gt; #                        difference from the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_*_cbp_partner     APIM between-person partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                        stable difference from the average person's usual</span></span>
+<span><span class="co">#&gt; #                        level</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 16</span></span></span>
-<span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support .i_composition  </span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female      5.03             4.30 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        1        1        1 female      5.64             4.24 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        1        1        2 female      5.49             3.54 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        1        1        3 female      6.71             5.04 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        1        1        4 female      5.61             4.74 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        1        1        5 female      6.11             4.72 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        1        1        6 female      6.96             5.12 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        1        1        7 female      7.03             5.21 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female      8.07             5.20 assumed_exchang…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female      4.87             4.69 assumed_exchang…</span></span>
+<span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support .i_composition</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female      5.03             4.30 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        1        1        1 female      5.64             4.24 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        1        1        2 female      5.49             3.54 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        1        1        3 female      6.71             5.04 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        1        1        4 female      5.61             4.74 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        1        1        5 female      6.11             4.72 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        1        1        6 female      6.96             5.12 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        1        1        7 female      7.03             5.21 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female      8.07             5.20 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female      4.87             4.69 female_x_male </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_dyad_mean &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_within_dyad_deviation &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
-<p>By default, numeric predictors in longitudinal model-ready
-preparation are decomposed into within-person and between-person
-components. This temporal predictor decomposition can be controlled via
-the <code>temporal_predictor_decomposition</code> argument. Usually for
-ILD, the <code>time_2l</code> option is the correct one.</p>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, .i_provided_support_cbp_partner &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>By default, numeric predictors in longitudinal APIM preparation are
+decomposed into within-person and between-person components. This
+temporal predictor decomposition can be controlled via the
+<code>temporal_predictor_decomposition</code> argument. Usually for ILD,
+the <code>time_2l</code> option is the correct one.</p>
 </div>
 </div>
 <div class="section level2">
@@ -668,8 +660,8 @@ convergence notes.</p>
 <h3 id="setting-distinguishable-dyads-to-be-treated-as-exchangeable">Setting distinguishable dyads to be treated as exchangeable<a class="anchor" aria-label="anchor" href="#setting-distinguishable-dyads-to-be-treated-as-exchangeable"></a>
 </h3>
 <p>Previously we treated all dyads in the same dataset as the same type
-of indistinguishable by omitting the <code>role</code> argument. If you
-need more control, you can separately set each distinguishable dyad
+of exchangeable by omitting the <code>role</code> argument. If you need
+more control, you can separately set each distinguishable dyad
 composition in the dataset to be treated as exchangeable.</p>
 <p>Note that whenever you need to refer to a dyad-type, the order of
 members does not matter (e.g., ‘male-female’ and ‘female-male’ will both
@@ -726,11 +718,11 @@ dyads (<code>male-male</code>, <code>female-female</code>, and
 composition as exchangeable.</p>
 </div>
 <div class="section level3">
-<h3 id="pooling-different-dyad-compositions">Pooling different dyad-compositions<a class="anchor" aria-label="anchor" href="#pooling-different-dyad-compositions"></a>
+<h3 id="pooling-different-dyad-compositions">Pooling different dyad compositions<a class="anchor" aria-label="anchor" href="#pooling-different-dyad-compositions"></a>
 </h3>
 <p>Sometimes for theoretical or practical reasons, we may want to
 <strong>pool different exchangeable dyads</strong> and analyze them as
-if they were one. This also allows to test various constraints via model
+if they were one. This also allows testing various constraints via model
 comparisons.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
@@ -783,9 +775,9 @@ dyads:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_same_sex &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Note that you cannot pool distinguishable dyads. If you would want to
-pool female-male with male-male you could treat female-male as
-exchangeable:</p>
+<p>Note that you cannot pool distinguishable dyads. If you want to pool
+<code>female-male</code> with <code>male-male</code>, you could treat
+<code>female-male</code> as exchangeable:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
