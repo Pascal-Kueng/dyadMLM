@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(interdep)
-has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 ## About this Vignette
@@ -96,7 +95,7 @@ time 3 for that person, which is fine and gives the models all the information
 they need. 
 
 
-## Data preparation for cross-sectional dyadic data
+## Data preparation for distinguishable dyads
 
 `example_dyadic_crosssectional` is a simulated cross-sectional dataset for
 distinguishable dyads. Each dyad has two rows: one for each member.
@@ -107,23 +106,6 @@ print(head(example_dyadic_crosssectional))
 
 We validate and prepare the data with the function `prepare_interdep_data()`
 
-This is the minimal call: 
-
-```{r prepare-cross-exchangeable-basic}
-cross_exchangeable_data <- prepare_interdep_data(
-  data = example_dyadic_crosssectional,
-  group = coupleID,
-  member = personID,
-  seed = 123
-)
-
-print(cross_exchangeable_data, n = 20)
-
-```
-
-Note that by not providing a `role` variable, we get a single type of
-exchangeable dyads. If we want to distinguish by gender, we do: 
-
 ```{r prepare-cross-distinguishable}
 cross_distinguishable_data <- prepare_interdep_data(
   data = example_dyadic_crosssectional,
@@ -131,16 +113,16 @@ cross_distinguishable_data <- prepare_interdep_data(
   member = personID,
   role = gender,
   
-  # In this example, we also add predictors and a model type to get 
-  # model-ready columns for this model type
+  # In this example, we optionally specify a predictor variable 
+  # and a model type to generate the columns needed for that model type.
   predictors = communication,
-  model_type = "apim",
-  seed = 123
+  model_type = "apim"
 )
 
-print(cross_distinguishable_data, n = 20)
+print(cross_distinguishable_data, n = 4)
 
 ```
+
 The function automatically recognized that in this dataset there are 95 
 female-male dyads and created APIM-relevant variables. These generated `.i_*` 
 columns can be used directly in model formulas. 
@@ -152,27 +134,30 @@ library(glmmTMB)
 
 cross_distinguishable_model <- glmmTMB(
   satisfaction ~ 
-    # remove standard intercept and model separate intercepts for male and female
+
+    # Gender-specific intercepts
     0 + 
     .i_is_female_x_male_female + 
     .i_is_female_x_male_male + 
     
-    # gender-specific slopes for communication actor effect (no main effect)
+    # Gender-specific actor effects
     .i_is_female_x_male_female:.i_communication_raw_actor + 
     .i_is_female_x_male_male:.i_communication_raw_actor +
     
-    # gender-specific slopes for communication partner effect (no main effect)
+    # Gender-specific partner effects
     .i_is_female_x_male_female:.i_communication_raw_partner + 
     .i_is_female_x_male_male:.i_communication_raw_partner +
     
-    # residual covariance in glmmTMB can be modeled with random intercepts
-    # when dispformula ~ 0. We model gender-specific residual variances and 
-    # a correlation between the partners' residuals. 
+    # Dyad-level unstructured random effects represent the two partner
+    # residual variances and their covariance when dispformula = ~ 0.
+    # This is glmmTMB-specific syntax; lme4 and brms use different syntax.
     us(0 + 
          .i_is_female_x_male_female + 
          .i_is_female_x_male_male 
        | coupleID)
   
+  # Fix the observation-level Gaussian dispersion near zero so the dyad-level
+  # random effects carry the partner residual covariance.
   , dispformula = ~ 0 
   , family = gaussian()
   , data = cross_distinguishable_data
@@ -185,6 +170,63 @@ summary(cross_distinguishable_model)
 Models are not run and summarized in this vignette. For fitted APIM examples,
 see the [Actor-Partner Interdependence Model vignette](apim.html).
 
+## Data preparation for exchangeable dyads
+
+For a dataset with only one type of dyad that should be treated as exchangeable, 
+we can simply omit the `role` argument: 
+
+```{r prepare-cross-exchangeable-basic}
+cross_exchangeable_data <- prepare_interdep_data(
+  data = example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  seed = 123
+)
+
+print(cross_exchangeable_data, n = 4)
+
+```
+
+Alternatively, for more control, we can explicitly set dyad types to exchangeable:
+
+```{r prepare-cross-set-exchangeable}
+cross_exchangeable_data <- prepare_interdep_data(
+  data = example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  set_exchangeable_compositions = "male-female",
+  seed = 123
+)
+
+print(cross_exchangeable_data, n = 4)
+
+```
+
+*Note* that whenever you need to refer to a dyad type, the order of members does not matter
+(e.g., 'male-female' and 'female-male' will both work), and you can use different separators 
+like 'male_female', 'male_x_female' or even 'male female'. 
+
+For exchangeable dyads, we can also request DIM and undirected DSM columns.
+This works here because omitting `role` treats all dyads as a single type of
+exchangeable dyads, and DIM and undirected DSM currently require exchangeable
+dyads. Undirected DSM preparation additionally needs `outcomes`, because
+it creates dyad-mean and within-dyad-deviation columns for both the predictor
+and the outcome.
+
+```{r prepare-cross-dim-dsm}
+cross_dim_dsm_data <- prepare_interdep_data(
+  data = example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  predictors = communication,
+  outcomes = satisfaction,
+  model_type = c("dim", "undirected_dsm"),
+  seed = 123
+)
+
+print(cross_dim_dsm_data, n = 4)
+```
 
 ## Incomplete dyads and missing roles
 
@@ -219,11 +261,14 @@ print(incomplete_dropped_data)
 `example_dyadic_ILD` is a simulated intensive longitudinal dyadic dataset. Each
 dyad has repeated observations over `diaryday`, with one row per person-day.
 
+The first rows look like this: 
+
 ```{r ild-raw}
-print(head(example_dyadic_ILD, n = 26), n = 26)
+print(example_dyadic_ILD, n = 26)
 ```
 
-For longitudinal data, simply pass the `time` variable as well.
+To prepare intensive longitudinal data, simply pass the `time` variable to 
+`prepare_interdep_data`. 
 
 ### ILD APIM preparation
 
@@ -255,11 +300,6 @@ option is the correct one.
 same data object: distinguishable female-male dyads and exchangeable
 female-female and male-male dyads.
 
-
-```{r mixed-cross-sectional-raw}
-print(example_dyadic_crosssectional_mixed)
-```
-
 Letting the `interdep` package just infer the compositions automatically: 
 
 ```{r prepare-mixed-cross-sectional}
@@ -271,7 +311,7 @@ mixed_cross_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(mixed_cross_data)
+print(mixed_cross_data, n = 4)
 ```
 
 We can use this data to model these dyad types as separate or in the same model;
@@ -280,14 +320,13 @@ mixed-composition formulas and practical convergence notes.
 
 ### Setting distinguishable dyads to be treated as exchangeable
 
-Previously we treated all dyads in the same dataset as the same type of exchangeable
-by omitting the `role` argument. If you need more control, you can separately 
-set each distinguishable dyad composition in the dataset to be treated as 
-exchangeable.  
+As mentioned earlier, omitting the `role` argument treated all
+dyads as one exchangeable composition, effectively pooling them. 
 
-Note that whenever you need to refer to a dyad-type, the order of members does not matter
-(e.g., 'male-female' and 'female-male' will both work), and you can use different separators 
-like 'male_female', 'male_x_female' or even 'male female'. 
+For more control, it is possible to separately set each distinguishable dyad 
+composition in a mixed dataset to be treated as exchangeable. This specification 
+keeps the differentiation between the kinds of dyads 
+(e.g., `male-male`, `female-female`, and `male-female`).
 
 
 ```{r prepare-mixed-cross-sectional-exchangeable}
@@ -296,23 +335,19 @@ mixed_cross_exchangeable_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
-  set_exchangeable_compositions = c('male-female'),
+  set_exchangeable_compositions = c("male-female"),
   seed = 123
 )
 
-print(mixed_cross_exchangeable_data)
+print(mixed_cross_exchangeable_data, n = 4)
 ```
-
-This specification keeps the differentiation between the kinds of dyads
-(`male-male`, `female-female`, and `male-female`), while treating the
-`male-female` composition as exchangeable.
 
 
 ### Pooling different dyad compositions
 
 Sometimes for theoretical or practical reasons, we may want to 
 **pool different exchangeable dyads** and analyze them as if they were one. 
-This also allows testing various constraints via model comparisons. 
+This also allows testing various constraints via model comparisons later. 
 
 For instance, let's pool `male-male` and `female-female` dyads
 and name them `same-sex` dyads: 
@@ -324,7 +359,7 @@ mixed_cross_data_pooled <- prepare_interdep_data(
   member = personID,
   role = gender,
   pool_compositions = list(
-    'same-sex' = c('male-male', 'female_female')
+    "same-sex" = c("male-male", "female_female")
   ),
   seed = 123
 )
@@ -332,9 +367,9 @@ mixed_cross_data_pooled <- prepare_interdep_data(
 print(mixed_cross_data_pooled)
 ```
 
-Note that you cannot pool distinguishable dyads. If you want to pool
-`female-male` with `male-male`, you could treat `female-male` as exchangeable:
-
+Note that you cannot pool distinguishable dyads. If we want to pool
+`female-male` with `male-male` for some reason, we first have to treat
+`female-male` as exchangeable:
 
 
 ```{r prepare-mixed-cross-sectional_pooled_constrained}
@@ -343,9 +378,9 @@ mixed_cross_data_pooled_constrained <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
-  set_exchangeable_compositions = 'male_x_female',
+  set_exchangeable_compositions = "male_x_female",
   pool_compositions = list(
-    'same-sex' = c('male-male', 'male_female')
+    "same-sex" = c("male-male", "male_female")
   ),
   seed = 123
 )
@@ -353,5 +388,11 @@ mixed_cross_data_pooled_constrained <- prepare_interdep_data(
 print(mixed_cross_data_pooled_constrained)
 ```
 
+
 If you want to exclude some dyad compositions completely, filter them before
 preparation. A dedicated composition-inclusion argument is planned.
+
+For model formulas and interpretation, continue with the
+[Actor-Partner Interdependence Model vignette](apim.html),
+[Dyad-Individual Model vignette](dim.html), or
+[Undirected Dyadic Score Model vignette](undirected-dsm.html).
