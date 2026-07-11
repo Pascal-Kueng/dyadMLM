@@ -105,6 +105,11 @@ vignette</a>.</p>
 data frame where dyads are stacked on top of each other and both members
 of a dyad appear as separate rows. Roughly, the expected structure
 is:</p>
+<p>If your raw data are currently in wide format (for time or dyads or
+both), reshape them to this long structure before using
+<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>. See the <a href="https://tidyr.tidyverse.org/articles/pivot.html" class="external-link">tidyr pivoting
+vignette</a> or the <a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link"><code>pivot_longer()</code>
+reference</a>.</p>
 <ul>
 <li>For cross-sectional data: one row per
 <code>dyad x member</code>
@@ -330,14 +335,12 @@ formulas.</p>
 <span>    </span>
 <span>    <span class="co"># Dyad-level unstructured random effects represent the two partner</span></span>
 <span>    <span class="co"># residual variances and their covariance when dispformula = ~ 0.</span></span>
-<span>    <span class="co"># This is glmmTMB-specific syntax; lme4 and brms use different syntax.</span></span>
+<span>    <span class="co"># This is glmmTMB-specific syntax! lme4 and brms use different syntax.</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> </span>
 <span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> </span>
 <span>         <span class="va">.i_is_female_x_male_male</span> </span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="co"># Fix the observation-level Gaussian dispersion near zero so the dyad-level</span></span>
-<span>  <span class="co"># random effects carry the partner residual covariance.</span></span>
+<span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> </span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">cross_distinguishable_data</span></span>
@@ -702,7 +705,7 @@ automatically:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>We can use this data to model these dyad types as separate or in the
-same model; the <a href="apim.html">Actor-Partner Interdependence Model
+same model. The <a href="apim.html">Actor-Partner Interdependence Model
 vignette</a> shows both mixed-composition formulas and practical
 convergence notes.</p>
 <div class="section level3">

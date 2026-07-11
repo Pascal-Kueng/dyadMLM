@@ -44,6 +44,14 @@ The basic data structure needed for `interdep` is a long data frame
 where dyads are stacked on top of each other and both members of a dyad
 appear as separate rows. Roughly, the expected structure is:
 
+If your raw data are currently in wide format (for time or dyads or
+both), reshape them to this long structure before using
+[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
+See the [tidyr pivoting
+vignette](https://tidyr.tidyverse.org/articles/pivot.html) or the
+[`pivot_longer()`
+reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
+
 - For cross-sectional data: one row per `dyad x member`
 
 | dyad | member |   x |   y |
@@ -176,14 +184,12 @@ cross_distinguishable_model <- glmmTMB(
     
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
-    # This is glmmTMB-specific syntax; lme4 and brms use different syntax.
+    # This is glmmTMB-specific syntax! lme4 and brms use different syntax.
     us(0 + 
          .i_is_female_x_male_female + 
          .i_is_female_x_male_male 
        | coupleID)
-  
-  # Fix the observation-level Gaussian dispersion near zero so the dyad-level
-  # random effects carry the partner residual covariance.
+
   , dispformula = ~ 0 
   , family = gaussian()
   , data = cross_distinguishable_data
@@ -573,7 +579,7 @@ print(mixed_cross_data, n = 4)
 ```
 
 We can use this data to model these dyad types as separate or in the
-same model; the [Actor-Partner Interdependence Model
+same model. The [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md)
 shows both mixed-composition formulas and practical convergence notes.
 
