@@ -79,7 +79,9 @@ into a shared final composition label. Must be a named list where each name
 is the final composition label and each value is a character vector of
 composition references, for example
 \code{list(same_sex_couples = c("female-female", "male-male"))}. Only
-exchangeable compositions can be pooled.}
+exchangeable compositions can be pooled. Each pool must contain at least
+two distinct observed compositions after composition references are
+resolved.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

@@ -362,9 +362,9 @@ test_that("infer_dyad_compositions rejects pooling distinguishable compositions"
 
 test_that("infer_dyad_compositions validates composition pooling input", {
   data <- data.frame(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    role = c("female", "female", "male", "male")
+    dyad_id = c(1, 1, 2, 2, 3, 3),
+    person_id = c("A", "B", "C", "D", "E", "F"),
+    role = c("female", "female", "male", "male", "friend", "friend")
   )
 
   validated <- validate_interdep_data(
@@ -381,13 +381,29 @@ test_that("infer_dyad_compositions validates composition pooling input", {
   )
   expect_error(
     infer_dyad_compositions(validated, pool_compositions = list(pool = character())),
-    "non-empty character vector",
+    "at least two dyad compositions",
+    fixed = TRUE
+  )
+  expect_error(
+    infer_dyad_compositions(validated, pool_compositions = list(pool = "female-female")),
+    "at least two dyad compositions",
     fixed = TRUE
   )
   expect_error(
     infer_dyad_compositions(
       validated,
-      pool_compositions = list(pool_a = "female-female", pool_b = "female female")
+      pool_compositions = list(pool = c("female-female", "female female"))
+    ),
+    "at least two distinct observed dyad compositions",
+    fixed = TRUE
+  )
+  expect_error(
+    infer_dyad_compositions(
+      validated,
+      pool_compositions = list(
+        pool_a = c("female-female", "male-male"),
+        pool_b = c("female female", "male male")
+      )
     ),
     "same composition to more than one pool",
     fixed = TRUE
@@ -395,7 +411,7 @@ test_that("infer_dyad_compositions validates composition pooling input", {
   expect_error(
     infer_dyad_compositions(
       validated,
-      pool_compositions = list(pool = "female-male")
+      pool_compositions = list(pool = c("female-male", "female-female"))
     ),
     "`pool_compositions` contains unknown dyad composition",
     fixed = TRUE
@@ -403,7 +419,7 @@ test_that("infer_dyad_compositions validates composition pooling input", {
   expect_error(
     infer_dyad_compositions(
       validated,
-      pool_compositions = list(male_x_male = "female-female")
+      pool_compositions = list(male_x_male = c("female-female", "friend-friend"))
     ),
     "names must not match observed compositions",
     fixed = TRUE

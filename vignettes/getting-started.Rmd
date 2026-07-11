@@ -393,14 +393,42 @@ mixed_cross_data_pooled <- prepare_interdep_data(
   member = personID,
   role = gender,
   pool_compositions = list(
-    'same-sex' = c('male-male', 'female-female')
+    'same-sex' = c('male-male', 'female_female')
   ),
   seed = 123
 )
 
-print(mixed_cross_data)
+print(mixed_cross_data_pooled)
 ```
 
-Note that you way use 'male-male', 'male_male', 'male_x_male' (what the package uses), or 'male male'. 
+Note that you cannot pool distinguishable dyads. If you would want to pool female-male with male-male, 
+you could treat female-male as exchangeable: 
 
 
+
+```{r prepare-mixed-cross-sectional}
+mixed_cross_data_pooled_constrained <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  set_exchangeable_compositions = 'male_x_female',
+  pool_compositions = list(
+    'same-sex' = c('male-male', 'male_female')
+  ),
+  seed = 123
+)
+
+print(mixed_cross_data_pooled_constrained)
+```
+
+If you want to exclude some dyad compositions completely, it is currently recommended
+to filter them after creation. Note that the metadata is then not correct anymore.
+
+```{r prepare-mixed-cross-sectional}
+
+data <- mixed_cross_data_pooled_constrained
+
+
+
+```

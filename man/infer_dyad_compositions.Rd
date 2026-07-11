@@ -21,7 +21,8 @@ exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 exchangeable for analysis.}
 
 \item{pool_compositions}{Optional named list that pools exchangeable dyad
-compositions into user-named final composition labels.}
+compositions into user-named final composition labels. Each pool must
+resolve to at least two distinct observed compositions.}
 }
 \value{
 An \code{interdep_data} object with added \code{.i_composition} and

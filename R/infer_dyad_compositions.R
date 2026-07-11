@@ -9,7 +9,8 @@
 #' @param set_exchangeable_compositions Optional dyad compositions to treat as
 #'   exchangeable for analysis.
 #' @param pool_compositions Optional named list that pools exchangeable dyad
-#'   compositions into user-named final composition labels.
+#'   compositions into user-named final composition labels. Each pool must
+#'   resolve to at least two distinct observed compositions.
 #'
 #' @return An `interdep_data` object with added `.i_composition` and
 #'   `.i_composition_role` factor columns, `.i_is_*` numeric indicator columns,
@@ -288,9 +289,9 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
     pool_name <- pool_names[[i]]
     references_to_pool <- pool_compositions[[i]]
 
-    if (!is.character(references_to_pool) || length(references_to_pool) == 0) {
+    if (!is.character(references_to_pool) || length(references_to_pool) < 2) {
       stop(
-        "Each `pool_compositions` element must be a non-empty character vector of dyad compositions, ",
+        "Each `pool_compositions` element must be a character vector of at least two dyad compositions, ",
         "for example `c(\"female-female\", \"male-male\")`.",
         call. = FALSE
       )
@@ -301,6 +302,16 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
       observed_compositions = observed_compositions,
       arg_name = "pool_compositions"
     )
+
+    if (length(resolved_compositions_to_pool) < 2) {
+      stop(
+        "Each `pool_compositions` element must resolve to at least two distinct observed dyad compositions. ",
+        "Pool `", pool_name, "` resolved to: ",
+        paste(resolved_compositions_to_pool, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
 
     # While still looping, check whether any composition has already been
     # assigned to a previous pool. To avoid duplications
