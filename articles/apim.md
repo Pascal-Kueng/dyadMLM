@@ -5,6 +5,16 @@
 library(interdep)
 ```
 
+This vignette focuses on APIM-style actor and partner effect preparation
+and model formulas. For the main data requirements and validation
+workflow, start with the [Getting Started
+vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
+For DIM predictors and their equivalence to APIM effects in exchangeable
+dyads, see the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
+undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+
 #### Test distinguishability
 
 Aside from using a Wald test on the first model, nested model

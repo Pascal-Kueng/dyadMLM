@@ -18,11 +18,15 @@ dyad composition.
 
 This vignette focuses mainly on APIM-style actor and partner effects in
 multilevel model formulas, especially models with multiple dyad types,
-intensive longitudinal data, and generalized outcomes. For the
-Dyad-Individual Model (DIM) parameterization, including dyad-mean and
-within-dyad-deviation predictors and their equivalence to APIM effects
-in exchangeable dyads, see the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
+intensive longitudinal data, and generalized outcomes. For more detailed
+APIM model formulas, see the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
+the Dyad-Individual Model (DIM) parameterization, including dyad-mean
+and within-dyad-deviation predictors and their equivalence to APIM
+effects in exchangeable dyads, see the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
+undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 
 The basic data structure is a long data frame where dyads are stacked on
 top of each other and both members of a dyad appear as separate rows.
@@ -396,8 +400,9 @@ cross_distinguishable_model <- glmmTMB(
 summary(cross_distinguishable_model)
 ```
 
-Note that models are not run and summarized in this vignette. For more
-infos See the vignette !TODO insert link to APIM vignette.
+Models are not run and summarized in this vignette. For fitted APIM
+examples, see the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
 
 ### Exchangeable Gaussian APIM
 
@@ -773,9 +778,10 @@ in the same data object: distinguishable female-male dyads and
 exchangeable female-female and male-male dyads.
 
 Here, we focus on the preparation steps that are possible with
-`interdep`. For example models for multilevel models with multiple
-different types of distinguishable and indistinguishable dyads and a
-discussion, check the vignette here: !TODO add link.
+`interdep`. For model formulas that combine distinguishable and
+exchangeable dyads in the same analysis, see the [Actor-Partner
+Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
 
 ``` r
 
@@ -847,8 +853,10 @@ print(mixed_cross_data)
 #> #   .i_diff_male_x_male <dbl>
 ```
 
-We can use this data to model these dyad types as separate (see Vignette
-X). ! TODO
+We can use this data to model these dyad types as separate or in the
+same model; the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md)
+shows both mixed-composition formulas and practical convergence notes.
 
 However, sometimes for theoretical or practical reasons, we may want to
 pool different exchangeable dyads and analyze them as if they were one.
@@ -963,5 +971,6 @@ print(mixed_cross_data_pooled_constrained)
 #> #   .i_diff_female_x_female <dbl>, .i_diff_same_sex <dbl>
 ```
 
-If you want to exclude some dyad compositions completely, you may filter
-them. !TODO feature coming.
+If you want to exclude some dyad compositions completely, filter them
+before preparation. A dedicated composition-inclusion argument is
+planned.

@@ -85,10 +85,13 @@ undirected DSM. Current DIM and undirected DSM helpers require one
 exchangeable dyad composition.</p>
 <p>This vignette focuses mainly on APIM-style actor and partner effects
 in multilevel model formulas, especially models with multiple dyad
-types, intensive longitudinal data, and generalized outcomes. For the
-Dyad-Individual Model (DIM) parameterization, including dyad-mean and
-within-dyad-deviation predictors and their equivalence to APIM effects
-in exchangeable dyads, see the <a href="dim.html">Dyad-Individual Model
+types, intensive longitudinal data, and generalized outcomes. For more
+detailed APIM model formulas, see the <a href="apim.html">Actor-Partner
+Interdependence Model vignette</a>. For the Dyad-Individual Model (DIM)
+parameterization, including dyad-mean and within-dyad-deviation
+predictors and their equivalence to APIM effects in exchangeable dyads,
+see the <a href="dim.html">Dyad-Individual Model vignette</a>. For
+undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model
 vignette</a>.</p>
 <p>The basic data structure is a long data frame where dyads are stacked
 on top of each other and both members of a dyad appear as separate rows.
@@ -551,8 +554,9 @@ formulas.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cross_distinguishable_model</span><span class="op">)</span></span></code></pre></div>
-<p>Note that models are not run and summarized in this vignette. For
-more infos See the vignette !TODO insert link to APIM vignette.</p>
+<p>Models are not run and summarized in this vignette. For fitted APIM
+examples, see the <a href="apim.html">Actor-Partner Interdependence
+Model vignette</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="exchangeable-gaussian-apim">Exchangeable Gaussian APIM<a class="anchor" aria-label="anchor" href="#exchangeable-gaussian-apim"></a>
@@ -908,9 +912,8 @@ work), and you can use different separators like ‘male_female’,
 compositions in the same data object: distinguishable female-male dyads
 and exchangeable female-female and male-male dyads.</p>
 <p>Here, we focus on the preparation steps that are possible with
-<code>interdep</code>. For example models for multilevel models with
-multiple different types of distinguishable and indistinguishable dyads
-and a discussion, check the vignette here: !TODO add link.</p>
+<code>interdep</code>. For model formulas that combine distinguishable
+and exchangeable dyads in the same analysis, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_dyadic_crosssectional_mixed</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 640 × 4</span></span></span>
@@ -974,8 +977,10 @@ automatically:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>We can use this data to model these dyad types as separate (see
-Vignette X). ! TODO</p>
+<p>We can use this data to model these dyad types as separate or in the
+same model; the <a href="apim.html">Actor-Partner Interdependence Model
+vignette</a> shows both mixed-composition formulas and practical
+convergence notes.</p>
 <p>However, sometimes for theoretical or practical reasons, we may want
 to pool different exchangeable dyads and analyze them as if they were
 one. This also allows to test various constraints via model
@@ -1082,8 +1087,9 @@ exchangeable:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 630 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;, .i_is_same_sex &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;, .i_diff_same_sex &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>If you want to exclude some dyad compositions completely, you may
-filter them. !TODO feature coming.</p>
+<p>If you want to exclude some dyad compositions completely, filter them
+before preparation. A dedicated composition-inclusion argument is
+planned.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

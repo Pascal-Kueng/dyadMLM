@@ -12,7 +12,11 @@ parameterizations. For broader guidance on fitting dyadic multilevel
 models with `interdep`-prepared data, especially APIMs with multiple
 dyad types, generalized outcomes, intensive longitudinal models, and
 optimizer choices, see the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
+vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md)
+and the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
+undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 
 ## Cross-Sectional Gaussian DIM
 
