@@ -43,6 +43,27 @@ test_that("DSM role order is required exactly with DSM preparation", {
   )
 })
 
+test_that("DIM and DSM cannot be requested together", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      model_type = c("dim", "dsm"),
+      dsm_role_order = c("female", "male")
+    ),
+    '`model_type = "dim"` and `model_type = "dsm"` cannot be combined.',
+    fixed = TRUE
+  )
+})
+
 test_that("DSM role order contains two distinct role values", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

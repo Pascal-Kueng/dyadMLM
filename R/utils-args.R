@@ -30,6 +30,15 @@ normalize_model_type <- function(model_type) {
     )
   }
 
+  if (all(c("dim", "dsm") %in% model_type)) {
+    stop(
+      '`model_type = "dim"` and `model_type = "dsm"` cannot be combined. ',
+      "DIM currently requires one exchangeable dyad composition, whereas DSM requires one distinguishable dyad composition. ",
+      "Prepare the two model parameterizations in separate calls.",
+      call. = FALSE
+    )
+  }
+
   model_type
 }
 

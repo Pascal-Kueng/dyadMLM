@@ -20,6 +20,29 @@ add_dyadic_score_columns <- function(data) {
 
   validate_dsm_compatibility(data)
 
+  meta_data <- attr(data, "interdep")
+
+  group <- meta_data$group
+  member <- meta_data$member
+  has_time <- meta_data$longitudinal
+  time <- meta_data$time
+
+  predictors <- meta_data$predictors
+  model_type <- meta_data$model_type
+  dsm_role_order <- meta_data$dsm_role_order
+
+  out <- data
+
+  if (!"dim" %in% model_type) {
+    out <- add_dyad_individual_columns(data)
+  }
+
+  # . . . .
+
+  if (!"dim" %in% model_type) {
+    out[[dim_only_diff_cols]] <- NULL
+  }
+
   data
 }
 

@@ -187,6 +187,7 @@ prepare_interdep_data <- function(
     pool_compositions = pool_compositions
   )
 
+  # Validate model compatibilities
   if ("dsm" %in% model_type) {
     validate_dsm_compatibility(out)
   }
@@ -198,6 +199,7 @@ prepare_interdep_data <- function(
     validate_dim_compatibility(out)
   }
 
+  # Add model cols
   if ("apim" %in% model_type) {
     out <- add_actor_partner_columns(out)
   }
