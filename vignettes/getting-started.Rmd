@@ -21,6 +21,15 @@ knitr::opts_chunk$set(
 library(interdep)
 ```
 
+## Installation
+
+You can install the development version of `interdep` from GitHub with:
+
+```{r installation, eval=FALSE}
+# install.packages("pak")
+pak::pak("Pascal-Kueng/interdep")
+```
+
 ## About this Vignette
 
 `interdep` helps researchers prepare cross-sectional and intensive longitudinal
