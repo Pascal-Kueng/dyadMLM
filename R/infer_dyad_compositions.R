@@ -16,8 +16,9 @@
 #'
 #' @return An `interdep_data` object with added `.i_composition` and
 #'   `.i_composition_role` factor columns, `.i_is_*` numeric indicator columns,
-#'   composition-specific `.i_diff_*` columns for exchangeable dyads, and dyad
-#'   composition metadata.
+#'   composition-specific numeric `.i_diff_*` contrast columns coded `-1` and
+#'   `1` for the two members of matching exchangeable dyads and `0` otherwise,
+#'   and dyad composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NULL,
@@ -174,7 +175,8 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
     by = group_name
   )
 
-  # Only exchangeable dyads need arbitrary labels to construct .i_diff_*.
+  # Only exchangeable dyads need arbitrary labels for their difference
+  # contrasts.
   exchangeable_data <- data[data[[interdep_dyad_type_col]] == "exchangeable", , drop = FALSE]
   arbitrary_roles <- assign_arbitrary_member_roles(
     exchangeable_data,
@@ -197,8 +199,8 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
     as.character(data[[interdep_composition_col]])
   )
 
-  # Add a temporary pooled contrast, then use it to create composition-specific
-  # .i_diff_* columns in finalize_composition_columns().
+  # Add a temporary pooled contrast, then expand it into one contrast column
+  # per exchangeable composition in finalize_composition_columns().
   data[[interdep_diff_col]] <- ifelse(
     data[[interdep_dyad_type_col]] == "exchangeable",
     ifelse(data[[interdep_arbitrary_role_col]] == "arbitrary_1", -1, 1),
@@ -503,10 +505,24 @@ finalize_composition_columns <- function(data) {
   composition_suffixes <- make_interdep_suffixes(
     data[[interdep_composition_col]][data[[interdep_diff_col]] != 0]
   )
+  role_was_supplied <- !is.null(attr(data, "interdep")$role)
 
   for (composition in sort(names(composition_suffixes))) {
     is_composition <- as.character(data[[interdep_composition_col]]) == composition
-    data[[paste0(interdep_reserved_prefix, "diff_", composition_suffixes[[composition]])]] <- ifelse(
+    diff_column <- if (
+      !role_was_supplied &&
+        identical(composition, interdep_assumed_exchangeable_label)
+    ) {
+      paste0(interdep_reserved_prefix, "diff_arbitrary")
+    } else {
+      paste0(
+        interdep_reserved_prefix,
+        "diff_",
+        composition_suffixes[[composition]],
+        "_arbitrary"
+      )
+    }
+    data[[diff_column]] <- ifelse(
       is_composition,
       data[[interdep_diff_col]],
       0

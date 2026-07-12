@@ -103,7 +103,8 @@ exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 The original data as a tibble with class \code{interdep_data},
 \code{.i_composition} and \code{.i_composition_role} factor columns,
 \verb{.i_is_*} numeric indicator columns, composition-specific
-\verb{.i_diff_*} columns for exchangeable dyads, and an \code{interdep} attribute
+numeric \verb{.i_diff_*} contrast columns coded \code{-1} and \code{1} for the two members
+of matching exchangeable dyads and \code{0} otherwise, and an \code{interdep} attribute
 containing structural metadata, \code{dyad_compositions}, and predictor metadata
 such as \code{temporal_predictor_decompositions}, \code{apim_predictors}, and
 \code{dim_predictors} when applicable.

@@ -122,7 +122,7 @@ added_columns_for_print <- function(x, meta) {
     ".i_composition",       "inferred dyad composition",
     ".i_composition_role",  "composition-specific member role",
     ".i_is_*",              "composition-role indicator columns",
-    ".i_diff_*",            "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions"
+    ".i_diff_*",            "composition-specific sum-diff contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
   )
   show_fixed_added_columns <- c(
     interdep_composition_col %in% names(x),

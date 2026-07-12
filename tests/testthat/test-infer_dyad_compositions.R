@@ -30,8 +30,10 @@ test_that("infer_dyad_compositions counts role compositions", {
       ".i_is_male_x_male"
     )
   )
-  expect_true(".i_diff_female_x_female" %in% names(result))
-  expect_true(".i_diff_male_x_male" %in% names(result))
+  expect_true(".i_diff_female_x_female_arbitrary" %in% names(result))
+  expect_true(".i_diff_male_x_male_arbitrary" %in% names(result))
+  expect_false(".i_diff_female_x_female" %in% names(result))
+  expect_false(".i_diff_male_x_male" %in% names(result))
   expect_true(all(sapply(result[indicator_names], is.numeric)))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
 
@@ -68,10 +70,10 @@ test_that("infer_dyad_compositions counts role compositions", {
       "male_x_male", "male_x_male")
   )
   expect_false(interdep_diff_col %in% names(result))
-  expect_equal(abs(result$.i_diff_female_x_female[result$dyad_id == 3]), rep(1, 2))
-  expect_equal(abs(result$.i_diff_male_x_male[result$dyad_id == 4]), rep(1, 2))
-  expect_equal(result$.i_diff_female_x_female[result$dyad_id != 3], rep(0, 6))
-  expect_equal(result$.i_diff_male_x_male[result$dyad_id != 4], rep(0, 6))
+  expect_equal(abs(result$.i_diff_female_x_female_arbitrary[result$dyad_id == 3]), rep(1, 2))
+  expect_equal(abs(result$.i_diff_male_x_male_arbitrary[result$dyad_id == 4]), rep(1, 2))
+  expect_equal(result$.i_diff_female_x_female_arbitrary[result$dyad_id != 3], rep(0, 6))
+  expect_equal(result$.i_diff_male_x_male_arbitrary[result$dyad_id != 4], rep(0, 6))
 })
 
 test_that("composition-specific diff signs do not depend on distinguishable dyads", {
@@ -106,12 +108,12 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
     infer_dyad_compositions(seed = 123)
 
   expect_equal(
-    mixed_result$.i_diff_female_x_female[mixed_result$dyad_id == 2],
-    exchangeable_result$.i_diff_female_x_female[exchangeable_result$dyad_id == 2]
+    mixed_result$.i_diff_female_x_female_arbitrary[mixed_result$dyad_id == 2],
+    exchangeable_result$.i_diff_female_x_female_arbitrary[exchangeable_result$dyad_id == 2]
   )
   expect_equal(
-    mixed_result$.i_diff_male_x_male[mixed_result$dyad_id == 3],
-    exchangeable_result$.i_diff_male_x_male[exchangeable_result$dyad_id == 3]
+    mixed_result$.i_diff_male_x_male_arbitrary[mixed_result$dyad_id == 3],
+    exchangeable_result$.i_diff_male_x_male_arbitrary[exchangeable_result$dyad_id == 3]
   )
 })
 
@@ -138,8 +140,9 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
   expect_true(".i_is_female_x_male" %in% names(result))
   expect_false(".i_is_female_x_male_female" %in% names(result))
   expect_false(".i_is_female_x_male_male" %in% names(result))
-  expect_true(".i_diff_female_x_male" %in% names(result))
-  expect_equal(abs(result$.i_diff_female_x_male), rep(1, 4))
+  expect_true(".i_diff_female_x_male_arbitrary" %in% names(result))
+  expect_false(".i_diff_female_x_male" %in% names(result))
+  expect_equal(abs(result$.i_diff_female_x_male_arbitrary), rep(1, 4))
   expect_equal(as.character(result$.i_composition), rep("female_x_male", 4))
   expect_equal(as.character(result$.i_composition_role), rep("female_x_male", 4))
   expect_equal(
@@ -244,9 +247,10 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
     )
 
   expect_true(".i_is_same_sex" %in% names(result))
-  expect_true(".i_diff_same_sex" %in% names(result))
-  expect_false(".i_diff_female_x_female" %in% names(result))
-  expect_false(".i_diff_male_x_male" %in% names(result))
+  expect_true(".i_diff_same_sex_arbitrary" %in% names(result))
+  expect_false(".i_diff_same_sex" %in% names(result))
+  expect_false(".i_diff_female_x_female_arbitrary" %in% names(result))
+  expect_false(".i_diff_male_x_male_arbitrary" %in% names(result))
   expect_equal(as.character(result$.i_composition), rep("same_sex", 4))
   expect_equal(as.character(result$.i_composition_role), rep("same_sex", 4))
 
@@ -259,6 +263,34 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
       pooled_from = "female_x_female, male_x_male",
       n_dyads = 2L
     )
+  )
+})
+
+test_that("role-aware pools named assumed_exchangeable retain composition-specific naming", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "female", "male", "male")
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role
+  ) |>
+    infer_dyad_compositions(
+      seed = 123,
+      pool_compositions = list(
+        assumed_exchangeable = c("female-female", "male-male")
+      )
+    )
+
+  expect_true(".i_diff_assumed_exchangeable_arbitrary" %in% names(result))
+  expect_false(".i_diff_arbitrary" %in% names(result))
+  expect_equal(
+    abs(result$.i_diff_assumed_exchangeable_arbitrary),
+    rep(1, 4)
   )
 })
 
@@ -297,9 +329,10 @@ test_that("infer_dyad_compositions preserves unpooled exchangeable compositions"
     as.character(result$.i_composition_role),
     c(rep("same_sex", 4), rep("friend_x_friend", 2))
   )
-  expect_true(".i_diff_friend_x_friend" %in% names(result))
-  expect_false(".i_diff_female_x_female" %in% names(result))
-  expect_false(".i_diff_male_x_male" %in% names(result))
+  expect_true(".i_diff_friend_x_friend_arbitrary" %in% names(result))
+  expect_false(".i_diff_friend_x_friend" %in% names(result))
+  expect_false(".i_diff_female_x_female_arbitrary" %in% names(result))
+  expect_false(".i_diff_male_x_male_arbitrary" %in% names(result))
 })
 
 test_that("infer_dyad_compositions pools after setting compositions exchangeable", {
@@ -332,7 +365,8 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
   )
   expect_equal(dyad_compositions$n_dyads, 3L)
   expect_true(".i_is_romantic_couples" %in% names(result))
-  expect_true(".i_diff_romantic_couples" %in% names(result))
+  expect_true(".i_diff_romantic_couples_arbitrary" %in% names(result))
+  expect_false(".i_diff_romantic_couples" %in% names(result))
 })
 
 test_that("infer_dyad_compositions rejects pooling distinguishable compositions", {
@@ -564,9 +598,9 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
       "female_x_female", "female_x_female",
       "female_x_female", "female_x_female")
   )
-  expect_true(".i_diff_female_x_female" %in% names(result))
-  expect_equal(result$.i_diff_female_x_female[result$dyad_id == 1], rep(0, 4))
-  expect_equal(abs(result$.i_diff_female_x_female[result$dyad_id == 2]), rep(1, 4))
+  expect_true(".i_diff_female_x_female_arbitrary" %in% names(result))
+  expect_equal(result$.i_diff_female_x_female_arbitrary[result$dyad_id == 1], rep(0, 4))
+  expect_equal(abs(result$.i_diff_female_x_female_arbitrary[result$dyad_id == 2]), rep(1, 4))
 })
 
 test_that("infer_dyad_compositions handles ragged longitudinal rows", {
@@ -650,9 +684,10 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_true(is.factor(result$.i_composition))
   expect_true(is.factor(result$.i_composition_role))
   expect_true(".i_is_assumed_exchangeable" %in% names(result))
-  expect_true(".i_diff_assumed_exchangeable" %in% names(result))
+  expect_true(".i_diff_arbitrary" %in% names(result))
+  expect_false(".i_diff_assumed_exchangeable" %in% names(result))
   expect_false(interdep_diff_col %in% names(result))
-  expect_equal(abs(result$.i_diff_assumed_exchangeable), rep(1, 4))
+  expect_equal(abs(result$.i_diff_arbitrary), rep(1, 4))
   expect_equal(
     as.character(result$.i_composition),
     rep("assumed_exchangeable", 4)

@@ -137,7 +137,7 @@ test_that("interdep data print describes generated predictor columns", {
   expect_added_column_description(
     printed,
     ".i_diff_*",
-    "composition-specific sum-diff contrasts; 0 for distinguishable dyads or other exchangeable compositions"
+    "composition-specific sum-diff contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
   )
   expect_true(any(grepl(".i_*_raw_actor", printed, fixed = TRUE)))
   expect_added_column_description(

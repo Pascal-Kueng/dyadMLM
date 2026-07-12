@@ -78,7 +78,8 @@
 #' @return The original data as a tibble with class `interdep_data`,
 #'   `.i_composition` and `.i_composition_role` factor columns,
 #'   `.i_is_*` numeric indicator columns, composition-specific
-#'   `.i_diff_*` columns for exchangeable dyads, and an `interdep` attribute
+#'   numeric `.i_diff_*` contrast columns coded `-1` and `1` for the two members
+#'   of matching exchangeable dyads and `0` otherwise, and an `interdep` attribute
 #'   containing structural metadata, `dyad_compositions`, and predictor metadata
 #'   such as `temporal_predictor_decompositions`, `apim_predictors`, and
 #'   `dim_predictors` when applicable.

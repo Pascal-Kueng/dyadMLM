@@ -31,8 +31,9 @@ resolve to at least two distinct observed compositions.}
 \value{
 An \code{interdep_data} object with added \code{.i_composition} and
 \code{.i_composition_role} factor columns, \verb{.i_is_*} numeric indicator columns,
-composition-specific \verb{.i_diff_*} columns for exchangeable dyads, and dyad
-composition metadata.
+composition-specific numeric \verb{.i_diff_*} contrast columns coded \code{-1} and
+\code{1} for the two members of matching exchangeable dyads and \code{0} otherwise,
+and dyad composition metadata.
 }
 \description{
 Builds a dyad-level summary of role compositions from a validated

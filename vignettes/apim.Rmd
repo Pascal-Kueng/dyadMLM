@@ -127,7 +127,7 @@ tweedie_exchangeable_model <- glmmTMB(
     .i_motivation_raw_partner +
     
     # exchangeable latent dyad block on the log-mean scale
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID)
+    (1 | coupleID) + (0 + .i_diff_arbitrary | coupleID)
     
   # estimate a single pooled Tweedie dispersion parameter
   , dispformula = ~ 1
@@ -364,10 +364,10 @@ ild_tweedie_exchangeable_model <- glmmTMB(
     .i_provided_support_cbp_partner +
 
     # stable exchangeable latent covariance
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable | coupleID) +
+    (1 | coupleID) + (0 + .i_diff_arbitrary | coupleID) +
   
     # same-day exchangeable latent covariance
-    (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable | coupleID:diaryday)
+    (1 | coupleID:diaryday) + (0 + .i_diff_arbitrary | coupleID:diaryday)
 
   # pooled dispersion; exchangeable positions should not define dispersion differences
   , dispformula = ~ 1
@@ -451,11 +451,11 @@ mixed_cross_gaussian_model <- glmmTMB(
 
     # exchangeable female-female residual covariance via sum-diff
     (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
 
     # exchangeable male-male residual covariance via sum-diff
     (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male | coupleID)
+    (0 + .i_diff_male_x_male_arbitrary | coupleID)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -587,19 +587,19 @@ mixed_ild_gaussian_model <- glmmTMB(
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
     
     (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
     
     (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male | coupleID) +
+    (0 + .i_diff_male_x_male_arbitrary | coupleID) +
 
     # same-day covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
     
     (0 + .i_is_female_x_female | coupleID:diaryday) +
-    (0 + .i_diff_female_x_female | coupleID:diaryday) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID:diaryday) +
     
     (0 + .i_is_male_x_male | coupleID:diaryday) +
-    (0 + .i_diff_male_x_male | coupleID:diaryday)
+    (0 + .i_diff_male_x_male_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -703,19 +703,19 @@ mixed_ild_tweedie_model <- glmmTMB(
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
     
     (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
     
     (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male | coupleID) +
+    (0 + .i_diff_male_x_male_arbitrary | coupleID) +
 
     # same-day latent covariance
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
     
     (0 + .i_is_female_x_female | coupleID:diaryday) +
-    (0 + .i_diff_female_x_female | coupleID:diaryday) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID:diaryday) +
     
     (0 + .i_is_male_x_male | coupleID:diaryday) +
-    (0 + .i_diff_male_x_male | coupleID:diaryday)
+    (0 + .i_diff_male_x_male_arbitrary | coupleID:diaryday)
 
     # recommended first simplification in convergence issues is to set dispfomula = ~ 1
   , dispformula = ~ 0 +

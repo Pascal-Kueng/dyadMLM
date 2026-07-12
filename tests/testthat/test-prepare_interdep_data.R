@@ -58,8 +58,10 @@ test_that("prepare_interdep_data returns validated data with dyad composition me
       "female_x_female", "female_x_female",
       "male_x_male", "male_x_male")
   )
-  expect_true(".i_diff_female_x_female" %in% names(result))
-  expect_true(".i_diff_male_x_male" %in% names(result))
+  expect_true(".i_diff_female_x_female_arbitrary" %in% names(result))
+  expect_true(".i_diff_male_x_male_arbitrary" %in% names(result))
+  expect_false(".i_diff_female_x_female" %in% names(result))
+  expect_false(".i_diff_male_x_male" %in% names(result))
 })
 
 test_that("prepare_interdep_data stores predictor metadata", {
@@ -201,7 +203,8 @@ test_that("prepare_interdep_data can set a distinguishable composition exchangea
   )
 
   expect_equal(attr(result, "interdep")$dyad_compositions$dyad_type, "exchangeable")
-  expect_true(".i_diff_female_x_male" %in% names(result))
+  expect_true(".i_diff_female_x_male_arbitrary" %in% names(result))
+  expect_false(".i_diff_female_x_male" %in% names(result))
   expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
 })
@@ -237,7 +240,8 @@ test_that("prepare_interdep_data can pool exchangeable compositions for DIM", {
     dyad_compositions$pooled_from,
     "female_x_female, female_x_male, male_x_male"
   )
-  expect_true(".i_diff_romantic_couples" %in% names(result))
+  expect_true(".i_diff_romantic_couples_arbitrary" %in% names(result))
+  expect_false(".i_diff_romantic_couples" %in% names(result))
   expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
 })
@@ -255,7 +259,8 @@ test_that("prepare_interdep_data treats data without role as assumed exchangeabl
   expect_true(is.factor(result$.i_composition_role))
   expect_true(".i_is_assumed_exchangeable" %in% names(result))
   expect_false(".i_diff" %in% names(result))
-  expect_true(".i_diff_assumed_exchangeable" %in% names(result))
+  expect_true(".i_diff_arbitrary" %in% names(result))
+  expect_false(".i_diff_assumed_exchangeable" %in% names(result))
   expect_equal(as.character(result$.i_composition), rep("assumed_exchangeable", 4))
   expect_equal(
     as.character(result$.i_composition_role),
@@ -405,8 +410,8 @@ test_that("prepare_interdep_data filters included compositions before finalizing
   expect_equal(levels(result$.i_composition_role), c("female_x_female", "male_x_male"))
   expect_true(".i_is_female_x_female" %in% names(result))
   expect_true(".i_is_male_x_male" %in% names(result))
-  expect_true(".i_diff_female_x_female" %in% names(result))
-  expect_true(".i_diff_male_x_male" %in% names(result))
+  expect_true(".i_diff_female_x_female_arbitrary" %in% names(result))
+  expect_true(".i_diff_male_x_male_arbitrary" %in% names(result))
   expect_false(any(grepl("female_x_male", names(result), fixed = TRUE)))
 
   expect_error(
@@ -500,7 +505,7 @@ test_that("prepare_interdep_data can filter, constrain, and pool in one call", {
   expect_equal(dyad_compositions$n_dyads, 3L)
   expect_equal(levels(result$.i_composition), "romantic_couples")
   expect_false(any(grepl("nonbinary", names(result), fixed = TRUE)))
-  expect_true(".i_diff_romantic_couples" %in% names(result))
+  expect_true(".i_diff_romantic_couples_arbitrary" %in% names(result))
   expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
   expect_equal(attr(result, "interdep")$dim_predictors$predictor, "x")

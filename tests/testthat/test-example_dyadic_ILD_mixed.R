@@ -38,15 +38,15 @@ check_mixed_dyad_type_ild_dataset <- function(data, outcome) {
   )
   expect_equal(dyad_compositions$n_dyads, c(60L, 80L, 60L))
   expect_false(interdep_diff_col %in% names(prepared))
-  expect_true(".i_diff_female_x_female" %in% names(prepared))
-  expect_true(".i_diff_male_x_male" %in% names(prepared))
+  expect_true(".i_diff_female_x_female_arbitrary" %in% names(prepared))
+  expect_true(".i_diff_male_x_male_arbitrary" %in% names(prepared))
 
   female_female <- prepared$.i_composition == "female_x_female"
   male_male <- prepared$.i_composition == "male_x_male"
-  expect_true(all(abs(prepared$.i_diff_female_x_female[female_female]) == 1))
-  expect_true(all(prepared$.i_diff_female_x_female[!female_female] == 0))
-  expect_true(all(abs(prepared$.i_diff_male_x_male[male_male]) == 1))
-  expect_true(all(prepared$.i_diff_male_x_male[!male_male] == 0))
+  expect_true(all(abs(prepared$.i_diff_female_x_female_arbitrary[female_female]) == 1))
+  expect_true(all(prepared$.i_diff_female_x_female_arbitrary[!female_female] == 0))
+  expect_true(all(abs(prepared$.i_diff_male_x_male_arbitrary[male_male]) == 1))
+  expect_true(all(prepared$.i_diff_male_x_male_arbitrary[!male_male] == 0))
 }
 
 test_that("ILD Gaussian example data with mixed dyad types has expected structure", {
