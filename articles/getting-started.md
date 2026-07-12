@@ -307,11 +307,10 @@ work), and you can use different separators like `male_female`,
 `male_x_female`, or `male female`.
 
 For exchangeable dyads, we can also request DIM and undirected DSM
-columns. This works here because omitting `role` treats all dyads as a
-single type of exchangeable dyads, and DIM and undirected DSM currently
-require exchangeable dyads. Undirected DSM preparation additionally
-needs `outcomes`, because it creates dyad-mean and within-dyad-deviation
-columns for both the predictor and the outcome.
+predictor columns. This works here because omitting `role` treats all
+dyads as a single type of exchangeable dyads, and DIM and undirected DSM
+currently require exchangeable dyads. The outcome remains unchanged and
+is selected later in the model formula.
 
 ``` r
 
@@ -320,7 +319,6 @@ cross_dim_dsm_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   predictors = communication,
-  outcomes = satisfaction,
   model_type = c("dim", "undirected_dsm"),
   seed = 123
 )
@@ -345,12 +343,8 @@ print(cross_dim_dsm_data, n = 4)
 #> #                                    predictor level, grand-mean centered
 #> #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:
 #> #                                    person's difference from the dyad average
-#> #   .i_{out}_dyad_mean               DSM dyad-mean outcome: dyad's average
-#> #                                    outcome level
-#> #   .i_{out}_within_dyad_deviation   DSM within-dyad outcome deviation:
-#> #                                    person's difference from the dyad average
 #> #
-#> # A tibble: 190 × 13
+#> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .i_composition      
 #>      <int>    <int> <fct>          <dbl>        <dbl> <fct>               
 #> 1        1        1 female          4.79         4.37 assumed_exchangeable
@@ -358,12 +352,11 @@ print(cross_dim_dsm_data, n = 4)
 #> 3        3        2 female          2.91         2.44 assumed_exchangeable
 #> 4        4        2 male            6.51         6.08 assumed_exchangeable
 #> # ℹ 186 more rows
-#> # ℹ 7 more variables: .i_composition_role <fct>,
+#> # ℹ 5 more variables: .i_composition_role <fct>,
 #> #   .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_communication_dyad_mean_gmc <dbl>,
-#> #   .i_communication_within_dyad_deviation <dbl>,
-#> #   .i_satisfaction_dyad_mean <dbl>, …
+#> #   .i_communication_within_dyad_deviation <dbl>
 ```
 
 ## Incomplete dyads and missing roles

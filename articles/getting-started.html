@@ -451,19 +451,16 @@ order of members does not matter (e.g., <code>male-female</code> and
 separators like <code>male_female</code>, <code>male_x_female</code>, or
 <code>male female</code>.</p>
 <p>For exchangeable dyads, we can also request DIM and undirected DSM
-columns. This works here because omitting <code>role</code> treats all
-dyads as a single type of exchangeable dyads, and DIM and undirected DSM
-currently require exchangeable dyads. Undirected DSM preparation
-additionally needs <code>outcomes</code>, because it creates dyad-mean
-and within-dyad-deviation columns for both the predictor and the
-outcome.</p>
+predictor columns. This works here because omitting <code>role</code>
+treats all dyads as a single type of exchangeable dyads, and DIM and
+undirected DSM currently require exchangeable dyads. The outcome remains
+unchanged and is selected later in the model formula.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dim_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
-<span>  outcomes <span class="op">=</span> <span class="va">satisfaction</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dim"</span>, <span class="st">"undirected_dsm"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
@@ -488,12 +485,8 @@ outcome.</p>
 <span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
 <span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
-<span><span class="co">#&gt; #   .i_{out}_dyad_mean               DSM dyad-mean outcome: dyad's average</span></span>
-<span><span class="co">#&gt; #                                    outcome level</span></span>
-<span><span class="co">#&gt; #   .i_{out}_within_dyad_deviation   DSM within-dyad outcome deviation:</span></span>
-<span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 13</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 11</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition      </span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 assumed_exchangeable</span></span>
@@ -501,12 +494,11 @@ outcome.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_deviation &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="incomplete-dyads-and-missing-roles">Incomplete dyads and missing roles<a class="anchor" aria-label="anchor" href="#incomplete-dyads-and-missing-roles"></a>

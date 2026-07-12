@@ -56,7 +56,6 @@ and model-ready columns for dyadic multilevel model parameterizations.</p>
 <span>  role <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  outcomes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -104,18 +103,14 @@ measures.</p></dd>
 decomposition and model-ready predictor construction.</p></dd>
 
 
-<dt id="arg-outcomes">outcomes<a class="anchor" aria-label="anchor" href="#arg-outcomes"></a></dt>
-<dd><p>Optional variables to use for model-ready outcome construction.
-Currently only needed for <code>model_type = "undirected_dsm"</code>.</p></dd>
-
-
 <dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
 <dd><p>Model-ready column families to construct. Can contain one
 or more of <code>"apim"</code>, <code>"dim"</code>, and <code>"undirected_dsm"</code>. <code>"apim"</code> creates
 actor and partner predictors. <code>"dim"</code> creates dyad-mean and
 within-dyad-deviation predictors. <code>"undirected_dsm"</code> creates undirected
-dyadic-score model columns. <code>"none"</code> skips model-specific predictor and
-outcome construction after validation, composition inference, and optional
+dyadic-score model predictor columns. Outcomes remain unchanged and are
+selected in the fitted-model formula. <code>"none"</code> skips model-specific predictor
+construction after validation, composition inference, and optional
 temporal predictor decomposition, and must be used alone.</p></dd>
 
 

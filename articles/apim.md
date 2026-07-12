@@ -744,6 +744,10 @@ ild_tweedie_exchangeable_model <- glmmTMB(
 summary(ild_tweedie_exchangeable_model)
 ```
 
+## Back transforming the variance-covariance matrix from Idiff to actor-partner
+
+-\> should be the next model function?
+
 For models that combine distinguishable and exchangeable dyad
 compositions, continue with the [Mixed-Composition APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).

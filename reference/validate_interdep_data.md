@@ -16,7 +16,6 @@ validate_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
-  outcomes = NULL,
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
@@ -54,18 +53,11 @@ validate_interdep_data(
   Optional variables to select and store as metadata for temporal
   predictor decomposition and model-helper functions.
 
-- outcomes:
-
-  Optional variables to select and store as metadata for outcome-side
-  model-helper functions. Currently used by
-  `model_type = "undirected_dsm"`.
-
 - model_type:
 
   Requested model-ready column families. Can contain one or more of
   `"apim"`, `"dim"`, and `"undirected_dsm"`. `"none"` indicates no
-  model-specific predictor or outcome construction and must be used
-  alone.
+  model-specific predictor construction and must be used alone.
 
 - temporal_predictor_decomposition:
 
