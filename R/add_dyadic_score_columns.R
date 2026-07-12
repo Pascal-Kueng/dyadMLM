@@ -33,41 +33,46 @@ add_dyadic_score_columns <- function(data) {
     -0.5
   )
 
-  # Calling the same function the DIM uses
   decomposition <- construct_dyad_predictor_decompositions(data)
 
   out <- decomposition$data
-  difference_cols <- vapply(
-    seq_len(nrow(decomposition$predictors)),
-    function(i) {
-      predictor <- decomposition$predictors$predictor[[i]]
-      component <- decomposition$predictors$component[[i]]
-      source_col <- decomposition$predictors$source_column[[i]]
+  n_predictors <- nrow(decomposition$predictors)
+  difference_cols <- character(n_predictors)
 
-      column_stem <- make_dyad_predictor_column_stem(
-        predictor = predictor,
-        component = component,
-        source_col = source_col
-      )
-      paste0(column_stem, "_dyad_difference")
-    },
-    character(1)
-  )
-
-  dsm_predictors <- decomposition$predictors |>
-    dplyr::mutate(difference_column = difference_cols, .after = "mean_column") |>
-    dplyr::select(-"deviation_column")
-
-  for (i in seq_len(nrow(decomposition$predictors))) {
+  for (i in seq_len(n_predictors)) {
+    predictor <- decomposition$predictors$predictor[[i]]
+    component <- decomposition$predictors$component[[i]]
+    source_col <- decomposition$predictors$source_column[[i]]
     deviation_col <- decomposition$predictors$deviation_column[[i]]
-    difference_col <- dsm_predictors$difference_column[[i]]
 
-    # Member deviation = role contrast * full directional difference.
+    column_stem <- make_dyad_predictor_column_stem(
+      predictor = predictor,
+      component = component,
+      source_col = source_col
+    )
+    difference_col <- paste0(column_stem, "_dyad_difference")
+
+    difference_cols[[i]] <- difference_col
+
+    # Deviation = role contrast * full directional difference, so division
+    # recovers the same role-1-minus-role-2 score on both member rows.
     out[[difference_col]] <-
       out[[deviation_col]] / out[[interdep_dsm_role_contrast_col]]
   }
 
-  deviation_cols <- unique(decomposition$predictors$deviation_column)
+  # update metadata (generic to dsm specific)
+  dsm_predictors <- decomposition$predictors |>
+    dplyr::mutate(
+      difference_column = difference_cols,
+      .after = "mean_column"
+    ) |>
+    # The deviation col is not needed anymore (DIM deviation pred) and is removed
+    # from the metadata
+    dplyr::select(-"deviation_column")
+
+  # We also remove the temp cols (DIM deviatin cols) from the actual
+  # dataframe.
+  deviation_cols <- decomposition$predictors$deviation_column
   if (length(deviation_cols) > 0) {
     out[deviation_cols] <- NULL
   }
