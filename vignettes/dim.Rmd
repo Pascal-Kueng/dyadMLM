@@ -26,8 +26,9 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 This vignette focuses on the Dyad-Individual Model (DIM) for dyadic multilevel
 models and its relationship to the Actor-Partner Interdependence Model (APIM).
 The DIM separates a predictor into the dyad's shared level and each member's
-deviation from that level. While the APIM focuses on two interdependent individuals, the DIM is closer to modeling a dyad-level process and a difference
-process between the partners in the dyad.
+deviation from that level. While the APIM expresses effects in terms of two
+interdependent individuals, the DIM expresses them in terms of the dyad's
+shared level and the contrast between partners.
 
 For the broader data-preparation workflow of the `interdep` package, see the
 [Getting Started vignette](getting-started.html). For distinguishable,
@@ -42,8 +43,9 @@ outcomes, see the
 
 The current DIM implementation prepares predictors for one exchangeable dyad
 composition. Exchangeability means that swapping the two member labels does not
-change the model. One way to make this assumption on the data preparation 
-layer is to omit `role` from `prepare_interdep_data()`. This treats all dyads as the same exchangeable composition.
+change the model. One way to make this assumption at the data-preparation layer
+is to omit `role` from `prepare_interdep_data()`. This treats all dyads as the
+same exchangeable composition.
 
 ```{r prepare-cross-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
@@ -60,7 +62,7 @@ cross_exchangeable_data <- prepare_interdep_data(
 print(cross_exchangeable_data, n = 4)
 ```
 
-The function creates arbitrary member labels encoding a member-difference 
+The function creates arbitrary member labels encoding a member-difference
 contrast `.i_diff_*` as 1 for one partner and -1 for the other. This is needed
 for the correct random effects specification. The fixed `seed` makes these
 arbitrary member labels reproducible.
@@ -119,7 +121,7 @@ research question.
 ### Example DIM Model
 
 For members \(j \in \{1, 2\}\) of dyad \(i\), the DIM decomposition is computed
-as: 
+as:
 
 $$
 \bar{x}_i = \frac{x_{i1} + x_{i2}}{2}, \qquad
@@ -134,10 +136,10 @@ shared level compared to all other couples.
 2. A within-dyad variable describing each partner's deviation from the couple
 mean, equivalently half the signed difference between partners.
 
-The resulting estimated fixed effects are a reparameterization of the APIM actor 
+The resulting estimated fixed effects are a reparameterization of the APIM actor
 and partner effects. The same random-effects structure can therefore be used for both
 fixed-effect parameterizations: a dyad-level intercept and a dyad-level
-difference contrast indexed by `.i_diff_assumed_exchangeable_arbitrary`. 
+difference contrast indexed by `.i_diff_assumed_exchangeable_arbitrary`.
 In `glmmTMB`, with `dispformula = ~ 0`, these random effects represent the two members' Gaussian residual variance and covariance.
 
 The intercept and difference contrast are specified as separate random-effects
@@ -178,28 +180,26 @@ summary(dim_1)
 message("Install glmmTMB to run the fitted-model examples in this vignette.")
 ```
 
-### Model interpretation 
+### Model interpretation
 
 Because this Gaussian model uses an identity link, fixed coefficients are
 interpreted in units of the outcome, e.g., "satisfaction":
 
 - The intercept (about 5.04) is the expected satisfaction
-  for a member whose communication equals the mean of a dyad, whose communication
-  is average.
+  when both members' communication equals the sample grand mean.
 
-- The dyad-mean estimate (about 2.00) means that for a person in a dyad with a 
-  one-point higher average communication while holding the difference between partners 
-  constant (i.e., both partners' communication is 1 unit higher than the reference), 
-  their satisfaction is expected to be 2.00 units higher.  
+- The dyad-mean estimate (about 2.00) means that for a person in a dyad with
+  one-point higher average communication, while holding the difference between
+  partners constant (i.e., both partners' communication is 1 unit higher than
+  the reference), expected satisfaction is 2.00 units higher.
 
-- The within-dyad-deviation estimate (about 1.52) means that a member whose
-  communication is one point higher than the dyad mean while holding the dyad mean
-  constant (i.e., their partner is 1 unit lower than the dyad mean), their 
-  satisfaction is expected to be 1.52 units higher (or 3.04 units higher than their
-  partner, since they are two units apart in that case). 
-    - A different and for some more intuitive interpretation is: If partners are 
-    1 unit apart (e.g., both are 0.5 units away from the dyad mean), their 
-    difference in satisfaction is expected to be 1.52 units too. 
+- The within-dyad-deviation estimate (about 1.52) means that a one-point
+  difference in communication between partners is associated with a 1.52-point
+  difference in their expected satisfaction, holding their average communication
+  constant. Equivalently, if one member is 1 point above the dyad mean while holding
+  the dyad mean constant, that implies the other is 1 point below the dyad mean. 
+  Then, the members are 2 points apart in communication and are expected to differ by 
+  3.04 points in satisfaction.
 
 ### Demonstrating model equivalence to APIM
 
@@ -236,7 +236,7 @@ data.frame(
 This demonstrates that the same statistical model is being estimated with different
 parameterizations and coefficient interpretations.
 
-Once APIM estimates are present, one can easily obtain DIM estimates, and 
+Once APIM estimates are present, one can easily obtain DIM estimates, and
 the other way around. The slope coefficients relate as follows:
 
 $$
@@ -917,11 +917,11 @@ b_dyad_mean <- dim_coef[[".i_communication_raw_dyad_mean_gmc"]]
 b_within_dyad <- dim_coef[[".i_communication_raw_within_dyad_deviation"]]
 
 
-cat("From APIM model:\n", 
+cat("From APIM model:\n",
      "  actor effect:                  ", round(b_actor, 3), "\n",
      "  partner effect:                ", round(b_partner, 3), "\n\n",
-     
-     "DIM transformation:\n", 
+
+     "DIM transformation:\n",
      "  actor effect + partner effect: ", round(b_actor + b_partner, 3), "\n",
      "  actor effect - partner effect: ", round(b_actor - b_partner, 3), "\n\n",
 
@@ -997,28 +997,28 @@ summary(dim_ILD)
 
 ```
 
-### Interpretation of ILD DIM coefficients 
+### Interpretation of ILD DIM coefficients
 
 The fitted coefficients can be interpreted as:
 
+- The `cbp` dyad-mean estimate (about 1.51) means that, comparing couples whose
+  average usual support differs by one point while holding the stable difference
+  between partners constant, a member of the higher-support couple is expected
+  to report 1.51 points higher closeness.
 
-- The `cbp` dyad-mean estimate (about 1.51) describes the expected closeness 
-  difference associtated with a one point difference in average support levels 
-  between couples (i.e., one couple has a 1 point higher average than another). 
+- The `cwp` dyad-mean estimate (about 0.49) means that when both members are one
+  point above their respective usual support levels, each member's expected
+  closeness is 0.49 points higher, holding the difference between their
+  momentary deviations constant.
 
-- The `cwp` dyad-mean estimate (about 0.49) describes the expected change in
-  closeness when both members are one point above their respective usual support
-  levels (i.e., a couples' dyad-mean is one point higher today than usual). 
+- The `cbp` within-dyad estimate (about 0.78) means that if partners differ by
+  one point in their usual support levels, they are expected to differ by 0.78
+  points in closeness, holding the couple's average usual support constant.
 
-- The `cbp` within-dyad estimate (about 0.78) describes the expected closeness
-  difference associated with a one-point difference between members in their
-  usual support levels (i.e., a persons' average level is one point higher
-  than their partners' average level). 
-  
-- The `cwp` within-dyad estimate (about 0.06) describes the expected change in 
-  closeness when there is a one-point difference between members in their
-  momentary deviations from usual support (i.e., a persons level today is 
-  one unit higher than their partners' level today).
+- The `cwp` within-dyad estimate (about 0.06) means that if one partner's
+  momentary deviation from usual support is one point higher than the other
+  partner's deviation, they are expected to differ by 0.06 points in closeness,
+  holding the occasion-specific dyad mean constant.
 
 ### Equivalence of APIM and DIM in ILD
 

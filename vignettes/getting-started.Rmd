@@ -53,7 +53,7 @@ For undirected dyadic score outcomes, see the [Undirected Dyadic Score Model vig
 
 The basic data structure needed for `interdep` is a long data frame where dyads
 are stacked on top of each other and both members of a dyad appear as separate
-rows. 
+rows.
 
 If your raw data are currently in wide format (for time or dyads or both),
 reshape them to this long structure before using `prepare_interdep_data()`. See the
@@ -301,7 +301,8 @@ print(ild_apim_data)
 By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This temporal
 predictor decomposition can be controlled via the
-`temporal_predictor_decomposition` argument. 
+`temporal_predictor_decomposition` argument. Use `"time_2l"` when within-person
+and between-person associations should be estimated separately.
 
 ## Data with multiple and mixed-composition dyads
 
