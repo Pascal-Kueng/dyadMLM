@@ -483,49 +483,15 @@ their original scale.
 
 In this example:
 
-``` r
-
-apim_coef <- glmmTMB::fixef(apim_1)$cond
-dim_coef <- glmmTMB::fixef(dim_1)$cond
-
-b_actor <- apim_coef[[".i_communication_raw_actor"]]
-b_partner <- apim_coef[[".i_communication_raw_partner"]]
-
-b_dyad_mean <- dim_coef[[".i_communication_raw_dyad_mean_gmc"]]
-b_within_dyad <- dim_coef[[".i_communication_raw_within_dyad_deviation"]]
-
-coefficient_comparison <- data.frame(
-  `DIM effect` = c("Dyad mean", "Within-dyad deviation"),
-  `APIM transformation` = c(
-    "actor effect + partner effect",
-    "actor effect - partner effect"
-  ),
-  `Transformed APIM estimate` = c(
-    b_actor + b_partner,
-    b_actor - b_partner
-  ),
-  `DIM model estimate` = c(b_dyad_mean, b_within_dyad),
-  check.names = FALSE
-)
-
-knitr::kable(
-  coefficient_comparison,
-  digits = 3,
-  align = c("l", "l", "r", "r"),
-  caption = sprintf(
-    "APIM estimates: actor effect = %.3f; partner effect = %.3f.",
-    b_actor,
-    b_partner
-  )
-)
-```
-
-| DIM effect | APIM transformation | Transformed APIM estimate | DIM model estimate |
-|:---|:---|---:|---:|
-| Dyad mean | actor effect + partner effect | 1.996 | 1.996 |
-| Within-dyad deviation | actor effect - partner effect | 1.520 | 1.520 |
-
-APIM estimates: actor effect = 1.758; partner effect = 0.238. {.table}
+    #> From APIM model:
+    #>   actor effect:                   1.758
+    #>   partner effect:                 0.238
+    #> DIM transformation:
+    #>   actor effect + partner effect:  1.996
+    #>   actor effect - partner effect:  1.52
+    #> From DIM model:
+    #>   dyad-mean effect:               1.996
+    #>   within-dyad-deviation effect:   1.52
 
 ## Intensive Longitudinal DIM
 

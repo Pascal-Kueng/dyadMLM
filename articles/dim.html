@@ -1049,70 +1049,15 @@ from both displayed equations.</p>
 DIM dyad mean is grand-mean centered, whereas the APIM predictors retain
 their original scale.</p>
 <p>In this example:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">apim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
-<span><span class="va">dim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
-<span></span>
-<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_actor"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_partner"</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">b_dyad_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">b_within_dyad</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_within_dyad_deviation"</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">coefficient_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  `DIM effect` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Dyad mean"</span>, <span class="st">"Within-dyad deviation"</span><span class="op">)</span>,</span>
-<span>  `APIM transformation` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"actor effect + partner effect"</span>,</span>
-<span>    <span class="st">"actor effect - partner effect"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `Transformed APIM estimate` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="va">b_actor</span> <span class="op">+</span> <span class="va">b_partner</span>,</span>
-<span>    <span class="va">b_actor</span> <span class="op">-</span> <span class="va">b_partner</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  `DIM model estimate` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">b_dyad_mean</span>, <span class="va">b_within_dyad</span><span class="op">)</span>,</span>
-<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="va">coefficient_comparison</span>,</span>
-<span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span>,</span>
-<span>  caption <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
-<span>    <span class="st">"APIM estimates: actor effect = %.3f; partner effect = %.3f."</span>,</span>
-<span>    <span class="va">b_actor</span>,</span>
-<span>    <span class="va">b_partner</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>APIM estimates: actor effect = 1.758; partner effect =
-0.238.</caption>
-<colgroup>
-<col width="22%">
-<col width="30%">
-<col width="26%">
-<col width="19%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">DIM effect</th>
-<th align="left">APIM transformation</th>
-<th align="right">Transformed APIM estimate</th>
-<th align="right">DIM model estimate</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Dyad mean</td>
-<td align="left">actor effect + partner effect</td>
-<td align="right">1.996</td>
-<td align="right">1.996</td>
-</tr>
-<tr class="even">
-<td align="left">Within-dyad deviation</td>
-<td align="left">actor effect - partner effect</td>
-<td align="right">1.520</td>
-<td align="right">1.520</td>
-</tr>
-</tbody>
-</table>
+<pre><code><span><span class="co">#&gt; From APIM model:</span></span>
+<span><span class="co">#&gt;   actor effect:                   1.758</span></span>
+<span><span class="co">#&gt;   partner effect:                 0.238</span></span>
+<span><span class="co">#&gt; DIM transformation:</span></span>
+<span><span class="co">#&gt;   actor effect + partner effect:  1.996</span></span>
+<span><span class="co">#&gt;   actor effect - partner effect:  1.52</span></span>
+<span><span class="co">#&gt; From DIM model:</span></span>
+<span><span class="co">#&gt;   dyad-mean effect:               1.996</span></span>
+<span><span class="co">#&gt;   within-dyad-deviation effect:   1.52</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">
