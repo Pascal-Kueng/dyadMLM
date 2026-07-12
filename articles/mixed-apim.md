@@ -12,10 +12,11 @@ vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md)
 and with the single-composition models in the [Actor-Partner
 Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-the alternative DIM parameterization of exchangeable dyads, see the
-[Dyad-Individual Model
+DIM predictors and their equivalence to APIM effects in exchangeable
+dyads, see the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
-undirected dyadic score outcomes, see the [Dyadic Score Model
+DSM predictor scores and their relationship to APIM effects in
+distinguishable dyads, see the [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 > This vignette is under construction and for now only contains a few
@@ -580,22 +581,17 @@ mixed_ild_tweedie_model <- glmmTMB(
 summary(mixed_ild_tweedie_model)
 ```
 
-For single-composition APIMs, return to the [Actor-Partner
-Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-the main data-preparation workflow, see the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
-For the DIM parameterization of exchangeable dyads, see the
-[Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
-continue to the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+------------------------------------------------------------------------
 
-For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see [Distinguishable and
-Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
-uses `interdep` for cross-sectional and intensive longitudinal APIM and
-DIM workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+**Continue** with the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
+
+refer to the:
+
+- [Actor-Partner Interdependence Model (APIM)
+  vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
+- [Dyadic Score Model
+  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
+
+or return to the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).

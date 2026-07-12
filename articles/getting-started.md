@@ -21,9 +21,9 @@ pak::pak("Pascal-Kueng/interdep")
 longitudinal dyadic data for (generalized) multilevel models. It
 automatically creates model-ready columns for dyadic multilevel model
 parameterizations such as Actor-Partner Interdependence Models (APIM),
-Dyad-Individual Models (DIM), and undirected Dyadic Score Models (DSM).
-Current DIM and undirected DSM helpers require a single type of
-exchangeable dyad composition.
+Dyad-Individual Models (DIM), and Dyadic Score Models (DSM). DIM
+currently supports one exchangeable dyad composition, whereas DSM
+supports one distinguishable dyad composition.
 
 **This vignette focuses on the automatic data preparation step.**
 
@@ -37,12 +37,18 @@ vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
 
 For guidance on how to use the Dyad-Individual Model (DIM)
 parameterization, including dyad-mean and within-dyad-deviation
-predictors and their equivalence to APIM effects in exchangeable dyads,
-see the [Dyad-Individual Model
+predictors and their equivalence to APIM effects (via an interactive
+example) in exchangeable dyads, see the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
 
-For undirected dyadic score outcomes, see the [Dyadic Score Model
+For the dyadic score parameterization and its relationship to the APIM
+for distinguishable dyads, see the [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+
+For an in-depth tutorial covering data preparation and model fitting,
+but also additional steps like diagnostics and assumption checks, see
+[Distinguishable and Exchangeable Dyads: Bayesian Multilevel
+Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
 
 ## Prerequisites
 
@@ -306,24 +312,22 @@ members does not matter (e.g., `male-female` and `female-male` will both
 work), and you can use different separators like `male_female`,
 `male_x_female`, or `male female`.
 
-For exchangeable dyads, we can also request DIM and undirected DSM
-predictor columns. This works here because omitting `role` treats all
-dyads as a single type of exchangeable dyads, and DIM and undirected DSM
-currently require exchangeable dyads. The outcome remains unchanged and
-is selected later in the model formula.
+For exchangeable dyads, we can request DIM predictor columns. This works
+here because omitting `role` treats all dyads as a single exchangeable
+composition.
 
 ``` r
 
-cross_dim_dsm_data <- prepare_interdep_data(
+cross_dim_data <- prepare_interdep_data(
   data = example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
   predictors = communication,
-  model_type = c("dim", "undirected_dsm"),
+  model_type = "dim",
   seed = 123
 )
 
-print(cross_dim_dsm_data, n = 4)
+print(cross_dim_data, n = 4)
 #> # interdep data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
 #> # Structure: group = coupleID, member = personID
@@ -339,7 +343,7 @@ print(cross_dim_dsm_data, n = 4)
 #> #                                    with arbitrary direction; 0 for
 #> #                                    distinguishable dyads or other
 #> #                                    exchangeable compositions
-#> #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
+#> #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average
 #> #                                    predictor level, grand-mean centered
 #> #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:
 #> #                                    person's difference from the dyad average
@@ -357,6 +361,58 @@ print(cross_dim_dsm_data, n = 4)
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_communication_dyad_mean_gmc <dbl>,
 #> #   .i_communication_within_dyad_deviation <dbl>
+```
+
+For distinguishable dyads, DSM preparation additionally requires a
+stable role variable and an explicit role order. The role order defines
+the direction of all DSM predictor differences and the DSM role
+contrast. Outcomes remain unchanged and are selected later in the
+fitted-model formula.
+
+``` r
+
+cross_dsm_data <- prepare_interdep_data(
+  data = example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  model_type = "dsm",
+  dsm_role_order = c("female", "male")
+)
+
+print(cross_dsm_data, n = 4)
+#> # interdep data
+#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Structure: group = coupleID, member = personID, role = gender
+#> # DSM direction: female - male
+#> #
+#> # Dyad compositions:
+#> # female_x_male distinguishable 95 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition             inferred dyad composition
+#> #   .i_composition_role        composition-specific member role
+#> #   .i_is_{comp-role}          composition-role indicator columns
+#> #   .i_dsm_role_contrast       DSM role contrast: +0.5 for the first declared
+#> #                              role and -0.5 for the second declared role
+#> #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor
+#> #                              level, grand-mean centered
+#> #   .i_{pred}_dyad_difference  DSM signed predictor difference: first declared
+#> #                              role minus second declared role
+#> #
+#> # A tibble: 190 × 12
+#>   personID coupleID gender communication satisfaction .i_composition
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
+#> 1        1        1 female          4.79         4.37 female_x_male 
+#> 2        2        1 male            3.80         2.34 female_x_male 
+#> 3        3        2 female          2.91         2.44 female_x_male 
+#> 4        4        2 male            6.51         6.08 female_x_male 
+#> # ℹ 186 more rows
+#> # ℹ 6 more variables: .i_composition_role <fct>,
+#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
+#> #   .i_dsm_role_contrast <dbl>, .i_communication_dyad_mean_gmc <dbl>,
+#> #   .i_communication_dyad_difference <dbl>
 ```
 
 ## Incomplete dyads and missing roles
@@ -809,21 +865,19 @@ print(mixed_cross_data_pooled_constrained)
 #> #   .i_diff_pooled_exchangeable_arbitrary <dbl>
 ```
 
-For model formulas and interpretation, continue with the [Actor-Partner
-Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
-[Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
-[Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
-[Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+------------------------------------------------------------------------
 
-For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see [Distinguishable and
-Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
-uses `interdep` for cross-sectional and intensive longitudinal APIM and
-DIM workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+**Continue** with the [Actor-Partner Interdependence Model (APIM)
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
+
+refer to the:
+
+- [Mixed-Composition APIM
+  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+- [Dyad-Individual Model
+  vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
+- [Dyadic Score Model
+  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
+
+or return to the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).

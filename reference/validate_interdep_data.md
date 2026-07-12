@@ -17,6 +17,7 @@ validate_interdep_data(
   time = NULL,
   predictors = NULL,
   model_type = "apim",
+  dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
@@ -56,8 +57,14 @@ validate_interdep_data(
 - model_type:
 
   Requested model-ready column families. Can contain one or more of
-  `"apim"`, `"dim"`, and `"undirected_dsm"`. `"none"` indicates no
-  model-specific predictor construction and must be used alone.
+  `"apim"`, `"dim"`, and `"dsm"`. `"none"` indicates no model-specific
+  predictor construction and must be used alone.
+
+- dsm_role_order:
+
+  For `model_type = "dsm"`, a character vector giving the two
+  distinguishable roles in the order used for directional differences.
+  Required when DSM columns are requested and must be `NULL` otherwise.
 
 - temporal_predictor_decomposition:
 

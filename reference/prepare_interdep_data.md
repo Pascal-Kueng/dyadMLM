@@ -15,6 +15,7 @@ prepare_interdep_data(
   time = NULL,
   predictors = NULL,
   model_type = "apim",
+  dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   set_exchangeable_compositions = NULL,
   include_compositions = NULL,
@@ -63,14 +64,21 @@ prepare_interdep_data(
 - model_type:
 
   Model-ready column families to construct. Can contain one or more of
-  `"apim"`, `"dim"`, and `"undirected_dsm"`. `"apim"` creates actor and
-  partner predictors. `"dim"` creates dyad-mean and
-  within-dyad-deviation predictors. `"undirected_dsm"` creates
-  undirected dyadic-score model predictor columns. Outcomes remain
-  unchanged and are selected in the fitted-model formula. `"none"` skips
-  model-specific predictor construction after validation, composition
-  inference, and optional temporal predictor decomposition, and must be
-  used alone.
+  `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates actor and partner
+  predictors. `"dim"` creates dyad-mean and within-dyad-deviation
+  predictors. `"dsm"` creates dyadic-score model predictor columns.
+  `"none"` skips model-specific predictor construction after validation,
+  composition inference, and optional temporal predictor decomposition,
+  and must be used alone.
+
+- dsm_role_order:
+
+  For `model_type = "dsm"`, a character vector giving the two
+  distinguishable roles in the order used for directional differences.
+  For example, `c("female", "male")` defines predictor differences as
+  female minus male and assigns the DSM role contrast `+0.5` to female
+  partners and `-0.5` to male partners. Required when DSM columns are
+  requested and must be `NULL` otherwise.
 
 - temporal_predictor_decomposition:
 
@@ -81,9 +89,9 @@ prepare_interdep_data(
   `"time_2l"` when both `time` and `predictors` are supplied, and to
   `"none"` otherwise. Raw cross-sectional DIM predictor dyad-mean
   columns are still centered around the grand mean of dyad means as part
-  of DIM-style predictor construction. For longitudinal DIM or
-  undirected DSM predictor construction, raw undecomposed predictors are
-  currently rejected; use `"auto"` or `"time_2l"`.
+  of DIM-style predictor construction. For longitudinal DIM predictor
+  construction, raw undecomposed predictors are currently rejected; use
+  `"auto"` or `"time_2l"`.
 
 - set_exchangeable_compositions:
 
@@ -139,7 +147,8 @@ contrast columns coded `-1` and `1` for the two members of matching
 exchangeable dyads and `0` otherwise, and an `interdep` attribute
 containing structural metadata, `dyad_compositions`, and predictor
 metadata such as `temporal_predictor_decompositions`, `apim_predictors`,
-and `dim_predictors` when applicable.
+and `dim_predictors`, as well as `dsm_predictors` and `dsm_role_order`
+when applicable.
 
 ## Details
 

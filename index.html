@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Prepare Dyadic Data for Multilevel Models">
-<meta name="description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, temporal predictor decomposition, and model-ready columns needed for dyadic multilevel model parameterizations such as APIM, DIM, and undirected DSM. Prepared data can be used with multilevel model engines such as glmmTMB.">
-<meta property="og:description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, temporal predictor decomposition, and model-ready columns needed for dyadic multilevel model parameterizations such as APIM, DIM, and undirected DSM. Prepared data can be used with multilevel model engines such as glmmTMB.">
+<meta name="description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, temporal predictor decomposition, and model-ready columns needed for dyadic multilevel model parameterizations such as APIM, DIM, and DSM. Prepared data can be used with multilevel model engines such as glmmTMB.">
+<meta property="og:description" content="Helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models. The package supports common dyadic designs with one kind of dyad, while also handling studies that combine different kinds of dyads, such as female-male, female-female, and male-male couples. It validates long-format dyadic data and creates the role, composition, temporal predictor decomposition, and model-ready columns needed for dyadic multilevel model parameterizations such as APIM, DIM, and DSM. Prepared data can be used with multilevel model engines such as glmmTMB.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -61,7 +61,7 @@
 <!-- badges: start -->
 
 <p><code>interdep</code> helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models.</p>
-<p>It supports dyadic datasets with distinguishable dyads, exchangeable dyads, or mixed dyad types in the same data, such as female-male, female-female, and male-male couples. It creates composition-aware, model-ready columns for dyadic multilevel model parameterizations such as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model (DIM), and undirected Dyadic Score Model (DSM). Current DIM and undirected DSM helpers require one exchangeable dyad composition.</p>
+<p>It supports dyadic datasets with distinguishable dyads, exchangeable dyads, or mixed dyad types in the same data, such as female-male, female-female, and male-male couples. It creates composition-aware, model-ready columns for dyadic multilevel model parameterizations such as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model (DIM), and Dyadic Score Model (DSM).</p>
 <p>Start with the vignettes, or scroll down for a quick-start.</p>
 <table class="table">
 <colgroup>
@@ -91,12 +91,11 @@
 </tr>
 <tr>
 <td><a href="https://pascal-kueng.github.io/interdep/articles/dsm.html">Dyadic Score Model</a></td>
-<td>Preliminary DSM predictor preparation</td>
+<td>DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads</td>
 </tr>
 </tbody>
 </table>
 <p>For an in-depth tutorial covering data preparation, model fitting, diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses <code>interdep</code> for cross-sectional and intensive longitudinal APIM and DIM workflows, with models fitted primarily using <code>brms</code> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>, <a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
-<p>The tutorial does not cover models that combine distinguishable and exchangeable dyads in a single analysis. For that workflow, see the <a href="https://pascal-kueng.github.io/interdep/articles/mixed-apim.html">Mixed-Composition APIM vignette</a>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -195,6 +194,19 @@
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="dt">url</span> = {https://github.com/Pascal-Kueng/interdep},</span>
 <span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>}</span></code></pre></div>
 <p>An archival DOI will be added once the package has a public release archive.</p>
+<hr>
+<p><strong>Continue</strong> with the <a href="https://pascal-kueng.github.io/interdep/articles/getting-started.html">Getting Started Vignette</a></p>
+<p>Or refer to the:</p>
+<ul>
+<li>
+<a href="apim.html">Actor-Partner Interdependence Model (APIM) vignette</a>,</li>
+<li>
+<a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</li>
+<li>
+<a href="dim.html">Dyad-Individual Model vignette</a>, or</li>
+<li>
+<a href="dsm.html">Dyadic Score Model vignette</a>.</li>
+</ul>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

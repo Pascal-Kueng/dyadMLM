@@ -13,7 +13,7 @@
 <url><loc>https://pascal-kueng.github.io/interdep/news/index.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/add_actor_partner_columns.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/add_dyad_individual_columns.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/interdep/reference/add_undirected_dyadic_score_columns.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/interdep/reference/add_dyadic_score_columns.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/assign_arbitrary_member_roles.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/canonical_composition.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/center_predictors.html</loc></url>
@@ -32,7 +32,9 @@
 <url><loc>https://pascal-kueng.github.io/interdep/reference/make_interdep_suffixes.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/resolve_composition_references.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/interdep/reference/resolve_dsm_role_order.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/interdep/reference/validate_dim_compatibility.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/interdep/reference/validate_dsm_compatibility.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/interdep/reference/validate_interdep_data.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/interdep/reference/validate_undirected_dyad_compatibility.html</loc></url>
 </urlset>
 

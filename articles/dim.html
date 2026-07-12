@@ -76,7 +76,7 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span>
 <span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>This vignette focuses on the Dyad-Individual Model (DIM) for dyadic
-multilevel models and its relationship to the Actor-Partner
+multilevel models and its relationship to the exchangeable Actor-Partner
 Interdependence Model (APIM). The DIM separates a predictor into the
 dyad’s shared level and each member’s deviation from that level. While
 the APIM expresses effects in terms of two interdependent individuals,
@@ -88,7 +88,10 @@ distinguishable, exchangeable, generalized, and intensive longitudinal
 APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model
 vignette</a>. For APIMs that combine distinguishable and exchangeable
 dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition
-APIM vignette</a>. For undirected dyadic score outcomes, see the <a href="dsm.html">Dyadic Score Model vignette</a>.</p>
+APIM vignette</a>. For the dyadic score model, see the <a href="dsm.html">Dyadic Score Model vignette</a>. Whereas the DIM is a
+different parameterization of the exchangeable APIM, the Dyadic Score
+Model (DSM) is a different parameterization of the distinguishable
+APIM.</p>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dim">Cross-Sectional Gaussian DIM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dim"></a>
 </h2>
@@ -130,7 +133,7 @@ same exchangeable composition.</p>
 <span><span class="co">#&gt; #                                    predictor values</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_partner                APIM partner predictor: partner's original</span></span>
 <span><span class="co">#&gt; #                                    predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average</span></span>
 <span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
 <span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
@@ -199,7 +202,7 @@ justified:</p>
 <span><span class="co">#&gt; #                                    predictor values</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_partner                APIM partner predictor: partner's original</span></span>
 <span><span class="co">#&gt; #                                    predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average</span></span>
 <span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
 <span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
@@ -251,7 +254,7 @@ exchangeable, we can do:</p>
 <span><span class="co">#&gt; #                                    predictor values</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_partner                APIM partner predictor: partner's original</span></span>
 <span><span class="co">#&gt; #                                    predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average</span></span>
 <span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
 <span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
@@ -365,9 +368,9 @@ distribution depend on the arbitrary labeling.</p>
 <p>Because this Gaussian model uses an identity link, fixed coefficients
 are interpreted in units of the outcome, e.g., “satisfaction”:</p>
 <p>The exchangeable Gaussian DIM is algebraically equivalent to the
-reduced undirected Dyadic Score Model (DSM). Therefore, each coefficient
-has both an individual-member interpretation and an equivalent couple
-mean/difference interpretation.</p>
+reduced, label-invariant Dyadic Score Model (DSM). Therefore, each
+coefficient has both an individual-member interpretation and an
+equivalent couple mean/difference interpretation.</p>
 <ul>
 <li><p>The intercept (about 5.04) is the expected satisfaction of either
 member, and therefore the expected couple-average satisfaction, when
@@ -1126,8 +1129,7 @@ differences).</li>
 stable difference from the dyad’s usual level.</li>
 </ol>
 <p><code>temporal_predictor_decomposition = "none"</code> is not
-available for longitudinal DIM or undirected DSM predictor
-construction.</p>
+available for longitudinal DIM predictor construction.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
@@ -1173,16 +1175,16 @@ construction.</p>
 <span><span class="co">#&gt; #   .i_{pred}_cbp_partner                APIM between-person partner predictor:</span></span>
 <span><span class="co">#&gt; #                                        partner's stable difference from the</span></span>
 <span><span class="co">#&gt; #                                        average person's usual level</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_cwp_dyad_mean              DIM within-person dyad-mean predictor:</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cwp_dyad_mean              within-person dyad-mean predictor:</span></span>
 <span><span class="co">#&gt; #                                        shared momentary deviations in the</span></span>
 <span><span class="co">#&gt; #                                        dyad</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_within_dyad_deviation  DIM within-person within-dyad</span></span>
 <span><span class="co">#&gt; #                                        predictor deviation: person's</span></span>
 <span><span class="co">#&gt; #                                        momentary deviation from the dyad</span></span>
 <span><span class="co">#&gt; #                                        average</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_cbp_dyad_mean              DIM between-person dyad-mean</span></span>
-<span><span class="co">#&gt; #                                        predictor: dyad's stable usual level,</span></span>
-<span><span class="co">#&gt; #                                        grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cbp_dyad_mean              between-person dyad-mean predictor:</span></span>
+<span><span class="co">#&gt; #                                        dyad's stable usual level, grand-mean</span></span>
+<span><span class="co">#&gt; #                                        centered</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cbp_within_dyad_deviation  DIM between-person within-dyad</span></span>
 <span><span class="co">#&gt; #                                        predictor deviation: person's stable</span></span>
 <span><span class="co">#&gt; #                                        difference from the dyad's usual level</span></span>
@@ -1522,20 +1524,18 @@ preserve exchangeability.</p>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>For APIM formulas with distinguishable, exchangeable, generalized,
-and intensive longitudinal dyads, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>. For
-models combining multiple dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For
-undirected dyadic score outcomes, see the <a href="dsm.html">Dyadic
-Score Model vignette</a>. For the broader data-preparation workflow,
-return to the <a href="getting-started.html">Getting Started
-vignette</a>.</p>
-<p>For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
-and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses
-<code>interdep</code> for cross-sectional and intensive longitudinal
-APIM and DIM workflows, with models fitted primarily using
-<code>brms</code> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>,
-<a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
+<hr>
+<p><strong>Continue</strong> with the <a href="dsm.html">Dyadic Score
+Model vignette</a>,</p>
+<p>refer to the:</p>
+<ul>
+<li>
+<a href="apim.html">Actor-Partner Interdependence Model (APIM)
+vignette</a>,</li>
+<li>
+<a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</li>
+</ul>
+<p>or return to the <a href="index.html">Overview</a>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

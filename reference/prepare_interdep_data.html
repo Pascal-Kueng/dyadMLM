@@ -57,6 +57,7 @@ and model-ready columns for dyadic multilevel model parameterizations.</p>
 <span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  dsm_role_order <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  include_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -105,13 +106,21 @@ decomposition and model-ready predictor construction.</p></dd>
 
 <dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
 <dd><p>Model-ready column families to construct. Can contain one
-or more of <code>"apim"</code>, <code>"dim"</code>, and <code>"undirected_dsm"</code>. <code>"apim"</code> creates
+or more of <code>"apim"</code>, <code>"dim"</code>, and <code>"dsm"</code>. <code>"apim"</code> creates
 actor and partner predictors. <code>"dim"</code> creates dyad-mean and
-within-dyad-deviation predictors. <code>"undirected_dsm"</code> creates undirected
-dyadic-score model predictor columns. Outcomes remain unchanged and are
-selected in the fitted-model formula. <code>"none"</code> skips model-specific predictor
+within-dyad-deviation predictors. <code>"dsm"</code> creates dyadic-score model
+predictor columns. <code>"none"</code> skips model-specific predictor
 construction after validation, composition inference, and optional
 temporal predictor decomposition, and must be used alone.</p></dd>
+
+
+<dt id="arg-dsm-role-order">dsm_role_order<a class="anchor" aria-label="anchor" href="#arg-dsm-role-order"></a></dt>
+<dd><p>For <code>model_type = "dsm"</code>, a character vector giving
+the two distinguishable roles in the order used for directional
+differences. For example, <code>c("female", "male")</code> defines predictor
+differences as female minus male and assigns the DSM role contrast <code>+0.5</code>
+to female partners and <code>-0.5</code> to male partners. Required when DSM columns
+are requested and must be <code>NULL</code> otherwise.</p></dd>
 
 
 <dt id="arg-temporal-predictor-decomposition">temporal_predictor_decomposition<a class="anchor" aria-label="anchor" href="#arg-temporal-predictor-decomposition"></a></dt>
@@ -123,7 +132,7 @@ decomposition into within-person and between-person components. <code>"auto"</co
 resolves to <code>"time_2l"</code> when both <code>time</code> and <code>predictors</code> are supplied, and
 to <code>"none"</code> otherwise. Raw cross-sectional DIM predictor dyad-mean columns
 are still centered around the grand mean of dyad means as part of DIM-style
-predictor construction. For longitudinal DIM or undirected DSM predictor
+predictor construction. For longitudinal DIM predictor
 construction, raw undecomposed predictors are currently rejected; use
 <code>"auto"</code> or <code>"time_2l"</code>.</p></dd>
 
@@ -182,7 +191,8 @@ numeric <code>.i_diff_*</code> contrast columns coded <code>-1</code> and <code>
 of matching exchangeable dyads and <code>0</code> otherwise, and an <code>interdep</code> attribute
 containing structural metadata, <code>dyad_compositions</code>, and predictor metadata
 such as <code>temporal_predictor_decompositions</code>, <code>apim_predictors</code>, and
-<code>dim_predictors</code> when applicable.</p>
+<code>dim_predictors</code>, as well as <code>dsm_predictors</code> and <code>dsm_role_order</code> when
+applicable.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

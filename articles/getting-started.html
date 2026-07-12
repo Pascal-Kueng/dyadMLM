@@ -90,9 +90,9 @@ GitHub with:</p>
 intensive longitudinal dyadic data for (generalized) multilevel models.
 It automatically creates model-ready columns for dyadic multilevel model
 parameterizations such as Actor-Partner Interdependence Models (APIM),
-Dyad-Individual Models (DIM), and undirected Dyadic Score Models (DSM).
-Current DIM and undirected DSM helpers require a single type of
-exchangeable dyad composition.</p>
+Dyad-Individual Models (DIM), and Dyadic Score Models (DSM). DIM
+currently supports one exchangeable dyad composition, whereas DSM
+supports one distinguishable dyad composition.</p>
 <p><strong>This vignette focuses on the automatic data preparation
 step.</strong></p>
 <p>For guidance and examples on how to use the prepared data to estimate
@@ -103,9 +103,14 @@ compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM
 vignette</a>.</p>
 <p>For guidance on how to use the Dyad-Individual Model (DIM)
 parameterization, including dyad-mean and within-dyad-deviation
-predictors and their equivalence to APIM effects in exchangeable dyads,
-see the <a href="dim.html">Dyad-Individual Model vignette</a>.</p>
-<p>For undirected dyadic score outcomes, see the <a href="dsm.html">Dyadic Score Model vignette</a>.</p>
+predictors and their equivalence to APIM effects (via an interactive
+example) in exchangeable dyads, see the <a href="dim.html">Dyad-Individual Model vignette</a>.</p>
+<p>For the dyadic score parameterization and its relationship to the
+APIM for distinguishable dyads, see the <a href="dsm.html">Dyadic Score
+Model vignette</a>.</p>
+<p>For an in-depth tutorial covering data preparation and model fitting,
+but also additional steps like diagnostics and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
+and Exchangeable Dyads: Bayesian Multilevel Modelling</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
@@ -450,22 +455,20 @@ order of members does not matter (e.g., <code>male-female</code> and
 <code>female-male</code> will both work), and you can use different
 separators like <code>male_female</code>, <code>male_x_female</code>, or
 <code>male female</code>.</p>
-<p>For exchangeable dyads, we can also request DIM and undirected DSM
-predictor columns. This works here because omitting <code>role</code>
-treats all dyads as a single type of exchangeable dyads, and DIM and
-undirected DSM currently require exchangeable dyads. The outcome remains
-unchanged and is selected later in the model formula.</p>
+<p>For exchangeable dyads, we can request DIM predictor columns. This
+works here because omitting <code>role</code> treats all dyads as a
+single exchangeable composition.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cross_dim_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">cross_dim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
-<span>  model_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dim"</span>, <span class="st">"undirected_dsm"</span><span class="op">)</span>,</span>
+<span>  model_type <span class="op">=</span> <span class="st">"dim"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_dim_dsm_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_dim_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 190 | Dyads: 95 | Intensive longitudinal: no</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID</span></span></span>
@@ -481,7 +484,7 @@ unchanged and is selected later in the model formula.</p>
 <span><span class="co">#&gt; #                                    with arbitrary direction; 0 for</span></span>
 <span><span class="co">#&gt; #                                    distinguishable dyads or other</span></span>
 <span><span class="co">#&gt; #                                    exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average</span></span>
 <span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
 <span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
@@ -499,6 +502,54 @@ unchanged and is selected later in the model formula.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>For distinguishable dyads, DSM preparation additionally requires a
+stable role variable and an explicit role order. The role order defines
+the direction of all DSM predictor differences and the DSM role
+contrast. Outcomes remain unchanged and are selected later in the
+fitted-model formula.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
+<span>  model_type <span class="op">=</span> <span class="st">"dsm"</span>,</span>
+<span>  dsm_role_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_dsm_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 190 | Dyads: 95 | Intensive longitudinal: no</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # DSM direction: female - male</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
+<span><span class="co">#&gt; # female_x_male distinguishable 95 dyads</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # Added columns:</span></span>
+<span><span class="co">#&gt; #   .i_composition             inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role        composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}          composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_dsm_role_contrast       DSM role contrast: +0.5 for the first declared</span></span>
+<span><span class="co">#&gt; #                              role and -0.5 for the second declared role</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                              level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_difference  DSM signed predictor difference: first declared</span></span>
+<span><span class="co">#&gt; #                              role minus second declared role</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 12</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_dsm_role_contrast &lt;dbl&gt;, .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_difference &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="incomplete-dyads-and-missing-roles">Incomplete dyads and missing roles<a class="anchor" aria-label="anchor" href="#incomplete-dyads-and-missing-roles"></a>
@@ -507,7 +558,7 @@ unchanged and is selected later in the model formula.</p>
 has only one observed member or when a member’s role cannot be resolved
 from the observed rows. These cases can also be dropped before
 validation continues.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">incomplete_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  coupleID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  personID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">7</span>, <span class="fl">8</span>, <span class="fl">10</span><span class="op">)</span>,</span>
@@ -566,7 +617,7 @@ validation continues.</p>
 dyadic dataset. Each dyad has repeated observations over
 <code>diaryday</code>, with one row per person-day.</p>
 <p>The first rows look like this:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_dyadic_ILD</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 6</span></span></span>
 <span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support</span></span>
@@ -603,7 +654,7 @@ variable to <code><a href="../reference/prepare_interdep_data.html">prepare_inte
 <div class="section level3">
 <h3 id="ild-apim-preparation">ILD APIM preparation<a class="anchor" aria-label="anchor" href="#ild-apim-preparation"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -677,7 +728,7 @@ compositions in the same data object: distinguishable female-male dyads
 and exchangeable female-female and male-male dyads.</p>
 <p>Let’s have <code>interdep</code> infer the compositions
 automatically:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -730,7 +781,7 @@ requested labels. The filtering happens before exchangeability
 constraints and pooling, so <code>set_exchangeable_compositions</code>
 and <code>pool_compositions</code> arguments can only refer to retained
 types of dyads.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_included</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -779,7 +830,7 @@ dataset can be treated as exchangeable. This specification keeps the
 differentiation between the kinds of dyads (e.g.,
 <code>male-male</code>, <code>female-female</code>, and
 <code>male-female</code>).</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -829,7 +880,7 @@ comparisons.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
 dyads:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -880,7 +931,7 @@ dyads:</p>
 <p>Note that you cannot pool distinguishable dyads. To pool
 <code>female-male</code> with <code>male-male</code>, we first have to
 treat <code>female-male</code> as exchangeable:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -929,14 +980,19 @@ treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_pooled_exchangeable &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_pooled_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>For model formulas and interpretation, continue with the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>, <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>, <a href="dim.html">Dyad-Individual Model vignette</a>, or <a href="dsm.html">Dyadic Score Model vignette</a>.</p>
-<p>For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
-and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses
-<code>interdep</code> for cross-sectional and intensive longitudinal
-APIM and DIM workflows, with models fitted primarily using
-<code>brms</code> (<a href="https://github.com/Pascal-Kueng/05DyadicDataAnalysis" class="external-link">source</a>,
-<a href="https://doi.org/10.5281/zenodo.17400655" class="external-link">DOI</a>).</p>
+<hr>
+<p><strong>Continue</strong> with the <a href="apim.html">Actor-Partner
+Interdependence Model (APIM) vignette</a>,</p>
+<p>refer to the:</p>
+<ul>
+<li>
+<a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</li>
+<li>
+<a href="dim.html">Dyad-Individual Model vignette</a>,</li>
+<li>
+<a href="dsm.html">Dyadic Score Model vignette</a>,</li>
+</ul>
+<p>or return to the <a href="index.html">Overview</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

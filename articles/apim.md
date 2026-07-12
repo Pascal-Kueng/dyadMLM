@@ -18,7 +18,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
 For DIM predictors and their equivalence to APIM effects in exchangeable
 dyads, see the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
-undirected dyadic score outcomes, see the [Dyadic Score Model
+DSM predictor scores and their relationship to APIM effects in
+distinguishable dyads, see the [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 > This vignette is under construction and for now only contains a few
@@ -748,22 +749,17 @@ summary(ild_tweedie_exchangeable_model)
 
 -\> should be the next model function?
 
-For models that combine distinguishable and exchangeable dyad
-compositions, continue with the [Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
-For the main data-preparation workflow, return to the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
-For the alternative DIM parameterization of exchangeable dyads, see the
-[Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
-continue to the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+------------------------------------------------------------------------
 
-For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see [Distinguishable and
-Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
-uses `interdep` for cross-sectional and intensive longitudinal APIM and
-DIM workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+**Continue** with the [Mixed-Composition APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+
+refer to the:
+
+- [Dyad-Individual Model
+  vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
+- [Dyadic Score Model
+  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
+
+or return to the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).

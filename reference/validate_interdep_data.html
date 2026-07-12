@@ -66,6 +66,7 @@ occasion within each dyad.</p>
 <span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  dsm_role_order <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  incomplete_dyads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  missing_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span></span>
@@ -106,8 +107,15 @@ temporal predictor decomposition and model-helper functions.</p></dd>
 
 <dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
 <dd><p>Requested model-ready column families. Can contain one or
-more of <code>"apim"</code>, <code>"dim"</code>, and <code>"undirected_dsm"</code>. <code>"none"</code> indicates no
+more of <code>"apim"</code>, <code>"dim"</code>, and <code>"dsm"</code>. <code>"none"</code> indicates no
 model-specific predictor construction and must be used alone.</p></dd>
+
+
+<dt id="arg-dsm-role-order">dsm_role_order<a class="anchor" aria-label="anchor" href="#arg-dsm-role-order"></a></dt>
+<dd><p>For <code>model_type = "dsm"</code>, a character vector giving
+the two distinguishable roles in the order used for directional
+differences. Required when DSM columns are requested and must be <code>NULL</code>
+otherwise.</p></dd>
 
 
 <dt id="arg-temporal-predictor-decomposition">temporal_predictor_decomposition<a class="anchor" aria-label="anchor" href="#arg-temporal-predictor-decomposition"></a></dt>

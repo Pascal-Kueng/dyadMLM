@@ -7,7 +7,7 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 This vignette focuses on the Dyad-Individual Model (DIM) for dyadic
-multilevel models and its relationship to the Actor-Partner
+multilevel models and its relationship to the exchangeable Actor-Partner
 Interdependence Model (APIM). The DIM separates a predictor into the
 dyad’s shared level and each member’s deviation from that level. While
 the APIM expresses effects in terms of two interdependent individuals,
@@ -23,8 +23,11 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 APIMs that combine distinguishable and exchangeable dyad compositions,
 see the [Mixed-Composition APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
-For undirected dyadic score outcomes, see the [Dyadic Score Model
+For the dyadic score model, see the [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+Whereas the DIM is a different parameterization of the exchangeable
+APIM, the Dyadic Score Model (DSM) is a different parameterization of
+the distinguishable APIM.
 
 ## Cross-Sectional Gaussian DIM
 
@@ -68,7 +71,7 @@ print(cross_exchangeable_data, n = 4)
 #> #                                    predictor values
 #> #   .i_{pred}_partner                APIM partner predictor: partner's original
 #> #                                    predictor values
-#> #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
+#> #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average
 #> #                                    predictor level, grand-mean centered
 #> #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:
 #> #                                    person's difference from the dyad average
@@ -143,7 +146,7 @@ print(cross_same_sex_pooled_data, n = 4)
 #> #                                    predictor values
 #> #   .i_{pred}_partner                APIM partner predictor: partner's original
 #> #                                    predictor values
-#> #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
+#> #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average
 #> #                                    predictor level, grand-mean centered
 #> #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:
 #> #                                    person's difference from the dyad average
@@ -199,7 +202,7 @@ print(cross_male_female_exchangeable_data, n = 4)
 #> #                                    predictor values
 #> #   .i_{pred}_partner                APIM partner predictor: partner's original
 #> #                                    predictor values
-#> #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
+#> #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average
 #> #                                    predictor level, grand-mean centered
 #> #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:
 #> #                                    person's difference from the dyad average
@@ -316,10 +319,10 @@ summary(dim_1)
 Because this Gaussian model uses an identity link, fixed coefficients
 are interpreted in units of the outcome, e.g., “satisfaction”:
 
-The exchangeable Gaussian DIM is algebraically equivalent to the reduced
-undirected Dyadic Score Model (DSM). Therefore, each coefficient has
-both an individual-member interpretation and an equivalent couple
-mean/difference interpretation.
+The exchangeable Gaussian DIM is algebraically equivalent to the
+reduced, label-invariant Dyadic Score Model (DSM). Therefore, each
+coefficient has both an individual-member interpretation and an
+equivalent couple mean/difference interpretation.
 
 - The intercept (about 5.04) is the expected satisfaction of either
   member, and therefore the expected couple-average satisfaction, when
@@ -556,7 +559,7 @@ are supplied:
     difference from the dyad’s usual level.
 
 `temporal_predictor_decomposition = "none"` is not available for
-longitudinal DIM or undirected DSM predictor construction.
+longitudinal DIM predictor construction.
 
 ``` r
 
@@ -604,16 +607,16 @@ print(ild_exchangeable_data)
 #> #   .i_{pred}_cbp_partner                APIM between-person partner predictor:
 #> #                                        partner's stable difference from the
 #> #                                        average person's usual level
-#> #   .i_{pred}_cwp_dyad_mean              DIM within-person dyad-mean predictor:
+#> #   .i_{pred}_cwp_dyad_mean              within-person dyad-mean predictor:
 #> #                                        shared momentary deviations in the
 #> #                                        dyad
 #> #   .i_{pred}_cwp_within_dyad_deviation  DIM within-person within-dyad
 #> #                                        predictor deviation: person's
 #> #                                        momentary deviation from the dyad
 #> #                                        average
-#> #   .i_{pred}_cbp_dyad_mean              DIM between-person dyad-mean
-#> #                                        predictor: dyad's stable usual level,
-#> #                                        grand-mean centered
+#> #   .i_{pred}_cbp_dyad_mean              between-person dyad-mean predictor:
+#> #                                        dyad's stable usual level, grand-mean
+#> #                                        centered
 #> #   .i_{pred}_cbp_within_dyad_deviation  DIM between-person within-dyad
 #> #                                        predictor deviation: person's stable
 #> #                                        difference from the dyad's usual level
@@ -987,23 +990,17 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 )
 ```
 
-For APIM formulas with distinguishable, exchangeable, generalized, and
-intensive longitudinal dyads, see the [Actor-Partner Interdependence
-Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-models combining multiple dyad compositions, see the [Mixed-Composition
-APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
-For undirected dyadic score outcomes, see the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md). For
-the broader data-preparation workflow, return to the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
+------------------------------------------------------------------------
 
-For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see [Distinguishable and
-Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
-uses `interdep` for cross-sectional and intensive longitudinal APIM and
-DIM workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+**Continue** with the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
+
+refer to the:
+
+- [Actor-Partner Interdependence Model (APIM)
+  vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
+- [Mixed-Composition APIM
+  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+
+or return to the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
