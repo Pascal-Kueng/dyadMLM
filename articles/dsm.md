@@ -3,6 +3,7 @@
 ``` r
 
 library(interdep)
+has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 This vignette focuses on the Dyadic Score Model (DSM) for
@@ -119,6 +120,43 @@ dsm_model <- glmmTMB::glmmTMB(
 )
 
 summary(dsm_model)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> satisfaction ~ .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  
+#>     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  
+#>     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  
+#>     (1 + .i_dsm_role_contrast | coupleID)
+#> Dispersion:                    ~0
+#> Data: cross_dsm_data
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>     589.5     618.0    -285.7     571.5       167 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups   Name                 Variance Std.Dev. Corr  
+#>  coupleID (Intercept)          0.632    0.795          
+#>           .i_dsm_role_contrast 3.678    1.918    -0.16 
+#> Number of obs: 176, groups:  coupleID, 88
+#> 
+#> Conditional model:
+#>                                                        Estimate Std. Error
+#> (Intercept)                                             5.04256    0.08481
+#> .i_communication_dyad_mean_gmc                          1.99024    0.07834
+#> .i_communication_within_dyad_diff                      -0.03201    0.05372
+#> .i_dsm_role_contrast                                    0.95644    0.20459
+#> .i_communication_dyad_mean_gmc:.i_dsm_role_contrast    -0.13847    0.18899
+#> .i_communication_within_dyad_diff:.i_dsm_role_contrast  1.48641    0.12959
+#>                                                        z value Pr(>|z|)    
+#> (Intercept)                                              59.46  < 2e-16 ***
+#> .i_communication_dyad_mean_gmc                           25.41  < 2e-16 ***
+#> .i_communication_within_dyad_diff                        -0.60    0.551    
+#> .i_dsm_role_contrast                                      4.67 2.94e-06 ***
+#> .i_communication_dyad_mean_gmc:.i_dsm_role_contrast      -0.73    0.464    
+#> .i_communication_within_dyad_diff:.i_dsm_role_contrast   11.47  < 2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ### Reversing the coding
@@ -134,7 +172,8 @@ cross_dsm_data_inverted <- prepare_interdep_data(
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "dsm",
+  # Request APIM columns too for comparison below.
+  model_type = c("dsm", "apim"),
   dsm_role_order = c("male", "female")
 )
 ```
@@ -155,6 +194,43 @@ dsm_model_inverted <- glmmTMB::glmmTMB(
 )
 
 summary(dsm_model_inverted)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> satisfaction ~ .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  
+#>     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  
+#>     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  
+#>     (1 + .i_dsm_role_contrast | coupleID)
+#> Dispersion:                    ~0
+#> Data: cross_dsm_data_inverted
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>     589.5     618.0    -285.7     571.5       167 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups   Name                 Variance Std.Dev. Corr 
+#>  coupleID (Intercept)          0.632    0.795         
+#>           .i_dsm_role_contrast 3.678    1.918    0.16 
+#> Number of obs: 176, groups:  coupleID, 88
+#> 
+#> Conditional model:
+#>                                                        Estimate Std. Error
+#> (Intercept)                                             5.04257    0.08481
+#> .i_communication_dyad_mean_gmc                          1.99024    0.07834
+#> .i_communication_within_dyad_diff                       0.03200    0.05372
+#> .i_dsm_role_contrast                                   -0.95644    0.20459
+#> .i_communication_dyad_mean_gmc:.i_dsm_role_contrast     0.13848    0.18899
+#> .i_communication_within_dyad_diff:.i_dsm_role_contrast  1.48641    0.12959
+#>                                                        z value Pr(>|z|)    
+#> (Intercept)                                              59.46  < 2e-16 ***
+#> .i_communication_dyad_mean_gmc                           25.41  < 2e-16 ***
+#> .i_communication_within_dyad_diff                         0.60    0.551    
+#> .i_dsm_role_contrast                                     -4.67 2.94e-06 ***
+#> .i_communication_dyad_mean_gmc:.i_dsm_role_contrast       0.73    0.464    
+#> .i_communication_within_dyad_diff:.i_dsm_role_contrast   11.47  < 2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 The two models have identical fitted values and model fit. Reversing the
@@ -225,17 +301,191 @@ associated.
 
 For distinguishable dyads, the full DSM and an unconstrained
 distinguishable APIM are alternative parameterizations of the same fixed
-associations. The APIM estimates separate actor and partner effects for
-each role. The DSM re-expresses those four slopes as:
+associations.
 
-- predictor level to outcome level;
-- predictor difference to outcome level;
-- predictor level to outcome difference; and
-- predictor difference to outcome difference.
+Let’s fit the equivalent distinguishable APIM:
 
-Neither parameterization is generally more correct. The APIM is often
-clearer for questions about actor and partner effects, whereas the DSM
-directly addresses questions about shared dyadic levels and directional
+``` r
+
+apim_model <- glmmTMB::glmmTMB(
+  satisfaction ~
+    # Role-specific intercepts
+    0 +
+    .i_is_female_x_male_female +
+    .i_is_female_x_male_male +
+
+    # Role-specific actor effects
+    .i_is_female_x_male_female:.i_communication_actor +
+    .i_is_female_x_male_male:.i_communication_actor +
+
+    # Role-specific partner effects
+    .i_is_female_x_male_female:.i_communication_partner +
+    .i_is_female_x_male_male:.i_communication_partner +
+
+    # Role-specific Gaussian residual variance-covariance
+    us(0 +
+         .i_is_female_x_male_female +
+         .i_is_female_x_male_male
+       | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = cross_dsm_data_inverted
+)
+```
+
+The two DSM directions and the APIM have identical fit statistics:
+
+``` r
+
+data.frame(
+  model = c("DSM: female - male", "DSM: male - female", "APIM"),
+  AIC = round(c(AIC(dsm_model), AIC(dsm_model_inverted), AIC(apim_model)), 3),
+  BIC = round(c(BIC(dsm_model), BIC(dsm_model_inverted), BIC(apim_model)), 3),
+  logLik = round(c(
+    as.numeric(logLik(dsm_model)),
+    as.numeric(logLik(dsm_model_inverted)),
+    as.numeric(logLik(apim_model))
+  ), 3)
+)
+#>                model     AIC     BIC   logLik
+#> 1 DSM: female - male 589.491 618.026 -285.746
+#> 2 DSM: male - female 589.491 618.026 -285.746
+#> 3               APIM 589.491 618.026 -285.746
+```
+
+### Fixed-effect transformation
+
+Let $`A_f`$ and $`A_m`$ denote the female and male actor effects, and
+let $`P_f`$ and $`P_m`$ denote the partner effects on the female and
+male outcomes, respectively. Let $`\alpha_f`$ and $`\alpha_m`$ be the
+corresponding APIM intercepts. The APIM slopes transform into the
+female-minus-male DSM paths as
+
+``` math
+\begin{aligned}
+a_{11} &= \frac{A_f + P_f + A_m + P_m}{2}, &
+a_{12} &= \frac{A_f - P_f + P_m - A_m}{4}, \\
+a_{21} &= A_f + P_f - A_m - P_m, &
+a_{22} &= \frac{A_f + A_m - P_f - P_m}{2}.
+\end{aligned}
+```
+
+The APIM predictors retain their original scale, whereas the DSM
+predictor level is grand-mean centered. If $`\mu_X`$ is the grand mean
+subtracted from the DSM predictor level, the intercepts therefore
+transform as
+
+``` math
+a_{10} = \frac{\alpha_f + \alpha_m}{2} + \mu_X a_{11}, \qquad
+a_{20} = \alpha_f - \alpha_m + \mu_X a_{21}.
+```
+
+The reverse slope transformation is
+
+``` math
+\begin{aligned}
+A_f &= \frac{a_{11}}{2} + a_{12} + \frac{a_{21}}{4} + \frac{a_{22}}{2}, &
+P_f &= \frac{a_{11}}{2} - a_{12} + \frac{a_{21}}{4} - \frac{a_{22}}{2}, \\
+A_m &= \frac{a_{11}}{2} - a_{12} - \frac{a_{21}}{4} + \frac{a_{22}}{2}, &
+P_m &= \frac{a_{11}}{2} + a_{12} - \frac{a_{21}}{4} - \frac{a_{22}}{2}.
+\end{aligned}
+```
+
+Similarly,
+
+``` math
+\alpha_f = a_{10} + \frac{a_{20}}{2}
+- \mu_X\left(a_{11} + \frac{a_{21}}{2}\right),
+```
+
+``` math
+\alpha_m = a_{10} - \frac{a_{20}}{2}
+- \mu_X\left(a_{11} - \frac{a_{21}}{2}\right).
+```
+
+The following comparison applies the APIM-to-DSM transformation to all
+six fixed effects:
+
+    #> From APIM model:
+    #>    female intercept:        -4.369 
+    #>    female actor effect:     1.672 
+    #>    female partner effect:   0.249 
+    #>    male intercept:          -6.038 
+    #>    male actor effect:       1.805 
+    #>    male partner effect:     0.255 
+    #>    centering constant:      5.148 
+    #> 
+    #>  DSM transformation:
+    #>    a10 = (female intercept + male intercept) / 2 +
+    #>           mu_X * a11:                                       5.043 
+    #>    a11 = (female actor + female partner + male actor +
+    #>           male partner) / 2:                                1.99 
+    #>    a12 = (female actor - female partner + male partner -
+    #>           male actor) / 4:                                  -0.032 
+    #>    a20 = female intercept - male intercept + mu_X * a21:    0.956 
+    #>    a21 = female actor + female partner - male actor -
+    #>           male partner:                                     -0.138 
+    #>    a22 = (female actor + male actor - female partner -
+    #>           male partner) / 2:                                1.486 
+    #> 
+    #>  From DSM model:
+    #>    outcome-level intercept (a10):        5.043 
+    #>    level -> level (a11):                 1.99 
+    #>    difference -> level (a12):            -0.032 
+    #>    outcome-difference intercept (a20):   0.956 
+    #>    level -> difference (a21):            -0.138 
+    #>    difference -> difference (a22):       1.486
+
+### Random-effect transformation
+
+Let $`u_f`$ and $`u_m`$ be the APIM random effects for the female and
+male outcomes. The DSM outcome-level and outcome-difference residuals
+are the same random effects expressed in different coordinates:
+
+``` math
+\begin{pmatrix} r_{YL} \\ r_{YD} \end{pmatrix}
+=
+\begin{pmatrix} 1/2 & 1/2 \\ 1 & -1 \end{pmatrix}
+\begin{pmatrix} u_f \\ u_m \end{pmatrix}.
+```
+
+Applying this rotation to the APIM covariance matrix reproduces the DSM
+random intercept variance, intercept-slope covariance, and role-slope
+variance:
+
+``` r
+
+apim_vcov <- as.matrix(glmmTMB::VarCorr(apim_model)$cond$coupleID)
+dsm_vcov <- as.matrix(glmmTMB::VarCorr(dsm_model)$cond$coupleID)
+
+rotation <- rbind(
+  outcome_level = c(0.5, 0.5),
+  outcome_difference = c(1, -1)
+)
+apim_to_dsm_vcov <- rotation %*% apim_vcov %*% t(rotation)
+
+data.frame(
+  parameter = c("Var(r_YL)", "Cov(r_YL, r_YD)", "Var(r_YD)"),
+  from_DSM = round(c(
+    dsm_vcov[1, 1],
+    dsm_vcov[1, 2],
+    dsm_vcov[2, 2]
+  ), 3),
+  from_APIM_transformation = round(c(
+    apim_to_dsm_vcov[1, 1],
+    apim_to_dsm_vcov[1, 2],
+    apim_to_dsm_vcov[2, 2]
+  ), 3)
+)
+#>         parameter from_DSM from_APIM_transformation
+#> 1       Var(r_YL)    0.632                    0.632
+#> 2 Cov(r_YL, r_YD)   -0.240                   -0.240
+#> 3       Var(r_YD)    3.678                    3.678
+```
+
+Both parameterization can be useful. The APIM is often clearer for
+questions about actor and partner effects, whereas the DSM directly
+addresses questions about shared dyadic levels and directional
 discrepancies.
 
 For exchangeable dyads, the direction of a member difference is

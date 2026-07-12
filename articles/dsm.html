@@ -69,7 +69,8 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span>
+<span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>This vignette focuses on the Dyadic Score Model (DSM) for
 distinguishable dyads and its relationship to the distinguishable
 Actor-Partner Interdependence Model (APIM). The DSM expresses
@@ -187,7 +188,44 @@ residual covariance matrix.</p>
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
+<span><span class="co">#&gt; Formula:          </span></span>
+<span><span class="co">#&gt; satisfaction ~ .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  </span></span>
+<span><span class="co">#&gt;     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     (1 + .i_dsm_role_contrast | coupleID)</span></span>
+<span><span class="co">#&gt; Dispersion:                    ~0</span></span>
+<span><span class="co">#&gt; Data: cross_dsm_data</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
+<span><span class="co">#&gt;     589.5     618.0    -285.7     571.5       167 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Random effects:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;  Groups   Name                 Variance Std.Dev. Corr  </span></span>
+<span><span class="co">#&gt;  coupleID (Intercept)          0.632    0.795          </span></span>
+<span><span class="co">#&gt;           .i_dsm_role_contrast 3.678    1.918    -0.16 </span></span>
+<span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;                                                        Estimate Std. Error</span></span>
+<span><span class="co">#&gt; (Intercept)                                             5.04256    0.08481</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc                          1.99024    0.07834</span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff                      -0.03201    0.05372</span></span>
+<span><span class="co">#&gt; .i_dsm_role_contrast                                    0.95644    0.20459</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc:.i_dsm_role_contrast    -0.13847    0.18899</span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff:.i_dsm_role_contrast  1.48641    0.12959</span></span>
+<span><span class="co">#&gt;                                                        z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                                              59.46  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc                           25.41  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff                        -0.60    0.551    </span></span>
+<span><span class="co">#&gt; .i_dsm_role_contrast                                      4.67 2.94e-06 ***</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc:.i_dsm_role_contrast      -0.73    0.464    </span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff:.i_dsm_role_contrast   11.47  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="reversing-the-coding">Reversing the coding<a class="anchor" aria-label="anchor" href="#reversing-the-coding"></a>
 </h3>
@@ -202,7 +240,8 @@ we can reverse the direction and compute
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
-<span>  model_type <span class="op">=</span> <span class="st">"dsm"</span>,</span>
+<span>  <span class="co"># Request APIM columns too for comparison below.</span></span>
+<span>  model_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dsm"</span>, <span class="st">"apim"</span><span class="op">)</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male"</span>, <span class="st">"female"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -219,7 +258,44 @@ we can reverse the direction and compute
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data_inverted</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model_inverted</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model_inverted</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
+<span><span class="co">#&gt; Formula:          </span></span>
+<span><span class="co">#&gt; satisfaction ~ .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  </span></span>
+<span><span class="co">#&gt;     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     (1 + .i_dsm_role_contrast | coupleID)</span></span>
+<span><span class="co">#&gt; Dispersion:                    ~0</span></span>
+<span><span class="co">#&gt; Data: cross_dsm_data_inverted</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
+<span><span class="co">#&gt;     589.5     618.0    -285.7     571.5       167 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Random effects:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;  Groups   Name                 Variance Std.Dev. Corr </span></span>
+<span><span class="co">#&gt;  coupleID (Intercept)          0.632    0.795         </span></span>
+<span><span class="co">#&gt;           .i_dsm_role_contrast 3.678    1.918    0.16 </span></span>
+<span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;                                                        Estimate Std. Error</span></span>
+<span><span class="co">#&gt; (Intercept)                                             5.04257    0.08481</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc                          1.99024    0.07834</span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff                       0.03200    0.05372</span></span>
+<span><span class="co">#&gt; .i_dsm_role_contrast                                   -0.95644    0.20459</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc:.i_dsm_role_contrast     0.13848    0.18899</span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff:.i_dsm_role_contrast  1.48641    0.12959</span></span>
+<span><span class="co">#&gt;                                                        z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                                              59.46  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc                           25.41  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff                         0.60    0.551    </span></span>
+<span><span class="co">#&gt; .i_dsm_role_contrast                                     -4.67 2.94e-06 ***</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc:.i_dsm_role_contrast       0.73    0.464    </span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_diff:.i_dsm_role_contrast   11.47  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>The two models have identical fitted values and model fit. Reversing
 the role order reverses both the predictor difference and the outcome
 difference represented by the role contrast. Consequently, the
@@ -347,17 +423,184 @@ difference are associated.</p>
 </h2>
 <p>For distinguishable dyads, the full DSM and an unconstrained
 distinguishable APIM are alternative parameterizations of the same fixed
-associations. The APIM estimates separate actor and partner effects for
-each role. The DSM re-expresses those four slopes as:</p>
-<ul>
-<li>predictor level to outcome level;</li>
-<li>predictor difference to outcome level;</li>
-<li>predictor level to outcome difference; and</li>
-<li>predictor difference to outcome difference.</li>
-</ul>
-<p>Neither parameterization is generally more correct. The APIM is often
-clearer for questions about actor and partner effects, whereas the DSM
-directly addresses questions about shared dyadic levels and directional
+associations.</p>
+<p>Let’s fit the equivalent distinguishable APIM:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">apim_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
+<span>    <span class="co"># Role-specific intercepts</span></span>
+<span>    <span class="fl">0</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Role-specific actor effects</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Role-specific partner effects</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Role-specific Gaussian residual variance-covariance</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_is_female_x_male_male</span></span>
+<span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">cross_dsm_data_inverted</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The two DSM directions and the APIM have identical fit
+statistics:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DSM: female - male"</span>, <span class="st">"DSM: male - female"</span>, <span class="st">"APIM"</span><span class="op">)</span>,</span>
+<span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dsm_model_inverted</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_model</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">dsm_model_inverted</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_model</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  logLik <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">dsm_model_inverted</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">apim_model</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;                model     AIC     BIC   logLik</span></span>
+<span><span class="co">#&gt; 1 DSM: female - male 589.491 618.026 -285.746</span></span>
+<span><span class="co">#&gt; 2 DSM: male - female 589.491 618.026 -285.746</span></span>
+<span><span class="co">#&gt; 3               APIM 589.491 618.026 -285.746</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="fixed-effect-transformation">Fixed-effect transformation<a class="anchor" aria-label="anchor" href="#fixed-effect-transformation"></a>
+</h3>
+<p>Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mi>f</mi></msub><annotation encoding="application/x-tex">A_f</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mi>m</mi></msub><annotation encoding="application/x-tex">A_m</annotation></semantics></math>
+denote the female and male actor effects, and let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mi>f</mi></msub><annotation encoding="application/x-tex">P_f</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mi>m</mi></msub><annotation encoding="application/x-tex">P_m</annotation></semantics></math>
+denote the partner effects on the female and male outcomes,
+respectively. Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>α</mi><mi>f</mi></msub><annotation encoding="application/x-tex">\alpha_f</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>α</mi><mi>m</mi></msub><annotation encoding="application/x-tex">\alpha_m</annotation></semantics></math>
+be the corresponding APIM intercepts. The APIM slopes transform into the
+female-minus-male DSM paths as</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>11</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>A</mi><mi>f</mi></msub><mo>+</mo><msub><mi>P</mi><mi>f</mi></msub><mo>+</mo><msub><mi>A</mi><mi>m</mi></msub><mo>+</mo><msub><mi>P</mi><mi>m</mi></msub></mrow><mn>2</mn></mfrac><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>12</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>A</mi><mi>f</mi></msub><mo>−</mo><msub><mi>P</mi><mi>f</mi></msub><mo>+</mo><msub><mi>P</mi><mi>m</mi></msub><mo>−</mo><msub><mi>A</mi><mi>m</mi></msub></mrow><mn>4</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>21</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>A</mi><mi>f</mi></msub><mo>+</mo><msub><mi>P</mi><mi>f</mi></msub><mo>−</mo><msub><mi>A</mi><mi>m</mi></msub><mo>−</mo><msub><mi>P</mi><mi>m</mi></msub><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>22</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>A</mi><mi>f</mi></msub><mo>+</mo><msub><mi>A</mi><mi>m</mi></msub><mo>−</mo><msub><mi>P</mi><mi>f</mi></msub><mo>−</mo><msub><mi>P</mi><mi>m</mi></msub></mrow><mn>2</mn></mfrac><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+a_{11} &amp;= \frac{A_f + P_f + A_m + P_m}{2}, &amp;
+a_{12} &amp;= \frac{A_f - P_f + P_m - A_m}{4}, \\
+a_{21} &amp;= A_f + P_f - A_m - P_m, &amp;
+a_{22} &amp;= \frac{A_f + A_m - P_f - P_m}{2}.
+\end{aligned}
+</annotation></semantics></math></p>
+<p>The APIM predictors retain their original scale, whereas the DSM
+predictor level is grand-mean centered. If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
+is the grand mean subtracted from the DSM predictor level, the
+intercepts therefore transform as</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mn>10</mn></msub><mo>=</mo><mfrac><mrow><msub><mi>α</mi><mi>f</mi></msub><mo>+</mo><msub><mi>α</mi><mi>m</mi></msub></mrow><mn>2</mn></mfrac><mo>+</mo><msub><mi>μ</mi><mi>X</mi></msub><msub><mi>a</mi><mn>11</mn></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>a</mi><mn>20</mn></msub><mo>=</mo><msub><mi>α</mi><mi>f</mi></msub><mo>−</mo><msub><mi>α</mi><mi>m</mi></msub><mo>+</mo><msub><mi>μ</mi><mi>X</mi></msub><msub><mi>a</mi><mn>21</mn></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+a_{10} = \frac{\alpha_f + \alpha_m}{2} + \mu_X a_{11}, \qquad
+a_{20} = \alpha_f - \alpha_m + \mu_X a_{21}.
+</annotation></semantics></math></p>
+<p>The reverse slope transformation is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>A</mi><mi>f</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>+</mo><msub><mi>a</mi><mn>12</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>+</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>P</mi><mi>f</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>a</mi><mn>12</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>−</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>A</mi><mi>m</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>a</mi><mn>12</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>+</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>P</mi><mi>m</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>+</mo><msub><mi>a</mi><mn>12</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>−</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+A_f &amp;= \frac{a_{11}}{2} + a_{12} + \frac{a_{21}}{4} + \frac{a_{22}}{2}, &amp;
+P_f &amp;= \frac{a_{11}}{2} - a_{12} + \frac{a_{21}}{4} - \frac{a_{22}}{2}, \\
+A_m &amp;= \frac{a_{11}}{2} - a_{12} - \frac{a_{21}}{4} + \frac{a_{22}}{2}, &amp;
+P_m &amp;= \frac{a_{11}}{2} + a_{12} - \frac{a_{21}}{4} - \frac{a_{22}}{2}.
+\end{aligned}
+</annotation></semantics></math></p>
+<p>Similarly,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mi>f</mi></msub><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>20</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mn>11</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\alpha_f = a_{10} + \frac{a_{20}}{2}
+- \mu_X\left(a_{11} + \frac{a_{21}}{2}\right),
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mi>m</mi></msub><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>20</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mn>11</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\alpha_m = a_{10} - \frac{a_{20}}{2}
+- \mu_X\left(a_{11} - \frac{a_{21}}{2}\right).
+</annotation></semantics></math></p>
+<p>The following comparison applies the APIM-to-DSM transformation to
+all six fixed effects:</p>
+<pre><code><span><span class="co">#&gt; From APIM model:</span></span>
+<span><span class="co">#&gt;    female intercept:        -4.369 </span></span>
+<span><span class="co">#&gt;    female actor effect:     1.672 </span></span>
+<span><span class="co">#&gt;    female partner effect:   0.249 </span></span>
+<span><span class="co">#&gt;    male intercept:          -6.038 </span></span>
+<span><span class="co">#&gt;    male actor effect:       1.805 </span></span>
+<span><span class="co">#&gt;    male partner effect:     0.255 </span></span>
+<span><span class="co">#&gt;    centering constant:      5.148 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  DSM transformation:</span></span>
+<span><span class="co">#&gt;    a10 = (female intercept + male intercept) / 2 +</span></span>
+<span><span class="co">#&gt;           mu_X * a11:                                       5.043 </span></span>
+<span><span class="co">#&gt;    a11 = (female actor + female partner + male actor +</span></span>
+<span><span class="co">#&gt;           male partner) / 2:                                1.99 </span></span>
+<span><span class="co">#&gt;    a12 = (female actor - female partner + male partner -</span></span>
+<span><span class="co">#&gt;           male actor) / 4:                                  -0.032 </span></span>
+<span><span class="co">#&gt;    a20 = female intercept - male intercept + mu_X * a21:    0.956 </span></span>
+<span><span class="co">#&gt;    a21 = female actor + female partner - male actor -</span></span>
+<span><span class="co">#&gt;           male partner:                                     -0.138 </span></span>
+<span><span class="co">#&gt;    a22 = (female actor + male actor - female partner -</span></span>
+<span><span class="co">#&gt;           male partner) / 2:                                1.486 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  From DSM model:</span></span>
+<span><span class="co">#&gt;    outcome-level intercept (a10):        5.043 </span></span>
+<span><span class="co">#&gt;    level -&gt; level (a11):                 1.99 </span></span>
+<span><span class="co">#&gt;    difference -&gt; level (a12):            -0.032 </span></span>
+<span><span class="co">#&gt;    outcome-difference intercept (a20):   0.956 </span></span>
+<span><span class="co">#&gt;    level -&gt; difference (a21):            -0.138 </span></span>
+<span><span class="co">#&gt;    difference -&gt; difference (a22):       1.486</span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="random-effect-transformation">Random-effect transformation<a class="anchor" aria-label="anchor" href="#random-effect-transformation"></a>
+</h3>
+<p>Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>f</mi></msub><annotation encoding="application/x-tex">u_f</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>m</mi></msub><annotation encoding="application/x-tex">u_m</annotation></semantics></math>
+be the APIM random effects for the female and male outcomes. The DSM
+outcome-level and outcome-difference residuals are the same random
+effects expressed in different coordinates:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>r</mi><mrow><mi>Y</mi><mi>L</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>r</mi><mrow><mi>Y</mi><mi>D</mi></mrow></msub></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn><mi>/</mi><mn>2</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn><mi>/</mi><mn>2</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>u</mi><mi>f</mi></msub></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>u</mi><mi>m</mi></msub></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\begin{pmatrix} r_{YL} \\ r_{YD} \end{pmatrix}
+=
+\begin{pmatrix} 1/2 &amp; 1/2 \\ 1 &amp; -1 \end{pmatrix}
+\begin{pmatrix} u_f \\ u_m \end{pmatrix}.
+</annotation></semantics></math></p>
+<p>Applying this rotation to the APIM covariance matrix reproduces the
+DSM random intercept variance, intercept-slope covariance, and
+role-slope variance:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">apim_vcov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html" class="external-link">VarCorr</a></span><span class="op">(</span><span class="va">apim_model</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span><span class="op">$</span><span class="va">coupleID</span><span class="op">)</span></span>
+<span><span class="va">dsm_vcov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html" class="external-link">VarCorr</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span><span class="op">$</span><span class="va">coupleID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rotation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  outcome_level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
+<span>  outcome_difference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">apim_to_dsm_vcov</span> <span class="op">&lt;-</span> <span class="va">rotation</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">apim_vcov</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">rotation</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  parameter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Var(r_YL)"</span>, <span class="st">"Cov(r_YL, r_YD)"</span>, <span class="st">"Var(r_YD)"</span><span class="op">)</span>,</span>
+<span>  from_DSM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="va">dsm_vcov</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span>,</span>
+<span>    <span class="va">dsm_vcov</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span>,</span>
+<span>    <span class="va">dsm_vcov</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">]</span></span>
+<span>  <span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  from_APIM_transformation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="va">apim_to_dsm_vcov</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span>,</span>
+<span>    <span class="va">apim_to_dsm_vcov</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span>,</span>
+<span>    <span class="va">apim_to_dsm_vcov</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">]</span></span>
+<span>  <span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;         parameter from_DSM from_APIM_transformation</span></span>
+<span><span class="co">#&gt; 1       Var(r_YL)    0.632                    0.632</span></span>
+<span><span class="co">#&gt; 2 Cov(r_YL, r_YD)   -0.240                   -0.240</span></span>
+<span><span class="co">#&gt; 3       Var(r_YD)    3.678                    3.678</span></span></code></pre></div>
+<p>Both parameterization can be useful. The APIM is often clearer for
+questions about actor and partner effects, whereas the DSM directly
+addresses questions about shared dyadic levels and directional
 discrepancies.</p>
 <p>For exchangeable dyads, the direction of a member difference is
 arbitrary. The directional intercept, both cross-paths, and the
@@ -379,6 +622,7 @@ or</li>
 <a href="dim.html">Dyad-Individual Model vignette</a>,</li>
 </ul>
 <p>or return to the <a href="index.html">Overview</a>.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
