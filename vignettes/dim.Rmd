@@ -185,7 +185,7 @@ message("Install glmmTMB to run the fitted-model examples in this vignette.")
 Because this Gaussian model uses an identity link, fixed coefficients are
 interpreted in units of the outcome, e.g., "satisfaction":
 
-Because the exchangeable Gaussian DIM is algebraically equivalent to the
+The exchangeable Gaussian DIM is algebraically equivalent to the
 reduced undirected DSM, each coefficient has both an individual-member
 interpretation and an equivalent couple mean/difference interpretation.
 
