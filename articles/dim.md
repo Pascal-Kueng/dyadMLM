@@ -316,9 +316,10 @@ summary(dim_1)
 Because this Gaussian model uses an identity link, fixed coefficients
 are interpreted in units of the outcome, e.g., “satisfaction”:
 
-Because the exchangeable Gaussian DIM is algebraically equivalent to the
-reduced undirected DSM, each coefficient has both an individual-member
-interpretation and an equivalent couple mean/difference interpretation.
+The exchangeable Gaussian DIM is algebraically equivalent to the reduced
+undirected Dyadic Score Model (DSM). Therefore, each coefficient has
+both an individual-member interpretation and an equivalent couple
+mean/difference interpretation.
 
 - The intercept (about 5.04) is the expected satisfaction of either
   member, and therefore the expected couple-average satisfaction, when
@@ -336,9 +337,9 @@ interpretation and an equivalent couple mean/difference interpretation.
   average communication constant. Equivalently, if one member is 1 point
   above the dyad mean, holding the dyad mean constant implies that the
   other is 1 point below it. The members are then 2 points apart in
-  communication; the first member’s expected satisfaction is 1.52 points
-  above the couple’s predicted mean, the second member’s is 1.52 points
-  below it, and they are expected to differ by 3.04 points in
+  communication. The first member’s expected satisfaction is then 1.52
+  points above the couple’s predicted mean, the second member’s is 1.52
+  points below it, and they are expected to differ by 3.04 points in
   satisfaction.
 
 ### Demonstrating model equivalence to APIM
@@ -715,10 +716,10 @@ summary(dim_ILD)
 
 ### Interpretation of ILD DIM coefficients
 
-The same dual interpretation applies longitudinally: dyad-mean effects
-describe both expected outcomes for individual members and expected
-couple-average outcomes, whereas within-dyad effects describe both
-member deviations and expected differences between partners.
+The same interpretation as before applies longitudinally: dyad-mean
+effects describe both expected outcomes for individual members and
+expected couple-average outcomes, whereas within-dyad effects describe
+both member deviations and expected differences between partners.
 
 - The `cbp` dyad-mean estimate (about 1.51) means that, comparing
   couples whose average usual support differs by one point while holding
