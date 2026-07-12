@@ -19,18 +19,13 @@ pak::pak("Pascal-Kueng/interdep")
 
 `interdep` helps researchers prepare cross-sectional and intensive
 longitudinal dyadic data for (generalized) multilevel models. It
-supports common dyadic designs with one type of exchangeable or
-distinguishable dyad, and it also handles studies where different kinds
-of dyads appear in the same dataset, such as female-male, female-female,
-and male-male couples.
-
-It automatically creates model-ready columns for dyadic multilevel model
+automatically creates model-ready columns for dyadic multilevel model
 parameterizations such as Actor-Partner Interdependence Models (APIM),
 Dyad-Individual Models (DIM), and undirected Dyadic Score Models (DSM).
 Current DIM and undirected DSM helpers require a single type of
 exchangeable dyad composition.
 
-This vignette focuses on the automatic data preparation step.
+**This vignette focuses on the automatic data preparation step.**
 
 For guidance and examples on how to use the prepared data to estimate
 cross-sectional, generalized, and intensive longitudinal APIMs, see the
@@ -54,7 +49,7 @@ vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 
 The basic data structure needed for `interdep` is a long data frame
 where dyads are stacked on top of each other and both members of a dyad
-appear as separate rows. Roughly, the expected structure is:
+appear as separate rows.
 
 If your raw data are currently in wide format (for time or dyads or
 both), reshape them to this long structure before using
@@ -63,6 +58,8 @@ See the [tidyr pivoting
 vignette](https://tidyr.tidyverse.org/articles/pivot.html) or the
 [`pivot_longer()`
 reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
+
+Roughly, the expected structure for `interdep` is:
 
 - For cross-sectional data: one row per `dyad x member`
 
@@ -544,7 +541,7 @@ print(ild_apim_data)
 By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This
 temporal predictor decomposition can be controlled via the
-`temporal_predictor_decomposition` argument. Use `time_2l` when
+`temporal_predictor_decomposition` argument. Use `"time_2l"` when
 within-person and between-person associations should be estimated
 separately.
 
@@ -554,7 +551,7 @@ separately.
 in the same data object: distinguishable female-male dyads and
 exchangeable female-female and male-male dyads.
 
-Let `interdep` infer the compositions automatically:
+Let’s have `interdep` infer the compositions automatically:
 
 ``` r
 
@@ -599,8 +596,8 @@ print(mixed_cross_data, n = 4)
 ```
 
 We can use this data to model these dyad types as separate or in the
-same model. The [Actor-Partner Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md)
+same model. The [APIMs with Mixed Dyad Compositions
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md)
 shows both mixed-composition formulas and practical convergence notes.
 
 ### Keeping only selected dyad compositions (filtering)
@@ -707,10 +704,10 @@ print(mixed_cross_exchangeable_data, n = 4)
 
 ### Pooling different dyad compositions
 
-Sometimes for theoretical or practical reasons, we may want to **pool
-different exchangeable dyads** and analyze them as if they were one.
-This also allows testing various constraints via model comparisons
-later.
+Sometimes for theoretical or practical reasons, we may want to pool
+different exchangeable dyad compositions and analyze them as if they
+were one. This also allows testing various constraints via model
+comparisons.
 
 For instance, let’s pool `male-male` and `female-female` dyads and name
 them `same-sex` dyads:
@@ -776,7 +773,7 @@ mixed_cross_data_pooled_constrained <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
-  set_exchangeable_compositions = "male_x_female",
+  set_exchangeable_compositions = "male female",
   pool_compositions = list(
     "pooled_exchangeable" = c("male-male", "male_female")
   ),

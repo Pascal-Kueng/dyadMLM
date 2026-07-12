@@ -78,8 +78,12 @@
 <p>This vignette focuses on the Dyad-Individual Model (DIM) for dyadic
 multilevel models and its relationship to the Actor-Partner
 Interdependence Model (APIM). The DIM separates a predictor into the
-dyad’s shared level and each member’s deviation from that level.</p>
-<p>For the broader data-preparation workflow, see the <a href="getting-started.html">Getting Started vignette</a>. For
+dyad’s shared level and each member’s deviation from that level. While
+the APIM expresses effects in terms of two interdependent individuals,
+the DIM expresses them in terms of the dyad’s shared level and the
+contrast between partners.</p>
+<p>For the broader data-preparation workflow of the
+<code>interdep</code> package, see the <a href="getting-started.html">Getting Started vignette</a>. For
 distinguishable, exchangeable, generalized, and intensive longitudinal
 APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model
 vignette</a>. For APIMs that combine distinguishable and exchangeable
@@ -92,9 +96,9 @@ vignette</a>.</p>
 <p>The current DIM implementation prepares predictors for one
 exchangeable dyad composition. Exchangeability means that swapping the
 two member labels does not change the model. One way to make this
-assumption is to omit <code>role</code> from
-<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>, which treats all dyads as the same
-exchangeable composition.</p>
+assumption at the data-preparation layer is to omit <code>role</code>
+from <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>. This treats all dyads as the
+same exchangeable composition.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -146,16 +150,19 @@ exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_actor &lt;dbl&gt;, .i_communication_raw_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>The fixed <code>seed</code> makes the arbitrary member labels used to
-construct the exchangeable-dyad difference contrast
-<code>.i_diff_*</code> reproducible.</p>
+<p>The function creates arbitrary member labels encoding a
+member-difference contrast <code>.i_diff_*</code> as 1 for one partner
+and -1 for the other. This is needed for the correct random effects
+specification. The fixed <code>seed</code> makes these arbitrary member
+labels reproducible.</p>
 <p>Passing a <code>role</code> is also possible when it leads to exactly
 one exchangeable composition (e.g., only female-female dyads).</p>
 <p>In a dataset with mixed dyad types, the right preparation depends on
 the analysis goal.</p>
 <p>For instance, we can filter dyads and keep only male-male and
 female-female dyads. Because DIM currently supports a single type of
-exchangeable dyad, we might pool those like this:</p>
+exchangeable dyad, we might pool those like this, if theoretically
+justified:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_same_sex_pooled_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
@@ -273,14 +280,15 @@ should follow the research question.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">j \in \{1, 2\}</annotation></semantics></math>
 of dyad
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
-the DIM decomposition is</p>
+the DIM decomposition is computed as:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>x</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>x</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \bar{x}_i = \frac{x_{i1} + x_{i2}}{2}, \qquad
 d_{ij} = x_{ij} - \bar{x}_i.
 </annotation></semantics></math></p>
-<p>The two deviations have equal magnitude and opposite signs:
+<p>The two deviations of the two partners have equal magnitude and
+opposite signs:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>=</mo><mi>−</mi><msub><mi>d</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub></mrow><annotation encoding="application/x-tex">d_{i1} = -d_{i2}</annotation></semantics></math>.
-The variables that enter the DIM fixed effects are:</p>
+The variables that enter the DIM fixed effects then represent:</p>
 <ol style="list-style-type: decimal">
 <li>A dyad-mean variable that is grand-mean centered. This describes a
 couple’s shared level compared to all other couples.</li>
@@ -288,10 +296,10 @@ couple’s shared level compared to all other couples.</li>
 couple mean, equivalently half the signed difference between
 partners.</li>
 </ol>
-<p>The fixed effects are a reparameterization of the APIM actor and
-partner effects. The same random-effects structure can therefore be used
-for both fixed-effect parameterizations: a dyad-level intercept and a
-dyad-level difference contrast indexed by
+<p>The resulting estimated fixed effects are a reparameterization of the
+APIM actor and partner effects. The same random-effects structure can
+therefore be used for both fixed-effect parameterizations: a dyad-level
+intercept and a dyad-level difference contrast indexed by
 <code>.i_diff_assumed_exchangeable_arbitrary</code>. In
 <code>glmmTMB</code>, with <code>dispformula = ~ 0</code>, these random
 effects represent the two members’ Gaussian residual variance and
@@ -302,6 +310,7 @@ preserves exchangeability: swapping the arbitrary member labels leaves
 the intercept term unchanged but reverses the difference contrast. A
 nonzero correlation between them would therefore make the random-effects
 distribution depend on the arbitrary labeling.</p>
+<p>The full model can be estimated as:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_1</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -355,23 +364,33 @@ distribution depend on the arbitrary labeling.</p>
 <span><span class="co">#&gt; .i_communication_raw_within_dyad_deviation ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="model-interpretation">Model interpretation<a class="anchor" aria-label="anchor" href="#model-interpretation"></a>
+</h3>
 <p>Because this Gaussian model uses an identity link, fixed coefficients
-are interpreted in satisfaction units:</p>
+are interpreted in units of the outcome, e.g., “satisfaction”:</p>
 <ul>
-<li><p>The intercept (about 5.04) is the expected satisfaction for a
-member whose communication equals the mean of a dyad with average
-communication.</p></li>
-<li><p>The dyad-mean estimate (about 2.00) means that a shared one-point
-difference in both members’ communication is associated with a two-point
-difference in expected satisfaction, holding their difference
-constant.</p></li>
-<li><p>The within-dyad-deviation estimate (about 1.52) means that the
-member whose communication is one point higher than their partner’s is
-expected to report satisfaction 1.52 points higher, holding the other
-model terms constant. This is a within-dyad association, not the
-expected change from increasing only one member’s communication, which
-would also change the dyad mean.</p></li>
+<li><p>The intercept (about 5.04) is the expected satisfaction when both
+members’ communication equals the sample grand mean.</p></li>
+<li><p>The dyad-mean estimate (about 2.00) means that for a person in a
+dyad with one-point higher average communication, while holding the
+difference between partners constant (i.e., both partners’ communication
+is 1 unit higher than the reference), expected satisfaction is 2.00
+units higher.</p></li>
+<li><p>The within-dyad-deviation estimate (about 1.52) means that a
+one-point difference in communication between partners is associated
+with a 1.52-point difference in their expected satisfaction, holding
+their average communication constant. Equivalently, if one member is 1
+point above the dyad mean while holding the dyad mean constant, that
+implies the other is 1 point below the dyad mean. Then, the members are
+2 points apart in communication and are expected to differ by 3.04
+points in satisfaction.</p></li>
 </ul>
+</div>
+<div class="section level3">
+<h3 id="demonstrating-model-equivalence-to-apim">Demonstrating model equivalence to APIM<a class="anchor" aria-label="anchor" href="#demonstrating-model-equivalence-to-apim"></a>
+</h3>
 <p>The same model can be written in APIM form. Since we have requested
 both sets of variables from <code>prepare_interdep_data</code>, we can
 fit one directly. For more guidance on APIM specifications and different
@@ -401,7 +420,8 @@ vignette</a>.</p>
 <span><span class="co">#&gt; 2  APIM 603.9834 619.8358 -296.9917</span></span></code></pre></div>
 <p>This demonstrates that the same statistical model is being estimated
 with different parameterizations and coefficient interpretations.</p>
-<p>The slope coefficients relate as follows:</p>
+<p>Once APIM estimates are present, one can easily obtain DIM estimates,
+and the other way around. The slope coefficients relate as follows:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">dyad mean</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">actor</mtext></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">partner</mtext></msub></mrow><annotation encoding="application/x-tex">
 \beta_{\text{dyad mean}} =
 \beta_{\text{actor}} + \beta_{\text{partner}}
@@ -1049,15 +1069,40 @@ from both displayed equations.</p>
 DIM dyad mean is grand-mean centered, whereas the APIM predictors retain
 their original scale.</p>
 <p>In this example:</p>
-<pre><code><span><span class="co">#&gt; From APIM model:</span></span>
-<span><span class="co">#&gt;   actor effect:                   1.758</span></span>
-<span><span class="co">#&gt;   partner effect:                 0.238</span></span>
-<span><span class="co">#&gt; DIM transformation:</span></span>
-<span><span class="co">#&gt;   actor effect + partner effect:  1.996</span></span>
-<span><span class="co">#&gt;   actor effect - partner effect:  1.52</span></span>
-<span><span class="co">#&gt; From DIM model:</span></span>
-<span><span class="co">#&gt;   dyad-mean effect:               1.996</span></span>
-<span><span class="co">#&gt;   within-dyad-deviation effect:   1.52</span></span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">apim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
+<span><span class="va">dim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
+<span></span>
+<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_actor"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_partner"</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span><span class="va">b_dyad_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_within_dyad</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_within_dyad_deviation"</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"From APIM model:\n"</span>,</span>
+<span>     <span class="st">"  actor effect:                  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
+<span>     <span class="st">"  partner effect:                "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span>,</span>
+<span></span>
+<span>     <span class="st">"DIM transformation:\n"</span>,</span>
+<span>     <span class="st">"  actor effect + partner effect: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">+</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
+<span>     <span class="st">"  actor effect - partner effect: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">-</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span>,</span>
+<span></span>
+<span>     <span class="st">"From DIM model:\n"</span>,</span>
+<span>     <span class="st">"  dyad-mean effect:              "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_dyad_mean</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
+<span>     <span class="st">"  within-dyad-deviation effect:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_within_dyad</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; From APIM model:</span></span>
+<span><span class="co">#&gt;    actor effect:                   1.758 </span></span>
+<span><span class="co">#&gt;    partner effect:                 0.238 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  DIM transformation:</span></span>
+<span><span class="co">#&gt;    actor effect + partner effect:  1.996 </span></span>
+<span><span class="co">#&gt;    actor effect - partner effect:  1.52 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  From DIM model:</span></span>
+<span><span class="co">#&gt;    dyad-mean effect:               1.996 </span></span>
+<span><span class="co">#&gt;    within-dyad-deviation effect:   1.52</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -1228,22 +1273,34 @@ construction.</p>
 <span><span class="co">#&gt; .i_provided_support_cbp_within_dyad_deviation   0.0103 *  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="interpretation-of-ild-dim-coefficients">Interpretation of ILD DIM coefficients<a class="anchor" aria-label="anchor" href="#interpretation-of-ild-dim-coefficients"></a>
+</h3>
 <p>The fitted coefficients can be interpreted as:</p>
 <ul>
-<li><p>The <code>cwp</code> dyad-mean estimate (about 0.49) describes
-the expected change in closeness when both members are one point above
-their respective usual support levels.</p></li>
-<li><p>The <code>cbp</code> dyad-mean estimate (about 1.51) instead
-compares dyads whose members’ average usual support levels differ by one
-point.</p></li>
-<li><p>The <code>cwp</code> within-dyad estimate (about 0.06) describes
-the expected closeness difference associated with a one-point difference
-between members in their momentary deviations from usual
-support.</p></li>
-<li><p>The <code>cbp</code> within-dyad estimate (about 0.78) describes
-the expected closeness difference associated with a one-point difference
-between members in their usual support levels.</p></li>
+<li><p>The <code>cbp</code> dyad-mean estimate (about 1.51) means that,
+comparing couples whose average usual support differs by one point while
+holding the stable difference between partners constant, a member of the
+higher-support couple is expected to report 1.51 points higher
+closeness.</p></li>
+<li><p>The <code>cwp</code> dyad-mean estimate (about 0.49) means that
+when both members are one point above their respective usual support
+levels, each member’s expected closeness is 0.49 points higher, holding
+the difference between their momentary deviations constant.</p></li>
+<li><p>The <code>cbp</code> within-dyad estimate (about 0.78) means that
+if partners differ by one point in their usual support levels, they are
+expected to differ by 0.78 points in closeness, holding the couple’s
+average usual support constant.</p></li>
+<li><p>The <code>cwp</code> within-dyad estimate (about 0.06) means that
+if one partner’s momentary deviation from usual support is one point
+higher than the other partner’s deviation, they are expected to differ
+by 0.06 points in closeness, holding the occasion-specific dyad mean
+constant.</p></li>
 </ul>
+</div>
+<div class="section level3">
+<h3 id="equivalence-of-apim-and-dim-in-ild">Equivalence of APIM and DIM in ILD<a class="anchor" aria-label="anchor" href="#equivalence-of-apim-and-dim-in-ild"></a>
+</h3>
 <p>The equivalent APIM uses actor and partner effects on both
 levels:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -1349,6 +1406,7 @@ level and a DIM parameterization on the other. For example:</p>
 <span><span class="co">#&gt; 1   DIM within / DIM between 2977.225 3026.637 -1478.613</span></span>
 <span><span class="co">#&gt; 2 APIM within / APIM between 2977.225 3026.637 -1478.613</span></span>
 <span><span class="co">#&gt; 3  APIM within / DIM between 2977.225 3026.637 -1478.613</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="including-random-slopes">Including Random Slopes<a class="anchor" aria-label="anchor" href="#including-random-slopes"></a>

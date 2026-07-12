@@ -62,7 +62,7 @@
 
 <p><code>interdep</code> helps researchers prepare cross-sectional and intensive longitudinal dyadic data for multilevel models, including generalized multilevel models.</p>
 <p>It supports dyadic datasets with distinguishable dyads, exchangeable dyads, or mixed dyad types in the same data, such as female-male, female-female, and male-male couples. It creates composition-aware, model-ready columns for dyadic multilevel model parameterizations such as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model (DIM), and undirected Dyadic Score Model (DSM). Current DIM and undirected DSM helpers require one exchangeable dyad composition.</p>
-<p>Start with the <a href="https://pascal-kueng.github.io/interdep/articles/getting-started.html">Getting Started</a> vignette for the main data-preparation workflow. The <a href="https://pascal-kueng.github.io/interdep/">documentation site</a> also includes the <a href="https://pascal-kueng.github.io/interdep/reference/index.html">function reference</a>. The current vignette structure is:</p>
+<p>Start with the vignettes, or scroll down for a quick-start.</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -87,11 +87,11 @@
 </tr>
 <tr>
 <td><a href="https://pascal-kueng.github.io/interdep/articles/dim.html">Dyad-Individual Model</a></td>
-<td>DIM predictor construction and APIM-DIM equivalence for exchangeable dyads</td>
+<td>DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads</td>
 </tr>
 <tr>
 <td><a href="https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html">Undirected Dyadic Score Model</a></td>
-<td>Undirected DSM outcome and predictor construction</td>
+<td>Undirected DSM outcome and predictor construction, with model formulas</td>
 </tr>
 </tbody>
 </table>
@@ -140,7 +140,7 @@
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # A tibble: 190 × 11</span></span>
 <span><span class="co">#&gt;    personID coupleID gender communication satisfaction .i_composition</span></span>
-<span><span class="co">#&gt;       &lt;int&gt;    &lt;int&gt; &lt;fct&gt;          &lt;dbl&gt;        &lt;dbl&gt; &lt;fct&gt;</span></span>
+<span><span class="co">#&gt;       &lt;int&gt;    &lt;int&gt; &lt;fct&gt;          &lt;dbl&gt;        &lt;dbl&gt; &lt;fct&gt;         </span></span>
 <span><span class="co">#&gt;  1        1        1 female          4.79         4.37 female_x_male </span></span>
 <span><span class="co">#&gt;  2        2        1 male            3.80         2.34 female_x_male </span></span>
 <span><span class="co">#&gt;  3        3        2 female          2.91         2.44 female_x_male </span></span>

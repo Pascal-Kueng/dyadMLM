@@ -88,16 +88,13 @@ GitHub with:</p>
 </h2>
 <p><code>interdep</code> helps researchers prepare cross-sectional and
 intensive longitudinal dyadic data for (generalized) multilevel models.
-It supports common dyadic designs with one type of exchangeable or
-distinguishable dyad, and it also handles studies where different kinds
-of dyads appear in the same dataset, such as female-male, female-female,
-and male-male couples.</p>
-<p>It automatically creates model-ready columns for dyadic multilevel
-model parameterizations such as Actor-Partner Interdependence Models
-(APIM), Dyad-Individual Models (DIM), and undirected Dyadic Score Models
-(DSM). Current DIM and undirected DSM helpers require a single type of
+It automatically creates model-ready columns for dyadic multilevel model
+parameterizations such as Actor-Partner Interdependence Models (APIM),
+Dyad-Individual Models (DIM), and undirected Dyadic Score Models (DSM).
+Current DIM and undirected DSM helpers require a single type of
 exchangeable dyad composition.</p>
-<p>This vignette focuses on the automatic data preparation step.</p>
+<p><strong>This vignette focuses on the automatic data preparation
+step.</strong></p>
 <p>For guidance and examples on how to use the prepared data to estimate
 cross-sectional, generalized, and intensive longitudinal APIMs, see the
 <a href="apim.html">Actor-Partner Interdependence Model vignette</a>.
@@ -116,13 +113,13 @@ vignette</a>.</p>
 </h2>
 <p>The basic data structure needed for <code>interdep</code> is a long
 data frame where dyads are stacked on top of each other and both members
-of a dyad appear as separate rows. Roughly, the expected structure
-is:</p>
+of a dyad appear as separate rows.</p>
 <p>If your raw data are currently in wide format (for time or dyads or
 both), reshape them to this long structure before using
 <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>. See the <a href="https://tidyr.tidyverse.org/articles/pivot.html" class="external-link">tidyr pivoting
 vignette</a> or the <a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link"><code>pivot_longer()</code>
 reference</a>.</p>
+<p>Roughly, the expected structure for <code>interdep</code> is:</p>
 <ul>
 <li>For cross-sectional data: one row per
 <code>dyad x member</code>
@@ -677,8 +674,8 @@ variable to <code><a href="../reference/prepare_interdep_data.html">prepare_inte
 decomposed into within-person and between-person components. This
 temporal predictor decomposition can be controlled via the
 <code>temporal_predictor_decomposition</code> argument. Use
-<code>time_2l</code> when within-person and between-person associations
-should be estimated separately.</p>
+<code>"time_2l"</code> when within-person and between-person
+associations should be estimated separately.</p>
 </div>
 </div>
 <div class="section level2">
@@ -687,7 +684,8 @@ should be estimated separately.</p>
 <p><code>example_dyadic_crosssectional_mixed</code> contains three dyad
 compositions in the same data object: distinguishable female-male dyads
 and exchangeable female-female and male-male dyads.</p>
-<p>Let <code>interdep</code> infer the compositions automatically:</p>
+<p>Let’s have <code>interdep</code> infer the compositions
+automatically:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
@@ -728,9 +726,9 @@ and exchangeable female-female and male-male dyads.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>We can use this data to model these dyad types as separate or in the
-same model. The <a href="apim.html">Actor-Partner Interdependence Model
-vignette</a> shows both mixed-composition formulas and practical
-convergence notes.</p>
+same model. The <a href="mixed-apim.html">APIMs with Mixed Dyad
+Compositions vignette</a> shows both mixed-composition formulas and
+practical convergence notes.</p>
 <div class="section level3">
 <h3 id="keeping-only-selected-dyad-compositions-filtering">Keeping only selected dyad compositions (filtering)<a class="anchor" aria-label="anchor" href="#keeping-only-selected-dyad-compositions-filtering"></a>
 </h3>
@@ -833,10 +831,10 @@ differentiation between the kinds of dyads (e.g.,
 <div class="section level3">
 <h3 id="pooling-different-dyad-compositions">Pooling different dyad compositions<a class="anchor" aria-label="anchor" href="#pooling-different-dyad-compositions"></a>
 </h3>
-<p>Sometimes for theoretical or practical reasons, we may want to
-<strong>pool different exchangeable dyads</strong> and analyze them as
-if they were one. This also allows testing various constraints via model
-comparisons later.</p>
+<p>Sometimes for theoretical or practical reasons, we may want to pool
+different exchangeable dyad compositions and analyze them as if they
+were one. This also allows testing various constraints via model
+comparisons.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
 dyads:</p>
@@ -897,7 +895,7 @@ treat <code>female-male</code> as exchangeable:</p>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"male_x_female"</span>,</span>
+<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"male female"</span>,</span>
 <span>  pool_compositions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    <span class="st">"pooled_exchangeable"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male-male"</span>, <span class="st">"male_female"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
