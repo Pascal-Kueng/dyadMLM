@@ -186,7 +186,7 @@ Because this Gaussian model uses an identity link, fixed coefficients are
 interpreted in units of the outcome, e.g., "satisfaction":
 
 The exchangeable Gaussian DIM is algebraically equivalent to the
-reduced undirected Dyadic Score Model (DSM). Therefore, each coefficient has 
+reduced, label-invariant Dyadic Score Model (DSM). Therefore, each coefficient has
 both an individual-member interpretation and an equivalent couple mean/difference
 interpretation.
 

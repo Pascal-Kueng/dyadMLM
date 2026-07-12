@@ -62,6 +62,7 @@ add_dyadic_score_columns <- function(data) {
     deviation_col <- decomposition$predictors$deviation_column[[i]]
     difference_col <- dsm_predictors$difference_column[[i]]
 
+    # Member deviation = role contrast * full directional difference.
     out[[difference_col]] <-
       out[[deviation_col]] / out[[interdep_dsm_role_contrast_col]]
   }

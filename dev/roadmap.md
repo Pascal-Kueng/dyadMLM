@@ -48,16 +48,15 @@ Recently completed cleanup:
 - added `include_compositions`, so analyses can keep selected observed dyad
   compositions before exchangeability overrides, pooling, and DIM/DSM
   compatibility checks
-- reviewed the DIM and undirected DSM preparation paths for the current v0.1
-  scope
+- implemented and reviewed separate DIM and directional DSM preparation paths
+  for the current v0.1 scope
 - accepted the current composition metadata shape for v0.1: returned data use
   final analysis compositions, while pooling metadata records the pooled source
   compositions in a compact `pooled_from` summary
 
 Immediate next step: finish vignette and release-facing polish. The
-getting-started and DIM vignettes have had recent production-polish passes.
-APIM and DSM still need careful review, and DSM is currently a placeholder page
-that announces the intended documentation structure.
+getting-started, DIM, and DSM vignettes now document their implemented
+preparation paths; APIM and release-facing integration still need final review.
 
 ## Vignette Architecture
 
@@ -95,9 +94,10 @@ Target vignette structure:
   - role-moderated and random-slope material only as advanced/conceptual
     guidance until the implementation is more complete
 - `dsm.Rmd`
-  - currently an under-construction placeholder
-  - add fuller examples before the alpha feedback round
-  - keep outcomes unchanged in the MLM-focused preparation API
+  - directional DSM preparation with an explicit role order
+  - dyad-level and signed-difference predictor columns
+  - exact long-format interaction model and coefficient interpretations
+  - outcomes remain unchanged in the MLM-focused preparation API
 
 ## Version 0.1.0 - First CRAN Release Candidate
 
@@ -171,10 +171,11 @@ model-building features.
   - Keep missing-data behavior explicit
   - Keep `predictors` as the only transformed-variable API; select outcomes in
     fitted-model formulas
-- Add minimal undirected dyadic-score model (DSM) data preparation
-  - Add `model_type = "undirected_dsm"` for undirected DSM preparation only
-  - Require one exchangeable dyad composition for the first undirected DSM path
-  - Reuse DIM construction for predictor-side dyad means/deviations
+- Add directional dyadic-score model (DSM) data preparation
+  - Use `model_type = "dsm"` with an explicit `dsm_role_order`
+  - Require one distinguishable dyad composition
+  - Reuse neutral dyad-mean/member-deviation calculations internally
+  - Create full signed predictor differences and a `+0.5/-0.5` role contrast
   - Leave outcomes unchanged
 - Add a print method for `interdep_data`
   - Keep normal tibble/data-frame printing; add a compact interdep header above
@@ -185,10 +186,10 @@ model-building features.
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
     `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
-    temporal predictor components, APIM predictor columns, and DIM-style
-    predictor columns
+    temporal predictor components, APIM predictor columns, DIM deviations, and
+    DSM directional predictor columns
   - Drive generated-column printing from `interdep_generated_columns()`, which
-    normalizes temporal predictor, APIM, and DIM metadata into
+    normalizes temporal predictor, APIM, DIM, and DSM metadata into
     one row per concrete generated column
   - Make dropped incomplete dyads and missing roles visible
   - Target display:
@@ -205,41 +206,42 @@ model-building features.
     # Added columns:
     #   .i_composition                  inferred dyad composition
     #   .i_composition_role             composition-specific member role
-    #   .i_is_*                         composition-role indicator columns
-    #   .i_diff_*                       composition-specific sum-diff contrasts; 0
+    #   .i_is_{comp-role}               composition-role indicator columns
+    #   .i_diff_{comp}                  composition-specific sum-diff contrasts; 0
     #                                   for distinguishable dyads or other
     #                                   exchangeable compositions
-    #   .i_*_cwp                        within-person predictor: momentary
+    #   .i_{pred}_cwp                   within-person predictor: momentary
     #                                   deviations from each person's usual level
-    #   .i_*_cbp                        between-person predictor: stable
+    #   .i_{pred}_cbp                   between-person predictor: stable
     #                                   differences from the average person's usual
     #                                   level
-    #   .i_*_cwp_actor                  APIM within-person actor predictor: actor's
+    #   .i_{pred}_cwp_actor             APIM within-person actor predictor: actor's
     #                                   momentary deviations from their usual level
-    #   .i_*_cwp_partner                APIM within-person partner predictor:
+    #   .i_{pred}_cwp_partner           APIM within-person partner predictor:
     #                                   partner's momentary deviations from their
     #                                   usual level
-    #   .i_*_cbp_actor                  APIM between-person actor predictor:
+    #   .i_{pred}_cbp_actor             APIM between-person actor predictor:
     #                                   actor's stable difference from the average
     #                                   person's usual level
-    #   .i_*_cbp_partner                APIM between-person partner predictor:
+    #   .i_{pred}_cbp_partner           APIM between-person partner predictor:
     #                                   partner's stable difference from the
     #                                   average person's usual level
-    #   .i_*_cwp_dyad_mean              DIM within-person dyad-mean predictor:
+    #   .i_{pred}_cwp_dyad_mean         within-person dyad-mean predictor:
     #                                   shared momentary deviations in the dyad
-    #   .i_*_cwp_within_dyad_deviation  DIM within-person within-dyad predictor
+    #   .i_{pred}_cwp_within_dyad_deviation
+    #                                   DIM within-person within-dyad predictor
     #                                   deviation: person's momentary deviation
     #                                   from the dyad average
-    #   .i_*_cbp_dyad_mean              DIM between-person dyad-mean predictor:
+    #   .i_{pred}_cbp_dyad_mean         between-person dyad-mean predictor:
     #                                   dyad's stable usual level, grand-mean
     #                                   centered
-    #   .i_*_cbp_within_dyad_deviation  DIM between-person within-dyad predictor
+    #   .i_{pred}_cbp_within_dyad_deviation
+    #                                   DIM between-person within-dyad predictor
     #                                   deviation: person's stable difference from
     #                                   the dyad's usual level
-    #   .i_*_raw_dyad_mean              DSM dyad-mean outcome: dyad's average
-    #                                   outcome level
-    #   .i_*_raw_within_dyad_deviation  DSM within-dyad outcome deviation: person's
-    #                                   difference from the dyad average
+    #   .i_dsm_role_contrast            DSM +0.5/-0.5 directional role contrast
+    #   .i_{pred}_cwp_dyad_difference   DSM within-person signed predictor difference
+    #   .i_{pred}_cbp_dyad_difference   DSM between-person signed predictor difference
     #
     # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more
     # A tibble: 5,600 x 17
@@ -267,7 +269,7 @@ model-building features.
   - use a separate ILD APIM vignette for temporal predictor decomposition,
     generalized outcomes, optimizer notes, and heavier mixed-composition ILD examples
 - Keep the focused DIM vignette separate from APIM/ILD APIM examples
-- Add a short DSM data-preparation example after the DSM API is stable
+- Keep the DSM data-preparation examples aligned with the implemented API
 - Add citation metadata
   - `inst/CITATION` for R users
   - `CITATION.cff` for GitHub and future Zenodo metadata
@@ -280,12 +282,12 @@ Complete these before calling the feature set CRAN-ready:
   - run `devtools::document()`
   - render `README.Rmd`
   - build pkgdown locally when changing vignette structure or `_pkgdown.yml`
-- DIM and undirected DSM preparation review: done for the current v0.1 scope
+- DIM and directional DSM preparation review: done for the current v0.1 scope
   - direct grouped DIM construction is accepted
   - raw cross-sectional DIM names are accepted
-  - DIM/DSM construction remains restricted to one final exchangeable analysis
-    composition, unless `pool_compositions` has explicitly produced that
-    analysis composition
+  - DIM remains restricted to one final exchangeable composition
+  - DSM remains restricted to one final distinguishable composition matching
+    `dsm_role_order`
 - Analysis-composition controls: done for v0.1
   - `include_compositions` is implemented as a raw observed-composition dyad
     filter before `set_exchangeable_compositions` and `pool_compositions`
@@ -312,7 +314,7 @@ Complete these before calling the feature set CRAN-ready:
 - Generated-column metadata: done for v0.1
   - `interdep_generated_columns()` stays internal as the single normalized table
     used by printing and documentation-facing summaries of generated temporal
-    predictor, APIM, DIM, and undirected DSM columns
+    predictor, APIM, DIM, and DSM columns
   - expose generated-column meanings through `print.interdep_data()` for v0.1;
     consider a public wrapper later only if users need programmatic inspection
   - preserve explicit fields for `temporal_decomposition`,
@@ -323,10 +325,11 @@ Complete these before calling the feature set CRAN-ready:
 - `print.interdep_data()` descriptions for DIM column families: done for v0.1
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
-- Minimal undirected DSM preparation: done for the current v0.1 scope
+- Directional DSM preparation: done for the current v0.1 scope
   - outcomes remain unchanged and are selected in model formulas
-  - DSM currently reuses DIM-style predictor construction
-  - expand the DSM placeholder vignette before the alpha feedback round
+  - DSM reuses neutral dyad-mean/member-deviation calculations internally
+  - full signed differences and the role contrast are recorded in DSM metadata
+  - the DSM vignette documents the exact long-format interaction model
 - Finalize vignette polish for v0.1.0
   - keep `getting-started.Rmd` as an orientation and data-prep vignette, not the
     main modeling manual
@@ -369,9 +372,8 @@ Complete these before calling the feature set CRAN-ready:
 
 - Add helper functions to rotate `.i_diff_*` / Idiff structures back to
   partner-level interpretations
-- Extend dyadic-score model support beyond the minimal v0.1.0 data-prep API
-  - Implement the full directional DSM using a role contrast and signed
-    predictor differences
+- Extend dyadic-score model support beyond the v0.1.0 data-prep API
+  - consider multiple distinguishable compositions with explicit directions
   - Keep multivariate DSM modeling and formula/syntax generation for a later
     modeling layer
 - Extend composition controls only after the v0.1 API has real examples

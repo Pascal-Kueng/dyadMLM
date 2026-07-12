@@ -1,8 +1,8 @@
 # Temporal Predictor Decomposition and Predictor Construction
 
 This note records the current v0.1.0 design for predictor construction. The
-core rule is that APIM and DIM share the same temporal predictor decomposition,
-but use separate construction helpers.
+core rule is that APIM, DIM, and DSM share the same temporal predictor
+decomposition, but expose model-specific predictor columns.
 
 ## Current Scope
 
@@ -17,7 +17,7 @@ Implemented scope:
 - `model_type = "dsm"` for directional dyadic-score model data preparation
 - DSM currently requires one distinguishable dyad composition
 - central generated-column metadata via `interdep_generated_columns()`, with
-  one row per temporal predictor, APIM, or DIM-style predictor column
+  one row per generated temporal, APIM, DIM, or DSM column
 
 Reserved for later:
 
@@ -25,7 +25,7 @@ Reserved for later:
   with an explicit higher temporal unit
 - grand-mean-only centering as a separate user option
 - automatic inference of 3-level decomposition from the fitted model structure
-- directed DSM variants
+- multiple-composition DSM support
 - explicit multivariate or SEM-oriented dyad-score preparation
 
 `time_2l` refers to the predictor decomposition over time, not to the full
@@ -53,9 +53,9 @@ Only `predictors` are transformed. Outcomes remain unchanged and are selected
 later in the model formula.
 
 `temporal_predictor_decomposition` controls predictor pre-decomposition over
-time. DIM may still apply model-specific conventions after that step;
-specifically, raw cross-sectional DIM dyad means are centered around the grand
-mean of dyad means.
+time. DIM and DSM apply dyadic predictor-score construction afterward;
+specifically, raw cross-sectional dyad means are centered around the grand mean
+of dyad means.
 
 ## Centering
 
@@ -98,8 +98,8 @@ columns.
 For raw predictors:
 
 ```r
-.i_x_raw_actor
-.i_x_raw_partner
+.i_x_actor
+.i_x_partner
 ```
 
 For `time_2l` predictors:
@@ -146,8 +146,8 @@ weighted by the number of observed days:
 For raw cross-sectional predictors:
 
 ```r
-.i_x_raw_dyad_mean_gmc
-.i_x_raw_within_dyad_deviation
+.i_x_dyad_mean_gmc
+.i_x_within_dyad_deviation
 ```
 
 DIM requires complete dyad information for the relevant component. If only one
@@ -170,27 +170,38 @@ within dyad-time or within dyad.
 
 ## Dyadic-Score Model Preparation
 
-For undirected dyadic-score model data preparation, use a separate model type:
+Directional DSM preparation uses:
 
 ```r
-model_type = "undirected_dsm"
+model_type = "dsm"
+dsm_role_order = c("female", "male")
 ```
 
-The implemented split is:
+DSM requires exactly one distinguishable composition. The declared role order
+defines every difference as the first role minus the second and creates
+`.i_dsm_role_contrast` with `+0.5/-0.5` coding.
+
+DIM and DSM share internal dyad-mean and member-deviation calculations. Their
+public columns then diverge:
 
 ```r
-center_predictors()
-add_dyad_individual_columns()    # predictor-side dyad means/deviations
-add_undirected_dyadic_score_columns() # outcome-side dyad scores
+# Shared mean
+.i_x_dyad_mean_gmc
+
+# DIM
+.i_x_within_dyad_deviation
+
+# DSM
+.i_x_dyad_difference
+.i_dsm_role_contrast
 ```
 
-Predictor-side construction should reuse the current DIM path completely. For
-ILD data, that means predictors are first decomposed into `.i_*_cwp` and
-`.i_*_cbp`, then converted into dyad means and within-dyad deviations.
+For ILD data, predictors are first decomposed into `.i_*_cwp` and `.i_*_cbp`.
+DSM then creates dyad means and full directional differences separately for
+both temporal components.
 
-Outcome-side scores are not materialized for the MLM-focused API. A future
-explicit multivariate or SEM workflow would require a separate dyad-score
-preparation design.
+Outcome scores are not materialized for the MLM-focused API. Outcomes remain
+member-level variables selected in the fitted-model formula.
 
 ## Validation Rules
 
@@ -199,22 +210,21 @@ preparation design.
 - non-numeric predictors can be kept undecomposed with
   `temporal_predictor_decomposition = "none"` only for model types that do not
   compute dyad means or within-dyad deviations, such as raw APIM.
-- DIM and undirected DSM predictor construction require numeric predictors.
+- DIM and DSM predictor construction require numeric predictors.
 - user data may not contain package-owned `.i_` columns.
-- longitudinal raw DIM or undirected DSM predictor construction is currently
+- longitudinal raw DIM or DSM predictor construction is currently
   rejected because it mixes within-person and between-person information.
 - `temporal_predictor_decomposition` applies only to predictors.
-- `model_type = "dim"` and `model_type = "undirected_dsm"` currently require
-  one exchangeable dyad composition.
+- `model_type = "dim"` requires one exchangeable dyad composition.
+- `model_type = "dsm"` requires one distinguishable dyad composition and an
+  explicit `dsm_role_order`.
+- DIM and DSM cannot be requested in the same preparation call.
 
 ## Remaining v0.1.0 Work
 
-- Review `add_dyad_individual_columns()` carefully before treating DIM as stable.
-- Keep the print header descriptions for DIM column families explicit but
+- Keep the print header descriptions for DIM and DSM column families explicit but
   compact.
-- Review `add_undirected_dyadic_score_columns()` before treating undirected DSM
-  as stable.
-- Treat `dim_predictors` metadata as stable for v0.1 unless the final DIM/DSM
+- Treat `dim_predictors` and `dsm_predictors` metadata as stable for v0.1 unless
   review finds a concrete problem.
 - Keep `interdep_generated_columns()` internal for v0.1. It is the normalized
   table used by `print.interdep_data()` and documentation-facing summaries, not
@@ -228,10 +238,10 @@ preparation design.
 - Keep APIM and temporal predictor decomposition model examples in APIM-focused
   vignettes; avoid duplicating APIM-DIM equivalence material there.
 - Keep the DIM vignette focused on DIM construction and APIM-DIM equivalence.
-- Expand the DSM placeholder vignette after the directional DSM API is implemented.
-- Analysis-composition controls should run before DIM/DSM compatibility checks.
+- Keep the DSM vignette aligned with the implemented directional score columns
+  and exact long-format interaction model.
+- Analysis-composition controls run before DIM/DSM compatibility checks.
   The implemented order is `include_compositions`, then
-  `set_exchangeable_compositions`, then `pool_compositions`. DIM/DSM should
-  continue to require one final exchangeable analysis composition, but that
-  composition may be produced explicitly by filtering, setting exchangeability,
-  and pooling exchangeable analysis compositions.
+  `set_exchangeable_compositions`, then `pool_compositions`. DIM continues to
+  require one final exchangeable composition, whereas DSM requires one final
+  distinguishable composition matching `dsm_role_order`.

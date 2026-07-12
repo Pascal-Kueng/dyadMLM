@@ -5,8 +5,8 @@
 This document records how the directional Dyadic Score Model (DSM) described
 by Iida et al. (2017) can be represented in `interdep`'s long, one-row-per-member
 data structure. It also distinguishes that model from the package's current
-Dyad-Individual Model (DIM), explains why the current "undirected DSM" is a
-reduced DIM-equivalent model, and proposes a package implementation.
+Dyad-Individual Model (DIM), explains why the reduced label-invariant DSM is
+DIM-equivalent, and records the package implementation.
 
 The relevant source is:
 
@@ -251,8 +251,8 @@ A materialized signed outcome difference is not required to fit the exact long
 model. The original outcome plus `role_contrast` implicitly represents both
 `YLevel` and `YDiff` through an invertible linear transformation.
 
-DSM preparation should therefore retain the original outcome unchanged and
-should not require an `outcomes` argument. A future explicit multivariate or
+DSM preparation therefore retains the original outcome unchanged and does not
+require an `outcomes` argument. A future explicit multivariate or
 SEM workflow would need a separate dyad-score preparation design rather than
 adding unused outcome transformations to the MLM-focused API.
 
@@ -272,7 +272,7 @@ different scaling is intentional: a `-1/+1` exchangeable contrast makes its
 random slope a member deviation, or half-difference, whereas the DSM contrast
 makes its random slope the full directional difference.
 
-## Relation to the DIM and current undirected DSM
+## Relation to the DIM and reduced DSM
 
 For an exchangeable Gaussian dyad, direction-specific terms cannot be
 identified substantively because reversing arbitrary member labels reverses
@@ -294,14 +294,13 @@ YDiff  =             a22 * XDiff  + rYD
 ```
 
 This is the reduced, label-invariant DSM and is algebraically the exchangeable
-Gaussian DIM already implemented by the package. The current
-`model_type = "undirected_dsm"` therefore does not add a distinct statistical
-model. Its separately fitted mean/deviation examples also fail to represent
-the complete joint likelihood and its covariance correctly.
+Gaussian DIM already implemented by the package. The package therefore uses
+`model_type = "dim"` for this exchangeable model rather than exposing a second
+DSM model type with equivalent parameters.
 
 The clean conceptual division is:
 
-- `dim`: exchangeable member-level model, equivalently a reduced undirected DSM;
+- `dim`: exchangeable member-level model, equivalently a reduced label-invariant DSM;
 - `dsm`: Iida's full directional model for distinguishable partners.
 
 ## Why the preliminary separate models are problematic
@@ -324,14 +323,10 @@ standard errors and p-values without an explicit convergence warning. An
 optimizer can report convergence to the boundary even when the likelihood
 does not support conventional inference.
 
-The preliminary separate-model examples in `vignettes/dsm.Rmd` should be
-removed or clearly replaced when directional DSM support is implemented.
+The package does not use these separate score models. The DSM vignette presents
+the exact long-format interaction formulation.
 
-## Proposed package API
-
-Because the package has no adoption constraints yet, replace the misleading
-internal and public `undirected_dsm` model family rather than maintaining both
-names:
+## Package API
 
 ```r
 prepare_interdep_data(
@@ -351,12 +346,11 @@ second. Requiring this argument initially is safer than silently using
 alphabetical order or row order. If a default is later added, the resolved
 order must be stored in metadata and printed prominently.
 
-The initial DSM implementation should deliberately support a narrow, clear
-case:
+The DSM implementation deliberately supports a narrow, clear case:
 
 - `role` is required;
 - exactly two stable roles are required;
-- initially, require exactly one distinguishable dyad composition;
+- exactly one distinguishable dyad composition is required;
 - exchangeable compositions are rejected for `model_type = "dsm"`;
 - both roles must be present in every structurally complete dyad;
 - each difference direction is recorded in `attr(data, "interdep")`;
@@ -367,41 +361,33 @@ later. Supporting them immediately would require composition-specific role
 contrasts, reference directions, fixed effects, and covariance structures and
 would obscure the core implementation.
 
-## Proposed implementation steps
+## Implemented package design
 
-1. Replace `"undirected_dsm"` with `"dsm"` in argument validation, metadata,
-   generated-column specifications, documentation, and tests.
-2. Keep `validate_dim_compatibility()` specific to the DIM path and add a
-   directional DSM validator that requires the declared two-role ordering.
-3. Keep DIM validation and construction separate; DIM remains the supported
-   exchangeable model.
-4. Add and validate `dsm_role_order`. It must contain exactly the two observed
-   roles in the supported composition, without duplicates or missing values.
-5. Generate `.i_dsm_role_contrast` as `+0.5/-0.5` from the declared order.
-6. Generate each predictor's dyad level and full signed dyad difference,
-   repeating both on the two member rows.
-7. Retain outcome variables unchanged; users select the outcome in the model
-   formula.
-8. Record source predictors, generated columns, score type, centering, and role
-   order in the `interdep` metadata and generated-column registry.
-9. Update `print.interdep_data()` so it states the resolved difference
-   direction and describes the generated patterns without printing every
-   predictor name.
-10. Replace the preliminary DSM vignette models with the exact interaction
-    formulation and coefficient interpretations.
-11. Retain the DIM vignette's secondary reduced-DSM interpretation, while
-    making clear that a full directional DSM additionally estimates both
-    cross-paths, a directional intercept, and a level-difference residual
-    covariance.
+1. `validate_dsm_compatibility()` requires one distinguishable composition and
+   the declared two-role ordering.
+2. DIM and DSM validation remain separate, while both constructors reuse the
+   same internal dyad-mean and member-deviation calculations.
+3. `dsm_role_order` must contain exactly the two observed roles without
+   duplicates or missing values.
+4. `.i_dsm_role_contrast` is coded `+0.5/-0.5` from the declared order.
+5. Each predictor receives a dyad level and full signed dyad difference,
+   repeated on both member rows.
+6. Outcome variables remain unchanged and are selected in the model formula.
+7. DSM predictor and contrast metadata feed the normalized generated-column
+   registry and concise print output.
+8. The DSM vignette uses the exact interaction formulation and direct
+   coefficient interpretations.
 
-Likely generated-column patterns are:
+Generated-column patterns are:
 
 ```text
 .i_dsm_role_contrast
 .i_{pred}_dyad_mean_gmc
 .i_{pred}_dyad_difference
-.i_{out}_dyad_mean
-.i_{out}_dyad_difference
+.i_{pred}_cwp_dyad_mean
+.i_{pred}_cwp_dyad_difference
+.i_{pred}_cbp_dyad_mean
+.i_{pred}_cbp_dyad_difference
 ```
 
 The exact use of `_gmc` should continue to reflect actual centering. Signed
@@ -409,30 +395,21 @@ differences generally require no grand-mean centering because the common
 location cancels, although optional centering of `XDiff` changes intercept
 interpretation and could be considered separately.
 
-## Testing plan
+## Test coverage
 
 ### Score construction
 
-- Verify dyad means against hand-calculated values.
-- Verify every signed difference is first declared role minus second declared
-  role, independent of input row order.
-- Verify the same mean and difference are repeated on both member rows.
-- Verify the role contrast is `+0.5/-0.5` and stable over longitudinal rows.
-- Verify missing member values produce missing score pairs.
-- Verify character and factor role inputs resolve identically when the same
-  explicit order is supplied.
+Automated tests verify hand-calculated dyad means, declared difference
+direction independent of row order, repeated dyad scores, stable `+0.5/-0.5`
+role contrasts, missing score pairs, temporal CWP/CBP construction, and role
+direction reversal.
 
 ### Validation
 
-- Reject a missing `role` argument.
-- Reject exchangeable dyads.
-- Reject one-role or more-than-two-role DSM compositions.
-- Reject a role order that is incomplete, duplicated, or inconsistent with
-  observed roles.
-- Reject mixed compositions in the initial implementation with an actionable
-  message.
+Automated tests reject missing roles or role orders, exchangeable or mixed
+compositions, invalid two-role orders, and combined DIM/DSM requests.
 
-### Algebraic equivalence
+### Remaining model-level verification
 
 - Simulate data from known `YLevel` and `YDiff` regressions.
 - Reconstruct `Y1` and `Y2` using the `+0.5/-0.5` contrast.
@@ -442,7 +419,7 @@ interpretation and could be considered separately.
   recover the level variance, difference variance, and their covariance.
 - Verify fitted member outcomes imply the fitted `YLevel` and `YDiff`.
 
-### Direction reversal
+### Direction reversal behavior
 
 Fit the same data after reversing `dsm_role_order`. Expected behavior:
 
@@ -459,12 +436,9 @@ from accidental dependence on row order.
 
 ### Regression protection
 
-- Verify DIM and APIM generated columns remain unchanged when DSM is not
-  requested.
-- Verify requesting APIM and DSM columns together does not overwrite shared
-  source columns.
-- Verify generated-column print patterns and metadata remain concise with
-  multiple predictors.
+Automated tests verify unchanged DIM behavior, coexistence of APIM and DSM
+columns, generated-column metadata, and concise print patterns. Model-fitting
+equivalence tests remain separate from data-preparation unit tests.
 
 ## Explicit multivariate alternative
 
@@ -529,8 +503,8 @@ conditionally independent after the included effects. Serial correlation,
 unequal spacing, trends, and lagged effects require further model design.
 
 For the existing two-level temporal predictor decomposition, both level and
-signed-difference DSM scores should be constructed separately for each
-temporal component. Conceptually:
+signed-difference DSM scores are constructed separately for each temporal
+component. Conceptually:
 
 ```text
 CWP XLevel_dt = mean of the partners' within-person deviations at time t
@@ -549,17 +523,18 @@ simulation tests, and vignette section.
 For longitudinal score construction, `dyad_id:time` must identify a unique
 paired occasion. The role orientation must remain stable across all occasions.
 
-## Decisions to settle during implementation
+## Current implementation decisions
 
-1. Whether `dsm_role_order` is always required or may default to an explicitly
-   printed factor-level order.
-2. Whether the first implementation supports only cross-sectional data and
-   adds longitudinal support in a second step.
-3. Whether predictor level columns are grand-mean centered by default, and how
-   that centering is described in DSM-specific output.
-4. Whether `glmmTMB` is the documented primary engine for the exact long model
-   and `brms` is documented primarily through the explicit multivariate form.
-5. How missing paired outcomes should be handled by the long model.
+1. `dsm_role_order` is always required and its direction is printed.
+2. Cross-sectional predictors and temporally decomposed ILD predictors are
+   supported. Raw undecomposed longitudinal DSM predictors are rejected.
+3. Raw cross-sectional predictor dyad means are grand-mean centered; signed
+   differences are not centered.
+4. The vignette documents `glmmTMB` for the exact long model. An explicit
+   multivariate `brms` workflow remains an alternative rather than a package
+   data representation.
+5. Outcomes remain member-level variables, so outcome missingness is handled by
+   the selected model engine rather than transformed during preparation.
 
 The core mathematical decision is already settled: the full directional DSM
 is representable without abandoning the long member-row structure, provided
