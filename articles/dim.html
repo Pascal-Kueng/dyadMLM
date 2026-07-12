@@ -390,40 +390,15 @@ vignette</a>.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The two models have identical fit statistics:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cross_fit_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM"</span>, <span class="st">"APIM"</span><span class="op">)</span>,</span>
 <span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  logLik <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="va">cross_fit_comparison</span>,</span>
-<span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">model</th>
-<th align="right">AIC</th>
-<th align="right">BIC</th>
-<th align="right">logLik</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">DIM</td>
-<td align="right">603.983</td>
-<td align="right">619.836</td>
-<td align="right">-296.992</td>
-</tr>
-<tr class="even">
-<td align="left">APIM</td>
-<td align="right">603.983</td>
-<td align="right">619.836</td>
-<td align="right">-296.992</td>
-</tr>
-</tbody>
-</table>
+<span><span class="co">#&gt;   model      AIC      BIC    logLik</span></span>
+<span><span class="co">#&gt; 1   DIM 603.9834 619.8358 -296.9917</span></span>
+<span><span class="co">#&gt; 2  APIM 603.9834 619.8358 -296.9917</span></span></code></pre></div>
 <p>This demonstrates that the same statistical model is being estimated
 with different parameterizations and coefficient interpretations.</p>
 <p>The slope coefficients relate as follows:</p>
@@ -1355,40 +1330,15 @@ levels:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The two ILD models again have identical fit statistics:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ild_fit_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM"</span>, <span class="st">"APIM"</span><span class="op">)</span>,</span>
 <span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  logLik <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="va">ild_fit_comparison</span>,</span>
-<span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">model</th>
-<th align="right">AIC</th>
-<th align="right">BIC</th>
-<th align="right">logLik</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">DIM</td>
-<td align="right">2977.225</td>
-<td align="right">3026.637</td>
-<td align="right">-1478.613</td>
-</tr>
-<tr class="even">
-<td align="left">APIM</td>
-<td align="right">2977.225</td>
-<td align="right">3026.637</td>
-<td align="right">-1478.613</td>
-</tr>
-</tbody>
-</table>
+<span><span class="co">#&gt;   model      AIC      BIC    logLik</span></span>
+<span><span class="co">#&gt; 1   DIM 2977.225 3026.637 -1478.613</span></span>
+<span><span class="co">#&gt; 2  APIM 2977.225 3026.637 -1478.613</span></span></code></pre></div>
 <p>The equivalence holds separately for the within-person
 (<code>cwp</code>) and between-person (<code>cbp</code>) predictor
 components. For the within-person component:</p>
@@ -1440,7 +1390,7 @@ level and a DIM parameterization on the other. For example:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This mixed parameterization still estimates the same model:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ild_all_fit_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM within / DIM between"</span>, <span class="st">"APIM within / APIM between"</span>, <span class="st">"APIM within / DIM between"</span><span class="op">)</span>,</span>
 <span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -1450,40 +1400,10 @@ level and a DIM parameterization on the other. For example:</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="va">ild_all_fit_comparison</span>,</span>
-<span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">model</th>
-<th align="right">AIC</th>
-<th align="right">BIC</th>
-<th align="right">logLik</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">DIM within / DIM between</td>
-<td align="right">2977.225</td>
-<td align="right">3026.637</td>
-<td align="right">-1478.613</td>
-</tr>
-<tr class="even">
-<td align="left">APIM within / APIM between</td>
-<td align="right">2977.225</td>
-<td align="right">3026.637</td>
-<td align="right">-1478.613</td>
-</tr>
-<tr class="odd">
-<td align="left">APIM within / DIM between</td>
-<td align="right">2977.225</td>
-<td align="right">3026.637</td>
-<td align="right">-1478.613</td>
-</tr>
-</tbody>
-</table>
+<span><span class="co">#&gt;                        model      AIC      BIC    logLik</span></span>
+<span><span class="co">#&gt; 1   DIM within / DIM between 2977.225 3026.637 -1478.613</span></span>
+<span><span class="co">#&gt; 2 APIM within / APIM between 2977.225 3026.637 -1478.613</span></span>
+<span><span class="co">#&gt; 3  APIM within / DIM between 2977.225 3026.637 -1478.613</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="including-random-slopes">Including Random Slopes<a class="anchor" aria-label="anchor" href="#including-random-slopes"></a>

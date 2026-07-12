@@ -271,65 +271,14 @@ occasion.</p>
 cross-sectional dataset for distinguishable dyads. Each dyad has two
 rows: one for each member.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_crosssectional</span><span class="op">)</span>,</span>
-<span>  digits <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"First six observations."</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>First six observations.</caption>
-<thead><tr class="header">
-<th align="right">personID</th>
-<th align="right">coupleID</th>
-<th align="left">gender</th>
-<th align="right">communication</th>
-<th align="right">satisfaction</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="left">female</td>
-<td align="right">4.79</td>
-<td align="right">4.37</td>
-</tr>
-<tr class="even">
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="left">male</td>
-<td align="right">3.80</td>
-<td align="right">2.34</td>
-</tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="right">2</td>
-<td align="left">female</td>
-<td align="right">2.91</td>
-<td align="right">2.44</td>
-</tr>
-<tr class="even">
-<td align="right">4</td>
-<td align="right">2</td>
-<td align="left">male</td>
-<td align="right">6.51</td>
-<td align="right">6.08</td>
-</tr>
-<tr class="odd">
-<td align="right">5</td>
-<td align="right">3</td>
-<td align="left">female</td>
-<td align="right">5.70</td>
-<td align="right">5.87</td>
-</tr>
-<tr class="even">
-<td align="right">6</td>
-<td align="right">3</td>
-<td align="left">male</td>
-<td align="right">8.22</td>
-<td align="right">9.66</td>
-</tr>
-</tbody>
-</table>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_crosssectional</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   personID coupleID gender communication satisfaction</span></span>
+<span><span class="co">#&gt; 1        1        1 female      4.789772     4.367824</span></span>
+<span><span class="co">#&gt; 2        2        1   male      3.803445     2.342890</span></span>
+<span><span class="co">#&gt; 3        3        2 female      2.914052     2.442250</span></span>
+<span><span class="co">#&gt; 4        4        2   male      6.508207     6.080428</span></span>
+<span><span class="co">#&gt; 5        5        3 female      5.696995     5.865494</span></span>
+<span><span class="co">#&gt; 6        6        3   male      8.215332     9.661295</span></span></code></pre></div>
 <p>We validate and prepare the data with the function
 <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -630,88 +579,37 @@ dyadic dataset. Each dyad has repeated observations over
 <code>diaryday</code>, with one row per person-day.</p>
 <p>The first rows look like this:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_ILD</span>, n <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
-<span>  digits <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  caption <span class="op">=</span> <span class="st">"First eight person-day observations."</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>First eight person-day observations.</caption>
-<thead><tr class="header">
-<th align="right">personID</th>
-<th align="right">coupleID</th>
-<th align="right">diaryday</th>
-<th align="left">gender</th>
-<th align="right">closeness</th>
-<th align="right">provided_support</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="left">female</td>
-<td align="right">5.03</td>
-<td align="right">4.30</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="left">female</td>
-<td align="right">5.64</td>
-<td align="right">4.24</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="left">female</td>
-<td align="right">5.49</td>
-<td align="right">3.54</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">3</td>
-<td align="left">female</td>
-<td align="right">6.71</td>
-<td align="right">5.04</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="left">female</td>
-<td align="right">5.61</td>
-<td align="right">4.74</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">5</td>
-<td align="left">female</td>
-<td align="right">6.11</td>
-<td align="right">4.72</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">6</td>
-<td align="left">female</td>
-<td align="right">6.96</td>
-<td align="right">5.12</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="left">female</td>
-<td align="right">7.03</td>
-<td align="right">5.21</td>
-</tr>
-</tbody>
-</table>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">example_dyadic_ILD</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 6</span></span></span>
+<span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female      5.03             4.30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        1        1        1 female      5.64             4.24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        1        1        2 female      5.49             3.54</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        1        1        3 female      6.71             5.04</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        1        1        4 female      5.61             4.74</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        1        1        5 female      6.11             4.72</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        1        1        6 female      6.96             5.12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        1        1        7 female      7.03             5.21</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female      8.07             5.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female      4.87             4.69</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>        1        1       10 female      5.53             5.67</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>        1        1       11 female      6.54             4.28</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>        1        1       12 female      5.31             3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>        1        1       13 female      5.16             4.85</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>        2        1        0 male        4.68             4.45</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>        2        1        1 male        4.52             5.84</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>        2        1        2 male       <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span>        2        1        3 male        4.42             6.07</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">19</span>        2        1        4 male        5.07             4.19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">20</span>        2        1        5 male        3.84             4.87</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">21</span>        2        1        6 male        2.22             5.25</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">22</span>        2        1        7 male        3.52             5.52</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">23</span>        2        1        8 male        5.26             4.64</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">24</span>        2        1        9 male        5.57             5.24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">25</span>        2        1       10 male        2.92             5.33</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">26</span>        2        1       11 male        3.18             4.30</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,094 more rows</span></span></span></code></pre></div>
 <p>To prepare intensive longitudinal data, pass the <code>time</code>
 variable to <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>.</p>
 <div class="section level3">

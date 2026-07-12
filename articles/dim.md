@@ -350,24 +350,16 @@ The two models have identical fit statistics:
 
 ``` r
 
-cross_fit_comparison <- data.frame(
+data.frame(
   model = c("DIM", "APIM"),
   AIC = c(AIC(dim_1), AIC(apim_1)),
   BIC = c(BIC(dim_1), BIC(apim_1)),
   logLik = c(as.numeric(logLik(dim_1)), as.numeric(logLik(apim_1)))
 )
-
-knitr::kable(
-  cross_fit_comparison,
-  digits = 3,
-  align = c("l", "r", "r", "r")
-)
+#>   model      AIC      BIC    logLik
+#> 1   DIM 603.9834 619.8358 -296.9917
+#> 2  APIM 603.9834 619.8358 -296.9917
 ```
-
-| model |     AIC |     BIC |   logLik |
-|:------|--------:|--------:|---------:|
-| DIM   | 603.983 | 619.836 | -296.992 |
-| APIM  | 603.983 | 619.836 | -296.992 |
 
 This demonstrates that the same statistical model is being estimated
 with different parameterizations and coefficient interpretations.
@@ -759,24 +751,16 @@ The two ILD models again have identical fit statistics:
 
 ``` r
 
-ild_fit_comparison <- data.frame(
+data.frame(
   model = c("DIM", "APIM"),
   AIC = c(AIC(dim_ILD), AIC(apim_ILD)),
   BIC = c(BIC(dim_ILD), BIC(apim_ILD)),
   logLik = c(as.numeric(logLik(dim_ILD)), as.numeric(logLik(apim_ILD)))
 )
-
-knitr::kable(
-  ild_fit_comparison,
-  digits = 3,
-  align = c("l", "r", "r", "r")
-)
+#>   model      AIC      BIC    logLik
+#> 1   DIM 2977.225 3026.637 -1478.613
+#> 2  APIM 2977.225 3026.637 -1478.613
 ```
-
-| model |      AIC |      BIC |    logLik |
-|:------|---------:|---------:|----------:|
-| DIM   | 2977.225 | 3026.637 | -1478.613 |
-| APIM  | 2977.225 | 3026.637 | -1478.613 |
 
 The equivalence holds separately for the within-person (`cwp`) and
 between-person (`cbp`) predictor components. For the within-person
@@ -841,7 +825,7 @@ This mixed parameterization still estimates the same model:
 
 ``` r
 
-ild_all_fit_comparison <- data.frame(
+data.frame(
   model = c("DIM within / DIM between", "APIM within / APIM between", "APIM within / DIM between"),
   AIC = c(AIC(dim_ILD), AIC(apim_ILD), AIC(apim_dim_ILD)),
   BIC = c(BIC(dim_ILD), BIC(apim_ILD), BIC(apim_dim_ILD)),
@@ -851,19 +835,11 @@ ild_all_fit_comparison <- data.frame(
     as.numeric(logLik(apim_dim_ILD))
   )
 )
-
-knitr::kable(
-  ild_all_fit_comparison,
-  digits = 3,
-  align = c("l", "r", "r", "r")
-)
+#>                        model      AIC      BIC    logLik
+#> 1   DIM within / DIM between 2977.225 3026.637 -1478.613
+#> 2 APIM within / APIM between 2977.225 3026.637 -1478.613
+#> 3  APIM within / DIM between 2977.225 3026.637 -1478.613
 ```
-
-| model                      |      AIC |      BIC |    logLik |
-|:---------------------------|---------:|---------:|----------:|
-| DIM within / DIM between   | 2977.225 | 3026.637 | -1478.613 |
-| APIM within / APIM between | 2977.225 | 3026.637 | -1478.613 |
-| APIM within / DIM between  | 2977.225 | 3026.637 | -1478.613 |
 
 ## Including Random Slopes
 
