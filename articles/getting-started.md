@@ -5,6 +5,16 @@
 library(interdep)
 ```
 
+## Installation
+
+You can install the development version of `interdep` from GitHub with:
+
+``` r
+
+# install.packages("pak")
+pak::pak("Pascal-Kueng/interdep")
+```
+
 ## About this Vignette
 
 `interdep` helps researchers prepare cross-sectional and intensive
