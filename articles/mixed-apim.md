@@ -26,16 +26,19 @@ The data were simulated with the following fixed effects and residual
 covariance parameters. For exchangeable dyads, `sum_variance` and
 `diff_variance` imply the partner correlation.
 
-    #>             block     parameter    value
-    #> 1   female_x_male   female_mean  5.50000
-    #> 2   female_x_male     male_mean  4.50000
-    #> 3   female_x_male   correlation -0.30000
-    #> 4 female_x_female          mean  5.80000
-    #> 5 female_x_female  sum_variance  0.67500
-    #> 6 female_x_female diff_variance  0.32500
-    #> 7     male_x_male          mean  4.20000
-    #> 8     male_x_male  sum_variance  0.63375
-    #> 9     male_x_male diff_variance  1.05625
+| block           | parameter     |  value |
+|:----------------|:--------------|-------:|
+| female_x_male   | female_mean   |  5.500 |
+| female_x_male   | male_mean     |  4.500 |
+| female_x_male   | correlation   | -0.300 |
+| female_x_female | mean          |  5.800 |
+| female_x_female | sum_variance  |  0.675 |
+| female_x_female | diff_variance |  0.325 |
+| male_x_male     | mean          |  4.200 |
+| male_x_male     | sum_variance  |  0.634 |
+| male_x_male     | diff_variance |  1.056 |
+
+Data-generating parameters by dyad composition. {.table}
 
 Let’s see if we can recover those parameters.
 
@@ -326,36 +329,28 @@ semi-continuous.
 
 ``` r
 
-print(head(example_dyadic_ILD_mixed_tweedie, n = 26), n = 26)
-#> # A tibble: 26 × 6
-#>    personID coupleID diaryday gender physical_activity provided_support
-#>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
-#>  1        1        1        0 female             11.4              3.92
-#>  2        1        1        1 female              2.24             3.86
-#>  3        1        1        2 female              8.14             4.15
-#>  4        1        1        3 female              4.48             3.55
-#>  5        1        1        4 female              2.39             4.13
-#>  6        1        1        5 female             10.1              3.50
-#>  7        1        1        6 female              4.95             4.29
-#>  8        1        1        7 female             NA               NA   
-#>  9        1        1        8 female              0                4.06
-#> 10        1        1        9 female              5.59             4.41
-#> 11        1        1       10 female              4.99             3.61
-#> 12        1        1       11 female             10.7              4.12
-#> 13        1        1       12 female              2.10             3.62
-#> 14        1        1       13 female              3.98             5.06
-#> 15        2        1        0 male               39.4              4.40
-#> 16        2        1        1 male               33.7              5.16
-#> 17        2        1        2 male                2.24             4.69
-#> 18        2        1        3 male                3.46             3.69
-#> 19        2        1        4 male               17.6              5.20
-#> 20        2        1        5 male               14.7              5.34
-#> 21        2        1        6 male                6.25             6.36
-#> 22        2        1        7 male               13.3              6.95
-#> 23        2        1        8 male               20.9              5.38
-#> 24        2        1        9 male                8.64             5.64
-#> 25        2        1       10 male                0                4.54
-#> 26        2        1       11 male               20.6              5.03
+knitr::kable(
+  head(example_dyadic_ILD_mixed_tweedie, n = 8),
+  digits = 2,
+  caption = "First eight person-day observations."
+)
+```
+
+| personID | coupleID | diaryday | gender | physical_activity | provided_support |
+|---------:|---------:|---------:|:-------|------------------:|-----------------:|
+|        1 |        1 |        0 | female |             11.44 |             3.92 |
+|        1 |        1 |        1 | female |              2.24 |             3.86 |
+|        1 |        1 |        2 | female |              8.14 |             4.15 |
+|        1 |        1 |        3 | female |              4.48 |             3.55 |
+|        1 |        1 |        4 | female |              2.39 |             4.13 |
+|        1 |        1 |        5 | female |             10.12 |             3.50 |
+|        1 |        1 |        6 | female |              4.95 |             4.29 |
+|        1 |        1 |        7 | female |                NA |               NA |
+
+First eight person-day observations. {.table}
+
+``` r
+
 hist(example_dyadic_ILD_mixed_tweedie$physical_activity, breaks = 20)
 ```
 
@@ -425,63 +420,6 @@ print(mixed_ild_tweedie_data)
 #> #   .i_diff_female_x_female_arbitrary <dbl>,
 #> #   .i_diff_male_x_male_arbitrary <dbl>, .i_provided_support_cwp <dbl>,
 #> #   .i_provided_support_cbp <dbl>, .i_provided_support_cwp_actor <dbl>, …
-summary(mixed_ild_tweedie_data)
-#>     personID        coupleID         diaryday       gender    
-#>  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   female:2800  
-#>  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   male  :2800  
-#>  Median :200.5   Median :100.50   Median : 6.5                
-#>  Mean   :200.5   Mean   :100.50   Mean   : 6.5                
-#>  3rd Qu.:300.2   3rd Qu.:150.25   3rd Qu.:10.0                
-#>  Max.   :400.0   Max.   :200.00   Max.   :13.0                
-#>                                                               
-#>  physical_activity provided_support            .i_composition
-#>  Min.   :  0.000   Min.   :-0.009341   female_x_female:1680  
-#>  1st Qu.:  1.725   1st Qu.: 4.028752   female_x_male  :2240  
-#>  Median :  6.974   Median : 4.836293   male_x_male    :1680  
-#>  Mean   : 11.366   Mean   : 4.821283                         
-#>  3rd Qu.: 16.163   3rd Qu.: 5.611992                         
-#>  Max.   :158.087   Max.   : 8.401539                         
-#>  NAs    :120       NAs    :220                               
-#>            .i_composition_role .i_is_female_x_female .i_is_female_x_male_female
-#>  female_x_female     :1680     Min.   :0.0           Min.   :0.0               
-#>  female_x_male_female:1120     1st Qu.:0.0           1st Qu.:0.0               
-#>  female_x_male_male  :1120     Median :0.0           Median :0.0               
-#>  male_x_male         :1680     Mean   :0.3           Mean   :0.2               
-#>                                3rd Qu.:1.0           3rd Qu.:0.0               
-#>                                Max.   :1.0           Max.   :1.0               
-#>                                                                                
-#>  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female_arbitrary
-#>  Min.   :0.0              Min.   :0.0       Min.   :-1                       
-#>  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0                       
-#>  Median :0.0              Median :0.0       Median : 0                       
-#>  Mean   :0.2              Mean   :0.3       Mean   : 0                       
-#>  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0                       
-#>  Max.   :1.0              Max.   :1.0       Max.   : 1                       
-#>                                                                              
-#>  .i_diff_male_x_male_arbitrary .i_provided_support_cwp .i_provided_support_cbp
-#>  Min.   :-1                    Min.   :-2.488131       Min.   :-2.6707037     
-#>  1st Qu.: 0                    1st Qu.:-0.507787       1st Qu.:-0.6189091     
-#>  Median : 0                    Median :-0.002168       Median : 0.0002432     
-#>  Mean   : 0                    Mean   : 0.000000       Mean   : 0.0000000     
-#>  3rd Qu.: 0                    3rd Qu.: 0.502352       3rd Qu.: 0.6169207     
-#>  Max.   : 1                    Max.   : 2.764062       Max.   : 2.1738733     
-#>                                NAs    :220                                    
-#>  .i_provided_support_cwp_actor .i_provided_support_cwp_partner
-#>  Min.   :-2.488131             Min.   :-2.488131              
-#>  1st Qu.:-0.507787             1st Qu.:-0.507787              
-#>  Median :-0.002168             Median :-0.002168              
-#>  Mean   : 0.000000             Mean   : 0.000000              
-#>  3rd Qu.: 0.502352             3rd Qu.: 0.502352              
-#>  Max.   : 2.764062             Max.   : 2.764062              
-#>  NAs    :220                   NAs    :220                    
-#>  .i_provided_support_cbp_actor .i_provided_support_cbp_partner
-#>  Min.   :-2.6707037            Min.   :-2.6707037             
-#>  1st Qu.:-0.6189091            1st Qu.:-0.6189091             
-#>  Median : 0.0002432            Median : 0.0002432             
-#>  Mean   : 0.0000000            Mean   : 0.0000000             
-#>  3rd Qu.: 0.6169207            3rd Qu.: 0.6169207             
-#>  Max.   : 2.1738733            Max.   : 2.1738733             
-#> 
 ```
 
 As in the Gaussian mixed-composition ILD model, the mean model contains

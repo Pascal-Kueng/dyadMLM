@@ -88,20 +88,65 @@ soon!</p>
 <p>The data were simulated with the following fixed effects and residual
 covariance parameters. For exchangeable dyads, <code>sum_variance</code>
 and <code>diff_variance</code> imply the partner correlation.</p>
-<pre><code><span><span class="co">#&gt;             block     parameter    value</span></span>
-<span><span class="co">#&gt; 1   female_x_male   female_mean  5.50000</span></span>
-<span><span class="co">#&gt; 2   female_x_male     male_mean  4.50000</span></span>
-<span><span class="co">#&gt; 3   female_x_male   correlation -0.30000</span></span>
-<span><span class="co">#&gt; 4 female_x_female          mean  5.80000</span></span>
-<span><span class="co">#&gt; 5 female_x_female  sum_variance  0.67500</span></span>
-<span><span class="co">#&gt; 6 female_x_female diff_variance  0.32500</span></span>
-<span><span class="co">#&gt; 7     male_x_male          mean  4.20000</span></span>
-<span><span class="co">#&gt; 8     male_x_male  sum_variance  0.63375</span></span>
-<span><span class="co">#&gt; 9     male_x_male diff_variance  1.05625</span></span></code></pre>
+<table class="table">
+<caption>Data-generating parameters by dyad composition.</caption>
+<thead><tr class="header">
+<th align="left">block</th>
+<th align="left">parameter</th>
+<th align="right">value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">female_x_male</td>
+<td align="left">female_mean</td>
+<td align="right">5.500</td>
+</tr>
+<tr class="even">
+<td align="left">female_x_male</td>
+<td align="left">male_mean</td>
+<td align="right">4.500</td>
+</tr>
+<tr class="odd">
+<td align="left">female_x_male</td>
+<td align="left">correlation</td>
+<td align="right">-0.300</td>
+</tr>
+<tr class="even">
+<td align="left">female_x_female</td>
+<td align="left">mean</td>
+<td align="right">5.800</td>
+</tr>
+<tr class="odd">
+<td align="left">female_x_female</td>
+<td align="left">sum_variance</td>
+<td align="right">0.675</td>
+</tr>
+<tr class="even">
+<td align="left">female_x_female</td>
+<td align="left">diff_variance</td>
+<td align="right">0.325</td>
+</tr>
+<tr class="odd">
+<td align="left">male_x_male</td>
+<td align="left">mean</td>
+<td align="right">4.200</td>
+</tr>
+<tr class="even">
+<td align="left">male_x_male</td>
+<td align="left">sum_variance</td>
+<td align="right">0.634</td>
+</tr>
+<tr class="odd">
+<td align="left">male_x_male</td>
+<td align="left">diff_variance</td>
+<td align="right">1.056</td>
+</tr>
+</tbody>
+</table>
 <p>Let’s see if we can recover those parameters.</p>
 <p>We first prepare the data with <code>prepare_interdep_data</code>. It
 automatically finds all dyad compositions.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -147,7 +192,7 @@ effects setup.</p>
 the corresponding composition, and 0 for each other composition.
 <code>prepare_interdep_data</code> does this automatically. Then, the
 following model can be specified:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mixed_cross_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
@@ -207,7 +252,7 @@ compositions as the mixed-composition cross-sectional example, but each
 dyad contributes repeated paired observations over
 <code>diaryday</code>.</p>
 <p>To prepare the data:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_ild_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -286,7 +331,7 @@ simpler or separate fits as part of the workflow. If the all-in-one fit
 is not clean, fit the composition-specific models separately for
 estimation, or simplify the same-day and stable covariance blocks before
 adding more random effects.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mixed_ild_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
@@ -368,38 +413,99 @@ adding more random effects.</p>
 <p><code>example_dyadic_ILD_mixed_tweedie</code> has the same
 mixed-composition intensive longitudinal dyadic structure, but the
 outcome is semi-continuous.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_mixed_tweedie</span>, n <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
+<span>  digits <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"First eight person-day observations."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>First eight person-day observations.</caption>
+<colgroup>
+<col width="13%">
+<col width="13%">
+<col width="13%">
+<col width="10%">
+<col width="26%">
+<col width="24%">
+</colgroup>
+<thead><tr class="header">
+<th align="right">personID</th>
+<th align="right">coupleID</th>
+<th align="right">diaryday</th>
+<th align="left">gender</th>
+<th align="right">physical_activity</th>
+<th align="right">provided_support</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="left">female</td>
+<td align="right">11.44</td>
+<td align="right">3.92</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="left">female</td>
+<td align="right">2.24</td>
+<td align="right">3.86</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="left">female</td>
+<td align="right">8.14</td>
+<td align="right">4.15</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="left">female</td>
+<td align="right">4.48</td>
+<td align="right">3.55</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="left">female</td>
+<td align="right">2.39</td>
+<td align="right">4.13</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="left">female</td>
+<td align="right">10.12</td>
+<td align="right">3.50</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">6</td>
+<td align="left">female</td>
+<td align="right">4.95</td>
+<td align="right">4.29</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">7</td>
+<td align="left">female</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_mixed_tweedie</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">26</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 26 × 6</span></span></span>
-<span><span class="co">#&gt;    personID coupleID diaryday gender physical_activity provided_support</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female             11.4              3.92</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        1        1        1 female              2.24             3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        1        1        2 female              8.14             4.15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        1        1        3 female              4.48             3.55</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        1        1        4 female              2.39             4.13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        1        1        5 female             10.1              3.50</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        1        1        6 female              4.95             4.29</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        1        1        7 female             <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female              0                4.06</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female              5.59             4.41</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>        1        1       10 female              4.99             3.61</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>        1        1       11 female             10.7              4.12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>        1        1       12 female              2.10             3.62</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>        1        1       13 female              3.98             5.06</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>        2        1        0 male               39.4              4.40</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>        2        1        1 male               33.7              5.16</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>        2        1        2 male                2.24             4.69</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span>        2        1        3 male                3.46             3.69</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">19</span>        2        1        4 male               17.6              5.20</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">20</span>        2        1        5 male               14.7              5.34</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">21</span>        2        1        6 male                6.25             6.36</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">22</span>        2        1        7 male               13.3              6.95</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">23</span>        2        1        8 male               20.9              5.38</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">24</span>        2        1        9 male                8.64             5.64</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">25</span>        2        1       10 male                0                4.54</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">26</span>        2        1       11 male               20.6              5.03</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_mixed_tweedie</span><span class="op">$</span><span class="va">physical_activity</span>, breaks <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">example_dyadic_ILD_mixed_tweedie</span><span class="op">$</span><span class="va">physical_activity</span>, breaks <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
 <p><img src="mixed-apim_files/figure-html/mixed-ild-tweedie-raw-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_ild_tweedie_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
@@ -463,64 +569,7 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_male_x_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;, .i_provided_support_cwp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp &lt;dbl&gt;, .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_tweedie_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     personID        coupleID         diaryday       gender    </span></span>
-<span><span class="co">#&gt;  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   female:2800  </span></span>
-<span><span class="co">#&gt;  1st Qu.:100.8   1st Qu.: 50.75   1st Qu.: 3.0   male  :2800  </span></span>
-<span><span class="co">#&gt;  Median :200.5   Median :100.50   Median : 6.5                </span></span>
-<span><span class="co">#&gt;  Mean   :200.5   Mean   :100.50   Mean   : 6.5                </span></span>
-<span><span class="co">#&gt;  3rd Qu.:300.2   3rd Qu.:150.25   3rd Qu.:10.0                </span></span>
-<span><span class="co">#&gt;  Max.   :400.0   Max.   :200.00   Max.   :13.0                </span></span>
-<span><span class="co">#&gt;                                                               </span></span>
-<span><span class="co">#&gt;  physical_activity provided_support            .i_composition</span></span>
-<span><span class="co">#&gt;  Min.   :  0.000   Min.   :-0.009341   female_x_female:1680  </span></span>
-<span><span class="co">#&gt;  1st Qu.:  1.725   1st Qu.: 4.028752   female_x_male  :2240  </span></span>
-<span><span class="co">#&gt;  Median :  6.974   Median : 4.836293   male_x_male    :1680  </span></span>
-<span><span class="co">#&gt;  Mean   : 11.366   Mean   : 4.821283                         </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 16.163   3rd Qu.: 5.611992                         </span></span>
-<span><span class="co">#&gt;  Max.   :158.087   Max.   : 8.401539                         </span></span>
-<span><span class="co">#&gt;  NAs    :120       NAs    :220                               </span></span>
-<span><span class="co">#&gt;            .i_composition_role .i_is_female_x_female .i_is_female_x_male_female</span></span>
-<span><span class="co">#&gt;  female_x_female     :1680     Min.   :0.0           Min.   :0.0               </span></span>
-<span><span class="co">#&gt;  female_x_male_female:1120     1st Qu.:0.0           1st Qu.:0.0               </span></span>
-<span><span class="co">#&gt;  female_x_male_male  :1120     Median :0.0           Median :0.0               </span></span>
-<span><span class="co">#&gt;  male_x_male         :1680     Mean   :0.3           Mean   :0.2               </span></span>
-<span><span class="co">#&gt;                                3rd Qu.:1.0           3rd Qu.:0.0               </span></span>
-<span><span class="co">#&gt;                                Max.   :1.0           Max.   :1.0               </span></span>
-<span><span class="co">#&gt;                                                                                </span></span>
-<span><span class="co">#&gt;  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female_arbitrary</span></span>
-<span><span class="co">#&gt;  Min.   :0.0              Min.   :0.0       Min.   :-1                       </span></span>
-<span><span class="co">#&gt;  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0                       </span></span>
-<span><span class="co">#&gt;  Median :0.0              Median :0.0       Median : 0                       </span></span>
-<span><span class="co">#&gt;  Mean   :0.2              Mean   :0.3       Mean   : 0                       </span></span>
-<span><span class="co">#&gt;  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0                       </span></span>
-<span><span class="co">#&gt;  Max.   :1.0              Max.   :1.0       Max.   : 1                       </span></span>
-<span><span class="co">#&gt;                                                                              </span></span>
-<span><span class="co">#&gt;  .i_diff_male_x_male_arbitrary .i_provided_support_cwp .i_provided_support_cbp</span></span>
-<span><span class="co">#&gt;  Min.   :-1                    Min.   :-2.488131       Min.   :-2.6707037     </span></span>
-<span><span class="co">#&gt;  1st Qu.: 0                    1st Qu.:-0.507787       1st Qu.:-0.6189091     </span></span>
-<span><span class="co">#&gt;  Median : 0                    Median :-0.002168       Median : 0.0002432     </span></span>
-<span><span class="co">#&gt;  Mean   : 0                    Mean   : 0.000000       Mean   : 0.0000000     </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0                    3rd Qu.: 0.502352       3rd Qu.: 0.6169207     </span></span>
-<span><span class="co">#&gt;  Max.   : 1                    Max.   : 2.764062       Max.   : 2.1738733     </span></span>
-<span><span class="co">#&gt;                                NAs    :220                                    </span></span>
-<span><span class="co">#&gt;  .i_provided_support_cwp_actor .i_provided_support_cwp_partner</span></span>
-<span><span class="co">#&gt;  Min.   :-2.488131             Min.   :-2.488131              </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.507787             1st Qu.:-0.507787              </span></span>
-<span><span class="co">#&gt;  Median :-0.002168             Median :-0.002168              </span></span>
-<span><span class="co">#&gt;  Mean   : 0.000000             Mean   : 0.000000              </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.502352             3rd Qu.: 0.502352              </span></span>
-<span><span class="co">#&gt;  Max.   : 2.764062             Max.   : 2.764062              </span></span>
-<span><span class="co">#&gt;  NAs    :220                   NAs    :220                    </span></span>
-<span><span class="co">#&gt;  .i_provided_support_cbp_actor .i_provided_support_cbp_partner</span></span>
-<span><span class="co">#&gt;  Min.   :-2.6707037            Min.   :-2.6707037             </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.6189091            1st Qu.:-0.6189091             </span></span>
-<span><span class="co">#&gt;  Median : 0.0002432            Median : 0.0002432             </span></span>
-<span><span class="co">#&gt;  Mean   : 0.0000000            Mean   : 0.0000000             </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.6169207            3rd Qu.: 0.6169207             </span></span>
-<span><span class="co">#&gt;  Max.   : 2.1738733            Max.   : 2.1738733             </span></span>
-<span><span class="co">#&gt; </span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp &lt;dbl&gt;, .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <p>As in the Gaussian mixed-composition ILD model, the mean model
 contains composition-specific intercepts, fixed time slopes, and
 within-person and between-person actor and partner effects. The dyadic

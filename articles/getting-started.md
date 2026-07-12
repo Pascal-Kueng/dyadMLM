@@ -110,15 +110,23 @@ for distinguishable dyads. Each dyad has two rows: one for each member.
 
 ``` r
 
-print(head(example_dyadic_crosssectional))
-#>   personID coupleID gender communication satisfaction
-#> 1        1        1 female      4.789772     4.367824
-#> 2        2        1   male      3.803445     2.342890
-#> 3        3        2 female      2.914052     2.442250
-#> 4        4        2   male      6.508207     6.080428
-#> 5        5        3 female      5.696995     5.865494
-#> 6        6        3   male      8.215332     9.661295
+knitr::kable(
+  head(example_dyadic_crosssectional),
+  digits = 2,
+  caption = "First six observations."
+)
 ```
+
+| personID | coupleID | gender | communication | satisfaction |
+|---------:|---------:|:-------|--------------:|-------------:|
+|        1 |        1 | female |          4.79 |         4.37 |
+|        2 |        1 | male   |          3.80 |         2.34 |
+|        3 |        2 | female |          2.91 |         2.44 |
+|        4 |        2 | male   |          6.51 |         6.08 |
+|        5 |        3 | female |          5.70 |         5.87 |
+|        6 |        3 | male   |          8.22 |         9.66 |
+
+First six observations. {.table}
 
 We validate and prepare the data with the function
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
@@ -442,38 +450,25 @@ The first rows look like this:
 
 ``` r
 
-print(example_dyadic_ILD, n = 26)
-#> # A tibble: 1,120 × 6
-#>    personID coupleID diaryday gender closeness provided_support
-#>       <int>    <int>    <int> <fct>      <dbl>            <dbl>
-#>  1        1        1        0 female      5.03             4.30
-#>  2        1        1        1 female      5.64             4.24
-#>  3        1        1        2 female      5.49             3.54
-#>  4        1        1        3 female      6.71             5.04
-#>  5        1        1        4 female      5.61             4.74
-#>  6        1        1        5 female      6.11             4.72
-#>  7        1        1        6 female      6.96             5.12
-#>  8        1        1        7 female      7.03             5.21
-#>  9        1        1        8 female      8.07             5.20
-#> 10        1        1        9 female      4.87             4.69
-#> 11        1        1       10 female      5.53             5.67
-#> 12        1        1       11 female      6.54             4.28
-#> 13        1        1       12 female      5.31             3.86
-#> 14        1        1       13 female      5.16             4.85
-#> 15        2        1        0 male        4.68             4.45
-#> 16        2        1        1 male        4.52             5.84
-#> 17        2        1        2 male       NA               NA   
-#> 18        2        1        3 male        4.42             6.07
-#> 19        2        1        4 male        5.07             4.19
-#> 20        2        1        5 male        3.84             4.87
-#> 21        2        1        6 male        2.22             5.25
-#> 22        2        1        7 male        3.52             5.52
-#> 23        2        1        8 male        5.26             4.64
-#> 24        2        1        9 male        5.57             5.24
-#> 25        2        1       10 male        2.92             5.33
-#> 26        2        1       11 male        3.18             4.30
-#> # ℹ 1,094 more rows
+knitr::kable(
+  head(example_dyadic_ILD, n = 8),
+  digits = 2,
+  caption = "First eight person-day observations."
+)
 ```
+
+| personID | coupleID | diaryday | gender | closeness | provided_support |
+|---------:|---------:|---------:|:-------|----------:|-----------------:|
+|        1 |        1 |        0 | female |      5.03 |             4.30 |
+|        1 |        1 |        1 | female |      5.64 |             4.24 |
+|        1 |        1 |        2 | female |      5.49 |             3.54 |
+|        1 |        1 |        3 | female |      6.71 |             5.04 |
+|        1 |        1 |        4 | female |      5.61 |             4.74 |
+|        1 |        1 |        5 | female |      6.11 |             4.72 |
+|        1 |        1 |        6 | female |      6.96 |             5.12 |
+|        1 |        1 |        7 | female |      7.03 |             5.21 |
+
+First eight person-day observations. {.table}
 
 To prepare intensive longitudinal data, pass the `time` variable to
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).

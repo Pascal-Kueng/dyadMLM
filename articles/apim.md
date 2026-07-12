@@ -38,14 +38,26 @@ distribution from the previous example.
 
 ``` r
 
-print(head(example_dyadic_crosssectional_tweedie))
-#>   personID coupleID gender motivation physical_activity
-#> 1        1        1 female -1.3379394          4.029024
-#> 2        2        1   male -0.9379639          3.432234
-#> 3        3        2 female -0.6370109          3.078311
-#> 4        4        2   male  0.6999823         13.721497
-#> 5        5        3 female -0.6078674          7.812779
-#> 6        6        3   male -0.6459191          7.078761
+knitr::kable(
+  head(example_dyadic_crosssectional_tweedie),
+  digits = 2,
+  caption = "First six observations."
+)
+```
+
+| personID | coupleID | gender | motivation | physical_activity |
+|---------:|---------:|:-------|-----------:|------------------:|
+|        1 |        1 | female |      -1.34 |              4.03 |
+|        2 |        1 | male   |      -0.94 |              3.43 |
+|        3 |        2 | female |      -0.64 |              3.08 |
+|        4 |        2 | male   |       0.70 |             13.72 |
+|        5 |        3 | female |      -0.61 |              7.81 |
+|        6 |        3 | male   |      -0.65 |              7.08 |
+
+First six observations. {.table}
+
+``` r
+
 hist(example_dyadic_crosssectional_tweedie$physical_activity, breaks = 20)
 ```
 
@@ -105,39 +117,6 @@ print(tweedie_distinguishable_data)
 #> # ℹ 5 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
-summary(tweedie_distinguishable_data)
-#>     personID         coupleID         gender      motivation       
-#>  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  
-#>  1st Qu.: 60.75   1st Qu.: 30.75   male  :120   1st Qu.:-0.580126  
-#>  Median :120.50   Median : 60.50                Median :-0.032795  
-#>  Mean   :120.50   Mean   : 60.50                Mean   :-0.008869  
-#>  3rd Qu.:180.25   3rd Qu.: 90.25                3rd Qu.: 0.537262  
-#>  Max.   :240.00   Max.   :120.00                Max.   : 2.423337  
-#>                                                 NAs    :9          
-#>  physical_activity       .i_composition           .i_composition_role
-#>  Min.   : 0.000    female_x_male:240    female_x_male_female:120     
-#>  1st Qu.: 1.445                         female_x_male_male  :120     
-#>  Median : 7.855                                                      
-#>  Mean   :11.026                                                      
-#>  3rd Qu.:15.147                                                      
-#>  Max.   :85.043                                                      
-#>  NAs    :4                                                           
-#>  .i_is_female_x_male_female .i_is_female_x_male_male .i_motivation_raw_actor
-#>  Min.   :0.0                Min.   :0.0              Min.   :-2.320532      
-#>  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.580126      
-#>  Median :0.5                Median :0.5              Median :-0.032795      
-#>  Mean   :0.5                Mean   :0.5              Mean   :-0.008869      
-#>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.537262      
-#>  Max.   :1.0                Max.   :1.0              Max.   : 2.423337      
-#>                                                      NAs    :9              
-#>  .i_motivation_raw_partner
-#>  Min.   :-2.320532        
-#>  1st Qu.:-0.580126        
-#>  Median :-0.032795        
-#>  Mean   :-0.008869        
-#>  3rd Qu.: 0.537262        
-#>  Max.   : 2.423337        
-#>  NAs    :9
 ```
 
 ``` r
@@ -218,39 +197,6 @@ print(tweedie_exchangeable_data)
 #> #   .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
-summary(tweedie_exchangeable_data)
-#>     personID         coupleID         gender      motivation       
-#>  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  
-#>  1st Qu.: 60.75   1st Qu.: 30.75   male  :120   1st Qu.:-0.580126  
-#>  Median :120.50   Median : 60.50                Median :-0.032795  
-#>  Mean   :120.50   Mean   : 60.50                Mean   :-0.008869  
-#>  3rd Qu.:180.25   3rd Qu.: 90.25                3rd Qu.: 0.537262  
-#>  Max.   :240.00   Max.   :120.00                Max.   : 2.423337  
-#>                                                 NAs    :9          
-#>  physical_activity              .i_composition           .i_composition_role
-#>  Min.   : 0.000    assumed_exchangeable:240    assumed_exchangeable:240     
-#>  1st Qu.: 1.445                                                             
-#>  Median : 7.855                                                             
-#>  Mean   :11.026                                                             
-#>  3rd Qu.:15.147                                                             
-#>  Max.   :85.043                                                             
-#>  NAs    :4                                                                  
-#>  .i_is_assumed_exchangeable .i_diff_assumed_exchangeable_arbitrary
-#>  Min.   :1                  Min.   :-1                            
-#>  1st Qu.:1                  1st Qu.:-1                            
-#>  Median :1                  Median : 0                            
-#>  Mean   :1                  Mean   : 0                            
-#>  3rd Qu.:1                  3rd Qu.: 1                            
-#>  Max.   :1                  Max.   : 1                            
-#>                                                                   
-#>  .i_motivation_raw_actor .i_motivation_raw_partner
-#>  Min.   :-2.320532       Min.   :-2.320532        
-#>  1st Qu.:-0.580126       1st Qu.:-0.580126        
-#>  Median :-0.032795       Median :-0.032795        
-#>  Mean   :-0.008869       Mean   :-0.008869        
-#>  3rd Qu.: 0.537262       3rd Qu.: 0.537262        
-#>  Max.   : 2.423337       Max.   : 2.423337        
-#>  NAs    :9               NAs    :9
 ```
 
 ``` r
@@ -339,36 +285,28 @@ structure as `example_dyadic_ILD`, but the outcome is semi-continuous.
 
 ``` r
 
-print(head(example_dyadic_ILD_tweedie, n = 26), n = 26)
-#> # A tibble: 26 × 6
-#>    personID coupleID diaryday gender physical_activity provided_support
-#>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
-#>  1        1        1        0 female             4.29              4.73
-#>  2        1        1        1 female             9.52              4.46
-#>  3        1        1        2 female            10.5               3.79
-#>  4        1        1        3 female             7.63              4.33
-#>  5        1        1        4 female             6.77              4.61
-#>  6        1        1        5 female            26.8               5.56
-#>  7        1        1        6 female             0                 4.91
-#>  8        1        1        7 female             0                 4.06
-#>  9        1        1        8 female            10.2               4.53
-#> 10        1        1        9 female             0                 3.72
-#> 11        1        1       10 female             0.574             3.12
-#> 12        1        1       11 female             2.84              3.60
-#> 13        1        1       12 female            NA                NA   
-#> 14        1        1       13 female             3.87              3.63
-#> 15        2        1        0 male               3.73              6.63
-#> 16        2        1        1 male              30.6               7.38
-#> 17        2        1        2 male              21.5               5.38
-#> 18        2        1        3 male               6.26              4.36
-#> 19        2        1        4 male               9.22              6.08
-#> 20        2        1        5 male              10.9               7.04
-#> 21        2        1        6 male              NA                NA   
-#> 22        2        1        7 male               0                 5.15
-#> 23        2        1        8 male              10.3               2.66
-#> 24        2        1        9 male              12.4               2.30
-#> 25        2        1       10 male               3.80              4.03
-#> 26        2        1       11 male               1.14              4.95
+knitr::kable(
+  head(example_dyadic_ILD_tweedie, n = 8),
+  digits = 2,
+  caption = "First eight person-day observations."
+)
+```
+
+| personID | coupleID | diaryday | gender | physical_activity | provided_support |
+|---------:|---------:|---------:|:-------|------------------:|-----------------:|
+|        1 |        1 |        0 | female |              4.29 |             4.73 |
+|        1 |        1 |        1 | female |              9.52 |             4.46 |
+|        1 |        1 |        2 | female |             10.54 |             3.79 |
+|        1 |        1 |        3 | female |              7.63 |             4.33 |
+|        1 |        1 |        4 | female |              6.77 |             4.61 |
+|        1 |        1 |        5 | female |             26.84 |             5.56 |
+|        1 |        1 |        6 | female |              0.00 |             4.91 |
+|        1 |        1 |        7 | female |              0.00 |             4.06 |
+
+First eight person-day observations. {.table}
+
+``` r
+
 hist(example_dyadic_ILD_tweedie$physical_activity, breaks = 20)
 ```
 
@@ -434,55 +372,6 @@ print(ild_tweedie_distinguishable_data)
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
 #> #   .i_provided_support_cbp_actor <dbl>, .i_provided_support_cbp_partner <dbl>
-summary(ild_tweedie_distinguishable_data)
-#>     personID        coupleID        diaryday       gender    physical_activity
-#>  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  
-#>  1st Qu.:20.75   1st Qu.:10.75   1st Qu.: 3.0   male  :560   1st Qu.:  1.481  
-#>  Median :40.50   Median :20.50   Median : 6.5                Median :  6.750  
-#>  Mean   :40.50   Mean   :20.50   Mean   : 6.5                Mean   : 10.346  
-#>  3rd Qu.:60.25   3rd Qu.:30.25   3rd Qu.:10.0                3rd Qu.: 14.635  
-#>  Max.   :80.00   Max.   :40.00   Max.   :13.0                Max.   :108.626  
-#>                                                              NAs    :24       
-#>  provided_support       .i_composition           .i_composition_role
-#>  Min.   :1.813    female_x_male:1120   female_x_male_female:560     
-#>  1st Qu.:4.435                         female_x_male_male  :560     
-#>  Median :5.070                                                      
-#>  Mean   :5.111                                                      
-#>  3rd Qu.:5.821                                                      
-#>  Max.   :8.271                                                      
-#>  NAs    :44                                                         
-#>  .i_is_female_x_male_female .i_is_female_x_male_male .i_provided_support_cwp
-#>  Min.   :0.0                Min.   :0.0              Min.   :-2.66098       
-#>  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.50775       
-#>  Median :0.5                Median :0.5              Median :-0.03176       
-#>  Mean   :0.5                Mean   :0.5              Mean   : 0.00000       
-#>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.52731       
-#>  Max.   :1.0                Max.   :1.0              Max.   : 2.42077       
-#>                                                      NAs    :44             
-#>  .i_provided_support_cbp .i_provided_support_cwp_actor
-#>  Min.   :-1.4073         Min.   :-2.66098             
-#>  1st Qu.:-0.4913         1st Qu.:-0.50775             
-#>  Median :-0.0164         Median :-0.03176             
-#>  Mean   : 0.0000         Mean   : 0.00000             
-#>  3rd Qu.: 0.4968         3rd Qu.: 0.52731             
-#>  Max.   : 1.6645         Max.   : 2.42077             
-#>                          NAs    :44                   
-#>  .i_provided_support_cwp_partner .i_provided_support_cbp_actor
-#>  Min.   :-2.66098                Min.   :-1.4073              
-#>  1st Qu.:-0.50775                1st Qu.:-0.4913              
-#>  Median :-0.03176                Median :-0.0164              
-#>  Mean   : 0.00000                Mean   : 0.0000              
-#>  3rd Qu.: 0.52731                3rd Qu.: 0.4968              
-#>  Max.   : 2.42077                Max.   : 1.6645              
-#>  NAs    :44                                                   
-#>  .i_provided_support_cbp_partner
-#>  Min.   :-1.4073                
-#>  1st Qu.:-0.4913                
-#>  Median :-0.0164                
-#>  Mean   : 0.0000                
-#>  3rd Qu.: 0.4968                
-#>  Max.   : 1.6645                
-#> 
 ```
 
 For Tweedie models, the random-effect blocks are latent effects on the
@@ -654,55 +543,6 @@ print(ild_tweedie_exchangeable_data)
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
 #> #   .i_provided_support_cbp_actor <dbl>, …
-summary(ild_tweedie_exchangeable_data)
-#>     personID        coupleID        diaryday       gender    physical_activity
-#>  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  
-#>  1st Qu.:20.75   1st Qu.:10.75   1st Qu.: 3.0   male  :560   1st Qu.:  1.481  
-#>  Median :40.50   Median :20.50   Median : 6.5                Median :  6.750  
-#>  Mean   :40.50   Mean   :20.50   Mean   : 6.5                Mean   : 10.346  
-#>  3rd Qu.:60.25   3rd Qu.:30.25   3rd Qu.:10.0                3rd Qu.: 14.635  
-#>  Max.   :80.00   Max.   :40.00   Max.   :13.0                Max.   :108.626  
-#>                                                              NAs    :24       
-#>  provided_support              .i_composition           .i_composition_role
-#>  Min.   :1.813    assumed_exchangeable:1120   assumed_exchangeable:1120    
-#>  1st Qu.:4.435                                                             
-#>  Median :5.070                                                             
-#>  Mean   :5.111                                                             
-#>  3rd Qu.:5.821                                                             
-#>  Max.   :8.271                                                             
-#>  NAs    :44                                                                
-#>  .i_is_assumed_exchangeable .i_diff_assumed_exchangeable_arbitrary
-#>  Min.   :1                  Min.   :-1                            
-#>  1st Qu.:1                  1st Qu.:-1                            
-#>  Median :1                  Median : 0                            
-#>  Mean   :1                  Mean   : 0                            
-#>  3rd Qu.:1                  3rd Qu.: 1                            
-#>  Max.   :1                  Max.   : 1                            
-#>                                                                   
-#>  .i_provided_support_cwp .i_provided_support_cbp .i_provided_support_cwp_actor
-#>  Min.   :-2.66098        Min.   :-1.4073         Min.   :-2.66098             
-#>  1st Qu.:-0.50775        1st Qu.:-0.4913         1st Qu.:-0.50775             
-#>  Median :-0.03176        Median :-0.0164         Median :-0.03176             
-#>  Mean   : 0.00000        Mean   : 0.0000         Mean   : 0.00000             
-#>  3rd Qu.: 0.52731        3rd Qu.: 0.4968         3rd Qu.: 0.52731             
-#>  Max.   : 2.42077        Max.   : 1.6645         Max.   : 2.42077             
-#>  NAs    :44                                      NAs    :44                   
-#>  .i_provided_support_cwp_partner .i_provided_support_cbp_actor
-#>  Min.   :-2.66098                Min.   :-1.4073              
-#>  1st Qu.:-0.50775                1st Qu.:-0.4913              
-#>  Median :-0.03176                Median :-0.0164              
-#>  Mean   : 0.00000                Mean   : 0.0000              
-#>  3rd Qu.: 0.52731                3rd Qu.: 0.4968              
-#>  Max.   : 2.42077                Max.   : 1.6645              
-#>  NAs    :44                                                   
-#>  .i_provided_support_cbp_partner
-#>  Min.   :-1.4073                
-#>  1st Qu.:-0.4913                
-#>  Median :-0.0164                
-#>  Mean   : 0.0000                
-#>  3rd Qu.: 0.4968                
-#>  Max.   : 1.6645                
-#> 
 ```
 
 This is the exchangeable analogue of the fuller Tweedie ILD model above.
