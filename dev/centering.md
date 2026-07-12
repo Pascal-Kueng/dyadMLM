@@ -14,8 +14,7 @@ Implemented scope:
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
 - DIM dyad-mean and within-dyad-deviation columns
 - DIM currently requires one exchangeable dyad composition
-- `model_type = "dsm"` for undirected dyadic-score model data
-  preparation
+- `model_type = "dsm"` for directional dyadic-score model data preparation
 - DSM currently requires one distinguishable dyad composition
 - central generated-column metadata via `interdep_generated_columns()`, with
   one row per temporal predictor, APIM, or DIM-style predictor column
@@ -42,7 +41,7 @@ infer_dyad_compositions()
 center_predictors()
 add_actor_partner_columns()      # "apim" in model_type
 add_dyad_individual_columns()    # "dim" in model_type
-add_dyadic_score_columns() # "undirected_dsm" in model_type
+add_dyadic_score_columns()       # "dsm" in model_type
 ```
 
 The resolved temporal predictor decomposition choice is stored in

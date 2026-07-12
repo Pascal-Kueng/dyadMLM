@@ -25,8 +25,9 @@ workflow in the [Getting Started vignette](getting-started.html) and with the
 single-composition models in the
 [Actor-Partner Interdependence Model vignette](apim.html). For DIM predictors and their
 equivalence to APIM effects in exchangeable dyads, see the
-[Dyad-Individual Model vignette](dim.html). For DSM predictors and their
-equivalence to APIM effects in distinguishable dyads, see the [Dyadic Score Model vignette](dsm.html).
+[Dyad-Individual Model vignette](dim.html). For DSM predictor scores and their
+relationship to APIM effects in distinguishable dyads, see the
+[Dyadic Score Model vignette](dsm.html).
 
 
 

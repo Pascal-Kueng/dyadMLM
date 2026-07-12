@@ -26,8 +26,9 @@ with the [Getting Started vignette](getting-started.html). For APIMs that
 combine distinguishable and exchangeable dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For DIM predictors and their
 equivalence to APIM effects in exchangeable dyads, see the
-[Dyad-Individual Model vignette](dim.html). For DSM predictors and their
-equivalence to APIM effects in distinguishable dyads, see the [Dyadic Score Model vignette](dsm.html).
+[Dyad-Individual Model vignette](dim.html). For DSM predictor scores and their
+relationship to APIM effects in distinguishable dyads, see the
+[Dyadic Score Model vignette](dsm.html).
 
 > This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
 

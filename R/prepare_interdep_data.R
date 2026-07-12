@@ -34,6 +34,12 @@
 #'   predictor columns. `"none"` skips model-specific predictor
 #'   construction after validation, composition inference, and optional
 #'   temporal predictor decomposition, and must be used alone.
+#' @param dsm_role_order For `model_type = "dsm"`, a character vector giving
+#'   the two distinguishable roles in the order used for directional
+#'   differences. For example, `c("female", "male")` defines predictor
+#'   differences as female minus male and assigns the DSM role contrast `+0.5`
+#'   to female partners and `-0.5` to male partners. Required when DSM columns
+#'   are requested and ignored otherwise.
 #' @param temporal_predictor_decomposition Temporal decomposition strategy for
 #'   `predictors`.
 #'   `"none"` leaves predictors undecomposed before model-specific columns are
@@ -42,7 +48,7 @@
 #'   resolves to `"time_2l"` when both `time` and `predictors` are supplied, and
 #'   to `"none"` otherwise. Raw cross-sectional DIM predictor dyad-mean columns
 #'   are still centered around the grand mean of dyad means as part of DIM-style
-#'   predictor construction. For longitudinal DIM or DSM predictor
+#'   predictor construction. For longitudinal DIM predictor
 #'   construction, raw undecomposed predictors are currently rejected; use
 #'   `"auto"` or `"time_2l"`.
 #' @param set_exchangeable_compositions Optionally specify dyad compositions
@@ -80,7 +86,7 @@
 #'   of matching exchangeable dyads and `0` otherwise, and an `interdep` attribute
 #'   containing structural metadata, `dyad_compositions`, and predictor metadata
 #'   such as `temporal_predictor_decompositions`, `apim_predictors`, and
-#'   `dim_predictors` when applicable.
+#'   `dim_predictors`, as well as `dsm_role_order` when applicable.
 #'
 #' @examples
 #' data <- data.frame(
@@ -144,6 +150,7 @@ prepare_interdep_data <- function(
     time = NULL,
     predictors = NULL,
     model_type = "apim",
+    dsm_role_order = NULL,
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     set_exchangeable_compositions = NULL,
     include_compositions = NULL,
@@ -166,6 +173,7 @@ prepare_interdep_data <- function(
     time = {{ time }},
     predictors = {{ predictors }},
     model_type = model_type,
+    dsm_role_order = dsm_role_order,
     temporal_predictor_decomposition = temporal_predictor_decomposition,
     incomplete_dyads = incomplete_dyads,
     missing_role = missing_role
@@ -181,8 +189,8 @@ prepare_interdep_data <- function(
 
   out <- center_predictors(out)
 
-  if (any(model_type %in% c("dim", "undirected_dsm"))) {
-    # Current DIM/DSM construction supports one exchangeable composition.
+  if ("dim" %in% model_type) {
+    # Current DIM construction supports one exchangeable composition.
     validate_undirected_dyad_compatibility(out)
   }
 
@@ -190,11 +198,11 @@ prepare_interdep_data <- function(
     out <- add_actor_partner_columns(out)
   }
 
-  if ("dim" %in% model_type && !"undirected_dsm" %in% model_type) {
+  if ("dim" %in% model_type) {
     out <- add_dyad_individual_columns(out)
   }
 
-  if ("undirected_dsm" %in% model_type) {
+  if ("dsm" %in% model_type) {
     out <- add_dyadic_score_columns(out)
   }
 

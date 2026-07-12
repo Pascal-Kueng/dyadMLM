@@ -17,7 +17,7 @@ dyads, or mixed dyad types in the same data, such as female-male,
 female-female, and male-male couples. It creates composition-aware,
 model-ready columns for dyadic multilevel model parameterizations such
 as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model
-(DIM), and Dyadic Score Model (DSM). 
+(DIM), and Dyadic Score Model (DSM).
 
 Start with the vignettes, or scroll down for a quick-start.
 
@@ -27,7 +27,7 @@ Start with the vignettes, or scroll down for a quick-start.
 | [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable, exchangeable, generalized, and intensive longitudinal dyads |
 | [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
 | [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
-| [Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/dsm.html) | Preliminary DSM predictor preparation |
+| [Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and
@@ -37,11 +37,6 @@ uses `interdep` for cross-sectional and intensive longitudinal APIM and
 DIM workflows, with models fitted primarily using `brms`
 ([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
 [DOI](https://doi.org/10.5281/zenodo.17400655)).
-
-The tutorial does not cover models that combine distinguishable and
-exchangeable dyads in a single analysis. For that workflow, see the
-[Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html).
 
 ## Installation
 
@@ -152,3 +147,15 @@ If you use `interdep`, please cite the package directly:
 
 An archival DOI will be added once the package has a public release
 archive.
+
+------------------------------------------------------------------------
+
+**Continue** with the [Getting Started
+Vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.html)
+
+Or refer to the:
+
+- [Actor-Partner Interdependence Model (APIM) vignette](apim.html),
+- [Mixed-Composition APIM vignette](mixed-apim.html),
+- [Dyad-Individual Model vignette](dim.html), or
+- [Dyadic Score Model vignette](dsm.html).

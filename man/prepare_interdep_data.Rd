@@ -12,6 +12,7 @@ prepare_interdep_data(
   time = NULL,
   predictors = NULL,
   model_type = "apim",
+  dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   set_exchangeable_compositions = NULL,
   include_compositions = NULL,
@@ -43,13 +44,19 @@ measures.}
 decomposition and model-ready predictor construction.}
 
 \item{model_type}{Model-ready column families to construct. Can contain one
-or more of \code{"apim"}, \code{"dim"}, and \code{"undirected_dsm"}. \code{"apim"} creates
+or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
 actor and partner predictors. \code{"dim"} creates dyad-mean and
-within-dyad-deviation predictors. \code{"undirected_dsm"} creates undirected
-dyadic-score model predictor columns. Outcomes remain unchanged and are
-selected in the fitted-model formula. \code{"none"} skips model-specific predictor
+within-dyad-deviation predictors. \code{"dsm"} creates dyadic-score model
+predictor columns. \code{"none"} skips model-specific predictor
 construction after validation, composition inference, and optional
 temporal predictor decomposition, and must be used alone.}
+
+\item{dsm_role_order}{For \code{model_type = "dsm"}, a character vector giving
+the two distinguishable roles in the order used for directional
+differences. For example, \code{c("female", "male")} defines predictor
+differences as female minus male and assigns the DSM role contrast \code{+0.5}
+to female partners and \code{-0.5} to male partners. Required when DSM columns
+are requested and ignored otherwise.}
 
 \item{temporal_predictor_decomposition}{Temporal decomposition strategy for
 \code{predictors}.
@@ -59,7 +66,7 @@ decomposition into within-person and between-person components. \code{"auto"}
 resolves to \code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and
 to \code{"none"} otherwise. Raw cross-sectional DIM predictor dyad-mean columns
 are still centered around the grand mean of dyad means as part of DIM-style
-predictor construction. For longitudinal DIM or undirected DSM predictor
+predictor construction. For longitudinal DIM predictor
 construction, raw undecomposed predictors are currently rejected; use
 \code{"auto"} or \code{"time_2l"}.}
 
@@ -104,7 +111,7 @@ numeric \verb{.i_diff_*} contrast columns coded \code{-1} and \code{1} for the t
 of matching exchangeable dyads and \code{0} otherwise, and an \code{interdep} attribute
 containing structural metadata, \code{dyad_compositions}, and predictor metadata
 such as \code{temporal_predictor_decompositions}, \code{apim_predictors}, and
-\code{dim_predictors} when applicable.
+\code{dim_predictors}, as well as \code{dsm_role_order} when applicable.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

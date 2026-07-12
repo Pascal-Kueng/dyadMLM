@@ -11,11 +11,11 @@ interdep_generated_columns(meta)
 }
 \value{
 A tibble with one row per generated temporal predictor, APIM, DIM,
-or DIM column.
+or DSM column.
 }
 \description{
 Creates a normalized, one-row-per-column view over temporal predictor, APIM,
-and DIM columns stored in an \code{interdep} attribute. This is a
+DIM, and DSM columns stored in an \code{interdep} attribute. This is a
 derived lookup table; the model-specific metadata tables remain the source
 records.
 }

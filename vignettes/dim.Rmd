@@ -35,9 +35,9 @@ exchangeable, generalized, and intensive longitudinal APIMs, see the
 [Actor-Partner Interdependence Model vignette](apim.html). For APIMs that
 combine distinguishable and exchangeable dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For the dyadic score
-model, see the [Dyadic Score Model vignette](dsm.html). Whereas the DIM is a 
-different parametrization of the exchangeable APIM, the Dyadic Score Model (DSM) 
-is a different parametrization of the distinguishable APIM. 
+model, see the [Dyadic Score Model vignette](dsm.html). Whereas the DIM is a
+different parameterization of the exchangeable APIM, the Dyadic Score Model
+(DSM) is a different parameterization of the distinguishable APIM.
 
 ## Cross-Sectional Gaussian DIM
 
@@ -957,7 +957,7 @@ strategy selects `"time_2l"` when both `time` and `predictors` are supplied:
    from the dyad's usual level.
 
 `temporal_predictor_decomposition = "none"` is not available for longitudinal
-DIM or undirected DSM predictor construction.
+DIM predictor construction.
 
 ```{r prepare-ild-exchangeable}
 ild_exchangeable_data <- prepare_interdep_data(

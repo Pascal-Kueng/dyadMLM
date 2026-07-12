@@ -12,6 +12,7 @@ validate_interdep_data(
   time = NULL,
   predictors = NULL,
   model_type = "apim",
+  dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
@@ -35,8 +36,12 @@ in the data are treated as exchangeable.}
 temporal predictor decomposition and model-helper functions.}
 
 \item{model_type}{Requested model-ready column families. Can contain one or
-more of \code{"apim"}, \code{"dim"}, and \code{"undirected_dsm"}. \code{"none"} indicates no
+more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"none"} indicates no
 model-specific predictor construction and must be used alone.}
+
+\item{dsm_role_order}{For \code{model_type = "dsm"}, a character vector giving
+the two distinguishable roles in the order used for directional
+differences.}
 
 \item{temporal_predictor_decomposition}{Requested temporal predictor decomposition
 strategy for predictors. \code{"none"} leaves predictors undecomposed before

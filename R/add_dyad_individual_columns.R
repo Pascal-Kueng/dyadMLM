@@ -2,9 +2,9 @@
 #'
 #' Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad-deviation
 #' columns for the predictors recorded in an `interdep_data` object. For
-#' currently supported undirected DIMs and DSMs, the data must
+#' currently supported DIMs, the data must
 #' contain one exchangeable dyad composition. This means distinguishable dyads
-#' and multiple exchangeable compositions are not supported by DIM/DSM
+#' and multiple exchangeable compositions are not supported by DIM
 #' construction until explicit role-contrast, composition-specific, or pooling
 #' support is added. For
 #' intensive longitudinal predictors decomposed by [center_predictors()], the
@@ -65,7 +65,7 @@ add_dyad_individual_columns <- function(data) {
 
     if (has_time && !component %in% c("cwp", "cbp")) {
       stop(
-        "Longitudinal DIM and DSM predictor construction requires temporally decomposed predictors. ",
+        "Longitudinal DIM predictor construction requires temporally decomposed predictors. ",
         "Predictor `", predictor, "` has undecomposed component `", component, "`. ",
         "Use `temporal_predictor_decomposition = \"auto\"` or `\"time_2l\"`, or choose a model type that supports raw longitudinal predictors.",
         call. = FALSE

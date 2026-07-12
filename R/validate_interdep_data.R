@@ -19,6 +19,9 @@
 #' @param model_type Requested model-ready column families. Can contain one or
 #'   more of `"apim"`, `"dim"`, and `"dsm"`. `"none"` indicates no
 #'   model-specific predictor construction and must be used alone.
+#' @param dsm_role_order For `model_type = "dsm"`, a character vector giving
+#'   the two distinguishable roles in the order used for directional
+#'   differences.
 #' @param temporal_predictor_decomposition Requested temporal predictor decomposition
 #'   strategy for predictors. `"none"` leaves predictors undecomposed before
 #'   model-specific columns are constructed. `"time_2l"` indicates a two-level
@@ -47,6 +50,7 @@ validate_interdep_data <- function(
     time = NULL,
     predictors = NULL,
     model_type = "apim",
+    dsm_role_order = NULL,
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop")
@@ -241,7 +245,7 @@ validate_interdep_data <- function(
     if (length(non_numeric_predictors) > 0) {
       stop(
         "`predictors` used with `model_type = \"dim\"` or `model_type = \"dsm\"` must be numeric. ",
-        "DIM and DSM predictor construction computes dyad means and within-dyad deviations. ",
+        "DIM and DSM predictor construction computes numeric dyadic predictor scores. ",
         "Non-numeric predictor(s): ",
         paste(non_numeric_predictors, collapse = ", "),
         ".",
@@ -260,6 +264,7 @@ validate_interdep_data <- function(
     longitudinal = has_time,
     temporal_predictor_decomposition = temporal_predictor_decomposition,
     model_type = model_type,
+    dsm_role_order = dsm_role_order,
     dropped_missing_role_dyads = dropped_missing_role_dyads,
     dropped_incomplete_dyads = dropped_incomplete_dyads
   )

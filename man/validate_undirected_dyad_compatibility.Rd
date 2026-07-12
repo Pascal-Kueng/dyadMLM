@@ -14,7 +14,7 @@ Invisibly returns \code{data} when compatible.
 }
 \description{
 Checks whether an \code{interdep_data} object can be used for the currently
-supported undirected DIM or undirected DSM construction. These models
+supported undirected DIM construction. These models
 currently support only data with exactly one exchangeable dyad composition. Distinguishable or
 multiple exchangeable compositions are rejected until explicit role-contrast,
 composition-specific, or pooling support is added.

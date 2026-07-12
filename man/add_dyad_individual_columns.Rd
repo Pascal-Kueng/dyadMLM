@@ -16,9 +16,9 @@ predictor columns added and DIM predictor metadata recorded.
 \description{
 Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad-deviation
 columns for the predictors recorded in an \code{interdep_data} object. For
-currently supported undirected DIMs and undirected DSMs, the data must
+currently supported DIMs, the data must
 contain one exchangeable dyad composition. This means distinguishable dyads
-and multiple exchangeable compositions are not supported by DIM/DSM
+and multiple exchangeable compositions are not supported by DIM
 construction until explicit role-contrast, composition-specific, or pooling
 support is added. For
 intensive longitudinal predictors decomposed by \code{\link[=center_predictors]{center_predictors()}}, the

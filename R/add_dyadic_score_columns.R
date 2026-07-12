@@ -1,17 +1,16 @@
 #' Add dyadic-score model predictor columns and contrast
 #'
-#' Adds Dyad-Score Model (DSM) style dyad-mean and within-dyad-deviation
-#' columns for the predictors recorded in an `interdep_data` object, which
-#' is equivalent to the DIM method. For currently supported DSMs,
-#' the data must contain one single distinguishable dyad composition. This means
-#' exchangeable dyads and multiple compositions are not supported by DSM yet.
-#' The function reads
-#' `attr(data, "interdep")$temporal_predictor_decompositions`.
+#' Adds Dyadic Score Model (DSM) dyad-mean and signed dyad-difference columns
+#' for the predictors recorded in an `interdep_data` object, together with a
+#' DSM role contrast coded `+0.5` and `-0.5`. DSM differences follow the role
+#' order recorded in `attr(data, "interdep")$dsm_role_order`. The supported DSM
+#' structure contains one distinguishable dyad composition; exchangeable dyads
+#' and multiple compositions are not supported.
 #'
 #' @param data An `interdep_data` object returned by [prepare_interdep_data()].
 #'
-#' @return An `interdep_data` object with dyad-mean and signed within-dyad
-#'   deviations predictor columns added.
+#' @return An `interdep_data` object with dyad-mean and signed dyad-difference
+#'   predictor columns and a DSM role contrast added.
 #'
 #' @keywords internal
 add_dyadic_score_columns <- function(data) {
