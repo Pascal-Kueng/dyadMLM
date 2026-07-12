@@ -18,8 +18,10 @@ knitr::opts_chunk$set(
 library(interdep)
 ```
 
-This vignette focuses on APIM-style actor and partner effect preparation and
-model formulas. For the main data requirements and validation workflow, start
+This vignette focuses on the cross-sectional and intensive longitudinal 
+Actor-Partner Interdependence model for distinguishable and exchangeable dyads. 
+
+For the main data requirements and validation workflow of the `interdep` package, start
 with the [Getting Started vignette](getting-started.html). For APIMs that
 combine distinguishable and exchangeable dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For DIM predictors and their
@@ -27,6 +29,7 @@ equivalence to APIM effects in exchangeable dyads, see the
 [Dyad-Individual Model vignette](dim.html). For undirected dyadic score
 outcomes, see the [Undirected Dyadic Score Model vignette](undirected-dsm.html).
 
+> This vignette is currently under construction. Please check back soon!
 
 
 ### Test distinguishability
