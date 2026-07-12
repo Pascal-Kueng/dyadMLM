@@ -163,7 +163,7 @@ dim_1 <- glmmTMB::glmmTMB(
     .i_communication_dyad_mean_gmc +
 
     # Within-couple effect
-    .i_communication_within_dyad_deviation +
+    .i_communication_within_dyad_dev +
 
     # Residual Gaussian variance-covariance
     (1 | coupleID) +
@@ -923,7 +923,7 @@ b_actor <- apim_coef[[".i_communication_actor"]]
 b_partner <- apim_coef[[".i_communication_partner"]]
 
 b_dyad_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
-b_within_dyad <- dim_coef[[".i_communication_within_dyad_deviation"]]
+b_within_dyad <- dim_coef[[".i_communication_within_dyad_dev"]]
 
 
 cat("From APIM model:\n",
@@ -983,11 +983,11 @@ dim_ILD <- glmmTMB::glmmTMB(
 
     # Within-person DIM
     .i_provided_support_cwp_dyad_mean +
-    .i_provided_support_cwp_within_dyad_deviation +
+    .i_provided_support_cwp_within_dyad_dev +
 
     # Between-person DIM
     .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_deviation +
+    .i_provided_support_cbp_within_dyad_dev +
 
     # Stable exchangeable dyad-level covariance
     (1 | coupleID) +
@@ -1130,7 +1130,7 @@ apim_dim_ILD <- glmmTMB::glmmTMB(
 
     # Between-person DIM
     .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_deviation +
+    .i_provided_support_cbp_within_dyad_dev +
 
     # Stable exchangeable dyad-level covariance
     (1 | coupleID)  + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
@@ -1236,21 +1236,21 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 
     # Within-person DIM
     .i_provided_support_cwp_dyad_mean +
-    .i_provided_support_cwp_within_dyad_deviation +
+    .i_provided_support_cwp_within_dyad_dev +
 
     # Between-person DIM
     .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_deviation +
+    .i_provided_support_cbp_within_dyad_dev +
 
     # Stable dyad-level covariance with within-person random slopes
     (1 +
        .i_provided_support_cwp_dyad_mean +
-       .i_provided_support_cwp_within_dyad_deviation
+       .i_provided_support_cwp_within_dyad_dev
      | coupleID)  +
     (0 +
        .i_diff_assumed_exchangeable_arbitrary +
        .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_dyad_mean +
-       .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_within_dyad_deviation
+       .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_within_dyad_dev
      | coupleID) +
 
     # Same-day exchangeable dyad-level covariance

@@ -20,8 +20,8 @@ test_that("DSM constructs directional cross-sectional predictor scores", {
 
   expect_equal(result$.i_dsm_role_contrast, c(-0.5, 0.5, 0.5, -0.5))
   expect_equal(result$.i_x_dyad_mean_gmc, c(-2.5, -2.5, 2.5, 2.5))
-  expect_equal(result$.i_x_dyad_difference, rep(4, 4))
-  expect_false(".i_x_within_dyad_deviation" %in% names(result))
+  expect_equal(result$.i_x_within_dyad_diff, rep(4, 4))
+  expect_false(".i_x_within_dyad_dev" %in% names(result))
   expect_false(any(startsWith(names(result), ".i_y_")))
 
   meta <- attr(result, "interdep")
@@ -34,7 +34,7 @@ test_that("DSM constructs directional cross-sectional predictor scores", {
       component = "raw",
       source_column = "x",
       mean_column = ".i_x_dyad_mean_gmc",
-      difference_column = ".i_x_dyad_difference",
+      difference_column = ".i_x_within_dyad_diff",
       dyad_decomposition_level = "dyad"
     )
   )
@@ -72,8 +72,8 @@ test_that("reversing DSM role order reverses directional columns only", {
     female_minus_male$.i_x_dyad_mean_gmc
   )
   expect_equal(
-    male_minus_female$.i_x_dyad_difference,
-    -female_minus_male$.i_x_dyad_difference
+    male_minus_female$.i_x_within_dyad_diff,
+    -female_minus_male$.i_x_within_dyad_diff
   )
   expect_equal(
     male_minus_female$.i_dsm_role_contrast,
@@ -100,8 +100,8 @@ test_that("DSM requires both predictor values for dyadic scores", {
   )
 
   expect_true(all(is.na(result$.i_x_dyad_mean_gmc[result$dyad_id == 1])))
-  expect_true(all(is.na(result$.i_x_dyad_difference[result$dyad_id == 1])))
-  expect_equal(result$.i_x_dyad_difference[result$dyad_id == 2], c(4, 4))
+  expect_true(all(is.na(result$.i_x_within_dyad_diff[result$dyad_id == 1])))
+  expect_equal(result$.i_x_within_dyad_diff[result$dyad_id == 2], c(4, 4))
 })
 
 test_that("DSM creates a role contrast without predictors", {
@@ -161,15 +161,18 @@ test_that("DSM keeps multiple predictors and metadata aligned", {
     dsm_role_order = c("female", "male")
   )
 
-  expect_equal(result$.i_x_dyad_difference, rep(4, 4))
-  expect_equal(result$.i_stress_level_dyad_difference, c(6, 6, 8, 8))
-  expect_false(any(grepl("within_dyad_deviation", names(result), fixed = TRUE)))
+  expect_equal(result$.i_x_within_dyad_diff, rep(4, 4))
+  expect_equal(result$.i_stress_level_within_dyad_diff, c(6, 6, 8, 8))
+  expect_false(any(grepl("within_dyad_dev", names(result), fixed = TRUE)))
 
   meta <- attr(result, "interdep")$dsm_predictors
   expect_equal(meta$predictor, c("x", "stress level"))
   expect_equal(
     meta$difference_column,
-    c(".i_x_dyad_difference", ".i_stress_level_dyad_difference")
+    c(
+      ".i_x_within_dyad_diff",
+      ".i_stress_level_within_dyad_diff"
+    )
   )
 })
 
@@ -194,11 +197,11 @@ test_that("DSM constructs longitudinal CWP and CBP scores", {
   )
 
   expect_equal(result$.i_x_cwp_dyad_mean, rep(c(-1.5, -1.5, 1.5, 1.5), 2))
-  expect_equal(result$.i_x_cwp_dyad_difference, rep(c(-1, -1, 1, 1), 2))
+  expect_equal(result$.i_x_cwp_within_dyad_diff, rep(c(-1, -1, 1, 1), 2))
   expect_equal(result$.i_x_cbp_dyad_mean, c(rep(-2.5, 4), rep(2.5, 4)))
-  expect_equal(result$.i_x_cbp_dyad_difference, c(rep(3, 4), rep(5, 4)))
+  expect_equal(result$.i_x_cbp_within_dyad_diff, c(rep(3, 4), rep(5, 4)))
   expect_equal(result$.i_dsm_role_contrast, rep(c(0.5, -0.5), 4))
-  expect_false(any(grepl("within_dyad_deviation", names(result), fixed = TRUE)))
+  expect_false(any(grepl("within_dyad_dev", names(result), fixed = TRUE)))
 
   meta <- attr(result, "interdep")$dsm_predictors
   expect_equal(meta$component, c("cwp", "cbp"))
@@ -229,11 +232,11 @@ test_that("DSM returns missing CWP scores for an incomplete predictor pair", {
   complete_occasion <- result$dyad_id == 1 & result$time == 2
 
   expect_true(all(is.na(result$.i_x_cwp_dyad_mean[incomplete_occasion])))
-  expect_true(all(is.na(result$.i_x_cwp_dyad_difference[incomplete_occasion])))
+  expect_true(all(is.na(result$.i_x_cwp_within_dyad_diff[incomplete_occasion])))
   expect_false(any(is.na(result$.i_x_cwp_dyad_mean[complete_occasion])))
-  expect_false(any(is.na(result$.i_x_cwp_dyad_difference[complete_occasion])))
+  expect_false(any(is.na(result$.i_x_cwp_within_dyad_diff[complete_occasion])))
   expect_false(any(is.na(result$.i_x_cbp_dyad_mean[result$dyad_id == 1])))
-  expect_false(any(is.na(result$.i_x_cbp_dyad_difference[result$dyad_id == 1])))
+  expect_false(any(is.na(result$.i_x_cbp_within_dyad_diff[result$dyad_id == 1])))
 })
 
 test_that("DSM and APIM predictor columns can coexist", {
@@ -258,7 +261,7 @@ test_that("DSM and APIM predictor columns can coexist", {
     ".i_x_actor",
     ".i_x_partner",
     ".i_x_dyad_mean_gmc",
-    ".i_x_dyad_difference",
+    ".i_x_within_dyad_diff",
     ".i_dsm_role_contrast"
   ) %in% names(result)))
 })

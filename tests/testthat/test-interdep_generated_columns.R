@@ -185,13 +185,13 @@ test_that("interdep_generated_columns collects DIM columns", {
       variable = c("x", "x"),
       component = c("raw", "raw"),
       column_role = c("dyad_mean", "within_dyad_deviation"),
-      column = c(".i_x_dyad_mean_gmc", ".i_x_within_dyad_deviation"),
+      column = c(".i_x_dyad_mean_gmc", ".i_x_within_dyad_dev"),
       source_column = c("x", "x"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
       column_centering = c("grand_mean", "none"),
       print_order = c(20L, 21L),
-      column_pattern = c(".i_{pred}_dyad_mean_gmc", ".i_{pred}_within_dyad_deviation"),
+      column_pattern = c(".i_{pred}_dyad_mean_gmc", ".i_{pred}_within_dyad_dev"),
       description = c(
         "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
         "DIM within-dyad predictor deviation: person's difference from the dyad average"
@@ -320,7 +320,7 @@ test_that("interdep_generated_columns collects DSM columns", {
     c(
       ".i_dsm_role_contrast",
       ".i_x_dyad_mean_gmc",
-      ".i_x_dyad_difference"
+      ".i_x_within_dyad_diff"
     )
   )
   expect_equal(result$dyadic_decomposition, c("role_contrast", "dyad_mean", "dyad_difference"))

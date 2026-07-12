@@ -228,20 +228,20 @@ model-building features.
     #                                   average person's usual level
     #   .i_{pred}_cwp_dyad_mean         within-person dyad-mean predictor:
     #                                   shared momentary deviations in the dyad
-    #   .i_{pred}_cwp_within_dyad_deviation
+    #   .i_{pred}_cwp_within_dyad_dev
     #                                   DIM within-person within-dyad predictor
     #                                   deviation: person's momentary deviation
     #                                   from the dyad average
     #   .i_{pred}_cbp_dyad_mean         between-person dyad-mean predictor:
     #                                   dyad's stable usual level, grand-mean
     #                                   centered
-    #   .i_{pred}_cbp_within_dyad_deviation
+    #   .i_{pred}_cbp_within_dyad_dev
     #                                   DIM between-person within-dyad predictor
     #                                   deviation: person's stable difference from
     #                                   the dyad's usual level
     #   .i_dsm_role_contrast            DSM +0.5/-0.5 directional role contrast
-    #   .i_{pred}_cwp_dyad_difference   DSM within-person signed predictor difference
-    #   .i_{pred}_cbp_dyad_difference   DSM between-person signed predictor difference
+    #   .i_{pred}_cwp_within_dyad_diff   DSM within-person signed predictor difference
+    #   .i_{pred}_cbp_within_dyad_diff   DSM between-person signed predictor difference
     #
     # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more
     # A tibble: 5,600 x 17

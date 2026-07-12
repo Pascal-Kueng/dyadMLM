@@ -34,9 +34,10 @@ Dyad-Individual Model (DIM), see the
 
 ## Preparing DSM Data
 
-A DSM requires a substantively meaningful direction. We therefore supply the
+A DSM requires a substantively meaningful direction (similar to a distinguishable
+APIM that distinguishes by gender). We therefore supply the
 two roles in `dsm_role_order`. Here, `c("female", "male")` defines every
-difference as female minus male, independently of row order.
+difference as female minus male.
 
 ```{r prepare-cross-dsm}
 cross_dsm_data <- prepare_interdep_data(
@@ -52,18 +53,15 @@ cross_dsm_data <- prepare_interdep_data(
 print(cross_dsm_data, n = 4)
 ```
 
-For predictor values `X_female` and `X_male`, `interdep` creates:
+For predictor values $X_{female}$and $X_{male}$, `interdep` then creates:
 
-```text
-.i_communication_dyad_mean_gmc
-  = (X_female + X_male) / 2, grand-mean centered
 
-.i_communication_dyad_difference
-  = X_female - X_male
+`.i_communication_dyad_mean_gmc` $= \frac{X_{female} + X_{male}}{2}$, grand-mean centered
 
-.i_dsm_role_contrast
-  = +0.5 for female and -0.5 for male
-```
+
+`.i_communication_within_dyad_diff` $= X_{female} - X_{male}$
+
+.i_dsm_role_contrast` $= +0.5$ for female and $-0.5$ for male
 
 The dyad mean and signed difference are repeated on both member rows. The
 original member-level outcome remains unchanged and is selected in the model
@@ -71,18 +69,9 @@ formula. No outcome argument or outcome transformation is needed.
 
 The `+0.5/-0.5` contrast is important: coefficients involving the contrast
 equal the full female-minus-male outcome difference. Reversing
-`dsm_role_order` reverses all directional differences and the contrast, but
-does not change fitted member outcomes.
+`dsm_role_order` reverses all directional differences and the contrast exactly.
 
 ## Cross-Sectional Gaussian DSM
-
-Let `XLevel` denote the centered predictor dyad mean, `XDiff` the signed
-predictor difference, and `C` the DSM role contrast. Iida et al.'s full DSM can
-be fitted to the unchanged member-level outcome using:
-
-```text
-outcome ~ XLevel + XDiff + C + XLevel:C + XDiff:C
-```
 
 For a cross-sectional Gaussian DSM, a correlated dyad random intercept and
 role-contrast slope represent unexplained outcome-level and outcome-difference
@@ -94,10 +83,10 @@ elements of the two-member residual covariance matrix.
 dsm_model <- glmmTMB::glmmTMB(
   satisfaction ~
     .i_communication_dyad_mean_gmc +
-    .i_communication_dyad_difference +
+    .i_communication_within_dyad_diff +
     .i_dsm_role_contrast +
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
-    .i_communication_dyad_difference:.i_dsm_role_contrast +
+    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
     (1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -106,6 +95,45 @@ dsm_model <- glmmTMB::glmmTMB(
 
 summary(dsm_model)
 ```
+
+### Reversing the coding
+
+Instead of computing $x_{female} - x_{male}$ we will inverse this exactly
+and compute $x_{female} - x_{male}$: 
+
+
+```{r prepare-cross-dsm}
+cross_dsm_data_inverted <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  model_type = "dsm",
+  dsm_role_order = c("male", "female")
+)
+```
+
+
+```{r fit-cross-dsm, eval=FALSE}
+dsm_model_inverted <- glmmTMB::glmmTMB(
+  satisfaction ~
+    .i_communication_dyad_mean_gmc +
+    .i_communication_within_dyad_diff +
+    .i_dsm_role_contrast +
+    .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
+    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
+    (1 + .i_dsm_role_contrast | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = cross_dsm_data_inverted
+)
+
+summary(dsm_model)
+```
+
+We see that the models have identical fit, and that parameters are identical 
+with just the sign reversed. 
 
 In this example, the fixed effects have the following interpretations:
 

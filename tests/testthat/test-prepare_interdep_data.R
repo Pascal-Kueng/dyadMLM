@@ -141,7 +141,7 @@ test_that("prepare_interdep_data constructs multiple requested model column fami
   expect_true(".i_x_actor" %in% names(result))
   expect_true(".i_x_partner" %in% names(result))
   expect_true(".i_x_dyad_mean_gmc" %in% names(result))
-  expect_true(".i_x_within_dyad_deviation" %in% names(result))
+  expect_true(".i_x_within_dyad_dev" %in% names(result))
   expect_s3_class(attr(result, "interdep")$apim_predictors, "tbl_df")
   expect_s3_class(attr(result, "interdep")$dim_predictors, "tbl_df")
 })
@@ -188,7 +188,7 @@ test_that("prepare_interdep_data can set a distinguishable composition exchangea
   expect_true(".i_diff_female_x_male_arbitrary" %in% names(result))
   expect_false(".i_diff_female_x_male" %in% names(result))
   expect_true(".i_x_dyad_mean_gmc" %in% names(result))
-  expect_true(".i_x_within_dyad_deviation" %in% names(result))
+  expect_true(".i_x_within_dyad_dev" %in% names(result))
 })
 
 test_that("prepare_interdep_data can pool exchangeable compositions for DIM", {
@@ -225,7 +225,7 @@ test_that("prepare_interdep_data can pool exchangeable compositions for DIM", {
   expect_true(".i_diff_romantic_couples_arbitrary" %in% names(result))
   expect_false(".i_diff_romantic_couples" %in% names(result))
   expect_true(".i_x_dyad_mean_gmc" %in% names(result))
-  expect_true(".i_x_within_dyad_deviation" %in% names(result))
+  expect_true(".i_x_within_dyad_dev" %in% names(result))
 })
 
 test_that("prepare_interdep_data treats data without role as assumed exchangeable dyads", {
@@ -443,7 +443,7 @@ test_that("prepare_interdep_data filters before DIM compatibility checks", {
   expect_equal(levels(result$.i_composition), "female_x_female")
   expect_false(any(grepl("male_x_male", names(result), fixed = TRUE)))
   expect_true(".i_x_dyad_mean_gmc" %in% names(result))
-  expect_true(".i_x_within_dyad_deviation" %in% names(result))
+  expect_true(".i_x_within_dyad_dev" %in% names(result))
   expect_false(any(startsWith(names(result), ".i_y_")))
   expect_equal(meta$dim_predictors$predictor, "x")
 })
@@ -487,7 +487,7 @@ test_that("prepare_interdep_data can filter, constrain, and pool in one call", {
   expect_false(any(grepl("nonbinary", names(result), fixed = TRUE)))
   expect_true(".i_diff_romantic_couples_arbitrary" %in% names(result))
   expect_true(".i_x_dyad_mean_gmc" %in% names(result))
-  expect_true(".i_x_within_dyad_deviation" %in% names(result))
+  expect_true(".i_x_within_dyad_dev" %in% names(result))
   expect_equal(attr(result, "interdep")$dim_predictors$predictor, "x")
 })
 

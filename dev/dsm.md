@@ -227,7 +227,7 @@ order `c("female", "male")`, for example:
 
 ```text
 .i_communication_dyad_mean_gmc
-.i_communication_dyad_difference
+.i_communication_within_dyad_diff
 ```
 
 Both values must be repeated on both member rows of a dyad. The difference
@@ -237,7 +237,7 @@ This constant column is necessary for the `XDiff -> YLevel` main effect.
 The existing column
 
 ```text
-.i_communication_within_dyad_deviation
+.i_communication_within_dyad_dev
 ```
 
 is not a DSM difference score. It contains `Xi - XLevel`, so its two values are
@@ -306,7 +306,7 @@ The clean conceptual division is:
 ## Why the preliminary separate models are problematic
 
 Fitting the repeated `.i_*_dyad_mean` and
-`.i_*_within_dyad_deviation` columns as two ordinary univariate mixed models is
+`.i_*_within_dyad_dev` columns as two ordinary univariate mixed models is
 not Iida's full DSM:
 
 - the cross-paths are omitted;
@@ -383,11 +383,11 @@ Generated-column patterns are:
 ```text
 .i_dsm_role_contrast
 .i_{pred}_dyad_mean_gmc
-.i_{pred}_dyad_difference
+.i_{pred}_within_dyad_diff
 .i_{pred}_cwp_dyad_mean
-.i_{pred}_cwp_dyad_difference
+.i_{pred}_cwp_within_dyad_diff
 .i_{pred}_cbp_dyad_mean
-.i_{pred}_cbp_dyad_difference
+.i_{pred}_cbp_within_dyad_diff
 ```
 
 The exact use of `_gmc` should continue to reflect actual centering. Signed

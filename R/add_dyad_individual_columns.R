@@ -86,7 +86,7 @@ construct_dyad_predictor_decompositions <- function(data) {
     if (component == "raw") {
       mean_col <- paste0(column_stem, "_dyad_mean_gmc")
     }
-    deviation_col <- paste0(column_stem, "_within_dyad_deviation")
+    deviation_col <- paste0(column_stem, "_within_dyad_dev")
 
     dyad_decomposition_level <- "dyad"
     if (component == "cwp") {

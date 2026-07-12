@@ -57,7 +57,7 @@ add_dyadic_score_columns <- function(data) {
       component = component,
       source_col = source_col
     )
-    difference_col <- paste0(column_stem, "_dyad_difference")
+    difference_col <- paste0(column_stem, "_within_dyad_diff")
 
     difference_cols[[i]] <- difference_col
 
