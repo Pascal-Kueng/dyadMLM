@@ -86,7 +86,8 @@
 #'   of matching exchangeable dyads and `0` otherwise, and an `interdep` attribute
 #'   containing structural metadata, `dyad_compositions`, and predictor metadata
 #'   such as `temporal_predictor_decompositions`, `apim_predictors`, and
-#'   `dim_predictors`, as well as `dsm_role_order` when applicable.
+#'   `dim_predictors`, as well as `dsm_predictors` and `dsm_role_order` when
+#'   applicable.
 #'
 #' @examples
 #' data <- data.frame(

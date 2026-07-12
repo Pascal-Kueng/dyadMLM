@@ -164,27 +164,6 @@ test_that("prepare_interdep_data rejects unsupported model types", {
   )
 })
 
-test_that("prepare_interdep_data rejects unsupported dyad compositions for undirected DSM", {
-  data <- data.frame(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    role = c("female", "male", "female", "male"),
-    y = c(1, 2, 3, 4)
-  )
-
-  expect_error(
-    prepare_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      role = role,
-      model_type = "undirected_dsm",
-      seed = 123
-    ),
-    "female_x_male \\(distinguishable, n_dyads = 2\\)"
-  )
-})
-
 test_that("prepare_interdep_data can set a distinguishable composition exchangeable for DIM", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -432,7 +411,7 @@ test_that("prepare_interdep_data filters included compositions before finalizing
   )
 })
 
-test_that("prepare_interdep_data filters before DIM and DSM compatibility checks", {
+test_that("prepare_interdep_data filters before DIM compatibility checks", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),
@@ -447,7 +426,7 @@ test_that("prepare_interdep_data filters before DIM and DSM compatibility checks
     member = person_id,
     role = role,
     predictors = x,
-    model_type = c("dim", "undirected_dsm"),
+    model_type = "dim",
     temporal_predictor_decomposition = "none",
     include_compositions = "female-female",
     seed = 123

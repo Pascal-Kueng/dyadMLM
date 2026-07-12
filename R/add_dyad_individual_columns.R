@@ -32,17 +32,22 @@ add_dyad_individual_columns <- function(data) {
 
   validate_dim_compatibility(data)
 
-  meta_data <- attr(data, "interdep")
+  decomposition <- construct_dyad_predictor_decompositions(data)
+  out <- decomposition$data
+  attr(out, "interdep")$dim_predictors <- decomposition$predictors
 
+  out
+}
+
+construct_dyad_predictor_decompositions <- function(data) {
+  meta_data <- attr(data, "interdep")
   group <- meta_data$group
   member <- meta_data$member
   has_time <- meta_data$longitudinal
   time <- meta_data$time
+  temporal_decompositions <- meta_data$temporal_predictor_decompositions
 
-  temporal_predictor_decompositions <- meta_data$temporal_predictor_decompositions
-
-  # empty table for metadata
-  dim_predictors <- tibble::tibble(
+  predictors <- tibble::tibble(
     predictor = character(),
     component = character(),
     source_column = character(),
@@ -51,34 +56,31 @@ add_dyad_individual_columns <- function(data) {
     dyad_decomposition_level = character()
   )
 
-  if (nrow(temporal_predictor_decompositions) == 0) {
-    attr(data, "interdep")$dim_predictors <- dim_predictors
-    return(data)
+  if (nrow(temporal_decompositions) == 0) {
+    return(list(data = data, predictors = predictors))
   }
 
   out <- data
 
-  for (i in seq_len(nrow(temporal_predictor_decompositions))) {
-    predictor <- temporal_predictor_decompositions$predictor[[i]]
-    component <- temporal_predictor_decompositions$component[[i]]
-    source_col <- temporal_predictor_decompositions$column[[i]]
+  for (i in seq_len(nrow(temporal_decompositions))) {
+    predictor <- temporal_decompositions$predictor[[i]]
+    component <- temporal_decompositions$component[[i]]
+    source_col <- temporal_decompositions$column[[i]]
 
     if (has_time && !component %in% c("cwp", "cbp")) {
       stop(
-        "Longitudinal DIM predictor construction requires temporally decomposed predictors. ",
+        "Longitudinal dyadic predictor-score construction requires temporally decomposed predictors. ",
         "Predictor `", predictor, "` has undecomposed component `", component, "`. ",
         "Use `temporal_predictor_decomposition = \"auto\"` or `\"time_2l\"`, or choose a model type that supports raw longitudinal predictors.",
         call. = FALSE
       )
     }
 
-    # constructing all column names that we will create dynamically.
-    predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
-    column_stem <- source_col
-
-    if (component == "raw") {
-      column_stem <- paste0(interdep_reserved_prefix, predictor_suffix)
-    }
+    column_stem <- make_dyad_predictor_column_stem(
+      predictor = predictor,
+      component = component,
+      source_col = source_col
+    )
 
     mean_col <- paste0(column_stem, "_dyad_mean")
     if (component == "raw") {
@@ -86,15 +88,13 @@ add_dyad_individual_columns <- function(data) {
     }
     deviation_col <- paste0(column_stem, "_within_dyad_deviation")
 
-    # Record the dyadic unit at which this component is decomposed.
     dyad_decomposition_level <- "dyad"
     if (component == "cwp") {
       dyad_decomposition_level <- "dyad_time"
     }
 
-    # update table with metadata of the current looping component.
-    dim_predictors <- tibble::add_row(
-      dim_predictors,
+    predictors <- tibble::add_row(
+      predictors,
       predictor = predictor,
       component = component,
       source_column = source_col,
@@ -103,7 +103,6 @@ add_dyad_individual_columns <- function(data) {
       dyad_decomposition_level = dyad_decomposition_level
     )
 
-    # only within-person components need special handling
     if (component == "cwp") {
       out <- add_dyad_time_decomposition(
         out = out,
@@ -127,9 +126,16 @@ add_dyad_individual_columns <- function(data) {
     }
   }
 
-  attr(out, "interdep")$dim_predictors <- dim_predictors
+  list(data = out, predictors = predictors)
+}
 
-  return(out)
+make_dyad_predictor_column_stem <- function(predictor, component, source_col) {
+  if (component != "raw") {
+    return(source_col)
+  }
+
+  predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
+  paste0(interdep_reserved_prefix, predictor_suffix)
 }
 
 add_dyad_time_decomposition <- function(out, group, member, time, source_col,
@@ -140,17 +146,15 @@ add_dyad_time_decomposition <- function(out, group, member, time, source_col,
     dplyr::select(dplyr::all_of(c(join_keys, source_col))) |>
     dplyr::group_by(.data[[group]], .data[[time]]) |>
     dplyr::mutate(
-      # We can only construct DIM parameters sensibly if we have both
-      # partners' observations. Therefore we return NA if that is not the case,
-      # otherwise construct the mean and individual deviation.
-      .i_dim_n_observed = sum(!is.na(.data[[source_col]])),
-      .i_dim_mean = dplyr::if_else(
-        .data$.i_dim_n_observed == 2L,
+      # Both member values are required for dyad-level predictor scores.
+      .i_dyad_n_observed = sum(!is.na(.data[[source_col]])),
+      .i_dyad_mean = dplyr::if_else(
+        .data$.i_dyad_n_observed == 2L,
         no_NaN_mean(.data[[source_col]]),
         NA_real_
       ),
-      "{mean_col}" := .data$.i_dim_mean,
-      "{deviation_col}" := .data[[source_col]] - .data$.i_dim_mean
+      "{mean_col}" := .data$.i_dyad_mean,
+      "{deviation_col}" := .data[[source_col]] - .data$.i_dyad_mean
     ) |>
     dplyr::ungroup() |>
     dplyr::select(
@@ -172,29 +176,29 @@ add_dyad_level_decomposition <- function(out, group, member, source_col, mean_co
   dyad_values <- person_values |>
     dplyr::group_by(.data[[group]]) |>
     dplyr::mutate(
-      .i_dim_n_observed = sum(!is.na(.data[[source_col]])),
-      .i_dim_mean = dplyr::if_else(
-        .data$.i_dim_n_observed == 2L,
+      .i_dyad_n_observed = sum(!is.na(.data[[source_col]])),
+      .i_dyad_mean = dplyr::if_else(
+        .data$.i_dyad_n_observed == 2L,
         no_NaN_mean(.data[[source_col]]),
         NA_real_
       ),
-      "{deviation_col}" := .data[[source_col]] - .data$.i_dim_mean
+      "{deviation_col}" := .data[[source_col]] - .data$.i_dyad_mean
     ) |>
     dplyr::ungroup()
 
-  # Raw cross-sectional DIM dyad means are grand-mean centered by convention.
+  # Raw cross-sectional dyad means are grand-mean centered by convention.
   if (center_mean) {
     dyad_mean_values <- dyad_values |>
-      dplyr::distinct(.data[[group]], .data$.i_dim_mean)
+      dplyr::distinct(.data[[group]], .data$.i_dyad_mean)
 
-    grand_mean <- no_NaN_mean(dyad_mean_values$.i_dim_mean)
+    grand_mean <- no_NaN_mean(dyad_mean_values$.i_dyad_mean)
 
     dyad_values <- dyad_values |>
-      dplyr::mutate("{mean_col}" := .data$.i_dim_mean - grand_mean)
+      dplyr::mutate("{mean_col}" := .data$.i_dyad_mean - grand_mean)
   } else {
     # Other components already have the intended scale, for example cbp.
     dyad_values <- dyad_values |>
-      dplyr::mutate("{mean_col}" := .data$.i_dim_mean)
+      dplyr::mutate("{mean_col}" := .data$.i_dyad_mean)
   }
 
   dyad_values <- dyad_values |>

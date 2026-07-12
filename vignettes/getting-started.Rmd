@@ -248,7 +248,7 @@ variable and an explicit role order. The role order defines the direction of
 all DSM predictor differences and the DSM role contrast. Outcomes remain
 unchanged and are selected later in the fitted-model formula.
 
-```{r prepare-cross-dsm, eval=FALSE}
+```{r prepare-cross-dsm}
 cross_dsm_data <- prepare_interdep_data(
   data = example_dyadic_crosssectional,
   group = coupleID,

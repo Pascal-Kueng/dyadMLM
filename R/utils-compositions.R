@@ -24,6 +24,7 @@ interdep_pool_member_col <- paste0(interdep_reserved_prefix, "pool_member")
 interdep_resolved_role_col <- paste0(interdep_reserved_prefix, "resolved_role")
 interdep_diff_col <- paste0(interdep_reserved_prefix, "diff")
 interdep_arbitrary_role_col <- paste0(interdep_reserved_prefix, "arbitrary_role")
+interdep_dsm_role_contrast_col <- paste0(interdep_reserved_prefix, "dsm_role_contrast")
 
 ############################################################################
 # HELPER FUNCTIONS

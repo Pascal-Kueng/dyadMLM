@@ -193,7 +193,7 @@ test_that("interdep_generated_columns collects DIM columns", {
       print_order = c(20L, 21L),
       column_pattern = c(".i_{pred}_dyad_mean_gmc", ".i_{pred}_within_dyad_deviation"),
       description = c(
-        "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centered",
+        "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
         "DIM within-dyad predictor deviation: person's difference from the dyad average"
       )
     )
@@ -281,10 +281,11 @@ test_that("interdep_generated_columns combines requested model families", {
   )
 })
 
-test_that("interdep_generated_columns collects DSM-style predictor columns", {
+test_that("interdep_generated_columns collects DSM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
     x = c(1, 10, 20, 30)
   )
 
@@ -292,8 +293,10 @@ test_that("interdep_generated_columns collects DSM-style predictor columns", {
     data,
     group = dyad_id,
     member = person_id,
+    role = role,
     predictors = x,
-    model_type = c("dim", "undirected_dsm"),
+    model_type = "dsm",
+    dsm_role_order = c("female", "male"),
     temporal_predictor_decomposition = "none",
     seed = 123
   )
@@ -302,17 +305,23 @@ test_that("interdep_generated_columns collects DSM-style predictor columns", {
 
   expect_equal(
     result$model_family,
-    c("dim", "dim")
+    c("dsm", "dsm", "dsm")
   )
   expect_equal(
     result$variable_role,
-    c("predictor", "predictor")
+    c("role", "predictor", "predictor")
+  )
+  expect_equal(
+    result$column_role,
+    c("role_contrast", "dyad_mean", "dyad_difference")
   )
   expect_equal(
     result$column,
     c(
+      ".i_dsm_role_contrast",
       ".i_x_dyad_mean_gmc",
-      ".i_x_within_dyad_deviation"
+      ".i_x_dyad_difference"
     )
   )
+  expect_equal(result$dyadic_decomposition, c("role_contrast", "dyad_mean", "dyad_difference"))
 })

@@ -33,6 +33,15 @@ print.interdep_data <- function(x, ...) {
     style = "subtle"
   )
 
+  if (!is.null(meta$dsm_role_order)) {
+    print_wrapped_comment_fields(
+      label = "DSM direction",
+      fields = paste(meta$dsm_role_order, collapse = " - "),
+      exdent = 2L,
+      style = "subtle"
+    )
+  }
+
   cat(pillar::style_subtle("#\n"))
 
   dropped_dyads <- list(

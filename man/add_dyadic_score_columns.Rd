@@ -20,5 +20,8 @@ DSM role contrast coded \code{+0.5} and \code{-0.5}. DSM differences follow the 
 order recorded in \code{attr(data, "interdep")$dsm_role_order}. The supported DSM
 structure contains one distinguishable dyad composition; exchangeable dyads
 and multiple compositions are not supported.
+Constructed predictor columns are recorded in
+\code{attr(data, "interdep")$dsm_predictors}, and the contrast column name is
+recorded in \code{attr(data, "interdep")$dsm_role_contrast_column}.
 }
 \keyword{internal}

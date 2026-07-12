@@ -212,15 +212,6 @@ test_that("validate_interdep_data validates incompatible model type requests", {
     fixed = TRUE
   )
 
-  result <- validate_interdep_data(
-    data,
-    group = dyad_id,
-    member = person_id,
-    predictors = x,
-    model_type = "undirected_dsm"
-  )
-
-  expect_equal(attr(result, "interdep")$predictors, "x")
 })
 
 test_that("validate_interdep_data validates explicit time_2l temporal predictor decomposition", {
@@ -280,6 +271,7 @@ test_that("validate_interdep_data rejects non-numeric DIM and DSM predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
     x = factor(c("low", "high", "low", "high"))
   )
 
@@ -292,7 +284,22 @@ test_that("validate_interdep_data rejects non-numeric DIM and DSM predictors", {
       model_type = "dim",
       temporal_predictor_decomposition = "none"
     ),
-    '`predictors` used with `model_type = "dim"` or `model_type = "undirected_dsm"` must be numeric.',
+    '`predictors` used with `model_type = "dim"` or `model_type = "dsm"` must be numeric.',
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      predictors = x,
+      model_type = "dsm",
+      dsm_role_order = c("female", "male"),
+      temporal_predictor_decomposition = "none"
+    ),
+    '`predictors` used with `model_type = "dim"` or `model_type = "dsm"` must be numeric.',
     fixed = TRUE
   )
 })

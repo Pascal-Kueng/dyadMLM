@@ -15,7 +15,12 @@ interdep_generated_columns <- function(meta) {
   dplyr::bind_rows(
     temporal_predictor_generated_columns(meta$temporal_predictor_decompositions),
     apim_generated_columns(meta$apim_predictors),
-    dim_generated_columns(meta$dim_predictors)
+    dim_generated_columns(meta$dim_predictors),
+    dsm_generated_columns(
+      dsm_predictors = meta$dsm_predictors,
+      role_contrast_column = meta$dsm_role_contrast_column,
+      role_column = meta$role
+    )
   )
 }
 
@@ -126,6 +131,55 @@ dim_generated_columns <- function(dim_predictors) {
   attach_generated_column_specs(columns)
 }
 
+dsm_generated_columns <- function(dsm_predictors, role_contrast_column, role_column) {
+  columns <- list()
+
+  if (!is.null(role_contrast_column)) {
+    columns$role_contrast <- tibble::tibble(
+      model_family = "dsm",
+      variable_role = "role",
+      variable = role_column,
+      component = "raw",
+      column_role = "role_contrast",
+      column = role_contrast_column,
+      source_column = role_column
+    )
+  }
+
+  if (!is.null(dsm_predictors) && nrow(dsm_predictors) > 0) {
+    predictor_columns <- dplyr::bind_rows(
+      tibble::tibble(
+        model_family = "dsm",
+        variable_role = "predictor",
+        variable = dsm_predictors$predictor,
+        component = dsm_predictors$component,
+        column_role = "dyad_mean",
+        column = dsm_predictors$mean_column,
+        source_column = dsm_predictors$source_column
+      ),
+      tibble::tibble(
+        model_family = "dsm",
+        variable_role = "predictor",
+        variable = dsm_predictors$predictor,
+        component = dsm_predictors$component,
+        column_role = "dyad_difference",
+        column = dsm_predictors$difference_column,
+        source_column = dsm_predictors$source_column
+      )
+    )
+
+    columns$predictors <- predictor_columns
+  }
+
+  columns <- dplyr::bind_rows(columns)
+
+  if (nrow(columns) == 0) {
+    return(empty_generated_columns())
+  }
+
+  attach_generated_column_specs(columns)
+}
+
 attach_generated_column_specs <- function(columns) {
   out <- columns |>
     dplyr::left_join(
@@ -170,11 +224,18 @@ generated_column_spec_lookup <- function() {
     "apim",           "predictor",    "cwp",      "partner",                "within_person",              "none",                     "none",            13L,          ".i_{pred}_cwp_partner",                     "APIM within-person partner predictor: partner's momentary deviations from their usual level",
     "apim",           "predictor",    "cbp",      "actor",                  "between_person_grand_mean",  "none",                     "none",            14L,          ".i_{pred}_cbp_actor",                       "APIM between-person actor predictor: actor's stable difference from the average person's usual level",
     "apim",           "predictor",    "cbp",      "partner",                "between_person_grand_mean",  "none",                     "none",            15L,          ".i_{pred}_cbp_partner",                     "APIM between-person partner predictor: partner's stable difference from the average person's usual level",
-    "dim",            "predictor",    "raw",      "dyad_mean",              "none",                       "dyad_mean",                "grand_mean",      20L,          ".i_{pred}_dyad_mean_gmc",               "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centered",
+    "dsm",            "role",         "raw",      "role_contrast",          "none",                       "role_contrast",            "none",            19L,          ".i_dsm_role_contrast",                   "DSM role contrast: +0.5 for the first declared role and -0.5 for the second declared role",
+    "dim",            "predictor",    "raw",      "dyad_mean",              "none",                       "dyad_mean",                "grand_mean",      20L,          ".i_{pred}_dyad_mean_gmc",               "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
     "dim",            "predictor",    "raw",      "within_dyad_deviation",  "none",                       "within_dyad_deviation",    "none",            21L,          ".i_{pred}_within_dyad_deviation",       "DIM within-dyad predictor deviation: person's difference from the dyad average",
-    "dim",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".i_{pred}_cwp_dyad_mean",                   "DIM within-person dyad-mean predictor: shared momentary deviations in the dyad",
+    "dim",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".i_{pred}_cwp_dyad_mean",                   "within-person dyad-mean predictor: shared momentary deviations in the dyad",
     "dim",            "predictor",    "cwp",      "within_dyad_deviation",  "within_person",              "within_dyad_deviation",    "none",            23L,          ".i_{pred}_cwp_within_dyad_deviation",       "DIM within-person within-dyad predictor deviation: person's momentary deviation from the dyad average",
-    "dim",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".i_{pred}_cbp_dyad_mean",                   "DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
-    "dim",            "predictor",    "cbp",      "within_dyad_deviation",  "between_person_grand_mean",  "within_dyad_deviation",    "none",            25L,          ".i_{pred}_cbp_within_dyad_deviation",       "DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level"
+    "dim",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".i_{pred}_cbp_dyad_mean",                   "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
+    "dim",            "predictor",    "cbp",      "within_dyad_deviation",  "between_person_grand_mean",  "within_dyad_deviation",    "none",            25L,          ".i_{pred}_cbp_within_dyad_deviation",       "DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level",
+    "dsm",            "predictor",    "raw",      "dyad_mean",              "none",                       "dyad_mean",                "grand_mean",      20L,          ".i_{pred}_dyad_mean_gmc",                   "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
+    "dsm",            "predictor",    "raw",      "dyad_difference",        "none",                       "dyad_difference",          "none",            21L,          ".i_{pred}_dyad_difference",                 "DSM signed predictor difference: first declared role minus second declared role",
+    "dsm",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".i_{pred}_cwp_dyad_mean",                   "within-person dyad-mean predictor: shared momentary deviations in the dyad",
+    "dsm",            "predictor",    "cwp",      "dyad_difference",        "within_person",              "dyad_difference",          "none",            23L,          ".i_{pred}_cwp_dyad_difference",             "DSM within-person signed predictor difference: first declared role minus second declared role",
+    "dsm",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".i_{pred}_cbp_dyad_mean",                   "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
+    "dsm",            "predictor",    "cbp",      "dyad_difference",        "between_person_grand_mean",  "dyad_difference",          "none",            25L,          ".i_{pred}_cbp_dyad_difference",             "DSM between-person signed predictor difference: first declared role minus second declared role"
   )
 }

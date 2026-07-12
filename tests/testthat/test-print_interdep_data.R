@@ -239,6 +239,7 @@ test_that("interdep data print orders generated column descriptions", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
+    role = rep(c("female", "male"), 4),
     time = c(1, 1, 2, 2, 1, 1, 2, 2),
     x = c(1, 2, 3, 4, 5, 6, 7, 8),
     y = c(2, 3, 4, 5, 6, 7, 8, 9)
@@ -248,9 +249,11 @@ test_that("interdep data print orders generated column descriptions", {
     data,
     group = dyad_id,
     member = person_id,
+    role = role,
     time = time,
     predictors = x,
-    model_type = c("apim", "undirected_dsm"),
+    model_type = c("apim", "dsm"),
+    dsm_role_order = c("female", "male"),
     seed = 123
   )
 
@@ -337,7 +340,7 @@ test_that("interdep data print describes cross-sectional DIM columns", {
   expect_added_column_description(
     printed,
     ".i_{pred}_dyad_mean_gmc",
-    "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centered"
+    "dyad-mean predictor: dyad's average predictor level, grand-mean centered"
   )
   expect_true(any(grepl(".i_{pred}_within_dyad_deviation", printed, fixed = TRUE)))
   expect_added_column_description(
@@ -371,7 +374,7 @@ test_that("interdep data print describes longitudinal DIM columns", {
   expect_added_column_description(
     printed,
     ".i_{pred}_cwp_dyad_mean",
-    "DIM within-person dyad-mean predictor: shared momentary deviations in the dyad"
+    "within-person dyad-mean predictor: shared momentary deviations in the dyad"
   )
   expect_true(any(grepl(".i_{pred}_cwp_within_dyad_deviation", printed, fixed = TRUE)))
   expect_added_column_description(
@@ -383,7 +386,7 @@ test_that("interdep data print describes longitudinal DIM columns", {
   expect_added_column_description(
     printed,
     ".i_{pred}_cbp_dyad_mean",
-    "DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered"
+    "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered"
   )
   expect_true(any(grepl(".i_{pred}_cbp_within_dyad_deviation", printed, fixed = TRUE)))
   expect_added_column_description(
@@ -393,10 +396,11 @@ test_that("interdep data print describes longitudinal DIM columns", {
   )
 })
 
-test_that("interdep data print describes longitudinal undirected DSM predictors", {
+test_that("interdep data print describes longitudinal DSM predictors", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
+    role = rep(c("female", "male"), 4),
     time = c(1, 1, 2, 2, 1, 1, 2, 2),
     x = c(1, 2, 3, 4, 5, 6, 7, 8),
     y = c(2, 3, 4, 5, 6, 7, 8, 9)
@@ -406,9 +410,11 @@ test_that("interdep data print describes longitudinal undirected DSM predictors"
     data,
     group = dyad_id,
     member = person_id,
+    role = role,
     time = time,
     predictors = x,
-    model_type = "undirected_dsm",
+    model_type = "dsm",
+    dsm_role_order = c("female", "male"),
     seed = 123
   )
 
@@ -416,8 +422,13 @@ test_that("interdep data print describes longitudinal undirected DSM predictors"
 
   expect_true(any(grepl(".i_{pred}_cwp", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cbp", printed, fixed = TRUE)))
+  expect_true(any(grepl("DSM direction: female - male", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_dsm_role_contrast", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_cwp_dyad_difference", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_cbp_dyad_difference", printed, fixed = TRUE)))
+  expect_false(any(grepl("within_dyad_deviation", printed, fixed = TRUE)))
 })
 
 test_that("interdep data print combines APIM and DIM column descriptions", {
@@ -444,10 +455,11 @@ test_that("interdep data print combines APIM and DIM column descriptions", {
   expect_true(any(grepl(".i_{pred}_within_dyad_deviation", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print combines APIM and DSM-style predictors", {
+test_that("interdep data print combines APIM and DSM predictors", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
+    role = c("female", "male", "female", "male"),
     x = c(1, 2, 3, 4),
     y = c(5, 6, 7, 8)
   )
@@ -456,8 +468,10 @@ test_that("interdep data print combines APIM and DSM-style predictors", {
     data,
     group = dyad_id,
     member = person_id,
+    role = role,
     predictors = x,
-    model_type = c("apim", "undirected_dsm"),
+    model_type = c("apim", "dsm"),
+    dsm_role_order = c("female", "male"),
     seed = 123
   )
 
@@ -470,7 +484,7 @@ test_that("interdep data print combines APIM and DSM-style predictors", {
     "APIM actor predictor: actor's original predictor values"
   )
   expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_within_dyad_deviation", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_dyad_difference", printed, fixed = TRUE)))
 })
 
 test_that("interdep data print describes dropped dyads with missing role information", {

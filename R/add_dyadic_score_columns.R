@@ -6,6 +6,9 @@
 #' order recorded in `attr(data, "interdep")$dsm_role_order`. The supported DSM
 #' structure contains one distinguishable dyad composition; exchangeable dyads
 #' and multiple compositions are not supported.
+#' Constructed predictor columns are recorded in
+#' `attr(data, "interdep")$dsm_predictors`, and the contrast column name is
+#' recorded in `attr(data, "interdep")$dsm_role_contrast_column`.
 #'
 #' @param data An `interdep_data` object returned by [prepare_interdep_data()].
 #'
@@ -21,29 +24,57 @@ add_dyadic_score_columns <- function(data) {
   validate_dsm_compatibility(data)
 
   meta_data <- attr(data, "interdep")
-
-  group <- meta_data$group
-  member <- meta_data$member
-  has_time <- meta_data$longitudinal
-  time <- meta_data$time
-
-  predictors <- meta_data$predictors
-  model_type <- meta_data$model_type
   dsm_role_order <- meta_data$dsm_role_order
+  role <- meta_data$role
 
-  out <- data
+  data[[interdep_dsm_role_contrast_col]] <- ifelse(
+    as.character(data[[role]]) == dsm_role_order[[1]],
+    0.5,
+    -0.5
+  )
 
-  if (!"dim" %in% model_type) {
-    out <- add_dyad_individual_columns(data)
+  # Calling the same function the DIM uses
+  decomposition <- construct_dyad_predictor_decompositions(data)
+
+  out <- decomposition$data
+  difference_cols <- vapply(
+    seq_len(nrow(decomposition$predictors)),
+    function(i) {
+      predictor <- decomposition$predictors$predictor[[i]]
+      component <- decomposition$predictors$component[[i]]
+      source_col <- decomposition$predictors$source_column[[i]]
+
+      column_stem <- make_dyad_predictor_column_stem(
+        predictor = predictor,
+        component = component,
+        source_col = source_col
+      )
+      paste0(column_stem, "_dyad_difference")
+    },
+    character(1)
+  )
+
+  dsm_predictors <- decomposition$predictors |>
+    dplyr::mutate(difference_column = difference_cols, .after = "mean_column") |>
+    dplyr::select(-"deviation_column")
+
+  for (i in seq_len(nrow(decomposition$predictors))) {
+    deviation_col <- decomposition$predictors$deviation_column[[i]]
+    difference_col <- dsm_predictors$difference_column[[i]]
+
+    out[[difference_col]] <-
+      out[[deviation_col]] / out[[interdep_dsm_role_contrast_col]]
   }
 
-  # . . . .
-
-  if (!"dim" %in% model_type) {
-    out[[dim_only_diff_cols]] <- NULL
+  deviation_cols <- unique(decomposition$predictors$deviation_column)
+  if (length(deviation_cols) > 0) {
+    out[deviation_cols] <- NULL
   }
 
-  data
+  attr(out, "interdep")$dsm_predictors <- dsm_predictors
+  attr(out, "interdep")$dsm_role_contrast_column <- interdep_dsm_role_contrast_col
+
+  out
 }
 
 # setup_add_dyadic_score_debug()

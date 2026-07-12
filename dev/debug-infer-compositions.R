@@ -12,7 +12,9 @@
 #   setup_center_debug()
 #   setup_add_actor_partner_debug()
 #   setup_add_dyad_individual_debug()
-#   setup_add_undirected_dyadic_score_debug()
+#   setup_add_dyadic_score_debug()
+#   debugonce(add_dyadic_score_columns)
+#   add_dyadic_score_columns(data)
 #
 # Each helper assigns `data` and the main local variables used inside the
 # corresponding internal function to the global environment. This makes it easy
@@ -29,7 +31,7 @@ load_interdep_debug_internals <- function() {
   source("R/validate-model-compatibility.R")
   source("R/add_actor_partner_columns.R")
   source("R/add_dyad_individual_columns.R")
-  source("R/add_undirected_dyadic_score_columns.R")
+  source("R/add_dyadic_score_columns.R")
 
   invisible(TRUE)
 }
@@ -368,6 +370,43 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
     mean_col = mean_col,
     deviation_col = deviation_col,
     dyad_decomposition_level = dyad_decomposition_level
+  )
+
+  invisible(data)
+}
+
+
+setup_add_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
+                                         dsm_role_order = c("female", "male")) {
+  load_interdep_debug_internals()
+
+  data <- validate_interdep_data(
+    load_debug_ild_data(dataset),
+    group = coupleID,
+    member = personID,
+    role = gender,
+    time = diaryday,
+    predictors = provided_support,
+    model_type = "dsm",
+    dsm_role_order = dsm_role_order
+  )
+  data <- infer_dyad_compositions(
+    data,
+    seed = seed,
+    include_compositions = "female-male"
+  )
+  validate_dsm_compatibility(data)
+  data <- center_predictors(data)
+
+  meta_data <- attr(data, "interdep")
+  dsm_role_order <- meta_data$dsm_role_order
+  role <- meta_data$role
+
+  assign_debug_vars(
+    data = data,
+    meta_data = meta_data,
+    dsm_role_order = dsm_role_order,
+    role = role
   )
 
   invisible(data)

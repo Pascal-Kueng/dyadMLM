@@ -111,7 +111,8 @@ numeric \verb{.i_diff_*} contrast columns coded \code{-1} and \code{1} for the t
 of matching exchangeable dyads and \code{0} otherwise, and an \code{interdep} attribute
 containing structural metadata, \code{dyad_compositions}, and predictor metadata
 such as \code{temporal_predictor_decompositions}, \code{apim_predictors}, and
-\code{dim_predictors}, as well as \code{dsm_role_order} when applicable.
+\code{dim_predictors}, as well as \code{dsm_predictors} and \code{dsm_role_order} when
+applicable.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata
