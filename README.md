@@ -20,21 +20,15 @@ as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model
 (DIM), and undirected Dyadic Score Model (DSM). Current DIM and
 undirected DSM helpers require one exchangeable dyad composition.
 
-Start with the [Getting
-Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html)
-vignette for the main data-preparation workflow. The [documentation
-site](https://pascal-kueng.github.io/interdep/) also includes the
-[function
-reference](https://pascal-kueng.github.io/interdep/reference/index.html).
-The current vignette structure is:
+Start with the vignettes, or scroll down for a quick-start.
 
 | Vignette | Focus |
 |----|----|
 | [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
 | [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable, exchangeable, generalized, and intensive longitudinal dyads |
 | [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction and APIM-DIM equivalence for exchangeable dyads |
-| [Undirected Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html) | Undirected DSM outcome and predictor construction |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction and formulas and interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
+| [Undirected Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html) | Undirected DSM outcome and predictor construction and formulas |
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and
@@ -94,7 +88,7 @@ print(prepared_data)
 #> #
 #> # A tibble: 190 × 11
 #>    personID coupleID gender communication satisfaction .i_composition
-#>       <int>    <int> <fct>          <dbl>        <dbl> <fct>
+#>       <int>    <int> <fct>          <dbl>        <dbl> <fct>         
 #>  1        1        1 female          4.79         4.37 female_x_male 
 #>  2        2        1 male            3.80         2.34 female_x_male 
 #>  3        3        2 female          2.91         2.44 female_x_male 
