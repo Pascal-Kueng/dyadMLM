@@ -239,16 +239,17 @@ print(cross_exchangeable_data, n = 4)
 #> 4        4        2 male            6.51         6.08 assumed_exchangeable
 #> # ℹ 186 more rows
 #> # ℹ 3 more variables: .i_composition_role <fct>,
-#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_arbitrary <dbl>
+#> #   .i_is_assumed_exchangeable <dbl>,
+#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>
 ```
 
-The generated `.i_diff_arbitrary` contrast assigns `-1` and `1` to the
-two members of each exchangeable dyad. Its direction is arbitrary, and
-`seed` makes the assignment reproducible. When role compositions are
-available, each exchangeable composition receives its own contrast, such
-as `.i_diff_female_x_female_arbitrary`, which is `0` for all other
-compositions. We use a fixed seed in the examples below for consistent
-results.
+The generated `.i_diff_assumed_exchangeable_arbitrary` contrast assigns
+`-1` and `1` to the two members of each exchangeable dyad. Its direction
+is arbitrary, and `seed` makes the assignment reproducible. When role
+compositions are available, each exchangeable composition receives its
+own contrast, such as `.i_diff_female_x_female_arbitrary`, which is `0`
+for all other compositions. We use a fixed seed in the examples below
+for consistent results.
 
 Alternatively, for more control, we can explicitly set dyad types to
 exchangeable:
@@ -350,11 +351,11 @@ print(cross_dim_dsm_data, n = 4)
 #> 4        4        2 male            6.51         6.08 assumed_exchangeable
 #> # ℹ 186 more rows
 #> # ℹ 7 more variables: .i_composition_role <fct>,
-#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_arbitrary <dbl>,
+#> #   .i_is_assumed_exchangeable <dbl>,
+#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_communication_raw_dyad_mean_gmc <dbl>,
 #> #   .i_communication_raw_within_dyad_deviation <dbl>,
-#> #   .i_satisfaction_raw_dyad_mean <dbl>,
-#> #   .i_satisfaction_raw_within_dyad_deviation <dbl>
+#> #   .i_satisfaction_raw_dyad_mean <dbl>, …
 ```
 
 ## Incomplete dyads and missing roles

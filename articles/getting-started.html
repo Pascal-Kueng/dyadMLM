@@ -388,15 +388,16 @@ exchangeable, omit the <code>role</code> argument:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>The generated <code>.i_diff_arbitrary</code> contrast assigns
-<code>-1</code> and <code>1</code> to the two members of each
-exchangeable dyad. Its direction is arbitrary, and <code>seed</code>
-makes the assignment reproducible. When role compositions are available,
-each exchangeable composition receives its own contrast, such as
-<code>.i_diff_female_x_female_arbitrary</code>, which is <code>0</code>
-for all other compositions. We use a fixed seed in the examples below
-for consistent results.</p>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The generated <code>.i_diff_assumed_exchangeable_arbitrary</code>
+contrast assigns <code>-1</code> and <code>1</code> to the two members
+of each exchangeable dyad. Its direction is arbitrary, and
+<code>seed</code> makes the assignment reproducible. When role
+compositions are available, each exchangeable composition receives its
+own contrast, such as <code>.i_diff_female_x_female_arbitrary</code>,
+which is <code>0</code> for all other compositions. We use a fixed seed
+in the examples below for consistent results.</p>
 <p>Alternatively, for more control, we can explicitly set dyad types to
 exchangeable:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -492,11 +493,11 @@ outcome.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_within_dyad_deviation &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_dyad_mean &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="incomplete-dyads-and-missing-roles">Incomplete dyads and missing roles<a class="anchor" aria-label="anchor" href="#incomplete-dyads-and-missing-roles"></a>

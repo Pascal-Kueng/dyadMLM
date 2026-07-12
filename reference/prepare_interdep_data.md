@@ -322,7 +322,7 @@ print(ild_prepared)
 #> 7       2         1     2     4 assumed_exchangeable assumed_exchangeable
 #> 8       2         2     2     7 assumed_exchangeable assumed_exchangeable
 #> # ℹ 8 more variables: .i_is_assumed_exchangeable <dbl>,
-#> #   .i_diff_arbitrary <dbl>, .i_x_cwp <dbl>, .i_x_cbp <dbl>,
-#> #   .i_x_cwp_actor <dbl>, .i_x_cwp_partner <dbl>, .i_x_cbp_actor <dbl>,
-#> #   .i_x_cbp_partner <dbl>
+#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>, .i_x_cwp <dbl>,
+#> #   .i_x_cbp <dbl>, .i_x_cwp_actor <dbl>, .i_x_cwp_partner <dbl>,
+#> #   .i_x_cbp_actor <dbl>, .i_x_cbp_partner <dbl>
 ```

@@ -140,7 +140,8 @@ exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_actor &lt;dbl&gt;, .i_communication_raw_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
@@ -290,9 +291,10 @@ partners.</li>
 partner effects. The same random-effects structure can therefore be used
 for both fixed-effect parameterizations: a dyad-level intercept and a
 dyad-level difference contrast indexed by
-<code>.i_diff_arbitrary</code>. In <code>glmmTMB</code>, with
-<code>dispformula = ~ 0</code>, these random effects represent the two
-members’ Gaussian residual variance and covariance.</p>
+<code>.i_diff_assumed_exchangeable_arbitrary</code>. In
+<code>glmmTMB</code>, with <code>dispformula = ~ 0</code>, these random
+effects represent the two members’ Gaussian residual variance and
+covariance.</p>
 <p>The intercept and difference contrast are specified as separate
 random-effects terms, which constrains their correlation to zero. This
 preserves exchangeability: swapping the arbitrary member labels leaves
@@ -315,7 +317,7 @@ distribution depend on the arbitrary labeling.</p>
 <span></span>
 <span>    <span class="co"># Residual Gaussian variance-covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">cross_exchangeable_data</span></span>
@@ -325,7 +327,8 @@ distribution depend on the arbitrary labeling.</p>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_raw_dyad_mean_gmc + .i_communication_raw_within_dyad_deviation +  </span></span>
-<span><span class="co">#&gt;     (1 | coupleID) + (0 + .i_diff_arbitrary | coupleID)</span></span>
+<span><span class="co">#&gt;     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: cross_exchangeable_data</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -335,9 +338,9 @@ distribution depend on the arbitrary labeling.</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups     Name              Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID   (Intercept)       0.6346   0.7966  </span></span>
-<span><span class="co">#&gt;  coupleID.1 .i_diff_arbitrary 1.1532   1.0739  </span></span>
+<span><span class="co">#&gt;  Groups     Name                                   Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID   (Intercept)                            0.6346   0.7966  </span></span>
+<span><span class="co">#&gt;  coupleID.1 .i_diff_assumed_exchangeable_arbitrary 1.1532   1.0739  </span></span>
 <span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
@@ -379,7 +382,7 @@ vignette</a>.</p>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_communication_raw_actor</span> <span class="op">+</span> <span class="va">.i_communication_raw_partner</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">cross_exchangeable_data</span></span>
@@ -1123,11 +1126,11 @@ construction.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female      4.87             4.69 assumed_exchang…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, .i_provided_support_cbp_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -1146,11 +1149,11 @@ construction.</p>
 <span></span>
 <span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Residual (same-day) exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -1163,8 +1166,9 @@ construction.</p>
 <span><span class="co">#&gt; closeness ~ 1 + diaryday + .i_provided_support_cwp_dyad_mean +  </span></span>
 <span><span class="co">#&gt;     .i_provided_support_cwp_within_dyad_deviation + .i_provided_support_cbp_dyad_mean +  </span></span>
 <span><span class="co">#&gt;     .i_provided_support_cbp_within_dyad_deviation + (1 | coupleID) +  </span></span>
-<span><span class="co">#&gt;     (0 + .i_diff_arbitrary | coupleID) + (1 | coupleID:diaryday) +  </span></span>
-<span><span class="co">#&gt;     (0 + .i_diff_arbitrary | coupleID:diaryday)</span></span>
+<span><span class="co">#&gt;     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +  </span></span>
+<span><span class="co">#&gt;     (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID:diaryday)</span></span>
 <span><span class="co">#&gt; Dispersion:                 ~0</span></span>
 <span><span class="co">#&gt; Data: ild_exchangeable_data</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1174,11 +1178,11 @@ construction.</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups              Name              Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID            (Intercept)       0.5254   0.7248  </span></span>
-<span><span class="co">#&gt;  coupleID.1          .i_diff_arbitrary 0.6416   0.8010  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)       0.3185   0.5643  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .i_diff_arbitrary 0.5184   0.7200  </span></span>
+<span><span class="co">#&gt;  Groups              Name                                   Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID            (Intercept)                            0.5254   0.7248  </span></span>
+<span><span class="co">#&gt;  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.6416   0.8010  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                            0.3185   0.5643  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5184   0.7200  </span></span>
 <span><span class="co">#&gt; Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
@@ -1233,11 +1237,11 @@ levels:</p>
 <span>    <span class="va">.i_provided_support_cbp_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Residual (same-day) exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -1293,11 +1297,11 @@ level and a DIM parameterization on the other. For example:</p>
 <span>    <span class="va">.i_provided_support_cbp_within_dyad_deviation</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -1367,14 +1371,14 @@ preserve exchangeability.</p>
 <span>         <span class="va">.i_provided_support_cwp_partner</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
-<span>         <span class="va">.i_diff_arbitrary</span> <span class="op">+</span></span>
-<span>         <span class="va">.i_diff_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_actor</span> <span class="op">+</span></span>
-<span>         <span class="va">.i_diff_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_partner</span></span>
+<span>         <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_diff_assumed_exchangeable_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_actor</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_diff_assumed_exchangeable_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_partner</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -1403,14 +1407,14 @@ preserve exchangeability.</p>
 <span>       <span class="va">.i_provided_support_cwp_within_dyad_deviation</span></span>
 <span>     <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
-<span>       <span class="va">.i_diff_arbitrary</span> <span class="op">+</span></span>
-<span>       <span class="va">.i_diff_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_dyad_mean</span> <span class="op">+</span></span>
-<span>       <span class="va">.i_diff_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_within_dyad_deviation</span></span>
+<span>       <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">+</span></span>
+<span>       <span class="va">.i_diff_assumed_exchangeable_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_dyad_mean</span> <span class="op">+</span></span>
+<span>       <span class="va">.i_diff_assumed_exchangeable_arbitrary</span><span class="op">:</span><span class="va">.i_provided_support_cwp_within_dyad_deviation</span></span>
 <span>     <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>

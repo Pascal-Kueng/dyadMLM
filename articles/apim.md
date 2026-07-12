@@ -207,7 +207,8 @@ print(tweedie_exchangeable_data)
 #> 10       10        5 male       1.77               20.1  assumed_exchangeable
 #> # ℹ 230 more rows
 #> # ℹ 5 more variables: .i_composition_role <fct>,
-#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_arbitrary <dbl>,
+#> #   .i_is_assumed_exchangeable <dbl>,
+#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
 summary(tweedie_exchangeable_data)
 #>     personID         coupleID         gender      motivation       
@@ -226,22 +227,22 @@ summary(tweedie_exchangeable_data)
 #>  3rd Qu.:15.147                                                             
 #>  Max.   :85.043                                                             
 #>  NAs    :4                                                                  
-#>  .i_is_assumed_exchangeable .i_diff_arbitrary .i_motivation_raw_actor
-#>  Min.   :1                  Min.   :-1        Min.   :-2.320532      
-#>  1st Qu.:1                  1st Qu.:-1        1st Qu.:-0.580126      
-#>  Median :1                  Median : 0        Median :-0.032795      
-#>  Mean   :1                  Mean   : 0        Mean   :-0.008869      
-#>  3rd Qu.:1                  3rd Qu.: 1        3rd Qu.: 0.537262      
-#>  Max.   :1                  Max.   : 1        Max.   : 2.423337      
-#>                                               NAs    :9              
-#>  .i_motivation_raw_partner
-#>  Min.   :-2.320532        
-#>  1st Qu.:-0.580126        
-#>  Median :-0.032795        
-#>  Mean   :-0.008869        
-#>  3rd Qu.: 0.537262        
-#>  Max.   : 2.423337        
-#>  NAs    :9
+#>  .i_is_assumed_exchangeable .i_diff_assumed_exchangeable_arbitrary
+#>  Min.   :1                  Min.   :-1                            
+#>  1st Qu.:1                  1st Qu.:-1                            
+#>  Median :1                  Median : 0                            
+#>  Mean   :1                  Mean   : 0                            
+#>  3rd Qu.:1                  3rd Qu.: 1                            
+#>  Max.   :1                  Max.   : 1                            
+#>                                                                   
+#>  .i_motivation_raw_actor .i_motivation_raw_partner
+#>  Min.   :-2.320532       Min.   :-2.320532        
+#>  1st Qu.:-0.580126       1st Qu.:-0.580126        
+#>  Median :-0.032795       Median :-0.032795        
+#>  Mean   :-0.008869       Mean   :-0.008869        
+#>  3rd Qu.: 0.537262       3rd Qu.: 0.537262        
+#>  Max.   : 2.423337       Max.   : 2.423337        
+#>  NAs    :9               NAs    :9
 ```
 
 ``` r
@@ -259,7 +260,7 @@ tweedie_exchangeable_model <- glmmTMB(
     .i_motivation_raw_partner +
     
     # exchangeable latent dyad block on the log-mean scale
-    (1 | coupleID) + (0 + .i_diff_arbitrary | coupleID)
+    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
     
   # estimate a single pooled Tweedie dispersion parameter
   , dispformula = ~ 1
@@ -640,10 +641,11 @@ print(ild_tweedie_exchangeable_data)
 #> 10        1        1        9 female              0                3.72
 #> # ℹ 1,110 more rows
 #> # ℹ 10 more variables: .i_composition <fct>, .i_composition_role <fct>,
-#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_arbitrary <dbl>,
+#> #   .i_is_assumed_exchangeable <dbl>,
+#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
-#> #   .i_provided_support_cbp_actor <dbl>, .i_provided_support_cbp_partner <dbl>
+#> #   .i_provided_support_cbp_actor <dbl>, …
 summary(ild_tweedie_exchangeable_data)
 #>     personID        coupleID        diaryday       gender    physical_activity
 #>  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  
@@ -661,22 +663,22 @@ summary(ild_tweedie_exchangeable_data)
 #>  3rd Qu.:5.821                                                             
 #>  Max.   :8.271                                                             
 #>  NAs    :44                                                                
-#>  .i_is_assumed_exchangeable .i_diff_arbitrary .i_provided_support_cwp
-#>  Min.   :1                  Min.   :-1        Min.   :-2.66098       
-#>  1st Qu.:1                  1st Qu.:-1        1st Qu.:-0.50775       
-#>  Median :1                  Median : 0        Median :-0.03176       
-#>  Mean   :1                  Mean   : 0        Mean   : 0.00000       
-#>  3rd Qu.:1                  3rd Qu.: 1        3rd Qu.: 0.52731       
-#>  Max.   :1                  Max.   : 1        Max.   : 2.42077       
-#>                                               NAs    :44             
-#>  .i_provided_support_cbp .i_provided_support_cwp_actor
-#>  Min.   :-1.4073         Min.   :-2.66098             
-#>  1st Qu.:-0.4913         1st Qu.:-0.50775             
-#>  Median :-0.0164         Median :-0.03176             
-#>  Mean   : 0.0000         Mean   : 0.00000             
-#>  3rd Qu.: 0.4968         3rd Qu.: 0.52731             
-#>  Max.   : 1.6645         Max.   : 2.42077             
-#>                          NAs    :44                   
+#>  .i_is_assumed_exchangeable .i_diff_assumed_exchangeable_arbitrary
+#>  Min.   :1                  Min.   :-1                            
+#>  1st Qu.:1                  1st Qu.:-1                            
+#>  Median :1                  Median : 0                            
+#>  Mean   :1                  Mean   : 0                            
+#>  3rd Qu.:1                  3rd Qu.: 1                            
+#>  Max.   :1                  Max.   : 1                            
+#>                                                                   
+#>  .i_provided_support_cwp .i_provided_support_cbp .i_provided_support_cwp_actor
+#>  Min.   :-2.66098        Min.   :-1.4073         Min.   :-2.66098             
+#>  1st Qu.:-0.50775        1st Qu.:-0.4913         1st Qu.:-0.50775             
+#>  Median :-0.03176        Median :-0.0164         Median :-0.03176             
+#>  Mean   : 0.00000        Mean   : 0.0000         Mean   : 0.00000             
+#>  3rd Qu.: 0.52731        3rd Qu.: 0.4968         3rd Qu.: 0.52731             
+#>  Max.   : 2.42077        Max.   : 1.6645         Max.   : 2.42077             
+#>  NAs    :44                                      NAs    :44                   
 #>  .i_provided_support_cwp_partner .i_provided_support_cbp_actor
 #>  Min.   :-2.66098                Min.   :-1.4073              
 #>  1st Qu.:-0.50775                1st Qu.:-0.4913              
@@ -719,10 +721,10 @@ ild_tweedie_exchangeable_model <- glmmTMB(
     .i_provided_support_cbp_partner +
 
     # stable exchangeable latent covariance
-    (1 | coupleID) + (0 + .i_diff_arbitrary | coupleID) +
+    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
   
     # same-day exchangeable latent covariance
-    (1 | coupleID:diaryday) + (0 + .i_diff_arbitrary | coupleID:diaryday)
+    (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   # pooled dispersion; exchangeable positions should not define dispersion differences
   , dispformula = ~ 1
