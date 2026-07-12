@@ -85,10 +85,11 @@ vignette</a>. For the exchangeable Dyad-Individual Model (DIM), see the
 <div class="section level2">
 <h2 id="preparing-dsm-data">Preparing DSM Data<a class="anchor" aria-label="anchor" href="#preparing-dsm-data"></a>
 </h2>
-<p>A DSM requires a substantively meaningful direction. We therefore
-supply the two roles in <code>dsm_role_order</code>. Here,
+<p>A DSM requires a substantively meaningful direction (similar to a
+distinguishable APIM that distinguishes by gender). We therefore supply
+the two roles in <code>dsm_role_order</code>. Here,
 <code>c("female", "male")</code> defines every difference as female
-minus male, independently of row order.</p>
+minus male.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -110,15 +111,15 @@ minus male, independently of row order.</p>
 <span><span class="co">#&gt; # female_x_male distinguishable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition             inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role        composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}          composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_dsm_role_contrast       DSM role contrast: +0.5 for the first declared</span></span>
-<span><span class="co">#&gt; #                              role and -0.5 for the second declared role</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor</span></span>
-<span><span class="co">#&gt; #                              level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_difference  DSM signed predictor difference: first declared</span></span>
-<span><span class="co">#&gt; #                              role minus second declared role</span></span>
+<span><span class="co">#&gt; #   .i_composition              inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role         composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}           composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
+<span><span class="co">#&gt; #                               role and -0.5 for the second declared role</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                               level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_diff  DSM signed predictor difference: first declared</span></span>
+<span><span class="co">#&gt; #                               role minus second declared role</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
@@ -131,17 +132,29 @@ minus male, independently of row order.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_dsm_role_contrast &lt;dbl&gt;, .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_difference &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>For predictor values <code>X_female</code> and <code>X_male</code>,
-<code>interdep</code> creates:</p>
-<pre class="text"><code>.i_communication_dyad_mean_gmc
-  = (X_female + X_male) / 2, grand-mean centered
-
-.i_communication_dyad_difference
-  = X_female - X_male
-
-.i_dsm_role_contrast
-  = +0.5 for female and -0.5 for male</code></pre>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>For predictor values
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">X_{female}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">X_{male}</annotation></semantics></math>,
+<code>interdep</code> then creates:</p>
+<ul>
+<li>
+<code>.i_communication_dyad_mean_gmc</code>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">=
+\frac{X_{female} + X_{male}}{2}</annotation></semantics></math>,
+grand-mean centered;</li>
+<li>
+<code>.i_communication_within_dyad_diff</code>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">= X_{female} - X_{male}</annotation></semantics></math>;
+and</li>
+<li>
+<code>.i_dsm_role_contrast</code>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mi>+</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">= +0.5</annotation></semantics></math>
+for female and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">-0.5</annotation></semantics></math>
+for male.</li>
+</ul>
 <p>The dyad mean and signed difference are repeated on both member rows.
 The original member-level outcome remains unchanged and is selected in
 the model formula. No outcome argument or outcome transformation is
@@ -149,31 +162,25 @@ needed.</p>
 <p>The <code>+0.5/-0.5</code> contrast is important: coefficients
 involving the contrast equal the full female-minus-male outcome
 difference. Reversing <code>dsm_role_order</code> reverses all
-directional differences and the contrast, but does not change fitted
-member outcomes.</p>
+directional differences and the contrast exactly.</p>
 </div>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dsm">Cross-Sectional Gaussian DSM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dsm"></a>
 </h2>
-<p>Let <code>XLevel</code> denote the centered predictor dyad mean,
-<code>XDiff</code> the signed predictor difference, and <code>C</code>
-the DSM role contrast. Iida et al.’s full DSM can be fitted to the
-unchanged member-level outcome using:</p>
-<pre class="text"><code><span><span class="va">outcome</span> <span class="op">~</span> <span class="va">XLevel</span> <span class="op">+</span> <span class="va">XDiff</span> <span class="op">+</span> <span class="va">C</span> <span class="op">+</span> <span class="va">XLevel</span><span class="op">:</span><span class="va">C</span> <span class="op">+</span> <span class="va">XDiff</span><span class="op">:</span><span class="va">C</span></span></code></pre>
 <p>For a cross-sectional Gaussian DSM, a correlated dyad random
 intercept and role-contrast slope represent unexplained outcome-level
 and outcome-difference variation. The ordinary member-level residual
 variance is suppressed because the three random-effect covariance
 parameters already span the three unique elements of the two-member
 residual covariance matrix.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsm_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
 <span>    <span class="va">.i_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_dyad_difference</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_within_dyad_diff</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_dyad_difference</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -181,44 +188,159 @@ residual covariance matrix.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span></span></code></pre></div>
-<p>In this example, the fixed effects have the following
-interpretations:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Intercept:</strong> the expected dyad-average satisfaction
-when the couple has the sample-average communication level and no
-female-male communication difference.</li>
-<li>
-<strong>Communication dyad mean:</strong> the difference in
-dyad-average satisfaction associated with a one-unit higher shared
-communication level, holding the communication difference constant.</li>
-<li>
-<strong>Communication difference:</strong> the difference in
-dyad-average satisfaction associated with a one-unit larger
-female-minus-male communication difference, holding the shared level
-constant.</li>
-<li>
-<strong>DSM role contrast:</strong> the expected female-minus-male
-satisfaction difference when the shared communication level is at its
-reference value and the communication difference is zero.</li>
-<li>
-<strong>Dyad mean by role contrast:</strong> the change in the
-female-minus-male satisfaction difference associated with a one-unit
-higher shared communication level.</li>
-<li>
-<strong>Communication difference by role contrast:</strong> the
-change in the female-minus-male satisfaction difference associated with
-a one-unit larger female-minus-male communication difference.</li>
-</ol>
-<p>The third and fifth coefficients are the DSM cross-paths: predictor
-difference to outcome level and predictor level to outcome difference.
-They are omitted from the reduced DSM but are needed for the full
-model.</p>
+<div class="section level3">
+<h3 id="reversing-the-coding">Reversing the coding<a class="anchor" aria-label="anchor" href="#reversing-the-coding"></a>
+</h3>
+<p>Instead of computing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">X_{female} - X_{male}</annotation></semantics></math>,
+we can reverse the direction and compute
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">X_{male} - X_{female}</annotation></semantics></math>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cross_dsm_data_inverted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_crosssectional</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
+<span>  model_type <span class="op">=</span> <span class="st">"dsm"</span>,</span>
+<span>  dsm_role_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male"</span>, <span class="st">"female"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dsm_model_inverted</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
+<span>    <span class="va">.i_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_within_dyad_diff</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">cross_dsm_data_inverted</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model_inverted</span><span class="op">)</span></span></code></pre></div>
+<p>The two models have identical fitted values and model fit. Reversing
+the role order reverses both the predictor difference and the outcome
+difference represented by the role contrast. Consequently, the
+predictor-difference main effect, role-contrast main effect, and
+dyad-mean-by-role-contrast interaction reverse sign. The
+difference-by-role-contrast interaction does not reverse because both
+variables in this product reverse. The random-effect variances also
+remain unchanged, whereas their covariance reverses sign.</p>
+</div>
+<div class="section level3">
+<h3 id="interpreting-the-dsm-paths">Interpreting the DSM paths<a class="anchor" aria-label="anchor" href="#interpreting-the-dsm-paths"></a>
+</h3>
+<p>The long-format model estimates the paths of the conventional
+score-based DSM directly. Define</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>L</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>X</mi><mi>D</mi></msub><mo>=</mo><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
+X_L = \frac{X_{female} + X_{male}}{2}, \qquad
+X_D = X_{female} - X_{male},
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mi>L</mi></msub><annotation encoding="application/x-tex">X_L</annotation></semantics></math>
+is grand-mean centered in this example. Similarly, define outcome level
+and outcome difference as</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>L</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>Y</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>Y</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>Y</mi><mi>D</mi></msub><mo>=</mo><msub><mi>Y</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>Y</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+Y_L = \frac{Y_{female} + Y_{male}}{2}, \qquad
+Y_D = Y_{female} - Y_{male}.
+</annotation></semantics></math></p>
+<p>Although <code>interdep</code> does not materialize
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mi>L</mi></msub><annotation encoding="application/x-tex">Y_L</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mi>D</mi></msub><annotation encoding="application/x-tex">Y_D</annotation></semantics></math>
+as columns, the fitted long-format model estimates their two DSM
+equations:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><msub><mi>Y</mi><mi>L</mi></msub><mo accent="true">̂</mo></mover><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>+</mo><msub><mi>a</mi><mn>11</mn></msub><msub><mi>X</mi><mi>L</mi></msub><mo>+</mo><msub><mi>a</mi><mn>12</mn></msub><msub><mi>X</mi><mi>D</mi></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\widehat{Y_L} = a_{10} + a_{11}X_L + a_{12}X_D,
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><msub><mi>Y</mi><mi>D</mi></msub><mo accent="true">̂</mo></mover><mo>=</mo><msub><mi>a</mi><mn>20</mn></msub><mo>+</mo><msub><mi>a</mi><mn>21</mn></msub><msub><mi>X</mi><mi>L</mi></msub><mo>+</mo><msub><mi>a</mi><mn>22</mn></msub><msub><mi>X</mi><mi>D</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat{Y_D} = a_{20} + a_{21}X_L + a_{22}X_D.
+</annotation></semantics></math></p>
+<p>The fixed effects map directly to these paths:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Long-format fixed effect</th>
+<th>DSM path and interpretation</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Intercept</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>10</mn></msub><annotation encoding="application/x-tex">a_{10}</annotation></semantics></math>:
+expected dyad-average satisfaction at the sample-average communication
+level and no female-male communication difference</td>
+</tr>
+<tr class="even">
+<td>Communication dyad mean</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>11</mn></msub><annotation encoding="application/x-tex">a_{11}</annotation></semantics></math>:
+predictor level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+outcome level</td>
+</tr>
+<tr class="odd">
+<td>Communication difference</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>12</mn></msub><annotation encoding="application/x-tex">a_{12}</annotation></semantics></math>:
+predictor difference
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+outcome level</td>
+</tr>
+<tr class="even">
+<td>DSM role contrast</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>20</mn></msub><annotation encoding="application/x-tex">a_{20}</annotation></semantics></math>:
+expected female-minus-male outcome difference at the predictor reference
+values</td>
+</tr>
+<tr class="odd">
+<td>Dyad mean
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+role contrast</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>21</mn></msub><annotation encoding="application/x-tex">a_{21}</annotation></semantics></math>:
+predictor level
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+outcome difference</td>
+</tr>
+<tr class="even">
+<td>Communication difference
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+role contrast</td>
+<td>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>22</mn></msub><annotation encoding="application/x-tex">a_{22}</annotation></semantics></math>:
+predictor difference
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math>
+outcome difference</td>
+</tr>
+</tbody>
+</table>
+<p>Thus, for example,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>12</mn></msub><annotation encoding="application/x-tex">a_{12}</annotation></semantics></math>
+is the change in dyad-average satisfaction associated with a one-unit
+larger female-minus-male communication difference, holding communication
+level constant. In contrast,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>22</mn></msub><annotation encoding="application/x-tex">a_{22}</annotation></semantics></math>
+is the change in the female-minus-male satisfaction difference
+associated with that same one-unit larger communication difference,
+holding communication level constant. The
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>12</mn></msub><annotation encoding="application/x-tex">a_{12}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>21</mn></msub><annotation encoding="application/x-tex">a_{21}</annotation></semantics></math>
+coefficients are the DSM cross-paths. They are omitted from the reduced
+DSM but are needed for the full model.</p>
 <p>The random intercept variance is unexplained variation in outcome
 level, and the random role-contrast slope variance is unexplained
 variation in the full directional outcome difference. Their covariance
 indicates whether unexplained outcome level and unexplained outcome
 difference are associated.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="relationship-to-the-apim-and-dim">Relationship to the APIM and DIM<a class="anchor" aria-label="anchor" href="#relationship-to-the-apim-and-dim"></a>

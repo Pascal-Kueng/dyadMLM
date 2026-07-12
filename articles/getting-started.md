@@ -336,17 +336,16 @@ print(cross_dim_data, n = 4)
 #> # assumed_exchangeable exchangeable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition                   inferred dyad composition
-#> #   .i_composition_role              composition-specific member role
-#> #   .i_is_{comp-role}                composition-role indicator columns
-#> #   .i_diff_{comp}                   composition-specific sum-diff contrasts
-#> #                                    with arbitrary direction; 0 for
-#> #                                    distinguishable dyads or other
-#> #                                    exchangeable compositions
-#> #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average
-#> #                                    predictor level, grand-mean centered
-#> #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:
-#> #                                    person's difference from the dyad average
+#> #   .i_composition             inferred dyad composition
+#> #   .i_composition_role        composition-specific member role
+#> #   .i_is_{comp-role}          composition-role indicator columns
+#> #   .i_diff_{comp}             composition-specific sum-diff contrasts with
+#> #                              arbitrary direction; 0 for distinguishable dyads
+#> #                              or other exchangeable compositions
+#> #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor
+#> #                              level, grand-mean centered
+#> #   .i_{pred}_within_dyad_dev  DIM within-dyad predictor deviation: person's
+#> #                              difference from the dyad average
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .i_composition      
@@ -360,7 +359,7 @@ print(cross_dim_data, n = 4)
 #> #   .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_communication_dyad_mean_gmc <dbl>,
-#> #   .i_communication_within_dyad_deviation <dbl>
+#> #   .i_communication_within_dyad_dev <dbl>
 ```
 
 For distinguishable dyads, DSM preparation additionally requires a
@@ -391,15 +390,15 @@ print(cross_dsm_data, n = 4)
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition             inferred dyad composition
-#> #   .i_composition_role        composition-specific member role
-#> #   .i_is_{comp-role}          composition-role indicator columns
-#> #   .i_dsm_role_contrast       DSM role contrast: +0.5 for the first declared
-#> #                              role and -0.5 for the second declared role
-#> #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor
-#> #                              level, grand-mean centered
-#> #   .i_{pred}_dyad_difference  DSM signed predictor difference: first declared
-#> #                              role minus second declared role
+#> #   .i_composition              inferred dyad composition
+#> #   .i_composition_role         composition-specific member role
+#> #   .i_is_{comp-role}           composition-role indicator columns
+#> #   .i_dsm_role_contrast        DSM role contrast: +0.5 for the first declared
+#> #                               role and -0.5 for the second declared role
+#> #   .i_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
+#> #                               level, grand-mean centered
+#> #   .i_{pred}_within_dyad_diff  DSM signed predictor difference: first declared
+#> #                               role minus second declared role
 #> #
 #> # A tibble: 190 × 12
 #>   personID coupleID gender communication satisfaction .i_composition
@@ -412,7 +411,7 @@ print(cross_dsm_data, n = 4)
 #> # ℹ 6 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_dsm_role_contrast <dbl>, .i_communication_dyad_mean_gmc <dbl>,
-#> #   .i_communication_dyad_difference <dbl>
+#> #   .i_communication_within_dyad_diff <dbl>
 ```
 
 ## Incomplete dyads and missing roles

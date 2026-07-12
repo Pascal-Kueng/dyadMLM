@@ -477,17 +477,16 @@ single exchangeable composition.</p>
 <span><span class="co">#&gt; # assumed_exchangeable exchangeable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition                   inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role              composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}                composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}                   composition-specific sum-diff contrasts</span></span>
-<span><span class="co">#&gt; #                                    with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                    distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                    exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          dyad-mean predictor: dyad's average</span></span>
-<span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
-<span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
+<span><span class="co">#&gt; #   .i_composition             inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role        composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}          composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_diff_{comp}             composition-specific sum-diff contrasts with</span></span>
+<span><span class="co">#&gt; #                              arbitrary direction; 0 for distinguishable dyads</span></span>
+<span><span class="co">#&gt; #                              or other exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                              level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_dev  DIM within-dyad predictor deviation: person's</span></span>
+<span><span class="co">#&gt; #                              difference from the dyad average</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 11</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition      </span></span>
@@ -501,7 +500,7 @@ single exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For distinguishable dyads, DSM preparation additionally requires a
 stable role variable and an explicit role order. The role order defines
 the direction of all DSM predictor differences and the DSM role
@@ -528,15 +527,15 @@ fitted-model formula.</p>
 <span><span class="co">#&gt; # female_x_male distinguishable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition             inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role        composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}          composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_dsm_role_contrast       DSM role contrast: +0.5 for the first declared</span></span>
-<span><span class="co">#&gt; #                              role and -0.5 for the second declared role</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor</span></span>
-<span><span class="co">#&gt; #                              level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_difference  DSM signed predictor difference: first declared</span></span>
-<span><span class="co">#&gt; #                              role minus second declared role</span></span>
+<span><span class="co">#&gt; #   .i_composition              inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role         composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}           composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
+<span><span class="co">#&gt; #                               role and -0.5 for the second declared role</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                               level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_diff  DSM signed predictor difference: first declared</span></span>
+<span><span class="co">#&gt; #                               role minus second declared role</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
@@ -549,7 +548,7 @@ fitted-model formula.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_dsm_role_contrast &lt;dbl&gt;, .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_difference &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="incomplete-dyads-and-missing-roles">Incomplete dyads and missing roles<a class="anchor" aria-label="anchor" href="#incomplete-dyads-and-missing-roles"></a>

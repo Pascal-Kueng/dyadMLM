@@ -25,9 +25,10 @@ vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
 
 ## Preparing DSM Data
 
-A DSM requires a substantively meaningful direction. We therefore supply
+A DSM requires a substantively meaningful direction (similar to a
+distinguishable APIM that distinguishes by gender). We therefore supply
 the two roles in `dsm_role_order`. Here, `c("female", "male")` defines
-every difference as female minus male, independently of row order.
+every difference as female minus male.
 
 ``` r
 
@@ -51,15 +52,15 @@ print(cross_dsm_data, n = 4)
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition             inferred dyad composition
-#> #   .i_composition_role        composition-specific member role
-#> #   .i_is_{comp-role}          composition-role indicator columns
-#> #   .i_dsm_role_contrast       DSM role contrast: +0.5 for the first declared
-#> #                              role and -0.5 for the second declared role
-#> #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor
-#> #                              level, grand-mean centered
-#> #   .i_{pred}_dyad_difference  DSM signed predictor difference: first declared
-#> #                              role minus second declared role
+#> #   .i_composition              inferred dyad composition
+#> #   .i_composition_role         composition-specific member role
+#> #   .i_is_{comp-role}           composition-role indicator columns
+#> #   .i_dsm_role_contrast        DSM role contrast: +0.5 for the first declared
+#> #                               role and -0.5 for the second declared role
+#> #   .i_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
+#> #                               level, grand-mean centered
+#> #   .i_{pred}_within_dyad_diff  DSM signed predictor difference: first declared
+#> #                               role minus second declared role
 #> #
 #> # A tibble: 190 × 12
 #>   personID coupleID gender communication satisfaction .i_composition
@@ -72,21 +73,16 @@ print(cross_dsm_data, n = 4)
 #> # ℹ 6 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_dsm_role_contrast <dbl>, .i_communication_dyad_mean_gmc <dbl>,
-#> #   .i_communication_dyad_difference <dbl>
+#> #   .i_communication_within_dyad_diff <dbl>
 ```
 
-For predictor values `X_female` and `X_male`, `interdep` creates:
+For predictor values $`X_{female}`$ and $`X_{male}`$, `interdep` then
+creates:
 
-``` text
-.i_communication_dyad_mean_gmc
-  = (X_female + X_male) / 2, grand-mean centered
-
-.i_communication_dyad_difference
-  = X_female - X_male
-
-.i_dsm_role_contrast
-  = +0.5 for female and -0.5 for male
-```
+- `.i_communication_dyad_mean_gmc` $`=
+  \frac{X_{female} + X_{male}}{2}`$, grand-mean centered;
+- `.i_communication_within_dyad_diff` $`= X_{female} - X_{male}`$; and
+- `.i_dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
 
 The dyad mean and signed difference are repeated on both member rows.
 The original member-level outcome remains unchanged and is selected in
@@ -95,18 +91,10 @@ needed.
 
 The `+0.5/-0.5` contrast is important: coefficients involving the
 contrast equal the full female-minus-male outcome difference. Reversing
-`dsm_role_order` reverses all directional differences and the contrast,
-but does not change fitted member outcomes.
+`dsm_role_order` reverses all directional differences and the contrast
+exactly.
 
 ## Cross-Sectional Gaussian DSM
-
-Let `XLevel` denote the centered predictor dyad mean, `XDiff` the signed
-predictor difference, and `C` the DSM role contrast. Iida et al.’s full
-DSM can be fitted to the unchanged member-level outcome using:
-
-``` text
-outcome ~ XLevel + XDiff + C + XLevel:C + XDiff:C
-```
 
 For a cross-sectional Gaussian DSM, a correlated dyad random intercept
 and role-contrast slope represent unexplained outcome-level and
@@ -120,10 +108,10 @@ residual covariance matrix.
 dsm_model <- glmmTMB::glmmTMB(
   satisfaction ~
     .i_communication_dyad_mean_gmc +
-    .i_communication_dyad_difference +
+    .i_communication_within_dyad_diff +
     .i_dsm_role_contrast +
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
-    .i_communication_dyad_difference:.i_dsm_role_contrast +
+    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
     (1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -133,30 +121,99 @@ dsm_model <- glmmTMB::glmmTMB(
 summary(dsm_model)
 ```
 
-In this example, the fixed effects have the following interpretations:
+### Reversing the coding
 
-1.  **Intercept:** the expected dyad-average satisfaction when the
-    couple has the sample-average communication level and no female-male
-    communication difference.
-2.  **Communication dyad mean:** the difference in dyad-average
-    satisfaction associated with a one-unit higher shared communication
-    level, holding the communication difference constant.
-3.  **Communication difference:** the difference in dyad-average
-    satisfaction associated with a one-unit larger female-minus-male
-    communication difference, holding the shared level constant.
-4.  **DSM role contrast:** the expected female-minus-male satisfaction
-    difference when the shared communication level is at its reference
-    value and the communication difference is zero.
-5.  **Dyad mean by role contrast:** the change in the female-minus-male
-    satisfaction difference associated with a one-unit higher shared
-    communication level.
-6.  **Communication difference by role contrast:** the change in the
-    female-minus-male satisfaction difference associated with a one-unit
-    larger female-minus-male communication difference.
+Instead of computing $`X_{female} - X_{male}`$, we can reverse the
+direction and compute $`X_{male} - X_{female}`$:
 
-The third and fifth coefficients are the DSM cross-paths: predictor
-difference to outcome level and predictor level to outcome difference.
-They are omitted from the reduced DSM but are needed for the full model.
+``` r
+
+cross_dsm_data_inverted <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  model_type = "dsm",
+  dsm_role_order = c("male", "female")
+)
+```
+
+``` r
+
+dsm_model_inverted <- glmmTMB::glmmTMB(
+  satisfaction ~
+    .i_communication_dyad_mean_gmc +
+    .i_communication_within_dyad_diff +
+    .i_dsm_role_contrast +
+    .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
+    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
+    (1 + .i_dsm_role_contrast | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = cross_dsm_data_inverted
+)
+
+summary(dsm_model_inverted)
+```
+
+The two models have identical fitted values and model fit. Reversing the
+role order reverses both the predictor difference and the outcome
+difference represented by the role contrast. Consequently, the
+predictor-difference main effect, role-contrast main effect, and
+dyad-mean-by-role-contrast interaction reverse sign. The
+difference-by-role-contrast interaction does not reverse because both
+variables in this product reverse. The random-effect variances also
+remain unchanged, whereas their covariance reverses sign.
+
+### Interpreting the DSM paths
+
+The long-format model estimates the paths of the conventional
+score-based DSM directly. Define
+
+``` math
+X_L = \frac{X_{female} + X_{male}}{2}, \qquad
+X_D = X_{female} - X_{male},
+```
+
+where $`X_L`$ is grand-mean centered in this example. Similarly, define
+outcome level and outcome difference as
+
+``` math
+Y_L = \frac{Y_{female} + Y_{male}}{2}, \qquad
+Y_D = Y_{female} - Y_{male}.
+```
+
+Although `interdep` does not materialize $`Y_L`$ and $`Y_D`$ as columns,
+the fitted long-format model estimates their two DSM equations:
+
+``` math
+\widehat{Y_L} = a_{10} + a_{11}X_L + a_{12}X_D,
+```
+
+``` math
+\widehat{Y_D} = a_{20} + a_{21}X_L + a_{22}X_D.
+```
+
+The fixed effects map directly to these paths:
+
+| Long-format fixed effect | DSM path and interpretation |
+|----|----|
+| Intercept | $`a_{10}`$: expected dyad-average satisfaction at the sample-average communication level and no female-male communication difference |
+| Communication dyad mean | $`a_{11}`$: predictor level $`\rightarrow`$ outcome level |
+| Communication difference | $`a_{12}`$: predictor difference $`\rightarrow`$ outcome level |
+| DSM role contrast | $`a_{20}`$: expected female-minus-male outcome difference at the predictor reference values |
+| Dyad mean $`\times`$ role contrast | $`a_{21}`$: predictor level $`\rightarrow`$ outcome difference |
+| Communication difference $`\times`$ role contrast | $`a_{22}`$: predictor difference $`\rightarrow`$ outcome difference |
+
+Thus, for example, $`a_{12}`$ is the change in dyad-average satisfaction
+associated with a one-unit larger female-minus-male communication
+difference, holding communication level constant. In contrast,
+$`a_{22}`$ is the change in the female-minus-male satisfaction
+difference associated with that same one-unit larger communication
+difference, holding communication level constant. The $`a_{12}`$ and
+$`a_{21}`$ coefficients are the DSM cross-paths. They are omitted from
+the reduced DSM but are needed for the full model.
 
 The random intercept variance is unexplained variation in outcome level,
 and the random role-contrast slope variance is unexplained variation in
