@@ -29,7 +29,7 @@ equivalence to APIM effects in exchangeable dyads, see the
 [Dyad-Individual Model vignette](dim.html). For undirected dyadic score
 outcomes, see the [Undirected Dyadic Score Model vignette](undirected-dsm.html).
 
-> This vignette is currently under construction. Please check back soon!
+> This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
 
 
 ### Test distinguishability

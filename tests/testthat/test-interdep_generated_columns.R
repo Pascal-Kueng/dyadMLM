@@ -53,7 +53,7 @@ test_that("interdep_generated_columns collects APIM columns", {
       dyadic_decomposition = c("none", "none"),
       column_centering = c("none", "none"),
       print_order = c(10L, 11L),
-      column_pattern = c(".i_*_raw_actor", ".i_*_raw_partner"),
+      column_pattern = c(".i_{pred}_raw_actor", ".i_{pred}_raw_partner"),
       description = c(
         "APIM actor predictor: actor's original predictor values",
         "APIM partner predictor: partner's original predictor values"
@@ -139,12 +139,12 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
       column_centering = c("none", "none", "none", "none", "none", "none"),
       print_order = c(8L, 9L, 12L, 14L, 13L, 15L),
       column_pattern = c(
-        ".i_*_cwp",
-        ".i_*_cbp",
-        ".i_*_cwp_actor",
-        ".i_*_cbp_actor",
-        ".i_*_cwp_partner",
-        ".i_*_cbp_partner"
+        ".i_{pred}_cwp",
+        ".i_{pred}_cbp",
+        ".i_{pred}_cwp_actor",
+        ".i_{pred}_cbp_actor",
+        ".i_{pred}_cwp_partner",
+        ".i_{pred}_cbp_partner"
       ),
       description = c(
         "within-person predictor: momentary deviations from each person's usual level",
@@ -191,7 +191,7 @@ test_that("interdep_generated_columns collects DIM columns", {
       dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
       column_centering = c("grand_mean", "none"),
       print_order = c(20L, 21L),
-      column_pattern = c(".i_*_raw_dyad_mean_gmc", ".i_*_raw_within_dyad_deviation"),
+      column_pattern = c(".i_{pred}_raw_dyad_mean_gmc", ".i_{pred}_raw_within_dyad_deviation"),
       description = c(
         "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centered",
         "DIM within-dyad predictor deviation: person's difference from the dyad average"
@@ -284,7 +284,7 @@ test_that("interdep_generated_columns collects undirected DSM outcome columns", 
       dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
       column_centering = c("none", "none"),
       print_order = c(30L, 31L),
-      column_pattern = c(".i_*_raw_dyad_mean", ".i_*_raw_within_dyad_deviation"),
+      column_pattern = c(".i_{out}_raw_dyad_mean", ".i_{out}_raw_within_dyad_deviation"),
       description = c(
         "DSM dyad-mean outcome: dyad's average outcome level",
         "DSM within-dyad outcome deviation: person's difference from the dyad average"

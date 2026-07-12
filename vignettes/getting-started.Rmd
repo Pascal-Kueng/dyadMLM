@@ -300,9 +300,8 @@ print(ild_apim_data)
 
 By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This temporal
-predictor decomposition can be controlled via the
-`temporal_predictor_decomposition` argument. Use `"time_2l"` when within-person
-and between-person associations should be estimated separately.
+predictor decomposition is controlled by `temporal_predictor_decomposition`.
+The default `"auto"` setting selects `"time_2l"` for this longitudinal setup.
 
 ## Data with multiple and mixed-composition dyads
 

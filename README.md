@@ -20,7 +20,7 @@ as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model
 (DIM), and undirected Dyadic Score Model (DSM). Current DIM and
 undirected DSM helpers require one exchangeable dyad composition.
 
-Start with the vignettes, or scroll down for a quick-start.
+Start with the vignettes or scroll down for a quick-start.
 
 | Vignette | Focus |
 |----|----|

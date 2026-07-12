@@ -28,7 +28,28 @@ combine distinguishable and exchangeable dyad compositions, see the
 within-dyad-deviation predictors, see the
 [Dyad-Individual Model vignette](dim.html).
 
-> This vignette is under construction. Please check back soon!
+> This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
+
+
+The model is an expantion of the DIM, but we now also decompose the outcome. 
+In preparaten, we therefore need to specify which variable is the outcome. 
+
+```{r prepare-cross-exchangeable}
+cross_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  predictors = communication,
+  outcomes = satisfaction,
+  # Create both APIM and DSM columns for comparison.
+  model_type = c("apim", "undirected_dsm"),
+  seed = 123
+)
+
+# Print the first two dyads.
+print(cross_exchangeable_data, n = 4)
+```
+
 
 For the main data-preparation workflow, return to the
 [Getting Started vignette](getting-started.html). For actor-partner models, see
