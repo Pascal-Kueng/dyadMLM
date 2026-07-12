@@ -371,7 +371,7 @@ would obscure the core implementation.
 
 1. Replace `"undirected_dsm"` with `"dsm"` in argument validation, metadata,
    generated-column specifications, documentation, and tests.
-2. Replace `validate_undirected_dyad_compatibility()` for the DSM path with a
+2. Keep `validate_dim_compatibility()` specific to the DIM path and add a
    directional DSM validator that requires the declared two-role ordering.
 3. Keep DIM validation and construction separate; DIM remains the supported
    exchangeable model.

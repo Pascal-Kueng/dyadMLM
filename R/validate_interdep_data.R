@@ -21,7 +21,8 @@
 #'   model-specific predictor construction and must be used alone.
 #' @param dsm_role_order For `model_type = "dsm"`, a character vector giving
 #'   the two distinguishable roles in the order used for directional
-#'   differences.
+#'   differences. Required when DSM columns are requested and must be `NULL`
+#'   otherwise.
 #' @param temporal_predictor_decomposition Requested temporal predictor decomposition
 #'   strategy for predictors. `"none"` leaves predictors undecomposed before
 #'   model-specific columns are constructed. `"time_2l"` indicates a two-level
@@ -111,6 +112,12 @@ validate_interdep_data <- function(
   if (has_role) {
     role_name <- rlang::as_name(role)
   }
+
+  dsm_role_order <- resolve_dsm_role_order(
+    dsm_role_order = dsm_role_order,
+    model_type = model_type,
+    has_role = has_role
+  )
 
   time <- rlang::enquo(time)
   has_time <- !rlang::quo_is_null(time)
@@ -277,6 +284,62 @@ validate_interdep_data <- function(
 ##########################################################################
 # End Main
 ##########################################################################
+
+#' Resolve the DSM role order
+#'
+#' Checks the relationship between `model_type`, `role`, and `dsm_role_order`,
+#' validates the requested role order, and returns its stored representation.
+#'
+#' @param dsm_role_order The requested DSM role order.
+#' @param model_type The normalized model types.
+#' @param has_role Whether a role column was supplied.
+#'
+#' @return The validated, unnamed role order, or `NULL`.
+#'
+#' @keywords internal
+resolve_dsm_role_order <- function(dsm_role_order, model_type, has_role) {
+  has_dsm <- "dsm" %in% model_type
+
+  if (!has_dsm && !is.null(dsm_role_order)) {
+    stop(
+      "`dsm_role_order` can only be supplied when `model_type` includes \"dsm\".",
+      call. = FALSE
+    )
+  }
+
+  if (!has_dsm) {
+    return(NULL)
+  }
+
+  if (is.null(dsm_role_order)) {
+    stop(
+      "`model_type = \"dsm\"` requires `dsm_role_order` to be supplied. For
+      undirected differences, use \"dim\" instead.",
+      call. = FALSE
+    )
+  }
+
+  if (!is.character(dsm_role_order) ||
+      length(dsm_role_order) != 2L ||
+      anyNA(dsm_role_order) ||
+      any(!nzchar(trimws(dsm_role_order))) ||
+      anyDuplicated(dsm_role_order)) {
+    stop(
+      "`dsm_role_order` must be a character vector containing exactly two distinct,
+      non-missing, non-empty role values, for example `c(\"male\", \"female\")`.",
+      call. = FALSE
+    )
+  }
+
+  if (!has_role) {
+    stop(
+      "`model_type = \"dsm\"` requires `role` to be supplied.",
+      call. = FALSE
+    )
+  }
+
+  unname(dsm_role_order)
+}
 
 resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dyads) {
 

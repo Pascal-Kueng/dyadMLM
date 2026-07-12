@@ -18,10 +18,9 @@ add_dyadic_score_columns <- function(data) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
   }
 
-  # validate_undirected_dyad_compatibility(data) # probably not needed, and we need to validate
-  # with a new function in the same file that it is a single type of distinguishable, right?
+  validate_dsm_compatibility(data)
 
-  add_dyad_individual_columns(data)
+  data
 }
 
 # setup_add_dyadic_score_debug()

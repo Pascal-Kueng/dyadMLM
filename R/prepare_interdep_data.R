@@ -39,7 +39,7 @@
 #'   differences. For example, `c("female", "male")` defines predictor
 #'   differences as female minus male and assigns the DSM role contrast `+0.5`
 #'   to female partners and `-0.5` to male partners. Required when DSM columns
-#'   are requested and ignored otherwise.
+#'   are requested and must be `NULL` otherwise.
 #' @param temporal_predictor_decomposition Temporal decomposition strategy for
 #'   `predictors`.
 #'   `"none"` leaves predictors undecomposed before model-specific columns are
@@ -187,11 +187,15 @@ prepare_interdep_data <- function(
     pool_compositions = pool_compositions
   )
 
+  if ("dsm" %in% model_type) {
+    validate_dsm_compatibility(out)
+  }
+
   out <- center_predictors(out)
 
   if ("dim" %in% model_type) {
     # Current DIM construction supports one exchangeable composition.
-    validate_undirected_dyad_compatibility(out)
+    validate_dim_compatibility(out)
   }
 
   if ("apim" %in% model_type) {

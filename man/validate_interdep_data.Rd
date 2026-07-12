@@ -41,7 +41,8 @@ model-specific predictor construction and must be used alone.}
 
 \item{dsm_role_order}{For \code{model_type = "dsm"}, a character vector giving
 the two distinguishable roles in the order used for directional
-differences.}
+differences. Required when DSM columns are requested and must be \code{NULL}
+otherwise.}
 
 \item{temporal_predictor_decomposition}{Requested temporal predictor decomposition
 strategy for predictors. \code{"none"} leaves predictors undecomposed before

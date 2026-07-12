@@ -56,7 +56,7 @@ the two distinguishable roles in the order used for directional
 differences. For example, \code{c("female", "male")} defines predictor
 differences as female minus male and assigns the DSM role contrast \code{+0.5}
 to female partners and \code{-0.5} to male partners. Required when DSM columns
-are requested and ignored otherwise.}
+are requested and must be \code{NULL} otherwise.}
 
 \item{temporal_predictor_decomposition}{Temporal decomposition strategy for
 \code{predictors}.

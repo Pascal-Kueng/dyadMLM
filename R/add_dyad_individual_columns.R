@@ -30,7 +30,7 @@ add_dyad_individual_columns <- function(data) {
     stop("`data` must be an `interdep_data` object.", call. = FALSE)
   }
 
-  validate_undirected_dyad_compatibility(data)
+  validate_dim_compatibility(data)
 
   meta_data <- attr(data, "interdep")
 
