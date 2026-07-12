@@ -75,7 +75,7 @@ validate_interdep_data(
   `"auto"` resolves to `"time_2l"` when both `time` and `predictors` are
   supplied, and to `"none"` otherwise. Model-specific helpers may apply
   additional conventions, such as grand-mean centering raw
-  cross-sectional DIM dyad means.
+  cross-sectional DIM and DSM dyad means.
 
 - incomplete_dyads:
 

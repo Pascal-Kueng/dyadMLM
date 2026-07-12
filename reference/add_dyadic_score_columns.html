@@ -4,18 +4,12 @@ for the predictors recorded in an interdep_data object, together with a
 DSM role contrast coded +0.5 and -0.5. DSM differences follow the role
 order recorded in attr(data, "interdep")$dsm_role_order. The supported DSM
 structure contains one distinguishable dyad composition; exchangeable dyads
-and multiple compositions are not supported.
-Constructed predictor columns are recorded in
-attr(data, "interdep")$dsm_predictors, and the contrast column name is
-recorded in attr(data, "interdep")$dsm_role_contrast_column.'><meta property="og:description" content='Adds Dyadic Score Model (DSM) dyad-mean and signed dyad-difference columns
+and multiple compositions are not supported.'><meta property="og:description" content='Adds Dyadic Score Model (DSM) dyad-mean and signed dyad-difference columns
 for the predictors recorded in an interdep_data object, together with a
 DSM role contrast coded +0.5 and -0.5. DSM differences follow the role
 order recorded in attr(data, "interdep")$dsm_role_order. The supported DSM
 structure contains one distinguishable dyad composition; exchangeable dyads
-and multiple compositions are not supported.
-Constructed predictor columns are recorded in
-attr(data, "interdep")$dsm_predictors, and the contrast column name is
-recorded in attr(data, "interdep")$dsm_role_contrast_column.'></head><body>
+and multiple compositions are not supported.'></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -62,10 +56,7 @@ for the predictors recorded in an <code>interdep_data</code> object, together wi
 DSM role contrast coded <code>+0.5</code> and <code>-0.5</code>. DSM differences follow the role
 order recorded in <code>attr(data, "interdep")$dsm_role_order</code>. The supported DSM
 structure contains one distinguishable dyad composition; exchangeable dyads
-and multiple compositions are not supported.
-Constructed predictor columns are recorded in
-<code>attr(data, "interdep")$dsm_predictors</code>, and the contrast column name is
-recorded in <code>attr(data, "interdep")$dsm_role_contrast_column</code>.</p>
+and multiple compositions are not supported.</p>
     </div>
 
     <div class="section level2">
@@ -85,6 +76,17 @@ recorded in <code>attr(data, "interdep")$dsm_role_contrast_column</code>.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>interdep_data</code> object with dyad-mean and signed dyad-difference
 predictor columns and a DSM role contrast added.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For temporally decomposed ILD predictors, within-person scores are computed
+within dyad-time and between-person scores within dyad. Raw cross-sectional
+dyad means are grand-mean centered. Both partners' predictor values are
+required for each score pair, and raw undecomposed longitudinal predictors
+are rejected.</p>
+<p>Constructed predictor columns are recorded in
+<code>attr(data, "interdep")$dsm_predictors</code>, and the contrast column name is
+recorded in <code>attr(data, "interdep")$dsm_role_contrast_column</code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
