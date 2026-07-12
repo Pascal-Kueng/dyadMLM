@@ -27,7 +27,7 @@ combine distinguishable and exchangeable dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For DIM predictors and their
 equivalence to APIM effects in exchangeable dyads, see the
 [Dyad-Individual Model vignette](dim.html). For undirected dyadic score
-outcomes, see the [Undirected Dyadic Score Model vignette](undirected-dsm.html).
+outcomes, see the [Dyadic Score Model vignette](dsm.html).
 
 > This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
 
@@ -390,7 +390,7 @@ main data-preparation workflow, return to the
 [Getting Started vignette](getting-started.html). For the alternative DIM
 parameterization of exchangeable dyads, see the
 [Dyad-Individual Model vignette](dim.html), or continue to the
-[Undirected Dyadic Score Model vignette](undirected-dsm.html).
+[Dyadic Score Model vignette](dsm.html).
 
 For an in-depth tutorial covering data preparation, model fitting, diagnostics,
 and assumption checks, see

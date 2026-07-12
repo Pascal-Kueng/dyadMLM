@@ -37,7 +37,7 @@ exchangeable, generalized, and intensive longitudinal APIMs, see the
 combine distinguishable and exchangeable dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For undirected dyadic score
 outcomes, see the
-[Undirected Dyadic Score Model vignette](undirected-dsm.html).
+[Dyadic Score Model vignette](dsm.html).
 
 ## Cross-Sectional Gaussian DIM
 
@@ -185,20 +185,28 @@ message("Install glmmTMB to run the fitted-model examples in this vignette.")
 Because this Gaussian model uses an identity link, fixed coefficients are
 interpreted in units of the outcome, e.g., "satisfaction":
 
-- The intercept (about 5.04) is the expected satisfaction
-  when both members' communication equals the sample grand mean.
+Because the exchangeable Gaussian DIM is algebraically equivalent to the
+reduced undirected DSM, each coefficient has both an individual-member
+interpretation and an equivalent couple mean/difference interpretation.
 
-- The dyad-mean estimate (about 2.00) means that for a person in a dyad with
-  one-point higher average communication, while holding the difference between
-  partners constant (i.e., both partners' communication is 1 unit higher than
-  the reference), expected satisfaction is 2.00 units higher.
+- The intercept (about 5.04) is the expected satisfaction of either member,
+  and therefore the expected couple-average satisfaction, when both members'
+  communication equals the sample grand mean.
+
+- The dyad-mean estimate (about 2.00) means that, comparing couples with the
+  same communication difference between partners, a one-point higher
+  couple-average communication level is associated with a 2.00-point higher
+  expected couple-average satisfaction. Equivalently, each member's expected
+  satisfaction is 2.00 points higher.
 
 - The within-dyad-deviation estimate (about 1.52) means that a one-point
   difference in communication between partners is associated with a 1.52-point
   difference in their expected satisfaction, holding their average communication
   constant. Equivalently, if one member is 1 point above the dyad mean, holding
   the dyad mean constant implies that the other is 1 point below it. The members
-  are then 2 points apart in communication and are expected to differ by 3.04
+  are then 2 points apart in communication; the first member's expected
+  satisfaction is 1.52 points above the couple's predicted mean, the second
+  member's is 1.52 points below it, and they are expected to differ by 3.04
   points in satisfaction.
 
 ### Demonstrating model equivalence to APIM
@@ -999,26 +1007,40 @@ summary(dim_ILD)
 
 ### Interpretation of ILD DIM coefficients
 
-The fitted coefficients can be interpreted as:
+The same dual interpretation applies longitudinally: dyad-mean effects describe
+both expected outcomes for individual members and expected couple-average
+outcomes, whereas within-dyad effects describe both member deviations and
+expected differences between partners.
 
 - The `cbp` dyad-mean estimate (about 1.51) means that, comparing couples whose
   average usual support differs by one point while holding the stable difference
-  between partners constant, a member of the higher-support couple is expected
-  to report 1.51 points higher closeness.
+  between partners constant, expected couple-average closeness is 1.51 points
+  higher for the higher-support couple. Equivalently, each member is expected to
+  report 1.51 points higher closeness.
 
 - The `cwp` dyad-mean estimate (about 0.49) means that when both members are one
   point above their respective usual support levels, each member's expected
   closeness is 0.49 points higher than when both are at their usual levels,
   holding the difference between their momentary deviations constant.
+  Equivalently, expected couple-average closeness is 0.49 points higher on that
+  occasion.
 
 - The `cbp` within-dyad estimate (about 0.78) means that if partners differ by
   one point in their usual support levels, they are expected to differ by 0.78
-  points in closeness, holding the couple's average usual support constant.
+  points in closeness, holding the couple's average usual support and the other
+  predictors constant. In member terms, a one-point increase in one member's
+  stable deviation from the dyad's usual support level, with the other member's
+  deviation decreasing by one point, is associated with a 0.78-point increase
+  for the first member and a 0.78-point decrease for the second.
 
 - The `cwp` within-dyad estimate (about 0.06) means that if one partner's
   momentary deviation from usual support is one point higher than the other
   partner's deviation, they are expected to differ by 0.06 points in closeness,
-  holding the occasion-specific dyad mean constant.
+  holding the occasion-specific dyad mean and the other predictors constant.
+  Equivalently, increasing one member's momentary deviation by one point while
+  decreasing the other member's deviation by one point is associated with a
+  0.06-point increase for the first member and a 0.06-point decrease for the
+  second.
 
 ### Equivalence of APIM and DIM in ILD
 
@@ -1247,7 +1269,7 @@ intensive longitudinal dyads, see the
 multiple dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For undirected dyadic score
 outcomes, see the
-[Undirected Dyadic Score Model vignette](undirected-dsm.html). For the broader
+[Dyadic Score Model vignette](dsm.html). For the broader
 data-preparation workflow, return to the
 [Getting Started vignette](getting-started.html).
 

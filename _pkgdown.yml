@@ -19,8 +19,8 @@ navbar:
         href: articles/mixed-apim.html
       - text: Dyad-Individual Model
         href: articles/dim.html
-      - text: Undirected Dyadic Score Model
-        href: articles/undirected-dsm.html
+      - text: Dyadic Score Model
+        href: articles/dsm.html
     github:
       icon: fa-github
       href: https://github.com/Pascal-Kueng/interdep
@@ -37,7 +37,7 @@ articles:
   - apim
   - mixed-apim
   - dim
-  - undirected-dsm
+  - dsm
 
 reference:
 - title: Main function

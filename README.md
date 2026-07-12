@@ -28,7 +28,7 @@ Start with the vignettes, or scroll down for a quick-start.
 | [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable, exchangeable, generalized, and intensive longitudinal dyads |
 | [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
 | [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
-| [Undirected Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html) | Undirected DSM outcome and predictor construction, with model formulas |
+| [Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/dsm.html) | Undirected DSM outcome and predictor construction, with model formulas |
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and

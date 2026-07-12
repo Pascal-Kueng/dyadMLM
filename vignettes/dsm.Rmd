@@ -1,8 +1,8 @@
 ---
-title: "Undirected Dyadic Score Model (DSM)"
+title: "Dyadic Score Model (DSM)"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Undirected Dyadic Score Model (DSM)}
+  %\VignetteIndexEntry{Dyadic Score Model (DSM)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -32,8 +32,8 @@ within-dyad-deviation predictors, see the
 > This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
 
 
-The model is an expantion of the DIM, but we now also decompose the outcome. 
-In preparaten, we therefore need to specify which variable is the outcome. 
+The model is an expantion of the DIM, but we now also decompose the outcome.
+In preparaten, we therefore need to specify which variable is the outcome.
 
 ```{r prepare-cross-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
@@ -63,23 +63,17 @@ The dyad-mean model is a DIM (see DIM Vignette for interpretation and explanatio
 with the outcome being the dyad-mean of the outcome. (Note: could and should we control
 for the dyad difference?? What does Iida say?)
 
-```{r fit-cross-dsm, eval=has_glmmTMB}
+```{r fit-cross-dsm-mean, eval=has_glmmTMB}
 
 dim_dyad_mean <- glmmTMB::glmmTMB(
   .i_satisfaction_dyad_mean ~
 
     # Pooled fixed intercept
-    1 +
+    0 +
 
     # Between-couple effect
     .i_communication_dyad_mean_gmc +
-
-    # Within-couple effect
-    .i_communication_within_dyad_deviation +
-
-    # Residual Gaussian variance-covariance
-    (1 | coupleID) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+    (1 | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -88,23 +82,17 @@ dim_dyad_mean <- glmmTMB::glmmTMB(
 summary(dim_dyad_mean)
 ```
 
-```{r fit-cross-dsm, eval=has_glmmTMB}
+```{r fit-cross-dsm-deviation, eval=has_glmmTMB}
 
 dim_within_dyad_deviation <- glmmTMB::glmmTMB(
   .i_satisfaction_within_dyad_deviation ~
 
     # Pooled fixed intercept
-    1 +
-
-    # Between-couple effect
-    .i_communication_dyad_mean_gmc +
+    0 +
 
     # Within-couple effect
     .i_communication_within_dyad_deviation +
-
-    # Residual Gaussian variance-covariance
-    (1 | coupleID) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+    (1 | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data

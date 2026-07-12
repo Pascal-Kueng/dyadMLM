@@ -47,7 +47,7 @@ For guidance on how to use the Dyad-Individual Model (DIM) parameterization,
 including dyad-mean and within-dyad-deviation predictors and their equivalence
 to APIM effects in exchangeable dyads, see the [Dyad-Individual Model vignette](dim.html).
 
-For undirected dyadic score outcomes, see the [Undirected Dyadic Score Model vignette](undirected-dsm.html).
+For undirected dyadic score outcomes, see the [Dyadic Score Model vignette](dsm.html).
 
 ## Prerequisites
 
@@ -422,7 +422,7 @@ For model formulas and interpretation, continue with the
 [Actor-Partner Interdependence Model vignette](apim.html),
 [Mixed-Composition APIM vignette](mixed-apim.html),
 [Dyad-Individual Model vignette](dim.html), or
-[Undirected Dyadic Score Model vignette](undirected-dsm.html).
+[Dyadic Score Model vignette](dsm.html).
 
 For an in-depth tutorial covering data preparation, model fitting, diagnostics,
 and assumption checks, see
