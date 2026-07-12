@@ -423,16 +423,29 @@ with different parameterizations and coefficient interpretations.</p>
 </annotation></semantics></math></p>
 </div>
 <div class="section level3">
-<h3 id="explore-the-reparameterization">Explore the Reparameterization<a class="anchor" aria-label="anchor" href="#explore-the-reparameterization"></a>
+<h3 id="why-are-these-models-equivalent-exploring-the-reparameterization">Why Are These Models Equivalent? Exploring the
+Reparameterization<a class="anchor" aria-label="anchor" href="#why-are-these-models-equivalent-exploring-the-reparameterization"></a>
 </h3>
+<p>An intuitive way to think about this is:</p>
+<ul>
+<li><p>When the dyad mean goes up by 1 unit while the difference between
+partners remains stable, both partners’ values must go up by 1. Both the
+actor and partner effects therefore contribute, which is why the
+dyad-mean effect is the actor effect + the partner effect.</p></li>
+<li><p>When a person’s deviation from the dyad mean goes up by 1 unit
+while the dyad mean remains constant, the other partner’s value must go
+<strong>down</strong> by 1 unit. The actor value therefore changes by +1
+and the partner value by -1, which is why the within-dyad-deviation
+effect is the actor effect - the partner effect.</p></li>
+</ul>
 <p>The grid below shows the same predictor values in both coordinate
 systems. The horizontal and vertical axes are actor and partner values
-centered at the sample grand mean; the diagonal axes are their dyad mean
-and within-dyad deviation. Moving a slider or the point updates both
-parameterizations. The displayed slope values approximate the fitted
-example above and illustrate that the two forms make the same change in
-the linear predictor relative to the grand-mean reference. The intercept
-is omitted from both displayed equations.</p>
+centered at the sample grand mean. The diagonal axes are their dyad mean
+and within-dyad deviation.</p>
+<p>The displayed slope values approximate the fitted example above and
+illustrate that the two forms make the same change in the linear
+predictor relative to the grand-mean reference. The intercept is omitted
+from both displayed equations.</p>
 <style>
 .interdep-dim-grid {
   --idg-actor: #1769aa;
@@ -530,7 +543,7 @@ is omitted from both displayed equations.</p>
   font-weight: 600;
 }
 .idg-control output {
-  flex: 0 0 4.2ch;
+  flex: 0 0 5.5ch;
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
@@ -577,6 +590,19 @@ is omitted from both displayed equations.</p>
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+.idg-equation-number {
+  display: inline-block;
+  text-align: right;
+}
+.idg-equation-number--apim {
+  width: 4ch;
+}
+.idg-equation-number--dim {
+  width: 5ch;
+}
+.idg-equation-number--result {
+  width: 6ch;
 }
 .idg-stage {
   display: grid;
@@ -836,6 +862,17 @@ is omitted from both displayed equations.</p>
     return normalized.toFixed(digits);
   }
 
+  function formatSigned(value, digits) {
+    var normalized = Math.abs(value) < 1e-10 ? 0 : value;
+    var sign = normalized < 0 ? "\u2212" : "\u2007";
+    return sign + Math.abs(normalized).toFixed(digits);
+  }
+
+  function formatEquationNumber(value, digits, widthClass) {
+    return '<span class="idg-equation-number idg-equation-number--' +
+      widthClass + '">' + formatSigned(value, digits) + '</span>';
+  }
+
   function xPixel(value) {
     return 160 + value * plotScale;
   }
@@ -844,13 +881,14 @@ is omitted from both displayed equations.</p>
     return 160 - value * plotScale;
   }
 
-  function updateDIMBounds(mean, within) {
-    var meanBound = roundDIM(limit - Math.abs(within));
-    var withinBound = roundDIM(limit - Math.abs(mean));
-    inputs.mean.min = -meanBound;
-    inputs.mean.max = meanBound;
-    inputs.within.min = -withinBound;
-    inputs.within.max = withinBound;
+  function feasibleMean(within) {
+    var bound = roundDIM(limit - Math.abs(within));
+    return [-bound, bound];
+  }
+
+  function feasibleWithin(mean) {
+    var bound = roundDIM(limit - Math.abs(mean));
+    return [-bound, bound];
   }
 
   function render() {
@@ -861,12 +899,18 @@ is omitted from both displayed equations.</p>
     var apimContribution = slopes.actor * actor + slopes.partner * partner;
     var dimContribution = slopes.mean * mean + slopes.within * within;
 
-    outputs.actor.value = format(actor, 1);
-    outputs.partner.value = format(partner, 1);
-    outputs.mean.value = format(mean, 2);
-    outputs.within.value = format(within, 2);
-    equationAPIM.textContent = "1.76 \u00d7 " + format(actor, 1) + " + 0.24 \u00d7 " + format(partner, 1) + " = " + format(apimContribution, 2);
-    equationDIM.textContent = "2.00 \u00d7 " + format(mean, 2) + " + 1.52 \u00d7 " + format(within, 2) + " = " + format(dimContribution, 2);
+    outputs.actor.value = formatSigned(actor, 1);
+    outputs.partner.value = formatSigned(partner, 1);
+    outputs.mean.value = formatSigned(mean, 2);
+    outputs.within.value = formatSigned(within, 2);
+    equationAPIM.innerHTML = "1.76 \u00d7 " +
+      formatEquationNumber(actor, 1, "apim") + " + 0.24 \u00d7 " +
+      formatEquationNumber(partner, 1, "apim") + " = " +
+      formatEquationNumber(apimContribution, 2, "result");
+    equationDIM.innerHTML = "2.00 \u00d7 " +
+      formatEquationNumber(mean, 2, "dim") + " + 1.52 \u00d7 " +
+      formatEquationNumber(within, 2, "dim") + " = " +
+      formatEquationNumber(dimContribution, 2, "result");
 
     point.setAttribute("cx", xPixel(actor));
     point.setAttribute("cy", yPixel(partner));
@@ -875,7 +919,6 @@ is omitted from both displayed equations.</p>
     description.textContent = "The selected point has actor " + format(actor, 1) +
       ", partner " + format(partner, 1) + ", dyad mean " + format(mean, 2) +
       ", and within-dyad deviation " + format(within, 2) + ".";
-    updateDIMBounds(mean, within);
   }
 
   function setFromAPIM(actor, partner) {
@@ -883,7 +926,6 @@ is omitted from both displayed equations.</p>
     partner = roundAPIM(clamp(partner, -limit, limit));
     var mean = roundDIM((actor + partner) / 2);
     var within = roundDIM((actor - partner) / 2);
-    updateDIMBounds(mean, within);
     inputs.actor.value = actor;
     inputs.partner.value = partner;
     inputs.mean.value = mean;
@@ -891,13 +933,11 @@ is omitted from both displayed equations.</p>
     render();
   }
 
-  function setFromDIM(mean, within, changed) {
-    if (changed === "mean") {
-      mean = roundDIM(clamp(mean, -limit + Math.abs(within), limit - Math.abs(within)));
-    } else {
-      within = roundDIM(clamp(within, -limit + Math.abs(mean), limit - Math.abs(mean)));
-    }
-    updateDIMBounds(mean, within);
+  function setFromDIM(mean, within) {
+    var meanBounds = feasibleMean(within);
+    mean = roundDIM(clamp(mean, meanBounds[0], meanBounds[1]));
+    var withinBounds = feasibleWithin(mean);
+    within = roundDIM(clamp(within, withinBounds[0], withinBounds[1]));
     inputs.mean.value = mean;
     inputs.within.value = within;
     inputs.actor.value = roundAPIM(mean + within);
@@ -912,10 +952,16 @@ is omitted from both displayed equations.</p>
     setFromAPIM(inputs.actor.value, inputs.partner.value);
   });
   inputs.mean.addEventListener("input", function () {
-    setFromDIM(Number(inputs.mean.value), Number(inputs.within.value), "mean");
+    var within = roundDIM(inputs.within.value);
+    var bounds = feasibleMean(within);
+    var mean = roundDIM(clamp(inputs.mean.value, bounds[0], bounds[1]));
+    setFromDIM(mean, within);
   });
   inputs.within.addEventListener("input", function () {
-    setFromDIM(Number(inputs.mean.value), Number(inputs.within.value), "within");
+    var mean = roundDIM(inputs.mean.value);
+    var bounds = feasibleWithin(mean);
+    var within = roundDIM(clamp(inputs.within.value, bounds[0], bounds[1]));
+    setFromDIM(mean, within);
   });
 
   root.querySelector("[data-idg-reset]").addEventListener("click", function () {

@@ -392,16 +392,30 @@ and
 \frac{\beta_{\text{dyad mean}} - \beta_{\text{within-dyad deviation}}}{2}
 ```
 
-### Explore the Reparameterization
+### Why Are These Models Equivalent? Exploring the Reparameterization
+
+An intuitive way to think about this is:
+
+- When the dyad mean goes up by 1 unit while the difference between
+  partners remains stable, both partners’ values must go up by 1. Both
+  the actor and partner effects therefore contribute, which is why the
+  dyad-mean effect is the actor effect + the partner effect.
+
+- When a person’s deviation from the dyad mean goes up by 1 unit while
+  the dyad mean remains constant, the other partner’s value must go
+  **down** by 1 unit. The actor value therefore changes by +1 and the
+  partner value by -1, which is why the within-dyad-deviation effect is
+  the actor effect - the partner effect.
 
 The grid below shows the same predictor values in both coordinate
 systems. The horizontal and vertical axes are actor and partner values
-centered at the sample grand mean; the diagonal axes are their dyad mean
-and within-dyad deviation. Moving a slider or the point updates both
-parameterizations. The displayed slope values approximate the fitted
-example above and illustrate that the two forms make the same change in
-the linear predictor relative to the grand-mean reference. The intercept
-is omitted from both displayed equations.
+centered at the sample grand mean. The diagonal axes are their dyad mean
+and within-dyad deviation.
+
+The displayed slope values approximate the fitted example above and
+illustrate that the two forms make the same change in the linear
+predictor relative to the grand-mean reference. The intercept is omitted
+from both displayed equations.
 
 **Predictor coordinates**
 
