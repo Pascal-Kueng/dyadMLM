@@ -17,8 +17,7 @@ dyads, or mixed dyad types in the same data, such as female-male,
 female-female, and male-male couples. It creates composition-aware,
 model-ready columns for dyadic multilevel model parameterizations such
 as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model
-(DIM), and undirected Dyadic Score Model (DSM). Current DIM and
-undirected DSM helpers require one exchangeable dyad composition.
+(DIM), and Dyadic Score Model (DSM). 
 
 Start with the vignettes, or scroll down for a quick-start.
 

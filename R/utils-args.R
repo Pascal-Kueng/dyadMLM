@@ -1,5 +1,5 @@
 normalize_model_type <- function(model_type) {
-  choices <- c("apim", "dim", "undirected_dsm", "none")
+  choices <- c("apim", "dim", "dsm", "none")
 
   if (!is.character(model_type) || length(model_type) == 0 || anyNA(model_type)) {
     stop(

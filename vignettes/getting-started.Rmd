@@ -45,9 +45,15 @@ see the [Mixed-Composition APIM vignette](mixed-apim.html).
 
 For guidance on how to use the Dyad-Individual Model (DIM) parameterization,
 including dyad-mean and within-dyad-deviation predictors and their equivalence
-to APIM effects in exchangeable dyads, see the [Dyad-Individual Model vignette](dim.html).
+to APIM effects (via an interactive example) in exchangeable dyads, see the
+[Dyad-Individual Model vignette](dim.html).
 
-For undirected dyadic score outcomes, see the [Dyadic Score Model vignette](dsm.html).
+For the dyadic score parametrization and demonstrations of its' equivalence to 
+the APIM for distinguishable dyads, see the [Dyadic Score Model vignette](dsm.html).
+
+For an in-depth tutorial covering data preparation and model fitting, but also
+additional steps like diagnostics and assumption checks, see
+[Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
 
 ## Prerequisites
 
@@ -414,17 +420,15 @@ mixed_cross_data_pooled_constrained <- prepare_interdep_data(
 print(mixed_cross_data_pooled_constrained)
 ```
 
+---
 
-For model formulas and interpretation, continue with the
-[Actor-Partner Interdependence Model vignette](apim.html),
-[Mixed-Composition APIM vignette](mixed-apim.html),
-[Dyad-Individual Model vignette](dim.html), or
-[Dyadic Score Model vignette](dsm.html).
+**Continue** with the 
+[Actor-Partner Interdependence Model (APIM) vignette](apim.html),
 
-For an in-depth tutorial covering data preparation, model fitting, diagnostics,
-and assumption checks, see
-[Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
-It uses `interdep` for cross-sectional and intensive longitudinal APIM and DIM
-workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+refer to the: 
+
+- [Mixed-Composition APIM vignette](mixed-apim.html),
+- [Dyad-Individual Model vignette](dim.html),
+- [Dyadic Score Model vignette](dsm.html),
+
+or return to the [Overview](index.html).

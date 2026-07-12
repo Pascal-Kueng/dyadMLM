@@ -26,8 +26,8 @@ with the [Getting Started vignette](getting-started.html). For APIMs that
 combine distinguishable and exchangeable dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For DIM predictors and their
 equivalence to APIM effects in exchangeable dyads, see the
-[Dyad-Individual Model vignette](dim.html). For undirected dyadic score
-outcomes, see the [Dyadic Score Model vignette](dsm.html).
+[Dyad-Individual Model vignette](dim.html). For DSM predictors and their
+equivalence to APIM effects in distinguishable dyads, see the [Dyadic Score Model vignette](dsm.html).
 
 > This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
 
@@ -388,18 +388,13 @@ summary(ild_tweedie_exchangeable_model)
 
 -> should be the next model function?
 
-For models that combine distinguishable and exchangeable dyad compositions,
-continue with the [Mixed-Composition APIM vignette](mixed-apim.html). For the
-main data-preparation workflow, return to the
-[Getting Started vignette](getting-started.html). For the alternative DIM
-parameterization of exchangeable dyads, see the
-[Dyad-Individual Model vignette](dim.html), or continue to the
-[Dyadic Score Model vignette](dsm.html).
+---
 
-For an in-depth tutorial covering data preparation, model fitting, diagnostics,
-and assumption checks, see
-[Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
-It uses `interdep` for cross-sectional and intensive longitudinal APIM and DIM
-workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+**Continue** with the [Mixed-Composition APIM vignette](mixed-apim.html),
+
+refer to the: 
+
+- [Dyad-Individual Model vignette](dim.html),
+- [Dyadic Score Model vignette](dsm.html),
+
+or return to the [Overview](index.html).

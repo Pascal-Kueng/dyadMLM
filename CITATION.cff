@@ -13,7 +13,7 @@ abstract: >-
   generalized multilevel models. It derives composition metadata and
   model-ready columns for distinguishable, exchangeable, and mixed-composition
   dyads. Prepared data can be used with multilevel model engines to estimate
-  dyadic model parameterizations such as APIM, DIM, and undirected DSM.
+  dyadic model parameterizations such as APIM, DIM, and DSM.
 keywords:
   - dyadic data
   - multilevel models

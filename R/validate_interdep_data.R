@@ -17,7 +17,7 @@
 #' @param predictors Optional variables to select and store as metadata for
 #'   temporal predictor decomposition and model-helper functions.
 #' @param model_type Requested model-ready column families. Can contain one or
-#'   more of `"apim"`, `"dim"`, and `"undirected_dsm"`. `"none"` indicates no
+#'   more of `"apim"`, `"dim"`, and `"dsm"`. `"none"` indicates no
 #'   model-specific predictor construction and must be used alone.
 #' @param temporal_predictor_decomposition Requested temporal predictor decomposition
 #'   strategy for predictors. `"none"` leaves predictors undecomposed before
@@ -234,14 +234,14 @@ validate_interdep_data <- function(
     }
   }
 
-  if (any(model_type %in% c("dim", "undirected_dsm")) && length(predictor_names) > 0) {
+  if (any(model_type %in% c("dim", "dsm")) && length(predictor_names) > 0) {
     predictor_is_numeric <- vapply(out[predictor_names], is.numeric, logical(1))
     non_numeric_predictors <- predictor_names[!predictor_is_numeric]
 
     if (length(non_numeric_predictors) > 0) {
       stop(
-        "`predictors` used with `model_type = \"dim\"` or `model_type = \"undirected_dsm\"` must be numeric. ",
-        "DIM and undirected DSM predictor construction computes dyad means and within-dyad deviations. ",
+        "`predictors` used with `model_type = \"dim\"` or `model_type = \"dsm\"` must be numeric. ",
+        "DIM and DSM predictor construction computes dyad means and within-dyad deviations. ",
         "Non-numeric predictor(s): ",
         paste(non_numeric_predictors, collapse = ", "),
         ".",

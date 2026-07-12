@@ -1,7 +1,7 @@
 #' Validate undirected dyad compatibility
 #'
 #' Checks whether an `interdep_data` object can be used for the currently
-#' supported undirected DIM or undirected DSM construction. These models
+#' supported undirected DIM construction. These models
 #' currently support only data with exactly one exchangeable dyad composition. Distinguishable or
 #' multiple exchangeable compositions are rejected until explicit role-contrast,
 #' composition-specific, or pooling support is added.
@@ -32,12 +32,12 @@ validate_undirected_dyad_compatibility <- function(data) {
     )
 
     stop(
-      "DIM and undirected DSM construction currently support only data with exactly one exchangeable dyad composition. ",
+      "DIM currently supports only data with exactly one exchangeable dyad composition. ",
       "The prepared data contains unsupported dyad composition metadata: ",
       dyad_composition_text,
       ". ",
-      "Use these model types only when partners are exchangeable for your analysis, for example by omitting `role`; ",
-      "otherwise use `model_type = \"apim\"`, `model_type = \"none\"`, or use `include_compositions`, ",
+      "Use this model type only when partners are exchangeable for your analysis, for example by omitting `role`; ",
+      "otherwise use `model_type = \"apim\"`, `model_type = \"dsm\"`, `model_type = \"none\"`, or use `include_compositions`, ",
       "`set_exchangeable_compositions`, or `pool_compositions` to prepare exactly one exchangeable composition.",
       call. = FALSE
     )

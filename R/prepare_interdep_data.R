@@ -28,11 +28,10 @@
 #' @param predictors Optional variables to use for temporal predictor
 #'   decomposition and model-ready predictor construction.
 #' @param model_type Model-ready column families to construct. Can contain one
-#'   or more of `"apim"`, `"dim"`, and `"undirected_dsm"`. `"apim"` creates
+#'   or more of `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
-#'   within-dyad-deviation predictors. `"undirected_dsm"` creates undirected
-#'   dyadic-score model predictor columns. Outcomes remain unchanged and are
-#'   selected in the fitted-model formula. `"none"` skips model-specific predictor
+#'   within-dyad-deviation predictors. `"dsm"` creates dyadic-score model
+#'   predictor columns. `"none"` skips model-specific predictor
 #'   construction after validation, composition inference, and optional
 #'   temporal predictor decomposition, and must be used alone.
 #' @param temporal_predictor_decomposition Temporal decomposition strategy for
@@ -43,7 +42,7 @@
 #'   resolves to `"time_2l"` when both `time` and `predictors` are supplied, and
 #'   to `"none"` otherwise. Raw cross-sectional DIM predictor dyad-mean columns
 #'   are still centered around the grand mean of dyad means as part of DIM-style
-#'   predictor construction. For longitudinal DIM or undirected DSM predictor
+#'   predictor construction. For longitudinal DIM or DSM predictor
 #'   construction, raw undecomposed predictors are currently rejected; use
 #'   `"auto"` or `"time_2l"`.
 #' @param set_exchangeable_compositions Optionally specify dyad compositions
@@ -196,7 +195,7 @@ prepare_interdep_data <- function(
   }
 
   if ("undirected_dsm" %in% model_type) {
-    out <- add_undirected_dyadic_score_columns(out)
+    out <- add_dyadic_score_columns(out)
   }
 
   return(out)

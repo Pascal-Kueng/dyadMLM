@@ -24,9 +24,8 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 This vignette focuses on the Dyad-Individual Model (DIM) for dyadic multilevel
-models and its relationship to the Actor-Partner Interdependence Model (APIM).
-The DIM separates a predictor into the dyad's shared level and each member's
-deviation from that level. While the APIM expresses effects in terms of two
+models and its relationship to the exchangeable Actor-Partner Interdependence 
+Model (APIM). The DIM separates a predictor into the dyad's shared level and each member's deviation from that level. While the APIM expresses effects in terms of two
 interdependent individuals, the DIM expresses them in terms of the dyad's
 shared level and the contrast between partners.
 
@@ -35,9 +34,10 @@ For the broader data-preparation workflow of the `interdep` package, see the
 exchangeable, generalized, and intensive longitudinal APIMs, see the
 [Actor-Partner Interdependence Model vignette](apim.html). For APIMs that
 combine distinguishable and exchangeable dyad compositions, see the
-[Mixed-Composition APIM vignette](mixed-apim.html). For undirected dyadic score
-outcomes, see the
-[Dyadic Score Model vignette](dsm.html).
+[Mixed-Composition APIM vignette](mixed-apim.html). For the dyadic score
+model, see the [Dyadic Score Model vignette](dsm.html). Whereas the DIM is a 
+different parametrization of the exchangeable APIM, the Dyadic Score Model (DSM) 
+is a different parametrization of the distinguishable APIM. 
 
 ## Cross-Sectional Gaussian DIM
 
@@ -1264,20 +1264,13 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 
 ```
 
-For APIM formulas with distinguishable, exchangeable, generalized, and
-intensive longitudinal dyads, see the
-[Actor-Partner Interdependence Model vignette](apim.html). For models combining
-multiple dyad compositions, see the
-[Mixed-Composition APIM vignette](mixed-apim.html). For undirected dyadic score
-outcomes, see the
-[Dyadic Score Model vignette](dsm.html). For the broader
-data-preparation workflow, return to the
-[Getting Started vignette](getting-started.html).
+---
 
-For an in-depth tutorial covering data preparation, model fitting, diagnostics,
-and assumption checks, see
-[Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
-It uses `interdep` for cross-sectional and intensive longitudinal APIM and DIM
-workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
+**Continue** with the [Dyadic Score Model vignette](dsm.html),
+
+refer to the: 
+
+- [Actor-Partner Interdependence Model (APIM) vignette](apim.html),
+- [Mixed-Composition APIM vignette](mixed-apim.html),
+
+or return to the [Overview](index.html).
