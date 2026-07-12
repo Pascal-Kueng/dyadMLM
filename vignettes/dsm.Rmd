@@ -129,7 +129,7 @@ dsm_model_inverted <- glmmTMB::glmmTMB(
   data = cross_dsm_data_inverted
 )
 
-summary(dsm_model)
+summary(dsm_model_inverted)
 ```
 
 We see that the models have identical fit, and that parameters are identical 
