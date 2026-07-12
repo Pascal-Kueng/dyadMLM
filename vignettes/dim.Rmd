@@ -894,7 +894,7 @@ scale.
 
 In this example:
 
-```{r compare-cross-coefficients, eval=has_glmmTMB}
+```{r compare-cross-coefficients, echo = FALSE, eval = has_glmmTMB}
 apim_coef <- glmmTMB::fixef(apim_1)$cond
 dim_coef <- glmmTMB::fixef(dim_1)$cond
 
@@ -904,30 +904,17 @@ b_partner <- apim_coef[[".i_communication_raw_partner"]]
 b_dyad_mean <- dim_coef[[".i_communication_raw_dyad_mean_gmc"]]
 b_within_dyad <- dim_coef[[".i_communication_raw_within_dyad_deviation"]]
 
-coefficient_comparison <- data.frame(
-  `DIM effect` = c("Dyad mean", "Within-dyad deviation"),
-  `APIM transformation` = c(
-    "actor effect + partner effect",
-    "actor effect - partner effect"
-  ),
-  `Transformed APIM estimate` = c(
-    b_actor + b_partner,
-    b_actor - b_partner
-  ),
-  `DIM model estimate` = c(b_dyad_mean, b_within_dyad),
-  check.names = FALSE
-)
+cat("From APIM model:\n")
+cat("  actor effect:                  ", round(b_actor, 3), "\n")
+cat("  partner effect:                ", round(b_partner, 3), "\n\n")
 
-knitr::kable(
-  coefficient_comparison,
-  digits = 3,
-  align = c("l", "l", "r", "r"),
-  caption = sprintf(
-    "APIM estimates: actor effect = %.3f; partner effect = %.3f.",
-    b_actor,
-    b_partner
-  )
-)
+cat("DIM transformation:\n")
+cat("  actor effect + partner effect: ", round(b_actor + b_partner, 3), "\n")
+cat("  actor effect - partner effect: ", round(b_actor - b_partner, 3), "\n\n")
+
+cat("From DIM model:\n")
+cat("  dyad-mean effect:              ", round(b_dyad_mean, 3), "\n")
+cat("  within-dyad-deviation effect:  ", round(b_within_dyad, 3), "\n")
 ```
 
 ## Intensive Longitudinal DIM
