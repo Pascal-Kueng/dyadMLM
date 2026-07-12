@@ -18,6 +18,9 @@ Details for specific dyadic model parameterizations.
 - [Actor-Partner Interdependence Model
   (APIM)](https://pascal-kueng.github.io/interdep/articles/apim.md):
 
+- [APIMs with Mixed Dyad
+  Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md):
+
 - [Dyad-Individual
   Model](https://pascal-kueng.github.io/interdep/articles/dim.md):
 

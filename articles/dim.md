@@ -11,14 +11,16 @@ multilevel models and its relationship to the Actor-Partner
 Interdependence Model (APIM). The DIM separates a predictor into the
 dyad’s shared level and each member’s deviation from that level.
 
-For broader guidance on using this package for data preparation for
-various dyadic model types, especially APIMs with multiple dyad types,
-generalized outcomes, intensive longitudinal models, and optimizer
-choices, see the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md)
-and the [Actor-Partner Interdependence Model
+For the broader data-preparation workflow, see the [Getting Started
+vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
+For distinguishable, exchangeable, generalized, and intensive
+longitudinal APIMs, see the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
+APIMs that combine distinguishable and exchangeable dyad compositions,
+see the [Mixed-Composition APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
+For undirected dyadic score outcomes, see the [Undirected Dyadic Score
+Model
 vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 
 ## Cross-Sectional Gaussian DIM
@@ -921,9 +923,14 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 ```
 
 For APIM formulas with distinguishable, exchangeable, generalized, and
-mixed-composition dyads, see the [Actor-Partner Interdependence Model
+intensive longitudinal dyads, see the [Actor-Partner Interdependence
+Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
+models combining multiple dyad compositions, see the [Mixed-Composition
+APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
+For undirected dyadic score outcomes, see the [Undirected Dyadic Score
+Model
 vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 For the broader data-preparation workflow, return to the [Getting
 Started

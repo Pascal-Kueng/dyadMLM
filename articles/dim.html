@@ -39,6 +39,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
+    <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
     <li><a class="dropdown-item" href="../articles/undirected-dsm.html">Undirected Dyadic Score Model</a></li>
   </ul>
@@ -78,12 +79,12 @@
 multilevel models and its relationship to the Actor-Partner
 Interdependence Model (APIM). The DIM separates a predictor into the
 dyad’s shared level and each member’s deviation from that level.</p>
-<p>For broader guidance on using this package for data preparation for
-various dyadic model types, especially APIMs with multiple dyad types,
-generalized outcomes, intensive longitudinal models, and optimizer
-choices, see the <a href="getting-started.html">Getting Started
-vignette</a> and the <a href="apim.html">Actor-Partner Interdependence
-Model vignette</a>. For undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model
+<p>For the broader data-preparation workflow, see the <a href="getting-started.html">Getting Started vignette</a>. For
+distinguishable, exchangeable, generalized, and intensive longitudinal
+APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model
+vignette</a>. For APIMs that combine distinguishable and exchangeable
+dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition
+APIM vignette</a>. For undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model
 vignette</a>.</p>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dim">Cross-Sectional Gaussian DIM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dim"></a>
@@ -1421,11 +1422,10 @@ preserve exchangeability.</p>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>For APIM formulas with distinguishable, exchangeable, generalized,
-and mixed-composition dyads, see the <a href="apim.html">Actor-Partner
-Interdependence Model vignette</a>. For undirected dyadic score
-outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score
-Model vignette</a>. For the broader data-preparation workflow, return to
-the <a href="getting-started.html">Getting Started vignette</a>.</p>
+and intensive longitudinal dyads, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>. For
+models combining multiple dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For
+undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model vignette</a>.
+For the broader data-preparation workflow, return to the <a href="getting-started.html">Getting Started vignette</a>.</p>
 <p>For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
 and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses

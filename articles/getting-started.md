@@ -23,10 +23,12 @@ exchangeable dyad composition.
 This vignette focuses on the automatic data preparation step.
 
 For guidance and examples on how to use the prepared data to estimate
-various APIM models from simple Gaussian cross-sectional to generalized
-intensive longitudinal (ILD) models with multiple dyad types, see the
+cross-sectional, generalized, and intensive longitudinal APIMs, see the
 [Actor-Partner Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
+models that combine distinguishable and exchangeable dyad compositions,
+see the [Mixed-Composition APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
 
 For guidance on how to use the Dyad-Individual Model (DIM)
 parameterization, including dyad-mean and within-dyad-deviation
@@ -812,6 +814,8 @@ print(mixed_cross_data_pooled_constrained)
 For model formulas and interpretation, continue with the [Actor-Partner
 Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
+[Mixed-Composition APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
 [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
 [Undirected Dyadic Score Model
