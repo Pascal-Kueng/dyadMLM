@@ -14,13 +14,11 @@ Implemented scope:
 - raw APIM columns for cross-sectional or explicitly undecomposed predictors
 - DIM dyad-mean and within-dyad-deviation columns
 - DIM currently requires one exchangeable dyad composition
-- `outcomes = NULL` in `prepare_interdep_data()` metadata, so DSM preparation
-  can distinguish predictor-side and outcome-side transformations
 - `model_type = "undirected_dsm"` for undirected dyadic-score model data
   preparation
 - undirected DSM currently requires one exchangeable dyad composition
 - central generated-column metadata via `interdep_generated_columns()`, with
-  one row per temporal predictor, APIM, DIM, or undirected DSM column
+  one row per temporal predictor, APIM, or DIM-style predictor column
 
 Reserved for later:
 
@@ -29,7 +27,7 @@ Reserved for later:
 - grand-mean-only centering as a separate user option
 - automatic inference of 3-level decomposition from the fitted model structure
 - directed DSM variants
-- centered or change-from-usual DSM outcome scores
+- explicit multivariate or SEM-oriented dyad-score preparation
 
 `time_2l` refers to the predictor decomposition over time, not to the full
 random-effects structure of the fitted model.
@@ -52,10 +50,8 @@ The resolved temporal predictor decomposition choice is stored in
 `temporal_predictor_decomposition = "auto"` resolves to `time_2l` when both `time` and
 `predictors` are supplied, and to `none` otherwise.
 
-For APIM and DIM, `predictors` are the only variables transformed. DSM uses a
-separate `outcomes` argument rather than broadening `predictors` into a generic
-variable list. This keeps APIM/DIM predictor construction clear while allowing
-DSM outcome construction to use different rules.
+Only `predictors` are transformed. Outcomes remain unchanged and are selected
+later in the model formula.
 
 `temporal_predictor_decomposition` controls predictor pre-decomposition over
 time. DIM may still apply model-specific conventions after that step;
@@ -193,28 +189,9 @@ Predictor-side construction should reuse the current DIM path completely. For
 ILD data, that means predictors are first decomposed into `.i_*_cwp` and
 `.i_*_cbp`, then converted into dyad means and within-dyad deviations.
 
-Outcome-side construction should be handled separately because the semantics are
-different. For ILD dyadic-score outcomes, the default target is the raw
-observation-level dyad score at each time point:
-
-```r
-.i_y_raw_dyad_mean
-.i_y_raw_within_dyad_deviation
-```
-
-For cross-sectional data, these are computed within dyad. For ILD data, they
-are computed within dyad-time. Outcomes are not within-/between-person centered
-by default. Centered or change-from-usual dyadic-score outcomes can be
-considered later as an explicit option, not as the default behavior.
-
-Store DSM outcome metadata separately from predictor metadata, for example:
-
-```r
-attr(data, "interdep")$undirected_dsm_outcomes
-```
-
-DSM outcome columns also appear in `interdep_generated_columns()` with
-`model_family = "undirected_dsm"` and `variable_role = "outcome"`.
+Outcome-side scores are not materialized for the MLM-focused API. A future
+explicit multivariate or SEM workflow would require a separate dyad-score
+preparation design.
 
 ## Validation Rules
 
@@ -224,13 +201,10 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
   `temporal_predictor_decomposition = "none"` only for model types that do not
   compute dyad means or within-dyad deviations, such as raw APIM.
 - DIM and undirected DSM predictor construction require numeric predictors.
-- Undirected DSM outcome construction requires numeric outcomes.
 - user data may not contain package-owned `.i_` columns.
 - longitudinal raw DIM or undirected DSM predictor construction is currently
   rejected because it mixes within-person and between-person information.
-- `model_type = "undirected_dsm"` requires `outcomes`.
-- DSM outcome columns use raw outcomes; `temporal_predictor_decomposition`
-  applies only to predictors.
+- `temporal_predictor_decomposition` applies only to predictors.
 - `model_type = "dim"` and `model_type = "undirected_dsm"` currently require
   one exchangeable dyad composition.
 
@@ -241,8 +215,8 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
   compact.
 - Review `add_undirected_dyadic_score_columns()` before treating undirected DSM
   as stable.
-- Treat `dim_predictors` and `undirected_dsm_outcomes` metadata names as stable
-  for v0.1 unless the final DIM/DSM review finds a concrete problem.
+- Treat `dim_predictors` metadata as stable for v0.1 unless the final DIM/DSM
+  review finds a concrete problem.
 - Keep `interdep_generated_columns()` internal for v0.1. It is the normalized
   table used by `print.interdep_data()` and documentation-facing summaries, not
   a public inspection API.
@@ -255,8 +229,7 @@ DSM outcome columns also appear in `interdep_generated_columns()` with
 - Keep APIM and temporal predictor decomposition model examples in APIM-focused
   vignettes; avoid duplicating APIM-DIM equivalence material there.
 - Keep the DIM vignette focused on DIM construction and APIM-DIM equivalence.
-- Expand the DSM placeholder vignette after the current
-  `outcomes` and `model_type = "undirected_dsm"` API is reviewed.
+- Expand the DSM placeholder vignette after the directional DSM API is implemented.
 - Analysis-composition controls should run before DIM/DSM compatibility checks.
   The implemented order is `include_compositions`, then
   `set_exchangeable_compositions`, then `pool_compositions`. DIM/DSM should

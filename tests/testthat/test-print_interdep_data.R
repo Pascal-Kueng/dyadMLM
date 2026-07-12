@@ -250,7 +250,6 @@ test_that("interdep data print orders generated column descriptions", {
     member = person_id,
     time = time,
     predictors = x,
-    outcomes = y,
     model_type = c("apim", "undirected_dsm"),
     seed = 123
   )
@@ -260,7 +259,6 @@ test_that("interdep data print orders generated column descriptions", {
   expect_lt(added_column_index(lines, ".i_{pred}_cwp"), added_column_index(lines, ".i_{pred}_cwp_actor"))
   expect_lt(added_column_index(lines, ".i_{pred}_cbp"), added_column_index(lines, ".i_{pred}_cbp_actor"))
   expect_lt(added_column_index(lines, ".i_{pred}_cbp_partner"), added_column_index(lines, ".i_{pred}_cwp_dyad_mean"))
-  expect_lt(added_column_index(lines, ".i_{pred}_cbp_within_dyad_deviation"), added_column_index(lines, ".i_{out}_dyad_mean"))
 })
 
 test_that("interdep data print collapses repeated generated column types", {
@@ -395,40 +393,7 @@ test_that("interdep data print describes longitudinal DIM columns", {
   )
 })
 
-test_that("interdep data print describes undirected DSM outcome columns", {
-  data <- tibble::tibble(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c(1, 2, 3, 4),
-    y = c(1, 2, 3, 4)
-  )
-
-  result <- prepare_interdep_data(
-    data,
-    group = dyad_id,
-    member = person_id,
-    outcomes = y,
-    model_type = "undirected_dsm",
-    seed = 123
-  )
-
-  printed <- capture_wide_print(result)
-
-  expect_true(any(grepl(".i_{out}_dyad_mean", printed, fixed = TRUE)))
-  expect_added_column_description(
-    printed,
-    ".i_{out}_dyad_mean",
-    "DSM dyad-mean outcome: dyad's average outcome level"
-  )
-  expect_true(any(grepl(".i_{out}_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_added_column_description(
-    printed,
-    ".i_{out}_within_dyad_deviation",
-    "DSM within-dyad outcome deviation: person's difference from the dyad average"
-  )
-  expect_false(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-})
-
-test_that("interdep data print describes longitudinal undirected DSM columns", {
+test_that("interdep data print describes longitudinal undirected DSM predictors", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
@@ -443,7 +408,6 @@ test_that("interdep data print describes longitudinal undirected DSM columns", {
     member = person_id,
     time = time,
     predictors = x,
-    outcomes = y,
     model_type = "undirected_dsm",
     seed = 123
   )
@@ -454,16 +418,6 @@ test_that("interdep data print describes longitudinal undirected DSM columns", {
   expect_true(any(grepl(".i_{pred}_cbp", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
-  expect_added_column_description(
-    printed,
-    ".i_{out}_dyad_mean",
-    "DSM dyad-mean outcome: dyad's average outcome level"
-  )
-  expect_added_column_description(
-    printed,
-    ".i_{out}_within_dyad_deviation",
-    "DSM within-dyad outcome deviation: person's difference from the dyad average"
-  )
 })
 
 test_that("interdep data print combines APIM and DIM column descriptions", {
@@ -490,7 +444,7 @@ test_that("interdep data print combines APIM and DIM column descriptions", {
   expect_true(any(grepl(".i_{pred}_within_dyad_deviation", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print combines APIM predictors and DSM outcomes", {
+test_that("interdep data print combines APIM and DSM-style predictors", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
@@ -503,7 +457,6 @@ test_that("interdep data print combines APIM predictors and DSM outcomes", {
     group = dyad_id,
     member = person_id,
     predictors = x,
-    outcomes = y,
     model_type = c("apim", "undirected_dsm"),
     seed = 123
   )
@@ -516,18 +469,8 @@ test_that("interdep data print combines APIM predictors and DSM outcomes", {
     ".i_{pred}_actor",
     "APIM actor predictor: actor's original predictor values"
   )
-  expect_true(any(grepl(".i_{out}_dyad_mean", printed, fixed = TRUE)))
-  expect_added_column_description(
-    printed,
-    ".i_{out}_dyad_mean",
-    "DSM dyad-mean outcome: dyad's average outcome level"
-  )
-  expect_true(any(grepl(".i_{out}_within_dyad_deviation", printed, fixed = TRUE)))
-  expect_added_column_description(
-    printed,
-    ".i_{out}_within_dyad_deviation",
-    "DSM within-dyad outcome deviation: person's difference from the dyad average"
-  )
+  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_within_dyad_deviation", printed, fixed = TRUE)))
 })
 
 test_that("interdep data print describes dropped dyads with missing role information", {

@@ -33,7 +33,6 @@ load_interdep_debug_internals <- function() {
 
   invisible(TRUE)
 }
-
 load_debug_ild_data <- function(dataset = c("gaussian", "tweedie")) {
   dataset <- rlang::arg_match(dataset)
   data_env <- new.env(parent = emptyenv())
@@ -365,81 +364,6 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
     component = component,
     source_col = source_col,
     predictor_suffix = predictor_suffix,
-    column_stem = column_stem,
-    mean_col = mean_col,
-    deviation_col = deviation_col,
-    dyad_decomposition_level = dyad_decomposition_level
-  )
-
-  invisible(data)
-}
-
-
-setup_add_undirected_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                                    set_exchangeable_compositions = NULL,
-                                                    pool_compositions = NULL) {
-  dataset <- rlang::arg_match(dataset)
-  load_interdep_debug_internals()
-
-  raw_data <- load_debug_ild_data(dataset)
-  outcome_name <- if (dataset == "gaussian") "closeness" else "physical_activity"
-
-  data <- validate_interdep_data(
-    raw_data,
-    group = coupleID,
-    member = personID,
-    time = diaryday,
-    predictors = provided_support,
-    model_type = "dim"
-  )
-  data <- infer_dyad_compositions(
-    data,
-    seed = seed,
-    set_exchangeable_compositions = set_exchangeable_compositions,
-    pool_compositions = pool_compositions
-  )
-  data <- center_predictors(data)
-  attr(data, "interdep")$outcomes <- outcome_name
-
-  meta_data <- attr(data, "interdep")
-  out <- data
-  group <- meta_data$group
-  member <- meta_data$member
-  has_time <- meta_data$longitudinal
-  time <- meta_data$time
-  outcomes <- meta_data$outcomes
-  temporal_predictor_decompositions <- meta_data$temporal_predictor_decompositions
-
-  dsm_outcomes <- tibble::tibble(
-    outcome = character(),
-    source_column = character(),
-    mean_column = character(),
-    deviation_column = character()
-  )
-
-  outcome <- outcomes[[1]]
-  outcome_suffix <- make_interdep_suffixes(outcome)[[outcome]]
-  column_stem <- paste0(interdep_reserved_prefix, outcome_suffix, "_raw")
-  mean_col <- paste0(column_stem, "_dyad_mean")
-  deviation_col <- paste0(column_stem, "_within_dyad_deviation")
-  dyad_decomposition_level <- if (has_time) "dyad_time" else "dyad"
-
-  assign_debug_vars(
-    raw_data = raw_data,
-    data = data,
-    set_exchangeable_compositions = set_exchangeable_compositions,
-    pool_compositions = pool_compositions,
-    meta_data = meta_data,
-    out = out,
-    group = group,
-    member = member,
-    has_time = has_time,
-    time = time,
-    outcomes = outcomes,
-    temporal_predictor_decompositions = temporal_predictor_decompositions,
-    dsm_outcomes = dsm_outcomes,
-    outcome = outcome,
-    outcome_suffix = outcome_suffix,
     column_stem = column_stem,
     mean_col = mean_col,
     deviation_col = deviation_col,

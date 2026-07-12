@@ -251,29 +251,10 @@ A materialized signed outcome difference is not required to fit the exact long
 model. The original outcome plus `role_contrast` implicitly represents both
 `YLevel` and `YDiff` through an invertible linear transformation.
 
-Nevertheless, DSM preparation should generate
-
-```text
-.i_satisfaction_dyad_mean
-.i_satisfaction_dyad_difference
-```
-
-with both values repeated across the two member rows. This has several
-advantages:
-
-- it exposes the actual DSM variables described in the literature;
-- it makes the sign convention inspectable;
-- it supports descriptive summaries and model checking;
-- it permits an explicit two-equation or multivariate fit after selecting one
-  row per dyad;
-- it makes tests of the long-format transformation straightforward.
-
-The current `.i_satisfaction_within_dyad_deviation` is `Ci * YDiff`, not
-`YDiff`. It should not be presented as Iida's signed outcome difference.
-
-If either member's value is missing at an occasion, the corresponding dyad
-mean and difference score should be missing. A one-member value must not be
-silently treated as a dyad mean or difference.
+DSM preparation should therefore retain the original outcome unchanged and
+should not require an `outcomes` argument. A future explicit multivariate or
+SEM workflow would need a separate dyad-score preparation design rather than
+adding unused outcome transformations to the MLM-focused API.
 
 ### Role contrast
 
@@ -359,7 +340,6 @@ prepare_interdep_data(
   member = personID,
   role = gender,
   predictors = communication,
-  outcomes = satisfaction,
   model_type = "dsm",
   dsm_role_order = c("female", "male")
 )
@@ -380,7 +360,7 @@ case:
 - exchangeable compositions are rejected for `model_type = "dsm"`;
 - both roles must be present in every structurally complete dyad;
 - each difference direction is recorded in `attr(data, "interdep")`;
-- multiple predictors and outcomes use the same declared role order.
+- multiple predictors use the same declared role order.
 
 Mixed compositions and multiple distinguishable compositions can be designed
 later. Supporting them immediately would require composition-specific role
@@ -400,14 +380,13 @@ would obscure the core implementation.
 5. Generate `.i_dsm_role_contrast` as `+0.5/-0.5` from the declared order.
 6. Generate each predictor's dyad level and full signed dyad difference,
    repeating both on the two member rows.
-7. Generate each outcome's dyad level and full signed dyad difference,
-   repeating both on the two member rows while retaining the raw outcome for
-   the long model response.
-8. Record source variables, generated columns, score type, centering, and role
+7. Retain outcome variables unchanged; users select the outcome in the model
+   formula.
+8. Record source predictors, generated columns, score type, centering, and role
    order in the `interdep` metadata and generated-column registry.
 9. Update `print.interdep_data()` so it states the resolved difference
    direction and describes the generated patterns without printing every
-   predictor or outcome name.
+   predictor name.
 10. Replace the preliminary DSM vignette models with the exact interaction
     formulation and coefficient interpretations.
 11. Retain the DIM vignette's secondary reduced-DSM interpretation, while
@@ -461,7 +440,7 @@ interpretation and could be considered separately.
 - Verify all six fixed coefficients agree within numerical tolerance.
 - Verify the random intercept variance, random slope variance, and covariance
   recover the level variance, difference variance, and their covariance.
-- Verify fitted member outcomes reconstruct fitted `YLevel` and `YDiff`.
+- Verify fitted member outcomes imply the fitted `YLevel` and `YDiff`.
 
 ### Direction reversal
 
@@ -485,7 +464,7 @@ from accidental dependence on row order.
 - Verify requesting APIM and DSM columns together does not overwrite shared
   source columns.
 - Verify generated-column print patterns and metadata remain concise with
-  multiple predictors and outcomes.
+  multiple predictors.
 
 ## Explicit multivariate alternative
 
@@ -576,19 +555,14 @@ paired occasion. The role orientation must remain stable across all occasions.
    printed factor-level order.
 2. Whether the first implementation supports only cross-sectional data and
    adds longitudinal support in a second step.
-3. Whether outcome mean/difference columns remain repeated on both member rows
-   or a helper also provides a one-row-per-dyad score table for multivariate
-   software.
-4. Whether predictor level columns are grand-mean centered by default, and how
+3. Whether predictor level columns are grand-mean centered by default, and how
    that centering is described in DSM-specific output.
-5. Whether `glmmTMB` is the documented primary engine for the exact long model
+4. Whether `glmmTMB` is the documented primary engine for the exact long model
    and `brms` is documented primarily through the explicit multivariate form.
-6. How missing paired outcomes should be handled by the long model versus the
-   descriptive score columns.
+5. How missing paired outcomes should be handled by the long model.
 
 The core mathematical decision is already settled: the full directional DSM
 is representable without abandoning the long member-row structure, provided
 the package supplies a stable `+0.5/-0.5` role contrast and a dyad-level signed
-predictor difference. A signed outcome difference should also be generated for
-clarity and alternative model forms, although it is not needed as the response
-in the exact long interaction model.
+predictor difference. The member-level outcome remains the response in the
+exact long interaction model.

@@ -1,3 +1,7 @@
+test_that("validate_interdep_data has no outcome-selection argument", {
+  expect_false("outcomes" %in% names(formals(validate_interdep_data)))
+})
+
 test_that("validate_interdep_data returns an interdep tibble", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -78,94 +82,6 @@ test_that("validate_interdep_data rejects predictor suffix collisions", {
       predictors = c(`x-a`, `x a`)
     ),
     "Some `predictors` would create the same generated column-name suffix",
-    fixed = TRUE
-  )
-})
-
-test_that("validate_interdep_data rejects outcome suffix collisions", {
-  data <- data.frame(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    "y-a" = 1:4,
-    "y a" = 5:8,
-    check.names = FALSE
-  )
-
-  expect_error(
-    validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      outcomes = c(`y-a`, `y a`)
-    ),
-    "Some `outcomes` would create the same generated column-name suffix",
-    fixed = TRUE
-  )
-})
-
-test_that("validate_interdep_data rejects shared DSM predictor and outcome variables", {
-  data <- data.frame(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    x = 1:4
-  )
-
-  expect_error(
-    validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      predictors = x,
-      outcomes = x,
-      model_type = "undirected_dsm",
-      temporal_predictor_decomposition = "none"
-    ),
-    "`predictors` and `outcomes` must select different variables",
-    fixed = TRUE
-  )
-})
-
-test_that("validate_interdep_data rejects shared predictor and outcome variables generally", {
-  data <- data.frame(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    x = 1:4
-  )
-
-  expect_error(
-    validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      predictors = x,
-      outcomes = x,
-      model_type = "apim"
-    ),
-    "`predictors` and `outcomes` must select different variables",
-    fixed = TRUE
-  )
-})
-
-test_that("validate_interdep_data rejects sanitized raw DSM predictor-outcome collisions", {
-  data <- data.frame(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    "x-a" = 1:4,
-    "x a" = 5:8,
-    check.names = FALSE
-  )
-
-  expect_error(
-    validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      predictors = `x-a`,
-      outcomes = `x a`,
-      model_type = "undirected_dsm",
-      temporal_predictor_decomposition = "none"
-    ),
-    "would create the same generated `.i_` column names",
     fixed = TRUE
   )
 })
@@ -296,28 +212,15 @@ test_that("validate_interdep_data validates incompatible model type requests", {
     fixed = TRUE
   )
 
-  expect_error(
-    validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      predictors = x,
-      model_type = "undirected_dsm"
-    ),
-    '`model_type = "undirected_dsm"` requires `outcomes` to be supplied.',
-    fixed = TRUE
-  )
-
   result <- validate_interdep_data(
     data,
     group = dyad_id,
     member = person_id,
     predictors = x,
-    outcomes = y,
     model_type = "undirected_dsm"
   )
 
-  expect_equal(attr(result, "interdep")$outcomes, "y")
+  expect_equal(attr(result, "interdep")$predictors, "x")
 })
 
 test_that("validate_interdep_data validates explicit time_2l temporal predictor decomposition", {
@@ -373,12 +276,11 @@ test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
   )
 })
 
-test_that("validate_interdep_data rejects non-numeric DIM and DSM variables", {
+test_that("validate_interdep_data rejects non-numeric DIM and DSM predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
-    x = factor(c("low", "high", "low", "high")),
-    y = factor(c("low", "high", "low", "high"))
+    x = factor(c("low", "high", "low", "high"))
   )
 
   expect_error(
@@ -391,18 +293,6 @@ test_that("validate_interdep_data rejects non-numeric DIM and DSM variables", {
       temporal_predictor_decomposition = "none"
     ),
     '`predictors` used with `model_type = "dim"` or `model_type = "undirected_dsm"` must be numeric.',
-    fixed = TRUE
-  )
-
-  expect_error(
-    validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      outcomes = y,
-      model_type = "undirected_dsm"
-    ),
-    '`outcomes` used with `model_type = "undirected_dsm"` must be numeric.',
     fixed = TRUE
   )
 })
@@ -520,17 +410,6 @@ test_that("validate_interdep_data rejects missing columns", {
       predictors = missing_predictor
     ),
     "`predictors` must select columns from `data`.",
-    fixed = TRUE
-  )
-
-  expect_error(
-    validate_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      outcomes = missing_outcome
-    ),
-    "`outcomes` must select columns from `data`.",
     fixed = TRUE
   )
 })

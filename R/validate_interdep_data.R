@@ -16,12 +16,9 @@
 #' @param time Optional column identifying time or measurement order.
 #' @param predictors Optional variables to select and store as metadata for
 #'   temporal predictor decomposition and model-helper functions.
-#' @param outcomes Optional variables to select and store as metadata for
-#'   outcome-side model-helper functions. Currently used by
-#'   `model_type = "undirected_dsm"`.
 #' @param model_type Requested model-ready column families. Can contain one or
 #'   more of `"apim"`, `"dim"`, and `"undirected_dsm"`. `"none"` indicates no
-#'   model-specific predictor or outcome construction and must be used alone.
+#'   model-specific predictor construction and must be used alone.
 #' @param temporal_predictor_decomposition Requested temporal predictor decomposition
 #'   strategy for predictors. `"none"` leaves predictors undecomposed before
 #'   model-specific columns are constructed. `"time_2l"` indicates a two-level
@@ -49,7 +46,6 @@ validate_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    outcomes = NULL,
     model_type = "apim",
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     incomplete_dyads = c("error", "drop"),
@@ -161,27 +157,6 @@ validate_interdep_data <- function(
     rename_hint = "variables"
   )
 
-  outcomes_quo <- rlang::enquo(outcomes)
-  outcome_names <- select_interdep_columns(out, outcomes_quo, "outcomes")
-  # Avoid different outcomes resolving to the same sanitized name later.
-  make_interdep_suffixes(
-    outcome_names,
-    label_type = "`outcomes`",
-    rename_hint = "variables"
-  )
-
-  shared_model_columns <- intersect(predictor_names, outcome_names)
-  if (length(shared_model_columns) > 0) {
-    stop(
-      "`predictors` and `outcomes` must select different variables. ",
-      "The same variable cannot be prepared as both a predictor and an outcome in one call. ",
-      "Shared variable(s): ",
-      paste(shared_model_columns, collapse = ", "),
-      ".",
-      call. = FALSE
-    )
-  }
-
   # Resolve dyads with fewer than two observed members.
   out_list <- resolve_incomplete_dyads(
     out = out,
@@ -239,42 +214,8 @@ validate_interdep_data <- function(
     }
   }
 
-  if ("undirected_dsm" %in% model_type && length(outcome_names) == 0) {
-    stop(
-      '`model_type = "undirected_dsm"` requires `outcomes` to be supplied.',
-      call. = FALSE
-    )
-  }
-
   if (temporal_predictor_decomposition == "auto") {
     temporal_predictor_decomposition <- if (has_time && length(predictor_names) > 0) "time_2l" else "none"
-  }
-
-  if ("undirected_dsm" %in% model_type &&
-      temporal_predictor_decomposition == "none" &&
-      length(predictor_names) > 0 &&
-      length(outcome_names) > 0) {
-    predictor_suffixes <- make_interdep_suffixes(predictor_names)
-    outcome_suffixes <- make_interdep_suffixes(outcome_names)
-    shared_suffixes <- intersect(unname(predictor_suffixes), unname(outcome_suffixes))
-
-    if (length(shared_suffixes) > 0) {
-      conflicting_predictors <- predictor_names[predictor_suffixes %in% shared_suffixes]
-      conflicting_outcomes <- outcome_names[outcome_suffixes %in% shared_suffixes]
-
-      stop(
-        "`predictors` and `outcomes` used with `model_type = \"undirected_dsm\"` and ",
-        "`temporal_predictor_decomposition = \"none\"` would create the same generated `.i_` column names. ",
-        "This can happen when different variable names become identical after replacing spaces or punctuation with underscores. ",
-        "Conflicting predictor(s): ",
-        paste(conflicting_predictors, collapse = ", "),
-        ". Conflicting outcome(s): ",
-        paste(conflicting_outcomes, collapse = ", "),
-        ". Use different variables or rename one of them. For longitudinal data, use ",
-        "`temporal_predictor_decomposition = \"auto\"` or `\"time_2l\"` so predictor columns are decomposed before DSM columns are generated.",
-        call. = FALSE
-      )
-    }
   }
 
   # Check if predictors are numeric in certain cases where needed.
@@ -309,30 +250,12 @@ validate_interdep_data <- function(
     }
   }
 
-  if ("undirected_dsm" %in% model_type && length(outcome_names) > 0) {
-    outcome_is_numeric <- vapply(out[outcome_names], is.numeric, logical(1))
-    non_numeric_outcomes <- outcome_names[!outcome_is_numeric]
-
-    if (length(non_numeric_outcomes) > 0) {
-      stop(
-        "`outcomes` used with `model_type = \"undirected_dsm\"` must be numeric. ",
-        "Undirected DSM outcome construction computes dyad means and within-dyad deviations. ",
-        "Non-numeric outcome(s): ",
-        paste(non_numeric_outcomes, collapse = ", "),
-        ".",
-        call. = FALSE
-      )
-    }
-  }
-
-
   attr(out, "interdep") <- list(
     group = group_name,
     member = member_name,
     role = role_name,
     time = time_name,
     predictors = predictor_names,
-    outcomes = outcome_names,
     n_dyads = n_groups,
     longitudinal = has_time,
     temporal_predictor_decomposition = temporal_predictor_decomposition,

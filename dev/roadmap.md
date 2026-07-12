@@ -94,10 +94,10 @@ Target vignette structure:
   - cross-sectional and ILD APIM-DIM equivalence
   - role-moderated and random-slope material only as advanced/conceptual
     guidance until the implementation is more complete
-- `undirected-dsm.Rmd`
+- `dsm.Rmd`
   - currently an under-construction placeholder
   - add fuller examples before the alpha feedback round
-  - keep DSM outcome-side semantics separate from DIM predictor construction
+  - keep outcomes unchanged in the MLM-focused preparation API
 
 ## Version 0.1.0 - First CRAN Release Candidate
 
@@ -169,20 +169,13 @@ model-building features.
   - Support raw APIM columns, within-/between-person APIM columns, and DIM
     dyad-mean / within-dyad-deviation columns
   - Keep missing-data behavior explicit
-  - Keep `predictors` as the predictor-side API; add `outcomes` separately
-    for outcome-aware preparation rather than turning `predictors` into a
-    generic variable list
+  - Keep `predictors` as the only transformed-variable API; select outcomes in
+    fitted-model formulas
 - Add minimal undirected dyadic-score model (DSM) data preparation
-  - Add `outcomes = NULL` to store outcome variables separately from
-    `predictors`
   - Add `model_type = "undirected_dsm"` for undirected DSM preparation only
   - Require one exchangeable dyad composition for the first undirected DSM path
   - Reuse DIM construction for predictor-side dyad means/deviations
-  - Add a separate outcome helper for raw dyad outcome means and within-dyad
-    deviations
-  - For ILD outcomes, compute raw dyad scores within dyad-time
-  - Do not within-/between-person center ILD outcomes by default; reserve
-    centered or directed DSM outcomes for an explicit later option
+  - Leave outcomes unchanged
 - Add a print method for `interdep_data`
   - Keep normal tibble/data-frame printing; add a compact interdep header above
     the data output
@@ -192,10 +185,10 @@ model-building features.
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
     `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
-    temporal predictor components, APIM predictor columns, DIM predictor
-    columns, and undirected DSM outcome columns
+    temporal predictor components, APIM predictor columns, and DIM-style
+    predictor columns
   - Drive generated-column printing from `interdep_generated_columns()`, which
-    normalizes temporal predictor, APIM, DIM, and undirected DSM metadata into
+    normalizes temporal predictor, APIM, and DIM metadata into
     one row per concrete generated column
   - Make dropped incomplete dyads and missing roles visible
   - Target display:
@@ -331,12 +324,8 @@ Complete these before calling the feature set CRAN-ready:
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
 - Minimal undirected DSM preparation: done for the current v0.1 scope
-  - `outcomes` selection and validation are accepted
-  - raw outcome dyad means/deviations are the only v0.1 outcome scores
-  - cross-sectional outcomes use dyad-level scores; ILD outcomes use dyad-time
-    scores
-  - DSM outcome metadata stays in `undirected_dsm_outcomes`, separate from
-    `dim_predictors`
+  - outcomes remain unchanged and are selected in model formulas
+  - DSM currently reuses DIM-style predictor construction
   - expand the DSM placeholder vignette before the alpha feedback round
 - Finalize vignette polish for v0.1.0
   - keep `getting-started.Rmd` as an orientation and data-prep vignette, not the
@@ -381,10 +370,8 @@ Complete these before calling the feature set CRAN-ready:
 - Add helper functions to rotate `.i_diff_*` / Idiff structures back to
   partner-level interpretations
 - Extend dyadic-score model support beyond the minimal v0.1.0 data-prep API
-  - Consider directed DSM variants only after the undirected data-prep path is
-    stable
-  - Consider centered or change-from-usual DSM outcome scores only as explicit
-    options
+  - Implement the full directional DSM using a role contrast and signed
+    predictor differences
   - Keep multivariate DSM modeling and formula/syntax generation for a later
     modeling layer
 - Extend composition controls only after the v0.1 API has real examples
@@ -464,7 +451,7 @@ Minimum expected state:
 
 - stable `prepare_interdep_data()` argument names and semantics
 - stable generated-column families for compositions, temporal predictor
-  components, APIM predictors, DIM predictors, and undirected DSM outcomes
+  components, APIM predictors, and DIM/DSM predictors
 - stable analysis-composition controls:
   `include_compositions`, `set_exchangeable_compositions`, and
   `pool_compositions`

@@ -16,7 +16,6 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(interdep)
-has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 This vignette focuses on undirected Dyadic Score Model (DSM) preparation. For
@@ -29,11 +28,11 @@ combine distinguishable and exchangeable dyad compositions, see the
 within-dyad-deviation predictors, see the
 [Dyad-Individual Model vignette](dim.html).
 
-> This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
+> This vignette is under construction. A directional DSM implementation is planned.
 
-
-The model is an expantion of the DIM, but we now also decompose the outcome.
-In preparaten, we therefore need to specify which variable is the outcome.
+The outcome remains unchanged and does not need to be declared during data
+preparation. The current undirected DSM preparation creates the same
+dyad-mean and within-dyad-deviation predictor columns as the DIM.
 
 ```{r prepare-cross-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
@@ -41,7 +40,6 @@ cross_exchangeable_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   predictors = communication,
-  outcomes = satisfaction,
   # Create both APIM and DSM columns for comparison.
   model_type = c("apim", "undirected_dsm"),
   seed = 123
@@ -49,56 +47,6 @@ cross_exchangeable_data <- prepare_interdep_data(
 
 # Print the first two dyads.
 print(cross_exchangeable_data, n = 4)
-```
-
-
-## The separate models approach
-
-Since `glmmTMB` is a univariate framwork, we can't model both mean and difference
-decomposed parts of the outcome in the same model. An approximation that does
-not estimate the residual correlation between the mean and difference is to 
-estimate two seaparate models. 
-
-The dyad-mean model is a DIM (see DIM Vignette for interpretation and explanations),
-with the outcome being the dyad-mean of the outcome. (Note: could and should we control
-for the dyad difference?? What does Iida say?)
-
-```{r fit-cross-dsm-mean, eval=has_glmmTMB}
-
-dim_dyad_mean <- glmmTMB::glmmTMB(
-  .i_satisfaction_dyad_mean ~
-
-    # Pooled fixed intercept
-    0 +
-
-    # Between-couple effect
-    .i_communication_dyad_mean_gmc +
-    (1 | coupleID)
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = cross_exchangeable_data
-)
-
-summary(dim_dyad_mean)
-```
-
-```{r fit-cross-dsm-deviation, eval=has_glmmTMB}
-
-dim_within_dyad_deviation <- glmmTMB::glmmTMB(
-  .i_satisfaction_within_dyad_deviation ~
-
-    # Pooled fixed intercept
-    0 +
-
-    # Within-couple effect
-    .i_communication_within_dyad_deviation +
-    (1 | coupleID)
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = cross_exchangeable_data
-)
-
-summary(dim_within_dyad_deviation)
 ```
 
 

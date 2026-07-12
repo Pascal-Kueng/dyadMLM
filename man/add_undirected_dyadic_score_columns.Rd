@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_undirected_dyadic_score_columns.R
 \name{add_undirected_dyadic_score_columns}
 \alias{add_undirected_dyadic_score_columns}
-\title{Add dyadic-score model (undirected) predictor and outcome columns}
+\title{Add dyadic-score model (undirected) predictor columns}
 \usage{
 add_undirected_dyadic_score_columns(data)
 }
@@ -11,22 +11,17 @@ add_undirected_dyadic_score_columns(data)
 }
 \value{
 An \code{interdep_data} object with dyad-mean and within-dyad-deviation
-predictor and outcome columns added and DSM outcome metadata recorded.
+predictor columns added.
 }
 \description{
 Adds Dyad-Score Model (DSM) style dyad-mean and within-dyad-deviation
-columns for the predictors and outcomes recorded in an \code{interdep_data} object. For
+columns for the predictors recorded in an \code{interdep_data} object. For
 currently supported undirected DSMs, the data must contain one exchangeable
 dyad composition. This means distinguishable dyads and multiple exchangeable
 compositions are not supported by DSM construction until explicit
 role-contrast, composition-specific, or pooling support is added.
 Predictors are constructed and treated identically to the DIM method.
-Outcomes are not temporally decomposed or grand-mean centered. Instead, a raw
-dyad mean and row-level within-dyad deviation is created at each time-point.
-}
-\details{
-The function reads \code{attr(data, "interdep")$temporal_predictor_decompositions} and
-stores the constructed outcome columns in
-\code{attr(data, "interdep")$undirected_dsm_outcomes}.
+The function reads
+\code{attr(data, "interdep")$temporal_predictor_decompositions}.
 }
 \keyword{internal}

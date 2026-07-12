@@ -1,22 +1,21 @@
 #' Collect interdep-generated columns
 #'
 #' Creates a normalized, one-row-per-column view over temporal predictor, APIM,
-#' DIM, and undirected DSM columns stored in an `interdep` attribute. This is a
+#' and DIM columns stored in an `interdep` attribute. This is a
 #' derived lookup table; the model-specific metadata tables remain the source
 #' records.
 #'
 #' @param meta The `interdep` metadata attribute from an `interdep_data` object.
 #'
 #' @return A tibble with one row per generated temporal predictor, APIM, DIM,
-#'   or undirected DSM column.
+#'   or DIM column.
 #'
 #' @keywords internal
 interdep_generated_columns <- function(meta) {
   dplyr::bind_rows(
     temporal_predictor_generated_columns(meta$temporal_predictor_decompositions),
     apim_generated_columns(meta$apim_predictors),
-    dim_generated_columns(meta$dim_predictors),
-    undirected_dsm_generated_columns(meta$undirected_dsm_outcomes)
+    dim_generated_columns(meta$dim_predictors)
   )
 }
 
@@ -127,35 +126,6 @@ dim_generated_columns <- function(dim_predictors) {
   attach_generated_column_specs(columns)
 }
 
-undirected_dsm_generated_columns <- function(undirected_dsm_outcomes) {
-  if (is.null(undirected_dsm_outcomes) || nrow(undirected_dsm_outcomes) == 0) {
-    return(empty_generated_columns())
-  }
-
-  columns <- dplyr::bind_rows(
-    tibble::tibble(
-      model_family = "undirected_dsm",
-      variable_role = "outcome",
-      variable = undirected_dsm_outcomes$outcome,
-      component = "raw",
-      column_role = "dyad_mean",
-      column = undirected_dsm_outcomes$mean_column,
-      source_column = undirected_dsm_outcomes$source_column
-    ),
-    tibble::tibble(
-      model_family = "undirected_dsm",
-      variable_role = "outcome",
-      variable = undirected_dsm_outcomes$outcome,
-      component = "raw",
-      column_role = "within_dyad_deviation",
-      column = undirected_dsm_outcomes$deviation_column,
-      source_column = undirected_dsm_outcomes$source_column
-    )
-  )
-
-  attach_generated_column_specs(columns)
-}
-
 attach_generated_column_specs <- function(columns) {
   out <- columns |>
     dplyr::left_join(
@@ -205,8 +175,6 @@ generated_column_spec_lookup <- function() {
     "dim",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".i_{pred}_cwp_dyad_mean",                   "DIM within-person dyad-mean predictor: shared momentary deviations in the dyad",
     "dim",            "predictor",    "cwp",      "within_dyad_deviation",  "within_person",              "within_dyad_deviation",    "none",            23L,          ".i_{pred}_cwp_within_dyad_deviation",       "DIM within-person within-dyad predictor deviation: person's momentary deviation from the dyad average",
     "dim",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".i_{pred}_cbp_dyad_mean",                   "DIM between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
-    "dim",            "predictor",    "cbp",      "within_dyad_deviation",  "between_person_grand_mean",  "within_dyad_deviation",    "none",            25L,          ".i_{pred}_cbp_within_dyad_deviation",       "DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level",
-    "undirected_dsm", "outcome",      "raw",      "dyad_mean",              "none",                       "dyad_mean",                "none",            30L,          ".i_{out}_dyad_mean",                   "DSM dyad-mean outcome: dyad's average outcome level",
-    "undirected_dsm", "outcome",      "raw",      "within_dyad_deviation",  "none",                       "within_dyad_deviation",    "none",            31L,          ".i_{out}_within_dyad_deviation",       "DSM within-dyad outcome deviation: person's difference from the dyad average"
+    "dim",            "predictor",    "cbp",      "within_dyad_deviation",  "between_person_grand_mean",  "within_dyad_deviation",    "none",            25L,          ".i_{pred}_cbp_within_dyad_deviation",       "DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level"
   )
 }

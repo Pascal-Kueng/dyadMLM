@@ -252,47 +252,6 @@ test_that("interdep_generated_columns records temporal and dyadic decomposition 
   )
 })
 
-test_that("interdep_generated_columns collects undirected DSM outcome columns", {
-  data <- data.frame(
-    dyad_id = c(1, 1, 2, 2),
-    person_id = c("A", "B", "C", "D"),
-    y = c(10, 14, 20, 24)
-  )
-
-  prepared <- prepare_interdep_data(
-    data,
-    group = dyad_id,
-    member = person_id,
-    outcomes = y,
-    model_type = "undirected_dsm",
-    seed = 123
-  )
-
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
-
-  expect_equal(
-    result,
-    tibble::tibble(
-      model_family = c("undirected_dsm", "undirected_dsm"),
-      variable_role = c("outcome", "outcome"),
-      variable = c("y", "y"),
-      component = c("raw", "raw"),
-      column_role = c("dyad_mean", "within_dyad_deviation"),
-      column = c(".i_y_dyad_mean", ".i_y_within_dyad_deviation"),
-      source_column = c("y", "y"),
-      temporal_decomposition = c("none", "none"),
-      dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
-      column_centering = c("none", "none"),
-      print_order = c(30L, 31L),
-      column_pattern = c(".i_{out}_dyad_mean", ".i_{out}_within_dyad_deviation"),
-      description = c(
-        "DSM dyad-mean outcome: dyad's average outcome level",
-        "DSM within-dyad outcome deviation: person's difference from the dyad average"
-      )
-    )
-  )
-})
-
 test_that("interdep_generated_columns combines requested model families", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
@@ -322,12 +281,11 @@ test_that("interdep_generated_columns combines requested model families", {
   )
 })
 
-test_that("interdep_generated_columns combines DIM predictors and DSM outcomes", {
+test_that("interdep_generated_columns collects DSM-style predictor columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
-    x = c(1, 10, 20, 30),
-    y = c(5, 6, 7, 8)
+    x = c(1, 10, 20, 30)
   )
 
   prepared <- prepare_interdep_data(
@@ -335,7 +293,6 @@ test_that("interdep_generated_columns combines DIM predictors and DSM outcomes",
     group = dyad_id,
     member = person_id,
     predictors = x,
-    outcomes = y,
     model_type = c("dim", "undirected_dsm"),
     temporal_predictor_decomposition = "none",
     seed = 123
@@ -345,19 +302,17 @@ test_that("interdep_generated_columns combines DIM predictors and DSM outcomes",
 
   expect_equal(
     result$model_family,
-    c("dim", "dim", "undirected_dsm", "undirected_dsm")
+    c("dim", "dim")
   )
   expect_equal(
     result$variable_role,
-    c("predictor", "predictor", "outcome", "outcome")
+    c("predictor", "predictor")
   )
   expect_equal(
     result$column,
     c(
       ".i_x_dyad_mean_gmc",
-      ".i_x_within_dyad_deviation",
-      ".i_y_dyad_mean",
-      ".i_y_within_dyad_deviation"
+      ".i_x_within_dyad_deviation"
     )
   )
 })

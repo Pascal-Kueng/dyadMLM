@@ -27,14 +27,13 @@
 #' measures.
 #' @param predictors Optional variables to use for temporal predictor
 #'   decomposition and model-ready predictor construction.
-#' @param outcomes Optional variables to use for model-ready outcome construction.
-#'   Currently only needed for `model_type = "undirected_dsm"`.
 #' @param model_type Model-ready column families to construct. Can contain one
 #'   or more of `"apim"`, `"dim"`, and `"undirected_dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
 #'   within-dyad-deviation predictors. `"undirected_dsm"` creates undirected
-#'   dyadic-score model columns. `"none"` skips model-specific predictor and
-#'   outcome construction after validation, composition inference, and optional
+#'   dyadic-score model predictor columns. Outcomes remain unchanged and are
+#'   selected in the fitted-model formula. `"none"` skips model-specific predictor
+#'   construction after validation, composition inference, and optional
 #'   temporal predictor decomposition, and must be used alone.
 #' @param temporal_predictor_decomposition Temporal decomposition strategy for
 #'   `predictors`.
@@ -145,7 +144,6 @@ prepare_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
-    outcomes = NULL,
     model_type = "apim",
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
     set_exchangeable_compositions = NULL,
@@ -168,7 +166,6 @@ prepare_interdep_data <- function(
     role = {{ role }},
     time = {{ time }},
     predictors = {{ predictors }},
-    outcomes = {{ outcomes }},
     model_type = model_type,
     temporal_predictor_decomposition = temporal_predictor_decomposition,
     incomplete_dyads = incomplete_dyads,

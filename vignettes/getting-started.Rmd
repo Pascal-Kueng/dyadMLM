@@ -217,12 +217,10 @@ print(cross_exchangeable_data, n = 4)
 (e.g., `male-female` and `female-male` will both work), and you can use different separators
 like `male_female`, `male_x_female`, or `male female`.
 
-For exchangeable dyads, we can also request DIM and undirected DSM columns.
+For exchangeable dyads, we can also request DIM and undirected DSM predictor columns.
 This works here because omitting `role` treats all dyads as a single type of
 exchangeable dyads, and DIM and undirected DSM currently require exchangeable
-dyads. Undirected DSM preparation additionally needs `outcomes`, because
-it creates dyad-mean and within-dyad-deviation columns for both the predictor
-and the outcome.
+dyads. The outcome remains unchanged and is selected later in the model formula.
 
 ```{r prepare-cross-dim-dsm}
 cross_dim_dsm_data <- prepare_interdep_data(
@@ -230,7 +228,6 @@ cross_dim_dsm_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   predictors = communication,
-  outcomes = satisfaction,
   model_type = c("dim", "undirected_dsm"),
   seed = 123
 )

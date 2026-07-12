@@ -1,3 +1,7 @@
+test_that("prepare_interdep_data has no outcome-selection argument", {
+  expect_false("outcomes" %in% names(formals(prepare_interdep_data)))
+})
+
 test_that("prepare_interdep_data returns validated data with dyad composition metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2, 3, 3),
@@ -174,7 +178,6 @@ test_that("prepare_interdep_data rejects unsupported dyad compositions for undir
       group = dyad_id,
       member = person_id,
       role = role,
-      outcomes = y,
       model_type = "undirected_dsm",
       seed = 123
     ),
@@ -444,7 +447,6 @@ test_that("prepare_interdep_data filters before DIM and DSM compatibility checks
     member = person_id,
     role = role,
     predictors = x,
-    outcomes = y,
     model_type = c("dim", "undirected_dsm"),
     temporal_predictor_decomposition = "none",
     include_compositions = "female-female",
@@ -463,10 +465,8 @@ test_that("prepare_interdep_data filters before DIM and DSM compatibility checks
   expect_false(any(grepl("male_x_male", names(result), fixed = TRUE)))
   expect_true(".i_x_dyad_mean_gmc" %in% names(result))
   expect_true(".i_x_within_dyad_deviation" %in% names(result))
-  expect_true(".i_y_dyad_mean" %in% names(result))
-  expect_true(".i_y_within_dyad_deviation" %in% names(result))
+  expect_false(any(startsWith(names(result), ".i_y_")))
   expect_equal(meta$dim_predictors$predictor, "x")
-  expect_equal(meta$undirected_dsm_outcomes$outcome, "y")
 })
 
 test_that("prepare_interdep_data can filter, constrain, and pool in one call", {

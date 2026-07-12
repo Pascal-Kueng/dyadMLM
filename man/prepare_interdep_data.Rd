@@ -11,7 +11,6 @@ prepare_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
-  outcomes = NULL,
   model_type = "apim",
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
   set_exchangeable_compositions = NULL,
@@ -43,15 +42,13 @@ measures.}
 \item{predictors}{Optional variables to use for temporal predictor
 decomposition and model-ready predictor construction.}
 
-\item{outcomes}{Optional variables to use for model-ready outcome construction.
-Currently only needed for \code{model_type = "undirected_dsm"}.}
-
 \item{model_type}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"undirected_dsm"}. \code{"apim"} creates
 actor and partner predictors. \code{"dim"} creates dyad-mean and
 within-dyad-deviation predictors. \code{"undirected_dsm"} creates undirected
-dyadic-score model columns. \code{"none"} skips model-specific predictor and
-outcome construction after validation, composition inference, and optional
+dyadic-score model predictor columns. Outcomes remain unchanged and are
+selected in the fitted-model formula. \code{"none"} skips model-specific predictor
+construction after validation, composition inference, and optional
 temporal predictor decomposition, and must be used alone.}
 
 \item{temporal_predictor_decomposition}{Temporal decomposition strategy for
