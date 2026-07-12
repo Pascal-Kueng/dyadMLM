@@ -226,9 +226,9 @@ print(cross_exchangeable_data, n = 4)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 190 × 9
 #>   personID coupleID gender communication satisfaction .i_composition      
@@ -239,11 +239,15 @@ print(cross_exchangeable_data, n = 4)
 #> 4        4        2 male            6.51         6.08 assumed_exchangeable
 #> # ℹ 186 more rows
 #> # ℹ 3 more variables: .i_composition_role <fct>,
-#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_assumed_exchangeable <dbl>
+#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_arbitrary <dbl>
 ```
 
-The `seed` makes the random `.i_diff_*` sign assignment reproducible. We
-use a fixed seed in all exchangeable-dyad examples below for consistent
+The generated `.i_diff_arbitrary` contrast assigns `-1` and `1` to the
+two members of each exchangeable dyad. Its direction is arbitrary, and
+`seed` makes the assignment reproducible. When role compositions are
+available, each exchangeable composition receives its own contrast, such
+as `.i_diff_female_x_female_arbitrary`, which is `0` for all other
+compositions. We use a fixed seed in the examples below for consistent
 results.
 
 Alternatively, for more control, we can explicitly set dyad types to
@@ -272,9 +276,9 @@ print(cross_exchangeable_data, n = 4)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 190 × 9
 #>   personID coupleID gender communication satisfaction .i_composition
@@ -285,7 +289,7 @@ print(cross_exchangeable_data, n = 4)
 #> 4        4        2 male            6.51         6.08 female_x_male 
 #> # ℹ 186 more rows
 #> # ℹ 3 more variables: .i_composition_role <fct>, .i_is_female_x_male <dbl>,
-#> #   .i_diff_female_x_male <dbl>
+#> #   .i_diff_female_x_male_arbitrary <dbl>
 ```
 
 *Note* that whenever you need to refer to a dyad type, the order of
@@ -324,9 +328,10 @@ print(cross_dim_dsm_data, n = 4)
 #> #   .i_composition                  inferred dyad composition
 #> #   .i_composition_role             composition-specific member role
 #> #   .i_is_*                         composition-role indicator columns
-#> #   .i_diff_*                       composition-specific sum-diff contrasts; 0
-#> #                                   for distinguishable dyads or other
-#> #                                   exchangeable compositions
+#> #   .i_diff_*                       composition-specific sum-diff contrasts
+#> #                                   with arbitrary direction; 0 for
+#> #                                   distinguishable dyads or other exchangeable
+#> #                                   compositions
 #> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
 #> #                                   predictor level, grand-mean centered
 #> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
@@ -345,7 +350,7 @@ print(cross_dim_dsm_data, n = 4)
 #> 4        4        2 male            6.51         6.08 assumed_exchangeable
 #> # ℹ 186 more rows
 #> # ℹ 7 more variables: .i_composition_role <fct>,
-#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_assumed_exchangeable <dbl>,
+#> #   .i_is_assumed_exchangeable <dbl>, .i_diff_arbitrary <dbl>,
 #> #   .i_communication_raw_dyad_mean_gmc <dbl>,
 #> #   .i_communication_raw_within_dyad_deviation <dbl>,
 #> #   .i_satisfaction_raw_dyad_mean <dbl>,
@@ -398,9 +403,9 @@ print(incomplete_dropped_data)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 4 × 10
 #>   coupleID personID gender satisfaction .i_composition  .i_composition_role 
@@ -411,7 +416,7 @@ print(incomplete_dropped_data)
 #> 4        4        8 male            4.6 female_x_male   female_x_male_male  
 #> # ℹ 4 more variables: .i_is_female_x_female <dbl>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_diff_female_x_female <dbl>
+#> #   .i_diff_female_x_female_arbitrary <dbl>
 ```
 
 ## Intensive longitudinal dyadic data
@@ -562,9 +567,9 @@ print(mixed_cross_data, n = 4)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 640 × 12
 #>   personID coupleID gender satisfaction .i_composition .i_composition_role 
@@ -576,8 +581,8 @@ print(mixed_cross_data, n = 4)
 #> # ℹ 636 more rows
 #> # ℹ 6 more variables: .i_is_female_x_female <dbl>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
-#> #   .i_diff_male_x_male <dbl>
+#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female_arbitrary <dbl>,
+#> #   .i_diff_male_x_male_arbitrary <dbl>
 ```
 
 We can use this data to model these dyad types as separate or in the
@@ -618,9 +623,9 @@ print(mixed_cross_data_included, n = 4)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 400 × 10
 #>   personID coupleID gender satisfaction .i_composition  .i_composition_role
@@ -631,7 +636,8 @@ print(mixed_cross_data_included, n = 4)
 #> 4      244      122 female         6.93 female_x_female female_x_female    
 #> # ℹ 396 more rows
 #> # ℹ 4 more variables: .i_is_female_x_female <dbl>, .i_is_male_x_male <dbl>,
-#> #   .i_diff_female_x_female <dbl>, .i_diff_male_x_male <dbl>
+#> #   .i_diff_female_x_female_arbitrary <dbl>,
+#> #   .i_diff_male_x_male_arbitrary <dbl>
 ```
 
 ### Setting distinguishable dyads to be treated as exchangeable
@@ -669,9 +675,9 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 640 × 12
 #>   personID coupleID gender satisfaction .i_composition .i_composition_role
@@ -682,8 +688,8 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> 4        4        2 male           3.11 female_x_male  female_x_male      
 #> # ℹ 636 more rows
 #> # ℹ 6 more variables: .i_is_female_x_female <dbl>, .i_is_female_x_male <dbl>,
-#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
-#> #   .i_diff_female_x_male <dbl>, .i_diff_male_x_male <dbl>
+#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female_arbitrary <dbl>,
+#> #   .i_diff_female_x_male_arbitrary <dbl>, .i_diff_male_x_male_arbitrary <dbl>
 ```
 
 ### Pooling different dyad compositions
@@ -724,9 +730,9 @@ print(mixed_cross_data_pooled)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 640 × 10
 #>    personID coupleID gender satisfaction .i_composition .i_composition_role 
@@ -744,7 +750,7 @@ print(mixed_cross_data_pooled)
 #> # ℹ 630 more rows
 #> # ℹ 4 more variables: .i_is_female_x_male_female <dbl>,
 #> #   .i_is_female_x_male_male <dbl>, .i_is_same_sex <dbl>,
-#> #   .i_diff_same_sex <dbl>
+#> #   .i_diff_same_sex_arbitrary <dbl>
 ```
 
 Note that you cannot pool distinguishable dyads. To pool `female-male`
@@ -779,9 +785,9 @@ print(mixed_cross_data_pooled_constrained)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #
 #> # A tibble: 640 × 10
 #>    personID coupleID gender satisfaction .i_composition      .i_composition_role
@@ -798,8 +804,8 @@ print(mixed_cross_data_pooled_constrained)
 #> 10       10        5 male           5.44 pooled_exchangeable pooled_exchangeable
 #> # ℹ 630 more rows
 #> # ℹ 4 more variables: .i_is_female_x_female <dbl>,
-#> #   .i_is_pooled_exchangeable <dbl>, .i_diff_female_x_female <dbl>,
-#> #   .i_diff_pooled_exchangeable <dbl>
+#> #   .i_is_pooled_exchangeable <dbl>, .i_diff_female_x_female_arbitrary <dbl>,
+#> #   .i_diff_pooled_exchangeable_arbitrary <dbl>
 ```
 
 For model formulas and interpretation, continue with the [Actor-Partner

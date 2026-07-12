@@ -46,5 +46,6 @@ infer_dyad_compositions(
 
 An `interdep_data` object with added `.i_composition` and
 `.i_composition_role` factor columns, `.i_is_*` numeric indicator
-columns, composition-specific `.i_diff_*` columns for exchangeable
-dyads, and dyad composition metadata.
+columns, composition-specific numeric `.i_diff_*` contrast columns coded
+`-1` and `1` for the two members of matching exchangeable dyads and `0`
+otherwise, and dyad composition metadata.

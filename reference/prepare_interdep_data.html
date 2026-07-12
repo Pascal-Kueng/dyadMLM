@@ -182,7 +182,8 @@ exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is u
     <p>The original data as a tibble with class <code>interdep_data</code>,
 <code>.i_composition</code> and <code>.i_composition_role</code> factor columns,
 <code>.i_is_*</code> numeric indicator columns, composition-specific
-<code>.i_diff_*</code> columns for exchangeable dyads, and an <code>interdep</code> attribute
+numeric <code>.i_diff_*</code> contrast columns coded <code>-1</code> and <code>1</code> for the two members
+of matching exchangeable dyads and <code>0</code> otherwise, and an <code>interdep</code> attribute
 containing structural metadata, <code>dyad_compositions</code>, and predictor metadata
 such as <code>temporal_predictor_decompositions</code>, <code>apim_predictors</code>, and
 <code>dim_predictors</code> when applicable.</p>
@@ -231,9 +232,9 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        distinguishable dyads or other exchangeable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        direction; 0 for distinguishable dyads or other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        exchangeable compositions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                        values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor</span>
@@ -250,8 +251,9 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       3         6 male       8 male_x_male     male_x_male         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;, .i_x_raw_actor &lt;dbl&gt;, .i_x_raw_partner &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;, .i_x_raw_actor &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_raw_partner &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">pooled</span> <span class="op">&lt;-</span> <span class="fu">prepare_interdep_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span>,</span></span>
@@ -281,9 +283,9 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        distinguishable dyads or other exchangeable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        direction; 0 for distinguishable dyads or other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        exchangeable compositions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                        values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor</span>
@@ -299,7 +301,7 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>       3         5 male       3 romantic_couples romantic_couples   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       3         6 male       8 romantic_couples romantic_couples   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 4 more variables: .i_is_romantic_couples &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_romantic_couples &lt;dbl&gt;, .i_x_raw_actor &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_romantic_couples_arbitrary &lt;dbl&gt;, .i_x_raw_actor &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_raw_partner &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ild_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
@@ -331,9 +333,9 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        distinguishable dyads or other exchangeable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        direction; 0 for distinguishable dyads or other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                        exchangeable compositions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cwp             within-person predictor: momentary deviations from</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                        each person's usual level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cbp             between-person predictor: stable differences from the</span>
@@ -360,7 +362,7 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span>       2         1     2     4 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span>       2         2     2     7 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_assumed_exchangeable &lt;dbl&gt;, .i_x_cwp &lt;dbl&gt;, .i_x_cbp &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_arbitrary &lt;dbl&gt;, .i_x_cwp &lt;dbl&gt;, .i_x_cbp &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cwp_actor &lt;dbl&gt;, .i_x_cwp_partner &lt;dbl&gt;, .i_x_cbp_actor &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cbp_partner &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>

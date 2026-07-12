@@ -139,11 +139,12 @@ prepare_interdep_data(
 
 The original data as a tibble with class `interdep_data`,
 `.i_composition` and `.i_composition_role` factor columns, `.i_is_*`
-numeric indicator columns, composition-specific `.i_diff_*` columns for
-exchangeable dyads, and an `interdep` attribute containing structural
-metadata, `dyad_compositions`, and predictor metadata such as
-`temporal_predictor_decompositions`, `apim_predictors`, and
-`dim_predictors` when applicable.
+numeric indicator columns, composition-specific numeric `.i_diff_*`
+contrast columns coded `-1` and `1` for the two members of matching
+exchangeable dyads and `0` otherwise, and an `interdep` attribute
+containing structural metadata, `dyad_compositions`, and predictor
+metadata such as `temporal_predictor_decompositions`, `apim_predictors`,
+and `dim_predictors` when applicable.
 
 ## Details
 
@@ -191,9 +192,9 @@ print(prepared)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
 #> #                        values
 #> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
@@ -210,8 +211,9 @@ print(prepared)
 #> 6       3         6 male       8 male_x_male     male_x_male         
 #> # ℹ 8 more variables: .i_is_female_x_female <dbl>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female <dbl>,
-#> #   .i_diff_male_x_male <dbl>, .i_x_raw_actor <dbl>, .i_x_raw_partner <dbl>
+#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female_arbitrary <dbl>,
+#> #   .i_diff_male_x_male_arbitrary <dbl>, .i_x_raw_actor <dbl>,
+#> #   .i_x_raw_partner <dbl>
 
 pooled <- prepare_interdep_data(
   data,
@@ -241,9 +243,9 @@ print(pooled)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
 #> #                        values
 #> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
@@ -259,7 +261,7 @@ print(pooled)
 #> 5       3         5 male       3 romantic_couples romantic_couples   
 #> 6       3         6 male       8 romantic_couples romantic_couples   
 #> # ℹ 4 more variables: .i_is_romantic_couples <dbl>,
-#> #   .i_diff_romantic_couples <dbl>, .i_x_raw_actor <dbl>,
+#> #   .i_diff_romantic_couples_arbitrary <dbl>, .i_x_raw_actor <dbl>,
 #> #   .i_x_raw_partner <dbl>
 
 ild_data <- data.frame(
@@ -291,9 +293,9 @@ print(ild_prepared)
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
 #> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts; 0 for
-#> #                        distinguishable dyads or other exchangeable
-#> #                        compositions
+#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
 #> #   .i_*_cwp             within-person predictor: momentary deviations from
 #> #                        each person's usual level
 #> #   .i_*_cbp             between-person predictor: stable differences from the
@@ -320,7 +322,7 @@ print(ild_prepared)
 #> 7       2         1     2     4 assumed_exchangeable assumed_exchangeable
 #> 8       2         2     2     7 assumed_exchangeable assumed_exchangeable
 #> # ℹ 8 more variables: .i_is_assumed_exchangeable <dbl>,
-#> #   .i_diff_assumed_exchangeable <dbl>, .i_x_cwp <dbl>, .i_x_cbp <dbl>,
+#> #   .i_diff_arbitrary <dbl>, .i_x_cwp <dbl>, .i_x_cbp <dbl>,
 #> #   .i_x_cwp_actor <dbl>, .i_x_cwp_partner <dbl>, .i_x_cbp_actor <dbl>,
 #> #   .i_x_cbp_partner <dbl>
 ```

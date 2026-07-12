@@ -237,9 +237,9 @@ part of the model.</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #   .i_*_raw_actor       APIM actor predictor: actor's original predictor</span></span>
 <span><span class="co">#&gt; #                        values</span></span>
 <span><span class="co">#&gt; #   .i_*_raw_partner     APIM partner predictor: partner's original predictor</span></span>
@@ -260,7 +260,7 @@ part of the model.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male       1.77               20.1  assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 230 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_motivation_raw_actor &lt;dbl&gt;, .i_motivation_raw_partner &lt;dbl&gt;</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">tweedie_exchangeable_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID         coupleID         gender      motivation       </span></span>
@@ -279,22 +279,22 @@ part of the model.</p>
 <span><span class="co">#&gt;  3rd Qu.:15.147                                                             </span></span>
 <span><span class="co">#&gt;  Max.   :85.043                                                             </span></span>
 <span><span class="co">#&gt;  NAs    :4                                                                  </span></span>
-<span><span class="co">#&gt;  .i_is_assumed_exchangeable .i_diff_assumed_exchangeable</span></span>
-<span><span class="co">#&gt;  Min.   :1                  Min.   :-1                  </span></span>
-<span><span class="co">#&gt;  1st Qu.:1                  1st Qu.:-1                  </span></span>
-<span><span class="co">#&gt;  Median :1                  Median : 0                  </span></span>
-<span><span class="co">#&gt;  Mean   :1                  Mean   : 0                  </span></span>
-<span><span class="co">#&gt;  3rd Qu.:1                  3rd Qu.: 1                  </span></span>
-<span><span class="co">#&gt;  Max.   :1                  Max.   : 1                  </span></span>
-<span><span class="co">#&gt;                                                         </span></span>
-<span><span class="co">#&gt;  .i_motivation_raw_actor .i_motivation_raw_partner</span></span>
-<span><span class="co">#&gt;  Min.   :-2.320532       Min.   :-2.320532        </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.580126       1st Qu.:-0.580126        </span></span>
-<span><span class="co">#&gt;  Median :-0.032795       Median :-0.032795        </span></span>
-<span><span class="co">#&gt;  Mean   :-0.008869       Mean   :-0.008869        </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.537262       3rd Qu.: 0.537262        </span></span>
-<span><span class="co">#&gt;  Max.   : 2.423337       Max.   : 2.423337        </span></span>
-<span><span class="co">#&gt;  NAs    :9               NAs    :9</span></span></code></pre></div>
+<span><span class="co">#&gt;  .i_is_assumed_exchangeable .i_diff_arbitrary .i_motivation_raw_actor</span></span>
+<span><span class="co">#&gt;  Min.   :1                  Min.   :-1        Min.   :-2.320532      </span></span>
+<span><span class="co">#&gt;  1st Qu.:1                  1st Qu.:-1        1st Qu.:-0.580126      </span></span>
+<span><span class="co">#&gt;  Median :1                  Median : 0        Median :-0.032795      </span></span>
+<span><span class="co">#&gt;  Mean   :1                  Mean   : 0        Mean   :-0.008869      </span></span>
+<span><span class="co">#&gt;  3rd Qu.:1                  3rd Qu.: 1        3rd Qu.: 0.537262      </span></span>
+<span><span class="co">#&gt;  Max.   :1                  Max.   : 1        Max.   : 2.423337      </span></span>
+<span><span class="co">#&gt;                                               NAs    :9              </span></span>
+<span><span class="co">#&gt;  .i_motivation_raw_partner</span></span>
+<span><span class="co">#&gt;  Min.   :-2.320532        </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.580126        </span></span>
+<span><span class="co">#&gt;  Median :-0.032795        </span></span>
+<span><span class="co">#&gt;  Mean   :-0.008869        </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.537262        </span></span>
+<span><span class="co">#&gt;  Max.   : 2.423337        </span></span>
+<span><span class="co">#&gt;  NAs    :9</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">tweedie_exchangeable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="op">(</span></span>
@@ -309,7 +309,7 @@ part of the model.</p>
 <span>    <span class="va">.i_motivation_raw_partner</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># exchangeable latent dyad block on the log-mean scale</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span>    </span>
 <span>  <span class="co"># estimate a single pooled Tweedie dispersion parameter</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span></span>
@@ -642,9 +642,9 @@ informed by repeated within-dyad patterns over time.</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #   .i_*_cwp             within-person predictor: momentary deviations from</span></span>
 <span><span class="co">#&gt; #                        each person's usual level</span></span>
 <span><span class="co">#&gt; #   .i_*_cbp             between-person predictor: stable differences from the</span></span>
@@ -674,7 +674,7 @@ informed by repeated within-dyad patterns over time.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female              0                3.72</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, .i_provided_support_cbp_partner &lt;dbl&gt;</span></span></span>
@@ -695,22 +695,22 @@ informed by repeated within-dyad patterns over time.</p>
 <span><span class="co">#&gt;  3rd Qu.:5.821                                                             </span></span>
 <span><span class="co">#&gt;  Max.   :8.271                                                             </span></span>
 <span><span class="co">#&gt;  NAs    :44                                                                </span></span>
-<span><span class="co">#&gt;  .i_is_assumed_exchangeable .i_diff_assumed_exchangeable</span></span>
-<span><span class="co">#&gt;  Min.   :1                  Min.   :-1                  </span></span>
-<span><span class="co">#&gt;  1st Qu.:1                  1st Qu.:-1                  </span></span>
-<span><span class="co">#&gt;  Median :1                  Median : 0                  </span></span>
-<span><span class="co">#&gt;  Mean   :1                  Mean   : 0                  </span></span>
-<span><span class="co">#&gt;  3rd Qu.:1                  3rd Qu.: 1                  </span></span>
-<span><span class="co">#&gt;  Max.   :1                  Max.   : 1                  </span></span>
-<span><span class="co">#&gt;                                                         </span></span>
-<span><span class="co">#&gt;  .i_provided_support_cwp .i_provided_support_cbp .i_provided_support_cwp_actor</span></span>
-<span><span class="co">#&gt;  Min.   :-2.66098        Min.   :-1.4073         Min.   :-2.66098             </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.50775        1st Qu.:-0.4913         1st Qu.:-0.50775             </span></span>
-<span><span class="co">#&gt;  Median :-0.03176        Median :-0.0164         Median :-0.03176             </span></span>
-<span><span class="co">#&gt;  Mean   : 0.00000        Mean   : 0.0000         Mean   : 0.00000             </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.52731        3rd Qu.: 0.4968         3rd Qu.: 0.52731             </span></span>
-<span><span class="co">#&gt;  Max.   : 2.42077        Max.   : 1.6645         Max.   : 2.42077             </span></span>
-<span><span class="co">#&gt;  NAs    :44                                      NAs    :44                   </span></span>
+<span><span class="co">#&gt;  .i_is_assumed_exchangeable .i_diff_arbitrary .i_provided_support_cwp</span></span>
+<span><span class="co">#&gt;  Min.   :1                  Min.   :-1        Min.   :-2.66098       </span></span>
+<span><span class="co">#&gt;  1st Qu.:1                  1st Qu.:-1        1st Qu.:-0.50775       </span></span>
+<span><span class="co">#&gt;  Median :1                  Median : 0        Median :-0.03176       </span></span>
+<span><span class="co">#&gt;  Mean   :1                  Mean   : 0        Mean   : 0.00000       </span></span>
+<span><span class="co">#&gt;  3rd Qu.:1                  3rd Qu.: 1        3rd Qu.: 0.52731       </span></span>
+<span><span class="co">#&gt;  Max.   :1                  Max.   : 1        Max.   : 2.42077       </span></span>
+<span><span class="co">#&gt;                                               NAs    :44             </span></span>
+<span><span class="co">#&gt;  .i_provided_support_cbp .i_provided_support_cwp_actor</span></span>
+<span><span class="co">#&gt;  Min.   :-1.4073         Min.   :-2.66098             </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.4913         1st Qu.:-0.50775             </span></span>
+<span><span class="co">#&gt;  Median :-0.0164         Median :-0.03176             </span></span>
+<span><span class="co">#&gt;  Mean   : 0.0000         Mean   : 0.00000             </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.4968         3rd Qu.: 0.52731             </span></span>
+<span><span class="co">#&gt;  Max.   : 1.6645         Max.   : 2.42077             </span></span>
+<span><span class="co">#&gt;                          NAs    :44                   </span></span>
 <span><span class="co">#&gt;  .i_provided_support_cwp_partner .i_provided_support_cbp_actor</span></span>
 <span><span class="co">#&gt;  Min.   :-2.66098                Min.   :-1.4073              </span></span>
 <span><span class="co">#&gt;  1st Qu.:-0.50775                1st Qu.:-0.4913              </span></span>
@@ -749,10 +749,10 @@ substantive roles.</p>
 <span>    <span class="va">.i_provided_support_cbp_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># stable exchangeable latent covariance</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  </span>
 <span>    <span class="co"># same-day exchangeable latent covariance</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="co"># pooled dispersion; exchangeable positions should not define dispersion differences</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">1</span></span>
@@ -802,9 +802,9 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 640 × 12</span></span></span>
 <span><span class="co">#&gt;    personID coupleID gender satisfaction .i_composition .i_composition_role </span></span>
@@ -822,8 +822,8 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 630 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mixed_cross_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="op">(</span></span>
@@ -837,11 +837,11 @@ and <code>diff_variance</code> imply the partner correlation.</p>
 <span></span>
 <span>    <span class="co"># exchangeable female-female residual covariance via sum-diff</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># exchangeable male-male residual covariance via sum-diff</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -910,9 +910,9 @@ dyad contributes repeated paired observations over
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #   .i_*_cwp             within-person predictor: momentary deviations from</span></span>
 <span><span class="co">#&gt; #                        each person's usual level</span></span>
 <span><span class="co">#&gt; #   .i_*_cbp             between-person predictor: stable differences from the</span></span>
@@ -943,8 +943,8 @@ dyad contributes repeated paired observations over
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,590 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: .i_composition_role &lt;fct&gt;, .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;, .i_provided_support_cwp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;, .i_provided_support_cwp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp &lt;dbl&gt;, .i_provided_support_cwp_actor &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_partner &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <p>This first mixed-composition ILD model includes composition-specific
@@ -1018,19 +1018,19 @@ adding more random effects.</p>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># same-day covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -1104,9 +1104,9 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #   .i_*_cwp             within-person predictor: momentary deviations from</span></span>
 <span><span class="co">#&gt; #                        each person's usual level</span></span>
 <span><span class="co">#&gt; #   .i_*_cbp             between-person predictor: stable differences from the</span></span>
@@ -1138,9 +1138,9 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_female &lt;dbl&gt;, .i_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_male_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;, .i_provided_support_cwp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp &lt;dbl&gt;, .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_tweedie_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID        coupleID         diaryday       gender    </span></span>
 <span><span class="co">#&gt;  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   female:2800  </span></span>
@@ -1166,22 +1166,22 @@ outcome is semi-continuous.</p>
 <span><span class="co">#&gt;                                3rd Qu.:1.0           3rd Qu.:0.0               </span></span>
 <span><span class="co">#&gt;                                Max.   :1.0           Max.   :1.0               </span></span>
 <span><span class="co">#&gt;                                                                                </span></span>
-<span><span class="co">#&gt;  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female</span></span>
-<span><span class="co">#&gt;  Min.   :0.0              Min.   :0.0       Min.   :-1             </span></span>
-<span><span class="co">#&gt;  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0             </span></span>
-<span><span class="co">#&gt;  Median :0.0              Median :0.0       Median : 0             </span></span>
-<span><span class="co">#&gt;  Mean   :0.2              Mean   :0.3       Mean   : 0             </span></span>
-<span><span class="co">#&gt;  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0             </span></span>
-<span><span class="co">#&gt;  Max.   :1.0              Max.   :1.0       Max.   : 1             </span></span>
-<span><span class="co">#&gt;                                                                    </span></span>
-<span><span class="co">#&gt;  .i_diff_male_x_male .i_provided_support_cwp .i_provided_support_cbp</span></span>
-<span><span class="co">#&gt;  Min.   :-1          Min.   :-2.488131       Min.   :-2.6707037     </span></span>
-<span><span class="co">#&gt;  1st Qu.: 0          1st Qu.:-0.507787       1st Qu.:-0.6189091     </span></span>
-<span><span class="co">#&gt;  Median : 0          Median :-0.002168       Median : 0.0002432     </span></span>
-<span><span class="co">#&gt;  Mean   : 0          Mean   : 0.000000       Mean   : 0.0000000     </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0          3rd Qu.: 0.502352       3rd Qu.: 0.6169207     </span></span>
-<span><span class="co">#&gt;  Max.   : 1          Max.   : 2.764062       Max.   : 2.1738733     </span></span>
-<span><span class="co">#&gt;                      NAs    :220                                    </span></span>
+<span><span class="co">#&gt;  .i_is_female_x_male_male .i_is_male_x_male .i_diff_female_x_female_arbitrary</span></span>
+<span><span class="co">#&gt;  Min.   :0.0              Min.   :0.0       Min.   :-1                       </span></span>
+<span><span class="co">#&gt;  1st Qu.:0.0              1st Qu.:0.0       1st Qu.: 0                       </span></span>
+<span><span class="co">#&gt;  Median :0.0              Median :0.0       Median : 0                       </span></span>
+<span><span class="co">#&gt;  Mean   :0.2              Mean   :0.3       Mean   : 0                       </span></span>
+<span><span class="co">#&gt;  3rd Qu.:0.0              3rd Qu.:1.0       3rd Qu.: 0                       </span></span>
+<span><span class="co">#&gt;  Max.   :1.0              Max.   :1.0       Max.   : 1                       </span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;  .i_diff_male_x_male_arbitrary .i_provided_support_cwp .i_provided_support_cbp</span></span>
+<span><span class="co">#&gt;  Min.   :-1                    Min.   :-2.488131       Min.   :-2.6707037     </span></span>
+<span><span class="co">#&gt;  1st Qu.: 0                    1st Qu.:-0.507787       1st Qu.:-0.6189091     </span></span>
+<span><span class="co">#&gt;  Median : 0                    Median :-0.002168       Median : 0.0002432     </span></span>
+<span><span class="co">#&gt;  Mean   : 0                    Mean   : 0.000000       Mean   : 0.0000000     </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0                    3rd Qu.: 0.502352       3rd Qu.: 0.6169207     </span></span>
+<span><span class="co">#&gt;  Max.   : 1                    Max.   : 2.764062       Max.   : 2.1738733     </span></span>
+<span><span class="co">#&gt;                                NAs    :220                                    </span></span>
 <span><span class="co">#&gt;  .i_provided_support_cwp_actor .i_provided_support_cwp_partner</span></span>
 <span><span class="co">#&gt;  Min.   :-2.488131             Min.   :-2.488131              </span></span>
 <span><span class="co">#&gt;  1st Qu.:-0.507787             1st Qu.:-0.507787              </span></span>
@@ -1266,19 +1266,19 @@ specific comparison question.</p>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># same-day latent covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># recommended first simplification in convergence issues is to set dispfomula = ~ 1</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>

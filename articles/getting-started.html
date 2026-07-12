@@ -375,9 +375,9 @@ exchangeable, omit the <code>role</code> argument:</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 9</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition      </span></span>
@@ -388,10 +388,15 @@ exchangeable, omit the <code>role</code> argument:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_assumed_exchangeable &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>The <code>seed</code> makes the random <code>.i_diff_*</code> sign
-assignment reproducible. We use a fixed seed in all exchangeable-dyad
-examples below for consistent results.</p>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The generated <code>.i_diff_arbitrary</code> contrast assigns
+<code>-1</code> and <code>1</code> to the two members of each
+exchangeable dyad. Its direction is arbitrary, and <code>seed</code>
+makes the assignment reproducible. When role compositions are available,
+each exchangeable composition receives its own contrast, such as
+<code>.i_diff_female_x_female_arbitrary</code>, which is <code>0</code>
+for all other compositions. We use a fixed seed in the examples below
+for consistent results.</p>
 <p>Alternatively, for more control, we can explicitly set dyad types to
 exchangeable:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -416,9 +421,9 @@ exchangeable:</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 9</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
@@ -429,7 +434,7 @@ exchangeable:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: .i_composition_role &lt;fct&gt;, .i_is_female_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <p><em>Note</em> that whenever you need to refer to a dyad type, the
 order of members does not matter (e.g., <code>male-female</code> and
 <code>female-male</code> will both work), and you can use different
@@ -465,9 +470,10 @@ outcome.</p>
 <span><span class="co">#&gt; #   .i_composition                  inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role             composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*                         composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*                       composition-specific sum-diff contrasts; 0</span></span>
-<span><span class="co">#&gt; #                                   for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                   exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*                       composition-specific sum-diff contrasts</span></span>
+<span><span class="co">#&gt; #                                   with arbitrary direction; 0 for</span></span>
+<span><span class="co">#&gt; #                                   distinguishable dyads or other exchangeable</span></span>
+<span><span class="co">#&gt; #                                   compositions</span></span>
 <span><span class="co">#&gt; #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
 <span><span class="co">#&gt; #                                   predictor level, grand-mean centered</span></span>
 <span><span class="co">#&gt; #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
@@ -486,7 +492,7 @@ outcome.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 assumed_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;, .i_diff_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_within_dyad_deviation &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_dyad_mean &lt;dbl&gt;,</span></span></span>
@@ -536,9 +542,9 @@ validation continues.</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 10</span></span></span>
 <span><span class="co">#&gt;   coupleID personID gender satisfaction .i_composition  .i_composition_role </span></span>
@@ -549,7 +555,7 @@ validation continues.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        8 male            4.6 female_x_male   female_x_male_male  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="intensive-longitudinal-dyadic-data">Intensive longitudinal dyadic data<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dyadic-data"></a>
@@ -691,9 +697,9 @@ and exchangeable female-female and male-male dyads.</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 640 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender satisfaction .i_composition .i_composition_role </span></span>
@@ -705,8 +711,8 @@ and exchangeable female-female and male-male dyads.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 636 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>We can use this data to model these dyad types as separate or in the
 same model. The <a href="apim.html">Actor-Partner Interdependence Model
 vignette</a> shows both mixed-composition formulas and practical
@@ -744,9 +750,9 @@ types of dyads.</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 400 × 10</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender satisfaction .i_composition  .i_composition_role</span></span>
@@ -757,7 +763,8 @@ types of dyads.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female         6.93 female_x_female female_x_female    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 396 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;, .i_is_male_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="setting-distinguishable-dyads-to-be-treated-as-exchangeable">Setting distinguishable dyads to be treated as exchangeable<a class="anchor" aria-label="anchor" href="#setting-distinguishable-dyads-to-be-treated-as-exchangeable"></a>
@@ -793,9 +800,9 @@ differentiation between the kinds of dyads (e.g.,
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 640 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender satisfaction .i_composition .i_composition_role</span></span>
@@ -806,8 +813,8 @@ differentiation between the kinds of dyads (e.g.,
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male           3.11 female_x_male  female_x_male      </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 636 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_is_female_x_female &lt;dbl&gt;, .i_is_female_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male &lt;dbl&gt;, .i_diff_male_x_male &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male_arbitrary &lt;dbl&gt;, .i_diff_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="pooling-different-dyad-compositions">Pooling different dyad compositions<a class="anchor" aria-label="anchor" href="#pooling-different-dyad-compositions"></a>
@@ -846,9 +853,9 @@ dyads:</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 640 × 10</span></span></span>
 <span><span class="co">#&gt;    personID coupleID gender satisfaction .i_composition .i_composition_role </span></span>
@@ -866,7 +873,7 @@ dyads:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 630 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_same_sex &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Note that you cannot pool distinguishable dyads. To pool
 <code>female-male</code> with <code>male-male</code>, we first have to
 treat <code>female-male</code> as exchangeable:</p>
@@ -898,9 +905,9 @@ treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts; 0 for</span></span>
-<span><span class="co">#&gt; #                        distinguishable dyads or other exchangeable</span></span>
-<span><span class="co">#&gt; #                        compositions</span></span>
+<span><span class="co">#&gt; #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 640 × 10</span></span></span>
 <span><span class="co">#&gt;    personID coupleID gender satisfaction .i_composition      .i_composition_role</span></span>
@@ -917,8 +924,8 @@ treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male           5.44 pooled_exchangeable pooled_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 630 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_pooled_exchangeable &lt;dbl&gt;, .i_diff_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_pooled_exchangeable &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_pooled_exchangeable &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_pooled_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For model formulas and interpretation, continue with the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>, <a href="dim.html">Dyad-Individual Model vignette</a>, or <a href="undirected-dsm.html">Undirected Dyadic Score Model
 vignette</a>.</p>
 <p>For an in-depth tutorial covering data preparation, model fitting,
