@@ -494,27 +494,38 @@ b_partner <- apim_coef[[".i_communication_raw_partner"]]
 b_dyad_mean <- dim_coef[[".i_communication_raw_dyad_mean_gmc"]]
 b_within_dyad <- dim_coef[[".i_communication_raw_within_dyad_deviation"]]
 
-cat("From APIM model:\n")
-#> From APIM model:
-cat("  actor effect:                  ", round(b_actor, 3), "\n")
-#>   actor effect:                   1.758
-cat("  partner effect:                ", round(b_partner, 3), "\n\n")
-#>   partner effect:                 0.238
+coefficient_comparison <- data.frame(
+  `DIM effect` = c("Dyad mean", "Within-dyad deviation"),
+  `APIM transformation` = c(
+    "actor effect + partner effect",
+    "actor effect - partner effect"
+  ),
+  `Transformed APIM estimate` = c(
+    b_actor + b_partner,
+    b_actor - b_partner
+  ),
+  `DIM model estimate` = c(b_dyad_mean, b_within_dyad),
+  check.names = FALSE
+)
 
-cat("  DIM transformation:\n")
-#>   DIM transformation:
-cat("  actor effect + partner effect: ", round(b_actor + b_partner, 3), "\n")
-#>   actor effect + partner effect:  1.996
-cat("  actor effect - partner effect: ", round(b_actor - b_partner, 3), "\n\n")
-#>   actor effect - partner effect:  1.52
-
-cat("From DIM model:\n")
-#> From DIM model:
-cat("  dyad-mean effect:              ", round(b_dyad_mean, 3), "\n")
-#>   dyad-mean effect:               1.996
-cat("  within-dyad-deviation effect:  ", round(b_within_dyad, 3), "\n")
-#>   within-dyad-deviation effect:   1.52
+knitr::kable(
+  coefficient_comparison,
+  digits = 3,
+  align = c("l", "l", "r", "r"),
+  caption = sprintf(
+    "APIM estimates: actor effect = %.3f; partner effect = %.3f.",
+    b_actor,
+    b_partner
+  )
+)
 ```
+
+| DIM effect | APIM transformation | Transformed APIM estimate | DIM model estimate |
+|:---|:---|---:|---:|
+| Dyad mean | actor effect + partner effect | 1.996 | 1.996 |
+| Within-dyad deviation | actor effect - partner effect | 1.520 | 1.520 |
+
+APIM estimates: actor effect = 1.758; partner effect = 0.238. {.table}
 
 ## Intensive Longitudinal DIM
 
