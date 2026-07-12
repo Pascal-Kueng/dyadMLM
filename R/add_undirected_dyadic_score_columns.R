@@ -51,7 +51,7 @@ add_undirected_dyadic_score_columns <- function(data) {
   for (outcome in outcomes) {
     source_col <- outcome
     outcome_suffix <- make_interdep_suffixes(outcome)[[outcome]]
-    column_stem <- paste0(interdep_reserved_prefix, outcome_suffix, "_raw")
+    column_stem <- paste0(interdep_reserved_prefix, outcome_suffix)
     mean_col <- paste0(column_stem, "_dyad_mean")
     deviation_col <- paste0(column_stem, "_within_dyad_deviation")
     dyad_decomposition_level <- "dyad"

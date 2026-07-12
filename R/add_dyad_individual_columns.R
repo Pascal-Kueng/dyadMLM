@@ -77,7 +77,7 @@ add_dyad_individual_columns <- function(data) {
     column_stem <- source_col
 
     if (component == "raw") {
-      column_stem <- paste0(interdep_reserved_prefix, predictor_suffix, "_raw")
+      column_stem <- paste0(interdep_reserved_prefix, predictor_suffix)
     }
 
     mean_col <- paste0(column_stem, "_dyad_mean")

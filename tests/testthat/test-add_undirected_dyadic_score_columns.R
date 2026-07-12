@@ -18,20 +18,20 @@ test_that("undirected DSM creates raw cross-sectional outcome columns", {
     seed = 123
   )
 
-  expect_equal(result$.i_y_raw_dyad_mean, c(12, 12, 22, 22))
-  expect_equal(result$.i_y_raw_within_dyad_deviation, c(-2, 2, -2, 2))
-  expect_equal(result$.i_z_raw_dyad_mean, c(4, 4, 35, 35))
-  expect_equal(result$.i_z_raw_within_dyad_deviation, c(-2, 2, -5, 5))
-  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
-  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+  expect_equal(result$.i_y_dyad_mean, c(12, 12, 22, 22))
+  expect_equal(result$.i_y_within_dyad_deviation, c(-2, 2, -2, 2))
+  expect_equal(result$.i_z_dyad_mean, c(4, 4, 35, 35))
+  expect_equal(result$.i_z_within_dyad_deviation, c(-2, 2, -5, 5))
+  expect_true(".i_x_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_within_dyad_deviation" %in% names(result))
 
   expect_equal(
     attr(result, "interdep")$undirected_dsm_outcomes,
     tibble::tibble(
       outcome = c("y", "z"),
       source_column = c("y", "z"),
-      mean_column = c(".i_y_raw_dyad_mean", ".i_z_raw_dyad_mean"),
-      deviation_column = c(".i_y_raw_within_dyad_deviation", ".i_z_raw_within_dyad_deviation"),
+      mean_column = c(".i_y_dyad_mean", ".i_z_dyad_mean"),
+      deviation_column = c(".i_y_within_dyad_deviation", ".i_z_within_dyad_deviation"),
       dyad_decomposition_level = c("dyad", "dyad")
     )
   )
@@ -53,8 +53,8 @@ test_that("undirected DSM does not grand-mean center outcome dyad means", {
     seed = 123
   )
 
-  expect_equal(result$.i_y_raw_dyad_mean, c(12, 12, 22, 22))
-  expect_false(".i_y_raw_dyad_mean_gmc" %in% names(result))
+  expect_equal(result$.i_y_dyad_mean, c(12, 12, 22, 22))
+  expect_false(".i_y_dyad_mean_gmc" %in% names(result))
 })
 
 test_that("undirected DSM creates raw longitudinal outcome columns by dyad-time", {
@@ -77,8 +77,8 @@ test_that("undirected DSM creates raw longitudinal outcome columns by dyad-time"
     seed = 123
   )
 
-  expect_equal(result$.i_y_raw_dyad_mean, c(12, 14, 12, 14, 22, 24, 22, 24))
-  expect_equal(result$.i_y_raw_within_dyad_deviation, c(-2, -2, 2, 2, -2, -2, 2, 2))
+  expect_equal(result$.i_y_dyad_mean, c(12, 14, 12, 14, 22, 24, 22, 24))
+  expect_equal(result$.i_y_within_dyad_deviation, c(-2, -2, 2, 2, -2, -2, 2, 2))
   expect_true(".i_x_cwp_dyad_mean" %in% names(result))
   expect_true(".i_x_cbp_dyad_mean" %in% names(result))
 
@@ -87,8 +87,8 @@ test_that("undirected DSM creates raw longitudinal outcome columns by dyad-time"
     tibble::tibble(
       outcome = "y",
       source_column = "y",
-      mean_column = ".i_y_raw_dyad_mean",
-      deviation_column = ".i_y_raw_within_dyad_deviation",
+      mean_column = ".i_y_dyad_mean",
+      deviation_column = ".i_y_within_dyad_deviation",
       dyad_decomposition_level = "dyad_time"
     )
   )
@@ -112,9 +112,9 @@ test_that("undirected DSM requires complete outcome values within dyad unit", {
     seed = 123
   )
 
-  expect_true(all(is.na(result$.i_y_raw_dyad_mean[result$dyad_id == 1 & result$time == 1])))
-  expect_false(any(is.na(result$.i_y_raw_dyad_mean[result$dyad_id == 1 & result$time == 2])))
-  expect_true(all(is.na(result$.i_y_raw_dyad_mean[result$dyad_id == 2 & result$time == 2])))
+  expect_true(all(is.na(result$.i_y_dyad_mean[result$dyad_id == 1 & result$time == 1])))
+  expect_false(any(is.na(result$.i_y_dyad_mean[result$dyad_id == 1 & result$time == 2])))
+  expect_true(all(is.na(result$.i_y_dyad_mean[result$dyad_id == 2 & result$time == 2])))
 })
 
 test_that("undirected DSM constructor enforces exchangeable compatibility without predictors", {

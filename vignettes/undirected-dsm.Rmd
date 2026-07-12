@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(interdep)
+has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 This vignette focuses on undirected Dyadic Score Model (DSM) preparation. For
@@ -48,6 +49,68 @@ cross_exchangeable_data <- prepare_interdep_data(
 
 # Print the first two dyads.
 print(cross_exchangeable_data, n = 4)
+```
+
+
+## The separate models approach
+
+Since `glmmTMB` is a univariate framwork, we can't model both mean and difference
+decomposed parts of the outcome in the same model. An approximation that does
+not estimate the residual correlation between the mean and difference is to 
+estimate two seaparate models. 
+
+The dyad-mean model is a DIM (see DIM Vignette for interpretation and explanations),
+with the outcome being the dyad-mean of the outcome. (Note: could and should we control
+for the dyad difference?? What does Iida say?)
+
+```{r fit-cross-dsm, eval=has_glmmTMB}
+
+dim_dyad_mean <- glmmTMB::glmmTMB(
+  .i_satisfaction_dyad_mean ~
+
+    # Pooled fixed intercept
+    1 +
+
+    # Between-couple effect
+    .i_communication_dyad_mean_gmc +
+
+    # Within-couple effect
+    .i_communication_within_dyad_deviation +
+
+    # Residual Gaussian variance-covariance
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = cross_exchangeable_data
+)
+
+summary(dim_dyad_mean)
+```
+
+```{r fit-cross-dsm, eval=has_glmmTMB}
+
+dim_within_dyad_deviation <- glmmTMB::glmmTMB(
+  .i_satisfaction_within_dyad_deviation ~
+
+    # Pooled fixed intercept
+    1 +
+
+    # Between-couple effect
+    .i_communication_dyad_mean_gmc +
+
+    # Within-couple effect
+    .i_communication_within_dyad_deviation +
+
+    # Residual Gaussian variance-covariance
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = cross_exchangeable_data
+)
+
+summary(dim_within_dyad_deviation)
 ```
 
 

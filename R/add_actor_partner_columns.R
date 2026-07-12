@@ -57,7 +57,7 @@ add_actor_partner_columns <- function(data) {
     column_stem <- source_col
     if (component == "raw") {
       predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
-      column_stem <- paste0(interdep_reserved_prefix, predictor_suffix, "_raw")
+      column_stem <- paste0(interdep_reserved_prefix, predictor_suffix)
     }
 
     actor_col <- paste0(column_stem, "_actor")

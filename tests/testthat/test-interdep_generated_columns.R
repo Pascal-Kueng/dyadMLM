@@ -47,13 +47,13 @@ test_that("interdep_generated_columns collects APIM columns", {
       variable = c("x", "x"),
       component = c("raw", "raw"),
       column_role = c("actor", "partner"),
-      column = c(".i_x_raw_actor", ".i_x_raw_partner"),
+      column = c(".i_x_actor", ".i_x_partner"),
       source_column = c("x", "x"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("none", "none"),
       column_centering = c("none", "none"),
       print_order = c(10L, 11L),
-      column_pattern = c(".i_{pred}_raw_actor", ".i_{pred}_raw_partner"),
+      column_pattern = c(".i_{pred}_actor", ".i_{pred}_partner"),
       description = c(
         "APIM actor predictor: actor's original predictor values",
         "APIM partner predictor: partner's original predictor values"
@@ -185,13 +185,13 @@ test_that("interdep_generated_columns collects DIM columns", {
       variable = c("x", "x"),
       component = c("raw", "raw"),
       column_role = c("dyad_mean", "within_dyad_deviation"),
-      column = c(".i_x_raw_dyad_mean_gmc", ".i_x_raw_within_dyad_deviation"),
+      column = c(".i_x_dyad_mean_gmc", ".i_x_within_dyad_deviation"),
       source_column = c("x", "x"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
       column_centering = c("grand_mean", "none"),
       print_order = c(20L, 21L),
-      column_pattern = c(".i_{pred}_raw_dyad_mean_gmc", ".i_{pred}_raw_within_dyad_deviation"),
+      column_pattern = c(".i_{pred}_dyad_mean_gmc", ".i_{pred}_within_dyad_deviation"),
       description = c(
         "DIM dyad-mean predictor: dyad's average predictor level, grand-mean centered",
         "DIM within-dyad predictor deviation: person's difference from the dyad average"
@@ -278,13 +278,13 @@ test_that("interdep_generated_columns collects undirected DSM outcome columns", 
       variable = c("y", "y"),
       component = c("raw", "raw"),
       column_role = c("dyad_mean", "within_dyad_deviation"),
-      column = c(".i_y_raw_dyad_mean", ".i_y_raw_within_dyad_deviation"),
+      column = c(".i_y_dyad_mean", ".i_y_within_dyad_deviation"),
       source_column = c("y", "y"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
       column_centering = c("none", "none"),
       print_order = c(30L, 31L),
-      column_pattern = c(".i_{out}_raw_dyad_mean", ".i_{out}_raw_within_dyad_deviation"),
+      column_pattern = c(".i_{out}_dyad_mean", ".i_{out}_within_dyad_deviation"),
       description = c(
         "DSM dyad-mean outcome: dyad's average outcome level",
         "DSM within-dyad outcome deviation: person's difference from the dyad average"
@@ -354,10 +354,10 @@ test_that("interdep_generated_columns combines DIM predictors and DSM outcomes",
   expect_equal(
     result$column,
     c(
-      ".i_x_raw_dyad_mean_gmc",
-      ".i_x_raw_within_dyad_deviation",
-      ".i_y_raw_dyad_mean",
-      ".i_y_raw_within_dyad_deviation"
+      ".i_x_dyad_mean_gmc",
+      ".i_x_within_dyad_deviation",
+      ".i_y_dyad_mean",
+      ".i_y_within_dyad_deviation"
     )
   )
 })

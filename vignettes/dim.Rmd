@@ -160,10 +160,10 @@ dim_1 <- glmmTMB::glmmTMB(
     1 +
 
     # Between-couple effect
-    .i_communication_raw_dyad_mean_gmc +
+    .i_communication_dyad_mean_gmc +
 
     # Within-couple effect
-    .i_communication_raw_within_dyad_deviation +
+    .i_communication_within_dyad_deviation +
 
     # Residual Gaussian variance-covariance
     (1 | coupleID) +
@@ -212,7 +212,7 @@ guidance on APIM specifications and different models, see the
 
 apim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 +
-    .i_communication_raw_actor + .i_communication_raw_partner +
+    .i_communication_actor + .i_communication_partner +
     (1 | coupleID) +
     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
@@ -910,11 +910,11 @@ In this example:
 apim_coef <- glmmTMB::fixef(apim_1)$cond
 dim_coef <- glmmTMB::fixef(dim_1)$cond
 
-b_actor <- apim_coef[[".i_communication_raw_actor"]]
-b_partner <- apim_coef[[".i_communication_raw_partner"]]
+b_actor <- apim_coef[[".i_communication_actor"]]
+b_partner <- apim_coef[[".i_communication_partner"]]
 
-b_dyad_mean <- dim_coef[[".i_communication_raw_dyad_mean_gmc"]]
-b_within_dyad <- dim_coef[[".i_communication_raw_within_dyad_deviation"]]
+b_dyad_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
+b_within_dyad <- dim_coef[[".i_communication_within_dyad_deviation"]]
 
 
 cat("From APIM model:\n",

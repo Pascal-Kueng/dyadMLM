@@ -83,10 +83,10 @@ tweedie_distinguishable_model <- glmmTMB(
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
     
     # gender-specific slopes for motivation actor effect
-    .i_is_female_x_male_female:.i_motivation_raw_actor + .i_is_female_x_male_male:.i_motivation_raw_actor +
+    .i_is_female_x_male_female:.i_motivation_actor + .i_is_female_x_male_male:.i_motivation_actor +
     
     # gender-specific slopes for motivation partner effect
-    .i_is_female_x_male_female:.i_motivation_raw_partner + .i_is_female_x_male_male:.i_motivation_raw_partner +
+    .i_is_female_x_male_female:.i_motivation_partner + .i_is_female_x_male_male:.i_motivation_partner +
     
     # keep a simple couple-level latent effect for stable non-independence
     # important limitation: this can only induce positive partner dependence
@@ -126,10 +126,10 @@ tweedie_exchangeable_model <- glmmTMB(
     1 + 
     
     # pooled actor slope for motivation
-    .i_motivation_raw_actor +
+    .i_motivation_actor +
     
     # pooled partner slope for motivation
-    .i_motivation_raw_partner +
+    .i_motivation_partner +
     
     # exchangeable latent dyad block on the log-mean scale
     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)

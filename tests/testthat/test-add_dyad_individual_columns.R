@@ -78,8 +78,8 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
     center_predictors() |>
     add_dyad_individual_columns()
 
-  expect_equal(result$.i_x_raw_dyad_mean_gmc, c(-9.75, -9.75, 9.75, 9.75))
-  expect_equal(result$.i_x_raw_within_dyad_deviation, c(-4.5, 4.5, -5, 5))
+  expect_equal(result$.i_x_dyad_mean_gmc, c(-9.75, -9.75, 9.75, 9.75))
+  expect_equal(result$.i_x_within_dyad_deviation, c(-4.5, 4.5, -5, 5))
 
   expect_equal(
     attr(result, "interdep")$dim_predictors,
@@ -87,8 +87,8 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
       predictor = "x",
       component = "raw",
       source_column = "x",
-      mean_column = ".i_x_raw_dyad_mean_gmc",
-      deviation_column = ".i_x_raw_within_dyad_deviation",
+      mean_column = ".i_x_dyad_mean_gmc",
+      deviation_column = ".i_x_within_dyad_deviation",
       dyad_decomposition_level = "dyad"
     )
   )
@@ -113,8 +113,8 @@ test_that("DIM construction allows one role-supplied exchangeable composition", 
     seed = 123
   )
 
-  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
-  expect_true(".i_x_raw_within_dyad_deviation" %in% names(result))
+  expect_true(".i_x_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_within_dyad_deviation" %in% names(result))
   expect_equal(unique(as.character(result$.i_composition)), "female_x_female")
   expect_equal(attr(result, "interdep")$dyad_compositions$dyad_type, "exchangeable")
 })
@@ -136,10 +136,10 @@ test_that("raw cross-sectional DIM requires complete dyad values", {
     seed = 123
   )
 
-  expect_true(all(is.na(result$.i_x_raw_dyad_mean_gmc[result$dyad_id == 1])))
-  expect_true(all(is.na(result$.i_x_raw_within_dyad_deviation[result$dyad_id == 1])))
-  expect_equal(result$.i_x_raw_dyad_mean_gmc[result$dyad_id == 2], c(0, 0))
-  expect_equal(result$.i_x_raw_within_dyad_deviation[result$dyad_id == 2], c(-5, 5))
+  expect_true(all(is.na(result$.i_x_dyad_mean_gmc[result$dyad_id == 1])))
+  expect_true(all(is.na(result$.i_x_within_dyad_deviation[result$dyad_id == 1])))
+  expect_equal(result$.i_x_dyad_mean_gmc[result$dyad_id == 2], c(0, 0))
+  expect_equal(result$.i_x_within_dyad_deviation[result$dyad_id == 2], c(-5, 5))
 })
 
 test_that("prepare_interdep_data creates DIM columns without APIM columns", {
@@ -159,7 +159,7 @@ test_that("prepare_interdep_data creates DIM columns without APIM columns", {
     seed = 123
   )
 
-  expect_true(".i_x_raw_dyad_mean_gmc" %in% names(result))
+  expect_true(".i_x_dyad_mean_gmc" %in% names(result))
   expect_false("x_actor" %in% names(result))
   expect_false("x_partner" %in% names(result))
 })

@@ -54,8 +54,8 @@ test_that("add_actor_partner_columns preserves rows with missing partner occasio
     add_actor_partner_columns()
 
   expect_equal(nrow(result), nrow(data))
-  expect_equal(result$.i_x_raw_actor, result$x)
-  expect_equal(result$.i_x_raw_partner, c(10, 1, NA, 30, 20, 34, 24))
+  expect_equal(result$.i_x_actor, result$x)
+  expect_equal(result$.i_x_partner, c(10, 1, NA, 30, 20, 34, 24))
   expect_false("x_actor" %in% names(result))
   expect_false("x_partner" %in% names(result))
   expect_equal(
@@ -64,8 +64,8 @@ test_that("add_actor_partner_columns preserves rows with missing partner occasio
       predictor = "x",
       component = "raw",
       source_column = "x",
-      actor_column = ".i_x_raw_actor",
-      partner_column = ".i_x_raw_partner"
+      actor_column = ".i_x_actor",
+      partner_column = ".i_x_partner"
     )
   )
 })
@@ -88,8 +88,8 @@ test_that("add_actor_partner_columns matches cross-sectional partners", {
     center_predictors() |>
     add_actor_partner_columns()
 
-  expect_equal(result$.i_x_raw_actor, result$x)
-  expect_equal(result$.i_x_raw_partner, c(10, 1, 30, 20))
+  expect_equal(result$.i_x_actor, result$x)
+  expect_equal(result$.i_x_partner, c(10, 1, 30, 20))
 })
 
 test_that("add_actor_partner_columns uses generated names for raw predictors", {
@@ -111,16 +111,16 @@ test_that("add_actor_partner_columns uses generated names for raw predictors", {
     center_predictors() |>
     add_actor_partner_columns()
 
-  expect_equal(result$.i_stress_level_raw_actor, result[["stress level"]])
-  expect_equal(result$.i_stress_level_raw_partner, c(10, 1, 30, 20))
+  expect_equal(result$.i_stress_level_actor, result[["stress level"]])
+  expect_equal(result$.i_stress_level_partner, c(10, 1, 30, 20))
   expect_equal(
     attr(result, "interdep")$apim_predictors,
     tibble::tibble(
       predictor = "stress level",
       component = "raw",
       source_column = "stress level",
-      actor_column = ".i_stress_level_raw_actor",
-      partner_column = ".i_stress_level_raw_partner"
+      actor_column = ".i_stress_level_actor",
+      partner_column = ".i_stress_level_partner"
     )
   )
 })
@@ -166,8 +166,8 @@ test_that("add_actor_partner_columns preserves measured missingness", {
     center_predictors() |>
     add_actor_partner_columns()
 
-  expect_equal(result$.i_x_raw_actor, result$x)
-  expect_equal(result$.i_x_raw_partner, c(NA, 1, 30, NA))
+  expect_equal(result$.i_x_actor, result$x)
+  expect_equal(result$.i_x_partner, c(NA, 1, 30, NA))
 })
 
 test_that("prepare_interdep_data creates actor and partner columns after dropping invalid dyads", {
@@ -193,6 +193,6 @@ test_that("prepare_interdep_data creates actor and partner columns after droppin
   )
 
   expect_equal(unique(result$dyad_id), c(1, 4))
-  expect_equal(result$.i_x_raw_actor, result$x)
-  expect_equal(result$.i_x_raw_partner, c(10, 1, 60, 50))
+  expect_equal(result$.i_x_actor, result$x)
+  expect_equal(result$.i_x_partner, c(10, 1, 60, 50))
 })

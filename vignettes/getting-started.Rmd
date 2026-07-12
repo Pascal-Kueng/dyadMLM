@@ -148,12 +148,12 @@ cross_distinguishable_model <- glmmTMB(
     .i_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_is_female_x_male_female:.i_communication_raw_actor +
-    .i_is_female_x_male_male:.i_communication_raw_actor +
+    .i_is_female_x_male_female:.i_communication_actor +
+    .i_is_female_x_male_male:.i_communication_actor +
 
     # Gender-specific partner effects
-    .i_is_female_x_male_female:.i_communication_raw_partner +
-    .i_is_female_x_male_male:.i_communication_raw_partner +
+    .i_is_female_x_male_female:.i_communication_partner +
+    .i_is_female_x_male_male:.i_communication_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.

@@ -94,12 +94,12 @@ simple_apim <- glmmTMB::glmmTMB(
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_communication_raw_actor:.i_is_female_x_male_female +
-    .i_communication_raw_actor:.i_is_female_x_male_male +
+    .i_communication_actor:.i_is_female_x_male_female +
+    .i_communication_actor:.i_is_female_x_male_male +
 
     # Gender-specific partner effects
-    .i_communication_raw_partner:.i_is_female_x_male_female +
-    .i_communication_raw_partner:.i_is_female_x_male_male +
+    .i_communication_partner:.i_is_female_x_male_female +
+    .i_communication_partner:.i_is_female_x_male_male +
 
     # Dyad-level random effects represent the partner residual
     # variance-covariance structure
