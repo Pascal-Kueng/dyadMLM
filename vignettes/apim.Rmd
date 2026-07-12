@@ -127,7 +127,7 @@ tweedie_exchangeable_model <- glmmTMB(
     .i_motivation_raw_partner +
     
     # exchangeable latent dyad block on the log-mean scale
-    (1 | coupleID) + (0 + .i_diff_arbitrary | coupleID)
+    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
     
   # estimate a single pooled Tweedie dispersion parameter
   , dispformula = ~ 1
@@ -364,10 +364,10 @@ ild_tweedie_exchangeable_model <- glmmTMB(
     .i_provided_support_cbp_partner +
 
     # stable exchangeable latent covariance
-    (1 | coupleID) + (0 + .i_diff_arbitrary | coupleID) +
+    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
   
     # same-day exchangeable latent covariance
-    (1 | coupleID:diaryday) + (0 + .i_diff_arbitrary | coupleID:diaryday)
+    (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   # pooled dispersion; exchangeable positions should not define dispersion differences
   , dispformula = ~ 1

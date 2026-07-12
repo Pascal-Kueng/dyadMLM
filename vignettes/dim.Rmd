@@ -133,9 +133,10 @@ mean, equivalently half the signed difference between partners.
 The fixed effects are a reparameterization of the APIM actor and partner
 effects. The same random-effects structure can therefore be used for both
 fixed-effect parameterizations: a dyad-level intercept and a dyad-level
-difference contrast indexed by `.i_diff_arbitrary`. In `glmmTMB`,
-with `dispformula = ~ 0`, these random effects represent the two members'
-Gaussian residual variance and covariance.
+difference contrast indexed by
+`.i_diff_assumed_exchangeable_arbitrary`. In `glmmTMB`, with
+`dispformula = ~ 0`, these random effects represent the two members' Gaussian
+residual variance and covariance.
 
 The intercept and difference contrast are specified as separate random-effects
 terms, which constrains their correlation to zero. This preserves
@@ -160,7 +161,7 @@ dim_1 <- glmmTMB::glmmTMB(
 
     # Residual Gaussian variance-covariance
     (1 | coupleID) +
-    (0 + .i_diff_arbitrary | coupleID)
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -201,7 +202,7 @@ apim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 +
     .i_communication_raw_actor + .i_communication_raw_partner +
     (1 | coupleID) +
-    (0 + .i_diff_arbitrary | coupleID)
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -919,11 +920,11 @@ dim_ILD <- glmmTMB::glmmTMB(
 
     # Stable exchangeable dyad-level covariance
     (1 | coupleID) +
-    (0 + .i_diff_arbitrary | coupleID) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Residual (same-day) exchangeable dyad-level covariance
     (1 | coupleID:diaryday) +
-    (0 + .i_diff_arbitrary | coupleID:diaryday)
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -970,11 +971,11 @@ apim_ILD <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_partner +
 
     # Stable exchangeable dyad-level covariance
-    (1 | coupleID)  + (0 + .i_diff_arbitrary | coupleID) +
+    (1 | coupleID)  + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Residual (same-day) exchangeable dyad-level covariance
     (1 | coupleID:diaryday) +
-    (0 + .i_diff_arbitrary | coupleID:diaryday)
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -1039,11 +1040,11 @@ apim_dim_ILD <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_within_dyad_deviation +
 
     # Stable exchangeable dyad-level covariance
-    (1 | coupleID)  + (0 + .i_diff_arbitrary | coupleID) +
+    (1 | coupleID)  + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     (1 | coupleID:diaryday) +
-    (0 + .i_diff_arbitrary | coupleID:diaryday)
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -1114,14 +1115,14 @@ apim_ILD_random <- glmmTMB::glmmTMB(
          .i_provided_support_cwp_partner
        | coupleID)  +
     (0 +
-         .i_diff_arbitrary +
-         .i_diff_arbitrary:.i_provided_support_cwp_actor +
-         .i_diff_arbitrary:.i_provided_support_cwp_partner
+         .i_diff_assumed_exchangeable_arbitrary +
+         .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_actor +
+         .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_partner
        | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     (1 | coupleID:diaryday) +
-    (0 + .i_diff_arbitrary | coupleID:diaryday)
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -1154,14 +1155,14 @@ dim_ILD_random <- glmmTMB::glmmTMB(
        .i_provided_support_cwp_within_dyad_deviation
      | coupleID)  +
     (0 +
-       .i_diff_arbitrary +
-       .i_diff_arbitrary:.i_provided_support_cwp_dyad_mean +
-       .i_diff_arbitrary:.i_provided_support_cwp_within_dyad_deviation
+       .i_diff_assumed_exchangeable_arbitrary +
+       .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_dyad_mean +
+       .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_within_dyad_deviation
      | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     (1 | coupleID:diaryday) +
-    (0 + .i_diff_arbitrary | coupleID:diaryday)
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()

@@ -187,10 +187,10 @@ print(cross_exchangeable_data, n = 4)
 
 ```
 
-The generated `.i_diff_arbitrary` contrast assigns `-1` and `1` to the two
-members of each exchangeable dyad. Its direction is arbitrary, and `seed` makes
-the assignment reproducible. When role compositions are available, each
-exchangeable composition receives its own contrast, such as
+The generated `.i_diff_assumed_exchangeable_arbitrary` contrast assigns `-1`
+and `1` to the two members of each exchangeable dyad. Its direction is
+arbitrary, and `seed` makes the assignment reproducible. When role compositions
+are available, each exchangeable composition receives its own contrast, such as
 `.i_diff_female_x_female_arbitrary`, which is `0` for all other compositions.
 We use a fixed seed in the examples below for consistent results.
 

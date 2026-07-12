@@ -505,23 +505,15 @@ finalize_composition_columns <- function(data) {
   composition_suffixes <- make_interdep_suffixes(
     data[[interdep_composition_col]][data[[interdep_diff_col]] != 0]
   )
-  role_was_supplied <- !is.null(attr(data, "interdep")$role)
 
   for (composition in sort(names(composition_suffixes))) {
     is_composition <- as.character(data[[interdep_composition_col]]) == composition
-    diff_column <- if (
-      !role_was_supplied &&
-        identical(composition, interdep_assumed_exchangeable_label)
-    ) {
-      paste0(interdep_reserved_prefix, "diff_arbitrary")
-    } else {
-      paste0(
-        interdep_reserved_prefix,
-        "diff_",
-        composition_suffixes[[composition]],
-        "_arbitrary"
-      )
-    }
+    diff_column <- paste0(
+      interdep_reserved_prefix,
+      "diff_",
+      composition_suffixes[[composition]],
+      "_arbitrary"
+    )
     data[[diff_column]] <- ifelse(
       is_composition,
       data[[interdep_diff_col]],

@@ -44,6 +44,11 @@ DIM workflows, with models fitted primarily using `brms`
 ([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
 [DOI](https://doi.org/10.5281/zenodo.17400655)).
 
+The tutorial does not cover models that combine distinguishable and
+exchangeable dyads in a single analysis. For that workflow, see the
+[APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html).
+
 ## Installation
 
 You can install the development version of `interdep` from GitHub with:

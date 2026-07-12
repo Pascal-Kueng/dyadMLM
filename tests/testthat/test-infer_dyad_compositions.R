@@ -684,10 +684,11 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_true(is.factor(result$.i_composition))
   expect_true(is.factor(result$.i_composition_role))
   expect_true(".i_is_assumed_exchangeable" %in% names(result))
-  expect_true(".i_diff_arbitrary" %in% names(result))
+  expect_true(".i_diff_assumed_exchangeable_arbitrary" %in% names(result))
+  expect_false(".i_diff_arbitrary" %in% names(result))
   expect_false(".i_diff_assumed_exchangeable" %in% names(result))
   expect_false(interdep_diff_col %in% names(result))
-  expect_equal(abs(result$.i_diff_arbitrary), rep(1, 4))
+  expect_equal(abs(result$.i_diff_assumed_exchangeable_arbitrary), rep(1, 4))
   expect_equal(
     as.character(result$.i_composition),
     rep("assumed_exchangeable", 4)
