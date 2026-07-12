@@ -313,8 +313,10 @@ resolve_dsm_role_order <- function(dsm_role_order, model_type, has_role) {
 
   if (is.null(dsm_role_order)) {
     stop(
-      "`model_type = \"dsm\"` requires `dsm_role_order` to be supplied. For
-      exchangeable dyads, use `model_type = \"dim\"` instead.",
+      paste0(
+        "`model_type = \"dsm\"` requires `dsm_role_order` to be supplied. ",
+        "For exchangeable dyads, use `model_type = \"dim\"` instead."
+      ),
       call. = FALSE
     )
   }

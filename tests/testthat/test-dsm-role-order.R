@@ -13,7 +13,10 @@ test_that("DSM role order is required exactly with DSM preparation", {
       role = role,
       model_type = "dsm"
     ),
-    '`model_type = "dsm"` requires `dsm_role_order` to be supplied.',
+    paste0(
+      '`model_type = "dsm"` requires `dsm_role_order` to be supplied. ',
+      'For exchangeable dyads, use `model_type = "dim"` instead.'
+    ),
     fixed = TRUE
   )
 

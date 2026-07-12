@@ -73,7 +73,7 @@ prepared_data <- prepare_interdep_data(
   model_type = "apim"
 )
 
-print(prepared_data)
+print(prepared_data, n = 4)
 ```
 
 The prepared data contains the composition indicators and APIM actor/partner
