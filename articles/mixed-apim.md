@@ -18,6 +18,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
 undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 
+> This vignette is currently under construction. Please check back soon!
+
 ## Cross-sectional mixed-dyads APIM
 
 The data were simulated with the following fixed effects and residual

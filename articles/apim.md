@@ -5,9 +5,12 @@
 library(interdep)
 ```
 
-This vignette focuses on APIM-style actor and partner effect preparation
-and model formulas. For the main data requirements and validation
-workflow, start with the [Getting Started
+This vignette focuses on the cross-sectional and intensive longitudinal
+Actor-Partner Interdependence model for distinguishable and exchangeable
+dyads.
+
+For the main data requirements and validation workflow of the `interdep`
+package, start with the [Getting Started
 vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
 For APIMs that combine distinguishable and exchangeable dyad
 compositions, see the [Mixed-Composition APIM
@@ -17,6 +20,8 @@ dyads, see the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
 undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+
+> This vignette is currently under construction. Please check back soon!
 
 ### Test distinguishability
 
