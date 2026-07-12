@@ -83,7 +83,9 @@ validate_dsm_compatibility <- function(data) {
       "DSM currently supports only data with exactly one distinguishable dyad composition. ",
       "The prepared data contains unsupported dyad composition metadata: ",
       dyad_composition_text,
-      ".",
+      ". Use `include_compositions` to retain one distinguishable composition, or prepare compositions in separate calls. ",
+      "If the intended dyads are exchangeable, use `model_type = \"dim\"` instead. ",
+      "If a distinguishable composition was overridden, remove it from `set_exchangeable_compositions`.",
       call. = FALSE
     )
   }

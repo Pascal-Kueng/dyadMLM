@@ -132,6 +132,45 @@ test_that("DSM creates a role contrast without predictors", {
       dyad_decomposition_level = character()
     )
   )
+
+  generated <- interdep_generated_columns(attr(result, "interdep"))
+  expect_equal(generated$column, ".i_dsm_role_contrast")
+
+  printed <- capture.output(print(result, n = 2))
+  expect_true(any(grepl("DSM direction: female - male", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_dsm_role_contrast", printed, fixed = TRUE)))
+  expect_false(any(grepl(".i_{pred}_dyad_mean", printed, fixed = TRUE)))
+})
+
+test_that("DSM keeps multiple predictors and metadata aligned", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
+    x = c(7, 3, 12, 8)
+  )
+  data[["stress level"]] <- c(10, 4, 9, 1)
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = c(x, `stress level`),
+    model_type = "dsm",
+    dsm_role_order = c("female", "male")
+  )
+
+  expect_equal(result$.i_x_dyad_difference, rep(4, 4))
+  expect_equal(result$.i_stress_level_dyad_difference, c(6, 6, 8, 8))
+  expect_false(any(grepl("within_dyad_deviation", names(result), fixed = TRUE)))
+
+  meta <- attr(result, "interdep")$dsm_predictors
+  expect_equal(meta$predictor, c("x", "stress level"))
+  expect_equal(
+    meta$difference_column,
+    c(".i_x_dyad_difference", ".i_stress_level_dyad_difference")
+  )
 })
 
 test_that("DSM constructs longitudinal CWP and CBP scores", {
@@ -164,6 +203,37 @@ test_that("DSM constructs longitudinal CWP and CBP scores", {
   meta <- attr(result, "interdep")$dsm_predictors
   expect_equal(meta$component, c("cwp", "cbp"))
   expect_equal(meta$dyad_decomposition_level, c("dyad_time", "dyad"))
+})
+
+test_that("DSM returns missing CWP scores for an incomplete predictor pair", {
+  data <- data.frame(
+    dyad_id = rep(1:2, each = 4),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    role = rep(c("female", "male"), 4),
+    time = rep(c(1, 1, 2, 2), 2),
+    x = c(4, NA, 8, 4, 10, 6, 14, 8)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time,
+    predictors = x,
+    model_type = "dsm",
+    dsm_role_order = c("female", "male")
+  )
+
+  incomplete_occasion <- result$dyad_id == 1 & result$time == 1
+  complete_occasion <- result$dyad_id == 1 & result$time == 2
+
+  expect_true(all(is.na(result$.i_x_cwp_dyad_mean[incomplete_occasion])))
+  expect_true(all(is.na(result$.i_x_cwp_dyad_difference[incomplete_occasion])))
+  expect_false(any(is.na(result$.i_x_cwp_dyad_mean[complete_occasion])))
+  expect_false(any(is.na(result$.i_x_cwp_dyad_difference[complete_occasion])))
+  expect_false(any(is.na(result$.i_x_cbp_dyad_mean[result$dyad_id == 1])))
+  expect_false(any(is.na(result$.i_x_cbp_dyad_difference[result$dyad_id == 1])))
 })
 
 test_that("DSM and APIM predictor columns can coexist", {

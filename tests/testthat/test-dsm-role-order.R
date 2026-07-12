@@ -148,4 +148,49 @@ test_that("DSM requires one distinguishable final composition", {
     "DSM currently supports only data with exactly one distinguishable dyad composition.",
     fixed = TRUE
   )
+
+  exchangeable_data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = rep("female", 4)
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      exchangeable_data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      model_type = "dsm",
+      dsm_role_order = c("female", "male")
+    ),
+    "If the intended dyads are exchangeable, use `model_type = \"dim\"` instead.",
+    fixed = TRUE
+  )
+})
+
+test_that("DSM rejects multiple distinguishable compositions actionably", {
+  data <- data.frame(
+    dyad_id = rep(1:4, each = 2),
+    person_id = LETTERS[1:8],
+    role = c(
+      "female", "male",
+      "female", "male",
+      "nonbinary", "male",
+      "nonbinary", "male"
+    )
+  )
+
+  expect_error(
+    prepare_interdep_data(
+      data,
+      group = dyad_id,
+      member = person_id,
+      role = role,
+      model_type = "dsm",
+      dsm_role_order = c("female", "male")
+    ),
+    "Use `include_compositions` to retain one distinguishable composition, or prepare compositions in separate calls.",
+    fixed = TRUE
+  )
 })

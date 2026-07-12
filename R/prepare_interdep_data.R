@@ -46,9 +46,9 @@
 #'   constructed. `"time_2l"` indicates a two-level temporal predictor
 #'   decomposition into within-person and between-person components. `"auto"`
 #'   resolves to `"time_2l"` when both `time` and `predictors` are supplied, and
-#'   to `"none"` otherwise. Raw cross-sectional DIM predictor dyad-mean columns
-#'   are still centered around the grand mean of dyad means as part of DIM-style
-#'   predictor construction. For longitudinal DIM predictor
+#'   to `"none"` otherwise. Raw cross-sectional DIM and DSM predictor dyad-mean
+#'   columns are still centered around the grand mean of dyad means as part of
+#'   dyadic predictor-score construction. For longitudinal DIM and DSM predictor
 #'   construction, raw undecomposed predictors are currently rejected; use
 #'   `"auto"` or `"time_2l"`.
 #' @param set_exchangeable_compositions Optionally specify dyad compositions

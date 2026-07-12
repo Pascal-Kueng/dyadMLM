@@ -71,7 +71,7 @@ construct_dyad_predictor_decompositions <- function(data) {
       stop(
         "Longitudinal dyadic predictor-score construction requires temporally decomposed predictors. ",
         "Predictor `", predictor, "` has undecomposed component `", component, "`. ",
-        "Use `temporal_predictor_decomposition = \"auto\"` or `\"time_2l\"`, or choose a model type that supports raw longitudinal predictors.",
+        "Use `temporal_predictor_decomposition = \"auto\"` or `\"time_2l\"`, or use `model_type = \"apim\"` for raw longitudinal actor-partner predictors.",
         call. = FALSE
       )
     }

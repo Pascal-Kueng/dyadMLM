@@ -20,6 +20,14 @@ DSM role contrast coded \code{+0.5} and \code{-0.5}. DSM differences follow the 
 order recorded in \code{attr(data, "interdep")$dsm_role_order}. The supported DSM
 structure contains one distinguishable dyad composition; exchangeable dyads
 and multiple compositions are not supported.
+}
+\details{
+For temporally decomposed ILD predictors, within-person scores are computed
+within dyad-time and between-person scores within dyad. Raw cross-sectional
+dyad means are grand-mean centered. Both partners' predictor values are
+required for each score pair, and raw undecomposed longitudinal predictors
+are rejected.
+
 Constructed predictor columns are recorded in
 \code{attr(data, "interdep")$dsm_predictors}, and the contrast column name is
 recorded in \code{attr(data, "interdep")$dsm_role_contrast_column}.

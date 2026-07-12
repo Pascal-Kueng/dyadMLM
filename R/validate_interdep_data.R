@@ -30,7 +30,7 @@
 #'   components. `"auto"` resolves to `"time_2l"` when both `time` and
 #'   `predictors` are supplied, and to `"none"` otherwise.
 #'   Model-specific helpers may apply additional conventions, such as grand-mean
-#'   centering raw cross-sectional DIM dyad means.
+#'   centering raw cross-sectional DIM and DSM dyad means.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.
@@ -314,7 +314,7 @@ resolve_dsm_role_order <- function(dsm_role_order, model_type, has_role) {
   if (is.null(dsm_role_order)) {
     stop(
       "`model_type = \"dsm\"` requires `dsm_role_order` to be supplied. For
-      undirected differences, use \"dim\" instead.",
+      exchangeable dyads, use `model_type = \"dim\"` instead.",
       call. = FALSE
     )
   }

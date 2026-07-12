@@ -6,6 +6,13 @@
 #' order recorded in `attr(data, "interdep")$dsm_role_order`. The supported DSM
 #' structure contains one distinguishable dyad composition; exchangeable dyads
 #' and multiple compositions are not supported.
+#'
+#' For temporally decomposed ILD predictors, within-person scores are computed
+#' within dyad-time and between-person scores within dyad. Raw cross-sectional
+#' dyad means are grand-mean centered. Both partners' predictor values are
+#' required for each score pair, and raw undecomposed longitudinal predictors
+#' are rejected.
+#'
 #' Constructed predictor columns are recorded in
 #' `attr(data, "interdep")$dsm_predictors`, and the contrast column name is
 #' recorded in `attr(data, "interdep")$dsm_role_contrast_column`.
@@ -60,18 +67,15 @@ add_dyadic_score_columns <- function(data) {
       out[[deviation_col]] / out[[interdep_dsm_role_contrast_col]]
   }
 
-  # update metadata (generic to dsm specific)
+  # Replace intermediate deviation metadata with DSM difference metadata.
   dsm_predictors <- decomposition$predictors |>
     dplyr::mutate(
       difference_column = difference_cols,
       .after = "mean_column"
     ) |>
-    # The deviation col is not needed anymore (DIM deviation pred) and is removed
-    # from the metadata
     dplyr::select(-"deviation_column")
 
-  # We also remove the temp cols (DIM deviatin cols) from the actual
-  # dataframe.
+  # Remove the intermediate deviation columns from DSM output.
   deviation_cols <- decomposition$predictors$deviation_column
   if (length(deviation_cols) > 0) {
     out[deviation_cols] <- NULL
