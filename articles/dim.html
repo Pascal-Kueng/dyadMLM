@@ -41,7 +41,7 @@
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
     <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
-    <li><a class="dropdown-item" href="../articles/undirected-dsm.html">Undirected Dyadic Score Model</a></li>
+    <li><a class="dropdown-item" href="../articles/dsm.html">Dyadic Score Model</a></li>
   </ul>
 </li>
       </ul>
@@ -88,8 +88,7 @@ distinguishable, exchangeable, generalized, and intensive longitudinal
 APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model
 vignette</a>. For APIMs that combine distinguishable and exchangeable
 dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition
-APIM vignette</a>. For undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model
-vignette</a>.</p>
+APIM vignette</a>. For undirected dyadic score outcomes, see the <a href="dsm.html">Dyadic Score Model vignette</a>.</p>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dim">Cross-Sectional Gaussian DIM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dim"></a>
 </h2>
@@ -120,23 +119,21 @@ same exchangeable composition.</p>
 <span><span class="co">#&gt; # assumed_exchangeable exchangeable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}                       composition-specific sum-diff</span></span>
-<span><span class="co">#&gt; #                                        contrasts with arbitrary direction; 0</span></span>
-<span><span class="co">#&gt; #                                        for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                        exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_actor                  APIM actor predictor: actor's original</span></span>
-<span><span class="co">#&gt; #                                        predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_partner                APIM partner predictor: partner's</span></span>
-<span><span class="co">#&gt; #                                        original predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's</span></span>
-<span><span class="co">#&gt; #                                        average predictor level, grand-mean</span></span>
-<span><span class="co">#&gt; #                                        centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
-<span><span class="co">#&gt; #                                        person's difference from the dyad</span></span>
-<span><span class="co">#&gt; #                                        average</span></span>
+<span><span class="co">#&gt; #   .i_composition                   inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role              composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}                composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_diff_{comp}                   composition-specific sum-diff contrasts</span></span>
+<span><span class="co">#&gt; #                                    with arbitrary direction; 0 for</span></span>
+<span><span class="co">#&gt; #                                    distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                                    exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor                  APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                                    predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner                APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                                    predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
+<span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 13</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition      </span></span>
@@ -148,10 +145,9 @@ same exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_actor &lt;dbl&gt;, .i_communication_raw_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;, .i_communication_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_partner &lt;dbl&gt;, .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>The function creates arbitrary member labels encoding a
 member-difference contrast <code>.i_diff_*</code> as 1 for one partner
 and -1 for the other. This is needed for the correct random effects
@@ -192,23 +188,21 @@ justified:</p>
 <span><span class="co"><span style="color: #949494;">#&gt; #   male_x_male</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span>#</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}                       composition-specific sum-diff</span></span>
-<span><span class="co">#&gt; #                                        contrasts with arbitrary direction; 0</span></span>
-<span><span class="co">#&gt; #                                        for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                        exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_actor                  APIM actor predictor: actor's original</span></span>
-<span><span class="co">#&gt; #                                        predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_partner                APIM partner predictor: partner's</span></span>
-<span><span class="co">#&gt; #                                        original predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's</span></span>
-<span><span class="co">#&gt; #                                        average predictor level, grand-mean</span></span>
-<span><span class="co">#&gt; #                                        centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
-<span><span class="co">#&gt; #                                        person's difference from the dyad</span></span>
-<span><span class="co">#&gt; #                                        average</span></span>
+<span><span class="co">#&gt; #   .i_composition                   inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role              composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}                composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_diff_{comp}                   composition-specific sum-diff contrasts</span></span>
+<span><span class="co">#&gt; #                                    with arbitrary direction; 0 for</span></span>
+<span><span class="co">#&gt; #                                    distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                                    exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor                  APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                                    predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner                APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                                    predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
+<span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 400 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender satisfaction .i_composition   .i_composition_role</span></span>
@@ -219,9 +213,9 @@ justified:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female         6.93 same-sex-couples same-sex-couples   </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 396 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_is_same_sex_couples &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex_couples_arbitrary &lt;dbl&gt;, .i_satisfaction_raw_actor &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_partner &lt;dbl&gt;, .i_satisfaction_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex_couples_arbitrary &lt;dbl&gt;, .i_satisfaction_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_partner &lt;dbl&gt;, .i_satisfaction_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>If we want to include only male-female couples and treat those as
 exchangeable, we can do:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -246,23 +240,21 @@ exchangeable, we can do:</p>
 <span><span class="co">#&gt; # female_x_male exchangeable (set by user) 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}                       composition-specific sum-diff</span></span>
-<span><span class="co">#&gt; #                                        contrasts with arbitrary direction; 0</span></span>
-<span><span class="co">#&gt; #                                        for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                        exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_actor                  APIM actor predictor: actor's original</span></span>
-<span><span class="co">#&gt; #                                        predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_partner                APIM partner predictor: partner's</span></span>
-<span><span class="co">#&gt; #                                        original predictor values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's</span></span>
-<span><span class="co">#&gt; #                                        average predictor level, grand-mean</span></span>
-<span><span class="co">#&gt; #                                        centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
-<span><span class="co">#&gt; #                                        person's difference from the dyad</span></span>
-<span><span class="co">#&gt; #                                        average</span></span>
+<span><span class="co">#&gt; #   .i_composition                   inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role              composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}                composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_diff_{comp}                   composition-specific sum-diff contrasts</span></span>
+<span><span class="co">#&gt; #                                    with arbitrary direction; 0 for</span></span>
+<span><span class="co">#&gt; #                                    distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                                    exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor                  APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                                    predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner                APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                                    predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
+<span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender satisfaction .i_composition .i_composition_role</span></span>
@@ -273,9 +265,9 @@ exchangeable, we can do:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male           3.11 female_x_male  female_x_male      </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_is_female_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male_arbitrary &lt;dbl&gt;, .i_satisfaction_raw_actor &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_partner &lt;dbl&gt;, .i_satisfaction_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male_arbitrary &lt;dbl&gt;, .i_satisfaction_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_partner &lt;dbl&gt;, .i_satisfaction_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_within_dyad_deviation &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Pooling compositions constrains them to share DIM effects. These are
 substantive modeling decisions, not only data-processing choices, and
 should follow the research question.</p>
@@ -326,10 +318,10 @@ distribution depend on the arbitrary labeling.</p>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Between-couple effect</span></span>
-<span>    <span class="va">.i_communication_raw_dyad_mean_gmc</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Within-couple effect</span></span>
-<span>    <span class="va">.i_communication_raw_within_dyad_deviation</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_within_dyad_deviation</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Residual Gaussian variance-covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
@@ -342,7 +334,7 @@ distribution depend on the arbitrary labeling.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_raw_dyad_mean_gmc + .i_communication_raw_within_dyad_deviation +  </span></span>
+<span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_dyad_mean_gmc + .i_communication_within_dyad_deviation +  </span></span>
 <span><span class="co">#&gt;     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
 <span><span class="co">#&gt;     coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
@@ -360,14 +352,10 @@ distribution depend on the arbitrary labeling.</p>
 <span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                            Estimate Std. Error z value Pr(&gt;|z|)</span></span>
-<span><span class="co">#&gt; (Intercept)                                 5.04066    0.08492   59.36   &lt;2e-16</span></span>
-<span><span class="co">#&gt; .i_communication_raw_dyad_mean_gmc          1.99563    0.07797   25.59   &lt;2e-16</span></span>
-<span><span class="co">#&gt; .i_communication_raw_within_dyad_deviation  1.51989    0.14406   10.55   &lt;2e-16</span></span>
-<span><span class="co">#&gt;                                               </span></span>
-<span><span class="co">#&gt; (Intercept)                                ***</span></span>
-<span><span class="co">#&gt; .i_communication_raw_dyad_mean_gmc         ***</span></span>
-<span><span class="co">#&gt; .i_communication_raw_within_dyad_deviation ***</span></span>
+<span><span class="co">#&gt;                                        Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                             5.04066    0.08492   59.36   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_dyad_mean_gmc          1.99563    0.07797   25.59   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_within_dyad_deviation  1.51989    0.14406   10.55   &lt;2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 </div>
@@ -376,21 +364,28 @@ distribution depend on the arbitrary labeling.</p>
 </h3>
 <p>Because this Gaussian model uses an identity link, fixed coefficients
 are interpreted in units of the outcome, e.g., “satisfaction”:</p>
+<p>Because the exchangeable Gaussian DIM is algebraically equivalent to
+the reduced undirected DSM, each coefficient has both an
+individual-member interpretation and an equivalent couple
+mean/difference interpretation.</p>
 <ul>
-<li><p>The intercept (about 5.04) is the expected satisfaction when both
-members’ communication equals the sample grand mean.</p></li>
-<li><p>The dyad-mean estimate (about 2.00) means that for a person in a
-dyad with one-point higher average communication, while holding the
-difference between partners constant (i.e., both partners’ communication
-is 1 unit higher than the reference), expected satisfaction is 2.00
-units higher.</p></li>
+<li><p>The intercept (about 5.04) is the expected satisfaction of either
+member, and therefore the expected couple-average satisfaction, when
+both members’ communication equals the sample grand mean.</p></li>
+<li><p>The dyad-mean estimate (about 2.00) means that, comparing couples
+with the same communication difference between partners, a one-point
+higher couple-average communication level is associated with a
+2.00-point higher expected couple-average satisfaction. Equivalently,
+each member’s expected satisfaction is 2.00 points higher.</p></li>
 <li><p>The within-dyad-deviation estimate (about 1.52) means that a
 one-point difference in communication between partners is associated
 with a 1.52-point difference in their expected satisfaction, holding
 their average communication constant. Equivalently, if one member is 1
 point above the dyad mean, holding the dyad mean constant implies that
 the other is 1 point below it. The members are then 2 points apart in
-communication and are expected to differ by 3.04 points in
+communication; the first member’s expected satisfaction is 1.52 points
+above the couple’s predicted mean, the second member’s is 1.52 points
+below it, and they are expected to differ by 3.04 points in
 satisfaction.</p></li>
 </ul>
 </div>
@@ -406,7 +401,7 @@ vignette</a>.</p>
 <code class="sourceCode R"><span></span>
 <span><span class="va">apim_1</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_raw_actor</span> <span class="op">+</span> <span class="va">.i_communication_raw_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_actor</span> <span class="op">+</span> <span class="va">.i_communication_partner</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
@@ -1079,11 +1074,11 @@ their original scale.</p>
 <code class="sourceCode R"><span><span class="va">apim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">apim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
 <span><span class="va">dim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
 <span></span>
-<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_actor"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_partner"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_actor"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_partner"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">b_dyad_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">b_within_dyad</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_raw_within_dyad_deviation"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_dyad_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_within_dyad</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_within_dyad_deviation"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"From APIM model:\n"</span>,</span>
@@ -1286,27 +1281,39 @@ construction.</p>
 <div class="section level3">
 <h3 id="interpretation-of-ild-dim-coefficients">Interpretation of ILD DIM coefficients<a class="anchor" aria-label="anchor" href="#interpretation-of-ild-dim-coefficients"></a>
 </h3>
-<p>The fitted coefficients can be interpreted as:</p>
+<p>The same dual interpretation applies longitudinally: dyad-mean
+effects describe both expected outcomes for individual members and
+expected couple-average outcomes, whereas within-dyad effects describe
+both member deviations and expected differences between partners.</p>
 <ul>
 <li><p>The <code>cbp</code> dyad-mean estimate (about 1.51) means that,
 comparing couples whose average usual support differs by one point while
-holding the stable difference between partners constant, a member of the
-higher-support couple is expected to report 1.51 points higher
-closeness.</p></li>
+holding the stable difference between partners constant, expected
+couple-average closeness is 1.51 points higher for the higher-support
+couple. Equivalently, each member is expected to report 1.51 points
+higher closeness.</p></li>
 <li><p>The <code>cwp</code> dyad-mean estimate (about 0.49) means that
 when both members are one point above their respective usual support
 levels, each member’s expected closeness is 0.49 points higher than when
 both are at their usual levels, holding the difference between their
-momentary deviations constant.</p></li>
+momentary deviations constant. Equivalently, expected couple-average
+closeness is 0.49 points higher on that occasion.</p></li>
 <li><p>The <code>cbp</code> within-dyad estimate (about 0.78) means that
 if partners differ by one point in their usual support levels, they are
 expected to differ by 0.78 points in closeness, holding the couple’s
-average usual support constant.</p></li>
+average usual support and the other predictors constant. In member
+terms, a one-point increase in one member’s stable deviation from the
+dyad’s usual support level, with the other member’s deviation decreasing
+by one point, is associated with a 0.78-point increase for the first
+member and a 0.78-point decrease for the second.</p></li>
 <li><p>The <code>cwp</code> within-dyad estimate (about 0.06) means that
 if one partner’s momentary deviation from usual support is one point
 higher than the other partner’s deviation, they are expected to differ
-by 0.06 points in closeness, holding the occasion-specific dyad mean
-constant.</p></li>
+by 0.06 points in closeness, holding the occasion-specific dyad mean and
+the other predictors constant. Equivalently, increasing one member’s
+momentary deviation by one point while decreasing the other member’s
+deviation by one point is associated with a 0.06-point increase for the
+first member and a 0.06-point decrease for the second.</p></li>
 </ul>
 </div>
 <div class="section level3">
@@ -1518,8 +1525,10 @@ preserve exchangeability.</p>
 <p>For APIM formulas with distinguishable, exchangeable, generalized,
 and intensive longitudinal dyads, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>. For
 models combining multiple dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For
-undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model vignette</a>.
-For the broader data-preparation workflow, return to the <a href="getting-started.html">Getting Started vignette</a>.</p>
+undirected dyadic score outcomes, see the <a href="dsm.html">Dyadic
+Score Model vignette</a>. For the broader data-preparation workflow,
+return to the <a href="getting-started.html">Getting Started
+vignette</a>.</p>
 <p>For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
 and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses

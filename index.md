@@ -20,7 +20,7 @@ Start with the vignettes, or scroll down for a quick-start.
 | [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable, exchangeable, generalized, and intensive longitudinal dyads |
 | [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
 | [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
-| [Undirected Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html) | Undirected DSM outcome and predictor construction, with model formulas |
+| [Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/dsm.html) | Undirected DSM outcome and predictor construction, with model formulas |
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and
@@ -74,10 +74,10 @@ print(prepared_data)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
 #> #                        values
-#> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
 #> #                        values
 #> #
 #> # A tibble: 190 × 11
@@ -96,7 +96,7 @@ print(prepared_data)
 #> # ℹ 180 more rows
 #> # ℹ 5 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_communication_raw_actor <dbl>, .i_communication_raw_partner <dbl>
+#> #   .i_communication_actor <dbl>, .i_communication_partner <dbl>
 ```
 
 The prepared data contains the composition indicators and APIM
@@ -113,12 +113,12 @@ simple_apim <- glmmTMB::glmmTMB(
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_communication_raw_actor:.i_is_female_x_male_female +
-    .i_communication_raw_actor:.i_is_female_x_male_male +
+    .i_communication_actor:.i_is_female_x_male_female +
+    .i_communication_actor:.i_is_female_x_male_male +
 
     # Gender-specific partner effects
-    .i_communication_raw_partner:.i_is_female_x_male_female +
-    .i_communication_raw_partner:.i_is_female_x_male_male +
+    .i_communication_partner:.i_is_female_x_male_female +
+    .i_communication_partner:.i_is_female_x_male_male +
 
     # Dyad-level random effects represent the partner residual
     # variance-covariance structure

@@ -18,8 +18,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
 For DIM predictors and their equivalence to APIM effects in exchangeable
 dyads, see the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
-undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+undirected dyadic score outcomes, see the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 > This vignette is under construction and for now only contains a few
 > preliminary example models. Please check back soon!
@@ -81,13 +81,13 @@ print(tweedie_distinguishable_data)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition         inferred dyad composition
-#> #   .i_composition_role    composition-specific member role
-#> #   .i_is_{comp-role}      composition-role indicator columns
-#> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor
-#> #                          values
-#> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor
-#> #                          values
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                        values
 #> #
 #> # A tibble: 240 × 11
 #>    personID coupleID gender motivation physical_activity .i_composition
@@ -105,7 +105,7 @@ print(tweedie_distinguishable_data)
 #> # ℹ 230 more rows
 #> # ℹ 5 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
+#> #   .i_motivation_actor <dbl>, .i_motivation_partner <dbl>
 summary(tweedie_distinguishable_data)
 #>     personID         coupleID         gender      motivation       
 #>  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  
@@ -123,21 +123,21 @@ summary(tweedie_distinguishable_data)
 #>  3rd Qu.:15.147                                                      
 #>  Max.   :85.043                                                      
 #>  NAs    :4                                                           
-#>  .i_is_female_x_male_female .i_is_female_x_male_male .i_motivation_raw_actor
-#>  Min.   :0.0                Min.   :0.0              Min.   :-2.320532      
-#>  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.580126      
-#>  Median :0.5                Median :0.5              Median :-0.032795      
-#>  Mean   :0.5                Mean   :0.5              Mean   :-0.008869      
-#>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.537262      
-#>  Max.   :1.0                Max.   :1.0              Max.   : 2.423337      
-#>                                                      NAs    :9              
-#>  .i_motivation_raw_partner
-#>  Min.   :-2.320532        
-#>  1st Qu.:-0.580126        
-#>  Median :-0.032795        
-#>  Mean   :-0.008869        
-#>  3rd Qu.: 0.537262        
-#>  Max.   : 2.423337        
+#>  .i_is_female_x_male_female .i_is_female_x_male_male .i_motivation_actor
+#>  Min.   :0.0                Min.   :0.0              Min.   :-2.320532  
+#>  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.580126  
+#>  Median :0.5                Median :0.5              Median :-0.032795  
+#>  Mean   :0.5                Mean   :0.5              Mean   :-0.008869  
+#>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.537262  
+#>  Max.   :1.0                Max.   :1.0              Max.   : 2.423337  
+#>                                                      NAs    :9          
+#>  .i_motivation_partner
+#>  Min.   :-2.320532    
+#>  1st Qu.:-0.580126    
+#>  Median :-0.032795    
+#>  Mean   :-0.008869    
+#>  3rd Qu.: 0.537262    
+#>  Max.   : 2.423337    
 #>  NAs    :9
 ```
 
@@ -150,10 +150,10 @@ tweedie_distinguishable_model <- glmmTMB(
     0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
     
     # gender-specific slopes for motivation actor effect
-    .i_is_female_x_male_female:.i_motivation_raw_actor + .i_is_female_x_male_male:.i_motivation_raw_actor +
+    .i_is_female_x_male_female:.i_motivation_actor + .i_is_female_x_male_male:.i_motivation_actor +
     
     # gender-specific slopes for motivation partner effect
-    .i_is_female_x_male_female:.i_motivation_raw_partner + .i_is_female_x_male_male:.i_motivation_raw_partner +
+    .i_is_female_x_male_female:.i_motivation_partner + .i_is_female_x_male_male:.i_motivation_partner +
     
     # keep a simple couple-level latent effect for stable non-independence
     # important limitation: this can only induce positive partner dependence
@@ -190,16 +190,16 @@ print(tweedie_exchangeable_data)
 #> # assumed_exchangeable exchangeable 120 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition         inferred dyad composition
-#> #   .i_composition_role    composition-specific member role
-#> #   .i_is_{comp-role}      composition-role indicator columns
-#> #   .i_diff_{comp}         composition-specific sum-diff contrasts with
-#> #                          arbitrary direction; 0 for distinguishable dyads or
-#> #                          other exchangeable compositions
-#> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor
-#> #                          values
-#> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor
-#> #                          values
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                        values
 #> #
 #> # A tibble: 240 × 11
 #>    personID coupleID gender motivation physical_activity .i_composition      
@@ -217,8 +217,8 @@ print(tweedie_exchangeable_data)
 #> # ℹ 230 more rows
 #> # ℹ 5 more variables: .i_composition_role <fct>,
 #> #   .i_is_assumed_exchangeable <dbl>,
-#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
-#> #   .i_motivation_raw_actor <dbl>, .i_motivation_raw_partner <dbl>
+#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>, .i_motivation_actor <dbl>,
+#> #   .i_motivation_partner <dbl>
 summary(tweedie_exchangeable_data)
 #>     personID         coupleID         gender      motivation       
 #>  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  
@@ -244,14 +244,14 @@ summary(tweedie_exchangeable_data)
 #>  3rd Qu.:1                  3rd Qu.: 1                            
 #>  Max.   :1                  Max.   : 1                            
 #>                                                                   
-#>  .i_motivation_raw_actor .i_motivation_raw_partner
-#>  Min.   :-2.320532       Min.   :-2.320532        
-#>  1st Qu.:-0.580126       1st Qu.:-0.580126        
-#>  Median :-0.032795       Median :-0.032795        
-#>  Mean   :-0.008869       Mean   :-0.008869        
-#>  3rd Qu.: 0.537262       3rd Qu.: 0.537262        
-#>  Max.   : 2.423337       Max.   : 2.423337        
-#>  NAs    :9               NAs    :9
+#>  .i_motivation_actor .i_motivation_partner
+#>  Min.   :-2.320532   Min.   :-2.320532    
+#>  1st Qu.:-0.580126   1st Qu.:-0.580126    
+#>  Median :-0.032795   Median :-0.032795    
+#>  Mean   :-0.008869   Mean   :-0.008869    
+#>  3rd Qu.: 0.537262   3rd Qu.: 0.537262    
+#>  Max.   : 2.423337   Max.   : 2.423337    
+#>  NAs    :9           NAs    :9
 ```
 
 ``` r
@@ -263,10 +263,10 @@ tweedie_exchangeable_model <- glmmTMB(
     1 + 
     
     # pooled actor slope for motivation
-    .i_motivation_raw_actor +
+    .i_motivation_actor +
     
     # pooled partner slope for motivation
-    .i_motivation_raw_partner +
+    .i_motivation_partner +
     
     # exchangeable latent dyad block on the log-mean scale
     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
@@ -752,8 +752,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
 For the alternative DIM parameterization of exchangeable dyads, see the
 [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
-continue to the [Undirected Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+continue to the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and

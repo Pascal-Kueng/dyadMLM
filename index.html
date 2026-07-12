@@ -39,7 +39,7 @@
     <li><a class="dropdown-item" href="articles/apim.html">Actor-Partner Interdependence Model</a></li>
     <li><a class="dropdown-item" href="articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="articles/dim.html">Dyad-Individual Model</a></li>
-    <li><a class="dropdown-item" href="articles/undirected-dsm.html">Undirected Dyadic Score Model</a></li>
+    <li><a class="dropdown-item" href="articles/dsm.html">Dyadic Score Model</a></li>
   </ul>
 </li>
       </ul>
@@ -90,7 +90,7 @@
 <td>DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads</td>
 </tr>
 <tr>
-<td><a href="https://pascal-kueng.github.io/interdep/articles/undirected-dsm.html">Undirected Dyadic Score Model</a></td>
+<td><a href="https://pascal-kueng.github.io/interdep/articles/dsm.html">Dyadic Score Model</a></td>
 <td>Undirected DSM outcome and predictor construction, with model formulas</td>
 </tr>
 </tbody>
@@ -132,10 +132,10 @@
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_*              composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_*_raw_actor       APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
 <span><span class="co">#&gt; #                        values</span></span>
-<span><span class="co">#&gt; #   .i_*_raw_partner     APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
 <span><span class="co">#&gt; #                        values</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # A tibble: 190 × 11</span></span>
@@ -154,7 +154,7 @@
 <span><span class="co">#&gt; # ℹ 180 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 5 more variables: .i_composition_role &lt;fct&gt;,</span></span>
 <span><span class="co">#&gt; #   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   .i_communication_raw_actor &lt;dbl&gt;, .i_communication_raw_partner &lt;dbl&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; #   .i_communication_actor &lt;dbl&gt;, .i_communication_partner &lt;dbl&gt;</span></span></code></pre></div>
 <p>The prepared data contains the composition indicators and APIM actor/partner predictor columns used in the model formulas below.</p>
 <p>One possible APIM formula is:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -165,12 +165,12 @@
 <span>    <span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific actor effects</span></span>
-<span>    <span class="va">.i_communication_raw_actor</span><span class="op">:</span><span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_raw_actor</span><span class="op">:</span><span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_actor</span><span class="op">:</span><span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_actor</span><span class="op">:</span><span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific partner effects</span></span>
-<span>    <span class="va">.i_communication_raw_partner</span><span class="op">:</span><span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_raw_partner</span><span class="op">:</span><span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_partner</span><span class="op">:</span><span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_partner</span><span class="op">:</span><span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Dyad-level random effects represent the partner residual</span></span>
 <span>    <span class="co"># variance-covariance structure</span></span>

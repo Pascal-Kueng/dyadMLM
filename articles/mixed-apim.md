@@ -15,8 +15,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 the alternative DIM parameterization of exchangeable dyads, see the
 [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
-undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+undirected dyadic score outcomes, see the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 > This vignette is under construction and for now only contains a few
 > preliminary example models. Please check back soon!
@@ -588,8 +588,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
 For the DIM parameterization of exchangeable dyads, see the
 [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
-continue to the [Undirected Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+continue to the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and

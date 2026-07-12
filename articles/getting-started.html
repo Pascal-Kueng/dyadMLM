@@ -41,7 +41,7 @@
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
     <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
-    <li><a class="dropdown-item" href="../articles/undirected-dsm.html">Undirected Dyadic Score Model</a></li>
+    <li><a class="dropdown-item" href="../articles/dsm.html">Dyadic Score Model</a></li>
   </ul>
 </li>
       </ul>
@@ -105,8 +105,7 @@ vignette</a>.</p>
 parameterization, including dyad-mean and within-dyad-deviation
 predictors and their equivalence to APIM effects in exchangeable dyads,
 see the <a href="dim.html">Dyad-Individual Model vignette</a>.</p>
-<p>For undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model
-vignette</a>.</p>
+<p>For undirected dyadic score outcomes, see the <a href="dsm.html">Dyadic Score Model vignette</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
@@ -300,13 +299,13 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; # female_x_male distinguishable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition         inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role    composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}      composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor</span></span>
-<span><span class="co">#&gt; #                          values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                          values</span></span>
+<span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 11</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
@@ -318,7 +317,7 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_actor &lt;dbl&gt;, .i_communication_raw_partner &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_actor &lt;dbl&gt;, .i_communication_partner &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>The function automatically recognized that in this dataset there are
 95 female-male dyads and created APIM-relevant variables. These
 generated <code>.i_*</code> columns can be used directly in model
@@ -336,12 +335,12 @@ formulas.</p>
 <span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific actor effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_raw_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_raw_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific partner effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_raw_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_raw_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Dyad-level unstructured random effects represent the two partner</span></span>
 <span>    <span class="co"># residual variances and their covariance when dispformula = ~ 0.</span></span>
@@ -478,24 +477,21 @@ outcome.</p>
 <span><span class="co">#&gt; # assumed_exchangeable exchangeable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}                       composition-specific sum-diff</span></span>
-<span><span class="co">#&gt; #                                        contrasts with arbitrary direction; 0</span></span>
-<span><span class="co">#&gt; #                                        for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                        exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's</span></span>
-<span><span class="co">#&gt; #                                        average predictor level, grand-mean</span></span>
-<span><span class="co">#&gt; #                                        centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
-<span><span class="co">#&gt; #                                        person's difference from the dyad</span></span>
-<span><span class="co">#&gt; #                                        average</span></span>
-<span><span class="co">#&gt; #   .i_{out}_raw_dyad_mean               DSM dyad-mean outcome: dyad's average</span></span>
-<span><span class="co">#&gt; #                                        outcome level</span></span>
-<span><span class="co">#&gt; #   .i_{out}_raw_within_dyad_deviation   DSM within-dyad outcome deviation:</span></span>
-<span><span class="co">#&gt; #                                        person's difference from the dyad</span></span>
-<span><span class="co">#&gt; #                                        average</span></span>
+<span><span class="co">#&gt; #   .i_composition                   inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role              composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}                composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_diff_{comp}                   composition-specific sum-diff contrasts</span></span>
+<span><span class="co">#&gt; #                                    with arbitrary direction; 0 for</span></span>
+<span><span class="co">#&gt; #                                    distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                                    exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:</span></span>
+<span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
+<span><span class="co">#&gt; #   .i_{out}_dyad_mean               DSM dyad-mean outcome: dyad's average</span></span>
+<span><span class="co">#&gt; #                                    outcome level</span></span>
+<span><span class="co">#&gt; #   .i_{out}_within_dyad_deviation   DSM within-dyad outcome deviation:</span></span>
+<span><span class="co">#&gt; #                                    person's difference from the dyad average</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 13</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition      </span></span>
@@ -508,9 +504,9 @@ outcome.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_raw_within_dyad_deviation &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_raw_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_deviation &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_satisfaction_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="incomplete-dyads-and-missing-roles">Incomplete dyads and missing roles<a class="anchor" aria-label="anchor" href="#incomplete-dyads-and-missing-roles"></a>
@@ -941,8 +937,7 @@ treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_pooled_exchangeable &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_pooled_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>For model formulas and interpretation, continue with the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>, <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>, <a href="dim.html">Dyad-Individual Model vignette</a>, or <a href="undirected-dsm.html">Undirected Dyadic Score Model
-vignette</a>.</p>
+<p>For model formulas and interpretation, continue with the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>, <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>, <a href="dim.html">Dyad-Individual Model vignette</a>, or <a href="dsm.html">Dyadic Score Model vignette</a>.</p>
 <p>For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
 and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses

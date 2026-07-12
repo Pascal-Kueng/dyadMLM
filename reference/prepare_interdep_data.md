@@ -189,16 +189,16 @@ print(prepared)
 #> # male_x_male     exchangeable    1 dyad
 #> #
 #> # Added columns:
-#> #   .i_composition         inferred dyad composition
-#> #   .i_composition_role    composition-specific member role
-#> #   .i_is_{comp-role}      composition-role indicator columns
-#> #   .i_diff_{comp}         composition-specific sum-diff contrasts with
-#> #                          arbitrary direction; 0 for distinguishable dyads or
-#> #                          other exchangeable compositions
-#> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor
-#> #                          values
-#> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor
-#> #                          values
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                        values
 #> #
 #> # A tibble: 6 × 14
 #>   dyad_id person_id role       x .i_composition  .i_composition_role 
@@ -212,8 +212,7 @@ print(prepared)
 #> # ℹ 8 more variables: .i_is_female_x_female <dbl>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female_arbitrary <dbl>,
-#> #   .i_diff_male_x_male_arbitrary <dbl>, .i_x_raw_actor <dbl>,
-#> #   .i_x_raw_partner <dbl>
+#> #   .i_diff_male_x_male_arbitrary <dbl>, .i_x_actor <dbl>, .i_x_partner <dbl>
 
 pooled <- prepare_interdep_data(
   data,
@@ -240,16 +239,16 @@ print(pooled)
 #> #   male_x_male
 #> #
 #> # Added columns:
-#> #   .i_composition         inferred dyad composition
-#> #   .i_composition_role    composition-specific member role
-#> #   .i_is_{comp-role}      composition-role indicator columns
-#> #   .i_diff_{comp}         composition-specific sum-diff contrasts with
-#> #                          arbitrary direction; 0 for distinguishable dyads or
-#> #                          other exchangeable compositions
-#> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor
-#> #                          values
-#> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor
-#> #                          values
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                        values
 #> #
 #> # A tibble: 6 × 10
 #>   dyad_id person_id role       x .i_composition   .i_composition_role
@@ -261,8 +260,8 @@ print(pooled)
 #> 5       3         5 male       3 romantic_couples romantic_couples   
 #> 6       3         6 male       8 romantic_couples romantic_couples   
 #> # ℹ 4 more variables: .i_is_romantic_couples <dbl>,
-#> #   .i_diff_romantic_couples_arbitrary <dbl>, .i_x_raw_actor <dbl>,
-#> #   .i_x_raw_partner <dbl>
+#> #   .i_diff_romantic_couples_arbitrary <dbl>, .i_x_actor <dbl>,
+#> #   .i_x_partner <dbl>
 
 ild_data <- data.frame(
   dyad_id = rep(c(1, 2), each = 4),

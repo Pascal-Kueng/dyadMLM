@@ -41,9 +41,8 @@ predictors and their equivalence to APIM effects in exchangeable dyads,
 see the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
 
-For undirected dyadic score outcomes, see the [Undirected Dyadic Score
-Model
-vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+For undirected dyadic score outcomes, see the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 ## Prerequisites
 
@@ -143,13 +142,13 @@ print(cross_distinguishable_data, n = 4)
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition         inferred dyad composition
-#> #   .i_composition_role    composition-specific member role
-#> #   .i_is_{comp-role}      composition-role indicator columns
-#> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor
-#> #                          values
-#> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor
-#> #                          values
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                        values
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .i_composition
@@ -161,7 +160,7 @@ print(cross_distinguishable_data, n = 4)
 #> # ℹ 186 more rows
 #> # ℹ 5 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_communication_raw_actor <dbl>, .i_communication_raw_partner <dbl>
+#> #   .i_communication_actor <dbl>, .i_communication_partner <dbl>
 ```
 
 The function automatically recognized that in this dataset there are 95
@@ -183,12 +182,12 @@ cross_distinguishable_model <- glmmTMB(
     .i_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_is_female_x_male_female:.i_communication_raw_actor +
-    .i_is_female_x_male_male:.i_communication_raw_actor +
+    .i_is_female_x_male_female:.i_communication_actor +
+    .i_is_female_x_male_male:.i_communication_actor +
 
     # Gender-specific partner effects
-    .i_is_female_x_male_female:.i_communication_raw_partner +
-    .i_is_female_x_male_male:.i_communication_raw_partner +
+    .i_is_female_x_male_female:.i_communication_partner +
+    .i_is_female_x_male_male:.i_communication_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
@@ -335,24 +334,21 @@ print(cross_dim_dsm_data, n = 4)
 #> # assumed_exchangeable exchangeable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition                       inferred dyad composition
-#> #   .i_composition_role                  composition-specific member role
-#> #   .i_is_{comp-role}                    composition-role indicator columns
-#> #   .i_diff_{comp}                       composition-specific sum-diff
-#> #                                        contrasts with arbitrary direction; 0
-#> #                                        for distinguishable dyads or other
-#> #                                        exchangeable compositions
-#> #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's
-#> #                                        average predictor level, grand-mean
-#> #                                        centered
-#> #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
-#> #                                        person's difference from the dyad
-#> #                                        average
-#> #   .i_{out}_raw_dyad_mean               DSM dyad-mean outcome: dyad's average
-#> #                                        outcome level
-#> #   .i_{out}_raw_within_dyad_deviation   DSM within-dyad outcome deviation:
-#> #                                        person's difference from the dyad
-#> #                                        average
+#> #   .i_composition                   inferred dyad composition
+#> #   .i_composition_role              composition-specific member role
+#> #   .i_is_{comp-role}                composition-role indicator columns
+#> #   .i_diff_{comp}                   composition-specific sum-diff contrasts
+#> #                                    with arbitrary direction; 0 for
+#> #                                    distinguishable dyads or other
+#> #                                    exchangeable compositions
+#> #   .i_{pred}_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
+#> #                                    predictor level, grand-mean centered
+#> #   .i_{pred}_within_dyad_deviation  DIM within-dyad predictor deviation:
+#> #                                    person's difference from the dyad average
+#> #   .i_{out}_dyad_mean               DSM dyad-mean outcome: dyad's average
+#> #                                    outcome level
+#> #   .i_{out}_within_dyad_deviation   DSM within-dyad outcome deviation:
+#> #                                    person's difference from the dyad average
 #> #
 #> # A tibble: 190 × 13
 #>   personID coupleID gender communication satisfaction .i_composition      
@@ -365,9 +361,9 @@ print(cross_dim_dsm_data, n = 4)
 #> # ℹ 7 more variables: .i_composition_role <fct>,
 #> #   .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
-#> #   .i_communication_raw_dyad_mean_gmc <dbl>,
-#> #   .i_communication_raw_within_dyad_deviation <dbl>,
-#> #   .i_satisfaction_raw_dyad_mean <dbl>, …
+#> #   .i_communication_dyad_mean_gmc <dbl>,
+#> #   .i_communication_within_dyad_deviation <dbl>,
+#> #   .i_satisfaction_dyad_mean <dbl>, …
 ```
 
 ## Incomplete dyads and missing roles
@@ -827,8 +823,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
 vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
 [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dim.md), or
-[Undirected Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
+[Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and

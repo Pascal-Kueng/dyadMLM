@@ -28,5 +28,5 @@ Details for specific dyadic model parameterizations.
   relationship to APIM effects in dyadic multilevel models for
   exchangeable dyads.
 
-- [Undirected Dyadic Score Model
-  (DSM)](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md):
+- [Dyadic Score Model
+  (DSM)](https://pascal-kueng.github.io/interdep/articles/dsm.md):

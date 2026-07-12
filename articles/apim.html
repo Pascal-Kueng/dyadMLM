@@ -37,7 +37,7 @@
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
     <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
-    <li><a class="dropdown-item" href="../articles/undirected-dsm.html">Undirected Dyadic Score Model</a></li>
+    <li><a class="dropdown-item" href="../articles/dsm.html">Dyadic Score Model</a></li>
   </ul>
 </li>
       </ul>
@@ -78,8 +78,8 @@ exchangeable dyads.</p>
 combine distinguishable and exchangeable dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For DIM
 predictors and their equivalence to APIM effects in exchangeable dyads,
 see the <a href="dim.html">Dyad-Individual Model vignette</a>. For
-undirected dyadic score outcomes, see the <a href="undirected-dsm.html">Undirected Dyadic Score Model
-vignette</a>.</p>
+undirected dyadic score outcomes, see the <a href="dsm.html">Dyadic
+Score Model vignette</a>.</p>
 <blockquote>
 <p>This vignette is under construction and for now only contains a few
 preliminary example models. Please check back soon!</p>
@@ -137,13 +137,13 @@ part of the model.</p>
 <span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition         inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role    composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}      composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor</span></span>
-<span><span class="co">#&gt; #                          values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                          values</span></span>
+<span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 11</span></span></span>
 <span><span class="co">#&gt;    personID coupleID gender motivation physical_activity .i_composition</span></span>
@@ -161,7 +161,7 @@ part of the model.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 230 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_motivation_raw_actor &lt;dbl&gt;, .i_motivation_raw_partner &lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_motivation_actor &lt;dbl&gt;, .i_motivation_partner &lt;dbl&gt;</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">tweedie_distinguishable_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID         coupleID         gender      motivation       </span></span>
 <span><span class="co">#&gt;  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  </span></span>
@@ -179,21 +179,21 @@ part of the model.</p>
 <span><span class="co">#&gt;  3rd Qu.:15.147                                                      </span></span>
 <span><span class="co">#&gt;  Max.   :85.043                                                      </span></span>
 <span><span class="co">#&gt;  NAs    :4                                                           </span></span>
-<span><span class="co">#&gt;  .i_is_female_x_male_female .i_is_female_x_male_male .i_motivation_raw_actor</span></span>
-<span><span class="co">#&gt;  Min.   :0.0                Min.   :0.0              Min.   :-2.320532      </span></span>
-<span><span class="co">#&gt;  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.580126      </span></span>
-<span><span class="co">#&gt;  Median :0.5                Median :0.5              Median :-0.032795      </span></span>
-<span><span class="co">#&gt;  Mean   :0.5                Mean   :0.5              Mean   :-0.008869      </span></span>
-<span><span class="co">#&gt;  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.537262      </span></span>
-<span><span class="co">#&gt;  Max.   :1.0                Max.   :1.0              Max.   : 2.423337      </span></span>
-<span><span class="co">#&gt;                                                      NAs    :9              </span></span>
-<span><span class="co">#&gt;  .i_motivation_raw_partner</span></span>
-<span><span class="co">#&gt;  Min.   :-2.320532        </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.580126        </span></span>
-<span><span class="co">#&gt;  Median :-0.032795        </span></span>
-<span><span class="co">#&gt;  Mean   :-0.008869        </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.537262        </span></span>
-<span><span class="co">#&gt;  Max.   : 2.423337        </span></span>
+<span><span class="co">#&gt;  .i_is_female_x_male_female .i_is_female_x_male_male .i_motivation_actor</span></span>
+<span><span class="co">#&gt;  Min.   :0.0                Min.   :0.0              Min.   :-2.320532  </span></span>
+<span><span class="co">#&gt;  1st Qu.:0.0                1st Qu.:0.0              1st Qu.:-0.580126  </span></span>
+<span><span class="co">#&gt;  Median :0.5                Median :0.5              Median :-0.032795  </span></span>
+<span><span class="co">#&gt;  Mean   :0.5                Mean   :0.5              Mean   :-0.008869  </span></span>
+<span><span class="co">#&gt;  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.537262  </span></span>
+<span><span class="co">#&gt;  Max.   :1.0                Max.   :1.0              Max.   : 2.423337  </span></span>
+<span><span class="co">#&gt;                                                      NAs    :9          </span></span>
+<span><span class="co">#&gt;  .i_motivation_partner</span></span>
+<span><span class="co">#&gt;  Min.   :-2.320532    </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.580126    </span></span>
+<span><span class="co">#&gt;  Median :-0.032795    </span></span>
+<span><span class="co">#&gt;  Mean   :-0.008869    </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.537262    </span></span>
+<span><span class="co">#&gt;  Max.   : 2.423337    </span></span>
 <span><span class="co">#&gt;  NAs    :9</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -203,10 +203,10 @@ part of the model.</p>
 <span>    <span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span> </span>
 <span>    </span>
 <span>    <span class="co"># gender-specific slopes for motivation actor effect</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_motivation_raw_actor</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_motivation_raw_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_motivation_actor</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_motivation_actor</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># gender-specific slopes for motivation partner effect</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_motivation_raw_partner</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_motivation_raw_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_motivation_partner</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_motivation_partner</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># keep a simple couple-level latent effect for stable non-independence</span></span>
 <span>    <span class="co"># important limitation: this can only induce positive partner dependence</span></span>
@@ -242,16 +242,16 @@ part of the model.</p>
 <span><span class="co">#&gt; # assumed_exchangeable exchangeable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition         inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role    composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}      composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}         composition-specific sum-diff contrasts with</span></span>
-<span><span class="co">#&gt; #                          arbitrary direction; 0 for distinguishable dyads or</span></span>
-<span><span class="co">#&gt; #                          other exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor</span></span>
-<span><span class="co">#&gt; #                          values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                          values</span></span>
+<span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary</span></span>
+<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
+<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 11</span></span></span>
 <span><span class="co">#&gt;    personID coupleID gender motivation physical_activity .i_composition      </span></span>
@@ -269,8 +269,8 @@ part of the model.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 230 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_motivation_raw_actor &lt;dbl&gt;, .i_motivation_raw_partner &lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;, .i_motivation_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_motivation_partner &lt;dbl&gt;</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">tweedie_exchangeable_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID         coupleID         gender      motivation       </span></span>
 <span><span class="co">#&gt;  Min.   :  1.00   Min.   :  1.00   female:120   Min.   :-2.320532  </span></span>
@@ -296,14 +296,14 @@ part of the model.</p>
 <span><span class="co">#&gt;  3rd Qu.:1                  3rd Qu.: 1                            </span></span>
 <span><span class="co">#&gt;  Max.   :1                  Max.   : 1                            </span></span>
 <span><span class="co">#&gt;                                                                   </span></span>
-<span><span class="co">#&gt;  .i_motivation_raw_actor .i_motivation_raw_partner</span></span>
-<span><span class="co">#&gt;  Min.   :-2.320532       Min.   :-2.320532        </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.580126       1st Qu.:-0.580126        </span></span>
-<span><span class="co">#&gt;  Median :-0.032795       Median :-0.032795        </span></span>
-<span><span class="co">#&gt;  Mean   :-0.008869       Mean   :-0.008869        </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.537262       3rd Qu.: 0.537262        </span></span>
-<span><span class="co">#&gt;  Max.   : 2.423337       Max.   : 2.423337        </span></span>
-<span><span class="co">#&gt;  NAs    :9               NAs    :9</span></span></code></pre></div>
+<span><span class="co">#&gt;  .i_motivation_actor .i_motivation_partner</span></span>
+<span><span class="co">#&gt;  Min.   :-2.320532   Min.   :-2.320532    </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.580126   1st Qu.:-0.580126    </span></span>
+<span><span class="co">#&gt;  Median :-0.032795   Median :-0.032795    </span></span>
+<span><span class="co">#&gt;  Mean   :-0.008869   Mean   :-0.008869    </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.537262   3rd Qu.: 0.537262    </span></span>
+<span><span class="co">#&gt;  Max.   : 2.423337   Max.   : 2.423337    </span></span>
+<span><span class="co">#&gt;  NAs    :9           NAs    :9</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">tweedie_exchangeable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="op">(</span></span>
@@ -312,10 +312,10 @@ part of the model.</p>
 <span>    <span class="fl">1</span> <span class="op">+</span> </span>
 <span>    </span>
 <span>    <span class="co"># pooled actor slope for motivation</span></span>
-<span>    <span class="va">.i_motivation_raw_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_motivation_actor</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># pooled partner slope for motivation</span></span>
-<span>    <span class="va">.i_motivation_raw_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_motivation_partner</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># exchangeable latent dyad block on the log-mean scale</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
@@ -775,8 +775,7 @@ substantive roles.</p>
 compositions, continue with the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For the main
 data-preparation workflow, return to the <a href="getting-started.html">Getting Started vignette</a>. For the
 alternative DIM parameterization of exchangeable dyads, see the <a href="dim.html">Dyad-Individual Model vignette</a>, or continue to the
-<a href="undirected-dsm.html">Undirected Dyadic Score Model
-vignette</a>.</p>
+<a href="dsm.html">Dyadic Score Model vignette</a>.</p>
 <p>For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
 and Exchangeable Dyads: Bayesian Multilevel Modelling</a>. It uses
