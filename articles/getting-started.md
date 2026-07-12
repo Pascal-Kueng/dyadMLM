@@ -143,13 +143,13 @@ print(cross_distinguishable_data, n = 4)
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor
-#> #                        values
-#> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor
-#> #                        values
+#> #   .i_composition         inferred dyad composition
+#> #   .i_composition_role    composition-specific member role
+#> #   .i_is_{comp-role}      composition-role indicator columns
+#> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor
+#> #                          values
+#> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor
+#> #                          values
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .i_composition
@@ -234,8 +234,8 @@ print(cross_exchangeable_data, n = 4)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -285,8 +285,8 @@ print(cross_exchangeable_data, n = 4)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -335,21 +335,24 @@ print(cross_dim_dsm_data, n = 4)
 #> # assumed_exchangeable exchangeable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition                  inferred dyad composition
-#> #   .i_composition_role             composition-specific member role
-#> #   .i_is_*                         composition-role indicator columns
-#> #   .i_diff_*                       composition-specific sum-diff contrasts
-#> #                                   with arbitrary direction; 0 for
-#> #                                   distinguishable dyads or other exchangeable
-#> #                                   compositions
-#> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
-#> #                                   predictor level, grand-mean centered
-#> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
-#> #                                   person's difference from the dyad average
-#> #   .i_*_raw_dyad_mean              DSM dyad-mean outcome: dyad's average
-#> #                                   outcome level
-#> #   .i_*_raw_within_dyad_deviation  DSM within-dyad outcome deviation: person's
-#> #                                   difference from the dyad average
+#> #   .i_composition                       inferred dyad composition
+#> #   .i_composition_role                  composition-specific member role
+#> #   .i_is_{comp-role}                    composition-role indicator columns
+#> #   .i_diff_{comp}                       composition-specific sum-diff
+#> #                                        contrasts with arbitrary direction; 0
+#> #                                        for distinguishable dyads or other
+#> #                                        exchangeable compositions
+#> #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's
+#> #                                        average predictor level, grand-mean
+#> #                                        centered
+#> #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
+#> #                                        person's difference from the dyad
+#> #                                        average
+#> #   .i_{out}_raw_dyad_mean               DSM dyad-mean outcome: dyad's average
+#> #                                        outcome level
+#> #   .i_{out}_raw_within_dyad_deviation   DSM within-dyad outcome deviation:
+#> #                                        person's difference from the dyad
+#> #                                        average
 #> #
 #> # A tibble: 190 × 13
 #>   personID coupleID gender communication satisfaction .i_composition      
@@ -412,8 +415,8 @@ print(incomplete_dropped_data)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -500,22 +503,22 @@ print(ild_apim_data)
 #> # female_x_male distinguishable 40 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_*_cwp             within-person predictor: momentary deviations from
-#> #                        each person's usual level
-#> #   .i_*_cbp             between-person predictor: stable differences from the
-#> #                        average person's usual level
-#> #   .i_*_cwp_actor       APIM within-person actor predictor: actor's momentary
-#> #                        deviations from their usual level
-#> #   .i_*_cwp_partner     APIM within-person partner predictor: partner's
-#> #                        momentary deviations from their usual level
-#> #   .i_*_cbp_actor       APIM between-person actor predictor: actor's stable
-#> #                        difference from the average person's usual level
-#> #   .i_*_cbp_partner     APIM between-person partner predictor: partner's
-#> #                        stable difference from the average person's usual
-#> #                        level
+#> #   .i_composition         inferred dyad composition
+#> #   .i_composition_role    composition-specific member role
+#> #   .i_is_{comp-role}      composition-role indicator columns
+#> #   .i_{pred}_cwp          within-person predictor: momentary deviations from
+#> #                          each person's usual level
+#> #   .i_{pred}_cbp          between-person predictor: stable differences from
+#> #                          the average person's usual level
+#> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
+#> #                          momentary deviations from their usual level
+#> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
+#> #                          momentary deviations from their usual level
+#> #   .i_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable
+#> #                          difference from the average person's usual level
+#> #   .i_{pred}_cbp_partner  APIM between-person partner predictor: partner's
+#> #                          stable difference from the average person's usual
+#> #                          level
 #> #
 #> # A tibble: 1,120 × 16
 #>    personID coupleID diaryday gender closeness provided_support .i_composition
@@ -540,10 +543,9 @@ print(ild_apim_data)
 
 By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This
-temporal predictor decomposition can be controlled via the
-`temporal_predictor_decomposition` argument. Use `"time_2l"` when
-within-person and between-person associations should be estimated
-separately.
+temporal predictor decomposition is controlled by
+`temporal_predictor_decomposition`. The default `"auto"` setting selects
+`"time_2l"` for this longitudinal setup.
 
 ## Data with multiple and mixed-composition dyads
 
@@ -576,8 +578,8 @@ print(mixed_cross_data, n = 4)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -632,8 +634,8 @@ print(mixed_cross_data_included, n = 4)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -684,8 +686,8 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -739,8 +741,8 @@ print(mixed_cross_data_pooled)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -794,8 +796,8 @@ print(mixed_cross_data_pooled_constrained)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #

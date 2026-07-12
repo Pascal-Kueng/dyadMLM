@@ -58,21 +58,23 @@ print(cross_exchangeable_data, n = 4)
 #> # assumed_exchangeable exchangeable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition                  inferred dyad composition
-#> #   .i_composition_role             composition-specific member role
-#> #   .i_is_*                         composition-role indicator columns
-#> #   .i_diff_*                       composition-specific sum-diff contrasts
-#> #                                   with arbitrary direction; 0 for
-#> #                                   distinguishable dyads or other exchangeable
-#> #                                   compositions
-#> #   .i_*_raw_actor                  APIM actor predictor: actor's original
-#> #                                   predictor values
-#> #   .i_*_raw_partner                APIM partner predictor: partner's original
-#> #                                   predictor values
-#> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
-#> #                                   predictor level, grand-mean centered
-#> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
-#> #                                   person's difference from the dyad average
+#> #   .i_composition                       inferred dyad composition
+#> #   .i_composition_role                  composition-specific member role
+#> #   .i_is_{comp-role}                    composition-role indicator columns
+#> #   .i_diff_{comp}                       composition-specific sum-diff
+#> #                                        contrasts with arbitrary direction; 0
+#> #                                        for distinguishable dyads or other
+#> #                                        exchangeable compositions
+#> #   .i_{pred}_raw_actor                  APIM actor predictor: actor's original
+#> #                                        predictor values
+#> #   .i_{pred}_raw_partner                APIM partner predictor: partner's
+#> #                                        original predictor values
+#> #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's
+#> #                                        average predictor level, grand-mean
+#> #                                        centered
+#> #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
+#> #                                        person's difference from the dyad
+#> #                                        average
 #> #
 #> # A tibble: 190 × 13
 #>   personID coupleID gender communication satisfaction .i_composition      
@@ -134,21 +136,23 @@ print(cross_same_sex_pooled_data, n = 4)
 #> #   male_x_male
 #> #
 #> # Added columns:
-#> #   .i_composition                  inferred dyad composition
-#> #   .i_composition_role             composition-specific member role
-#> #   .i_is_*                         composition-role indicator columns
-#> #   .i_diff_*                       composition-specific sum-diff contrasts
-#> #                                   with arbitrary direction; 0 for
-#> #                                   distinguishable dyads or other exchangeable
-#> #                                   compositions
-#> #   .i_*_raw_actor                  APIM actor predictor: actor's original
-#> #                                   predictor values
-#> #   .i_*_raw_partner                APIM partner predictor: partner's original
-#> #                                   predictor values
-#> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
-#> #                                   predictor level, grand-mean centered
-#> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
-#> #                                   person's difference from the dyad average
+#> #   .i_composition                       inferred dyad composition
+#> #   .i_composition_role                  composition-specific member role
+#> #   .i_is_{comp-role}                    composition-role indicator columns
+#> #   .i_diff_{comp}                       composition-specific sum-diff
+#> #                                        contrasts with arbitrary direction; 0
+#> #                                        for distinguishable dyads or other
+#> #                                        exchangeable compositions
+#> #   .i_{pred}_raw_actor                  APIM actor predictor: actor's original
+#> #                                        predictor values
+#> #   .i_{pred}_raw_partner                APIM partner predictor: partner's
+#> #                                        original predictor values
+#> #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's
+#> #                                        average predictor level, grand-mean
+#> #                                        centered
+#> #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
+#> #                                        person's difference from the dyad
+#> #                                        average
 #> #
 #> # A tibble: 400 × 12
 #>   personID coupleID gender satisfaction .i_composition   .i_composition_role
@@ -190,21 +194,23 @@ print(cross_male_female_exchangeable_data, n = 4)
 #> # female_x_male exchangeable (set by user) 120 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition                  inferred dyad composition
-#> #   .i_composition_role             composition-specific member role
-#> #   .i_is_*                         composition-role indicator columns
-#> #   .i_diff_*                       composition-specific sum-diff contrasts
-#> #                                   with arbitrary direction; 0 for
-#> #                                   distinguishable dyads or other exchangeable
-#> #                                   compositions
-#> #   .i_*_raw_actor                  APIM actor predictor: actor's original
-#> #                                   predictor values
-#> #   .i_*_raw_partner                APIM partner predictor: partner's original
-#> #                                   predictor values
-#> #   .i_*_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's average
-#> #                                   predictor level, grand-mean centered
-#> #   .i_*_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
-#> #                                   person's difference from the dyad average
+#> #   .i_composition                       inferred dyad composition
+#> #   .i_composition_role                  composition-specific member role
+#> #   .i_is_{comp-role}                    composition-role indicator columns
+#> #   .i_diff_{comp}                       composition-specific sum-diff
+#> #                                        contrasts with arbitrary direction; 0
+#> #                                        for distinguishable dyads or other
+#> #                                        exchangeable compositions
+#> #   .i_{pred}_raw_actor                  APIM actor predictor: actor's original
+#> #                                        predictor values
+#> #   .i_{pred}_raw_partner                APIM partner predictor: partner's
+#> #                                        original predictor values
+#> #   .i_{pred}_raw_dyad_mean_gmc          DIM dyad-mean predictor: dyad's
+#> #                                        average predictor level, grand-mean
+#> #                                        centered
+#> #   .i_{pred}_raw_within_dyad_deviation  DIM within-dyad predictor deviation:
+#> #                                        person's difference from the dyad
+#> #                                        average
 #> #
 #> # A tibble: 240 × 12
 #>   personID coupleID gender satisfaction .i_composition .i_composition_role
@@ -335,10 +341,10 @@ are interpreted in units of the outcome, e.g., “satisfaction”:
   difference in communication between partners is associated with a
   1.52-point difference in their expected satisfaction, holding their
   average communication constant. Equivalently, if one member is 1 point
-  above the dyad mean while holding the dyad mean constant, that implies
-  the other is 1 point below the dyad mean. Then, the members are 2
-  points apart in communication and are expected to differ by 3.04
-  points in satisfaction.
+  above the dyad mean, holding the dyad mean constant implies that the
+  other is 1 point below it. The members are then 2 points apart in
+  communication and are expected to differ by 3.04 points in
+  satisfaction.
 
 ### Demonstrating model equivalence to APIM
 
@@ -577,40 +583,44 @@ print(ild_exchangeable_data)
 #> # assumed_exchangeable exchangeable 40 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition                  inferred dyad composition
-#> #   .i_composition_role             composition-specific member role
-#> #   .i_is_*                         composition-role indicator columns
-#> #   .i_diff_*                       composition-specific sum-diff contrasts
-#> #                                   with arbitrary direction; 0 for
-#> #                                   distinguishable dyads or other exchangeable
-#> #                                   compositions
-#> #   .i_*_cwp                        within-person predictor: momentary
-#> #                                   deviations from each person's usual level
-#> #   .i_*_cbp                        between-person predictor: stable
-#> #                                   differences from the average person's usual
-#> #                                   level
-#> #   .i_*_cwp_actor                  APIM within-person actor predictor: actor's
-#> #                                   momentary deviations from their usual level
-#> #   .i_*_cwp_partner                APIM within-person partner predictor:
-#> #                                   partner's momentary deviations from their
-#> #                                   usual level
-#> #   .i_*_cbp_actor                  APIM between-person actor predictor:
-#> #                                   actor's stable difference from the average
-#> #                                   person's usual level
-#> #   .i_*_cbp_partner                APIM between-person partner predictor:
-#> #                                   partner's stable difference from the
-#> #                                   average person's usual level
-#> #   .i_*_cwp_dyad_mean              DIM within-person dyad-mean predictor:
-#> #                                   shared momentary deviations in the dyad
-#> #   .i_*_cwp_within_dyad_deviation  DIM within-person within-dyad predictor
-#> #                                   deviation: person's momentary deviation
-#> #                                   from the dyad average
-#> #   .i_*_cbp_dyad_mean              DIM between-person dyad-mean predictor:
-#> #                                   dyad's stable usual level, grand-mean
-#> #                                   centered
-#> #   .i_*_cbp_within_dyad_deviation  DIM between-person within-dyad predictor
-#> #                                   deviation: person's stable difference from
-#> #                                   the dyad's usual level
+#> #   .i_composition                       inferred dyad composition
+#> #   .i_composition_role                  composition-specific member role
+#> #   .i_is_{comp-role}                    composition-role indicator columns
+#> #   .i_diff_{comp}                       composition-specific sum-diff
+#> #                                        contrasts with arbitrary direction; 0
+#> #                                        for distinguishable dyads or other
+#> #                                        exchangeable compositions
+#> #   .i_{pred}_cwp                        within-person predictor: momentary
+#> #                                        deviations from each person's usual
+#> #                                        level
+#> #   .i_{pred}_cbp                        between-person predictor: stable
+#> #                                        differences from the average person's
+#> #                                        usual level
+#> #   .i_{pred}_cwp_actor                  APIM within-person actor predictor:
+#> #                                        actor's momentary deviations from
+#> #                                        their usual level
+#> #   .i_{pred}_cwp_partner                APIM within-person partner predictor:
+#> #                                        partner's momentary deviations from
+#> #                                        their usual level
+#> #   .i_{pred}_cbp_actor                  APIM between-person actor predictor:
+#> #                                        actor's stable difference from the
+#> #                                        average person's usual level
+#> #   .i_{pred}_cbp_partner                APIM between-person partner predictor:
+#> #                                        partner's stable difference from the
+#> #                                        average person's usual level
+#> #   .i_{pred}_cwp_dyad_mean              DIM within-person dyad-mean predictor:
+#> #                                        shared momentary deviations in the
+#> #                                        dyad
+#> #   .i_{pred}_cwp_within_dyad_deviation  DIM within-person within-dyad
+#> #                                        predictor deviation: person's
+#> #                                        momentary deviation from the dyad
+#> #                                        average
+#> #   .i_{pred}_cbp_dyad_mean              DIM between-person dyad-mean
+#> #                                        predictor: dyad's stable usual level,
+#> #                                        grand-mean centered
+#> #   .i_{pred}_cbp_within_dyad_deviation  DIM between-person within-dyad
+#> #                                        predictor deviation: person's stable
+#> #                                        difference from the dyad's usual level
 #> #
 #> # A tibble: 1,120 × 20
 #>    personID coupleID diaryday gender closeness provided_support .i_composition  
@@ -720,8 +730,9 @@ The fitted coefficients can be interpreted as:
 
 - The `cwp` dyad-mean estimate (about 0.49) means that when both members
   are one point above their respective usual support levels, each
-  member’s expected closeness is 0.49 points higher, holding the
-  difference between their momentary deviations constant.
+  member’s expected closeness is 0.49 points higher than when both are
+  at their usual levels, holding the difference between their momentary
+  deviations constant.
 
 - The `cbp` within-dyad estimate (about 0.78) means that if partners
   differ by one point in their usual support levels, they are expected

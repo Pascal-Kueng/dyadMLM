@@ -18,7 +18,8 @@ vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
 undirected dyadic score outcomes, see the [Undirected Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/undirected-dsm.md).
 
-> This vignette is currently under construction. Please check back soon!
+> This vignette is under construction and for now only contains a few
+> preliminary example models. Please check back soon!
 
 ## Cross-sectional mixed-dyads APIM
 
@@ -65,8 +66,8 @@ print(mixed_cross_data, n = 4)
 #> # Added columns:
 #> #   .i_composition       inferred dyad composition
 #> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
 #> #                        direction; 0 for distinguishable dyads or other
 #> #                        exchangeable compositions
 #> #
@@ -180,25 +181,25 @@ print(mixed_ild_data)
 #> # male_x_male     exchangeable    60 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
-#> #                        direction; 0 for distinguishable dyads or other
-#> #                        exchangeable compositions
-#> #   .i_*_cwp             within-person predictor: momentary deviations from
-#> #                        each person's usual level
-#> #   .i_*_cbp             between-person predictor: stable differences from the
-#> #                        average person's usual level
-#> #   .i_*_cwp_actor       APIM within-person actor predictor: actor's momentary
-#> #                        deviations from their usual level
-#> #   .i_*_cwp_partner     APIM within-person partner predictor: partner's
-#> #                        momentary deviations from their usual level
-#> #   .i_*_cbp_actor       APIM between-person actor predictor: actor's stable
-#> #                        difference from the average person's usual level
-#> #   .i_*_cbp_partner     APIM between-person partner predictor: partner's
-#> #                        stable difference from the average person's usual
-#> #                        level
+#> #   .i_composition         inferred dyad composition
+#> #   .i_composition_role    composition-specific member role
+#> #   .i_is_{comp-role}      composition-role indicator columns
+#> #   .i_diff_{comp}         composition-specific sum-diff contrasts with
+#> #                          arbitrary direction; 0 for distinguishable dyads or
+#> #                          other exchangeable compositions
+#> #   .i_{pred}_cwp          within-person predictor: momentary deviations from
+#> #                          each person's usual level
+#> #   .i_{pred}_cbp          between-person predictor: stable differences from
+#> #                          the average person's usual level
+#> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
+#> #                          momentary deviations from their usual level
+#> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
+#> #                          momentary deviations from their usual level
+#> #   .i_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable
+#> #                          difference from the average person's usual level
+#> #   .i_{pred}_cbp_partner  APIM between-person partner predictor: partner's
+#> #                          stable difference from the average person's usual
+#> #                          level
 #> #
 #> # A tibble: 5,600 × 20
 #>    personID coupleID diaryday gender closeness provided_support .i_composition
@@ -385,25 +386,25 @@ print(mixed_ild_tweedie_data)
 #> # male_x_male     exchangeable    60 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_*              composition-role indicator columns
-#> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary
-#> #                        direction; 0 for distinguishable dyads or other
-#> #                        exchangeable compositions
-#> #   .i_*_cwp             within-person predictor: momentary deviations from
-#> #                        each person's usual level
-#> #   .i_*_cbp             between-person predictor: stable differences from the
-#> #                        average person's usual level
-#> #   .i_*_cwp_actor       APIM within-person actor predictor: actor's momentary
-#> #                        deviations from their usual level
-#> #   .i_*_cwp_partner     APIM within-person partner predictor: partner's
-#> #                        momentary deviations from their usual level
-#> #   .i_*_cbp_actor       APIM between-person actor predictor: actor's stable
-#> #                        difference from the average person's usual level
-#> #   .i_*_cbp_partner     APIM between-person partner predictor: partner's
-#> #                        stable difference from the average person's usual
-#> #                        level
+#> #   .i_composition         inferred dyad composition
+#> #   .i_composition_role    composition-specific member role
+#> #   .i_is_{comp-role}      composition-role indicator columns
+#> #   .i_diff_{comp}         composition-specific sum-diff contrasts with
+#> #                          arbitrary direction; 0 for distinguishable dyads or
+#> #                          other exchangeable compositions
+#> #   .i_{pred}_cwp          within-person predictor: momentary deviations from
+#> #                          each person's usual level
+#> #   .i_{pred}_cbp          between-person predictor: stable differences from
+#> #                          the average person's usual level
+#> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
+#> #                          momentary deviations from their usual level
+#> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
+#> #                          momentary deviations from their usual level
+#> #   .i_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable
+#> #                          difference from the average person's usual level
+#> #   .i_{pred}_cbp_partner  APIM between-person partner predictor: partner's
+#> #                          stable difference from the average person's usual
+#> #                          level
 #> #
 #> # A tibble: 5,600 × 20
 #>    personID coupleID diaryday gender physical_activity provided_support

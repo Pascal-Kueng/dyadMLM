@@ -230,16 +230,16 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # male_x_male     exchangeable    1 dyad</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        direction; 0 for distinguishable dyads or other</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        exchangeable compositions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition         inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role    composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_{comp-role}      composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_{comp}         composition-specific sum-diff contrasts with</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          arbitrary direction; 0 for distinguishable dyads or</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          other exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 14</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id role       x .i_composition  .i_composition_role </span>
@@ -281,16 +281,16 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   male_x_male</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        direction; 0 for distinguishable dyads or other</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        exchangeable compositions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_actor       APIM actor predictor: actor's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_raw_partner     APIM partner predictor: partner's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition         inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role    composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_{comp-role}      composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_{comp}         composition-specific sum-diff contrasts with</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          arbitrary direction; 0 for distinguishable dyads or</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          other exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_raw_actor    APIM actor predictor: actor's original predictor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_raw_partner  APIM partner predictor: partner's original predictor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 10</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id role       x .i_composition   .i_composition_role</span>
@@ -331,25 +331,25 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # assumed_exchangeable exchangeable 2 dyads</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition       inferred dyad composition</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role  composition-specific member role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_*              composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_*            composition-specific sum-diff contrasts with arbitrary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        direction; 0 for distinguishable dyads or other</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        exchangeable compositions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cwp             within-person predictor: momentary deviations from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        each person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cbp             between-person predictor: stable differences from the</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        average person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cwp_actor       APIM within-person actor predictor: actor's momentary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        deviations from their usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cwp_partner     APIM within-person partner predictor: partner's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        momentary deviations from their usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cbp_actor       APIM between-person actor predictor: actor's stable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        difference from the average person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_*_cbp_partner     APIM between-person partner predictor: partner's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        stable difference from the average person's usual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                        level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition         inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role    composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_{comp-role}      composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_{comp}         composition-specific sum-diff contrasts with</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          arbitrary direction; 0 for distinguishable dyads or</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          other exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp          within-person predictor: momentary deviations from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          each person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp          between-person predictor: stable differences from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          the average person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          momentary deviations from their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          momentary deviations from their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          difference from the average person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp_partner  APIM between-person partner predictor: partner's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          stable difference from the average person's usual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 14</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id  time     x .i_composition       .i_composition_role </span>
