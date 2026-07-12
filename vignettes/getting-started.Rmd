@@ -115,7 +115,11 @@ placeholder row for the missing occasion.
 distinguishable dyads. Each dyad has two rows: one for each member.
 
 ```{r cross-sectional-raw}
-print(head(example_dyadic_crosssectional))
+knitr::kable(
+  head(example_dyadic_crosssectional),
+  digits = 2,
+  caption = "First six observations."
+)
 ```
 
 We validate and prepare the data with the function `prepare_interdep_data()`
@@ -281,7 +285,11 @@ dyad has repeated observations over `diaryday`, with one row per person-day.
 The first rows look like this:
 
 ```{r ild-raw}
-print(example_dyadic_ILD, n = 26)
+knitr::kable(
+  head(example_dyadic_ILD, n = 8),
+  digits = 2,
+  caption = "First eight person-day observations."
+)
 ```
 
 To prepare intensive longitudinal data, pass the `time` variable to
