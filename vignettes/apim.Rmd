@@ -48,11 +48,7 @@ some physical activity outcomes, in contrast to the Gaussian distribution from t
 previous example. 
 
 ```{r tweedie-raw}
-knitr::kable(
-  head(example_dyadic_crosssectional_tweedie),
-  digits = 2,
-  caption = "First six observations."
-)
+print(head(example_dyadic_crosssectional_tweedie))
 hist(example_dyadic_crosssectional_tweedie$physical_activity, breaks = 20)
 ```
 
@@ -75,6 +71,7 @@ tweedie_distinguishable_data <- prepare_interdep_data(
 )
 
 print(tweedie_distinguishable_data)
+summary(tweedie_distinguishable_data)
 ```
 
 
@@ -118,6 +115,7 @@ tweedie_exchangeable_data <- prepare_interdep_data(
 )
 
 print(tweedie_exchangeable_data)
+summary(tweedie_exchangeable_data)
 ```
 
 ```{r fit-tweedie-exchangeable, eval = FALSE}
@@ -207,11 +205,7 @@ summary(ild_distinguishable_model)
 structure as `example_dyadic_ILD`, but the outcome is semi-continuous.
 
 ```{r ild-tweedie-raw}
-knitr::kable(
-  head(example_dyadic_ILD_tweedie, n = 8),
-  digits = 2,
-  caption = "First eight person-day observations."
-)
+print(head(example_dyadic_ILD_tweedie, n = 26), n = 26)
 hist(example_dyadic_ILD_tweedie$physical_activity, breaks = 20)
 ```
 
@@ -229,6 +223,7 @@ ild_tweedie_distinguishable_data <- prepare_interdep_data(
 )
 
 print(ild_tweedie_distinguishable_data)
+summary(ild_tweedie_distinguishable_data)
 ```
 
 For Tweedie models, the random-effect blocks are latent effects on the log-mean
@@ -349,6 +344,7 @@ ild_tweedie_exchangeable_data <- prepare_interdep_data(
 )
 
 print(ild_tweedie_exchangeable_data)
+summary(ild_tweedie_exchangeable_data)
 ```
 
 This is the exchangeable analogue of the fuller Tweedie ILD model above. The
