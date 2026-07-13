@@ -1295,21 +1295,22 @@ serial dependence, the closest extension is a dyadic residual dynamic structural
 equation model (RDSEM). It keeps the concurrent regression separate from a VAR
 model for its residuals [@asparouhovComparisonModelsAnalysis2020]. This
 residual-VAR structure is not directly available through the `glmmTMB` interface
-used here, and open-source support for dyadic dynamic models remains limited
+used here, and open-source support for dyadic dynamic models remains very limited
 [@delrosarioPracticalGuideSpecifying2025].
 
-A practical alternative is a model with lagged outcomes, especially when
+#### Dynamic models
+
+A **practical alternative** is a model with lagged outcomes, especially when
 carryover or temporal dynamics are part of the research question
 [@gistelinckMultilevelAutoregressiveDyadic2020]. In such a model, the
 interpretation changes. All DIM predictor effects then describe associations
 conditional on the members' prior outcomes.
 
-However, lagged-outcome models require care. Person-mean centering the outcome
-lag can bias the average carryover estimate downward
-[@hamakerCenterNotCenter2015]. This downward bias is known as Nickell bias
-[@nickellBiasesDynamicModels1981]. A raw lag in a random-intercept model avoids
-this specific centering bias, but it can still be biased because it is related
-to stable member levels and the first outcome requires special treatment
+Person-mean centering the outcome lag can bias the average carryover estimate
+downward [@hamakerCenterNotCenter2015]. This downward bias is known as Nickell bias
+[@nickellBiasesDynamicModels1981]. A raw lag avoids this centering bias, but a
+standard random-intercept model can still be biased because it assumes that the
+lag is unrelated to stable member levels
 [@gistelinckMultilevelAutoregressiveSmall2021].
 
 Both problems matter most when there are few occasions. In one simple
@@ -1317,9 +1318,7 @@ simulation, most approaches other than person-mean centering performed
 acceptably from about ten occasions, but this is not a universal cutoff
 [@gistelinckMultilevelAutoregressiveSmall2021]. For shorter panels, consider an
 LD-APIM, which lets the first outcomes relate to the members' stable levels in a
-wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020]. The simulation
-did not include other predictors, so it does not establish the size or direction
-of any resulting bias in DIM effects.
+wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020]. 
 
 These lagged-outcome issues are separate from the earlier concern about
 unreliable person means used to construct `cbp` predictors with few occasions.
