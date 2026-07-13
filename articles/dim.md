@@ -1036,6 +1036,21 @@ These lagged-outcome issues are separate from the earlier concern about
 unreliable person means used to construct `cbp` predictors with few
 occasions.
 
+------------------------------------------------------------------------
+
+**Continue** with the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
+
+refer to the:
+
+- [Actor-Partner Interdependence Model (APIM)
+  vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
+- [Mixed-Composition APIM
+  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+
+or return to the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+
 ## References
 
 Asparouhov, Tihomir, and Bengt Muthén. 2020. “Comparison of Models for
@@ -1089,18 +1104,3 @@ Rosario, Kareena S. del, and Tessa V. West. 2025. “A Practical Guide to
 Specifying Random Effects in Longitudinal Dyadic Multilevel Modeling.”
 *Advances in Methods and Practices in Psychological Science* 8 (3):
 25152459251351286. <https://doi.org/10.1177/25152459251351286>.
-
-------------------------------------------------------------------------
-
-**Continue** with the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
-
-refer to the:
-
-- [Actor-Partner Interdependence Model (APIM)
-  vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
-- [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
-
-or return to the
-[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
