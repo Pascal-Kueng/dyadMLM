@@ -64,10 +64,13 @@ cross_exchangeable_data <- prepare_interdep_data(
 print(cross_exchangeable_data, n = 4)
 ```
 
-The function creates arbitrary member labels encoding a member-difference
-contrast `.i_diff_*` as 1 for one partner and -1 for the other. This is needed
-for the correct random effects specification. The fixed `seed` makes these
-arbitrary member labels reproducible.
+The implementation adapts the R sum-and-difference approach for
+indistinguishable dyads described by @delrosarioPracticalGuideSpecifying2025.
+Because the ordinary intercept already serves as the sum component, the function
+only needs to create a member-difference contrast `.i_diff_*`, coded as 1 for one
+partner and -1 for the other. This contrast is used for the random-effects
+specification below. The fixed `seed` makes these arbitrary member labels
+reproducible.
 
 Passing a `role` is also possible when it leads to exactly one
 exchangeable composition (e.g., only female-female dyads).
@@ -139,9 +142,10 @@ shared level compared to all other couples.
 mean, equivalently half the signed difference between partners.
 
 The resulting estimated fixed effects are a reparameterization of the APIM actor
-and partner effects. The same random-effects structure can therefore be used for both
-fixed-effect parameterizations: a dyad-level intercept and a dyad-level
-difference contrast indexed by `.i_diff_assumed_exchangeable_arbitrary`.
+and partner effects [@Bolger2025Unified]. The same random-effects structure can
+therefore be used for both fixed-effect parameterizations: a dyad-level intercept
+and a dyad-level difference contrast indexed by
+`.i_diff_assumed_exchangeable_arbitrary`.
 In `glmmTMB`, with `dispformula = ~ 0`, these random effects represent the two members' Gaussian residual variance and covariance.
 
 The intercept and difference contrast are specified as separate random-effects
@@ -149,7 +153,7 @@ terms, which constrains their correlation to zero. This preserves
 exchangeability: swapping the arbitrary member labels leaves the intercept term
 unchanged but reverses the difference contrast. A nonzero correlation between
 them would therefore make the random-effects distribution depend on the
-arbitrary labeling.
+arbitrary labeling [@delrosarioPracticalGuideSpecifying2025].
 
 The full model can be estimated as:
 
@@ -188,8 +192,9 @@ Because this Gaussian model uses an identity link, fixed coefficients are
 interpreted in units of the outcome, e.g., "satisfaction":
 
 The exchangeable Gaussian DIM is algebraically equivalent to the
-reduced, label-invariant Dyadic Score Model (DSM). Therefore, each coefficient has
-both an individual-member interpretation and an equivalent couple mean/difference
+reduced, label-invariant Dyadic Score Model (DSM)
+[@iidaModelsInterdependentIndividuals2018]. Therefore, each coefficient has both
+an individual-member interpretation and an equivalent couple mean/difference
 interpretation.
 
 - The intercept (about 5.04) is the expected satisfaction of either member,
@@ -221,7 +226,14 @@ guidance on APIM specifications and different models, see the
 
 apim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 +
+    
+    # Fixed effects APIM
     .i_communication_actor + .i_communication_partner +
+    
+    # Random effects 
+      # Since both models are equivalent, the same random effects structure
+      # can be used. See the APIM vignette to learn how to back-transform
+      # these blocks to a full actor-partner variance-covariance matrix
     (1 | coupleID) +
     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
@@ -944,8 +956,10 @@ cat("From APIM model:\n",
 ## Intensive Longitudinal DIM
 
 For longitudinal DIM, predictors are decomposed into within-person and
-between-person components before the dyadic decomposition. The default `"auto"`
-strategy selects `"time_2l"` when both `time` and `predictors` are supplied:
+between-person components before the dyadic decomposition
+[@bolgerIntensiveLongitudinalMethods2013;
+@gistelinckMultilevelAutoregressiveDyadic2020]. The default `"auto"` strategy
+selects `"time_2l"` when both `time` and `predictors` are supplied:
 
 1. The `cwp` dyad mean captures a shared occasion-specific shift from the two
    members' usual levels (shared occasion-level variation).
@@ -955,6 +969,15 @@ strategy selects `"time_2l"` when both `time` and `predictors` are supplied:
    sample's grand mean (stable between-dyad differences).
 4. The `cbp` within-dyad deviation captures each member's stable difference
    from the dyad's usual level.
+
+The `cbp` terms use each member's mean across the observed occasions to
+estimate that member's longer-run usual level. 
+
+Note that *With few occasions (small T)*, especially when the predictor has 
+low stability over time, these person means can be unreliable and the associated between-person estimates can be biased as well as imprecise, so interpret them cautiously [@gottfredsonStraightforwardApproachCoping2019].
+This concern is specific to estimating the between-person predictor components
+from observed person means, within-person estimates are generally less 
+problematic to interpret.
 
 `temporal_predictor_decomposition = "none"` is not available for longitudinal
 DIM predictor construction.
@@ -972,6 +995,19 @@ ild_exchangeable_data <- prepare_interdep_data(
 
 print(ild_exchangeable_data)
 ```
+
+The example below estimates same-day associations between support and closeness
+and includes `diaryday` to adjust for a linear trend across the study. 
+
+The following models only focus on concurrent effects and not lagged effects. 
+The model does not incorporate residual dependence from one day to the next. 
+This limitation and suggestions to address it are discussed at the end of the vignette. 
+
+Following del Rosario and West, the stable dyad covariance is represented using
+sum-and-difference random effects
+[@delrosarioPracticalGuideSpecifying2025]. In the Gaussian model below, we
+extend this parameterization to the dyad-occasion level to represent
+same-occasion residual dependence in `glmmTMB`.
 
 ```{r fit-ild-dim, eval = has_glmmTMB}
 
@@ -1006,7 +1042,7 @@ summary(dim_ILD)
 
 ```
 
-### Interpretation of ILD DIM coefficients
+### Interpretation of concurrent ILD DIM coefficients
 
 The same interpretation as before applies longitudinally: dyad-mean effects describe
 both expected outcomes for individual members and expected couple-average
@@ -1160,28 +1196,13 @@ data.frame(
 )
 ```
 
-## Including Random Slopes
+### Including Random Slopes
 
 Random-slope DIM and APIM parameterizations can be written analogously by adding
 the corresponding within-person effects to the stable dyad-level random-effect
 blocks. These larger models do not converge cleanly with the example data, so
-the chunks are not evaluated. Such models can be fit when the study design,
-data, and convergence diagnostics support the added complexity.
-
-A random-slope standard deviation describes how much the corresponding
-association varies across dyads around its fixed effect. Correlations within a
-random-effects block describe how its latent dyad-specific effects co-vary; they
-are not correlations between observed predictors or partners. Separate
-random-effects terms define separate covariance blocks, so correlations across
-those blocks are constrained to zero, preserving the exchangeability condition
-described above.
-
-For an exchangeable APIM, the sum-difference random-effects representation
-involving `.i_diff_*` can be rotated back to a constrained actor-partner
-representation. This can make actor and partner random effects easier to
-interpret, while offering no analogous interpretive advantage for the DIM. The
-[APIM vignette](apim.html) describes this rotation and the constraints required
-to preserve exchangeability.
+the chunks are not evaluated and interpreted. Such models can be fit when 
+the study design, data, and convergence diagnostics support the added complexity.
 
 In the APIM:
 
@@ -1262,6 +1283,45 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 )
 
 ```
+
+### Current limitations of dyadic ILD designs in R
+
+The models above adjust for a linear time trend and account for stable dyadic
+dependence and same-occasion partner dependence. They do not model residual
+serial dependence, however, and therefore estimate concurrent associations
+under the assumption that residuals from different days are independent.
+
+If the goal is to retain these concurrent DIM associations while accounting for
+serial dependence, the closest extension is a dyadic residual dynamic structural
+equation model (RDSEM). It keeps the concurrent regression separate from a VAR
+model for its residuals [@asparouhovComparisonModelsAnalysis2020]. This
+residual-VAR structure is not directly available through the `glmmTMB` interface
+used here, and open-source support for dyadic dynamic models remains severly 
+limited [@delrosarioPracticalGuideSpecifying2025]. 
+
+A practical alternative is a model with lagged outcomes, especially when 
+carryover or temporal dynamics are part of the research question [@gistelinckMultilevelAutoregressiveDyadic2020]. In such a model, the interpretation
+changes. All DIM predictor effects then describe associations conditional on the members' prior outcomes. 
+
+However, this approach comes with several issues, such as Nickell bias when including
+a within-person centred version of the outcome as a predictor [@nickellBiasesDynamicModels1981], and !TODO name other bias when using a raw
+laggeg version of the outcome as a predictor. For guidance on when to use
+which approach and a discussion of the issues, refer to  
+[@hamakerCenterNotCenter2015]. 
+
+These biases are more severe in small time-series and may be neglibible in longer
+time series, although no clear cutoff-point exists. Some simple simulations demonstrated acceptable performance in ~ 10 timepoints  [@gistelinckMultilevelAutoregressiveSmall2021]. For
+shorter panels, consider an LD-APIM, which lets the first outcomes relate to
+the members' stable levels in a wide-format SEM
+[@gistelinckMultilevelAutoregressiveDyadic2020]. 
+
+This issue is separate from the earlier concern about unreliable person means 
+used to construct `cbp` predictors in short time series.
+
+## References
+
+::: {#refs}
+:::
 
 ---
 
