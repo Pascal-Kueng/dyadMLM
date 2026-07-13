@@ -606,6 +606,10 @@ print(ild_exchangeable_data)
 #> #                                  deviations from each person's usual level
 #> #   .i_{pred}_cbp                  between-person predictor: stable differences
 #> #                                  from the average person's usual level
+#> #   .i_{pred}_actor                APIM actor predictor: actor's original
+#> #                                  predictor values
+#> #   .i_{pred}_partner              APIM partner predictor: partner's original
+#> #                                  predictor values
 #> #   .i_{pred}_cwp_actor            APIM within-person actor predictor: actor's
 #> #                                  momentary deviations from their usual level
 #> #   .i_{pred}_cwp_partner          APIM within-person partner predictor:
@@ -617,6 +621,10 @@ print(ild_exchangeable_data)
 #> #   .i_{pred}_cbp_partner          APIM between-person partner predictor:
 #> #                                  partner's stable difference from the average
 #> #                                  person's usual level
+#> #   .i_{pred}_dyad_mean_gmc        dyad-mean predictor: dyad's average
+#> #                                  predictor level, grand-mean centered
+#> #   .i_{pred}_within_dyad_dev      DIM within-dyad predictor deviation:
+#> #                                  person's difference from the dyad average
 #> #   .i_{pred}_cwp_dyad_mean        within-person dyad-mean predictor: shared
 #> #                                  momentary deviations in the dyad
 #> #   .i_{pred}_cwp_within_dyad_dev  DIM within-person within-dyad predictor
@@ -628,7 +636,7 @@ print(ild_exchangeable_data)
 #> #                                  deviation: person's stable difference from
 #> #                                  the dyad's usual level
 #> #
-#> # A tibble: 1,120 × 20
+#> # A tibble: 1,120 × 24
 #>    personID coupleID diaryday gender closeness provided_support .i_composition  
 #>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>           
 #>  1        1        1        0 female      5.03             4.30 assumed_exchang…
@@ -642,12 +650,12 @@ print(ild_exchangeable_data)
 #>  9        1        1        8 female      8.07             5.20 assumed_exchang…
 #> 10        1        1        9 female      4.87             4.69 assumed_exchang…
 #> # ℹ 1,110 more rows
-#> # ℹ 13 more variables: .i_composition_role <fct>,
+#> # ℹ 17 more variables: .i_composition_role <fct>,
 #> #   .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
-#> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
-#> #   .i_provided_support_cbp_actor <dbl>, …
+#> #   .i_provided_support_actor <dbl>, .i_provided_support_partner <dbl>,
+#> #   .i_provided_support_cwp_actor <dbl>, …
 ```
 
 The example below estimates same-day associations between support and

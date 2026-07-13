@@ -1178,6 +1178,10 @@ available for longitudinal DIM predictor construction.</p>
 <span><span class="co">#&gt; #                                  deviations from each person's usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cbp                  between-person predictor: stable differences</span></span>
 <span><span class="co">#&gt; #                                  from the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor                APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                                  predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner              APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                                  predictor values</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_actor            APIM within-person actor predictor: actor's</span></span>
 <span><span class="co">#&gt; #                                  momentary deviations from their usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_partner          APIM within-person partner predictor:</span></span>
@@ -1189,6 +1193,10 @@ available for longitudinal DIM predictor construction.</p>
 <span><span class="co">#&gt; #   .i_{pred}_cbp_partner          APIM between-person partner predictor:</span></span>
 <span><span class="co">#&gt; #                                  partner's stable difference from the average</span></span>
 <span><span class="co">#&gt; #                                  person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc        dyad-mean predictor: dyad's average</span></span>
+<span><span class="co">#&gt; #                                  predictor level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_within_dyad_dev      DIM within-dyad predictor deviation:</span></span>
+<span><span class="co">#&gt; #                                  person's difference from the dyad average</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_dyad_mean        within-person dyad-mean predictor: shared</span></span>
 <span><span class="co">#&gt; #                                  momentary deviations in the dyad</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_within_dyad_dev  DIM within-person within-dyad predictor</span></span>
@@ -1200,7 +1208,7 @@ available for longitudinal DIM predictor construction.</p>
 <span><span class="co">#&gt; #                                  deviation: person's stable difference from</span></span>
 <span><span class="co">#&gt; #                                  the dyad's usual level</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 20</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 24</span></span></span>
 <span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support .i_composition  </span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female      5.03             4.30 assumed_exchang…</span></span>
@@ -1214,12 +1222,12 @@ available for longitudinal DIM predictor construction.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female      8.07             5.20 assumed_exchang…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female      4.87             4.69 assumed_exchang…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 17 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_actor &lt;dbl&gt;, .i_provided_support_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <p>The example below estimates same-day associations between support and
 closeness and includes <code>diaryday</code> to adjust for a linear
 trend across the study. The following models focus on concurrent rather

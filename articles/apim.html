@@ -453,6 +453,10 @@ the outcome is semi-continuous.</p>
 <span><span class="co">#&gt; #                          each person's usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cbp          between-person predictor: stable differences from</span></span>
 <span><span class="co">#&gt; #                          the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor        APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                          values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner      APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                          values</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's</span></span>
 <span><span class="co">#&gt; #                          momentary deviations from their usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's</span></span>
@@ -463,7 +467,7 @@ the outcome is semi-continuous.</p>
 <span><span class="co">#&gt; #                          stable difference from the average person's usual</span></span>
 <span><span class="co">#&gt; #                          level</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 16</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 18</span></span></span>
 <span><span class="co">#&gt;    personID coupleID diaryday gender physical_activity provided_support</span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female              4.29             4.73</span></span>
@@ -477,11 +481,12 @@ the outcome is semi-continuous.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female             10.2              4.53</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female              0                3.72</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_actor &lt;dbl&gt;, .i_provided_support_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, .i_provided_support_cbp_partner &lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, …</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">ild_tweedie_distinguishable_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID        coupleID        diaryday       gender    physical_activity</span></span>
 <span><span class="co">#&gt;  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  </span></span>
@@ -507,29 +512,29 @@ the outcome is semi-continuous.</p>
 <span><span class="co">#&gt;  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.52731       </span></span>
 <span><span class="co">#&gt;  Max.   :1.0                Max.   :1.0              Max.   : 2.42077       </span></span>
 <span><span class="co">#&gt;                                                      NAs    :44             </span></span>
-<span><span class="co">#&gt;  .i_provided_support_cbp .i_provided_support_cwp_actor</span></span>
-<span><span class="co">#&gt;  Min.   :-1.4073         Min.   :-2.66098             </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.4913         1st Qu.:-0.50775             </span></span>
-<span><span class="co">#&gt;  Median :-0.0164         Median :-0.03176             </span></span>
-<span><span class="co">#&gt;  Mean   : 0.0000         Mean   : 0.00000             </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.4968         3rd Qu.: 0.52731             </span></span>
-<span><span class="co">#&gt;  Max.   : 1.6645         Max.   : 2.42077             </span></span>
-<span><span class="co">#&gt;                          NAs    :44                   </span></span>
-<span><span class="co">#&gt;  .i_provided_support_cwp_partner .i_provided_support_cbp_actor</span></span>
-<span><span class="co">#&gt;  Min.   :-2.66098                Min.   :-1.4073              </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.50775                1st Qu.:-0.4913              </span></span>
-<span><span class="co">#&gt;  Median :-0.03176                Median :-0.0164              </span></span>
-<span><span class="co">#&gt;  Mean   : 0.00000                Mean   : 0.0000              </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.52731                3rd Qu.: 0.4968              </span></span>
-<span><span class="co">#&gt;  Max.   : 2.42077                Max.   : 1.6645              </span></span>
-<span><span class="co">#&gt;  NAs    :44                                                   </span></span>
-<span><span class="co">#&gt;  .i_provided_support_cbp_partner</span></span>
-<span><span class="co">#&gt;  Min.   :-1.4073                </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.4913                </span></span>
-<span><span class="co">#&gt;  Median :-0.0164                </span></span>
-<span><span class="co">#&gt;  Mean   : 0.0000                </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.4968                </span></span>
-<span><span class="co">#&gt;  Max.   : 1.6645                </span></span>
+<span><span class="co">#&gt;  .i_provided_support_cbp .i_provided_support_actor .i_provided_support_partner</span></span>
+<span><span class="co">#&gt;  Min.   :-1.4073         Min.   :1.813             Min.   :1.813              </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.4913         1st Qu.:4.435             1st Qu.:4.435              </span></span>
+<span><span class="co">#&gt;  Median :-0.0164         Median :5.070             Median :5.070              </span></span>
+<span><span class="co">#&gt;  Mean   : 0.0000         Mean   :5.111             Mean   :5.111              </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.4968         3rd Qu.:5.821             3rd Qu.:5.821              </span></span>
+<span><span class="co">#&gt;  Max.   : 1.6645         Max.   :8.271             Max.   :8.271              </span></span>
+<span><span class="co">#&gt;                          NAs    :44                NAs    :44                 </span></span>
+<span><span class="co">#&gt;  .i_provided_support_cwp_actor .i_provided_support_cwp_partner</span></span>
+<span><span class="co">#&gt;  Min.   :-2.66098              Min.   :-2.66098               </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.50775              1st Qu.:-0.50775               </span></span>
+<span><span class="co">#&gt;  Median :-0.03176              Median :-0.03176               </span></span>
+<span><span class="co">#&gt;  Mean   : 0.00000              Mean   : 0.00000               </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.52731              3rd Qu.: 0.52731               </span></span>
+<span><span class="co">#&gt;  Max.   : 2.42077              Max.   : 2.42077               </span></span>
+<span><span class="co">#&gt;  NAs    :44                    NAs    :44                     </span></span>
+<span><span class="co">#&gt;  .i_provided_support_cbp_actor .i_provided_support_cbp_partner</span></span>
+<span><span class="co">#&gt;  Min.   :-1.4073               Min.   :-1.4073                </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.4913               1st Qu.:-0.4913                </span></span>
+<span><span class="co">#&gt;  Median :-0.0164               Median :-0.0164                </span></span>
+<span><span class="co">#&gt;  Mean   : 0.0000               Mean   : 0.0000                </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.4968               3rd Qu.: 0.4968                </span></span>
+<span><span class="co">#&gt;  Max.   : 1.6645               Max.   : 1.6645                </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>For Tweedie models, the random-effect blocks are latent effects on
 the log-mean scale. They can induce partner dependence, but they are not
@@ -661,6 +666,10 @@ informed by repeated within-dyad patterns over time.</p>
 <span><span class="co">#&gt; #                          each person's usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cbp          between-person predictor: stable differences from</span></span>
 <span><span class="co">#&gt; #                          the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor        APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                          values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner      APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                          values</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's</span></span>
 <span><span class="co">#&gt; #                          momentary deviations from their usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's</span></span>
@@ -671,7 +680,7 @@ informed by repeated within-dyad patterns over time.</p>
 <span><span class="co">#&gt; #                          stable difference from the average person's usual</span></span>
 <span><span class="co">#&gt; #                          level</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 16</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 18</span></span></span>
 <span><span class="co">#&gt;    personID coupleID diaryday gender physical_activity provided_support</span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female              4.29             4.73</span></span>
@@ -685,12 +694,12 @@ informed by repeated within-dyad patterns over time.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female             10.2              4.53</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female              0                3.72</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: .i_composition &lt;fct&gt;, .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, …</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_actor &lt;dbl&gt;, .i_provided_support_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">ild_tweedie_exchangeable_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     personID        coupleID        diaryday       gender    physical_activity</span></span>
 <span><span class="co">#&gt;  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  </span></span>
@@ -716,14 +725,22 @@ informed by repeated within-dyad patterns over time.</p>
 <span><span class="co">#&gt;  3rd Qu.:1                  3rd Qu.: 1                            </span></span>
 <span><span class="co">#&gt;  Max.   :1                  Max.   : 1                            </span></span>
 <span><span class="co">#&gt;                                                                   </span></span>
-<span><span class="co">#&gt;  .i_provided_support_cwp .i_provided_support_cbp .i_provided_support_cwp_actor</span></span>
-<span><span class="co">#&gt;  Min.   :-2.66098        Min.   :-1.4073         Min.   :-2.66098             </span></span>
-<span><span class="co">#&gt;  1st Qu.:-0.50775        1st Qu.:-0.4913         1st Qu.:-0.50775             </span></span>
-<span><span class="co">#&gt;  Median :-0.03176        Median :-0.0164         Median :-0.03176             </span></span>
-<span><span class="co">#&gt;  Mean   : 0.00000        Mean   : 0.0000         Mean   : 0.00000             </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 0.52731        3rd Qu.: 0.4968         3rd Qu.: 0.52731             </span></span>
-<span><span class="co">#&gt;  Max.   : 2.42077        Max.   : 1.6645         Max.   : 2.42077             </span></span>
-<span><span class="co">#&gt;  NAs    :44                                      NAs    :44                   </span></span>
+<span><span class="co">#&gt;  .i_provided_support_cwp .i_provided_support_cbp .i_provided_support_actor</span></span>
+<span><span class="co">#&gt;  Min.   :-2.66098        Min.   :-1.4073         Min.   :1.813            </span></span>
+<span><span class="co">#&gt;  1st Qu.:-0.50775        1st Qu.:-0.4913         1st Qu.:4.435            </span></span>
+<span><span class="co">#&gt;  Median :-0.03176        Median :-0.0164         Median :5.070            </span></span>
+<span><span class="co">#&gt;  Mean   : 0.00000        Mean   : 0.0000         Mean   :5.111            </span></span>
+<span><span class="co">#&gt;  3rd Qu.: 0.52731        3rd Qu.: 0.4968         3rd Qu.:5.821            </span></span>
+<span><span class="co">#&gt;  Max.   : 2.42077        Max.   : 1.6645         Max.   :8.271            </span></span>
+<span><span class="co">#&gt;  NAs    :44                                      NAs    :44               </span></span>
+<span><span class="co">#&gt;  .i_provided_support_partner .i_provided_support_cwp_actor</span></span>
+<span><span class="co">#&gt;  Min.   :1.813               Min.   :-2.66098             </span></span>
+<span><span class="co">#&gt;  1st Qu.:4.435               1st Qu.:-0.50775             </span></span>
+<span><span class="co">#&gt;  Median :5.070               Median :-0.03176             </span></span>
+<span><span class="co">#&gt;  Mean   :5.111               Mean   : 0.00000             </span></span>
+<span><span class="co">#&gt;  3rd Qu.:5.821               3rd Qu.: 0.52731             </span></span>
+<span><span class="co">#&gt;  Max.   :8.271               Max.   : 2.42077             </span></span>
+<span><span class="co">#&gt;  NAs    :44                  NAs    :44                   </span></span>
 <span><span class="co">#&gt;  .i_provided_support_cwp_partner .i_provided_support_cbp_actor</span></span>
 <span><span class="co">#&gt;  Min.   :-2.66098                Min.   :-1.4073              </span></span>
 <span><span class="co">#&gt;  1st Qu.:-0.50775                1st Qu.:-0.4913              </span></span>

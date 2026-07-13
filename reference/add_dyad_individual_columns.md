@@ -9,12 +9,12 @@ construction until explicit role-contrast, composition-specific, or
 pooling support is added. For intensive longitudinal predictors
 decomposed by
 [`center_predictors()`](https://pascal-kueng.github.io/interdep/reference/center_predictors.md),
-the within-person component is decomposed within each dyad-time occasion
-and the between-person component is decomposed once within each dyad.
-For raw cross-sectional predictors, the dyad-mean column is centered
-around the grand mean of dyad means by DIM convention, while the
-within-dyad-deviation column is the person's deviation from the
-uncentered dyad mean.
+raw predictors and within-person components are decomposed within each
+dyad-time occasion, while between-person components are decomposed once
+within each dyad. For raw predictors, the dyad-mean column is centered
+around the grand mean of dyad means, or dyad-occasion means in
+longitudinal data, while the within-dyad-deviation column is the
+person's deviation from the uncentered dyad mean.
 
 ## Usage
 

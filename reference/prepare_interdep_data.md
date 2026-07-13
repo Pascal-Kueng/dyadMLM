@@ -87,11 +87,14 @@ prepare_interdep_data(
   `"time_2l"` indicates a two-level temporal predictor decomposition
   into within-person and between-person components. `"auto"` resolves to
   `"time_2l"` when both `time` and `predictors` are supplied, and to
-  `"none"` otherwise. Raw cross-sectional DIM and DSM predictor
-  dyad-mean columns are still centered around the grand mean of dyad
-  means as part of dyadic predictor-score construction. For longitudinal
-  DIM and DSM predictor construction, raw undecomposed predictors are
-  currently rejected; use `"auto"` or `"time_2l"`.
+  `"none"` otherwise. `"time_2l"` retains raw model-ready predictors in
+  addition to their within-person and between-person components. For
+  longitudinal DIM and DSM construction, raw and within-person dyadic
+  scores are computed within each dyad occasion, while between-person
+  scores are computed within dyads. Raw DIM and DSM dyad means are
+  grand-mean centered. Do not include the raw, within-person, and
+  between-person versions of the same contemporaneous predictor in one
+  model because they are linearly dependent.
 
 - set_exchangeable_compositions:
 
@@ -303,6 +306,10 @@ print(ild_prepared)
 #> #                          each person's usual level
 #> #   .i_{pred}_cbp          between-person predictor: stable differences from
 #> #                          the average person's usual level
+#> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                          values
+#> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                          values
 #> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
 #> #                          momentary deviations from their usual level
 #> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
@@ -313,7 +320,7 @@ print(ild_prepared)
 #> #                          stable difference from the average person's usual
 #> #                          level
 #> #
-#> # A tibble: 8 × 14
+#> # A tibble: 8 × 16
 #>   dyad_id person_id  time     x .i_composition       .i_composition_role 
 #>     <dbl>     <dbl> <dbl> <dbl> <fct>                <fct>               
 #> 1       1         1     1     4 assumed_exchangeable assumed_exchangeable
@@ -324,8 +331,8 @@ print(ild_prepared)
 #> 6       2         2     1     6 assumed_exchangeable assumed_exchangeable
 #> 7       2         1     2     4 assumed_exchangeable assumed_exchangeable
 #> 8       2         2     2     7 assumed_exchangeable assumed_exchangeable
-#> # ℹ 8 more variables: .i_is_assumed_exchangeable <dbl>,
+#> # ℹ 10 more variables: .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>, .i_x_cwp <dbl>,
-#> #   .i_x_cbp <dbl>, .i_x_cwp_actor <dbl>, .i_x_cwp_partner <dbl>,
-#> #   .i_x_cbp_actor <dbl>, .i_x_cbp_partner <dbl>
+#> #   .i_x_cbp <dbl>, .i_x_actor <dbl>, .i_x_partner <dbl>, .i_x_cwp_actor <dbl>,
+#> #   .i_x_cwp_partner <dbl>, .i_x_cbp_actor <dbl>, .i_x_cbp_partner <dbl>
 ```

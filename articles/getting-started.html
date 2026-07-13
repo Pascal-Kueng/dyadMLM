@@ -684,6 +684,10 @@ variable to <code><a href="../reference/prepare_interdep_data.html">prepare_inte
 <span><span class="co">#&gt; #                          each person's usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cbp          between-person predictor: stable differences from</span></span>
 <span><span class="co">#&gt; #                          the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor        APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                          values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner      APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                          values</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's</span></span>
 <span><span class="co">#&gt; #                          momentary deviations from their usual level</span></span>
 <span><span class="co">#&gt; #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's</span></span>
@@ -694,7 +698,7 @@ variable to <code><a href="../reference/prepare_interdep_data.html">prepare_inte
 <span><span class="co">#&gt; #                          stable difference from the average person's usual</span></span>
 <span><span class="co">#&gt; #                          level</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 16</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 18</span></span></span>
 <span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support .i_composition</span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female      5.03             4.30 female_x_male </span></span>
@@ -708,11 +712,12 @@ variable to <code><a href="../reference/prepare_interdep_data.html">prepare_inte
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female      8.07             5.20 female_x_male </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female      4.87             4.69 female_x_male </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_actor &lt;dbl&gt;, .i_provided_support_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, .i_provided_support_cbp_partner &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <p>By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This
 temporal predictor decomposition is controlled by

@@ -130,11 +130,14 @@ are requested and must be <code>NULL</code> otherwise.</p></dd>
 constructed. <code>"time_2l"</code> indicates a two-level temporal predictor
 decomposition into within-person and between-person components. <code>"auto"</code>
 resolves to <code>"time_2l"</code> when both <code>time</code> and <code>predictors</code> are supplied, and
-to <code>"none"</code> otherwise. Raw cross-sectional DIM and DSM predictor dyad-mean
-columns are still centered around the grand mean of dyad means as part of
-dyadic predictor-score construction. For longitudinal DIM and DSM predictor
-construction, raw undecomposed predictors are currently rejected; use
-<code>"auto"</code> or <code>"time_2l"</code>.</p></dd>
+to <code>"none"</code> otherwise. <code>"time_2l"</code> retains raw model-ready predictors in
+addition to their within-person and between-person components. For
+longitudinal DIM and DSM construction, raw and within-person dyadic scores
+are computed within each dyad occasion, while between-person scores are
+computed within dyads. Raw DIM and DSM dyad means are grand-mean centered.
+Do not include the raw, within-person, and between-person versions of the
+same contemporaneous predictor in one model because they are linearly
+dependent.</p></dd>
 
 
 <dt id="arg-set-exchangeable-compositions">set_exchangeable_compositions<a class="anchor" aria-label="anchor" href="#arg-set-exchangeable-compositions"></a></dt>
@@ -345,6 +348,10 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                          each person's usual level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp          between-person predictor: stable differences from</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                          the average person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                          momentary deviations from their usual level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's</span>
@@ -355,7 +362,7 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                          stable difference from the average person's usual</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                          level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 14</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 16</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id  time     x .i_composition       .i_composition_role </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       1         1     1     4 assumed_exchangeable assumed_exchangeable</span>
@@ -366,10 +373,10 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       2         2     1     6 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span>       2         1     2     4 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span>       2         2     2     7 assumed_exchangeable assumed_exchangeable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 10 more variables: .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;, .i_x_cwp &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cbp &lt;dbl&gt;, .i_x_cwp_actor &lt;dbl&gt;, .i_x_cwp_partner &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cbp_actor &lt;dbl&gt;, .i_x_cbp_partner &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cbp &lt;dbl&gt;, .i_x_actor &lt;dbl&gt;, .i_x_partner &lt;dbl&gt;, .i_x_cwp_actor &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cwp_partner &lt;dbl&gt;, .i_x_cbp_actor &lt;dbl&gt;, .i_x_cbp_partner &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

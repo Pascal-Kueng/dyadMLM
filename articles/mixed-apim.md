@@ -192,6 +192,10 @@ print(mixed_ild_data)
 #> #                          each person's usual level
 #> #   .i_{pred}_cbp          between-person predictor: stable differences from
 #> #                          the average person's usual level
+#> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                          values
+#> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                          values
 #> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
 #> #                          momentary deviations from their usual level
 #> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
@@ -202,7 +206,7 @@ print(mixed_ild_data)
 #> #                          stable difference from the average person's usual
 #> #                          level
 #> #
-#> # A tibble: 5,600 × 20
+#> # A tibble: 5,600 × 22
 #>    personID coupleID diaryday gender closeness provided_support .i_composition
 #>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>         
 #>  1        1        1        0 female      3.79             4.85 female_x_male 
@@ -216,12 +220,12 @@ print(mixed_ild_data)
 #>  9        1        1        8 female      4.45             4.11 female_x_male 
 #> 10        1        1        9 female      3.17             4.01 female_x_male 
 #> # ℹ 5,590 more rows
-#> # ℹ 13 more variables: .i_composition_role <fct>, .i_is_female_x_female <dbl>,
+#> # ℹ 15 more variables: .i_composition_role <fct>, .i_is_female_x_female <dbl>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female_arbitrary <dbl>,
 #> #   .i_diff_male_x_male_arbitrary <dbl>, .i_provided_support_cwp <dbl>,
-#> #   .i_provided_support_cbp <dbl>, .i_provided_support_cwp_actor <dbl>,
-#> #   .i_provided_support_cwp_partner <dbl>, …
+#> #   .i_provided_support_cbp <dbl>, .i_provided_support_actor <dbl>,
+#> #   .i_provided_support_partner <dbl>, .i_provided_support_cwp_actor <dbl>, …
 ```
 
 This first mixed-composition ILD model includes composition-specific
@@ -397,6 +401,10 @@ print(mixed_ild_tweedie_data)
 #> #                          each person's usual level
 #> #   .i_{pred}_cbp          between-person predictor: stable differences from
 #> #                          the average person's usual level
+#> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                          values
+#> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                          values
 #> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
 #> #                          momentary deviations from their usual level
 #> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
@@ -407,7 +415,7 @@ print(mixed_ild_tweedie_data)
 #> #                          stable difference from the average person's usual
 #> #                          level
 #> #
-#> # A tibble: 5,600 × 20
+#> # A tibble: 5,600 × 22
 #>    personID coupleID diaryday gender physical_activity provided_support
 #>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
 #>  1        1        1        0 female             11.4              3.92
@@ -421,12 +429,12 @@ print(mixed_ild_tweedie_data)
 #>  9        1        1        8 female              0                4.06
 #> 10        1        1        9 female              5.59             4.41
 #> # ℹ 5,590 more rows
-#> # ℹ 14 more variables: .i_composition <fct>, .i_composition_role <fct>,
+#> # ℹ 16 more variables: .i_composition <fct>, .i_composition_role <fct>,
 #> #   .i_is_female_x_female <dbl>, .i_is_female_x_male_female <dbl>,
 #> #   .i_is_female_x_male_male <dbl>, .i_is_male_x_male <dbl>,
 #> #   .i_diff_female_x_female_arbitrary <dbl>,
 #> #   .i_diff_male_x_male_arbitrary <dbl>, .i_provided_support_cwp <dbl>,
-#> #   .i_provided_support_cbp <dbl>, .i_provided_support_cwp_actor <dbl>, …
+#> #   .i_provided_support_cbp <dbl>, .i_provided_support_actor <dbl>, …
 summary(mixed_ild_tweedie_data)
 #>     personID        coupleID         diaryday       gender    
 #>  Min.   :  1.0   Min.   :  1.00   Min.   : 0.0   female:2800  
@@ -468,6 +476,14 @@ summary(mixed_ild_tweedie_data)
 #>  3rd Qu.: 0                    3rd Qu.: 0.502352       3rd Qu.: 0.6169207     
 #>  Max.   : 1                    Max.   : 2.764062       Max.   : 2.1738733     
 #>                                NAs    :220                                    
+#>  .i_provided_support_actor .i_provided_support_partner
+#>  Min.   :-0.009341         Min.   :-0.009341          
+#>  1st Qu.: 4.028752         1st Qu.: 4.028752          
+#>  Median : 4.836293         Median : 4.836293          
+#>  Mean   : 4.821283         Mean   : 4.821283          
+#>  3rd Qu.: 5.611992         3rd Qu.: 5.611992          
+#>  Max.   : 8.401539         Max.   : 8.401539          
+#>  NAs    :220               NAs    :220                
 #>  .i_provided_support_cwp_actor .i_provided_support_cwp_partner
 #>  Min.   :-2.488131             Min.   :-2.488131              
 #>  1st Qu.:-0.507787             1st Qu.:-0.507787              

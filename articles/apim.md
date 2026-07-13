@@ -407,6 +407,10 @@ print(ild_tweedie_distinguishable_data)
 #> #                          each person's usual level
 #> #   .i_{pred}_cbp          between-person predictor: stable differences from
 #> #                          the average person's usual level
+#> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                          values
+#> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                          values
 #> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
 #> #                          momentary deviations from their usual level
 #> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
@@ -417,7 +421,7 @@ print(ild_tweedie_distinguishable_data)
 #> #                          stable difference from the average person's usual
 #> #                          level
 #> #
-#> # A tibble: 1,120 × 16
+#> # A tibble: 1,120 × 18
 #>    personID coupleID diaryday gender physical_activity provided_support
 #>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
 #>  1        1        1        0 female              4.29             4.73
@@ -431,11 +435,12 @@ print(ild_tweedie_distinguishable_data)
 #>  9        1        1        8 female             10.2              4.53
 #> 10        1        1        9 female              0                3.72
 #> # ℹ 1,110 more rows
-#> # ℹ 10 more variables: .i_composition <fct>, .i_composition_role <fct>,
+#> # ℹ 12 more variables: .i_composition <fct>, .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
+#> #   .i_provided_support_actor <dbl>, .i_provided_support_partner <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
-#> #   .i_provided_support_cbp_actor <dbl>, .i_provided_support_cbp_partner <dbl>
+#> #   .i_provided_support_cbp_actor <dbl>, …
 summary(ild_tweedie_distinguishable_data)
 #>     personID        coupleID        diaryday       gender    physical_activity
 #>  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  
@@ -461,29 +466,29 @@ summary(ild_tweedie_distinguishable_data)
 #>  3rd Qu.:1.0                3rd Qu.:1.0              3rd Qu.: 0.52731       
 #>  Max.   :1.0                Max.   :1.0              Max.   : 2.42077       
 #>                                                      NAs    :44             
-#>  .i_provided_support_cbp .i_provided_support_cwp_actor
-#>  Min.   :-1.4073         Min.   :-2.66098             
-#>  1st Qu.:-0.4913         1st Qu.:-0.50775             
-#>  Median :-0.0164         Median :-0.03176             
-#>  Mean   : 0.0000         Mean   : 0.00000             
-#>  3rd Qu.: 0.4968         3rd Qu.: 0.52731             
-#>  Max.   : 1.6645         Max.   : 2.42077             
-#>                          NAs    :44                   
-#>  .i_provided_support_cwp_partner .i_provided_support_cbp_actor
-#>  Min.   :-2.66098                Min.   :-1.4073              
-#>  1st Qu.:-0.50775                1st Qu.:-0.4913              
-#>  Median :-0.03176                Median :-0.0164              
-#>  Mean   : 0.00000                Mean   : 0.0000              
-#>  3rd Qu.: 0.52731                3rd Qu.: 0.4968              
-#>  Max.   : 2.42077                Max.   : 1.6645              
-#>  NAs    :44                                                   
-#>  .i_provided_support_cbp_partner
-#>  Min.   :-1.4073                
-#>  1st Qu.:-0.4913                
-#>  Median :-0.0164                
-#>  Mean   : 0.0000                
-#>  3rd Qu.: 0.4968                
-#>  Max.   : 1.6645                
+#>  .i_provided_support_cbp .i_provided_support_actor .i_provided_support_partner
+#>  Min.   :-1.4073         Min.   :1.813             Min.   :1.813              
+#>  1st Qu.:-0.4913         1st Qu.:4.435             1st Qu.:4.435              
+#>  Median :-0.0164         Median :5.070             Median :5.070              
+#>  Mean   : 0.0000         Mean   :5.111             Mean   :5.111              
+#>  3rd Qu.: 0.4968         3rd Qu.:5.821             3rd Qu.:5.821              
+#>  Max.   : 1.6645         Max.   :8.271             Max.   :8.271              
+#>                          NAs    :44                NAs    :44                 
+#>  .i_provided_support_cwp_actor .i_provided_support_cwp_partner
+#>  Min.   :-2.66098              Min.   :-2.66098               
+#>  1st Qu.:-0.50775              1st Qu.:-0.50775               
+#>  Median :-0.03176              Median :-0.03176               
+#>  Mean   : 0.00000              Mean   : 0.00000               
+#>  3rd Qu.: 0.52731              3rd Qu.: 0.52731               
+#>  Max.   : 2.42077              Max.   : 2.42077               
+#>  NAs    :44                    NAs    :44                     
+#>  .i_provided_support_cbp_actor .i_provided_support_cbp_partner
+#>  Min.   :-1.4073               Min.   :-1.4073                
+#>  1st Qu.:-0.4913               1st Qu.:-0.4913                
+#>  Median :-0.0164               Median :-0.0164                
+#>  Mean   : 0.0000               Mean   : 0.0000                
+#>  3rd Qu.: 0.4968               3rd Qu.: 0.4968                
+#>  Max.   : 1.6645               Max.   : 1.6645                
 #> 
 ```
 
@@ -626,6 +631,10 @@ print(ild_tweedie_exchangeable_data)
 #> #                          each person's usual level
 #> #   .i_{pred}_cbp          between-person predictor: stable differences from
 #> #                          the average person's usual level
+#> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                          values
+#> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                          values
 #> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
 #> #                          momentary deviations from their usual level
 #> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
@@ -636,7 +645,7 @@ print(ild_tweedie_exchangeable_data)
 #> #                          stable difference from the average person's usual
 #> #                          level
 #> #
-#> # A tibble: 1,120 × 16
+#> # A tibble: 1,120 × 18
 #>    personID coupleID diaryday gender physical_activity provided_support
 #>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
 #>  1        1        1        0 female              4.29             4.73
@@ -650,12 +659,12 @@ print(ild_tweedie_exchangeable_data)
 #>  9        1        1        8 female             10.2              4.53
 #> 10        1        1        9 female              0                3.72
 #> # ℹ 1,110 more rows
-#> # ℹ 10 more variables: .i_composition <fct>, .i_composition_role <fct>,
+#> # ℹ 12 more variables: .i_composition <fct>, .i_composition_role <fct>,
 #> #   .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
-#> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
-#> #   .i_provided_support_cbp_actor <dbl>, …
+#> #   .i_provided_support_actor <dbl>, .i_provided_support_partner <dbl>,
+#> #   .i_provided_support_cwp_actor <dbl>, …
 summary(ild_tweedie_exchangeable_data)
 #>     personID        coupleID        diaryday       gender    physical_activity
 #>  Min.   : 1.00   Min.   : 1.00   Min.   : 0.0   female:560   Min.   :  0.000  
@@ -681,14 +690,22 @@ summary(ild_tweedie_exchangeable_data)
 #>  3rd Qu.:1                  3rd Qu.: 1                            
 #>  Max.   :1                  Max.   : 1                            
 #>                                                                   
-#>  .i_provided_support_cwp .i_provided_support_cbp .i_provided_support_cwp_actor
-#>  Min.   :-2.66098        Min.   :-1.4073         Min.   :-2.66098             
-#>  1st Qu.:-0.50775        1st Qu.:-0.4913         1st Qu.:-0.50775             
-#>  Median :-0.03176        Median :-0.0164         Median :-0.03176             
-#>  Mean   : 0.00000        Mean   : 0.0000         Mean   : 0.00000             
-#>  3rd Qu.: 0.52731        3rd Qu.: 0.4968         3rd Qu.: 0.52731             
-#>  Max.   : 2.42077        Max.   : 1.6645         Max.   : 2.42077             
-#>  NAs    :44                                      NAs    :44                   
+#>  .i_provided_support_cwp .i_provided_support_cbp .i_provided_support_actor
+#>  Min.   :-2.66098        Min.   :-1.4073         Min.   :1.813            
+#>  1st Qu.:-0.50775        1st Qu.:-0.4913         1st Qu.:4.435            
+#>  Median :-0.03176        Median :-0.0164         Median :5.070            
+#>  Mean   : 0.00000        Mean   : 0.0000         Mean   :5.111            
+#>  3rd Qu.: 0.52731        3rd Qu.: 0.4968         3rd Qu.:5.821            
+#>  Max.   : 2.42077        Max.   : 1.6645         Max.   :8.271            
+#>  NAs    :44                                      NAs    :44               
+#>  .i_provided_support_partner .i_provided_support_cwp_actor
+#>  Min.   :1.813               Min.   :-2.66098             
+#>  1st Qu.:4.435               1st Qu.:-0.50775             
+#>  Median :5.070               Median :-0.03176             
+#>  Mean   :5.111               Mean   : 0.00000             
+#>  3rd Qu.:5.821               3rd Qu.: 0.52731             
+#>  Max.   :8.271               Max.   : 2.42077             
+#>  NAs    :44                  NAs    :44                   
 #>  .i_provided_support_cwp_partner .i_provided_support_cbp_actor
 #>  Min.   :-2.66098                Min.   :-1.4073              
 #>  1st Qu.:-0.50775                1st Qu.:-0.4913              

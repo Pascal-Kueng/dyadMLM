@@ -554,6 +554,10 @@ print(ild_apim_data)
 #> #                          each person's usual level
 #> #   .i_{pred}_cbp          between-person predictor: stable differences from
 #> #                          the average person's usual level
+#> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                          values
+#> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                          values
 #> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
 #> #                          momentary deviations from their usual level
 #> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
@@ -564,7 +568,7 @@ print(ild_apim_data)
 #> #                          stable difference from the average person's usual
 #> #                          level
 #> #
-#> # A tibble: 1,120 × 16
+#> # A tibble: 1,120 × 18
 #>    personID coupleID diaryday gender closeness provided_support .i_composition
 #>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>         
 #>  1        1        1        0 female      5.03             4.30 female_x_male 
@@ -578,11 +582,12 @@ print(ild_apim_data)
 #>  9        1        1        8 female      8.07             5.20 female_x_male 
 #> 10        1        1        9 female      4.87             4.69 female_x_male 
 #> # ℹ 1,110 more rows
-#> # ℹ 9 more variables: .i_composition_role <fct>,
+#> # ℹ 11 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
+#> #   .i_provided_support_actor <dbl>, .i_provided_support_partner <dbl>,
 #> #   .i_provided_support_cwp_actor <dbl>, .i_provided_support_cwp_partner <dbl>,
-#> #   .i_provided_support_cbp_actor <dbl>, .i_provided_support_cbp_partner <dbl>
+#> #   .i_provided_support_cbp_actor <dbl>, …
 ```
 
 By default, numeric predictors in longitudinal APIM preparation are
