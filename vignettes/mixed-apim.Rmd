@@ -1,5 +1,7 @@
 ---
 title: "APIMs with Mixed Dyad Compositions"
+author: "Pascal Küng"
+bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{APIMs with Mixed Dyad Compositions}

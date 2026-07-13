@@ -81,6 +81,88 @@ test_that("reversing DSM role order reverses directional columns only", {
   )
 })
 
+test_that("DSM columns reproduce APIM fixed and random effects", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
+    x = c(7, 3, 12, 8)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    predictors = x,
+    model_type = c("apim", "dsm"),
+    dsm_role_order = c("female", "male")
+  )
+
+  apim <- c(
+    alpha_f = 1.2,
+    alpha_m = -0.4,
+    A_f = 0.8,
+    P_f = -0.2,
+    A_m = 1.1,
+    P_m = 0.3
+  )
+  mu_x <- unique(
+    (result$.i_x_actor + result$.i_x_partner) / 2 -
+      result$.i_x_dyad_mean_gmc
+  )
+
+  a11 <- (apim[["A_f"]] + apim[["P_f"]] +
+    apim[["A_m"]] + apim[["P_m"]]) / 2
+  a12 <- (apim[["A_f"]] - apim[["P_f"]] +
+    apim[["P_m"]] - apim[["A_m"]]) / 4
+  a21 <- apim[["A_f"]] + apim[["P_f"]] -
+    apim[["A_m"]] - apim[["P_m"]]
+  a22 <- (apim[["A_f"]] + apim[["A_m"]] -
+    apim[["P_f"]] - apim[["P_m"]]) / 2
+
+  dsm <- c(
+    a10 = (apim[["alpha_f"]] + apim[["alpha_m"]]) / 2 + mu_x * a11,
+    a11 = a11,
+    a12 = a12,
+    a20 = apim[["alpha_f"]] - apim[["alpha_m"]] + mu_x * a21,
+    a21 = a21,
+    a22 = a22
+  )
+  expect_equal(
+    dsm,
+    c(a10 = 7.9, a11 = 1, a12 = 0.05,
+      a20 = -4.4, a21 = -0.8, a22 = 0.9)
+  )
+
+  apim_prediction <- ifelse(
+    result$role == "female",
+    apim[["alpha_f"]] + apim[["A_f"]] * result$.i_x_actor +
+      apim[["P_f"]] * result$.i_x_partner,
+    apim[["alpha_m"]] + apim[["A_m"]] * result$.i_x_actor +
+      apim[["P_m"]] * result$.i_x_partner
+  )
+  dsm_prediction <-
+    dsm[["a10"]] +
+    dsm[["a11"]] * result$.i_x_dyad_mean_gmc +
+    dsm[["a12"]] * result$.i_x_within_dyad_diff +
+    result$.i_dsm_role_contrast * (
+      dsm[["a20"]] +
+        dsm[["a21"]] * result$.i_x_dyad_mean_gmc +
+        dsm[["a22"]] * result$.i_x_within_dyad_diff
+    )
+  expect_equal(dsm_prediction, apim_prediction)
+
+  apim_covariance <- matrix(c(1.44, 0.36, 0.36, 0.81), nrow = 2)
+  rotation <- rbind(c(0.5, 0.5), c(1, -1))
+  dsm_covariance <- rotation %*% apim_covariance %*% t(rotation)
+
+  expect_equal(
+    dsm_covariance,
+    matrix(c(0.7425, 0.315, 0.315, 1.53), nrow = 2)
+  )
+})
+
 test_that("DSM requires both predictor values for dyadic scores", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),

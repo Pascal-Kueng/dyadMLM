@@ -1,5 +1,7 @@
 ---
 title: "Actor-Partner Interdependence Model (APIM)"
+author: "Pascal Küng"
+bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Actor-Partner Interdependence Model (APIM)}

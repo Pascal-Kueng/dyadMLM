@@ -1,8 +1,10 @@
 ---
 title: "Getting Started"
+author: "Pascal Küng"
 description: >
   Core workflow for validating dyadic data, identifying dyad compositions, and
   preparing model-ready columns for dyadic multilevel models.
+bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Getting Started}

@@ -327,8 +327,11 @@ resolve_dsm_role_order <- function(dsm_role_order, model_type, has_role) {
       any(!nzchar(trimws(dsm_role_order))) ||
       anyDuplicated(dsm_role_order)) {
     stop(
-      "`dsm_role_order` must be a character vector containing exactly two distinct,
-      non-missing, non-empty role values, for example `c(\"male\", \"female\")`.",
+      paste0(
+        "`dsm_role_order` must be a character vector containing exactly two ",
+        "distinct, non-missing, non-empty role values, for example ",
+        "`c(\"male\", \"female\")`."
+      ),
       call. = FALSE
     )
   }

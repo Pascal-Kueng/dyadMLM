@@ -81,9 +81,14 @@ test_that("DSM role order contains two distinct role values", {
     c("female", " "),
     c(1, 2)
   )
+  expected_message <- paste0(
+    "`dsm_role_order` must be a character vector containing exactly two ",
+    "distinct, non-missing, non-empty role values, for example ",
+    "`c(\"male\", \"female\")`."
+  )
 
   for (role_order in invalid_orders) {
-    expect_error(
+    error <- tryCatch(
       validate_interdep_data(
         data,
         group = dyad_id,
@@ -92,9 +97,9 @@ test_that("DSM role order contains two distinct role values", {
         model_type = "dsm",
         dsm_role_order = role_order
       ),
-      "`dsm_role_order` must be a character vector",
-      fixed = TRUE
+      error = identity
     )
+    expect_identical(conditionMessage(error), expected_message)
   }
 })
 

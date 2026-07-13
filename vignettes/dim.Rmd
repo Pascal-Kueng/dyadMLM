@@ -1,9 +1,11 @@
 ---
 title: "Dyad-Individual Model"
+author: "Pascal Küng"
 description: >
   Construction and interpretation of DIM predictors, including their
   relationship to APIM effects in dyadic multilevel models for exchangeable
   dyads.
+bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Dyad-Individual Model}
@@ -203,12 +205,10 @@ interpretation.
 - The within-dyad-deviation estimate (about 1.52) means that a one-point
   difference in communication between partners is associated with a 1.52-point
   difference in their expected satisfaction, holding their average communication
-  constant. Equivalently, if one member is 1 point above the dyad mean, holding
-  the dyad mean constant implies that the other is 1 point below it. The members
-  are then 2 points apart in communication. The first member's expected
-  satisfaction is then 1.52 points above the couple's predicted mean, the second
-  member's is 1.52 points below it, and they are expected to differ by 3.04
-  points in satisfaction.
+  constant. In member terms, suppose one member is 0.5 points above the dyad
+  mean and the other is 0.5 points below it. Their expected satisfaction is then
+  0.76 points above and below the couple's predicted mean, respectively, so they
+  are expected to differ by 1.52 points in satisfaction.
 
 ### Demonstrating model equivalence to APIM
 
@@ -1029,19 +1029,18 @@ expected differences between partners.
 - The `cbp` within-dyad estimate (about 0.78) means that if partners differ by
   one point in their usual support levels, they are expected to differ by 0.78
   points in closeness, holding the couple's average usual support and the other
-  predictors constant. In member terms, a one-point increase in one member's
-  stable deviation from the dyad's usual support level, with the other member's
-  deviation decreasing by one point, is associated with a 0.78-point increase
-  for the first member and a 0.78-point decrease for the second.
+  predictors constant. In member terms, suppose one member is 0.5 points above
+  the couple's average usual support and the other is 0.5 points below it. Their
+  expected closeness is then 0.39 points above and below the couple's predicted
+  mean, respectively.
 
 - The `cwp` within-dyad estimate (about 0.06) means that if one partner's
   momentary deviation from usual support is one point higher than the other
   partner's deviation, they are expected to differ by 0.06 points in closeness,
   holding the occasion-specific dyad mean and the other predictors constant.
-  Equivalently, increasing one member's momentary deviation by one point while
-  decreasing the other member's deviation by one point is associated with a
-  0.06-point increase for the first member and a 0.06-point decrease for the
-  second.
+  In member terms, suppose their momentary deviations are 0.5 points above and
+  below the occasion-specific dyad mean. Their expected closeness is then 0.03
+  points above and below the couple's predicted mean, respectively.
 
 ### Equivalence of APIM and DIM in ILD
 

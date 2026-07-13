@@ -1,5 +1,7 @@
 ---
 title: "Dyadic Score Model (DSM)"
+author: "Pascal Küng"
+bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Dyadic Score Model (DSM)}
@@ -144,8 +146,10 @@ also remain unchanged, whereas their covariance reverses sign.
 
 ### Interpreting the DSM paths
 
-The long-format model estimates the paths of the conventional score-based DSM
-directly. Define
+For the outcomes given the predictors, the long-format model estimates the same
+paths as the conventional score-based DSM. Unlike the original SEM approach, it
+does not also model the predictor scores or provide an overall SEM fit test.
+Define
 
 $$
 X_L = \frac{X_{female} + X_{male}}{2}, \qquad
@@ -170,6 +174,11 @@ $$
 $$
 \widehat{Y_D} = a_{20} + a_{21}X_L + a_{22}X_D.
 $$
+
+Observed $Y_L$ and $Y_D$ scores require both partners' outcomes. The long-format
+model can still use one partner's available outcome when the other is missing;
+in that case, these equations describe the paired expected outcomes rather than
+observed outcome scores for that dyad.
 
 The fixed effects map directly to these paths:
 
