@@ -64,6 +64,8 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Dyad-Individual Model</h1>
+                        <h4 data-toc-skip class="author">Pascal
+Küng</h4>
             
       
 
@@ -97,7 +99,7 @@ APIM.</p>
 </h2>
 <p>The current DIM implementation prepares predictors for one
 exchangeable dyad composition. Exchangeability means that swapping the
-two member labels does not change the model. One way to make this
+two member labels does not change the model <span class="citation">(Kenny et al. 2006)</span>. One way to make this
 assumption at the data-preparation layer is to omit <code>role</code>
 from <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>. This treats all dyads as the
 same exchangeable composition.</p>
@@ -150,11 +152,14 @@ same exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;, .i_communication_actor &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_partner &lt;dbl&gt;, .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>The function creates arbitrary member labels encoding a
-member-difference contrast <code>.i_diff_*</code> as 1 for one partner
-and -1 for the other. This is needed for the correct random effects
-specification. The fixed <code>seed</code> makes these arbitrary member
-labels reproducible.</p>
+<p>The implementation adapts the R sum-and-difference approach for
+indistinguishable dyads described by <span class="citation">del Rosario
+and West (2025)</span>. Because the ordinary intercept already serves as
+the sum component, the function only needs to create a member-difference
+contrast <code>.i_diff_*</code>, coded as 1 for one partner and -1 for
+the other. This contrast is used for the random-effects specification
+below. The fixed <code>seed</code> makes these arbitrary member labels
+reproducible.</p>
 <p>Passing a <code>role</code> is also possible when it leads to exactly
 one exchangeable composition (e.g., only female-female dyads).</p>
 <p>In a dataset with mixed dyad types, the right preparation depends on
@@ -295,9 +300,10 @@ couple mean, equivalently half the signed difference between
 partners.</li>
 </ol>
 <p>The resulting estimated fixed effects are a reparameterization of the
-APIM actor and partner effects. The same random-effects structure can
-therefore be used for both fixed-effect parameterizations: a dyad-level
-intercept and a dyad-level difference contrast indexed by
+APIM actor and partner effects <span class="citation">(Bolger et al.
+2025)</span>. The same random-effects structure can therefore be used
+for both fixed-effect parameterizations: a dyad-level intercept and a
+dyad-level difference contrast indexed by
 <code>.i_diff_assumed_exchangeable_arbitrary</code>. In
 <code>glmmTMB</code>, with <code>dispformula = ~ 0</code>, these random
 effects represent the two members’ Gaussian residual variance and
@@ -307,7 +313,7 @@ random-effects terms, which constrains their correlation to zero. This
 preserves exchangeability: swapping the arbitrary member labels leaves
 the intercept term unchanged but reverses the difference contrast. A
 nonzero correlation between them would therefore make the random-effects
-distribution depend on the arbitrary labeling.</p>
+distribution depend on the arbitrary labeling <span class="citation">(del Rosario and West 2025)</span>.</p>
 <p>The full model can be estimated as:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -365,9 +371,9 @@ distribution depend on the arbitrary labeling.</p>
 <p>Because this Gaussian model uses an identity link, fixed coefficients
 are interpreted in units of the outcome, e.g., “satisfaction”:</p>
 <p>The exchangeable Gaussian DIM is algebraically equivalent to the
-reduced, label-invariant Dyadic Score Model (DSM). Therefore, each
-coefficient has both an individual-member interpretation and an
-equivalent couple mean/difference interpretation.</p>
+reduced, label-invariant Dyadic Score Model (DSM) <span class="citation">(Iida et al. 2018)</span>. Therefore, each coefficient
+has both an individual-member interpretation and an equivalent couple
+mean/difference interpretation.</p>
 <ul>
 <li><p>The intercept (about 5.04) is the expected satisfaction of either
 member, and therefore the expected couple-average satisfaction, when
@@ -380,13 +386,11 @@ each member’s expected satisfaction is 2.00 points higher.</p></li>
 <li><p>The within-dyad-deviation estimate (about 1.52) means that a
 one-point difference in communication between partners is associated
 with a 1.52-point difference in their expected satisfaction, holding
-their average communication constant. Equivalently, if one member is 1
-point above the dyad mean, holding the dyad mean constant implies that
-the other is 1 point below it. The members are then 2 points apart in
-communication. The first member’s expected satisfaction is then 1.52
-points above the couple’s predicted mean, the second member’s is 1.52
-points below it, and they are expected to differ by 3.04 points in
-satisfaction.</p></li>
+their average communication constant. In member terms, suppose one
+member is 0.5 points above the dyad mean and the other is 0.5 points
+below it. Their expected satisfaction is then 0.76 points above and
+below the couple’s predicted mean, respectively, so they are expected to
+differ by 1.52 points in satisfaction.</p></li>
 </ul>
 </div>
 <div class="section level3">
@@ -401,7 +405,13 @@ vignette</a>.</p>
 <code class="sourceCode R"><span></span>
 <span><span class="va">apim_1</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Fixed effects APIM</span></span>
 <span>    <span class="va">.i_communication_actor</span> <span class="op">+</span> <span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Since both models are equivalent, the same random-effects structure</span></span>
+<span>    <span class="co"># can be used. See the APIM vignette to learn how to back-transform</span></span>
+<span>    <span class="co"># these blocks to a full actor-partner variance-covariance matrix.</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
@@ -1110,9 +1120,10 @@ their original scale.</p>
 <h2 id="intensive-longitudinal-dim">Intensive Longitudinal DIM<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dim"></a>
 </h2>
 <p>For longitudinal DIM, predictors are decomposed into within-person
-and between-person components before the dyadic decomposition. The
-default <code>"auto"</code> strategy selects <code>"time_2l"</code> when
-both <code>time</code> and <code>predictors</code> are supplied:</p>
+and between-person components before the dyadic decomposition <span class="citation">(Bolger and Laurenceau 2013; Gistelinck and Loeys
+2020)</span>. The default <code>"auto"</code> strategy selects
+<code>"time_2l"</code> when both <code>time</code> and
+<code>predictors</code> are supplied:</p>
 <ol style="list-style-type: decimal">
 <li>The <code>cwp</code> dyad mean captures a shared occasion-specific
 shift from the two members’ usual levels (shared occasion-level
@@ -1125,6 +1136,16 @@ differences).</li>
 <li>The <code>cbp</code> within-dyad deviation captures each member’s
 stable difference from the dyad’s usual level.</li>
 </ol>
+<p>The <code>cbp</code> terms use each member’s mean across the observed
+occasions to estimate that member’s longer-run usual level. With few
+occasions (small
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>),
+especially when the predictor has low stability over time, these person
+means can be unreliable. The associated between-person estimates can
+therefore be biased as well as imprecise, so interpret them cautiously
+<span class="citation">(Gottfredson 2019)</span>. This concern primarily
+affects the between-person estimates constructed from observed person
+means.</p>
 <p><code>temporal_predictor_decomposition = "none"</code> is not
 available for longitudinal DIM predictor construction.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -1199,6 +1220,17 @@ available for longitudinal DIM predictor construction.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<p>The example below estimates same-day associations between support and
+closeness and includes <code>diaryday</code> to adjust for a linear
+trend across the study. The following models focus on concurrent rather
+than lagged effects. They do not model residual dependence from one day
+to the next. This limitation and suggestions for addressing it are
+discussed at the end of the vignette.</p>
+<p>Following del Rosario and West, the stable dyad covariance is
+represented using sum-and-difference random effects <span class="citation">(del Rosario and West 2025)</span>. In the Gaussian
+model below, we extend this parameterization to the dyad-occasion level
+to represent same-occasion residual dependence in
+<code>glmmTMB</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -1271,7 +1303,7 @@ available for longitudinal DIM predictor construction.</p>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="interpretation-of-ild-dim-coefficients">Interpretation of ILD DIM coefficients<a class="anchor" aria-label="anchor" href="#interpretation-of-ild-dim-coefficients"></a>
+<h3 id="interpretation-of-concurrent-ild-dim-coefficients">Interpretation of concurrent ILD DIM coefficients<a class="anchor" aria-label="anchor" href="#interpretation-of-concurrent-ild-dim-coefficients"></a>
 </h3>
 <p>The same interpretation as before applies longitudinally: dyad-mean
 effects describe both expected outcomes for individual members and
@@ -1294,18 +1326,18 @@ closeness is 0.49 points higher on that occasion.</p></li>
 if partners differ by one point in their usual support levels, they are
 expected to differ by 0.78 points in closeness, holding the couple’s
 average usual support and the other predictors constant. In member
-terms, a one-point increase in one member’s stable deviation from the
-dyad’s usual support level, with the other member’s deviation decreasing
-by one point, is associated with a 0.78-point increase for the first
-member and a 0.78-point decrease for the second.</p></li>
+terms, suppose one member is 0.5 points above the couple’s average usual
+support and the other is 0.5 points below it. Their expected closeness
+is then 0.39 points above and below the couple’s predicted mean,
+respectively.</p></li>
 <li><p>The <code>cwp</code> within-dyad estimate (about 0.06) means that
 if one partner’s momentary deviation from usual support is one point
 higher than the other partner’s deviation, they are expected to differ
 by 0.06 points in closeness, holding the occasion-specific dyad mean and
-the other predictors constant. Equivalently, increasing one member’s
-momentary deviation by one point while decreasing the other member’s
-deviation by one point is associated with a 0.06-point increase for the
-first member and a 0.06-point decrease for the second.</p></li>
+the other predictors constant. In member terms, suppose their momentary
+deviations are 0.5 points above and below the occasion-specific dyad
+mean. Their expected closeness is then 0.03 points above and below the
+couple’s predicted mean, respectively.</p></li>
 </ul>
 </div>
 <div class="section level3">
@@ -1417,31 +1449,15 @@ level and a DIM parameterization on the other. For example:</p>
 <span><span class="co">#&gt; 2 APIM within / APIM between 2977.225 3026.637 -1478.613</span></span>
 <span><span class="co">#&gt; 3  APIM within / DIM between 2977.225 3026.637 -1478.613</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="including-random-slopes">Including Random Slopes<a class="anchor" aria-label="anchor" href="#including-random-slopes"></a>
-</h2>
+<div class="section level3">
+<h3 id="including-random-slopes">Including Random Slopes<a class="anchor" aria-label="anchor" href="#including-random-slopes"></a>
+</h3>
 <p>Random-slope DIM and APIM parameterizations can be written
 analogously by adding the corresponding within-person effects to the
 stable dyad-level random-effect blocks. These larger models do not
-converge cleanly with the example data, so the chunks are not evaluated.
-Such models can be fit when the study design, data, and convergence
-diagnostics support the added complexity.</p>
-<p>A random-slope standard deviation describes how much the
-corresponding association varies across dyads around its fixed effect.
-Correlations within a random-effects block describe how its latent
-dyad-specific effects co-vary; they are not correlations between
-observed predictors or partners. Separate random-effects terms define
-separate covariance blocks, so correlations across those blocks are
-constrained to zero, preserving the exchangeability condition described
-above.</p>
-<p>For an exchangeable APIM, the sum-difference random-effects
-representation involving <code>.i_diff_*</code> can be rotated back to a
-constrained actor-partner representation. This can make actor and
-partner random effects easier to interpret, while offering no analogous
-interpretive advantage for the DIM. The <a href="apim.html">APIM
-vignette</a> describes this rotation and the constraints required to
-preserve exchangeability.</p>
+converge cleanly with the example data, so the examples are neither
+evaluated nor interpreted. Such models can be fit when the study design,
+data, and convergence diagnostics support the added complexity.</p>
 <p>In the APIM:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -1514,6 +1530,114 @@ preserve exchangeability.</p>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="current-limitations-of-dyadic-ild-designs-in-r">Current limitations of dyadic ILD designs in R<a class="anchor" aria-label="anchor" href="#current-limitations-of-dyadic-ild-designs-in-r"></a>
+</h3>
+<p>The models above adjust for a linear time trend and account for
+stable dyadic dependence and same-occasion partner dependence. They do
+not model residual serial dependence, however, and therefore estimate
+concurrent associations under the assumption that residuals from
+different days are independent.</p>
+<p>If the goal is to retain these concurrent DIM associations while
+accounting for serial dependence, the closest extension is a dyadic
+residual dynamic structural equation model (RDSEM). It keeps the
+concurrent regression separate from a VAR model for its residuals <span class="citation">(Asparouhov and Muthén 2020)</span>. This residual-VAR
+structure is not directly available through the <code>glmmTMB</code>
+interface used here, and open-source support for dyadic dynamic models
+remains very limited <span class="citation">(del Rosario and West
+2025)</span>.</p>
+<div class="section level4">
+<h4 id="dynamic-models">Dynamic models<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
+</h4>
+<p>A <strong>practical alternative</strong> is a model with lagged
+outcomes, especially when carryover or temporal dynamics are part of the
+research question <span class="citation">(Gistelinck and Loeys
+2020)</span>. In such a model, the interpretation changes. All DIM
+predictor effects then describe associations conditional on the members’
+prior outcomes.</p>
+<p>Person-mean centering the outcome lag can bias the average carryover
+estimate downward <span class="citation">(Hamaker and Grasman
+2015)</span>. This downward bias is known as Nickell bias <span class="citation">(Nickell 1981)</span>. A raw lag avoids this centering
+bias, but a standard random-intercept model can still be biased because
+it assumes that the lag is unrelated to stable member levels <span class="citation">(Gistelinck et al. 2021)</span>.</p>
+<p>Both problems matter most when there are few occasions. In one simple
+simulation, most approaches other than person-mean centering performed
+acceptably from about ten occasions, but this is not a universal cutoff
+<span class="citation">(Gistelinck et al. 2021)</span>. For shorter
+panels, consider an LD-APIM, which lets the first outcomes relate to the
+members’ stable levels in a wide-format SEM <span class="citation">(Gistelinck and Loeys 2020)</span>.</p>
+<p>These lagged-outcome issues are separate from the earlier concern
+about unreliable person means used to construct <code>cbp</code>
+predictors with few occasions.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-asparouhovComparisonModelsAnalysis2020" class="csl-entry">
+Asparouhov, Tihomir, and Bengt Muthén. 2020. <span>“Comparison of Models
+for the Analysis of Intensive Longitudinal Data.”</span> <em>Structural
+Equation Modeling: A Multidisciplinary Journal</em> 27 (2): 275–97. <a href="https://doi.org/10.1080/10705511.2019.1626733" class="external-link">https://doi.org/10.1080/10705511.2019.1626733</a>.
+</div>
+<div id="ref-bolgerIntensiveLongitudinalMethods2013" class="csl-entry">
+Bolger, Niall, and Jean-Philippe Laurenceau. 2013. <em>Intensive
+Longitudinal Methods: An Introduction to Diary and Experience Sampling
+Research</em>. Guilford Press. <a href="https://www.guilford.com/books/Intensive-Longitudinal-Methods/Bolger-Laurenceau/9781462506781" class="external-link">https://www.guilford.com/books/Intensive-Longitudinal-Methods/Bolger-Laurenceau/9781462506781</a>.
+</div>
+<div id="ref-Bolger2025Unified" class="csl-entry">
+Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
+<span>“Unified Analysis Model for Indistinguishable and Distinguishable
+Dyads.”</span> <em>Innovations in Interpersonal Relationships and Health
+Research: <span>Advancing</span> the Integration of Interdisciplinary
+Approaches to Dyadic Behavior Change</em>. <a href="https://doi.org/10.17605/OSF.IO/WYDCJ" class="external-link">https://doi.org/10.17605/OSF.IO/WYDCJ</a>.
+</div>
+<div id="ref-gistelinckMultilevelAutoregressiveDyadic2020" class="csl-entry">
+Gistelinck, Fien, and Tom Loeys. 2020. <span>“Multilevel Autoregressive
+Models for Longitudinal Dyadic Data.”</span> <em>TPM - Testing,
+Psychometrics, Methodology in Applied Psychology</em> 27 (3): 433–52. <a href="https://doi.org/10.4473/TPM27.3.7" class="external-link">https://doi.org/10.4473/TPM27.3.7</a>.
+</div>
+<div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry">
+Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. <span>“Multilevel
+Autoregressive Models When the Number of Time Points Is Small.”</span>
+<em>Structural Equation Modeling: A Multidisciplinary Journal</em> 28
+(1): 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517" class="external-link">https://doi.org/10.1080/10705511.2020.1753517</a>.
+</div>
+<div id="ref-gottfredsonStraightforwardApproachCoping2019" class="csl-entry">
+Gottfredson, Nisha C. 2019. <span>“A Straightforward Approach for Coping
+with Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.”</span> <em>Addictive
+Behaviors</em> 94: 156–61. <a href="https://doi.org/10.1016/j.addbeh.2018.09.031" class="external-link">https://doi.org/10.1016/j.addbeh.2018.09.031</a>.
+</div>
+<div id="ref-hamakerCenterNotCenter2015" class="csl-entry">
+Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. <span>“To Center or
+Not to Center? Investigating Inertia with a Multilevel Autoregressive
+Model.”</span> <em>Frontiers in Psychology</em> 5: 1492. <a href="https://doi.org/10.3389/fpsyg.2014.01492" class="external-link">https://doi.org/10.3389/fpsyg.2014.01492</a>.
+</div>
+<div id="ref-iidaModelsInterdependentIndividuals2018" class="csl-entry">
+Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018.
+<span>“Models of Interdependent Individuals Versus Dyadic Processes in
+Relationship Research.”</span> <em>Journal of Social and Personal
+Relationships</em> 35 (1): 59–88. <a href="https://doi.org/10.1177/0265407517725407" class="external-link">https://doi.org/10.1177/0265407517725407</a>.
+</div>
+<div id="ref-kenny2006dyadic" class="csl-entry">
+Kenny, David A, Deborah A Kashy, and William L Cook. 2006. <em>Dyadic
+Data Analysis</em>. Guilford Press.
+</div>
+<div id="ref-nickellBiasesDynamicModels1981" class="csl-entry">
+Nickell, Stephen. 1981. <span>“Biases in Dynamic Models with Fixed
+Effects.”</span> <em>Econometrica</em> 49 (6): 1417–26. <a href="https://doi.org/10.2307/1911408" class="external-link">https://doi.org/10.2307/1911408</a>.
+</div>
+<div id="ref-delrosarioPracticalGuideSpecifying2025" class="csl-entry">
+Rosario, Kareena S. del, and Tessa V. West. 2025. <span>“A
+<span>Practical Guide</span> to <span>Specifying Random Effects</span>
+in <span>Longitudinal Dyadic Multilevel Modeling</span>.”</span>
+<em>Advances in Methods and Practices in Psychological Science</em> 8
+(3): 25152459251351286. <a href="https://doi.org/10.1177/25152459251351286" class="external-link">https://doi.org/10.1177/25152459251351286</a>.
+</div>
+</div>
 <hr>
 <p><strong>Continue</strong> with the <a href="dsm.html">Dyadic Score
 Model vignette</a>,</p>

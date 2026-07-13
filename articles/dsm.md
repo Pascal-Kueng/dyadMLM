@@ -244,8 +244,10 @@ remain unchanged, whereas their covariance reverses sign.
 
 ### Interpreting the DSM paths
 
-The long-format model estimates the paths of the conventional
-score-based DSM directly. Define
+For the outcomes given the predictors, the long-format model estimates
+the same paths as the conventional score-based DSM. Unlike the original
+SEM approach, it does not also model the predictor scores or provide an
+overall SEM fit test. Define
 
 ``` math
 X_L = \frac{X_{female} + X_{male}}{2}, \qquad
@@ -270,6 +272,11 @@ the fitted long-format model estimates their two DSM equations:
 ``` math
 \widehat{Y_D} = a_{20} + a_{21}X_L + a_{22}X_D.
 ```
+
+Observed $`Y_L`$ and $`Y_D`$ scores require both partners’ outcomes. The
+long-format model can still use one partner’s available outcome when the
+other is missing; in that case, these equations describe the paired
+expected outcomes rather than observed outcome scores for that dyad.
 
 The fixed effects map directly to these paths:
 
@@ -483,30 +490,25 @@ data.frame(
 #> 3       Var(r_YD)    3.678                    3.678
 ```
 
-Both parameterization can be useful. The APIM is often clearer for
-questions about actor and partner effects, whereas the DSM directly
-addresses questions about shared dyadic levels and directional
-discrepancies.
-
 For exchangeable dyads, the direction of a member difference is
 arbitrary. The directional intercept, both cross-paths, and the
 covariance between outcome level and outcome difference must then be
 zero. The remaining reduced, label-invariant DSM is algebraically the
-Gaussian DIM. In `interdep`, use `model_type = "dim"` for this
-exchangeable model and reserve `model_type = "dsm"` for distinguishable
-dyads.
+Gaussian Dyad-Individual Model (DIM). In `interdep`, use
+`model_type = "dim"` for this exchangeable model and reserve
+`model_type = "dsm"` for distinguishable dyads.
 
 ------------------------------------------------------------------------
 
-Refer to the:
+Continue with the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
+
+refer to the:
 
 - [Actor-Partner Interdependence Model (APIM)
   vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
 - [Mixed-Composition APIM
   vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
-  or
-- [Dyad-Individual Model
-  vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
 
 or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
