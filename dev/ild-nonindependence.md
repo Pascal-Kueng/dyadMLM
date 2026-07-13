@@ -1,6 +1,9 @@
 # Non-Independence in Intensive Longitudinal Dyadic Models
 
-**Status:** analysis and tutorial design note
+**Status:** analysis and tutorial design note. The concurrent-model guidance,
+observed-person-mean caution, and concise dynamic-model limitations are now
+implemented in the DIM vignette. Equivalent review of the APIM and planned DSM
+ILD material remains open.
 
 **Scope:** Gaussian and generalized intensive longitudinal dyadic data, with
 particular attention to APIM, DIM, and DSM examples fitted outside
@@ -585,7 +588,8 @@ Use these labels consistently:
 
 ### 7.3 Immediate versus longer-term recommendation
 
-For the current high-level R tutorial:
+For the current high-level R tutorial, this policy is implemented in the DIM
+vignette and should guide the remaining APIM and DSM review:
 
 - retain `time_2l` for ordinary predictors;
 - include appropriate time trends;

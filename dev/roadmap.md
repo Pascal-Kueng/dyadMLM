@@ -15,6 +15,9 @@ helpers, and eventually model syntax explicit and reproducible.
 - Possible future reintroduction of inspection-only incomplete/unknown dyads:
   [`keep-behavior-notes.md`](keep-behavior-notes.md)
 - Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
+- Directional DSM derivation and implementation record: [`dsm.md`](dsm.md)
+- ILD non-independence evidence and tutorial policy:
+  [`ild-nonindependence.md`](ild-nonindependence.md)
 - Composition-inference debugging scratch code:
   [`debug-infer-compositions.R`](debug-infer-compositions.R)
 
@@ -55,8 +58,9 @@ Recently completed cleanup:
   compositions in a compact `pooled_from` summary
 
 Immediate next step: finish vignette and release-facing polish. The
-getting-started, DIM, and DSM vignettes now document their implemented
-preparation paths; APIM and release-facing integration still need final review.
+getting-started and DIM vignettes have completed detailed review. The APIM,
+mixed-APIM, and DSM vignettes still need final review, and the DSM vignette
+still needs its planned ILD section.
 
 ## Vignette Architecture
 
@@ -77,26 +81,28 @@ Target vignette structure:
   - links to available model-specific vignettes
   - minimal or no fitted models
 - `apim.Rmd`
-  - cross-sectional APIM model construction
+  - cross-sectional and ILD APIM model construction
   - distinguishable and exchangeable APIMs
-  - mixed dyad types in one APIM
-  - `.i_is_*`, `.i_diff_*`, and raw actor/partner predictor columns
-- `intensive-longitudinal-apim.Rmd`
-  - ILD APIMs with temporal predictor decomposition
   - within-person and between-person actor/partner effects
   - generalized outcomes, including Tweedie examples
+  - `.i_is_*`, `.i_diff_*`, and raw actor/partner predictor columns
+- `mixed-apim.Rmd`
+  - cross-sectional and ILD APIMs with mixed dyad compositions
   - optimizer and convergence notes
-  - heavier mixed-composition ILD models shown carefully, with `eval = FALSE` where
-    needed
+  - heavier mixed-composition ILD models shown carefully, with `eval = FALSE`
+    where needed
 - `dim.Rmd`
-  - undirected DIM assumptions
+  - exchangeable-dyad DIM assumptions
   - cross-sectional and ILD APIM-DIM equivalence
-  - role-moderated and random-slope material only as advanced/conceptual
-    guidance until the implementation is more complete
+  - fixed and random-effect transformations
+  - random-slope examples
+  - a concise section on current limitations of dyadic ILD designs in R
 - `dsm.Rmd`
   - directional DSM preparation with an explicit role order
   - dyad-level and signed-difference predictor columns
   - exact long-format interaction model and coefficient interpretations
+  - role-order reversal and APIM-DSM transformations
+  - a brief ILD extension, still to be added
   - outcomes remain unchanged in the MLM-focused preparation API
 
 ## Version 0.1.0 - First CRAN Release Candidate
@@ -167,7 +173,8 @@ model-building features.
   - Allow explicit `temporal_predictor_decomposition = "none"` for
     undecomposed or externally centered cases
   - Support raw APIM columns, within-/between-person APIM columns, and DIM
-    dyad-mean / within-dyad-deviation columns
+    dyad-mean / within-dyad-deviation columns using the `_within_dyad_dev`
+    suffix
   - Keep missing-data behavior explicit
   - Keep `predictors` as the only transformed-variable API; select outcomes in
     fitted-model formulas
@@ -331,18 +338,20 @@ Complete these before calling the feature set CRAN-ready:
   - full signed differences and the role contrast are recorded in DSM metadata
   - the DSM vignette documents the exact long-format interaction model
 - Finalize vignette polish for v0.1.0
-  - keep `getting-started.Rmd` as an orientation and data-prep vignette, not the
-    main modeling manual
-  - review and polish `apim.Rmd`
-  - decide whether ILD APIM, generalized outcome, optimizer, and
-    mixed-composition ILD material should stay in `apim.Rmd` for now or move
-    into an ILD APIM vignette
+  - `getting-started.Rmd` is finalized as an orientation and data-prep vignette,
+    not the main modeling manual
+  - `dim.Rmd` is finalized for the current scope, including cross-sectional and
+    ILD equivalence, interpretations, random slopes, citations, and current ILD
+    limitations
+  - review and polish `apim.Rmd` and `mixed-apim.Rmd`
+  - complete the planned ILD DSM section and final review of `dsm.Rmd`
   - keep heavy or convergence-sensitive examples out of `getting-started.Rmd`
     and mark advanced examples `eval = FALSE` where needed
-- Keep the DIM vignette focused
-  - show cross-sectional APIM-DIM equivalence
-  - show ILD DIM construction from `time_2l` components
-  - keep mixed-composition/maximal models in the APIM vignette for now
+- Keep the completed DIM vignette stable
+  - retain cross-sectional and ILD APIM-DIM equivalence
+  - retain ILD construction from `time_2l` components and the current concise
+    methodological limitations
+  - keep mixed-composition models in the APIM vignettes
 - Resolve mixed-composition ILD model convergence documentation
   - current increased simulation size improves information but does not fully
     remove Gaussian optimizer warnings for the maximal mixed-composition ILD APIM
@@ -459,7 +468,7 @@ Minimum expected state:
   `pool_compositions`
 - clear metadata for raw observed compositions versus final analysis
   compositions
-- complete getting-started, APIM, ILD APIM, DIM, and DSM documentation paths
+- complete getting-started, APIM, mixed-APIM, DIM, and DSM documentation paths
 - interpretation helpers for `.i_diff_*` structures
 - syntax generation for at least one primary model engine, preferably
   `glmmTMB`, with tests that protect intended estimands

@@ -1,5 +1,10 @@
 # Directional Dyadic Score Model
 
+**Status:** predictor preparation, validation, metadata, and printing are
+complete for the current v0.1 scope. The vignette contains the cross-sectional
+long-format model and APIM transformations. Its final review, direct model-level
+equivalence tests, and the planned ILD section remain open.
+
 ## Purpose
 
 This document records how the directional Dyadic Score Model (DSM) described
