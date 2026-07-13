@@ -426,23 +426,21 @@ data.frame(
 )
 ```
 
-Both parameterization can be useful. The APIM is often clearer
-for questions about actor and partner effects, whereas the DSM directly
-addresses questions about shared dyadic levels and directional discrepancies.
 
 For exchangeable dyads, the direction of a member difference is arbitrary.
 The directional intercept, both cross-paths, and the covariance between outcome
 level and outcome difference must then be zero. The remaining reduced,
-label-invariant DSM is algebraically the Gaussian DIM. In `interdep`, use
-`model_type = "dim"` for this exchangeable model and reserve
+label-invariant DSM is algebraically the Gaussian Dyad-Individual Model (DIM). 
+In `interdep`, use `model_type = "dim"` for this exchangeable model and reserve
 `model_type = "dsm"` for distinguishable dyads.
 
 ---
 
-Refer to the:
+Continue with the [Dyad-Individual Model vignette](dim.html),
+
+refer to the:
 
 - [Actor-Partner Interdependence Model (APIM) vignette](apim.html),
-- [Mixed-Composition APIM vignette](mixed-apim.html), or
-- [Dyad-Individual Model vignette](dim.html),
+- [Mixed-Composition APIM vignette](mixed-apim.html),
 
 or return to the [Overview](index.html).
