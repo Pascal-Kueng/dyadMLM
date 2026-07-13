@@ -278,6 +278,8 @@ test_that("DSM constructs longitudinal CWP and CBP scores", {
     dsm_role_order = c("female", "male")
   )
 
+  expect_equal(result$.i_x_dyad_mean_gmc, rep(c(-4, -1, 1, 4), each = 2))
+  expect_equal(result$.i_x_within_dyad_diff, rep(c(2, 4, 4, 6), each = 2))
   expect_equal(result$.i_x_cwp_dyad_mean, rep(c(-1.5, -1.5, 1.5, 1.5), 2))
   expect_equal(result$.i_x_cwp_within_dyad_diff, rep(c(-1, -1, 1, 1), 2))
   expect_equal(result$.i_x_cbp_dyad_mean, c(rep(-2.5, 4), rep(2.5, 4)))
@@ -286,8 +288,8 @@ test_that("DSM constructs longitudinal CWP and CBP scores", {
   expect_false(any(grepl("within_dyad_dev", names(result), fixed = TRUE)))
 
   meta <- attr(result, "interdep")$dsm_predictors
-  expect_equal(meta$component, c("cwp", "cbp"))
-  expect_equal(meta$dyad_decomposition_level, c("dyad_time", "dyad"))
+  expect_equal(meta$component, c("raw", "cwp", "cbp"))
+  expect_equal(meta$dyad_decomposition_level, c("dyad_time", "dyad_time", "dyad"))
 })
 
 test_that("DSM returns missing CWP scores for an incomplete predictor pair", {
@@ -313,6 +315,10 @@ test_that("DSM returns missing CWP scores for an incomplete predictor pair", {
   incomplete_occasion <- result$dyad_id == 1 & result$time == 1
   complete_occasion <- result$dyad_id == 1 & result$time == 2
 
+  expect_true(all(is.na(result$.i_x_dyad_mean_gmc[incomplete_occasion])))
+  expect_true(all(is.na(result$.i_x_within_dyad_diff[incomplete_occasion])))
+  expect_false(any(is.na(result$.i_x_dyad_mean_gmc[complete_occasion])))
+  expect_false(any(is.na(result$.i_x_within_dyad_diff[complete_occasion])))
   expect_true(all(is.na(result$.i_x_cwp_dyad_mean[incomplete_occasion])))
   expect_true(all(is.na(result$.i_x_cwp_within_dyad_diff[incomplete_occasion])))
   expect_false(any(is.na(result$.i_x_cwp_dyad_mean[complete_occasion])))
@@ -348,7 +354,7 @@ test_that("DSM and APIM predictor columns can coexist", {
   ) %in% names(result)))
 })
 
-test_that("DSM rejects raw longitudinal predictor-score construction", {
+test_that("DSM constructs raw longitudinal predictor scores", {
   data <- data.frame(
     dyad_id = rep(1:2, each = 4),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -357,19 +363,20 @@ test_that("DSM rejects raw longitudinal predictor-score construction", {
     x = c(4, 2, 8, 4, 10, 6, 14, 8)
   )
 
-  expect_error(
-    prepare_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      role = role,
-      time = time,
-      predictors = x,
-      model_type = "dsm",
-      dsm_role_order = c("female", "male"),
-      temporal_predictor_decomposition = "none"
-    ),
-    "Longitudinal dyadic predictor-score construction requires temporally decomposed predictors.",
-    fixed = TRUE
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    time = time,
+    predictors = x,
+    model_type = "dsm",
+    dsm_role_order = c("female", "male"),
+    temporal_predictor_decomposition = "none"
   )
+
+  expect_equal(result$.i_x_dyad_mean_gmc, rep(c(-4, -1, 1, 4), each = 2))
+  expect_equal(result$.i_x_within_dyad_diff, rep(c(2, 4, 4, 6), each = 2))
+  expect_equal(attr(result, "interdep")$dsm_predictors$component, "raw")
+  expect_equal(attr(result, "interdep")$dsm_predictors$dyad_decomposition_level, "dyad_time")
 })

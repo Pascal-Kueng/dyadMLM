@@ -16,7 +16,9 @@ updated predictor metadata.
 \description{
 Adds centered predictor columns to an \code{interdep_data} object. It currently
 supports two-level temporal centering for intensive longitudinal predictors:
-a within-person component and a between-person component.
+a within-person component and a between-person component. The original
+predictor remains available as a raw component for model-specific column
+construction.
 For two-level temporal centering, the between-person component is centered
 around the grand mean of person means, not the grand mean of all observed rows.
 This gives each person equal weight even when people have different numbers of

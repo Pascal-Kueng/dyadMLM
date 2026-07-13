@@ -41,10 +41,10 @@ test_that("center_predictors creates time_2l centered predictor columns", {
   expect_equal(
     attr(result, "interdep")$temporal_predictor_decompositions,
     tibble::tibble(
-      predictor = c("x", "x"),
-      component = c("cwp", "cbp"),
-      column = c(".i_x_cwp", ".i_x_cbp"),
-      temporal_predictor_decomposition = c("time_2l", "time_2l")
+      predictor = c("x", "x", "x"),
+      component = c("raw", "cwp", "cbp"),
+      column = c("x", ".i_x_cwp", ".i_x_cbp"),
+      temporal_predictor_decomposition = c("none", "time_2l", "time_2l")
     )
   )
 })

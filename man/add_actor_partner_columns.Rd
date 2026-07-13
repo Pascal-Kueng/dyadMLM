@@ -17,9 +17,9 @@ added and APIM predictor metadata recorded.
 Adds APIM-style actor and partner columns for the predictors recorded in an
 \code{interdep_data} object. For uncentered predictors, this will create actor and
 partner versions of the raw predictor. For centered intensive longitudinal
-predictors, this will create actor and partner versions of each recorded
-predictor component, such as the within-person and between-person components
-created by \code{\link[=center_predictors]{center_predictors()}}.
+predictors, this will create actor and partner versions of the raw predictor
+and each recorded predictor component, such as the within-person and
+between-person components created by \code{\link[=center_predictors]{center_predictors()}}.
 }
 \details{
 The function will use the predictor decomposition metadata stored in

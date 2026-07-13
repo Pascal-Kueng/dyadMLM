@@ -3,9 +3,9 @@
 #' Adds APIM-style actor and partner columns for the predictors recorded in an
 #' `interdep_data` object. For uncentered predictors, this will create actor and
 #' partner versions of the raw predictor. For centered intensive longitudinal
-#' predictors, this will create actor and partner versions of each recorded
-#' predictor component, such as the within-person and between-person components
-#' created by [center_predictors()].
+#' predictors, this will create actor and partner versions of the raw predictor
+#' and each recorded predictor component, such as the within-person and
+#' between-person components created by [center_predictors()].
 #'
 #' The function will use the predictor decomposition metadata stored in
 #' `attr(data, "interdep")$temporal_predictor_decompositions`, so downstream code does

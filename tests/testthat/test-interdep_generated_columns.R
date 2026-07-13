@@ -106,51 +106,61 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
   expect_equal(
     result,
     tibble::tibble(
-      model_family = c("temporal", "temporal", "apim", "apim", "apim", "apim"),
-      variable_role = c("predictor", "predictor", "predictor", "predictor", "predictor", "predictor"),
-      variable = c("x", "x", "x", "x", "x", "x"),
-      component = c("cwp", "cbp", "cwp", "cbp", "cwp", "cbp"),
+      model_family = c("temporal", "temporal", rep("apim", 6)),
+      variable_role = rep("predictor", 8),
+      variable = rep("x", 8),
+      component = c("cwp", "cbp", "raw", "cwp", "cbp", "raw", "cwp", "cbp"),
       column_role = c(
         "temporal_component",
         "temporal_component",
         "actor",
         "actor",
+        "actor",
+        "partner",
         "partner",
         "partner"
       ),
       column = c(
         ".i_x_cwp",
         ".i_x_cbp",
+        ".i_x_actor",
         ".i_x_cwp_actor",
         ".i_x_cbp_actor",
+        ".i_x_partner",
         ".i_x_cwp_partner",
         ".i_x_cbp_partner"
       ),
-      source_column = c("x", "x", ".i_x_cwp", ".i_x_cbp", ".i_x_cwp", ".i_x_cbp"),
+      source_column = c("x", "x", "x", ".i_x_cwp", ".i_x_cbp", "x", ".i_x_cwp", ".i_x_cbp"),
       temporal_decomposition = c(
         "within_person",
         "between_person_grand_mean",
+        "none",
         "within_person",
         "between_person_grand_mean",
+        "none",
         "within_person",
         "between_person_grand_mean"
       ),
-      dyadic_decomposition = c("none", "none", "none", "none", "none", "none"),
-      column_centering = c("none", "none", "none", "none", "none", "none"),
-      print_order = c(8L, 9L, 12L, 14L, 13L, 15L),
+      dyadic_decomposition = rep("none", 8),
+      column_centering = rep("none", 8),
+      print_order = c(8L, 9L, 10L, 12L, 14L, 11L, 13L, 15L),
       column_pattern = c(
         ".i_{pred}_cwp",
         ".i_{pred}_cbp",
+        ".i_{pred}_actor",
         ".i_{pred}_cwp_actor",
         ".i_{pred}_cbp_actor",
+        ".i_{pred}_partner",
         ".i_{pred}_cwp_partner",
         ".i_{pred}_cbp_partner"
       ),
       description = c(
         "within-person predictor: momentary deviations from each person's usual level",
         "between-person predictor: stable differences from the average person's usual level",
+        "APIM actor predictor: actor's original predictor values",
         "APIM within-person actor predictor: actor's momentary deviations from their usual level",
         "APIM between-person actor predictor: actor's stable difference from the average person's usual level",
+        "APIM partner predictor: partner's original predictor values",
         "APIM within-person partner predictor: partner's momentary deviations from their usual level",
         "APIM between-person partner predictor: partner's stable difference from the average person's usual level"
       )
@@ -225,19 +235,25 @@ test_that("interdep_generated_columns records temporal and dyadic decomposition 
     c(
       "within_person",
       "between_person_grand_mean",
+      "none",
       "within_person",
       "between_person_grand_mean",
+      "none",
       "within_person",
       "between_person_grand_mean"
     )
   )
   expect_equal(
     result$dyadic_decomposition,
-    c("none", "none", "dyad_mean", "dyad_mean", "within_dyad_deviation", "within_dyad_deviation")
+    c(
+      "none", "none",
+      "dyad_mean", "dyad_mean", "dyad_mean",
+      "within_dyad_deviation", "within_dyad_deviation", "within_dyad_deviation"
+    )
   )
   expect_equal(
     result$column_centering,
-    c("none", "none", "none", "none", "none", "none")
+    c("none", "none", "grand_mean", "none", "none", "none", "none", "none")
   )
   expect_equal(
     result$column_role,
@@ -246,6 +262,8 @@ test_that("interdep_generated_columns records temporal and dyadic decomposition 
       "temporal_component",
       "dyad_mean",
       "dyad_mean",
+      "dyad_mean",
+      "within_dyad_deviation",
       "within_dyad_deviation",
       "within_dyad_deviation"
     )

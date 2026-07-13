@@ -229,6 +229,8 @@ test_that("interdep data print describes longitudinal APIM columns", {
     ".i_{pred}_cbp",
     "between-person predictor: stable differences from the average person's usual level"
   )
+  expect_true(any(grepl(".i_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_partner", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cwp_actor", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cwp_partner", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cbp_actor", printed, fixed = TRUE)))
@@ -286,6 +288,8 @@ test_that("interdep data print collapses repeated generated column types", {
 
   expect_equal(added_column_count(lines, ".i_{pred}_cwp"), 1)
   expect_equal(added_column_count(lines, ".i_{pred}_cbp"), 1)
+  expect_equal(added_column_count(lines, ".i_{pred}_actor"), 1)
+  expect_equal(added_column_count(lines, ".i_{pred}_partner"), 1)
   expect_equal(added_column_count(lines, ".i_{pred}_cwp_actor"), 1)
   expect_equal(added_column_count(lines, ".i_{pred}_cwp_partner"), 1)
   expect_equal(added_column_count(lines, ".i_{pred}_cbp_actor"), 1)
@@ -370,6 +374,8 @@ test_that("interdep data print describes longitudinal DIM columns", {
 
   printed <- capture_wide_print(result)
 
+  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_within_dyad_dev", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
@@ -424,6 +430,8 @@ test_that("interdep data print describes longitudinal DSM predictors", {
   expect_true(any(grepl(".i_{pred}_cbp", printed, fixed = TRUE)))
   expect_true(any(grepl("DSM direction: female - male", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_dsm_role_contrast", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".i_{pred}_within_dyad_diff", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
   expect_true(any(grepl(".i_{pred}_cwp_within_dyad_diff", printed, fixed = TRUE)))

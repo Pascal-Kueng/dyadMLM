@@ -7,11 +7,10 @@
 #' structure contains one distinguishable dyad composition; exchangeable dyads
 #' and multiple compositions are not supported.
 #'
-#' For temporally decomposed ILD predictors, within-person scores are computed
-#' within dyad-time and between-person scores within dyad. Raw cross-sectional
-#' dyad means are grand-mean centered. Both partners' predictor values are
-#' required for each score pair, and raw undecomposed longitudinal predictors
-#' are rejected.
+#' For ILD predictors, raw and within-person scores are computed within
+#' dyad-time and between-person scores within dyad. Raw dyad means are
+#' grand-mean centered. Both partners' predictor values are required for each
+#' score pair.
 #'
 #' Constructed predictor columns are recorded in
 #' `attr(data, "interdep")$dsm_predictors`, and the contrast column name is

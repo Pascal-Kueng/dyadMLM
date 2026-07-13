@@ -7,11 +7,12 @@
 #' and multiple exchangeable compositions are not supported by DIM
 #' construction until explicit role-contrast, composition-specific, or pooling
 #' support is added. For
-#' intensive longitudinal predictors decomposed by [center_predictors()], the
-#' within-person component is decomposed within each dyad-time occasion and the
-#' between-person component is decomposed once within each dyad.
-#' For raw cross-sectional predictors, the dyad-mean column is centered around
-#' the grand mean of dyad means by DIM convention, while the
+#' intensive longitudinal predictors decomposed by [center_predictors()], raw
+#' predictors and within-person components are decomposed within each dyad-time
+#' occasion, while between-person components are decomposed once within each
+#' dyad.
+#' For raw predictors, the dyad-mean column is centered around the grand mean
+#' of dyad means, or dyad-occasion means in longitudinal data, while the
 #' within-dyad-deviation column is the person's deviation from the uncentered
 #' dyad mean.
 #'
@@ -67,15 +68,6 @@ construct_dyad_predictor_decompositions <- function(data) {
     component <- temporal_decompositions$component[[i]]
     source_col <- temporal_decompositions$column[[i]]
 
-    if (has_time && !component %in% c("cwp", "cbp")) {
-      stop(
-        "Longitudinal dyadic predictor-score construction requires temporally decomposed predictors. ",
-        "Predictor `", predictor, "` has undecomposed component `", component, "`. ",
-        "Use `temporal_predictor_decomposition = \"auto\"` or `\"time_2l\"`, or use `model_type = \"apim\"` for raw longitudinal actor-partner predictors.",
-        call. = FALSE
-      )
-    }
-
     column_stem <- make_dyad_predictor_column_stem(
       predictor = predictor,
       component = component,
@@ -89,7 +81,7 @@ construct_dyad_predictor_decompositions <- function(data) {
     deviation_col <- paste0(column_stem, "_within_dyad_dev")
 
     dyad_decomposition_level <- "dyad"
-    if (component == "cwp") {
+    if (has_time && component %in% c("raw", "cwp")) {
       dyad_decomposition_level <- "dyad_time"
     }
 
@@ -103,7 +95,7 @@ construct_dyad_predictor_decompositions <- function(data) {
       dyad_decomposition_level = dyad_decomposition_level
     )
 
-    if (component == "cwp") {
+    if (has_time && component %in% c("raw", "cwp")) {
       out <- add_dyad_time_decomposition(
         out = out,
         group = group,
@@ -111,7 +103,8 @@ construct_dyad_predictor_decompositions <- function(data) {
         time = time,
         source_col = source_col,
         mean_col = mean_col,
-        deviation_col = deviation_col
+        deviation_col = deviation_col,
+        center_mean = component == "raw"
       )
     } else {
       out <- add_dyad_level_decomposition(
@@ -139,7 +132,8 @@ make_dyad_predictor_column_stem <- function(predictor, component, source_col) {
 }
 
 add_dyad_time_decomposition <- function(out, group, member, time, source_col,
-                                        mean_col, deviation_col) {
+                                        mean_col, deviation_col,
+                                        center_mean = FALSE) {
   join_keys <- c(group, time, member)
 
   dyad_time_values <- out |>
@@ -156,7 +150,19 @@ add_dyad_time_decomposition <- function(out, group, member, time, source_col,
       "{mean_col}" := .data$.i_dyad_mean,
       "{deviation_col}" := .data[[source_col]] - .data$.i_dyad_mean
     ) |>
-    dplyr::ungroup() |>
+    dplyr::ungroup()
+
+  if (center_mean) {
+    dyad_time_mean_values <- dyad_time_values |>
+      dplyr::distinct(.data[[group]], .data[[time]], .data[[mean_col]])
+
+    grand_mean <- no_NaN_mean(dyad_time_mean_values[[mean_col]])
+
+    dyad_time_values <- dyad_time_values |>
+      dplyr::mutate("{mean_col}" := .data[[mean_col]] - grand_mean)
+  }
+
+  dyad_time_values <- dyad_time_values |>
     dplyr::select(
       dplyr::all_of(join_keys),
       dplyr::all_of(c(mean_col, deviation_col))

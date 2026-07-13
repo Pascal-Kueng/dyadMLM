@@ -2,7 +2,9 @@
 #'
 #' Adds centered predictor columns to an `interdep_data` object. It currently
 #' supports two-level temporal centering for intensive longitudinal predictors:
-#' a within-person component and a between-person component.
+#' a within-person component and a between-person component. The original
+#' predictor remains available as a raw component for model-specific column
+#' construction.
 #' For two-level temporal centering, the between-person component is centered
 #' around the grand mean of person means, not the grand mean of all observed rows.
 #' This gives each person equal weight even when people have different numbers of
@@ -45,13 +47,15 @@ center_predictors <- function(data) {
     return(out)
   }
 
+  temporal_predictor_decompositions <- tibble::tibble(
+    predictor = predictors,
+    component = "raw",
+    column = predictors,
+    temporal_predictor_decomposition = "none"
+  )
+
   if (temporal_predictor_decomposition == "none") {
-    attr(out, "interdep")$temporal_predictor_decompositions <- tibble::tibble(
-      predictor = predictors,
-      component = "raw",
-      column = predictors,
-      temporal_predictor_decomposition = temporal_predictor_decomposition
-    )
+    attr(out, "interdep")$temporal_predictor_decompositions <- temporal_predictor_decompositions
 
     return(out)
   }

@@ -17,19 +17,63 @@ test_that("add_actor_partner_columns creates actor and partner columns", {
     center_predictors() |>
     add_actor_partner_columns()
 
+  expect_equal(result$.i_x_actor, result$x)
   expect_equal(result$.i_x_cwp_actor, result$.i_x_cwp)
   expect_equal(result$.i_x_cbp_actor, result$.i_x_cbp)
+  expect_equal(result$.i_x_partner, c(10, 1, 14, 3, 30, 20, 34, 24))
   expect_equal(result$.i_x_cwp_partner, c(-2, -1, 2, 1, -2, -2, 2, 2))
   expect_equal(result$.i_x_cbp_partner, c(-5, -15, -5, -15, 15, 5, 15, 5))
   expect_equal(
     attr(result, "interdep")$apim_predictors,
     tibble::tibble(
-      predictor = c("x", "x"),
-      component = c("cwp", "cbp"),
-      source_column = c(".i_x_cwp", ".i_x_cbp"),
-      actor_column = c(".i_x_cwp_actor", ".i_x_cbp_actor"),
-      partner_column = c(".i_x_cwp_partner", ".i_x_cbp_partner")
+      predictor = c("x", "x", "x"),
+      component = c("raw", "cwp", "cbp"),
+      source_column = c("x", ".i_x_cwp", ".i_x_cbp"),
+      actor_column = c(".i_x_actor", ".i_x_cwp_actor", ".i_x_cbp_actor"),
+      partner_column = c(".i_x_partner", ".i_x_cwp_partner", ".i_x_cbp_partner")
     )
+  )
+  expect_equal(
+    attr(result, "interdep")$temporal_predictor_decompositions$component,
+    c("raw", "cwp", "cbp")
+  )
+})
+
+test_that("longitudinal APIM and DIM predictor columns can coexist", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
+    person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
+    time = c(1, 1, 2, 2, 1, 1, 2, 2),
+    x = c(1, 10, 3, 14, 20, 30, 24, 34)
+  )
+
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = x,
+    model_type = c("apim", "dim"),
+    seed = 123
+  )
+
+  expect_true(all(c(
+    ".i_x_actor",
+    ".i_x_partner",
+    ".i_x_cwp_actor",
+    ".i_x_cwp_partner",
+    ".i_x_cbp_actor",
+    ".i_x_cbp_partner",
+    ".i_x_dyad_mean_gmc",
+    ".i_x_within_dyad_dev",
+    ".i_x_cwp_dyad_mean",
+    ".i_x_cwp_within_dyad_dev",
+    ".i_x_cbp_dyad_mean",
+    ".i_x_cbp_within_dyad_dev"
+  ) %in% names(result)))
+  expect_equal(
+    attr(result, "interdep")$dim_predictors$component,
+    c("raw", "cwp", "cbp")
   )
 })
 

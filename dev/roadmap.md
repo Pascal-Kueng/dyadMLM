@@ -86,6 +86,9 @@ Target vignette structure:
   - within-person and between-person actor/partner effects
   - generalized outcomes, including Tweedie examples
   - `.i_is_*`, `.i_diff_*`, and raw actor/partner predictor columns
+  - a brief comparison of manifest raw outcome lags and separately estimated
+    within-/between-person outcome-lag components, with their different
+    interpretations and small-T cautions
 - `mixed-apim.Rmd`
   - cross-sectional and ILD APIMs with mixed dyad compositions
   - optimizer and convergence notes
@@ -172,9 +175,25 @@ model-building features.
     otherwise
   - Allow explicit `temporal_predictor_decomposition = "none"` for
     undecomposed or externally centered cases
-  - Support raw APIM columns, within-/between-person APIM columns, and DIM
-    dyad-mean / within-dyad-deviation columns using the `_within_dyad_dev`
-    suffix
+  - Support raw and within-/between-person model-ready columns for APIM, DIM,
+    and DSM, including DIM within-dyad deviations using the
+    `_within_dyad_dev` suffix
+  - For ILD models using `time_2l`, retain each selected raw predictor alongside
+    its CWP and CBP components in the shared predictor metadata
+    - construct raw APIM actor/partner columns and raw DIM/DSM dyadic scores
+      from the shared metadata
+    - decompose raw longitudinal DIM/DSM predictors within dyad-occasion, while
+      retaining dyad-level construction for CBP components
+    - keep the established `.i_{pred}_actor` and `.i_{pred}_partner` names; do
+      not reintroduce `_raw_` into generated column names
+    - document that raw and decomposed versions of the same contemporaneous
+      predictor should not all be included in one formula because they are
+      linearly dependent
+    - allow users to include an outcome in `predictors`, lag the raw
+      model-specific columns, and choose a manifest raw-lag or within-between
+      lag parameterization
+    - test raw-column values, model metadata and print output, dyad-occasion
+      matching and decomposition, and coexistence across model requests
   - Keep missing-data behavior explicit
   - Keep `predictors` as the only transformed-variable API; select outcomes in
     fitted-model formulas
@@ -344,6 +363,9 @@ Complete these before calling the feature set CRAN-ready:
     ILD equivalence, interpretations, random slopes, citations, and current ILD
     limitations
   - review and polish `apim.Rmd` and `mixed-apim.Rmd`
+  - in `apim.Rmd`, show concise versions of both the manifest raw-lag and
+    manifest within-between lag specifications; describe them as different
+    parameterizations rather than interchangeable corrections
   - complete the planned ILD DSM section and final review of `dsm.Rmd`
   - keep heavy or convergence-sensitive examples out of `getting-started.Rmd`
     and mark advanced examples `eval = FALSE` where needed
@@ -379,6 +401,16 @@ Complete these before calling the feature set CRAN-ready:
 
 ## Version 0.2.0
 
+- Add a dedicated, validated simulation of lagged-outcome bias if this remains
+  useful after the v0.1 tutorial review
+  - generate data from a structural lagged-outcome model rather than reuse the
+    current examples, whose serial dependence is generated at the residual
+    level
+  - compare manifest raw-lag and manifest-centered lag specifications across
+    several values of T, and include an initial-condition-aware reference model
+    if the results are presented as a methodological comparison
+  - keep computationally expensive Monte Carlo work out of normal vignette
+    rendering; use a development script or validated precomputed summary
 - Add helper functions to rotate `.i_diff_*` / Idiff structures back to
   partner-level interpretations
 - Extend dyadic-score model support beyond the v0.1.0 data-prep API

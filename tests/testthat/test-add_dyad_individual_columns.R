@@ -17,6 +17,8 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
     center_predictors() |>
     add_dyad_individual_columns()
 
+  expect_equal(result$.i_x_dyad_mean_gmc, c(-11.5, -11.5, -8.5, -8.5, 8, 8, 12, 12))
+  expect_equal(result$.i_x_within_dyad_dev, c(-4.5, 4.5, -5.5, 5.5, -5, 5, -5, 5))
   expect_equal(result$.i_x_cwp_dyad_mean, c(-1.5, -1.5, 1.5, 1.5, -2, -2, 2, 2))
   expect_equal(result$.i_x_cwp_within_dyad_dev, c(0.5, -0.5, -0.5, 0.5, 0, 0, 0, 0))
   expect_equal(result$.i_x_cbp_dyad_mean, c(-10, -10, -10, -10, 10, 10, 10, 10))
@@ -25,12 +27,16 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
   expect_equal(
     attr(result, "interdep")$dim_predictors,
     tibble::tibble(
-      predictor = c("x", "x"),
-      component = c("cwp", "cbp"),
-      source_column = c(".i_x_cwp", ".i_x_cbp"),
-      mean_column = c(".i_x_cwp_dyad_mean", ".i_x_cbp_dyad_mean"),
-      deviation_column = c(".i_x_cwp_within_dyad_dev", ".i_x_cbp_within_dyad_dev"),
-      dyad_decomposition_level = c("dyad_time", "dyad")
+      predictor = c("x", "x", "x"),
+      component = c("raw", "cwp", "cbp"),
+      source_column = c("x", ".i_x_cwp", ".i_x_cbp"),
+      mean_column = c(".i_x_dyad_mean_gmc", ".i_x_cwp_dyad_mean", ".i_x_cbp_dyad_mean"),
+      deviation_column = c(
+        ".i_x_within_dyad_dev",
+        ".i_x_cwp_within_dyad_dev",
+        ".i_x_cbp_within_dyad_dev"
+      ),
+      dyad_decomposition_level = c("dyad_time", "dyad_time", "dyad")
     )
   )
 })
@@ -56,6 +62,9 @@ test_that("add_dyad_individual_columns requires complete dyad values for each co
 
   expect_false(is.na(result$.i_x_cwp_dyad_mean[1]))
   expect_true(is.na(result$.i_x_cwp_dyad_mean[3]))
+  expect_false(is.na(result$.i_x_dyad_mean_gmc[1]))
+  expect_true(is.na(result$.i_x_dyad_mean_gmc[3]))
+  expect_true(is.na(result$.i_x_within_dyad_dev[3]))
   expect_true(all(is.na(result$.i_x_cbp_dyad_mean[result$dyad_id == 2])))
   expect_true(all(is.na(result$.i_x_cbp_within_dyad_dev[result$dyad_id == 2])))
 })
@@ -233,7 +242,7 @@ test_that("DIM construction errors for multiple exchangeable dyad compositions",
   )
 })
 
-test_that("longitudinal DIM rejects undecomposed raw predictors", {
+test_that("longitudinal DIM constructs undecomposed raw predictor scores", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -241,18 +250,19 @@ test_that("longitudinal DIM rejects undecomposed raw predictors", {
     x = c(1, 10, 3, 14, 20, 30, 24, 34)
   )
 
-  expect_error(
-    prepare_interdep_data(
-      data,
-      group = dyad_id,
-      member = person_id,
-      time = time,
-      predictors = x,
-      model_type = "dim",
-      temporal_predictor_decomposition = "none",
-      seed = 123
-    ),
-    "Predictor `x` has undecomposed component `raw`.",
-    fixed = TRUE
+  result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = x,
+    model_type = "dim",
+    temporal_predictor_decomposition = "none",
+    seed = 123
   )
+
+  expect_equal(result$.i_x_dyad_mean_gmc, c(-11.5, -11.5, -8.5, -8.5, 8, 8, 12, 12))
+  expect_equal(result$.i_x_within_dyad_dev, c(-4.5, 4.5, -5.5, 5.5, -5, 5, -5, 5))
+  expect_equal(attr(result, "interdep")$dim_predictors$component, "raw")
+  expect_equal(attr(result, "interdep")$dim_predictors$dyad_decomposition_level, "dyad_time")
 })
