@@ -30,7 +30,7 @@
 #'   components. `"auto"` resolves to `"time_2l"` when both `time` and
 #'   `predictors` are supplied, and to `"none"` otherwise.
 #'   Model-specific helpers may apply additional conventions, such as grand-mean
-#'   centering raw cross-sectional DIM and DSM dyad means.
+#'   centering raw DIM and DSM dyad means.
 #' @param incomplete_dyads How to handle dyads that do not contain exactly two
 #'   unique members anywhere in the data. `"error"` stops with an error and
 #'   `"drop"` removes the entire dyad.

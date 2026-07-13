@@ -406,8 +406,8 @@ interpretation and could be considered separately.
 
 Automated tests verify hand-calculated dyad means, declared difference
 direction independent of row order, repeated dyad scores, stable `+0.5/-0.5`
-role contrasts, missing score pairs, temporal CWP/CBP construction, and role
-direction reversal.
+role contrasts, missing score pairs, raw longitudinal and temporal CWP/CBP
+construction, and role direction reversal.
 
 ### Validation
 
@@ -531,10 +531,10 @@ paired occasion. The role orientation must remain stable across all occasions.
 ## Current implementation decisions
 
 1. `dsm_role_order` is always required and its direction is printed.
-2. Cross-sectional predictors and temporally decomposed ILD predictors are
-   supported. Raw undecomposed longitudinal DSM predictors are rejected.
-3. Raw cross-sectional predictor dyad means are grand-mean centered; signed
-   differences are not centered.
+2. Cross-sectional and longitudinal predictors can be used raw or with the
+   `time_2l` decomposition.
+3. Raw predictor dyad means are grand-mean centered across dyads or observed
+   dyad occasions; signed differences are not centered.
 4. The vignette documents `glmmTMB` for the exact long model. An explicit
    multivariate `brms` workflow remains an alternative rather than a package
    data representation.

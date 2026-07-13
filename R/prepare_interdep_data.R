@@ -33,7 +33,8 @@
 #'   within-dyad-deviation predictors. `"dsm"` creates dyadic-score model
 #'   predictor columns. `"none"` skips model-specific predictor
 #'   construction after validation, composition inference, and optional
-#'   temporal predictor decomposition, and must be used alone.
+#'   temporal predictor decomposition, and must be used alone. `"dim"` and
+#'   `"dsm"` must be requested in separate calls.
 #' @param dsm_role_order For `model_type = "dsm"`, a character vector giving
 #'   the two distinguishable roles in the order used for directional
 #'   differences. For example, `c("female", "male")` defines predictor

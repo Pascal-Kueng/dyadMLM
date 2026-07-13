@@ -49,7 +49,8 @@ actor and partner predictors. \code{"dim"} creates dyad-mean and
 within-dyad-deviation predictors. \code{"dsm"} creates dyadic-score model
 predictor columns. \code{"none"} skips model-specific predictor
 construction after validation, composition inference, and optional
-temporal predictor decomposition, and must be used alone.}
+temporal predictor decomposition, and must be used alone. \code{"dim"} and
+\code{"dsm"} must be requested in separate calls.}
 
 \item{dsm_role_order}{For \code{model_type = "dsm"}, a character vector giving
 the two distinguishable roles in the order used for directional

@@ -385,7 +385,7 @@ mixed_ild_tweedie_model <- glmmTMB(
     (0 + .i_is_male_x_male | coupleID:diaryday) +
     (0 + .i_diff_male_x_male_arbitrary | coupleID:diaryday)
 
-    # recommended first simplification in convergence issues is to set dispfomula = ~ 1
+    # recommended first simplification in convergence issues is to set dispformula = ~ 1
   , dispformula = ~ 0 +
       .i_is_female_x_male_female + .i_is_female_x_male_male +
       .i_is_female_x_female + .i_is_male_x_male

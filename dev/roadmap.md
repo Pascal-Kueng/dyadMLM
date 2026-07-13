@@ -169,7 +169,8 @@ model-building features.
   `.i_composition_role`
 - Add temporal predictor decomposition and predictor-shape helpers for ILD data
   - Keep the implemented `time_2l` workflow described in [`centering.md`](centering.md)
-  - Keep APIM and DIM on the same temporal predictor decomposition foundation
+  - Keep APIM, DIM, and DSM on the same temporal predictor decomposition
+    foundation
   - Use `temporal_predictor_decomposition = "auto"` by default: resolve to
     `time_2l` when both `time` and predictors are supplied, and to `none`
     otherwise
@@ -241,6 +242,8 @@ model-building features.
     #   .i_{pred}_cbp                   between-person predictor: stable
     #                                   differences from the average person's usual
     #                                   level
+    #   .i_{pred}_actor                 APIM actor predictor: actor's original values
+    #   .i_{pred}_partner               APIM partner predictor: partner's original values
     #   .i_{pred}_cwp_actor             APIM within-person actor predictor: actor's
     #                                   momentary deviations from their usual level
     #   .i_{pred}_cwp_partner           APIM within-person partner predictor:
@@ -252,6 +255,9 @@ model-building features.
     #   .i_{pred}_cbp_partner           APIM between-person partner predictor:
     #                                   partner's stable difference from the
     #                                   average person's usual level
+    #   .i_{pred}_dyad_mean_gmc         raw dyad-mean predictor, grand-mean centered
+    #   .i_{pred}_within_dyad_dev       DIM raw within-dyad predictor deviation
+    #   .i_{pred}_within_dyad_diff      DSM raw signed predictor difference
     #   .i_{pred}_cwp_dyad_mean         within-person dyad-mean predictor:
     #                                   shared momentary deviations in the dyad
     #   .i_{pred}_cwp_within_dyad_dev
@@ -290,10 +296,10 @@ model-building features.
 - Keep README and `getting-started.Rmd` focused on the data-preparation
   workflow
 - Split model-fitting examples out of `getting-started.Rmd`
-  - use a cross-sectional APIM vignette for distinguishable, exchangeable, and
-    multiple-dyad-type APIM examples
-  - use a separate ILD APIM vignette for temporal predictor decomposition,
-    generalized outcomes, optimizer notes, and heavier mixed-composition ILD examples
+  - use `apim.Rmd` for cross-sectional and ILD distinguishable or exchangeable
+    APIM examples
+  - use `mixed-apim.Rmd` for cross-sectional and ILD mixed-composition APIM
+    examples, including generalized outcomes and optimizer notes
 - Keep the focused DIM vignette separate from APIM/ILD APIM examples
 - Keep the DSM data-preparation examples aligned with the implemented API
 - Add citation metadata
@@ -310,7 +316,7 @@ Complete these before calling the feature set CRAN-ready:
   - build pkgdown locally when changing vignette structure or `_pkgdown.yml`
 - DIM and directional DSM preparation review: done for the current v0.1 scope
   - direct grouped DIM construction is accepted
-  - raw cross-sectional DIM names are accepted
+  - raw cross-sectional and longitudinal DIM names are accepted
   - DIM remains restricted to one final exchangeable composition
   - DSM remains restricted to one final distinguishable composition matching
     `dsm_role_order`
@@ -371,7 +377,7 @@ Complete these before calling the feature set CRAN-ready:
     and mark advanced examples `eval = FALSE` where needed
 - Keep the completed DIM vignette stable
   - retain cross-sectional and ILD APIM-DIM equivalence
-  - retain ILD construction from `time_2l` components and the current concise
+  - retain raw and `time_2l` ILD construction and the current concise
     methodological limitations
   - keep mixed-composition models in the APIM vignettes
 - Resolve mixed-composition ILD model convergence documentation

@@ -11,7 +11,7 @@ Implemented scope:
 - `model_type = c("apim", "dim", "dsm", "none")`
 - `temporal_predictor_decomposition = c("auto", "time_2l", "none")`
 - two-level temporal predictor decomposition for ILD predictors
-- raw APIM columns for cross-sectional or explicitly undecomposed predictors
+- raw and temporally decomposed model-ready columns for APIM, DIM, and DSM
 - DIM dyad-mean and within-dyad-deviation columns
 - DIM currently requires one exchangeable dyad composition
 - `model_type = "dsm"` for directional dyadic-score model data preparation
@@ -54,8 +54,8 @@ later in the model formula.
 
 `temporal_predictor_decomposition` controls predictor pre-decomposition over
 time. DIM and DSM apply dyadic predictor-score construction afterward;
-specifically, raw cross-sectional dyad means are centered around the grand mean
-of dyad means.
+raw dyad means are centered around the grand mean of dyad means or observed
+dyad-occasion means.
 
 ## Centering
 
@@ -83,12 +83,14 @@ The metadata table is:
 attr(data, "interdep")$temporal_predictor_decompositions
 ```
 
-with one row per predictor component.
+with one row for the raw predictor and one row per constructed temporal
+component.
 
 Generated `.i_*_cwp` and `.i_*_cbp` columns also appear in the normalized
-generated-column table returned by `interdep_generated_columns()`. Raw
-undecomposed predictor records are intentionally excluded from that table
-because they are source columns, not package-generated columns.
+generated-column table returned by `interdep_generated_columns()`. Raw source
+records are excluded from the temporal part of that table because they are not
+package-generated columns. Their model-specific APIM, DIM, or DSM columns are
+included.
 
 ## APIM Columns
 
@@ -102,7 +104,7 @@ For raw predictors:
 .i_x_partner
 ```
 
-For `time_2l` predictors:
+For `time_2l` predictors, the raw columns above are retained alongside:
 
 ```r
 .i_x_cwp_actor
@@ -143,12 +145,16 @@ weighted by the number of observed days:
 .i_x_cbp_within_dyad_dev
 ```
 
-For raw cross-sectional predictors:
+For raw predictors:
 
 ```r
 .i_x_dyad_mean_gmc
 .i_x_within_dyad_dev
 ```
+
+Raw longitudinal predictors are decomposed within dyad-time. Raw
+cross-sectional predictors are decomposed within dyad. Their dyad means are
+grand-mean centered in both cases.
 
 DIM requires complete dyad information for the relevant component. If only one
 partner has an observed value for that component, the dyad mean and deviation
@@ -196,9 +202,9 @@ public columns then diverge:
 .i_dsm_role_contrast
 ```
 
-For ILD data, predictors are first decomposed into `.i_*_cwp` and `.i_*_cbp`.
-DSM then creates dyad means and full directional differences separately for
-both temporal components.
+For ILD data, DSM creates dyad means and full directional differences for the
+raw predictor and separately for `.i_*_cwp` and `.i_*_cbp`. Raw and CWP scores
+are constructed within dyad-time, while CBP scores are constructed within dyad.
 
 Outcome scores are not materialized for the MLM-focused API. Outcomes remain
 member-level variables selected in the fitted-model formula.
@@ -212,8 +218,9 @@ member-level variables selected in the fitted-model formula.
   compute dyad means or within-dyad deviations, such as raw APIM.
 - DIM and DSM predictor construction require numeric predictors.
 - user data may not contain package-owned `.i_` columns.
-- longitudinal raw DIM or DSM predictor construction is currently
-  rejected because it mixes within-person and between-person information.
+- longitudinal raw DIM and DSM predictor construction is available with
+  `temporal_predictor_decomposition = "none"`; `time_2l` returns raw scores
+  alongside CWP and CBP scores.
 - `temporal_predictor_decomposition` applies only to predictors.
 - `model_type = "dim"` requires one exchangeable dyad composition.
 - `model_type = "dsm"` requires one distinguishable dyad composition and an

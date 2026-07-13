@@ -959,7 +959,9 @@ For longitudinal DIM, predictors are decomposed into within-person and
 between-person components before the dyadic decomposition
 [@bolgerIntensiveLongitudinalMethods2013;
 @gistelinckMultilevelAutoregressiveDyadic2020]. The default `"auto"` strategy
-selects `"time_2l"` when both `time` and `predictors` are supplied:
+selects `"time_2l"` when both `time` and `predictors` are supplied. It also
+retains raw dyad-occasion means and within-dyad deviations. The decomposed
+columns used below are:
 
 1. The `cwp` dyad mean captures a shared occasion-specific shift from the two
    members' usual levels (shared occasion-level variation).
@@ -978,8 +980,8 @@ be biased as well as imprecise, so interpret them cautiously
 [@gottfredsonStraightforwardApproachCoping2019]. This concern primarily affects
 the between-person estimates constructed from observed person means.
 
-`temporal_predictor_decomposition = "none"` is not available for longitudinal
-DIM predictor construction.
+Use `temporal_predictor_decomposition = "none"` to construct only the raw
+dyad-occasion mean and within-dyad deviation.
 
 ```{r prepare-ild-exchangeable}
 ild_exchangeable_data <- prepare_interdep_data(

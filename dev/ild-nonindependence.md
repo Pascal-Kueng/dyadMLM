@@ -301,10 +301,12 @@ the intended long-term solution.
 ### Case B: own-outcome carryover is a substantive parameter
 
 When the target is the average carryover or inertia coefficient, use a raw-lag
-parameterization rather than manifest person-mean centering. Do not pass the
-outcome lag through `time_2l`, and do not describe a person-mean-centered
-outcome lag as an unbiased within-person dynamic effect. When $T$ is small, the
-estimator must also address initial conditions and random-effect endogeneity.
+parameterization rather than manifest person-mean centering. The outcome may be
+included in `predictors` under `time_2l` to create all model-specific columns,
+but lag and use the raw columns for this parameterization. Do not describe a
+person-mean-centered outcome lag as an unbiased within-person dynamic effect.
+When $T$ is small, the estimator must also address initial conditions and
+random-effect endogeneity.
 
 Retain all other dependence components:
 

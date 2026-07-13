@@ -51,7 +51,7 @@ temporal predictor decomposition into within-person and between-person
 components. \code{"auto"} resolves to \code{"time_2l"} when both \code{time} and
 \code{predictors} are supplied, and to \code{"none"} otherwise.
 Model-specific helpers may apply additional conventions, such as grand-mean
-centering raw cross-sectional DIM and DSM dyad means.}
+centering raw DIM and DSM dyad means.}
 
 \item{incomplete_dyads}{How to handle dyads that do not contain exactly two
 unique members anywhere in the data. \code{"error"} stops with an error and

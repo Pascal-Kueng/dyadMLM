@@ -343,11 +343,20 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   component <- temporal_predictor_decompositions$component[[i]]
   source_col <- temporal_predictor_decompositions$column[[i]]
 
-  predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
-  column_stem <- source_col
+  column_stem <- make_dyad_predictor_column_stem(
+    predictor = predictor,
+    component = component,
+    source_col = source_col
+  )
   mean_col <- paste0(column_stem, "_dyad_mean")
+  if (component == "raw") {
+    mean_col <- paste0(column_stem, "_dyad_mean_gmc")
+  }
   deviation_col <- paste0(column_stem, "_within_dyad_dev")
-  dyad_decomposition_level <- if (component == "cwp") "dyad_time" else "dyad"
+  dyad_decomposition_level <- "dyad"
+  if (has_time && component %in% c("raw", "cwp")) {
+    dyad_decomposition_level <- "dyad_time"
+  }
 
   assign_debug_vars(
     data = data,
@@ -365,7 +374,6 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
     predictor = predictor,
     component = component,
     source_col = source_col,
-    predictor_suffix = predictor_suffix,
     column_stem = column_stem,
     mean_col = mean_col,
     deviation_col = deviation_col,

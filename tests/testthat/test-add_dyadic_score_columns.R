@@ -258,7 +258,7 @@ test_that("DSM keeps multiple predictors and metadata aligned", {
   )
 })
 
-test_that("DSM constructs longitudinal CWP and CBP scores", {
+test_that("DSM constructs longitudinal raw, CWP, and CBP scores", {
   data <- data.frame(
     dyad_id = rep(1:2, each = 4),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
