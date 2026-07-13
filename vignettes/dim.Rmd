@@ -1323,11 +1323,6 @@ wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020].
 These lagged-outcome issues are separate from the earlier concern about
 unreliable person means used to construct `cbp` predictors with few occasions.
 
-## References
-
-::: {#refs}
-:::
-
 ---
 
 **Continue** with the [Dyadic Score Model vignette](dsm.html),
@@ -1338,3 +1333,8 @@ refer to the:
 - [Mixed-Composition APIM vignette](mixed-apim.html),
 
 or return to the [Overview](index.html).
+
+## References
+
+::: {#refs}
+:::
