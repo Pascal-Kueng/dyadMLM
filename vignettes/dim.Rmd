@@ -26,10 +26,11 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 ```
 
 This vignette focuses on the Dyad-Individual Model (DIM) for dyadic multilevel
-models and its relationship to the exchangeable Actor-Partner Interdependence 
-Model (APIM). The DIM separates a predictor into the dyad's shared level and each member's deviation from that level. While the APIM expresses effects in terms of two
-interdependent individuals, the DIM expresses them in terms of the dyad's
-shared level and the contrast between partners.
+models and its relationship to the exchangeable Actor-Partner Interdependence
+Model (APIM). The DIM separates a predictor into the dyad's shared level and
+each member's deviation from that level. While the APIM expresses effects in
+terms of two interdependent individuals, the DIM expresses them in terms of the
+dyad's shared level and the contrast between partners.
 
 For the broader data-preparation workflow of the `interdep` package, see the
 [Getting Started vignette](getting-started.html). For distinguishable,
@@ -226,14 +227,13 @@ guidance on APIM specifications and different models, see the
 
 apim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 +
-    
+
     # Fixed effects APIM
     .i_communication_actor + .i_communication_partner +
-    
-    # Random effects 
-      # Since both models are equivalent, the same random effects structure
-      # can be used. See the APIM vignette to learn how to back-transform
-      # these blocks to a full actor-partner variance-covariance matrix
+
+    # Since both models are equivalent, the same random-effects structure
+    # can be used. See the APIM vignette to learn how to back-transform
+    # these blocks to a full actor-partner variance-covariance matrix.
     (1 | coupleID) +
     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
@@ -971,13 +971,12 @@ selects `"time_2l"` when both `time` and `predictors` are supplied:
    from the dyad's usual level.
 
 The `cbp` terms use each member's mean across the observed occasions to
-estimate that member's longer-run usual level. 
-
-Note that *With few occasions (small T)*, especially when the predictor has 
-low stability over time, these person means can be unreliable and the associated between-person estimates can be biased as well as imprecise, so interpret them cautiously [@gottfredsonStraightforwardApproachCoping2019].
-This concern is specific to estimating the between-person predictor components
-from observed person means, within-person estimates are generally less 
-problematic to interpret.
+estimate that member's longer-run usual level. With few occasions (small
+\(T\)), especially when the predictor has low stability over time, these person
+means can be unreliable. The associated between-person estimates can therefore
+be biased as well as imprecise, so interpret them cautiously
+[@gottfredsonStraightforwardApproachCoping2019]. This concern primarily affects
+the between-person estimates constructed from observed person means.
 
 `temporal_predictor_decomposition = "none"` is not available for longitudinal
 DIM predictor construction.
@@ -997,11 +996,10 @@ print(ild_exchangeable_data)
 ```
 
 The example below estimates same-day associations between support and closeness
-and includes `diaryday` to adjust for a linear trend across the study. 
-
-The following models only focus on concurrent effects and not lagged effects. 
-The model does not incorporate residual dependence from one day to the next. 
-This limitation and suggestions to address it are discussed at the end of the vignette. 
+and includes `diaryday` to adjust for a linear trend across the study. The
+following models focus on concurrent rather than lagged effects. They do not
+model residual dependence from one day to the next. This limitation and
+suggestions for addressing it are discussed at the end of the vignette.
 
 Following del Rosario and West, the stable dyad covariance is represented using
 sum-and-difference random effects
@@ -1201,8 +1199,9 @@ data.frame(
 Random-slope DIM and APIM parameterizations can be written analogously by adding
 the corresponding within-person effects to the stable dyad-level random-effect
 blocks. These larger models do not converge cleanly with the example data, so
-the chunks are not evaluated and interpreted. Such models can be fit when 
-the study design, data, and convergence diagnostics support the added complexity.
+the examples are neither evaluated nor interpreted. Such models can be fit when
+the study design, data, and convergence diagnostics support the added
+complexity.
 
 In the APIM:
 
@@ -1296,27 +1295,34 @@ serial dependence, the closest extension is a dyadic residual dynamic structural
 equation model (RDSEM). It keeps the concurrent regression separate from a VAR
 model for its residuals [@asparouhovComparisonModelsAnalysis2020]. This
 residual-VAR structure is not directly available through the `glmmTMB` interface
-used here, and open-source support for dyadic dynamic models remains severly 
-limited [@delrosarioPracticalGuideSpecifying2025]. 
+used here, and open-source support for dyadic dynamic models remains limited
+[@delrosarioPracticalGuideSpecifying2025].
 
-A practical alternative is a model with lagged outcomes, especially when 
-carryover or temporal dynamics are part of the research question [@gistelinckMultilevelAutoregressiveDyadic2020]. In such a model, the interpretation
-changes. All DIM predictor effects then describe associations conditional on the members' prior outcomes. 
+A practical alternative is a model with lagged outcomes, especially when
+carryover or temporal dynamics are part of the research question
+[@gistelinckMultilevelAutoregressiveDyadic2020]. In such a model, the
+interpretation changes. All DIM predictor effects then describe associations
+conditional on the members' prior outcomes.
 
-However, this approach comes with several issues, such as Nickell bias when including
-a within-person centred version of the outcome as a predictor [@nickellBiasesDynamicModels1981], and !TODO name other bias when using a raw
-laggeg version of the outcome as a predictor. For guidance on when to use
-which approach and a discussion of the issues, refer to  
-[@hamakerCenterNotCenter2015]. 
+However, lagged-outcome models require care. Person-mean centering the outcome
+lag can bias the average carryover estimate downward
+[@hamakerCenterNotCenter2015]. This downward bias is known as Nickell bias
+[@nickellBiasesDynamicModels1981]. A raw lag in a random-intercept model avoids
+this specific centering bias, but it can still be biased because it is related
+to stable member levels and the first outcome requires special treatment
+[@gistelinckMultilevelAutoregressiveSmall2021].
 
-These biases are more severe in small time-series and may be neglibible in longer
-time series, although no clear cutoff-point exists. Some simple simulations demonstrated acceptable performance in ~ 10 timepoints  [@gistelinckMultilevelAutoregressiveSmall2021]. For
-shorter panels, consider an LD-APIM, which lets the first outcomes relate to
-the members' stable levels in a wide-format SEM
-[@gistelinckMultilevelAutoregressiveDyadic2020]. 
+Both problems matter most when there are few occasions. In one simple
+simulation, most approaches other than person-mean centering performed
+acceptably from about ten occasions, but this is not a universal cutoff
+[@gistelinckMultilevelAutoregressiveSmall2021]. For shorter panels, consider an
+LD-APIM, which lets the first outcomes relate to the members' stable levels in a
+wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020]. The simulation
+did not include other predictors, so it does not establish the size or direction
+of any resulting bias in DIM effects.
 
-This issue is separate from the earlier concern about unreliable person means 
-used to construct `cbp` predictors in short time series.
+These lagged-outcome issues are separate from the earlier concern about
+unreliable person means used to construct `cbp` predictors with few occasions.
 
 ## References
 
@@ -1327,7 +1333,7 @@ used to construct `cbp` predictors in short time series.
 
 **Continue** with the [Dyadic Score Model vignette](dsm.html),
 
-refer to the: 
+refer to the:
 
 - [Actor-Partner Interdependence Model (APIM) vignette](apim.html),
 - [Mixed-Composition APIM vignette](mixed-apim.html),
