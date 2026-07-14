@@ -65,6 +65,7 @@ occasion within each dyad.</p>
 <span>  role <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lag_predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
@@ -105,6 +106,12 @@ in the data are treated as exchangeable.</p></dd>
 temporal predictor decomposition and model-helper functions.</p></dd>
 
 
+<dt id="arg-lag-predictors">lag_predictors<a class="anchor" aria-label="anchor" href="#arg-lag-predictors"></a></dt>
+<dd><p>Optional subset of <code>predictors</code> for which lag-1
+model-ready columns should be created. Requires a finite, integer-valued
+numeric <code>time</code> variable.</p></dd>
+
+
 <dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
 <dd><p>Requested model-ready column families. Can contain one or
 more of <code>"apim"</code>, <code>"dim"</code>, and <code>"dsm"</code>. <code>"none"</code> indicates no
@@ -126,7 +133,7 @@ temporal predictor decomposition into within-person and between-person
 components. <code>"auto"</code> resolves to <code>"time_2l"</code> when both <code>time</code> and
 <code>predictors</code> are supplied, and to <code>"none"</code> otherwise.
 Model-specific helpers may apply additional conventions, such as grand-mean
-centering raw cross-sectional DIM and DSM dyad means.</p></dd>
+centering raw DIM and DSM dyad means.</p></dd>
 
 
 <dt id="arg-incomplete-dyads">incomplete_dyads<a class="anchor" aria-label="anchor" href="#arg-incomplete-dyads"></a></dt>

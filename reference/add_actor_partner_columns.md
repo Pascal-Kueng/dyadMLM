@@ -7,6 +7,8 @@ longitudinal predictors, this will create actor and partner versions of
 the raw predictor and each recorded predictor component, such as the
 within-person and between-person components created by
 [`center_predictors()`](https://pascal-kueng.github.io/interdep/reference/center_predictors.md).
+Selected lag predictors additionally create lag-1 raw and within-person
+actor and partner columns.
 
 ## Usage
 

@@ -594,7 +594,8 @@ By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components. This
 temporal predictor decomposition is controlled by
 `temporal_predictor_decomposition`. The default `"auto"` setting selects
-`"time_2l"` for this longitudinal setup.
+`"time_2l"` for this longitudinal setup and retains raw actor and
+partner columns alongside both components.
 
 ## Data with multiple and mixed-composition dyads
 

@@ -145,13 +145,14 @@ Vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.html)
 Or refer to the:
 
 - [Actor-Partner Interdependence Model (APIM)
-  vignette](https://pascal-kueng.github.io/interdep/apim.md),
+  vignette](https://pascal-kueng.github.io/interdep/articles/apim.html),
 - [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/interdep/mixed-apim.md),
+  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html),
 - [Dyad-Individual Model
-  vignette](https://pascal-kueng.github.io/interdep/dim.md), or
+  vignette](https://pascal-kueng.github.io/interdep/articles/dim.html),
+  or
 - [Dyadic Score Model
-  vignette](https://pascal-kueng.github.io/interdep/dsm.md).
+  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.html).
 
 # Package index
 

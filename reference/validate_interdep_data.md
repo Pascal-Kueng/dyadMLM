@@ -16,6 +16,7 @@ validate_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
+  lag_predictors = NULL,
   model_type = "apim",
   dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
@@ -54,6 +55,12 @@ validate_interdep_data(
   Optional variables to select and store as metadata for temporal
   predictor decomposition and model-helper functions.
 
+- lag_predictors:
+
+  Optional subset of `predictors` for which lag-1 model-ready columns
+  should be created. Requires a finite, integer-valued numeric `time`
+  variable.
+
 - model_type:
 
   Requested model-ready column families. Can contain one or more of
@@ -74,8 +81,8 @@ validate_interdep_data(
   decomposition into within-person and between-person components.
   `"auto"` resolves to `"time_2l"` when both `time` and `predictors` are
   supplied, and to `"none"` otherwise. Model-specific helpers may apply
-  additional conventions, such as grand-mean centering raw
-  cross-sectional DIM and DSM dyad means.
+  additional conventions, such as grand-mean centering raw DIM and DSM
+  dyad means.
 
 - incomplete_dyads:
 

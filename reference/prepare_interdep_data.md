@@ -14,6 +14,7 @@ prepare_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
+  lag_predictors = NULL,
   model_type = "apim",
   dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
@@ -61,6 +62,13 @@ prepare_interdep_data(
   Optional variables to use for temporal predictor decomposition and
   model-ready predictor construction.
 
+- lag_predictors:
+
+  Optional subset of `predictors` for which lag-1 model-ready columns
+  should be created. Requires `time` to be a finite, integer-valued
+  numeric measurement index. Raw and within-person predictor versions
+  are lagged; stable between-person versions are not.
+
 - model_type:
 
   Model-ready column families to construct. Can contain one or more of
@@ -69,7 +77,8 @@ prepare_interdep_data(
   predictors. `"dsm"` creates dyadic-score model predictor columns.
   `"none"` skips model-specific predictor construction after validation,
   composition inference, and optional temporal predictor decomposition,
-  and must be used alone.
+  and must be used alone. `"dim"` and `"dsm"` must be requested in
+  separate calls.
 
 - dsm_role_order:
 
@@ -149,9 +158,9 @@ numeric indicator columns, composition-specific numeric `.i_diff_*`
 contrast columns coded `-1` and `1` for the two members of matching
 exchangeable dyads and `0` otherwise, and an `interdep` attribute
 containing structural metadata, `dyad_compositions`, and predictor
-metadata such as `temporal_predictor_decompositions`, `apim_predictors`,
-and `dim_predictors`, as well as `dsm_predictors` and `dsm_role_order`
-when applicable.
+metadata such as `temporal_predictor_decompositions`, `lag_predictors`,
+`apim_predictors`, and `dim_predictors`, as well as `dsm_predictors` and
+`dsm_role_order` when applicable.
 
 ## Details
 

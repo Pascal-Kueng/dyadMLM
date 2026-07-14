@@ -20,4 +20,5 @@ interdep_generated_columns(meta)
 ## Value
 
 A tibble with one row per generated temporal predictor, APIM, DIM, or
-DSM column.
+DSM column. The `lag` column is `0` for contemporaneous columns and `1`
+for lag-1 columns.
