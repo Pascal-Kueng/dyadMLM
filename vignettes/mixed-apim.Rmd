@@ -380,37 +380,69 @@ summary(mixed_ild_gaussian_model)
 
 ```
 
-This worked example omits random slopes, as they would add further complexity. 
-However, they could be added as such: 
+This worked example omits random slopes, as they would add further complexity.
+One possible extension is to let the within-person actor and partner effects
+vary across dyads. The following blocks would replace the stable dyad-level
+covariance terms in the model above. Each `us()` block estimates all variances
+and covariances among the terms inside it.
 
-```{r eval = FALSE}
+```{r mixed-ild-random-slopes, eval = FALSE}
+# distinguishable female-male random intercepts and slopes
+us(
+  0 +
+    .i_is_female_x_male_female +
+    .i_is_female_x_male_male +
+    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
+    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
+    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
+    .i_is_female_x_male_male:.i_provided_support_cwp_partner |
+    coupleID
+) +
 
-    # stable dyad-level covariance 
-    # Everything within the same block will be correlated in an unstructured
-    # matrix
+# exchangeable female-female shared block
+us(
+  0 +
+    .i_is_female_x_female +
+    .i_is_female_x_female:.i_provided_support_cwp_actor +
+    .i_is_female_x_female:.i_provided_support_cwp_partner |
+    coupleID
+) +
 
-    # Male-Female Variance covariance block
-    (0 + 
-       # random intercepts
-       .i_is_female_x_male_female + .i_is_female_x_male_male +
-       
-       # random actor slopes
-       .i_is_female_x_male_female:x_cwp_actor + .i_is_female_x_male_male:x_cwp_actor +
-       
-       # random partner slopes
-       .i_is_female_x_male_female:x_cwp_partner + .i_is_female_x_male_male:x_cwp_partner +
+# exchangeable female-female difference block
+us(
+  0 +
+    .i_diff_female_x_female_arbitrary +
+    .i_diff_female_x_female_arbitrary:.i_provided_support_cwp_actor +
+    .i_diff_female_x_female_arbitrary:.i_provided_support_cwp_partner |
+    coupleID
+) +
 
-       | coupleID) +
-    
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
-    
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID) +
-  
+# exchangeable male-male shared block
+us(
+  0 +
+    .i_is_male_x_male +
+    .i_is_male_x_male:.i_provided_support_cwp_actor +
+    .i_is_male_x_male:.i_provided_support_cwp_partner |
+    coupleID
+) +
+
+# exchangeable male-male difference block
+us(
+  0 +
+    .i_diff_male_x_male_arbitrary +
+    .i_diff_male_x_male_arbitrary:.i_provided_support_cwp_actor +
+    .i_diff_male_x_male_arbitrary:.i_provided_support_cwp_partner |
+    coupleID
+)
 ```
 
-
+This extension estimates a very large covariance structure and may not be
+supported by many datasets. A more practical starting point is to add only the
+random slopes that are central to the research question. If the equality
+assumption is substantively reasonable, female-female and male-male dyads could
+also be pooled into one same-sex composition to reduce the number of parameters.
+Regularizing priors may help with estimation, but they do not make an
+unsupported random-effects structure appropriate.
 
 ## Practical takeaway
 
