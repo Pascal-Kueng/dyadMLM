@@ -172,39 +172,46 @@ $$
 = \beta_{MM}.
 $$
 
-The random-effects terms reduce in the same way because their indicator columns
-are also `0` outside the relevant composition. For a female-male dyad, the
-`us()` term gives the female and male members separate random intercepts and
-estimates their covariance:
+The random-effects terms reduce in a similar way because their indicator columns
+are also `0` outside the relevant composition. 
+
+For a female-male dyad, the `us()` term gives the female and male members 
+separate random intercepts and estimates their covariance:
 
 $$
-\mu_{Fj} = \beta_{FM,F} + u_{Fj}, \qquad
-\mu_{Mj} = \beta_{FM,M} + u_{Mj}.
+\Sigma_{FM} =
+\begin{pmatrix}
+\sigma_{FM,F}^2 & \sigma_{FM,M} \\
+\sigma_{FM,F} & \sigma_{FM,M}^2
+\end{pmatrix}
 $$
 
-For an exchangeable composition $C$ (female-female or male-male), the two
-random-effects terms give a shared dyad effect $u_{Cj}$ and an opposite member
-effect $v_{Cj}$:
+For an exchangeable composition (female-female and male-male), the two
+random-effects terms imply a single pooled residual variance and still allow
+for a covariance:
 
 $$
-\mu_{Cij} = \beta_C + u_{Cj} + d_{Cij}v_{Cj},
-\qquad d_{Cij} \in \{-1, 1\}.
+\Sigma_{FF} =
+\begin{pmatrix}
+\sigma_{FF}^2 & \sigma_{FF} \\
+\sigma_{FF} & \sigma_{FF}^2
+\end{pmatrix}
+
+\text{and, }
+
+\Sigma_{FF} =
+\begin{pmatrix}
+\sigma_{FF}^2 & \sigma_{FF} \\
+\sigma_{FF} & \sigma_{FF}^2
+\end{pmatrix}
+
 $$
 
-Thus, the shared effect moves both members together, while the difference effect
-moves them in opposite directions. Its `-1`/`1` direction is arbitrary.
+The five random-effects terms in the model form separate blocks. No random-effect 
+covariance is estimated between compositions (e.g., a male person from a male-male 
+couple should not be  correlated with a female person from a female-female couple). 
 
-The five random-effects terms in the model form separate blocks: one correlated
-female-male block, two female-female sum-and-difference blocks, and two
-male-male sum-and-difference blocks. No random-effect covariance is estimated
-between compositions. The two blocks within each exchangeable composition are
-also separate, so the shared and difference effects are uncorrelated. Because
-this is a cross-sectional model with one observation per member and
-`dispformula = ~ 0`, these dyad-level random effects represent the member
-variances and within-dyad covariance without an additional observation-level
-residual variance.
-
-This illustration is limited to the fixed-intercept model. The ILD example below
+This illustration only covered the fixed-intercept model. The ILD example below
 shows how composition-specific slopes can be added.
 
 ### Single versus separate mixed-composition fits
@@ -214,10 +221,10 @@ model call. This is useful when the goal is to compare effects across
 compositions, test equality constraints, or make those comparisons within one
 joint fitted model.
 
-`marginaleffects::hypotheses()` provides a string interface for testing linear
+`marginaleffects::hypotheses()` allows for testing linear
 combinations of `glmmTMB` fixed effects. In these equations, `conditional_`
 identifies coefficients from the conditional model. A positive estimate means
-that the quantity on the left side is higher than the quantity on the right
+that the estimate on the left side is higher than the estimate on the right
 side.
 
 ```{r mixed-cross-sectional-contrasts, eval = FALSE}
@@ -246,33 +253,27 @@ marginaleffects::hypotheses(
 
 ```
 
-These are population-level fixed-effect comparisons. Setting `re.form = NA`
-excludes dyad-specific random effects from the quantities being compared; it
-does not remove the random-effects structure from the fitted model. Uncertainty
-is calculated for the fixed-effect comparison, which is the intended target
-here.
+Since we only want to compare fixed-effects here, we set `re.form = NA`.
 
 It is important to note that such a fixed-effect formula with all compositions
-in one model call does not, by itself, create partial pooling across dyad
-compositions. The composition-specific intercepts and slopes above are ordinary
-fixed effects, so estimates for female-female or male-male dyads are not
-automatically shrunk toward estimates from the other dyad types. If every mean,
-variance, and covariance parameter is composition-specific, the likelihood largely
-factorizes by composition. In that case, a combined fit can closely match
-separate composition-specific fits. Its main advantage is that formal
+in one model call does not create partial pooling across dyad
+compositions. Estimates for female-female, for instance, are not
+automatically shrunk toward estimates from the other dyad types. In this model, 
+almost every parameter is composition-specific. This means that the likelihood largely
+factorizes by composition. Therefore, separate composition-specific fits would 
+largely recover the same parameters. 
+
+The main advantage of estimating everything in a single model is that formal 
 parameter comparisons can be made within one fitted model, and that models with
 different versions of pooling can be compared. For example, it can be tested
 whether pooling male-male and female-female couples as same-sex substantially
 worsens model fit, considering both the fixed effects and random-effects
 structure. Such model comparisons require the restricted and unrestricted
-models to use the same observations; separate fits to different compositions
-should not be compared this way.
+models to use the same observations and a nested models, which pooling represents.
 
 If partial pooling is desired, for instance with few dyads for one particular type,
-a different model specification is required, such as a common effect
-plus composition deviations with a hierarchical prior, or a random dyad-type
-effect. However, with only a few dyad types, frequentist random dyad-type variance
-components are usually weakly identified.
+a different model specification would be required, such as a common effect
+plus composition deviations.
 
 ## Mixed-composition intensive longitudinal (ILD) Gaussian model
 
