@@ -95,8 +95,9 @@ parameterizations such as Actor-Partner Interdependence Models (APIM),
 Dyad-Individual Models (DIM), and Dyadic Score Models (DSM). DIM
 currently supports one exchangeable dyad composition, whereas DSM
 supports one distinguishable dyad composition.</p>
-<p><strong>This vignette focuses on the automatic data preparation
-step.</strong></p>
+<p><strong>This vignette focuses on automatic data preparation for
+multilevel models (MLMs).</strong> For a comparison of MLM and
+structural equation modeling (SEM) approaches to dyadic data, see <span class="citation">Ledermann and Kenny (2017)</span>.</p>
 <p>For guidance and examples on how to use the prepared data to estimate
 cross-sectional, generalized, and intensive longitudinal APIMs, see the
 <a href="apim.html">Actor-Partner Interdependence Model vignette</a>.
@@ -326,9 +327,8 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_actor &lt;dbl&gt;, .i_communication_partner &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>The function automatically recognized that in this dataset there are
-95 female-male dyads and created APIM-relevant variables. These
-generated <code>.i_*</code> columns can be used directly in model
-formulas.</p>
+95 female-male dyads and created APIM-relevant variables <span class="citation">(Kenny and Cook 1999)</span>. These generated
+<code>.i_*</code> columns can be used directly in model formulas.</p>
 <p>Here is a simple example:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/glmmTMB/glmmTMB" class="external-link">glmmTMB</a></span><span class="op">)</span></span>
@@ -412,7 +412,7 @@ of each exchangeable dyad. Its direction is arbitrary, and
 <code>seed</code> makes the assignment reproducible. When role
 compositions are available, each exchangeable composition receives its
 own contrast, such as <code>.i_diff_female_x_female_arbitrary</code>,
-which is <code>0</code> for all other compositions. We use a fixed seed
+which is <code>0</code> for all other compositions <span class="citation">(del Rosario and West 2025)</span>. We use a fixed seed
 in the examples below for consistent results.</p>
 <p>Alternatively, for more control, we can explicitly set dyad types to
 exchangeable:</p>
@@ -505,9 +505,9 @@ single exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For distinguishable dyads, DSM preparation additionally requires a
 stable role variable and an explicit role order. The role order defines
-the direction of all DSM predictor differences and the DSM role
-contrast. Outcomes remain unchanged and are selected later in the
-fitted-model formula.</p>
+the direction of all DSM predictor differences and the DSM role contrast
+<span class="citation">(Iida et al. 2018)</span>. Outcomes remain
+unchanged and are selected later in the fitted-model formula.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -719,12 +719,184 @@ variable to <code><a href="../reference/prepare_interdep_data.html">prepare_inte
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, .i_provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cbp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <p>By default, numeric predictors in longitudinal APIM preparation are
-decomposed into within-person and between-person components. This
-temporal predictor decomposition is controlled by
+decomposed into within-person and between-person components <span class="citation">(Bolger and Laurenceau 2013)</span>. This temporal
+predictor decomposition is controlled by
 <code>temporal_predictor_decomposition</code>. The default
 <code>"auto"</code> setting selects <code>"time_2l"</code> for this
 longitudinal setup and retains raw actor and partner columns alongside
 both components.</p>
+</div>
+<div class="section level3">
+<h3 id="dynamic-models">Dynamic Models<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
+</h3>
+<p>The preparation above supports contemporaneous models, but
+observations can also remain dependent over time. Currently, commonly
+used open-source MLM interfaces in R do not provide the full dyadic
+residual VAR structure needed to model serial dependence across both
+partners. Such a model requires custom TMB or Stan code.</p>
+<p>One practical alternative, especially when carryover and temporal
+dynamics are part of the research question, is to create a dynamic model
+by including lagged versions of the outcome as predictors.</p>
+<p>Lagged versions of variables, including an outcome that is also
+passed to <code>predictors</code>, can be obtained through the
+<code>lag_predictors</code> argument.
+<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code> then returns lag-1 raw and
+within-person-centered actor and partner columns alongside their
+contemporaneous versions.</p>
+<p>Whether raw or within-person-centered lagged outcomes should be used
+depends on the research question and the data. For guidance on this
+choice, refer to <span class="citation">Hamaker and Grasman
+(2015)</span> and <span class="citation">Gistelinck et al.
+(2021)</span>.</p>
+<p>Brief exchangeable example:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_ILD</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">diaryday</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">closeness</span>,</span>
+<span>  lag_predictors <span class="op">=</span> <span class="va">closeness</span>,</span>
+<span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ild_apim_data_dynamic</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, time = diaryday</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
+<span><span class="co">#&gt; # assumed_exchangeable exchangeable 40 dyads</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # Added columns:</span></span>
+<span><span class="co">#&gt; #   .i_composition              inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .i_composition_role         composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .i_is_{comp-role}           composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .i_diff_{comp}              composition-specific sum-diff contrasts with</span></span>
+<span><span class="co">#&gt; #                               arbitrary direction; 0 for distinguishable</span></span>
+<span><span class="co">#&gt; #                               dyads or other exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_lag1              lag-1 raw predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cwp               within-person predictor: momentary deviations</span></span>
+<span><span class="co">#&gt; #                               from each person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cwp_lag1          lag-1 within-person predictor: momentary</span></span>
+<span><span class="co">#&gt; #                               deviations from each person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cbp               between-person predictor: stable differences</span></span>
+<span><span class="co">#&gt; #                               from the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor             APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_actor_lag1        lag-1 APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner           APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_partner_lag1      lag-1 APIM partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                               original predictor values</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cwp_actor         APIM within-person actor predictor: actor's</span></span>
+<span><span class="co">#&gt; #                               momentary deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cwp_actor_lag1    lag-1 APIM within-person actor predictor:</span></span>
+<span><span class="co">#&gt; #                               actor's momentary deviations from their usual</span></span>
+<span><span class="co">#&gt; #                               level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cwp_partner       APIM within-person partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                               momentary deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cwp_partner_lag1  lag-1 APIM within-person partner predictor:</span></span>
+<span><span class="co">#&gt; #                               partner's momentary deviations from their usual</span></span>
+<span><span class="co">#&gt; #                               level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cbp_actor         APIM between-person actor predictor: actor's</span></span>
+<span><span class="co">#&gt; #                               stable difference from the average person's</span></span>
+<span><span class="co">#&gt; #                               usual level</span></span>
+<span><span class="co">#&gt; #   .i_{pred}_cbp_partner       APIM between-person partner predictor:</span></span>
+<span><span class="co">#&gt; #                               partner's stable difference from the average</span></span>
+<span><span class="co">#&gt; #                               person's usual level</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,120 × 24</span></span></span>
+<span><span class="co">#&gt;    personID coupleID diaryday gender closeness provided_support .i_composition  </span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1        0 female      5.03             4.30 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        1        1        1 female      5.64             4.24 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        1        1        2 female      5.49             3.54 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        1        1        3 female      6.71             5.04 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        1        1        4 female      5.61             4.74 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        1        1        5 female      6.11             4.72 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        1        1        6 female      6.96             5.12 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        1        1        7 female      7.03             5.21 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        1        1        8 female      8.07             5.20 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        1        1        9 female      4.87             4.69 assumed_exchang…</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,110 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 17 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;, .i_closeness_cwp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_closeness_cbp &lt;dbl&gt;, .i_closeness_lag1 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_closeness_cwp_lag1 &lt;dbl&gt;, .i_closeness_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .i_closeness_partner &lt;dbl&gt;, .i_closeness_cwp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<p>A simple fixed-slope dyadic stability and influence model <span class="citation">(del Rosario and West 2025)</span>:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">stability_influence</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Stability (actor effect across time)</span></span>
+<span>    <span class="va">.i_closeness_actor_lag1</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Influence (partner effect across time)</span></span>
+<span>    <span class="va">.i_closeness_partner_lag1</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Linear time trend</span></span>
+<span>    <span class="va">diaryday</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span></span>
+<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
+<span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  , data <span class="op">=</span> <span class="va">ild_apim_data_dynamic</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">stability_influence</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
+<span><span class="co">#&gt; Formula:          </span></span>
+<span><span class="co">#&gt; closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  </span></span>
+<span><span class="co">#&gt;     diaryday + (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID:diaryday)</span></span>
+<span><span class="co">#&gt; Dispersion:                 ~0</span></span>
+<span><span class="co">#&gt; Data: ild_apim_data_dynamic</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
+<span><span class="co">#&gt;    2929.0    2968.0   -1456.5    2913.0       967 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Random effects:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;  Groups              Name                                   Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID            (Intercept)                            0.9161   0.9571  </span></span>
+<span><span class="co">#&gt;  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                            0.3925   0.6265  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  </span></span>
+<span><span class="co">#&gt; Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
+<span><span class="co">#&gt; diaryday                  -0.005281   0.007643  -0.691    0.490    </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<p>This model can be extended with contemporaneous actor and partner
+predictor associations and other lagged predictors. Time-varying
+predictors should usually be separated into within-person and
+between-person components. Their contemporaneous coefficients are then
+conditional on both partners’ prior outcomes.</p>
+<p><strong>Note:</strong> Person-mean centering a lagged outcome can
+introduce Nickell bias, especially in shorter time series <span class="citation">(Hamaker and Grasman 2015; Nickell 1981; Gistelinck et
+al. 2021)</span>. Refer to the <a href="dim.html">DIM vignette</a> and
+<a href="apim.html">APIM vignette</a> for fuller discussions and fitted
+dynamic examples.</p>
 </div>
 </div>
 <div class="section level2">
@@ -732,10 +904,10 @@ both components.</p>
 </h2>
 <p><code>example_dyadic_crosssectional_mixed</code> contains three dyad
 compositions in the same data object: distinguishable female-male dyads
-and exchangeable female-female and male-male dyads.</p>
+and exchangeable female-female and male-male dyads <span class="citation">(Bolger et al. 2025)</span>.</p>
 <p>Let’s have <code>interdep</code> infer the compositions
 automatically:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -788,7 +960,7 @@ requested labels. The filtering happens before exchangeability
 constraints and pooling, so <code>set_exchangeable_compositions</code>
 and <code>pool_compositions</code> arguments can only refer to retained
 types of dyads.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_included</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -837,7 +1009,7 @@ dataset can be treated as exchangeable. This specification keeps the
 differentiation between the kinds of dyads (e.g.,
 <code>male-male</code>, <code>female-female</code>, and
 <code>male-female</code>).</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -887,7 +1059,7 @@ comparisons.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
 dyads:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -938,7 +1110,7 @@ dyads:</p>
 <p>Note that you cannot pool distinguishable dyads. To pool
 <code>female-male</code> with <code>male-male</code>, we first have to
 treat <code>female-male</code> as exchangeable:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -1000,6 +1172,64 @@ Interdependence Model (APIM) vignette</a>,</p>
 <a href="dsm.html">Dyadic Score Model vignette</a>,</li>
 </ul>
 <p>or return to the <a href="index.html">Overview</a>.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-bolgerIntensiveLongitudinalMethods2013" class="csl-entry">
+Bolger, Niall, and Jean-Philippe Laurenceau. 2013. <em>Intensive
+Longitudinal Methods: An Introduction to Diary and Experience Sampling
+Research</em>. Guilford Press. <a href="https://www.guilford.com/books/Intensive-Longitudinal-Methods/Bolger-Laurenceau/9781462506781" class="external-link">https://www.guilford.com/books/Intensive-Longitudinal-Methods/Bolger-Laurenceau/9781462506781</a>.
+</div>
+<div id="ref-Bolger2025Unified" class="csl-entry">
+Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
+<span>“Unified Analysis Model for Indistinguishable and Distinguishable
+Dyads.”</span> <em>Innovations in Interpersonal Relationships and Health
+Research: <span>Advancing</span> the Integration of Interdisciplinary
+Approaches to Dyadic Behavior Change</em>. <a href="https://doi.org/10.17605/OSF.IO/WYDCJ" class="external-link">https://doi.org/10.17605/OSF.IO/WYDCJ</a>.
+</div>
+<div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry">
+Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. <span>“Multilevel
+Autoregressive Models When the Number of Time Points Is Small.”</span>
+<em>Structural Equation Modeling: A Multidisciplinary Journal</em> 28
+(1): 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517" class="external-link">https://doi.org/10.1080/10705511.2020.1753517</a>.
+</div>
+<div id="ref-hamakerCenterNotCenter2015" class="csl-entry">
+Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. <span>“To Center or
+Not to Center? Investigating Inertia with a Multilevel Autoregressive
+Model.”</span> <em>Frontiers in Psychology</em> 5: 1492. <a href="https://doi.org/10.3389/fpsyg.2014.01492" class="external-link">https://doi.org/10.3389/fpsyg.2014.01492</a>.
+</div>
+<div id="ref-iidaModelsInterdependentIndividuals2018" class="csl-entry">
+Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018.
+<span>“Models of Interdependent Individuals Versus Dyadic Processes in
+Relationship Research.”</span> <em>Journal of Social and Personal
+Relationships</em> 35 (1): 59–88. <a href="https://doi.org/10.1177/0265407517725407" class="external-link">https://doi.org/10.1177/0265407517725407</a>.
+</div>
+<div id="ref-kennyPartnerEffectsRelationship1999" class="csl-entry">
+Kenny, David A., and William Cook. 1999. <span>“Partner Effects in
+Relationship Research: <span>Conceptual</span> Issues, Analytic
+Difficulties, and Illustrations.”</span> <em>Personal Relationships</em>
+6 (4): 433–48. <a href="https://doi.org/10.1111/j.1475-6811.1999.tb00202.x" class="external-link">https://doi.org/10.1111/j.1475-6811.1999.tb00202.x</a>.
+</div>
+<div id="ref-ledermannAnalyzingDyadicData2017" class="csl-entry">
+Ledermann, Thomas, and David A. Kenny. 2017. <span>“Analyzing Dyadic
+Data with Multilevel Modeling Versus Structural Equation Modeling:
+<span>A</span> Tale of Two Methods.”</span> <em>Journal of Family
+Psychology</em> 31 (4): 442–52. <a href="https://doi.org/10.1037/fam0000290" class="external-link">https://doi.org/10.1037/fam0000290</a>.
+</div>
+<div id="ref-nickellBiasesDynamicModels1981" class="csl-entry">
+Nickell, Stephen. 1981. <span>“Biases in Dynamic Models with Fixed
+Effects.”</span> <em>Econometrica</em> 49 (6): 1417–26. <a href="https://doi.org/10.2307/1911408" class="external-link">https://doi.org/10.2307/1911408</a>.
+</div>
+<div id="ref-delrosarioPracticalGuideSpecifying2025" class="csl-entry">
+Rosario, Kareena S. del, and Tessa V. West. 2025. <span>“A
+<span>Practical Guide</span> to <span>Specifying Random Effects</span>
+in <span>Longitudinal Dyadic Multilevel Modeling</span>.”</span>
+<em>Advances in Methods and Practices in Psychological Science</em> 8
+(3): 25152459251351286. <a href="https://doi.org/10.1177/25152459251351286" class="external-link">https://doi.org/10.1177/25152459251351286</a>.
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

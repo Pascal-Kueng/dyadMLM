@@ -25,7 +25,10 @@ Dyad-Individual Models (DIM), and Dyadic Score Models (DSM). DIM
 currently supports one exchangeable dyad composition, whereas DSM
 supports one distinguishable dyad composition.
 
-**This vignette focuses on the automatic data preparation step.**
+**This vignette focuses on automatic data preparation for multilevel
+models (MLMs).** For a comparison of MLM and structural equation
+modeling (SEM) approaches to dyadic data, see Ledermann and Kenny
+(2017).
 
 For guidance and examples on how to use the prepared data to estimate
 cross-sectional, generalized, and intensive longitudinal APIMs, see the
@@ -170,8 +173,9 @@ print(cross_distinguishable_data, n = 4)
 ```
 
 The function automatically recognized that in this dataset there are 95
-female-male dyads and created APIM-relevant variables. These generated
-`.i_*` columns can be used directly in model formulas.
+female-male dyads and created APIM-relevant variables (Kenny and Cook
+1999). These generated `.i_*` columns can be used directly in model
+formulas.
 
 Here is a simple example:
 
@@ -262,8 +266,8 @@ The generated `.i_diff_assumed_exchangeable_arbitrary` contrast assigns
 is arbitrary, and `seed` makes the assignment reproducible. When role
 compositions are available, each exchangeable composition receives its
 own contrast, such as `.i_diff_female_x_female_arbitrary`, which is `0`
-for all other compositions. We use a fixed seed in the examples below
-for consistent results.
+for all other compositions (del Rosario and West 2025). We use a fixed
+seed in the examples below for consistent results.
 
 Alternatively, for more control, we can explicitly set dyad types to
 exchangeable:
@@ -364,9 +368,9 @@ print(cross_dim_data, n = 4)
 
 For distinguishable dyads, DSM preparation additionally requires a
 stable role variable and an explicit role order. The role order defines
-the direction of all DSM predictor differences and the DSM role
-contrast. Outcomes remain unchanged and are selected later in the
-fitted-model formula.
+the direction of all DSM predictor differences and the DSM role contrast
+(Iida et al. 2018). Outcomes remain unchanged and are selected later in
+the fitted-model formula.
 
 ``` r
 
@@ -591,17 +595,202 @@ print(ild_apim_data)
 ```
 
 By default, numeric predictors in longitudinal APIM preparation are
-decomposed into within-person and between-person components. This
-temporal predictor decomposition is controlled by
+decomposed into within-person and between-person components (Bolger and
+Laurenceau 2013). This temporal predictor decomposition is controlled by
 `temporal_predictor_decomposition`. The default `"auto"` setting selects
 `"time_2l"` for this longitudinal setup and retains raw actor and
 partner columns alongside both components.
+
+### Dynamic Models
+
+The preparation above supports contemporaneous models, but observations
+can also remain dependent over time. Currently, commonly used
+open-source MLM interfaces in R do not provide the full dyadic residual
+VAR structure needed to model serial dependence across both partners.
+Such a model requires custom TMB or Stan code.
+
+One practical alternative, especially when carryover and temporal
+dynamics are part of the research question, is to create a dynamic model
+by including lagged versions of the outcome as predictors.
+
+Lagged versions of variables, including an outcome that is also passed
+to `predictors`, can be obtained through the `lag_predictors` argument.
+[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+then returns lag-1 raw and within-person-centered actor and partner
+columns alongside their contemporaneous versions.
+
+Whether raw or within-person-centered lagged outcomes should be used
+depends on the research question and the data. For guidance on this
+choice, refer to Hamaker and Grasman (2015) and Gistelinck et al.
+(2021).
+
+Brief exchangeable example:
+
+``` r
+
+ild_apim_data_dynamic <- prepare_interdep_data(
+  example_dyadic_ILD,
+  group = coupleID,
+  member = personID,
+  time = diaryday,
+  predictors = closeness,
+  lag_predictors = closeness,
+  model_type = "apim",
+  seed = 123
+)
+
+print(ild_apim_data_dynamic)
+#> # interdep data
+#> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
+#> # Structure: group = coupleID, member = personID, time = diaryday
+#> #
+#> # Dyad compositions:
+#> # assumed_exchangeable exchangeable 40 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition              inferred dyad composition
+#> #   .i_composition_role         composition-specific member role
+#> #   .i_is_{comp-role}           composition-role indicator columns
+#> #   .i_diff_{comp}              composition-specific sum-diff contrasts with
+#> #                               arbitrary direction; 0 for distinguishable
+#> #                               dyads or other exchangeable compositions
+#> #   .i_{pred}_lag1              lag-1 raw predictor values
+#> #   .i_{pred}_cwp               within-person predictor: momentary deviations
+#> #                               from each person's usual level
+#> #   .i_{pred}_cwp_lag1          lag-1 within-person predictor: momentary
+#> #                               deviations from each person's usual level
+#> #   .i_{pred}_cbp               between-person predictor: stable differences
+#> #                               from the average person's usual level
+#> #   .i_{pred}_actor             APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .i_{pred}_actor_lag1        lag-1 APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .i_{pred}_partner           APIM partner predictor: partner's original
+#> #                               predictor values
+#> #   .i_{pred}_partner_lag1      lag-1 APIM partner predictor: partner's
+#> #                               original predictor values
+#> #   .i_{pred}_cwp_actor         APIM within-person actor predictor: actor's
+#> #                               momentary deviations from their usual level
+#> #   .i_{pred}_cwp_actor_lag1    lag-1 APIM within-person actor predictor:
+#> #                               actor's momentary deviations from their usual
+#> #                               level
+#> #   .i_{pred}_cwp_partner       APIM within-person partner predictor: partner's
+#> #                               momentary deviations from their usual level
+#> #   .i_{pred}_cwp_partner_lag1  lag-1 APIM within-person partner predictor:
+#> #                               partner's momentary deviations from their usual
+#> #                               level
+#> #   .i_{pred}_cbp_actor         APIM between-person actor predictor: actor's
+#> #                               stable difference from the average person's
+#> #                               usual level
+#> #   .i_{pred}_cbp_partner       APIM between-person partner predictor:
+#> #                               partner's stable difference from the average
+#> #                               person's usual level
+#> #
+#> # A tibble: 1,120 × 24
+#>    personID coupleID diaryday gender closeness provided_support .i_composition  
+#>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>           
+#>  1        1        1        0 female      5.03             4.30 assumed_exchang…
+#>  2        1        1        1 female      5.64             4.24 assumed_exchang…
+#>  3        1        1        2 female      5.49             3.54 assumed_exchang…
+#>  4        1        1        3 female      6.71             5.04 assumed_exchang…
+#>  5        1        1        4 female      5.61             4.74 assumed_exchang…
+#>  6        1        1        5 female      6.11             4.72 assumed_exchang…
+#>  7        1        1        6 female      6.96             5.12 assumed_exchang…
+#>  8        1        1        7 female      7.03             5.21 assumed_exchang…
+#>  9        1        1        8 female      8.07             5.20 assumed_exchang…
+#> 10        1        1        9 female      4.87             4.69 assumed_exchang…
+#> # ℹ 1,110 more rows
+#> # ℹ 17 more variables: .i_composition_role <fct>,
+#> #   .i_is_assumed_exchangeable <dbl>,
+#> #   .i_diff_assumed_exchangeable_arbitrary <dbl>, .i_closeness_cwp <dbl>,
+#> #   .i_closeness_cbp <dbl>, .i_closeness_lag1 <dbl>,
+#> #   .i_closeness_cwp_lag1 <dbl>, .i_closeness_actor <dbl>,
+#> #   .i_closeness_partner <dbl>, .i_closeness_cwp_actor <dbl>, …
+```
+
+A simple fixed-slope dyadic stability and influence model (del Rosario
+and West 2025):
+
+``` r
+
+
+stability_influence <- glmmTMB::glmmTMB(
+  closeness ~ 1 +
+
+    # Stability (actor effect across time)
+    .i_closeness_actor_lag1 +
+
+    # Influence (partner effect across time)
+    .i_closeness_partner_lag1 +
+
+    # Linear time trend
+    diaryday +
+
+    # Stable exchangeable dyad-level covariance
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_apim_data_dynamic
+)
+
+summary(stability_influence)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  
+#>     diaryday + (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
+#>     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
+#>     coupleID:diaryday)
+#> Dispersion:                 ~0
+#> Data: ild_apim_data_dynamic
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>    2929.0    2968.0   -1456.5    2913.0       967 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups              Name                                   Variance Std.Dev.
+#>  coupleID            (Intercept)                            0.9161   0.9571  
+#>  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  
+#>  coupleID.diaryday   (Intercept)                            0.3925   0.6265  
+#>  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  
+#> Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497
+#> 
+#> Conditional model:
+#>                            Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                4.213120   0.300184  14.035  < 2e-16 ***
+#> .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
+#> .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
+#> diaryday                  -0.005281   0.007643  -0.691    0.490    
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+This model can be extended with contemporaneous actor and partner
+predictor associations and other lagged predictors. Time-varying
+predictors should usually be separated into within-person and
+between-person components. Their contemporaneous coefficients are then
+conditional on both partners’ prior outcomes.
+
+**Note:** Person-mean centering a lagged outcome can introduce Nickell
+bias, especially in shorter time series (Hamaker and Grasman 2015;
+Nickell 1981; Gistelinck et al. 2021). Refer to the [DIM
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) and
+[APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md) for
+fuller discussions and fitted dynamic examples.
 
 ## Data with multiple and mixed-composition dyads
 
 `example_dyadic_crosssectional_mixed` contains three dyad compositions
 in the same data object: distinguishable female-male dyads and
-exchangeable female-female and male-male dyads.
+exchangeable female-female and male-male dyads (Bolger et al. 2025).
 
 Let’s have `interdep` infer the compositions automatically:
 
@@ -886,3 +1075,49 @@ refer to the:
 
 or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+
+## References
+
+Bolger, Niall, and Jean-Philippe Laurenceau. 2013. *Intensive
+Longitudinal Methods: An Introduction to Diary and Experience Sampling
+Research*. Guilford Press.
+<https://www.guilford.com/books/Intensive-Longitudinal-Methods/Bolger-Laurenceau/9781462506781>.
+
+Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
+“Unified Analysis Model for Indistinguishable and Distinguishable
+Dyads.” *Innovations in Interpersonal Relationships and Health Research:
+Advancing the Integration of Interdisciplinary Approaches to Dyadic
+Behavior Change*. <https://doi.org/10.17605/OSF.IO/WYDCJ>.
+
+Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. “Multilevel
+Autoregressive Models When the Number of Time Points Is Small.”
+*Structural Equation Modeling: A Multidisciplinary Journal* 28 (1):
+15–27. <https://doi.org/10.1080/10705511.2020.1753517>.
+
+Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. “To Center or Not
+to Center? Investigating Inertia with a Multilevel Autoregressive
+Model.” *Frontiers in Psychology* 5: 1492.
+<https://doi.org/10.3389/fpsyg.2014.01492>.
+
+Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018. “Models of
+Interdependent Individuals Versus Dyadic Processes in Relationship
+Research.” *Journal of Social and Personal Relationships* 35 (1): 59–88.
+<https://doi.org/10.1177/0265407517725407>.
+
+Kenny, David A., and William Cook. 1999. “Partner Effects in
+Relationship Research: Conceptual Issues, Analytic Difficulties, and
+Illustrations.” *Personal Relationships* 6 (4): 433–48.
+<https://doi.org/10.1111/j.1475-6811.1999.tb00202.x>.
+
+Ledermann, Thomas, and David A. Kenny. 2017. “Analyzing Dyadic Data with
+Multilevel Modeling Versus Structural Equation Modeling: A Tale of Two
+Methods.” *Journal of Family Psychology* 31 (4): 442–52.
+<https://doi.org/10.1037/fam0000290>.
+
+Nickell, Stephen. 1981. “Biases in Dynamic Models with Fixed Effects.”
+*Econometrica* 49 (6): 1417–26. <https://doi.org/10.2307/1911408>.
+
+Rosario, Kareena S. del, and Tessa V. West. 2025. “A Practical Guide to
+Specifying Random Effects in Longitudinal Dyadic Multilevel Modeling.”
+*Advances in Methods and Practices in Psychological Science* 8 (3):
+25152459251351286. <https://doi.org/10.1177/25152459251351286>.
