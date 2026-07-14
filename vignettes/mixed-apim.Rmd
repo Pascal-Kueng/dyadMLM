@@ -36,7 +36,7 @@ relationship to APIM effects in distinguishable dyads, see the
 
 ## Cross-sectional mixed-composition APIM
 
-The data were simulated with the following fixed effects and residual covariance
+The data were simulated with the following fixed effects and covariance
 parameters. For exchangeable dyads, `sum_variance` and `diff_variance` imply the
 partner correlation.
 
@@ -80,7 +80,7 @@ mixed_cross_targets <- data.frame(
 mixed_cross_targets
 ```
 
-We first prepare the data with `prepare_interdep_data()`. It identifies all
+We first prepare the data with `prepare_interdep_data()`, which identifies all
 observed dyad compositions.
 
 ```{r prepare-mixed-cross-sectional}
@@ -143,9 +143,8 @@ summary(mixed_cross_gaussian_model)
 
 ```
 
-The four fixed-effect indicators are mutually exclusive: exactly one equals `1`
-for each row. Using shorter labels for the generated columns, the fixed part of
-the model is
+The four fixed-effect indicators are mutually exclusive. With $I$ denoting `.i_{composition_role}`, the fixed part of the
+model can be written as:
 
 $$
 \mu_{ij}^{\mathrm{fixed}} =
@@ -155,7 +154,7 @@ $$
 \beta_{MM} I_{MM,ij}.
 $$
 
-The active indicator, and therefore the fixed intercept, depends on the row:
+The active composition-and-role indicator `.i_{composition_role}` for each person is shown below:
 
 | Row | $I_{FM,F}$ | $I_{FM,M}$ | $I_{FF}$ | $I_{MM}$ | Fixed intercept |
 |:--|--:|--:|--:|--:|:--|
@@ -164,7 +163,8 @@ The active indicator, and therefore the fixed intercept, depends on the row:
 | Member of a female-female dyad | 0 | 0 | **1** | 0 | $\beta_{FF}$ |
 | Member of a male-male dyad | 0 | 0 | 0 | **1** | $\beta_{MM}$ |
 
-For a member of a male-male dyad, for example, the fixed part reduces to
+Therefore, for a member of a male-male dyad, for example, the fixed part reduces
+to
 
 $$
 0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
@@ -245,7 +245,13 @@ marginaleffects::hypotheses(
 
 ```
 
-It is important to note, that such a fixed-effect formula with all compositions
+These are population-level fixed-effect comparisons. Setting `re.form = NA`
+excludes dyad-specific random effects from the quantities being compared; it
+does not remove the random-effects structure from the fitted model. Uncertainty
+is calculated for the fixed-effect comparison, which is the intended target
+here.
+
+It is important to note that such a fixed-effect formula with all compositions
 in one model call does not, by itself, create partial pooling across dyad
 compositions. The composition-specific intercepts and slopes above are ordinary
 fixed effects, so estimates for female-female or male-male dyads are not
@@ -254,10 +260,12 @@ variance, and covariance parameter is composition-specific, the likelihood large
 factorizes by composition. In that case, a combined fit can closely match
 separate composition-specific fits. Its main advantage is that formal
 parameter comparisons can be made within one fitted model, and that models with
-different versions of pooling can be compared. For example, it can be tested,
-whether pooling male-male and female-female couples as same-sex substantially worsens
-model fit, under consideration of not only the fixed effects, but also the
-random effects structure.
+different versions of pooling can be compared. For example, it can be tested
+whether pooling male-male and female-female couples as same-sex substantially
+worsens model fit, considering both the fixed effects and random-effects
+structure. Such model comparisons require the restricted and unrestricted
+models to use the same observations; separate fits to different compositions
+should not be compared this way.
 
 If partial pooling is desired, for instance with few dyads for one particular type,
 a different model specification is required, such as a common effect
@@ -265,13 +273,16 @@ plus composition deviations with a hierarchical prior, or a random dyad-type
 effect. However, with only a few dyad types, frequentist random dyad-type variance
 components are usually weakly identified.
 
-## Mixed-composition intensive longitudinal Gaussian model
+## Mixed-composition intensive longitudinal (ILD) Gaussian model
 
 `example_dyadic_ILD_mixed` contains the same three dyad compositions as the
 mixed-composition cross-sectional example, but each dyad contributes repeated
 paired observations over `diaryday`.
 
-We prepare the data in the same way, now adding `time` and a predictor:
+To keep the example lighter, we will pool male-male and female-female compositions
+to one same-sex dyad. In practice, this should be theory based or an empiric decision.
+
+Aside from the pooling, we prepare the data in the same way, now adding `time` and a predictor:
 
 ```{r prepare-mixed-ild}
 mixed_ild_data <- prepare_interdep_data(
@@ -279,6 +290,9 @@ mixed_ild_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
+  pool_compositions = list(
+    "same-sex" = c("male-male", "female-female")
+  ),
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -288,8 +302,8 @@ print(mixed_ild_data)
 ```
 
 
-This mixed-composition ILD model includes composition-specific intercepts,
-fixed time slopes, and within-person and between-person actor and partner
+This mixed-composition ILD model includes composition-specific fixed
+intercepts, time slopes, and within-person and between-person actor and partner
 effects. It omits random slopes, as they would add several variances and
 covariances to an already large model.
 
@@ -310,66 +324,49 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
     # Composition-specific intercepts
     .i_is_female_x_male_female + .i_is_female_x_male_male +
     
-    .i_is_female_x_female + 
-    .i_is_male_x_male +
+    i_is_same_sex +
 
     # Composition-specific time trends
     .i_is_female_x_male_female:diaryday +
     .i_is_female_x_male_male:diaryday +
     
-    .i_is_female_x_female:diaryday +
-    
-    .i_is_male_x_male:diaryday +
+    i_is_same_sex:diaryday +
 
     # Composition-specific within-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cwp_actor +
     .i_is_female_x_male_male:.i_provided_support_cwp_actor +
     
-    .i_is_female_x_female:.i_provided_support_cwp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_actor +
+    i_is_same_sex:.i_provided_support_cwp_actor +
 
     # Composition-specific within-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cwp_partner +
     .i_is_female_x_male_male:.i_provided_support_cwp_partner +
     
-    .i_is_female_x_female:.i_provided_support_cwp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_partner +
+    i_is_same_sex:.i_provided_support_cwp_partner +
 
     # Composition-specific between-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cbp_actor +
     .i_is_female_x_male_male:.i_provided_support_cbp_actor +
     
-    .i_is_female_x_female:.i_provided_support_cbp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_actor +
+    i_is_same_sex:.i_provided_support_cbp_actor +
 
     # Composition-specific between-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cbp_partner +
     .i_is_female_x_male_male:.i_provided_support_cbp_partner +
     
-    .i_is_female_x_female:.i_provided_support_cbp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_partner +
+    i_is_same_sex:.i_provided_support_cbp_partner +
 
     # stable dyad-level covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
     
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
-    
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID) +
+    (0 + .i_is_same_sex | coupleID) +
+    (0 + .i_diff_same_sex_arbitrary | coupleID) 
 
     # same-day covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
     
-    (0 + .i_is_female_x_female | coupleID:diaryday) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID:diaryday) +
-    
-    (0 + .i_is_male_x_male | coupleID:diaryday) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID:diaryday)
+    (0 + .i_is_same_sex | coupleID:diaryday) +
+    (0 + .i_diff_same_sex_arbitrary | coupleID:diaryday) 
 
   , dispformula = ~ 0
   , family = gaussian()
