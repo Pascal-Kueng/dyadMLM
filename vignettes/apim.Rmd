@@ -60,6 +60,10 @@ constrained columns are planned.
 
 ### Concurrent ILD Gaussian APIM for distinguishable dyads
 
+Observed person means used to construct the between-person (`cbp`) predictors
+can be unreliable when each member contributes few occasions, which can bias
+between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
+
 Example model specification: 
 
 ```{r fit-ild-distinguishable, eval = FALSE}
@@ -122,13 +126,16 @@ summary(ild_distinguishable_model)
 
 ---
 
-**Continue** with the [Mixed-Composition APIM vignette](mixed-apim.html),
+From here, choose the model-specific vignette that matches the research
+question:
 
-refer to the: 
+- [Mixed-Composition APIM vignette](mixed-apim.html) for analyses combining
+  distinguishable and exchangeable dyad compositions;
+- [Dyad-Individual Model vignette](dim.html) for the exchangeable DIM
+  parameterization; or
+- [Dyadic Score Model vignette](dsm.html) for the distinguishable DSM
+  parameterization.
 
-- [Dyad-Individual Model vignette](dim.html),
-- [Dyadic Score Model vignette](dsm.html),
-
-or return to the [Overview](index.html).
+Or return to the [Overview](index.html).
 
 A vignette with non-Gaussian generalized APIM examples is planned. 

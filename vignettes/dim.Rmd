@@ -33,8 +33,8 @@ terms of two interdependent individuals, the DIM expresses them in terms of the
 dyad's shared level and the contrast between partners.
 
 For the broader data-preparation workflow of the `interdep` package, see the
-[Getting Started vignette](getting-started.html). For distinguishable,
-exchangeable, generalized, and intensive longitudinal APIMs, see the
+[Getting Started vignette](getting-started.html). For distinguishable and
+exchangeable APIMs in cross-sectional and intensive longitudinal data, see the
 [Actor-Partner Interdependence Model vignette](apim.html). For APIMs that
 combine distinguishable and exchangeable dyad compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For the dyadic score
@@ -1016,9 +1016,8 @@ The `cbp` terms use each member's mean across the observed occasions to
 estimate that member's longer-run usual level. With few occasions (small
 \(T\)), especially when the predictor has low stability over time, these person
 means can be unreliable. The associated between-person estimates can therefore
-be biased as well as imprecise, so interpret them cautiously
-[@gottfredsonStraightforwardApproachCoping2019]. This concern primarily affects
-the between-person estimates constructed from observed person means.
+be biased or imprecise, so they should be interpreted cautiously
+[@gottfredsonStraightforwardApproachCoping2019].
 
 Use `temporal_predictor_decomposition = "none"` to construct only the raw
 dyad-occasion mean and within-dyad deviation.
@@ -1483,14 +1482,10 @@ unreliable person means used to construct `cbp` predictors with few occasions.
 
 ---
 
-**Continue** with the [Dyadic Score Model vignette](dsm.html),
-
-refer to the:
-
-- [Actor-Partner Interdependence Model (APIM) vignette](apim.html),
-- [Mixed-Composition APIM vignette](mixed-apim.html),
-
-or return to the [Overview](index.html).
+Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
+the [Mixed-Composition APIM vignette](mixed-apim.html) or the
+[Dyadic Score Model vignette](dsm.html) for related model specifications, or
+return to the [Overview](index.html).
 
 ## References
 

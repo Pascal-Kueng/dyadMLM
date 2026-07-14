@@ -306,6 +306,9 @@ mixed_ild_data <- prepare_interdep_data(
 print(mixed_ild_data)
 ```
 
+Note that observed person means used to construct the between-person (`cbp`) predictors
+can be unreliable when each member contributes few occasions, which can bias
+between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
 
 This mixed-composition ILD model includes composition-specific fixed
 intercepts, time slopes, and within-person and between-person actor and partner
@@ -445,7 +448,7 @@ complexity.
 
 ---
 
-**Continue** with the [Dyad-Individual Model vignette](dim.html), refer to the
-[Actor-Partner Interdependence Model vignette](apim.html) or the
-[Dyadic Score Model vignette](dsm.html), or return to the
-[Overview](index.html).
+Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
+the [Dyad-Individual Model vignette](dim.html) or the
+[Dyadic Score Model vignette](dsm.html) for alternative parameterizations, or
+return to the [Overview](index.html).

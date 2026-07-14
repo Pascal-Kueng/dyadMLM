@@ -28,8 +28,8 @@ dyad's shared level and the directional difference between partners
 [@iidaModelsInterdependentIndividuals2018].
 
 For the broader data-preparation workflow, see the
-[Getting Started vignette](getting-started.html). For distinguishable,
-exchangeable, generalized, and intensive longitudinal APIMs, see the
+[Getting Started vignette](getting-started.html). For distinguishable and
+exchangeable APIMs in cross-sectional and intensive longitudinal data, see the
 [Actor-Partner Interdependence Model vignette](apim.html). For APIMs combining
 distinguishable and exchangeable compositions, see the
 [Mixed-Composition APIM vignette](mixed-apim.html). For the exchangeable
@@ -450,6 +450,10 @@ In `interdep`, use `model_type = "dim"` for this exchangeable model and reserve
 
 ### Concurrent ILD Gaussian DSM 
 
+Observed person means used to construct the between-person (`cbp`) predictors
+can be unreliable when each member contributes few occasions, which can bias
+between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
+
 ### Current limitations of dyadic ILD designs in R
 
 Short, link to APIM!
@@ -462,13 +466,9 @@ version can be implemented.
 
 ---
 
-Continue with the [Dyad-Individual Model vignette](dim.html),
-
-refer to the:
-
-- [Actor-Partner Interdependence Model (APIM) vignette](apim.html),
-- [Mixed-Composition APIM vignette](mixed-apim.html),
-
+Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
+the [Mixed-Composition APIM vignette](mixed-apim.html) or the
+[Dyad-Individual Model vignette](dim.html) for related model specifications,
 or return to the [Overview](index.html).
 
 ## References

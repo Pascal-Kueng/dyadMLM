@@ -24,7 +24,7 @@ Start with the vignettes, or scroll down for a quick-start.
 | Vignette | Focus |
 |----|----|
 | [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable, exchangeable, generalized, and intensive longitudinal dyads |
+| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
 | [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
 | [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
 | [Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
@@ -145,9 +145,9 @@ archive.
 ------------------------------------------------------------------------
 
 **Continue** with the [Getting Started
-Vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.html)
+Vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.html).
 
-Or refer to the:
+Or go directly to a model-specific vignette:
 
 - [Actor-Partner Interdependence Model (APIM)
   vignette](https://pascal-kueng.github.io/interdep/articles/apim.html),
