@@ -332,8 +332,8 @@ semi-continuous.
 
 ``` r
 
-print(head(example_dyadic_ILD_mixed_tweedie, n = 26), n = 26)
-#> # A tibble: 26 × 6
+print(head(example_dyadic_ILD_mixed_tweedie, 20))
+#> # A tibble: 20 × 6
 #>    personID coupleID diaryday gender physical_activity provided_support
 #>       <int>    <int>    <int> <fct>              <dbl>            <dbl>
 #>  1        1        1        0 female             11.4              3.92
@@ -356,12 +356,6 @@ print(head(example_dyadic_ILD_mixed_tweedie, n = 26), n = 26)
 #> 18        2        1        3 male                3.46             3.69
 #> 19        2        1        4 male               17.6              5.20
 #> 20        2        1        5 male               14.7              5.34
-#> 21        2        1        6 male                6.25             6.36
-#> 22        2        1        7 male               13.3              6.95
-#> 23        2        1        8 male               20.9              5.38
-#> 24        2        1        9 male                8.64             5.64
-#> 25        2        1       10 male                0                4.54
-#> 26        2        1       11 male               20.6              5.03
 hist(example_dyadic_ILD_mixed_tweedie$physical_activity, breaks = 20)
 ```
 
