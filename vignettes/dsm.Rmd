@@ -435,7 +435,6 @@ data.frame(
 )
 ```
 
-
 For exchangeable dyads, the direction of a member difference is arbitrary.
 The directional intercept, both cross-paths, and the covariance between outcome
 level and outcome difference must then be zero. The remaining reduced,

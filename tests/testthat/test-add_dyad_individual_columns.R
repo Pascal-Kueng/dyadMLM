@@ -105,6 +105,34 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
   )
 })
 
+test_that("DIM sum-and-difference variances reproduce exchangeable member covariance", {
+  shared_variance <- 1.3
+  difference_variance <- 0.4
+  sum_difference_covariance <- diag(c(shared_variance, difference_variance))
+  member_rotation <- rbind(
+    member_1 = c(1, 1),
+    member_2 = c(1, -1)
+  )
+
+  member_covariance <-
+    member_rotation %*% sum_difference_covariance %*% t(member_rotation)
+
+  expect_equal(
+    unname(member_covariance),
+    matrix(c(1.7, 0.9, 0.9, 1.7), nrow = 2)
+  )
+
+  member_variance <- member_covariance[1, 1]
+  partner_covariance <- member_covariance[1, 2]
+  expect_equal(
+    c(
+      shared = (member_variance + partner_covariance) / 2,
+      difference = (member_variance - partner_covariance) / 2
+    ),
+    c(shared = shared_variance, difference = difference_variance)
+  )
+})
+
 test_that("DIM construction allows one role-supplied exchangeable composition", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
