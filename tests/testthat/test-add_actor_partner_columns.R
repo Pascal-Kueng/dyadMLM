@@ -28,6 +28,7 @@ test_that("add_actor_partner_columns creates actor and partner columns", {
     tibble::tibble(
       predictor = c("x", "x", "x"),
       component = c("raw", "cwp", "cbp"),
+      lag = c(0L, 0L, 0L),
       source_column = c("x", ".i_x_cwp", ".i_x_cbp"),
       actor_column = c(".i_x_actor", ".i_x_cwp_actor", ".i_x_cbp_actor"),
       partner_column = c(".i_x_partner", ".i_x_cwp_partner", ".i_x_cbp_partner")
@@ -107,6 +108,7 @@ test_that("add_actor_partner_columns preserves rows with missing partner occasio
     tibble::tibble(
       predictor = "x",
       component = "raw",
+      lag = 0L,
       source_column = "x",
       actor_column = ".i_x_actor",
       partner_column = ".i_x_partner"
@@ -162,6 +164,7 @@ test_that("add_actor_partner_columns uses generated names for raw predictors", {
     tibble::tibble(
       predictor = "stress level",
       component = "raw",
+      lag = 0L,
       source_column = "stress level",
       actor_column = ".i_stress_level_actor",
       partner_column = ".i_stress_level_partner"
@@ -185,6 +188,7 @@ test_that("add_actor_partner_columns stores empty metadata without predictors", 
     tibble::tibble(
       predictor = character(),
       component = character(),
+      lag = integer(),
       source_column = character(),
       actor_column = character(),
       partner_column = character()

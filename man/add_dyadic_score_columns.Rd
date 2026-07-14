@@ -26,6 +26,8 @@ For ILD predictors, raw and within-person scores are computed within
 dyad-time and between-person scores within dyad. Raw dyad means are
 grand-mean centered. Both partners' predictor values are required for each
 score pair.
+Selected lag predictors additionally create lag-1 raw and within-person
+dyad-mean and signed-difference columns.
 
 Constructed predictor columns are recorded in
 \code{attr(data, "interdep")$dsm_predictors}, and the contrast column name is

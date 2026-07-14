@@ -20,6 +20,8 @@ partner versions of the raw predictor. For centered intensive longitudinal
 predictors, this will create actor and partner versions of the raw predictor
 and each recorded predictor component, such as the within-person and
 between-person components created by \code{\link[=center_predictors]{center_predictors()}}.
+Selected lag predictors additionally create lag-1 raw and within-person
+actor and partner columns.
 }
 \details{
 The function will use the predictor decomposition metadata stored in

@@ -15,6 +15,8 @@
 #' of dyad means, or dyad-occasion means in longitudinal data, while the
 #' within-dyad-deviation column is the person's deviation from the uncentered
 #' dyad mean.
+#' Selected lag predictors additionally create lag-1 raw and within-person
+#' dyad-mean and within-dyad-deviation columns.
 #'
 #' The function reads `attr(data, "interdep")$temporal_predictor_decompositions` and
 #' stores the constructed DIM columns in
@@ -51,6 +53,7 @@ construct_dyad_predictor_decompositions <- function(data) {
   predictors <- tibble::tibble(
     predictor = character(),
     component = character(),
+    lag = integer(),
     source_column = character(),
     mean_column = character(),
     deviation_column = character(),
@@ -66,19 +69,22 @@ construct_dyad_predictor_decompositions <- function(data) {
   for (i in seq_len(nrow(temporal_decompositions))) {
     predictor <- temporal_decompositions$predictor[[i]]
     component <- temporal_decompositions$component[[i]]
+    lag <- temporal_decompositions$lag[[i]]
     source_col <- temporal_decompositions$column[[i]]
 
     column_stem <- make_dyad_predictor_column_stem(
       predictor = predictor,
       component = component,
-      source_col = source_col
+      source_col = source_col,
+      lag = lag
     )
 
-    mean_col <- paste0(column_stem, "_dyad_mean")
+    lag_suffix <- make_predictor_lag_suffix(lag)
+    mean_col <- paste0(column_stem, "_dyad_mean", lag_suffix)
     if (component == "raw") {
-      mean_col <- paste0(column_stem, "_dyad_mean_gmc")
+      mean_col <- paste0(column_stem, "_dyad_mean_gmc", lag_suffix)
     }
-    deviation_col <- paste0(column_stem, "_within_dyad_dev")
+    deviation_col <- paste0(column_stem, "_within_dyad_dev", lag_suffix)
 
     dyad_decomposition_level <- "dyad"
     if (has_time && component %in% c("raw", "cwp")) {
@@ -89,6 +95,7 @@ construct_dyad_predictor_decompositions <- function(data) {
       predictors,
       predictor = predictor,
       component = component,
+      lag = lag,
       source_column = source_col,
       mean_column = mean_col,
       deviation_column = deviation_col,
@@ -122,7 +129,12 @@ construct_dyad_predictor_decompositions <- function(data) {
   list(data = out, predictors = predictors)
 }
 
-make_dyad_predictor_column_stem <- function(predictor, component, source_col) {
+make_dyad_predictor_column_stem <- function(predictor, component, source_col,
+                                            lag = 0L) {
+  if (lag > 0L) {
+    source_col <- sub(paste0("_lag", lag, "$"), "", source_col)
+  }
+
   if (component != "raw") {
     return(source_col)
   }

@@ -8,7 +8,8 @@
 #' @param meta The `interdep` metadata attribute from an `interdep_data` object.
 #'
 #' @return A tibble with one row per generated temporal predictor, APIM, DIM,
-#'   or DSM column.
+#'   or DSM column. The `lag` column is `0` for contemporaneous columns and `1`
+#'   for lag-1 columns.
 #'
 #' @keywords internal
 interdep_generated_columns <- function(meta) {
@@ -32,6 +33,7 @@ empty_generated_columns <- function() {
     variable_role = character(),
     variable = character(),
     component = character(),
+    lag = integer(),
     column_role = character(),
     column = character(),
     source_column = character(),
@@ -51,7 +53,8 @@ temporal_predictor_generated_columns <- function(temporal_predictor_decompositio
   }
 
   temporal_predictor_decompositions <- temporal_predictor_decompositions[
-    temporal_predictor_decompositions$component %in% c("cwp", "cbp"),
+    temporal_predictor_decompositions$component %in% c("cwp", "cbp") |
+      temporal_predictor_decompositions$lag > 0L,
     ,
     drop = FALSE
   ]
@@ -65,6 +68,7 @@ temporal_predictor_generated_columns <- function(temporal_predictor_decompositio
     variable_role = "predictor",
     variable = temporal_predictor_decompositions$predictor,
     component = temporal_predictor_decompositions$component,
+    lag = temporal_predictor_decompositions$lag,
     column_role = "temporal_component",
     column = temporal_predictor_decompositions$column,
     source_column = temporal_predictor_decompositions$predictor
@@ -84,6 +88,7 @@ apim_generated_columns <- function(apim_predictors) {
       variable_role = "predictor",
       variable = apim_predictors$predictor,
       component = apim_predictors$component,
+      lag = apim_predictors$lag,
       column_role = "actor",
       column = apim_predictors$actor_column,
       source_column = apim_predictors$source_column
@@ -93,6 +98,7 @@ apim_generated_columns <- function(apim_predictors) {
       variable_role = "predictor",
       variable = apim_predictors$predictor,
       component = apim_predictors$component,
+      lag = apim_predictors$lag,
       column_role = "partner",
       column = apim_predictors$partner_column,
       source_column = apim_predictors$source_column
@@ -113,6 +119,7 @@ dim_generated_columns <- function(dim_predictors) {
       variable_role = "predictor",
       variable = dim_predictors$predictor,
       component = dim_predictors$component,
+      lag = dim_predictors$lag,
       column_role = "dyad_mean",
       column = dim_predictors$mean_column,
       source_column = dim_predictors$source_column
@@ -122,6 +129,7 @@ dim_generated_columns <- function(dim_predictors) {
       variable_role = "predictor",
       variable = dim_predictors$predictor,
       component = dim_predictors$component,
+      lag = dim_predictors$lag,
       column_role = "within_dyad_deviation",
       column = dim_predictors$deviation_column,
       source_column = dim_predictors$source_column
@@ -140,6 +148,7 @@ dsm_generated_columns <- function(dsm_predictors, role_contrast_column, role_col
       variable_role = "role",
       variable = role_column,
       component = "raw",
+      lag = 0L,
       column_role = "role_contrast",
       column = role_contrast_column,
       source_column = role_column
@@ -153,6 +162,7 @@ dsm_generated_columns <- function(dsm_predictors, role_contrast_column, role_col
         variable_role = "predictor",
         variable = dsm_predictors$predictor,
         component = dsm_predictors$component,
+        lag = dsm_predictors$lag,
         column_role = "dyad_mean",
         column = dsm_predictors$mean_column,
         source_column = dsm_predictors$source_column
@@ -162,6 +172,7 @@ dsm_generated_columns <- function(dsm_predictors, role_contrast_column, role_col
         variable_role = "predictor",
         variable = dsm_predictors$predictor,
         component = dsm_predictors$component,
+        lag = dsm_predictors$lag,
         column_role = "dyad_difference",
         column = dsm_predictors$difference_column,
         source_column = dsm_predictors$source_column
@@ -210,12 +221,26 @@ attach_generated_column_specs <- function(columns) {
     )
   }
 
+  is_lagged <- out$lag > 0L
+  out$column_pattern[is_lagged] <- paste0(
+    out$column_pattern[is_lagged],
+    "_lag",
+    out$lag[is_lagged]
+  )
+  out$description[is_lagged] <- paste0(
+    "lag-",
+    out$lag[is_lagged],
+    " ",
+    out$description[is_lagged]
+  )
+
   out
 }
 
 generated_column_spec_lookup <- function() {
   tibble::tribble(
     ~model_family,    ~variable_role, ~component, ~column_role,              ~temporal_decomposition,      ~dyadic_decomposition,      ~column_centering, ~print_order, ~column_pattern,                         ~description,
+    "temporal",       "predictor",    "raw",      "temporal_component",      "none",                       "none",                     "none",            7L,           ".i_{pred}",                                 "raw predictor values",
     "temporal",       "predictor",    "cwp",      "temporal_component",      "within_person",              "none",                     "none",            8L,           ".i_{pred}_cwp",                             "within-person predictor: momentary deviations from each person's usual level",
     "temporal",       "predictor",    "cbp",      "temporal_component",      "between_person_grand_mean",  "none",                     "none",            9L,           ".i_{pred}_cbp",                             "between-person predictor: stable differences from the average person's usual level",
     "apim",           "predictor",    "raw",      "actor",                  "none",                       "none",                     "none",            10L,          ".i_{pred}_actor",                       "APIM actor predictor: actor's original predictor values",

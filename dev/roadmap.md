@@ -379,6 +379,8 @@ Complete these before calling the feature set CRAN-ready:
   - retain cross-sectional and ILD APIM-DIM equivalence
   - retain raw and `time_2l` ILD construction and the current concise
     methodological limitations
+  - retain selective `lag_predictors` construction for lag-1 raw and CWP
+    model-ready columns without bridging missing time indexes
   - keep mixed-composition models in the APIM vignettes
 - Resolve mixed-composition ILD model convergence documentation
   - current increased simulation size improves information but does not fully

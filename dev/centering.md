@@ -39,6 +39,7 @@ random-effects structure of the fitted model.
 validate_interdep_data()
 infer_dyad_compositions()
 center_predictors()
+add_temporal_lag_columns()     # lag_predictors, when requested
 add_actor_partner_columns()      # "apim" in model_type
 add_dyad_individual_columns()    # "dim" in model_type
 add_dyadic_score_columns()       # "dsm" in model_type
@@ -84,7 +85,8 @@ attr(data, "interdep")$temporal_predictor_decompositions
 ```
 
 with one row for the raw predictor and one row per constructed temporal
-component.
+component. When `lag_predictors` is supplied, lag-1 raw and CWP records are
+added with `lag = 1`; unlagged records use `lag = 0`.
 
 Generated `.i_*_cwp` and `.i_*_cbp` columns also appear in the normalized
 generated-column table returned by `interdep_generated_columns()`. Raw source
@@ -212,6 +214,9 @@ member-level variables selected in the fitted-model formula.
 ## Validation Rules
 
 - `temporal_predictor_decomposition = "time_2l"` requires `time` and `predictors`.
+- `lag_predictors` must be a subset of `predictors` and requires a finite,
+  integer-valued numeric `time` index. Values are matched at exactly `time - 1`.
+- raw and CWP predictor versions are lagged; stable CBP versions are not.
 - predictors used with `temporal_predictor_decomposition = "time_2l"` must be numeric.
 - non-numeric predictors can be kept undecomposed with
   `temporal_predictor_decomposition = "none"` only for model types that do not

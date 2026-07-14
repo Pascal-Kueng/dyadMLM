@@ -11,6 +11,7 @@ prepare_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
+  lag_predictors = NULL,
   model_type = "apim",
   dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
@@ -42,6 +43,11 @@ measures.}
 
 \item{predictors}{Optional variables to use for temporal predictor
 decomposition and model-ready predictor construction.}
+
+\item{lag_predictors}{Optional subset of \code{predictors} for which lag-1
+model-ready columns should be created. Requires \code{time} to be a finite,
+integer-valued numeric measurement index. Raw and within-person predictor
+versions are lagged; stable between-person versions are not.}
 
 \item{model_type}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
@@ -114,7 +120,8 @@ The original data as a tibble with class \code{interdep_data},
 numeric \verb{.i_diff_*} contrast columns coded \code{-1} and \code{1} for the two members
 of matching exchangeable dyads and \code{0} otherwise, and an \code{interdep} attribute
 containing structural metadata, \code{dyad_compositions}, and predictor metadata
-such as \code{temporal_predictor_decompositions}, \code{apim_predictors}, and
+such as \code{temporal_predictor_decompositions}, \code{lag_predictors},
+\code{apim_predictors}, and
 \code{dim_predictors}, as well as \code{dsm_predictors} and \code{dsm_role_order} when
 applicable.
 }

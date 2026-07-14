@@ -29,6 +29,7 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
     tibble::tibble(
       predictor = c("x", "x", "x"),
       component = c("raw", "cwp", "cbp"),
+      lag = c(0L, 0L, 0L),
       source_column = c("x", ".i_x_cwp", ".i_x_cbp"),
       mean_column = c(".i_x_dyad_mean_gmc", ".i_x_cwp_dyad_mean", ".i_x_cbp_dyad_mean"),
       deviation_column = c(
@@ -95,6 +96,7 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
     tibble::tibble(
       predictor = "x",
       component = "raw",
+      lag = 0L,
       source_column = "x",
       mean_column = ".i_x_dyad_mean_gmc",
       deviation_column = ".i_x_within_dyad_dev",

@@ -6,6 +6,8 @@
 #' predictors, this will create actor and partner versions of the raw predictor
 #' and each recorded predictor component, such as the within-person and
 #' between-person components created by [center_predictors()].
+#' Selected lag predictors additionally create lag-1 raw and within-person
+#' actor and partner columns.
 #'
 #' The function will use the predictor decomposition metadata stored in
 #' `attr(data, "interdep")$temporal_predictor_decompositions`, so downstream code does
@@ -36,6 +38,7 @@ add_actor_partner_columns <- function(data) {
   apim_predictors <- tibble::tibble(
     predictor = character(),
     component = character(),
+    lag = integer(),
     source_column = character(),
     actor_column = character(),
     partner_column = character()
@@ -52,21 +55,27 @@ add_actor_partner_columns <- function(data) {
   for (i in seq_len(nrow(temporal_predictor_decompositions))) {
     predictor <- temporal_predictor_decompositions$predictor[[i]]
     component <- temporal_predictor_decompositions$component[[i]]
+    lag <- temporal_predictor_decompositions$lag[[i]]
     source_col <- temporal_predictor_decompositions$column[[i]]
 
     column_stem <- source_col
+    if (lag > 0L) {
+      column_stem <- sub(paste0("_lag", lag, "$"), "", column_stem)
+    }
     if (component == "raw") {
       predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
       column_stem <- paste0(interdep_reserved_prefix, predictor_suffix)
     }
 
-    actor_col <- paste0(column_stem, "_actor")
-    partner_col <- paste0(column_stem, "_partner")
+    lag_suffix <- make_predictor_lag_suffix(lag)
+    actor_col <- paste0(column_stem, "_actor", lag_suffix)
+    partner_col <- paste0(column_stem, "_partner", lag_suffix)
 
     apim_predictors <- tibble::add_row(
       apim_predictors,
       predictor = predictor,
       component = component,
+      lag = lag,
       source_column = source_col,
       actor_column = actor_col,
       partner_column = partner_col

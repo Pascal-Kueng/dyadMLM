@@ -27,6 +27,10 @@
 #' measures.
 #' @param predictors Optional variables to use for temporal predictor
 #'   decomposition and model-ready predictor construction.
+#' @param lag_predictors Optional subset of `predictors` for which lag-1
+#'   model-ready columns should be created. Requires `time` to be a finite,
+#'   integer-valued numeric measurement index. Raw and within-person predictor
+#'   versions are lagged; stable between-person versions are not.
 #' @param model_type Model-ready column families to construct. Can contain one
 #'   or more of `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
@@ -89,7 +93,8 @@
 #'   numeric `.i_diff_*` contrast columns coded `-1` and `1` for the two members
 #'   of matching exchangeable dyads and `0` otherwise, and an `interdep` attribute
 #'   containing structural metadata, `dyad_compositions`, and predictor metadata
-#'   such as `temporal_predictor_decompositions`, `apim_predictors`, and
+#'   such as `temporal_predictor_decompositions`, `lag_predictors`,
+#'   `apim_predictors`, and
 #'   `dim_predictors`, as well as `dsm_predictors` and `dsm_role_order` when
 #'   applicable.
 #'
@@ -154,6 +159,7 @@ prepare_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
+    lag_predictors = NULL,
     model_type = "apim",
     dsm_role_order = NULL,
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
@@ -177,6 +183,7 @@ prepare_interdep_data <- function(
     role = {{ role }},
     time = {{ time }},
     predictors = {{ predictors }},
+    lag_predictors = {{ lag_predictors }},
     model_type = model_type,
     dsm_role_order = dsm_role_order,
     temporal_predictor_decomposition = temporal_predictor_decomposition,
@@ -198,6 +205,7 @@ prepare_interdep_data <- function(
   }
 
   out <- center_predictors(out)
+  out <- add_temporal_lag_columns(out)
 
   if ("dim" %in% model_type) {
     # Current DIM construction supports one exchangeable composition.

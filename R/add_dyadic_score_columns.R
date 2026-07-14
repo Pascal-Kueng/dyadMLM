@@ -11,6 +11,8 @@
 #' dyad-time and between-person scores within dyad. Raw dyad means are
 #' grand-mean centered. Both partners' predictor values are required for each
 #' score pair.
+#' Selected lag predictors additionally create lag-1 raw and within-person
+#' dyad-mean and signed-difference columns.
 #'
 #' Constructed predictor columns are recorded in
 #' `attr(data, "interdep")$dsm_predictors`, and the contrast column name is
@@ -48,15 +50,21 @@ add_dyadic_score_columns <- function(data) {
   for (i in seq_len(n_predictors)) {
     predictor <- decomposition$predictors$predictor[[i]]
     component <- decomposition$predictors$component[[i]]
+    lag <- decomposition$predictors$lag[[i]]
     source_col <- decomposition$predictors$source_column[[i]]
     deviation_col <- decomposition$predictors$deviation_column[[i]]
 
     column_stem <- make_dyad_predictor_column_stem(
       predictor = predictor,
       component = component,
-      source_col = source_col
+      source_col = source_col,
+      lag = lag
     )
-    difference_col <- paste0(column_stem, "_within_dyad_diff")
+    difference_col <- paste0(
+      column_stem,
+      "_within_dyad_diff",
+      make_predictor_lag_suffix(lag)
+    )
 
     difference_cols[[i]] <- difference_col
 

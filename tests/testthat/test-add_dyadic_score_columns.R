@@ -32,6 +32,7 @@ test_that("DSM constructs directional cross-sectional predictor scores", {
     tibble::tibble(
       predictor = "x",
       component = "raw",
+      lag = 0L,
       source_column = "x",
       mean_column = ".i_x_dyad_mean_gmc",
       difference_column = ".i_x_within_dyad_diff",
@@ -208,6 +209,7 @@ test_that("DSM creates a role contrast without predictors", {
     tibble::tibble(
       predictor = character(),
       component = character(),
+      lag = integer(),
       source_column = character(),
       mean_column = character(),
       difference_column = character(),

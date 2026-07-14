@@ -28,6 +28,7 @@ load_interdep_debug_internals <- function() {
   source("R/validate_interdep_data.R")
   source("R/infer_dyad_compositions.R")
   source("R/center_predictors.R")
+  source("R/add_temporal_lag_columns.R")
   source("R/validate-model-compatibility.R")
   source("R/add_actor_partner_columns.R")
   source("R/add_dyad_individual_columns.R")
@@ -332,6 +333,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   dim_predictors <- tibble::tibble(
     predictor = character(),
     component = character(),
+    lag = integer(),
     source_column = character(),
     mean_column = character(),
     deviation_column = character(),
@@ -341,18 +343,21 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   i <- 1L
   predictor <- temporal_predictor_decompositions$predictor[[i]]
   component <- temporal_predictor_decompositions$component[[i]]
+  lag <- temporal_predictor_decompositions$lag[[i]]
   source_col <- temporal_predictor_decompositions$column[[i]]
 
   column_stem <- make_dyad_predictor_column_stem(
     predictor = predictor,
     component = component,
-    source_col = source_col
+    source_col = source_col,
+    lag = lag
   )
-  mean_col <- paste0(column_stem, "_dyad_mean")
+  lag_suffix <- make_predictor_lag_suffix(lag)
+  mean_col <- paste0(column_stem, "_dyad_mean", lag_suffix)
   if (component == "raw") {
-    mean_col <- paste0(column_stem, "_dyad_mean_gmc")
+    mean_col <- paste0(column_stem, "_dyad_mean_gmc", lag_suffix)
   }
-  deviation_col <- paste0(column_stem, "_within_dyad_dev")
+  deviation_col <- paste0(column_stem, "_within_dyad_dev", lag_suffix)
   dyad_decomposition_level <- "dyad"
   if (has_time && component %in% c("raw", "cwp")) {
     dyad_decomposition_level <- "dyad_time"
@@ -373,8 +378,10 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
     i = i,
     predictor = predictor,
     component = component,
+    lag = lag,
     source_col = source_col,
     column_stem = column_stem,
+    lag_suffix = lag_suffix,
     mean_col = mean_col,
     deviation_col = deviation_col,
     dyad_decomposition_level = dyad_decomposition_level

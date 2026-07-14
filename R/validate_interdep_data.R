@@ -16,6 +16,9 @@
 #' @param time Optional column identifying time or measurement order.
 #' @param predictors Optional variables to select and store as metadata for
 #'   temporal predictor decomposition and model-helper functions.
+#' @param lag_predictors Optional subset of `predictors` for which lag-1
+#'   model-ready columns should be created. Requires a finite, integer-valued
+#'   numeric `time` variable.
 #' @param model_type Requested model-ready column families. Can contain one or
 #'   more of `"apim"`, `"dim"`, and `"dsm"`. `"none"` indicates no
 #'   model-specific predictor construction and must be used alone.
@@ -50,6 +53,7 @@ validate_interdep_data <- function(
     role = NULL,
     time = NULL,
     predictors = NULL,
+    lag_predictors = NULL,
     model_type = "apim",
     dsm_role_order = NULL,
     temporal_predictor_decomposition = c("auto", "time_2l", "none"),
@@ -168,6 +172,43 @@ validate_interdep_data <- function(
     rename_hint = "variables"
   )
 
+  lag_predictors_quo <- rlang::enquo(lag_predictors)
+  lag_predictor_names <- select_interdep_columns(
+    out,
+    lag_predictors_quo,
+    "lag_predictors"
+  )
+
+  predictors_not_selected <- setdiff(lag_predictor_names, predictor_names)
+  if (length(predictors_not_selected) > 0) {
+    stop(
+      "`lag_predictors` must select only variables already selected by `predictors`. ",
+      "Not selected by `predictors`: ",
+      paste(predictors_not_selected, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+
+  if (length(lag_predictor_names) > 0) {
+    if (!has_time) {
+      stop("`lag_predictors` requires `time` to be supplied.", call. = FALSE)
+    }
+
+    time_values <- out[[time_name]]
+    is_integer_time <- is.numeric(time_values) &&
+      all(is.finite(time_values)) &&
+      all(time_values == floor(time_values))
+
+    if (!is_integer_time) {
+      stop(
+        "`lag_predictors` requires `time` to be a finite, integer-valued numeric measurement index. ",
+        "Create an occasion index such as 1, 2, 3, ... and supply it as `time`.",
+        call. = FALSE
+      )
+    }
+  }
+
   # Resolve dyads with fewer than two observed members.
   out_list <- resolve_incomplete_dyads(
     out = out,
@@ -267,6 +308,7 @@ validate_interdep_data <- function(
     role = role_name,
     time = time_name,
     predictors = predictor_names,
+    lag_predictors = lag_predictor_names,
     n_dyads = n_groups,
     longitudinal = has_time,
     temporal_predictor_decomposition = temporal_predictor_decomposition,

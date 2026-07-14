@@ -29,6 +29,8 @@ For raw predictors, the dyad-mean column is centered around the grand mean
 of dyad means, or dyad-occasion means in longitudinal data, while the
 within-dyad-deviation column is the person's deviation from the uncentered
 dyad mean.
+Selected lag predictors additionally create lag-1 raw and within-person
+dyad-mean and within-dyad-deviation columns.
 }
 \details{
 The function reads \code{attr(data, "interdep")$temporal_predictor_decompositions} and

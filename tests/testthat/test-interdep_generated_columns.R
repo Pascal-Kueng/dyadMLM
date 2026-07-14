@@ -9,6 +9,7 @@ test_that("interdep_generated_columns errors when generated column specs are mis
     apim_predictors = tibble::tibble(
       predictor = "x",
       component = "unsupported",
+      lag = 0L,
       source_column = "x",
       actor_column = ".i_x_unsupported_actor",
       partner_column = ".i_x_unsupported_partner"
@@ -46,6 +47,7 @@ test_that("interdep_generated_columns collects APIM columns", {
       variable_role = c("predictor", "predictor"),
       variable = c("x", "x"),
       component = c("raw", "raw"),
+      lag = c(0L, 0L),
       column_role = c("actor", "partner"),
       column = c(".i_x_actor", ".i_x_partner"),
       source_column = c("x", "x"),
@@ -110,6 +112,7 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
       variable_role = rep("predictor", 8),
       variable = rep("x", 8),
       component = c("cwp", "cbp", "raw", "cwp", "cbp", "raw", "cwp", "cbp"),
+      lag = rep(0L, 8),
       column_role = c(
         "temporal_component",
         "temporal_component",
@@ -194,6 +197,7 @@ test_that("interdep_generated_columns collects DIM columns", {
       variable_role = c("predictor", "predictor"),
       variable = c("x", "x"),
       component = c("raw", "raw"),
+      lag = c(0L, 0L),
       column_role = c("dyad_mean", "within_dyad_deviation"),
       column = c(".i_x_dyad_mean_gmc", ".i_x_within_dyad_dev"),
       source_column = c("x", "x"),

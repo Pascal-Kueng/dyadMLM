@@ -11,7 +11,8 @@ interdep_generated_columns(meta)
 }
 \value{
 A tibble with one row per generated temporal predictor, APIM, DIM,
-or DSM column.
+or DSM column. The \code{lag} column is \code{0} for contemporaneous columns and \code{1}
+for lag-1 columns.
 }
 \description{
 Creates a normalized, one-row-per-column view over temporal predictor, APIM,

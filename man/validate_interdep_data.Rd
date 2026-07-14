@@ -11,6 +11,7 @@ validate_interdep_data(
   role = NULL,
   time = NULL,
   predictors = NULL,
+  lag_predictors = NULL,
   model_type = "apim",
   dsm_role_order = NULL,
   temporal_predictor_decomposition = c("auto", "time_2l", "none"),
@@ -34,6 +35,10 @@ in the data are treated as exchangeable.}
 
 \item{predictors}{Optional variables to select and store as metadata for
 temporal predictor decomposition and model-helper functions.}
+
+\item{lag_predictors}{Optional subset of \code{predictors} for which lag-1
+model-ready columns should be created. Requires a finite, integer-valued
+numeric \code{time} variable.}
 
 \item{model_type}{Requested model-ready column families. Can contain one or
 more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"none"} indicates no

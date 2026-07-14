@@ -38,7 +38,8 @@ center_predictors <- function(data) {
     predictor = character(),
     component = character(),
     column = character(),
-    temporal_predictor_decomposition = character()
+    temporal_predictor_decomposition = character(),
+    lag = integer()
   )
 
   if (length(predictors) == 0) {
@@ -51,7 +52,8 @@ center_predictors <- function(data) {
     predictor = predictors,
     component = "raw",
     column = predictors,
-    temporal_predictor_decomposition = "none"
+    temporal_predictor_decomposition = "none",
+    lag = 0L
   )
 
   if (temporal_predictor_decomposition == "none") {
@@ -92,7 +94,8 @@ center_predictors <- function(data) {
         predictor = c(predictor, predictor),
         component = c("cwp", "cbp"),
         column = c(cwp_col, cbp_col),
-        temporal_predictor_decomposition = temporal_predictor_decomposition
+        temporal_predictor_decomposition = temporal_predictor_decomposition,
+        lag = 0L
       )
     }
 

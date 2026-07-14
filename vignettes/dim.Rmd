@@ -1308,11 +1308,120 @@ carryover or temporal dynamics are part of the research question
 interpretation changes. All DIM predictor effects then describe associations
 conditional on the members' prior outcomes.
 
-Person-mean centering the outcome lag can bias the average carryover estimate
-downward [@hamakerCenterNotCenter2015]. This downward bias is known as Nickell bias
-[@nickellBiasesDynamicModels1981]. A raw lag avoids this centering bias, but a
-standard random-intercept model can still be biased because it assumes that the
-lag is unrelated to stable member levels
+By adding the outcome to `predictors` and selecting it with `lag_predictors`,
+`interdep::prepare_interdep_data()` returns lag-1 raw and within-person scores
+alongside the contemporaneous scores. Between-person scores are not lagged
+because they describe stable differences between members.
+
+For guidance when to include raw or centred versions of the outcome as a
+predictor, you may refer to @hamakerCenterNotCenter2015 and
+@gistelinckMultilevelAutoregressiveSmall2021.
+
+Brief example:
+
+```{r}
+ild_exchangeable_data_dynamic <- prepare_interdep_data(
+  example_dyadic_ILD,
+  group = coupleID,
+  member = personID,
+  time = diaryday,
+  predictors = c(provided_support, closeness),
+  lag_predictors = closeness,
+  model_type = "dim",
+  seed = 123
+)
+
+print(ild_exchangeable_data_dynamic)
+```
+
+This returns all necessary variables for either choice, including lag-1 raw
+and within-person closeness scores. Lags are matched at exactly
+`diaryday - 1`, so omitted diary days are not bridged.
+
+And include in the model as such:
+
+```{r}
+dim_ILD_random_lag <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+
+    # include raw lagged outcomes as predictors
+    .i_closeness_dyad_mean_gmc_lag1 + .i_closeness_within_dyad_dev_lag1 +
+
+    diaryday +
+
+    # Within-person DIM
+    .i_provided_support_cwp_dyad_mean +
+    .i_provided_support_cwp_within_dyad_dev +
+
+    # Between-person DIM
+    .i_provided_support_cbp_dyad_mean +
+    .i_provided_support_cbp_within_dyad_dev +
+
+    # Stable dyad-level covariance with within-person random slopes
+    (1 | coupleID)  +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data_dynamic
+  
+  # The model did not converge with the default optimizer
+  , control = glmmTMB::glmmTMBControl(
+      optimizer = stats::optim,
+      optArgs = list(method = "BFGS")
+    )
+)
+
+summary(dim_ILD_random_lag)
+
+```
+
+
+
+```{r}
+dim_ILD_random_lag_cw <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+
+    # include person-mean centred outcomes as predictors
+    .i_closeness_cwp_dyad_mean_lag1 + .i_closeness_cwp_within_dyad_dev_lag1 +
+
+    diaryday +
+
+    # Within-person DIM
+    .i_provided_support_cwp_dyad_mean +
+    .i_provided_support_cwp_within_dyad_dev +
+
+    # Between-person DIM
+    .i_provided_support_cbp_dyad_mean +
+    .i_provided_support_cbp_within_dyad_dev +
+
+    # Stable dyad-level covariance with within-person random slopes
+    (1 | coupleID)  +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_exchangeable_data_dynamic
+)
+
+summary(dim_ILD_random_lag_cw)
+```
+
+Note that person-mean centering (within-person centering) the outcome lag can 
+bias the average carryover estimate downward [@hamakerCenterNotCenter2015]. 
+This downward bias is known as Nickell bias [@nickellBiasesDynamicModels1981]. 
+A raw lag avoids this centering bias, but a standard random-intercept model can 
+still be biased because it assumes that the lag is unrelated to stable member levels
 [@gistelinckMultilevelAutoregressiveSmall2021].
 
 Both problems matter most when there are few occasions. In one simple

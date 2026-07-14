@@ -32,6 +32,7 @@ test_that("validate_interdep_data stores input metadata", {
   expect_null(meta$role)
   expect_null(meta$time)
   expect_null(meta$predictors)
+  expect_null(meta$lag_predictors)
   expect_equal(meta$model_type, "apim")
   expect_equal(meta$temporal_predictor_decomposition, "none")
   expect_equal(meta$n_dyads, 2L)
@@ -63,6 +64,90 @@ test_that("validate_interdep_data stores predictor metadata", {
     predictors = c(x, z)
   )
   expect_equal(attr(multiple, "interdep")$predictors, c("x", "z"))
+})
+
+test_that("validate_interdep_data resolves lag predictor metadata", {
+  data <- data.frame(
+    dyad_id = rep(1:2, each = 4),
+    person_id = rep(c("A", "B"), 4),
+    time = rep(rep(1:2, each = 2), 2),
+    x = 1:8,
+    z = 11:18
+  )
+
+  result <- validate_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    time = time,
+    predictors = c(x, z),
+    lag_predictors = dplyr::starts_with("x")
+  )
+
+  expect_equal(attr(result, "interdep")$lag_predictors, "x")
+})
+
+test_that("validate_interdep_data checks lag predictor arguments", {
+  longitudinal <- data.frame(
+    dyad_id = rep(1:2, each = 4),
+    person_id = rep(c("A", "B"), 4),
+    time = rep(rep(1:2, each = 2), 2),
+    x = 1:8,
+    z = 11:18
+  )
+
+  expect_error(
+    validate_interdep_data(
+      longitudinal,
+      group = dyad_id,
+      member = person_id,
+      time = time,
+      predictors = x,
+      lag_predictors = z
+    ),
+    "`lag_predictors` must select only variables already selected by `predictors`.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      longitudinal,
+      group = dyad_id,
+      member = person_id,
+      predictors = x,
+      lag_predictors = x
+    ),
+    "`lag_predictors` requires `time` to be supplied.",
+    fixed = TRUE
+  )
+
+  non_integer_time <- dplyr::mutate(longitudinal, time = .data$time / 2)
+  expect_error(
+    validate_interdep_data(
+      non_integer_time,
+      group = dyad_id,
+      member = person_id,
+      time = time,
+      predictors = x,
+      lag_predictors = x
+    ),
+    "`lag_predictors` requires `time` to be a finite, integer-valued numeric measurement index.",
+    fixed = TRUE
+  )
+
+  character_time <- dplyr::mutate(longitudinal, time = as.character(.data$time))
+  expect_error(
+    validate_interdep_data(
+      character_time,
+      group = dyad_id,
+      member = person_id,
+      time = time,
+      predictors = x,
+      lag_predictors = x
+    ),
+    "`lag_predictors` requires `time` to be a finite, integer-valued numeric measurement index.",
+    fixed = TRUE
+  )
 })
 
 test_that("validate_interdep_data rejects predictor suffix collisions", {
