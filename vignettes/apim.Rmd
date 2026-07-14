@@ -51,6 +51,53 @@ Here, $a_f$ and $a_m$ are the actor effects on the female and male outcomes,
 whereas $p_f$ and $p_m$ are the corresponding partner effects. All four paths
 can differ in a distinguishable APIM.
 
+We first prepare the example data with `prepare_interdep_data()`:
+
+```{r prepare-cross-distinguishable-apim}
+apim_distinguishable_data <- prepare_interdep_data(
+  data = example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  model_type = "apim"
+)
+```
+
+The generated `.i_*` columns can be used directly in the model formula. Here is
+a simple example:
+
+```{r fit-cross-distinguishable-gaussian}
+apim_distinguishable_model <- glmmTMB::glmmTMB(
+  satisfaction ~
+
+    # Gender-specific intercepts
+    0 +
+    .i_is_female_x_male_female +
+    .i_is_female_x_male_male +
+
+    # Gender-specific actor effects
+    .i_is_female_x_male_female:.i_communication_actor +
+    .i_is_female_x_male_male:.i_communication_actor +
+
+    # Gender-specific partner effects
+    .i_is_female_x_male_female:.i_communication_partner +
+    .i_is_female_x_male_male:.i_communication_partner +
+
+    # Dyad-level unstructured random effects represent the two partner
+    # residual variances and their covariance when dispformula = ~ 0.
+    # This is glmmTMB-specific syntax! lme4 and brms use different syntax.
+    us(0 +
+         .i_is_female_x_male_female +
+         .i_is_female_x_male_male
+       | coupleID)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = apim_distinguishable_data
+)
+```
+
 ### Residual random-effects structure {#distinguishable-residual-structure}
 
 For a distinguishable female-male dyad, the two members can have different
@@ -158,18 +205,11 @@ roles may differ with a restricted exchangeable model. This comparison tests
 the imposed equality constraints jointly. Here, they concern the fixed
 intercepts, actor effects, partner effects, and residual variances.
 
-The two parameterizations require different generated columns, so we prepare
-the same observations once as distinguishable and once as exchangeable:
+The two parameterizations require different generated columns. The full
+distinguishable model was fitted above, so we now prepare the same original
+observations as exchangeable:
 
 ```{r prepare-cross-distinguishability}
-apim_distinguishable_data <- prepare_interdep_data(
-  example_dyadic_crosssectional,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = communication
-)
-
 apim_exchangeable_data <- prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
@@ -180,27 +220,10 @@ apim_exchangeable_data <- prepare_interdep_data(
 )
 ```
 
-The distinguishable model allows all fixed effects and both residual variances
-to differ between female and male members:
+The exchangeable model constrains the corresponding fixed effects and residual
+variances to be equal across members:
 
 ```{r fit-cross-distinguishability}
-apim_distinguishable_model <- glmmTMB::glmmTMB(
-  satisfaction ~ 0 +
-    .i_is_female_x_male_female +
-    .i_is_female_x_male_male +
-    .i_is_female_x_male_female:.i_communication_actor +
-    .i_is_female_x_male_male:.i_communication_actor +
-    .i_is_female_x_male_female:.i_communication_partner +
-    .i_is_female_x_male_male:.i_communication_partner +
-    us(
-      0 + .i_is_female_x_male_female + .i_is_female_x_male_male |
-        coupleID
-    ),
-  dispformula = ~ 0,
-  family = gaussian(),
-  data = apim_distinguishable_data
-)
-
 apim_exchangeable_model <- glmmTMB::glmmTMB(
   satisfaction ~ 0 +
     .i_is_female_x_male +
@@ -298,6 +321,76 @@ summary(ild_distinguishable_model)
 ### Current limitations of dyadic ILD designs in R
 
 #### Dynamic models
+
+The preparation shown in the Getting Started vignette supports contemporaneous
+models, but observations can also remain dependent over time. Currently,
+commonly used open-source MLM interfaces in R do not provide the full dyadic
+residual VAR structure needed to model serial dependence across both partners.
+Within open-source R, such a model generally requires custom TMB or Stan code.
+
+One practical alternative, especially when carryover and temporal dynamics are
+part of the research question, is to create a dynamic model by including lagged
+versions of the outcome as predictors.
+
+For this example, we obtain the lagged actor and partner outcome columns through
+the `lag_predictors` argument:
+
+```{r prepare-ild-apim-dynamic-model}
+ild_apim_data_dynamic <- prepare_interdep_data(
+  example_dyadic_ILD,
+  group = coupleID,
+  member = personID,
+  time = diaryday,
+  predictors = closeness,
+  lag_predictors = closeness,
+  model_type = "apim",
+  seed = 123
+)
+```
+
+A simple fixed-slope dyadic stability and influence model
+[@delrosarioPracticalGuideSpecifying2025]:
+
+```{r fit-ild-stability-influence}
+stability_influence <- glmmTMB::glmmTMB(
+  closeness ~ 1 +
+
+    # Stability (actor effect across time)
+    .i_closeness_actor_lag1 +
+
+    # Influence (partner effect across time)
+    .i_closeness_partner_lag1 +
+
+    # Linear time trend
+    diaryday +
+
+    # Stable exchangeable dyad-level covariance
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_apim_data_dynamic
+)
+
+summary(stability_influence)
+```
+
+This model can be extended with contemporaneous actor and partner predictor
+associations and other lagged predictors. Time-varying predictors should usually
+be separated into within-person and between-person components. Their
+contemporaneous coefficients are then conditional on both partners' prior
+outcomes.
+
+**Note:** Person-mean centering a lagged outcome can introduce Nickell bias,
+especially in shorter time series [@hamakerCenterNotCenter2015;
+@nickellBiasesDynamicModels1981;
+@gistelinckMultilevelAutoregressiveSmall2021]. Refer to the
+[DIM vignette](dim.html) for a fuller discussion of exchangeable models.
 
 
 ---

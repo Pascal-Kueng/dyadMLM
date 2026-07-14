@@ -106,7 +106,8 @@ exchangeable composition and `0` for all other compositions.
 `prepare_interdep_data()` creates this structure automatically.
 The [APIM vignette](apim.html#exchangeable-residual-structure) derives
 the resulting covariance matrix and shows how to back-transform the sum and
-difference variances to regular constrained actor-partner variance-covariance matrices.
+difference variances to the usual equal-variance member-level covariance
+matrix.
 
 The model can then be specified as follows (example for an intercept-only model):
 
@@ -300,9 +301,9 @@ compare_interdep_models(
 ```
 
 Here, the constrained model fits substantially worse
-than the full model. Note that the test evaluates all imposed constraints jointly, 
-e.g., the pooling of fixed effects and the pooling of the residual covariances
-at the same time. 
+than the full model. Note that the test evaluates all imposed constraints
+jointly, including the pooled fixed effects and residual covariance structure.
+It does not show which restriction accounts for the difference.
 
 ## Mixed-composition intensive longitudinal (ILD) Gaussian model
 
