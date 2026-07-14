@@ -143,8 +143,9 @@ summary(mixed_cross_gaussian_model)
 
 ```
 
-The four fixed-effect indicators are mutually exclusive. With $I$ denoting `.i_{composition_role}`, the fixed part of the
-model can be written as:
+The four fixed-effect indicators are mutually exclusive. With $I$ denoting a
+shorter label for each generated composition-and-role indicator, the fixed part
+of the model can be written as:
 
 $$
 \mu_{ij}^{\mathrm{fixed}} =
@@ -154,7 +155,7 @@ $$
 \beta_{MM} I_{MM,ij}.
 $$
 
-The active composition-and-role indicator `.i_{composition_role}` for each person is shown below:
+The active indicator for each person is shown below:
 
 | Row | $I_{FM,F}$ | $I_{FM,M}$ | $I_{FF}$ | $I_{MM}$ | Fixed intercept |
 |:--|--:|--:|--:|--:|:--|
@@ -279,10 +280,14 @@ components are usually weakly identified.
 mixed-composition cross-sectional example, but each dyad contributes repeated
 paired observations over `diaryday`.
 
-To keep the example lighter, we will pool male-male and female-female compositions
-to one same-sex dyad. In practice, this should be theory based or an empiric decision.
+To keep the example lighter, we pool female-female and male-male dyads into one
+same-sex composition. This is a simplifying modeling assumption and does not
+reflect all differences used to simulate these example data. In an applied
+analysis, pooling should be theoretically justified or evaluated by comparing
+pooled and unpooled models fitted to the same observations.
 
-Aside from the pooling, we prepare the data in the same way, now adding `time` and a predictor:
+Aside from the pooling, we prepare the data in the same way, now adding `time`
+and a predictor:
 
 ```{r prepare-mixed-ild}
 mixed_ild_data <- prepare_interdep_data(
@@ -314,7 +319,8 @@ complex for the available data or some components are close to zero
 make a frequentist fit unstable, regularizing priors in a Bayesian model can
 sometimes help, but they do not replace careful model checks
 [@delrosarioPracticalGuideSpecifying2025]. A Bayesian implementation of this
-mixed-composition model is beyond the scope of this vignette.
+mixed-composition model is beyond the scope of this vignette. For these example
+data, we use the BFGS optimizer with a higher iteration limit.
 
 ```{r fit-mixed-ild-gaussian, eval = FALSE}
 
@@ -324,53 +330,58 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
     # Composition-specific intercepts
     .i_is_female_x_male_female + .i_is_female_x_male_male +
     
-    i_is_same_sex +
+    .i_is_same_sex +
 
     # Composition-specific time trends
     .i_is_female_x_male_female:diaryday +
     .i_is_female_x_male_male:diaryday +
     
-    i_is_same_sex:diaryday +
+    .i_is_same_sex:diaryday +
 
     # Composition-specific within-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cwp_actor +
     .i_is_female_x_male_male:.i_provided_support_cwp_actor +
     
-    i_is_same_sex:.i_provided_support_cwp_actor +
+    .i_is_same_sex:.i_provided_support_cwp_actor +
 
     # Composition-specific within-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cwp_partner +
     .i_is_female_x_male_male:.i_provided_support_cwp_partner +
     
-    i_is_same_sex:.i_provided_support_cwp_partner +
+    .i_is_same_sex:.i_provided_support_cwp_partner +
 
     # Composition-specific between-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cbp_actor +
     .i_is_female_x_male_male:.i_provided_support_cbp_actor +
     
-    i_is_same_sex:.i_provided_support_cbp_actor +
+    .i_is_same_sex:.i_provided_support_cbp_actor +
 
     # Composition-specific between-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cbp_partner +
     .i_is_female_x_male_male:.i_provided_support_cbp_partner +
     
-    i_is_same_sex:.i_provided_support_cbp_partner +
+    .i_is_same_sex:.i_provided_support_cbp_partner +
 
     # stable dyad-level covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
     
     (0 + .i_is_same_sex | coupleID) +
-    (0 + .i_diff_same_sex_arbitrary | coupleID) 
+    (0 + .i_diff_same_sex_arbitrary | coupleID) +
 
     # same-day covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
     
     (0 + .i_is_same_sex | coupleID:diaryday) +
-    (0 + .i_diff_same_sex_arbitrary | coupleID:diaryday) 
+    (0 + .i_diff_same_sex_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
   , data = mixed_ild_data
+  , control = glmmTMB::glmmTMBControl(
+      optimizer = stats::optim,
+      optArgs = list(method = "BFGS"),
+      optCtrl = list(maxit = 10000)
+    )
 )
 
 summary(mixed_ild_gaussian_model)
@@ -396,46 +407,28 @@ us(
     coupleID
 ) +
 
-# exchangeable female-female shared block
+# exchangeable same-sex shared block
 us(
   0 +
-    .i_is_female_x_female +
-    .i_is_female_x_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_female:.i_provided_support_cwp_partner |
+    .i_is_same_sex +
+    .i_is_same_sex:.i_provided_support_cwp_actor +
+    .i_is_same_sex:.i_provided_support_cwp_partner |
     coupleID
 ) +
 
-# exchangeable female-female difference block
+# exchangeable same-sex difference block
 us(
   0 +
-    .i_diff_female_x_female_arbitrary +
-    .i_diff_female_x_female_arbitrary:.i_provided_support_cwp_actor +
-    .i_diff_female_x_female_arbitrary:.i_provided_support_cwp_partner |
-    coupleID
-) +
-
-# exchangeable male-male shared block
-us(
-  0 +
-    .i_is_male_x_male +
-    .i_is_male_x_male:.i_provided_support_cwp_actor +
-    .i_is_male_x_male:.i_provided_support_cwp_partner |
-    coupleID
-) +
-
-# exchangeable male-male difference block
-us(
-  0 +
-    .i_diff_male_x_male_arbitrary +
-    .i_diff_male_x_male_arbitrary:.i_provided_support_cwp_actor +
-    .i_diff_male_x_male_arbitrary:.i_provided_support_cwp_partner |
+    .i_diff_same_sex_arbitrary +
+    .i_diff_same_sex_arbitrary:.i_provided_support_cwp_actor +
+    .i_diff_same_sex_arbitrary:.i_provided_support_cwp_partner |
     coupleID
 )
 ```
 
 This extension estimates a very large covariance structure and may not be
-supported by many datasets. Regularizing priors may help with estimation, but they do not make an
-unsupported random-effects structure appropriate.
+supported by many datasets. Regularizing priors may help with estimation, but 
+they do not necessarily make an unsupported random-effects structure appropriate.
 
 ## Practical takeaway
 
@@ -445,10 +438,10 @@ and the fitted model can place the corresponding fixed effects and covariance
 terms in one formula.
 
 It is often useful to begin with separate composition-specific models or
-simpler covariance structures. Combine them when a comparison or equality
-constraint or the empirical comparison of effect sizes is part of the research 
-question, and add further random effects only when the data support the 
-additional complexity.
+simpler covariance structures. Combine them when an equality constraint or a
+comparison of effects across compositions is part of the research question,
+and add further random effects only when the data support the additional
+complexity.
 
 ---
 
