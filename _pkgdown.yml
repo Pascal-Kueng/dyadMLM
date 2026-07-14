@@ -40,9 +40,10 @@ articles:
   - dsm
 
 reference:
-- title: Main function
+- title: Main functions
   contents:
   - prepare_interdep_data
+  - compare_interdep_models
 
 - title: Example data
   contents:

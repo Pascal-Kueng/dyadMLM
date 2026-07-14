@@ -21,6 +21,12 @@ diagram_helper <- if (file.exists("diagram-helpers.Rinc")) {
   file.path("vignettes", "diagram-helpers.Rinc")
 }
 sys.source(diagram_helper, envir = knitr::knit_global())
+
+diagram_device <- if (identical(Sys.getenv("IN_PKGDOWN"), "true")) {
+  "ragg_png"
+} else {
+  "svglite"
+}
 ```
 
 ```{r setup}
@@ -43,7 +49,7 @@ relationship to APIM effects in distinguishable dyads, see the
 
 ## The cross sectional Gaussian distinguishable APIM
 
-```{r distinguishable-apim-diagram, echo=FALSE, dev="svglite", fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads. Actor and partner effects can differ by the role of the outcome member, and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. The female and male outcome residuals covary."}
+```{r distinguishable-apim-diagram, echo=FALSE, dev=diagram_device, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads. Actor and partner effects can differ by the role of the outcome member, and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. The female and male outcome residuals covary."}
 draw_apim_diagram("distinguishable")
 ```
 
@@ -122,7 +128,7 @@ covariance.
 
 ## The cross-sectional Gaussian exchangeable APIM
 
-```{r exchangeable-apim-diagram, echo=FALSE, dev="svglite", fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for exchangeable dyads. The two members share one actor effect and one partner effect; their outcome residuals have equal variances and covary within dyads.", fig.alt="Path diagram for an exchangeable cross-sectional APIM. Each member's predictor has the same actor effect on their own outcome and the same partner effect on the other member's outcome. The two outcome residuals have equal variances and covary."}
+```{r exchangeable-apim-diagram, echo=FALSE, dev=diagram_device, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for exchangeable dyads. The two members share one actor effect and one partner effect; their outcome residuals have equal variances and covary within dyads.", fig.alt="Path diagram for an exchangeable cross-sectional APIM. Each member's predictor has the same actor effect on their own outcome and the same partner effect on the other member's outcome. The two outcome residuals have equal variances and covary."}
 draw_apim_diagram("exchangeable")
 ```
 

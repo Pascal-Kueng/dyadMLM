@@ -322,12 +322,7 @@ and partner columns alongside their contemporaneous versions. Lagging respects
 the dyad and member structure, matches observations at exactly `time - 1`, and
 does not bridge missing occasions.
 
-Whether raw or within-person-centered lagged outcomes should be used depends on
-the research question and the data. For guidance on this choice, refer to
-@hamakerCenterNotCenter2015 and
-@gistelinckMultilevelAutoregressiveSmall2021.
-
-Brief exchangeable example:
+Brief example:
 
 ```{r prepare-ild-apim-dynamic}
 ild_apim_data_dynamic <- prepare_interdep_data(
@@ -345,12 +340,12 @@ print(ild_apim_data_dynamic, n = 6)
 
 ```
 
-**Note:** Person-mean centering a lagged outcome can introduce Nickell bias,
-especially in shorter time series [@hamakerCenterNotCenter2015;
-@nickellBiasesDynamicModels1981;
-@gistelinckMultilevelAutoregressiveSmall2021]. See the
-[APIM vignette](apim.html) for modeling limitations and a fitted dynamic
-example.
+**Note:** Whether to use the raw or within-person-centered lagged outcome depends
+on the research question and the data. Including a lagged **outcome** in dynamic 
+models can introduce bias, especially in shorter time series 
+[@hamakerCenterNotCenter2015; @nickellBiasesDynamicModels1981;
+@gistelinckMultilevelAutoregressiveSmall2021]. See the [APIM vignette](apim.html) 
+for a more detailed discussion and guidance.
 
 ## Data with multiple and mixed-composition dyads
 
