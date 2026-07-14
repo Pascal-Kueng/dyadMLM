@@ -22,9 +22,12 @@ library(interdep)
 
 
 This vignette covers APIMs that combine distinguishable and exchangeable dyad
-compositions in one analysis. It assumes familiarity with the data-preparation
-workflow in the [Getting Started vignette](getting-started.html) and with the
-single-composition models in the
+compositions in one analysis. The unified model presented by Bolger, Laurenceau,
+and DiGiovanni is the basis and inspiration for this vignette. Their presentation
+includes a hybrid model for these dyad types in SEM [@Bolger2025Unified]. Here,
+we implement the same general idea in one multilevel model. The vignette assumes familiarity
+with the data-preparation workflow in the
+[Getting Started vignette](getting-started.html) and with the single-composition models in the
 [Actor-Partner Interdependence Model vignette](apim.html). For DIM predictors and their
 equivalence to APIM effects in exchangeable dyads, see the
 [Dyad-Individual Model vignette](dim.html). For DSM predictor scores and their
@@ -93,21 +96,33 @@ print(mixed_cross_data, n = 4)
 ```
 
 For each composition, the model uses either distinguishable or exchangeable
-APIM terms. Most of the additional work is in the random-effects structure.
+APIM terms. For exchangeable compositions, it uses a sum-and-difference
+parameterization. This gives the two members equal variances while allowing
+their within-dyad covariance to be estimated
+[@delrosarioPracticalGuideSpecifying2025].
 
-The `.i_diff_*` variables contain `-1` and `1` for the corresponding
+The returned `.i_diff_*` variables contain `-1` and `1` for the corresponding
 exchangeable composition and `0` for all other compositions.
-`prepare_interdep_data()` creates this structure automatically. The model can
-then be specified as follows:
+`prepare_interdep_data()` creates this structure automatically.
+
+The model can then be specified as follows (example for an intercept-only model):
 
 ```{r fit-mixed-cross-sectional-gaussian, eval = FALSE}
 
 mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
   satisfaction ~ 0 +
 
+    ##### INTERCEPTS ######
+    # fixed intercepts for individuals from distinguishable female-male couples
     .i_is_female_x_male_female + .i_is_female_x_male_male +
-    .i_is_female_x_female + .i_is_male_x_male +
 
+    # fixed pooled intercept for female-female couples
+    .i_is_female_x_female +
+
+    # fixed pooled intercept for male-male couples
+    .i_is_male_x_male +
+
+    ##### RESIDUAL STRUCTURE ######
     # distinguishable female-male residual covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
 
@@ -128,31 +143,124 @@ summary(mixed_cross_gaussian_model)
 
 ```
 
+The four fixed-effect indicators are mutually exclusive: exactly one equals `1`
+for each row. Using shorter labels for the generated columns, the fixed part of
+the model is
+
+$$
+\mu_{ij}^{\mathrm{fixed}} =
+\beta_{FM,F} I_{FM,F,ij} +
+\beta_{FM,M} I_{FM,M,ij} +
+\beta_{FF} I_{FF,ij} +
+\beta_{MM} I_{MM,ij}.
+$$
+
+The active indicator, and therefore the fixed intercept, depends on the row:
+
+| Row | $I_{FM,F}$ | $I_{FM,M}$ | $I_{FF}$ | $I_{MM}$ | Fixed intercept |
+|:--|--:|--:|--:|--:|:--|
+| Female in a female-male dyad | **1** | 0 | 0 | 0 | $\beta_{FM,F}$ |
+| Male in a female-male dyad | 0 | **1** | 0 | 0 | $\beta_{FM,M}$ |
+| Member of a female-female dyad | 0 | 0 | **1** | 0 | $\beta_{FF}$ |
+| Member of a male-male dyad | 0 | 0 | 0 | **1** | $\beta_{MM}$ |
+
+For a member of a male-male dyad, for example, the fixed part reduces to
+
+$$
+0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
+= \beta_{MM}.
+$$
+
+The random-effects terms reduce in the same way because their indicator columns
+are also `0` outside the relevant composition. For a female-male dyad, the
+`us()` term gives the female and male members separate random intercepts and
+estimates their covariance:
+
+$$
+\mu_{Fj} = \beta_{FM,F} + u_{Fj}, \qquad
+\mu_{Mj} = \beta_{FM,M} + u_{Mj}.
+$$
+
+For an exchangeable composition $C$ (female-female or male-male), the two
+random-effects terms give a shared dyad effect $u_{Cj}$ and an opposite member
+effect $v_{Cj}$:
+
+$$
+\mu_{Cij} = \beta_C + u_{Cj} + d_{Cij}v_{Cj},
+\qquad d_{Cij} \in \{-1, 1\}.
+$$
+
+Thus, the shared effect moves both members together, while the difference effect
+moves them in opposite directions. Its `-1`/`1` direction is arbitrary.
+
+The five random-effects terms in the model form separate blocks: one correlated
+female-male block, two female-female sum-and-difference blocks, and two
+male-male sum-and-difference blocks. No random-effect covariance is estimated
+between compositions. The two blocks within each exchangeable composition are
+also separate, so the shared and difference effects are uncorrelated. Because
+this is a cross-sectional model with one observation per member and
+`dispformula = ~ 0`, these dyad-level random effects represent the member
+variances and within-dyad covariance without an additional observation-level
+residual variance.
+
+This illustration is limited to the fixed-intercept model. The ILD example below
+shows how composition-specific slopes can be added.
+
 ### Single versus separate mixed-composition fits
 
-The mixed-composition models in this vignette fit all dyad compositions in one
+The mixed-composition models described in this vignette fit all dyad compositions in one
 model call. This is useful when the goal is to compare effects across
 compositions, test equality constraints, or make those comparisons within one
 joint fitted model.
 
-A fixed-effect formula with all compositions in one model call does not, by
-itself, create partial pooling across dyad compositions. The
-composition-specific intercepts and slopes above are ordinary fixed effects, so
-estimates for female-female or male-male dyads are not automatically shrunk
-toward estimates from the other dyad types. If every mean, variance, and
-covariance parameter is composition-specific, the likelihood largely
+`marginaleffects::hypotheses()` provides a string interface for testing linear
+combinations of `glmmTMB` fixed effects. In these equations, `conditional_`
+identifies coefficients from the conditional model. A positive estimate means
+that the quantity on the left side is higher than the quantity on the right
+side.
+
+```{r mixed-cross-sectional-contrasts, eval = FALSE}
+# Test whether male-male and female-female pooled intercepts are different
+marginaleffects::hypotheses(
+  mixed_cross_gaussian_model,
+  hypothesis = "conditional_.i_is_male_x_male = conditional_.i_is_female_x_female"
+)
+
+# Test whether the average female-male intercept is different from the pooled
+# male-male intercept
+marginaleffects::hypotheses(
+  mixed_cross_gaussian_model,
+  hypothesis = "(conditional_.i_is_female_x_male_female + conditional_.i_is_female_x_male_male) / 2 = conditional_.i_is_male_x_male"
+)
+
+# Test whether the male intercept from a female-male couple is different from
+# the pooled male intercept from a male-male couple
+marginaleffects::hypotheses(
+  mixed_cross_gaussian_model,
+  hypothesis = "conditional_.i_is_female_x_male_male = conditional_.i_is_male_x_male"
+)
+
+```
+
+It is important to note, that such a fixed-effect formula with all compositions
+in one model call does not, by itself, create partial pooling across dyad
+compositions. The composition-specific intercepts and slopes above are ordinary
+fixed effects, so estimates for female-female or male-male dyads are not
+automatically shrunk toward estimates from the other dyad types. If every mean,
+variance, and covariance parameter is composition-specific, the likelihood largely
 factorizes by composition. In that case, a combined fit can closely match
-separate composition-specific fits. Its main advantage is that comparisons can
-be made within one fitted model.
+separate composition-specific fits. Its main advantage is that formal
+parameter comparisons can be made within one fitted model, and that models with
+different versions of pooling can be compared. For example, it can be tested,
+whether pooling male-male and female-female couples as same-sex substantially worsens
+model fit, under consideration of not only the fixed effects, but also the
+random effects structure.
 
-Partial pooling requires a different model specification, such as a common effect
+If partial pooling is desired, for instance with few dyads for one particular type,
+a different model specification is required, such as a common effect
 plus composition deviations with a hierarchical prior, or a random dyad-type
-effect. With only a few dyad types, frequentist random dyad-type variance
-components are usually weakly identified. Complete pooling, where a slope is
-constrained to be identical across compositions, can improve precision and
-stability when the equality constraint is substantively reasonable. However,
-it can hide meaningful differences between dyad compositions.
-
+effect. However, with only a few dyad types, frequentist random dyad-type variance
+components are usually weakly identified.
 
 ## Mixed-composition intensive longitudinal Gaussian model
 
@@ -179,17 +287,14 @@ print(mixed_ild_data)
 
 This mixed-composition ILD model includes composition-specific intercepts,
 fixed time slopes, and within-person and between-person actor and partner
-effects. Random time slopes are omitted because the separate stable and
-same-day covariance blocks already introduce many variance parameters. They
-should be added only when the research question and data support the additional
-complexity.
+effects. It omits random slopes, as they would add several variances and 
+covariances to an already large model. 
 
-The all-in-one covariance model is demanding and may produce optimizer
-convergence warnings. A positive definite Hessian and estimates that are close
-to simpler or separate fits are useful checks, but neither should be treated as
-automatic proof that a warning can be ignored. If the combined fit is not
-clean, fit the composition-specific models separately or simplify the stable
-and same-day covariance blocks before adding more random effects.
+This model is complex and may produce optimizer convergence warnings, 
+especially when the random-effects structure is too
+complex for the available data or some components are close to zero
+[@delrosarioPracticalGuideSpecifying2025]. A Bayesian approach may help to 
+stabilize the complex model !TODO: link to brms.
 
 ```{r fit-mixed-ild-gaussian, eval = FALSE}
 
