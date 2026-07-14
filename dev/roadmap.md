@@ -15,6 +15,8 @@ helpers, and eventually model syntax explicit and reproducible.
 - Possible future reintroduction of inspection-only incomplete/unknown dyads:
   [`keep-behavior-notes.md`](keep-behavior-notes.md)
 - Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
+  - the note is provisional and must be revised against the methodological
+    papers in [`References/`](References/) before implementation
 - Directional DSM derivation and implementation record: [`dsm.md`](dsm.md)
 - ILD non-independence evidence and tutorial policy:
   [`ild-nonindependence.md`](ild-nonindependence.md)
@@ -490,6 +492,10 @@ Complete these before calling the feature set CRAN-ready:
     missingness, and latent centering out of the first Stan implementation
   - Preserve the package-wide composition metadata and exchangeability
     constraints rather than introducing a parallel dyad registry
+  - Before implementation, reconcile the plan with the papers under
+    [`References/`](References/), including the distinctions between structural
+    DSEM and residual DSEM, manifest and latent centering, initial conditions,
+    unequal intervals, and Kalman-style missing-data handling
 
 ## Version 1.0.0 - Stable User-Facing API
 

@@ -3,7 +3,7 @@
 **Status:** implementation roadmap  
 **Target:** future inclusion in an R package for dyadic longitudinal models  
 **Model class:** Gaussian two-person dyadic residual VAR(1) models  
-**Last updated:** 2026-07-06
+**Last updated:** 2026-07-14
 
 ---
 
@@ -123,6 +123,54 @@ The first full implementation should be restricted to:
 - no latent centering at first.
 
 This restricted scope is deliberate. The statistical core must be validated before adding DSEM extensions.
+
+### 1.4 Relation to DSEM, RDSEM, and manifest lagged models
+
+The proposed model is closest to a multivariate **residual DSEM (RDSEM)**. Its
+mean model contains time trends and concurrent actor, partner, DIM, or DSM
+associations, while the VAR process is applied to the remaining residuals. This
+is different from a structural lagged-outcome MLM or ordinary DSEM, where the
+observed outcome is directly regressed on its own and possibly its partner's
+prior outcome. Adding observed outcome lags changes the interpretation of all
+other coefficients and is not a neutral substitute for residual dynamics.
+
+The following DSEM considerations should inform later design stages without
+expanding the first Stan implementation:
+
+- Mplus DSEM creates lags from the observed series but uses latent person-mean
+  centering by default. This is not equivalent to either a raw manifest lag or
+  an observed person-mean-centered lag. The latent decomposition is intended to
+  avoid Nickell bias in autoregressive paths and bias from unreliable observed
+  person means in between-person effects.
+- Latent centering is not automatically reliable with very short series.
+  Simulations by Gistelinck, Loeys, and Flamant show that default DSEM can still
+  be biased or unstable at small `T`, partly because of initial-condition and
+  presample-state handling. The first-outcome likelihood and its relationship
+  with stable member effects must therefore remain explicit design decisions.
+- A time covariate in a structural lagged-outcome equation is not identical to
+  separating the trend from residual autoregression. The planned residual VAR
+  should keep the mean trend and residual transition equations distinct.
+- A full multivariate dynamic model should estimate own- and cross-partner
+  transitions jointly with same-occasion innovation covariance. Separate
+  univariate mixed models cannot generally recover all innovation and
+  cross-outcome random-coefficient correlations directly.
+- Discrete lag coefficients are tied to a specific elapsed-time unit. Ragged
+  records and omitted occasions must not silently turn the previous available
+  observation into a lag-1 observation. Gap-aware transitions, and eventually
+  state-space or Kalman-style handling, should be evaluated against Mplus's
+  `TINTERVAL` and missing-data behavior.
+- Contemporaneous predictors may be included in a dynamic mean model, but their
+  coefficients remain conditional associations unless temporal ordering and
+  stronger identifying assumptions justify a causal interpretation.
+
+This note has not yet been systematically reconciled with the methodological
+papers stored in [`References/`](References/). Before any Stan implementation,
+revise the plan against that local collection, especially the work on DSEM and
+RDSEM, latent centering, small-`T` autoregressive bias, dyadic longitudinal
+models, and random-effect specification. The McNeish and Hamaker DSEM primer,
+the Asparouhov papers, the Hamaker and Grasman centering paper, the Gistelinck
+papers, Nickell, and del Rosario and West should be treated as required starting
+points rather than relying on this roadmap alone.
 
 ---
 
@@ -2569,4 +2617,3 @@ mixed-composition models:
 ```
 
 The custom Stan route is harder than forcing the problem into existing high-level mixed-model syntax, but it is statistically cleaner. The dyadic residual VAR process is explicit, exchangeability constraints are transparent, distinguishable roles are modeled directly, and the eventual package can generate models that match the substantive dyadic structure instead of approximating it indirectly.
-

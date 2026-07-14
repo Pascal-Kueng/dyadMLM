@@ -29,8 +29,10 @@
 #'   decomposition and model-ready predictor construction.
 #' @param lag_predictors Optional subset of `predictors` for which lag-1
 #'   model-ready columns should be created. Requires `time` to be a finite,
-#'   integer-valued numeric measurement index. Raw and within-person predictor
-#'   versions are lagged; stable between-person versions are not.
+#'   integer-valued numeric measurement index. Lagging respects the dyad and
+#'   member structure, matches observations at exactly `time - 1`, and does not
+#'   bridge missing occasions. Only raw and within-person predictors are
+#'   lagged. Stable between-person versions are not.
 #' @param model_type Model-ready column families to construct. Can contain one
 #'   or more of `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
@@ -145,6 +147,7 @@
 #'   member = person_id,
 #'   time = time,
 #'   predictors = x,
+#'   lag_predictors = x,
 #'   model_type = "apim",
 #'   seed = 123
 #' )

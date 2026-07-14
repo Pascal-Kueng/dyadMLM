@@ -1335,7 +1335,8 @@ under the assumption that residuals from different days are independent.
 If the goal is to retain these concurrent DIM associations while accounting for
 serial dependence, the closest extension is a dyadic residual dynamic structural
 equation model (RDSEM). It keeps the concurrent regression separate from a VAR
-model for its residuals [@asparouhovComparisonModelsAnalysis2020]. This
+model for its residuals [@asparouhovComparisonModelsAnalysis2020;
+@mcneishPrimerTwoLevel2020]. This
 residual-VAR structure is not directly available through the `glmmTMB` interface
 used here, and open-source support for dyadic dynamic models remains very limited
 [@delrosarioPracticalGuideSpecifying2025].
@@ -1470,6 +1471,12 @@ acceptably from about ten occasions, but this is not a universal cutoff
 [@gistelinckMultilevelAutoregressiveSmall2021]. For shorter panels, consider an
 LD-APIM, which lets the first outcomes relate to the members' stable levels in a
 wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020].
+
+These manifest-lag models are not equivalent to Mplus DSEM, which uses latent
+person-mean centering by default and can estimate multivariate or residual
+dynamics jointly [@mcneishPrimerTwoLevel2020]. For very short panels, however,
+default DSEM may still be biased or unstable, so the LD-APIM recommendation
+above may be preferable [@gistelinckMultilevelAutoregressiveSmall2021].
 
 These lagged-outcome issues are separate from the earlier concern about
 unreliable person means used to construct `cbp` predictors with few occasions.

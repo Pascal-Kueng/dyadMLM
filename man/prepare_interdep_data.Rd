@@ -46,8 +46,10 @@ decomposition and model-ready predictor construction.}
 
 \item{lag_predictors}{Optional subset of \code{predictors} for which lag-1
 model-ready columns should be created. Requires \code{time} to be a finite,
-integer-valued numeric measurement index. Raw and within-person predictor
-versions are lagged; stable between-person versions are not.}
+integer-valued numeric measurement index. Lagging respects the dyad and
+member structure, matches observations at exactly \code{time - 1}, and does not
+bridge missing occasions. Only raw and within-person predictors are
+lagged. Stable between-person versions are not.}
 
 \item{model_type}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
@@ -187,6 +189,7 @@ ild_prepared <- prepare_interdep_data(
   member = person_id,
   time = time,
   predictors = x,
+  lag_predictors = x,
   model_type = "apim",
   seed = 123
 )
