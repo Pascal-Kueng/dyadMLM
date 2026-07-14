@@ -181,8 +181,8 @@ separate random intercepts and estimates their covariance:
 $$
 \Sigma_{FM} =
 \begin{pmatrix}
-\sigma_{FM,F}^2 & \sigma_{FM,M} \\
-\sigma_{FM,F} & \sigma_{FM,M}^2
+\sigma_{FM,F}^2 & c_{FM} \\
+c_{FM} & \sigma_{FM,M}^2
 \end{pmatrix}
 $$
 
@@ -193,18 +193,15 @@ for a covariance:
 $$
 \Sigma_{FF} =
 \begin{pmatrix}
-\sigma_{FF}^2 & \sigma_{FF} \\
-\sigma_{FF} & \sigma_{FF}^2
-\end{pmatrix}
-
-\text{and, }
-
-\Sigma_{FF} =
+\sigma_{FF}^2 & c_{FF} \\
+c_{FF} & \sigma_{FF}^2
+\end{pmatrix},
+\qquad
+\Sigma_{MM} =
 \begin{pmatrix}
-\sigma_{FF}^2 & \sigma_{FF} \\
-\sigma_{FF} & \sigma_{FF}^2
+\sigma_{MM}^2 & c_{MM} \\
+c_{MM} & \sigma_{MM}^2
 \end{pmatrix}
-
 $$
 
 The five random-effects terms in the model form separate blocks. No random-effect 
@@ -269,11 +266,66 @@ different versions of pooling can be compared. For example, it can be tested
 whether pooling male-male and female-female couples as same-sex substantially
 worsens model fit, considering both the fixed effects and random-effects
 structure. Such model comparisons require the restricted and unrestricted
-models to use the same observations and a nested models, which pooling represents.
+models to use the same observations and require the restricted model to be
+nested within the unrestricted model.
 
 If partial pooling is desired, for instance with few dyads for one particular type,
 a different model specification would be required, such as a common effect
 plus composition deviations.
+
+### Model comparison with a restricted model
+
+The following is a brief example of comparing a constrained model with the full
+model from before. Here, we treat female-male dyads as exchangeable and pool them with
+male-male dyads, while modeling female-female dyads separately. In an applied
+analysis, these constraints would require a theoretical justification.
+
+```{r prepare-mixed-cross-sectional-constrained}
+mixed_cross_data_constrained <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  set_exchangeable_compositions = "male-female",
+  pool_compositions = list(
+    "non_female_x_female" = c("male-male", "female-male")
+  ),
+  seed = 123
+)
+
+mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
+  satisfaction ~ 0 +
+    .i_is_female_x_female +
+    .i_is_non_female_x_female +
+
+    # exchangeable female-female residual covariance via sum-diff
+    (0 + .i_is_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
+
+    # pooled female-male and male-male residual covariance via sum-diff
+    (0 + .i_is_non_female_x_female | coupleID) +
+    (0 + .i_diff_non_female_x_female_arbitrary | coupleID)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = mixed_cross_data_constrained
+)
+
+compare_interdep_models(
+  restricted = mixed_cross_gaussian_model_constrained,
+  full = mixed_cross_gaussian_model
+)
+```
+
+The helper verifies that both models were fitted to equivalent observations,
+then performs a likelihood-ratio test without requiring both model calls to use
+the same R data object. Here, the constrained model fits substantially worse
+than the full model. The test evaluates all imposed constraints jointly; it
+does not identify which particular constraint accounts for the difference.
+
+`compare_interdep_models()` cannot determine from the model formulas alone
+whether one reparameterized model is truly nested within the other. That remains
+a substantive modeling requirement.
 
 ## Mixed-composition intensive longitudinal (ILD) Gaussian model
 

@@ -70,6 +70,67 @@ also constrained to be equal, while their covariance is estimated.
 
 ### Residual random effects structure - and back-transformation
 
+For an exchangeable dyad, `interdep` generates an arbitrary member-difference
+column, named `.i_diff_*`, that is `+1` for one member and `-1` for the other.
+The exchangeable residual structure is represented by two separate
+random-effects terms: a shared dyad random intercept and a random coefficient
+for this difference column [@delrosarioPracticalGuideSpecifying2025]. If their
+random effects are denoted by $u_{Mj}$ and $u_{Dj}$, the two members receive
+
+$$
+r_{1j} = u_{Mj} + u_{Dj}, \qquad
+r_{2j} = u_{Mj} - u_{Dj}.
+$$
+
+Because the shared and difference effects are fitted in separate random-effects
+terms, they are uncorrelated. Writing their variances as $\sigma_M^2$ and
+$\sigma_D^2$ gives
+
+$$
+\begin{pmatrix}
+u_{Mj} \\
+u_{Dj}
+\end{pmatrix}
+\sim
+\mathcal{N}
+\left[
+\begin{pmatrix}
+0 \\
+0
+\end{pmatrix},
+\begin{pmatrix}
+\sigma_M^2 & 0 \\
+0 & \sigma_D^2
+\end{pmatrix}
+\right].
+$$
+
+The implied member-level residual covariance matrix is therefore
+
+$$
+\Sigma =
+\begin{pmatrix}
+\sigma_M^2 + \sigma_D^2 & \sigma_M^2 - \sigma_D^2 \\
+\sigma_M^2 - \sigma_D^2 & \sigma_M^2 + \sigma_D^2
+\end{pmatrix}.
+$$
+
+Thus, both members have the same residual variance
+$V = \sigma_M^2 + \sigma_D^2$, their covariance is
+$C = \sigma_M^2 - \sigma_D^2$, and their residual correlation is $C/V$.
+Conversely, the shared and difference variances can be recovered from a
+member-level variance and covariance as
+
+$$
+\sigma_M^2 = \frac{V + C}{2}, \qquad
+\sigma_D^2 = \frac{V - C}{2}.
+$$
+
+Reversing the arbitrary `+1/-1` assignment changes the sign of $u_{Dj}$ but not
+its variance or the implied member-level covariance matrix. In longitudinal
+models, the same transformation applies separately to stable dyad-level and
+same-occasion dyad-level covariance blocks.
+
 ### Interpretation
 
 ## Testing distinguishability

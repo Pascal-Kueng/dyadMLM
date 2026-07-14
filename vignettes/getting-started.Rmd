@@ -121,7 +121,7 @@ placeholder row for the missing occasion.
 `example_dyadic_crosssectional` is a simulated cross-sectional dataset for
 distinguishable dyads. Each dyad has two rows: one for each member.
 
-```{r cross-sectional-raw}
+```{r cross-sectional-raw, echo = FALSE}
 print(head(example_dyadic_crosssectional))
 ```
 
@@ -249,11 +249,10 @@ cross_dim_data <- prepare_interdep_data(
 print(cross_dim_data, n = 4)
 ```
 
-For distinguishable dyads, DSM preparation additionally requires a stable role
-variable and an explicit role order. The role order defines the direction of
+For distinguishable dyads, DSM columns can be requested. These additionally require 
+an explicit role order. The role order defines the direction of
 all DSM predictor differences and the DSM role contrast
-[@iidaModelsInterdependentIndividuals2018]. Outcomes remain unchanged and are
-selected later in the fitted-model formula.
+[@iidaModelsInterdependentIndividuals2018].
 
 ```{r prepare-cross-dsm}
 cross_dsm_data <- prepare_interdep_data(
@@ -302,16 +301,15 @@ print(incomplete_dropped_data)
 `example_dyadic_ILD` is a simulated intensive longitudinal dyadic dataset. Each
 dyad has repeated observations over `diaryday`, with one row per person-day.
 
-The first rows look like this:
-
-```{r ild-raw}
-print(example_dyadic_ILD, n = 26)
+```{r ild-raw, echo=FALSE}
+example_dyadic_ILD <- example_dyadic_ILD |>
+  dplyr::arrange(
+    coupleID, diaryday
+  ) 
 ```
 
 To prepare intensive longitudinal data, pass the `time` variable to
 `prepare_interdep_data()`.
-
-### ILD APIM preparation
 
 ```{r prepare-ild-apim}
 ild_apim_data <- prepare_interdep_data(
@@ -325,7 +323,7 @@ ild_apim_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(ild_apim_data)
+print(ild_apim_data, n = 6)
 
 ```
 
@@ -378,7 +376,7 @@ ild_apim_data_dynamic <- prepare_interdep_data(
   seed = 123
 )
 
-print(ild_apim_data_dynamic)
+print(ild_apim_data_dynamic, n = 6)
 
 ```
 
