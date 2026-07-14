@@ -1,0 +1,137 @@
+---
+title: "Generalized Non-Gaussian Actor-Partner Interdependence Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Generalized Non-Gaussian Actor-Partner Interdependence Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(interdep)
+```
+
+
+## Dichotomous outcomes
+
+## Ordinal outcomes
+
+## Categorical outcomes
+
+## Poisson and Negative Binomial Outcomes
+
+##
+
+## Example and excursion: semi-continuous cross-sectional data
+
+!NOTE: potentially we should separate non-normal models into their own vignette, since they are actually
+quite complex and models depend on 
+
+`example_dyadic_crosssectional_tweedie` has the same dyadic structure as before, but the
+outcome has exact zeros and positive skewed values, as in
+some physical activity outcomes, in contrast to the Gaussian distribution from the 
+previous example. 
+
+```{r tweedie-raw}
+print(head(example_dyadic_crosssectional_tweedie))
+hist(example_dyadic_crosssectional_tweedie$physical_activity, breaks = 20)
+```
+
+Validation and modeling work the same way because the dyadic structure is the same.
+The random-effect interpretation is different from the Gaussian case: Tweedie
+random effects are latent effects on the log-mean scale, while the
+observation-level Tweedie variance remains part of the model.
+
+### Distinguishable Tweedie APIM
+
+```{r prepare-tweedie-distinguishable}
+tweedie_distinguishable_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_tweedie,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = motivation,
+  # when no model_type is specified, apim is the default.
+  seed = 123
+)
+
+print(tweedie_distinguishable_data)
+summary(tweedie_distinguishable_data)
+```
+
+
+```{r fit-tweedie-distinguishable, eval = FALSE}
+
+tweedie_distinguishable_model <- glmmTMB(
+  physical_activity ~ 
+    # remove standard intercept and model separate intercepts for male and female
+    0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
+    
+    # gender-specific slopes for motivation actor effect
+    .i_is_female_x_male_female:.i_motivation_actor + .i_is_female_x_male_male:.i_motivation_actor +
+    
+    # gender-specific slopes for motivation partner effect
+    .i_is_female_x_male_female:.i_motivation_partner + .i_is_female_x_male_male:.i_motivation_partner +
+    
+    # keep a simple couple-level latent effect for stable non-independence
+    # important limitation: this can only induce positive partner dependence
+    (1 | coupleID) 
+  
+  # allow role-specific Tweedie dispersion
+  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
+  , family = tweedie()
+  , data = tweedie_distinguishable_data
+)
+
+summary(tweedie_distinguishable_model)
+
+```
+
+### Exchangeable Tweedie APIM
+
+```{r prepare-tweedie-exchangeable}
+tweedie_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_crosssectional_tweedie,
+  group = coupleID,
+  member = personID,
+  # role = gender,
+  predictors = motivation,
+  seed = 123
+)
+
+print(tweedie_exchangeable_data)
+summary(tweedie_exchangeable_data)
+```
+
+```{r fit-tweedie-exchangeable, eval = FALSE}
+
+tweedie_exchangeable_model <- glmmTMB(
+  physical_activity ~ 
+    # pooled intercept 
+    1 + 
+    
+    # pooled actor slope for motivation
+    .i_motivation_actor +
+    
+    # pooled partner slope for motivation
+    .i_motivation_partner +
+    
+    # exchangeable latent dyad block on the log-mean scale
+    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+    
+  # estimate a single pooled Tweedie dispersion parameter
+  , dispformula = ~ 1
+  , family = tweedie()
+  , data = tweedie_exchangeable_data
+)
+
+summary(tweedie_exchangeable_model)
+
+```
