@@ -96,7 +96,7 @@ print(prepared_data, n = 4)
 The prepared data contains the composition indicators and APIM
 actor/partner predictor columns used in the model formulas below.
 
-One possible APIM formula is:
+One simple distinguishable APIM formula is:
 
 ``` r
 simple_apim <- glmmTMB::glmmTMB(
