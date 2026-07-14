@@ -434,11 +434,7 @@ us(
 ```
 
 This extension estimates a very large covariance structure and may not be
-supported by many datasets. A more practical starting point is to add only the
-random slopes that are central to the research question. If the equality
-assumption is substantively reasonable, female-female and male-male dyads could
-also be pooled into one same-sex composition to reduce the number of parameters.
-Regularizing priors may help with estimation, but they do not make an
+supported by many datasets. Regularizing priors may help with estimation, but they do not make an
 unsupported random-effects structure appropriate.
 
 ## Practical takeaway
@@ -450,8 +446,9 @@ terms in one formula.
 
 It is often useful to begin with separate composition-specific models or
 simpler covariance structures. Combine them when a comparison or equality
-constraint is part of the research question, and add further random effects
-only when the data support the additional complexity.
+constraint or the empirical comparison of effect sizes is part of the research 
+question, and add further random effects only when the data support the 
+additional complexity.
 
 ---
 
