@@ -24,20 +24,31 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 APIMs that combine distinguishable and exchangeable dyad compositions,
 see the [Mixed-Composition APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
-For the dyadic score model, see the [Dyadic Score Model
+For the full Dyadic Score Model (DSM), a different parameterization of
+the distinguishable APIM, see the [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
-Whereas the DIM is a different parameterization of the exchangeable
-APIM, the Dyadic Score Model (DSM) is a different parameterization of
-the distinguishable APIM.
+Under exchangeability constraints, the reduced, label-invariant DSM is
+also equivalent to the DIM, as discussed below.
 
 ## Cross-Sectional Gaussian DIM
 
-The current DIM implementation prepares predictors for one exchangeable
-dyad composition. Exchangeability means that swapping the two member
-labels does not change the model (Kenny et al. 2006). One way to make
-this assumption at the data-preparation layer is to omit `role` from
+The current DIM implementation needs one exchangeable dyad composition.
+Exchangeability means that swapping the two member labels does not
+change the model (Kenny et al. 2006). Whether roles can and should be
+treated as exchangeable is a substantive assumption (see [Testing
+distinguishability in the APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability)).
+
+One way to make this assumption in `interdep` at the data-preparation
+step is to omit `role` from
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
-This treats all dyads as the same exchangeable composition.
+This treats all dyads as the same exchangeable composition. Passing a
+`role` is also possible when it leads to exactly one exchangeable
+composition (e.g., only female-female dyads). Otherwise, refer to the
+[Getting Started
+vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md)
+for how to filter, pool, and constrain dyad compositions to obtain a
+single exchangeable dyad composition.
 
 ``` r
 
@@ -91,138 +102,11 @@ print(cross_exchangeable_data, n = 4)
 #> #   .i_communication_within_dyad_dev <dbl>
 ```
 
-For the exchangeable random-effects specification below,
+For the exchangeable random-effects specification,
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
 creates a member-difference contrast `.i_diff_*`, coded as `+1` for one
 partner and `-1` for the other. Because these member labels are
 arbitrary, setting `seed` makes their assignment reproducible.
-
-Passing a `role` is also possible when it leads to exactly one
-exchangeable composition (e.g., only female-female dyads).
-
-In a dataset with mixed dyad types, the right preparation depends on the
-analysis goal.
-
-For instance, we can filter dyads and keep only male-male and
-female-female dyads. Because DIM currently supports a single type of
-exchangeable dyad, we might pool those like this, if theoretically
-justified:
-
-``` r
-
-cross_same_sex_pooled_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_mixed,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = satisfaction,
-  model_type = c("apim", "dim"),
-  # Remove male-female dyads.
-  include_compositions = c("male-male", "female-female"),
-  pool_compositions = list(
-    "same-sex-couples" = c("male-male", "female-female")
-  ),
-  seed = 123
-)
-
-print(cross_same_sex_pooled_data, n = 4)
-#> # interdep data
-#> # Rows: 400 | Dyads: 200 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
-#> #
-#> # Dyad compositions:
-#> # same-sex-couples (pooled) exchangeable 200 dyads
-#> #   female_x_female
-#> #   male_x_male
-#> #
-#> # Added columns:
-#> #   .i_composition             inferred dyad composition
-#> #   .i_composition_role        composition-specific member role
-#> #   .i_is_{comp-role}          composition-role indicator columns
-#> #   .i_diff_{comp}             composition-specific sum-diff contrasts with
-#> #                              arbitrary direction; 0 for distinguishable dyads
-#> #                              or other exchangeable compositions
-#> #   .i_{pred}_actor            APIM actor predictor: actor's original predictor
-#> #                              values
-#> #   .i_{pred}_partner          APIM partner predictor: partner's original
-#> #                              predictor values
-#> #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor
-#> #                              level, grand-mean centered
-#> #   .i_{pred}_within_dyad_dev  DIM within-dyad predictor deviation: person's
-#> #                              difference from the dyad average
-#> #
-#> # A tibble: 400 × 12
-#>   personID coupleID gender satisfaction .i_composition   .i_composition_role
-#>      <int>    <int> <fct>         <dbl> <fct>            <fct>              
-#> 1      241      121 female         5.32 same-sex-couples same-sex-couples   
-#> 2      242      121 female         5.37 same-sex-couples same-sex-couples   
-#> 3      243      122 female         5.99 same-sex-couples same-sex-couples   
-#> 4      244      122 female         6.93 same-sex-couples same-sex-couples   
-#> # ℹ 396 more rows
-#> # ℹ 6 more variables: .i_is_same_sex_couples <dbl>,
-#> #   .i_diff_same_sex_couples_arbitrary <dbl>, .i_satisfaction_actor <dbl>,
-#> #   .i_satisfaction_partner <dbl>, .i_satisfaction_dyad_mean_gmc <dbl>,
-#> #   .i_satisfaction_within_dyad_dev <dbl>
-```
-
-If we want to include only male-female couples (filter the data) and
-treat those as exchangeable, we can do:
-
-``` r
-
-cross_male_female_exchangeable_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_mixed,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = satisfaction,
-  model_type = c("apim", "dim"),
-  include_compositions = "male-female",
-  set_exchangeable_compositions = "male-female",
-  seed = 123
-)
-
-print(cross_male_female_exchangeable_data, n = 4)
-#> # interdep data
-#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
-#> #
-#> # Dyad compositions:
-#> # female_x_male exchangeable (set by user) 120 dyads
-#> #
-#> # Added columns:
-#> #   .i_composition             inferred dyad composition
-#> #   .i_composition_role        composition-specific member role
-#> #   .i_is_{comp-role}          composition-role indicator columns
-#> #   .i_diff_{comp}             composition-specific sum-diff contrasts with
-#> #                              arbitrary direction; 0 for distinguishable dyads
-#> #                              or other exchangeable compositions
-#> #   .i_{pred}_actor            APIM actor predictor: actor's original predictor
-#> #                              values
-#> #   .i_{pred}_partner          APIM partner predictor: partner's original
-#> #                              predictor values
-#> #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor
-#> #                              level, grand-mean centered
-#> #   .i_{pred}_within_dyad_dev  DIM within-dyad predictor deviation: person's
-#> #                              difference from the dyad average
-#> #
-#> # A tibble: 240 × 12
-#>   personID coupleID gender satisfaction .i_composition .i_composition_role
-#>      <int>    <int> <fct>         <dbl> <fct>          <fct>              
-#> 1        1        1 female         4.95 female_x_male  female_x_male      
-#> 2        2        1 male           5.26 female_x_male  female_x_male      
-#> 3        3        2 female         5.14 female_x_male  female_x_male      
-#> 4        4        2 male           3.11 female_x_male  female_x_male      
-#> # ℹ 236 more rows
-#> # ℹ 6 more variables: .i_is_female_x_male <dbl>,
-#> #   .i_diff_female_x_male_arbitrary <dbl>, .i_satisfaction_actor <dbl>,
-#> #   .i_satisfaction_partner <dbl>, .i_satisfaction_dyad_mean_gmc <dbl>,
-#> #   .i_satisfaction_within_dyad_dev <dbl>
-```
-
-Pooling compositions constrains them to share DIM effects. These are
-substantive modeling decisions, not only data-processing choices, and
-should follow the research question.
 
 ### Example DIM Model
 
@@ -312,10 +196,11 @@ summary(dim_1)
 
 ### Model interpretation
 
-The exchangeable Gaussian DIM is algebraically equivalent to the
-reduced, label-invariant Dyadic Score Model (DSM) (Iida et al. 2018).
-Therefore, each coefficient has both an individual-member interpretation
-and an equivalent couple mean/difference interpretation.
+Under these exchangeability constraints, the Gaussian DIM is
+algebraically equivalent to the reduced, label-invariant Dyadic Score
+Model (DSM) (Iida et al. 2018). Therefore, each coefficient has both an
+individual-member interpretation and an equivalent couple
+mean/difference interpretation.
 
 In this Gaussian model, fixed coefficients are interpreted in units of
 the outcome, e.g., “satisfaction”:
@@ -338,6 +223,12 @@ the outcome, e.g., “satisfaction”:
   Their expected satisfaction is then 0.76 points above and below the
   couple’s predicted mean, respectively, so they are expected to differ
   by 1.52 points in satisfaction.
+
+Because the Gaussian DIM is the exchangeability-constrained version of
+the full DSM, exchangeability can also be tested by comparing these
+nested models. This is equivalent to the comparison shown in [Testing
+distinguishability in the APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability).
 
 ### Demonstrating model equivalence to APIM
 
@@ -910,51 +801,8 @@ data.frame(
 
 ### Including Random Slopes
 
-Random-slope DIM and APIM parameterizations can be included by adding
-the corresponding within-person effects to the stable dyad-level
-random-effect blocks.
-
-In the APIM:
-
-``` r
-
-
-apim_ILD_random <- glmmTMB::glmmTMB(
-  closeness ~
-    1 +
-
-    diaryday +
-
-    # Within-person APIM
-    .i_provided_support_cwp_actor +
-    .i_provided_support_cwp_partner +
-
-    # Between-person APIM
-    .i_provided_support_cbp_actor +
-    .i_provided_support_cbp_partner +
-
-    # Stable dyad-level covariance with within-person random slopes
-    (1 +
-         .i_provided_support_cwp_actor +
-         .i_provided_support_cwp_partner
-       | coupleID)  +
-    (0 +
-         .i_diff_assumed_exchangeable_arbitrary +
-         .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_actor +
-         .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_partner
-       | coupleID) +
-
-    # Same-day exchangeable dyad-level covariance
-    (1 | coupleID:diaryday) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_exchangeable_data
-)
-```
-
-In the DIM:
+Random slopes can be included in the DIM by adding the corresponding
+within-person effects to the stable dyad-level random-effect blocks:
 
 ``` r
 
@@ -996,17 +844,9 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 
 ### Dynamic ILD DIM example
 
-The ILD models above do not model residual serial dependence and
-therefore estimate concurrent associations under the assumption that
-residuals from different days are independent. When carryover or
-temporal dynamics are part of the research question, one practical
-alternative is to include lagged outcomes as predictors.
-
-By adding the outcome to `predictors` and selecting it with
-`lag_predictors`,
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-creates lag-1 raw and within-person scores. Stable between-person scores
-are not lagged.
+The ILD models above do not model residual serial dependence. One way to
+model dynamics or to account for temporal dependency is to include
+lagged outcomes as predictors.
 
 **Note:** Dynamic models, especially with small time series, are subject
 to bias. This, and the choice between raw and within-person-centered
@@ -1014,7 +854,8 @@ outcome lags, are addressed in the [APIM vignette’s discussion of
 dynamic
 models](https://pascal-kueng.github.io/interdep/articles/apim.html#dynamic-models).
 
-Brief example:
+Brief example to obtain lagged raw and within-person centered versions
+of the outcome:
 
 ``` r
 
@@ -1196,6 +1037,12 @@ summary(dim_ILD_lag_raw)
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
+
+The lagged dyad-mean coefficient describes how a one-point higher shared
+prior outcome level relates to both members’ current outcomes. The
+lagged within-dyad-deviation coefficient describes how a one-point prior
+difference between partners relates to their current expected
+difference.
 
 All predictor effects in this model are conditional on both members’
 prior outcomes.

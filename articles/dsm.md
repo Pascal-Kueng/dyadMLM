@@ -500,6 +500,12 @@ Gaussian Dyad-Individual Model (DIM). In `interdep`, use
 `model_type = "dim"` for this exchangeable model and reserve
 `model_type = "dsm"` for distinguishable dyads.
 
+Because the Gaussian DIM is the exchangeability-constrained version of
+the full DSM, exchangeability can also be tested by comparing these
+nested models. This is equivalent to the comparison shown in [Testing
+distinguishability in the APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability).
+
 ## Intensive longitudinal DSM
 
 ### Concurrent ILD Gaussian DSM
