@@ -24,7 +24,8 @@ has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 This vignette focuses on the Dyadic Score Model (DSM) for distinguishable
 dyads and its relationship to the distinguishable Actor-Partner
 Interdependence Model (APIM). The DSM expresses associations in terms of the
-dyad's shared level and the directional difference between partners.
+dyad's shared level and the directional difference between partners
+[@iidaModelsInterdependentIndividuals2018].
 
 For the broader data-preparation workflow, see the
 [Getting Started vignette](getting-started.html). For distinguishable,
@@ -59,7 +60,8 @@ print(cross_dsm_data, n = 4)
 For predictor values $X_{female}$ and $X_{male}$, `interdep` then creates:
 
 - `.i_communication_dyad_mean_gmc` $=
-  \frac{X_{female} + X_{male}}{2}$, grand-mean centered;
+  \frac{X_{female} + X_{male}}{2} - \mu_X$, where $\mu_X$ is the sample grand
+  mean of the dyad-level predictor means;
 - `.i_communication_within_dyad_diff` $= X_{female} - X_{male}$; and
 - `.i_dsm_role_contrast` $= +0.5$ for female and $-0.5$ for male.
 
@@ -147,17 +149,18 @@ also remain unchanged, whereas their covariance reverses sign.
 ### Interpreting the DSM paths
 
 For the outcomes given the predictors, the long-format model estimates the same
-paths as the conventional score-based DSM. Unlike the original SEM approach, it
-does not also model the predictor scores or provide an overall SEM fit test.
+paths as the conventional score-based DSM
+[@iidaModelsInterdependentIndividuals2018]. Unlike the original SEM approach,
+it does not also model the predictor scores or provide an overall SEM fit test.
 Define
 
 $$
-X_L = \frac{X_{female} + X_{male}}{2}, \qquad
+X_L = \frac{X_{female} + X_{male}}{2} - \mu_X, \qquad
 X_D = X_{female} - X_{male},
 $$
 
-where $X_L$ is grand-mean centered in this example. Similarly, define outcome
-level and outcome difference as
+where $\mu_X$ is the sample grand mean of the dyad-level predictor means.
+Similarly, define outcome level and outcome difference as
 
 $$
 Y_L = \frac{Y_{female} + Y_{male}}{2}, \qquad
@@ -207,7 +210,8 @@ outcome level and unexplained outcome difference are associated.
 ## Relationship to the APIM and DIM
 
 For distinguishable dyads, the full DSM and an unconstrained distinguishable
-APIM are alternative parameterizations of the same fixed associations.
+APIM are alternative parameterizations of the same fixed associations
+[@iidaModelsInterdependentIndividuals2018].
 
 Let's fit the equivalent distinguishable APIM:
 
@@ -452,3 +456,8 @@ refer to the:
 - [Mixed-Composition APIM vignette](mixed-apim.html),
 
 or return to the [Overview](index.html).
+
+## References
+
+::: {#refs}
+:::
