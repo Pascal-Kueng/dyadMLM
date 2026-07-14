@@ -41,7 +41,9 @@ Actor-Partner Interdependence Models (APIM), Dyad-Individual Models (DIM), and
 Dyadic Score Models (DSM). DIM currently supports one exchangeable dyad
 composition, whereas DSM supports one distinguishable dyad composition.
 
-**This vignette focuses on the automatic data preparation step.**
+**This vignette focuses on automatic data preparation for multilevel models
+(MLMs).** For a comparison of MLM and structural equation modeling (SEM)
+approaches to dyadic data, see @ledermannAnalyzingDyadicData2017.
 
 For guidance and examples on how to use the prepared data to estimate
 cross-sectional, generalized, and intensive longitudinal APIMs, see the
@@ -143,8 +145,9 @@ print(cross_distinguishable_data, n = 4)
 ```
 
 The function automatically recognized that in this dataset there are 95
-female-male dyads and created APIM-relevant variables. These generated `.i_*`
-columns can be used directly in model formulas.
+female-male dyads and created APIM-relevant variables
+[@kennyPartnerEffectsRelationship1999]. These generated `.i_*` columns can be
+used directly in model formulas.
 
 Here is a simple example:
 
@@ -206,8 +209,9 @@ The generated `.i_diff_assumed_exchangeable_arbitrary` contrast assigns `-1`
 and `1` to the two members of each exchangeable dyad. Its direction is
 arbitrary, and `seed` makes the assignment reproducible. When role compositions
 are available, each exchangeable composition receives its own contrast, such as
-`.i_diff_female_x_female_arbitrary`, which is `0` for all other compositions.
-We use a fixed seed in the examples below for consistent results.
+`.i_diff_female_x_female_arbitrary`, which is `0` for all other compositions
+[@delrosarioPracticalGuideSpecifying2025]. We use a fixed seed in the examples
+below for consistent results.
 
 Alternatively, for more control, we can explicitly set dyad types to exchangeable:
 
@@ -247,8 +251,9 @@ print(cross_dim_data, n = 4)
 
 For distinguishable dyads, DSM preparation additionally requires a stable role
 variable and an explicit role order. The role order defines the direction of
-all DSM predictor differences and the DSM role contrast. Outcomes remain
-unchanged and are selected later in the fitted-model formula.
+all DSM predictor differences and the DSM role contrast
+[@iidaModelsInterdependentIndividuals2018]. Outcomes remain unchanged and are
+selected later in the fitted-model formula.
 
 ```{r prepare-cross-dsm}
 cross_dsm_data <- prepare_interdep_data(
@@ -325,16 +330,99 @@ print(ild_apim_data)
 ```
 
 By default, numeric predictors in longitudinal APIM preparation are
-decomposed into within-person and between-person components. This temporal
-predictor decomposition is controlled by `temporal_predictor_decomposition`.
-The default `"auto"` setting selects `"time_2l"` for this longitudinal setup
-and retains raw actor and partner columns alongside both components.
+decomposed into within-person and between-person components
+[@bolgerIntensiveLongitudinalMethods2013]. This temporal predictor decomposition
+is controlled by `temporal_predictor_decomposition`. The default `"auto"`
+setting selects `"time_2l"` for this longitudinal setup and retains raw actor
+and partner columns alongside both components.
+
+#### Dynamic Models
+
+The preparation above supports contemporaneous models, but observations can
+also remain dependent over time. The `glmmTMB` approach used here does not
+directly support a dyadic residual VAR structure for modeling both partners'
+residual serial dependence.
+
+One practical alternative, especially when carryover and temporal dynamics are
+part of the research question, is to create a dynamic model by including lagged
+versions of the outcome as predictors.
+
+Lagged versions of variables, including an outcome that is also passed to
+`predictors`, can be obtained through the `lag_predictors` argument.
+`prepare_interdep_data()` then returns lag-1 raw and within-person-centered actor
+and partner columns alongside their contemporaneous versions.
+
+Whether raw or within-person-centered lagged outcomes should be used depends on
+the research question and the data [@hamakerCenterNotCenter2015;
+@gistelinckMultilevelAutoregressiveSmall2021].
+
+Brief exchangeable example:
+
+```{r prepare-ild-apim-dynamic}
+ild_apim_data_dynamic <- prepare_interdep_data(
+  example_dyadic_ILD,
+  group = coupleID,
+  member = personID,
+  time = diaryday,
+  predictors = closeness,
+  lag_predictors = closeness,
+  model_type = "apim",
+  seed = 123
+)
+
+print(ild_apim_data_dynamic)
+
+```
+A simple fixed-slope dyadic stability and influence model
+[@delrosarioPracticalGuideSpecifying2025]:
+
+```{r fit-ild-stability-influence, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+
+stability_influence <- glmmTMB::glmmTMB(
+  closeness ~ 1 +
+
+    # Stability (actor effect across time)
+    .i_closeness_actor_lag1 +
+
+    # Influence (partner effect across time)
+    .i_closeness_partner_lag1 +
+
+    # Linear time trend
+    diaryday +
+
+    # Stable exchangeable dyad-level covariance
+    (1 | coupleID) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+
+    # Same-day exchangeable dyad-level covariance
+    (1 | coupleID:diaryday) +
+    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_apim_data_dynamic
+)
+
+summary(stability_influence)
+
+```
+
+This model can be extended with contemporaneous actor and partner predictor
+associations and other lagged predictors. Time-varying predictors should usually
+be separated into within-person and between-person components. Their
+contemporaneous coefficients are then conditional on both partners' prior
+outcomes.
+
+Person-mean centering a lagged outcome can introduce Nickell bias, especially
+when there are few occasions [@hamakerCenterNotCenter2015;
+@nickellBiasesDynamicModels1981]. Refer to the DIM vignette for a fuller
+discussion and fitted dynamic examples.
 
 ## Data with multiple and mixed-composition dyads
 
 `example_dyadic_crosssectional_mixed` contains three dyad compositions in the
 same data object: distinguishable female-male dyads and exchangeable
-female-female and male-male dyads.
+female-female and male-male dyads [@Bolger2025Unified].
 
 Let's have `interdep` infer the compositions automatically:
 
@@ -456,3 +544,8 @@ refer to the:
 - [Dyadic Score Model vignette](dsm.html),
 
 or return to the [Overview](index.html).
+
+## References
+
+::: {#refs}
+:::
