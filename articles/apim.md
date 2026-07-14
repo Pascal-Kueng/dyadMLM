@@ -192,6 +192,10 @@ recovered from a member-level variance and covariance as
 \sigma_D^2 = \frac{V - C}{2}.
 ```
 
+For example, a random-intercept variance of 1.2 and a difference
+variance of 0.3 imply a member variance of 1.5 and a covariance between
+partners of 0.9.
+
 Reversing the arbitrary `+1/-1` assignment changes the sign of
 $`u_{Dj}`$ but not its variance or the implied member-level covariance
 matrix. In longitudinal models, the same transformation applies
@@ -334,20 +338,44 @@ summary(ild_distinguishable_model)
 
 ### Concurrent ILD Gaussian APIM for exchangeable dyads
 
+Following del Rosario and West, the stable dyad covariance can be
+represented using sum-and-difference random effects (del Rosario and
+West 2025). In longitudinal Gaussian APIMs fitted with `glmmTMB`, the
+same parameterization can be extended to the dyad-occasion level to
+represent same-occasion residual dependence.
+
 ### Current limitations of dyadic ILD designs in R
+
+Concurrent dyadic ILD models can adjust for a time trend and account for
+stable dyadic dependence and same-occasion partner dependence. They do
+not model residual serial dependence, however, and therefore estimate
+concurrent associations under the assumption that residuals from
+different days are independent.
+
+If the goal is to retain these concurrent APIM associations while
+accounting for serial dependence, the closest extension is a dyadic
+residual dynamic structural equation model (RDSEM). It keeps the
+concurrent regression separate from a VAR model for its residuals
+(Asparouhov and Muthén 2020; McNeish and Hamaker 2020). This
+residual-VAR structure is not directly available through the `glmmTMB`
+interface used here, and open-source support for dyadic dynamic models
+remains very limited (del Rosario and West 2025). Within open-source R,
+such a model generally requires custom TMB or Stan code.
 
 #### Dynamic models
 
-The preparation shown in the Getting Started vignette supports
-contemporaneous models, but observations can also remain dependent over
-time. Currently, commonly used open-source MLM interfaces in R do not
-provide the full dyadic residual VAR structure needed to model serial
-dependence across both partners. Within open-source R, such a model
-generally requires custom TMB or Stan code.
+A **practical alternative** is a model with lagged outcomes, especially
+when carryover or temporal dynamics are part of the research question
+(Gistelinck and Loeys 2020). In such a model, the interpretation
+changes. All APIM predictor effects then describe associations
+conditional on the members’ prior outcomes.
 
-One practical alternative, especially when carryover and temporal
-dynamics are part of the research question, is to create a dynamic model
-by including lagged versions of the outcome as predictors.
+By adding the outcome to `predictors` and selecting it with
+`lag_predictors`,
+[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+returns lag-1 raw and within-person scores alongside the contemporaneous
+scores. Between-person scores are not lagged because they describe
+stable differences between members.
 
 For this example, we obtain the lagged actor and partner outcome columns
 through the `lag_predictors` argument:
@@ -365,6 +393,10 @@ ild_apim_data_dynamic <- prepare_interdep_data(
   seed = 123
 )
 ```
+
+This returns all necessary variables for either choice, including lag-1
+raw and within-person closeness scores. Lags are matched at exactly
+`diaryday - 1`, so omitted diary days are not bridged.
 
 A simple fixed-slope dyadic stability and influence model (del Rosario
 and West 2025):
@@ -435,11 +467,34 @@ predictors should usually be separated into within-person and
 between-person components. Their contemporaneous coefficients are then
 conditional on both partners’ prior outcomes.
 
-**Note:** Person-mean centering a lagged outcome can introduce Nickell
-bias, especially in shorter time series (Hamaker and Grasman 2015;
-Nickell 1981; Gistelinck et al. 2021). Refer to the [DIM
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) for a
-fuller discussion of exchangeable models.
+The model above uses raw lagged outcomes. The corresponding
+within-person-centered lagged terms are `.i_closeness_cwp_actor_lag1`
+and `.i_closeness_cwp_partner_lag1`.
+
+Whether to use a raw or within-person-centered lagged outcome depends on
+the research question and the data. Person-mean centering the outcome
+lag can bias the average carryover estimate downward (Hamaker and
+Grasman 2015). This downward bias is known as Nickell bias (Nickell
+1981). A raw lag avoids this centering bias, but a standard
+random-intercept model can still be biased because it assumes that the
+lag is unrelated to stable member levels (Gistelinck et al. 2021).
+
+Both problems matter most when there are few occasions. In one simple
+simulation, most approaches other than person-mean centering performed
+acceptably from about ten occasions, but this is not a universal cutoff
+(Gistelinck et al. 2021). For shorter panels, consider an LD-APIM, which
+lets the first outcomes relate to the members’ stable levels in a
+wide-format SEM (Gistelinck and Loeys 2020).
+
+These manifest-lag models are not equivalent to Mplus DSEM, which uses
+latent person-mean centering by default and can estimate multivariate or
+residual dynamics jointly (McNeish and Hamaker 2020). For very short
+panels, however, default DSEM may still be biased or unstable, so the
+LD-APIM recommendation above may be preferable (Gistelinck et al. 2021).
+
+These lagged-outcome issues are separate from the earlier concern about
+unreliable person means used to construct `cbp` predictors with few
+occasions.
 
 ------------------------------------------------------------------------
 
@@ -464,6 +519,16 @@ A vignette with non-Gaussian generalized APIM examples is planned.
 
 ## References
 
+Asparouhov, Tihomir, and Bengt Muthén. 2020. “Comparison of Models for
+the Analysis of Intensive Longitudinal Data.” *Structural Equation
+Modeling: A Multidisciplinary Journal* 27 (2): 275–97.
+<https://doi.org/10.1080/10705511.2019.1626733>.
+
+Gistelinck, Fien, and Tom Loeys. 2020. “Multilevel Autoregressive Models
+for Longitudinal Dyadic Data.” *TPM - Testing, Psychometrics,
+Methodology in Applied Psychology* 27 (3): 433–52.
+<https://doi.org/10.4473/TPM27.3.7>.
+
 Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. “Multilevel
 Autoregressive Models When the Number of Time Points Is Small.”
 *Structural Equation Modeling: A Multidisciplinary Journal* 28 (1):
@@ -478,6 +543,11 @@ Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. “To Center or Not
 to Center? Investigating Inertia with a Multilevel Autoregressive
 Model.” *Frontiers in Psychology* 5: 1492.
 <https://doi.org/10.3389/fpsyg.2014.01492>.
+
+McNeish, Daniel, and Ellen L. Hamaker. 2020. “A Primer on Two-Level
+Dynamic Structural Equation Models for Intensive Longitudinal Data in
+Mplus.” *Psychological Methods* 25 (5): 610–35.
+<https://doi.org/10.1037/met0000250>.
 
 Nickell, Stephen. 1981. “Biases in Dynamic Models with Fixed Effects.”
 *Econometrica* 49 (6): 1417–26. <https://doi.org/10.2307/1911408>.

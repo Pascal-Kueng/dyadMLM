@@ -91,13 +91,11 @@ print(cross_exchangeable_data, n = 4)
 #> #   .i_communication_within_dyad_dev <dbl>
 ```
 
-The implementation adapts the R sum-and-difference approach for
-indistinguishable dyads described by del Rosario and West (2025).
-Because the ordinary intercept already serves as the sum component, the
-function only needs to create a member-difference contrast `.i_diff_*`,
-coded as 1 for one partner and -1 for the other. This contrast is used
-for the random-effects specification below. The fixed `seed` makes these
-arbitrary member labels reproducible.
+For the exchangeable random-effects specification below,
+[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+creates a member-difference contrast `.i_diff_*`, coded as `+1` for one
+partner and `-1` for the other. Because these member labels are
+arbitrary, setting `seed` makes their assignment reproducible.
 
 Passing a `role` is also possible when it leads to exactly one
 exchangeable composition (e.g., only female-female dyads).
@@ -167,8 +165,8 @@ print(cross_same_sex_pooled_data, n = 4)
 #> #   .i_satisfaction_within_dyad_dev <dbl>
 ```
 
-If we want to include only male-female couples and treat those as
-exchangeable, we can do:
+If we want to include only male-female couples (filter the data) and
+treat those as exchangeable, we can do:
 
 ``` r
 
@@ -247,20 +245,16 @@ effects then represent:
     partners.
 
 The resulting estimated fixed effects are a reparameterization of the
-APIM actor and partner effects (Bolger et al. 2025). The same
-random-effects structure can therefore be used for both fixed-effect
-parameterizations: a dyad-level intercept and a dyad-level difference
-contrast indexed by `.i_diff_assumed_exchangeable_arbitrary`. In
-`glmmTMB`, with `dispformula = ~ 0`, these random effects represent the
-two members’ Gaussian residual variance and covariance.
+APIM actor and partner effects (Bolger et al. 2025). And just like the
+exchangeable APIM, the random-effects structure comprises a dyad-level
+intercept and a dyad-level difference contrast indexed by
+`.i_diff_assumed_exchangeable_arbitrary`. In `glmmTMB`, with
+`dispformula = ~ 0`, these random effects represent the two members’
+Gaussian residual variance and covariance.
 
 The intercept and difference contrast are specified as separate
-random-effects terms, which constrains their correlation to zero. This
-preserves exchangeability: swapping the arbitrary member labels leaves
-the intercept term unchanged but reverses the difference contrast. A
-nonzero correlation between them would therefore make the random-effects
-distribution depend on the arbitrary labeling (del Rosario and West
-2025).
+random-effects terms, which constrains their correlation to zero,
+preserving exchangeability (del Rosario and West 2025).
 
 The full model can be estimated as:
 
@@ -318,13 +312,13 @@ summary(dim_1)
 
 ### Model interpretation
 
-Because this Gaussian model uses an identity link, fixed coefficients
-are interpreted in units of the outcome, e.g., “satisfaction”:
-
 The exchangeable Gaussian DIM is algebraically equivalent to the
 reduced, label-invariant Dyadic Score Model (DSM) (Iida et al. 2018).
 Therefore, each coefficient has both an individual-member interpretation
 and an equivalent couple mean/difference interpretation.
+
+In this Gaussian model, fixed coefficients are interpreted in units of
+the outcome, e.g., “satisfaction”:
 
 - The intercept (about 5.04) is the expected satisfaction of either
   member, and therefore the expected couple-average satisfaction, when
@@ -421,6 +415,49 @@ and
 \frac{\beta_{\text{dyad mean}} - \beta_{\text{within-dyad deviation}}}{2}
 ```
 
+In this example we can see that the transformations work:
+
+``` r
+
+apim_coef <- glmmTMB::fixef(apim_1)$cond
+dim_coef <- glmmTMB::fixef(dim_1)$cond
+
+b_actor <- apim_coef[[".i_communication_actor"]]
+b_partner <- apim_coef[[".i_communication_partner"]]
+
+b_dyad_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
+b_within_dyad <- dim_coef[[".i_communication_within_dyad_dev"]]
+
+
+cat("From APIM model:\n",
+     "  actor effect:                  ", round(b_actor, 3), "\n",
+     "  partner effect:                ", round(b_partner, 3), "\n\n",
+
+     "DIM transformation:\n",
+     "  actor effect + partner effect: ", round(b_actor + b_partner, 3), "\n",
+     "  actor effect - partner effect: ", round(b_actor - b_partner, 3), "\n\n",
+
+     "From DIM model:\n",
+     "  dyad-mean effect:              ", round(b_dyad_mean, 3), "\n",
+     "  within-dyad-deviation effect:  ", round(b_within_dyad, 3), "\n"
+)
+#> From APIM model:
+#>    actor effect:                   1.758 
+#>    partner effect:                 0.238 
+#> 
+#>  DIM transformation:
+#>    actor effect + partner effect:  1.996 
+#>    actor effect - partner effect:  1.52 
+#> 
+#>  From DIM model:
+#>    dyad-mean effect:               1.996 
+#>    within-dyad-deviation effect:   1.52
+```
+
+The DIM and APIM intercepts are not expected to be equal because the DIM
+dyad mean is grand-mean centered, whereas the APIM predictors retain
+their original scale.
+
 ### Why Are These Models Equivalent? Exploring the Reparameterization
 
 An intuitive way to think about this is:
@@ -506,99 +543,23 @@ DIM coordinates.
 Enable JavaScript to manipulate this figure. The equations and
 discussion above provide the same transformation.
 
-The DIM and APIM intercepts are not expected to be equal because the DIM
-dyad mean is grand-mean centered, whereas the APIM predictors retain
-their original scale.
-
-In this example:
-
-``` r
-
-apim_coef <- glmmTMB::fixef(apim_1)$cond
-dim_coef <- glmmTMB::fixef(dim_1)$cond
-
-b_actor <- apim_coef[[".i_communication_actor"]]
-b_partner <- apim_coef[[".i_communication_partner"]]
-
-b_dyad_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
-b_within_dyad <- dim_coef[[".i_communication_within_dyad_dev"]]
-
-
-cat("From APIM model:\n",
-     "  actor effect:                  ", round(b_actor, 3), "\n",
-     "  partner effect:                ", round(b_partner, 3), "\n\n",
-
-     "DIM transformation:\n",
-     "  actor effect + partner effect: ", round(b_actor + b_partner, 3), "\n",
-     "  actor effect - partner effect: ", round(b_actor - b_partner, 3), "\n\n",
-
-     "From DIM model:\n",
-     "  dyad-mean effect:              ", round(b_dyad_mean, 3), "\n",
-     "  within-dyad-deviation effect:  ", round(b_within_dyad, 3), "\n"
-)
-#> From APIM model:
-#>    actor effect:                   1.758 
-#>    partner effect:                 0.238 
-#> 
-#>  DIM transformation:
-#>    actor effect + partner effect:  1.996 
-#>    actor effect - partner effect:  1.52 
-#> 
-#>  From DIM model:
-#>    dyad-mean effect:               1.996 
-#>    within-dyad-deviation effect:   1.52
-```
-
 ### Random-effect transformation
 
 The DIM and APIM models above already use the same sum-and-difference
-random-effects parameterization (del Rosario and West 2025). Let $`u_M`$
-denote the random intercept and $`u_D`$ the random coefficient for the
-`+1/-1` member-difference contrast. The two members’ random-effect
-contributions are then
-
-``` math
-r_1 = u_M + u_D, \qquad r_2 = u_M - u_D.
-```
-
-The separate random-effects terms constrain $`u_M`$ and $`u_D`$ to be
-uncorrelated, as required for exchangeable dyads. If their variances are
-$`\sigma_M^2`$ and $`\sigma_D^2`$, respectively, the member-level
-variance and covariance are
-
-``` math
-\operatorname{Var}(r_1) = \operatorname{Var}(r_2)
-= \sigma_M^2 + \sigma_D^2,
-```
-
-``` math
-\operatorname{Cov}(r_1,r_2) = \sigma_M^2 - \sigma_D^2.
-```
-
-Conversely, if $`V`$ is either member’s random-effect variance and $`C`$
-is the covariance between members, then
-
-``` math
-\sigma_M^2 = \frac{V + C}{2}, \qquad
-\sigma_D^2 = \frac{V - C}{2}.
-```
-
-For example, a random-intercept variance of 1.2 and a difference
-variance of 0.3 imply a member variance of 1.5 and a covariance between
-partners of 0.9.
-
-The same transformation applies separately to the stable dyad-level and
-same-occasion dyad-level covariance blocks in the longitudinal models
-below.
+random-effects parameterization (del Rosario and West 2025). See the
+[exchangeable residual-structure section of the APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
+for the derivation and back-transformation to the member-level
+variance-covariance matrix.
 
 ## Intensive Longitudinal DIM
 
 For longitudinal DIM, predictors are decomposed into within-person and
 between-person components before the dyadic decomposition (Bolger and
 Laurenceau 2013; Gistelinck and Loeys 2020). The default `"auto"`
-strategy selects `"time_2l"` when both `time` and `predictors` are
-supplied. It also retains raw dyad-occasion means and within-dyad
-deviations. The decomposed columns used below are:
+selects `"time_2l"` when both `time` and `predictors` are supplied. It
+also retains raw dyad-occasion means and within-dyad deviations. The
+decomposed columns used below are:
 
 1.  The `cwp` dyad mean captures a shared occasion-specific shift from
     the two members’ usual levels (shared occasion-level variation).
@@ -704,16 +665,7 @@ print(ild_exchangeable_data)
 
 The example below estimates same-day associations between support and
 closeness and includes `diaryday` to adjust for a linear trend across
-the study. The following models focus on concurrent rather than lagged
-effects. They do not model residual dependence from one day to the next.
-This limitation and suggestions for addressing it are discussed at the
-end of the vignette.
-
-Following del Rosario and West, the stable dyad covariance is
-represented using sum-and-difference random effects (del Rosario and
-West 2025). In the Gaussian model below, we extend this parameterization
-to the dyad-occasion level to represent same-occasion residual
-dependence in `glmmTMB`.
+the study.
 
 ``` r
 
@@ -958,12 +910,9 @@ data.frame(
 
 ### Including Random Slopes
 
-Random-slope DIM and APIM parameterizations can be written analogously
-by adding the corresponding within-person effects to the stable
-dyad-level random-effect blocks. These larger models do not converge
-cleanly with the example data, so the examples are neither evaluated nor
-interpreted. Such models can be fit when the study design, data, and
-convergence diagnostics support the added complexity.
+Random-slope DIM and APIM parameterizations can be included by adding
+the corresponding within-person effects to the stable dyad-level
+random-effect blocks.
 
 In the APIM:
 
@@ -1045,41 +994,25 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 )
 ```
 
-### Current limitations of dyadic ILD designs in R
+### Dynamic ILD DIM example
 
-The models above adjust for a linear time trend and account for stable
-dyadic dependence and same-occasion partner dependence. They do not
-model residual serial dependence, however, and therefore estimate
-concurrent associations under the assumption that residuals from
-different days are independent.
-
-If the goal is to retain these concurrent DIM associations while
-accounting for serial dependence, the closest extension is a dyadic
-residual dynamic structural equation model (RDSEM). It keeps the
-concurrent regression separate from a VAR model for its residuals
-(Asparouhov and Muthén 2020; McNeish and Hamaker 2020). This
-residual-VAR structure is not directly available through the `glmmTMB`
-interface used here, and open-source support for dyadic dynamic models
-remains very limited (del Rosario and West 2025).
-
-#### Dynamic models
-
-A **practical alternative** is a model with lagged outcomes, especially
-when carryover or temporal dynamics are part of the research question
-(Gistelinck and Loeys 2020). In such a model, the interpretation
-changes. All DIM predictor effects then describe associations
-conditional on the members’ prior outcomes.
+The ILD models above do not model residual serial dependence and
+therefore estimate concurrent associations under the assumption that
+residuals from different days are independent. When carryover or
+temporal dynamics are part of the research question, one practical
+alternative is to include lagged outcomes as predictors.
 
 By adding the outcome to `predictors` and selecting it with
 `lag_predictors`,
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-returns lag-1 raw and within-person scores alongside the contemporaneous
-scores. Between-person scores are not lagged because they describe
-stable differences between members.
+creates lag-1 raw and within-person scores. Stable between-person scores
+are not lagged.
 
-For guidance when to include raw or centred versions of the outcome as a
-predictor, you may refer to Hamaker and Grasman (2015) and Gistelinck et
-al. (2021).
+**Note:** Dynamic models, especially with small time series, are subject
+to bias. This, and the choice between raw and within-person-centered
+outcome lags, are addressed in the [APIM vignette’s discussion of
+dynamic
+models](https://pascal-kueng.github.io/interdep/articles/apim.html#dynamic-models).
 
 Brief example:
 
@@ -1173,11 +1106,10 @@ print(ild_exchangeable_data_dynamic)
 #> #   .i_closeness_cwp_lag1 <dbl>, .i_provided_support_dyad_mean_gmc <dbl>, …
 ```
 
-This returns all necessary variables for either choice, including lag-1
-raw and within-person closeness scores. Lags are matched at exactly
-`diaryday - 1`, so omitted diary days are not bridged.
+Lags are matched at exactly `diaryday - 1`, so omitted diary days are
+not bridged.
 
-And include in the model as such:
+The raw lagged outcome scores can be included in the model as follows:
 
 ``` r
 
@@ -1185,7 +1117,7 @@ dim_ILD_lag_raw <- glmmTMB::glmmTMB(
   closeness ~
     1 +
 
-    # include raw lagged outcomes as predictors
+    # Raw lagged outcomes
     .i_closeness_dyad_mean_gmc_lag1 + .i_closeness_within_dyad_dev_lag1 +
 
     diaryday +
@@ -1209,7 +1141,7 @@ dim_ILD_lag_raw <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_exchangeable_data_dynamic
-  
+
   # The model did not converge with the default optimizer
   , control = glmmTMB::glmmTMBControl(
       optimizer = stats::optim,
@@ -1265,109 +1197,8 @@ summary(dim_ILD_lag_raw)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-``` r
-
-dim_ILD_lag_cwp <- glmmTMB::glmmTMB(
-  closeness ~
-    1 +
-
-    # include person-mean centred outcomes as predictors
-    .i_closeness_cwp_dyad_mean_lag1 + .i_closeness_cwp_within_dyad_dev_lag1 +
-
-    diaryday +
-
-    # Within-person DIM
-    .i_provided_support_cwp_dyad_mean +
-    .i_provided_support_cwp_within_dyad_dev +
-
-    # Between-person DIM
-    .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_dev +
-
-    # Stable exchangeable dyad-level covariance
-    (1 | coupleID)  +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
-
-    # Same-day exchangeable dyad-level covariance
-    (1 | coupleID:diaryday) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_exchangeable_data_dynamic
-)
-
-summary(dim_ILD_lag_cwp)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> closeness ~ 1 + .i_closeness_cwp_dyad_mean_lag1 + .i_closeness_cwp_within_dyad_dev_lag1 +  
-#>     diaryday + .i_provided_support_cwp_dyad_mean + .i_provided_support_cwp_within_dyad_dev +  
-#>     .i_provided_support_cbp_dyad_mean + .i_provided_support_cbp_within_dyad_dev +  
-#>     (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
-#>     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
-#>     coupleID:diaryday)
-#> Dispersion:                 ~0
-#> Data: ild_exchangeable_data_dynamic
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2654.4    2712.4   -1315.2    2630.4       914 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups              Name                                   Variance Std.Dev.
-#>  coupleID            (Intercept)                            0.5051   0.7107  
-#>  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.6430   0.8019  
-#>  coupleID.diaryday   (Intercept)                            0.2958   0.5439  
-#>  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5168   0.7189  
-#> Number of obs: 926, groups:  coupleID, 40; coupleID:diaryday, 463
-#> 
-#> Conditional model:
-#>                                          Estimate Std. Error z value Pr(>|z|)
-#> (Intercept)                              5.103092   0.125052   40.81  < 2e-16
-#> .i_closeness_cwp_dyad_mean_lag1          0.005813   0.041926    0.14  0.88972
-#> .i_closeness_cwp_within_dyad_dev_lag1    0.006385   0.048136    0.13  0.89448
-#> diaryday                                -0.009979   0.006849   -1.46  0.14509
-#> .i_provided_support_cwp_dyad_mean        0.472977   0.042681   11.08  < 2e-16
-#> .i_provided_support_cwp_within_dyad_dev  0.058781   0.076026    0.77  0.43942
-#> .i_provided_support_cbp_dyad_mean        1.519402   0.190487    7.98 1.51e-15
-#> .i_provided_support_cbp_within_dyad_dev  0.784136   0.304207    2.58  0.00995
-#>                                            
-#> (Intercept)                             ***
-#> .i_closeness_cwp_dyad_mean_lag1            
-#> .i_closeness_cwp_within_dyad_dev_lag1      
-#> diaryday                                   
-#> .i_provided_support_cwp_dyad_mean       ***
-#> .i_provided_support_cwp_within_dyad_dev    
-#> .i_provided_support_cbp_dyad_mean       ***
-#> .i_provided_support_cbp_within_dyad_dev ** 
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
-
-Note that person-mean centering (within-person centering) the outcome
-lag can bias the average carryover estimate downward (Hamaker and
-Grasman 2015). This downward bias is known as Nickell bias (Nickell
-1981). A raw lag avoids this centering bias, but a standard
-random-intercept model can still be biased because it assumes that the
-lag is unrelated to stable member levels (Gistelinck et al. 2021).
-
-Both problems matter most when there are few occasions. In one simple
-simulation, most approaches other than person-mean centering performed
-acceptably from about ten occasions, but this is not a universal cutoff
-(Gistelinck et al. 2021). For shorter panels, consider an LD-APIM, which
-lets the first outcomes relate to the members’ stable levels in a
-wide-format SEM (Gistelinck and Loeys 2020).
-
-These manifest-lag models are not equivalent to Mplus DSEM, which uses
-latent person-mean centering by default and can estimate multivariate or
-residual dynamics jointly (McNeish and Hamaker 2020). For very short
-panels, however, default DSEM may still be biased or unstable, so the
-LD-APIM recommendation above may be preferable (Gistelinck et al. 2021).
-
-These lagged-outcome issues are separate from the earlier concern about
-unreliable person means used to construct `cbp` predictors with few
-occasions.
+All predictor effects in this model are conditional on both members’
+prior outcomes.
 
 ------------------------------------------------------------------------
 
@@ -1381,11 +1212,6 @@ related model specifications, or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 ## References
-
-Asparouhov, Tihomir, and Bengt Muthén. 2020. “Comparison of Models for
-the Analysis of Intensive Longitudinal Data.” *Structural Equation
-Modeling: A Multidisciplinary Journal* 27 (2): 275–97.
-<https://doi.org/10.1080/10705511.2019.1626733>.
 
 Bolger, Niall, and Jean-Philippe Laurenceau. 2013. *Intensive
 Longitudinal Methods: An Introduction to Diary and Experience Sampling
@@ -1403,20 +1229,10 @@ for Longitudinal Dyadic Data.” *TPM - Testing, Psychometrics,
 Methodology in Applied Psychology* 27 (3): 433–52.
 <https://doi.org/10.4473/TPM27.3.7>.
 
-Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. “Multilevel
-Autoregressive Models When the Number of Time Points Is Small.”
-*Structural Equation Modeling: A Multidisciplinary Journal* 28 (1):
-15–27. <https://doi.org/10.1080/10705511.2020.1753517>.
-
 Gottfredson, Nisha C. 2019. “A Straightforward Approach for Coping with
 Unreliability of Person Means When Parsing Within-Person and
 Between-Person Effects in Longitudinal Studies.” *Addictive Behaviors*
 94: 156–61. <https://doi.org/10.1016/j.addbeh.2018.09.031>.
-
-Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. “To Center or Not
-to Center? Investigating Inertia with a Multilevel Autoregressive
-Model.” *Frontiers in Psychology* 5: 1492.
-<https://doi.org/10.3389/fpsyg.2014.01492>.
 
 Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018. “Models of
 Interdependent Individuals Versus Dyadic Processes in Relationship
@@ -1425,14 +1241,6 @@ Research.” *Journal of Social and Personal Relationships* 35 (1): 59–88.
 
 Kenny, David A, Deborah A Kashy, and William L Cook. 2006. *Dyadic Data
 Analysis*. Guilford Press.
-
-McNeish, Daniel, and Ellen L. Hamaker. 2020. “A Primer on Two-Level
-Dynamic Structural Equation Models for Intensive Longitudinal Data in
-Mplus.” *Psychological Methods* 25 (5): 610–35.
-<https://doi.org/10.1037/met0000250>.
-
-Nickell, Stephen. 1981. “Biases in Dynamic Models with Fixed Effects.”
-*Econometrica* 49 (6): 1417–26. <https://doi.org/10.2307/1911408>.
 
 Rosario, Kareena S. del, and Tessa V. West. 2025. “A Practical Guide to
 Specifying Random Effects in Longitudinal Dyadic Multilevel Modeling.”
