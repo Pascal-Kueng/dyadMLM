@@ -1,0 +1,195 @@
+draw_apim_diagram <- function(
+    type = c("distinguishable", "exchangeable"),
+    edge_labels = NULL) {
+  type <- match.arg(type)
+
+  actor_colour <- "#0072B2"
+  partner_colour <- "#D55E00"
+  ink_colour <- "#263238"
+  muted_colour <- "#64748B"
+  node_fill <- "#F8FAFC"
+
+  if (type == "distinguishable") {
+    node_labels <- list(
+      x_top = expression(X[plain(female)]),
+      x_bottom = expression(X[plain(male)]),
+      y_top = expression(Y[plain(female)]),
+      y_bottom = expression(Y[plain(male)]),
+      e_top = expression(epsilon[f]),
+      e_bottom = expression(epsilon[m])
+    )
+    default_edge_labels <- list(
+      actor_top = expression(a[f]),
+      actor_bottom = expression(a[m]),
+      partner_to_top = expression(p[f]),
+      partner_to_bottom = expression(p[m])
+    )
+  } else {
+    node_labels <- list(
+      x_top = expression(X[1]),
+      x_bottom = expression(X[2]),
+      y_top = expression(Y[1]),
+      y_bottom = expression(Y[2]),
+      e_top = expression(epsilon[1]),
+      e_bottom = expression(epsilon[2])
+    )
+    default_edge_labels <- list(
+      actor_top = expression(a),
+      actor_bottom = expression(a),
+      partner_to_top = expression(p),
+      partner_to_bottom = expression(p)
+    )
+  }
+
+  if (is.null(edge_labels)) {
+    edge_labels <- default_edge_labels
+  } else {
+    edge_labels <- as.list(edge_labels)
+    missing_labels <- setdiff(names(default_edge_labels), names(edge_labels))
+    edge_labels[missing_labels] <- default_edge_labels[missing_labels]
+  }
+
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 24,
+    length = grid::unit(0.12, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 24,
+    length = grid::unit(0.09, "inches"),
+    ends = "both",
+    type = "closed"
+  )
+
+  draw_node <- function(x, y, label) {
+    grid::grid.roundrect(
+      x = native(x),
+      y = native(y),
+      width = native(0.25),
+      height = native(0.22),
+      r = grid::unit(0.09, "snpc"),
+      gp = grid::gpar(
+        fill = node_fill,
+        col = ink_colour,
+        lwd = 1.8
+      )
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 20)
+    )
+  }
+
+  draw_residual <- function(x, y, label) {
+    grid::grid.circle(
+      x = native(x),
+      y = native(y),
+      r = grid::unit(0.052, "snpc"),
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 17)
+    )
+  }
+
+  draw_path <- function(x0, y0, x1, y1, colour) {
+    grid::grid.segments(
+      x0 = native(x0),
+      y0 = native(y0),
+      x1 = native(x1),
+      y1 = native(y1),
+      arrow = arrow_head,
+      gp = grid::gpar(col = colour, fill = colour, lwd = 2.2)
+    )
+  }
+
+  draw_path_label <- function(x, y, label, colour) {
+    label_width <- if (is.expression(label) || is.language(label)) 0.055 else 0.075
+    grid::grid.roundrect(
+      x = native(x),
+      y = native(y),
+      width = native(label_width),
+      height = native(0.066),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y),
+      gp = grid::gpar(col = colour, fontsize = 17)
+    )
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  draw_node(0.17, 0.72, node_labels$x_top)
+  draw_node(0.17, 0.28, node_labels$x_bottom)
+  draw_node(0.64, 0.72, node_labels$y_top)
+  draw_node(0.64, 0.28, node_labels$y_bottom)
+  draw_residual(0.91, 0.72, node_labels$e_top)
+  draw_residual(0.91, 0.28, node_labels$e_bottom)
+
+  # Actor paths
+  draw_path(0.295, 0.72, 0.515, 0.72, actor_colour)
+  draw_path(0.295, 0.28, 0.515, 0.28, actor_colour)
+
+  # Partner paths
+  draw_path(0.295, 0.72, 0.515, 0.28, partner_colour)
+  draw_path(0.295, 0.28, 0.515, 0.72, partner_colour)
+
+  draw_path_label(0.405, 0.72, edge_labels$actor_top, actor_colour)
+  draw_path_label(0.405, 0.28, edge_labels$actor_bottom, actor_colour)
+  draw_path_label(0.345, 0.62, edge_labels$partner_to_bottom, partner_colour)
+  draw_path_label(0.345, 0.38, edge_labels$partner_to_top, partner_colour)
+
+  # Residuals point to their outcomes. Their curved double-headed path denotes
+  # within-dyad residual covariance.
+  draw_path(0.855, 0.72, 0.768, 0.72, muted_colour)
+  draw_path(0.855, 0.28, 0.768, 0.28, muted_colour)
+  grid::grid.curve(
+    x1 = native(0.947),
+    y1 = native(0.68),
+    x2 = native(0.947),
+    y2 = native(0.32),
+    curvature = -0.24,
+    angle = 90,
+    ncp = 12,
+    square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
+  )
+
+  # A small legend makes the colour coding optional rather than necessary.
+  grid::grid.segments(
+    x0 = native(0.29), y0 = native(0.075),
+    x1 = native(0.35), y1 = native(0.075),
+    gp = grid::gpar(col = actor_colour, lwd = 2.5)
+  )
+  grid::grid.text(
+    "Actor effect",
+    x = native(0.415), y = native(0.075),
+    gp = grid::gpar(col = ink_colour, fontsize = 11)
+  )
+  grid::grid.segments(
+    x0 = native(0.56), y0 = native(0.075),
+    x1 = native(0.62), y1 = native(0.075),
+    gp = grid::gpar(col = partner_colour, lwd = 2.5)
+  )
+  grid::grid.text(
+    "Partner effect",
+    x = native(0.695), y = native(0.075),
+    gp = grid::gpar(col = ink_colour, fontsize = 11)
+  )
+
+  grid::popViewport()
+  invisible(NULL)
+}

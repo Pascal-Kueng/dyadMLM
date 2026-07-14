@@ -23,11 +23,11 @@ library(interdep)
 
 This vignette covers APIMs that combine distinguishable and exchangeable dyad
 compositions in one analysis. The unified model presented by Bolger, Laurenceau,
-and DiGiovanni is the basis and inspiration for this vignette. Their presentation
-includes a hybrid model for these dyad types in SEM [@Bolger2025Unified]. Here,
-we implement the same general idea in one multilevel model. The vignette assumes familiarity
-with the data-preparation workflow in the
-[Getting Started vignette](getting-started.html) and with the single-composition models in the
+and DiGiovanni implemented in SEM is the basis and inspiration for this vignette [@Bolger2025Unified]. Here,
+we implement the same general idea in one multilevel model. 
+
+For the general data-preparation workflow, go to the 
+[Getting Started vignette](getting-started.html). For regular APIMs, refer to the
 [Actor-Partner Interdependence Model vignette](apim.html). For DIM predictors and their
 equivalence to APIM effects in exchangeable dyads, see the
 [Dyad-Individual Model vignette](dim.html). For DSM predictor scores and their
@@ -107,7 +107,7 @@ exchangeable composition and `0` for all other compositions.
 
 The model can then be specified as follows (example for an intercept-only model):
 
-```{r fit-mixed-cross-sectional-gaussian, eval = FALSE}
+```{r fit-mixed-cross-sectional-gaussian}
 
 mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
   satisfaction ~ 0 +
@@ -143,9 +143,9 @@ summary(mixed_cross_gaussian_model)
 
 ```
 
-The four fixed-effect indicators are mutually exclusive. With $I$ denoting a
-shorter label for each generated composition-and-role indicator, the fixed part
-of the model can be written as:
+The four fixed-effect indicators are mutually exclusive. With $I$ denoting the 
+generated `.i_is_{composition_role} indicator, the fixed part
+of the full model can be written as:
 
 $$
 \mu_{ij}^{\mathrm{fixed}} =
@@ -165,7 +165,7 @@ The active indicator for each person is shown below:
 | Member of a male-male dyad | 0 | 0 | 0 | **1** | $\beta_{MM}$ |
 
 Therefore, for a member of a male-male dyad, for example, the fixed part reduces
-to
+to just $\beta_{MM}$ via: 
 
 $$
 0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
