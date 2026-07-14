@@ -34,9 +34,19 @@ relationship to APIM effects in distinguishable dyads, see the
 
 > This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
 
-## The cross sectional distinguishable APIM
+## The cross sectional Gaussian distinguishable APIM
 
-## The cross-sectional exchangeable APIM
+### Residual random effects structure
+
+### Interpretation
+
+## The cross-sectional Gaussian exchangeable APIM
+
+### Assumptions
+
+### Residual random effects structure - and back-transformation
+
+### Interpretation
 
 ## Testing distinguishability
 
@@ -46,8 +56,9 @@ constrained columns are planned.
 
 
 
+## Intensive longitudinal APIMs
 
-## ILD
+### Concurrent ILD Gaussian APIM for distinguishable dyads
 
 Example model specification: 
 
@@ -101,190 +112,13 @@ summary(ild_distinguishable_model)
 ```
 
 
-## Semi-continuous intensive longitudinal dyadic data
+### Concurrent ILD Gaussian APIM for exchangeable dyads
 
-`example_dyadic_ILD_tweedie` has the same intensive longitudinal dyadic
-structure as `example_dyadic_ILD`, but the outcome is semi-continuous.
 
-```{r ild-tweedie-raw}
-print(head(example_dyadic_ILD_tweedie, 20))
-hist(example_dyadic_ILD_tweedie$physical_activity, breaks = 20)
-```
+### Current limitations of dyadic ILD designs in R
 
-### Distinguishable Tweedie ILD APIM
+#### Dynamic models
 
-```{r prepare-ild-tweedie-distinguishable}
-ild_tweedie_distinguishable_data <- prepare_interdep_data(
-  example_dyadic_ILD_tweedie,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  time = diaryday,
-  predictors = provided_support,
-  seed = 123
-)
-
-print(ild_tweedie_distinguishable_data)
-summary(ild_tweedie_distinguishable_data)
-```
-
-For Tweedie models, the random-effect blocks are latent effects on the log-mean
-scale. They can induce partner dependence, but they are not residual covariance
-structures in the same direct sense as in Gaussian models, because the Tweedie
-observation-level variance remains part of the model.
-
-The first model uses role-specific stable couple effects and a simple same-day
-shared latent shock. This is the easier teaching model: it keeps role-specific
-Tweedie dispersion, but the same-day latent shock can only induce positive
-partner dependence.
-
-```{r fit-ild-tweedie-distinguishable-shared-day, eval = FALSE}
-
-ild_tweedie_distinguishable_shared_day_model <- glmmTMB(
-  physical_activity ~ 0 +
-
-    .i_is_female_x_male_female + .i_is_female_x_male_male +
-
-    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
-
-    # Gender-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-
-    # Gender-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-
-    # Gender-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-
-    # Gender-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-
-    # random effects for stable non-independence (means)
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-
-    # same-day shared latent shock; positive dependence only
-    (1 | coupleID:diaryday)
-
-  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-  , family = tweedie()
-  , data = ild_tweedie_distinguishable_data
-)
-
-summary(ild_tweedie_distinguishable_shared_day_model)
-
-```
-
-The second model uses a role-specific same-day latent covariance block. This is
-closer to the Gaussian ILD covariance structure and can represent positive or
-negative same-day partner dependence. In this ILD example, the repeated paired
-occasions provide enough information to also estimate role-specific Tweedie
-dispersion.
-
-```{r fit-ild-tweedie-distinguishable-latent-day-cov, eval = FALSE}
-
-ild_tweedie_distinguishable_latent_day_cov_model <- glmmTMB(
-  physical_activity ~ 0 +
-
-    .i_is_female_x_male_female + .i_is_female_x_male_male +
-
-    .i_is_female_x_male_female:diaryday + .i_is_female_x_male_male:diaryday +
-
-    # Gender-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-
-    # Gender-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-
-    # Gender-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-
-    # Gender-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-
-    # random effects for stable non-independence (means)
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-
-    # same-day role-specific latent covariance; positive or negative dependence
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday)
-
-  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
-  # in case of non-convergence, a first simplification could be to remove the
-  # role-specific dispersion formula
-  , family = tweedie()
-  , data = ild_tweedie_distinguishable_data
-)
-
-summary(ild_tweedie_distinguishable_latent_day_cov_model)
-
-```
-
-The fuller same-day latent covariance structure is much more fragile in the
-cross-sectional case because each dyad contributes only one paired occasion. The
-same pair of observations must inform the fixed effects, Tweedie dispersion and
-power, and the dyadic dependence structure. In ILD data, each dyad contributes
-many paired occasions, so the stable couple-level block and the same-day
-occasion-level block are informed by repeated within-dyad patterns over time.
-
-### Exchangeable Tweedie ILD APIM
-
-```{r prepare-ild-tweedie-exchangeable}
-ild_tweedie_exchangeable_data <- prepare_interdep_data(
-  example_dyadic_ILD_tweedie,
-  group = coupleID,
-  member = personID,
-  time = diaryday,
-  predictors = provided_support,
-  seed = 123
-)
-
-print(ild_tweedie_exchangeable_data)
-summary(ild_tweedie_exchangeable_data)
-```
-
-This is the exchangeable analogue of the fuller Tweedie ILD model above. The
-sum-diff random-effect blocks provide stable and same-day exchangeable latent
-covariance structures. The Tweedie dispersion stays pooled because the
-sum-diff signs identify exchangeable positions, not substantive roles.
-
-```{r fit-ild-tweedie-exchangeable, eval = FALSE}
-
-ild_tweedie_exchangeable_model <- glmmTMB(
-  physical_activity ~
-    1 +
-
-    diaryday +
-
-    # Pooled within-person actor and partner effects
-    .i_provided_support_cwp_actor +
-    .i_provided_support_cwp_partner +
-
-    # Pooled between-person actor and partner effects
-    .i_provided_support_cbp_actor +
-    .i_provided_support_cbp_partner +
-
-    # stable exchangeable latent covariance
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
-  
-    # same-day exchangeable latent covariance
-    (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  # pooled dispersion; exchangeable positions should not define dispersion differences
-  , dispformula = ~ 1
-  , family = tweedie()
-  , data = ild_tweedie_exchangeable_data
-)
-
-summary(ild_tweedie_exchangeable_model)
-
-```
 
 ---
 
@@ -296,3 +130,5 @@ refer to the:
 - [Dyadic Score Model vignette](dsm.html),
 
 or return to the [Overview](index.html).
+
+A vignette with non-Gaussian generalized APIM examples is planned. 

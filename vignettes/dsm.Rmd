@@ -446,6 +446,20 @@ label-invariant DSM is algebraically the Gaussian Dyad-Individual Model (DIM).
 In `interdep`, use `model_type = "dim"` for this exchangeable model and reserve
 `model_type = "dsm"` for distinguishable dyads.
 
+## Intensive longitudinal DSM
+
+### Concurrent ILD Gaussian DSM 
+
+### Current limitations of dyadic ILD designs in R
+
+Short, link to APIM!
+
+#### Dynamic models
+
+Short, link to APIM! Just provide one simple example for how the dynamic 
+version can be implemented.
+
+
 ---
 
 Continue with the [Dyad-Individual Model vignette](dim.html),
