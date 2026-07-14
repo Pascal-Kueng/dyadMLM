@@ -37,23 +37,27 @@ For the broader data-preparation workflow of the `interdep` package, see the
 exchangeable APIMs in cross-sectional and intensive longitudinal data, see the
 [Actor-Partner Interdependence Model vignette](apim.html). For APIMs that
 combine distinguishable and exchangeable dyad compositions, see the
-[Mixed-Composition APIM vignette](mixed-apim.html). For the dyadic score
-model, see the [Dyadic Score Model vignette](dsm.html). Whereas the DIM is a
-different parameterization of the exchangeable APIM, the Dyadic Score Model
-(DSM) is a different parameterization of the distinguishable APIM.
+[Mixed-Composition APIM vignette](mixed-apim.html). For the full Dyadic Score
+Model (DSM), a different parameterization of the distinguishable APIM, see the
+[Dyadic Score Model vignette](dsm.html). Under exchangeability constraints, the
+reduced, label-invariant DSM is also equivalent to the DIM, as discussed below.
 
 ## Cross-Sectional Gaussian DIM
 
-The current DIM implementation needs one exchangeable dyad composition. 
+The current DIM implementation needs one exchangeable dyad composition.
 Exchangeability means that swapping the two member labels does not
-change the model [@kenny2006dyadic]. 
+change the model [@kenny2006dyadic]. Whether roles can and should be treated as
+exchangeable is a substantive assumption (see
+[Testing distinguishability in the APIM
+vignette](apim.html#testing-distinguishability)).
 
-One way to make this assumption in `interdep` at the data-preparation layer is 
-to omit `role` from `prepare_interdep_data()`. This treats all dyads as the 
-same exchangeable composition. Passing a `role` is also possible when it leads 
-to exactly one exchangeable composition (e.g., only female-female dyads). Otherwise, 
-refer to the [Getting Started vignette](getting-started.html) for how to filter, pool, and 
-constrain dyad compositions to obtain a single exchangeable dyad composition. 
+One way to make this assumption in `interdep` at the data-preparation step is
+to omit `role` from `prepare_interdep_data()`. This treats all dyads as the
+same exchangeable composition. Passing a `role` is also possible when it leads
+to exactly one exchangeable composition (e.g., only female-female dyads).
+Otherwise, refer to the [Getting Started vignette](getting-started.html) for how
+to filter, pool, and constrain dyad compositions to obtain a single exchangeable
+dyad composition.
 
 ```{r prepare-cross-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
@@ -137,8 +141,8 @@ message("Install glmmTMB to run the fitted-model examples in this vignette.")
 
 ### Model interpretation
 
-The exchangeable Gaussian DIM is algebraically equivalent to the reduced,
-label-invariant Dyadic Score Model (DSM)
+Under these exchangeability constraints, the Gaussian DIM is algebraically
+equivalent to the reduced, label-invariant Dyadic Score Model (DSM)
 [@iidaModelsInterdependentIndividuals2018]. Therefore, each coefficient has both
 an individual-member interpretation and an equivalent couple mean/difference
 interpretation.
@@ -163,6 +167,11 @@ interpreted in units of the outcome, e.g., "satisfaction":
   mean and the other is 0.5 points below it. Their expected satisfaction is then
   0.76 points above and below the couple's predicted mean, respectively, so they
   are expected to differ by 1.52 points in satisfaction.
+
+Because the Gaussian DIM is the exchangeability-constrained version of the full
+DSM, exchangeability can also be tested by comparing these nested models. This
+is equivalent to the comparison shown in [Testing distinguishability in the
+APIM vignette](apim.html#testing-distinguishability).
 
 ### Demonstrating model equivalence to APIM
 
@@ -909,7 +918,7 @@ grand-mean reference. The intercept is omitted from both displayed equations.
 
 The DIM and APIM models above already use the same sum-and-difference
 random-effects parameterization [@delrosarioPracticalGuideSpecifying2025]. See
-the [exchangeable residual-structure section of the APIM vignette](apim.html#exchangeable-residual-structure) 
+the [exchangeable residual-structure section of the APIM vignette](apim.html#exchangeable-residual-structure)
 for the derivation and back-transformation to the member-level variance-covariance matrix.
 
 ## Intensive Longitudinal DIM
@@ -1147,8 +1156,8 @@ data.frame(
 
 ### Including Random Slopes
 
-Random-slopes can be included in the DIM by adding the corresponding within-person 
-effects to the stable dyad-level random-effect blocks: 
+Random slopes can be included in the DIM by adding the corresponding
+within-person effects to the stable dyad-level random-effect blocks:
 
 ```{r fit-ild-dim-random, eval = FALSE}
 
@@ -1193,9 +1202,10 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 The ILD models above do not model residual serial dependence. One way to model
 dynamics or to account for temporal dependency is to include lagged outcomes as predictors.
 
-**Note:** Dynamic models, especially with small time series, are subject to bias. 
-This, and the choice between raw and within-person-centered outcome lags, are 
-addressed in the [APIM vignette's discussion of dynamic models](apim.html#dynamic-models). 
+**Note:** Dynamic models, especially with small time series, are subject to bias.
+This, and the choice between raw and within-person-centered outcome lags, are
+addressed in the [APIM vignette's discussion of dynamic
+models](apim.html#dynamic-models).
 
 Brief example to obtain lagged raw and within-person centered versions of the outcome:
 
@@ -1258,6 +1268,11 @@ dim_ILD_lag_raw <- glmmTMB::glmmTMB(
 
 summary(dim_ILD_lag_raw)
 ```
+
+The lagged dyad-mean coefficient describes how a one-point higher shared prior
+outcome level relates to both members' current outcomes. The lagged
+within-dyad-deviation coefficient describes how a one-point prior difference
+between partners relates to their current expected difference.
 
 All predictor effects in this model are conditional on both members' prior
 outcomes.
