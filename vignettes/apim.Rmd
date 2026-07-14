@@ -107,7 +107,7 @@ summary(ild_distinguishable_model)
 structure as `example_dyadic_ILD`, but the outcome is semi-continuous.
 
 ```{r ild-tweedie-raw}
-print(head(example_dyadic_ILD_tweedie, n = 26), n = 26)
+print(head(example_dyadic_ILD_tweedie, 20))
 hist(example_dyadic_ILD_tweedie$physical_activity, breaks = 20)
 ```
 

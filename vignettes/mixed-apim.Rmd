@@ -284,7 +284,7 @@ summary(mixed_ild_gaussian_model)
 longitudinal dyadic structure, but the outcome is semi-continuous.
 
 ```{r mixed-ild-tweedie-raw}
-print(head(example_dyadic_ILD_mixed_tweedie, n = 26), n = 26)
+print(head(example_dyadic_ILD_mixed_tweedie, 20))
 hist(example_dyadic_ILD_mixed_tweedie$physical_activity, breaks = 20)
 ```
 
