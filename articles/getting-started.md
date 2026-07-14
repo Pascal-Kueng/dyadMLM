@@ -31,8 +31,8 @@ modeling (SEM) approaches to dyadic data, see Ledermann and Kenny
 (2017).
 
 For guidance and examples on how to use the prepared data to estimate
-cross-sectional, generalized, and intensive longitudinal APIMs, see the
-[Actor-Partner Interdependence Model
+cross-sectional and intensive longitudinal APIMs, see the [Actor-Partner
+Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 models that combine distinguishable and exchangeable dyad compositions,
 see the [Mixed-Composition APIM
@@ -601,6 +601,10 @@ Laurenceau 2013). This temporal predictor decomposition is controlled by
 `"time_2l"` for this longitudinal setup and retains raw actor and
 partner columns alongside both components.
 
+Note that observed person means used to construct the between-person
+(`cbp`) predictors can be unreliable when each member contributes few
+occasions, which can bias between-person estimates (Gottfredson 2019).
+
 ### Dynamic Models
 
 The preparation above supports contemporaneous models, but observations
@@ -1065,9 +1069,9 @@ print(mixed_cross_data_pooled_constrained)
 ------------------------------------------------------------------------
 
 **Continue** with the [Actor-Partner Interdependence Model (APIM)
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
 
-refer to the:
+Related model-specific vignettes:
 
 - [Mixed-Composition APIM
   vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
@@ -1096,6 +1100,11 @@ Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. “Multilevel
 Autoregressive Models When the Number of Time Points Is Small.”
 *Structural Equation Modeling: A Multidisciplinary Journal* 28 (1):
 15–27. <https://doi.org/10.1080/10705511.2020.1753517>.
+
+Gottfredson, Nisha C. 2019. “A Straightforward Approach for Coping with
+Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.” *Addictive Behaviors*
+94: 156–61. <https://doi.org/10.1016/j.addbeh.2018.09.031>.
 
 Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. “To Center or Not
 to Center? Investigating Inertia with a Multilevel Autoregressive

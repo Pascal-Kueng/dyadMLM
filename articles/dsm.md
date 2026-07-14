@@ -14,8 +14,9 @@ difference between partners (Iida et al. 2018).
 
 For the broader data-preparation workflow, see the [Getting Started
 vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
-For distinguishable, exchangeable, generalized, and intensive
-longitudinal APIMs, see the [Actor-Partner Interdependence Model
+For distinguishable and exchangeable APIMs in cross-sectional and
+intensive longitudinal data, see the [Actor-Partner Interdependence
+Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 APIMs combining distinguishable and exchangeable compositions, see the
 [Mixed-Composition APIM
@@ -503,6 +504,10 @@ Gaussian Dyad-Individual Model (DIM). In `interdep`, use
 
 ### Concurrent ILD Gaussian DSM
 
+Observed person means used to construct the between-person (`cbp`)
+predictors can be unreliable when each member contributes few occasions,
+which can bias between-person estimates (Gottfredson 2019).
+
 ### Current limitations of dyadic ILD designs in R
 
 Short, link to APIM!
@@ -514,20 +519,21 @@ version can be implemented.
 
 ------------------------------------------------------------------------
 
-Continue with the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
-
-refer to the:
-
-- [Actor-Partner Interdependence Model (APIM)
-  vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
-- [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
-
-or return to the
+Return to the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md), see
+the [Mixed-Composition APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md)
+or the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) for
+related model specifications, or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 ## References
+
+Gottfredson, Nisha C. 2019. “A Straightforward Approach for Coping with
+Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.” *Addictive Behaviors*
+94: 156–61. <https://doi.org/10.1016/j.addbeh.2018.09.031>.
 
 Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018. “Models of
 Interdependent Individuals Versus Dyadic Processes in Relationship

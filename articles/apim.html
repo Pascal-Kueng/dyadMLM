@@ -128,6 +128,9 @@ for creating those constrained columns are planned.</p>
 <div class="section level3">
 <h3 id="concurrent-ild-gaussian-apim-for-distinguishable-dyads">Concurrent ILD Gaussian APIM for distinguishable dyads<a class="anchor" aria-label="anchor" href="#concurrent-ild-gaussian-apim-for-distinguishable-dyads"></a>
 </h3>
+<p>Observed person means used to construct the between-person
+(<code>cbp</code>) predictors can be unreliable when each member
+contributes few occasions, which can bias between-person estimates <span class="citation">(Gottfredson 2019)</span>.</p>
 <p>Example model specification:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -187,17 +190,31 @@ for creating those constrained columns are planned.</p>
 <h4 id="dynamic-models">Dynamic models<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
 </h4>
 <hr>
-<p><strong>Continue</strong> with the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</p>
-<p>refer to the:</p>
+<p>From here, choose the model-specific vignette that matches the
+research question:</p>
 <ul>
 <li>
-<a href="dim.html">Dyad-Individual Model vignette</a>,</li>
+<a href="mixed-apim.html">Mixed-Composition APIM vignette</a> for
+analyses combining distinguishable and exchangeable dyad
+compositions;</li>
 <li>
-<a href="dsm.html">Dyadic Score Model vignette</a>,</li>
+<a href="dim.html">Dyad-Individual Model vignette</a> for the
+exchangeable DIM parameterization; or</li>
+<li>
+<a href="dsm.html">Dyadic Score Model vignette</a> for the
+distinguishable DSM parameterization.</li>
 </ul>
-<p>or return to the <a href="index.html">Overview</a>.</p>
+<p>Or return to the <a href="index.html">Overview</a>.</p>
 <p>A vignette with non-Gaussian generalized APIM examples is
 planned.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-gottfredsonStraightforwardApproachCoping2019" class="csl-entry">
+Gottfredson, Nisha C. 2019. <span>“A Straightforward Approach for Coping
+with Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.”</span> <em>Addictive
+Behaviors</em> 94: 156–61. <a href="https://doi.org/10.1016/j.addbeh.2018.09.031" class="external-link">https://doi.org/10.1016/j.addbeh.2018.09.031</a>.
+</div>
+</div>
 </div>
 </div>
 </div>

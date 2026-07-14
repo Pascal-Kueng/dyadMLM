@@ -80,12 +80,11 @@ associations in terms of the dyad’s shared level and the directional
 difference between partners <span class="citation">(Iida et al.
 2018)</span>.</p>
 <p>For the broader data-preparation workflow, see the <a href="getting-started.html">Getting Started vignette</a>. For
-distinguishable, exchangeable, generalized, and intensive longitudinal
-APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model
-vignette</a>. For APIMs combining distinguishable and exchangeable
-compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM
-vignette</a>. For the exchangeable Dyad-Individual Model (DIM), see the
-<a href="dim.html">Dyad-Individual Model vignette</a>.</p>
+distinguishable and exchangeable APIMs in cross-sectional and intensive
+longitudinal data, see the <a href="apim.html">Actor-Partner
+Interdependence Model vignette</a>. For APIMs combining distinguishable
+and exchangeable compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For the
+exchangeable Dyad-Individual Model (DIM), see the <a href="dim.html">Dyad-Individual Model vignette</a>.</p>
 <div class="section level2">
 <h2 id="preparing-dsm-data">Preparing DSM Data<a class="anchor" aria-label="anchor" href="#preparing-dsm-data"></a>
 </h2>
@@ -628,6 +627,9 @@ Gaussian Dyad-Individual Model (DIM). In <code>interdep</code>, use
 <div class="section level3">
 <h3 id="concurrent-ild-gaussian-dsm">Concurrent ILD Gaussian DSM<a class="anchor" aria-label="anchor" href="#concurrent-ild-gaussian-dsm"></a>
 </h3>
+<p>Observed person means used to construct the between-person
+(<code>cbp</code>) predictors can be unreliable when each member
+contributes few occasions, which can bias between-person estimates <span class="citation">(Gottfredson 2019)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="current-limitations-of-dyadic-ild-designs-in-r">Current limitations of dyadic ILD designs in R<a class="anchor" aria-label="anchor" href="#current-limitations-of-dyadic-ild-designs-in-r"></a>
@@ -639,17 +641,10 @@ Gaussian Dyad-Individual Model (DIM). In <code>interdep</code>, use
 <p>Short, link to APIM! Just provide one simple example for how the
 dynamic version can be implemented.</p>
 <hr>
-<p>Continue with the <a href="dim.html">Dyad-Individual Model
-vignette</a>,</p>
-<p>refer to the:</p>
-<ul>
-<li>
-<a href="apim.html">Actor-Partner Interdependence Model (APIM)
-vignette</a>,</li>
-<li>
-<a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</li>
-</ul>
-<p>or return to the <a href="index.html">Overview</a>.</p>
+<p>Return to the <a href="apim.html">Actor-Partner Interdependence Model
+vignette</a>, see the <a href="mixed-apim.html">Mixed-Composition APIM
+vignette</a> or the <a href="dim.html">Dyad-Individual Model
+vignette</a> for related model specifications, or return to the <a href="index.html">Overview</a>.</p>
 </div>
 </div>
 </div>
@@ -657,6 +652,12 @@ vignette</a>,</li>
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-gottfredsonStraightforwardApproachCoping2019" class="csl-entry">
+Gottfredson, Nisha C. 2019. <span>“A Straightforward Approach for Coping
+with Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.”</span> <em>Addictive
+Behaviors</em> 94: 156–61. <a href="https://doi.org/10.1016/j.addbeh.2018.09.031" class="external-link">https://doi.org/10.1016/j.addbeh.2018.09.031</a>.
+</div>
 <div id="ref-iidaModelsInterdependentIndividuals2018" class="csl-entry">
 Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018.
 <span>“Models of Interdependent Individuals Versus Dyadic Processes in

@@ -86,14 +86,14 @@ the DIM expresses them in terms of the dyad’s shared level and the
 contrast between partners.</p>
 <p>For the broader data-preparation workflow of the
 <code>interdep</code> package, see the <a href="getting-started.html">Getting Started vignette</a>. For
-distinguishable, exchangeable, generalized, and intensive longitudinal
-APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model
-vignette</a>. For APIMs that combine distinguishable and exchangeable
-dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition
-APIM vignette</a>. For the dyadic score model, see the <a href="dsm.html">Dyadic Score Model vignette</a>. Whereas the DIM is a
-different parameterization of the exchangeable APIM, the Dyadic Score
-Model (DSM) is a different parameterization of the distinguishable
-APIM.</p>
+distinguishable and exchangeable APIMs in cross-sectional and intensive
+longitudinal data, see the <a href="apim.html">Actor-Partner
+Interdependence Model vignette</a>. For APIMs that combine
+distinguishable and exchangeable dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For the
+dyadic score model, see the <a href="dsm.html">Dyadic Score Model
+vignette</a>. Whereas the DIM is a different parameterization of the
+exchangeable APIM, the Dyadic Score Model (DSM) is a different
+parameterization of the distinguishable APIM.</p>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dim">Cross-Sectional Gaussian DIM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dim"></a>
 </h2>
@@ -1191,10 +1191,8 @@ occasions (small
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>),
 especially when the predictor has low stability over time, these person
 means can be unreliable. The associated between-person estimates can
-therefore be biased as well as imprecise, so interpret them cautiously
-<span class="citation">(Gottfredson 2019)</span>. This concern primarily
-affects the between-person estimates constructed from observed person
-means.</p>
+therefore be biased or imprecise, so they should be interpreted
+cautiously <span class="citation">(Gottfredson 2019)</span>.</p>
 <p>Use <code>temporal_predictor_decomposition = "none"</code> to
 construct only the raw dyad-occasion mean and within-dyad deviation.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -1896,17 +1894,10 @@ LD-APIM recommendation above may be preferable <span class="citation">(Gistelinc
 about unreliable person means used to construct <code>cbp</code>
 predictors with few occasions.</p>
 <hr>
-<p><strong>Continue</strong> with the <a href="dsm.html">Dyadic Score
-Model vignette</a>,</p>
-<p>refer to the:</p>
-<ul>
-<li>
-<a href="apim.html">Actor-Partner Interdependence Model (APIM)
-vignette</a>,</li>
-<li>
-<a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</li>
-</ul>
-<p>or return to the <a href="index.html">Overview</a>.</p>
+<p>Return to the <a href="apim.html">Actor-Partner Interdependence Model
+vignette</a>, see the <a href="mixed-apim.html">Mixed-Composition APIM
+vignette</a> or the <a href="dsm.html">Dyadic Score Model vignette</a>
+for related model specifications, or return to the <a href="index.html">Overview</a>.</p>
 </div>
 </div>
 </div>

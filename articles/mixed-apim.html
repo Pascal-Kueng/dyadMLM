@@ -445,6 +445,9 @@ adding <code>time</code> and a predictor:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp &lt;dbl&gt;, .i_provided_support_cbp &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_actor &lt;dbl&gt;, .i_provided_support_partner &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_provided_support_cwp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<p>Note that observed person means used to construct the between-person
+(<code>cbp</code>) predictors can be unreliable when each member
+contributes few occasions, which can bias between-person estimates <span class="citation">(Gottfredson 2019)</span>.</p>
 <p>This mixed-composition ILD model includes composition-specific fixed
 intercepts, time slopes, and within-person and between-person actor and
 partner effects. It omits random slopes, as they would add several
@@ -575,10 +578,10 @@ constraint or a comparison of effects across compositions is part of the
 research question, and add further random effects only when the data
 support the additional complexity.</p>
 <hr>
-<p><strong>Continue</strong> with the <a href="dim.html">Dyad-Individual
-Model vignette</a>, refer to the <a href="apim.html">Actor-Partner
-Interdependence Model vignette</a> or the <a href="dsm.html">Dyadic
-Score Model vignette</a>, or return to the <a href="index.html">Overview</a>.</p>
+<p>Return to the <a href="apim.html">Actor-Partner Interdependence Model
+vignette</a>, see the <a href="dim.html">Dyad-Individual Model
+vignette</a> or the <a href="dsm.html">Dyadic Score Model vignette</a>
+for alternative parameterizations, or return to the <a href="index.html">Overview</a>.</p>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-Bolger2025Unified" class="csl-entry">
 Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
@@ -586,6 +589,12 @@ Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
 Dyads.”</span> <em>Innovations in Interpersonal Relationships and Health
 Research: <span>Advancing</span> the Integration of Interdisciplinary
 Approaches to Dyadic Behavior Change</em>. <a href="https://doi.org/10.17605/OSF.IO/WYDCJ" class="external-link">https://doi.org/10.17605/OSF.IO/WYDCJ</a>.
+</div>
+<div id="ref-gottfredsonStraightforwardApproachCoping2019" class="csl-entry">
+Gottfredson, Nisha C. 2019. <span>“A Straightforward Approach for Coping
+with Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.”</span> <em>Addictive
+Behaviors</em> 94: 156–61. <a href="https://doi.org/10.1016/j.addbeh.2018.09.031" class="external-link">https://doi.org/10.1016/j.addbeh.2018.09.031</a>.
 </div>
 <div id="ref-delrosarioPracticalGuideSpecifying2025" class="csl-entry">
 Rosario, Kareena S. del, and Tessa V. West. 2025. <span>“A

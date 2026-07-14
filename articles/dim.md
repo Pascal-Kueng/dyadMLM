@@ -17,8 +17,9 @@ contrast between partners.
 For the broader data-preparation workflow of the `interdep` package, see
 the [Getting Started
 vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
-For distinguishable, exchangeable, generalized, and intensive
-longitudinal APIMs, see the [Actor-Partner Interdependence Model
+For distinguishable and exchangeable APIMs in cross-sectional and
+intensive longitudinal data, see the [Actor-Partner Interdependence
+Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 APIMs that combine distinguishable and exchangeable dyad compositions,
 see the [Mixed-Composition APIM
@@ -612,9 +613,8 @@ The `cbp` terms use each member’s mean across the observed occasions to
 estimate that member’s longer-run usual level. With few occasions (small
 $`T`$), especially when the predictor has low stability over time, these
 person means can be unreliable. The associated between-person estimates
-can therefore be biased as well as imprecise, so interpret them
-cautiously (Gottfredson 2019). This concern primarily affects the
-between-person estimates constructed from observed person means.
+can therefore be biased or imprecise, so they should be interpreted
+cautiously (Gottfredson 2019).
 
 Use `temporal_predictor_decomposition = "none"` to construct only the
 raw dyad-occasion mean and within-dyad deviation.
@@ -1371,17 +1371,13 @@ occasions.
 
 ------------------------------------------------------------------------
 
-**Continue** with the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
-
-refer to the:
-
-- [Actor-Partner Interdependence Model (APIM)
-  vignette](https://pascal-kueng.github.io/interdep/articles/apim.md),
-- [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
-
-or return to the
+Return to the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md), see
+the [Mixed-Composition APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md)
+or the [Dyadic Score Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md) for
+related model specifications, or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 ## References

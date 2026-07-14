@@ -49,6 +49,10 @@ for creating those constrained columns are planned.
 
 ### Concurrent ILD Gaussian APIM for distinguishable dyads
 
+Observed person means used to construct the between-person (`cbp`)
+predictors can be unreliable when each member contributes few occasions,
+which can bias between-person estimates (Gottfredson 2019).
+
 Example model specification:
 
 ``` r
@@ -108,17 +112,26 @@ summary(ild_distinguishable_model)
 
 ------------------------------------------------------------------------
 
-**Continue** with the [Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+From here, choose the model-specific vignette that matches the research
+question:
 
-refer to the:
-
+- [Mixed-Composition APIM
+  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md)
+  for analyses combining distinguishable and exchangeable dyad
+  compositions;
 - [Dyad-Individual Model
-  vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
+  vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) for
+  the exchangeable DIM parameterization; or
 - [Dyadic Score Model
-  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md),
+  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md) for
+  the distinguishable DSM parameterization.
 
-or return to the
+Or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 A vignette with non-Gaussian generalized APIM examples is planned.
+
+Gottfredson, Nisha C. 2019. “A Straightforward Approach for Coping with
+Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.” *Addictive Behaviors*
+94: 156–61. <https://doi.org/10.1016/j.addbeh.2018.09.031>.

@@ -363,6 +363,10 @@ print(mixed_ild_data)
 #> #   .i_provided_support_cwp_actor <dbl>, …
 ```
 
+Note that observed person means used to construct the between-person
+(`cbp`) predictors can be unreliable when each member contributes few
+occasions, which can bias between-person estimates (Gottfredson 2019).
+
 This mixed-composition ILD model includes composition-specific fixed
 intercepts, time slopes, and within-person and between-person actor and
 partner effects. It omits random slopes, as they would add several
@@ -503,13 +507,13 @@ additional complexity.
 
 ------------------------------------------------------------------------
 
-**Continue** with the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md),
-refer to the [Actor-Partner Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md) or
+Return to the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md), see
+the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) or
 the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md), or
-return to the
+vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md) for
+alternative parameterizations, or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
@@ -517,6 +521,11 @@ Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
 Dyads.” *Innovations in Interpersonal Relationships and Health Research:
 Advancing the Integration of Interdisciplinary Approaches to Dyadic
 Behavior Change*. <https://doi.org/10.17605/OSF.IO/WYDCJ>.
+
+Gottfredson, Nisha C. 2019. “A Straightforward Approach for Coping with
+Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.” *Addictive Behaviors*
+94: 156–61. <https://doi.org/10.1016/j.addbeh.2018.09.031>.
 
 Rosario, Kareena S. del, and Tessa V. West. 2025. “A Practical Guide to
 Specifying Random Effects in Longitudinal Dyadic Multilevel Modeling.”

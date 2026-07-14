@@ -99,10 +99,9 @@ supports one distinguishable dyad composition.</p>
 multilevel models (MLMs).</strong> For a comparison of MLM and
 structural equation modeling (SEM) approaches to dyadic data, see <span class="citation">Ledermann and Kenny (2017)</span>.</p>
 <p>For guidance and examples on how to use the prepared data to estimate
-cross-sectional, generalized, and intensive longitudinal APIMs, see the
-<a href="apim.html">Actor-Partner Interdependence Model vignette</a>.
-For models that combine distinguishable and exchangeable dyad
-compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM
+cross-sectional and intensive longitudinal APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>. For
+models that combine distinguishable and exchangeable dyad compositions,
+see the <a href="mixed-apim.html">Mixed-Composition APIM
 vignette</a>.</p>
 <p>For guidance on how to use the Dyad-Individual Model (DIM)
 parameterization, including dyad-mean and within-dyad-deviation
@@ -725,6 +724,9 @@ predictor decomposition is controlled by
 <code>"auto"</code> setting selects <code>"time_2l"</code> for this
 longitudinal setup and retains raw actor and partner columns alongside
 both components.</p>
+<p>Note that observed person means used to construct the between-person
+(<code>cbp</code>) predictors can be unreliable when each member
+contributes few occasions, which can bias between-person estimates <span class="citation">(Gottfredson 2019)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="dynamic-models">Dynamic Models<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
@@ -1164,8 +1166,8 @@ treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_pooled_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <hr>
 <p><strong>Continue</strong> with the <a href="apim.html">Actor-Partner
-Interdependence Model (APIM) vignette</a>,</p>
-<p>refer to the:</p>
+Interdependence Model (APIM) vignette</a>.</p>
+<p>Related model-specific vignettes:</p>
 <ul>
 <li>
 <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</li>
@@ -1198,6 +1200,12 @@ Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. <span>“Multilevel
 Autoregressive Models When the Number of Time Points Is Small.”</span>
 <em>Structural Equation Modeling: A Multidisciplinary Journal</em> 28
 (1): 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517" class="external-link">https://doi.org/10.1080/10705511.2020.1753517</a>.
+</div>
+<div id="ref-gottfredsonStraightforwardApproachCoping2019" class="csl-entry">
+Gottfredson, Nisha C. 2019. <span>“A Straightforward Approach for Coping
+with Unreliability of Person Means When Parsing Within-Person and
+Between-Person Effects in Longitudinal Studies.”</span> <em>Addictive
+Behaviors</em> 94: 156–61. <a href="https://doi.org/10.1016/j.addbeh.2018.09.031" class="external-link">https://doi.org/10.1016/j.addbeh.2018.09.031</a>.
 </div>
 <div id="ref-hamakerCenterNotCenter2015" class="csl-entry">
 Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. <span>“To Center or
