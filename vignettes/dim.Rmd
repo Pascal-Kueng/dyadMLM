@@ -219,7 +219,7 @@ interpretation.
 ### Demonstrating model equivalence to APIM
 
 The same model can be written in APIM form. Since we have requested both sets of
-variables from `prepare_interdep_data`, we can fit one directly. For more
+variables from `prepare_interdep_data()`, we can fit one directly. For more
 guidance on APIM specifications and different models, see the
 [Actor-Partner Interdependence Model vignette](apim.html).
 
@@ -1309,7 +1309,7 @@ interpretation changes. All DIM predictor effects then describe associations
 conditional on the members' prior outcomes.
 
 By adding the outcome to `predictors` and selecting it with `lag_predictors`,
-`interdep::prepare_interdep_data()` returns lag-1 raw and within-person scores
+`prepare_interdep_data()` returns lag-1 raw and within-person scores
 alongside the contemporaneous scores. Between-person scores are not lagged
 because they describe stable differences between members.
 
