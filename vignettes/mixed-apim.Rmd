@@ -203,7 +203,7 @@ c_{MM} & \sigma_{MM}^2
 \end{pmatrix}
 $$
 
-The five random-effects terms in the model form separate blocks. No random-effect 
+The random-effects terms in the model form separate blocks. No random-effect 
 covariance is estimated between compositions (e.g., a male person from a male-male 
 couple should not be  correlated with a female person from a female-female couple). 
 
