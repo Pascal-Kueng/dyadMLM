@@ -77,7 +77,8 @@ Küng</h4>
 distinguishable dyads and its relationship to the distinguishable
 Actor-Partner Interdependence Model (APIM). The DSM expresses
 associations in terms of the dyad’s shared level and the directional
-difference between partners.</p>
+difference between partners <span class="citation">(Iida et al.
+2018)</span>.</p>
 <p>For the broader data-preparation workflow, see the <a href="getting-started.html">Getting Started vignette</a>. For
 distinguishable, exchangeable, generalized, and intensive longitudinal
 APIMs, see the <a href="apim.html">Actor-Partner Interdependence Model
@@ -144,9 +145,11 @@ and
 <ul>
 <li>
 <code>.i_communication_dyad_mean_gmc</code>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">=
-\frac{X_{female} + X_{male}}{2}</annotation></semantics></math>,
-grand-mean centered;</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub></mrow><annotation encoding="application/x-tex">=
+\frac{X_{female} + X_{male}}{2} - \mu_X</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
+is the sample grand mean of the dyad-level predictor means;</li>
 <li>
 <code>.i_communication_within_dyad_diff</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">= X_{female} - X_{male}</annotation></semantics></math>;
@@ -311,17 +314,17 @@ remain unchanged, whereas their covariance reverses sign.</p>
 <h3 id="interpreting-the-dsm-paths">Interpreting the DSM paths<a class="anchor" aria-label="anchor" href="#interpreting-the-dsm-paths"></a>
 </h3>
 <p>For the outcomes given the predictors, the long-format model
-estimates the same paths as the conventional score-based DSM. Unlike the
-original SEM approach, it does not also model the predictor scores or
-provide an overall SEM fit test. Define</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>L</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>X</mi><mi>D</mi></msub><mo>=</mo><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
-X_L = \frac{X_{female} + X_{male}}{2}, \qquad
+estimates the same paths as the conventional score-based DSM <span class="citation">(Iida et al. 2018)</span>. Unlike the original SEM
+approach, it does not also model the predictor scores or provide an
+overall SEM fit test. Define</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>L</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>X</mi><mi>D</mi></msub><mo>=</mo><msub><mi>X</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
+X_L = \frac{X_{female} + X_{male}}{2} - \mu_X, \qquad
 X_D = X_{female} - X_{male},
 </annotation></semantics></math></p>
 <p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mi>L</mi></msub><annotation encoding="application/x-tex">X_L</annotation></semantics></math>
-is grand-mean centered in this example. Similarly, define outcome level
-and outcome difference as</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
+is the sample grand mean of the dyad-level predictor means. Similarly,
+define outcome level and outcome difference as</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>L</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>Y</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>+</mo><msub><mi>Y</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>Y</mi><mi>D</mi></msub><mo>=</mo><msub><mi>Y</mi><mrow><mi>f</mi><mi>e</mi><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mo>−</mo><msub><mi>Y</mi><mrow><mi>m</mi><mi>a</mi><mi>l</mi><mi>e</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 Y_L = \frac{Y_{female} + Y_{male}}{2}, \qquad
 Y_D = Y_{female} - Y_{male}.
@@ -435,7 +438,7 @@ difference are associated.</p>
 </h2>
 <p>For distinguishable dyads, the full DSM and an unconstrained
 distinguishable APIM are alternative parameterizations of the same fixed
-associations.</p>
+associations <span class="citation">(Iida et al. 2018)</span>.</p>
 <p>Let’s fit the equivalent distinguishable APIM:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apim_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -629,6 +632,18 @@ vignette</a>,</li>
 <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>,</li>
 </ul>
 <p>or return to the <a href="index.html">Overview</a>.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-iidaModelsInterdependentIndividuals2018" class="csl-entry">
+Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018.
+<span>“Models of Interdependent Individuals Versus Dyadic Processes in
+Relationship Research.”</span> <em>Journal of Social and Personal
+Relationships</em> 35 (1): 59–88. <a href="https://doi.org/10.1177/0265407517725407" class="external-link">https://doi.org/10.1177/0265407517725407</a>.
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -10,7 +10,7 @@ This vignette focuses on the Dyadic Score Model (DSM) for
 distinguishable dyads and its relationship to the distinguishable
 Actor-Partner Interdependence Model (APIM). The DSM expresses
 associations in terms of the dyad’s shared level and the directional
-difference between partners.
+difference between partners (Iida et al. 2018).
 
 For the broader data-preparation workflow, see the [Getting Started
 vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
@@ -81,7 +81,8 @@ For predictor values $`X_{female}`$ and $`X_{male}`$, `interdep` then
 creates:
 
 - `.i_communication_dyad_mean_gmc` $`=
-  \frac{X_{female} + X_{male}}{2}`$, grand-mean centered;
+  \frac{X_{female} + X_{male}}{2} - \mu_X`$, where $`\mu_X`$ is the
+  sample grand mean of the dyad-level predictor means;
 - `.i_communication_within_dyad_diff` $`= X_{female} - X_{male}`$; and
 - `.i_dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
 
@@ -245,17 +246,17 @@ remain unchanged, whereas their covariance reverses sign.
 ### Interpreting the DSM paths
 
 For the outcomes given the predictors, the long-format model estimates
-the same paths as the conventional score-based DSM. Unlike the original
-SEM approach, it does not also model the predictor scores or provide an
-overall SEM fit test. Define
+the same paths as the conventional score-based DSM (Iida et al. 2018).
+Unlike the original SEM approach, it does not also model the predictor
+scores or provide an overall SEM fit test. Define
 
 ``` math
-X_L = \frac{X_{female} + X_{male}}{2}, \qquad
+X_L = \frac{X_{female} + X_{male}}{2} - \mu_X, \qquad
 X_D = X_{female} - X_{male},
 ```
 
-where $`X_L`$ is grand-mean centered in this example. Similarly, define
-outcome level and outcome difference as
+where $`\mu_X`$ is the sample grand mean of the dyad-level predictor
+means. Similarly, define outcome level and outcome difference as
 
 ``` math
 Y_L = \frac{Y_{female} + Y_{male}}{2}, \qquad
@@ -308,7 +309,7 @@ associated.
 
 For distinguishable dyads, the full DSM and an unconstrained
 distinguishable APIM are alternative parameterizations of the same fixed
-associations.
+associations (Iida et al. 2018).
 
 Let’s fit the equivalent distinguishable APIM:
 
@@ -512,3 +513,10 @@ refer to the:
 
 or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+
+## References
+
+Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018. “Models of
+Interdependent Individuals Versus Dyadic Processes in Relationship
+Research.” *Journal of Social and Personal Relationships* 35 (1): 59–88.
+<https://doi.org/10.1177/0265407517725407>.
