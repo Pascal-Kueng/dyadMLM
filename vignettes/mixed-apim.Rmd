@@ -20,7 +20,6 @@ knitr::opts_chunk$set(
 library(interdep)
 ```
 
-
 This vignette covers APIMs that combine distinguishable and exchangeable dyad
 compositions in one analysis. The unified model presented by Bolger, Laurenceau,
 and DiGiovanni implemented in SEM is the basis and inspiration for this vignette [@Bolger2025Unified]. Here,

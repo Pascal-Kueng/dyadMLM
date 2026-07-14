@@ -46,8 +46,10 @@ composition, whereas DSM supports one distinguishable dyad composition.
 approaches to dyadic data, see @ledermannAnalyzingDyadicData2017.
 
 For guidance and examples on how to use the prepared data to estimate
-cross-sectional and intensive longitudinal APIMs, see the
+cross-sectional and intensive longitudinal APIMs for exchangeble and 
+distinguishable dyads, and how to test distinguishability, see the
 [Actor-Partner Interdependence Model vignette](apim.html).
+
 For models that combine distinguishable and exchangeable dyad compositions,
 see the [Mixed-Composition APIM vignette](mixed-apim.html).
 
