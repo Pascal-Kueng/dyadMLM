@@ -51,7 +51,25 @@ Here, $a_f$ and $a_m$ are the actor effects on the female and male outcomes,
 whereas $p_f$ and $p_m$ are the corresponding partner effects. All four paths
 can differ in a distinguishable APIM.
 
-### Residual random effects structure
+### Residual random-effects structure {#distinguishable-residual-structure}
+
+For a distinguishable female-male dyad, the two members can have different
+residual variances. Their residual covariance matrix is
+
+$$
+\Sigma_{FM} =
+\begin{pmatrix}
+\sigma_{FM,F}^2 & c_{FM} \\
+c_{FM} & \sigma_{FM,M}^2
+\end{pmatrix}.
+$$
+
+With one outcome row per member, this structure is estimated with an
+unstructured random-effects block such as
+`us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)`
+and `dispformula = ~ 0`. The two indicator columns select the female and male
+rows, respectively. The `us()` block estimates both variances and their
+covariance.
 
 ### Interpretation
 
@@ -68,7 +86,7 @@ also constrained to be equal, while their covariance is estimated.
 
 ### Assumptions
 
-### Residual random effects structure - and back-transformation
+### Residual random-effects structure and back-transformation {#exchangeable-residual-structure}
 
 For an exchangeable dyad, `interdep` generates an arbitrary member-difference
 column, named `.i_diff_*`, that is `+1` for one member and `-1` for the other.
@@ -133,11 +151,84 @@ same-occasion dyad-level covariance blocks.
 
 ### Interpretation
 
-## Testing distinguishability
+## Testing distinguishability {#testing-distinguishability}
 
-Aside from using a Wald test on the first model, nested model comparisons
-require models fit to the same prepared data object. Helpers for creating those
-constrained columns are planned.
+Distinguishability can be evaluated by comparing a full model in which the two
+roles may differ with a restricted exchangeable model. This comparison tests
+the imposed equality constraints jointly. Here, they concern the fixed
+intercepts, actor effects, partner effects, and residual variances.
+
+The two parameterizations require different generated columns, so we prepare
+the same observations once as distinguishable and once as exchangeable:
+
+```{r prepare-cross-distinguishability}
+apim_distinguishable_data <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication
+)
+
+apim_exchangeable_data <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  set_exchangeable_compositions = "female-male"
+)
+```
+
+The distinguishable model allows all fixed effects and both residual variances
+to differ between female and male members:
+
+```{r fit-cross-distinguishability}
+apim_distinguishable_model <- glmmTMB::glmmTMB(
+  satisfaction ~ 0 +
+    .i_is_female_x_male_female +
+    .i_is_female_x_male_male +
+    .i_is_female_x_male_female:.i_communication_actor +
+    .i_is_female_x_male_male:.i_communication_actor +
+    .i_is_female_x_male_female:.i_communication_partner +
+    .i_is_female_x_male_male:.i_communication_partner +
+    us(
+      0 + .i_is_female_x_male_female + .i_is_female_x_male_male |
+        coupleID
+    ),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = apim_distinguishable_data
+)
+
+apim_exchangeable_model <- glmmTMB::glmmTMB(
+  satisfaction ~ 0 +
+    .i_is_female_x_male +
+    .i_communication_actor +
+    .i_communication_partner +
+    (0 + .i_is_female_x_male | coupleID) +
+    (0 + .i_diff_female_x_male_arbitrary | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = apim_exchangeable_data
+)
+```
+
+`compare_interdep_models()` verifies that both models use equivalent original
+observations before performing the likelihood-ratio test:
+
+```{r compare-cross-distinguishability}
+compare_interdep_models(
+  restricted = apim_exchangeable_model,
+  full = apim_distinguishable_model
+)
+```
+
+The test provides evidence against all restrictions jointly, but it does not
+show which parameter differs. The helper also cannot determine whether the
+models are mathematically nested; that remains a modeling requirement. The
+usual chi-squared reference distribution may be unreliable when a tested
+variance parameter lies on its boundary.
 
 
 
