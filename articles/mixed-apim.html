@@ -73,25 +73,23 @@ Küng</h4>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span></code></pre></div>
 <p>This vignette covers APIMs that combine distinguishable and
-exchangeable dyad compositions in one analysis. The unified model
-presented by Bolger, Laurenceau, and DiGiovanni is the basis and
-inspiration for this vignette. Their presentation includes a hybrid
-model for these dyad types in SEM <span class="citation">(Bolger et al.
+exchangeable dyad compositions in one analysis. The unified SEM
+presentation by Bolger, Laurenceau, and DiGiovanni is the basis and
+inspiration for this vignette <span class="citation">(Bolger et al.
 2025)</span>. Here, we implement the same general idea in one multilevel
-model. The vignette assumes familiarity with the data-preparation
-workflow in the <a href="getting-started.html">Getting Started
-vignette</a> and with the single-composition models in the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>. For
-DIM predictors and their equivalence to APIM effects in exchangeable
-dyads, see the <a href="dim.html">Dyad-Individual Model vignette</a>.
-For DSM predictor scores and their relationship to APIM effects in
-distinguishable dyads, see the <a href="dsm.html">Dyadic Score Model
-vignette</a>.</p>
+model.</p>
+<p>For the general data-preparation workflow, go to the <a href="getting-started.html">Getting Started vignette</a>. For regular
+APIMs, refer to the <a href="apim.html">Actor-Partner Interdependence
+Model vignette</a>. For DIM predictors and their equivalence to APIM
+effects in exchangeable dyads, see the <a href="dim.html">Dyad-Individual Model vignette</a>. For DSM predictor
+scores and their relationship to APIM effects in distinguishable dyads,
+see the <a href="dsm.html">Dyadic Score Model vignette</a>.</p>
 <div class="section level2">
 <h2 id="cross-sectional-mixed-composition-apim">Cross-sectional mixed-composition APIM<a class="anchor" aria-label="anchor" href="#cross-sectional-mixed-composition-apim"></a>
 </h2>
 <p>The data were simulated with the following fixed effects and
 covariance parameters. For exchangeable dyads, <code>sum_variance</code>
-and <code>diff_variance</code> imply the partner correlation.</p>
+and <code>diff_variance</code> imply the within-dyad correlation.</p>
 <pre><code><span><span class="co">#&gt;             block     parameter    value</span></span>
 <span><span class="co">#&gt; 1   female_x_male   female_mean  5.50000</span></span>
 <span><span class="co">#&gt; 2   female_x_male     male_mean  4.50000</span></span>
@@ -152,7 +150,10 @@ variances while allowing their within-dyad covariance to be estimated
 and <code>1</code> for the corresponding exchangeable composition and
 <code>0</code> for all other compositions.
 <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code> creates this structure
-automatically.</p>
+automatically. The <a href="apim.html#exchangeable-residual-structure">APIM vignette</a>
+derives the resulting covariance matrix and shows how to back-transform
+the sum and difference variances to the usual equal-variance
+member-level covariance matrix.</p>
 <p>The model can then be specified as follows (example for an
 intercept-only model):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -187,11 +188,45 @@ intercept-only model):</p>
 <span>  , data <span class="op">=</span> <span class="va">mixed_cross_data</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_cross_gaussian_model</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_cross_gaussian_model</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
+<span><span class="co">#&gt; Formula:          </span></span>
+<span><span class="co">#&gt; satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  </span></span>
+<span><span class="co">#&gt;     .i_is_female_x_female + .i_is_male_x_male + us(0 + .i_is_female_x_male_female +  </span></span>
+<span><span class="co">#&gt;     .i_is_female_x_male_male | coupleID) + (0 + .i_is_female_x_female |  </span></span>
+<span><span class="co">#&gt;     coupleID) + (0 + .i_diff_female_x_female_arbitrary | coupleID) +  </span></span>
+<span><span class="co">#&gt;     (0 + .i_is_male_x_male | coupleID) + (0 + .i_diff_male_x_male_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID)</span></span>
+<span><span class="co">#&gt; Dispersion:                    ~0</span></span>
+<span><span class="co">#&gt; Data: mixed_cross_data</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
+<span><span class="co">#&gt;    2009.9    2059.0    -994.0    1987.9       629 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Random effects:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;  Groups     Name                              Variance Std.Dev. Corr  </span></span>
+<span><span class="co">#&gt;  coupleID   .i_is_female_x_male_female        1.1999   1.0954         </span></span>
+<span><span class="co">#&gt;             .i_is_female_x_male_male          1.9437   1.3942   -0.30 </span></span>
+<span><span class="co">#&gt;  coupleID.1 .i_is_female_x_female             0.6682   0.8175         </span></span>
+<span><span class="co">#&gt;  coupleID.2 .i_diff_female_x_female_arbitrary 0.3217   0.5672         </span></span>
+<span><span class="co">#&gt;  coupleID.3 .i_is_male_x_male                 0.6274   0.7921         </span></span>
+<span><span class="co">#&gt;  coupleID.4 .i_diff_male_x_male_arbitrary     1.0457   1.0226         </span></span>
+<span><span class="co">#&gt; Number of obs: 640, groups:  coupleID, 320</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_female  5.50000    0.10000   55.00   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_male_male    4.50000    0.12727   35.36   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_female_x_female       5.80000    0.08175   70.95   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_is_male_x_male           4.20000    0.07921   53.02   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>The four fixed-effect indicators are mutually exclusive. With
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>I</mi><annotation encoding="application/x-tex">I</annotation></semantics></math>
-denoting a shorter label for each generated composition-and-role
-indicator, the fixed part of the model can be written as:</p>
+denoting the generated <code>.i_is_{composition_role}</code> indicator,
+the fixed part of the full model can be written as:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>μ</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></msubsup><mo>=</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow></msub><msub><mi>I</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow></msub><msub><mi>I</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>F</mi></mrow></msub><msub><mi>I</mi><mrow><mi>F</mi><mi>F</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><msub><mi>I</mi><mrow><mi>M</mi><mi>M</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \mu_{ij}^{\mathrm{fixed}} =
 \beta_{FM,F} I_{FM,F,ij} +
@@ -253,45 +288,26 @@ indicator, the fixed part of the model can be written as:</p>
 </tbody>
 </table>
 <p>Therefore, for a member of a male-male dyad, for example, the fixed
-part reduces to</p>
+part reduces to just
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><annotation encoding="application/x-tex">\beta_{MM}</annotation></semantics></math>
+via:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow></msub><mo>+</mo><mn>0</mn><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow></msub><mo>+</mo><mn>0</mn><msub><mi>β</mi><mrow><mi>F</mi><mi>F</mi></mrow></msub><mo>+</mo><mn>1</mn><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><mo>=</mo><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
 = \beta_{MM}.
 </annotation></semantics></math></p>
 <p>The random-effects terms reduce in the same way because their
 indicator columns are also <code>0</code> outside the relevant
-composition. For a female-male dyad, the <code>us()</code> term gives
-the female and male members separate random intercepts and estimates
-their covariance:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mrow><mi>F</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>F</mi><mi>j</mi></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>μ</mi><mrow><mi>M</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>M</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\mu_{Fj} = \beta_{FM,F} + u_{Fj}, \qquad
-\mu_{Mj} = \beta_{FM,M} + u_{Mj}.
-</annotation></semantics></math></p>
-<p>For an exchangeable composition
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>
-(female-female or male-male), the two random-effects terms give a shared
-dyad effect
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>C</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">u_{Cj}</annotation></semantics></math>
-and an opposite member effect
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>C</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{Cj}</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mrow><mi>C</mi><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>β</mi><mi>C</mi></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>C</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>d</mi><mrow><mi>C</mi><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>v</mi><mrow><mi>C</mi><mi>j</mi></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>d</mi><mrow><mi>C</mi><mi>i</mi><mi>j</mi></mrow></msub><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mi>−</mi><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\mu_{Cij} = \beta_C + u_{Cj} + d_{Cij}v_{Cj},
-\qquad d_{Cij} \in \{-1, 1\}.
-</annotation></semantics></math></p>
-<p>Thus, the shared effect moves both members together, while the
-difference effect moves them in opposite directions. Its
-<code>-1</code>/<code>1</code> direction is arbitrary.</p>
-<p>The five random-effects terms in the model form separate blocks: one
-correlated female-male block, two female-female sum-and-difference
-blocks, and two male-male sum-and-difference blocks. No random-effect
-covariance is estimated between compositions. The two blocks within each
-exchangeable composition are also separate, so the shared and difference
-effects are uncorrelated. Because this is a cross-sectional model with
-one observation per member and <code>dispformula = ~ 0</code>, these
-dyad-level random effects represent the member variances and within-dyad
-covariance without an additional observation-level residual
-variance.</p>
-<p>This illustration is limited to the fixed-intercept model. The ILD
+composition. The model combines an unrestricted distinguishable
+covariance block for female-male dyads with a separate equal-variance
+covariance block for each exchangeable composition. The main APIM
+vignette introduces the <a href="apim.html#distinguishable-residual-structure">distinguishable</a>
+and <a href="apim.html#exchangeable-residual-structure">exchangeable</a>
+structures.</p>
+<p>The random-effects terms form composition-specific blocks, so no
+covariance parameters are estimated across compositions. Such parameters
+would not be identified because each dyad belongs to only one
+composition.</p>
+<p>This illustration only covered the fixed-intercept model. The ILD
 example below shows how composition-specific slopes can be added.</p>
 <div class="section level3">
 <h3 id="single-versus-separate-mixed-composition-fits">Single versus separate mixed-composition fits<a class="anchor" aria-label="anchor" href="#single-versus-separate-mixed-composition-fits"></a>
@@ -300,12 +316,11 @@ example below shows how composition-specific slopes can be added.</p>
 compositions in one model call. This is useful when the goal is to
 compare effects across compositions, test equality constraints, or make
 those comparisons within one joint fitted model.</p>
-<p><code><a href="https://rdrr.io/pkg/marginaleffects/man/hypotheses.html" class="external-link">marginaleffects::hypotheses()</a></code> provides a string
-interface for testing linear combinations of <code>glmmTMB</code> fixed
-effects. In these equations, <code>conditional_</code> identifies
-coefficients from the conditional model. A positive estimate means that
-the quantity on the left side is higher than the quantity on the right
-side.</p>
+<p><code><a href="https://rdrr.io/pkg/marginaleffects/man/hypotheses.html" class="external-link">marginaleffects::hypotheses()</a></code> allows for testing linear
+combinations of <code>glmmTMB</code> fixed effects. In these equations,
+<code>conditional_</code> identifies coefficients from the conditional
+model. A positive estimate means that the estimate on the left side is
+higher than the estimate on the right side.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test whether male-male and female-female pooled intercepts are different</span></span>
 <span><span class="fu">marginaleffects</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/marginaleffects/man/hypotheses.html" class="external-link">hypotheses</a></span><span class="op">(</span></span>
@@ -329,34 +344,91 @@ side.</p>
 <span>  hypothesis <span class="op">=</span> <span class="st">"conditional_.i_is_female_x_male_male = conditional_.i_is_male_x_male"</span>,</span>
 <span>  re.form <span class="op">=</span> <span class="cn">NA</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>These are population-level fixed-effect comparisons. Setting
-<code>re.form = NA</code> excludes dyad-specific random effects from the
-quantities being compared; it does not remove the random-effects
-structure from the fitted model. Uncertainty is calculated for the
-fixed-effect comparison, which is the intended target here.</p>
+<p>Since we only want to compare fixed-effects here, we set
+<code>re.form = NA</code>.</p>
 <p>It is important to note that such a fixed-effect formula with all
-compositions in one model call does not, by itself, create partial
-pooling across dyad compositions. The composition-specific intercepts
-and slopes above are ordinary fixed effects, so estimates for
-female-female or male-male dyads are not automatically shrunk toward
-estimates from the other dyad types. If every mean, variance, and
-covariance parameter is composition-specific, the likelihood largely
-factorizes by composition. In that case, a combined fit can closely
-match separate composition-specific fits. Its main advantage is that
+compositions in one model call does not create partial pooling across
+dyad compositions. Estimates for female-female, for instance, are not
+automatically shrunk toward estimates from the other dyad types. In this
+model, almost every parameter is composition-specific. This means that
+the likelihood largely factorizes by composition. Therefore, separate
+composition-specific fits would largely recover the same parameters.</p>
+<p>The main advantage of estimating everything in a single model is that
 formal parameter comparisons can be made within one fitted model, and
 that models with different versions of pooling can be compared. For
 example, it can be tested whether pooling male-male and female-female
 couples as same-sex substantially worsens model fit, considering both
 the fixed effects and random-effects structure. Such model comparisons
 require the restricted and unrestricted models to use the same
-observations; separate fits to different compositions should not be
-compared this way.</p>
+observations and require the restricted model to be nested within the
+unrestricted model.</p>
 <p>If partial pooling is desired, for instance with few dyads for one
-particular type, a different model specification is required, such as a
-common effect plus composition deviations with a hierarchical prior, or
-a random dyad-type effect. However, with only a few dyad types,
-frequentist random dyad-type variance components are usually weakly
-identified.</p>
+particular type, a different model specification would be required, such
+as a common effect plus composition deviations.</p>
+</div>
+<div class="section level3">
+<h3 id="model-comparison-with-a-restricted-model">Model comparison with a restricted model<a class="anchor" aria-label="anchor" href="#model-comparison-with-a-restricted-model"></a>
+</h3>
+<p>The <a href="apim.html#testing-distinguishability">regular APIM
+vignette</a> introduces <code><a href="../reference/compare_interdep_models.html">compare_interdep_models()</a></code> by
+comparing a distinguishable APIM with its exchangeable restriction.
+Here, we use the same approach for a mixed-composition constraint. We
+treat female-male dyads as exchangeable and pool them with male-male
+dyads, while modeling female-female dyads separately. In an applied
+analysis, these constraints would require a theoretical or empirical
+justification.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mixed_cross_data_constrained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"male-female"</span>,</span>
+<span>  pool_compositions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="st">"non_female_x_female"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male-male"</span>, <span class="st">"female-male"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mixed_cross_gaussian_model_constrained</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_non_female_x_female</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># exchangeable female-female residual covariance via sum-diff</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># pooled female-male and male-male residual covariance via sum-diff</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_non_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_non_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span></span>
+<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
+<span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  , data <span class="op">=</span> <span class="va">mixed_cross_data_constrained</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/compare_interdep_models.html">compare_interdep_models</a></span><span class="op">(</span></span>
+<span>  restricted <span class="op">=</span> <span class="va">mixed_cross_gaussian_model_constrained</span>,</span>
+<span>  full <span class="op">=</span> <span class="va">mixed_cross_gaussian_model</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent interdep data</span></span>
+<span><span class="co">#&gt; Mathematical nesting is assumed and cannot be verified from the data alone.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                                        Df    AIC    BIC   logLik deviance</span></span>
+<span><span class="co">#&gt; mixed_cross_gaussian_model_constrained  6 2087.8 2114.6 -1037.90   2075.8</span></span>
+<span><span class="co">#&gt; mixed_cross_gaussian_model             11 2010.0 2059.0  -993.97   1988.0</span></span>
+<span><span class="co">#&gt;                                         Chisq Chi Df Pr(&gt;Chisq)    </span></span>
+<span><span class="co">#&gt; mixed_cross_gaussian_model_constrained                             </span></span>
+<span><span class="co">#&gt; mixed_cross_gaussian_model             87.856      5  &lt; 2.2e-16 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Under the assumed nesting and chi-squared reference distribution, the test provides evidence that `mixed_cross_gaussian_model_constrained` fits the data worse than `mixed_cross_gaussian_model` (likelihood-ratio test: χ²(5) = 87.86, p &lt; .001).</span></span></code></pre></div>
+<p>Here, the constrained model fits substantially worse than the full
+model. Note that the test evaluates all imposed constraints jointly,
+including the pooled fixed effects and residual covariance structure. It
+does not show which restriction accounts for the difference.</p>
 </div>
 </div>
 <div class="section level2">
@@ -374,7 +446,7 @@ justified or evaluated by comparing pooled and unpooled models fitted to
 the same observations.</p>
 <p>Aside from the pooling, we prepare the data in the same way, now
 adding <code>time</code> and a predictor:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_ild_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -461,55 +533,55 @@ careful model checks <span class="citation">(del Rosario and West
 2025)</span>. A Bayesian implementation of this mixed-composition model
 is beyond the scope of this vignette. For these example data, we use the
 BFGS optimizer with a higher iteration limit.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mixed_ild_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Composition-specific intercepts</span></span>
 <span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="va">.i_is_same_sex</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Composition-specific time trends</span></span>
 <span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">diaryday</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">diaryday</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="va">.i_is_same_sex</span><span class="op">:</span><span class="va">diaryday</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Composition-specific within-person actor effects</span></span>
 <span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cwp_actor</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cwp_actor</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="va">.i_is_same_sex</span><span class="op">:</span><span class="va">.i_provided_support_cwp_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Composition-specific within-person partner effects</span></span>
 <span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cwp_partner</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cwp_partner</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="va">.i_is_same_sex</span><span class="op">:</span><span class="va">.i_provided_support_cwp_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Composition-specific between-person actor effects</span></span>
 <span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cbp_actor</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cbp_actor</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="va">.i_is_same_sex</span><span class="op">:</span><span class="va">.i_provided_support_cbp_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Composition-specific between-person partner effects</span></span>
 <span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cbp_partner</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cbp_partner</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="va">.i_is_same_sex</span><span class="op">:</span><span class="va">.i_provided_support_cbp_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># stable dyad-level covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_same_sex</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_same_sex_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># same-day covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    </span>
+<span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_same_sex</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_same_sex_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
@@ -524,13 +596,11 @@ BFGS optimizer with a higher iteration limit.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mixed_ild_gaussian_model</span><span class="op">)</span></span></code></pre></div>
-<p>This worked example omits random slopes, as they would add further
-complexity. One possible extension is to let the within-person actor and
-partner effects vary across dyads. The following blocks would replace
-the stable dyad-level covariance terms in the model above. Each
-<code>us()</code> block estimates all variances and covariances among
-the terms inside it.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>This example omits random slopes, as they would add further
+complexity. To extend the model with random slopes, the following blocks
+would replace the stable dyad-level covariance terms in the model
+above:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># distinguishable female-male random intercepts and slopes</span></span>
 <span><span class="fu">us</span><span class="op">(</span></span>
 <span>  <span class="fl">0</span> <span class="op">+</span></span>
@@ -561,17 +631,16 @@ the terms inside it.</p>
 <span>    <span class="va">coupleID</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This extension estimates a very large covariance structure and may
-not be supported by many datasets. Regularizing priors may help with
-estimation, but they do not necessarily make an unsupported
-random-effects structure appropriate.</p>
+not be supported by many datasets. Regularizing priors in a Bayesian
+framework may help with estimation, but they do not necessarily make an
+unsupported random-effects structure appropriate.</p>
 </div>
 <div class="section level2">
-<h2 id="practical-takeaway">Practical takeaway<a class="anchor" aria-label="anchor" href="#practical-takeaway"></a>
+<h2 id="takeaway">Takeaway<a class="anchor" aria-label="anchor" href="#takeaway"></a>
 </h2>
-<p>Mixed dyad compositions do not require separate data-preparation
-calls. <code>interdep</code> creates the composition-specific indicator
-and difference columns, and the fitted model can place the corresponding
-fixed effects and covariance terms in one formula.</p>
+<p>Mixed dyad compositions do not always require separate models.
+<code>interdep</code> creates the necessary columns to fit a joint model
+and apply various pooling and exchangeability constraints.</p>
 <p>It is often useful to begin with separate composition-specific models
 or simpler covariance structures. Combine them when an equality
 constraint or a comparison of effects across compositions is part of the
@@ -582,6 +651,10 @@ support the additional complexity.</p>
 vignette</a>, see the <a href="dim.html">Dyad-Individual Model
 vignette</a> or the <a href="dsm.html">Dyadic Score Model vignette</a>
 for alternative parameterizations, or return to the <a href="index.html">Overview</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-Bolger2025Unified" class="csl-entry">
 Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.

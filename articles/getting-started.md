@@ -31,11 +31,13 @@ modeling (SEM) approaches to dyadic data, see Ledermann and Kenny
 (2017).
 
 For guidance and examples on how to use the prepared data to estimate
-cross-sectional and intensive longitudinal APIMs, see the [Actor-Partner
-Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-models that combine distinguishable and exchangeable dyad compositions,
-see the [Mixed-Composition APIM
+cross-sectional and intensive longitudinal APIMs for exchangeable and
+distinguishable dyads, and how to test distinguishability, see the
+[Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
+
+For models that combine distinguishable and exchangeable dyad
+compositions, see the [Mixed-Composition APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
 
 For guidance on how to use the Dyad-Individual Model (DIM)
@@ -113,17 +115,13 @@ without requiring a placeholder row for the missing occasion.
 `example_dyadic_crosssectional` is a simulated cross-sectional dataset
 for distinguishable dyads. Each dyad has two rows: one for each member.
 
-``` r
-
-print(head(example_dyadic_crosssectional))
-#>   personID coupleID gender communication satisfaction
-#> 1        1        1 female      4.789772     4.367824
-#> 2        2        1   male      3.803445     2.342890
-#> 3        3        2 female      2.914052     2.442250
-#> 4        4        2   male      6.508207     6.080428
-#> 5        5        3 female      5.696995     5.865494
-#> 6        6        3   male      8.215332     9.661295
-```
+    #>   personID coupleID gender communication satisfaction
+    #> 1        1        1 female      4.789772     4.367824
+    #> 2        2        1   male      3.803445     2.342890
+    #> 3        3        2 female      2.914052     2.442250
+    #> 4        4        2   male      6.508207     6.080428
+    #> 5        5        3 female      5.696995     5.865494
+    #> 6        6        3   male      8.215332     9.661295
 
 We validate and prepare the data with the function
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
@@ -177,45 +175,8 @@ female-male dyads and created APIM-relevant variables (Kenny and Cook
 1999). These generated `.i_*` columns can be used directly in model
 formulas.
 
-Here is a simple example:
-
-``` r
-
-library(glmmTMB)
-
-cross_distinguishable_model <- glmmTMB(
-  satisfaction ~
-
-    # Gender-specific intercepts
-    0 +
-    .i_is_female_x_male_female +
-    .i_is_female_x_male_male +
-
-    # Gender-specific actor effects
-    .i_is_female_x_male_female:.i_communication_actor +
-    .i_is_female_x_male_male:.i_communication_actor +
-
-    # Gender-specific partner effects
-    .i_is_female_x_male_female:.i_communication_partner +
-    .i_is_female_x_male_male:.i_communication_partner +
-
-    # Dyad-level unstructured random effects represent the two partner
-    # residual variances and their covariance when dispformula = ~ 0.
-    # This is glmmTMB-specific syntax! lme4 and brms use different syntax.
-    us(0 +
-         .i_is_female_x_male_female +
-         .i_is_female_x_male_male
-       | coupleID)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = cross_distinguishable_data
-)
-```
-
-The model is fitted when `glmmTMB` is installed, but its output is
-omitted here to keep the focus on data preparation. For fitted APIM
-examples, see the [Actor-Partner Interdependence Model
+For fitted APIM examples using these columns, see the [Actor-Partner
+Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
 
 ## Data preparation for exchangeable dyads
@@ -366,11 +327,10 @@ print(cross_dim_data, n = 4)
 #> #   .i_communication_within_dyad_dev <dbl>
 ```
 
-For distinguishable dyads, DSM preparation additionally requires a
-stable role variable and an explicit role order. The role order defines
-the direction of all DSM predictor differences and the DSM role contrast
-(Iida et al. 2018). Outcomes remain unchanged and are selected later in
-the fitted-model formula.
+For distinguishable dyads, DSM columns can be requested. These
+additionally require an explicit role order. The role order defines the
+direction of all DSM predictor differences and the DSM role contrast
+(Iida et al. 2018).
 
 ``` r
 
@@ -428,12 +388,21 @@ dropped before validation continues.
 
 ``` r
 
-incomplete_data <- data.frame(
-  coupleID = c(1, 2, 2, 3, 3, 4, 4, 5),
-  personID = c(1, 3, 4, 5, 6, 7, 8, 10),
-  gender = c("female", "female", NA, "female", "female", "female", "male", NA),
-  satisfaction = c(5.2, 4.8, 4.9, 5.1, 5.0, 4.7, 4.6, 3.0)
-)
+incomplete_data <- tibble::tribble(
+  
+    ~coupleID, ~personID, ~gender,  ~satisfaction,
+    1,         1,         "female", 5.2,
+  # Note missing row
+    2,         3,         "female", 4.8,
+    2,         4,          NA,      4.9,
+    3,         5,         "female", 5.1,
+    3,         6,         "female", 5.0,
+    4,         7,         "female", 4.7,
+    4,         8,         "male",   4.6,
+  # Note missing row
+    5,         10,         NA,      3.0
+    
+  )
 
 incomplete_dropped_data <- prepare_interdep_data(
   incomplete_data,
@@ -486,47 +455,8 @@ print(incomplete_dropped_data)
 dataset. Each dyad has repeated observations over `diaryday`, with one
 row per person-day.
 
-The first rows look like this:
-
-``` r
-
-print(example_dyadic_ILD, n = 26)
-#> # A tibble: 1,120 × 6
-#>    personID coupleID diaryday gender closeness provided_support
-#>       <int>    <int>    <int> <fct>      <dbl>            <dbl>
-#>  1        1        1        0 female      5.03             4.30
-#>  2        1        1        1 female      5.64             4.24
-#>  3        1        1        2 female      5.49             3.54
-#>  4        1        1        3 female      6.71             5.04
-#>  5        1        1        4 female      5.61             4.74
-#>  6        1        1        5 female      6.11             4.72
-#>  7        1        1        6 female      6.96             5.12
-#>  8        1        1        7 female      7.03             5.21
-#>  9        1        1        8 female      8.07             5.20
-#> 10        1        1        9 female      4.87             4.69
-#> 11        1        1       10 female      5.53             5.67
-#> 12        1        1       11 female      6.54             4.28
-#> 13        1        1       12 female      5.31             3.86
-#> 14        1        1       13 female      5.16             4.85
-#> 15        2        1        0 male        4.68             4.45
-#> 16        2        1        1 male        4.52             5.84
-#> 17        2        1        2 male       NA               NA   
-#> 18        2        1        3 male        4.42             6.07
-#> 19        2        1        4 male        5.07             4.19
-#> 20        2        1        5 male        3.84             4.87
-#> 21        2        1        6 male        2.22             5.25
-#> 22        2        1        7 male        3.52             5.52
-#> 23        2        1        8 male        5.26             4.64
-#> 24        2        1        9 male        5.57             5.24
-#> 25        2        1       10 male        2.92             5.33
-#> 26        2        1       11 male        3.18             4.30
-#> # ℹ 1,094 more rows
-```
-
 To prepare intensive longitudinal data, pass the `time` variable to
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
-
-### ILD APIM preparation
 
 ``` r
 
@@ -541,7 +471,7 @@ ild_apim_data <- prepare_interdep_data(
   seed = 123
 )
 
-print(ild_apim_data)
+print(ild_apim_data, n = 6)
 #> # interdep data
 #> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
 #> # Structure: group = coupleID, member = personID, role = gender, time =
@@ -573,19 +503,15 @@ print(ild_apim_data)
 #> #                          level
 #> #
 #> # A tibble: 1,120 × 18
-#>    personID coupleID diaryday gender closeness provided_support .i_composition
-#>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>         
-#>  1        1        1        0 female      5.03             4.30 female_x_male 
-#>  2        1        1        1 female      5.64             4.24 female_x_male 
-#>  3        1        1        2 female      5.49             3.54 female_x_male 
-#>  4        1        1        3 female      6.71             5.04 female_x_male 
-#>  5        1        1        4 female      5.61             4.74 female_x_male 
-#>  6        1        1        5 female      6.11             4.72 female_x_male 
-#>  7        1        1        6 female      6.96             5.12 female_x_male 
-#>  8        1        1        7 female      7.03             5.21 female_x_male 
-#>  9        1        1        8 female      8.07             5.20 female_x_male 
-#> 10        1        1        9 female      4.87             4.69 female_x_male 
-#> # ℹ 1,110 more rows
+#>   personID coupleID diaryday gender closeness provided_support .i_composition
+#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>         
+#> 1        1        1        0 female      5.03             4.30 female_x_male 
+#> 2        2        1        0 male        4.68             4.45 female_x_male 
+#> 3        1        1        1 female      5.64             4.24 female_x_male 
+#> 4        2        1        1 male        4.52             5.84 female_x_male 
+#> 5        1        1        2 female      5.49             3.54 female_x_male 
+#> 6        2        1        2 male       NA               NA    female_x_male 
+#> # ℹ 1,114 more rows
 #> # ℹ 11 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
@@ -605,18 +531,7 @@ Note that observed person means used to construct the between-person
 (`cbp`) predictors can be unreliable when each member contributes few
 occasions, which can bias between-person estimates (Gottfredson 2019).
 
-### Dynamic Models
-
-The preparation above supports contemporaneous models, but observations
-can also remain dependent over time. Currently, commonly used
-open-source MLM interfaces in R do not provide the full dyadic residual
-VAR structure needed to model serial dependence across both partners.
-Within open-source R, such a model generally requires custom TMB or Stan
-code.
-
-One practical alternative, especially when carryover and temporal
-dynamics are part of the research question, is to create a dynamic model
-by including lagged versions of the outcome as predictors.
+### Preparing lagged predictors
 
 Lagged versions of variables, including an outcome that is also passed
 to `predictors`, can be obtained through the `lag_predictors` argument.
@@ -626,12 +541,7 @@ columns alongside their contemporaneous versions. Lagging respects the
 dyad and member structure, matches observations at exactly `time - 1`,
 and does not bridge missing occasions.
 
-Whether raw or within-person-centered lagged outcomes should be used
-depends on the research question and the data. For guidance on this
-choice, refer to Hamaker and Grasman (2015) and Gistelinck et al.
-(2021).
-
-Brief exchangeable example:
+Brief example:
 
 ``` r
 
@@ -646,7 +556,7 @@ ild_apim_data_dynamic <- prepare_interdep_data(
   seed = 123
 )
 
-print(ild_apim_data_dynamic)
+print(ild_apim_data_dynamic, n = 6)
 #> # interdep data
 #> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
 #> # Structure: group = coupleID, member = personID, time = diaryday
@@ -694,19 +604,15 @@ print(ild_apim_data_dynamic)
 #> #                               person's usual level
 #> #
 #> # A tibble: 1,120 × 24
-#>    personID coupleID diaryday gender closeness provided_support .i_composition  
-#>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>           
-#>  1        1        1        0 female      5.03             4.30 assumed_exchang…
-#>  2        1        1        1 female      5.64             4.24 assumed_exchang…
-#>  3        1        1        2 female      5.49             3.54 assumed_exchang…
-#>  4        1        1        3 female      6.71             5.04 assumed_exchang…
-#>  5        1        1        4 female      5.61             4.74 assumed_exchang…
-#>  6        1        1        5 female      6.11             4.72 assumed_exchang…
-#>  7        1        1        6 female      6.96             5.12 assumed_exchang…
-#>  8        1        1        7 female      7.03             5.21 assumed_exchang…
-#>  9        1        1        8 female      8.07             5.20 assumed_exchang…
-#> 10        1        1        9 female      4.87             4.69 assumed_exchang…
-#> # ℹ 1,110 more rows
+#>   personID coupleID diaryday gender closeness provided_support .i_composition   
+#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>            
+#> 1        1        1        0 female      5.03             4.30 assumed_exchange…
+#> 2        2        1        0 male        4.68             4.45 assumed_exchange…
+#> 3        1        1        1 female      5.64             4.24 assumed_exchange…
+#> 4        2        1        1 male        4.52             5.84 assumed_exchange…
+#> 5        1        1        2 female      5.49             3.54 assumed_exchange…
+#> 6        2        1        2 male       NA               NA    assumed_exchange…
+#> # ℹ 1,114 more rows
 #> # ℹ 17 more variables: .i_composition_role <fct>,
 #> #   .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>, .i_closeness_cwp <dbl>,
@@ -715,83 +621,13 @@ print(ild_apim_data_dynamic)
 #> #   .i_closeness_partner <dbl>, .i_closeness_cwp_actor <dbl>, …
 ```
 
-A simple fixed-slope dyadic stability and influence model (del Rosario
-and West 2025):
-
-``` r
-
-
-stability_influence <- glmmTMB::glmmTMB(
-  closeness ~ 1 +
-
-    # Stability (actor effect across time)
-    .i_closeness_actor_lag1 +
-
-    # Influence (partner effect across time)
-    .i_closeness_partner_lag1 +
-
-    # Linear time trend
-    diaryday +
-
-    # Stable exchangeable dyad-level covariance
-    (1 | coupleID) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
-
-    # Same-day exchangeable dyad-level covariance
-    (1 | coupleID:diaryday) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_apim_data_dynamic
-)
-
-summary(stability_influence)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  
-#>     diaryday + (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
-#>     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
-#>     coupleID:diaryday)
-#> Dispersion:                 ~0
-#> Data: ild_apim_data_dynamic
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2929.0    2968.0   -1456.5    2913.0       967 
-#> 
-#> Random effects:
-#> 
-#> Conditional model:
-#>  Groups              Name                                   Variance Std.Dev.
-#>  coupleID            (Intercept)                            0.9161   0.9571  
-#>  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  
-#>  coupleID.diaryday   (Intercept)                            0.3925   0.6265  
-#>  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  
-#> Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497
-#> 
-#> Conditional model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                4.213120   0.300184  14.035  < 2e-16 ***
-#> .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
-#> .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
-#> diaryday                  -0.005281   0.007643  -0.691    0.490    
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
-
-This model can be extended with contemporaneous actor and partner
-predictor associations and other lagged predictors. Time-varying
-predictors should usually be separated into within-person and
-between-person components. Their contemporaneous coefficients are then
-conditional on both partners’ prior outcomes.
-
-**Note:** Person-mean centering a lagged outcome can introduce Nickell
-bias, especially in shorter time series (Hamaker and Grasman 2015;
-Nickell 1981; Gistelinck et al. 2021). Refer to the [DIM
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) and
-[APIM
+**Note:** Whether to use the raw or within-person-centered lagged
+outcome depends on the research question and the data. Including a
+lagged **outcome** in dynamic models can introduce bias, especially in
+shorter time series (Hamaker and Grasman 2015; Nickell 1981; Gistelinck
+et al. 2021). See the [APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md) for
-fuller discussions and fitted dynamic examples.
+a more detailed discussion and guidance.
 
 ## Data with multiple and mixed-composition dyads
 

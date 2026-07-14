@@ -1,9 +1,11 @@
 # Package index
 
-## Main function
+## Main functions
 
 - [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
   : Prepare dyadic data for multilevel models
+- [`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+  : Compare nested models fitted to equivalent interdep data
 
 ## Example data
 

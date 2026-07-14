@@ -6,15 +6,14 @@ library(interdep)
 ```
 
 This vignette covers APIMs that combine distinguishable and exchangeable
-dyad compositions in one analysis. The unified model presented by
+dyad compositions in one analysis. The unified SEM presentation by
 Bolger, Laurenceau, and DiGiovanni is the basis and inspiration for this
-vignette. Their presentation includes a hybrid model for these dyad
-types in SEM (Bolger et al. 2025). Here, we implement the same general
-idea in one multilevel model. The vignette assumes familiarity with the
-data-preparation workflow in the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md)
-and with the single-composition models in the [Actor-Partner
-Interdependence Model
+vignette (Bolger et al. 2025). Here, we implement the same general idea
+in one multilevel model.
+
+For the general data-preparation workflow, go to the [Getting Started
+vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
+For regular APIMs, refer to the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 DIM predictors and their equivalence to APIM effects in exchangeable
 dyads, see the [Dyad-Individual Model
@@ -27,7 +26,7 @@ vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 The data were simulated with the following fixed effects and covariance
 parameters. For exchangeable dyads, `sum_variance` and `diff_variance`
-imply the partner correlation.
+imply the within-dyad correlation.
 
     #>             block     parameter    value
     #> 1   female_x_male   female_mean  5.50000
@@ -96,7 +95,11 @@ The returned `.i_diff_*` variables contain `-1` and `1` for the
 corresponding exchangeable composition and `0` for all other
 compositions.
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-creates this structure automatically.
+creates this structure automatically. The [APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
+derives the resulting covariance matrix and shows how to back-transform
+the sum and difference variances to the usual equal-variance
+member-level covariance matrix.
 
 The model can then be specified as follows (example for an
 intercept-only model):
@@ -135,11 +138,45 @@ mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
 )
 
 summary(mixed_cross_gaussian_model)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
+#>     .i_is_female_x_female + .i_is_male_x_male + us(0 + .i_is_female_x_male_female +  
+#>     .i_is_female_x_male_male | coupleID) + (0 + .i_is_female_x_female |  
+#>     coupleID) + (0 + .i_diff_female_x_female_arbitrary | coupleID) +  
+#>     (0 + .i_is_male_x_male | coupleID) + (0 + .i_diff_male_x_male_arbitrary |  
+#>     coupleID)
+#> Dispersion:                    ~0
+#> Data: mixed_cross_data
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>    2009.9    2059.0    -994.0    1987.9       629 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups     Name                              Variance Std.Dev. Corr  
+#>  coupleID   .i_is_female_x_male_female        1.1999   1.0954         
+#>             .i_is_female_x_male_male          1.9437   1.3942   -0.30 
+#>  coupleID.1 .i_is_female_x_female             0.6682   0.8175         
+#>  coupleID.2 .i_diff_female_x_female_arbitrary 0.3217   0.5672         
+#>  coupleID.3 .i_is_male_x_male                 0.6274   0.7921         
+#>  coupleID.4 .i_diff_male_x_male_arbitrary     1.0457   1.0226         
+#> Number of obs: 640, groups:  coupleID, 320
+#> 
+#> Conditional model:
+#>                            Estimate Std. Error z value Pr(>|z|)    
+#> .i_is_female_x_male_female  5.50000    0.10000   55.00   <2e-16 ***
+#> .i_is_female_x_male_male    4.50000    0.12727   35.36   <2e-16 ***
+#> .i_is_female_x_female       5.80000    0.08175   70.95   <2e-16 ***
+#> .i_is_male_x_male           4.20000    0.07921   53.02   <2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 The four fixed-effect indicators are mutually exclusive. With $`I`$
-denoting a shorter label for each generated composition-and-role
-indicator, the fixed part of the model can be written as:
+denoting the generated `.i_is_{composition_role}` indicator, the fixed
+part of the full model can be written as:
 
 ``` math
 \mu_{ij}^{\mathrm{fixed}} =
@@ -159,7 +196,7 @@ The active indicator for each person is shown below:
 | Member of a male-male dyad | 0 | 0 | 0 | **1** | $`\beta_{MM}`$ |
 
 Therefore, for a member of a male-male dyad, for example, the fixed part
-reduces to
+reduces to just $`\beta_{MM}`$ via:
 
 ``` math
 0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
@@ -167,39 +204,21 @@ reduces to
 ```
 
 The random-effects terms reduce in the same way because their indicator
-columns are also `0` outside the relevant composition. For a female-male
-dyad, the `us()` term gives the female and male members separate random
-intercepts and estimates their covariance:
+columns are also `0` outside the relevant composition. The model
+combines an unrestricted distinguishable covariance block for
+female-male dyads with a separate equal-variance covariance block for
+each exchangeable composition. The main APIM vignette introduces the
+[distinguishable](https://pascal-kueng.github.io/interdep/articles/apim.html#distinguishable-residual-structure)
+and
+[exchangeable](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
+structures.
 
-``` math
-\mu_{Fj} = \beta_{FM,F} + u_{Fj}, \qquad
-\mu_{Mj} = \beta_{FM,M} + u_{Mj}.
-```
+The random-effects terms form composition-specific blocks, so no
+covariance parameters are estimated across compositions. Such parameters
+would not be identified because each dyad belongs to only one
+composition.
 
-For an exchangeable composition $`C`$ (female-female or male-male), the
-two random-effects terms give a shared dyad effect $`u_{Cj}`$ and an
-opposite member effect $`v_{Cj}`$:
-
-``` math
-\mu_{Cij} = \beta_C + u_{Cj} + d_{Cij}v_{Cj},
-\qquad d_{Cij} \in \{-1, 1\}.
-```
-
-Thus, the shared effect moves both members together, while the
-difference effect moves them in opposite directions. Its `-1`/`1`
-direction is arbitrary.
-
-The five random-effects terms in the model form separate blocks: one
-correlated female-male block, two female-female sum-and-difference
-blocks, and two male-male sum-and-difference blocks. No random-effect
-covariance is estimated between compositions. The two blocks within each
-exchangeable composition are also separate, so the shared and difference
-effects are uncorrelated. Because this is a cross-sectional model with
-one observation per member and `dispformula = ~ 0`, these dyad-level
-random effects represent the member variances and within-dyad covariance
-without an additional observation-level residual variance.
-
-This illustration is limited to the fixed-intercept model. The ILD
+This illustration only covered the fixed-intercept model. The ILD
 example below shows how composition-specific slopes can be added.
 
 ### Single versus separate mixed-composition fits
@@ -210,11 +229,10 @@ compare effects across compositions, test equality constraints, or make
 those comparisons within one joint fitted model.
 
 [`marginaleffects::hypotheses()`](https://rdrr.io/pkg/marginaleffects/man/hypotheses.html)
-provides a string interface for testing linear combinations of `glmmTMB`
-fixed effects. In these equations, `conditional_` identifies
-coefficients from the conditional model. A positive estimate means that
-the quantity on the left side is higher than the quantity on the right
-side.
+allows for testing linear combinations of `glmmTMB` fixed effects. In
+these equations, `conditional_` identifies coefficients from the
+conditional model. A positive estimate means that the estimate on the
+left side is higher than the estimate on the right side.
 
 ``` r
 
@@ -242,36 +260,98 @@ marginaleffects::hypotheses(
 )
 ```
 
-These are population-level fixed-effect comparisons. Setting
-`re.form = NA` excludes dyad-specific random effects from the quantities
-being compared; it does not remove the random-effects structure from the
-fitted model. Uncertainty is calculated for the fixed-effect comparison,
-which is the intended target here.
+Since we only want to compare fixed-effects here, we set `re.form = NA`.
 
 It is important to note that such a fixed-effect formula with all
-compositions in one model call does not, by itself, create partial
-pooling across dyad compositions. The composition-specific intercepts
-and slopes above are ordinary fixed effects, so estimates for
-female-female or male-male dyads are not automatically shrunk toward
-estimates from the other dyad types. If every mean, variance, and
-covariance parameter is composition-specific, the likelihood largely
-factorizes by composition. In that case, a combined fit can closely
-match separate composition-specific fits. Its main advantage is that
+compositions in one model call does not create partial pooling across
+dyad compositions. Estimates for female-female, for instance, are not
+automatically shrunk toward estimates from the other dyad types. In this
+model, almost every parameter is composition-specific. This means that
+the likelihood largely factorizes by composition. Therefore, separate
+composition-specific fits would largely recover the same parameters.
+
+The main advantage of estimating everything in a single model is that
 formal parameter comparisons can be made within one fitted model, and
 that models with different versions of pooling can be compared. For
 example, it can be tested whether pooling male-male and female-female
 couples as same-sex substantially worsens model fit, considering both
 the fixed effects and random-effects structure. Such model comparisons
 require the restricted and unrestricted models to use the same
-observations; separate fits to different compositions should not be
-compared this way.
+observations and require the restricted model to be nested within the
+unrestricted model.
 
 If partial pooling is desired, for instance with few dyads for one
-particular type, a different model specification is required, such as a
-common effect plus composition deviations with a hierarchical prior, or
-a random dyad-type effect. However, with only a few dyad types,
-frequentist random dyad-type variance components are usually weakly
-identified.
+particular type, a different model specification would be required, such
+as a common effect plus composition deviations.
+
+### Model comparison with a restricted model
+
+The [regular APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability)
+introduces
+[`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+by comparing a distinguishable APIM with its exchangeable restriction.
+Here, we use the same approach for a mixed-composition constraint. We
+treat female-male dyads as exchangeable and pool them with male-male
+dyads, while modeling female-female dyads separately. In an applied
+analysis, these constraints would require a theoretical or empirical
+justification.
+
+``` r
+
+mixed_cross_data_constrained <- prepare_interdep_data(
+  example_dyadic_crosssectional_mixed,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  set_exchangeable_compositions = "male-female",
+  pool_compositions = list(
+    "non_female_x_female" = c("male-male", "female-male")
+  ),
+  seed = 123
+)
+
+mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
+  satisfaction ~ 0 +
+    .i_is_female_x_female +
+    .i_is_non_female_x_female +
+
+    # exchangeable female-female residual covariance via sum-diff
+    (0 + .i_is_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
+
+    # pooled female-male and male-male residual covariance via sum-diff
+    (0 + .i_is_non_female_x_female | coupleID) +
+    (0 + .i_diff_non_female_x_female_arbitrary | coupleID)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = mixed_cross_data_constrained
+)
+
+compare_interdep_models(
+  restricted = mixed_cross_gaussian_model_constrained,
+  full = mixed_cross_gaussian_model
+)
+#> Likelihood-ratio test for nested models fitted to equivalent interdep data
+#> Mathematical nesting is assumed and cannot be verified from the data alone.
+#> 
+#>                                        Df    AIC    BIC   logLik deviance
+#> mixed_cross_gaussian_model_constrained  6 2087.8 2114.6 -1037.90   2075.8
+#> mixed_cross_gaussian_model             11 2010.0 2059.0  -993.97   1988.0
+#>                                         Chisq Chi Df Pr(>Chisq)    
+#> mixed_cross_gaussian_model_constrained                             
+#> mixed_cross_gaussian_model             87.856      5  < 2.2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Under the assumed nesting and chi-squared reference distribution, the test provides evidence that `mixed_cross_gaussian_model_constrained` fits the data worse than `mixed_cross_gaussian_model` (likelihood-ratio test: χ²(5) = 87.86, p < .001).
+```
+
+Here, the constrained model fits substantially worse than the full
+model. Note that the test evaluates all imposed constraints jointly,
+including the pooled fixed effects and residual covariance structure. It
+does not show which restriction accounts for the difference.
 
 ## Mixed-composition intensive longitudinal (ILD) Gaussian model
 
@@ -390,48 +470,48 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
 
     # Composition-specific intercepts
     .i_is_female_x_male_female + .i_is_female_x_male_male +
-    
+
     .i_is_same_sex +
 
     # Composition-specific time trends
     .i_is_female_x_male_female:diaryday +
     .i_is_female_x_male_male:diaryday +
-    
+
     .i_is_same_sex:diaryday +
 
     # Composition-specific within-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cwp_actor +
     .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-    
+
     .i_is_same_sex:.i_provided_support_cwp_actor +
 
     # Composition-specific within-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cwp_partner +
     .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-    
+
     .i_is_same_sex:.i_provided_support_cwp_partner +
 
     # Composition-specific between-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cbp_actor +
     .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-    
+
     .i_is_same_sex:.i_provided_support_cbp_actor +
 
     # Composition-specific between-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cbp_partner +
     .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-    
+
     .i_is_same_sex:.i_provided_support_cbp_partner +
 
     # stable dyad-level covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-    
+
     (0 + .i_is_same_sex | coupleID) +
     (0 + .i_diff_same_sex_arbitrary | coupleID) +
 
     # same-day covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
-    
+
     (0 + .i_is_same_sex | coupleID:diaryday) +
     (0 + .i_diff_same_sex_arbitrary | coupleID:diaryday)
 
@@ -448,11 +528,9 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
 summary(mixed_ild_gaussian_model)
 ```
 
-This worked example omits random slopes, as they would add further
-complexity. One possible extension is to let the within-person actor and
-partner effects vary across dyads. The following blocks would replace
-the stable dyad-level covariance terms in the model above. Each `us()`
-block estimates all variances and covariances among the terms inside it.
+This example omits random slopes, as they would add further complexity.
+To extend the model with random slopes, the following blocks would
+replace the stable dyad-level covariance terms in the model above:
 
 ``` r
 
@@ -488,16 +566,15 @@ us(
 ```
 
 This extension estimates a very large covariance structure and may not
-be supported by many datasets. Regularizing priors may help with
-estimation, but they do not necessarily make an unsupported
-random-effects structure appropriate.
+be supported by many datasets. Regularizing priors in a Bayesian
+framework may help with estimation, but they do not necessarily make an
+unsupported random-effects structure appropriate.
 
-## Practical takeaway
+## Takeaway
 
-Mixed dyad compositions do not require separate data-preparation calls.
-`interdep` creates the composition-specific indicator and difference
-columns, and the fitted model can place the corresponding fixed effects
-and covariance terms in one formula.
+Mixed dyad compositions do not always require separate models.
+`interdep` creates the necessary columns to fit a joint model and apply
+various pooling and exchangeability constraints.
 
 It is often useful to begin with separate composition-specific models or
 simpler covariance structures. Combine them when an equality constraint
@@ -515,6 +592,8 @@ the [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md) for
 alternative parameterizations, or return to the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+
+## References
 
 Bolger, Niall, Jean-Philippe Laurenceau, and Ana DiGiovanni. 2025.
 “Unified Analysis Model for Indistinguishable and Distinguishable

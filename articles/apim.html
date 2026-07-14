@@ -90,9 +90,83 @@ preliminary example models. Please check back soon!</p>
 <div class="section level2">
 <h2 id="the-cross-sectional-gaussian-distinguishable-apim">The cross sectional Gaussian distinguishable APIM<a class="anchor" aria-label="anchor" href="#the-cross-sectional-gaussian-distinguishable-apim"></a>
 </h2>
+<div class="figure">
+<img src="apim_files/figure-html/distinguishable-apim-diagram-1.png" class="r-plt" alt="Path diagram for a distinguishable cross-sectional APIM. Female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. The female and male outcome residuals covary." width="100%"><p class="caption">
+Conceptual cross-sectional APIM for distinguishable female-male dyads.
+Actor and partner effects can differ by the role of the outcome member,
+and the two outcome residuals covary within dyads.
+</p>
+</div>
+<p>Here,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mi>f</mi></msub><annotation encoding="application/x-tex">a_f</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mi>m</mi></msub><annotation encoding="application/x-tex">a_m</annotation></semantics></math>
+are the actor effects on the female and male outcomes, whereas
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>f</mi></msub><annotation encoding="application/x-tex">p_f</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>m</mi></msub><annotation encoding="application/x-tex">p_m</annotation></semantics></math>
+are the corresponding partner effects. All four paths can differ in a
+distinguishable APIM.</p>
+<p>We first prepare the example data with
+<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">apim_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
+<span>  model_type <span class="op">=</span> <span class="st">"apim"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The generated <code>.i_*</code> columns can be used directly in the
+model formula. Here is a simple example:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">apim_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific intercepts</span></span>
+<span>    <span class="fl">0</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific actor effects</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Gender-specific partner effects</span></span>
+<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Dyad-level unstructured random effects represent the two partner</span></span>
+<span>    <span class="co"># residual variances and their covariance when dispformula = ~ 0.</span></span>
+<span>    <span class="co"># This is glmmTMB-specific syntax! lme4 and brms use different syntax.</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.i_is_female_x_male_male</span></span>
+<span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span></span>
+<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
+<span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  , data <span class="op">=</span> <span class="va">apim_distinguishable_data</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="residual-random-effects-structure">Residual random effects structure<a class="anchor" aria-label="anchor" href="#residual-random-effects-structure"></a>
+<h3 id="distinguishable-residual-structure">Residual random-effects structure<a class="anchor" aria-label="anchor" href="#distinguishable-residual-structure"></a>
 </h3>
+<p>For a distinguishable female-male dyad, the two members can have
+different residual variances. Their residual covariance matrix is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Σ</mi><mrow><mi>F</mi><mi>M</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><msub><mi>c</mi><mrow><mi>F</mi><mi>M</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>c</mi><mrow><mi>F</mi><mi>M</mi></mrow></msub></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow><mn>2</mn></msubsup></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\Sigma_{FM} =
+\begin{pmatrix}
+\sigma_{FM,F}^2 &amp; c_{FM} \\
+c_{FM} &amp; \sigma_{FM,M}^2
+\end{pmatrix}.
+</annotation></semantics></math></p>
+<p>With one outcome row per member, this structure is estimated with an
+unstructured random-effects block such as
+<code>us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)</code>
+and <code>dispformula = ~ 0</code>. The two indicator columns select the
+female and male rows, respectively. The <code>us()</code> block
+estimates both variances and their covariance.</p>
 </div>
 <div class="section level3">
 <h3 id="interpretation">Interpretation<a class="anchor" aria-label="anchor" href="#interpretation"></a>
@@ -102,13 +176,93 @@ preliminary example models. Please check back soon!</p>
 <div class="section level2">
 <h2 id="the-cross-sectional-gaussian-exchangeable-apim">The cross-sectional Gaussian exchangeable APIM<a class="anchor" aria-label="anchor" href="#the-cross-sectional-gaussian-exchangeable-apim"></a>
 </h2>
+<div class="figure">
+<img src="apim_files/figure-html/exchangeable-apim-diagram-1.png" class="r-plt" alt="Path diagram for an exchangeable cross-sectional APIM. Each member's predictor has the same actor effect on their own outcome and the same partner effect on the other member's outcome. The two outcome residuals have equal variances and covary." width="100%"><p class="caption">
+Conceptual cross-sectional APIM for exchangeable dyads. The two members
+share one actor effect and one partner effect; their outcome residuals
+have equal variances and covary within dyads.
+</p>
+</div>
+<p>Because the member labels are arbitrary, swapping members 1 and 2
+does not change the model. The two actor paths therefore share the
+coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+and the two partner paths share the coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.
+The two residual variances are also constrained to be equal, while their
+covariance is estimated.</p>
 <div class="section level3">
 <h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
 </h3>
 </div>
 <div class="section level3">
-<h3 id="residual-random-effects-structure---and-back-transformation">Residual random effects structure - and back-transformation<a class="anchor" aria-label="anchor" href="#residual-random-effects-structure---and-back-transformation"></a>
+<h3 id="exchangeable-residual-structure">Residual random-effects structure and back-transformation<a class="anchor" aria-label="anchor" href="#exchangeable-residual-structure"></a>
 </h3>
+<p>For an exchangeable dyad, <code>interdep</code> generates an
+arbitrary member-difference column, named <code>.i_diff_*</code>, that
+is <code>+1</code> for one member and <code>-1</code> for the other. The
+exchangeable residual structure is represented by two separate
+random-effects terms: a shared dyad random intercept and a random
+coefficient for this difference column <span class="citation">(del
+Rosario and West 2025)</span>. If their random effects are denoted by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>M</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">u_{Mj}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>D</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">u_{Dj}</annotation></semantics></math>,
+the two members receive</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mn>1</mn><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>u</mi><mrow><mi>M</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>D</mi><mi>j</mi></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>r</mi><mrow><mn>2</mn><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>u</mi><mrow><mi>M</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>u</mi><mrow><mi>D</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+r_{1j} = u_{Mj} + u_{Dj}, \qquad
+r_{2j} = u_{Mj} - u_{Dj}.
+</annotation></semantics></math></p>
+<p>Because the shared and difference effects are fitted in separate
+random-effects terms, they are uncorrelated. Writing their variances as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_M^2</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_D^2</annotation></semantics></math>
+gives</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>u</mi><mrow><mi>M</mi><mi>j</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>u</mi><mrow><mi>D</mi><mi>j</mi></mrow></msub></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mo>∼</mo><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">[</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\begin{pmatrix}
+u_{Mj} \\
+u_{Dj}
+\end{pmatrix}
+\sim
+\mathcal{N}
+\left[
+\begin{pmatrix}
+0 \\
+0
+\end{pmatrix},
+\begin{pmatrix}
+\sigma_M^2 &amp; 0 \\
+0 &amp; \sigma_D^2
+\end{pmatrix}
+\right].
+</annotation></semantics></math></p>
+<p>The implied member-level residual covariance matrix is therefore</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Σ</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>−</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>−</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\Sigma =
+\begin{pmatrix}
+\sigma_M^2 + \sigma_D^2 &amp; \sigma_M^2 - \sigma_D^2 \\
+\sigma_M^2 - \sigma_D^2 &amp; \sigma_M^2 + \sigma_D^2
+\end{pmatrix}.
+</annotation></semantics></math></p>
+<p>Thus, both members have the same residual variance
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo>=</mo><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">V = \sigma_M^2 + \sigma_D^2</annotation></semantics></math>,
+their covariance is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>−</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">C = \sigma_M^2 - \sigma_D^2</annotation></semantics></math>,
+and their residual correlation is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>/</mi><mi>V</mi></mrow><annotation encoding="application/x-tex">C/V</annotation></semantics></math>.
+Conversely, the shared and difference variances can be recovered from a
+member-level variance and covariance as</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><mi>V</mi><mo>+</mo><mi>C</mi></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><mi>V</mi><mo>−</mo><mi>C</mi></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\sigma_M^2 = \frac{V + C}{2}, \qquad
+\sigma_D^2 = \frac{V - C}{2}.
+</annotation></semantics></math></p>
+<p>Reversing the arbitrary <code>+1/-1</code> assignment changes the
+sign of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>D</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">u_{Dj}</annotation></semantics></math>
+but not its variance or the implied member-level covariance matrix. In
+longitudinal models, the same transformation applies separately to
+stable dyad-level and same-occasion dyad-level covariance blocks.</p>
 </div>
 <div class="section level3">
 <h3 id="interpretation-1">Interpretation<a class="anchor" aria-label="anchor" href="#interpretation-1"></a>
@@ -118,9 +272,63 @@ preliminary example models. Please check back soon!</p>
 <div class="section level2">
 <h2 id="testing-distinguishability">Testing distinguishability<a class="anchor" aria-label="anchor" href="#testing-distinguishability"></a>
 </h2>
-<p>Aside from using a Wald test on the first model, nested model
-comparisons require models fit to the same prepared data object. Helpers
-for creating those constrained columns are planned.</p>
+<p>Distinguishability can be evaluated by comparing a full model in
+which the two roles may differ with a restricted exchangeable model.
+This comparison tests the imposed equality constraints jointly. Here,
+they concern the fixed intercepts, actor effects, partner effects, and
+residual variances.</p>
+<p>The two parameterizations require different generated columns. The
+full distinguishable model was fitted above, so we now prepare the same
+original observations as exchangeable:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">apim_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_crosssectional</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
+<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"female-male"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The exchangeable model constrains the corresponding fixed effects and
+residual variances to be equal across members:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">apim_exchangeable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_is_female_x_male</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">apim_exchangeable_data</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/compare_interdep_models.html">compare_interdep_models()</a></code> verifies that both models use
+equivalent original observations before performing the likelihood-ratio
+test:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/compare_interdep_models.html">compare_interdep_models</a></span><span class="op">(</span></span>
+<span>  restricted <span class="op">=</span> <span class="va">apim_exchangeable_model</span>,</span>
+<span>  full <span class="op">=</span> <span class="va">apim_distinguishable_model</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent interdep data</span></span>
+<span><span class="co">#&gt; Mathematical nesting is assumed and cannot be verified from the data alone.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
+<span><span class="co">#&gt; apim_exchangeable_model     5 603.98 619.84 -296.99   593.98              </span></span>
+<span><span class="co">#&gt; apim_distinguishable_model  9 589.49 618.03 -285.75   571.49 22.492      4</span></span>
+<span><span class="co">#&gt;                            Pr(&gt;Chisq)    </span></span>
+<span><span class="co">#&gt; apim_exchangeable_model                  </span></span>
+<span><span class="co">#&gt; apim_distinguishable_model  0.0001599 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Under the assumed nesting and chi-squared reference distribution, the test provides evidence that `apim_exchangeable_model` fits the data worse than `apim_distinguishable_model` (likelihood-ratio test: χ²(4) = 22.49, p &lt; .001).</span></span></code></pre></div>
+<p>The test provides evidence against all restrictions jointly, but it
+does not show which parameter differs. The helper also cannot determine
+whether the models are mathematically nested; that remains a modeling
+requirement. The usual chi-squared reference distribution may be
+unreliable when a tested variance parameter lies on its boundary.</p>
 </div>
 <div class="section level2">
 <h2 id="intensive-longitudinal-apims">Intensive longitudinal APIMs<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-apims"></a>
@@ -132,7 +340,7 @@ for creating those constrained columns are planned.</p>
 (<code>cbp</code>) predictors can be unreliable when each member
 contributes few occasions, which can bias between-person estimates <span class="citation">(Gottfredson 2019)</span>.</p>
 <p>Example model specification:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">ild_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> </span>
@@ -189,6 +397,95 @@ contributes few occasions, which can bias between-person estimates <span class="
 <div class="section level4">
 <h4 id="dynamic-models">Dynamic models<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
 </h4>
+<p>The preparation shown in the Getting Started vignette supports
+contemporaneous models, but observations can also remain dependent over
+time. Currently, commonly used open-source MLM interfaces in R do not
+provide the full dyadic residual VAR structure needed to model serial
+dependence across both partners. Within open-source R, such a model
+generally requires custom TMB or Stan code.</p>
+<p>One practical alternative, especially when carryover and temporal
+dynamics are part of the research question, is to create a dynamic model
+by including lagged versions of the outcome as predictors.</p>
+<p>For this example, we obtain the lagged actor and partner outcome
+columns through the <code>lag_predictors</code> argument:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">example_dyadic_ILD</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
+<span>  time <span class="op">=</span> <span class="va">diaryday</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">closeness</span>,</span>
+<span>  lag_predictors <span class="op">=</span> <span class="va">closeness</span>,</span>
+<span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>A simple fixed-slope dyadic stability and influence model <span class="citation">(del Rosario and West 2025)</span>:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">stability_influence</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Stability (actor effect across time)</span></span>
+<span>    <span class="va">.i_closeness_actor_lag1</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Influence (partner effect across time)</span></span>
+<span>    <span class="va">.i_closeness_partner_lag1</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Linear time trend</span></span>
+<span>    <span class="va">diaryday</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
+<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span></span>
+<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
+<span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  , data <span class="op">=</span> <span class="va">ild_apim_data_dynamic</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">stability_influence</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
+<span><span class="co">#&gt; Formula:          </span></span>
+<span><span class="co">#&gt; closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  </span></span>
+<span><span class="co">#&gt;     diaryday + (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID:diaryday)</span></span>
+<span><span class="co">#&gt; Dispersion:                 ~0</span></span>
+<span><span class="co">#&gt; Data: ild_apim_data_dynamic</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
+<span><span class="co">#&gt;    2929.0    2968.0   -1456.5    2913.0       967 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Random effects:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;  Groups              Name                                   Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID            (Intercept)                            0.9161   0.9571  </span></span>
+<span><span class="co">#&gt;  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                            0.3925   0.6265  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  </span></span>
+<span><span class="co">#&gt; Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conditional model:</span></span>
+<span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
+<span><span class="co">#&gt; diaryday                  -0.005281   0.007643  -0.691    0.490    </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<p>This model can be extended with contemporaneous actor and partner
+predictor associations and other lagged predictors. Time-varying
+predictors should usually be separated into within-person and
+between-person components. Their contemporaneous coefficients are then
+conditional on both partners’ prior outcomes.</p>
+<p><strong>Note:</strong> Person-mean centering a lagged outcome can
+introduce Nickell bias, especially in shorter time series <span class="citation">(Hamaker and Grasman 2015; Nickell 1981; Gistelinck et
+al. 2021)</span>. Refer to the <a href="dim.html">DIM vignette</a> for a
+fuller discussion of exchangeable models.</p>
 <hr>
 <p>From here, choose the model-specific vignette that matches the
 research question:</p>
@@ -207,14 +504,40 @@ distinguishable DSM parameterization.</li>
 <p>Or return to the <a href="index.html">Overview</a>.</p>
 <p>A vignette with non-Gaussian generalized APIM examples is
 planned.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry">
+Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. <span>“Multilevel
+Autoregressive Models When the Number of Time Points Is Small.”</span>
+<em>Structural Equation Modeling: A Multidisciplinary Journal</em> 28
+(1): 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517" class="external-link">https://doi.org/10.1080/10705511.2020.1753517</a>.
+</div>
 <div id="ref-gottfredsonStraightforwardApproachCoping2019" class="csl-entry">
 Gottfredson, Nisha C. 2019. <span>“A Straightforward Approach for Coping
 with Unreliability of Person Means When Parsing Within-Person and
 Between-Person Effects in Longitudinal Studies.”</span> <em>Addictive
 Behaviors</em> 94: 156–61. <a href="https://doi.org/10.1016/j.addbeh.2018.09.031" class="external-link">https://doi.org/10.1016/j.addbeh.2018.09.031</a>.
 </div>
+<div id="ref-hamakerCenterNotCenter2015" class="csl-entry">
+Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. <span>“To Center or
+Not to Center? Investigating Inertia with a Multilevel Autoregressive
+Model.”</span> <em>Frontiers in Psychology</em> 5: 1492. <a href="https://doi.org/10.3389/fpsyg.2014.01492" class="external-link">https://doi.org/10.3389/fpsyg.2014.01492</a>.
 </div>
+<div id="ref-nickellBiasesDynamicModels1981" class="csl-entry">
+Nickell, Stephen. 1981. <span>“Biases in Dynamic Models with Fixed
+Effects.”</span> <em>Econometrica</em> 49 (6): 1417–26. <a href="https://doi.org/10.2307/1911408" class="external-link">https://doi.org/10.2307/1911408</a>.
+</div>
+<div id="ref-delrosarioPracticalGuideSpecifying2025" class="csl-entry">
+Rosario, Kareena S. del, and Tessa V. West. 2025. <span>“A
+<span>Practical Guide</span> to <span>Specifying Random Effects</span>
+in <span>Longitudinal Dyadic Multilevel Modeling</span>.”</span>
+<em>Advances in Methods and Practices in Psychological Science</em> 8
+(3): 25152459251351286. <a href="https://doi.org/10.1177/25152459251351286" class="external-link">https://doi.org/10.1177/25152459251351286</a>.
 </div>
 </div>
 </div>
