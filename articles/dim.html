@@ -1599,11 +1599,10 @@ different days are independent.</p>
 <p>If the goal is to retain these concurrent DIM associations while
 accounting for serial dependence, the closest extension is a dyadic
 residual dynamic structural equation model (RDSEM). It keeps the
-concurrent regression separate from a VAR model for its residuals <span class="citation">(Asparouhov and Muthén 2020)</span>. This residual-VAR
-structure is not directly available through the <code>glmmTMB</code>
-interface used here, and open-source support for dyadic dynamic models
-remains very limited <span class="citation">(del Rosario and West
-2025)</span>.</p>
+concurrent regression separate from a VAR model for its residuals <span class="citation">(Asparouhov and Muthén 2020; McNeish and Hamaker
+2020)</span>. This residual-VAR structure is not directly available
+through the <code>glmmTMB</code> interface used here, and open-source
+support for dyadic dynamic models remains very limited <span class="citation">(del Rosario and West 2025)</span>.</p>
 <div class="section level4">
 <h4 id="dynamic-models">Dynamic models<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
 </h4>
@@ -1888,6 +1887,11 @@ acceptably from about ten occasions, but this is not a universal cutoff
 <span class="citation">(Gistelinck et al. 2021)</span>. For shorter
 panels, consider an LD-APIM, which lets the first outcomes relate to the
 members’ stable levels in a wide-format SEM <span class="citation">(Gistelinck and Loeys 2020)</span>.</p>
+<p>These manifest-lag models are not equivalent to Mplus DSEM, which
+uses latent person-mean centering by default and can estimate
+multivariate or residual dynamics jointly <span class="citation">(McNeish and Hamaker 2020)</span>. For very short
+panels, however, default DSEM may still be biased or unstable, so the
+LD-APIM recommendation above may be preferable <span class="citation">(Gistelinck et al. 2021)</span>.</p>
 <p>These lagged-outcome issues are separate from the earlier concern
 about unreliable person means used to construct <code>cbp</code>
 predictors with few occasions.</p>
@@ -1958,6 +1962,12 @@ Relationships</em> 35 (1): 59–88. <a href="https://doi.org/10.1177/02654075177
 <div id="ref-kenny2006dyadic" class="csl-entry">
 Kenny, David A, Deborah A Kashy, and William L Cook. 2006. <em>Dyadic
 Data Analysis</em>. Guilford Press.
+</div>
+<div id="ref-mcneishPrimerTwoLevel2020" class="csl-entry">
+McNeish, Daniel, and Ellen L. Hamaker. 2020. <span>“A Primer on
+Two-Level Dynamic Structural Equation Models for Intensive Longitudinal
+Data in <span>Mplus</span>.”</span> <em>Psychological Methods</em> 25
+(5): 610–35. <a href="https://doi.org/10.1037/met0000250" class="external-link">https://doi.org/10.1037/met0000250</a>.
 </div>
 <div id="ref-nickellBiasesDynamicModels1981" class="csl-entry">
 Nickell, Stephen. 1981. <span>“Biases in Dynamic Models with Fixed

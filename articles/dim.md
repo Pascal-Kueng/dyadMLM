@@ -1057,10 +1057,10 @@ If the goal is to retain these concurrent DIM associations while
 accounting for serial dependence, the closest extension is a dyadic
 residual dynamic structural equation model (RDSEM). It keeps the
 concurrent regression separate from a VAR model for its residuals
-(Asparouhov and Muthén 2020). This residual-VAR structure is not
-directly available through the `glmmTMB` interface used here, and
-open-source support for dyadic dynamic models remains very limited (del
-Rosario and West 2025).
+(Asparouhov and Muthén 2020; McNeish and Hamaker 2020). This
+residual-VAR structure is not directly available through the `glmmTMB`
+interface used here, and open-source support for dyadic dynamic models
+remains very limited (del Rosario and West 2025).
 
 #### Dynamic models
 
@@ -1359,6 +1359,12 @@ acceptably from about ten occasions, but this is not a universal cutoff
 lets the first outcomes relate to the members’ stable levels in a
 wide-format SEM (Gistelinck and Loeys 2020).
 
+These manifest-lag models are not equivalent to Mplus DSEM, which uses
+latent person-mean centering by default and can estimate multivariate or
+residual dynamics jointly (McNeish and Hamaker 2020). For very short
+panels, however, default DSEM may still be biased or unstable, so the
+LD-APIM recommendation above may be preferable (Gistelinck et al. 2021).
+
 These lagged-outcome issues are separate from the earlier concern about
 unreliable person means used to construct `cbp` predictors with few
 occasions.
@@ -1423,6 +1429,11 @@ Research.” *Journal of Social and Personal Relationships* 35 (1): 59–88.
 
 Kenny, David A, Deborah A Kashy, and William L Cook. 2006. *Dyadic Data
 Analysis*. Guilford Press.
+
+McNeish, Daniel, and Ellen L. Hamaker. 2020. “A Primer on Two-Level
+Dynamic Structural Equation Models for Intensive Longitudinal Data in
+Mplus.” *Psychological Methods* 25 (5): 610–35.
+<https://doi.org/10.1037/met0000250>.
 
 Nickell, Stephen. 1981. “Biases in Dynamic Models with Fixed Effects.”
 *Econometrica* 49 (6): 1417–26. <https://doi.org/10.2307/1911408>.

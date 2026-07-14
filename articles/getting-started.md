@@ -607,7 +607,8 @@ The preparation above supports contemporaneous models, but observations
 can also remain dependent over time. Currently, commonly used
 open-source MLM interfaces in R do not provide the full dyadic residual
 VAR structure needed to model serial dependence across both partners.
-Such a model requires custom TMB or Stan code.
+Within open-source R, such a model generally requires custom TMB or Stan
+code.
 
 One practical alternative, especially when carryover and temporal
 dynamics are part of the research question, is to create a dynamic model
@@ -617,7 +618,9 @@ Lagged versions of variables, including an outcome that is also passed
 to `predictors`, can be obtained through the `lag_predictors` argument.
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
 then returns lag-1 raw and within-person-centered actor and partner
-columns alongside their contemporaneous versions.
+columns alongside their contemporaneous versions. Lagging respects the
+dyad and member structure, matches observations at exactly `time - 1`,
+and does not bridge missing occasions.
 
 Whether raw or within-person-centered lagged outcomes should be used
 depends on the research question and the data. For guidance on this

@@ -66,8 +66,10 @@ prepare_interdep_data(
 
   Optional subset of `predictors` for which lag-1 model-ready columns
   should be created. Requires `time` to be a finite, integer-valued
-  numeric measurement index. Raw and within-person predictor versions
-  are lagged; stable between-person versions are not.
+  numeric measurement index. Lagging respects the dyad and member
+  structure, matches observations at exactly `time - 1`, and does not
+  bridge missing occasions. Only raw and within-person predictors are
+  lagged. Stable between-person versions are not.
 
 - model_type:
 
@@ -292,6 +294,7 @@ ild_prepared <- prepare_interdep_data(
   member = person_id,
   time = time,
   predictors = x,
+  lag_predictors = x,
   model_type = "apim",
   seed = 123
 )
@@ -305,31 +308,45 @@ print(ild_prepared)
 #> # assumed_exchangeable exchangeable 2 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition         inferred dyad composition
-#> #   .i_composition_role    composition-specific member role
-#> #   .i_is_{comp-role}      composition-role indicator columns
-#> #   .i_diff_{comp}         composition-specific sum-diff contrasts with
-#> #                          arbitrary direction; 0 for distinguishable dyads or
-#> #                          other exchangeable compositions
-#> #   .i_{pred}_cwp          within-person predictor: momentary deviations from
-#> #                          each person's usual level
-#> #   .i_{pred}_cbp          between-person predictor: stable differences from
-#> #                          the average person's usual level
-#> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor
-#> #                          values
-#> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor
-#> #                          values
-#> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's
-#> #                          momentary deviations from their usual level
-#> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's
-#> #                          momentary deviations from their usual level
-#> #   .i_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable
-#> #                          difference from the average person's usual level
-#> #   .i_{pred}_cbp_partner  APIM between-person partner predictor: partner's
-#> #                          stable difference from the average person's usual
-#> #                          level
+#> #   .i_composition              inferred dyad composition
+#> #   .i_composition_role         composition-specific member role
+#> #   .i_is_{comp-role}           composition-role indicator columns
+#> #   .i_diff_{comp}              composition-specific sum-diff contrasts with
+#> #                               arbitrary direction; 0 for distinguishable
+#> #                               dyads or other exchangeable compositions
+#> #   .i_{pred}_lag1              lag-1 raw predictor values
+#> #   .i_{pred}_cwp               within-person predictor: momentary deviations
+#> #                               from each person's usual level
+#> #   .i_{pred}_cwp_lag1          lag-1 within-person predictor: momentary
+#> #                               deviations from each person's usual level
+#> #   .i_{pred}_cbp               between-person predictor: stable differences
+#> #                               from the average person's usual level
+#> #   .i_{pred}_actor             APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .i_{pred}_actor_lag1        lag-1 APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .i_{pred}_partner           APIM partner predictor: partner's original
+#> #                               predictor values
+#> #   .i_{pred}_partner_lag1      lag-1 APIM partner predictor: partner's
+#> #                               original predictor values
+#> #   .i_{pred}_cwp_actor         APIM within-person actor predictor: actor's
+#> #                               momentary deviations from their usual level
+#> #   .i_{pred}_cwp_actor_lag1    lag-1 APIM within-person actor predictor:
+#> #                               actor's momentary deviations from their usual
+#> #                               level
+#> #   .i_{pred}_cwp_partner       APIM within-person partner predictor: partner's
+#> #                               momentary deviations from their usual level
+#> #   .i_{pred}_cwp_partner_lag1  lag-1 APIM within-person partner predictor:
+#> #                               partner's momentary deviations from their usual
+#> #                               level
+#> #   .i_{pred}_cbp_actor         APIM between-person actor predictor: actor's
+#> #                               stable difference from the average person's
+#> #                               usual level
+#> #   .i_{pred}_cbp_partner       APIM between-person partner predictor:
+#> #                               partner's stable difference from the average
+#> #                               person's usual level
 #> #
-#> # A tibble: 8 × 16
+#> # A tibble: 8 × 22
 #>   dyad_id person_id  time     x .i_composition       .i_composition_role 
 #>     <dbl>     <dbl> <dbl> <dbl> <fct>                <fct>               
 #> 1       1         1     1     4 assumed_exchangeable assumed_exchangeable
@@ -340,8 +357,11 @@ print(ild_prepared)
 #> 6       2         2     1     6 assumed_exchangeable assumed_exchangeable
 #> 7       2         1     2     4 assumed_exchangeable assumed_exchangeable
 #> 8       2         2     2     7 assumed_exchangeable assumed_exchangeable
-#> # ℹ 10 more variables: .i_is_assumed_exchangeable <dbl>,
+#> # ℹ 16 more variables: .i_is_assumed_exchangeable <dbl>,
 #> #   .i_diff_assumed_exchangeable_arbitrary <dbl>, .i_x_cwp <dbl>,
-#> #   .i_x_cbp <dbl>, .i_x_actor <dbl>, .i_x_partner <dbl>, .i_x_cwp_actor <dbl>,
-#> #   .i_x_cwp_partner <dbl>, .i_x_cbp_actor <dbl>, .i_x_cbp_partner <dbl>
+#> #   .i_x_cbp <dbl>, .i_x_lag1 <dbl>, .i_x_cwp_lag1 <dbl>, .i_x_actor <dbl>,
+#> #   .i_x_partner <dbl>, .i_x_cwp_actor <dbl>, .i_x_cwp_partner <dbl>,
+#> #   .i_x_cbp_actor <dbl>, .i_x_cbp_partner <dbl>, .i_x_actor_lag1 <dbl>,
+#> #   .i_x_partner_lag1 <dbl>, .i_x_cwp_actor_lag1 <dbl>,
+#> #   .i_x_cwp_partner_lag1 <dbl>
 ```

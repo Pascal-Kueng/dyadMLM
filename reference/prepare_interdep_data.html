@@ -108,8 +108,10 @@ decomposition and model-ready predictor construction.</p></dd>
 <dt id="arg-lag-predictors">lag_predictors<a class="anchor" aria-label="anchor" href="#arg-lag-predictors"></a></dt>
 <dd><p>Optional subset of <code>predictors</code> for which lag-1
 model-ready columns should be created. Requires <code>time</code> to be a finite,
-integer-valued numeric measurement index. Raw and within-person predictor
-versions are lagged; stable between-person versions are not.</p></dd>
+integer-valued numeric measurement index. Lagging respects the dyad and
+member structure, matches observations at exactly <code>time - 1</code>, and does not
+bridge missing occasions. Only raw and within-person predictors are
+lagged. Stable between-person versions are not.</p></dd>
 
 
 <dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
@@ -335,6 +337,7 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-in"><span>  member <span class="op">=</span> <span class="va">person_id</span>,</span></span>
 <span class="r-in"><span>  time <span class="op">=</span> <span class="va">time</span>,</span></span>
 <span class="r-in"><span>  predictors <span class="op">=</span> <span class="va">x</span>,</span></span>
+<span class="r-in"><span>  lag_predictors <span class="op">=</span> <span class="va">x</span>,</span></span>
 <span class="r-in"><span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span></span>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">123</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
@@ -348,31 +351,45 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # assumed_exchangeable exchangeable 2 dyads</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition         inferred dyad composition</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role    composition-specific member role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_{comp-role}      composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_{comp}         composition-specific sum-diff contrasts with</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          arbitrary direction; 0 for distinguishable dyads or</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          other exchangeable compositions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp          within-person predictor: momentary deviations from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          each person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp          between-person predictor: stable differences from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          the average person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_actor        APIM actor predictor: actor's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_partner      APIM partner predictor: partner's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_actor    APIM within-person actor predictor: actor's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          momentary deviations from their usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_partner  APIM within-person partner predictor: partner's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          momentary deviations from their usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          difference from the average person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp_partner  APIM between-person partner predictor: partner's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          stable difference from the average person's usual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                          level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition              inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_composition_role         composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_is_{comp-role}           composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_diff_{comp}              composition-specific sum-diff contrasts with</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               arbitrary direction; 0 for distinguishable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               dyads or other exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_lag1              lag-1 raw predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp               within-person predictor: momentary deviations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               from each person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_lag1          lag-1 within-person predictor: momentary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               deviations from each person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp               between-person predictor: stable differences</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               from the average person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_actor             APIM actor predictor: actor's original</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_actor_lag1        lag-1 APIM actor predictor: actor's original</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_partner           APIM partner predictor: partner's original</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_partner_lag1      lag-1 APIM partner predictor: partner's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               original predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_actor         APIM within-person actor predictor: actor's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               momentary deviations from their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_actor_lag1    lag-1 APIM within-person actor predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               actor's momentary deviations from their usual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_partner       APIM within-person partner predictor: partner's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               momentary deviations from their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cwp_partner_lag1  lag-1 APIM within-person partner predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               partner's momentary deviations from their usual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp_actor         APIM between-person actor predictor: actor's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               stable difference from the average person's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .i_{pred}_cbp_partner       APIM between-person partner predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               partner's stable difference from the average</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               person's usual level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 22</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id  time     x .i_composition       .i_composition_role </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       1         1     1     4 assumed_exchangeable assumed_exchangeable</span>
@@ -383,10 +400,13 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       2         2     1     6 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span>       2         1     2     4 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span>       2         2     2     7 assumed_exchangeable assumed_exchangeable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 10 more variables: .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 16 more variables: .i_is_assumed_exchangeable &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;, .i_x_cwp &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cbp &lt;dbl&gt;, .i_x_actor &lt;dbl&gt;, .i_x_partner &lt;dbl&gt;, .i_x_cwp_actor &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cwp_partner &lt;dbl&gt;, .i_x_cbp_actor &lt;dbl&gt;, .i_x_cbp_partner &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cbp &lt;dbl&gt;, .i_x_lag1 &lt;dbl&gt;, .i_x_cwp_lag1 &lt;dbl&gt;, .i_x_actor &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_partner &lt;dbl&gt;, .i_x_cwp_actor &lt;dbl&gt;, .i_x_cwp_partner &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cbp_actor &lt;dbl&gt;, .i_x_cbp_partner &lt;dbl&gt;, .i_x_actor_lag1 &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_partner_lag1 &lt;dbl&gt;, .i_x_cwp_actor_lag1 &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .i_x_cwp_partner_lag1 &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
