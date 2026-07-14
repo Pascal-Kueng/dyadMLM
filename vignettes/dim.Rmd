@@ -44,11 +44,16 @@ different parameterization of the exchangeable APIM, the Dyadic Score Model
 
 ## Cross-Sectional Gaussian DIM
 
-The current DIM implementation prepares predictors for one exchangeable dyad
-composition. Exchangeability means that swapping the two member labels does not
-change the model [@kenny2006dyadic]. One way to make this assumption at the
-data-preparation layer is to omit `role` from `prepare_interdep_data()`. This
-treats all dyads as the same exchangeable composition.
+The current DIM implementation needs one exchangeable dyad composition. 
+Exchangeability means that swapping the two member labels does not
+change the model [@kenny2006dyadic]. 
+
+One way to make this assumption in `interdep` at the data-preparation layer is 
+to omit `role` from `prepare_interdep_data()`. This treats all dyads as the 
+same exchangeable composition. Passing a `role` is also possible when it leads 
+to exactly one exchangeable composition (e.g., only female-female dyads). Otherwise, 
+refer to the [Getting Started vignette](getting-started.html) for how to filter, pool, and 
+constrain dyad compositions to obtain a single exchangeable dyad composition. 
 
 ```{r prepare-cross-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
@@ -65,61 +70,10 @@ cross_exchangeable_data <- prepare_interdep_data(
 print(cross_exchangeable_data, n = 4)
 ```
 
-For the exchangeable random-effects specification below,
+For the exchangeable random-effects specification,
 `prepare_interdep_data()` creates a member-difference contrast `.i_diff_*`,
 coded as `+1` for one partner and `-1` for the other. Because these member labels
 are arbitrary, setting `seed` makes their assignment reproducible.
-
-Passing a `role` is also possible when it leads to exactly one
-exchangeable composition (e.g., only female-female dyads).
-
-In a dataset with mixed dyad types, the right preparation depends on the analysis goal.
-
-For instance, we can filter dyads and keep only male-male and female-female
-dyads. Because DIM currently supports a single type of exchangeable dyad, we
-might pool those like this, if theoretically justified:
-
-```{r prepare-cross-filter-pool-same-sex}
-cross_same_sex_pooled_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_mixed,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = satisfaction,
-  model_type = c("apim", "dim"),
-  # Remove male-female dyads.
-  include_compositions = c("male-male", "female-female"),
-  pool_compositions = list(
-    "same-sex-couples" = c("male-male", "female-female")
-  ),
-  seed = 123
-)
-
-print(cross_same_sex_pooled_data, n = 4)
-```
-
-If we want to include only male-female couples (filter the data) and treat those as exchangeable,
-we can do:
-
-```{r prepare-cross-filter-set-male-female-exchangeable}
-cross_male_female_exchangeable_data <- prepare_interdep_data(
-  example_dyadic_crosssectional_mixed,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = satisfaction,
-  model_type = c("apim", "dim"),
-  include_compositions = "male-female",
-  set_exchangeable_compositions = "male-female",
-  seed = 123
-)
-
-print(cross_male_female_exchangeable_data, n = 4)
-```
-
-Pooling compositions constrains them to share DIM effects. These are substantive
-modeling decisions, not only data-processing choices, and should follow the
-research question.
 
 ### Example DIM Model
 
@@ -1193,51 +1147,8 @@ data.frame(
 
 ### Including Random Slopes
 
-Random-slope DIM and APIM parameterizations can be included by adding
-the corresponding within-person effects to the stable dyad-level random-effect
-blocks.
-
-In the APIM:
-
-```{r fit-ild-apim-random, eval = FALSE}
-
-apim_ILD_random <- glmmTMB::glmmTMB(
-  closeness ~
-    1 +
-
-    diaryday +
-
-    # Within-person APIM
-    .i_provided_support_cwp_actor +
-    .i_provided_support_cwp_partner +
-
-    # Between-person APIM
-    .i_provided_support_cbp_actor +
-    .i_provided_support_cbp_partner +
-
-    # Stable dyad-level covariance with within-person random slopes
-    (1 +
-         .i_provided_support_cwp_actor +
-         .i_provided_support_cwp_partner
-       | coupleID)  +
-    (0 +
-         .i_diff_assumed_exchangeable_arbitrary +
-         .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_actor +
-         .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_partner
-       | coupleID) +
-
-    # Same-day exchangeable dyad-level covariance
-    (1 | coupleID:diaryday) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_exchangeable_data
-)
-
-```
-
-In the DIM:
+Random-slopes can be included in the DIM by adding the corresponding within-person 
+effects to the stable dyad-level random-effect blocks: 
 
 ```{r fit-ild-dim-random, eval = FALSE}
 
@@ -1279,20 +1190,14 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 
 ### Dynamic ILD DIM example
 
-The ILD models above do not model residual serial dependence and therefore estimate
-concurrent associations under the assumption that residuals from different days
-are independent. When carryover or temporal dynamics are part of the research
-question, one practical alternative is to include lagged outcomes as predictors.
-
-By adding the outcome to `predictors` and selecting it with `lag_predictors`,
-`prepare_interdep_data()` creates lag-1 raw and within-person scores. Stable
-between-person scores are not lagged.
+The ILD models above do not model residual serial dependence. One way to model
+dynamics or to account for temporal dependency is to include lagged outcomes as predictors.
 
 **Note:** Dynamic models, especially with small time series, are subject to bias. 
 This, and the choice between raw and within-person-centered outcome lags, are 
 addressed in the [APIM vignette's discussion of dynamic models](apim.html#dynamic-models). 
 
-Brief example:
+Brief example to obtain lagged raw and within-person centered versions of the outcome:
 
 ```{r prepare-ild-dim-dynamic}
 ild_exchangeable_data_dynamic <- prepare_interdep_data(
