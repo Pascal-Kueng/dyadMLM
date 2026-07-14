@@ -503,3 +503,8 @@ Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
 the [Dyad-Individual Model vignette](dim.html) or the
 [Dyadic Score Model vignette](dsm.html) for alternative parameterizations, or
 return to the [Overview](index.html).
+
+## References
+
+::: {#refs}
+:::

@@ -29,8 +29,8 @@ observations before comparing the models.
 \details{
 Both model calls must use named \code{interdep_data} objects. The function checks
 the original, non-\code{.i_} columns, structural dyad metadata, outcome values and
-missingness, fitted row identities, number of fitted observations, model
-family and link, maximum-likelihood estimation, and model convergence.
+missingness, fitted row identities, model family and link,
+maximum-likelihood estimation, and model convergence.
 
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the other.

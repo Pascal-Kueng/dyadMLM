@@ -13,8 +13,8 @@
 #' @details
 #' Both model calls must use named `interdep_data` objects. The function checks
 #' the original, non-`.i_` columns, structural dyad metadata, outcome values and
-#' missingness, fitted row identities, number of fitted observations, model
-#' family and link, maximum-likelihood estimation, and model convergence.
+#' missingness, fitted row identities, model family and link,
+#' maximum-likelihood estimation, and model convergence.
 #'
 #' These checks establish that the models use equivalent observations. They
 #' cannot establish that one model is mathematically nested within the other.
@@ -68,11 +68,11 @@ compare_interdep_models <- function(full, restricted, alpha = 0.05) {
   )
   validate_interdep_models(models)
 
-  data <- list(
+  model_data <- list(
     restricted = interdep_model_data(restricted, parent.frame(), "restricted"),
     full = interdep_model_data(full, parent.frame(), "full")
   )
-  validate_interdep_model_data(models, data)
+  validate_interdep_model_data(models, model_data)
 
   test <- interdep_likelihood_ratio(models)
   new_interdep_model_comparison(models, labels, test, alpha)
@@ -83,9 +83,7 @@ print.interdep_model_comparison <- function(x, ...) {
   interpretation <- attr(x, "interpretation", exact = TRUE)
 
   modified <- x
-  class(modified) <- class(modified)[
-    class(modified) != "interdep_model_comparison"
-  ]
+  class(modified) <- setdiff(class(modified), "interdep_model_comparison")
   print(modified, ...)
 
   if (!is.null(interpretation)) {
@@ -124,7 +122,7 @@ validate_interdep_models <- function(models) {
 interdep_model_data <- function(model, caller_env, argument) {
   data_call <- model$call$data
   comparison_check(
-    !is.null(data_call) && is.symbol(data_call),
+    is.symbol(data_call),
     sprintf(
       "The `%s` model must have been fitted with a named `interdep_data` object in `data`.",
       argument
@@ -153,11 +151,11 @@ interdep_model_data <- function(model, caller_env, argument) {
   )
 }
 
-validate_interdep_model_data <- function(models, data) {
+validate_interdep_model_data <- function(models, model_data) {
   restricted <- models$restricted
   full <- models$full
-  restricted_data <- data$restricted
-  full_data <- data$full
+  restricted_data <- model_data$restricted
+  full_data <- model_data$full
 
   comparison_check(
     nrow(restricted_data) == nrow(full_data),
@@ -210,23 +208,12 @@ validate_interdep_model_data <- function(models, data) {
       sprintf("Original column `%s` differs between the two prepared datasets.", column)
     )
   }
-  comparison_check(
-    stats::nobs(restricted) == stats::nobs(full),
-    "The two models were fitted to different numbers of observations."
-  )
 
   restricted_frame <- restricted$frame
   full_frame <- full$frame
   comparison_check(
     identical(row.names(restricted_frame), row.names(full_frame)),
     "The two models were fitted to different observation rows."
-  )
-  comparison_check(
-    same_values(
-      stats::model.response(restricted_frame),
-      stats::model.response(full_frame)
-    ),
-    "The fitted outcome values differ between the two models."
   )
 
   restricted_family <- restricted$modelInfo$family
@@ -255,15 +242,14 @@ comparison_check <- function(condition, message) {
 
 interdep_likelihood_ratio <- function(models) {
   log_lik <- lapply(models, stats::logLik)
-  df <- lapply(log_lik, attr, which = "df")
+  df <- vapply(log_lik, attr, numeric(1), which = "df")
 
   comparison_check(
-    !any(vapply(df, is.null, logical(1))) && df$full > df$restricted,
+    df["full"] > df["restricted"],
     "`full` must have more estimated parameters than `restricted`."
   )
 
   log_lik <- vapply(log_lik, as.numeric, numeric(1))
-  df <- unlist(df, use.names = TRUE)
   statistic <- 2 * (log_lik["full"] - log_lik["restricted"])
   comparison_check(
     is.finite(statistic) && statistic >= -sqrt(.Machine$double.eps),

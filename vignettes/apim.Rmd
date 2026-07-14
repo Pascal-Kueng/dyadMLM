@@ -224,3 +224,9 @@ question:
 Or return to the [Overview](index.html).
 
 A vignette with non-Gaussian generalized APIM examples is planned. 
+
+
+## References
+
+::: {#refs}
+:::
