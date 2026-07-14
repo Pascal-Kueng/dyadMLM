@@ -25,9 +25,9 @@ vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
 
 ## Cross-sectional mixed-composition APIM
 
-The data were simulated with the following fixed effects and residual
-covariance parameters. For exchangeable dyads, `sum_variance` and
-`diff_variance` imply the partner correlation.
+The data were simulated with the following fixed effects and covariance
+parameters. For exchangeable dyads, `sum_variance` and `diff_variance`
+imply the partner correlation.
 
     #>             block     parameter    value
     #> 1   female_x_male   female_mean  5.50000
@@ -41,8 +41,8 @@ covariance parameters. For exchangeable dyads, `sum_variance` and
     #> 9     male_x_male diff_variance  1.05625
 
 We first prepare the data with
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
-It identifies all observed dyad compositions.
+[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md),
+which identifies all observed dyad compositions.
 
 ``` r
 
@@ -137,9 +137,9 @@ mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
 summary(mixed_cross_gaussian_model)
 ```
 
-The four fixed-effect indicators are mutually exclusive: exactly one
-equals `1` for each row. Using shorter labels for the generated columns,
-the fixed part of the model is
+The four fixed-effect indicators are mutually exclusive. With $`I`$
+denoting a shorter label for each generated composition-and-role
+indicator, the fixed part of the model can be written as:
 
 ``` math
 \mu_{ij}^{\mathrm{fixed}} =
@@ -149,8 +149,7 @@ the fixed part of the model is
 \beta_{MM} I_{MM,ij}.
 ```
 
-The active indicator, and therefore the fixed intercept, depends on the
-row:
+The active indicator for each person is shown below:
 
 | Row | $`I_{FM,F}`$ | $`I_{FM,M}`$ | $`I_{FF}`$ | $`I_{MM}`$ | Fixed intercept |
 |:---|---:|---:|---:|---:|:---|
@@ -159,7 +158,8 @@ row:
 | Member of a female-female dyad | 0 | 0 | **1** | 0 | $`\beta_{FF}`$ |
 | Member of a male-male dyad | 0 | 0 | 0 | **1** | $`\beta_{MM}`$ |
 
-For a member of a male-male dyad, for example, the fixed part reduces to
+Therefore, for a member of a male-male dyad, for example, the fixed part
+reduces to
 
 ``` math
 0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
@@ -242,7 +242,13 @@ marginaleffects::hypotheses(
 )
 ```
 
-It is important to note, that such a fixed-effect formula with all
+These are population-level fixed-effect comparisons. Setting
+`re.form = NA` excludes dyad-specific random effects from the quantities
+being compared; it does not remove the random-effects structure from the
+fitted model. Uncertainty is calculated for the fixed-effect comparison,
+which is the intended target here.
+
+It is important to note that such a fixed-effect formula with all
 compositions in one model call does not, by itself, create partial
 pooling across dyad compositions. The composition-specific intercepts
 and slopes above are ordinary fixed effects, so estimates for
@@ -253,9 +259,12 @@ factorizes by composition. In that case, a combined fit can closely
 match separate composition-specific fits. Its main advantage is that
 formal parameter comparisons can be made within one fitted model, and
 that models with different versions of pooling can be compared. For
-example, it can be tested, whether pooling male-male and female-female
-couples as same-sex substantially worsens model fit, under consideration
-of not only the fixed effects, but also the random effects structure.
+example, it can be tested whether pooling male-male and female-female
+couples as same-sex substantially worsens model fit, considering both
+the fixed effects and random-effects structure. Such model comparisons
+require the restricted and unrestricted models to use the same
+observations; separate fits to different compositions should not be
+compared this way.
 
 If partial pooling is desired, for instance with few dyads for one
 particular type, a different model specification is required, such as a
@@ -264,13 +273,21 @@ a random dyad-type effect. However, with only a few dyad types,
 frequentist random dyad-type variance components are usually weakly
 identified.
 
-## Mixed-composition intensive longitudinal Gaussian model
+## Mixed-composition intensive longitudinal (ILD) Gaussian model
 
 `example_dyadic_ILD_mixed` contains the same three dyad compositions as
 the mixed-composition cross-sectional example, but each dyad contributes
 repeated paired observations over `diaryday`.
 
-We prepare the data in the same way, now adding `time` and a predictor:
+To keep the example lighter, we pool female-female and male-male dyads
+into one same-sex composition. This is a simplifying modeling assumption
+and does not reflect all differences used to simulate these example
+data. In an applied analysis, pooling should be theoretically justified
+or evaluated by comparing pooled and unpooled models fitted to the same
+observations.
+
+Aside from the pooling, we prepare the data in the same way, now adding
+`time` and a predictor:
 
 ``` r
 
@@ -279,6 +296,9 @@ mixed_ild_data <- prepare_interdep_data(
   group = coupleID,
   member = personID,
   role = gender,
+  pool_compositions = list(
+    "same-sex" = c("male-male", "female-female")
+  ),
   time = diaryday,
   predictors = provided_support,
   seed = 123
@@ -291,9 +311,10 @@ print(mixed_ild_data)
 #> # diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable    60 dyads
-#> # female_x_male   distinguishable 80 dyads
-#> # male_x_male     exchangeable    60 dyads
+#> # female_x_male          distinguishable  80 dyads
+#> # same-sex (pooled)      exchangeable    120 dyads
+#> #   female_x_female
+#> #   male_x_male
 #> #
 #> # Added columns:
 #> #   .i_composition         inferred dyad composition
@@ -320,7 +341,7 @@ print(mixed_ild_data)
 #> #                          stable difference from the average person's usual
 #> #                          level
 #> #
-#> # A tibble: 5,600 × 22
+#> # A tibble: 5,600 × 20
 #>    personID coupleID diaryday gender closeness provided_support .i_composition
 #>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>         
 #>  1        1        1        0 female      3.79             4.85 female_x_male 
@@ -334,18 +355,18 @@ print(mixed_ild_data)
 #>  9        1        1        8 female      4.45             4.11 female_x_male 
 #> 10        1        1        9 female      3.17             4.01 female_x_male 
 #> # ℹ 5,590 more rows
-#> # ℹ 15 more variables: .i_composition_role <fct>, .i_is_female_x_female <dbl>,
+#> # ℹ 13 more variables: .i_composition_role <fct>,
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_is_male_x_male <dbl>, .i_diff_female_x_female_arbitrary <dbl>,
-#> #   .i_diff_male_x_male_arbitrary <dbl>, .i_provided_support_cwp <dbl>,
-#> #   .i_provided_support_cbp <dbl>, .i_provided_support_actor <dbl>,
-#> #   .i_provided_support_partner <dbl>, .i_provided_support_cwp_actor <dbl>, …
+#> #   .i_is_same_sex <dbl>, .i_diff_same_sex_arbitrary <dbl>,
+#> #   .i_provided_support_cwp <dbl>, .i_provided_support_cbp <dbl>,
+#> #   .i_provided_support_actor <dbl>, .i_provided_support_partner <dbl>,
+#> #   .i_provided_support_cwp_actor <dbl>, …
 ```
 
-This mixed-composition ILD model includes composition-specific
-intercepts, fixed time slopes, and within-person and between-person
-actor and partner effects. It omits random slopes, as they would add
-several variances and covariances to an already large model.
+This mixed-composition ILD model includes composition-specific fixed
+intercepts, time slopes, and within-person and between-person actor and
+partner effects. It omits random slopes, as they would add several
+variances and covariances to an already large model.
 
 This model is complex and may produce optimizer convergence warnings,
 especially when the random-effects structure is too complex for the
@@ -354,7 +375,8 @@ West 2025). When near-zero covariance components make a frequentist fit
 unstable, regularizing priors in a Bayesian model can sometimes help,
 but they do not replace careful model checks (del Rosario and West
 2025). A Bayesian implementation of this mixed-composition model is
-beyond the scope of this vignette.
+beyond the scope of this vignette. For these example data, we use the
+BFGS optimizer with a higher iteration limit.
 
 ``` r
 
@@ -365,70 +387,58 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
     # Composition-specific intercepts
     .i_is_female_x_male_female + .i_is_female_x_male_male +
     
-    .i_is_female_x_female + 
-    .i_is_male_x_male +
+    .i_is_same_sex +
 
     # Composition-specific time trends
     .i_is_female_x_male_female:diaryday +
     .i_is_female_x_male_male:diaryday +
     
-    .i_is_female_x_female:diaryday +
-    
-    .i_is_male_x_male:diaryday +
+    .i_is_same_sex:diaryday +
 
     # Composition-specific within-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cwp_actor +
     .i_is_female_x_male_male:.i_provided_support_cwp_actor +
     
-    .i_is_female_x_female:.i_provided_support_cwp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_actor +
+    .i_is_same_sex:.i_provided_support_cwp_actor +
 
     # Composition-specific within-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cwp_partner +
     .i_is_female_x_male_male:.i_provided_support_cwp_partner +
     
-    .i_is_female_x_female:.i_provided_support_cwp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_partner +
+    .i_is_same_sex:.i_provided_support_cwp_partner +
 
     # Composition-specific between-person actor effects
     .i_is_female_x_male_female:.i_provided_support_cbp_actor +
     .i_is_female_x_male_male:.i_provided_support_cbp_actor +
     
-    .i_is_female_x_female:.i_provided_support_cbp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_actor +
+    .i_is_same_sex:.i_provided_support_cbp_actor +
 
     # Composition-specific between-person partner effects
     .i_is_female_x_male_female:.i_provided_support_cbp_partner +
     .i_is_female_x_male_male:.i_provided_support_cbp_partner +
     
-    .i_is_female_x_female:.i_provided_support_cbp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_partner +
+    .i_is_same_sex:.i_provided_support_cbp_partner +
 
     # stable dyad-level covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
     
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
-    
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID) +
+    (0 + .i_is_same_sex | coupleID) +
+    (0 + .i_diff_same_sex_arbitrary | coupleID) +
 
     # same-day covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
     
-    (0 + .i_is_female_x_female | coupleID:diaryday) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID:diaryday) +
-    
-    (0 + .i_is_male_x_male | coupleID:diaryday) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID:diaryday)
+    (0 + .i_is_same_sex | coupleID:diaryday) +
+    (0 + .i_diff_same_sex_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
   , data = mixed_ild_data
+  , control = glmmTMB::glmmTMBControl(
+      optimizer = stats::optim,
+      optArgs = list(method = "BFGS"),
+      optCtrl = list(maxit = 10000)
+    )
 )
 
 summary(mixed_ild_gaussian_model)
@@ -454,51 +464,29 @@ us(
     coupleID
 ) +
 
-# exchangeable female-female shared block
+# exchangeable same-sex shared block
 us(
   0 +
-    .i_is_female_x_female +
-    .i_is_female_x_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_female:.i_provided_support_cwp_partner |
+    .i_is_same_sex +
+    .i_is_same_sex:.i_provided_support_cwp_actor +
+    .i_is_same_sex:.i_provided_support_cwp_partner |
     coupleID
 ) +
 
-# exchangeable female-female difference block
+# exchangeable same-sex difference block
 us(
   0 +
-    .i_diff_female_x_female_arbitrary +
-    .i_diff_female_x_female_arbitrary:.i_provided_support_cwp_actor +
-    .i_diff_female_x_female_arbitrary:.i_provided_support_cwp_partner |
-    coupleID
-) +
-
-# exchangeable male-male shared block
-us(
-  0 +
-    .i_is_male_x_male +
-    .i_is_male_x_male:.i_provided_support_cwp_actor +
-    .i_is_male_x_male:.i_provided_support_cwp_partner |
-    coupleID
-) +
-
-# exchangeable male-male difference block
-us(
-  0 +
-    .i_diff_male_x_male_arbitrary +
-    .i_diff_male_x_male_arbitrary:.i_provided_support_cwp_actor +
-    .i_diff_male_x_male_arbitrary:.i_provided_support_cwp_partner |
+    .i_diff_same_sex_arbitrary +
+    .i_diff_same_sex_arbitrary:.i_provided_support_cwp_actor +
+    .i_diff_same_sex_arbitrary:.i_provided_support_cwp_partner |
     coupleID
 )
 ```
 
 This extension estimates a very large covariance structure and may not
-be supported by many datasets. A more practical starting point is to add
-only the random slopes that are central to the research question. If the
-equality assumption is substantively reasonable, female-female and
-male-male dyads could also be pooled into one same-sex composition to
-reduce the number of parameters. Regularizing priors may help with
-estimation, but they do not make an unsupported random-effects structure
-appropriate.
+be supported by many datasets. Regularizing priors may help with
+estimation, but they do not necessarily make an unsupported
+random-effects structure appropriate.
 
 ## Practical takeaway
 
@@ -508,9 +496,10 @@ columns, and the fitted model can place the corresponding fixed effects
 and covariance terms in one formula.
 
 It is often useful to begin with separate composition-specific models or
-simpler covariance structures. Combine them when a comparison or
-equality constraint is part of the research question, and add further
-random effects only when the data support the additional complexity.
+simpler covariance structures. Combine them when an equality constraint
+or a comparison of effects across compositions is part of the research
+question, and add further random effects only when the data support the
+additional complexity.
 
 ------------------------------------------------------------------------
 
