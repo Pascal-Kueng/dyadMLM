@@ -392,11 +392,9 @@ summary(mixed_ild_gaussian_model)
 
 ```
 
-This worked example omits random slopes, as they would add further complexity.
-One possible extension is to let the within-person actor and partner effects
-vary across dyads. The following blocks would replace the stable dyad-level
-covariance terms in the model above. Each `us()` block estimates all variances
-and covariances among the terms inside it.
+This example omits random slopes, as they would add further complexity. To 
+extend the model with random slopes, the following blocks would replace the 
+stable dyad-level covariance terms in the model above:
 
 ```{r mixed-ild-random-slopes, eval = FALSE}
 # distinguishable female-male random intercepts and slopes
@@ -431,15 +429,15 @@ us(
 ```
 
 This extension estimates a very large covariance structure and may not be
-supported by many datasets. Regularizing priors may help with estimation, but 
-they do not necessarily make an unsupported random-effects structure appropriate.
+supported by many datasets. Regularizing priors in a Bayesian framework may help 
+with estimation, but they do not necessarily make an unsupported random-effects 
+structure appropriate.
 
-## Practical takeaway
+## Takeaway
 
-Mixed dyad compositions do not require separate data-preparation calls.
-`interdep` creates the composition-specific indicator and difference columns,
-and the fitted model can place the corresponding fixed effects and covariance
-terms in one formula.
+Mixed dyad compositions do not always require separate models.
+`interdep` creates the necessary columns to fit a joint model and apply various
+pooling and exchangeability constraints. 
 
 It is often useful to begin with separate composition-specific models or
 simpler covariance structures. Combine them when an equality constraint or a
