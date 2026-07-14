@@ -548,6 +548,48 @@ cat("From APIM model:\n",
 #>    within-dyad-deviation effect:   1.52
 ```
 
+### Random-effect transformation
+
+The DIM and APIM models above already use the same sum-and-difference
+random-effects parameterization (del Rosario and West 2025). Let $`u_M`$
+denote the random intercept and $`u_D`$ the random coefficient for the
+`+1/-1` member-difference contrast. The two members’ random-effect
+contributions are then
+
+``` math
+r_1 = u_M + u_D, \qquad r_2 = u_M - u_D.
+```
+
+The separate random-effects terms constrain $`u_M`$ and $`u_D`$ to be
+uncorrelated, as required for exchangeable dyads. If their variances are
+$`\sigma_M^2`$ and $`\sigma_D^2`$, respectively, the member-level
+variance and covariance are
+
+``` math
+\operatorname{Var}(r_1) = \operatorname{Var}(r_2)
+= \sigma_M^2 + \sigma_D^2,
+```
+
+``` math
+\operatorname{Cov}(r_1,r_2) = \sigma_M^2 - \sigma_D^2.
+```
+
+Conversely, if $`V`$ is either member’s random-effect variance and $`C`$
+is the covariance between members, then
+
+``` math
+\sigma_M^2 = \frac{V + C}{2}, \qquad
+\sigma_D^2 = \frac{V - C}{2}.
+```
+
+For example, a random-intercept variance of 1.2 and a difference
+variance of 0.3 imply a member variance of 1.5 and a covariance between
+partners of 0.9.
+
+The same transformation applies separately to the stable dyad-level and
+same-occasion dyad-level covariance blocks in the longitudinal models
+below.
+
 ## Intensive Longitudinal DIM
 
 For longitudinal DIM, predictors are decomposed into within-person and
@@ -1139,7 +1181,7 @@ And include in the model as such:
 
 ``` r
 
-dim_ILD_random_lag <- glmmTMB::glmmTMB(
+dim_ILD_lag_raw <- glmmTMB::glmmTMB(
   closeness ~
     1 +
 
@@ -1156,7 +1198,7 @@ dim_ILD_random_lag <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_dyad_mean +
     .i_provided_support_cbp_within_dyad_dev +
 
-    # Stable dyad-level covariance with within-person random slopes
+    # Stable exchangeable dyad-level covariance
     (1 | coupleID)  +
     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
 
@@ -1175,7 +1217,7 @@ dim_ILD_random_lag <- glmmTMB::glmmTMB(
     )
 )
 
-summary(dim_ILD_random_lag)
+summary(dim_ILD_lag_raw)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> closeness ~ 1 + .i_closeness_dyad_mean_gmc_lag1 + .i_closeness_within_dyad_dev_lag1 +  
@@ -1225,7 +1267,7 @@ summary(dim_ILD_random_lag)
 
 ``` r
 
-dim_ILD_random_lag_cw <- glmmTMB::glmmTMB(
+dim_ILD_lag_cwp <- glmmTMB::glmmTMB(
   closeness ~
     1 +
 
@@ -1242,7 +1284,7 @@ dim_ILD_random_lag_cw <- glmmTMB::glmmTMB(
     .i_provided_support_cbp_dyad_mean +
     .i_provided_support_cbp_within_dyad_dev +
 
-    # Stable dyad-level covariance with within-person random slopes
+    # Stable exchangeable dyad-level covariance
     (1 | coupleID)  +
     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
 
@@ -1255,7 +1297,7 @@ dim_ILD_random_lag_cw <- glmmTMB::glmmTMB(
   , data = ild_exchangeable_data_dynamic
 )
 
-summary(dim_ILD_random_lag_cw)
+summary(dim_ILD_lag_cwp)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> closeness ~ 1 + .i_closeness_cwp_dyad_mean_lag1 + .i_closeness_cwp_within_dyad_dev_lag1 +  

@@ -1115,6 +1115,53 @@ their original scale.</p>
 <span><span class="co">#&gt;    dyad-mean effect:               1.996 </span></span>
 <span><span class="co">#&gt;    within-dyad-deviation effect:   1.52</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="random-effect-transformation">Random-effect transformation<a class="anchor" aria-label="anchor" href="#random-effect-transformation"></a>
+</h3>
+<p>The DIM and APIM models above already use the same sum-and-difference
+random-effects parameterization <span class="citation">(del Rosario and
+West 2025)</span>. Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>M</mi></msub><annotation encoding="application/x-tex">u_M</annotation></semantics></math>
+denote the random intercept and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>D</mi></msub><annotation encoding="application/x-tex">u_D</annotation></semantics></math>
+the random coefficient for the <code>+1/-1</code> member-difference
+contrast. The two members’ random-effect contributions are then</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mn>1</mn></msub><mo>=</mo><msub><mi>u</mi><mi>M</mi></msub><mo>+</mo><msub><mi>u</mi><mi>D</mi></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>r</mi><mn>2</mn></msub><mo>=</mo><msub><mi>u</mi><mi>M</mi></msub><mo>−</mo><msub><mi>u</mi><mi>D</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+r_1 = u_M + u_D, \qquad r_2 = u_M - u_D.
+</annotation></semantics></math></p>
+<p>The separate random-effects terms constrain
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>M</mi></msub><annotation encoding="application/x-tex">u_M</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>D</mi></msub><annotation encoding="application/x-tex">u_D</annotation></semantics></math>
+to be uncorrelated, as required for exchangeable dyads. If their
+variances are
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_M^2</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_D^2</annotation></semantics></math>,
+respectively, the member-level variance and covariance are</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\operatorname{Var}(r_1) = \operatorname{Var}(r_2)
+= \sigma_M^2 + \sigma_D^2,
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Cov</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>r</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>−</mo><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{Cov}(r_1,r_2) = \sigma_M^2 - \sigma_D^2.
+</annotation></semantics></math></p>
+<p>Conversely, if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>
+is either member’s random-effect variance and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>
+is the covariance between members, then</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>M</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><mi>V</mi><mo>+</mo><mi>C</mi></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msubsup><mi>σ</mi><mi>D</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><mi>V</mi><mo>−</mo><mi>C</mi></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\sigma_M^2 = \frac{V + C}{2}, \qquad
+\sigma_D^2 = \frac{V - C}{2}.
+</annotation></semantics></math></p>
+<p>For example, a random-intercept variance of 1.2 and a difference
+variance of 0.3 imply a member variance of 1.5 and a covariance between
+partners of 0.9.</p>
+<p>The same transformation applies separately to the stable dyad-level
+and same-occasion dyad-level covariance blocks in the longitudinal
+models below.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="intensive-longitudinal-dim">Intensive Longitudinal DIM<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dim"></a>
@@ -1669,7 +1716,7 @@ exactly <code>diaryday - 1</code>, so omitted diary days are not
 bridged.</p>
 <p>And include in the model as such:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dim_ILD_random_lag</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">dim_ILD_lag_raw</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
@@ -1686,7 +1733,7 @@ bridged.</p>
 <span>    <span class="va">.i_provided_support_cbp_dyad_mean</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_provided_support_cbp_within_dyad_dev</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="co"># Stable dyad-level covariance with within-person random slopes</span></span>
+<span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
@@ -1705,7 +1752,7 @@ bridged.</p>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dim_ILD_random_lag</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dim_ILD_lag_raw</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; closeness ~ 1 + .i_closeness_dyad_mean_gmc_lag1 + .i_closeness_within_dyad_dev_lag1 +  </span></span>
@@ -1752,7 +1799,7 @@ bridged.</p>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dim_ILD_random_lag_cw</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">dim_ILD_lag_cwp</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
@@ -1769,7 +1816,7 @@ bridged.</p>
 <span>    <span class="va">.i_provided_support_cbp_dyad_mean</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_provided_support_cbp_within_dyad_dev</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="co"># Stable dyad-level covariance with within-person random slopes</span></span>
+<span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
@@ -1782,7 +1829,7 @@ bridged.</p>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data_dynamic</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dim_ILD_random_lag_cw</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dim_ILD_lag_cwp</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; closeness ~ 1 + .i_closeness_cwp_dyad_mean_lag1 + .i_closeness_cwp_within_dyad_dev_lag1 +  </span></span>
