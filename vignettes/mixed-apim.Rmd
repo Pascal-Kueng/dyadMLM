@@ -223,21 +223,24 @@ side.
 # Test whether male-male and female-female pooled intercepts are different
 marginaleffects::hypotheses(
   mixed_cross_gaussian_model,
-  hypothesis = "conditional_.i_is_male_x_male = conditional_.i_is_female_x_female"
+  hypothesis = "conditional_.i_is_male_x_male = conditional_.i_is_female_x_female",
+  re.form = NA
 )
 
 # Test whether the average female-male intercept is different from the pooled
 # male-male intercept
 marginaleffects::hypotheses(
   mixed_cross_gaussian_model,
-  hypothesis = "(conditional_.i_is_female_x_male_female + conditional_.i_is_female_x_male_male) / 2 = conditional_.i_is_male_x_male"
+  hypothesis = "(conditional_.i_is_female_x_male_female + conditional_.i_is_female_x_male_male) / 2 = conditional_.i_is_male_x_male",
+  re.form = NA
 )
 
 # Test whether the male intercept from a female-male couple is different from
 # the pooled male intercept from a male-male couple
 marginaleffects::hypotheses(
   mixed_cross_gaussian_model,
-  hypothesis = "conditional_.i_is_female_x_male_male = conditional_.i_is_male_x_male"
+  hypothesis = "conditional_.i_is_female_x_male_male = conditional_.i_is_male_x_male",
+  re.form = NA
 )
 
 ```
@@ -287,14 +290,17 @@ print(mixed_ild_data)
 
 This mixed-composition ILD model includes composition-specific intercepts,
 fixed time slopes, and within-person and between-person actor and partner
-effects. It omits random slopes, as they would add several variances and 
-covariances to an already large model. 
+effects. It omits random slopes, as they would add several variances and
+covariances to an already large model.
 
-This model is complex and may produce optimizer convergence warnings, 
+This model is complex and may produce optimizer convergence warnings,
 especially when the random-effects structure is too
 complex for the available data or some components are close to zero
-[@delrosarioPracticalGuideSpecifying2025]. A Bayesian approach may help to 
-stabilize the complex model !TODO: link to brms.
+[@delrosarioPracticalGuideSpecifying2025]. When near-zero covariance components
+make a frequentist fit unstable, regularizing priors in a Bayesian model can
+sometimes help, but they do not replace careful model checks
+[@delrosarioPracticalGuideSpecifying2025]. A Bayesian implementation of this
+mixed-composition model is beyond the scope of this vignette.
 
 ```{r fit-mixed-ild-gaussian, eval = FALSE}
 
@@ -373,6 +379,37 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
 summary(mixed_ild_gaussian_model)
 
 ```
+
+This worked example omits random slopes, as they would add further complexity. 
+However, they could be added as such: 
+
+```{r eval = FALSE}
+
+    # stable dyad-level covariance 
+    # Everything within the same block will be correlated in an unstructured
+    # matrix
+
+    # Male-Female Variance covariance block
+    (0 + 
+       # random intercepts
+       .i_is_female_x_male_female + .i_is_female_x_male_male +
+       
+       # random actor slopes
+       .i_is_female_x_male_female:x_cwp_actor + .i_is_female_x_male_male:x_cwp_actor +
+       
+       # random partner slopes
+       .i_is_female_x_male_female:x_cwp_partner + .i_is_female_x_male_male:x_cwp_partner +
+
+       | coupleID) +
+    
+    (0 + .i_is_female_x_female | coupleID) +
+    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
+    
+    (0 + .i_is_male_x_male | coupleID) +
+    (0 + .i_diff_male_x_male_arbitrary | coupleID) +
+  
+```
+
 
 
 ## Practical takeaway
