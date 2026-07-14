@@ -31,11 +31,7 @@ equivalence to APIM effects in exchangeable dyads, see the
 relationship to APIM effects in distinguishable dyads, see the
 [Dyadic Score Model vignette](dsm.html).
 
-
-
-> This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
-
-# Cross-sectional mixed-dyads APIM
+## Cross-sectional mixed-composition APIM
 
 The data were simulated with the following fixed effects and residual covariance
 parameters. For exchangeable dyads, `sum_variance` and `diff_variance` imply the
@@ -81,10 +77,8 @@ mixed_cross_targets <- data.frame(
 mixed_cross_targets
 ```
 
-Let's see if we can recover those parameters. 
-
-We first prepare the data with `prepare_interdep_data`. It automatically finds
-all dyad compositions. 
+We first prepare the data with `prepare_interdep_data()`. It identifies all
+observed dyad compositions.
 
 ```{r prepare-mixed-cross-sectional}
 mixed_cross_data <- prepare_interdep_data(
@@ -98,16 +92,17 @@ mixed_cross_data <- prepare_interdep_data(
 print(mixed_cross_data, n = 4)
 ```
 
-We basically simply estimate a separate distinguishable or exchangeable APIM 
-per dyad composition. The tricky part is the random effects setup. 
+For each composition, the model uses either distinguishable or exchangeable
+APIM terms. Most of the additional work is in the random-effects structure.
 
-.i_diff variables need to be structured as containing -1 and 1 for the corresponding
-composition, and 0 for each other composition. `prepare_interdep_data` does this
-automatically. Then, the following model can be specified:
+The `.i_diff_*` variables contain `-1` and `1` for the corresponding
+exchangeable composition and `0` for all other compositions.
+`prepare_interdep_data()` creates this structure automatically. The model can
+then be specified as follows:
 
 ```{r fit-mixed-cross-sectional-gaussian, eval = FALSE}
 
-mixed_cross_gaussian_model <- glmmTMB(
+mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
   satisfaction ~ 0 +
 
     .i_is_female_x_male_female + .i_is_female_x_male_male +
@@ -136,37 +131,36 @@ summary(mixed_cross_gaussian_model)
 ### Single versus separate mixed-composition fits
 
 The mixed-composition models in this vignette fit all dyad compositions in one
-model call. That is useful when the goal is to
-compare effects across compositions, test equality constraints, keep one
-model-based covariance matrix for those comparisons, or intentionally share
-parameters such as a common Tweedie power parameter.
+model call. This is useful when the goal is to compare effects across
+compositions, test equality constraints, or make those comparisons within one
+joint fitted model.
 
 A fixed-effect formula with all compositions in one model call does not, by
 itself, create partial pooling across dyad compositions. The
 composition-specific intercepts and slopes above are ordinary fixed effects, so
 estimates for female-female or male-male dyads are not automatically shrunk
 toward estimates from the other dyad types. If every mean, variance, and
-covariance parameter is composition-specific, the likelihood largely factorizes
-by composition. In the cross-sectional Gaussian example, the single
-mixed-composition fit and three separate composition-specific fits give the same
-log-likelihood and fixed-effect estimates up to numerical tolerance.
+covariance parameter is composition-specific, the likelihood largely
+factorizes by composition. In that case, a combined fit can closely match
+separate composition-specific fits. Its main advantage is that comparisons can
+be made within one fitted model.
 
 Partial pooling requires a different model specification, such as a common effect
 plus composition deviations with a hierarchical prior, or a random dyad-type
 effect. With only a few dyad types, frequentist random dyad-type variance
 components are usually weakly identified. Complete pooling, where a slope is
-constrained to be identical across compositions, can be more stable and more
-powerful when the constraint is substantively correct, but it is biased when the
-dyad compositions truly differ.
+constrained to be identical across compositions, can improve precision and
+stability when the equality constraint is substantively reasonable. However,
+it can hide meaningful differences between dyad compositions.
 
 
 ## Mixed-composition intensive longitudinal Gaussian model
 
 `example_dyadic_ILD_mixed` contains the same three dyad compositions as the
-mixed-composition cross-sectional example, but each dyad contributes repeated paired
-observations over `diaryday`.
+mixed-composition cross-sectional example, but each dyad contributes repeated
+paired observations over `diaryday`.
 
-To prepare the data: 
+We prepare the data in the same way, now adding `time` and a predictor:
 
 ```{r prepare-mixed-ild}
 mixed_ild_data <- prepare_interdep_data(
@@ -183,25 +177,23 @@ print(mixed_ild_data)
 ```
 
 
-This first mixed-composition ILD model includes composition-specific intercepts, fixed
-time slopes, and within-person and between-person actor and partner effects.
-Random time slopes are omitted; with separate stable and same-day dyadic
-covariance blocks, random time slopes add many weakly identified parameters and
-are a likely first source of convergence problems.
+This mixed-composition ILD model includes composition-specific intercepts,
+fixed time slopes, and within-person and between-person actor and partner
+effects. Random time slopes are omitted because the separate stable and
+same-day covariance blocks already introduce many variance parameters. They
+should be added only when the research question and data support the additional
+complexity.
 
-This maximal covariance model is a demanding all-in-one likelihood. In this
-simulated example, separate composition-specific fits recover the same
-fixed-effect solution cleanly, while the all-in-one mixed-composition fit can
-report false convergence even when it reaches the same likelihood and has a
-positive definite Hessian.
-Treat convergence diagnostics, Hessian diagnostics, and comparison with simpler
-or separate fits as part of the workflow. If the all-in-one fit is not clean, fit
-the composition-specific models separately for estimation, or simplify the
-same-day and stable covariance blocks before adding more random effects.
+The all-in-one covariance model is demanding and may produce optimizer
+convergence warnings. A positive definite Hessian and estimates that are close
+to simpler or separate fits are useful checks, but neither should be treated as
+automatic proof that a warning can be ignored. If the combined fit is not
+clean, fit the composition-specific models separately or simplify the stable
+and same-day covariance blocks before adding more random effects.
 
 ```{r fit-mixed-ild-gaussian, eval = FALSE}
 
-mixed_ild_gaussian_model <- glmmTMB(
+mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
   closeness ~ 0 +
 
     # Composition-specific intercepts
@@ -278,132 +270,21 @@ summary(mixed_ild_gaussian_model)
 ```
 
 
-## Mixed-composition intensive longitudinal Tweedie model
+## Practical takeaway
 
-`example_dyadic_ILD_mixed_tweedie` has the same mixed-composition intensive
-longitudinal dyadic structure, but the outcome is semi-continuous.
+Mixed dyad compositions do not require separate data-preparation calls.
+`interdep` creates the composition-specific indicator and difference columns,
+and the fitted model can place the corresponding fixed effects and covariance
+terms in one formula.
 
-```{r mixed-ild-tweedie-raw}
-print(head(example_dyadic_ILD_mixed_tweedie, 20))
-hist(example_dyadic_ILD_mixed_tweedie$physical_activity, breaks = 20)
-```
-
-```{r prepare-mixed-ild-tweedie}
-mixed_ild_tweedie_data <- prepare_interdep_data(
-  example_dyadic_ILD_mixed_tweedie,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  time = diaryday,
-  predictors = provided_support,
-  seed = 123
-)
-
-print(mixed_ild_tweedie_data)
-summary(mixed_ild_tweedie_data)
-```
-
-As in the Gaussian mixed-composition ILD model, the mean model contains
-composition-specific intercepts, fixed time slopes, and within-person and
-between-person actor and partner effects. The dyadic random-effect blocks are
-latent effects on the log-mean scale, not residual covariance parameters in the
-Gaussian sense. This is the most fragile example in the vignette because it
-combines composition-specific mean effects, composition-specific latent dyadic
-dependence, composition-specific dispersion, and a common Tweedie power
-parameter. A practical workflow is to fit separate Gaussian or simpler Tweedie
-models first, then add shared-parameter constraints only when they answer a
-specific comparison question.
-
-```{r fit-mixed-ild-tweedie, eval = FALSE}
-
-mixed_ild_tweedie_model <- glmmTMB(
-  physical_activity ~ 0 +
-
-    # Intercepts for each composition_role
-    .i_is_female_x_male_female + 
-    .i_is_female_x_male_male +
-    
-    .i_is_female_x_female + 
-    
-    .i_is_male_x_male +
-
-    # C-specific specific time trends
-    .i_is_female_x_male_female:diaryday + 
-    .i_is_female_x_male_male:diaryday +
-    
-    .i_is_female_x_female:diaryday +
-    
-    .i_is_male_x_male:diaryday +
-
-    # Composition-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
-    
-    .i_is_female_x_female:.i_provided_support_cwp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_actor +
-
-    # Composition-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
-    
-    .i_is_female_x_female:.i_provided_support_cwp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cwp_partner +
-
-    # Composition-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
-    
-    .i_is_female_x_female:.i_provided_support_cbp_actor +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_actor +
-
-    # Composition-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
-    
-    .i_is_female_x_female:.i_provided_support_cbp_partner +
-    
-    .i_is_male_x_male:.i_provided_support_cbp_partner +
-
-    # stable dyad-level latent covariance
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
-    
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
-    
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID) +
-
-    # same-day latent covariance
-    (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
-    
-    (0 + .i_is_female_x_female | coupleID:diaryday) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID:diaryday) +
-    
-    (0 + .i_is_male_x_male | coupleID:diaryday) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID:diaryday)
-
-    # recommended first simplification in convergence issues is to set dispformula = ~ 1
-  , dispformula = ~ 0 +
-      .i_is_female_x_male_female + .i_is_female_x_male_male +
-      .i_is_female_x_female + .i_is_male_x_male
-  , family = tweedie()
-  , data = mixed_ild_tweedie_data
-)
-
-summary(mixed_ild_tweedie_model)
-
-```
+It is often useful to begin with separate composition-specific models or
+simpler covariance structures. Combine them when a comparison or equality
+constraint is part of the research question, and add further random effects
+only when the data support the additional complexity.
 
 ---
 
-**Continue** with the [Dyad-Individual Model vignette](dim.html),
-
-refer to the: 
-
-- [Actor-Partner Interdependence Model (APIM) vignette](apim.html),
-- [Dyadic Score Model vignette](dsm.html),
-
-or return to the [Overview](index.html).
+**Continue** with the [Dyad-Individual Model vignette](dim.html), refer to the
+[Actor-Partner Interdependence Model vignette](apim.html) or the
+[Dyadic Score Model vignette](dsm.html), or return to the
+[Overview](index.html).

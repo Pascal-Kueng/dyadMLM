@@ -301,7 +301,7 @@ model-building features.
   - use `apim.Rmd` for cross-sectional and ILD distinguishable or exchangeable
     APIM examples
   - use `mixed-apim.Rmd` for cross-sectional and ILD mixed-composition APIM
-    examples, including generalized outcomes and optimizer notes
+    examples and optimizer notes
 - Keep the focused DIM vignette separate from APIM/ILD APIM examples
 - Keep the DSM data-preparation examples aligned with the implemented API
 - Add citation metadata
