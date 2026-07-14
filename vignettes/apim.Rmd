@@ -197,6 +197,9 @@ $$
 \sigma_D^2 = \frac{V - C}{2}.
 $$
 
+For example, a random-intercept variance of 1.2 and a difference variance of
+0.3 imply a member variance of 1.5 and a covariance between partners of 0.9.
+
 Reversing the arbitrary `+1/-1` assignment changes the sign of $u_{Dj}$ but not
 its variance or the implied member-level covariance matrix. In longitudinal
 models, the same transformation applies separately to stable dyad-level and
@@ -323,20 +326,43 @@ summary(ild_distinguishable_model)
 
 ### Concurrent ILD Gaussian APIM for exchangeable dyads
 
+Following del Rosario and West, the stable dyad covariance can be represented
+using sum-and-difference random effects
+[@delrosarioPracticalGuideSpecifying2025]. In longitudinal Gaussian APIMs fitted
+with `glmmTMB`, the same parameterization can be extended to the dyad-occasion
+level to represent same-occasion residual dependence.
+
 
 ### Current limitations of dyadic ILD designs in R
 
-#### Dynamic models
+Concurrent dyadic ILD models can adjust for a time trend and account for stable
+dyadic dependence and same-occasion partner dependence. They do not model
+residual serial dependence, however, and therefore estimate concurrent
+associations under the assumption that residuals from different days are
+independent.
 
-The preparation shown in the Getting Started vignette supports contemporaneous
-models, but observations can also remain dependent over time. Currently,
-commonly used open-source MLM interfaces in R do not provide the full dyadic
-residual VAR structure needed to model serial dependence across both partners.
-Within open-source R, such a model generally requires custom TMB or Stan code.
+If the goal is to retain these concurrent APIM associations while accounting
+for serial dependence, the closest extension is a dyadic residual dynamic
+structural equation model (RDSEM). It keeps the concurrent regression separate
+from a VAR model for its residuals [@asparouhovComparisonModelsAnalysis2020;
+@mcneishPrimerTwoLevel2020]. This residual-VAR structure is not directly
+available through the `glmmTMB` interface used here, and open-source support for
+dyadic dynamic models remains very limited
+[@delrosarioPracticalGuideSpecifying2025]. Within open-source R, such a model
+generally requires custom TMB or Stan code.
 
-One practical alternative, especially when carryover and temporal dynamics are
-part of the research question, is to create a dynamic model by including lagged
-versions of the outcome as predictors.
+#### Dynamic models {#dynamic-models}
+
+A **practical alternative** is a model with lagged outcomes, especially when
+carryover or temporal dynamics are part of the research question
+[@gistelinckMultilevelAutoregressiveDyadic2020]. In such a model, the
+interpretation changes. All APIM predictor effects then describe associations
+conditional on the members' prior outcomes.
+
+By adding the outcome to `predictors` and selecting it with `lag_predictors`,
+`prepare_interdep_data()` returns lag-1 raw and within-person scores alongside
+the contemporaneous scores. Between-person scores are not lagged because they
+describe stable differences between members.
 
 For this example, we obtain the lagged actor and partner outcome columns through
 the `lag_predictors` argument:
@@ -353,6 +379,10 @@ ild_apim_data_dynamic <- prepare_interdep_data(
   seed = 123
 )
 ```
+
+This returns all necessary variables for either choice, including lag-1 raw
+and within-person closeness scores. Lags are matched at exactly
+`diaryday - 1`, so omitted diary days are not bridged.
 
 A simple fixed-slope dyadic stability and influence model
 [@delrosarioPracticalGuideSpecifying2025]:
@@ -392,11 +422,33 @@ be separated into within-person and between-person components. Their
 contemporaneous coefficients are then conditional on both partners' prior
 outcomes.
 
-**Note:** Person-mean centering a lagged outcome can introduce Nickell bias,
-especially in shorter time series [@hamakerCenterNotCenter2015;
-@nickellBiasesDynamicModels1981;
-@gistelinckMultilevelAutoregressiveSmall2021]. Refer to the
-[DIM vignette](dim.html) for a fuller discussion of exchangeable models.
+The model above uses raw lagged outcomes. The corresponding
+within-person-centered lagged terms are `.i_closeness_cwp_actor_lag1` and
+`.i_closeness_cwp_partner_lag1`.
+
+Whether to use a raw or within-person-centered lagged outcome depends on the
+research question and the data. Person-mean centering the outcome lag can bias
+the average carryover estimate downward [@hamakerCenterNotCenter2015]. This
+downward bias is known as Nickell bias [@nickellBiasesDynamicModels1981]. A raw
+lag avoids this centering bias, but a standard random-intercept model can still
+be biased because it assumes that the lag is unrelated to stable member levels
+[@gistelinckMultilevelAutoregressiveSmall2021].
+
+Both problems matter most when there are few occasions. In one simple
+simulation, most approaches other than person-mean centering performed
+acceptably from about ten occasions, but this is not a universal cutoff
+[@gistelinckMultilevelAutoregressiveSmall2021]. For shorter panels, consider an
+LD-APIM, which lets the first outcomes relate to the members' stable levels in a
+wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020].
+
+These manifest-lag models are not equivalent to Mplus DSEM, which uses latent
+person-mean centering by default and can estimate multivariate or residual
+dynamics jointly [@mcneishPrimerTwoLevel2020]. For very short panels, however,
+default DSEM may still be biased or unstable, so the LD-APIM recommendation
+above may be preferable [@gistelinckMultilevelAutoregressiveSmall2021].
+
+These lagged-outcome issues are separate from the earlier concern about
+unreliable person means used to construct `cbp` predictors with few occasions.
 
 
 ---

@@ -124,7 +124,7 @@ placeholder row for the missing occasion.
 distinguishable dyads. Each dyad has two rows: one for each member.
 
 ```{r cross-sectional-raw, echo = FALSE}
-print(head(example_dyadic_crosssectional))
+head(example_dyadic_crosssectional)
 ```
 
 We validate and prepare the data with the function `prepare_interdep_data()`
