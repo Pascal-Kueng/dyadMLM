@@ -336,12 +336,13 @@ is controlled by `temporal_predictor_decomposition`. The default `"auto"`
 setting selects `"time_2l"` for this longitudinal setup and retains raw actor
 and partner columns alongside both components.
 
-#### Dynamic Models
+### Dynamic Models
 
 The preparation above supports contemporaneous models, but observations can
-also remain dependent over time. The `glmmTMB` approach used here does not
-directly support a dyadic residual VAR structure for modeling both partners'
-residual serial dependence.
+also remain dependent over time. Currently, commonly used open-source MLM
+interfaces in R do not provide the full dyadic residual VAR structure needed to
+model serial dependence across both partners. Such a model requires custom TMB
+or Stan code.
 
 One practical alternative, especially when carryover and temporal dynamics are
 part of the research question, is to create a dynamic model by including lagged
@@ -353,8 +354,9 @@ Lagged versions of variables, including an outcome that is also passed to
 and partner columns alongside their contemporaneous versions.
 
 Whether raw or within-person-centered lagged outcomes should be used depends on
-the research question and the data [@hamakerCenterNotCenter2015;
-@gistelinckMultilevelAutoregressiveSmall2021].
+the research question and the data. For guidance on this choice, refer to
+@hamakerCenterNotCenter2015 and
+@gistelinckMultilevelAutoregressiveSmall2021.
 
 Brief exchangeable example:
 
@@ -373,6 +375,7 @@ ild_apim_data_dynamic <- prepare_interdep_data(
 print(ild_apim_data_dynamic)
 
 ```
+
 A simple fixed-slope dyadic stability and influence model
 [@delrosarioPracticalGuideSpecifying2025]:
 
@@ -413,10 +416,12 @@ be separated into within-person and between-person components. Their
 contemporaneous coefficients are then conditional on both partners' prior
 outcomes.
 
-Person-mean centering a lagged outcome can introduce Nickell bias, especially
-when there are few occasions [@hamakerCenterNotCenter2015;
-@nickellBiasesDynamicModels1981]. Refer to the DIM vignette for a fuller
-discussion and fitted dynamic examples.
+**Note:** Person-mean centering a lagged outcome can introduce Nickell bias,
+especially in shorter time series [@hamakerCenterNotCenter2015;
+@nickellBiasesDynamicModels1981;
+@gistelinckMultilevelAutoregressiveSmall2021]. Refer to the
+[DIM vignette](dim.html) and [APIM vignette](apim.html) for fuller discussions
+and fitted dynamic examples.
 
 ## Data with multiple and mixed-composition dyads
 
