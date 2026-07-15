@@ -110,16 +110,16 @@ arbitrary, setting `seed` makes their assignment reproducible.
 
 ### Example DIM Model
 
-For members $`j \in \{1, 2\}`$ of dyad $`i`$, the DIM decomposition is
+For member $`i \in \{1, 2\}`$ of dyad $`j`$, the DIM decomposition is
 computed as:
 
 ``` math
-\bar{x}_i = \frac{x_{i1} + x_{i2}}{2}, \qquad
-d_{ij} = x_{ij} - \bar{x}_i.
+\bar{x}_j = \frac{x_{1j} + x_{2j}}{2}, \qquad
+d_{ij} = x_{ij} - \bar{x}_j.
 ```
 
 The two deviations of the two partners have equal magnitude and opposite
-signs: $`d_{i1} = -d_{i2}`$. The variables that enter the DIM fixed
+signs: $`d_{1j} = -d_{2j}`$. The variables that enter the DIM fixed
 effects then represent:
 
 1.  A dyad-mean variable that is grand-mean centered. This describes a
@@ -157,7 +157,7 @@ dim_1 <- glmmTMB::glmmTMB(
     # Within-couple effect
     .i_communication_within_dyad_dev +
 
-    # Residual Gaussian variance-covariance
+    # Residual Gaussian covariance structure
     (1 | coupleID) +
     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
@@ -250,7 +250,7 @@ apim_1 <- glmmTMB::glmmTMB(
 
     # Since both models are equivalent, the same random-effects structure
     # can be used. See the APIM vignette to learn how to back-transform
-    # these blocks to a full actor-partner variance-covariance matrix.
+    # these blocks to a full actor-partner covariance matrix.
     (1 | coupleID) +
     (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
@@ -278,32 +278,33 @@ This demonstrates that the same statistical model is being estimated
 with different parameterizations and coefficient interpretations.
 
 Once APIM estimates are present, one can easily obtain DIM estimates,
-and the other way around. The slope coefficients relate as follows:
+and the other way around. Let $`b_{\mathrm{actor}}`$ and
+$`b_{\mathrm{partner}}`$ denote the APIM actor and partner slopes, and
+let $`b_{\mathrm{mean}}`$ and $`b_{\mathrm{diff}}`$ denote the DIM
+dyad-mean and within-dyad-deviation slopes. They relate as follows:
 
 ``` math
-\beta_{\text{dyad mean}} =
-\beta_{\text{actor}} + \beta_{\text{partner}}
+b_{\mathrm{mean}} = b_{\mathrm{actor}} + b_{\mathrm{partner}}
 ```
 
 and
 
 ``` math
-\beta_{\text{within-dyad deviation}} =
-\beta_{\text{actor}} - \beta_{\text{partner}}
+b_{\mathrm{diff}} = b_{\mathrm{actor}} - b_{\mathrm{partner}}
 ```
 
 Conversely:
 
 ``` math
-\beta_{\text{actor}} =
-\frac{\beta_{\text{dyad mean}} + \beta_{\text{within-dyad deviation}}}{2}
+b_{\mathrm{actor}}
+= \frac{b_{\mathrm{mean}} + b_{\mathrm{diff}}}{2}
 ```
 
 and
 
 ``` math
-\beta_{\text{partner}} =
-\frac{\beta_{\text{dyad mean}} - \beta_{\text{within-dyad deviation}}}{2}
+b_{\mathrm{partner}}
+= \frac{b_{\mathrm{mean}} - b_{\mathrm{diff}}}{2}
 ```
 
 In this example we can see that the transformations work:
@@ -316,8 +317,8 @@ dim_coef <- glmmTMB::fixef(dim_1)$cond
 b_actor <- apim_coef[[".i_communication_actor"]]
 b_partner <- apim_coef[[".i_communication_partner"]]
 
-b_dyad_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
-b_within_dyad <- dim_coef[[".i_communication_within_dyad_dev"]]
+b_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
+b_diff <- dim_coef[[".i_communication_within_dyad_dev"]]
 
 
 cat("From APIM model:\n",
@@ -325,20 +326,20 @@ cat("From APIM model:\n",
      "  partner effect:                ", round(b_partner, 3), "\n\n",
 
      "DIM transformation:\n",
-     "  actor effect + partner effect: ", round(b_actor + b_partner, 3), "\n",
-     "  actor effect - partner effect: ", round(b_actor - b_partner, 3), "\n\n",
+     "  b_mean = b_actor + b_partner:  ", round(b_actor + b_partner, 3), "\n",
+     "  b_diff = b_actor - b_partner:  ", round(b_actor - b_partner, 3), "\n\n",
 
      "From DIM model:\n",
-     "  dyad-mean effect:              ", round(b_dyad_mean, 3), "\n",
-     "  within-dyad-deviation effect:  ", round(b_within_dyad, 3), "\n"
+     "  dyad-mean effect:              ", round(b_mean, 3), "\n",
+     "  within-dyad-deviation effect:  ", round(b_diff, 3), "\n"
 )
 #> From APIM model:
 #>    actor effect:                   1.758 
 #>    partner effect:                 0.238 
 #> 
 #>  DIM transformation:
-#>    actor effect + partner effect:  1.996 
-#>    actor effect - partner effect:  1.52 
+#>    b_mean = b_actor + b_partner:   1.996 
+#>    b_diff = b_actor - b_partner:   1.52 
 #> 
 #>  From DIM model:
 #>    dyad-mean effect:               1.996 
@@ -394,19 +395,20 @@ Dyad mean, *x*_(mean)
 
 0.0
 
-Within-dyad deviation, *x*_(within)
+Within-dyad deviation, *x*_(diff)
 
 0.0
 
 *x*_(mean) = (*x*_(actor) + *x*_(partner)) / 2
 
-*x*_(within) = (*x*_(actor) - *x*_(partner)) / 2
+*x*_(diff) = (*x*_(actor) - *x*_(partner)) / 2
 
 APIM0.00 = 0.00
 
 DIM0.00 = 0.00
 
-Slopes*b*_(mean) = 1.76 + 0.24 = 2.00; *b*_(within) = 1.76 - 0.24 = 1.52
+Slopes*b*_(mean) = *b*_(actor) + *b*_(partner) = 2.00; *b*_(diff) =
+*b*_(actor) - *b*_(partner) = 1.52
 
 ![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iaWRnLXBsb3QiIGRhdGEtaWRnLXBsb3Qgdmlld2JveD0iMCAwIDMyMCAzMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbGxlZGJ5PSJpZGctcGxvdC10aXRsZSBpZGctcGxvdC1kZXNjcmlwdGlvbiI+PHRpdGxlIGlkPSJpZGctcGxvdC10aXRsZSI+QVBJTSBhbmQgRElNIGNvb3JkaW5hdGUgZ3JpZDwvdGl0bGU+CjxkZXNjIGlkPSJpZGctcGxvdC1kZXNjcmlwdGlvbiI+VGhlIHNlbGVjdGVkIHBvaW50IGhhcyBhY3RvciwgcGFydG5lciwgZHlhZC1tZWFuLCBhbmQgd2l0aGluLWR5YWQgdmFsdWVzIG9mIHplcm8uPC9kZXNjPjxkZWZzPjxjbGlwcGF0aCBpZD0iaWRnLXBsb3QtY2xpcCI+PHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgcng9IjQiIC8+PC9jbGlwcGF0aD48L2RlZnM+PHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgcng9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utb3BhY2l0eT0iMC4zNSIgLz48ZyBkYXRhLWlkZy1ncmlkLWxpbmVzIGNsaXAtcGF0aD0idXJsKCNpZGctcGxvdC1jbGlwKSI+PC9nPjxnIGRhdGEtaWRnLWF4aXMtbGFiZWxzPjwvZz48Y2lyY2xlIGNsYXNzPSJpZGctaGFsbyIgZGF0YS1pZGctaGFsbyBjeD0iMTYwIiBjeT0iMTYwIiByPSIxMyI+PC9jaXJjbGU+PGNpcmNsZSBjbGFzcz0iaWRnLXBvaW50IiBkYXRhLWlkZy1wb2ludCBjeD0iMTYwIiBjeT0iMTYwIiByPSI2Ij48L2NpcmNsZT48L3N2Zz4=)
 
@@ -426,7 +428,7 @@ Show
 When one member is one point higher and the other one point lower, the
 dyad mean is unchanged and the deviation is one point.
 
-*b*_(within) = *b*_(actor) - *b*_(partner)
+*b*_(diff) = *b*_(actor) - *b*_(partner)
 
 The dot uses APIM coordinates. The diagonal lines show the same point in
 DIM coordinates.
@@ -441,7 +443,7 @@ random-effects parameterization (del Rosario and West 2025). See the
 [exchangeable residual-structure section of the APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
 for the derivation and back-transformation to the member-level
-variance-covariance matrix.
+covariance matrix.
 
 ## Intensive Longitudinal DIM
 
@@ -725,25 +727,25 @@ between-person (`cbp`) predictor components. For the within-person
 component:
 
 ``` math
-\beta_{\text{cwp dyad mean}} =
-\beta_{\text{cwp actor}} + \beta_{\text{cwp partner}}
+b_{\mathrm{cwp,mean}}
+= b_{\mathrm{cwp,actor}} + b_{\mathrm{cwp,partner}}
 ```
 
 ``` math
-\beta_{\text{cwp within-dyad deviation}} =
-\beta_{\text{cwp actor}} - \beta_{\text{cwp partner}}
+b_{\mathrm{cwp,diff}}
+= b_{\mathrm{cwp,actor}} - b_{\mathrm{cwp,partner}}
 ```
 
 For the between-person component:
 
 ``` math
-\beta_{\text{cbp dyad mean}} =
-\beta_{\text{cbp actor}} + \beta_{\text{cbp partner}}
+b_{\mathrm{cbp,mean}}
+= b_{\mathrm{cbp,actor}} + b_{\mathrm{cbp,partner}}
 ```
 
 ``` math
-\beta_{\text{cbp within-dyad deviation}} =
-\beta_{\text{cbp actor}} - \beta_{\text{cbp partner}}
+b_{\mathrm{cbp,diff}}
+= b_{\mathrm{cbp,actor}} - b_{\mathrm{cbp,partner}}
 ```
 
 This also means that an APIM parameterization can be used on one level
@@ -804,6 +806,10 @@ data.frame(
 Random slopes can be included in the DIM by adding the corresponding
 within-person effects to the stable dyad-level random-effect blocks:
 
+The following syntax illustrates the full random-slope specification. It
+is not fitted here because the example data do not support this complex
+random-effects structure.
+
 ``` r
 
 
@@ -854,31 +860,34 @@ exchangeability.
 Applying the same transformation to the random-slope coefficients
 proceeds in two steps. First, transform the DIM dyad-mean and
 within-dyad-deviation random slopes into APIM actor and partner random
-slopes. For the shared block,
+slopes. Random effects use $`u`$, with subscripts that write out
+`actor`, `partner`, `mean`, and `diff`. For the shared block,
 
 ``` math
-b_{actor} = \frac{b_{mean} + b_{dev}}{2},
+u_{\mathrm{actor},j}
+= \frac{u_{\mathrm{mean},j} + u_{\mathrm{diff},j}}{2},
 \qquad
-b_{partner} = \frac{b_{mean} - b_{dev}}{2},
+u_{\mathrm{partner},j}
+= \frac{u_{\mathrm{mean},j} - u_{\mathrm{diff},j}}{2},
 ```
 
-and for the `.i_diff_*` block,
+and for the `.i_diff_*` block, marked by a tilde,
 
 ``` math
-b_{diff:actor}
-= \frac{b_{diff:mean} + b_{diff:dev}}{2},
+\widetilde{u}_{\mathrm{actor},j}
+= \frac{\widetilde{u}_{\mathrm{mean},j} + \widetilde{u}_{\mathrm{diff},j}}{2},
 \qquad
-b_{diff:partner}
-= \frac{b_{diff:mean} - b_{diff:dev}}{2}.
+\widetilde{u}_{\mathrm{partner},j}
+= \frac{\widetilde{u}_{\mathrm{mean},j} - \widetilde{u}_{\mathrm{diff},j}}{2}.
 ```
 
 The shared and `.i_diff_*` random intercepts remain unchanged.
 
 We now have the shared and `.i_diff_*` actor and partner effects which
 are then back-transformed into the complete and more readily
-interpretable member-specific actor-partner variance-covariance matrix.
-This is described in the [exchangeable random-slope back-transformation
-in the APIM
+interpretable member-specific actor-partner covariance matrix. This is
+described in the [exchangeable random-slope back-transformation in the
+APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-random-slope-back-transformation).
 
 ### Dynamic ILD DIM example
@@ -892,6 +901,7 @@ to bias. This, and the choice between raw and within-person-centered
 outcome lags, are addressed in the [APIM vignette’s discussion of
 dynamic
 models](https://pascal-kueng.github.io/interdep/articles/apim.html#dynamic-models).
+!TODO: search and find such broken wrapping links across all vignettes!
 
 Brief example to obtain lagged raw and within-person centered versions
 of the outcome:

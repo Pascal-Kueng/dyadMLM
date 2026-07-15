@@ -165,11 +165,11 @@
 <span>    <span class="va">.i_communication_partner</span><span class="op">:</span><span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_communication_partner</span><span class="op">:</span><span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="co"># Dyad-level random effects represent the partner residual</span></span>
-<span>    <span class="co"># variance-covariance structure</span></span>
+<span>    <span class="co"># Dyad-level random effects represent the two members'</span></span>
+<span>    <span class="co"># residual covariance structure</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span></span>
-<span>  <span class="co"># With the residual variance-covariance represented by the dyad-level</span></span>
+<span>  <span class="co"># With the residual covariance represented by the dyad-level</span></span>
 <span>  <span class="co"># random effects above, the Gaussian residual dispersion is fixed near zero.</span></span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>

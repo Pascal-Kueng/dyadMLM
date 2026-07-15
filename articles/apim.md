@@ -37,9 +37,16 @@ Conceptual cross-sectional APIM for distinguishable female-male dyads.
 Actor and partner effects can differ by the role of the outcome member,
 and the two outcome residuals covary within dyads.
 
-Here, $`a_f`$ and $`a_m`$ are the actor effects on the female and male
-outcomes, whereas $`p_f`$ and $`p_m`$ are the corresponding partner
-effects. All four paths can differ in a distinguishable APIM.
+Here, $`b_{\mathrm{actor},\mathrm{female}}`$ and
+$`b_{\mathrm{actor},\mathrm{male}}`$ are the actor effects on the female
+and male outcomes, whereas $`b_{\mathrm{partner},\mathrm{female}}`$ and
+$`b_{\mathrm{partner},\mathrm{male}}`$ are the corresponding partner
+effects. Fixed coefficients use $`b`$ throughout the vignettes; the
+first subscript names the effect and the second identifies the outcome
+member. The corresponding intercepts are $`b_{0,\mathrm{female}}`$ and
+$`b_{0,\mathrm{male}}`$. All four paths can differ in a distinguishable
+APIM. The diagram uses `F` and `M` only to keep its edge and residual
+labels compact.
 
 We first prepare the example data with
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md):
@@ -97,12 +104,14 @@ For a distinguishable female-male dyad, the two members can have
 different residual variances. Their residual covariance matrix is
 
 ``` math
-\Sigma_{FM} =
+\boldsymbol{\Sigma}_{\mathrm{FM}} =
 \begin{pmatrix}
-\sigma_{FM,F}^2 & c_{FM} \\
-c_{FM} & \sigma_{FM,M}^2
+\sigma_{\mathrm{FM,F}}^2 & c_{\mathrm{FM}} \\
+c_{\mathrm{FM}} & \sigma_{\mathrm{FM,M}}^2
 \end{pmatrix}.
 ```
+
+Rows and columns are ordered female, male.
 
 With one outcome row per member, this structure is estimated with an
 unstructured random-effects block such as
@@ -127,9 +136,10 @@ have equal variances and covary within dyads.
 
 Because the member labels are arbitrary, swapping members 1 and 2 does
 not change the model. The two actor paths therefore share the
-coefficient $`a`$, and the two partner paths share the coefficient
-$`p`$. The two residual variances are also constrained to be equal,
-while their covariance is estimated.
+coefficient $`b_{\mathrm{actor}}`$, and the two partner paths share
+$`b_{\mathrm{partner}}`$. The members also share the intercept $`b_0`$.
+The two residual variances are constrained to be equal, while their
+covariance is estimated.
 
 ### Assumptions
 
@@ -141,21 +151,22 @@ and `-1` for the other. The exchangeable residual structure is
 represented by two separate random-effects terms: a shared dyad random
 intercept and a random coefficient for this difference column (del
 Rosario and West 2025). If their random effects are denoted by
-$`u_{Mj}`$ and $`u_{Dj}`$, the two members receive
+$`u_{\mathrm{mean},j}`$ and $`u_{\mathrm{diff},j}`$, the two members
+receive
 
 ``` math
-r_{1j} = u_{Mj} + u_{Dj}, \qquad
-r_{2j} = u_{Mj} - u_{Dj}.
+r_{1j} = u_{\mathrm{mean},j} + u_{\mathrm{diff},j}, \qquad
+r_{2j} = u_{\mathrm{mean},j} - u_{\mathrm{diff},j}.
 ```
 
 Because the shared and difference effects are fitted in separate
 random-effects terms, they are uncorrelated. Writing their variances as
-$`\sigma_M^2`$ and $`\sigma_D^2`$ gives
+$`\sigma_{\mathrm{mean}}^2`$ and $`\sigma_{\mathrm{diff}}^2`$ gives
 
 ``` math
 \begin{pmatrix}
-u_{Mj} \\
-u_{Dj}
+u_{\mathrm{mean},j} \\
+u_{\mathrm{diff},j}
 \end{pmatrix}
 \sim
 \mathcal{N}
@@ -165,8 +176,8 @@ u_{Dj}
 0
 \end{pmatrix},
 \begin{pmatrix}
-\sigma_M^2 & 0 \\
-0 & \sigma_D^2
+\sigma_{\mathrm{mean}}^2 & 0 \\
+0 & \sigma_{\mathrm{diff}}^2
 \end{pmatrix}
 \right].
 ```
@@ -174,22 +185,26 @@ u_{Dj}
 The implied member-level residual covariance matrix is therefore
 
 ``` math
-\Sigma =
+\boldsymbol{\Sigma}_{\mathrm{exch}} =
 \begin{pmatrix}
-\sigma_M^2 + \sigma_D^2 & \sigma_M^2 - \sigma_D^2 \\
-\sigma_M^2 - \sigma_D^2 & \sigma_M^2 + \sigma_D^2
+\sigma_{\mathrm{mean}}^2 + \sigma_{\mathrm{diff}}^2 &
+\sigma_{\mathrm{mean}}^2 - \sigma_{\mathrm{diff}}^2 \\
+\sigma_{\mathrm{mean}}^2 - \sigma_{\mathrm{diff}}^2 &
+\sigma_{\mathrm{mean}}^2 + \sigma_{\mathrm{diff}}^2
 \end{pmatrix}.
 ```
 
 Thus, both members have the same residual variance
-$`V = \sigma_M^2 + \sigma_D^2`$, their covariance is
-$`C = \sigma_M^2 - \sigma_D^2`$, and their residual correlation is
-$`C/V`$. Conversely, the shared and difference variances can be
-recovered from a member-level variance and covariance as
+$`v = \sigma_{\mathrm{mean}}^2 + \sigma_{\mathrm{diff}}^2`$, their
+covariance is
+$`c = \sigma_{\mathrm{mean}}^2 - \sigma_{\mathrm{diff}}^2`$, and their
+residual correlation is $`c/v`$. Conversely, the shared and difference
+variances can be recovered from a member-level variance and covariance
+as
 
 ``` math
-\sigma_M^2 = \frac{V + C}{2}, \qquad
-\sigma_D^2 = \frac{V - C}{2}.
+\sigma_{\mathrm{mean}}^2 = \frac{v + c}{2}, \qquad
+\sigma_{\mathrm{diff}}^2 = \frac{v - c}{2}.
 ```
 
 For example, a random-intercept variance of 1.2 and a difference
@@ -197,41 +212,45 @@ variance of 0.3 imply a member variance of 1.5 and a covariance between
 partners of 0.9.
 
 Reversing the arbitrary `+1/-1` assignment changes the sign of
-$`u_{Dj}`$ but not its variance or the implied member-level covariance
-matrix. In longitudinal models, the same transformation applies
-separately to stable dyad-level and same-occasion dyad-level covariance
-blocks.
+$`u_{\mathrm{diff},j}`$ but not its variance or the implied member-level
+covariance matrix. In longitudinal models, the same transformation
+applies separately to stable dyad-level and same-occasion dyad-level
+covariance blocks.
 
 #### Extension to exchangeable random slopes
 
 The same shared/difference back-transformation applies to random slopes
-(del Rosario and West 2025). For example, let $`b_{actor}`$ denote the
-shared actor random slope and $`b_{diff:actor}`$ the corresponding
-`.i_diff_*` random slope. The actor slopes for the members assigned `+1`
+(del Rosario and West 2025). For example, let $`u_{\mathrm{actor},j}`$
+denote the shared actor random slope for dyad $`j`$ and
+$`\widetilde{u}_{\mathrm{actor},j}`$ the corresponding `.i_diff_*`
+random slope. The tilde marks random coefficients from the
+member-difference block. The actor slopes for the members assigned `+1`
 and `-1` are
 
 ``` math
-b_{actor,1} = b_{actor} + b_{diff:actor},
+u_{\mathrm{actor},1j}
+= u_{\mathrm{actor},j} + \widetilde{u}_{\mathrm{actor},j},
 \qquad
-b_{actor,2} = b_{actor} - b_{diff:actor}.
+u_{\mathrm{actor},2j}
+= u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
 ```
 
 Because the shared and `.i_diff_*` blocks are fitted as separate
 random-effects terms, they are independent. Therefore,
 
 ``` math
-\operatorname{Var}(b_{actor,1})
-= \operatorname{Var}(b_{actor,2})
-= \operatorname{Var}(b_{actor})
-+ \operatorname{Var}(b_{diff:actor}),
+\operatorname{Var}(u_{\mathrm{actor},1j})
+= \operatorname{Var}(u_{\mathrm{actor},2j})
+= \operatorname{Var}(u_{\mathrm{actor},j})
++ \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}),
 ```
 
 and
 
 ``` math
-\operatorname{Cov}(b_{actor,1}, b_{actor,2})
-= \operatorname{Var}(b_{actor})
-- \operatorname{Var}(b_{diff:actor}).
+\operatorname{Cov}(u_{\mathrm{actor},1j}, u_{\mathrm{actor},2j})
+= \operatorname{Var}(u_{\mathrm{actor},j})
+- \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}).
 ```
 
 The same calculation applies to the partner slopes and random
@@ -489,10 +508,10 @@ summary(stability_influence)
 #> 
 #> Conditional model:
 #>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                4.213055   0.300180  14.035  < 2e-16 ***
-#> .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***
-#> .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    
-#> diaryday                  -0.005280   0.007643  -0.691    0.490    
+#> (Intercept)                4.213120   0.300184  14.035  < 2e-16 ***
+#> .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
+#> .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
+#> diaryday                  -0.005281   0.007643  -0.691    0.490    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

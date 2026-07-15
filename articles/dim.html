@@ -170,18 +170,18 @@ reproducible.</p>
 <div class="section level3">
 <h3 id="example-dim-model">Example DIM Model<a class="anchor" aria-label="anchor" href="#example-dim-model"></a>
 </h3>
-<p>For members
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">j \in \{1, 2\}</annotation></semantics></math>
+<p>For member
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">i \in \{1, 2\}</annotation></semantics></math>
 of dyad
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>,
 the DIM decomposition is computed as:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>x</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>x</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\bar{x}_i = \frac{x_{i1} + x_{i2}}{2}, \qquad
-d_{ij} = x_{ij} - \bar{x}_i.
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>x</mi><mrow><mn>1</mn><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>x</mi><mrow><mn>2</mn><mi>j</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\bar{x}_j = \frac{x_{1j} + x_{2j}}{2}, \qquad
+d_{ij} = x_{ij} - \bar{x}_j.
 </annotation></semantics></math></p>
 <p>The two deviations of the two partners have equal magnitude and
 opposite signs:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>=</mo><mi>−</mi><msub><mi>d</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub></mrow><annotation encoding="application/x-tex">d_{i1} = -d_{i2}</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mn>1</mn><mi>j</mi></mrow></msub><mo>=</mo><mi>−</mi><msub><mi>d</mi><mrow><mn>2</mn><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">d_{1j} = -d_{2j}</annotation></semantics></math>.
 The variables that enter the DIM fixed effects then represent:</p>
 <ol style="list-style-type: decimal">
 <li>A dyad-mean variable that is grand-mean centered. This describes a
@@ -217,7 +217,7 @@ preserving exchangeability <span class="citation">(del Rosario and West
 <span>    <span class="co"># Within-couple effect</span></span>
 <span>    <span class="va">.i_communication_within_dyad_dev</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="co"># Residual Gaussian variance-covariance</span></span>
+<span>    <span class="co"># Residual Gaussian covariance structure</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
@@ -304,7 +304,7 @@ vignette</a>.</p>
 <span></span>
 <span>    <span class="co"># Since both models are equivalent, the same random-effects structure</span></span>
 <span>    <span class="co"># can be used. See the APIM vignette to learn how to back-transform</span></span>
-<span>    <span class="co"># these blocks to a full actor-partner variance-covariance matrix.</span></span>
+<span>    <span class="co"># these blocks to a full actor-partner covariance matrix.</span></span>
 <span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
@@ -325,25 +325,32 @@ vignette</a>.</p>
 <p>This demonstrates that the same statistical model is being estimated
 with different parameterizations and coefficient interpretations.</p>
 <p>Once APIM estimates are present, one can easily obtain DIM estimates,
-and the other way around. The slope coefficients relate as follows:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">dyad mean</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">actor</mtext></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">partner</mtext></msub></mrow><annotation encoding="application/x-tex">
-\beta_{\text{dyad mean}} =
-\beta_{\text{actor}} + \beta_{\text{partner}}
+and the other way around. Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{actor}}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{partner}}</annotation></semantics></math>
+denote the APIM actor and partner slopes, and let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{mean}}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{diff}}</annotation></semantics></math>
+denote the DIM dyad-mean and within-dyad-deviation slopes. They relate
+as follows:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{mean}} = b_{\mathrm{actor}} + b_{\mathrm{partner}}
 </annotation></semantics></math></p>
 <p>and</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">within-dyad deviation</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">actor</mtext></msub><mo>−</mo><msub><mi>β</mi><mtext mathvariant="normal">partner</mtext></msub></mrow><annotation encoding="application/x-tex">
-\beta_{\text{within-dyad deviation}} =
-\beta_{\text{actor}} - \beta_{\text{partner}}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{diff}} = b_{\mathrm{actor}} - b_{\mathrm{partner}}
 </annotation></semantics></math></p>
 <p>Conversely:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">actor</mtext></msub><mo>=</mo><mfrac><mrow><msub><mi>β</mi><mtext mathvariant="normal">dyad mean</mtext></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">within-dyad deviation</mtext></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">
-\beta_{\text{actor}} =
-\frac{\beta_{\text{dyad mean}} + \beta_{\text{within-dyad deviation}}}{2}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{actor}}
+= \frac{b_{\mathrm{mean}} + b_{\mathrm{diff}}}{2}
 </annotation></semantics></math></p>
 <p>and</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">partner</mtext></msub><mo>=</mo><mfrac><mrow><msub><mi>β</mi><mtext mathvariant="normal">dyad mean</mtext></msub><mo>−</mo><msub><mi>β</mi><mtext mathvariant="normal">within-dyad deviation</mtext></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">
-\beta_{\text{partner}} =
-\frac{\beta_{\text{dyad mean}} - \beta_{\text{within-dyad deviation}}}{2}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{partner}}
+= \frac{b_{\mathrm{mean}} - b_{\mathrm{diff}}}{2}
 </annotation></semantics></math></p>
 <p>In this example we can see that the transformations work:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -353,8 +360,8 @@ and the other way around. The slope coefficients relate as follows:</p>
 <span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_actor"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".i_communication_partner"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">b_dyad_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">b_within_dyad</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_within_dyad_dev"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_diff</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".i_communication_within_dyad_dev"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"From APIM model:\n"</span>,</span>
@@ -362,20 +369,20 @@ and the other way around. The slope coefficients relate as follows:</p>
 <span>     <span class="st">"  partner effect:                "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span>,</span>
 <span></span>
 <span>     <span class="st">"DIM transformation:\n"</span>,</span>
-<span>     <span class="st">"  actor effect + partner effect: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">+</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
-<span>     <span class="st">"  actor effect - partner effect: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">-</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span>,</span>
+<span>     <span class="st">"  b_mean = b_actor + b_partner:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">+</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
+<span>     <span class="st">"  b_diff = b_actor - b_partner:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_actor</span> <span class="op">-</span> <span class="va">b_partner</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n\n"</span>,</span>
 <span></span>
 <span>     <span class="st">"From DIM model:\n"</span>,</span>
-<span>     <span class="st">"  dyad-mean effect:              "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_dyad_mean</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
-<span>     <span class="st">"  within-dyad-deviation effect:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_within_dyad</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span></span>
+<span>     <span class="st">"  dyad-mean effect:              "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_mean</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
+<span>     <span class="st">"  within-dyad-deviation effect:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">b_diff</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; From APIM model:</span></span>
 <span><span class="co">#&gt;    actor effect:                   1.758 </span></span>
 <span><span class="co">#&gt;    partner effect:                 0.238 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  DIM transformation:</span></span>
-<span><span class="co">#&gt;    actor effect + partner effect:  1.996 </span></span>
-<span><span class="co">#&gt;    actor effect - partner effect:  1.52 </span></span>
+<span><span class="co">#&gt;    b_mean = b_actor + b_partner:   1.996 </span></span>
+<span><span class="co">#&gt;    b_diff = b_actor - b_partner:   1.52 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  From DIM model:</span></span>
 <span><span class="co">#&gt;    dyad-mean effect:               1.996 </span></span>
@@ -718,7 +725,7 @@ from both displayed equations.</p>
 </div>
       <div class="idg-control idg-within">
         <div class="idg-control-head">
-          <label for="idg-within">Within-dyad deviation, <i>x</i><sub>within</sub></label>
+          <label for="idg-within">Within-dyad deviation, <i>x</i><sub>diff</sub></label>
           <output for="idg-within" data-idg-output="within">0.0</output>
 </div>
         <input id="idg-within" data-idg-input="within" type="range" min="-5" max="5" step="0.1" value="0">
@@ -729,7 +736,7 @@ from both displayed equations.</p>
       <div>
 <i>x</i><sub>mean</sub> = (<i>x</i><sub>actor</sub> + <i>x</i><sub>partner</sub>) / 2</div>
       <div>
-<i>x</i><sub>within</sub> = (<i>x</i><sub>actor</sub> - <i>x</i><sub>partner</sub>) / 2</div>
+<i>x</i><sub>diff</sub> = (<i>x</i><sub>actor</sub> - <i>x</i><sub>partner</sub>) / 2</div>
     </div>
   </div>
 
@@ -742,7 +749,7 @@ from both displayed equations.</p>
 <span class="idg-equation-label">DIM</span><span data-idg-equation="dim">0.00 = 0.00</span>
 </div>
       <div>
-<span class="idg-equation-label">Slopes</span><span><i>b</i><sub>mean</sub> = 1.76 + 0.24 = 2.00; <i>b</i><sub>within</sub> = 1.76 - 0.24 = 1.52</span>
+<span class="idg-equation-label">Slopes</span><span><i>b</i><sub>mean</sub> = <i>b</i><sub>actor</sub> + <i>b</i><sub>partner</sub> = 2.00; <i>b</i><sub>diff</sub> = <i>b</i><sub>actor</sub> - <i>b</i><sub>partner</sub> = 1.52</span>
 </div>
     </div>
 
@@ -766,7 +773,7 @@ from both displayed equations.</p>
           </div>
           <p>When one member is one point higher and the other one point lower, the dyad mean is unchanged and the deviation is one point.</p>
           <div class="idg-mini-equation">
-<i>b</i><sub>within</sub> = <i>b</i><sub>actor</sub> - <i>b</i><sub>partner</sub>
+<i>b</i><sub>diff</sub> = <i>b</i><sub>actor</sub> - <i>b</i><sub>partner</sub>
 </div>
         </div>
         <p>The dot uses APIM coordinates. The diagonal lines show the same point in DIM coordinates.</p>
@@ -1001,7 +1008,7 @@ from both displayed equations.</p>
     addLabel("actor", 286, 151, colors.actor, "end");
     addLabel("partner", 160, 22, colors.partner);
     addLabel("dyad mean", 247, 66, colors.mean);
-    addLabel("within", 248, 261, colors.within);
+    addLabel("difference", 248, 261, colors.within);
   }
 
   drawGrid();
@@ -1016,8 +1023,7 @@ from both displayed equations.</p>
 random-effects parameterization <span class="citation">(del Rosario and
 West 2025)</span>. See the <a href="apim.html#exchangeable-residual-structure">exchangeable
 residual-structure section of the APIM vignette</a> for the derivation
-and back-transformation to the member-level variance-covariance
-matrix.</p>
+and back-transformation to the member-level covariance matrix.</p>
 </div>
 </div>
 <div class="section level2">
@@ -1290,22 +1296,22 @@ levels:</p>
 <p>The equivalence holds separately for the within-person
 (<code>cwp</code>) and between-person (<code>cbp</code>) predictor
 components. For the within-person component:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">cwp dyad mean</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">cwp actor</mtext></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">cwp partner</mtext></msub></mrow><annotation encoding="application/x-tex">
-\beta_{\text{cwp dyad mean}} =
-\beta_{\text{cwp actor}} + \beta_{\text{cwp partner}}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{cwp,mean}}
+= b_{\mathrm{cwp,actor}} + b_{\mathrm{cwp,partner}}
 </annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">cwp within-dyad deviation</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">cwp actor</mtext></msub><mo>−</mo><msub><mi>β</mi><mtext mathvariant="normal">cwp partner</mtext></msub></mrow><annotation encoding="application/x-tex">
-\beta_{\text{cwp within-dyad deviation}} =
-\beta_{\text{cwp actor}} - \beta_{\text{cwp partner}}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">w</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{cwp,diff}}
+= b_{\mathrm{cwp,actor}} - b_{\mathrm{cwp,partner}}
 </annotation></semantics></math></p>
 <p>For the between-person component:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">cbp dyad mean</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">cbp actor</mtext></msub><mo>+</mo><msub><mi>β</mi><mtext mathvariant="normal">cbp partner</mtext></msub></mrow><annotation encoding="application/x-tex">
-\beta_{\text{cbp dyad mean}} =
-\beta_{\text{cbp actor}} + \beta_{\text{cbp partner}}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{cbp,mean}}
+= b_{\mathrm{cbp,actor}} + b_{\mathrm{cbp,partner}}
 </annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mtext mathvariant="normal">cbp within-dyad deviation</mtext></msub><mo>=</mo><msub><mi>β</mi><mtext mathvariant="normal">cbp actor</mtext></msub><mo>−</mo><msub><mi>β</mi><mtext mathvariant="normal">cbp partner</mtext></msub></mrow><annotation encoding="application/x-tex">
-\beta_{\text{cbp within-dyad deviation}} =
-\beta_{\text{cbp actor}} - \beta_{\text{cbp partner}}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">p</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{cbp,diff}}
+= b_{\mathrm{cbp,actor}} - b_{\mathrm{cbp,partner}}
 </annotation></semantics></math></p>
 <p>This also means that an APIM parameterization can be used on one
 level and a DIM parameterization on the other. For example:</p>
@@ -1358,6 +1364,9 @@ level and a DIM parameterization on the other. For example:</p>
 </h3>
 <p>Random slopes can be included in the DIM by adding the corresponding
 within-person effects to the stable dyad-level random-effect blocks:</p>
+<p>The following syntax illustrates the full random-slope specification.
+It is not fitted here because the example data do not support this
+complex random-effects structure.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">dim_ILD_random</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -1405,26 +1414,31 @@ preserving exchangeability.</p>
 <p>Applying the same transformation to the random-slope coefficients
 proceeds in two steps. First, transform the DIM dyad-mean and
 within-dyad-deviation random slopes into APIM actor and partner random
-slopes. For the shared block,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>b</mi><mrow><mi>p</mi><mi>a</mi><mi>r</mi><mi>t</mi><mi>n</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
-b_{actor} = \frac{b_{mean} + b_{dev}}{2},
+slopes. Random effects use
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>,
+with subscripts that write out <code>actor</code>, <code>partner</code>,
+<code>mean</code>, and <code>diff</code>. For the shared block,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
+u_{\mathrm{actor},j}
+= \frac{u_{\mathrm{mean},j} + u_{\mathrm{diff},j}}{2},
 \qquad
-b_{partner} = \frac{b_{mean} - b_{dev}}{2},
+u_{\mathrm{partner},j}
+= \frac{u_{\mathrm{mean},j} - u_{\mathrm{diff},j}}{2},
 </annotation></semantics></math></p>
-<p>and for the <code>.i_diff_*</code> block,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>p</mi><mi>a</mi><mi>r</mi><mi>t</mi><mi>n</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
-b_{diff:actor}
-= \frac{b_{diff:mean} + b_{diff:dev}}{2},
+<p>and for the <code>.i_diff_*</code> block, marked by a tilde,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widetilde{u}_{\mathrm{actor},j}
+= \frac{\widetilde{u}_{\mathrm{mean},j} + \widetilde{u}_{\mathrm{diff},j}}{2},
 \qquad
-b_{diff:partner}
-= \frac{b_{diff:mean} - b_{diff:dev}}{2}.
+\widetilde{u}_{\mathrm{partner},j}
+= \frac{\widetilde{u}_{\mathrm{mean},j} - \widetilde{u}_{\mathrm{diff},j}}{2}.
 </annotation></semantics></math></p>
 <p>The shared and <code>.i_diff_*</code> random intercepts remain
 unchanged.</p>
 <p>We now have the shared and <code>.i_diff_*</code> actor and partner
 effects which are then back-transformed into the complete and more
-readily interpretable member-specific actor-partner variance-covariance
-matrix. This is described in the <a href="apim.html#exchangeable-random-slope-back-transformation">exchangeable
+readily interpretable member-specific actor-partner covariance matrix.
+This is described in the <a href="apim.html#exchangeable-random-slope-back-transformation">exchangeable
 random-slope back-transformation in the APIM vignette</a>.</p>
 </div>
 </div>
@@ -1437,7 +1451,8 @@ lagged outcomes as predictors.</p>
 <p><strong>Note:</strong> Dynamic models, especially with small time
 series, are subject to bias. This, and the choice between raw and
 within-person-centered outcome lags, are addressed in the <a href="apim.html#dynamic-models">APIM vignette’s discussion of dynamic
-models</a>.</p>
+models</a>. !TODO: search and find such broken wrapping links across all
+vignettes!</p>
 <p>Brief example to obtain lagged raw and within-person centered
 versions of the outcome:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">

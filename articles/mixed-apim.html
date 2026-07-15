@@ -225,15 +225,22 @@ intercept-only model):</p>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>The four fixed-effect indicators are mutually exclusive. With
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>I</mi><annotation encoding="application/x-tex">I</annotation></semantics></math>
-denoting the generated <code>.i_is_{composition_role}</code> indicator,
-the fixed part of the full model can be written as:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>μ</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></msubsup><mo>=</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow></msub><msub><mi>I</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow></msub><msub><mi>I</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mi>F</mi><mi>F</mi></mrow></msub><msub><mi>I</mi><mrow><mi>F</mi><mi>F</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><msub><mi>I</mi><mrow><mi>M</mi><mi>M</mi><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+denoting the generated <code>.i_is_{composition_role}</code> indicator
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mn>0</mn></msub><annotation encoding="application/x-tex">b_0</annotation></semantics></math>
+a fixed intercept, the fixed part of the full model can be written
+as:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>μ</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></msubsup><mo>=</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">F</mi></mrow></mrow></msub><msub><mi>I</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">F</mi></mrow><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">M</mi></mrow></mrow></msub><msub><mi>I</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">M</mi></mrow><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">F</mi></mrow></mrow></msub><msub><mi>I</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">F</mi></mrow><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">M</mi></mrow></mrow></msub><msub><mi>I</mi><mrow><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">M</mi></mrow><mo>,</mo><mi>i</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \mu_{ij}^{\mathrm{fixed}} =
-\beta_{FM,F} I_{FM,F,ij} +
-\beta_{FM,M} I_{FM,M,ij} +
-\beta_{FF} I_{FF,ij} +
-\beta_{MM} I_{MM,ij}.
+b_{0,\mathrm{FM,F}} I_{\mathrm{FM,F},ij} +
+b_{0,\mathrm{FM,M}} I_{\mathrm{FM,M},ij} +
+b_{0,\mathrm{FF}} I_{\mathrm{FF},ij} +
+b_{0,\mathrm{MM}} I_{\mathrm{MM},ij}.
 </annotation></semantics></math></p>
+<p>In <code>FM,F</code>, the first part identifies the female-male
+composition and the final <code>F</code> identifies the female outcome
+member. The same composition-first convention is used throughout this
+vignette.</p>
 <p>The active indicator for each person is shown below:</p>
 <table style="width:100%;" class="table">
 <colgroup>
@@ -246,10 +253,10 @@ the fixed part of the full model can be written as:</p>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Row</th>
-<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow></msub><annotation encoding="application/x-tex">I_{FM,F}</annotation></semantics></math></th>
-<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow></msub><annotation encoding="application/x-tex">I_{FM,M}</annotation></semantics></math></th>
-<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi>F</mi><mi>F</mi></mrow></msub><annotation encoding="application/x-tex">I_{FF}</annotation></semantics></math></th>
-<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><annotation encoding="application/x-tex">I_{MM}</annotation></semantics></math></th>
+<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">F</mi></mrow></msub><annotation encoding="application/x-tex">I_{\mathrm{FM,F}}</annotation></semantics></math></th>
+<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">M</mi></mrow></msub><annotation encoding="application/x-tex">I_{\mathrm{FM,M}}</annotation></semantics></math></th>
+<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">F</mi></mrow></msub><annotation encoding="application/x-tex">I_{\mathrm{FF}}</annotation></semantics></math></th>
+<th align="right"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>I</mi><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">M</mi></mrow></msub><annotation encoding="application/x-tex">I_{\mathrm{MM}}</annotation></semantics></math></th>
 <th align="left">Fixed intercept</th>
 </tr></thead>
 <tbody>
@@ -259,7 +266,7 @@ the fixed part of the full model can be written as:</p>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow></msub><annotation encoding="application/x-tex">\beta_{FM,F}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">F</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{FM,F}}</annotation></semantics></math></td>
 </tr>
 <tr class="even">
 <td align="left">Male in a female-male dyad</td>
@@ -267,7 +274,7 @@ the fixed part of the full model can be written as:</p>
 <td align="right"><strong>1</strong></td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow></msub><annotation encoding="application/x-tex">\beta_{FM,M}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">M</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{FM,M}}</annotation></semantics></math></td>
 </tr>
 <tr class="odd">
 <td align="left">Member of a female-female dyad</td>
@@ -275,7 +282,7 @@ the fixed part of the full model can be written as:</p>
 <td align="right">0</td>
 <td align="right"><strong>1</strong></td>
 <td align="right">0</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mrow><mi>F</mi><mi>F</mi></mrow></msub><annotation encoding="application/x-tex">\beta_{FF}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">F</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{FF}}</annotation></semantics></math></td>
 </tr>
 <tr class="even">
 <td align="left">Member of a male-male dyad</td>
@@ -283,17 +290,18 @@ the fixed part of the full model can be written as:</p>
 <td align="right">0</td>
 <td align="right">0</td>
 <td align="right"><strong>1</strong></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><annotation encoding="application/x-tex">\beta_{MM}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">M</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{MM}}</annotation></semantics></math></td>
 </tr>
 </tbody>
 </table>
 <p>Therefore, for a member of a male-male dyad, for example, the fixed
 part reduces to just
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><annotation encoding="application/x-tex">\beta_{MM}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">M</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{MM}}</annotation></semantics></math>
 via:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>F</mi></mrow></msub><mo>+</mo><mn>0</mn><msub><mi>β</mi><mrow><mi>F</mi><mi>M</mi><mo>,</mo><mi>M</mi></mrow></msub><mo>+</mo><mn>0</mn><msub><mi>β</mi><mrow><mi>F</mi><mi>F</mi></mrow></msub><mo>+</mo><mn>1</mn><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><mo>=</mo><msub><mi>β</mi><mrow><mi>M</mi><mi>M</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
-0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
-= \beta_{MM}.
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>⋅</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">F</mi></mrow></mrow></msub><mo>+</mo><mn>0</mn><mo>⋅</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">M</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">M</mi></mrow></mrow></msub><mo>+</mo><mn>0</mn><mo>⋅</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">F</mi></mrow></mrow></msub><mo>+</mo><mn>1</mn><mo>⋅</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">M</mi></mrow></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">M</mi><mi mathvariant="normal">M</mi></mrow></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+0 \cdot b_{0,\mathrm{FM,F}} + 0 \cdot b_{0,\mathrm{FM,M}} +
+0 \cdot b_{0,\mathrm{FF}} + 1 \cdot b_{0,\mathrm{MM}}
+= b_{0,\mathrm{MM}}.
 </annotation></semantics></math></p>
 <p>The random-effects terms reduce in the same way because their
 indicator columns are also <code>0</code> outside the relevant
