@@ -1,3 +1,22 @@
+.draw_diagram_legend <- function(
+    labels, colours, y, segment_starts, text_x, fontsize = 10.5) {
+  for (index in seq_along(labels)) {
+    grid::grid.segments(
+      x0 = grid::unit(segment_starts[index], "native"),
+      y0 = grid::unit(y, "native"),
+      x1 = grid::unit(segment_starts[index] + 0.06, "native"),
+      y1 = grid::unit(y, "native"),
+      gp = grid::gpar(col = colours[index], lwd = 2.5)
+    )
+    grid::grid.text(
+      labels[index],
+      x = grid::unit(text_x[index], "native"),
+      y = grid::unit(y, "native"),
+      gp = grid::gpar(col = "#263238", fontsize = fontsize)
+    )
+  }
+}
+
 draw_apim_diagram <- function(
     type = c("distinguishable", "exchangeable"),
     edge_labels = NULL) {
@@ -51,13 +70,13 @@ draw_apim_diagram <- function(
 
   native <- function(value) grid::unit(value, "native")
   arrow_head <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.12, "inches"),
+    angle = 28,
+    length = grid::unit(0.15, "inches"),
     type = "closed"
   )
   covariance_arrow <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.09, "inches"),
+    angle = 26,
+    length = grid::unit(0.10, "inches"),
     ends = "both",
     type = "closed"
   )
@@ -110,21 +129,21 @@ draw_apim_diagram <- function(
   }
 
   draw_path_label <- function(x, y, label, colour) {
-    label_width <- if (is.expression(label) || is.language(label)) 0.09 else 0.075
-    grid::grid.roundrect(
-      x = native(x),
-      y = native(y),
-      width = native(label_width),
-      height = native(0.066),
-      r = grid::unit(0.02, "snpc"),
-      gp = grid::gpar(fill = "white", col = NA)
-    )
-    grid::grid.text(
+    label_grob <- grid::textGrob(
       label,
       x = native(x),
       y = native(y),
       gp = grid::gpar(col = colour, fontsize = 15)
     )
+    grid::grid.roundrect(
+      x = native(x),
+      y = native(y),
+      width = grid::grobWidth(label_grob) + grid::unit(2.5, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(1.5, "mm"),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.draw(label_grob)
   }
 
   grid::grid.newpage()
@@ -143,8 +162,8 @@ draw_apim_diagram <- function(
   draw_path(0.295, 0.28, 0.515, 0.28, actor_colour)
 
   # Partner paths
-  draw_path(0.295, 0.72, 0.515, 0.28, partner_colour)
-  draw_path(0.295, 0.28, 0.515, 0.72, partner_colour)
+  draw_path(0.295, 0.72, 0.515, 0.34, partner_colour)
+  draw_path(0.295, 0.28, 0.515, 0.66, partner_colour)
 
   draw_path_label(0.405, 0.72, edge_labels$actor_top, actor_colour)
   draw_path_label(0.405, 0.28, edge_labels$actor_bottom, actor_colour)
@@ -169,25 +188,13 @@ draw_apim_diagram <- function(
   )
 
   # A small legend makes the colour coding optional rather than necessary.
-  grid::grid.segments(
-    x0 = native(0.29), y0 = native(0.075),
-    x1 = native(0.35), y1 = native(0.075),
-    gp = grid::gpar(col = actor_colour, lwd = 2.5)
-  )
-  grid::grid.text(
-    "Actor effect",
-    x = native(0.415), y = native(0.075),
-    gp = grid::gpar(col = ink_colour, fontsize = 11)
-  )
-  grid::grid.segments(
-    x0 = native(0.56), y0 = native(0.075),
-    x1 = native(0.62), y1 = native(0.075),
-    gp = grid::gpar(col = partner_colour, lwd = 2.5)
-  )
-  grid::grid.text(
-    "Partner effect",
-    x = native(0.695), y = native(0.075),
-    gp = grid::gpar(col = ink_colour, fontsize = 11)
+  .draw_diagram_legend(
+    labels = c("Actor effect", "Partner effect"),
+    colours = c(actor_colour, partner_colour),
+    y = 0.075,
+    segment_starts = c(0.29, 0.56),
+    text_x = c(0.415, 0.695),
+    fontsize = 11
   )
 
   grid::popViewport()
@@ -214,13 +221,13 @@ draw_dsm_diagram <- function(estimates = NULL) {
 
   native <- function(value) grid::unit(value, "native")
   arrow_head <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.12, "inches"),
+    angle = 28,
+    length = grid::unit(0.15, "inches"),
     type = "closed"
   )
   covariance_arrow <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.09, "inches"),
+    angle = 26,
+    length = grid::unit(0.10, "inches"),
     ends = "both",
     type = "closed"
   )
@@ -275,20 +282,20 @@ draw_dsm_diagram <- function(estimates = NULL) {
   }
 
   draw_label <- function(x, y, label, colour) {
+    label_grob <- grid::textGrob(
+      label,
+      x = native(x), y = native(y),
+      gp = grid::gpar(col = colour, fontsize = 15)
+    )
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
-      width = native(if (is.null(estimates)) 0.07 else 0.13),
-      height = native(0.064),
+      width = grid::grobWidth(label_grob) + grid::unit(2.5, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(1.5, "mm"),
       r = grid::unit(0.02, "snpc"),
       gp = grid::gpar(fill = "white", col = NA)
     )
-    grid::grid.text(
-      label,
-      x = native(x),
-      y = native(y),
-      gp = grid::gpar(col = colour, fontsize = 15)
-    )
+    grid::grid.draw(label_grob)
   }
 
   draw_intercept <- function(x, y, label) {
@@ -337,10 +344,10 @@ draw_dsm_diagram <- function(estimates = NULL) {
 
   # Paths from predictor level.
   draw_path(0.32, 0.72, 0.50, 0.72, mean_colour)
-  draw_path(0.32, 0.72, 0.50, 0.28, mean_colour)
+  draw_path(0.32, 0.72, 0.50, 0.34, mean_colour)
 
   # Paths from predictor difference.
-  draw_path(0.32, 0.28, 0.50, 0.72, difference_colour)
+  draw_path(0.32, 0.28, 0.50, 0.66, difference_colour)
   draw_path(0.32, 0.28, 0.50, 0.28, difference_colour)
 
   draw_label(0.41, 0.72, parameter_label("11"), mean_colour)
@@ -367,13 +374,22 @@ draw_dsm_diagram <- function(estimates = NULL) {
     gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
   )
 
+  .draw_diagram_legend(
+    labels = c("Predictor-mean paths", "Predictor-difference paths"),
+    colours = c(mean_colour, difference_colour),
+    y = 0.055,
+    segment_starts = c(0.18, 0.53),
+    text_x = c(0.35, 0.72),
+    fontsize = 10
+  )
+
   grid::popViewport()
   invisible(NULL)
 }
 
 draw_dim_diagram <- function(estimates = NULL) {
   mean_colour <- "#0072B2"
-  difference_colour <- "#D55E00"
+  deviation_colour <- "#D55E00"
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -390,8 +406,8 @@ draw_dim_diagram <- function(estimates = NULL) {
 
   native <- function(value) grid::unit(value, "native")
   arrow_head <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.12, "inches"),
+    angle = 28,
+    length = grid::unit(0.15, "inches"),
     type = "closed"
   )
   draw_node <- function(x, y, label, subtitle) {
@@ -432,16 +448,18 @@ draw_dim_diagram <- function(estimates = NULL) {
   }
 
   draw_label <- function(x, y, label, colour) {
-    grid::grid.roundrect(
-      x = native(x), y = native(y),
-      width = native(if (is.null(estimates)) 0.11 else 0.18),
-      height = native(0.062), r = grid::unit(0.02, "snpc"),
-      gp = grid::gpar(fill = "white", col = NA)
-    )
-    grid::grid.text(
+    label_grob <- grid::textGrob(
       label, x = native(x), y = native(y),
       gp = grid::gpar(col = colour, fontsize = 14)
     )
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = grid::grobWidth(label_grob) + grid::unit(2.5, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(1.5, "mm"),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.draw(label_grob)
   }
 
   draw_intercept <- function(x, y) {
@@ -459,49 +477,206 @@ draw_dim_diagram <- function(estimates = NULL) {
   }
 
   mean_label <- parameter_label("b_mean", "plain(mean)")
-  difference_label <- parameter_label("b_diff", "plain(diff)")
-
+  deviation_label <- parameter_label("b_dev", "plain(dev)")
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   draw_node(
     0.17, 0.72,
-    expression(frac(X[1] + X[2], 2) - mu[X]),
-    "Centered predictor mean"
+    expression(bar(X) - mu[X]),
+    "Predictor mean\n(grand-mean centered)"
   )
   draw_node(
     0.17, 0.28,
-    expression(X[1] - X[2]),
-    "Predictor difference"
+    expression(X[i] - bar(X)),
+    "Predictor deviation"
   )
   draw_node(
     0.65, 0.72,
-    expression(frac(Y[1] + Y[2], 2)),
+    expression(bar(Y)),
     "Outcome mean"
   )
   draw_node(
     0.65, 0.28,
-    expression(Y[1] - Y[2]),
-    "Outcome difference"
+    expression(Y[i] - bar(Y)),
+    "Outcome deviation"
   )
-  draw_residual(0.91, 0.72, expression(r[plain(mean)]))
-  draw_residual(0.91, 0.28, expression(r[plain(diff)]))
+  draw_residual(0.91, 0.72, expression(r[m]))
+  draw_residual(0.91, 0.28, expression(r[d * "," * i]))
 
-  # Exchangeability retains the two parallel paths and removes the DSM
-  # cross-paths.
+  # Exchangeability retains the parallel mean and deviation paths and removes
+  # the DSM cross-paths.
   draw_path(0.32, 0.72, 0.50, 0.72, mean_colour)
-  draw_path(0.32, 0.28, 0.50, 0.28, difference_colour)
+  draw_path(0.32, 0.28, 0.50, 0.28, deviation_colour)
   draw_label(0.41, 0.72, mean_label, mean_colour)
-  draw_label(0.41, 0.28, difference_label, difference_colour)
+  draw_label(0.41, 0.28, deviation_label, deviation_colour)
 
   # Only the outcome-mean equation has an intercept under exchangeability.
   draw_intercept(0.65, 0.86)
 
-  # Mean and difference residual components are uncorrelated under the
+  # Mean and deviation residual components are uncorrelated under the
   # exchangeability constraints.
   draw_path(0.855, 0.72, 0.80, 0.72, muted_colour)
   draw_path(0.855, 0.28, 0.80, 0.28, muted_colour)
+
+  .draw_diagram_legend(
+    labels = c("Between-couple effect", "Within-couple effect"),
+    colours = c(mean_colour, deviation_colour),
+    y = 0.075,
+    segment_starts = c(0.22, 0.56),
+    text_x = c(0.405, 0.745)
+  )
+
+  grid::popViewport()
+  invisible(NULL)
+}
+
+draw_dim_member_diagram <- function() {
+  mean_colour <- "#0072B2"
+  deviation_colour <- "#D55E00"
+  ink_colour <- "#263238"
+  muted_colour <- "#64748B"
+  node_fill <- "#F8FAFC"
+
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 28,
+    length = grid::unit(0.15, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 26,
+    length = grid::unit(0.10, "inches"),
+    ends = "both",
+    type = "closed"
+  )
+
+  draw_node <- function(x, y, label, subtitle = NULL, width = 0.26) {
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = native(width), height = native(0.16),
+      r = grid::unit(0.07, "snpc"),
+      gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y + if (is.null(subtitle)) 0 else 0.025),
+      gp = grid::gpar(col = ink_colour, fontsize = 16)
+    )
+    if (!is.null(subtitle)) {
+      grid::grid.text(
+        subtitle, x = native(x), y = native(y - 0.035),
+        gp = grid::gpar(col = muted_colour, fontsize = 9.5)
+      )
+    }
+  }
+
+  draw_residual <- function(x, y, label) {
+    grid::grid.circle(
+      x = native(x), y = native(y), r = grid::unit(0.047, "snpc"),
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 15)
+    )
+  }
+
+  draw_path <- function(x0, y0, x1, y1, colour) {
+    grid::grid.segments(
+      x0 = native(x0), y0 = native(y0),
+      x1 = native(x1), y1 = native(y1),
+      arrow = arrow_head,
+      gp = grid::gpar(col = colour, fill = colour, lwd = 2.2)
+    )
+  }
+
+  draw_label <- function(x, y, label, colour) {
+    label_grob <- grid::textGrob(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = colour, fontsize = 14)
+    )
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = grid::grobWidth(label_grob) + grid::unit(2.5, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(1.5, "mm"),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.draw(label_grob)
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  # Each member has the same dyad-level predictor and their own deviation.
+  draw_node(
+    0.15, 0.79,
+    expression(bar(X) - mu[X]),
+    "Predictor mean\n(grand-mean centered)"
+  )
+  draw_node(
+    0.15, 0.60,
+    expression(X[1] - bar(X)),
+    "Within-couple predictor"
+  )
+  draw_node(
+    0.15, 0.40,
+    expression(bar(X) - mu[X]),
+    "Predictor mean\n(grand-mean centered)"
+  )
+  draw_node(
+    0.15, 0.21,
+    expression(X[2] - bar(X)),
+    "Within-couple predictor"
+  )
+  draw_node(0.66, 0.695, expression(Y[1]), "Outcome", width = 0.24)
+  draw_node(0.66, 0.305, expression(Y[2]), "Outcome", width = 0.24)
+  draw_residual(0.91, 0.695, expression(epsilon[1]))
+  draw_residual(0.91, 0.305, expression(epsilon[2]))
+
+  draw_path(0.28, 0.79, 0.54, 0.715, mean_colour)
+  draw_path(0.28, 0.60, 0.54, 0.675, deviation_colour)
+  draw_path(0.28, 0.40, 0.54, 0.325, mean_colour)
+  draw_path(0.28, 0.21, 0.54, 0.285, deviation_colour)
+  draw_label(0.40, 0.752, expression(b[plain(mean)]), mean_colour)
+  draw_label(0.40, 0.638, expression(b[plain(dev)]), deviation_colour)
+  draw_label(0.40, 0.362, expression(b[plain(mean)]), mean_colour)
+  draw_label(0.40, 0.248, expression(b[plain(dev)]), deviation_colour)
+
+  draw_path(0.86, 0.695, 0.78, 0.695, muted_colour)
+  draw_path(0.86, 0.305, 0.78, 0.305, muted_colour)
+  grid::grid.curve(
+    x1 = native(0.951), y1 = native(0.655),
+    x2 = native(0.951), y2 = native(0.345),
+    curvature = -0.24, angle = 90, ncp = 12, square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
+  )
+
+  grid::grid.text(
+    "Arbitrary member 1", x = native(0.50), y = native(0.92),
+    gp = grid::gpar(col = muted_colour, fontsize = 11, fontface = "bold")
+  )
+  grid::grid.text(
+    "Arbitrary member 2", x = native(0.50), y = native(0.095),
+    gp = grid::gpar(col = muted_colour, fontsize = 11, fontface = "bold")
+  )
+  grid::grid.segments(
+    x0 = native(0.04), y0 = native(0.50),
+    x1 = native(0.86), y1 = native(0.50),
+    gp = grid::gpar(col = muted_colour, lwd = 1.2, lty = 2)
+  )
+
+  .draw_diagram_legend(
+    labels = c("Between-couple effect", "Within-couple effect"),
+    colours = c(mean_colour, deviation_colour),
+    y = 0.04,
+    segment_starts = c(0.20, 0.56),
+    text_x = c(0.385, 0.745),
+    fontsize = 10
+  )
 
   grid::popViewport()
   invisible(NULL)
@@ -516,13 +691,13 @@ draw_mixed_apim_diagram <- function() {
 
   native <- function(value) grid::unit(value, "native")
   arrow_head <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.09, "inches"),
+    angle = 28,
+    length = grid::unit(0.12, "inches"),
     type = "closed"
   )
   covariance_arrow <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.07, "inches"),
+    angle = 26,
+    length = grid::unit(0.08, "inches"),
     ends = "both",
     type = "closed"
   )
