@@ -201,6 +201,178 @@ draw_apim_diagram <- function(
   invisible(NULL)
 }
 
+draw_apim_member_diagram <- function(
+    type = c("distinguishable", "exchangeable")) {
+  type <- match.arg(type)
+
+  actor_colour <- "#0072B2"
+  partner_colour <- "#D55E00"
+  ink_colour <- "#263238"
+  muted_colour <- "#64748B"
+  node_fill <- "#F8FAFC"
+
+  if (type == "distinguishable") {
+    labels <- list(
+      panel_top = "Female outcome member",
+      panel_bottom = "Male outcome member",
+      actor_subtitle = "Actor predictor",
+      actor_x_top = expression(X[plain(F)]),
+      partner_x_top = expression(X[plain(M)]),
+      actor_x_bottom = expression(X[plain(M)]),
+      partner_x_bottom = expression(X[plain(F)]),
+      y_top = expression(Y[plain(F)]),
+      y_bottom = expression(Y[plain(M)]),
+      residual_top = expression(epsilon[plain(F)]),
+      residual_bottom = expression(epsilon[plain(M)]),
+      actor_top = expression(a[plain(F)]),
+      actor_bottom = expression(a[plain(M)]),
+      partner_top = expression(p[plain(F)]),
+      partner_bottom = expression(p[plain(M)])
+    )
+  } else {
+    labels <- list(
+      panel_top = "Arbitrary member 1",
+      panel_bottom = "Arbitrary member 2",
+      actor_subtitle = "Own predictor",
+      actor_x_top = expression(X[1]),
+      partner_x_top = expression(X[2]),
+      actor_x_bottom = expression(X[2]),
+      partner_x_bottom = expression(X[1]),
+      y_top = expression(Y[1]),
+      y_bottom = expression(Y[2]),
+      residual_top = expression(epsilon[1]),
+      residual_bottom = expression(epsilon[2]),
+      actor_top = expression(a),
+      actor_bottom = expression(a),
+      partner_top = expression(p),
+      partner_bottom = expression(p)
+    )
+  }
+
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 28,
+    length = grid::unit(0.15, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 26,
+    length = grid::unit(0.10, "inches"),
+    ends = "both",
+    type = "closed"
+  )
+
+  draw_node <- function(x, y, label, subtitle, width = 0.26) {
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = native(width), height = native(0.16),
+      r = grid::unit(0.07, "snpc"),
+      gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y + 0.025),
+      gp = grid::gpar(col = ink_colour, fontsize = 16)
+    )
+    grid::grid.text(
+      subtitle, x = native(x), y = native(y - 0.035),
+      gp = grid::gpar(col = muted_colour, fontsize = 9.5)
+    )
+  }
+
+  draw_residual <- function(x, y, label) {
+    grid::grid.circle(
+      x = native(x), y = native(y), r = grid::unit(0.047, "snpc"),
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 15)
+    )
+  }
+
+  draw_path <- function(x0, y0, x1, y1, colour) {
+    grid::grid.segments(
+      x0 = native(x0), y0 = native(y0),
+      x1 = native(x1), y1 = native(y1),
+      arrow = arrow_head,
+      gp = grid::gpar(col = colour, fill = colour, lwd = 2.2)
+    )
+  }
+
+  draw_label <- function(x, y, label, colour) {
+    label_grob <- grid::textGrob(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = colour, fontsize = 14)
+    )
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = grid::grobWidth(label_grob) + grid::unit(2.5, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(1.5, "mm"),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.draw(label_grob)
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  draw_node(0.15, 0.79, labels$actor_x_top, labels$actor_subtitle)
+  draw_node(0.15, 0.60, labels$partner_x_top, "Partner predictor")
+  draw_node(0.15, 0.40, labels$actor_x_bottom, labels$actor_subtitle)
+  draw_node(0.15, 0.21, labels$partner_x_bottom, "Partner predictor")
+  draw_node(0.66, 0.695, labels$y_top, "Outcome", width = 0.24)
+  draw_node(0.66, 0.305, labels$y_bottom, "Outcome", width = 0.24)
+  draw_residual(0.91, 0.695, labels$residual_top)
+  draw_residual(0.91, 0.305, labels$residual_bottom)
+
+  draw_path(0.28, 0.79, 0.54, 0.715, actor_colour)
+  draw_path(0.28, 0.60, 0.54, 0.675, partner_colour)
+  draw_path(0.28, 0.40, 0.54, 0.325, actor_colour)
+  draw_path(0.28, 0.21, 0.54, 0.285, partner_colour)
+  draw_label(0.40, 0.752, labels$actor_top, actor_colour)
+  draw_label(0.40, 0.638, labels$partner_top, partner_colour)
+  draw_label(0.40, 0.362, labels$actor_bottom, actor_colour)
+  draw_label(0.40, 0.248, labels$partner_bottom, partner_colour)
+
+  draw_path(0.86, 0.695, 0.78, 0.695, muted_colour)
+  draw_path(0.86, 0.305, 0.78, 0.305, muted_colour)
+  grid::grid.curve(
+    x1 = native(0.951), y1 = native(0.655),
+    x2 = native(0.951), y2 = native(0.345),
+    curvature = -0.24, angle = 90, ncp = 12, square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
+  )
+
+  grid::grid.text(
+    labels$panel_top, x = native(0.50), y = native(0.92),
+    gp = grid::gpar(col = muted_colour, fontsize = 11, fontface = "bold")
+  )
+  grid::grid.text(
+    labels$panel_bottom, x = native(0.50), y = native(0.095),
+    gp = grid::gpar(col = muted_colour, fontsize = 11, fontface = "bold")
+  )
+  grid::grid.segments(
+    x0 = native(0.04), y0 = native(0.50),
+    x1 = native(0.86), y1 = native(0.50),
+    gp = grid::gpar(col = muted_colour, lwd = 1.2, lty = 2)
+  )
+
+  .draw_diagram_legend(
+    labels = c("Actor effect", "Partner effect"),
+    colours = c(actor_colour, partner_colour),
+    y = 0.025,
+    segment_starts = c(0.29, 0.56),
+    text_x = c(0.415, 0.695),
+    fontsize = 10
+  )
+
+  grid::popViewport()
+  invisible(NULL)
+}
+
 draw_dsm_diagram <- function(estimates = NULL) {
   mean_colour <- "#0072B2"
   difference_colour <- "#D55E00"
@@ -322,7 +494,7 @@ draw_dsm_diagram <- function(estimates = NULL) {
   draw_node(
     0.17, 0.72,
     expression(frac(X[plain(F)] + X[plain(M)], 2) - mu[X]),
-    "Centered predictor mean"
+    "Predictor mean (GM-centered)"
   )
   draw_node(
     0.17, 0.28,
@@ -339,8 +511,8 @@ draw_dsm_diagram <- function(estimates = NULL) {
     expression(Y[plain(F)] - Y[plain(M)]),
     "Outcome difference"
   )
-  draw_residual(0.91, 0.72, expression(r[plain(mean)]))
-  draw_residual(0.91, 0.28, expression(r[plain(diff)]))
+  draw_residual(0.91, 0.72, expression(r[m]))
+  draw_residual(0.91, 0.28, expression(r[d]))
 
   # Paths from predictor level.
   draw_path(0.32, 0.72, 0.50, 0.72, mean_colour)
@@ -485,7 +657,7 @@ draw_dim_diagram <- function(estimates = NULL) {
   draw_node(
     0.17, 0.72,
     expression(bar(X) - mu[X]),
-    "Predictor mean\n(grand-mean centered)"
+    "Predictor mean (GM-centered)"
   )
   draw_node(
     0.17, 0.28,
@@ -614,7 +786,7 @@ draw_dim_member_diagram <- function() {
   draw_node(
     0.15, 0.79,
     expression(bar(X) - mu[X]),
-    "Predictor mean\n(grand-mean centered)"
+    "Predictor mean (GM-centered)"
   )
   draw_node(
     0.15, 0.60,
@@ -624,7 +796,7 @@ draw_dim_member_diagram <- function() {
   draw_node(
     0.15, 0.40,
     expression(bar(X) - mu[X]),
-    "Predictor mean\n(grand-mean centered)"
+    "Predictor mean (GM-centered)"
   )
   draw_node(
     0.15, 0.21,
