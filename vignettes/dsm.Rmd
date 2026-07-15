@@ -14,6 +14,13 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+diagram_helper <- if (file.exists("diagram-helpers.Rinc")) {
+  "diagram-helpers.Rinc"
+} else {
+  file.path("vignettes", "diagram-helpers.Rinc")
+}
+sys.source(diagram_helper, envir = knitr::knit_global())
 ```
 
 ```{r setup}
@@ -76,6 +83,12 @@ For a cross-sectional Gaussian DSM, a correlated dyad random intercept and
 role-contrast slope represent unexplained outcome-level and outcome-difference
 variation. 
 
+```{r conceptual-dsm-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional DSM. Predictor level and predictor difference each predict both outcome level and outcome difference. The intercepts are a10 and a20; the four regression paths are a11, a12, a21, and a22. The outcome-level and outcome-difference residuals may covary.", fig.alt="Path diagram for a cross-sectional dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20."}
+draw_dsm_diagram()
+```
+
+The path labels correspond directly to the terms in the model below:
+
 ```{r fit-cross-dsm, eval=has_glmmTMB}
 dsm_model <- glmmTMB::glmmTMB(
   satisfaction ~
@@ -83,11 +96,19 @@ dsm_model <- glmmTMB::glmmTMB(
     # Outcome-level intercept
     1 +
 
-    # !TODO: shall we enter comments what each term estimates or represents? E.g,. in the APIM we say "Actor effects", what do we say here for each?
+    # Predictor level -> outcome level (a11)
     .i_communication_dyad_mean_gmc +
+
+    # Predictor difference -> outcome level (a12)
     .i_communication_within_dyad_diff +
+
+    # Outcome-difference intercept (a20)
     .i_dsm_role_contrast +
+
+    # Predictor level -> outcome difference (a21)
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
+
+    # Predictor difference -> outcome difference (a22)
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
@@ -143,6 +164,27 @@ $$
 = a_{20} + a_{21}X_{\mathrm{mean}} + a_{22}X_{\mathrm{diff}}.
 $$
 
+The fitted paths for this example are:
+
+```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. Edge and intercept labels show the estimated DSM coefficients.", fig.alt="Fitted path diagram for the example dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. The six paths and intercepts are labelled with their estimated coefficients."}
+dsm_coef_for_diagram <- glmmTMB::fixef(dsm_model)$cond
+
+draw_dsm_diagram(
+  estimates = c(
+    a10 = dsm_coef_for_diagram[["(Intercept)"]],
+    a11 = dsm_coef_for_diagram[[".i_communication_dyad_mean_gmc"]],
+    a12 = dsm_coef_for_diagram[[".i_communication_within_dyad_diff"]],
+    a20 = dsm_coef_for_diagram[[".i_dsm_role_contrast"]],
+    a21 = dsm_coef_for_diagram[[
+      ".i_communication_dyad_mean_gmc:.i_dsm_role_contrast"
+    ]],
+    a22 = dsm_coef_for_diagram[[
+      ".i_communication_within_dyad_diff:.i_dsm_role_contrast"
+    ]]
+  )
+)
+```
+
 The fixed effects from our MLM model map directly to these paths as such:
 
 | Long-format fixed effect | DSM SEM path and interpretation |
@@ -166,8 +208,6 @@ The random intercept variance is unexplained variation in outcome level, and
 the random role-contrast slope variance is unexplained variation in the full
 directional outcome difference. Their covariance indicates whether unexplained
 outcome level and unexplained outcome difference are associated.
-
-!TODO: include SEM-Style diagram where the coefficients are mapped onto, as a_{22} = xxx, etc. Once this is present, do you think the table should still be kept or not? think and propose in your response
 
 ### Reversing the coding
 
@@ -288,8 +328,6 @@ data.frame(
 
 ### Fixed-effect transformation
 
-!TODO: The backtransformations are quite complex and take alot of space. Can they be simpler, yet still clear?
-
 Let $b_{\mathrm{actor},\mathrm{female}}$ and
 $b_{\mathrm{actor},\mathrm{male}}$ denote the actor effects on the female and
 male outcomes. The corresponding partner effects are
@@ -297,38 +335,47 @@ $b_{\mathrm{partner},\mathrm{female}}$ and
 $b_{\mathrm{partner},\mathrm{male}}$, and the APIM intercepts are
 $b_{0,\mathrm{female}}$ and $b_{0,\mathrm{male}}$. Fixed APIM coefficients use
 $b$ and write out their effect and outcome role. The numbered paths $a_{10}$
-through $a_{22}$ retain the published DSM notation. The APIM slopes transform
-into the female-minus-male DSM paths as
+through $a_{22}$ retain the published DSM notation.
+
+The slope transformation can be understood in two steps. First, for each
+outcome role $r \in \{\mathrm{female},\mathrm{male}\}$, form the actor-plus-partner
+and actor-minus-partner combinations:
+
+$$
+\begin{aligned}
+b_{\mathrm{sum},r}
+&= b_{\mathrm{actor},r} + b_{\mathrm{partner},r}, \\
+b_{\mathrm{difference},r}
+&= b_{\mathrm{actor},r} - b_{\mathrm{partner},r}.
+\end{aligned}
+$$
+
+The DSM slopes then follow by combining the female- and male-outcome effects:
 
 $$
 \begin{aligned}
 a_{11}
-&= \frac{b_{\mathrm{actor},\mathrm{female}}
-        + b_{\mathrm{partner},\mathrm{female}}
-        + b_{\mathrm{actor},\mathrm{male}}
-        + b_{\mathrm{partner},\mathrm{male}}}{2}, \\
-a_{12}
-&= \frac{b_{\mathrm{actor},\mathrm{female}}
-        - b_{\mathrm{partner},\mathrm{female}}
-        + b_{\mathrm{partner},\mathrm{male}}
-        - b_{\mathrm{actor},\mathrm{male}}}{4}, \\
+&= \frac{b_{\mathrm{sum},\mathrm{female}}
+        + b_{\mathrm{sum},\mathrm{male}}}{2},
+&
 a_{21}
-&= b_{\mathrm{actor},\mathrm{female}}
-   + b_{\mathrm{partner},\mathrm{female}}
-   - b_{\mathrm{actor},\mathrm{male}}
-   - b_{\mathrm{partner},\mathrm{male}}, \\
+&= b_{\mathrm{sum},\mathrm{female}}
+   - b_{\mathrm{sum},\mathrm{male}}, \\
+a_{12}
+&= \frac{b_{\mathrm{difference},\mathrm{female}}
+        - b_{\mathrm{difference},\mathrm{male}}}{4},
+&
 a_{22}
-&= \frac{b_{\mathrm{actor},\mathrm{female}}
-        + b_{\mathrm{actor},\mathrm{male}}
-        - b_{\mathrm{partner},\mathrm{female}}
-        - b_{\mathrm{partner},\mathrm{male}}}{2}.
+&= \frac{b_{\mathrm{difference},\mathrm{female}}
+        + b_{\mathrm{difference},\mathrm{male}}}{2}.
 \end{aligned}
 $$
 
 The APIM predictors retain their original scale, whereas the DSM predictor
-level is grand-mean centered. !TODO: would you recommend to always gm-center our "raw" predictors too? or does this have negative consequences for other parts of our package or vignettes transformations? Such as lagging or whatever? do we need raw or is gm centered fine, according to th lagging papers in this repos dev/references?
-If $\mu_X$ is the grand mean subtracted from the
-DSM predictor level, the intercepts therefore transform as
+level is grand-mean centered. Keeping the raw APIM predictors on their original
+scale preserves their reference values; the centering difference is handled
+explicitly in the intercept transformation. If $\mu_X$ is the grand mean
+subtracted from the DSM predictor level, the intercepts transform as
 
 $$
 a_{10}
@@ -337,22 +384,35 @@ a_{10}
 a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}} + \mu_X a_{21}.
 $$
 
-The reverse slope transformation is
+For the reverse slope transformation, first recover the role-specific
+actor-plus-partner and actor-minus-partner combinations:
 
 $$
 \begin{aligned}
-b_{\mathrm{actor},\mathrm{female}}
-&= \frac{a_{11}}{2} + a_{12} + \frac{a_{21}}{4} + \frac{a_{22}}{2}, \\
-b_{\mathrm{partner},\mathrm{female}}
-&= \frac{a_{11}}{2} - a_{12} + \frac{a_{21}}{4} - \frac{a_{22}}{2}, \\
-b_{\mathrm{actor},\mathrm{male}}
-&= \frac{a_{11}}{2} - a_{12} - \frac{a_{21}}{4} + \frac{a_{22}}{2}, \\
-b_{\mathrm{partner},\mathrm{male}}
-&= \frac{a_{11}}{2} + a_{12} - \frac{a_{21}}{4} - \frac{a_{22}}{2}.
+b_{\mathrm{sum},\mathrm{female}}
+&= a_{11} + \frac{a_{21}}{2},
+&
+b_{\mathrm{sum},\mathrm{male}}
+&= a_{11} - \frac{a_{21}}{2}, \\
+b_{\mathrm{difference},\mathrm{female}}
+&= a_{22} + 2a_{12},
+&
+b_{\mathrm{difference},\mathrm{male}}
+&= a_{22} - 2a_{12}.
 \end{aligned}
 $$
 
-Similarly,
+Then, for each outcome role $r$,
+
+$$
+b_{\mathrm{actor},r}
+= \frac{b_{\mathrm{sum},r} + b_{\mathrm{difference},r}}{2},
+\qquad
+b_{\mathrm{partner},r}
+= \frac{b_{\mathrm{sum},r} - b_{\mathrm{difference},r}}{2}.
+$$
+
+The intercepts transform back as
 
 $$
 b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2}
@@ -393,18 +453,15 @@ mu_X <- mean(
   na.rm = TRUE
 )
 
-a11_from_apim <- (
-  b_actor_female + b_partner_female + b_actor_male + b_partner_male
-) / 2
-a12_from_apim <- (
-  b_actor_female - b_partner_female + b_partner_male - b_actor_male
-) / 4
-a21_from_apim <- (
-  b_actor_female + b_partner_female - b_actor_male - b_partner_male
-)
-a22_from_apim <- (
-  b_actor_female + b_actor_male - b_partner_female - b_partner_male
-) / 2
+b_sum_female <- b_actor_female + b_partner_female
+b_sum_male <- b_actor_male + b_partner_male
+b_difference_female <- b_actor_female - b_partner_female
+b_difference_male <- b_actor_male - b_partner_male
+
+a11_from_apim <- (b_sum_female + b_sum_male) / 2
+a21_from_apim <- b_sum_female - b_sum_male
+a12_from_apim <- (b_difference_female - b_difference_male) / 4
+a22_from_apim <- (b_difference_female + b_difference_male) / 2
 
 apim_to_dsm <- c(
   a10 = (b0_female + b0_male) / 2 + mu_X * a11_from_apim,
@@ -426,42 +483,26 @@ a22_dsm <- dsm_coef[[
   ".i_communication_within_dyad_diff:.i_dsm_role_contrast"
 ]]
 
-cat(
-  "From APIM model:\n",
-  "  female intercept:       ", round(b0_female, 3), "\n",
-  "  female actor effect:    ", round(b_actor_female, 3), "\n",
-  "  female partner effect:  ", round(b_partner_female, 3), "\n",
-  "  male intercept:         ", round(b0_male, 3), "\n",
-  "  male actor effect:      ", round(b_actor_male, 3), "\n",
-  "  male partner effect:    ", round(b_partner_male, 3), "\n",
-  "  centering constant:     ", round(mu_X, 3), "\n\n",
-
-  "DSM transformation:\n",
-  "  a10 = (female intercept + male intercept) / 2 +\n",
-  "         mu_X * a11:                                      ",
-  round(apim_to_dsm[["a10"]], 3), "\n",
-  "  a11 = (female actor + female partner + male actor +\n",
-  "         male partner) / 2:                               ",
-  round(apim_to_dsm[["a11"]], 3), "\n",
-  "  a12 = (female actor - female partner + male partner -\n",
-  "         male actor) / 4:                                 ",
-  round(apim_to_dsm[["a12"]], 3), "\n",
-  "  a20 = female intercept - male intercept + mu_X * a21:   ",
-  round(apim_to_dsm[["a20"]], 3), "\n",
-  "  a21 = female actor + female partner - male actor -\n",
-  "         male partner:                                    ",
-  round(apim_to_dsm[["a21"]], 3), "\n",
-  "  a22 = (female actor + male actor - female partner -\n",
-  "         male partner) / 2:                               ",
-  round(apim_to_dsm[["a22"]], 3), "\n\n",
-
-  "From DSM model:\n",
-  "  outcome-level intercept (a10):       ", round(a10_dsm, 3), "\n",
-  "  level -> level (a11):                ", round(a11_dsm, 3), "\n",
-  "  difference -> level (a12):           ", round(a12_dsm, 3), "\n",
-  "  outcome-difference intercept (a20):  ", round(a20_dsm, 3), "\n",
-  "  level -> difference (a21):           ", round(a21_dsm, 3), "\n",
-  "  difference -> difference (a22):      ", round(a22_dsm, 3), "\n"
+knitr::kable(
+  data.frame(
+    `DSM path` = names(apim_to_dsm),
+    `From APIM transformation` = round(unname(apim_to_dsm), 3),
+    `From DSM model` = round(c(
+      a10_dsm,
+      a11_dsm,
+      a12_dsm,
+      a20_dsm,
+      a21_dsm,
+      a22_dsm
+    ), 3),
+    check.names = FALSE
+  ),
+  align = c("l", "r", "r"),
+  caption = paste0(
+    "APIM-to-DSM fixed-effect transformation (centering constant = ",
+    round(mu_X, 3),
+    ")."
+  )
 )
 ```
 
@@ -519,7 +560,7 @@ In `interdep`, use `model_type = "dim"` for this exchangeable model and reserve
 
 Because the Gaussian DIM is the exchangeability-constrained version of the full
 DSM, exchangeability can also be tested by comparing these nested models. This
-is equivalent to the comparison shown in the [APIM vignette's discussion of testing distinguishability](apim.html#testing-distinguishability).
+is equivalent to the comparison shown in [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability).
 
 ## Intensive longitudinal DSM
 

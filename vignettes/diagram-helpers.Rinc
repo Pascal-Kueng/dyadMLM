@@ -193,3 +193,180 @@ draw_apim_diagram <- function(
   grid::popViewport()
   invisible(NULL)
 }
+
+draw_dsm_diagram <- function(estimates = NULL) {
+  mean_colour <- "#0072B2"
+  difference_colour <- "#D55E00"
+  ink_colour <- "#263238"
+  muted_colour <- "#64748B"
+  node_fill <- "#F8FAFC"
+
+  parameter_label <- function(number) {
+    name <- paste0("a", number)
+    if (is.null(estimates)) {
+      return(parse(text = sprintf("a[%s]", number)))
+    }
+    if (!name %in% names(estimates)) {
+      stop("`estimates` must contain a value named ", name, ".", call. = FALSE)
+    }
+    parse(text = sprintf("a[%s] == %.2f", number, estimates[[name]]))
+  }
+
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 24,
+    length = grid::unit(0.12, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 24,
+    length = grid::unit(0.09, "inches"),
+    ends = "both",
+    type = "closed"
+  )
+
+  draw_node <- function(x, y, label, subtitle) {
+    grid::grid.roundrect(
+      x = native(x),
+      y = native(y),
+      width = native(0.27),
+      height = native(0.22),
+      r = grid::unit(0.09, "snpc"),
+      gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y + 0.025),
+      gp = grid::gpar(col = ink_colour, fontsize = 19)
+    )
+    grid::grid.text(
+      subtitle,
+      x = native(x),
+      y = native(y - 0.047),
+      gp = grid::gpar(col = muted_colour, fontsize = 10)
+    )
+  }
+
+  draw_residual <- function(x, y, label) {
+    grid::grid.circle(
+      x = native(x),
+      y = native(y),
+      r = grid::unit(0.052, "snpc"),
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 16)
+    )
+  }
+
+  draw_path <- function(x0, y0, x1, y1, colour) {
+    grid::grid.segments(
+      x0 = native(x0),
+      y0 = native(y0),
+      x1 = native(x1),
+      y1 = native(y1),
+      arrow = arrow_head,
+      gp = grid::gpar(col = colour, fill = colour, lwd = 2.2)
+    )
+  }
+
+  draw_label <- function(x, y, label, colour) {
+    grid::grid.roundrect(
+      x = native(x),
+      y = native(y),
+      width = native(if (is.null(estimates)) 0.07 else 0.13),
+      height = native(0.064),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y),
+      gp = grid::gpar(col = colour, fontsize = 15)
+    )
+  }
+
+  draw_intercept <- function(x, y, label) {
+    grid::grid.roundrect(
+      x = native(x),
+      y = native(y),
+      width = native(if (is.null(estimates)) 0.08 else 0.14),
+      height = native(0.065),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = muted_colour, lwd = 1)
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y),
+      gp = grid::gpar(col = muted_colour, fontsize = 14)
+    )
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  draw_node(
+    0.17, 0.72,
+    expression(X[plain(mean)]),
+    "Communication level"
+  )
+  draw_node(
+    0.17, 0.28,
+    expression(X[plain(diff)]),
+    "Female - male communication"
+  )
+  draw_node(
+    0.65, 0.72,
+    expression(Y[plain(mean)]),
+    "Satisfaction level"
+  )
+  draw_node(
+    0.65, 0.28,
+    expression(Y[plain(diff)]),
+    "Female - male satisfaction"
+  )
+  draw_residual(0.91, 0.72, expression(r[plain(mean)]))
+  draw_residual(0.91, 0.28, expression(r[plain(diff)]))
+
+  # Paths from predictor level.
+  draw_path(0.305, 0.72, 0.515, 0.72, mean_colour)
+  draw_path(0.305, 0.72, 0.515, 0.28, mean_colour)
+
+  # Paths from predictor difference.
+  draw_path(0.305, 0.28, 0.515, 0.72, difference_colour)
+  draw_path(0.305, 0.28, 0.515, 0.28, difference_colour)
+
+  draw_label(0.41, 0.72, parameter_label("11"), mean_colour)
+  draw_label(0.38, 0.56, parameter_label("21"), mean_colour)
+  draw_label(0.38, 0.44, parameter_label("12"), difference_colour)
+  draw_label(0.41, 0.28, parameter_label("22"), difference_colour)
+
+  draw_intercept(0.65, 0.86, parameter_label("10"))
+  draw_intercept(0.65, 0.14, parameter_label("20"))
+
+  # Residuals point to their outcomes and may covary.
+  draw_path(0.855, 0.72, 0.785, 0.72, muted_colour)
+  draw_path(0.855, 0.28, 0.785, 0.28, muted_colour)
+  grid::grid.curve(
+    x1 = native(0.956),
+    y1 = native(0.68),
+    x2 = native(0.956),
+    y2 = native(0.32),
+    curvature = -0.24,
+    angle = 90,
+    ncp = 12,
+    square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
+  )
+
+  grid::popViewport()
+  invisible(NULL)
+}
