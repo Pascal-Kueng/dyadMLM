@@ -205,6 +205,42 @@ its variance or the implied member-level covariance matrix. In longitudinal
 models, the same transformation applies separately to stable dyad-level and
 same-occasion dyad-level covariance blocks.
 
+#### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
+
+The same shared/difference back-transformation applies to random slopes
+[@delrosarioPracticalGuideSpecifying2025]. For example, let $b_{actor}$ denote
+the shared actor random slope and $b_{diff:actor}$ the corresponding
+`.i_diff_*` random slope. The actor slopes for the members assigned `+1` and
+`-1` are
+
+$$
+b_{actor,1} = b_{actor} + b_{diff:actor},
+\qquad
+b_{actor,2} = b_{actor} - b_{diff:actor}.
+$$
+
+Because the shared and `.i_diff_*` blocks are fitted as separate random-effects
+terms, they are independent. Therefore,
+
+$$
+\operatorname{Var}(b_{actor,1})
+= \operatorname{Var}(b_{actor,2})
+= \operatorname{Var}(b_{actor})
++ \operatorname{Var}(b_{diff:actor}),
+$$
+
+and
+
+$$
+\operatorname{Cov}(b_{actor,1}, b_{actor,2})
+= \operatorname{Var}(b_{actor})
+- \operatorname{Var}(b_{diff:actor}).
+$$
+
+The same calculation applies to the partner slopes and random intercepts. Any
+covariances among the random intercept, actor slope, and partner slope can be
+back-transformed in the same way.
+
 ### Interpretation
 
 ## Testing distinguishability {#testing-distinguishability}
