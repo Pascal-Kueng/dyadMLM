@@ -508,10 +508,10 @@ summary(stability_influence)
 #> 
 #> Conditional model:
 #>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                4.213055   0.300180  14.035  < 2e-16 ***
-#> .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***
-#> .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    
-#> diaryday                  -0.005280   0.007643  -0.691    0.490    
+#> (Intercept)                4.213120   0.300184  14.035  < 2e-16 ***
+#> .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
+#> .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
+#> diaryday                  -0.005281   0.007643  -0.691    0.490    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

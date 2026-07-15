@@ -128,6 +128,19 @@ effects then represent:
     couple mean, equivalently half the signed difference between
     partners.
 
+![Path diagram for a cross-sectional Dyad-Individual Model. Dyad-mean
+communication predicts both members' satisfaction with the same
+coefficient b mean. Each member's communication deviation predicts their
+own satisfaction with the same coefficient b difference. Both outcomes
+have the same intercept b zero, and their residuals may
+covary.](dim_files/figure-html/conceptual-dim-diagram-1.png)
+
+Conceptual cross-sectional DIM. The dyad-mean predictor has the same
+effect on both members’ outcomes, and each member’s within-dyad
+deviation has the same effect on their own outcome. The repeated path
+labels express the exchangeability constraints. Member residuals may
+covary within dyads.
+
 The resulting estimated fixed effects are a reparameterization of the
 APIM actor and partner effects (Bolger et al. 2025). And just like the
 exchangeable APIM, the random-effects structure comprises a dyad-level
@@ -193,6 +206,17 @@ summary(dim_1)
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
+
+The same diagram can now be labelled with the estimated fixed effects:
+
+![Fitted path diagram for the cross-sectional Dyad-Individual Model. The
+intercept is about 5.04, the dyad-mean communication effect is about
+2.00, and the within-dyad communication deviation effect is about 1.52
+for both members.](dim_files/figure-html/fitted-dim-diagram-1.png)
+
+Estimated fixed effects from the cross-sectional Gaussian DIM. Because
+the members are treated as exchangeable, the same dyad-mean effect,
+within-dyad-deviation effect, and intercept apply to both members.
 
 ### Model interpretation
 
