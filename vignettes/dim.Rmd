@@ -18,6 +18,13 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+diagram_helper <- if (file.exists("diagram-helpers.Rinc")) {
+  "diagram-helpers.Rinc"
+} else {
+  file.path("vignettes", "diagram-helpers.Rinc")
+}
+sys.source(diagram_helper, envir = knitr::knit_global())
 ```
 
 ```{r setup}
@@ -95,6 +102,10 @@ shared level compared to all other couples.
 2. A within-dyad variable describing each partner's deviation from the couple
 mean, equivalently half the signed difference between partners.
 
+```{r conceptual-dim-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Conceptual cross-sectional DIM. The dyad-mean predictor has the same effect on both members' outcomes, and each member's within-dyad deviation has the same effect on their own outcome. The repeated path labels express the exchangeability constraints. Member residuals may covary within dyads.", fig.alt="Path diagram for a cross-sectional Dyad-Individual Model. Dyad-mean communication predicts both members' satisfaction with the same coefficient b mean. Each member's communication deviation predicts their own satisfaction with the same coefficient b difference. Both outcomes have the same intercept b zero, and their residuals may covary."}
+draw_dim_diagram()
+```
+
 The resulting estimated fixed effects are a reparameterization of the APIM actor
 and partner effects [@Bolger2025Unified]. And just like the exchangeable APIM,
 the random-effects structure comprises a dyad-level intercept
@@ -131,6 +142,20 @@ dim_1 <- glmmTMB::glmmTMB(
 )
 
 summary(dim_1)
+```
+
+The same diagram can now be labelled with the estimated fixed effects:
+
+```{r fitted-dim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Estimated fixed effects from the cross-sectional Gaussian DIM. Because the members are treated as exchangeable, the same dyad-mean effect, within-dyad-deviation effect, and intercept apply to both members.", fig.alt="Fitted path diagram for the cross-sectional Dyad-Individual Model. The intercept is about 5.04, the dyad-mean communication effect is about 2.00, and the within-dyad communication deviation effect is about 1.52 for both members."}
+dim_fixed_effects <- glmmTMB::fixef(dim_1)$cond
+
+draw_dim_diagram(
+  estimates = c(
+    b0 = dim_fixed_effects[["(Intercept)"]],
+    b_mean = dim_fixed_effects[[".i_communication_dyad_mean_gmc"]],
+    b_diff = dim_fixed_effects[[".i_communication_within_dyad_dev"]]
+  )
+)
 ```
 
 ### Model interpretation
