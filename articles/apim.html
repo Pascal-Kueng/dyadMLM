@@ -121,6 +121,22 @@ are
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{male}}</annotation></semantics></math>.
 All four paths can differ in a distinguishable APIM.</p>
+<p>The conceptual diagram places both members in one SEM-style path
+model. The same model is fitted in long format with one outcome row per
+member. In the individual-level representation below, the female
+predictor is the actor predictor for the female outcome and the partner
+predictor for the male outcome; the male predictor changes roles in the
+same way. The coefficient subscript identifies the outcome member.</p>
+<div class="figure">
+<img src="apim_files/figure-html/distinguishable-apim-member-diagram-1.png" class="r-plt" alt="Two-panel path diagram for a distinguishable female-male APIM. In the female outcome panel, female X is the actor predictor and male X is the partner predictor of female Y, with coefficients a F and p F. In the male outcome panel, male X is the actor predictor and female X is the partner predictor of male Y, with coefficients a M and p M. The female and male outcome residuals covary." width="100%"><p class="caption">
+Individual-level representation of the distinguishable cross-sectional
+APIM used for the long-format multilevel model. For the female outcome,
+the female predictor is the actor predictor and the male predictor is
+the partner predictor; these roles reverse for the male outcome. Actor
+and partner coefficients may differ by outcome role, and the two member
+residuals may have different variances and covary.
+</p>
+</div>
 <p>We first prepare the example data with
 <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -212,6 +228,20 @@ partner effects as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.</p>
+<p>The individual-level representation makes the long-format model
+explicit. For each outcome row, that member’s own predictor is the actor
+predictor and the other member’s predictor is the partner predictor.
+Swapping the arbitrary member labels swaps the two panels but does not
+change either coefficient.</p>
+<div class="figure">
+<img src="apim_files/figure-html/exchangeable-apim-member-diagram-1.png" class="r-plt" alt="Two-panel path diagram for an exchangeable APIM. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary." width="100%"><p class="caption">
+Individual-level representation of the exchangeable cross-sectional APIM
+used for the long-format multilevel model. Each member’s own predictor
+has the shared actor effect, and the other member’s predictor has the
+shared partner effect. The two residual variances are equal and the
+residuals may covary.
+</p>
+</div>
 <div class="section level3">
 <h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
 </h3>

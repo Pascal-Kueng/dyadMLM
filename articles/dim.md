@@ -110,42 +110,71 @@ arbitrary, setting `seed` makes their assignment reproducible.
 
 ### Example DIM Model
 
-For member $`i \in \{1, 2\}`$ of dyad $`j`$, the DIM decomposition is
-computed as:
+For member $`i \in \{1, 2\}`$ of dyad $`j`$, define the predictor mean
+and member deviation as:
 
 ``` math
 \bar{x}_j = \frac{x_{1j} + x_{2j}}{2}, \qquad
-d_{ij} = x_{ij} - \bar{x}_j.
+x_{\mathrm{dev},ij} = x_{ij} - \bar{x}_j.
 ```
 
-The two deviations of the two partners have equal magnitude and opposite
-signs: $`d_{1j} = -d_{2j}`$. The variables that enter the DIM fixed
-effects then represent:
+The deviations of the two partners have equal magnitude and opposite
+signs: $`x_{\mathrm{dev},1j} = -x_{\mathrm{dev},2j}`$. Outcome means and
+deviations are defined analogously. The variables that enter the DIM
+fixed effects then separate two associations:
 
-1.  A dyad-mean variable that is grand-mean centered. This describes a
-    couple’s shared level compared to all other couples.
-2.  A within-dyad variable describing each partner’s deviation from the
-    couple mean, equivalently half the signed difference between
-    partners.
+1.  The **between-couple effect**, $`b_{\mathrm{mean}}`$: whether
+    couples with a higher average predictor value than other couples
+    also have a higher average outcome value.
+2.  The **within-couple effect**, $`b_{\mathrm{dev}}`$: whether the
+    member who is above the couple’s predictor mean is also above the
+    couple’s outcome mean. With two members, each deviation is half the
+    corresponding signed partner difference.
 
-The DIM can equivalently be displayed using dyad means and signed
-differences. Because both members’ predictor and outcome deviations
-scale to their full signed differences in the same way, the difference
-path retains the coefficient $`b_{\mathrm{diff}}`$.
+The first diagram emphasizes this between- and within-couple
+decomposition. Its upper row describes differences between couples; its
+lower row describes the corresponding deviations within a couple for
+either member $`i \in \{1, 2\}`$. Switching members reverses both
+deviations and therefore leaves $`b_{\mathrm{dev}}`$ unchanged.
 
-![Path diagram for a cross-sectional Dyad-Individual Model. The centered
-mean of members' predictor scores predicts the mean of their outcomes
-with coefficient b mean. Their signed predictor difference predicts
-their signed outcome difference with coefficient b difference. There are
-no cross-paths, and only the outcome-mean equation has intercept b
-zero.](dim_files/figure-html/conceptual-dim-diagram-1.png)
+![Path diagram separating the between- and within-couple associations in
+a cross-sectional Dyad-Individual Model. The centered predictor mean
+predicts the outcome mean with coefficient b mean. Member i's predictor
+deviation predicts the same member's outcome deviation with coefficient
+b dev. There are no cross-paths, and only the outcome-mean equation has
+intercept b zero.](dim_files/figure-html/conceptual-dim-diagram-1.png)
 
-Conceptual cross-sectional DIM in its equivalent mean-and-difference
-representation. The centered predictor mean predicts the outcome mean,
-and the signed predictor difference predicts the signed outcome
-difference. Exchangeability removes the two DSM cross-paths and the
-outcome-difference intercept; the mean and difference residual
-components are uncorrelated.
+Between- and within-couple representation of the cross-sectional DIM.
+The between-couple effect links couples’ centered predictor means to
+their outcome means. The within-couple effect links a member’s predictor
+deviation to that member’s outcome deviation. Exchangeability removes
+the two DSM cross-paths and the outcome-deviation intercept; the mean
+and deviation residual components are uncorrelated.
+
+The second diagram translates the same decomposition to the
+individual-member rows used by the long-format multilevel model. Each
+member’s expected outcome combines the couple’s shared,
+grand-mean-centered predictor mean with that member’s own predictor
+deviation. The same $`b_{\mathrm{mean}}`$ and $`b_{\mathrm{dev}}`$ apply
+to both arbitrarily labelled members, while their two outcomes remain
+interdependent.
+
+![Path diagram for two arbitrarily labelled members of an exchangeable
+dyad. For each member, the shared, grand-mean-centered couple predictor
+mean and the member's own predictor deviation predict the individual
+outcome. Both members share the same between- and within-couple
+coefficients, and their outcome residuals are
+correlated.](dim_files/figure-html/conceptual-dim-member-diagram-1.png)
+
+Individual-level representation of the cross-sectional DIM used for the
+long-format multilevel model. Each member’s outcome is predicted by the
+couple’s shared predictor mean and that member’s own predictor
+deviation. Both members share the same two coefficients, and their
+residuals may covary.
+
+Uncorrelated $`r_m`$ and $`r_{d,i}`$ in the conceptual representation do
+not imply that the member residuals are independent: $`\epsilon_1`$ and
+$`\epsilon_2`$ in the member-level representation may still covary.
 
 The resulting estimated fixed effects are a reparameterization of the
 APIM actor and partner effects (Bolger et al. 2025). And just like the
@@ -173,7 +202,7 @@ dim_1 <- glmmTMB::glmmTMB(
     # Between-couple effect
     .i_communication_dyad_mean_gmc +
 
-    # Within-couple effect
+    # Member-deviation effect
     .i_communication_within_dyad_dev +
 
     # Residual Gaussian covariance structure
@@ -213,18 +242,17 @@ summary(dim_1)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-The same mean-and-difference diagram can now be labelled with the
+The same mean-and-deviation diagram can now be labelled with the
 estimated fixed effects:
 
 ![Fitted path diagram for the cross-sectional Dyad-Individual Model. The
 outcome-mean intercept is about 5.04, the centered predictor-mean effect
-is about 2.00, and the signed predictor-difference effect is about 1.52.
-There are no
-cross-paths.](dim_files/figure-html/fitted-dim-diagram-1.png)
+is about 2.00, and the member-deviation effect is about 1.52. There are
+no cross-paths.](dim_files/figure-html/fitted-dim-diagram-1.png)
 
 Estimated fixed effects from the cross-sectional Gaussian DIM in its
-equivalent mean-and-difference representation. The intercept belongs to
-the outcome-mean equation; exchangeability fixes the outcome-difference
+mean-and-deviation representation. The intercept belongs to the
+outcome-mean equation; exchangeability fixes the outcome-deviation
 intercept and both cross-paths to zero.
 
 ### Model interpretation
@@ -248,7 +276,7 @@ the outcome, e.g., “satisfaction”:
   higher expected couple-average satisfaction. Equivalently, each
   member’s expected satisfaction is 2.00 points higher.
 
-- The within-dyad-deviation estimate (about 1.52) means that a one-point
+- The member-deviation estimate (about 1.52) means that a one-point
   difference in communication between partners is associated with a
   1.52-point difference in their expected satisfaction, holding their
   average communication constant. In member terms, suppose one member is
@@ -313,8 +341,8 @@ with different parameterizations and coefficient interpretations.
 Once APIM estimates are present, one can easily obtain DIM estimates,
 and the other way around. Let $`b_{\mathrm{actor}}`$ and
 $`b_{\mathrm{partner}}`$ denote the APIM actor and partner slopes, and
-let $`b_{\mathrm{mean}}`$ and $`b_{\mathrm{diff}}`$ denote the DIM
-dyad-mean and within-dyad-deviation slopes. They relate as follows:
+let $`b_{\mathrm{mean}}`$ and $`b_{\mathrm{dev}}`$ denote the DIM
+dyad-mean and member-deviation slopes. They relate as follows:
 
 ``` math
 b_{\mathrm{mean}} = b_{\mathrm{actor}} + b_{\mathrm{partner}}
@@ -323,21 +351,21 @@ b_{\mathrm{mean}} = b_{\mathrm{actor}} + b_{\mathrm{partner}}
 and
 
 ``` math
-b_{\mathrm{diff}} = b_{\mathrm{actor}} - b_{\mathrm{partner}}
+b_{\mathrm{dev}} = b_{\mathrm{actor}} - b_{\mathrm{partner}}
 ```
 
 Conversely:
 
 ``` math
 b_{\mathrm{actor}}
-= \frac{b_{\mathrm{mean}} + b_{\mathrm{diff}}}{2}
+= \frac{b_{\mathrm{mean}} + b_{\mathrm{dev}}}{2}
 ```
 
 and
 
 ``` math
 b_{\mathrm{partner}}
-= \frac{b_{\mathrm{mean}} - b_{\mathrm{diff}}}{2}
+= \frac{b_{\mathrm{mean}} - b_{\mathrm{dev}}}{2}
 ```
 
 In this example we can see that the transformations work:
@@ -351,7 +379,7 @@ b_actor <- apim_coef[[".i_communication_actor"]]
 b_partner <- apim_coef[[".i_communication_partner"]]
 
 b_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
-b_diff <- dim_coef[[".i_communication_within_dyad_dev"]]
+b_dev <- dim_coef[[".i_communication_within_dyad_dev"]]
 
 
 cat("From APIM model:\n",
@@ -360,11 +388,11 @@ cat("From APIM model:\n",
 
      "DIM transformation:\n",
      "  b_mean = b_actor + b_partner:  ", round(b_actor + b_partner, 3), "\n",
-     "  b_diff = b_actor - b_partner:  ", round(b_actor - b_partner, 3), "\n\n",
+     "  b_dev = b_actor - b_partner:   ", round(b_actor - b_partner, 3), "\n\n",
 
      "From DIM model:\n",
      "  dyad-mean effect:              ", round(b_mean, 3), "\n",
-     "  within-dyad-deviation effect:  ", round(b_diff, 3), "\n"
+     "  member-deviation effect:       ", round(b_dev, 3), "\n"
 )
 #> From APIM model:
 #>    actor effect:                   1.758 
@@ -372,11 +400,11 @@ cat("From APIM model:\n",
 #> 
 #>  DIM transformation:
 #>    b_mean = b_actor + b_partner:   1.996 
-#>    b_diff = b_actor - b_partner:   1.52 
+#>    b_dev = b_actor - b_partner:    1.52 
 #> 
 #>  From DIM model:
 #>    dyad-mean effect:               1.996 
-#>    within-dyad-deviation effect:   1.52
+#>    member-deviation effect:        1.52
 ```
 
 The DIM and APIM intercepts are not expected to be equal because the DIM
@@ -395,8 +423,8 @@ An intuitive way to think about this is:
 - When a person’s deviation from the dyad mean goes up by 1 unit while
   the dyad mean remains constant, the other partner’s value must go
   **down** by 1 unit. The actor value therefore changes by +1 and the
-  partner value by -1, which is why the within-dyad-deviation effect is
-  the actor effect - the partner effect.
+  partner value by -1, which is why the member-deviation effect is the
+  actor effect - the partner effect.
 
 The grid below shows the same predictor values in both coordinate
 systems. The horizontal and vertical axes are actor and partner values
@@ -428,19 +456,19 @@ Dyad mean, *x*_(mean)
 
 0.0
 
-Within-dyad deviation, *x*_(diff)
+Member deviation, *x*_(dev)
 
 0.0
 
 *x*_(mean) = (*x*_(actor) + *x*_(partner)) / 2
 
-*x*_(diff) = (*x*_(actor) - *x*_(partner)) / 2
+*x*_(dev) = (*x*_(actor) - *x*_(partner)) / 2
 
 APIM0.00 = 0.00
 
 DIM0.00 = 0.00
 
-Slopes*b*_(mean) = *b*_(actor) + *b*_(partner) = 2.00; *b*_(diff) =
+Slopes*b*_(mean) = *b*_(actor) + *b*_(partner) = 2.00; *b*_(dev) =
 *b*_(actor) - *b*_(partner) = 1.52
 
 ![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iaWRnLXBsb3QiIGRhdGEtaWRnLXBsb3Qgdmlld2JveD0iMCAwIDMyMCAzMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbGxlZGJ5PSJpZGctcGxvdC10aXRsZSBpZGctcGxvdC1kZXNjcmlwdGlvbiI+PHRpdGxlIGlkPSJpZGctcGxvdC10aXRsZSI+QVBJTSBhbmQgRElNIGNvb3JkaW5hdGUgZ3JpZDwvdGl0bGU+CjxkZXNjIGlkPSJpZGctcGxvdC1kZXNjcmlwdGlvbiI+VGhlIHNlbGVjdGVkIHBvaW50IGhhcyBhY3RvciwgcGFydG5lciwgZHlhZC1tZWFuLCBhbmQgd2l0aGluLWR5YWQgdmFsdWVzIG9mIHplcm8uPC9kZXNjPjxkZWZzPjxjbGlwcGF0aCBpZD0iaWRnLXBsb3QtY2xpcCI+PHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgcng9IjQiIC8+PC9jbGlwcGF0aD48L2RlZnM+PHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgcng9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utb3BhY2l0eT0iMC4zNSIgLz48ZyBkYXRhLWlkZy1ncmlkLWxpbmVzIGNsaXAtcGF0aD0idXJsKCNpZGctcGxvdC1jbGlwKSI+PC9nPjxnIGRhdGEtaWRnLWF4aXMtbGFiZWxzPjwvZz48Y2lyY2xlIGNsYXNzPSJpZGctaGFsbyIgZGF0YS1pZGctaGFsbyBjeD0iMTYwIiBjeT0iMTYwIiByPSIxMyI+PC9jaXJjbGU+PGNpcmNsZSBjbGFzcz0iaWRnLXBvaW50IiBkYXRhLWlkZy1wb2ludCBjeD0iMTYwIiBjeT0iMTYwIiByPSI2Ij48L2NpcmNsZT48L3N2Zz4=)
@@ -454,14 +482,14 @@ higher and the deviation is unchanged.
 
 *b*_(mean) = *b*_(actor) + *b*_(partner)
 
-**Within-dyad difference**
+**Member deviation**
 
 Show
 
 When one member is one point higher and the other one point lower, the
 dyad mean is unchanged and the deviation is one point.
 
-*b*_(diff) = *b*_(actor) - *b*_(partner)
+*b*_(dev) = *b*_(actor) - *b*_(partner)
 
 The dot uses APIM coordinates. The diagonal lines show the same point in
 DIM coordinates.
@@ -484,17 +512,17 @@ For longitudinal DIM, predictors are decomposed into within-person and
 between-person components before the dyadic decomposition (Bolger and
 Laurenceau 2013; Gistelinck and Loeys 2020). The default `"auto"`
 selects `"time_2l"` when both `time` and `predictors` are supplied. It
-also retains raw dyad-occasion means and within-dyad deviations. The
+also retains raw dyad-occasion means and member deviations. The
 decomposed columns used below are:
 
 1.  The `cwp` dyad mean captures a shared occasion-specific shift from
     the two members’ usual levels (shared occasion-level variation).
-2.  The `cwp` within-dyad deviation captures which member is further
-    above or below their own usual level on that occasion.
+2.  The `cwp` member deviation captures which member is further above or
+    below their own usual level on that occasion.
 3.  The `cbp` dyad mean captures the dyad’s shared usual level relative
     to the sample’s grand mean (stable between-dyad differences).
-4.  The `cbp` within-dyad deviation captures each member’s stable
-    difference from the dyad’s usual level.
+4.  The `cbp` member deviation captures each member’s stable difference
+    from the dyad’s usual level.
 
 The `cbp` terms use each member’s mean across the observed occasions to
 estimate that member’s longer-run usual level. With few occasions (small
@@ -504,7 +532,7 @@ can therefore be biased or imprecise, so they should be interpreted
 cautiously (Gottfredson 2019).
 
 Use `temporal_predictor_decomposition = "none"` to construct only the
-raw dyad-occasion mean and within-dyad deviation.
+raw dyad-occasion mean and member deviation.
 
 ``` r
 
@@ -688,16 +716,16 @@ both member deviations and expected differences between partners.
   deviations constant. Equivalently, expected couple-average closeness
   is 0.49 points higher on that occasion.
 
-- The `cbp` within-dyad estimate (about 0.78) means that if partners
-  differ by one point in their usual support levels, they are expected
-  to differ by 0.78 points in closeness, holding the couple’s average
-  usual support and the other predictors constant. In member terms,
-  suppose one member is 0.5 points above the couple’s average usual
-  support and the other is 0.5 points below it. Their expected closeness
-  is then 0.39 points above and below the couple’s predicted mean,
-  respectively.
+- The `cbp` member-deviation estimate (about 0.78) means that if
+  partners differ by one point in their usual support levels, they are
+  expected to differ by 0.78 points in closeness, holding the couple’s
+  average usual support and the other predictors constant. In member
+  terms, suppose one member is 0.5 points above the couple’s average
+  usual support and the other is 0.5 points below it. Their expected
+  closeness is then 0.39 points above and below the couple’s predicted
+  mean, respectively.
 
-- The `cwp` within-dyad estimate (about 0.06) means that if one
+- The `cwp` member-deviation estimate (about 0.06) means that if one
   partner’s momentary deviation from usual support is one point higher
   than the other partner’s deviation, they are expected to differ by
   0.06 points in closeness, holding the occasion-specific dyad mean and
@@ -882,9 +910,9 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 ```
 
 The first stable dyad-level random effects block contains the shared DIM
-intercept, dyad-mean slope, and within-dyad-deviation slope. The second
-block contains their member-difference counterparts, included through
-the `.i_diff_*` interactions. These uncorrelated blocks allow the two
+intercept, dyad-mean slope, and member-deviation slope. The second block
+contains their member-difference counterparts, included through the
+`.i_diff_*` interactions. These uncorrelated blocks allow the two
 members to have different random slopes while preserving
 exchangeability.
 
@@ -892,26 +920,26 @@ exchangeability.
 
 Applying the same transformation to the random-slope coefficients
 proceeds in two steps. First, transform the DIM dyad-mean and
-within-dyad-deviation random slopes into APIM actor and partner random
+member-deviation random slopes into APIM actor and partner random
 slopes. Random effects use $`u`$, with subscripts that write out
-`actor`, `partner`, `mean`, and `diff`. For the shared block,
+`actor`, `partner`, `mean`, and `dev`. For the shared block,
 
 ``` math
 u_{\mathrm{actor},j}
-= \frac{u_{\mathrm{mean},j} + u_{\mathrm{diff},j}}{2},
+= \frac{u_{\mathrm{mean},j} + u_{\mathrm{dev},j}}{2},
 \qquad
 u_{\mathrm{partner},j}
-= \frac{u_{\mathrm{mean},j} - u_{\mathrm{diff},j}}{2},
+= \frac{u_{\mathrm{mean},j} - u_{\mathrm{dev},j}}{2},
 ```
 
 and for the `.i_diff_*` block, marked by a tilde,
 
 ``` math
 \widetilde{u}_{\mathrm{actor},j}
-= \frac{\widetilde{u}_{\mathrm{mean},j} + \widetilde{u}_{\mathrm{diff},j}}{2},
+= \frac{\widetilde{u}_{\mathrm{mean},j} + \widetilde{u}_{\mathrm{dev},j}}{2},
 \qquad
 \widetilde{u}_{\mathrm{partner},j}
-= \frac{\widetilde{u}_{\mathrm{mean},j} - \widetilde{u}_{\mathrm{diff},j}}{2}.
+= \frac{\widetilde{u}_{\mathrm{mean},j} - \widetilde{u}_{\mathrm{dev},j}}{2}.
 ```
 
 The shared and `.i_diff_*` random intercepts remain unchanged.
@@ -1121,7 +1149,7 @@ summary(dim_ILD_lag_raw)
 
 The lagged dyad-mean coefficient describes how a one-point higher shared
 prior outcome level relates to both members’ current outcomes. The
-lagged within-dyad-deviation coefficient describes how a one-point prior
+lagged member-deviation coefficient describes how a one-point prior
 difference between partners relates to their current expected
 difference.
 

@@ -49,6 +49,28 @@ The corresponding intercepts are $`b_{0,\mathrm{female}}`$ and
 $`b_{0,\mathrm{male}}`$. All four paths can differ in a distinguishable
 APIM.
 
+The conceptual diagram places both members in one SEM-style path model.
+The same model is fitted in long format with one outcome row per member.
+In the individual-level representation below, the female predictor is
+the actor predictor for the female outcome and the partner predictor for
+the male outcome; the male predictor changes roles in the same way. The
+coefficient subscript identifies the outcome member.
+
+![Two-panel path diagram for a distinguishable female-male APIM. In the
+female outcome panel, female X is the actor predictor and male X is the
+partner predictor of female Y, with coefficients a F and p F. In the
+male outcome panel, male X is the actor predictor and female X is the
+partner predictor of male Y, with coefficients a M and p M. The female
+and male outcome residuals
+covary.](apim_files/figure-html/distinguishable-apim-member-diagram-1.png)
+
+Individual-level representation of the distinguishable cross-sectional
+APIM used for the long-format multilevel model. For the female outcome,
+the female predictor is the actor predictor and the male predictor is
+the partner predictor; these roles reverse for the male outcome. Actor
+and partner coefficients may differ by outcome role, and the two member
+residuals may have different variances and covary.
+
 We first prepare the example data with
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md):
 
@@ -142,6 +164,25 @@ $`b_{\mathrm{partner}}`$. The members also share the intercept $`b_0`$.
 The two residual variances are constrained to be equal, while their
 covariance is estimated. The diagram abbreviates the shared actor and
 partner effects as $`a`$ and $`p`$.
+
+The individual-level representation makes the long-format model
+explicit. For each outcome row, that member’s own predictor is the actor
+predictor and the other member’s predictor is the partner predictor.
+Swapping the arbitrary member labels swaps the two panels but does not
+change either coefficient.
+
+![Two-panel path diagram for an exchangeable APIM. For arbitrary member
+1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1.
+For arbitrary member 2, X 2 is the actor predictor and X 1 is the
+partner predictor of Y 2. Both panels use the same actor coefficient a
+and partner coefficient p, and their outcome residuals
+covary.](apim_files/figure-html/exchangeable-apim-member-diagram-1.png)
+
+Individual-level representation of the exchangeable cross-sectional APIM
+used for the long-format multilevel model. Each member’s own predictor
+has the shared actor effect, and the other member’s predictor has the
+shared partner effect. The two residual variances are equal and the
+residuals may covary.
 
 ### Assumptions
 
