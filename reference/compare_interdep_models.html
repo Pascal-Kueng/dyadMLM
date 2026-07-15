@@ -110,11 +110,11 @@ on the boundary.</p>
 <span class="r-in"><span>  <span class="va">full_data</span> <span class="op">&lt;-</span> <span class="va">restricted_data</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">restricted_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">restricted_data</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">full_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">satisfaction</span> <span class="op">~</span> <span class="va">gender</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="va">satisfaction</span> <span class="op">~</span> <span class="va">gender</span> <span class="op">+</span> <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">full_data</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

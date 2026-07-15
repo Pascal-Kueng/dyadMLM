@@ -41,12 +41,13 @@ Here, $`b_{\mathrm{actor},\mathrm{female}}`$ and
 $`b_{\mathrm{actor},\mathrm{male}}`$ are the actor effects on the female
 and male outcomes, whereas $`b_{\mathrm{partner},\mathrm{female}}`$ and
 $`b_{\mathrm{partner},\mathrm{male}}`$ are the corresponding partner
-effects. Fixed coefficients use $`b`$ throughout the vignettes; the
-first subscript names the effect and the second identifies the outcome
-member. The corresponding intercepts are $`b_{0,\mathrm{female}}`$ and
+effects. The diagram abbreviates these paths as $`a_{\mathrm{F}}`$,
+$`a_{\mathrm{M}}`$, $`p_{\mathrm{F}}`$, and $`p_{\mathrm{M}}`$, with the
+subscript identifying the outcome member. In the text and equations,
+fixed coefficients use $`b`$ and write out actor and partner explicitly.
+The corresponding intercepts are $`b_{0,\mathrm{female}}`$ and
 $`b_{0,\mathrm{male}}`$. All four paths can differ in a distinguishable
-APIM. The diagram uses `F` and `M` only to keep its edge and residual
-labels compact.
+APIM.
 
 We first prepare the example data with
 [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md):
@@ -139,7 +140,8 @@ not change the model. The two actor paths therefore share the
 coefficient $`b_{\mathrm{actor}}`$, and the two partner paths share
 $`b_{\mathrm{partner}}`$. The members also share the intercept $`b_0`$.
 The two residual variances are constrained to be equal, while their
-covariance is estimated.
+covariance is estimated. The diagram abbreviates the shared actor and
+partner effects as $`a`$ and $`p`$.
 
 ### Assumptions
 
@@ -293,8 +295,8 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     .i_is_female_x_male +
     .i_communication_actor +
     .i_communication_partner +
-    (0 + .i_is_female_x_male | coupleID) +
-    (0 + .i_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .i_is_female_x_male | coupleID) +
+    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -471,12 +473,12 @@ stability_influence <- glmmTMB::glmmTMB(
     diaryday +
 
     # Stable exchangeable dyad-level covariance
-    (1 | coupleID) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(1 | coupleID) +
+    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
-    (1 | coupleID:diaryday) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(1 | coupleID:diaryday) +
+    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -487,8 +489,8 @@ summary(stability_influence)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  
-#>     diaryday + (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
-#>     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  
+#>     diaryday + us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  
+#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_apim_data_dynamic
@@ -508,10 +510,10 @@ summary(stability_influence)
 #> 
 #> Conditional model:
 #>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                4.213120   0.300184  14.035  < 2e-16 ***
-#> .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
-#> .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
-#> diaryday                  -0.005281   0.007643  -0.691    0.490    
+#> (Intercept)                4.213055   0.300180  14.035  < 2e-16 ***
+#> .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***
+#> .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    
+#> diaryday                  -0.005280   0.007643  -0.691    0.490    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

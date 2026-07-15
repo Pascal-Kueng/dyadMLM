@@ -143,12 +143,12 @@ mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
 
     # exchangeable female-female residual covariance via sum-diff
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
+    us(0 + .i_is_female_x_female | coupleID) +
+    us(0 + .i_diff_female_x_female_arbitrary | coupleID) +
 
     # exchangeable male-male residual covariance via sum-diff
-    (0 + .i_is_male_x_male | coupleID) +
-    (0 + .i_diff_male_x_male_arbitrary | coupleID)
+    us(0 + .i_is_male_x_male | coupleID) +
+    us(0 + .i_diff_male_x_male_arbitrary | coupleID)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -160,9 +160,9 @@ summary(mixed_cross_gaussian_model)
 #> Formula:          
 #> satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
 #>     .i_is_female_x_female + .i_is_male_x_male + us(0 + .i_is_female_x_male_female +  
-#>     .i_is_female_x_male_male | coupleID) + (0 + .i_is_female_x_female |  
-#>     coupleID) + (0 + .i_diff_female_x_female_arbitrary | coupleID) +  
-#>     (0 + .i_is_male_x_male | coupleID) + (0 + .i_diff_male_x_male_arbitrary |  
+#>     .i_is_female_x_male_male | coupleID) + us(0 + .i_is_female_x_female |  
+#>     coupleID) + us(0 + .i_diff_female_x_female_arbitrary | coupleID) +  
+#>     us(0 + .i_is_male_x_male | coupleID) + us(0 + .i_diff_male_x_male_arbitrary |  
 #>     coupleID)
 #> Dispersion:                    ~0
 #> Data: mixed_cross_data
@@ -340,12 +340,12 @@ mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
     .i_is_non_female_x_female +
 
     # exchangeable female-female residual covariance via sum-diff
-    (0 + .i_is_female_x_female | coupleID) +
-    (0 + .i_diff_female_x_female_arbitrary | coupleID) +
+    us(0 + .i_is_female_x_female | coupleID) +
+    us(0 + .i_diff_female_x_female_arbitrary | coupleID) +
 
     # pooled female-male and male-male residual covariance via sum-diff
-    (0 + .i_is_non_female_x_female | coupleID) +
-    (0 + .i_diff_non_female_x_female_arbitrary | coupleID)
+    us(0 + .i_is_non_female_x_female | coupleID) +
+    us(0 + .i_diff_non_female_x_female_arbitrary | coupleID)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -529,14 +529,14 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
     # stable dyad-level covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID) +
 
-    (0 + .i_is_same_sex | coupleID) +
-    (0 + .i_diff_same_sex_arbitrary | coupleID) +
+    us(0 + .i_is_same_sex | coupleID) +
+    us(0 + .i_diff_same_sex_arbitrary | coupleID) +
 
     # same-day covariance
     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID:diaryday) +
 
-    (0 + .i_is_same_sex | coupleID:diaryday) +
-    (0 + .i_diff_same_sex_arbitrary | coupleID:diaryday)
+    us(0 + .i_is_same_sex | coupleID:diaryday) +
+    us(0 + .i_diff_same_sex_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()

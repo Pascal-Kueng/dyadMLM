@@ -99,16 +99,19 @@ For a cross-sectional Gaussian DSM, a correlated dyad random intercept
 and role-contrast slope represent unexplained outcome-level and
 outcome-difference variation.
 
-![Path diagram for a cross-sectional dyadic score model. Communication
-level and female-minus-male communication difference each predict
-satisfaction level and female-minus-male satisfaction difference. Paths
-are labelled a11, a12, a21, and a22, and outcome intercepts are labelled
-a10 and a20.](dsm_files/figure-html/conceptual-dsm-diagram-1.png)
+![Path diagram for a cross-sectional dyadic score model. The centered
+female-male predictor mean and female-minus-male predictor difference
+each predict the female-male outcome mean and female-minus-male outcome
+difference. Paths are labelled a11, a12, a21, and a22, and outcome
+intercepts are labelled a10 and
+a20.](dsm_files/figure-html/conceptual-dsm-diagram-1.png)
 
-Conceptual cross-sectional DSM. Predictor level and predictor difference
-each predict both outcome level and outcome difference. The intercepts
-are a10 and a20; the four regression paths are a11, a12, a21, and a22.
-The outcome-level and outcome-difference residuals may covary.
+Conceptual cross-sectional DSM. The nodes show the centered predictor
+mean, signed predictor difference, outcome mean, and signed outcome
+difference explicitly. Predictor mean and predictor difference each
+predict both outcome scores. The intercepts are a10 and a20; the four
+regression paths are a11, a12, a21, and a22. The outcome-mean and
+outcome-difference residuals may covary.
 
 The path labels correspond directly to the terms in the model below:
 
@@ -136,7 +139,7 @@ dsm_model <- glmmTMB::glmmTMB(
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
-    (1 + .i_dsm_role_contrast | coupleID),
+    us(1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data
@@ -148,7 +151,7 @@ summary(dsm_model)
 #> satisfaction ~ 1 + .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  
 #>     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  
 #>     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  
-#>     (1 + .i_dsm_role_contrast | coupleID)
+#>     us(1 + .i_dsm_role_contrast | coupleID)
 #> Dispersion:                    ~0
 #> Data: cross_dsm_data
 #> 
@@ -227,14 +230,15 @@ Consider the conceptual SEM formulas:
 
 The fitted paths for this example are:
 
-![Fitted path diagram for the example dyadic score model. Communication
-level and female-minus-male communication difference each predict
-satisfaction level and female-minus-male satisfaction difference. The
-six paths and intercepts are labelled with their estimated
-coefficients.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
+![Fitted path diagram for the example dyadic score model. The centered
+female-male predictor mean and female-minus-male predictor difference
+each predict the female-male outcome mean and female-minus-male outcome
+difference. The four paths and two intercepts are labelled with their
+estimated coefficients.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
 
-Fitted cross-sectional DSM for the example data. Edge and intercept
-labels show the estimated DSM coefficients.
+Fitted cross-sectional DSM for the example data. The nodes show the
+score definitions explicitly, while edge and intercept labels show the
+estimated DSM coefficients.
 
 The fixed effects from our MLM model map directly to these paths as
 such:
@@ -293,7 +297,7 @@ dsm_model_inverted <- glmmTMB::glmmTMB(
     .i_dsm_role_contrast +
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
-    (1 + .i_dsm_role_contrast | coupleID),
+    us(1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data_inverted

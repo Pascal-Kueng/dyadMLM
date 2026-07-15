@@ -61,11 +61,11 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
   full_data <- restricted_data
 
   restricted_model <- glmmTMB::glmmTMB(
-    satisfaction ~ 1 + (1 | coupleID),
+    satisfaction ~ 1 + us(1 | coupleID),
     data = restricted_data
   )
   full_model <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + (1 | coupleID),
+    satisfaction ~ gender + us(1 | coupleID),
     data = full_data
   )
 

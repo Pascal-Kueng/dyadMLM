@@ -105,16 +105,22 @@ are the actor effects on the female and male outcomes, whereas
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{partner},\mathrm{female}}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{partner},\mathrm{male}}</annotation></semantics></math>
-are the corresponding partner effects. Fixed coefficients use
+are the corresponding partner effects. The diagram abbreviates these
+paths as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mi mathvariant="normal">F</mi></msub><annotation encoding="application/x-tex">a_{\mathrm{F}}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mi mathvariant="normal">M</mi></msub><annotation encoding="application/x-tex">a_{\mathrm{M}}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi mathvariant="normal">F</mi></msub><annotation encoding="application/x-tex">p_{\mathrm{F}}</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi mathvariant="normal">M</mi></msub><annotation encoding="application/x-tex">p_{\mathrm{M}}</annotation></semantics></math>,
+with the subscript identifying the outcome member. In the text and
+equations, fixed coefficients use
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
-throughout the vignettes; the first subscript names the effect and the
-second identifies the outcome member. The corresponding intercepts are
+and write out actor and partner explicitly. The corresponding intercepts
+are
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{female}}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{0,\mathrm{male}}</annotation></semantics></math>.
-All four paths can differ in a distinguishable APIM. The diagram uses
-<code>F</code> and <code>M</code> only to keep its edge and residual
-labels compact.</p>
+All four paths can differ in a distinguishable APIM.</p>
 <p>We first prepare the example data with
 <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -201,7 +207,11 @@ and the two partner paths share
 The members also share the intercept
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mn>0</mn></msub><annotation encoding="application/x-tex">b_0</annotation></semantics></math>.
 The two residual variances are constrained to be equal, while their
-covariance is estimated.</p>
+covariance is estimated. The diagram abbreviates the shared actor and
+partner effects as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>.</p>
 <div class="section level3">
 <h3 id="assumptions">Assumptions<a class="anchor" aria-label="anchor" href="#assumptions"></a>
 </h3>
@@ -352,8 +362,8 @@ residual variances to be equal across members:</p>
 <span>    <span class="va">.i_is_female_x_male</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_communication_actor</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_communication_partner</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">apim_exchangeable_data</span></span>
@@ -513,12 +523,12 @@ bridged.</p>
 <span>    <span class="va">diaryday</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -529,8 +539,8 @@ bridged.</p>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  </span></span>
-<span><span class="co">#&gt;     diaryday + (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
-<span><span class="co">#&gt;     coupleID) + (1 | coupleID:diaryday) + (0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     diaryday + us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID) + us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
 <span><span class="co">#&gt;     coupleID:diaryday)</span></span>
 <span><span class="co">#&gt; Dispersion:                 ~0</span></span>
 <span><span class="co">#&gt; Data: ild_apim_data_dynamic</span></span>
@@ -550,10 +560,10 @@ bridged.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
-<span><span class="co">#&gt; diaryday                  -0.005281   0.007643  -0.691    0.490    </span></span>
+<span><span class="co">#&gt; (Intercept)                4.213055   0.300180  14.035  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    </span></span>
+<span><span class="co">#&gt; diaryday                  -0.005280   0.007643  -0.691    0.490    </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This model can be extended with contemporaneous actor and partner

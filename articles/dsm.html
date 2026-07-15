@@ -166,11 +166,13 @@ The outcome remains unchanged and no transformation is needed.</p>
 intercept and role-contrast slope represent unexplained outcome-level
 and outcome-difference variation.</p>
 <div class="figure">
-<img src="dsm_files/figure-html/conceptual-dsm-diagram-1.png" class="r-plt" alt="Path diagram for a cross-sectional dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20." width="100%"><p class="caption">
-Conceptual cross-sectional DSM. Predictor level and predictor difference
-each predict both outcome level and outcome difference. The intercepts
-are a10 and a20; the four regression paths are a11, a12, a21, and a22.
-The outcome-level and outcome-difference residuals may covary.
+<img src="dsm_files/figure-html/conceptual-dsm-diagram-1.png" class="r-plt" alt="Path diagram for a cross-sectional dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20." width="100%"><p class="caption">
+Conceptual cross-sectional DSM. The nodes show the centered predictor
+mean, signed predictor difference, outcome mean, and signed outcome
+difference explicitly. Predictor mean and predictor difference each
+predict both outcome scores. The intercepts are a10 and a20; the four
+regression paths are a11, a12, a21, and a22. The outcome-mean and
+outcome-difference residuals may covary.
 </p>
 </div>
 <p>The path labels correspond directly to the terms in the model
@@ -198,7 +200,7 @@ below:</p>
 <span>    <span class="va">.i_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Outcome-level and outcome-difference residual variances and their covariance</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data</span></span>
@@ -210,7 +212,7 @@ below:</p>
 <span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  </span></span>
 <span><span class="co">#&gt;     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  </span></span>
 <span><span class="co">#&gt;     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     (1 + .i_dsm_role_contrast | coupleID)</span></span>
+<span><span class="co">#&gt;     us(1 + .i_dsm_role_contrast | coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: cross_dsm_data</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -282,9 +284,10 @@ parameterization of the same conditional outcome regressions.</p>
 </annotation></semantics></math></p>
 <p>The fitted paths for this example are:</p>
 <div class="figure">
-<img src="dsm_files/figure-html/fitted-dsm-diagram-1.png" class="r-plt" alt="Fitted path diagram for the example dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. The six paths and intercepts are labelled with their estimated coefficients." width="100%"><p class="caption">
-Fitted cross-sectional DSM for the example data. Edge and intercept
-labels show the estimated DSM coefficients.
+<img src="dsm_files/figure-html/fitted-dsm-diagram-1.png" class="r-plt" alt="Fitted path diagram for the example dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. The four paths and two intercepts are labelled with their estimated coefficients." width="100%"><p class="caption">
+Fitted cross-sectional DSM for the example data. The nodes show the
+score definitions explicitly, while edge and intercept labels show the
+estimated DSM coefficients.
 </p>
 </div>
 <p>The fixed effects from our MLM model map directly to these paths as
@@ -399,7 +402,7 @@ model.</p>
 <span>    <span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
 <span>    <span class="va">.i_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data_inverted</span></span>

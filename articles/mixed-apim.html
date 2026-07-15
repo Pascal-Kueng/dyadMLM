@@ -188,12 +188,12 @@ intercept-only model):</p>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># exchangeable female-female residual covariance via sum-diff</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># exchangeable male-male residual covariance via sum-diff</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_male_x_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_male_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -205,9 +205,9 @@ intercept-only model):</p>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  </span></span>
 <span><span class="co">#&gt;     .i_is_female_x_female + .i_is_male_x_male + us(0 + .i_is_female_x_male_female +  </span></span>
-<span><span class="co">#&gt;     .i_is_female_x_male_male | coupleID) + (0 + .i_is_female_x_female |  </span></span>
-<span><span class="co">#&gt;     coupleID) + (0 + .i_diff_female_x_female_arbitrary | coupleID) +  </span></span>
-<span><span class="co">#&gt;     (0 + .i_is_male_x_male | coupleID) + (0 + .i_diff_male_x_male_arbitrary |  </span></span>
+<span><span class="co">#&gt;     .i_is_female_x_male_male | coupleID) + us(0 + .i_is_female_x_female |  </span></span>
+<span><span class="co">#&gt;     coupleID) + us(0 + .i_diff_female_x_female_arbitrary | coupleID) +  </span></span>
+<span><span class="co">#&gt;     us(0 + .i_is_male_x_male | coupleID) + us(0 + .i_diff_male_x_male_arbitrary |  </span></span>
 <span><span class="co">#&gt;     coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: mixed_cross_data</span></span>
@@ -416,12 +416,12 @@ justification.</p>
 <span>    <span class="va">.i_is_non_female_x_female</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># exchangeable female-female residual covariance via sum-diff</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># pooled female-male and male-male residual covariance via sum-diff</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_non_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_non_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_non_female_x_female</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_non_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -596,14 +596,14 @@ BFGS optimizer with a higher iteration limit.</p>
 <span>    <span class="co"># stable dyad-level covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_same_sex</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_same_sex_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_same_sex</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_same_sex_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># same-day covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> <span class="va">.i_is_female_x_male_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_same_sex</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_same_sex_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_is_same_sex</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_same_sex_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
