@@ -1393,6 +1393,40 @@ within-person effects to the stable dyad-level random-effect blocks:</p>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>The first stable dyad-level random effects block contains the shared
+DIM intercept, dyad-mean slope, and within-dyad-deviation slope. The
+second block contains their member-difference counterparts, included
+through the <code>.i_diff_*</code> interactions. These uncorrelated
+blocks allow the two members to have different random slopes while
+preserving exchangeability.</p>
+<div class="section level4">
+<h4 id="transforming-dim-random-slopes-to-apim-slopes">Transforming DIM random slopes to APIM slopes<a class="anchor" aria-label="anchor" href="#transforming-dim-random-slopes-to-apim-slopes"></a>
+</h4>
+<p>Applying the same transformation to the random-slope coefficients
+proceeds in two steps. First, transform the DIM dyad-mean and
+within-dyad-deviation random slopes into APIM actor and partner random
+slopes. For the shared block,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>b</mi><mrow><mi>p</mi><mi>a</mi><mi>r</mi><mi>t</mi><mi>n</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
+b_{actor} = \frac{b_{mean} + b_{dev}}{2},
+\qquad
+b_{partner} = \frac{b_{mean} - b_{dev}}{2},
+</annotation></semantics></math></p>
+<p>and for the <code>.i_diff_*</code> block,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>p</mi><mi>a</mi><mi>r</mi><mi>t</mi><mi>n</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>m</mi><mi>e</mi><mi>a</mi><mi>n</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>d</mi><mi>e</mi><mi>v</mi></mrow></msub></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+b_{diff:actor}
+= \frac{b_{diff:mean} + b_{diff:dev}}{2},
+\qquad
+b_{diff:partner}
+= \frac{b_{diff:mean} - b_{diff:dev}}{2}.
+</annotation></semantics></math></p>
+<p>The shared and <code>.i_diff_*</code> random intercepts remain
+unchanged.</p>
+<p>We now have the shared and <code>.i_diff_*</code> actor and partner
+effects which are then back-transformed into the complete and more
+readily interpretable member-specific actor-partner variance-covariance
+matrix. This is described in the <a href="apim.html#exchangeable-random-slope-back-transformation">exchangeable
+random-slope back-transformation in the APIM vignette</a>.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="dynamic-ild-dim-example">Dynamic ILD DIM example<a class="anchor" aria-label="anchor" href="#dynamic-ild-dim-example"></a>

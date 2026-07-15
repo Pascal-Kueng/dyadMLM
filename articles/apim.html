@@ -266,6 +266,40 @@ sign of
 but not its variance or the implied member-level covariance matrix. In
 longitudinal models, the same transformation applies separately to
 stable dyad-level and same-occasion dyad-level covariance blocks.</p>
+<div class="section level4">
+<h4 id="exchangeable-random-slope-back-transformation">Extension to exchangeable random slopes<a class="anchor" aria-label="anchor" href="#exchangeable-random-slope-back-transformation"></a>
+</h4>
+<p>The same shared/difference back-transformation applies to random
+slopes <span class="citation">(del Rosario and West 2025)</span>. For
+example, let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">b_{actor}</annotation></semantics></math>
+denote the shared actor random slope and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">b_{diff:actor}</annotation></semantics></math>
+the corresponding <code>.i_diff_*</code> random slope. The actor slopes
+for the members assigned <code>+1</code> and <code>-1</code> are</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi><mo>,</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi><mo>,</mo><mn>2</mn></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+b_{actor,1} = b_{actor} + b_{diff:actor},
+\qquad
+b_{actor,2} = b_{actor} - b_{diff:actor}.
+</annotation></semantics></math></p>
+<p>Because the shared and <code>.i_diff_*</code> blocks are fitted as
+separate random-effects terms, they are independent. Therefore,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi><mo>,</mo><mn>1</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi><mo>,</mo><mn>2</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\operatorname{Var}(b_{actor,1})
+= \operatorname{Var}(b_{actor,2})
+= \operatorname{Var}(b_{actor})
++ \operatorname{Var}(b_{diff:actor}),
+</annotation></semantics></math></p>
+<p>and</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Cov</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi><mo>,</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi><mo>,</mo><mn>2</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>b</mi><mrow><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>b</mi><mrow><mi>d</mi><mi>i</mi><mi>f</mi><mi>f</mi><mo>:</mo><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{Cov}(b_{actor,1}, b_{actor,2})
+= \operatorname{Var}(b_{actor})
+- \operatorname{Var}(b_{diff:actor}).
+</annotation></semantics></math></p>
+<p>The same calculation applies to the partner slopes and random
+intercepts. Any covariances among the random intercept, actor slope, and
+partner slope can be back-transformed in the same way.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="interpretation-1">Interpretation<a class="anchor" aria-label="anchor" href="#interpretation-1"></a>
@@ -498,10 +532,10 @@ bridged.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
-<span><span class="co">#&gt; diaryday                  -0.005281   0.007643  -0.691    0.490    </span></span>
+<span><span class="co">#&gt; (Intercept)                4.213055   0.300180  14.035  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    </span></span>
+<span><span class="co">#&gt; diaryday                  -0.005280   0.007643  -0.691    0.490    </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This model can be extended with contemporaneous actor and partner

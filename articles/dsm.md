@@ -27,10 +27,9 @@ vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
 
 ## Preparing DSM Data
 
-A DSM requires a substantively meaningful direction (similar to a
-distinguishable APIM that distinguishes by gender). We therefore supply
-the two roles in `dsm_role_order`. Here, `c("female", "male")` defines
-every difference as female minus male.
+A DSM requires a substantively meaningful direction. We therefore supply
+the two roles in `dsm_role_order`. In this example,
+`c("female", "male")` defines every difference as female minus male.
 
 ``` r
 
@@ -82,39 +81,39 @@ For predictor values $`X_{female}`$ and $`X_{male}`$, `interdep` then
 creates:
 
 - `.i_communication_dyad_mean_gmc` $`=
-  \frac{X_{female} + X_{male}}{2} - \mu_X`$, where $`\mu_X`$ is the
-  sample grand mean of the dyad-level predictor means;
-- `.i_communication_within_dyad_diff` $`= X_{female} - X_{male}`$; and
+  \frac{X_{female} + X_{male}}{2} - \mu_X`$ (with $`\mu_X`$ representing
+  the sample grand mean of the dyad-level predictor means)
+
+- `.i_communication_within_dyad_diff` $`= X_{female} - X_{male}`$
+
 - `.i_dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
 
 The dyad mean and signed difference are repeated on both member rows.
-The original member-level outcome remains unchanged and is selected in
-the model formula. No outcome argument or outcome transformation is
-needed.
-
-The `+0.5/-0.5` contrast is important: coefficients involving the
-contrast equal the full female-minus-male outcome difference. Reversing
-`dsm_role_order` reverses all directional differences and the contrast
-exactly.
+The outcome remains unchanged and no transformation is needed.
 
 ## Cross-Sectional Gaussian DSM
 
 For a cross-sectional Gaussian DSM, a correlated dyad random intercept
 and role-contrast slope represent unexplained outcome-level and
-outcome-difference variation. The ordinary member-level residual
-variance is suppressed because the three random-effect covariance
-parameters already span the three unique elements of the two-member
-residual covariance matrix.
+outcome-difference variation.
 
 ``` r
 
 dsm_model <- glmmTMB::glmmTMB(
   satisfaction ~
+    
+    # Why do we need the fixed intercept here and not in the exchangeable 
+    1 + 
     .i_communication_dyad_mean_gmc +
     .i_communication_within_dyad_diff +
     .i_dsm_role_contrast +
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
+    
+    # Estimating a couple level residual variance, a residual variance of the contrast 
+    # within the couple, and a correlation between these terms.
+    # This follows the same logic as the diff: approach for the DIM and exchangeable
+    # dyads, but now DOES include a correlation because we model distinguishability. 
     (1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -124,7 +123,7 @@ dsm_model <- glmmTMB::glmmTMB(
 summary(dsm_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  
+#> satisfaction ~ 1 + .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  
 #>     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  
 #>     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  
 #>     (1 + .i_dsm_role_contrast | coupleID)
@@ -237,11 +236,13 @@ summary(dsm_model_inverted)
 
 The two models have identical fitted values and model fit. Reversing the
 role order reverses both the predictor difference and the outcome
-difference represented by the role contrast. Consequently, the
-predictor-difference main effect, role-contrast main effect, and
-dyad-mean-by-role-contrast interaction reverse sign. The
-difference-by-role-contrast interaction does not reverse because both
-variables in this product reverse. The random-effect variances also
+difference represented by the role contrast.
+
+Consequently, the predictor-difference main effect, role-contrast main
+effect, and dyad-mean-by-role-contrast interaction reverse sign.
+
+The difference-by-role-contrast interaction does not reverse because
+both variables in this product reverse. The random-effect variances also
 remain unchanged, whereas their covariance reverses sign.
 
 ### Interpreting the DSM paths

@@ -842,6 +842,45 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 )
 ```
 
+The first stable dyad-level random effects block contains the shared DIM
+intercept, dyad-mean slope, and within-dyad-deviation slope. The second
+block contains their member-difference counterparts, included through
+the `.i_diff_*` interactions. These uncorrelated blocks allow the two
+members to have different random slopes while preserving
+exchangeability.
+
+#### Transforming DIM random slopes to APIM slopes
+
+Applying the same transformation to the random-slope coefficients
+proceeds in two steps. First, transform the DIM dyad-mean and
+within-dyad-deviation random slopes into APIM actor and partner random
+slopes. For the shared block,
+
+``` math
+b_{actor} = \frac{b_{mean} + b_{dev}}{2},
+\qquad
+b_{partner} = \frac{b_{mean} - b_{dev}}{2},
+```
+
+and for the `.i_diff_*` block,
+
+``` math
+b_{diff:actor}
+= \frac{b_{diff:mean} + b_{diff:dev}}{2},
+\qquad
+b_{diff:partner}
+= \frac{b_{diff:mean} - b_{diff:dev}}{2}.
+```
+
+The shared and `.i_diff_*` random intercepts remain unchanged.
+
+We now have the shared and `.i_diff_*` actor and partner effects which
+are then back-transformed into the complete and more readily
+interpretable member-specific actor-partner variance-covariance matrix.
+This is described in the [exchangeable random-slope back-transformation
+in the APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-random-slope-back-transformation).
+
 ### Dynamic ILD DIM example
 
 The ILD models above do not model residual serial dependence. One way to
