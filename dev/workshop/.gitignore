@@ -4,3 +4,9 @@
 !/branding.html
 /*.pdf
 /*_files/
+*.xlsx
+*.rds
+*.rda
+*.RData
+.~lock.*#
+*.rds
