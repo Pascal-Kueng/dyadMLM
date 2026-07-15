@@ -36,7 +36,7 @@ model-specific vignettes, including the
 [Dyad-Individual Model](dim.html), and
 [Dyadic Score Model](dsm.html), see the [Overview](index.html).
 
-> This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
+> This vignette is under construction and preliminary. Please check back soon!
 
 ## The cross sectional Gaussian distinguishable APIM
 

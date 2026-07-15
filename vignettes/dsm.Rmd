@@ -81,18 +81,14 @@ For a cross-sectional Gaussian DSM, a correlated dyad random intercept and
 role-contrast slope represent unexplained outcome-level and outcome-difference
 variation. 
 
-```{r conceptual-dsm-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional DSM. The nodes show the centered predictor mean, signed predictor difference, outcome mean, and signed outcome difference explicitly. Predictor mean and predictor difference each predict both outcome scores. The intercepts are a10 and a20; the four regression paths are a11, a12, a21, and a22. The outcome-mean and outcome-difference residuals may covary.", fig.alt="Path diagram for a cross-sectional dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20."}
+```{r conceptual-dsm-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional DSM. Predictor mean and predictor difference each predict both outcome scores.", fig.alt="Path diagram for a cross-sectional dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20."}
 draw_dsm_diagram()
 ```
 
 The same model can be displayed in the individual-member rows used by the
-long-format multilevel model. The centered predictor mean and signed predictor
-difference are repeated on both rows. Because the DSM role contrast is $+0.5$
-for the female outcome and $-0.5$ for the male outcome, each row combines an
-outcome-level coefficient with one-half of the corresponding
-outcome-difference coefficient.
+long-format multilevel model.
 
-```{r conceptual-dsm-member-diagram, echo=FALSE, fig.width=9, fig.height=5.6, out.width="100%", fig.cap="Individual-level representation of the cross-sectional DSM used for the long-format multilevel model. The centered predictor mean and female-minus-male predictor difference appear on both member rows. For the female outcome, the intercept and slopes add one-half of the corresponding outcome-difference parameters; for the male outcome, they subtract one-half. The female and male residuals may have different variances and covary.", fig.alt="Two-panel path diagram for a female-minus-male dyadic score model. Both panels contain the centered predictor mean and female-minus-male predictor difference. For the female outcome, the intercept is a10 plus half a20, the predictor-mean coefficient is a11 plus half a21, and the predictor-difference coefficient is a12 plus half a22. For the male outcome, the same combinations use minus signs. The two member residuals covary."}
+```{r conceptual-dsm-member-diagram, echo=FALSE, fig.width=9, fig.height=5.6, out.width="100%", fig.cap="Individual-level representation of the cross-sectional DSM used for the long-format multilevel model. The centered predictor mean and female-minus-male predictor difference appear on both member rows. For the female outcome, the intercept and slopes add one-half of the corresponding outcome-difference parameters. For the male outcome, they subtract one-half. The female and male residuals may have different variances and covary.", fig.alt="Two-panel path diagram for a female-minus-male dyadic score model. Both panels contain the centered predictor mean and female-minus-male predictor difference. For the female outcome, the intercept is a10 plus half a20, the predictor-mean coefficient is a11 plus half a21, and the predictor-difference coefficient is a12 plus half a22. For the male outcome, the same combinations use minus signs. The two member residuals covary."}
 draw_dsm_member_diagram()
 ```
 

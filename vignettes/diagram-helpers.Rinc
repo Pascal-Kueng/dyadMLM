@@ -1081,7 +1081,11 @@ draw_dsm_member_diagram <- function() {
   invisible(NULL)
 }
 
-draw_dim_diagram <- function(estimates = NULL, residuals = NULL) {
+draw_dim_diagram <- function(
+    estimates = NULL,
+    residuals = NULL,
+    effect_unit = c("dyad", "couple")) {
+  effect_unit <- match.arg(effect_unit)
   mean_colour <- .interdep_diagram_colours$mean
   deviation_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
@@ -1249,7 +1253,7 @@ draw_dim_diagram <- function(estimates = NULL, residuals = NULL) {
   )
 
   .draw_diagram_legend(
-    labels = c("Between-couple effect", "Within-couple effect"),
+    labels = paste0(c("Between-", "Within-"), effect_unit, " effect"),
     colours = c(mean_colour, deviation_colour),
     y = 0.075,
     segment_starts = c(0.22, 0.56),
@@ -1407,7 +1411,7 @@ draw_dim_member_diagram <- function() {
   )
 
   .draw_diagram_legend(
-    labels = c("Between-couple effect", "Within-couple effect"),
+    labels = c("Between-dyad effect", "Within-dyad effect"),
     colours = c(mean_colour, deviation_colour),
     y = 0.018,
     segment_starts = c(0.20, 0.56),

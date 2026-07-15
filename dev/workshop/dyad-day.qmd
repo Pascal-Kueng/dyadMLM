@@ -1,0 +1,440 @@
+---
+title: "Dyad-Day"
+subtitle: "Dyadic Data Analysis with R and interdep"
+author:
+  - "Turu"
+  - "Pascal"
+bibliography: ../../vignettes/references.bib
+format:
+  revealjs:
+    css: workshop.css
+    logo: uzh-logo.svg
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+---
+
+<!--
+
+# Planning advice
+
+Use a hybrid production sequence:
+
+1. Build the workshop skeleton immediately.
+2. Finish and stabilize only the cross-sectional APIM vignette.
+3. Turn the stable APIM and DIM content into workshop-specific materials.
+4. Return to broader vignette polishing after the workshop.
+
+Do not finish the entire APIM vignette first, but do not develop the statistical
+content independently inside the slides either. The vignette should remain the
+technical source of truth; the workshop should be a deliberately simplified
+teaching layer.
+
+The APIM vignette already contains the full cross-sectional sequence:
+distinguishable, exchangeable, residual structure, interpretation, and testing
+distinguishability. It mainly needs consolidation and teaching polish. The DIM
+cross-sectional material is already extensive enough to extract from.
+
+## Most important conceptual advice
+
+The overall progression is good:
+
+APIM → exchangeable APIM → DIM → DSM → CFM.
+
+Avoid describing this too literally as a progression from the “most
+individual” to the “most dyadic” model. These are different representations
+and assumptions, not a strict continuum of dyadicness.
+
+A useful recurring question is:
+
+> What aspect of the dyad does this model treat as the explanatory unit?
+
+- APIM: each member’s predictor, separated into actor and partner contributions.
+- DIM: the dyad’s shared predictor level and each member’s deviation.
+- DSM: predictor level and directed difference predicting outcome level and
+  directed difference.
+- CFM: a shared latent construct measured imperfectly by members.
+
+Emphasize that APIM, DIM, and DSM can sometimes be algebraic
+reparameterizations or constrained versions of one another. They are not
+always competing explanations that produce different fitted values.
+
+## Suggested adjustment to Session 1
+
+The listed model allocations total 50 rather than 45 minutes, and the complete
+first session leaves effectively no transition buffer.
+
+Suggested allocation:
+
+- Introductions and aims: 20 minutes
+- Why dyadic data are special: 5 minutes
+- Model landscape: 40 minutes
+- Comparison and decision table: 10 minutes
+- Participant activity and discussion: 25 minutes
+- Buffer: 5 minutes
+
+Possible model-landscape allocation:
+
+- Distinguishable APIM: 8 minutes
+- Exchangeable APIM: 7 minutes
+- DIM: 8 minutes
+- DSM: 8 minutes
+- CFM: 7 minutes
+- Transitions: 2 minutes
+
+The comparison table should probably appear in the main presentation rather
+than only in the appendix. Useful columns are:
+
+| Model | Basic unit | Role assumption | Predictor representation | Outcome representation | Best-suited question |
+|---|---|---|---|---|---|
+
+Omit Truth and Bias from the taught sequence. A final “other dyadic models”
+resources slide is sufficient.
+
+## Testing distinguishability
+
+Teach this as testing whether role-specific parameters can reasonably be
+constrained to equality.
+
+Distinguishability is partly a substantive and design property. A
+nonsignificant comparison does not prove that members are inherently
+indistinguishable. It supports pooling the particular parameters under the
+tested constraints.
+
+## Detailed tutorial
+
+Session 2 currently fills all 90 minutes exactly. Live code, questions, and
+minor technical problems will consume time.
+
+Suggested allocation:
+
+- Framework and software overview: 10–15 minutes
+- Distinguishable APIM: 20 minutes
+- Exchangeable APIM: 15 minutes
+- Equality constraints and model comparison: 10 minutes
+- DIM and APIM–DIM equivalence: 15 minutes
+- Short interpretation task: 10 minutes
+- Buffer: 5–10 minutes
+
+Use one shared example and repeatedly ask participants to interpret one
+highlighted coefficient. This is likely more useful than displaying several
+complete model summaries.
+
+## Intensive longitudinal section
+
+Clearly distinguish:
+
+- Concurrent ILD APIM: predictors and outcomes at the same occasion.
+- Lagged or dynamic APIM: earlier states predicting later outcomes.
+- Residual serial dependence: remaining temporal correlation, which is not
+  itself a substantive dynamic effect.
+
+For this workshop, fully demonstrate one concurrent ILD APIM and present
+dynamic models as a guided preview using prepared output. Avoid relying on a
+complex dynamic model fitting successfully during live teaching.
+
+## Exercises
+
+Define three core exercises:
+
+1. Fit and interpret a distinguishable APIM.
+2. Fit the constrained exchangeable APIM and compare it with the
+   distinguishable model.
+3. Transform the APIM coefficients into DIM coefficients and interpret the
+   result.
+
+Provide these as extensions:
+
+- Fit the DIM directly and verify equivalence.
+- Fit an ILD APIM.
+- Explore the DSM vignette.
+- Try a generalized model.
+
+Provide partially completed scripts, explicit questions, and solution files.
+Late in the day, participants will learn more from interpretation and
+modification than from typing model formulas from scratch.
+
+## Two-week production sequence
+
+1. Create the slide and exercise skeleton, including fixed learning objectives
+   and timing placeholders.
+2. Finish the cross-sectional APIM vignette to workshop-ready quality.
+3. Extract figures, model code, fitted values, and explanations from APIM and
+   DIM.
+4. Write workshop-specific slides and exercises rather than shortened copies
+   of the vignettes.
+5. Create one tested “golden script” containing every model used during the
+   workshop.
+6. Conduct a full timed rehearsal, freeze code and outputs, and keep only bug
+   fixes afterward.
+
+The materials should have distinct functions:
+
+- Slides explain the conceptual story.
+- A handout contains concise formulas and interpretation guidance.
+- Scripts contain runnable code.
+- Vignettes remain the detailed reference.
+- Solutions contain the complete analysis and expected output.
+
+Reserve at least one full day for a timed rehearsal.
+
+# Original program
+
+## Dyad-Day
+
+### 11:00–12:45: Session 1 (105 Minutes)
+
+- Introducing Turu & Pascal (5 Minutes?)
+- Introductions of participants (name, field, dyadic experience, one sentence
+  on data-type of current project/problem) (10 Minutes)
+- Workshop Aims & Program (5 Minutes)
+
+#### Part 1: Introducing different dyadic models (conceptually only) (80 Minutes)
+
+- What is dyadic data (analysis) and why is it challenging? (5 Minutes)
+- Overview over different types of dyadic models (45 Minutes):
+
+  Dyadic data can be modeled in many different ways, depending on the data and
+  research question! Here are some interesting approaches, from the most
+  “individual” to the most “dyadic” model. Conceptual only, with code only in
+  the appendix. We can provide output with numeric examples using the same
+  variables for each model to demonstrate interpretation:
+
+  - Distinguishable APIM (most common) (max. 10 Minutes; short since it will be
+    a focus later on)
+    - Individual → individual (interdependent)
+  - Indistinguishable/exchangeable APIM (10 Minutes)
+    - Individual → individual (interdependent)
+  - Dyad-Individual Model; DIM (10 Minutes)
+    - Dyad-level/deviation → individual
+    - Or can be interpreted as dyad-level → dyad-level; deviation → deviation,
+      but without cross-paths
+  - Dyadic Score Model; DSM (10 Minutes)
+    - Dyad-level/directed deviation → dyad-level/directed deviation
+    - Adds cross-paths compared to the DIM
+  - Common Fate Model (10 Minutes)
+    - Latent dyadic construct → latent dyadic construct (individual differences
+      are residual)
+    - This is last because it is somewhat similar to the dyad level of the DSM,
+      but also very different in what a latent construct means versus a simple
+      mean.
+  - Truth and Bias model (optional brief mention, since it is conceptually
+    different. Probably omit to avoid overwhelming participants.) Perhaps have
+    a slide that is skipped but points participants to resources.
+
+- Brief recap/summary of when to choose which model! (Table in appendix)
+  (5 Minutes)
+- Interactive session (considering 7–10 people) (30 Minutes, can be shortened
+  and used as buffer):
+  - Brief Q&A (10 Minutes)
+  - Optional brief exercise in which participants consider their own potential
+    research questions and which model or models would be appropriate and why.
+    Participants without their own dyadic research question receive 3–4
+    questions to consider. (10 Minutes)
+  - Group discussion (10 Minutes)
+
+### 12:45–14:00: Lunch Break (75 Minutes)
+
+### 14:00–15:30: Session 2 (90 Minutes)
+
+#### Part 2 (short): Which framework and software to use when? (max. 15 Minutes)
+
+- MLM (Multilevel) or SEM? (5–10 Minutes; a brief summary of the main points,
+  and note that this is provided in the slides to help participants make their
+  decision.)
+
+  In many simpler cases, the two frameworks estimate equivalent models and the
+  choice is a matter of preference. In more complex scenarios, there are
+  additional considerations.
+
+  You may consider favoring SEM when:
+
+  - Latent modelling might be beneficial, such as with certain types of missing
+    data, measurement models, Dynamic SEM, lagged effects, or mediation.
+
+  You may consider favoring MLM when:
+
+  - There are complex nested or crossed grouping structures; a need for more
+    robust and varied support for non-Gaussian distributions, such as
+    zero-inflated or hurdle models; complex models requiring flexible
+    interactions, splines, or nonlinear effects; or a preference or need for a
+    more mature workflow for predictive checks and distributional diagnostics.
+
+  In this workshop, we will probably mostly show the MLM approach. It is still
+  recommended to learn both frameworks eventually and choose the best one for
+  the data and research questions.
+
+  Optional brief note: It can be worthwhile to learn Bayesian modelling and use
+  Bayesian SEM and Bayesian MLM, for example with brms, because priors can help
+  stabilize models alongside benefits in reporting and interpretation.
+
+- Why are we using R instead of SPSS, SAS, or Mplus? (5 Minutes max.)
+
+  R is open, free, reproducible, scriptable, and offers packages that are very
+  flexible for observed-variable MLMs and GLMMs, including non-Gaussian cases.
+  SPSS and SAS are more mature specifically for Gaussian mixed models with
+  residual covariance structures over time, such as Kronecker AR1@UN. Mplus is
+  still particularly strong for complex SEM and DSEM. lavaan, blavaan, or
+  dynamite in R can be viable options for some simpler SEM models.
+
+#### Part 3: Detailed tutorial and walkthrough of selected cross-sectional Gaussian models (75 Minutes)
+
+Estimating these models with glmmTMB and discussing assumptions:
+
+- Cross-sectional APIM for distinguishable dyads (20 Minutes)
+- Cross-sectional APIM for indistinguishable dyads (20 Minutes)
+- Testing distinguishability with model comparison and Wald test (10 Minutes)
+- Cross-sectional DIM for indistinguishable dyads and demonstrating the
+  equivalence (20 Minutes)
+- Mention very briefly that generalized non-Gaussian models are possible but,
+  depending on the family, require additional assumptions and constraints due
+  to additional parameters and non-identifiability issues. Generalized models
+  are often a much easier extension in ILD. Brief example if there is enough
+  time (buffer).
+- Q&A / Buffer (5 Minutes)
+
+### 15:30–15:45: Short Break (15 Minutes)
+
+### 15:45–16:45: Session 3 (60 Minutes)
+
+#### Part 4: Extending to the intensive longitudinal case (60 Minutes)
+
+Extending to the intensive longitudinal case as a brief applied tutorial
+without too much theory, since participants already know ILD analysis and this
+could fill its own full day:
+
+- AR1 versus dynamic models and current limitations and developments in R
+  (15 Minutes)
+- Distinguishable dynamic APIM (15 Minutes)
+- Indistinguishable dynamic APIM (15 Minutes)
+- Dynamic DIM (5 Minutes preview only, demonstrating equivalence on both levels
+  and referring to online materials)
+
+#### Part 4.5: Extension to generalized MLMs (buffer only; approximately 15 Minutes)
+
+Very briefly mention or show one or two examples of a generalized non-Gaussian
+APIM or DIM with a negative binomial outcome and point to the example code.
+
+### 16:45–17:00: Short Break (15 Minutes)
+
+### 17:00–18:00: Part 5: Exercises (60 Minutes)
+
+- Cross-sectional Gaussian APIM, distinguishable
+- Cross-sectional Gaussian APIM, indistinguishable
+- Test distinguishability
+- ILD APIM, distinguishable
+- ILD APIM, indistinguishable
+- Compute and interpret DIM estimates directly from APIM models
+- Optional: Estimate the DIM and compare it with the manually computed DIM
+  estimates
+- For participants who finish very quickly, refer to the DSM documentation
+  online; they can try it with the example data.
+
+-->
+
+<!-- Workshop slide content starts here. -->
+
+## Today
+
+| Time | Focus |
+|---|---|
+| 11:00–12:45 | Introduction and conceptual model landscape |
+| 12:45–14:00 | Lunch break |
+| 14:00–15:30 | Frameworks and cross-sectional models |
+| 15:30–15:45 | Short break |
+| 15:45–16:45 | Intensive longitudinal extensions |
+| 16:45–17:00 | Short break |
+| 17:00–18:00 | Exercises in R |
+
+# Session 1: Conceptual foundations
+
+## Welcome and introductions
+
+## Workshop aims and program
+
+# Part 1: Introducing dyadic models
+
+## What is dyadic data analysis—and why is it challenging?
+
+## A landscape of dyadic models
+
+## Distinguishable APIM
+
+## Exchangeable APIM
+
+## Dyad–Individual Model (DIM)
+
+## Dyadic Score Model (DSM)
+
+## Common Fate Model (CFM)
+
+## When should we choose which model?
+
+## Apply the models to your own research questions
+
+## Questions and group discussion
+
+# Lunch break
+
+# Session 2: Cross-sectional models
+
+# Part 2: Choosing a framework and software
+
+## Multilevel modelling or SEM?
+
+## Why are we using R?
+
+# Part 3: Cross-sectional Gaussian models
+
+## Distinguishable APIM
+
+## Exchangeable APIM
+
+## Testing distinguishability
+
+## Exchangeable DIM and APIM–DIM equivalence
+
+## Generalized non-Gaussian models
+
+## Questions and buffer
+
+# Short break
+
+# Session 3: Intensive longitudinal models
+
+# Part 4: Extending to intensive longitudinal data
+
+## AR(1) versus dynamic models
+
+## Distinguishable dynamic APIM
+
+## Exchangeable dynamic APIM
+
+## Dynamic DIM
+
+# Part 4.5: Generalized multilevel models
+
+# Short break
+
+# Part 5: Exercises in R
+
+## Cross-sectional distinguishable APIM
+
+## Cross-sectional exchangeable APIM
+
+## Testing distinguishability
+
+## Intensive longitudinal distinguishable APIM
+
+## Intensive longitudinal exchangeable APIM
+
+## Computing and interpreting DIM estimates from an APIM
+
+## Estimating the DIM directly
+
+## Further exploration: DSM
