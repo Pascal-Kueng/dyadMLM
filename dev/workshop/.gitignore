@@ -1,2 +1,6 @@
 /.quarto/
 **/*.quarto_ipynb
+/*.html
+!/branding.html
+/*.pdf
+/*_files/

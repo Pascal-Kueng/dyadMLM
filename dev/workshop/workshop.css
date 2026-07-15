@@ -14,18 +14,64 @@
   font-size: 32px;
 }
 
-.reveal .slide-logo {
-  display: block;
+.workshop-branding {
+  display: flex;
   position: fixed;
-  top: 2.2vh;
-  right: auto;
-  bottom: auto;
+  top: 2vh;
   left: 1.4vw;
+  align-items: center;
+  gap: 1vw;
+  height: 7vh;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.workshop-branding img {
+  display: block;
   width: auto;
   max-width: none;
-  height: 9vh;
-  max-height: 9vh;
-  z-index: 10;
+  height: 7vh;
+  max-height: 7vh;
+  margin: 0;
+  object-fit: contain;
+}
+
+.workshop-branding .brand-divider {
+  height: 5.2vh;
+  border-left: 1px solid var(--uzh-rule);
+}
+
+.summer-school-label {
+  position: fixed;
+  top: 4.1vh;
+  right: 5vw;
+  color: var(--uzh-blue-dark);
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  font-size: 2.15vh;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  line-height: 1;
+  z-index: 40;
+  pointer-events: none;
+}
+
+@media screen and (min-aspect-ratio: 2/1) {
+  .workshop-branding {
+    left: calc((100vw - 150vh) / 2 + 1.4vw);
+  }
+
+  .summer-school-label {
+    right: calc((100vw - 150vh) / 2 + 5vw);
+  }
+}
+
+.reveal div.footer {
+  bottom: 1.35vh;
+  color: var(--uzh-muted);
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.65vh;
+  font-weight: 500;
+  letter-spacing: 0.025em;
 }
 
 .reveal h1,
@@ -44,7 +90,7 @@
 
 .reveal h2 {
   margin-bottom: 0.8em;
-  padding-top: 1.4em;
+  padding-top: 1.25em;
   padding-bottom: 0.22em;
   border-bottom: 4px solid var(--uzh-blue);
   font-size: 1.55em;
@@ -155,7 +201,8 @@
 }
 
 @media print {
-  .reveal .slide-logo {
+  .workshop-branding,
+  .summer-school-label {
     position: absolute;
   }
 }

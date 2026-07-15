@@ -1,14 +1,18 @@
 ---
 title: "Dyad-Day"
-subtitle: "Dyadic Data Analysis with R and interdep"
+subtitle: "Dyadic Data Analysis with R"
 author:
-  - "Turu"
-  - "Pascal"
+  - "Pascal Küng"
+  - "Turu Stadler"
 bibliography: ../../vignettes/references.bib
+resources:
+  - uzh-logo.svg
+  - charite-logo.svg
 format:
   revealjs:
     css: workshop.css
-    logo: uzh-logo.svg
+    include-after-body: branding.html
+    footer: "Dyadic Data Analysis"
     slide-number: true
     chalkboard: true
     preview-links: auto
