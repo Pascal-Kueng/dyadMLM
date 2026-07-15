@@ -87,6 +87,17 @@ variation.
 draw_dsm_diagram()
 ```
 
+The same model can be displayed in the individual-member rows used by the
+long-format multilevel model. The centered predictor mean and signed predictor
+difference are repeated on both rows. Because the DSM role contrast is $+0.5$
+for the female outcome and $-0.5$ for the male outcome, each row combines an
+outcome-level coefficient with one-half of the corresponding
+outcome-difference coefficient.
+
+```{r conceptual-dsm-member-diagram, echo=FALSE, fig.width=9, fig.height=5.6, out.width="100%", fig.cap="Individual-level representation of the cross-sectional DSM used for the long-format multilevel model. The centered predictor mean and female-minus-male predictor difference appear on both member rows. For the female outcome, the intercept and slopes add one-half of the corresponding outcome-difference parameters; for the male outcome, they subtract one-half. The female and male residuals may have different variances and covary.", fig.alt="Two-panel path diagram for a female-minus-male dyadic score model. Both panels contain the centered predictor mean and female-minus-male predictor difference. For the female outcome, the intercept is a10 plus half a20, the predictor-mean coefficient is a11 plus half a21, and the predictor-difference coefficient is a12 plus half a22. For the male outcome, the same combinations use minus signs. The two member residuals covary."}
+draw_dsm_member_diagram()
+```
+
 The path labels correspond directly to the terms in the model below:
 
 ```{r fit-cross-dsm, eval=has_glmmTMB}
@@ -166,8 +177,9 @@ $$
 
 The fitted paths for this example are:
 
-```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. The nodes show the score definitions explicitly, while edge and intercept labels show the estimated DSM coefficients.", fig.alt="Fitted path diagram for the example dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. The four paths and two intercepts are labelled with their estimated coefficients."}
+```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. The nodes show the score definitions explicitly; edge and intercept labels show the estimated DSM coefficients, and the residual labels show the estimated score-component standard deviations and correlation.", fig.alt="Fitted path diagram for the example dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. The four paths, two intercepts, two residual standard deviations, and residual correlation are labelled with their estimates."}
 dsm_coef_for_diagram <- glmmTMB::fixef(dsm_model)$cond
+dsm_random_components <- glmmTMB::VarCorr(dsm_model)$cond
 
 draw_dsm_diagram(
   estimates = c(
@@ -181,6 +193,21 @@ draw_dsm_diagram(
     a22 = dsm_coef_for_diagram[[
       ".i_communication_within_dyad_diff:.i_dsm_role_contrast"
     ]]
+  ),
+  residuals = c(
+    sd_mean = .extract_diagram_random_sd(
+      dsm_random_components,
+      "(Intercept)"
+    ),
+    sd_difference = .extract_diagram_random_sd(
+      dsm_random_components,
+      ".i_dsm_role_contrast"
+    ),
+    correlation = .extract_diagram_random_correlation(
+      dsm_random_components,
+      "(Intercept)",
+      ".i_dsm_role_contrast"
+    )
   )
 )
 ```

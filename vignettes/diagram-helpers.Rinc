@@ -24,6 +24,77 @@
   }
 }
 
+.draw_residual_annotation <- function(
+    label, x, y, fontsize = 10.5, colour = "#64748B") {
+  label_grob <- grid::textGrob(
+    label,
+    x = grid::unit(x, "native"),
+    y = grid::unit(y, "native"),
+    gp = grid::gpar(col = colour, fontsize = fontsize)
+  )
+  grid::grid.roundrect(
+    x = grid::unit(x, "native"),
+    y = grid::unit(y, "native"),
+    width = grid::grobWidth(label_grob) + grid::unit(2, "mm"),
+    height = grid::grobHeight(label_grob) + grid::unit(1, "mm"),
+    r = grid::unit(0.015, "snpc"),
+    gp = grid::gpar(fill = "white", col = NA)
+  )
+  grid::grid.draw(label_grob)
+}
+
+.extract_diagram_random_sd <- function(components, term) {
+  values <- vapply(
+    components,
+    function(component) {
+      standard_deviations <- attr(component, "stddev")
+      if (is.null(standard_deviations) ||
+          !term %in% names(standard_deviations)) {
+        return(NA_real_)
+      }
+      unname(standard_deviations[[term]])
+    },
+    numeric(1)
+  )
+  values <- values[is.finite(values)]
+  if (length(values) != 1L) {
+    stop(
+      "Could not identify one random-effect SD for term `",
+      term,
+      "`.",
+      call. = FALSE
+    )
+  }
+  unname(values[[1]])
+}
+
+.extract_diagram_random_correlation <- function(components, term_1, term_2) {
+  values <- vapply(
+    components,
+    function(component) {
+      correlation <- attr(component, "correlation")
+      if (is.null(correlation) ||
+          !all(c(term_1, term_2) %in% rownames(correlation))) {
+        return(NA_real_)
+      }
+      unname(correlation[term_1, term_2])
+    },
+    numeric(1)
+  )
+  values <- values[is.finite(values)]
+  if (length(values) != 1L) {
+    stop(
+      "Could not identify one random-effect correlation for terms `",
+      term_1,
+      "` and `",
+      term_2,
+      "`.",
+      call. = FALSE
+    )
+  }
+  unname(values[[1]])
+}
+
 draw_apim_diagram <- function(
     type = c("distinguishable", "exchangeable"),
     edge_labels = NULL) {
@@ -221,6 +292,25 @@ draw_apim_diagram <- function(
     gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
   )
 
+  if (type == "distinguishable") {
+    residual_sd_labels <- list(
+      expression(plain(SD) == sigma[plain(F)]),
+      expression(plain(SD) == sigma[plain(M)])
+    )
+    residual_correlation_label <- expression(rho[plain(FM)])
+  } else {
+    residual_sd_labels <- list(
+      expression(plain(SD) == sigma[epsilon]),
+      expression(plain(SD) == sigma[epsilon])
+    )
+    residual_correlation_label <- expression(rho[epsilon])
+  }
+  .draw_residual_annotation(residual_sd_labels[[1]], 0.91, 0.84)
+  .draw_residual_annotation(residual_sd_labels[[2]], 0.91, 0.16)
+  .draw_residual_annotation(
+    residual_correlation_label, 0.955, 0.50, fontsize = 11
+  )
+
   # A small legend makes the colour coding optional rather than necessary.
   .draw_diagram_legend(
     labels = c("Actor effect", "Partner effect"),
@@ -399,6 +489,25 @@ draw_apim_member_diagram <- function(
     gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
   )
 
+  if (type == "distinguishable") {
+    residual_sd_labels <- list(
+      expression(plain(SD) == sigma[plain(F)]),
+      expression(plain(SD) == sigma[plain(M)])
+    )
+    residual_correlation_label <- expression(rho[plain(FM)])
+  } else {
+    residual_sd_labels <- list(
+      expression(plain(SD) == sigma[epsilon]),
+      expression(plain(SD) == sigma[epsilon])
+    )
+    residual_correlation_label <- expression(rho[epsilon])
+  }
+  .draw_residual_annotation(residual_sd_labels[[1]], 0.91, 0.79)
+  .draw_residual_annotation(residual_sd_labels[[2]], 0.91, 0.21)
+  .draw_residual_annotation(
+    residual_correlation_label, 0.955, 0.50, fontsize = 11
+  )
+
   grid::grid.text(
     labels$panel_top, x = native(0.50), y = native(0.92),
     gp = grid::gpar(col = muted_colour, fontsize = 11, fontface = "bold")
@@ -426,7 +535,7 @@ draw_apim_member_diagram <- function(
   invisible(NULL)
 }
 
-draw_dsm_diagram <- function(estimates = NULL) {
+draw_dsm_diagram <- function(estimates = NULL, residuals = NULL) {
   mean_colour <- .interdep_diagram_colours$mean
   difference_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
@@ -442,6 +551,36 @@ draw_dsm_diagram <- function(estimates = NULL) {
       stop("`estimates` must contain a value named ", name, ".", call. = FALSE)
     }
     parse(text = sprintf("a[%s] == %.2f", number, estimates[[name]]))
+  }
+
+  if (!is.null(residuals)) {
+    required_residuals <- c("sd_mean", "sd_difference", "correlation")
+    missing_residuals <- setdiff(required_residuals, names(residuals))
+    if (length(missing_residuals) > 0L) {
+      stop(
+        "`residuals` must contain values named ",
+        paste(missing_residuals, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+    if (any(!is.finite(residuals[required_residuals]))) {
+      stop("`residuals` values must be finite.", call. = FALSE)
+    }
+  }
+
+  residual_sd_label <- function(name, subscript) {
+    if (is.null(residuals)) {
+      return(parse(text = sprintf("plain(SD) == sigma[%s]", subscript)))
+    }
+    parse(text = sprintf("plain(SD) == %.2f", residuals[[name]]))
+  }
+
+  residual_correlation_label <- function() {
+    if (is.null(residuals)) {
+      return(expression(rho[plain(md)]))
+    }
+    parse(text = sprintf("rho[plain(md)] == %.2f", residuals[["correlation"]]))
   }
 
   native <- function(value) grid::unit(value, "native")
@@ -598,6 +737,15 @@ draw_dsm_diagram <- function(estimates = NULL) {
     arrow = covariance_arrow,
     gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
   )
+  .draw_residual_annotation(
+    residual_sd_label("sd_mean", "m"), 0.91, 0.84
+  )
+  .draw_residual_annotation(
+    residual_sd_label("sd_difference", "d"), 0.91, 0.16
+  )
+  .draw_residual_annotation(
+    residual_correlation_label(), 0.955, 0.50, fontsize = 11
+  )
 
   .draw_diagram_legend(
     labels = c("Predictor-mean paths", "Predictor-difference paths"),
@@ -612,7 +760,200 @@ draw_dsm_diagram <- function(estimates = NULL) {
   invisible(NULL)
 }
 
-draw_dim_diagram <- function(estimates = NULL) {
+draw_dsm_member_diagram <- function() {
+  mean_colour <- .interdep_diagram_colours$mean
+  difference_colour <- .interdep_diagram_colours$within
+  ink_colour <- "#263238"
+  muted_colour <- "#64748B"
+  node_fill <- "#F8FAFC"
+
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 28,
+    length = grid::unit(0.15, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 26,
+    length = grid::unit(0.10, "inches"),
+    ends = "both",
+    type = "closed"
+  )
+
+  draw_node <- function(
+      x, y, label, subtitle, width = 0.30,
+      label_nudge = 0, subtitle_nudge = 0) {
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = native(width), height = native(0.18),
+      r = grid::unit(0.07, "snpc"),
+      gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y + 0.025 + label_nudge),
+      gp = grid::gpar(col = ink_colour, fontsize = 14)
+    )
+    grid::grid.text(
+      subtitle, x = native(x), y = native(y - 0.035 + subtitle_nudge),
+      gp = grid::gpar(col = muted_colour, fontsize = 9.5)
+    )
+  }
+
+  draw_residual <- function(x, y, label) {
+    grid::grid.circle(
+      x = native(x), y = native(y), r = grid::unit(0.047, "snpc"),
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 15)
+    )
+  }
+
+  draw_path <- function(x0, y0, x1, y1, colour) {
+    grid::grid.segments(
+      x0 = native(x0), y0 = native(y0),
+      x1 = native(x1), y1 = native(y1),
+      arrow = arrow_head,
+      gp = grid::gpar(col = colour, fill = colour, lwd = 2.2)
+    )
+  }
+
+  draw_label <- function(x, y, label, colour) {
+    label_y <- y - 0.006
+    label_grob <- grid::textGrob(
+      label, x = native(x), y = native(label_y),
+      gp = grid::gpar(col = colour, fontsize = 13)
+    )
+    grid::grid.roundrect(
+      x = native(x), y = native(label_y),
+      width = grid::grobWidth(label_grob) + grid::unit(2.5, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(1.5, "mm"),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.draw(label_grob)
+  }
+
+  draw_intercept <- function(x, y, label) {
+    label_y <- y - 0.006
+    label_grob <- grid::textGrob(
+      label, x = native(x), y = native(label_y),
+      gp = grid::gpar(col = muted_colour, fontsize = 12.5)
+    )
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = grid::grobWidth(label_grob) + grid::unit(3, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(2, "mm"),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = muted_colour, lwd = 1)
+    )
+    grid::grid.draw(label_grob)
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(-0.03, 1)))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  mean_label <- expression(frac(X[plain(F)] + X[plain(M)], 2) - mu[X])
+  difference_label <- expression(X[plain(F)] - X[plain(M)])
+
+  # The same predictor scores appear on both member rows. The role contrast
+  # combines each score-level path with half its outcome-difference path.
+  draw_node(
+    0.17, 0.79, mean_label, "Predictor mean (GM-centered)",
+    label_nudge = -0.006, subtitle_nudge = -0.006
+  )
+  draw_node(0.17, 0.60, difference_label, "Predictor difference")
+  draw_node(
+    0.17, 0.40, mean_label, "Predictor mean (GM-centered)",
+    label_nudge = -0.006, subtitle_nudge = -0.006
+  )
+  draw_node(0.17, 0.21, difference_label, "Predictor difference")
+  draw_node(0.68, 0.695, expression(Y[plain(F)]), "Outcome", width = 0.24)
+  draw_node(0.68, 0.305, expression(Y[plain(M)]), "Outcome", width = 0.24)
+  draw_residual(0.92, 0.695, expression(epsilon[plain(F)]))
+  draw_residual(0.92, 0.305, expression(epsilon[plain(M)]))
+
+  draw_intercept(
+    0.68, 0.83,
+    expression(a[10] + frac(a[20], 2))
+  )
+  draw_intercept(
+    0.68, 0.17,
+    expression(a[10] - frac(a[20], 2))
+  )
+
+  draw_path(0.32, 0.79, 0.56, 0.715, mean_colour)
+  draw_path(0.32, 0.60, 0.56, 0.675, difference_colour)
+  draw_path(0.32, 0.40, 0.56, 0.325, mean_colour)
+  draw_path(0.32, 0.21, 0.56, 0.285, difference_colour)
+  draw_label(
+    0.44, 0.752,
+    expression(a[11] + frac(a[21], 2)), mean_colour
+  )
+  draw_label(
+    0.44, 0.638,
+    expression(a[12] + frac(a[22], 2)), difference_colour
+  )
+  draw_label(
+    0.44, 0.362,
+    expression(a[11] - frac(a[21], 2)), mean_colour
+  )
+  draw_label(
+    0.44, 0.248,
+    expression(a[12] - frac(a[22], 2)), difference_colour
+  )
+
+  draw_path(0.875, 0.695, 0.80, 0.695, muted_colour)
+  draw_path(0.875, 0.305, 0.80, 0.305, muted_colour)
+  grid::grid.curve(
+    x1 = native(0.961), y1 = native(0.655),
+    x2 = native(0.961), y2 = native(0.345),
+    curvature = -0.24, angle = 90, ncp = 12, square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
+  )
+  .draw_residual_annotation(
+    expression(plain(SD) == sigma[plain(F)]), 0.92, 0.79
+  )
+  .draw_residual_annotation(
+    expression(plain(SD) == sigma[plain(M)]), 0.92, 0.21
+  )
+  .draw_residual_annotation(
+    expression(rho[plain(FM)]), 0.965, 0.50, fontsize = 11
+  )
+
+  grid::grid.text(
+    "Female outcome member (+0.5 role contrast)",
+    x = native(0.50), y = native(0.95),
+    gp = grid::gpar(col = muted_colour, fontsize = 11, fontface = "bold")
+  )
+  grid::grid.text(
+    "Male outcome member (-0.5 role contrast)",
+    x = native(0.50), y = native(0.06),
+    gp = grid::gpar(col = muted_colour, fontsize = 11, fontface = "bold")
+  )
+  grid::grid.segments(
+    x0 = native(0.04), y0 = native(0.50),
+    x1 = native(0.87), y1 = native(0.50),
+    gp = grid::gpar(col = muted_colour, lwd = 1.2, lty = 2)
+  )
+
+  .draw_diagram_legend(
+    labels = c("Predictor-mean contribution", "Predictor-difference contribution"),
+    colours = c(mean_colour, difference_colour),
+    y = -0.008,
+    segment_starts = c(0.14, 0.53),
+    text_x = c(0.345, 0.755),
+    fontsize = 9.5
+  )
+
+  grid::popViewport()
+  invisible(NULL)
+}
+
+draw_dim_diagram <- function(estimates = NULL, residuals = NULL) {
   mean_colour <- .interdep_diagram_colours$mean
   deviation_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
@@ -627,6 +968,29 @@ draw_dim_diagram <- function(estimates = NULL) {
       stop("`estimates` must contain a value named ", name, ".", call. = FALSE)
     }
     parse(text = sprintf("b[%s] == %.2f", subscript, estimates[[name]]))
+  }
+
+  if (!is.null(residuals)) {
+    required_residuals <- c("sd_mean", "sd_difference")
+    missing_residuals <- setdiff(required_residuals, names(residuals))
+    if (length(missing_residuals) > 0L) {
+      stop(
+        "`residuals` must contain values named ",
+        paste(missing_residuals, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+    if (any(!is.finite(residuals[required_residuals]))) {
+      stop("`residuals` values must be finite.", call. = FALSE)
+    }
+  }
+
+  residual_sd_label <- function(name, subscript) {
+    if (is.null(residuals)) {
+      return(parse(text = sprintf("plain(SD) == sigma[%s]", subscript)))
+    }
+    parse(text = sprintf("plain(SD) == %.2f", residuals[[name]]))
   }
 
   native <- function(value) grid::unit(value, "native")
@@ -744,6 +1108,15 @@ draw_dim_diagram <- function(estimates = NULL) {
   # exchangeability constraints.
   draw_path(0.855, 0.72, 0.80, 0.72, muted_colour)
   draw_path(0.855, 0.28, 0.80, 0.28, muted_colour)
+  .draw_residual_annotation(
+    residual_sd_label("sd_mean", "m"), 0.91, 0.84
+  )
+  .draw_residual_annotation(
+    residual_sd_label("sd_difference", "d"), 0.91, 0.16
+  )
+  .draw_residual_annotation(
+    expression(rho[plain(md)] == 0), 0.91, 0.50, fontsize = 11
+  )
 
   .draw_diagram_legend(
     labels = c("Between-couple effect", "Within-couple effect"),
@@ -879,6 +1252,15 @@ draw_dim_member_diagram <- function() {
     arrow = covariance_arrow,
     gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
   )
+  .draw_residual_annotation(
+    expression(plain(SD) == sigma[epsilon]), 0.91, 0.79
+  )
+  .draw_residual_annotation(
+    expression(plain(SD) == sigma[epsilon]), 0.91, 0.21
+  )
+  .draw_residual_annotation(
+    expression(rho[epsilon]), 0.955, 0.50, fontsize = 11
+  )
 
   grid::grid.text(
     "Arbitrary member 1", x = native(0.50), y = native(0.92),
@@ -897,7 +1279,7 @@ draw_dim_member_diagram <- function() {
   .draw_diagram_legend(
     labels = c("Between-couple effect", "Within-couple effect"),
     colours = c(mean_colour, deviation_colour),
-    y = 0.025,
+    y = 0.018,
     segment_starts = c(0.20, 0.56),
     text_x = c(0.385, 0.745),
     fontsize = 10
@@ -908,8 +1290,6 @@ draw_dim_member_diagram <- function() {
 }
 
 draw_mixed_apim_diagram <- function() {
-  distinguishable_colour <- "#0072B2"
-  exchangeable_colour <- "#D55E00"
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -927,12 +1307,12 @@ draw_mixed_apim_diagram <- function() {
     type = "closed"
   )
 
-  draw_outcome <- function(x, y, outcome, intercept, colour) {
+  draw_outcome <- function(x, y, outcome, intercept) {
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(0.135), height = native(0.16),
       r = grid::unit(0.06, "snpc"),
-      gp = grid::gpar(fill = node_fill, col = colour, lwd = 1.8)
+      gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
     )
     grid::grid.text(
       outcome, x = native(x), y = native(y + 0.025),
@@ -940,7 +1320,7 @@ draw_mixed_apim_diagram <- function() {
     )
     grid::grid.text(
       intercept, x = native(x), y = native(y - 0.035),
-      gp = grid::gpar(col = colour, fontsize = 12)
+      gp = grid::gpar(col = muted_colour, fontsize = 12)
     )
   }
 
@@ -956,12 +1336,13 @@ draw_mixed_apim_diagram <- function() {
   }
 
   draw_panel <- function(
-      centre, title, subtitle, outcomes, intercepts, residuals, footer, colour) {
+      centre, title, subtitle, outcomes, intercepts, residuals,
+      residual_sds, residual_correlation, footer) {
     grid::grid.roundrect(
       x = native(centre), y = native(0.50),
       width = native(0.29), height = native(0.70),
       r = grid::unit(0.04, "snpc"),
-      gp = grid::gpar(fill = "white", col = colour, lwd = 2)
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.6)
     )
     grid::grid.text(
       title, x = native(centre), y = native(0.78),
@@ -969,15 +1350,15 @@ draw_mixed_apim_diagram <- function() {
     )
     grid::grid.text(
       subtitle, x = native(centre), y = native(0.735),
-      gp = grid::gpar(col = colour, fontsize = 11)
+      gp = grid::gpar(col = muted_colour, fontsize = 11)
     )
 
     outcome_x <- centre - 0.035
     residual_x <- centre + 0.095
     member_y <- c(0.61, 0.39)
 
-    draw_outcome(outcome_x, member_y[1], outcomes[[1]], intercepts[[1]], colour)
-    draw_outcome(outcome_x, member_y[2], outcomes[[2]], intercepts[[2]], colour)
+    draw_outcome(outcome_x, member_y[1], outcomes[[1]], intercepts[[1]])
+    draw_outcome(outcome_x, member_y[2], outcomes[[2]], intercepts[[2]])
     draw_residual(residual_x, member_y[1], residuals[[1]])
     draw_residual(residual_x, member_y[2], residuals[[2]])
 
@@ -999,6 +1380,16 @@ draw_mixed_apim_diagram <- function() {
       curvature = -0.23, angle = 90, ncp = 10, square = FALSE,
       arrow = covariance_arrow,
       gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.5)
+    )
+
+    .draw_residual_annotation(
+      residual_sds[[1]], residual_x, 0.685, fontsize = 8.5
+    )
+    .draw_residual_annotation(
+      residual_sds[[2]], residual_x, 0.315, fontsize = 8.5
+    )
+    .draw_residual_annotation(
+      residual_correlation, residual_x + 0.022, 0.50, fontsize = 9
     )
 
     grid::grid.text(
@@ -1031,24 +1422,36 @@ draw_mixed_apim_diagram <- function() {
       expression(b[0 * "," * plain(FM) * "," * plain(M)])
     ),
     list(expression(epsilon[plain(F)]), expression(epsilon[plain(M)])),
-    "Separate variances + covariance",
-    distinguishable_colour
+    list(
+      expression(plain(SD) == sigma[plain(F)]),
+      expression(plain(SD) == sigma[plain(M)])
+    ),
+    expression(rho[plain(FM)]),
+    "Unrestricted residual block"
   )
   draw_panel(
     0.50, "Female-female", "Exchangeable",
     list(expression(Y[1]), expression(Y[2])),
     list(expression(b[0 * "," * plain(FF)]), expression(b[0 * "," * plain(FF)])),
     list(expression(epsilon[1]), expression(epsilon[2])),
-    "Equal variances + covariance",
-    exchangeable_colour
+    list(
+      expression(plain(SD) == sigma[plain(FF)]),
+      expression(plain(SD) == sigma[plain(FF)])
+    ),
+    expression(rho[plain(FF)]),
+    "Exchangeable residual block"
   )
   draw_panel(
     0.82, "Male-male", "Exchangeable",
     list(expression(Y[1]), expression(Y[2])),
     list(expression(b[0 * "," * plain(MM)]), expression(b[0 * "," * plain(MM)])),
     list(expression(epsilon[1]), expression(epsilon[2])),
-    "Equal variances + covariance",
-    exchangeable_colour
+    list(
+      expression(plain(SD) == sigma[plain(MM)]),
+      expression(plain(SD) == sigma[plain(MM)])
+    ),
+    expression(rho[plain(MM)]),
+    "Exchangeable residual block"
   )
 
   grid::grid.text(
@@ -1061,12 +1464,51 @@ draw_mixed_apim_diagram <- function() {
   invisible(NULL)
 }
 
-draw_cfm_diagram <- function() {
-  level_colour <- "#0072B2"
-  covariance_colour <- "#D55E00"
+draw_cfm_diagram <- function(
+  b_level = NULL,
+  beta_level = NULL,
+  residual_correlations = NULL,
+  r_squared = NULL,
+  outcome_residual_variance = NULL,
+  admissible = NULL,
+  member_ids = c("1", "2"),
+  member_names = c("Member 1", "Member 2"),
+  predictor_name = "predictor",
+  outcome_name = "outcome"
+) {
+  level_colour <- .interdep_diagram_colours$mean
+  member_specific_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
+
+  fitted_values <- list(
+    b_level,
+    beta_level,
+    residual_correlations,
+    r_squared,
+    outcome_residual_variance,
+    admissible
+  )
+  supplied_values <- !vapply(fitted_values, is.null, logical(1))
+  show_estimates <- all(supplied_values)
+
+  if (any(supplied_values) && !show_estimates) {
+    stop("Supply all fitted CFM quantities, or leave all of them NULL.")
+  }
+  if (show_estimates && length(residual_correlations) != 2) {
+    stop("`residual_correlations` must contain one value for each member.")
+  }
+  if (length(member_ids) != 2 || length(member_names) != 2) {
+    stop("`member_ids` and `member_names` must each contain two values.")
+  }
+
+  format_estimate <- function(value) {
+    formatC(value, format = "f", digits = 2)
+  }
+  member_symbols <- lapply(as.character(member_ids), function(value) {
+    if (grepl("^[0-9]+$", value)) as.integer(value) else as.name(value)
+  })
 
   native <- function(value) grid::unit(value, "native")
   arrow_head <- grid::arrow(
@@ -1155,19 +1597,31 @@ draw_cfm_diagram <- function() {
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   indicator_x <- c(0.10, 0.35, 0.62, 0.87)
-  draw_observed(indicator_x[1], expression(X[1]), "Member 1 predictor")
-  draw_observed(indicator_x[2], expression(X[2]), "Member 2 predictor")
-  draw_observed(indicator_x[3], expression(Y[1]), "Member 1 outcome")
-  draw_observed(indicator_x[4], expression(Y[2]), "Member 2 outcome")
+  draw_observed(
+    indicator_x[1], bquote(X[.(member_symbols[[1]])]),
+    paste(member_names[1], predictor_name)
+  )
+  draw_observed(
+    indicator_x[2], bquote(X[.(member_symbols[[2]])]),
+    paste(member_names[2], predictor_name)
+  )
+  draw_observed(
+    indicator_x[3], bquote(Y[.(member_symbols[[1]])]),
+    paste(member_names[1], outcome_name)
+  )
+  draw_observed(
+    indicator_x[4], bquote(Y[.(member_symbols[[2]])]),
+    paste(member_names[2], outcome_name)
+  )
 
   draw_latent(0.225, expression(X[plain(level)]), "Latent predictor level")
   draw_latent(0.745, expression(Y[plain(level)]), "Latent outcome level")
 
   residual_labels <- list(
-    expression(epsilon[plain(X1)]),
-    expression(epsilon[plain(X2)]),
-    expression(epsilon[plain(Y1)]),
-    expression(epsilon[plain(Y2)])
+    bquote(epsilon[X[.(member_symbols[[1]])]]),
+    bquote(epsilon[X[.(member_symbols[[2]])]]),
+    bquote(epsilon[Y[.(member_symbols[[1]])]]),
+    bquote(epsilon[Y[.(member_symbols[[2]])]])
   )
   for (index in seq_along(indicator_x)) {
     draw_residual(indicator_x[index], residual_labels[[index]])
@@ -1192,13 +1646,24 @@ draw_cfm_diagram <- function() {
     draw_path(path[1], path[2], path[3], path[4], muted_colour, lwd = 1.8)
     draw_label(
       loading_label_x[index], 0.43,
-      expression(1), muted_colour, fontsize = 11
+      if (show_estimates) expression(1~plain("(fixed)")) else expression(1),
+      muted_colour, fontsize = 11
     )
   }
 
   # The structural CFM path links the two shared dyad-level constructs.
   draw_path(0.355, 0.25, 0.615, 0.25, level_colour, lwd = 2.3)
-  draw_label(0.485, 0.25, expression(b[plain(level)]), level_colour, 14)
+  structural_label <- if (show_estimates && isTRUE(admissible)) {
+    bquote(
+      b[plain(level)] == .(format_estimate(b_level)) ~
+        "(" * beta == .(format_estimate(beta_level)) * ")"
+    )
+  } else if (show_estimates) {
+    bquote(b[plain(level)] == .(format_estimate(b_level)))
+  } else {
+    expression(b[plain(level)])
+  }
+  draw_label(0.485, 0.25, structural_label, level_colour, 14)
 
   # Same-member residual covariances retain the association unique to each
   # member rather than attributing it to the shared dyad-level path.
@@ -1208,27 +1673,70 @@ draw_cfm_diagram <- function() {
     curvature = -0.10, angle = 90, ncp = 14, square = FALSE,
     arrow = covariance_arrow,
     gp = grid::gpar(
-      col = covariance_colour, fill = covariance_colour, lwd = 1.8
+      col = member_specific_colour, fill = member_specific_colour, lwd = 1.8
     )
   )
+
   grid::grid.curve(
     x1 = native(0.35), y1 = native(0.895),
     x2 = native(0.87), y2 = native(0.895),
     curvature = -0.15, angle = 90, ncp = 14, square = FALSE,
     arrow = covariance_arrow,
     gp = grid::gpar(
-      col = covariance_colour, fill = covariance_colour, lwd = 1.8
+      col = member_specific_colour, fill = member_specific_colour, lwd = 1.8
     )
   )
+
+  if (show_estimates) {
+    draw_label(
+      0.29, 0.955,
+      bquote(
+        rho[plain(res) * "," * .(member_symbols[[1]])] ==
+          .(format_estimate(residual_correlations[[1]]))
+      ),
+      member_specific_colour, fontsize = 11
+    )
+    draw_label(
+      0.70, 0.955,
+      bquote(
+        rho[plain(res) * "," * .(member_symbols[[2]])] ==
+          .(format_estimate(residual_correlations[[2]]))
+      ),
+      member_specific_colour, fontsize = 11
+    )
+  }
 
   # The latent outcome level has a disturbance; the predictor level is
   # exogenous in this simple predictor-to-outcome CFM.
   draw_residual(0.94, expression(r[Y]), y = 0.25)
   draw_path(0.897, 0.25, 0.875, 0.25, muted_colour, lwd = 1.7)
 
+  if (show_estimates) {
+    outcome_diagnostic <- if (isTRUE(admissible)) {
+      bquote(R^2 == .(format_estimate(r_squared)))
+    } else if (
+      is.finite(outcome_residual_variance) && outcome_residual_variance < 0
+    ) {
+      bquote(
+        sigma[r[Y]]^2 == .(format_estimate(outcome_residual_variance)) ~
+          plain("(inadmissible)")
+      )
+    } else {
+      expression(plain("inadmissible solution"))
+    }
+    draw_label(0.745, 0.135, outcome_diagnostic, ink_colour, fontsize = 10.5)
+  }
+
   .draw_diagram_legend(
-    labels = c("Dyad-level effect", "Member-specific residual covariance"),
-    colours = c(level_colour, covariance_colour),
+    labels = c(
+      "Dyad-level effect",
+      if (show_estimates) {
+        "Member-specific residual correlation"
+      } else {
+        "Member-specific residual covariance"
+      }
+    ),
+    colours = c(level_colour, member_specific_colour),
     y = 0.055,
     segment_starts = c(0.20, 0.53),
     text_x = c(0.38, 0.75),

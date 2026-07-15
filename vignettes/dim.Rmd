@@ -123,7 +123,7 @@ member's own predictor deviation. The same $b_{\mathrm{mean}}$ and
 $b_{\mathrm{dev}}$ apply to both arbitrarily labelled members, while their two
 outcomes remain interdependent.
 
-```{r conceptual-dim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the cross-sectional DIM used for the long-format multilevel model. Each member's outcome is predicted by the couple's shared predictor mean and that member's own predictor deviation. Both members share the same two coefficients, and their residuals may covary.", fig.alt="Path diagram for two arbitrarily labelled members of an exchangeable dyad. For each member, the shared, grand-mean-centered couple predictor mean and the member's own predictor deviation predict the individual outcome. Both members share the same between- and within-couple coefficients, and their outcome residuals are correlated."}
+```{r conceptual-dim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the cross-sectional DIM used for the long-format multilevel model. Each member's outcome is predicted by the couple's shared predictor mean and that member's own predictor deviation. Both members share the same two coefficients, their residual standard deviations are equal, and their residuals may covary.", fig.alt="Path diagram for two arbitrarily labelled members of an exchangeable dyad. For each member, the shared, grand-mean-centered couple predictor mean and the member's own predictor deviation predict the individual outcome. Both members share the same between- and within-couple coefficients and residual standard deviation, while their outcome residuals are correlated."}
 draw_dim_member_diagram()
 ```
 
@@ -170,16 +170,27 @@ summary(dim_1)
 ```
 
 The same mean-and-deviation diagram can now be labelled with the estimated
-fixed effects:
+fixed effects and residual-component standard deviations:
 
-```{r fitted-dim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Estimated fixed effects from the cross-sectional Gaussian DIM in its mean-and-deviation representation. The intercept belongs to the outcome-mean equation; exchangeability fixes the outcome-deviation intercept and both cross-paths to zero.", fig.alt="Fitted path diagram for the cross-sectional Dyad-Individual Model. The outcome-mean intercept is about 5.04, the centered predictor-mean effect is about 2.00, and the member-deviation effect is about 1.52. There are no cross-paths."}
+```{r fitted-dim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Estimated fixed effects and residual-component standard deviations from the cross-sectional Gaussian DIM in its mean-and-deviation representation. The intercept belongs to the outcome-mean equation; exchangeability fixes the outcome-deviation intercept and both cross-paths to zero, and the mean and deviation residual components are uncorrelated.", fig.alt="Fitted path diagram for the cross-sectional Dyad-Individual Model. Labels give the estimated outcome-mean intercept, predictor-mean effect, member-deviation effect, and residual-component standard deviations. There are no cross-paths, and the residual-component correlation is zero."}
 dim_fixed_effects <- glmmTMB::fixef(dim_1)$cond
+dim_random_components <- glmmTMB::VarCorr(dim_1)$cond
 
 draw_dim_diagram(
   estimates = c(
     b0 = dim_fixed_effects[["(Intercept)"]],
     b_mean = dim_fixed_effects[[".i_communication_dyad_mean_gmc"]],
     b_dev = dim_fixed_effects[[".i_communication_within_dyad_dev"]]
+  ),
+  residuals = c(
+    sd_mean = .extract_diagram_random_sd(
+      dim_random_components,
+      "(Intercept)"
+    ),
+    sd_difference = .extract_diagram_random_sd(
+      dim_random_components,
+      ".i_diff_assumed_exchangeable_arbitrary"
+    )
   )
 )
 ```
@@ -317,6 +328,27 @@ cat("From APIM model:\n",
 
 ```
 
+```{r prepare-dim-grid-values, include=FALSE}
+dim_grid_slopes <- c(
+  actor = NA_real_,
+  partner = NA_real_,
+  mean = NA_real_,
+  within = NA_real_
+)
+
+if (has_glmmTMB) {
+  dim_grid_slopes[] <- unname(c(b_actor, b_partner, b_mean, b_dev))
+}
+
+dim_grid_js_number <- function(name) {
+  value <- dim_grid_slopes[[name]]
+  if (!is.finite(value)) {
+    return("null")
+  }
+  formatC(value, digits = 17, format = "g", decimal.mark = ".")
+}
+```
+
 The DIM and APIM intercepts are not expected to be equal because the DIM dyad
 mean is grand-mean centered, whereas the APIM predictors retain their original
 scale.
@@ -341,9 +373,10 @@ horizontal and vertical axes are actor and partner values centered at the
 sample grand mean. The diagonal axes are their dyad mean and within-dyad
 deviation.
 
-The displayed slope values approximate the fitted example above and illustrate
-that the two forms make the same change in the linear predictor relative to the
-grand-mean reference. The intercept is omitted from both displayed equations.
+The displayed slope values are read directly from the fitted APIM and DIM
+models above. They illustrate that the two forms make the same change in the
+linear predictor relative to the grand-mean reference. The intercept is omitted
+from both displayed equations.
 
 ```{=html}
 <style>
@@ -656,7 +689,7 @@ grand-mean reference. The intercept is omitted from both displayed equations.
           <output for="idg-mean" data-idg-output="mean">0.0</output>
         </div>
         <input id="idg-mean" data-idg-input="mean" type="range"
-               min="-5" max="5" step="0.1" value="0">
+               min="-5" max="5" step="0.05" value="0">
       </div>
       <div class="idg-control idg-within">
         <div class="idg-control-head">
@@ -664,7 +697,7 @@ grand-mean reference. The intercept is omitted from both displayed equations.
           <output for="idg-within" data-idg-output="within">0.0</output>
         </div>
         <input id="idg-within" data-idg-input="within" type="range"
-               min="-5" max="5" step="0.1" value="0">
+               min="-5" max="5" step="0.05" value="0">
       </div>
     </div>
 
@@ -678,7 +711,7 @@ grand-mean reference. The intercept is omitted from both displayed equations.
     <div class="idg-equations">
       <div><span class="idg-equation-label">APIM</span><span data-idg-equation="apim">0.00 = 0.00</span></div>
       <div><span class="idg-equation-label">DIM</span><span data-idg-equation="dim">0.00 = 0.00</span></div>
-      <div><span class="idg-equation-label">Slopes</span><span><i>b</i><sub>mean</sub> = <i>b</i><sub>actor</sub> + <i>b</i><sub>partner</sub> = 2.00; <i>b</i><sub>dev</sub> = <i>b</i><sub>actor</sub> - <i>b</i><sub>partner</sub> = 1.52</span></div>
+      <div><span class="idg-equation-label">Slopes</span><span data-idg-slopes>Loading fitted slopes...</span></div>
     </div>
 
     <div class="idg-stage">
@@ -733,7 +766,12 @@ grand-mean reference. The intercept is omitted from both displayed equations.
 
   var limit = 5;
   var plotScale = 130 / limit;
-  var slopes = { actor: 1.76, partner: 0.24, mean: 2.00, within: 1.52 };
+  var slopes = {
+    actor: `r dim_grid_js_number("actor")`,
+    partner: `r dim_grid_js_number("partner")`,
+    mean: `r dim_grid_js_number("mean")`,
+    within: `r dim_grid_js_number("within")`
+  };
   var colors = {
     actor: "var(--idg-actor)",
     partner: "var(--idg-partner)",
@@ -753,6 +791,27 @@ grand-mean reference. The intercept is omitted from both displayed equations.
   var description = root.querySelector("#idg-plot-description");
   var equationAPIM = root.querySelector('[data-idg-equation="apim"]');
   var equationDIM = root.querySelector('[data-idg-equation="dim"]');
+  var slopeSummary = root.querySelector("[data-idg-slopes]");
+
+  var hasFittedSlopes = [
+    slopes.actor,
+    slopes.partner,
+    slopes.mean,
+    slopes.within
+  ].every(Number.isFinite);
+
+  if (!hasFittedSlopes) {
+    equationAPIM.textContent = "Fitted slopes unavailable";
+    equationDIM.textContent = "Fitted slopes unavailable";
+    slopeSummary.textContent =
+      "Install glmmTMB and refit the models to activate this figure.";
+    root.querySelectorAll("input, button").forEach(function (control) {
+      control.disabled = true;
+    });
+    description.textContent =
+      "The coordinate grid is inactive because fitted slopes are unavailable.";
+    return;
+  }
 
   function roundAPIM(value) {
     return Math.round(Number(value) * 10) / 10;
@@ -780,6 +839,15 @@ grand-mean reference. The intercept is omitted from both displayed equations.
   function formatEquationNumber(value, digits, widthClass) {
     return '<span class="idg-equation-number idg-equation-number--' +
       widthClass + '">' + formatSigned(value, digits) + '</span>';
+  }
+
+  function formatCoefficient(value, following) {
+    var normalized = Math.abs(value) < 1e-10 ? 0 : value;
+    var magnitude = Math.abs(normalized).toFixed(2);
+    if (following) {
+      return normalized < 0 ? " \u2212 " + magnitude : " + " + magnitude;
+    }
+    return normalized < 0 ? "\u2212" + magnitude : magnitude;
   }
 
   function xPixel(value) {
@@ -812,14 +880,21 @@ grand-mean reference. The intercept is omitted from both displayed equations.
     outputs.partner.value = formatSigned(partner, 1);
     outputs.mean.value = formatSigned(mean, 2);
     outputs.within.value = formatSigned(within, 2);
-    equationAPIM.innerHTML = "1.76 \u00d7 " +
-      formatEquationNumber(actor, 1, "apim") + " + 0.24 \u00d7 " +
+    equationAPIM.innerHTML = formatCoefficient(slopes.actor, false) + " \u00d7 " +
+      formatEquationNumber(actor, 1, "apim") +
+      formatCoefficient(slopes.partner, true) + " \u00d7 " +
       formatEquationNumber(partner, 1, "apim") + " = " +
       formatEquationNumber(apimContribution, 2, "result");
-    equationDIM.innerHTML = "2.00 \u00d7 " +
-      formatEquationNumber(mean, 2, "dim") + " + 1.52 \u00d7 " +
+    equationDIM.innerHTML = formatCoefficient(slopes.mean, false) + " \u00d7 " +
+      formatEquationNumber(mean, 2, "dim") +
+      formatCoefficient(slopes.within, true) + " \u00d7 " +
       formatEquationNumber(within, 2, "dim") + " = " +
       formatEquationNumber(dimContribution, 2, "result");
+    slopeSummary.innerHTML =
+      "<i>b</i><sub>mean</sub> = <i>b</i><sub>actor</sub> + " +
+      "<i>b</i><sub>partner</sub> = " + formatCoefficient(slopes.mean, false) +
+      "; <i>b</i><sub>dev</sub> = <i>b</i><sub>actor</sub> \u2212 " +
+      "<i>b</i><sub>partner</sub> = " + formatCoefficient(slopes.within, false);
 
     point.setAttribute("cx", xPixel(actor));
     point.setAttribute("cy", yPixel(partner));
