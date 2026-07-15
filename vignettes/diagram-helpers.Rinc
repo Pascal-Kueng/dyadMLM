@@ -619,7 +619,7 @@ draw_dim_member_diagram <- function() {
   draw_node(
     0.15, 0.60,
     expression(X[1] - bar(X)),
-    "Within-couple predictor"
+    "Predictor deviation"
   )
   draw_node(
     0.15, 0.40,
@@ -629,7 +629,7 @@ draw_dim_member_diagram <- function() {
   draw_node(
     0.15, 0.21,
     expression(X[2] - bar(X)),
-    "Within-couple predictor"
+    "Predictor deviation"
   )
   draw_node(0.66, 0.695, expression(Y[1]), "Outcome", width = 0.24)
   draw_node(0.66, 0.305, expression(Y[2]), "Outcome", width = 0.24)
@@ -672,7 +672,7 @@ draw_dim_member_diagram <- function() {
   .draw_diagram_legend(
     labels = c("Between-couple effect", "Within-couple effect"),
     colours = c(mean_colour, deviation_colour),
-    y = 0.04,
+    y = 0.025,
     segment_starts = c(0.20, 0.56),
     text_x = c(0.385, 0.745),
     fontsize = 10
