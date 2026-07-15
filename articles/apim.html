@@ -75,17 +75,12 @@ Küng</h4>
 <p>This vignette focuses on the cross-sectional and intensive
 longitudinal Actor-Partner Interdependence model for distinguishable and
 exchangeable dyads.</p>
-<p>For the main data requirements and validation workflow of the
-<code>interdep</code> package, start with the <a href="getting-started.html">Getting Started vignette</a>. For APIMs that
-combine distinguishable and exchangeable dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For DIM
-predictors and their equivalence to APIM effects in exchangeable dyads,
-see the <a href="dim.html">Dyad-Individual Model vignette</a>. For DSM
-predictor scores and their relationship to APIM effects in
-distinguishable dyads, see the <a href="dsm.html">Dyadic Score Model
-vignette</a>.</p>
+<p>For the broader package workflow and an overview of the available
+model-specific vignettes, including the <a href="mixed-apim.html">Mixed-Composition APIM</a>, <a href="dim.html">Dyad-Individual Model</a>, and <a href="dsm.html">Dyadic
+Score Model</a>, see the <a href="index.html">Overview</a>.</p>
 <blockquote>
-<p>This vignette is under construction and for now only contains a few
-preliminary example models. Please check back soon!</p>
+<p>This vignette is under construction and preliminary. Please check
+back soon!</p>
 </blockquote>
 <div class="section level2">
 <h2 id="the-cross-sectional-gaussian-distinguishable-apim">The cross sectional Gaussian distinguishable APIM<a class="anchor" aria-label="anchor" href="#the-cross-sectional-gaussian-distinguishable-apim"></a>
@@ -180,6 +175,13 @@ model formula. Here is a simple example:</p>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">apim_distinguishable_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="apim_files/figure-html/fitted-distinguishable-apim-diagram-1.png" class="r-plt" alt="Fitted distinguishable APIM. Female and male intercepts -4.37 and -6.04; actor effects 1.67 and 1.80; partner effects 0.25 and 0.25; residual SDs 1.15 and 1.34, with correlation -0.19." width="100%"><p class="caption">
+Fitted cross-sectional distinguishable APIM for the example data. Fixed
+effects, residual standard deviations, and the residual correlation are
+extracted from the fitted model.
+</p>
+</div>
 <div class="section level3">
 <h3 id="distinguishable-residual-structure">Residual random-effects structure<a class="anchor" aria-label="anchor" href="#distinguishable-residual-structure"></a>
 </h3>
@@ -399,6 +401,13 @@ residual variances to be equal across members:</p>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">apim_exchangeable_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="apim_files/figure-html/fitted-exchangeable-apim-diagram-1.png" class="r-plt" alt="Fitted exchangeable APIM. Intercept -5.23, actor effect 1.76, partner effect 0.24, common residual SD 1.34, and residual correlation -0.29." width="100%"><p class="caption">
+Fitted cross-sectional exchangeable APIM for the example data. The
+common member residual standard deviation and residual correlation are
+back-transformed from the fitted mean and difference components.
+</p>
+</div>
 <p><code><a href="../reference/compare_interdep_models.html">compare_interdep_models()</a></code> verifies that both models use
 equivalent original observations before performing the likelihood-ratio
 test:</p>
@@ -591,10 +600,10 @@ bridged.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                4.213055   0.300180  14.035  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    </span></span>
-<span><span class="co">#&gt; diaryday                  -0.005280   0.007643  -0.691    0.490    </span></span>
+<span><span class="co">#&gt; (Intercept)                4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
+<span><span class="co">#&gt; diaryday                  -0.005281   0.007643  -0.691    0.490    </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This model can be extended with contemporaneous actor and partner

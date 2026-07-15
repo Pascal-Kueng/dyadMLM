@@ -4,6 +4,7 @@
 
 library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+dsm_fitted_alt <- "Fitted DSM diagram unavailable."
 ```
 
 This vignette focuses on the Dyadic Score Model (DSM) for
@@ -12,18 +13,14 @@ Actor-Partner Interdependence Model (APIM). The DSM expresses
 associations in terms of the dyad’s shared level and the directional
 difference between partners (Iida et al. 2018).
 
-For the broader data-preparation workflow, see the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
-For distinguishable and exchangeable APIMs in cross-sectional and
-intensive longitudinal data, see the [Actor-Partner Interdependence
-Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-APIMs combining distinguishable and exchangeable compositions, see the
-[Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
-For the exchangeable Dyad-Individual Model (DIM), see the
-[Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
+For the broader package workflow and an overview of the available
+model-specific vignettes, including the [Actor-Partner Interdependence
+Model](https://pascal-kueng.github.io/interdep/articles/apim.md),
+[Mixed-Composition
+APIM](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+and [Dyad-Individual
+Model](https://pascal-kueng.github.io/interdep/articles/dim.md), see the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 ## Preparing DSM Data
 
@@ -106,19 +103,11 @@ difference. Paths are labelled a11, a12, a21, and a22, and outcome
 intercepts are labelled a10 and
 a20.](dsm_files/figure-html/conceptual-dsm-diagram-1.png)
 
-Conceptual cross-sectional DSM. The nodes show the centered predictor
-mean, signed predictor difference, outcome mean, and signed outcome
-difference explicitly. Predictor mean and predictor difference each
-predict both outcome scores. The intercepts are a10 and a20; the four
-regression paths are a11, a12, a21, and a22. The outcome-mean and
-outcome-difference residuals may covary.
+Conceptual cross-sectional DSM. Predictor mean and predictor difference
+each predict both outcome scores.
 
 The same model can be displayed in the individual-member rows used by
-the long-format multilevel model. The centered predictor mean and signed
-predictor difference are repeated on both rows. Because the DSM role
-contrast is $`+0.5`$ for the female outcome and $`-0.5`$ for the male
-outcome, each row combines an outcome-level coefficient with one-half of
-the corresponding outcome-difference coefficient.
+the long-format multilevel model.
 
 ![Two-panel path diagram for a female-minus-male dyadic score model.
 Both panels contain the centered predictor mean and female-minus-male
@@ -132,7 +121,7 @@ Individual-level representation of the cross-sectional DSM used for the
 long-format multilevel model. The centered predictor mean and
 female-minus-male predictor difference appear on both member rows. For
 the female outcome, the intercept and slopes add one-half of the
-corresponding outcome-difference parameters; for the male outcome, they
+corresponding outcome-difference parameters. For the male outcome, they
 subtract one-half. The female and male residuals may have different
 variances and covary.
 
@@ -253,12 +242,9 @@ Consider the conceptual SEM formulas:
 
 The fitted paths for this example are:
 
-![Fitted path diagram for the example dyadic score model. The centered
-female-male predictor mean and female-minus-male predictor difference
-each predict the female-male outcome mean and female-minus-male outcome
-difference. The four paths, two intercepts, two residual standard
-deviations, and residual correlation are labelled with their
-estimates.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
+![Fitted DSM. Intercepts a10 5.04 and a20 0.96; paths a11 1.99, a12
+-0.03, a21 -0.14, and a22 1.49; residual SDs 0.79 and 1.92, with
+correlation -0.16.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
 
 Fitted cross-sectional DSM for the example data. The nodes show the
 score definitions explicitly; edge and intercept labels show the

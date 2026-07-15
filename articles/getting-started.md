@@ -30,25 +30,16 @@ models (MLMs).** For a comparison of MLM and structural equation
 modeling (SEM) approaches to dyadic data, see Ledermann and Kenny
 (2017).
 
-For guidance and examples on how to use the prepared data to estimate
-cross-sectional and intensive longitudinal APIMs for exchangeable and
-distinguishable dyads, and how to test distinguishability, see the
-[Actor-Partner Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
-
-For models that combine distinguishable and exchangeable dyad
-compositions, see the [Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
-
-For guidance on how to use the Dyad-Individual Model (DIM)
-parameterization, including dyad-mean and within-dyad-deviation
-predictors and their equivalence to APIM effects (via an interactive
-example) in exchangeable dyads, see the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md).
-
-For the dyadic score parameterization and its relationship to the APIM
-for distinguishable dyads, see the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+For the broader package workflow and an overview of the available
+model-specific vignettes, including the [Actor-Partner Interdependence
+Model](https://pascal-kueng.github.io/interdep/articles/apim.md),
+[Mixed-Composition
+APIM](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+[Dyad-Individual
+Model](https://pascal-kueng.github.io/interdep/articles/dim.md), and
+[Dyadic Score
+Model](https://pascal-kueng.github.io/interdep/articles/dsm.md), see the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 For an in-depth tutorial covering data preparation and model fitting,
 but also additional steps like diagnostics and assumption checks, see

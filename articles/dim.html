@@ -76,7 +76,8 @@ Küng</h4>
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span>
-<span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">dim_fitted_alt</span> <span class="op">&lt;-</span> <span class="st">"Fitted DIM diagram unavailable."</span></span></code></pre></div>
 <p>This vignette focuses on the Dyad-Individual Model (DIM) for dyadic
 multilevel models and its relationship to the exchangeable Actor-Partner
 Interdependence Model (APIM). The DIM separates a predictor into the
@@ -84,17 +85,12 @@ dyad’s shared level and each member’s deviation from that level. While
 the APIM expresses effects in terms of two interdependent individuals,
 the DIM expresses them in terms of the dyad’s shared level and the
 contrast between partners.</p>
-<p>For the broader data-preparation workflow of the
-<code>interdep</code> package, see the <a href="getting-started.html">Getting Started vignette</a>. For
-distinguishable and exchangeable APIMs in cross-sectional and intensive
-longitudinal data, see the <a href="apim.html">Actor-Partner
-Interdependence Model vignette</a>. For APIMs that combine
-distinguishable and exchangeable dyad compositions, see the <a href="mixed-apim.html">Mixed-Composition APIM vignette</a>. For the full
-Dyadic Score Model (DSM), a different parameterization of the
-distinguishable APIM, see the <a href="dsm.html">Dyadic Score Model
-vignette</a>. Under exchangeability constraints, the reduced,
-label-invariant DSM is also equivalent to the DIM, as discussed
-below.</p>
+<p>Under exchangeability constraints, the reduced, label-invariant DSM
+is also equivalent to the DIM, as discussed below. For the broader
+package workflow and an overview of the available model-specific
+vignettes, including the <a href="apim.html">Actor-Partner
+Interdependence Model</a>, <a href="mixed-apim.html">Mixed-Composition
+APIM</a>, and <a href="dsm.html">Dyadic Score Model</a>, see the <a href="index.html">Overview</a>.</p>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dim">Cross-Sectional Gaussian DIM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dim"></a>
 </h2>
@@ -185,51 +181,33 @@ signs:
 Outcome means and deviations are defined analogously. The variables that
 enter the DIM fixed effects then separate two associations:</p>
 <ol style="list-style-type: decimal">
-<li>The <strong>between-couple effect</strong>,
+<li>The <strong>between-dyad effect</strong>,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{mean}}</annotation></semantics></math>:
-whether couples with a higher average predictor value than other couples
+whether dyads with a higher average predictor value than other dyads
 also have a higher average outcome value.</li>
-<li>The <strong>within-couple effect</strong>,
+<li>The <strong>within-dyad effect</strong>,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">v</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{dev}}</annotation></semantics></math>:
-whether the member who is above the couple’s predictor mean is also
-above the couple’s outcome mean. With two members, each deviation is
-half the corresponding signed partner difference.</li>
+whether the member who is above the dyad’s predictor mean is also above
+the dyad’s outcome mean. With two members, each deviation is half the
+corresponding signed partner difference.</li>
 </ol>
-<p>The first diagram emphasizes this between- and within-couple
-decomposition. Its upper row describes differences between couples; its
-lower row describes the corresponding deviations within a couple for
-either member
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">i \in \{1, 2\}</annotation></semantics></math>.
-Switching members reverses both deviations and therefore leaves
+<p>The first diagram emphasizes this between- and within-dyad
+decomposition. Its upper row describes differences between dyads. Its
+lower row describes the corresponding deviations within a dyad for
+either member. Switching members reverses both deviations and therefore
+leaves the pooled
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">v</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{dev}}</annotation></semantics></math>
 unchanged.</p>
 <div class="figure">
-<img src="dim_files/figure-html/conceptual-dim-diagram-1.png" class="r-plt" alt="Path diagram separating the between- and within-couple associations in a cross-sectional Dyad-Individual Model. The centered predictor mean predicts the outcome mean with coefficient b mean. Member i's predictor deviation predicts the same member's outcome deviation with coefficient b dev. There are no cross-paths, and only the outcome-mean equation has intercept b zero." width="100%"><p class="caption">
-Between- and within-couple representation of the cross-sectional DIM.
-The between-couple effect links couples’ centered predictor means to
-their outcome means. The within-couple effect links a member’s predictor
-deviation to that member’s outcome deviation. Exchangeability removes
-the two DSM cross-paths and the outcome-deviation intercept; the mean
-and deviation residual components are uncorrelated.
-</p>
-</div>
-<p>The second diagram translates the same decomposition to the
-individual-member rows used by the long-format multilevel model. Each
-member’s expected outcome combines the couple’s shared,
-grand-mean-centered predictor mean with that member’s own predictor
-deviation. The same
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{mean}}</annotation></semantics></math>
+<img src="dim_files/figure-html/conceptual-dim-diagram-1.png" class="r-plt" alt="Path diagram separating the between- and within-dyad associations in a cross-sectional Dyad-Individual Model. The centered predictor mean predicts the outcome mean with coefficient b mean. Member i's predictor deviation predicts the same member's outcome deviation with coefficient b dev. There are no cross-paths, and only the outcome-mean equation has intercept b zero." width="100%"><p class="caption">
+Between- and within-dyad effects representation of the cross-sectional
+DIM. The uncorrelated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mi>m</mi></msub><annotation encoding="application/x-tex">r_m</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">v</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{dev}}</annotation></semantics></math>
-apply to both arbitrarily labelled members, while their two outcomes
-remain interdependent.</p>
-<div class="figure">
-<img src="dim_files/figure-html/conceptual-dim-member-diagram-1.png" class="r-plt" alt="Path diagram for two arbitrarily labelled members of an exchangeable dyad. For each member, the shared, grand-mean-centered couple predictor mean and the member's own predictor deviation predict the individual outcome. Both members share the same between- and within-couple coefficients and residual standard deviation, while their outcome residuals are correlated." width="100%"><p class="caption">
-Individual-level representation of the cross-sectional DIM used for the
-long-format multilevel model. Each member’s outcome is predicted by the
-couple’s shared predictor mean and that member’s own predictor
-deviation. Both members share the same two coefficients, their residual
-standard deviations are equal, and their residuals may covary.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi>d</mi><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">r_{d,i}</annotation></semantics></math>
+in the conceptual representation do not imply that the member residuals
+are independent, instead, both members information is contained in each
+of these residuals.
 </p>
 </div>
 <p>Uncorrelated
@@ -237,11 +215,19 @@ standard deviations are equal, and their residuals may covary.
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi>d</mi><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">r_{d,i}</annotation></semantics></math>
 in the conceptual representation do not imply that the member residuals
-are independent:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϵ</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\epsilon_1</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϵ</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\epsilon_2</annotation></semantics></math>
-in the member-level representation may still covary.</p>
+are independent</p>
+<p>The second diagram translates the same decomposition to the
+individual-member rows used by the long-format multilevel model. Each
+member’s outcome is predicted by the dyad’s shared predictor mean and
+that member’s own predictor deviation from that shared mean. Both
+members share the same two coefficients, so estimation pools information
+across members under the exchangeability assumptions.</p>
+<div class="figure">
+<img src="dim_files/figure-html/conceptual-dim-member-diagram-1.png" class="r-plt" alt="Path diagram for two arbitrarily labelled members of an exchangeable dyad. For each member, the shared, grand-mean-centered dyad predictor mean and the member's own predictor deviation predict the individual outcome. Both members share the same between- and within-dyad coefficients and residual standard deviation, while their outcome residuals are correlated." width="100%"><p class="caption">
+Individual-level representation of the cross-sectional DIM used for the
+long-format multilevel model.
+</p>
+</div>
 <p>The resulting estimated fixed effects are a reparameterization of the
 APIM actor and partner effects <span class="citation">(Bolger et al.
 2025)</span>. And just like the exchangeable APIM, the random-effects
@@ -307,24 +293,27 @@ preserving exchangeability <span class="citation">(del Rosario and West
 <p>The same mean-and-deviation diagram can now be labelled with the
 estimated fixed effects and residual-component standard deviations:</p>
 <div class="figure">
-<img src="dim_files/figure-html/fitted-dim-diagram-1.png" class="r-plt" alt="Fitted path diagram for the cross-sectional Dyad-Individual Model. Labels give the estimated outcome-mean intercept, predictor-mean effect, member-deviation effect, and residual-component standard deviations. There are no cross-paths, and the residual-component correlation is zero." width="100%"><p class="caption">
+<img src="dim_files/figure-html/fitted-dim-diagram-1.png" class="r-plt" alt="Fitted DIM. Intercept 5.04, between-couple effect 2.00, within-couple effect 1.52, and mean/deviation residual SDs 0.80 and 1.07; their correlation is fixed at zero." width="100%"><p class="caption">
 Estimated fixed effects and residual-component standard deviations from
 the cross-sectional Gaussian DIM in its mean-and-deviation
-representation. The intercept belongs to the outcome-mean equation;
-exchangeability fixes the outcome-deviation intercept and both
-cross-paths to zero, and the mean and deviation residual components are
-uncorrelated.
+representation. The intercept belongs to the outcome-mean equation.
 </p>
 </div>
+<p>Under these exchangeability constraints, the Gaussian DIM is
+algebraically equivalent to the reduced, label-invariant Dyadic Score
+Model (DSM) <span class="citation">(Iida et al. 2018)</span>. Compared
+to a full DSM, the DIM’s exchangeability constraints fix the
+outcome-deviation intercept and both cross-paths to zero and constrain
+the mean and deviation residual components to be uncorrelated (see the
+diagrams here and compare them with the <a href="dsm.html#cross-sectional-gaussian-dsm">conceptual DSM
+diagrams</a>).</p>
 </div>
 <div class="section level3">
 <h3 id="model-interpretation">Model interpretation<a class="anchor" aria-label="anchor" href="#model-interpretation"></a>
 </h3>
-<p>Under these exchangeability constraints, the Gaussian DIM is
-algebraically equivalent to the reduced, label-invariant Dyadic Score
-Model (DSM) <span class="citation">(Iida et al. 2018)</span>. Therefore,
-each coefficient has both an individual-member interpretation and an
-equivalent couple mean/difference interpretation.</p>
+<p>Therefore, each coefficient has both an individual-member
+interpretation and an equivalent couple mean/difference
+interpretation.</p>
 <p>In this Gaussian model, fixed coefficients are interpreted in units
 of the outcome, e.g., “satisfaction”:</p>
 <ul>
@@ -858,10 +847,10 @@ intercept is omitted from both displayed equations.</p>
   var limit = 5;
   var plotScale = 130 / limit;
   var slopes = {
-    actor: 1.7577551727306389,
-    partner: 0.23787304955496402,
-    mean: 1.9956254260624589,
-    within: 1.5198922225023468
+    actor: 1.7577551727306386,
+    partner: 0.23787304955494726,
+    mean: 1.9956254260554023,
+    within: 1.5198922225044085
   };
   var colors = {
     actor: "var(--idg-actor)",

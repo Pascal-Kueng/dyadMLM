@@ -9,21 +9,17 @@ This vignette focuses on the cross-sectional and intensive longitudinal
 Actor-Partner Interdependence model for distinguishable and exchangeable
 dyads.
 
-For the main data requirements and validation workflow of the `interdep`
-package, start with the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
-For APIMs that combine distinguishable and exchangeable dyad
-compositions, see the [Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md).
-For DIM predictors and their equivalence to APIM effects in exchangeable
-dyads, see the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
-DSM predictor scores and their relationship to APIM effects in
-distinguishable dyads, see the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+For the broader package workflow and an overview of the available
+model-specific vignettes, including the [Mixed-Composition
+APIM](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+[Dyad-Individual
+Model](https://pascal-kueng.github.io/interdep/articles/dim.md), and
+[Dyadic Score
+Model](https://pascal-kueng.github.io/interdep/articles/dsm.md), see the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
-> This vignette is under construction and for now only contains a few
-> preliminary example models. Please check back soon!
+> This vignette is under construction and preliminary. Please check back
+> soon!
 
 ## The cross sectional Gaussian distinguishable APIM
 
@@ -122,6 +118,15 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
   , data = apim_distinguishable_data
 )
 ```
+
+![Fitted distinguishable APIM. Female and male intercepts -4.37 and
+-6.04; actor effects 1.67 and 1.80; partner effects 0.25 and 0.25;
+residual SDs 1.15 and 1.34, with correlation
+-0.19.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.png)
+
+Fitted cross-sectional distinguishable APIM for the example data. Fixed
+effects, residual standard deviations, and the residual correlation are
+extracted from the fitted model.
 
 ### Residual random-effects structure
 
@@ -347,6 +352,14 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 )
 ```
 
+![Fitted exchangeable APIM. Intercept -5.23, actor effect 1.76, partner
+effect 0.24, common residual SD 1.34, and residual correlation
+-0.29.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.png)
+
+Fitted cross-sectional exchangeable APIM for the example data. The
+common member residual standard deviation and residual correlation are
+back-transformed from the fitted mean and difference components.
+
 [`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:
@@ -554,10 +567,10 @@ summary(stability_influence)
 #> 
 #> Conditional model:
 #>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                4.213055   0.300180  14.035  < 2e-16 ***
-#> .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***
-#> .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    
-#> diaryday                  -0.005280   0.007643  -0.691    0.490    
+#> (Intercept)                4.213120   0.300184  14.035  < 2e-16 ***
+#> .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
+#> .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
+#> diaryday                  -0.005281   0.007643  -0.691    0.490    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

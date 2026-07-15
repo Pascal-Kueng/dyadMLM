@@ -7,20 +7,17 @@ library(interdep)
 
 This vignette covers APIMs that combine distinguishable and exchangeable
 dyad compositions in one analysis. The unified SEM presentation by
-Bolger, Laurenceau, and DiGiovanni is the basis and inspiration for this
-vignette (Bolger et al. 2025). Here, we implement the same general idea
-in one multilevel model.
+Bolger et al. (2025) is the basis and inspiration for this vignette.
+Here, we implement a similar general idea in one multilevel model.
 
-For the general data-preparation workflow, go to the [Getting Started
-vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.md).
-For regular APIMs, refer to the [Actor-Partner Interdependence Model
+This vignette builds on the regular [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
-DIM predictors and their equivalence to APIM effects in exchangeable
-dyads, see the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md). For
-DSM predictor scores and their relationship to APIM effects in
-distinguishable dyads, see the [Dyadic Score Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md).
+the broader package workflow and an overview of the other model-specific
+vignettes, including the [Dyad-Individual
+Model](https://pascal-kueng.github.io/interdep/articles/dim.md) and
+[Dyadic Score
+Model](https://pascal-kueng.github.io/interdep/articles/dsm.md), see the
+[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
 ## Cross-sectional mixed-composition APIM
 
@@ -112,12 +109,12 @@ variances, and a covariance. No covariance parameters connect the three
 composition
 blocks.](mixed-apim_files/figure-html/mixed-composition-diagram-1.png)
 
-Structure of the cross-sectional mixed-composition APIM. Female-male
-dyads have distinguishable member intercepts and an unrestricted
-residual covariance block. Each same-gender composition has a pooled
-intercept and an exchangeable residual covariance block. The three
-blocks are estimated jointly but are not connected by covariance
-parameters.
+Structure of the cross-sectional mixed-composition APIM (Intercept only
+example). Female-male dyads have distinguishable member intercepts and
+an unrestricted residual covariance block. Each same-gender composition
+has a pooled intercept and an exchangeable residual covariance block.
+The three blocks are estimated jointly but are not connected by
+covariance parameters.
 
 The model can then be specified as follows (example for an
 intercept-only model):
