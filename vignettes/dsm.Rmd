@@ -519,14 +519,13 @@ In `interdep`, use `model_type = "dim"` for this exchangeable model and reserve
 
 Because the Gaussian DIM is the exchangeability-constrained version of the full
 DSM, exchangeability can also be tested by comparing these nested models. This
-is equivalent to the comparison shown in [Testing distinguishability in the
-APIM vignette](apim.html#testing-distinguishability).
+is equivalent to the comparison shown in the [APIM vignette's discussion of testing distinguishability](apim.html#testing-distinguishability).
 
 ## Intensive longitudinal DSM
 
-> The following sections are under construction and are coming soon! But this extension
-is equivalent to the cross-setcional DIM to the ILD DIM. Please refer to that
-section.
+> The following sections are under construction and are coming soon! This extension
+is equivalent to the extension from the cross-sectional DIM to the ILD DIM. Please
+refer to that section.
 
 ### Interpretation of concurrent ILD DSM coefficients
 
@@ -536,7 +535,7 @@ section.
 
 #### Transforming DSM random slopes to APIM slopes
 
-### Dynamic ILD DIM example
+### Dynamic ILD DSM example
 
 The ILD models above do not model residual serial dependence. One way to model
 dynamics or to account for temporal dependency is to include lagged outcomes as predictors.
