@@ -1,3 +1,10 @@
+.interdep_diagram_colours <- list(
+  actor = "#1769AA",
+  partner = "#7B3FA1",
+  mean = "#C43C35",
+  within = "#8A6500"
+)
+
 .draw_diagram_legend <- function(
     labels, colours, y, segment_starts, text_x, fontsize = 10.5) {
   for (index in seq_along(labels)) {
@@ -22,8 +29,8 @@ draw_apim_diagram <- function(
     edge_labels = NULL) {
   type <- match.arg(type)
 
-  actor_colour <- "#0072B2"
-  partner_colour <- "#D55E00"
+  actor_colour <- .interdep_diagram_colours$actor
+  partner_colour <- .interdep_diagram_colours$partner
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -43,6 +50,10 @@ draw_apim_diagram <- function(
       partner_to_top = expression(p[plain(F)]),
       partner_to_bottom = expression(p[plain(M)])
     )
+    intercept_labels <- list(
+      top = expression(b[0 * "," * plain(F)]),
+      bottom = expression(b[0 * "," * plain(M)])
+    )
   } else {
     node_labels <- list(
       x_top = expression(X[1]),
@@ -57,6 +68,10 @@ draw_apim_diagram <- function(
       actor_bottom = expression(a),
       partner_to_top = expression(p),
       partner_to_bottom = expression(p)
+    )
+    intercept_labels <- list(
+      top = expression(b[0]),
+      bottom = expression(b[0])
     )
   }
 
@@ -146,6 +161,23 @@ draw_apim_diagram <- function(
     grid::grid.draw(label_grob)
   }
 
+  draw_intercept <- function(x, y, label) {
+    grid::grid.roundrect(
+      x = native(x),
+      y = native(y),
+      width = native(0.09),
+      height = native(0.065),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = muted_colour, lwd = 1)
+    )
+    grid::grid.text(
+      label,
+      x = native(x),
+      y = native(y),
+      gp = grid::gpar(col = muted_colour, fontsize = 14)
+    )
+  }
+
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
@@ -156,6 +188,8 @@ draw_apim_diagram <- function(
   draw_node(0.64, 0.28, node_labels$y_bottom)
   draw_residual(0.91, 0.72, node_labels$e_top)
   draw_residual(0.91, 0.28, node_labels$e_bottom)
+  draw_intercept(0.64, 0.86, intercept_labels$top)
+  draw_intercept(0.64, 0.14, intercept_labels$bottom)
 
   # Actor paths
   draw_path(0.295, 0.72, 0.515, 0.72, actor_colour)
@@ -205,8 +239,8 @@ draw_apim_member_diagram <- function(
     type = c("distinguishable", "exchangeable")) {
   type <- match.arg(type)
 
-  actor_colour <- "#0072B2"
-  partner_colour <- "#D55E00"
+  actor_colour <- .interdep_diagram_colours$actor
+  partner_colour <- .interdep_diagram_colours$partner
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -227,7 +261,9 @@ draw_apim_member_diagram <- function(
       actor_top = expression(a[plain(F)]),
       actor_bottom = expression(a[plain(M)]),
       partner_top = expression(p[plain(F)]),
-      partner_bottom = expression(p[plain(M)])
+      partner_bottom = expression(p[plain(M)]),
+      intercept_top = expression(b[0 * "," * plain(F)]),
+      intercept_bottom = expression(b[0 * "," * plain(M)])
     )
   } else {
     labels <- list(
@@ -245,7 +281,9 @@ draw_apim_member_diagram <- function(
       actor_top = expression(a),
       actor_bottom = expression(a),
       partner_top = expression(p),
-      partner_bottom = expression(p)
+      partner_bottom = expression(p),
+      intercept_top = expression(b[0]),
+      intercept_bottom = expression(b[0])
     )
   }
 
@@ -314,6 +352,19 @@ draw_apim_member_diagram <- function(
     grid::grid.draw(label_grob)
   }
 
+  draw_intercept <- function(x, y, label) {
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = native(0.09), height = native(0.06),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = muted_colour, lwd = 1)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = muted_colour, fontsize = 13)
+    )
+  }
+
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
@@ -326,6 +377,8 @@ draw_apim_member_diagram <- function(
   draw_node(0.66, 0.305, labels$y_bottom, "Outcome", width = 0.24)
   draw_residual(0.91, 0.695, labels$residual_top)
   draw_residual(0.91, 0.305, labels$residual_bottom)
+  draw_intercept(0.66, 0.805, labels$intercept_top)
+  draw_intercept(0.66, 0.195, labels$intercept_bottom)
 
   draw_path(0.28, 0.79, 0.54, 0.715, actor_colour)
   draw_path(0.28, 0.60, 0.54, 0.675, partner_colour)
@@ -374,8 +427,8 @@ draw_apim_member_diagram <- function(
 }
 
 draw_dsm_diagram <- function(estimates = NULL) {
-  mean_colour <- "#0072B2"
-  difference_colour <- "#D55E00"
+  mean_colour <- .interdep_diagram_colours$mean
+  difference_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -560,8 +613,8 @@ draw_dsm_diagram <- function(estimates = NULL) {
 }
 
 draw_dim_diagram <- function(estimates = NULL) {
-  mean_colour <- "#0072B2"
-  deviation_colour <- "#D55E00"
+  mean_colour <- .interdep_diagram_colours$mean
+  deviation_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -705,8 +758,8 @@ draw_dim_diagram <- function(estimates = NULL) {
 }
 
 draw_dim_member_diagram <- function() {
-  mean_colour <- "#0072B2"
-  deviation_colour <- "#D55E00"
+  mean_colour <- .interdep_diagram_colours$mean
+  deviation_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -1002,6 +1055,184 @@ draw_mixed_apim_diagram <- function() {
     "Composition-specific blocks: no covariance parameters connect them",
     x = native(0.5), y = native(0.085),
     gp = grid::gpar(col = muted_colour, fontsize = 11)
+  )
+
+  grid::popViewport()
+  invisible(NULL)
+}
+
+draw_cfm_diagram <- function() {
+  level_colour <- "#0072B2"
+  covariance_colour <- "#D55E00"
+  ink_colour <- "#263238"
+  muted_colour <- "#64748B"
+  node_fill <- "#F8FAFC"
+
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 28,
+    length = grid::unit(0.15, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 26,
+    length = grid::unit(0.10, "inches"),
+    ends = "both",
+    type = "closed"
+  )
+
+  draw_observed <- function(x, label, subtitle) {
+    grid::grid.roundrect(
+      x = native(x), y = native(0.60),
+      width = native(0.19), height = native(0.17),
+      r = grid::unit(0.07, "snpc"),
+      gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(0.625),
+      gp = grid::gpar(col = ink_colour, fontsize = 16)
+    )
+    grid::grid.text(
+      subtitle, x = native(x), y = native(0.565),
+      gp = grid::gpar(col = muted_colour, fontsize = 9)
+    )
+  }
+
+  draw_latent <- function(x, label, subtitle) {
+    theta <- seq(0, 2 * pi, length.out = 101)
+    grid::grid.polygon(
+      x = native(x + 0.13 * cos(theta)),
+      y = native(0.25 + 0.09 * sin(theta)),
+      gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(0.275),
+      gp = grid::gpar(col = ink_colour, fontsize = 17)
+    )
+    grid::grid.text(
+      subtitle, x = native(x), y = native(0.215),
+      gp = grid::gpar(col = muted_colour, fontsize = 9.5)
+    )
+  }
+
+  draw_residual <- function(x, label, y = 0.84) {
+    grid::grid.circle(
+      x = native(x), y = native(y), r = grid::unit(0.043, "snpc"),
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 13)
+    )
+  }
+
+  draw_path <- function(x0, y0, x1, y1, colour, lwd = 2) {
+    grid::grid.segments(
+      x0 = native(x0), y0 = native(y0),
+      x1 = native(x1), y1 = native(y1),
+      arrow = arrow_head,
+      gp = grid::gpar(col = colour, fill = colour, lwd = lwd)
+    )
+  }
+
+  draw_label <- function(x, y, label, colour, fontsize = 13) {
+    label_grob <- grid::textGrob(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = colour, fontsize = fontsize)
+    )
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = grid::grobWidth(label_grob) + grid::unit(2.5, "mm"),
+      height = grid::grobHeight(label_grob) + grid::unit(1.5, "mm"),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = NA)
+    )
+    grid::grid.draw(label_grob)
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  indicator_x <- c(0.10, 0.35, 0.62, 0.87)
+  draw_observed(indicator_x[1], expression(X[1]), "Member 1 predictor")
+  draw_observed(indicator_x[2], expression(X[2]), "Member 2 predictor")
+  draw_observed(indicator_x[3], expression(Y[1]), "Member 1 outcome")
+  draw_observed(indicator_x[4], expression(Y[2]), "Member 2 outcome")
+
+  draw_latent(0.225, expression(X[plain(level)]), "Latent predictor level")
+  draw_latent(0.745, expression(Y[plain(level)]), "Latent outcome level")
+
+  residual_labels <- list(
+    expression(epsilon[plain(X1)]),
+    expression(epsilon[plain(X2)]),
+    expression(epsilon[plain(Y1)]),
+    expression(epsilon[plain(Y2)])
+  )
+  for (index in seq_along(indicator_x)) {
+    draw_residual(indicator_x[index], residual_labels[[index]])
+    draw_path(
+      indicator_x[index], 0.795,
+      indicator_x[index], 0.685,
+      muted_colour, lwd = 1.7
+    )
+  }
+
+  # Unit loadings identify each latent dyad-level construct as the shared
+  # level underlying the two member reports.
+  loading_paths <- list(
+    c(0.18, 0.337, 0.10, 0.515),
+    c(0.27, 0.337, 0.35, 0.515),
+    c(0.70, 0.337, 0.62, 0.515),
+    c(0.79, 0.337, 0.87, 0.515)
+  )
+  loading_label_x <- c(0.135, 0.315, 0.655, 0.835)
+  for (index in seq_along(loading_paths)) {
+    path <- loading_paths[[index]]
+    draw_path(path[1], path[2], path[3], path[4], muted_colour, lwd = 1.8)
+    draw_label(
+      loading_label_x[index], 0.43,
+      expression(1), muted_colour, fontsize = 11
+    )
+  }
+
+  # The structural CFM path links the two shared dyad-level constructs.
+  draw_path(0.355, 0.25, 0.615, 0.25, level_colour, lwd = 2.3)
+  draw_label(0.485, 0.25, expression(b[plain(level)]), level_colour, 14)
+
+  # Same-member residual covariances retain the association unique to each
+  # member rather than attributing it to the shared dyad-level path.
+  grid::grid.curve(
+    x1 = native(0.10), y1 = native(0.895),
+    x2 = native(0.62), y2 = native(0.895),
+    curvature = -0.10, angle = 90, ncp = 14, square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(
+      col = covariance_colour, fill = covariance_colour, lwd = 1.8
+    )
+  )
+  grid::grid.curve(
+    x1 = native(0.35), y1 = native(0.895),
+    x2 = native(0.87), y2 = native(0.895),
+    curvature = -0.15, angle = 90, ncp = 14, square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(
+      col = covariance_colour, fill = covariance_colour, lwd = 1.8
+    )
+  )
+
+  # The latent outcome level has a disturbance; the predictor level is
+  # exogenous in this simple predictor-to-outcome CFM.
+  draw_residual(0.94, expression(r[Y]), y = 0.25)
+  draw_path(0.897, 0.25, 0.875, 0.25, muted_colour, lwd = 1.7)
+
+  .draw_diagram_legend(
+    labels = c("Dyad-level effect", "Member-specific residual covariance"),
+    colours = c(level_colour, covariance_colour),
+    y = 0.055,
+    segment_starts = c(0.20, 0.53),
+    text_x = c(0.38, 0.75),
+    fontsize = 10
   )
 
   grid::popViewport()

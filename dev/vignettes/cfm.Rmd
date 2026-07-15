@@ -1,5 +1,6 @@
 ---
 title: "Common Fate Model"
+bibliography: ../../vignettes/references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Common Fate Model}
@@ -12,8 +13,38 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+diagram_candidates <- c(
+  "diagram-helpers.Rinc",
+  "../../vignettes/diagram-helpers.Rinc",
+  "vignettes/diagram-helpers.Rinc"
+)
+diagram_helper <- diagram_candidates[file.exists(diagram_candidates)][1]
+
+if (is.na(diagram_helper)) {
+  stop("Could not find vignettes/diagram-helpers.Rinc.")
+}
+
+sys.source(diagram_helper, envir = knitr::knit_global())
 ```
 
 ```{r setup}
 library(interdep)
 ```
+
+> This vignette is a draft and is under construction.
+
+The Common Fate Model (CFM) represents the two members' reports as indicators
+of a shared latent dyad-level construct [@ledermannAnalyzingDyadicData2017;
+@iidaModelsInterdependentIndividuals2018]. In the predictor-to-outcome CFM
+below, the shared predictor level predicts the shared outcome level. The
+unit-loading paths define each latent variable from the two member reports.
+
+```{r conceptual-cfm-diagram, echo=FALSE, fig.width=10, fig.height=5.8, out.width="100%", fig.cap="SEM representation of a predictor-to-outcome Common Fate Model. Each pair of member reports loads with a fixed unit loading on a shared latent dyad-level construct. The latent predictor level predicts the latent outcome level. Same-member predictor and outcome residuals may covary, and the latent outcome level has a residual disturbance.", fig.alt="Structural equation path diagram for a Common Fate Model. X 1 and X 2 are unit-loading indicators of latent X level, and Y 1 and Y 2 are unit-loading indicators of latent Y level. Latent X level predicts latent Y level with coefficient b level. The residuals of X 1 and Y 1 covary, as do the residuals of X 2 and Y 2. Latent Y level has a residual disturbance."}
+draw_cfm_diagram()
+```
+
+The orange curved paths retain the predictor--outcome association specific to
+each member rather than assigning it to the shared dyad-level effect. Only the
+SEM representation is shown here; there is no individual-level multilevel-model
+diagram for this CFM.
