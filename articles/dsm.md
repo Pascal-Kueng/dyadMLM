@@ -99,6 +99,19 @@ For a cross-sectional Gaussian DSM, a correlated dyad random intercept
 and role-contrast slope represent unexplained outcome-level and
 outcome-difference variation.
 
+![Path diagram for a cross-sectional dyadic score model. Communication
+level and female-minus-male communication difference each predict
+satisfaction level and female-minus-male satisfaction difference. Paths
+are labelled a11, a12, a21, and a22, and outcome intercepts are labelled
+a10 and a20.](dsm_files/figure-html/conceptual-dsm-diagram-1.png)
+
+Conceptual cross-sectional DSM. Predictor level and predictor difference
+each predict both outcome level and outcome difference. The intercepts
+are a10 and a20; the four regression paths are a11, a12, a21, and a22.
+The outcome-level and outcome-difference residuals may covary.
+
+The path labels correspond directly to the terms in the model below:
+
 ``` r
 
 dsm_model <- glmmTMB::glmmTMB(
@@ -107,11 +120,19 @@ dsm_model <- glmmTMB::glmmTMB(
     # Outcome-level intercept
     1 +
 
-    # !TODO: shall we enter comments what each term estimates or represents? E.g,. in the APIM we say "Actor effects", what do we say here for each?
+    # Predictor level -> outcome level (a11)
     .i_communication_dyad_mean_gmc +
+
+    # Predictor difference -> outcome level (a12)
     .i_communication_within_dyad_diff +
+
+    # Outcome-difference intercept (a20)
     .i_dsm_role_contrast +
+
+    # Predictor level -> outcome difference (a21)
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
+
+    # Predictor difference -> outcome difference (a22)
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
@@ -204,6 +225,17 @@ Consider the conceptual SEM formulas:
 = a_{20} + a_{21}X_{\mathrm{mean}} + a_{22}X_{\mathrm{diff}}.
 ```
 
+The fitted paths for this example are:
+
+![Fitted path diagram for the example dyadic score model. Communication
+level and female-minus-male communication difference each predict
+satisfaction level and female-minus-male satisfaction difference. The
+six paths and intercepts are labelled with their estimated
+coefficients.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
+
+Fitted cross-sectional DSM for the example data. Edge and intercept
+labels show the estimated DSM coefficients.
+
 The fixed effects from our MLM model map directly to these paths as
 such:
 
@@ -230,10 +262,6 @@ and the random role-contrast slope variance is unexplained variation in
 the full directional outcome difference. Their covariance indicates
 whether unexplained outcome level and unexplained outcome difference are
 associated.
-
-!TODO: include SEM-Style diagram where the coefficients are mapped onto,
-as a\_{22} = xxx, etc. Once this is present, do you think the table
-should still be kept or not? think and propose in your response
 
 ### Reversing the coding
 
@@ -372,9 +400,6 @@ data.frame(
 
 ### Fixed-effect transformation
 
-!TODO: The backtransformations are quite complex and take alot of space.
-Can they be simpler, yet still clear?
-
 Let $`b_{\mathrm{actor},\mathrm{female}}`$ and
 $`b_{\mathrm{actor},\mathrm{male}}`$ denote the actor effects on the
 female and male outcomes. The corresponding partner effects are
@@ -383,42 +408,49 @@ $`b_{\mathrm{partner},\mathrm{male}}`$, and the APIM intercepts are
 $`b_{0,\mathrm{female}}`$ and $`b_{0,\mathrm{male}}`$. Fixed APIM
 coefficients use $`b`$ and write out their effect and outcome role. The
 numbered paths $`a_{10}`$ through $`a_{22}`$ retain the published DSM
-notation. The APIM slopes transform into the female-minus-male DSM paths
-as
+notation.
+
+The slope transformation can be understood in two steps. First, for each
+outcome role $`r \in \{\mathrm{female},\mathrm{male}\}`$, form the
+actor-plus-partner and actor-minus-partner combinations:
+
+``` math
+\begin{aligned}
+b_{\mathrm{sum},r}
+&= b_{\mathrm{actor},r} + b_{\mathrm{partner},r}, \\
+b_{\mathrm{difference},r}
+&= b_{\mathrm{actor},r} - b_{\mathrm{partner},r}.
+\end{aligned}
+```
+
+The DSM slopes then follow by combining the female- and male-outcome
+effects:
 
 ``` math
 \begin{aligned}
 a_{11}
-&= \frac{b_{\mathrm{actor},\mathrm{female}}
-        + b_{\mathrm{partner},\mathrm{female}}
-        + b_{\mathrm{actor},\mathrm{male}}
-        + b_{\mathrm{partner},\mathrm{male}}}{2}, \\
-a_{12}
-&= \frac{b_{\mathrm{actor},\mathrm{female}}
-        - b_{\mathrm{partner},\mathrm{female}}
-        + b_{\mathrm{partner},\mathrm{male}}
-        - b_{\mathrm{actor},\mathrm{male}}}{4}, \\
+&= \frac{b_{\mathrm{sum},\mathrm{female}}
+        + b_{\mathrm{sum},\mathrm{male}}}{2},
+&
 a_{21}
-&= b_{\mathrm{actor},\mathrm{female}}
-   + b_{\mathrm{partner},\mathrm{female}}
-   - b_{\mathrm{actor},\mathrm{male}}
-   - b_{\mathrm{partner},\mathrm{male}}, \\
+&= b_{\mathrm{sum},\mathrm{female}}
+   - b_{\mathrm{sum},\mathrm{male}}, \\
+a_{12}
+&= \frac{b_{\mathrm{difference},\mathrm{female}}
+        - b_{\mathrm{difference},\mathrm{male}}}{4},
+&
 a_{22}
-&= \frac{b_{\mathrm{actor},\mathrm{female}}
-        + b_{\mathrm{actor},\mathrm{male}}
-        - b_{\mathrm{partner},\mathrm{female}}
-        - b_{\mathrm{partner},\mathrm{male}}}{2}.
+&= \frac{b_{\mathrm{difference},\mathrm{female}}
+        + b_{\mathrm{difference},\mathrm{male}}}{2}.
 \end{aligned}
 ```
 
 The APIM predictors retain their original scale, whereas the DSM
-predictor level is grand-mean centered. !TODO: would you recommend to
-always gm-center our “raw” predictors too? or does this have negative
-consequences for other parts of our package or vignettes
-transformations? Such as lagging or whatever? do we need raw or is gm
-centered fine, according to th lagging papers in this repos
-dev/references? If $`\mu_X`$ is the grand mean subtracted from the DSM
-predictor level, the intercepts therefore transform as
+predictor level is grand-mean centered. Keeping the raw APIM predictors
+on their original scale preserves their reference values; the centering
+difference is handled explicitly in the intercept transformation. If
+$`\mu_X`$ is the grand mean subtracted from the DSM predictor level, the
+intercepts transform as
 
 ``` math
 a_{10}
@@ -427,22 +459,35 @@ a_{10}
 a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}} + \mu_X a_{21}.
 ```
 
-The reverse slope transformation is
+For the reverse slope transformation, first recover the role-specific
+actor-plus-partner and actor-minus-partner combinations:
 
 ``` math
 \begin{aligned}
-b_{\mathrm{actor},\mathrm{female}}
-&= \frac{a_{11}}{2} + a_{12} + \frac{a_{21}}{4} + \frac{a_{22}}{2}, \\
-b_{\mathrm{partner},\mathrm{female}}
-&= \frac{a_{11}}{2} - a_{12} + \frac{a_{21}}{4} - \frac{a_{22}}{2}, \\
-b_{\mathrm{actor},\mathrm{male}}
-&= \frac{a_{11}}{2} - a_{12} - \frac{a_{21}}{4} + \frac{a_{22}}{2}, \\
-b_{\mathrm{partner},\mathrm{male}}
-&= \frac{a_{11}}{2} + a_{12} - \frac{a_{21}}{4} - \frac{a_{22}}{2}.
+b_{\mathrm{sum},\mathrm{female}}
+&= a_{11} + \frac{a_{21}}{2},
+&
+b_{\mathrm{sum},\mathrm{male}}
+&= a_{11} - \frac{a_{21}}{2}, \\
+b_{\mathrm{difference},\mathrm{female}}
+&= a_{22} + 2a_{12},
+&
+b_{\mathrm{difference},\mathrm{male}}
+&= a_{22} - 2a_{12}.
 \end{aligned}
 ```
 
-Similarly,
+Then, for each outcome role $`r`$,
+
+``` math
+b_{\mathrm{actor},r}
+= \frac{b_{\mathrm{sum},r} + b_{\mathrm{difference},r}}{2},
+\qquad
+b_{\mathrm{partner},r}
+= \frac{b_{\mathrm{sum},r} - b_{\mathrm{difference},r}}{2}.
+```
+
+The intercepts transform back as
 
 ``` math
 b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2}
@@ -457,35 +502,17 @@ b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}
 The following comparison applies the APIM-to-DSM transformation to all
 six fixed effects:
 
-    #> From APIM model:
-    #>    female intercept:        -4.369 
-    #>    female actor effect:     1.672 
-    #>    female partner effect:   0.249 
-    #>    male intercept:          -6.038 
-    #>    male actor effect:       1.805 
-    #>    male partner effect:     0.255 
-    #>    centering constant:      5.148 
-    #> 
-    #>  DSM transformation:
-    #>    a10 = (female intercept + male intercept) / 2 +
-    #>           mu_X * a11:                                       5.043 
-    #>    a11 = (female actor + female partner + male actor +
-    #>           male partner) / 2:                                1.99 
-    #>    a12 = (female actor - female partner + male partner -
-    #>           male actor) / 4:                                  -0.032 
-    #>    a20 = female intercept - male intercept + mu_X * a21:    0.956 
-    #>    a21 = female actor + female partner - male actor -
-    #>           male partner:                                     -0.138 
-    #>    a22 = (female actor + male actor - female partner -
-    #>           male partner) / 2:                                1.486 
-    #> 
-    #>  From DSM model:
-    #>    outcome-level intercept (a10):        5.043 
-    #>    level -> level (a11):                 1.99 
-    #>    difference -> level (a12):            -0.032 
-    #>    outcome-difference intercept (a20):   0.956 
-    #>    level -> difference (a21):            -0.138 
-    #>    difference -> difference (a22):       1.486
+| DSM path | From APIM transformation | From DSM model |
+|:---------|-------------------------:|---------------:|
+| a10      |                    5.043 |          5.043 |
+| a11      |                    1.990 |          1.990 |
+| a12      |                   -0.032 |         -0.032 |
+| a20      |                    0.956 |          0.956 |
+| a21      |                   -0.138 |         -0.138 |
+| a22      |                    1.486 |          1.486 |
+
+APIM-to-DSM fixed-effect transformation (centering constant = 5.148).
+{.table}
 
 ### Random-effect transformation
 
@@ -555,9 +582,9 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-dis
 
 ## Intensive longitudinal DSM
 
-> The following sections are under construction and are coming soon! But
-> this extension is equivalent to the cross-setcional DIM to the ILD
-> DIM. Please refer to that section.
+> The following sections are under construction and are coming soon!
+> This extension is equivalent to the extension from the cross-sectional
+> DIM to the ILD DIM. Please refer to that section.
 
 ### Interpretation of concurrent ILD DSM coefficients
 
@@ -567,7 +594,7 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-dis
 
 #### Transforming DSM random slopes to APIM slopes
 
-### Dynamic ILD DIM example
+### Dynamic ILD DSM example
 
 The ILD models above do not model residual serial dependence. One way to
 model dynamics or to account for temporal dependency is to include

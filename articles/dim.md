@@ -901,7 +901,6 @@ to bias. This, and the choice between raw and within-person-centered
 outcome lags, are addressed in the [APIM vignette’s discussion of
 dynamic
 models](https://pascal-kueng.github.io/interdep/articles/apim.html#dynamic-models).
-!TODO: search and find such broken wrapping links across all vignettes!
 
 Brief example to obtain lagged raw and within-person centered versions
 of the outcome:

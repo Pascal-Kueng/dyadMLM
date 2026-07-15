@@ -165,6 +165,16 @@ The outcome remains unchanged and no transformation is needed.</p>
 <p>For a cross-sectional Gaussian DSM, a correlated dyad random
 intercept and role-contrast slope represent unexplained outcome-level
 and outcome-difference variation.</p>
+<div class="figure">
+<img src="dsm_files/figure-html/conceptual-dsm-diagram-1.png" class="r-plt" alt="Path diagram for a cross-sectional dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20." width="100%"><p class="caption">
+Conceptual cross-sectional DSM. Predictor level and predictor difference
+each predict both outcome level and outcome difference. The intercepts
+are a10 and a20; the four regression paths are a11, a12, a21, and a22.
+The outcome-level and outcome-difference residuals may covary.
+</p>
+</div>
+<p>The path labels correspond directly to the terms in the model
+below:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsm_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
@@ -172,11 +182,19 @@ and outcome-difference variation.</p>
 <span>    <span class="co"># Outcome-level intercept</span></span>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="co"># !TODO: shall we enter comments what each term estimates or represents? E.g,. in the APIM we say "Actor effects", what do we say here for each?</span></span>
+<span>    <span class="co"># Predictor level -&gt; outcome level (a11)</span></span>
 <span>    <span class="va">.i_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Predictor difference -&gt; outcome level (a12)</span></span>
 <span>    <span class="va">.i_communication_within_dyad_diff</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Outcome-difference intercept (a20)</span></span>
 <span>    <span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Predictor level -&gt; outcome difference (a21)</span></span>
 <span>    <span class="va">.i_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span></span>
+<span>    <span class="co"># Predictor difference -&gt; outcome difference (a22)</span></span>
 <span>    <span class="va">.i_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Outcome-level and outcome-difference residual variances and their covariance</span></span>
@@ -262,6 +280,13 @@ parameterization of the same conditional outcome regressions.</p>
 \widehat{Y_{\mathrm{diff}}}
 = a_{20} + a_{21}X_{\mathrm{mean}} + a_{22}X_{\mathrm{diff}}.
 </annotation></semantics></math></p>
+<p>The fitted paths for this example are:</p>
+<div class="figure">
+<img src="dsm_files/figure-html/fitted-dsm-diagram-1.png" class="r-plt" alt="Fitted path diagram for the example dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. The six paths and intercepts are labelled with their estimated coefficients." width="100%"><p class="caption">
+Fitted cross-sectional DSM for the example data. Edge and intercept
+labels show the estimated DSM coefficients.
+</p>
+</div>
 <p>The fixed effects from our MLM model map directly to these paths as
 such:</p>
 <table class="table">
@@ -345,9 +370,6 @@ level, and the random role-contrast slope variance is unexplained
 variation in the full directional outcome difference. Their covariance
 indicates whether unexplained outcome level and unexplained outcome
 difference are associated.</p>
-<p>!TODO: include SEM-Style diagram where the coefficients are mapped
-onto, as a_{22} = xxx, etc. Once this is present, do you think the table
-should still be kept or not? think and propose in your response</p>
 </div>
 <div class="section level3">
 <h3 id="reversing-the-coding">Reversing the coding<a class="anchor" aria-label="anchor" href="#reversing-the-coding"></a>
@@ -509,8 +531,6 @@ statistics:</p>
 <div class="section level3">
 <h3 id="fixed-effect-transformation">Fixed-effect transformation<a class="anchor" aria-label="anchor" href="#fixed-effect-transformation"></a>
 </h3>
-<p>!TODO: The backtransformations are quite complex and take alot of
-space. Can they be simpler, yet still clear?</p>
 <p>Let
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{actor},\mathrm{female}}</annotation></semantics></math>
 and
@@ -530,62 +550,78 @@ and write out their effect and outcome role. The numbered paths
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>10</mn></msub><annotation encoding="application/x-tex">a_{10}</annotation></semantics></math>
 through
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mn>22</mn></msub><annotation encoding="application/x-tex">a_{22}</annotation></semantics></math>
-retain the published DSM notation. The APIM slopes transform into the
-female-minus-male DSM paths as</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>11</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>12</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>4</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>21</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>22</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>2</mn></mfrac><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+retain the published DSM notation.</p>
+<p>The slope transformation can be understood in two steps. First, for
+each outcome role
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{\mathrm{female},\mathrm{male}\}</annotation></semantics></math>,
+form the actor-plus-partner and actor-minus-partner combinations:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+b_{\mathrm{sum},r}
+&amp;= b_{\mathrm{actor},r} + b_{\mathrm{partner},r}, \\
+b_{\mathrm{difference},r}
+&amp;= b_{\mathrm{actor},r} - b_{\mathrm{partner},r}.
+\end{aligned}
+</annotation></semantics></math></p>
+<p>The DSM slopes then follow by combining the female- and male-outcome
+effects:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>11</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>21</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>12</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>4</mn></mfrac><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>a</mi><mn>22</mn></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>2</mn></mfrac><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
 a_{11}
-&amp;= \frac{b_{\mathrm{actor},\mathrm{female}}
-        + b_{\mathrm{partner},\mathrm{female}}
-        + b_{\mathrm{actor},\mathrm{male}}
-        + b_{\mathrm{partner},\mathrm{male}}}{2}, \\
-a_{12}
-&amp;= \frac{b_{\mathrm{actor},\mathrm{female}}
-        - b_{\mathrm{partner},\mathrm{female}}
-        + b_{\mathrm{partner},\mathrm{male}}
-        - b_{\mathrm{actor},\mathrm{male}}}{4}, \\
+&amp;= \frac{b_{\mathrm{sum},\mathrm{female}}
+        + b_{\mathrm{sum},\mathrm{male}}}{2},
+&amp;
 a_{21}
-&amp;= b_{\mathrm{actor},\mathrm{female}}
-   + b_{\mathrm{partner},\mathrm{female}}
-   - b_{\mathrm{actor},\mathrm{male}}
-   - b_{\mathrm{partner},\mathrm{male}}, \\
+&amp;= b_{\mathrm{sum},\mathrm{female}}
+   - b_{\mathrm{sum},\mathrm{male}}, \\
+a_{12}
+&amp;= \frac{b_{\mathrm{difference},\mathrm{female}}
+        - b_{\mathrm{difference},\mathrm{male}}}{4},
+&amp;
 a_{22}
-&amp;= \frac{b_{\mathrm{actor},\mathrm{female}}
-        + b_{\mathrm{actor},\mathrm{male}}
-        - b_{\mathrm{partner},\mathrm{female}}
-        - b_{\mathrm{partner},\mathrm{male}}}{2}.
+&amp;= \frac{b_{\mathrm{difference},\mathrm{female}}
+        + b_{\mathrm{difference},\mathrm{male}}}{2}.
 \end{aligned}
 </annotation></semantics></math></p>
 <p>The APIM predictors retain their original scale, whereas the DSM
-predictor level is grand-mean centered. !TODO: would you recommend to
-always gm-center our “raw” predictors too? or does this have negative
-consequences for other parts of our package or vignettes
-transformations? Such as lagging or whatever? do we need raw or is gm
-centered fine, according to th lagging papers in this repos
-dev/references? If
+predictor level is grand-mean centered. Keeping the raw APIM predictors
+on their original scale preserves their reference values; the centering
+difference is handled explicitly in the intercept transformation. If
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
 is the grand mean subtracted from the DSM predictor level, the
-intercepts therefore transform as</p>
+intercepts transform as</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mn>10</mn></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>2</mn></mfrac><mo>+</mo><msub><mi>μ</mi><mi>X</mi></msub><msub><mi>a</mi><mn>11</mn></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>a</mi><mn>20</mn></msub><mo>=</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>μ</mi><mi>X</mi></msub><msub><mi>a</mi><mn>21</mn></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 a_{10}
 = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2} + \mu_X a_{11},
 \qquad
 a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}} + \mu_X a_{21}.
 </annotation></semantics></math></p>
-<p>The reverse slope transformation is</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>+</mo><msub><mi>a</mi><mn>12</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>+</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>a</mi><mn>12</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>−</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>a</mi><mn>12</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>+</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mfrac><msub><mi>a</mi><mn>11</mn></msub><mn>2</mn></mfrac><mo>+</mo><msub><mi>a</mi><mn>12</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>4</mn></mfrac><mo>−</mo><mfrac><msub><mi>a</mi><mn>22</mn></msub><mn>2</mn></mfrac><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<p>For the reverse slope transformation, first recover the role-specific
+actor-plus-partner and actor-minus-partner combinations:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>11</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>11</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>22</mn></msub><mo>+</mo><mn>2</mn><msub><mi>a</mi><mn>12</mn></msub><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>22</mn></msub><mo>−</mo><mn>2</mn><msub><mi>a</mi><mn>12</mn></msub><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
-b_{\mathrm{actor},\mathrm{female}}
-&amp;= \frac{a_{11}}{2} + a_{12} + \frac{a_{21}}{4} + \frac{a_{22}}{2}, \\
-b_{\mathrm{partner},\mathrm{female}}
-&amp;= \frac{a_{11}}{2} - a_{12} + \frac{a_{21}}{4} - \frac{a_{22}}{2}, \\
-b_{\mathrm{actor},\mathrm{male}}
-&amp;= \frac{a_{11}}{2} - a_{12} - \frac{a_{21}}{4} + \frac{a_{22}}{2}, \\
-b_{\mathrm{partner},\mathrm{male}}
-&amp;= \frac{a_{11}}{2} + a_{12} - \frac{a_{21}}{4} - \frac{a_{22}}{2}.
+b_{\mathrm{sum},\mathrm{female}}
+&amp;= a_{11} + \frac{a_{21}}{2},
+&amp;
+b_{\mathrm{sum},\mathrm{male}}
+&amp;= a_{11} - \frac{a_{21}}{2}, \\
+b_{\mathrm{difference},\mathrm{female}}
+&amp;= a_{22} + 2a_{12},
+&amp;
+b_{\mathrm{difference},\mathrm{male}}
+&amp;= a_{22} - 2a_{12}.
 \end{aligned}
 </annotation></semantics></math></p>
-<p>Similarly,</p>
+<p>Then, for each outcome role
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mi>r</mi></mrow></msub></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+b_{\mathrm{actor},r}
+= \frac{b_{\mathrm{sum},r} + b_{\mathrm{difference},r}}{2},
+\qquad
+b_{\mathrm{partner},r}
+= \frac{b_{\mathrm{sum},r} - b_{\mathrm{difference},r}}{2}.
+</annotation></semantics></math></p>
+<p>The intercepts transform back as</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>20</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mn>11</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
 b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2}
 - \mu_X\left(a_{11} + \frac{a_{21}}{2}\right),
@@ -596,35 +632,47 @@ b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}
 </annotation></semantics></math></p>
 <p>The following comparison applies the APIM-to-DSM transformation to
 all six fixed effects:</p>
-<pre><code><span><span class="co">#&gt; From APIM model:</span></span>
-<span><span class="co">#&gt;    female intercept:        -4.369 </span></span>
-<span><span class="co">#&gt;    female actor effect:     1.672 </span></span>
-<span><span class="co">#&gt;    female partner effect:   0.249 </span></span>
-<span><span class="co">#&gt;    male intercept:          -6.038 </span></span>
-<span><span class="co">#&gt;    male actor effect:       1.805 </span></span>
-<span><span class="co">#&gt;    male partner effect:     0.255 </span></span>
-<span><span class="co">#&gt;    centering constant:      5.148 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  DSM transformation:</span></span>
-<span><span class="co">#&gt;    a10 = (female intercept + male intercept) / 2 +</span></span>
-<span><span class="co">#&gt;           mu_X * a11:                                       5.043 </span></span>
-<span><span class="co">#&gt;    a11 = (female actor + female partner + male actor +</span></span>
-<span><span class="co">#&gt;           male partner) / 2:                                1.99 </span></span>
-<span><span class="co">#&gt;    a12 = (female actor - female partner + male partner -</span></span>
-<span><span class="co">#&gt;           male actor) / 4:                                  -0.032 </span></span>
-<span><span class="co">#&gt;    a20 = female intercept - male intercept + mu_X * a21:    0.956 </span></span>
-<span><span class="co">#&gt;    a21 = female actor + female partner - male actor -</span></span>
-<span><span class="co">#&gt;           male partner:                                     -0.138 </span></span>
-<span><span class="co">#&gt;    a22 = (female actor + male actor - female partner -</span></span>
-<span><span class="co">#&gt;           male partner) / 2:                                1.486 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  From DSM model:</span></span>
-<span><span class="co">#&gt;    outcome-level intercept (a10):        5.043 </span></span>
-<span><span class="co">#&gt;    level -&gt; level (a11):                 1.99 </span></span>
-<span><span class="co">#&gt;    difference -&gt; level (a12):            -0.032 </span></span>
-<span><span class="co">#&gt;    outcome-difference intercept (a20):   0.956 </span></span>
-<span><span class="co">#&gt;    level -&gt; difference (a21):            -0.138 </span></span>
-<span><span class="co">#&gt;    difference -&gt; difference (a22):       1.486</span></span></code></pre>
+<table class="table">
+<caption>APIM-to-DSM fixed-effect transformation (centering constant =
+5.148).</caption>
+<thead><tr class="header">
+<th align="left">DSM path</th>
+<th align="right">From APIM transformation</th>
+<th align="right">From DSM model</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">a10</td>
+<td align="right">5.043</td>
+<td align="right">5.043</td>
+</tr>
+<tr class="even">
+<td align="left">a11</td>
+<td align="right">1.990</td>
+<td align="right">1.990</td>
+</tr>
+<tr class="odd">
+<td align="left">a12</td>
+<td align="right">-0.032</td>
+<td align="right">-0.032</td>
+</tr>
+<tr class="even">
+<td align="left">a20</td>
+<td align="right">0.956</td>
+<td align="right">0.956</td>
+</tr>
+<tr class="odd">
+<td align="left">a21</td>
+<td align="right">-0.138</td>
+<td align="right">-0.138</td>
+</tr>
+<tr class="even">
+<td align="left">a22</td>
+<td align="right">1.486</td>
+<td align="right">1.486</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level3">
 <h3 id="random-effect-transformation">Random-effect transformation<a class="anchor" aria-label="anchor" href="#random-effect-transformation"></a>
@@ -645,7 +693,7 @@ effects expressed in different coordinates:</p>
 <p>Applying this rotation to the APIM covariance matrix reproduces the
 DSM random intercept variance, intercept-slope covariance, and
 role-slope variance:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apim_vcov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html" class="external-link">VarCorr</a></span><span class="op">(</span><span class="va">apim_model</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span><span class="op">$</span><span class="va">coupleID</span><span class="op">)</span></span>
 <span><span class="va">dsm_vcov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/VarCorr.html" class="external-link">VarCorr</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span><span class="op">$</span><span class="va">coupleID</span><span class="op">)</span></span>
 <span></span>
@@ -694,8 +742,8 @@ in the APIM vignette</a>.</p>
 </h2>
 <blockquote>
 <p>The following sections are under construction and are coming soon!
-But this extension is equivalent to the cross-setcional DIM to the ILD
-DIM. Please refer to that section.</p>
+This extension is equivalent to the extension from the cross-sectional
+DIM to the ILD DIM. Please refer to that section.</p>
 </blockquote>
 <div class="section level3">
 <h3 id="interpretation-of-concurrent-ild-dsm-coefficients">Interpretation of concurrent ILD DSM coefficients<a class="anchor" aria-label="anchor" href="#interpretation-of-concurrent-ild-dsm-coefficients"></a>
@@ -714,7 +762,7 @@ DIM. Please refer to that section.</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="dynamic-ild-dim-example">Dynamic ILD DIM example<a class="anchor" aria-label="anchor" href="#dynamic-ild-dim-example"></a>
+<h3 id="dynamic-ild-dsm-example">Dynamic ILD DSM example<a class="anchor" aria-label="anchor" href="#dynamic-ild-dsm-example"></a>
 </h3>
 <p>The ILD models above do not model residual serial dependence. One way
 to model dynamics or to account for temporal dependency is to include
