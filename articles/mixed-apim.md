@@ -101,6 +101,24 @@ derives the resulting covariance matrix and shows how to back-transform
 the sum and difference variances to the usual equal-variance
 member-level covariance matrix.
 
+The three composition-specific blocks are combined within one joint
+model:
+
+![Diagram of one joint mixed-composition model containing three separate
+blocks. The female-male block has distinct female and male intercepts,
+separate residual variances, and their covariance. Female-female and
+male-male blocks each have one shared intercept, equal member residual
+variances, and a covariance. No covariance parameters connect the three
+composition
+blocks.](mixed-apim_files/figure-html/mixed-composition-diagram-1.png)
+
+Structure of the cross-sectional mixed-composition APIM. Female-male
+dyads have distinguishable member intercepts and an unrestricted
+residual covariance block. Each same-gender composition has a pooled
+intercept and an exchangeable residual covariance block. The three
+blocks are estimated jointly but are not connected by covariance
+parameters.
+
 The model can then be specified as follows (example for an
 intercept-only model):
 
