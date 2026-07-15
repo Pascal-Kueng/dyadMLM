@@ -83,7 +83,7 @@ For a cross-sectional Gaussian DSM, a correlated dyad random intercept and
 role-contrast slope represent unexplained outcome-level and outcome-difference
 variation. 
 
-```{r conceptual-dsm-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional DSM. Predictor level and predictor difference each predict both outcome level and outcome difference. The intercepts are a10 and a20; the four regression paths are a11, a12, a21, and a22. The outcome-level and outcome-difference residuals may covary.", fig.alt="Path diagram for a cross-sectional dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20."}
+```{r conceptual-dsm-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional DSM. The nodes show the centered predictor mean, signed predictor difference, outcome mean, and signed outcome difference explicitly. Predictor mean and predictor difference each predict both outcome scores. The intercepts are a10 and a20; the four regression paths are a11, a12, a21, and a22. The outcome-mean and outcome-difference residuals may covary.", fig.alt="Path diagram for a cross-sectional dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. Paths are labelled a11, a12, a21, and a22, and outcome intercepts are labelled a10 and a20."}
 draw_dsm_diagram()
 ```
 
@@ -166,7 +166,7 @@ $$
 
 The fitted paths for this example are:
 
-```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. Edge and intercept labels show the estimated DSM coefficients.", fig.alt="Fitted path diagram for the example dyadic score model. Communication level and female-minus-male communication difference each predict satisfaction level and female-minus-male satisfaction difference. The six paths and intercepts are labelled with their estimated coefficients."}
+```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. The nodes show the score definitions explicitly, while edge and intercept labels show the estimated DSM coefficients.", fig.alt="Fitted path diagram for the example dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. The four paths and two intercepts are labelled with their estimated coefficients."}
 dsm_coef_for_diagram <- glmmTMB::fixef(dsm_model)$cond
 
 draw_dsm_diagram(

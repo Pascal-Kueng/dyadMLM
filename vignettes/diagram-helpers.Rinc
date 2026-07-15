@@ -11,18 +11,18 @@ draw_apim_diagram <- function(
 
   if (type == "distinguishable") {
     node_labels <- list(
-      x_top = expression(X[plain(female)]),
-      x_bottom = expression(X[plain(male)]),
-      y_top = expression(Y[plain(female)]),
-      y_bottom = expression(Y[plain(male)]),
+      x_top = expression(X[plain(F)]),
+      x_bottom = expression(X[plain(M)]),
+      y_top = expression(Y[plain(F)]),
+      y_bottom = expression(Y[plain(M)]),
       e_top = expression(epsilon[plain(F)]),
       e_bottom = expression(epsilon[plain(M)])
     )
     default_edge_labels <- list(
-      actor_top = expression(b[plain(actor) * "," * plain(F)]),
-      actor_bottom = expression(b[plain(actor) * "," * plain(M)]),
-      partner_to_top = expression(b[plain(partner) * "," * plain(F)]),
-      partner_to_bottom = expression(b[plain(partner) * "," * plain(M)])
+      actor_top = expression(a[plain(F)]),
+      actor_bottom = expression(a[plain(M)]),
+      partner_to_top = expression(p[plain(F)]),
+      partner_to_bottom = expression(p[plain(M)])
     )
   } else {
     node_labels <- list(
@@ -34,10 +34,10 @@ draw_apim_diagram <- function(
       e_bottom = expression(epsilon[2])
     )
     default_edge_labels <- list(
-      actor_top = expression(b[plain(actor)]),
-      actor_bottom = expression(b[plain(actor)]),
-      partner_to_top = expression(b[plain(partner)]),
-      partner_to_bottom = expression(b[plain(partner)])
+      actor_top = expression(a),
+      actor_bottom = expression(a),
+      partner_to_top = expression(p),
+      partner_to_bottom = expression(p)
     )
   }
 
@@ -110,7 +110,7 @@ draw_apim_diagram <- function(
   }
 
   draw_path_label <- function(x, y, label, colour) {
-    label_width <- if (is.expression(label) || is.language(label)) 0.13 else 0.075
+    label_width <- if (is.expression(label) || is.language(label)) 0.09 else 0.075
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -229,7 +229,7 @@ draw_dsm_diagram <- function(estimates = NULL) {
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
-      width = native(0.27),
+      width = native(0.30),
       height = native(0.22),
       r = grid::unit(0.09, "snpc"),
       gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
@@ -238,7 +238,7 @@ draw_dsm_diagram <- function(estimates = NULL) {
       label,
       x = native(x),
       y = native(y + 0.025),
-      gp = grid::gpar(col = ink_colour, fontsize = 19)
+      gp = grid::gpar(col = ink_colour, fontsize = 16)
     )
     grid::grid.text(
       subtitle,
@@ -314,34 +314,34 @@ draw_dsm_diagram <- function(estimates = NULL) {
 
   draw_node(
     0.17, 0.72,
-    expression(X[plain(mean)]),
-    "Communication level"
+    expression(frac(X[plain(F)] + X[plain(M)], 2) - mu[X]),
+    "Centered predictor mean"
   )
   draw_node(
     0.17, 0.28,
-    expression(X[plain(diff)]),
-    "Female - male communication"
+    expression(X[plain(F)] - X[plain(M)]),
+    "Predictor difference"
   )
   draw_node(
     0.65, 0.72,
-    expression(Y[plain(mean)]),
-    "Satisfaction level"
+    expression(frac(Y[plain(F)] + Y[plain(M)], 2)),
+    "Outcome mean"
   )
   draw_node(
     0.65, 0.28,
-    expression(Y[plain(diff)]),
-    "Female - male satisfaction"
+    expression(Y[plain(F)] - Y[plain(M)]),
+    "Outcome difference"
   )
   draw_residual(0.91, 0.72, expression(r[plain(mean)]))
   draw_residual(0.91, 0.28, expression(r[plain(diff)]))
 
   # Paths from predictor level.
-  draw_path(0.305, 0.72, 0.515, 0.72, mean_colour)
-  draw_path(0.305, 0.72, 0.515, 0.28, mean_colour)
+  draw_path(0.32, 0.72, 0.50, 0.72, mean_colour)
+  draw_path(0.32, 0.72, 0.50, 0.28, mean_colour)
 
   # Paths from predictor difference.
-  draw_path(0.305, 0.28, 0.515, 0.72, difference_colour)
-  draw_path(0.305, 0.28, 0.515, 0.28, difference_colour)
+  draw_path(0.32, 0.28, 0.50, 0.72, difference_colour)
+  draw_path(0.32, 0.28, 0.50, 0.28, difference_colour)
 
   draw_label(0.41, 0.72, parameter_label("11"), mean_colour)
   draw_label(0.38, 0.56, parameter_label("21"), mean_colour)
@@ -352,8 +352,8 @@ draw_dsm_diagram <- function(estimates = NULL) {
   draw_intercept(0.65, 0.14, parameter_label("20"))
 
   # Residuals point to their outcomes and may covary.
-  draw_path(0.855, 0.72, 0.785, 0.72, muted_colour)
-  draw_path(0.855, 0.28, 0.785, 0.28, muted_colour)
+  draw_path(0.855, 0.72, 0.80, 0.72, muted_colour)
+  draw_path(0.855, 0.28, 0.80, 0.28, muted_colour)
   grid::grid.curve(
     x1 = native(0.956),
     y1 = native(0.68),
@@ -373,7 +373,7 @@ draw_dsm_diagram <- function(estimates = NULL) {
 
 draw_dim_diagram <- function(estimates = NULL) {
   mean_colour <- "#0072B2"
-  deviation_colour <- "#D55E00"
+  difference_colour <- "#D55E00"
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -394,23 +394,16 @@ draw_dim_diagram <- function(estimates = NULL) {
     length = grid::unit(0.12, "inches"),
     type = "closed"
   )
-  covariance_arrow <- grid::arrow(
-    angle = 24,
-    length = grid::unit(0.09, "inches"),
-    ends = "both",
-    type = "closed"
-  )
-
-  draw_node <- function(x, y, label, subtitle, width = 0.25) {
+  draw_node <- function(x, y, label, subtitle) {
     grid::grid.roundrect(
       x = native(x), y = native(y),
-      width = native(width), height = native(0.20),
+      width = native(0.30), height = native(0.22),
       r = grid::unit(0.09, "snpc"),
       gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
     )
     grid::grid.text(
       label, x = native(x), y = native(y + 0.023),
-      gp = grid::gpar(col = ink_colour, fontsize = 19)
+      gp = grid::gpar(col = ink_colour, fontsize = 16)
     )
     grid::grid.text(
       subtitle, x = native(x), y = native(y - 0.043),
@@ -466,49 +459,49 @@ draw_dim_diagram <- function(estimates = NULL) {
   }
 
   mean_label <- parameter_label("b_mean", "plain(mean)")
-  deviation_label <- parameter_label("b_diff", "plain(diff)")
+  difference_label <- parameter_label("b_diff", "plain(diff)")
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   draw_node(
-    0.16, 0.50,
-    expression(bar(X)[j] - mu[X]),
-    "Centered dyad-mean communication"
+    0.17, 0.72,
+    expression(frac(X[1] + X[2], 2) - mu[X]),
+    "Centered predictor mean"
   )
-  draw_node(0.16, 0.82, expression(d[1 * j]), "Member 1 deviation")
-  draw_node(0.16, 0.18, expression(d[2 * j]), "Member 2 deviation")
-  draw_node(0.66, 0.72, expression(Y[1 * j]), "Member 1 satisfaction", 0.26)
-  draw_node(0.66, 0.28, expression(Y[2 * j]), "Member 2 satisfaction", 0.26)
-  draw_residual(0.92, 0.72, expression(epsilon[1 * j]))
-  draw_residual(0.92, 0.28, expression(epsilon[2 * j]))
-
-  # The shared dyad mean has the same effect on both members.
-  draw_path(0.285, 0.50, 0.53, 0.72, mean_colour)
-  draw_path(0.285, 0.50, 0.53, 0.28, mean_colour)
-  draw_label(0.41, 0.65, mean_label, mean_colour)
-  draw_label(0.41, 0.35, mean_label, mean_colour)
-
-  # Each member's deviation has the same effect on that member's outcome.
-  draw_path(0.285, 0.82, 0.53, 0.72, deviation_colour)
-  draw_path(0.285, 0.18, 0.53, 0.28, deviation_colour)
-  draw_label(0.40, 0.79, deviation_label, deviation_colour)
-  draw_label(0.40, 0.21, deviation_label, deviation_colour)
-
-  draw_intercept(0.66, 0.86)
-  draw_intercept(0.66, 0.14)
-
-  # Member residuals may covary within dyads.
-  draw_path(0.865, 0.72, 0.79, 0.72, muted_colour)
-  draw_path(0.865, 0.28, 0.79, 0.28, muted_colour)
-  grid::grid.curve(
-    x1 = native(0.964), y1 = native(0.68),
-    x2 = native(0.964), y2 = native(0.32),
-    curvature = -0.24, angle = 90, ncp = 12, square = FALSE,
-    arrow = covariance_arrow,
-    gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
+  draw_node(
+    0.17, 0.28,
+    expression(X[1] - X[2]),
+    "Predictor difference"
   )
+  draw_node(
+    0.65, 0.72,
+    expression(frac(Y[1] + Y[2], 2)),
+    "Outcome mean"
+  )
+  draw_node(
+    0.65, 0.28,
+    expression(Y[1] - Y[2]),
+    "Outcome difference"
+  )
+  draw_residual(0.91, 0.72, expression(r[plain(mean)]))
+  draw_residual(0.91, 0.28, expression(r[plain(diff)]))
+
+  # Exchangeability retains the two parallel paths and removes the DSM
+  # cross-paths.
+  draw_path(0.32, 0.72, 0.50, 0.72, mean_colour)
+  draw_path(0.32, 0.28, 0.50, 0.28, difference_colour)
+  draw_label(0.41, 0.72, mean_label, mean_colour)
+  draw_label(0.41, 0.28, difference_label, difference_colour)
+
+  # Only the outcome-mean equation has an intercept under exchangeability.
+  draw_intercept(0.65, 0.86)
+
+  # Mean and difference residual components are uncorrelated under the
+  # exchangeability constraints.
+  draw_path(0.855, 0.72, 0.80, 0.72, muted_colour)
+  draw_path(0.855, 0.28, 0.80, 0.28, muted_colour)
 
   grid::popViewport()
   invisible(NULL)

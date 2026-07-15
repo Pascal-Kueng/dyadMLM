@@ -51,11 +51,12 @@ Here, $b_{\mathrm{actor},\mathrm{female}}$ and
 $b_{\mathrm{actor},\mathrm{male}}$ are the actor effects on the female and male
 outcomes, whereas $b_{\mathrm{partner},\mathrm{female}}$ and
 $b_{\mathrm{partner},\mathrm{male}}$ are the corresponding partner effects.
-Fixed coefficients use $b$ throughout the vignettes; the first subscript names
-the effect and the second identifies the outcome member. The corresponding
-intercepts are $b_{0,\mathrm{female}}$ and $b_{0,\mathrm{male}}$. All four
-paths can differ in a distinguishable APIM. The diagram uses `F` and `M` only
-to keep its edge and residual labels compact.
+The diagram abbreviates these paths as $a_{\mathrm{F}}$, $a_{\mathrm{M}}$,
+$p_{\mathrm{F}}$, and $p_{\mathrm{M}}$, with the subscript identifying the
+outcome member. In the text and equations, fixed coefficients use $b$ and write
+out actor and partner explicitly. The corresponding intercepts are
+$b_{0,\mathrm{female}}$ and $b_{0,\mathrm{male}}$. All four paths can differ
+in a distinguishable APIM.
 
 We first prepare the example data with `prepare_interdep_data()`:
 
@@ -139,7 +140,8 @@ change the model. The two actor paths therefore share the coefficient
 $b_{\mathrm{actor}}$, and the two partner paths share
 $b_{\mathrm{partner}}$. The members also share the intercept $b_0$. The two
 residual variances are constrained to be equal, while their covariance is
-estimated.
+estimated. The diagram abbreviates the shared actor and partner effects as
+$a$ and $p$.
 
 ### Assumptions
 
