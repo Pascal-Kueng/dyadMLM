@@ -28,18 +28,15 @@ library(interdep)
 ```
 
 This vignette covers APIMs that combine distinguishable and exchangeable dyad
-compositions in one analysis. The unified SEM presentation by Bolger,
-Laurenceau, and DiGiovanni is the basis and inspiration for this vignette
-[@Bolger2025Unified]. Here, we implement the same general idea in one multilevel
-model.
+compositions in one analysis. The unified SEM presentation by @Bolger2025Unified
+is the basis and inspiration for this vignette. Here, we implement a similar
+general idea in one multilevel model.
 
-For the general data-preparation workflow, go to the
-[Getting Started vignette](getting-started.html). For regular APIMs, refer to the
-[Actor-Partner Interdependence Model vignette](apim.html). For DIM predictors and their
-equivalence to APIM effects in exchangeable dyads, see the
-[Dyad-Individual Model vignette](dim.html). For DSM predictor scores and their
-relationship to APIM effects in distinguishable dyads, see the
-[Dyadic Score Model vignette](dsm.html).
+This vignette builds on the regular
+[Actor-Partner Interdependence Model vignette](apim.html). For the broader
+package workflow and an overview of the other model-specific vignettes,
+including the [Dyad-Individual Model](dim.html) and
+[Dyadic Score Model](dsm.html), see the [Overview](index.html).
 
 ## Cross-sectional mixed-composition APIM
 

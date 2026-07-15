@@ -26,6 +26,7 @@ sys.source(diagram_helper, envir = knitr::knit_global())
 ```{r setup}
 library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+dsm_fitted_alt <- "Fitted DSM diagram unavailable."
 ```
 
 This vignette focuses on the Dyadic Score Model (DSM) for distinguishable
@@ -34,14 +35,11 @@ Interdependence Model (APIM). The DSM expresses associations in terms of the
 dyad's shared level and the directional difference between partners
 [@iidaModelsInterdependentIndividuals2018].
 
-For the broader data-preparation workflow, see the
-[Getting Started vignette](getting-started.html). For distinguishable and
-exchangeable APIMs in cross-sectional and intensive longitudinal data, see the
-[Actor-Partner Interdependence Model vignette](apim.html). For APIMs combining
-distinguishable and exchangeable compositions, see the
-[Mixed-Composition APIM vignette](mixed-apim.html). For the exchangeable
-Dyad-Individual Model (DIM), see the
-[Dyad-Individual Model vignette](dim.html).
+For the broader package workflow and an overview of the available
+model-specific vignettes, including the
+[Actor-Partner Interdependence Model](apim.html),
+[Mixed-Composition APIM](mixed-apim.html), and
+[Dyad-Individual Model](dim.html), see the [Overview](index.html).
 
 ## Preparing DSM Data
 
@@ -177,38 +175,59 @@ $$
 
 The fitted paths for this example are:
 
-```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. The nodes show the score definitions explicitly; edge and intercept labels show the estimated DSM coefficients, and the residual labels show the estimated score-component standard deviations and correlation.", fig.alt="Fitted path diagram for the example dyadic score model. The centered female-male predictor mean and female-minus-male predictor difference each predict the female-male outcome mean and female-minus-male outcome difference. The four paths, two intercepts, two residual standard deviations, and residual correlation are labelled with their estimates."}
+```{r prepare-fitted-dsm-diagram, include=FALSE, eval=has_glmmTMB}
 dsm_coef_for_diagram <- glmmTMB::fixef(dsm_model)$cond
 dsm_random_components <- glmmTMB::VarCorr(dsm_model)$cond
 
-draw_dsm_diagram(
-  estimates = c(
-    a10 = dsm_coef_for_diagram[["(Intercept)"]],
-    a11 = dsm_coef_for_diagram[[".i_communication_dyad_mean_gmc"]],
-    a12 = dsm_coef_for_diagram[[".i_communication_within_dyad_diff"]],
-    a20 = dsm_coef_for_diagram[[".i_dsm_role_contrast"]],
-    a21 = dsm_coef_for_diagram[[
-      ".i_communication_dyad_mean_gmc:.i_dsm_role_contrast"
-    ]],
-    a22 = dsm_coef_for_diagram[[
-      ".i_communication_within_dyad_diff:.i_dsm_role_contrast"
-    ]]
+dsm_diagram_estimates <- c(
+  a10 = dsm_coef_for_diagram[["(Intercept)"]],
+  a11 = dsm_coef_for_diagram[[".i_communication_dyad_mean_gmc"]],
+  a12 = dsm_coef_for_diagram[[".i_communication_within_dyad_diff"]],
+  a20 = dsm_coef_for_diagram[[".i_dsm_role_contrast"]],
+  a21 = dsm_coef_for_diagram[[
+    ".i_communication_dyad_mean_gmc:.i_dsm_role_contrast"
+  ]],
+  a22 = dsm_coef_for_diagram[[
+    ".i_communication_within_dyad_diff:.i_dsm_role_contrast"
+  ]]
+)
+dsm_diagram_residuals <- c(
+  sd_mean = .extract_diagram_random_sd(
+    dsm_random_components,
+    "(Intercept)"
   ),
-  residuals = c(
-    sd_mean = .extract_diagram_random_sd(
-      dsm_random_components,
-      "(Intercept)"
-    ),
-    sd_difference = .extract_diagram_random_sd(
-      dsm_random_components,
-      ".i_dsm_role_contrast"
-    ),
-    correlation = .extract_diagram_random_correlation(
-      dsm_random_components,
-      "(Intercept)",
-      ".i_dsm_role_contrast"
-    )
+  sd_difference = .extract_diagram_random_sd(
+    dsm_random_components,
+    ".i_dsm_role_contrast"
+  ),
+  correlation = .extract_diagram_random_correlation(
+    dsm_random_components,
+    "(Intercept)",
+    ".i_dsm_role_contrast"
   )
+)
+
+dsm_fitted_alt <- sprintf(
+  paste(
+    "Fitted DSM. Intercepts a10 %.2f and a20 %.2f; paths a11 %.2f, a12 %.2f,",
+    "a21 %.2f, and a22 %.2f; residual SDs %.2f and %.2f, with correlation %.2f."
+  ),
+  dsm_diagram_estimates[["a10"]],
+  dsm_diagram_estimates[["a20"]],
+  dsm_diagram_estimates[["a11"]],
+  dsm_diagram_estimates[["a12"]],
+  dsm_diagram_estimates[["a21"]],
+  dsm_diagram_estimates[["a22"]],
+  dsm_diagram_residuals[["sd_mean"]],
+  dsm_diagram_residuals[["sd_difference"]],
+  dsm_diagram_residuals[["correlation"]]
+)
+```
+
+```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. The nodes show the score definitions explicitly; edge and intercept labels show the estimated DSM coefficients, and the residual labels show the estimated score-component standard deviations and correlation.", fig.alt=dsm_fitted_alt}
+draw_dsm_diagram(
+  estimates = dsm_diagram_estimates,
+  residuals = dsm_diagram_residuals
 )
 ```
 

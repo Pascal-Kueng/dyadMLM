@@ -31,8 +31,7 @@ library(interdep)
 
 ## Example and excursion: semi-continuous cross-sectional data
 
-!NOTE: potentially we should separate non-normal models into their own vignette, since they are actually
-quite complex and models depend on 
+! TODO: the text and formulas below is old:
 
 `example_dyadic_crosssectional_tweedie` has the same dyadic structure as before, but the
 outcome has exact zeros and positive skewed values, as in

@@ -30,6 +30,7 @@ sys.source(diagram_helper, envir = knitr::knit_global())
 ```{r setup}
 library(interdep)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+dim_fitted_alt <- "Fitted DIM diagram unavailable."
 ```
 
 This vignette focuses on the Dyad-Individual Model (DIM) for dyadic multilevel
@@ -39,15 +40,12 @@ each member's deviation from that level. While the APIM expresses effects in
 terms of two interdependent individuals, the DIM expresses them in terms of the
 dyad's shared level and the contrast between partners.
 
-For the broader data-preparation workflow of the `interdep` package, see the
-[Getting Started vignette](getting-started.html). For distinguishable and
-exchangeable APIMs in cross-sectional and intensive longitudinal data, see the
-[Actor-Partner Interdependence Model vignette](apim.html). For APIMs that
-combine distinguishable and exchangeable dyad compositions, see the
-[Mixed-Composition APIM vignette](mixed-apim.html). For the full Dyadic Score
-Model (DSM), a different parameterization of the distinguishable APIM, see the
-[Dyadic Score Model vignette](dsm.html). Under exchangeability constraints, the
-reduced, label-invariant DSM is also equivalent to the DIM, as discussed below.
+Under exchangeability constraints, the reduced, label-invariant DSM is also
+equivalent to the DIM, as discussed below. For the broader package workflow and
+an overview of the available model-specific vignettes, including the
+[Actor-Partner Interdependence Model](apim.html),
+[Mixed-Composition APIM](mixed-apim.html), and
+[Dyadic Score Model](dsm.html), see the [Overview](index.html).
 
 ## Cross-Sectional Gaussian DIM
 
@@ -107,9 +105,9 @@ above the couple's predictor mean is also above the couple's outcome mean. With
 two members, each deviation is half the corresponding signed partner difference.
 
 The first diagram emphasizes this between- and within-couple decomposition. Its
-upper row describes differences between couples; its lower row describes the
-corresponding deviations within a couple for either member $i \in \{1, 2\}$.
-Switching members reverses both deviations and therefore leaves
+upper row describes differences between couples. Its lower row describes the
+corresponding deviations within a couple for either member.
+Switching members reverses both deviations and therefore leaves the pooled
 $b_{\mathrm{dev}}$ unchanged.
 
 ```{r conceptual-dim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Between- and within-couple representation of the cross-sectional DIM. The between-couple effect links couples' centered predictor means to their outcome means. The within-couple effect links a member's predictor deviation to that member's outcome deviation. Exchangeability removes the two DSM cross-paths and the outcome-deviation intercept; the mean and deviation residual components are uncorrelated.", fig.alt="Path diagram separating the between- and within-couple associations in a cross-sectional Dyad-Individual Model. The centered predictor mean predicts the outcome mean with coefficient b mean. Member i's predictor deviation predicts the same member's outcome deviation with coefficient b dev. There are no cross-paths, and only the outcome-mean equation has intercept b zero."}
@@ -172,26 +170,44 @@ summary(dim_1)
 The same mean-and-deviation diagram can now be labelled with the estimated
 fixed effects and residual-component standard deviations:
 
-```{r fitted-dim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Estimated fixed effects and residual-component standard deviations from the cross-sectional Gaussian DIM in its mean-and-deviation representation. The intercept belongs to the outcome-mean equation; exchangeability fixes the outcome-deviation intercept and both cross-paths to zero, and the mean and deviation residual components are uncorrelated.", fig.alt="Fitted path diagram for the cross-sectional Dyad-Individual Model. Labels give the estimated outcome-mean intercept, predictor-mean effect, member-deviation effect, and residual-component standard deviations. There are no cross-paths, and the residual-component correlation is zero."}
+```{r prepare-fitted-dim-diagram, include=FALSE, eval=has_glmmTMB}
 dim_fixed_effects <- glmmTMB::fixef(dim_1)$cond
 dim_random_components <- glmmTMB::VarCorr(dim_1)$cond
 
-draw_dim_diagram(
-  estimates = c(
-    b0 = dim_fixed_effects[["(Intercept)"]],
-    b_mean = dim_fixed_effects[[".i_communication_dyad_mean_gmc"]],
-    b_dev = dim_fixed_effects[[".i_communication_within_dyad_dev"]]
+dim_diagram_estimates <- c(
+  b0 = dim_fixed_effects[["(Intercept)"]],
+  b_mean = dim_fixed_effects[[".i_communication_dyad_mean_gmc"]],
+  b_dev = dim_fixed_effects[[".i_communication_within_dyad_dev"]]
+)
+dim_diagram_residuals <- c(
+  sd_mean = .extract_diagram_random_sd(
+    dim_random_components,
+    "(Intercept)"
   ),
-  residuals = c(
-    sd_mean = .extract_diagram_random_sd(
-      dim_random_components,
-      "(Intercept)"
-    ),
-    sd_difference = .extract_diagram_random_sd(
-      dim_random_components,
-      ".i_diff_assumed_exchangeable_arbitrary"
-    )
+  sd_difference = .extract_diagram_random_sd(
+    dim_random_components,
+    ".i_diff_assumed_exchangeable_arbitrary"
   )
+)
+
+dim_fitted_alt <- sprintf(
+  paste(
+    "Fitted DIM. Intercept %.2f, between-couple effect %.2f, within-couple",
+    "effect %.2f, and mean/deviation residual SDs %.2f and %.2f; their",
+    "correlation is fixed at zero."
+  ),
+  dim_diagram_estimates[["b0"]],
+  dim_diagram_estimates[["b_mean"]],
+  dim_diagram_estimates[["b_dev"]],
+  dim_diagram_residuals[["sd_mean"]],
+  dim_diagram_residuals[["sd_difference"]]
+)
+```
+
+```{r fitted-dim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Estimated fixed effects and residual-component standard deviations from the cross-sectional Gaussian DIM in its mean-and-deviation representation. The intercept belongs to the outcome-mean equation; exchangeability fixes the outcome-deviation intercept and both cross-paths to zero, and the mean and deviation residual components are uncorrelated.", fig.alt=dim_fitted_alt}
+draw_dim_diagram(
+  estimates = dim_diagram_estimates,
+  residuals = dim_diagram_residuals
 )
 ```
 

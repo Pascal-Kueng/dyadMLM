@@ -5,6 +5,20 @@
   within = "#8A6500"
 )
 
+.format_diagram_estimate <- function(value) {
+  formatC(value, format = "f", digits = 2)
+}
+
+.diagram_estimate_label <- function(label, value) {
+  if (is.expression(label)) {
+    label <- label[[1L]]
+  }
+  substitute(
+    LABEL == plain(VALUE),
+    list(LABEL = label, VALUE = .format_diagram_estimate(value))
+  )
+}
+
 .draw_diagram_legend <- function(
     labels, colours, y, segment_starts, text_x, fontsize = 10.5) {
   for (index in seq_along(labels)) {
@@ -97,7 +111,9 @@
 
 draw_apim_diagram <- function(
     type = c("distinguishable", "exchangeable"),
-    edge_labels = NULL) {
+    edge_labels = NULL,
+    estimates = NULL,
+    residuals = NULL) {
   type <- match.arg(type)
 
   actor_colour <- .interdep_diagram_colours$actor
@@ -125,6 +141,12 @@ draw_apim_diagram <- function(
       top = expression(b[0 * "," * plain(F)]),
       bottom = expression(b[0 * "," * plain(M)])
     )
+    required_estimates <- c(
+      "intercept_female", "intercept_male",
+      "actor_female", "actor_male",
+      "partner_female", "partner_male"
+    )
+    required_residuals <- c("sd_female", "sd_male", "correlation")
   } else {
     node_labels <- list(
       x_top = expression(X[1]),
@@ -144,6 +166,88 @@ draw_apim_diagram <- function(
       top = expression(b[0]),
       bottom = expression(b[0])
     )
+    required_estimates <- c("intercept", "actor", "partner")
+    required_residuals <- c("sd", "correlation")
+  }
+
+  if (!is.null(estimates)) {
+    missing_estimates <- setdiff(required_estimates, names(estimates))
+    if (length(missing_estimates) > 0L) {
+      stop(
+        "`estimates` must contain values named ",
+        paste(missing_estimates, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+    if (any(!is.finite(unlist(estimates[required_estimates])))) {
+      stop("`estimates` values must be finite.", call. = FALSE)
+    }
+
+    if (type == "distinguishable") {
+      default_edge_labels <- list(
+        actor_top = .diagram_estimate_label(
+          expression(a[plain(F)]), estimates[["actor_female"]]
+        ),
+        actor_bottom = .diagram_estimate_label(
+          expression(a[plain(M)]), estimates[["actor_male"]]
+        ),
+        partner_to_top = .diagram_estimate_label(
+          expression(p[plain(F)]), estimates[["partner_female"]]
+        ),
+        partner_to_bottom = .diagram_estimate_label(
+          expression(p[plain(M)]), estimates[["partner_male"]]
+        )
+      )
+      intercept_labels <- list(
+        top = .diagram_estimate_label(
+          expression(b[0 * "," * plain(F)]),
+          estimates[["intercept_female"]]
+        ),
+        bottom = .diagram_estimate_label(
+          expression(b[0 * "," * plain(M)]),
+          estimates[["intercept_male"]]
+        )
+      )
+    } else {
+      default_edge_labels <- list(
+        actor_top = .diagram_estimate_label(
+          expression(a), estimates[["actor"]]
+        ),
+        actor_bottom = .diagram_estimate_label(
+          expression(a), estimates[["actor"]]
+        ),
+        partner_to_top = .diagram_estimate_label(
+          expression(p), estimates[["partner"]]
+        ),
+        partner_to_bottom = .diagram_estimate_label(
+          expression(p), estimates[["partner"]]
+        )
+      )
+      intercept_labels <- list(
+        top = .diagram_estimate_label(
+          expression(b[0]), estimates[["intercept"]]
+        ),
+        bottom = .diagram_estimate_label(
+          expression(b[0]), estimates[["intercept"]]
+        )
+      )
+    }
+  }
+
+  if (!is.null(residuals)) {
+    missing_residuals <- setdiff(required_residuals, names(residuals))
+    if (length(missing_residuals) > 0L) {
+      stop(
+        "`residuals` must contain values named ",
+        paste(missing_residuals, collapse = ", "),
+        ".",
+        call. = FALSE
+      )
+    }
+    if (any(!is.finite(unlist(residuals[required_residuals])))) {
+      stop("`residuals` values must be finite.", call. = FALSE)
+    }
   }
 
   if (is.null(edge_labels)) {
@@ -236,7 +340,7 @@ draw_apim_diagram <- function(
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
-      width = native(0.09),
+      width = native(if (is.null(estimates)) 0.09 else 0.15),
       height = native(0.065),
       r = grid::unit(0.02, "snpc"),
       gp = grid::gpar(fill = "white", col = muted_colour, lwd = 1)
@@ -292,7 +396,27 @@ draw_apim_diagram <- function(
     gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.8)
   )
 
-  if (type == "distinguishable") {
+  if (!is.null(residuals) && type == "distinguishable") {
+    residual_sd_labels <- list(
+      .diagram_estimate_label(
+        expression(plain(SD)), residuals[["sd_female"]]
+      ),
+      .diagram_estimate_label(
+        expression(plain(SD)), residuals[["sd_male"]]
+      )
+    )
+    residual_correlation_label <- .diagram_estimate_label(
+      expression(rho[plain(FM)]), residuals[["correlation"]]
+    )
+  } else if (!is.null(residuals)) {
+    residual_sd_labels <- list(
+      .diagram_estimate_label(expression(plain(SD)), residuals[["sd"]]),
+      .diagram_estimate_label(expression(plain(SD)), residuals[["sd"]])
+    )
+    residual_correlation_label <- .diagram_estimate_label(
+      expression(rho[epsilon]), residuals[["correlation"]]
+    )
+  } else if (type == "distinguishable") {
     residual_sd_labels <- list(
       expression(plain(SD) == sigma[plain(F)]),
       expression(plain(SD) == sigma[plain(M)])
@@ -550,7 +674,9 @@ draw_dsm_diagram <- function(estimates = NULL, residuals = NULL) {
     if (!name %in% names(estimates)) {
       stop("`estimates` must contain a value named ", name, ".", call. = FALSE)
     }
-    parse(text = sprintf("a[%s] == %.2f", number, estimates[[name]]))
+    .diagram_estimate_label(
+      parse(text = sprintf("a[%s]", number)), estimates[[name]]
+    )
   }
 
   if (!is.null(residuals)) {
@@ -573,14 +699,16 @@ draw_dsm_diagram <- function(estimates = NULL, residuals = NULL) {
     if (is.null(residuals)) {
       return(parse(text = sprintf("plain(SD) == sigma[%s]", subscript)))
     }
-    parse(text = sprintf("plain(SD) == %.2f", residuals[[name]]))
+    .diagram_estimate_label(expression(plain(SD)), residuals[[name]])
   }
 
   residual_correlation_label <- function() {
     if (is.null(residuals)) {
       return(expression(rho[plain(md)]))
     }
-    parse(text = sprintf("rho[plain(md)] == %.2f", residuals[["correlation"]]))
+    .diagram_estimate_label(
+      expression(rho[plain(md)]), residuals[["correlation"]]
+    )
   }
 
   native <- function(value) grid::unit(value, "native")
@@ -967,7 +1095,9 @@ draw_dim_diagram <- function(estimates = NULL, residuals = NULL) {
     if (!name %in% names(estimates)) {
       stop("`estimates` must contain a value named ", name, ".", call. = FALSE)
     }
-    parse(text = sprintf("b[%s] == %.2f", subscript, estimates[[name]]))
+    .diagram_estimate_label(
+      parse(text = sprintf("b[%s]", subscript)), estimates[[name]]
+    )
   }
 
   if (!is.null(residuals)) {
@@ -990,7 +1120,7 @@ draw_dim_diagram <- function(estimates = NULL, residuals = NULL) {
     if (is.null(residuals)) {
       return(parse(text = sprintf("plain(SD) == sigma[%s]", subscript)))
     }
-    parse(text = sprintf("plain(SD) == %.2f", residuals[[name]]))
+    .diagram_estimate_label(expression(plain(SD)), residuals[[name]])
   }
 
   native <- function(value) grid::unit(value, "native")
@@ -1702,6 +1832,17 @@ draw_cfm_diagram <- function(
         rho[plain(res) * "," * .(member_symbols[[2]])] ==
           .(format_estimate(residual_correlations[[2]]))
       ),
+      member_specific_colour, fontsize = 11
+    )
+  } else {
+    draw_label(
+      0.29, 0.955,
+      bquote(c[plain(res) * "," * .(member_symbols[[1]])]),
+      member_specific_colour, fontsize = 11
+    )
+    draw_label(
+      0.70, 0.955,
+      bquote(c[plain(res) * "," * .(member_symbols[[2]])]),
       member_specific_colour, fontsize = 11
     )
   }

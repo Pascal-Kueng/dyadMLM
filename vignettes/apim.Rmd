@@ -30,14 +30,11 @@ library(interdep)
 This vignette focuses on the cross-sectional and intensive longitudinal 
 Actor-Partner Interdependence model for distinguishable and exchangeable dyads. 
 
-For the main data requirements and validation workflow of the `interdep` package, start
-with the [Getting Started vignette](getting-started.html). For APIMs that
-combine distinguishable and exchangeable dyad compositions, see the
-[Mixed-Composition APIM vignette](mixed-apim.html). For DIM predictors and their
-equivalence to APIM effects in exchangeable dyads, see the
-[Dyad-Individual Model vignette](dim.html). For DSM predictor scores and their
-relationship to APIM effects in distinguishable dyads, see the
-[Dyadic Score Model vignette](dsm.html).
+For the broader package workflow and an overview of the available
+model-specific vignettes, including the
+[Mixed-Composition APIM](mixed-apim.html),
+[Dyad-Individual Model](dim.html), and
+[Dyadic Score Model](dsm.html), see the [Overview](index.html).
 
 > This vignette is under construction and for now only contains a few preliminary example models. Please check back soon!
 
@@ -113,6 +110,77 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = apim_distinguishable_data
+)
+```
+
+```{r prepare-fitted-distinguishable-apim-diagram, include=FALSE}
+apim_distinguishable_fixed <- glmmTMB::fixef(
+  apim_distinguishable_model
+)$cond
+apim_distinguishable_random <- glmmTMB::VarCorr(
+  apim_distinguishable_model
+)$cond
+
+apim_distinguishable_diagram_estimates <- c(
+  intercept_female = apim_distinguishable_fixed[[
+    ".i_is_female_x_male_female"
+  ]],
+  intercept_male = apim_distinguishable_fixed[[
+    ".i_is_female_x_male_male"
+  ]],
+  actor_female = apim_distinguishable_fixed[[
+    ".i_is_female_x_male_female:.i_communication_actor"
+  ]],
+  actor_male = apim_distinguishable_fixed[[
+    ".i_is_female_x_male_male:.i_communication_actor"
+  ]],
+  partner_female = apim_distinguishable_fixed[[
+    ".i_is_female_x_male_female:.i_communication_partner"
+  ]],
+  partner_male = apim_distinguishable_fixed[[
+    ".i_is_female_x_male_male:.i_communication_partner"
+  ]]
+)
+
+apim_distinguishable_diagram_residuals <- c(
+  sd_female = .extract_diagram_random_sd(
+    apim_distinguishable_random,
+    ".i_is_female_x_male_female"
+  ),
+  sd_male = .extract_diagram_random_sd(
+    apim_distinguishable_random,
+    ".i_is_female_x_male_male"
+  ),
+  correlation = .extract_diagram_random_correlation(
+    apim_distinguishable_random,
+    ".i_is_female_x_male_female",
+    ".i_is_female_x_male_male"
+  )
+)
+
+apim_distinguishable_fitted_alt <- sprintf(
+  paste(
+    "Fitted distinguishable APIM. Female and male intercepts %.2f and %.2f;",
+    "actor effects %.2f and %.2f; partner effects %.2f and %.2f;",
+    "residual SDs %.2f and %.2f, with correlation %.2f."
+  ),
+  apim_distinguishable_diagram_estimates[["intercept_female"]],
+  apim_distinguishable_diagram_estimates[["intercept_male"]],
+  apim_distinguishable_diagram_estimates[["actor_female"]],
+  apim_distinguishable_diagram_estimates[["actor_male"]],
+  apim_distinguishable_diagram_estimates[["partner_female"]],
+  apim_distinguishable_diagram_estimates[["partner_male"]],
+  apim_distinguishable_diagram_residuals[["sd_female"]],
+  apim_distinguishable_diagram_residuals[["sd_male"]],
+  apim_distinguishable_diagram_residuals[["correlation"]]
+)
+```
+
+```{r fitted-distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional distinguishable APIM for the example data. Fixed effects, residual standard deviations, and the residual correlation are extracted from the fitted model.", fig.alt=apim_distinguishable_fitted_alt}
+draw_apim_diagram(
+  "distinguishable",
+  estimates = apim_distinguishable_diagram_estimates,
+  residuals = apim_distinguishable_diagram_residuals
 )
 ```
 
@@ -312,6 +380,56 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
+)
+```
+
+```{r prepare-fitted-exchangeable-apim-diagram, include=FALSE}
+apim_exchangeable_fixed <- glmmTMB::fixef(apim_exchangeable_model)$cond
+apim_exchangeable_random <- glmmTMB::VarCorr(apim_exchangeable_model)$cond
+
+apim_exchangeable_diagram_estimates <- c(
+  intercept = apim_exchangeable_fixed[[".i_is_female_x_male"]],
+  actor = apim_exchangeable_fixed[[".i_communication_actor"]],
+  partner = apim_exchangeable_fixed[[".i_communication_partner"]]
+)
+
+apim_exchangeable_mean_sd <- .extract_diagram_random_sd(
+  apim_exchangeable_random,
+  ".i_is_female_x_male"
+)
+apim_exchangeable_difference_sd <- .extract_diagram_random_sd(
+  apim_exchangeable_random,
+  ".i_diff_female_x_male_arbitrary"
+)
+apim_exchangeable_member_variance <-
+  apim_exchangeable_mean_sd^2 + apim_exchangeable_difference_sd^2
+apim_exchangeable_member_covariance <-
+  apim_exchangeable_mean_sd^2 - apim_exchangeable_difference_sd^2
+
+apim_exchangeable_diagram_residuals <- c(
+  sd = sqrt(apim_exchangeable_member_variance),
+  correlation = apim_exchangeable_member_covariance /
+    apim_exchangeable_member_variance
+)
+
+apim_exchangeable_fitted_alt <- sprintf(
+  paste(
+    "Fitted exchangeable APIM. Intercept %.2f, actor effect %.2f, partner",
+    "effect %.2f, common residual SD %.2f, and residual correlation %.2f."
+  ),
+  apim_exchangeable_diagram_estimates[["intercept"]],
+  apim_exchangeable_diagram_estimates[["actor"]],
+  apim_exchangeable_diagram_estimates[["partner"]],
+  apim_exchangeable_diagram_residuals[["sd"]],
+  apim_exchangeable_diagram_residuals[["correlation"]]
+)
+```
+
+```{r fitted-exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
+draw_apim_diagram(
+  "exchangeable",
+  estimates = apim_exchangeable_diagram_estimates,
+  residuals = apim_exchangeable_diagram_residuals
 )
 ```
 

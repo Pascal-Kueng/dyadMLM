@@ -45,9 +45,10 @@ unit-loading paths define each latent variable from the two member reports.
 draw_cfm_diagram()
 ```
 
-The curved paths retain the predictor--outcome association specific to each
-member rather than assigning it to the shared dyad-level effect. To match the
-DIM and DSM diagrams, the shared-level path uses the predictor-mean/between-
+The curved paths, labelled $c_{\mathrm{res},1}$ and
+$c_{\mathrm{res},2}$, retain the predictor--outcome association specific to
+each member rather than assigning it to the shared dyad-level effect. To match
+the DIM and DSM diagrams, the shared-level path uses the predictor-mean/between-
 couple field color, whereas the member-specific residual paths use the
 within-couple field color. These colors describe fields of variation, not actor
 and partner effects. Only the SEM representation is shown here; there is no
@@ -225,10 +226,8 @@ cfm_fitted_caption <- paste(
 cfm_fitted_alt <- if (cfm_admissible) {
   sprintf(
     paste(
-      "Fitted Common Fate Model. The latent communication level predicts the",
-      "latent satisfaction level with coefficient %.2f and standardized",
-      "coefficient %.2f. Female and male residual correlations are %.2f and",
-      "%.2f. Latent satisfaction R-squared is %.2f."
+      "Fitted CFM. Dyad-level effect %.2f, standardized effect %.2f, female",
+      "and male residual correlations %.2f and %.2f, and outcome R-squared %.2f."
     ),
     cfm_b$est, cfm_b$std.all,
     cfm_residual_correlations[1], cfm_residual_correlations[2],
@@ -237,10 +236,8 @@ cfm_fitted_alt <- if (cfm_admissible) {
 } else if (outcome_variance_negative) {
   sprintf(
     paste(
-      "Fitted Common Fate Model. The latent communication-level path is %.2f",
-      "and the female and male residual correlations are %.2f and %.2f.",
-      "The latent satisfaction disturbance variance is %.2f, so the solution",
-      "is inadmissible."
+      "Fitted CFM. Dyad-level effect %.2f, female and male residual correlations",
+      "%.2f and %.2f, and outcome disturbance variance %.2f (inadmissible)."
     ),
     cfm_b$est,
     cfm_residual_correlations[1], cfm_residual_correlations[2],
