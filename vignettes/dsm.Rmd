@@ -112,7 +112,7 @@ dsm_model <- glmmTMB::glmmTMB(
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
-    (1 + .i_dsm_role_contrast | coupleID),
+    us(1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data
@@ -236,7 +236,7 @@ dsm_model_inverted <- glmmTMB::glmmTMB(
     .i_dsm_role_contrast +
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
-    (1 + .i_dsm_role_contrast | coupleID),
+    us(1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data_inverted

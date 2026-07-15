@@ -30,10 +30,10 @@ test_that("compare_interdep_models compares reparameterized nested models", {
         0 + .i_is_female_x_male_female + .i_is_female_x_male_male |
           coupleID
       ) +
-      (0 + .i_is_female_x_female | coupleID) +
-      (0 + .i_diff_female_x_female_arbitrary | coupleID) +
-      (0 + .i_is_male_x_male | coupleID) +
-      (0 + .i_diff_male_x_male_arbitrary | coupleID),
+      us(0 + .i_is_female_x_female | coupleID) +
+      us(0 + .i_diff_female_x_female_arbitrary | coupleID) +
+      us(0 + .i_is_male_x_male | coupleID) +
+      us(0 + .i_diff_male_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = full_data
@@ -42,10 +42,10 @@ test_that("compare_interdep_models compares reparameterized nested models", {
     satisfaction ~ 0 +
       .i_is_female_x_female +
       .i_is_non_female_x_female +
-      (0 + .i_is_female_x_female | coupleID) +
-      (0 + .i_diff_female_x_female_arbitrary | coupleID) +
-      (0 + .i_is_non_female_x_female | coupleID) +
-      (0 + .i_diff_non_female_x_female_arbitrary | coupleID),
+      us(0 + .i_is_female_x_female | coupleID) +
+      us(0 + .i_diff_female_x_female_arbitrary | coupleID) +
+      us(0 + .i_is_non_female_x_female | coupleID) +
+      us(0 + .i_diff_non_female_x_female_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = restricted_data
@@ -84,11 +84,11 @@ test_that("compare_interdep_models rejects different original data", {
   )
 
   model_one <- glmmTMB::glmmTMB(
-    satisfaction ~ 1 + (1 | coupleID),
+    satisfaction ~ 1 + us(1 | coupleID),
     data = data_one
   )
   model_two <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + (1 | coupleID),
+    satisfaction ~ gender + us(1 | coupleID),
     data = data_two
   )
 
@@ -126,19 +126,19 @@ test_that("compare_interdep_models checks row counts and outcome missingness", {
   )
 
   complete_restricted <- glmmTMB::glmmTMB(
-    satisfaction ~ 1 + (1 | coupleID),
+    satisfaction ~ 1 + us(1 | coupleID),
     data = complete_data
   )
   complete_full <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + (1 | coupleID),
+    satisfaction ~ gender + us(1 | coupleID),
     data = complete_data
   )
   shorter_full <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + (1 | coupleID),
+    satisfaction ~ gender + us(1 | coupleID),
     data = shorter_data
   )
   missing_full <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + (1 | coupleID),
+    satisfaction ~ gender + us(1 | coupleID),
     data = missing_data
   )
 
@@ -259,11 +259,11 @@ test_that("compare_interdep_models agrees with anova.glmmTMB", {
     role = gender
   )
   restricted_model <- glmmTMB::glmmTMB(
-    satisfaction ~ 1 + (1 | coupleID),
+    satisfaction ~ 1 + us(1 | coupleID),
     data = model_data
   )
   full_model <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + (1 | coupleID),
+    satisfaction ~ gender + us(1 | coupleID),
     data = model_data
   )
 

@@ -285,8 +285,8 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     .i_is_female_x_male +
     .i_communication_actor +
     .i_communication_partner +
-    (0 + .i_is_female_x_male | coupleID) +
-    (0 + .i_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .i_is_female_x_male | coupleID) +
+    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -448,12 +448,12 @@ stability_influence <- glmmTMB::glmmTMB(
     diaryday +
 
     # Stable exchangeable dyad-level covariance
-    (1 | coupleID) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(1 | coupleID) +
+    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
-    (1 | coupleID:diaryday) +
-    (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(1 | coupleID:diaryday) +
+    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
