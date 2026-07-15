@@ -113,6 +113,29 @@ predict both outcome scores. The intercepts are a10 and a20; the four
 regression paths are a11, a12, a21, and a22. The outcome-mean and
 outcome-difference residuals may covary.
 
+The same model can be displayed in the individual-member rows used by
+the long-format multilevel model. The centered predictor mean and signed
+predictor difference are repeated on both rows. Because the DSM role
+contrast is $`+0.5`$ for the female outcome and $`-0.5`$ for the male
+outcome, each row combines an outcome-level coefficient with one-half of
+the corresponding outcome-difference coefficient.
+
+![Two-panel path diagram for a female-minus-male dyadic score model.
+Both panels contain the centered predictor mean and female-minus-male
+predictor difference. For the female outcome, the intercept is a10 plus
+half a20, the predictor-mean coefficient is a11 plus half a21, and the
+predictor-difference coefficient is a12 plus half a22. For the male
+outcome, the same combinations use minus signs. The two member residuals
+covary.](dsm_files/figure-html/conceptual-dsm-member-diagram-1.png)
+
+Individual-level representation of the cross-sectional DSM used for the
+long-format multilevel model. The centered predictor mean and
+female-minus-male predictor difference appear on both member rows. For
+the female outcome, the intercept and slopes add one-half of the
+corresponding outcome-difference parameters; for the male outcome, they
+subtract one-half. The female and male residuals may have different
+variances and covary.
+
 The path labels correspond directly to the terms in the model below:
 
 ``` r
@@ -233,12 +256,14 @@ The fitted paths for this example are:
 ![Fitted path diagram for the example dyadic score model. The centered
 female-male predictor mean and female-minus-male predictor difference
 each predict the female-male outcome mean and female-minus-male outcome
-difference. The four paths and two intercepts are labelled with their
-estimated coefficients.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
+difference. The four paths, two intercepts, two residual standard
+deviations, and residual correlation are labelled with their
+estimates.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
 
 Fitted cross-sectional DSM for the example data. The nodes show the
-score definitions explicitly, while edge and intercept labels show the
-estimated DSM coefficients.
+score definitions explicitly; edge and intercept labels show the
+estimated DSM coefficients, and the residual labels show the estimated
+score-component standard deviations and correlation.
 
 The fixed effects from our MLM model map directly to these paths as
 such:

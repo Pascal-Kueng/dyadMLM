@@ -163,14 +163,15 @@ interdependent.
 dyad. For each member, the shared, grand-mean-centered couple predictor
 mean and the member's own predictor deviation predict the individual
 outcome. Both members share the same between- and within-couple
-coefficients, and their outcome residuals are
+coefficients and residual standard deviation, while their outcome
+residuals are
 correlated.](dim_files/figure-html/conceptual-dim-member-diagram-1.png)
 
 Individual-level representation of the cross-sectional DIM used for the
 long-format multilevel model. Each member’s outcome is predicted by the
 couple’s shared predictor mean and that member’s own predictor
-deviation. Both members share the same two coefficients, and their
-residuals may covary.
+deviation. Both members share the same two coefficients, their residual
+standard deviations are equal, and their residuals may covary.
 
 Uncorrelated $`r_m`$ and $`r_{d,i}`$ in the conceptual representation do
 not imply that the member residuals are independent: $`\epsilon_1`$ and
@@ -243,17 +244,20 @@ summary(dim_1)
 ```
 
 The same mean-and-deviation diagram can now be labelled with the
-estimated fixed effects:
+estimated fixed effects and residual-component standard deviations:
 
-![Fitted path diagram for the cross-sectional Dyad-Individual Model. The
-outcome-mean intercept is about 5.04, the centered predictor-mean effect
-is about 2.00, and the member-deviation effect is about 1.52. There are
-no cross-paths.](dim_files/figure-html/fitted-dim-diagram-1.png)
+![Fitted path diagram for the cross-sectional Dyad-Individual Model.
+Labels give the estimated outcome-mean intercept, predictor-mean effect,
+member-deviation effect, and residual-component standard deviations.
+There are no cross-paths, and the residual-component correlation is
+zero.](dim_files/figure-html/fitted-dim-diagram-1.png)
 
-Estimated fixed effects from the cross-sectional Gaussian DIM in its
-mean-and-deviation representation. The intercept belongs to the
-outcome-mean equation; exchangeability fixes the outcome-deviation
-intercept and both cross-paths to zero.
+Estimated fixed effects and residual-component standard deviations from
+the cross-sectional Gaussian DIM in its mean-and-deviation
+representation. The intercept belongs to the outcome-mean equation;
+exchangeability fixes the outcome-deviation intercept and both
+cross-paths to zero, and the mean and deviation residual components are
+uncorrelated.
 
 ### Model interpretation
 
@@ -431,10 +435,10 @@ systems. The horizontal and vertical axes are actor and partner values
 centered at the sample grand mean. The diagonal axes are their dyad mean
 and within-dyad deviation.
 
-The displayed slope values approximate the fitted example above and
-illustrate that the two forms make the same change in the linear
-predictor relative to the grand-mean reference. The intercept is omitted
-from both displayed equations.
+The displayed slope values are read directly from the fitted APIM and
+DIM models above. They illustrate that the two forms make the same
+change in the linear predictor relative to the grand-mean reference. The
+intercept is omitted from both displayed equations.
 
 **Predictor coordinates**
 
@@ -468,8 +472,7 @@ APIM0.00 = 0.00
 
 DIM0.00 = 0.00
 
-Slopes*b*_(mean) = *b*_(actor) + *b*_(partner) = 2.00; *b*_(dev) =
-*b*_(actor) - *b*_(partner) = 1.52
+SlopesLoading fitted slopes...
 
 ![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iaWRnLXBsb3QiIGRhdGEtaWRnLXBsb3Qgdmlld2JveD0iMCAwIDMyMCAzMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbGxlZGJ5PSJpZGctcGxvdC10aXRsZSBpZGctcGxvdC1kZXNjcmlwdGlvbiI+PHRpdGxlIGlkPSJpZGctcGxvdC10aXRsZSI+QVBJTSBhbmQgRElNIGNvb3JkaW5hdGUgZ3JpZDwvdGl0bGU+CjxkZXNjIGlkPSJpZGctcGxvdC1kZXNjcmlwdGlvbiI+VGhlIHNlbGVjdGVkIHBvaW50IGhhcyBhY3RvciwgcGFydG5lciwgZHlhZC1tZWFuLCBhbmQgd2l0aGluLWR5YWQgdmFsdWVzIG9mIHplcm8uPC9kZXNjPjxkZWZzPjxjbGlwcGF0aCBpZD0iaWRnLXBsb3QtY2xpcCI+PHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgcng9IjQiIC8+PC9jbGlwcGF0aD48L2RlZnM+PHJlY3QgeD0iMzAiIHk9IjMwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjI2MCIgcng9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utb3BhY2l0eT0iMC4zNSIgLz48ZyBkYXRhLWlkZy1ncmlkLWxpbmVzIGNsaXAtcGF0aD0idXJsKCNpZGctcGxvdC1jbGlwKSI+PC9nPjxnIGRhdGEtaWRnLWF4aXMtbGFiZWxzPjwvZz48Y2lyY2xlIGNsYXNzPSJpZGctaGFsbyIgZGF0YS1pZGctaGFsbyBjeD0iMTYwIiBjeT0iMTYwIiByPSIxMyI+PC9jaXJjbGU+PGNpcmNsZSBjbGFzcz0iaWRnLXBvaW50IiBkYXRhLWlkZy1wb2ludCBjeD0iMTYwIiBjeT0iMTYwIiByPSI2Ij48L2NpcmNsZT48L3N2Zz4=)
 
