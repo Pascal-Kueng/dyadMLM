@@ -1155,6 +1155,10 @@ data.frame(
 Random slopes can be included in the DIM by adding the corresponding
 within-person effects to the stable dyad-level random-effect blocks:
 
+The following syntax illustrates the full random-slope specification. It is not
+fitted here because the example data do not support this complex random-effects
+structure.
+
 ```{r fit-ild-dim-random, eval = FALSE}
 
 dim_ILD_random <- glmmTMB::glmmTMB(

@@ -78,19 +78,16 @@ variation.
 ```{r fit-cross-dsm, eval=has_glmmTMB}
 dsm_model <- glmmTMB::glmmTMB(
   satisfaction ~
-    
-    # Why do we need the fixed intercept here and not in the exchangeable 
-    1 + 
+
+    # Outcome-level intercept (also estimated in the DIM)
+    1 +
     .i_communication_dyad_mean_gmc +
     .i_communication_within_dyad_diff +
     .i_dsm_role_contrast +
     .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
     .i_communication_within_dyad_diff:.i_dsm_role_contrast +
-    
-    # Estimating a couple level residual variance, a residual variance of the contrast 
-    # within the couple, and a correlation between these terms.
-    # This follows the same logic as the diff: approach for the DIM and exchangeable
-    # dyads, but now DOES include a correlation because we model distinguishability. 
+
+    # Outcome-level and outcome-difference residual variances and their covariance
     (1 + .i_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -100,95 +97,47 @@ dsm_model <- glmmTMB::glmmTMB(
 summary(dsm_model)
 ```
 
-
-### Reversing the coding
-
-Instead of computing $X_{female} - X_{male}$, we can reverse the direction and
-compute $X_{male} - X_{female}$:
-
-```{r prepare-cross-dsm-inverted}
-cross_dsm_data_inverted <- prepare_interdep_data(
-  example_dyadic_crosssectional,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = communication,
-  # Request APIM columns too for comparison below.
-  model_type = c("dsm", "apim"),
-  dsm_role_order = c("male", "female")
-)
-```
-
-
-```{r fit-cross-dsm-inverted, eval=has_glmmTMB}
-dsm_model_inverted <- glmmTMB::glmmTMB(
-  satisfaction ~
-    .i_communication_dyad_mean_gmc +
-    .i_communication_within_dyad_diff +
-    .i_dsm_role_contrast +
-    .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
-    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
-    (1 + .i_dsm_role_contrast | coupleID),
-  dispformula = ~ 0,
-  family = gaussian(),
-  data = cross_dsm_data_inverted
-)
-
-summary(dsm_model_inverted)
-```
-
-The two models have identical fitted values and model fit. Reversing the role
-order reverses both the predictor difference and the outcome difference
-represented by the role contrast. 
-
-Consequently, the predictor-difference main
-effect, role-contrast main effect, and dyad-mean-by-role-contrast interaction
-reverse sign. 
-
-The difference-by-role-contrast interaction does not reverse
-because both variables in this product reverse. The random-effect variances
-also remain unchanged, whereas their covariance reverses sign.
-
 ### Interpreting the DSM paths
 
 For the outcomes given the predictors, the long-format model estimates the same
 paths as the conventional score-based DSM
-[@iidaModelsInterdependentIndividuals2018]. Unlike the original SEM approach,
-it does not also model the predictor scores or provide an overall SEM fit test.
-Define
+[@iidaModelsInterdependentIndividuals2018].
+
+In the conventional score-based representation, the **predictors** are
+decomposed in the same way:
 
 $$
-X_L = \frac{X_{female} + X_{male}}{2} - \mu_X, \qquad
-X_D = X_{female} - X_{male},
+X_{mean} = \frac{X_{female} + X_{male}}{2} - \mu_X, \qquad
+X_{diff} = X_{female} - X_{male},
 $$
 
 where $\mu_X$ is the sample grand mean of the dyad-level predictor means.
-Similarly, define outcome level and outcome difference as
+
+The **outcomes** are also decomposed:
 
 $$
-Y_L = \frac{Y_{female} + Y_{male}}{2}, \qquad
-Y_D = Y_{female} - Y_{male}.
+Y_{mean} = \frac{Y_{female} + Y_{male}}{2}, \qquad
+Y_{diff} = Y_{female} - Y_{male}.
 $$
 
-Although `interdep` does not materialize $Y_L$ and $Y_D$ as columns, the fitted
-long-format model estimates their two DSM equations:
+The long-format model fitted here does not create $Y_{mean}$ and $Y_{diff}$ as
+observed variables. Instead, it uses the member-level outcome directly. With
+complete outcome pairs, this is an equivalent parameterization of the same
+conditional outcome regressions.
+
+Consider the conceptual SEM formulas:
 
 $$
-\widehat{Y_L} = a_{10} + a_{11}X_L + a_{12}X_D,
+\widehat{Y_{mean}} = a_{10} + a_{11}X_{mean} + a_{12}X_{diff},
 $$
 
 $$
-\widehat{Y_D} = a_{20} + a_{21}X_L + a_{22}X_D.
+\widehat{Y_{diff}} = a_{20} + a_{21}X_{mean} + a_{22}X_{diff}.
 $$
 
-Observed $Y_L$ and $Y_D$ scores require both partners' outcomes. The long-format
-model can still use one partner's available outcome when the other is missing;
-in that case, these equations describe the paired expected outcomes rather than
-observed outcome scores for that dyad.
+The fixed effects from our MLM model map directly to these paths as such:
 
-The fixed effects map directly to these paths:
-
-| Long-format fixed effect | DSM path and interpretation |
+| Long-format fixed effect | DSM SEM path and interpretation |
 |---|---|
 | Intercept | $a_{10}$: expected dyad-average satisfaction at the sample-average communication level and no female-male communication difference |
 | Communication dyad mean | $a_{11}$: predictor level $\rightarrow$ outcome level |
@@ -209,6 +158,73 @@ The random intercept variance is unexplained variation in outcome level, and
 the random role-contrast slope variance is unexplained variation in the full
 directional outcome difference. Their covariance indicates whether unexplained
 outcome level and unexplained outcome difference are associated.
+
+### Reversing the coding
+
+Instead of computing $X_{female} - X_{male}$, we can reverse the direction and
+compute $X_{male} - X_{female}$. This changes the direction of the differences,
+but not the substantive model.
+
+```{r prepare-cross-dsm-inverted}
+cross_dsm_data_inverted <- prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  # Request APIM columns too for comparison below.
+  model_type = c("dsm", "apim"),
+  dsm_role_order = c("male", "female")
+)
+```
+
+```{r fit-cross-dsm-inverted, eval=has_glmmTMB}
+dsm_model_inverted <- glmmTMB::glmmTMB(
+  satisfaction ~
+    .i_communication_dyad_mean_gmc +
+    .i_communication_within_dyad_diff +
+    .i_dsm_role_contrast +
+    .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
+    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
+    (1 + .i_dsm_role_contrast | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = cross_dsm_data_inverted
+)
+
+female_minus_male <- glmmTMB::fixef(dsm_model)$cond
+male_minus_female <- glmmTMB::fixef(dsm_model_inverted)$cond
+
+knitr::kable(
+  data.frame(
+    `model term` = names(female_minus_male),
+    `female - male` = unname(female_minus_male),
+    `male - female` = unname(male_minus_female),
+    check.names = FALSE
+  ),
+  digits = 3,
+  align = c("l", "r", "r")
+)
+```
+
+The two models have identical fitted values and model fit: 
+
+- `.i_communication_within_dyad_diff` reverses because the predictor difference
+  reverses.
+
+- `.i_dsm_role_contrast` reverses because the represented outcome difference
+  reverses.
+
+- `.i_communication_dyad_mean_gmc:.i_dsm_role_contrast` reverses because only
+  the outcome difference reverses.
+
+- `.i_communication_within_dyad_diff:.i_dsm_role_contrast` remains unchanged
+  because both differences reverse.
+
+The intercept and `.i_communication_dyad_mean_gmc` also remain unchanged. For
+the random effects, the variances of `(Intercept)` and
+`.i_dsm_role_contrast` remain unchanged, whereas their covariance reverses
+sign.
 
 ## Relationship to the APIM and DIM
 
