@@ -513,3 +513,157 @@ draw_dim_diagram <- function(estimates = NULL) {
   grid::popViewport()
   invisible(NULL)
 }
+
+draw_mixed_apim_diagram <- function() {
+  distinguishable_colour <- "#0072B2"
+  exchangeable_colour <- "#D55E00"
+  ink_colour <- "#263238"
+  muted_colour <- "#64748B"
+  node_fill <- "#F8FAFC"
+
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 24,
+    length = grid::unit(0.09, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 24,
+    length = grid::unit(0.07, "inches"),
+    ends = "both",
+    type = "closed"
+  )
+
+  draw_outcome <- function(x, y, outcome, intercept, colour) {
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = native(0.135), height = native(0.16),
+      r = grid::unit(0.06, "snpc"),
+      gp = grid::gpar(fill = node_fill, col = colour, lwd = 1.8)
+    )
+    grid::grid.text(
+      outcome, x = native(x), y = native(y + 0.025),
+      gp = grid::gpar(col = ink_colour, fontsize = 17)
+    )
+    grid::grid.text(
+      intercept, x = native(x), y = native(y - 0.035),
+      gp = grid::gpar(col = colour, fontsize = 12)
+    )
+  }
+
+  draw_residual <- function(x, y, label) {
+    grid::grid.circle(
+      x = native(x), y = native(y), r = grid::unit(0.038, "snpc"),
+      gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.6)
+    )
+    grid::grid.text(
+      label, x = native(x), y = native(y),
+      gp = grid::gpar(col = ink_colour, fontsize = 13)
+    )
+  }
+
+  draw_panel <- function(
+      centre, title, subtitle, outcomes, intercepts, residuals, footer, colour) {
+    grid::grid.roundrect(
+      x = native(centre), y = native(0.50),
+      width = native(0.29), height = native(0.70),
+      r = grid::unit(0.04, "snpc"),
+      gp = grid::gpar(fill = "white", col = colour, lwd = 2)
+    )
+    grid::grid.text(
+      title, x = native(centre), y = native(0.78),
+      gp = grid::gpar(col = ink_colour, fontsize = 15, fontface = "bold")
+    )
+    grid::grid.text(
+      subtitle, x = native(centre), y = native(0.735),
+      gp = grid::gpar(col = colour, fontsize = 11)
+    )
+
+    outcome_x <- centre - 0.035
+    residual_x <- centre + 0.095
+    member_y <- c(0.61, 0.39)
+
+    draw_outcome(outcome_x, member_y[1], outcomes[[1]], intercepts[[1]], colour)
+    draw_outcome(outcome_x, member_y[2], outcomes[[2]], intercepts[[2]], colour)
+    draw_residual(residual_x, member_y[1], residuals[[1]])
+    draw_residual(residual_x, member_y[2], residuals[[2]])
+
+    grid::grid.segments(
+      x0 = native(residual_x - 0.035), y0 = native(member_y[1]),
+      x1 = native(outcome_x + 0.068), y1 = native(member_y[1]),
+      arrow = arrow_head,
+      gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.6)
+    )
+    grid::grid.segments(
+      x0 = native(residual_x - 0.035), y0 = native(member_y[2]),
+      x1 = native(outcome_x + 0.068), y1 = native(member_y[2]),
+      arrow = arrow_head,
+      gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.6)
+    )
+    grid::grid.curve(
+      x1 = native(residual_x + 0.032), y1 = native(member_y[1] - 0.025),
+      x2 = native(residual_x + 0.032), y2 = native(member_y[2] + 0.025),
+      curvature = -0.23, angle = 90, ncp = 10, square = FALSE,
+      arrow = covariance_arrow,
+      gp = grid::gpar(col = muted_colour, fill = muted_colour, lwd = 1.5)
+    )
+
+    grid::grid.text(
+      footer, x = native(centre), y = native(0.235),
+      gp = grid::gpar(col = muted_colour, fontsize = 10)
+    )
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
+  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
+
+  grid::grid.roundrect(
+    x = native(0.5), y = native(0.50),
+    width = native(0.98), height = native(0.94),
+    r = grid::unit(0.025, "snpc"),
+    gp = grid::gpar(fill = NA, col = muted_colour, lwd = 1.5, lty = 2)
+  )
+  grid::grid.text(
+    "One joint mixed-composition model",
+    x = native(0.5), y = native(0.94),
+    gp = grid::gpar(col = ink_colour, fontsize = 16, fontface = "bold")
+  )
+
+  draw_panel(
+    0.18, "Female-male", "Distinguishable",
+    list(expression(Y[plain(F)]), expression(Y[plain(M)])),
+    list(
+      expression(b[0 * "," * plain(FM) * "," * plain(F)]),
+      expression(b[0 * "," * plain(FM) * "," * plain(M)])
+    ),
+    list(expression(epsilon[plain(F)]), expression(epsilon[plain(M)])),
+    "Separate variances + covariance",
+    distinguishable_colour
+  )
+  draw_panel(
+    0.50, "Female-female", "Exchangeable",
+    list(expression(Y[1]), expression(Y[2])),
+    list(expression(b[0 * "," * plain(FF)]), expression(b[0 * "," * plain(FF)])),
+    list(expression(epsilon[1]), expression(epsilon[2])),
+    "Equal variances + covariance",
+    exchangeable_colour
+  )
+  draw_panel(
+    0.82, "Male-male", "Exchangeable",
+    list(expression(Y[1]), expression(Y[2])),
+    list(expression(b[0 * "," * plain(MM)]), expression(b[0 * "," * plain(MM)])),
+    list(expression(epsilon[1]), expression(epsilon[2])),
+    "Equal variances + covariance",
+    exchangeable_colour
+  )
+
+  grid::grid.text(
+    "Composition-specific blocks: no covariance parameters connect them",
+    x = native(0.5), y = native(0.085),
+    gp = grid::gpar(col = muted_colour, fontsize = 11)
+  )
+
+  grid::popViewport()
+  invisible(NULL)
+}

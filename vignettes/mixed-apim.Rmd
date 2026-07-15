@@ -14,6 +14,13 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+diagram_helper <- if (file.exists("diagram-helpers.Rinc")) {
+  "diagram-helpers.Rinc"
+} else {
+  file.path("vignettes", "diagram-helpers.Rinc")
+}
+sys.source(diagram_helper, envir = knitr::knit_global())
 ```
 
 ```{r setup}
@@ -108,6 +115,12 @@ The [APIM vignette](apim.html#exchangeable-residual-structure) derives
 the resulting covariance matrix and shows how to back-transform the sum and
 difference variances to the usual equal-variance member-level covariance
 matrix.
+
+The three composition-specific blocks are combined within one joint model:
+
+```{r mixed-composition-diagram, echo=FALSE, fig.width=10, fig.height=5.5, out.width="100%", fig.cap="Structure of the cross-sectional mixed-composition APIM. Female-male dyads have distinguishable member intercepts and an unrestricted residual covariance block. Each same-gender composition has a pooled intercept and an exchangeable residual covariance block. The three blocks are estimated jointly but are not connected by covariance parameters.", fig.alt="Diagram of one joint mixed-composition model containing three separate blocks. The female-male block has distinct female and male intercepts, separate residual variances, and their covariance. Female-female and male-male blocks each have one shared intercept, equal member residual variances, and a covariance. No covariance parameters connect the three composition blocks."}
+draw_mixed_apim_diagram()
+```
 
 The model can then be specified as follows (example for an intercept-only model):
 
