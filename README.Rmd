@@ -96,11 +96,11 @@ simple_apim <- glmmTMB::glmmTMB(
     .i_communication_partner:.i_is_female_x_male_female +
     .i_communication_partner:.i_is_female_x_male_male +
 
-    # Dyad-level random effects represent the partner residual
-    # variance-covariance structure
+    # Dyad-level random effects represent the two members'
+    # residual covariance structure
     (0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID),
 
-  # With the residual variance-covariance represented by the dyad-level
+  # With the residual covariance represented by the dyad-level
   # random effects above, the Gaussian residual dispersion is fixed near zero.
   dispformula = ~ 0,
   family = gaussian(),

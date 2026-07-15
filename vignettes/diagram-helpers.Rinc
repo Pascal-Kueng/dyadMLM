@@ -15,14 +15,14 @@ draw_apim_diagram <- function(
       x_bottom = expression(X[plain(male)]),
       y_top = expression(Y[plain(female)]),
       y_bottom = expression(Y[plain(male)]),
-      e_top = expression(epsilon[f]),
-      e_bottom = expression(epsilon[m])
+      e_top = expression(epsilon[plain(F)]),
+      e_bottom = expression(epsilon[plain(M)])
     )
     default_edge_labels <- list(
-      actor_top = expression(a[f]),
-      actor_bottom = expression(a[m]),
-      partner_to_top = expression(p[f]),
-      partner_to_bottom = expression(p[m])
+      actor_top = expression(b[plain(actor) * "," * plain(F)]),
+      actor_bottom = expression(b[plain(actor) * "," * plain(M)]),
+      partner_to_top = expression(b[plain(partner) * "," * plain(F)]),
+      partner_to_bottom = expression(b[plain(partner) * "," * plain(M)])
     )
   } else {
     node_labels <- list(
@@ -34,10 +34,10 @@ draw_apim_diagram <- function(
       e_bottom = expression(epsilon[2])
     )
     default_edge_labels <- list(
-      actor_top = expression(a),
-      actor_bottom = expression(a),
-      partner_to_top = expression(p),
-      partner_to_bottom = expression(p)
+      actor_top = expression(b[plain(actor)]),
+      actor_bottom = expression(b[plain(actor)]),
+      partner_to_top = expression(b[plain(partner)]),
+      partner_to_bottom = expression(b[plain(partner)])
     )
   }
 
@@ -110,7 +110,7 @@ draw_apim_diagram <- function(
   }
 
   draw_path_label <- function(x, y, label, colour) {
-    label_width <- if (is.expression(label) || is.language(label)) 0.055 else 0.075
+    label_width <- if (is.expression(label) || is.language(label)) 0.13 else 0.075
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -123,7 +123,7 @@ draw_apim_diagram <- function(
       label,
       x = native(x),
       y = native(y),
-      gp = grid::gpar(col = colour, fontsize = 17)
+      gp = grid::gpar(col = colour, fontsize = 15)
     )
   }
 

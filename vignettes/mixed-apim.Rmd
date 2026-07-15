@@ -148,32 +148,37 @@ summary(mixed_cross_gaussian_model)
 ```
 
 The four fixed-effect indicators are mutually exclusive. With $I$ denoting the
-generated `.i_is_{composition_role}` indicator, the fixed part
-of the full model can be written as:
+generated `.i_is_{composition_role}` indicator and $b_0$ a fixed intercept, the
+fixed part of the full model can be written as:
 
 $$
 \mu_{ij}^{\mathrm{fixed}} =
-\beta_{FM,F} I_{FM,F,ij} +
-\beta_{FM,M} I_{FM,M,ij} +
-\beta_{FF} I_{FF,ij} +
-\beta_{MM} I_{MM,ij}.
+b_{0,\mathrm{FM,F}} I_{\mathrm{FM,F},ij} +
+b_{0,\mathrm{FM,M}} I_{\mathrm{FM,M},ij} +
+b_{0,\mathrm{FF}} I_{\mathrm{FF},ij} +
+b_{0,\mathrm{MM}} I_{\mathrm{MM},ij}.
 $$
+
+In `FM,F`, the first part identifies the female-male composition and the final
+`F` identifies the female outcome member. The same composition-first convention
+is used throughout this vignette.
 
 The active indicator for each person is shown below:
 
-| Row | $I_{FM,F}$ | $I_{FM,M}$ | $I_{FF}$ | $I_{MM}$ | Fixed intercept |
+| Row | $I_{\mathrm{FM,F}}$ | $I_{\mathrm{FM,M}}$ | $I_{\mathrm{FF}}$ | $I_{\mathrm{MM}}$ | Fixed intercept |
 |:--|--:|--:|--:|--:|:--|
-| Female in a female-male dyad | **1** | 0 | 0 | 0 | $\beta_{FM,F}$ |
-| Male in a female-male dyad | 0 | **1** | 0 | 0 | $\beta_{FM,M}$ |
-| Member of a female-female dyad | 0 | 0 | **1** | 0 | $\beta_{FF}$ |
-| Member of a male-male dyad | 0 | 0 | 0 | **1** | $\beta_{MM}$ |
+| Female in a female-male dyad | **1** | 0 | 0 | 0 | $b_{0,\mathrm{FM,F}}$ |
+| Male in a female-male dyad | 0 | **1** | 0 | 0 | $b_{0,\mathrm{FM,M}}$ |
+| Member of a female-female dyad | 0 | 0 | **1** | 0 | $b_{0,\mathrm{FF}}$ |
+| Member of a male-male dyad | 0 | 0 | 0 | **1** | $b_{0,\mathrm{MM}}$ |
 
 Therefore, for a member of a male-male dyad, for example, the fixed part reduces
-to just $\beta_{MM}$ via:
+to just $b_{0,\mathrm{MM}}$ via:
 
 $$
-0\beta_{FM,F} + 0\beta_{FM,M} + 0\beta_{FF} + 1\beta_{MM}
-= \beta_{MM}.
+0 \cdot b_{0,\mathrm{FM,F}} + 0 \cdot b_{0,\mathrm{FM,M}} +
+0 \cdot b_{0,\mathrm{FF}} + 1 \cdot b_{0,\mathrm{MM}}
+= b_{0,\mathrm{MM}}.
 $$
 
 The random-effects terms reduce in the same way because their indicator columns
