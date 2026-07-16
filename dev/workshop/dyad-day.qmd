@@ -163,7 +163,7 @@ distribution_plot <- function(data, variables, bin_widths) {
 
 | Time | Focus |
 |---|---|
-| 11:00–12:45 | Introduction and different types of dyadic models |
+| 11:00–12:45 | Introduction and types of dyadic models |
 | 12:45–14:00 | *Lunch break* |
 | 14:00–15:30 | Estimating cross-sectional models in R |
 | 15:30–15:45 | *Short break* |
@@ -172,6 +172,9 @@ distribution_plot <- function(data, variables, bin_widths) {
 | 17:00–18:00 | Exercises in R |
 
 <!-- ca. 2.5 Minutes -->
+
+# Introduction
+Relevance and todays' example dataset
 
 ## Why dyadic data?
 
@@ -275,38 +278,98 @@ The variables now represent person-level daily averages across the study:
 
 <!-- ca. 1 Minute -->
 
-## Pilot data: APIM variables
+## Plotting provided support by partner role
 
 ```{r}
-#| label: pilot-aggregated-distributions-plot
-#| echo: false
-#| out-width: 100%
-#| out-height: 100%
-#| fig-alt: "Histograms of provided emotional support and person-level mean total MVPA."
+#| label: build-pilot-support-distributions-by-role
+#| echo: true
+#| code-line-numbers: false
 
-distribution_plot(
+support_distribution_plot <- ggplot(
   pilot_aggregated,
-  variables = c("provided_emotional_support", "mvpa_total"),
-  bin_widths = c(
-    provided_emotional_support = 0.25,
-    mvpa_total = 7.5
-  )
-)
+  aes(provided_emotional_support, y = after_stat(density))
+) +
+  geom_histogram(
+    bins = 15, boundary = 0,
+    fill = "steelblue", color = "white", alpha = 0.75
+  ) +
+  geom_density(
+    bounds = c(0, Inf), color = "navy", linewidth = 1.1
+  ) +
+  facet_wrap(~role, nrow = 1) +
+  labs(x = "Average provided support", y = "Density") +
+  see::theme_modern(base_size = 16)
 ```
 
 <!-- ca. 1 Minute -->
 
-<!-- TODO: implement plots for females and males separately! 
+## Provided support by partner role
 
-see for ref:
-ggplot(data = BLdyads_doubleentry, aes(x = reldis)) +
-  geom_histogram(fill = "white", color = "black") + 
-  labs(x = "Relationship Dissatisfaction") +
-  facet_grid(. ~ gender) # creating a separate plot for each gender
+```{r}
+#| label: pilot-support-distributions-by-role
+#| echo: false
+#| fig-width: 12
+#| fig-height: 5.1
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Histograms and boundary-corrected density curves of average provided emotional support, shown separately for female and male partners."
 
-can we have a similar little code block so participants can re-use it and also print it on the slide?
-With a very short code block, can we still style it a bit nicer and closer to what we have currently?
--->
+support_distribution_plot
+```
+
+:::{.notes}
+
+- Each panel contains one person per included dyad and shows their average daily
+  provided support across the study.
+- The histogram and density curve use the same density scale. The curve is
+  boundary-corrected at zero, so it does not extend to impossible negative
+  support values.
+- These are descriptive differences. They do not by themselves establish that
+  APIM parameters differ between roles.
+
+:::
+
+<!-- ca. 1 Minute -->
+
+## Total MVPA by partner role
+
+```{r}
+#| label: pilot-mvpa-distributions-by-role
+#| echo: false
+#| fig-width: 12
+#| fig-height: 5.1
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Histograms and boundary-corrected density curves of average daily total MVPA, shown separately for female and male partners."
+
+ggplot(pilot_aggregated,
+       aes(mvpa_total, y = after_stat(density))) +
+  geom_histogram(
+    bins = 15, boundary = 0,
+    fill = "steelblue", color = "white", alpha = 0.75
+  ) +
+  geom_density(
+    bounds = c(0, Inf), color = "navy", linewidth = 1.1
+  ) +
+  facet_wrap(~role, nrow = 1) +
+  labs(x = "Average total MVPA (minutes/day)", y = "Density") +
+  see::theme_modern(base_size = 16)
+```
+
+:::{.notes}
+
+- Each panel shows person-level average daily total MVPA for one partner role.
+- Both panels use the same axes, allowing direct comparison of distributional
+  shape and spread.
+- The long right tails reflect a few participants with much higher average
+  daily MVPA. These descriptive differences should not be overinterpreted as
+  evidence that APIM parameters differ by role.
+
+:::
+
+<!-- ca. 1 Minute -->
+
+# Different types of dyadic models
 
 ## Many models to choose from
 
@@ -322,7 +385,8 @@ With a very short code block, can we still style it a bit nicer and closer to wh
 Other approaches include the **mutual-influence model**, for reciprocal influence
 between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
 **Truth and Bias model**, for separating mean-level bias from correlational
-accuracy in judgments of a partner [@sternAssessingAccuracyClose2018].
+accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
+@westTruthBiasModel2011].
 :::
 
 <!-- ca. 3 Minutes -->
@@ -343,11 +407,54 @@ see how we can use it to answer our research question (in what way). "
 Other approaches include the **mutual-influence model**, for reciprocal influence
 between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
 **Truth and Bias model**, for separating mean-level bias from correlational
-accuracy in judgments of a partner [@sternAssessingAccuracyClose2018].
+accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
+@westTruthBiasModel2011].
 
 <!-- ca. 1 Minutes -->
 
-<!-- TODO: potentially add a slide here showing how much the APIM is used vs. other models if we find a reference -->
+## One model dominates dyadic research
+
+```{r}
+#| label: apim-use-plot
+#| echo: false
+#| fig-alt: "A horizontal bar showing that more than 85% of 998 coded dyadic studies used an APIM or APIM variant, leaving fewer than 15% for all other model specifications combined."
+#| out-width: 100%
+
+model_use <- tibble(
+  model = c("APIM or APIM variant", "All other specifications"),
+  xmin = c(0, 85),
+  xmax = c(85, 100),
+  midpoint = c(42.5, 92.5),
+  label = c("> 85%\nAPIM or APIM variant", "< 15%\nAll others")
+)
+
+ggplot(model_use) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = 0, ymax = 1, fill = model),
+    color = "white", linewidth = 1.2
+  ) +
+  geom_text(
+    aes(x = midpoint, y = 0.5, label = label, color = model),
+    lineheight = 0.95, fontface = "bold", size = c(9, 6.2)
+  ) +
+  scale_fill_manual(values = c(
+    "APIM or APIM variant" = "#0028a5",
+    "All other specifications" = "#e8eefb"
+  )) +
+  scale_color_manual(values = c(
+    "APIM or APIM variant" = "white",
+    "All other specifications" = "#001f73"
+  )) +
+  coord_cartesian(xlim = c(0, 100), ylim = c(-0.06, 1.06), expand = FALSE) +
+  theme_void() +
+  theme(legend.position = "none", plot.margin = margin(12, 6, 12, 6))
+```
+
+::: {.subtle}
+Preliminary results from an ongoing systematic review ($n = 998$ coded
+articles). The authors report bounds rather than exact percentages
+[@sakalukRenewalDyadicStructural2025, p. 5].
+:::
 
 ## The distinguishable APIM - Conceptually
 
@@ -840,26 +947,81 @@ to 5 = *completely true today*
 We aggregate each person's ratings into their **average daily collaborative
 planning** across the 55 days.
 
-## Dyadic outcome: joint physical activity
-
-
+## Collaborative planning by partner role
 
 ```{r}
-#| label: pilot-aggregated-distributions-cfm-plot
+#| label: pilot-planning-distributions-by-role
 #| echo: false
+#| fig-width: 12
+#| fig-height: 5.1
 #| out-width: 100%
-#| out-height: 100%
-#| fig-alt: "Histograms of provided collaborative planning and person-level mean joint MVPA."
+#| fig-align: center
+#| fig-alt: "Histograms and boundary-corrected density curves of average collaborative planning, shown separately for female and male partners."
 
-distribution_plot(
-  pilot_aggregated,
-  variables = c("collaborative_planning", "mvpa_joint"),
-  bin_widths = c(
-    collaborative_planning = 0.25,
-    mvpa_joint = 7.5
-  )
-)
+ggplot(pilot_aggregated,
+       aes(collaborative_planning, y = after_stat(density))) +
+  geom_histogram(
+    bins = 15, boundary = 0,
+    fill = "steelblue", color = "white", alpha = 0.75
+  ) +
+  geom_density(
+    bounds = c(0, Inf), color = "navy", linewidth = 1.1
+  ) +
+  facet_wrap(~role, nrow = 1) +
+  labs(x = "Average collaborative planning", y = "Density") +
+  see::theme_modern(base_size = 16)
 ```
+
+:::{.notes}
+
+- Each panel shows a partner's average daily collaborative planning across the
+  study.
+- The shared axes allow direct comparison of the two role-specific
+  distributions.
+- These are descriptive role differences, not evidence that the CFM parameters
+  differ by role.
+
+:::
+
+<!-- ca. 1 Minute -->
+
+## Joint MVPA by partner role
+
+```{r}
+#| label: pilot-joint-mvpa-distributions-by-role
+#| echo: false
+#| fig-width: 12
+#| fig-height: 5.1
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Histograms and boundary-corrected density curves of average daily joint MVPA, shown separately for female and male partners."
+
+ggplot(pilot_aggregated,
+       aes(mvpa_joint, y = after_stat(density))) +
+  geom_histogram(
+    bins = 15, boundary = 0,
+    fill = "steelblue", color = "white", alpha = 0.75
+  ) +
+  geom_density(
+    bounds = c(0, Inf), color = "navy", linewidth = 1.1
+  ) +
+  facet_wrap(~role, nrow = 1) +
+  labs(x = "Average joint MVPA (minutes/day)", y = "Density") +
+  see::theme_modern(base_size = 16)
+```
+
+:::{.notes}
+
+- Each panel shows person-level average daily MVPA performed jointly with the
+  partner.
+- Both roles share the same axes and each dyad contributes one person to each
+  panel.
+- The distributions are descriptive inputs to the subsequent common fate
+  model.
+
+:::
+
+<!-- ca. 1 Minute -->
 
 ## The CFM
 
@@ -906,7 +1068,8 @@ TODO: Probably create a second slide deck!
 
 <!-- ILD-part: 
 
-- see dev note on ar1 processes 
+- see dev note on ar1 processes careful to consider degrees of freedom! relevant here?
+  - TODO @codex: are degrees of freedom alreaedy important in the cross-sectional case and should we teach anything regarding those?
 - see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
 
 -->
