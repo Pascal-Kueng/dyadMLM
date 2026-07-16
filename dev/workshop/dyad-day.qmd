@@ -479,6 +479,7 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 ```{r}
 #| label: conceptual-distinguishable-apim-paths-only
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -506,6 +507,7 @@ do not introduce residual parameters yet.-->
 ```{r}
 #| label: conceptual-distinguishable-apim_brief
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -601,6 +603,7 @@ E.g., correlated residuals.
 ```{r}
 #| label: conceptual-distinguishable-apim
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -699,6 +702,7 @@ Then move to the right-hand side:
 ```{r}
 #| label: fitted-distinguishable-apim
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -766,6 +770,7 @@ $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
 ```{r}
 #| label: conceptual-exchangeable-apim-paths-only
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -783,6 +788,7 @@ draw_apim_diagram("exchangeable", show_residuals = FALSE)
 ```{r}
 #| label: conceptual-exchangeable-apim
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -819,7 +825,7 @@ concepts were introduced visually just a few slides earlier.
 ```{r}
 #| label: apim-exchangeability-comparison
 #| echo: false
-#| dev: svglite
+#| dev: svg
 #| fig-width: 10.5
 #| fig-height: 5.2
 #| out-width: 95%
@@ -859,6 +865,7 @@ draw_apim_exchangeability_comparison()
 ```{r}
 #| label: fitted-exchangeable-apim
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -912,6 +919,7 @@ dim_reparameterization_grid(
 ```{r}
 #| label: conceptual-dim-paths-only
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -928,6 +936,7 @@ draw_dim_diagram(show_residuals = FALSE)
 ```{r}
 #| label: conceptual-dim
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -963,6 +972,7 @@ $$
 ```{r}
 #| label: fitted-dim
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -986,6 +996,7 @@ fit_and_draw_dim(
 ```{r}
 #| label: conceptual-dsm-paths-only
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -995,11 +1006,12 @@ fit_and_draw_dim(
 draw_dsm_diagram(show_residuals = FALSE)
 ```
 
-## The DSM: a mean-and-difference parameterization of the distinguishable APIM
+## The DSM
 
 ```{r}
 #| label: conceptual-dsm
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -1014,6 +1026,7 @@ draw_dsm_diagram()
 ```{r}
 #| label: fitted-dsm
 #| echo: false
+#| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
 #| out-width: 100%
@@ -1137,6 +1150,7 @@ ggplot(pilot_aggregated,
 ```{r}
 #| label: conceptual-cfm-paths-only
 #| echo: false
+#| dev: svg
 #| fig-width: 10
 #| fig-height: 5.8
 #| out-width: 100%
@@ -1151,6 +1165,7 @@ draw_cfm_diagram(show_residuals = FALSE)
 ```{r}
 #| label: conceptual-cfm
 #| echo: false
+#| dev: svg
 #| fig-width: 10
 #| fig-height: 5.8
 #| out-width: 100%
