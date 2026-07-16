@@ -6,8 +6,8 @@
   const cssColor = (name, fallback) => (
     ROOT_STYLES.getPropertyValue(name).trim() || fallback
   );
-  const FEMALE = cssColor("--interdep-residual-female", "#00695c");
-  const MALE = cssColor("--interdep-residual-male", "#2a7f78");
+  const FEMALE = cssColor("--interdep-residual-female", "#004d40");
+  const MALE = cssColor("--interdep-residual-male", "#007a8c");
   const INK = "#263238";
   const MUTED = "#64748b";
   const GRID = "#dbe3ec";

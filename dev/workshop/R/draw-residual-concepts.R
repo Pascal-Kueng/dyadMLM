@@ -15,8 +15,8 @@ draw_residual_concepts <- function() {
   residual_data$observed <- predicted_value + residual_data$residual
 
   role_colours <- c(
-    "Female partner" = "#00695C",
-    "Male partner" = "#2A7F78"
+    "Female partner" = "#004D40",
+    "Male partner" = "#007A8C"
   )
   ink_colour <- "#263238"
   muted_colour <- "#64748B"

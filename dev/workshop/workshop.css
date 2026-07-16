@@ -12,8 +12,8 @@
   --interdep-dyad-mean-effect: #c43c35;
   --interdep-member-deviation-effect: #8a6500;
   /* Supporting residual colors deliberately avoid the effect palette. */
-  --interdep-residual-female: #00695c;
-  --interdep-residual-male: #2a7f78;
+  --interdep-residual-female: #004d40;
+  --interdep-residual-male: #007a8c;
   --interdep-residual-correlation: #546e7a;
 }
 

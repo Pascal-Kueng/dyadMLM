@@ -371,6 +371,52 @@ ggplot(pilot_aggregated,
 
 # Different types of dyadic models
 
+## One model dominates dyadic research
+
+```{r}
+#| label: apim-use-plot
+#| echo: false
+#| fig-alt: "A horizontal bar showing that more than 85% of 998 coded dyadic studies used an APIM or APIM variant, leaving fewer than 15% for all other model specifications combined."
+#| out-width: 100%
+
+model_use <- tibble(
+  model = c("APIM or APIM variant", "All other specifications"),
+  xmin = c(0, 85),
+  xmax = c(85, 100),
+  midpoint = c(42.5, 92.5),
+  label = c("> 85%\nAPIM or APIM variant", "< 15%\nAll others")
+)
+
+ggplot(model_use) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = 0, ymax = 1, fill = model),
+    color = "white", linewidth = 1.2
+  ) +
+  geom_text(
+    aes(x = midpoint, y = 0.5, label = label, color = model),
+    lineheight = 0.95, fontface = "bold", size = c(9, 6.2)
+  ) +
+  scale_fill_manual(values = c(
+    "APIM or APIM variant" = "#0028a5",
+    "All other specifications" = "#e8eefb"
+  )) +
+  scale_color_manual(values = c(
+    "APIM or APIM variant" = "white",
+    "All other specifications" = "#001f73"
+  )) +
+  coord_cartesian(xlim = c(0, 100), ylim = c(-0.06, 1.06), expand = FALSE) +
+  theme_void() +
+  theme(legend.position = "none", plot.margin = margin(12, 6, 12, 6))
+```
+
+::: {.subtle}
+Preliminary results from an ongoing systematic review (APIM use coded for
+$n = 998$ eligible articles)
+
+[@sakalukRenewalDyadicStructural2025, p. 5].
+:::
+
+
 ## Many models to choose from
 
 **Various dyadic models** can be used, each answering different questions!
@@ -412,48 +458,6 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 
 <!-- ca. 2 Minutes -->
 
-## One model dominates dyadic research
-
-```{r}
-#| label: apim-use-plot
-#| echo: false
-#| fig-alt: "A horizontal bar showing that more than 85% of 998 coded dyadic studies used an APIM or APIM variant, leaving fewer than 15% for all other model specifications combined."
-#| out-width: 100%
-
-model_use <- tibble(
-  model = c("APIM or APIM variant", "All other specifications"),
-  xmin = c(0, 85),
-  xmax = c(85, 100),
-  midpoint = c(42.5, 92.5),
-  label = c("> 85%\nAPIM or APIM variant", "< 15%\nAll others")
-)
-
-ggplot(model_use) +
-  geom_rect(
-    aes(xmin = xmin, xmax = xmax, ymin = 0, ymax = 1, fill = model),
-    color = "white", linewidth = 1.2
-  ) +
-  geom_text(
-    aes(x = midpoint, y = 0.5, label = label, color = model),
-    lineheight = 0.95, fontface = "bold", size = c(9, 6.2)
-  ) +
-  scale_fill_manual(values = c(
-    "APIM or APIM variant" = "#0028a5",
-    "All other specifications" = "#e8eefb"
-  )) +
-  scale_color_manual(values = c(
-    "APIM or APIM variant" = "white",
-    "All other specifications" = "#001f73"
-  )) +
-  coord_cartesian(xlim = c(0, 100), ylim = c(-0.06, 1.06), expand = FALSE) +
-  theme_void() +
-  theme(legend.position = "none", plot.margin = margin(12, 6, 12, 6))
-```
-
-::: {.subtle}
-Preliminary results from an ongoing systematic review (APIM use coded for
-$n = 998$ eligible articles). 
-:::
 
 ## The distinguishable APIM - Conceptually
 
