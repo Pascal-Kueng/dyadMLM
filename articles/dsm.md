@@ -246,9 +246,9 @@ The fitted paths for this example are:
 -0.03, a21 -0.14, and a22 1.49; residual SDs 0.79 and 1.92, with
 correlation -0.16.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
 
-Fitted cross-sectional DSM for the example data. The nodes show the
-score definitions explicitly; edge and intercept labels show the
-estimated DSM coefficients, and the residual labels show the estimated
+Fitted cross-sectional DSM for the example data. The nodes identify the
+mean and difference scores; edge and intercept labels show the estimated
+DSM coefficients, and the residual labels show the estimated
 score-component standard deviations and correlation.
 
 The fixed effects from our MLM model map directly to these paths as
