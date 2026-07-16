@@ -101,6 +101,16 @@
   font-size: 1.12em;
 }
 
+/* Quarto shrinks slide content but compensates headings using its defaults.
+   Keep headings at this theme's regular absolute size on .smaller slides. */
+.reveal .slides section.smaller h2 {
+  font-size: calc(1.55em / 0.7);
+}
+
+.reveal .slides section.smaller h3 {
+  font-size: calc(1.12em / 0.7);
+}
+
 .reveal .title-slide h1,
 .reveal #title-slide h1 {
   margin-top: 0.65em;
@@ -186,6 +196,15 @@
 
 .reveal code {
   color: var(--uzh-blue-dark);
+}
+
+.reveal .subtle {
+  font-size: 0.76em;
+  color: var(--uzh-muted);
+}
+
+.reveal .subtle a {
+  color: inherit;
 }
 
 .reveal .progress {

@@ -1,10 +1,11 @@
 ---
-title: "Dyad-Day"
-subtitle: "Dyadic Data Analysis with R"
+title: "Dyadic Data Analysis with R"
+subtitle: "From Cross-Sectional Models to Intensive Longitudinal Data"
 author:
   - "Pascal Küng"
   - "Turu Stadler"
 bibliography: ../../vignettes/references.bib
+csl: apa.csl
 resources:
   - uzh-logo.svg
   - charite-logo.svg
@@ -29,7 +30,6 @@ editor: source
 
 library(dplyr)
 library(ggplot2)
-library(tidyr)
 
 data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds"
 
@@ -41,49 +41,66 @@ pilot <- readRDS(data_file) |>
   transmute(
     couple_id = coupleID,
     person_id = userID,
-    emotional_support = ss_emo_pleasure,
+    provided_emotional_support = ss_emo_pleasure,
     collaborative_planning = sc_actionplan,
     mvpa_solo = if_else(ss_pa == 0, 0, ss_pa_min_solo),
     mvpa_joint = if_else(ss_pa == 0, 0, ss_pa_min_collab),
     mvpa_total = mvpa_solo + mvpa_joint
   )
 
-pilot_aggregated <- pilot |>
-  group_by(couple_id, person_id) |>
-  summarise(
-    across(everything(), ~ mean(.x, na.rm = TRUE)),
-    .groups = "drop"
-  )
-
-distribution_plot <- function(data) {
+distribution_plot <- function(data, variables, bin_widths) {
   labels <- c(
-    emotional_support = "Emotional support provided",
+    provided_emotional_support = "Provided emotional support",
     collaborative_planning = "Collaborative planning (daily mean)",
     mvpa_solo = "Mean solo MVPA (minutes/day)",
     mvpa_joint = "Mean joint MVPA (minutes/day)",
     mvpa_total = "Mean total MVPA (minutes/day)"
   )
 
-  data |>
-    pivot_longer(-c(couple_id, person_id), names_to = "variable") |>
-    mutate(variable = factor(variable, levels = names(labels), labels = labels)) |>
-    ggplot(aes(value)) +
-    geom_histogram(
-      aes(y = after_stat(density)),
-      bins = 16,
-      fill = "#B88900",
-      color = "white",
-      linewidth = 0.25
-    ) +
-    geom_density(color = "#D94335", linewidth = 0.8, adjust = 1.1) +
-    facet_wrap(vars(variable), scales = "free", ncol = 3) +
-    labs(x = NULL, y = "Density") +
-    theme_minimal(base_size = 15) +
-    theme(
-      panel.grid.minor = element_blank(),
-      strip.text = element_text(face = "bold"),
-      axis.text = element_text(color = "#222222")
+  missing_widths <- setdiff(variables, names(bin_widths))
+  if (length(missing_widths)) {
+    stop("Missing bin widths for: ", paste(missing_widths, collapse = ", "))
+  }
+
+  plots <- Map(\(variable, bin_width) {
+    values <- data[[variable]]
+    values <- values[is.finite(values)]
+    limits <- c(
+      floor(min(values) / bin_width) * bin_width,
+      ceiling(max(values) / bin_width) * bin_width
     )
+    bandwidth <- density(values, adjust = 1.1)$bw
+    curve <- density(
+      c(values, -values), bw = bandwidth, from = 0, to = limits[2]
+    )
+    curve <- tibble(
+      value = curve$x,
+      count = curve$y * 2 * length(values) * bin_width
+    )
+
+    ggplot(tibble(value = values), aes(value)) +
+      geom_histogram(
+        binwidth = bin_width, boundary = limits[1], closed = "right",
+        fill = "steelblue", color = "white", linewidth = 0.25
+      ) +
+      geom_line(
+        data = curve, aes(value, count), inherit.aes = FALSE,
+        color = "navy", linewidth = 1
+      ) +
+      labs(title = labels[[variable]], x = NULL, y = "Number of participants") +
+      theme_minimal(base_size = 15) +
+      theme(
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.text = element_text(color = "#222222")
+      )
+  }, variables, unname(bin_widths[variables]))
+
+  patchwork::wrap_plots(
+    plots,
+    ncol = min(3, length(plots)),
+    axis_titles = "collect_y"
+  )
 }
 ```
 
@@ -110,60 +127,133 @@ distribution_plot <- function(data) {
 
 <!-- ca. 5 Minutes -->
 
-## A dyadic dataset
+## Why dyadic data?
 
-- 38 physically inactive romantic couples (oposite sex)
-- both partners wanted to increase their physical activity jointly
-- JITAIs and planning interventions
-- Tracked with daily diaries over 55 days
+> “Much of what we think, do, and feel is determined not by who we are but by
+> whom we are with.” [@kennyPartnerEffectsRelationship1999, p. 446]
 
+- A person's response may reflect both **their own characteristics** and **their
+partner's characteristics**.
+- Partner effects reveal **relational processes**: Does something
+about *you* predict something about *me*?
+- 
 
-## Pilot data: aggregated variables {.smaller}
+## Introducing today's dyadic dataset!
+
+- 38 physically inactive opposite-sex romantic couples
+- Both partners intended to increase their physical activity together
+- Smartphone-based planning interventions and JITAIs
+- Daily diaries over 55 days
+
+[@kuengDailyAssociationsSocialControl2026;
+@hoehenerEffectivenessSmartphoneDyadic2026]{.subtle}
+
+<!-- ca. 5 Minutes -->
+
+## Measurement - Predictor
+
+### Emotional support provided
+
+> **Rough English translation of the original German item**<br>
+> “How much did you emotionally support your partner today so that they would
+be physically active with greater enjoyment?”
+>
+> [Adapted from @bolgerInvisibleSupportAdjustment2000]{.subtle}
+
+0 = *not at all today* <br>
+5 = *very much today*<br>
+
+## Measurement - Outcome
+
+### Moderate to vigorous physical activity (MVPA)
+
+> **Rough English translation of the original German item**<br>
+> “How many minutes did you spend engaging in moderate-to-vigorous physical
+activity today?” 
+[Adapted from @amireaultGodinShephardQuestionnaire2015]{.subtle}
+
+- **Alone:** _____ minutes
+- **Together with your partner:** _____ minutes
+
+**Total MVPA = solo MVPA + joint MVPA.**
+
+## Aggregating for cross-sectional examples
+
+To show simple dyadic models we aggregate the daily diary data to
+obtain a "cross-sectional" dataset.
+
+```{r}
+library(dplyr)
+
+pilot_aggregated <- pilot |>
+  group_by(couple_id, person_id) |>
+  summarise(
+    across(everything(), ~ mean(.x, na.rm = TRUE)),
+    .groups = "drop"
+  )
+```
+
+The variables now represent person-level daily averages across the study:
+
+- `provided_social_support`: average daily support provided
+- `mvpa_total`: average daily total MVPA (minutes)
+
+## Pilot data: APIM variables
 
 ```{r}
 #| label: pilot-aggregated-distributions-plot
 #| echo: false
-#| fig-width: 10
-#| fig-height: 5.7
-#| fig-alt: "Histograms of provided emotional support, collaborative planning, and person-level mean MVPA."
+#| out-width: 100%
+#| out-height: 100%
+#| fig-alt: "Histograms of provided emotional support and person-level mean total MVPA."
 
-distribution_plot(pilot_aggregated)
+distribution_plot(
+  pilot_aggregated,
+  variables = c("provided_emotional_support", "mvpa_total"),
+  bin_widths = c(
+    provided_emotional_support = 0.25,
+    mvpa_total = 7.5
+  )
+)
 ```
 
-## Measurement: social processes {.smaller}
 
-### Emotional support provided
+## Measurement - CFM predictor
 
-> **English translation of the original German item**<br>
-> “How much did you emotionally support your partner today so that they would be physically active with greater enjoyment?”
+### Dyadic predictor: collaborative planning
 
-**Translated response options:** 0 = *not at all today* to 5 = *very much today*<br>
-**Source:** Adapted from @bolgerInvisibleSupportAdjustment2000.<br>
-**Variable:** `ss_emo_pleasure`
+> **Rough english translations of the original German item**<br>
+> “We have already planned precisely for tomorrow when, where, and how we will
+be physically active together.”
+[Adapted from @scholzBeyondBehaviouralIntentions2008]{.subtle}
 
-### Collaborative planning
-
-> **English translation of the original German item**<br>
-> “We have already planned precisely for tomorrow when, where, and how we will be physically active together.”
-
-**Translated response options:** 0 = *not at all true today*<br>
+0 = *not at all true today*<br>
 to 5 = *completely true today*
 
-**Source:** Adapted from @scholzBeyondBehaviouralIntentions2008; Health Action Process Approach.<br>
-**Variable:** `sc_actionplan`
+We aggregate each person's ratings into their **average daily collaborative
+planning** across the 55 days.
 
-## Measurement: physical activity {.smaller}
+## Dyadic outcome: joint physical activity
 
-> **English translations of the original German items**<br>
-> “Did you engage in moderate-to-vigorous physical activity today?”<br>
-> If yes: “How many minutes did you spend engaging in moderate-to-vigorous physical activity today?”
 
-- **Alone:** _____ minutes (`ss_pa_min_solo`)
-- **Together with your partner:** _____ minutes (`ss_pa_min_collab`)
 
-**Translated response options:** Yes/no screening item followed by numeric minute fields.<br>
-**Source:** Screening item developed for the study; duration items adapted from @amireaultGodinShephardQuestionnaire2015.
+```{r}
+#| label: pilot-aggregated-distributions-cfm-plot
+#| echo: false
+#| out-width: 100%
+#| out-height: 100%
+#| fig-alt: "Histograms of provided collaborative planning and person-level mean joint MVPA."
 
-Reported non-activity days are coded as **0 minutes**; missing diaries remain missing.
+distribution_plot(
+  pilot_aggregated,
+  variables = c("collaborative_planning", "mvpa_joint"),
+  bin_widths = c(
+    collaborative_planning = 0.25,
+    mvpa_joint = 7.5
+  )
+)
+```
 
-**Total MVPA = solo MVPA + joint MVPA.**
+## References
+
+
