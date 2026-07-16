@@ -27,17 +27,16 @@ editor: source
 <!--
 !TODO: 
 
-1. Why dyadic data?
-2. Example dataset and substantive question
-3. Why not analyze each partner separately?
-4. APIM graphic
-5. Minimal conceptual APIM equations
-6. Actor and partner effect interpretations
-7. Distinguishable versus indistinguishable dyads
-8. DIM
-9. DSM and CFM as shorter alternatives
-10. Model-choice recap
-  
+  Development checklist:
+
+  - Fit and interpret the distinguishable APIM
+  - Explain residual interdependence
+  - Introduce distinguishability and equality constraints
+  - Fit and interpret the exchangeable APIM
+  - Demonstrate APIM–DIM equivalence
+  - Add brief DSM and CFM examples
+  - Add model-choice recap
+
 -->
 
 ```{r}
@@ -378,16 +377,16 @@ Do two separate models like this work?
 
 ## Why not just separate regression equations for each partner?
 
-Yes, but there are downsides:
+Yes, but:
 
 :::{.incremental}
-- No formal tests of whether the two actor effects or partner effects are different for males and females.
-- Equal paths cannot be pooled into a shared estimate, which can increase power.
+- Can't formally test whether the two actor effects or partner effects are different for males and females.
+- Can't pool equal paths into a shared estimate, which can increase power.
 - Ignores unmodelled sources of non-independence between partners. 
 - A joint dyadic model can tell us how much of the interdependence is explained.
 :::
 
-!TODO: cite [bolgers workshop slides]{.subtle}
+[@kenny2006dyadic; @laurenceauBolger2026]{.subtle}
 
 <!-- ca. 2 minutes -->
 
