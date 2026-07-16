@@ -157,6 +157,43 @@ summary(mixed_cross_gaussian_model)
 
 ```
 
+The same composition-specific blocks can be labelled directly from the fitted
+model. For the exchangeable blocks, the common member residual standard
+deviation and correlation are back-transformed from their fitted sum-and-
+difference components.
+
+```{r prepare-fitted-mixed-apim-diagram, include=FALSE}
+mixed_apim_diagram_values <- .extract_mixed_apim_diagram_values(
+  mixed_cross_gaussian_model
+)
+mixed_apim_diagram_estimates <- mixed_apim_diagram_values$estimates
+mixed_apim_diagram_residuals <- mixed_apim_diagram_values$residuals
+
+mixed_apim_fitted_alt <- sprintf(
+  paste(
+    "Fitted mixed-composition APIM. Female-male intercepts %.2f and %.2f,",
+    "residual SDs %.2f and %.2f, and residual correlation %.2f.",
+    "Female-female intercept %.2f, residual SD %.2f, and correlation %.2f.",
+    "Male-male intercept %.2f, residual SD %.2f, and correlation %.2f."
+  ),
+  mixed_apim_diagram_estimates[["intercept_fm_female"]],
+  mixed_apim_diagram_estimates[["intercept_fm_male"]],
+  mixed_apim_diagram_residuals$fm[["sd_female"]],
+  mixed_apim_diagram_residuals$fm[["sd_male"]],
+  mixed_apim_diagram_residuals$fm[["correlation"]],
+  mixed_apim_diagram_estimates[["intercept_ff"]],
+  mixed_apim_diagram_residuals$ff[["sd"]],
+  mixed_apim_diagram_residuals$ff[["correlation"]],
+  mixed_apim_diagram_estimates[["intercept_mm"]],
+  mixed_apim_diagram_residuals$mm[["sd"]],
+  mixed_apim_diagram_residuals$mm[["correlation"]]
+)
+```
+
+```{r fitted-mixed-apim-diagram, echo=FALSE, fig.width=10, fig.height=5.5, out.width="100%", fig.cap="Fitted intercept-only mixed-composition APIM. Intercepts and composition-specific residual parameters are extracted from the fitted joint model; the two exchangeable blocks are shown on the member scale.", fig.alt=mixed_apim_fitted_alt}
+draw_mixed_apim_diagram(model = mixed_cross_gaussian_model)
+```
+
 The four fixed-effect indicators are mutually exclusive. With $I$ denoting the
 generated `.i_is_{composition_role}` indicator and $b_0$ a fixed intercept, the
 fixed part of the full model can be written as:

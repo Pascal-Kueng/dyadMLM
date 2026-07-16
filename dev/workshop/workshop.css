@@ -207,6 +207,58 @@
   color: inherit;
 }
 
+.reveal .text-highlight {
+  padding: 0;
+  border-radius: 0.12em;
+  background: rgba(230, 166, 0, 0.22);
+  color: var(--uzh-blue-dark);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.reveal .slides section.rq-slide.present {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.reveal .rq-center {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  text-align: center;
+}
+
+.reveal .rq-card {
+  width: 94%;
+  max-width: 1040px;
+}
+
+.reveal .rq-card p {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.32em;
+  margin: 0;
+  text-align: left;
+}
+
+.reveal .rq-label {
+  display: block;
+  color: var(--uzh-blue);
+  font-size: 1.4em;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.reveal .rq-text {
+  display: block;
+  color: var(--uzh-blue-dark);
+  font-size: 1.4em;
+  font-weight: 650;
+  line-height: 1.28;
+}
+
 .reveal .progress {
   color: var(--uzh-blue);
 }

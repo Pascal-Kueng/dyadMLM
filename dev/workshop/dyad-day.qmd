@@ -24,6 +24,22 @@ execute:
 editor: source
 ---
 
+<!--
+!TODO: 
+
+1. Why dyadic data?
+2. Example dataset and substantive question
+3. Why not analyze each partner separately?
+4. APIM graphic
+5. Minimal conceptual APIM equations
+6. Actor and partner effect interpretations
+7. Distinguishable versus indistinguishable dyads
+8. DIM
+9. DSM and CFM as shorter alternatives
+10. Model-choice recap
+  
+-->
+
 ```{r}
 #| label: setup-pilot-data
 #| include: false
@@ -129,7 +145,7 @@ distribution_plot <- function(data, variables, bin_widths) {
   - Name, Affiliation & Career stage
   - Your dyadic data and RQ
   
-<!-- ca. 10 Minutes -->
+<!-- ca. 15 Minutes -->
 
 ## Today's Aims and Program
 
@@ -143,22 +159,26 @@ distribution_plot <- function(data, variables, bin_widths) {
 | 16:45–17:00 | *Short break* |
 | 17:00–18:00 | Exercises in R |
 
-<!-- ca. 5 Minutes -->
+<!-- ca. 2.5 Minutes -->
 
 ## Why dyadic data?
 
 > “Much of what we think, do, and feel is determined not by who we are but by
 > whom we are with.” [@kennyPartnerEffectsRelationship1999, p. 446]
 
-- **Partners influence each other:** An outcome may depend on both *my
-characteristics* and *my partner's characteristics*.
-- **Some experiences belong to the couple:** Shared contexts and relationship
-processes can describe *us*, not either partner alone.
-- **The configuration matters:** Partners' similarity, mismatch, or
-complementarity may predict outcomes beyond either individual score.
+::: {.incremental}
+- **Partners matter:** An outcome may depend on both *my characteristics* and 
+*my partner's characteristics*.
+- **Some constructs and processes are dyadic:** Shared contexts and interdependence
+processes can make partners' outcomes correlated.
+- **The configuration matters:** Partners' similarity, or complementarity (differences) 
+may predict outcomes beyond either individual score.
+:::
 
 [@kennyPartnerEffectsRelationship1999;
 @iidaModelsInterdependentIndividuals2018]{.subtle}
+
+<!-- ca. 2.5 Minutes -->
 
 ## Introducing today's dyadic dataset!
 
@@ -170,7 +190,16 @@ complementarity may predict outcomes beyond either individual score.
 [@kuengDailyAssociationsSocialControl2026;
 @hoehenerEffectivenessSmartphoneDyadic2026]{.subtle}
 
-<!-- ca. 5 Minutes -->
+<!-- ca. 1 Minute -->
+
+## Research Question 1 {.rq-slide}
+
+::: {.rq-center}
+::: {.rq-card}
+[RQ1:]{.rq-label} [In romantic couples, how is provided health-related social support linked to physical activity?]{.rq-text}
+:::
+:::
+
 
 ## Measurement - Predictor
 
@@ -185,6 +214,8 @@ be physically active with greater enjoyment?”
 0 = *not at all today* <br>
 5 = *very much today*<br>
 
+<!-- ca. 1 Minute -->
+
 ## Measurement - Outcome
 
 ### Moderate to vigorous physical activity (MVPA)
@@ -197,7 +228,9 @@ activity today?”
 - **Alone:** _____ minutes
 - **Together with your partner:** _____ minutes
 
-**Total MVPA = solo MVPA + joint MVPA.**
+[**Total MVPA = solo MVPA + joint MVPA.**]{.fragment}
+
+<!-- ca. 1 Minute -->
 
 ## Aggregating for cross-sectional examples
 
@@ -215,27 +248,14 @@ pilot_aggregated <- pilot |>
   )
 ```
 
+::: {.fragment}
 The variables now represent person-level daily averages across the study:
 
 - `provided_emotional_support`: average daily support provided
 - `mvpa_total`: average daily total MVPA (minutes)
+:::
 
-## Why separate regressions are not enough
-
-- **Omitted-variable bias:** Own and partner predictors are often correlated;
-leaving either out can bias the other effect.
-- **No direct comparisons:** Separate equations cannot test whether actor and
-partner effects differ across partners—or from each other.
-- **Less power:** Equal paths cannot be pooled into a common, more precise
-estimate.
-- **Residual interdependence is lost:** The remaining association between
-partners' outcomes is not modeled.
-- **Other dyadic processes remain hidden:** Shared couple levels and
-within-couple differences require a CFM or DSM.
-
-[@kennyPartnerEffectsRelationship1999;
-@iidaModelsInterdependentIndividuals2018;
-@laurenceauIntroductionIntensiveLongitudinal2026]{.subtle}
+<!-- ca. 1 Minute -->
 
 ## Pilot data: APIM variables
 
@@ -256,6 +276,158 @@ distribution_plot(
 )
 ```
 
+<!-- ca. 1 Minute -->
+
+## Many models to choose from
+
+**Various dyadic models** can be used, each answering different questions!
+
+::: {.incremental}
+- **Actor-partner interdependence model (APIM)**: interdependent individuals
+- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
+- **Common fate model (CFM)**: latent dyadic process
+:::
+
+::: {.fragment}
+Other noteable models include the mutual influence model (iida?) and the 
+truth-and bias model (ref?). !TODO: also add others?
+:::
+
+<!-- ca. 3 Minutes -->
+
+::: {.notes}
+"For RQ 1 we first go with the Actor-Partner interdependence model and 
+see how we can use it to answer our research question (in what way). "
+:::
+
+## Many models to choose from
+
+**Various dyadic models** can be used, each answering different questions!
+
+- [**Actor-partner interdependence model (APIM)**: interdependent individuals]{.text-highlight}
+- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
+- **Common fate model (CFM)**: latent dyadic process
+
+
+Other noteable models include the mutual influence model (iida?) and the 
+truth-and bias model (ref?). !TODO: also add others?
+
+<!-- ca. 3 Minutes -->
+
+## The distinguishable APIM
+
+```{r}
+#| label: conceptual-distinguishable-apim
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
+
+draw_apim_diagram("distinguishable")
+```
+
+::: {.notes}
+
+Explain actor and partner effects only and briefly. Not talking about residuals yet. 
+-> to set up next slide
+
+:::
+
+<!-- ca. 2 Minutes -->
+
+## Can we just estimate separate regression equations for each partner?
+
+Do two separate models like this work?
+
+<br>
+
+**Male model:** $\qquad Y_{male_i} = b_0 + b_1 \times X_{male_i} + b_2 \times  X_{female_i} + \epsilon_{male_i}$ 
+
+<br>
+
+**Female model:** $\quad Y_{female_i} = b_0 + b_1 \times X_{male_i} + b_2 \times  X_{female_i} + \epsilon_{female_i}$ 
+
+<!-- ca. 2 minutes (ask students what issues) -->
+
+## Why not just separate regression equations for each partner?
+
+Probably not a good idea because of:
+
+:::{.incremental}
+- Ignores unmodelled sources of non-independence between partners, which can
+bias results. 
+- No formal tests of whether the two actor effects or partner effects are different for males and females.
+- Equal paths cannot be pooled into a shared estimate, which can increase power.
+- A joint dyadic model can tell us how much of the interdependence is explained.
+:::
+
+!TODO: cite [bolgers workshop slides]{.subtle}
+
+<!-- ca. 2 minutes -->
+
+:::{.notes}
+Thus, we need to properly account for non-explained non-independence! 
+E.g., correlated residuals.
+:::
+
+## Interpreting the fit of the actor partner interdependence model
+
+<!-- insert the fit model, discuss that in this model we have correlated residuals (and what that means)
+And then interpret the actor path values and residual values and correlation -->
+
+
+<!------------- BELOW HERE IS JUST STRUCTURE  -------------------->
+
+## The exchangeable APIM
+
+```{r}
+#| label: conceptual-exchangeable-apim
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual exchangeable APIM with pooled actor and partner paths."
+
+draw_apim_diagram("exchangeable")
+```
+
+## The DIM (equivalent to exchangeable APIM)
+
+```{r}
+#| label: conceptual-dim
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual DIM separating dyad-mean and member-deviation effects."
+
+draw_dim_diagram()
+```
+
+## The DSM (equivalent to distinguishable APIM)
+
+```{r}
+#| label: conceptual-dsm
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual DSM linking predictor mean and difference to outcome mean and difference."
+
+draw_dsm_diagram()
+```
+
+
+
+## Research Question 2
+
+RQ2: In romantic couples, how is collaborative planning linked to physical 
+activity?
 
 ## Measurement - CFM predictor
 
@@ -292,5 +464,22 @@ distribution_plot(
   )
 )
 ```
+
+## The CFM
+
+```{r}
+#| label: conceptual-cfm
+#| echo: false
+#| fig-width: 10
+#| fig-height: 5.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual Common Fate Model with shared latent predictor and outcome levels."
+
+draw_cfm_diagram()
+```
+
+
+
 
 ## References

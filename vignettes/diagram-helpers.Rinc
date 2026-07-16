@@ -109,12 +109,363 @@
   unname(values[[1]])
 }
 
+.diagram_term_map <- function(terms, allowed, diagram) {
+  if (is.null(terms)) {
+    return(list())
+  }
+  if (is.list(terms)) {
+    terms <- unlist(terms, use.names = TRUE)
+  }
+  if (!is.character(terms) || is.null(names(terms)) || any(names(terms) == "")) {
+    stop(
+      "`terms` for the ", diagram,
+      " diagram must be a named character vector or named list.",
+      call. = FALSE
+    )
+  }
+  unknown <- setdiff(names(terms), allowed)
+  if (length(unknown) > 0L) {
+    stop(
+      "Unknown `terms` name", if (length(unknown) == 1L) "" else "s", ": ",
+      paste(unknown, collapse = ", "), ". Allowed names are: ",
+      paste(allowed, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  if (anyDuplicated(names(terms))) {
+    stop("`terms` names must be unique.", call. = FALSE)
+  }
+  as.list(terms)
+}
+
+.diagram_resolve_term <- function(
+    available, supplied, predicate, parameter, component) {
+  if (!is.null(supplied)) {
+    if (length(supplied) != 1L || !supplied %in% available) {
+      stop(
+        "The supplied ", component, " term for `", parameter, "` was not ",
+        "found in the fitted model: ", paste(supplied, collapse = ", "), ".",
+        call. = FALSE
+      )
+    }
+    return(supplied)
+  }
+
+  matches <- available[vapply(available, predicate, logical(1))]
+  if (length(matches) != 1L) {
+    stop(
+      "Could not identify exactly one ", component, " term for `", parameter,
+      "`; matched ", length(matches), ". Supply it explicitly through ",
+      "`terms = c(", parameter, " = \"...\")`. Available ", component,
+      " terms: ", paste(available, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  matches[[1]]
+}
+
+.diagram_glmmtmb_components <- function(model, diagram) {
+  if (!inherits(model, "glmmTMB")) {
+    stop("`model` for the ", diagram, " diagram must inherit from `glmmTMB`.",
+         call. = FALSE)
+  }
+  if (!requireNamespace("glmmTMB", quietly = TRUE)) {
+    stop("Package `glmmTMB` is required to extract fitted diagram values.",
+         call. = FALSE)
+  }
+
+  model_family <- stats::family(model)$family
+  if (!identical(tolower(model_family), "gaussian")) {
+    stop(
+      "Fitted ", diagram, " diagrams currently require a Gaussian model; ",
+      "the supplied model uses `", model_family, "`.",
+      call. = FALSE
+    )
+  }
+
+  dispersion_formula <- stats::formula(model, component = "disp")
+  dispersion_rhs <- dispersion_formula[[2L]]
+  dispersion_is_zero <- is.numeric(dispersion_rhs) &&
+    length(dispersion_rhs) == 1L && dispersion_rhs == 0
+  if (!dispersion_is_zero) {
+    stop(
+      "Fitted ", diagram, " diagrams require `dispformula = ~ 0` so the ",
+      "displayed dyad random effects represent the complete Gaussian ",
+      "residual covariance structure.",
+      call. = FALSE
+    )
+  }
+
+  fixed <- glmmTMB::fixef(model)$cond
+  random <- glmmTMB::VarCorr(model)$cond
+  random_terms <- unique(unlist(lapply(
+    random,
+    function(component) names(attr(component, "stddev"))
+  )))
+
+  list(fixed = fixed, random = random, random_terms = random_terms)
+}
+
+.exchangeable_member_residuals <- function(mean_sd, difference_sd) {
+  member_variance <- mean_sd^2 + difference_sd^2
+  member_covariance <- mean_sd^2 - difference_sd^2
+  c(
+    sd = sqrt(member_variance),
+    correlation = member_covariance / member_variance
+  )
+}
+
+.extract_apim_diagram_values <- function(
+    model, type = c("distinguishable", "exchangeable"), terms = NULL) {
+  type <- match.arg(type)
+  components <- .diagram_glmmtmb_components(model, paste(type, "APIM"))
+  fixed_names <- names(components$fixed)
+
+  if (type == "distinguishable") {
+    allowed <- c(
+      "intercept_female", "intercept_male",
+      "actor_female", "actor_male",
+      "partner_female", "partner_male",
+      "random_female", "random_male"
+    )
+    terms <- .diagram_term_map(terms, allowed, "distinguishable APIM")
+    fixed_term <- function(parameter, role, field = NULL) {
+      .diagram_resolve_term(
+        fixed_names, terms[[parameter]],
+        function(term) {
+          role_match <- grepl(paste0("\\.i_is_.*_", role, "($|:)"), term)
+          if (is.null(field)) {
+            return(role_match && !grepl(":", term))
+          }
+          role_match && grepl(":", term) &&
+            grepl(paste0("_", field, "($|:)"), term)
+        },
+        parameter, "fixed-effect"
+      )
+    }
+
+    resolved <- c(
+      intercept_female = fixed_term("intercept_female", "female"),
+      intercept_male = fixed_term("intercept_male", "male"),
+      actor_female = fixed_term("actor_female", "female", "actor"),
+      actor_male = fixed_term("actor_male", "male", "actor"),
+      partner_female = fixed_term("partner_female", "female", "partner"),
+      partner_male = fixed_term("partner_male", "male", "partner")
+    )
+    random_female <- .diagram_resolve_term(
+      components$random_terms, terms$random_female,
+      function(term) grepl("\\.i_is_.*_female$", term),
+      "random_female", "random-effect"
+    )
+    random_male <- .diagram_resolve_term(
+      components$random_terms, terms$random_male,
+      function(term) grepl("\\.i_is_.*_male$", term),
+      "random_male", "random-effect"
+    )
+
+    return(list(
+      estimates = stats::setNames(
+        unname(components$fixed[resolved]), names(resolved)
+      ),
+      residuals = c(
+        sd_female = .extract_diagram_random_sd(
+          components$random, random_female
+        ),
+        sd_male = .extract_diagram_random_sd(
+          components$random, random_male
+        ),
+        correlation = .extract_diagram_random_correlation(
+          components$random, random_female, random_male
+        )
+      ),
+      terms = c(resolved, random_female = random_female, random_male = random_male)
+    ))
+  }
+
+  allowed <- c(
+    "intercept", "actor", "partner", "random_mean", "random_difference"
+  )
+  terms <- .diagram_term_map(terms, allowed, "exchangeable APIM")
+  resolve_fixed <- function(parameter, predicate) {
+    .diagram_resolve_term(
+      fixed_names, terms[[parameter]], predicate, parameter, "fixed-effect"
+    )
+  }
+  intercept <- resolve_fixed(
+    "intercept",
+    function(term) term == "(Intercept)" ||
+      (grepl("^\\.i_is_", term) && !grepl(":", term))
+  )
+  actor <- resolve_fixed(
+    "actor", function(term) grepl("_actor$", term) && !grepl(":", term)
+  )
+  partner <- resolve_fixed(
+    "partner", function(term) grepl("_partner$", term) && !grepl(":", term)
+  )
+  random_mean <- .diagram_resolve_term(
+    components$random_terms, terms$random_mean,
+    function(term) term == "(Intercept)" || grepl("^\\.i_is_", term),
+    "random_mean", "random-effect"
+  )
+  random_difference <- .diagram_resolve_term(
+    components$random_terms, terms$random_difference,
+    function(term) grepl("^\\.i_diff_", term),
+    "random_difference", "random-effect"
+  )
+  mean_sd <- .extract_diagram_random_sd(components$random, random_mean)
+  difference_sd <- .extract_diagram_random_sd(
+    components$random, random_difference
+  )
+
+  list(
+    estimates = c(
+      intercept = unname(components$fixed[[intercept]]),
+      actor = unname(components$fixed[[actor]]),
+      partner = unname(components$fixed[[partner]])
+    ),
+    residuals = .exchangeable_member_residuals(mean_sd, difference_sd),
+    terms = c(
+      intercept = intercept, actor = actor, partner = partner,
+      random_mean = random_mean, random_difference = random_difference
+    )
+  )
+}
+
+.extract_dim_diagram_values <- function(model, terms = NULL) {
+  components <- .diagram_glmmtmb_components(model, "DIM")
+  fixed_names <- names(components$fixed)
+  allowed <- c("b0", "b_mean", "b_dev", "random_mean", "random_difference")
+  terms <- .diagram_term_map(terms, allowed, "DIM")
+  resolve_fixed <- function(parameter, predicate) {
+    .diagram_resolve_term(
+      fixed_names, terms[[parameter]], predicate, parameter, "fixed-effect"
+    )
+  }
+  b0 <- resolve_fixed(
+    "b0", function(term) term == "(Intercept)" ||
+      (grepl("^\\.i_is_", term) && !grepl(":", term))
+  )
+  b_mean <- resolve_fixed(
+    "b_mean", function(term) grepl("_dyad_mean_gmc$", term)
+  )
+  b_dev <- resolve_fixed(
+    "b_dev", function(term) grepl("_within_dyad_dev$", term)
+  )
+  random_mean <- .diagram_resolve_term(
+    components$random_terms, terms$random_mean,
+    function(term) term == "(Intercept)" || grepl("^\\.i_is_", term),
+    "random_mean", "random-effect"
+  )
+  random_difference <- .diagram_resolve_term(
+    components$random_terms, terms$random_difference,
+    function(term) grepl("^\\.i_diff_", term),
+    "random_difference", "random-effect"
+  )
+
+  list(
+    estimates = c(
+      b0 = unname(components$fixed[[b0]]),
+      b_mean = unname(components$fixed[[b_mean]]),
+      b_dev = unname(components$fixed[[b_dev]])
+    ),
+    residuals = c(
+      sd_mean = .extract_diagram_random_sd(components$random, random_mean),
+      sd_difference = .extract_diagram_random_sd(
+        components$random, random_difference
+      )
+    ),
+    terms = c(
+      b0 = b0, b_mean = b_mean, b_dev = b_dev,
+      random_mean = random_mean, random_difference = random_difference
+    )
+  )
+}
+
+.extract_dsm_diagram_values <- function(model, terms = NULL) {
+  components <- .diagram_glmmtmb_components(model, "DSM")
+  fixed_names <- names(components$fixed)
+  allowed <- c(
+    "a10", "a11", "a12", "a20", "a21", "a22",
+    "random_mean", "random_difference"
+  )
+  terms <- .diagram_term_map(terms, allowed, "DSM")
+  resolve_fixed <- function(parameter, predicate) {
+    .diagram_resolve_term(
+      fixed_names, terms[[parameter]], predicate, parameter, "fixed-effect"
+    )
+  }
+  a10 <- resolve_fixed("a10", function(term) term == "(Intercept)")
+  a11 <- resolve_fixed(
+    "a11", function(term) grepl("_dyad_mean_gmc$", term) && !grepl(":", term)
+  )
+  a12 <- resolve_fixed(
+    "a12", function(term) grepl("_within_dyad_diff$", term) && !grepl(":", term)
+  )
+  a20 <- resolve_fixed(
+    "a20", function(term) term == ".i_dsm_role_contrast"
+  )
+  a21 <- resolve_fixed(
+    "a21", function(term) grepl("_dyad_mean_gmc", term) &&
+      grepl("\\.i_dsm_role_contrast", term) && grepl(":", term)
+  )
+  a22 <- resolve_fixed(
+    "a22", function(term) grepl("_within_dyad_diff", term) &&
+      grepl("\\.i_dsm_role_contrast", term) && grepl(":", term)
+  )
+  random_mean <- .diagram_resolve_term(
+    components$random_terms, terms$random_mean,
+    function(term) term == "(Intercept)",
+    "random_mean", "random-effect"
+  )
+  random_difference <- .diagram_resolve_term(
+    components$random_terms, terms$random_difference,
+    function(term) term == ".i_dsm_role_contrast",
+    "random_difference", "random-effect"
+  )
+
+  resolved <- c(a10 = a10, a11 = a11, a12 = a12, a20 = a20, a21 = a21, a22 = a22)
+  list(
+    estimates = stats::setNames(
+      unname(components$fixed[resolved]), names(resolved)
+    ),
+    residuals = c(
+      sd_mean = .extract_diagram_random_sd(components$random, random_mean),
+      sd_difference = .extract_diagram_random_sd(
+        components$random, random_difference
+      ),
+      correlation = .extract_diagram_random_correlation(
+        components$random, random_mean, random_difference
+      )
+    ),
+    terms = c(
+      resolved, random_mean = random_mean,
+      random_difference = random_difference
+    )
+  )
+}
+
 draw_apim_diagram <- function(
     type = c("distinguishable", "exchangeable"),
     edge_labels = NULL,
     estimates = NULL,
-    residuals = NULL) {
+    residuals = NULL,
+    model = NULL,
+    terms = NULL) {
   type <- match.arg(type)
+
+  if (!is.null(model)) {
+    if (!is.null(estimates) || !is.null(residuals)) {
+      stop(
+        "Supply either `model` or manual `estimates`/`residuals`, not both.",
+        call. = FALSE
+      )
+    }
+    fitted_values <- .extract_apim_diagram_values(model, type, terms)
+    estimates <- fitted_values$estimates
+    residuals <- fitted_values$residuals
+  } else if (!is.null(terms)) {
+    stop("`terms` can only be used together with `model`.", call. = FALSE)
+  }
 
   actor_colour <- .interdep_diagram_colours$actor
   partner_colour <- .interdep_diagram_colours$partner
@@ -659,7 +1010,22 @@ draw_apim_member_diagram <- function(
   invisible(NULL)
 }
 
-draw_dsm_diagram <- function(estimates = NULL, residuals = NULL) {
+draw_dsm_diagram <- function(
+    estimates = NULL, residuals = NULL, model = NULL, terms = NULL) {
+  if (!is.null(model)) {
+    if (!is.null(estimates) || !is.null(residuals)) {
+      stop(
+        "Supply either `model` or manual `estimates`/`residuals`, not both.",
+        call. = FALSE
+      )
+    }
+    fitted_values <- .extract_dsm_diagram_values(model, terms)
+    estimates <- fitted_values$estimates
+    residuals <- fitted_values$residuals
+  } else if (!is.null(terms)) {
+    stop("`terms` can only be used together with `model`.", call. = FALSE)
+  }
+
   mean_colour <- .interdep_diagram_colours$mean
   difference_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
@@ -1084,8 +1450,25 @@ draw_dsm_member_diagram <- function() {
 draw_dim_diagram <- function(
     estimates = NULL,
     residuals = NULL,
-    effect_unit = c("dyad", "couple")) {
+    effect_unit = c("dyad", "couple"),
+    model = NULL,
+    terms = NULL) {
   effect_unit <- match.arg(effect_unit)
+
+  if (!is.null(model)) {
+    if (!is.null(estimates) || !is.null(residuals)) {
+      stop(
+        "Supply either `model` or manual `estimates`/`residuals`, not both.",
+        call. = FALSE
+      )
+    }
+    fitted_values <- .extract_dim_diagram_values(model, terms)
+    estimates <- fitted_values$estimates
+    residuals <- fitted_values$residuals
+  } else if (!is.null(terms)) {
+    stop("`terms` can only be used together with `model`.", call. = FALSE)
+  }
+
   mean_colour <- .interdep_diagram_colours$mean
   deviation_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"
@@ -1423,7 +1806,113 @@ draw_dim_member_diagram <- function() {
   invisible(NULL)
 }
 
-draw_mixed_apim_diagram <- function() {
+.extract_mixed_apim_diagram_values <- function(model, terms = NULL) {
+  components <- .diagram_glmmtmb_components(model, "mixed-composition APIM")
+  fixed_names <- names(components$fixed)
+  allowed <- c(
+    "intercept_fm_female", "intercept_fm_male",
+    "intercept_ff", "intercept_mm",
+    "random_fm_female", "random_fm_male",
+    "random_ff_mean", "random_ff_difference",
+    "random_mm_mean", "random_mm_difference"
+  )
+  terms <- .diagram_term_map(terms, allowed, "mixed-composition APIM")
+  resolve_exact <- function(
+      available, parameter, default, component = "fixed-effect") {
+    .diagram_resolve_term(
+      available, terms[[parameter]], function(term) term == default,
+      parameter, component
+    )
+  }
+
+  fixed_terms <- c(
+    intercept_fm_female = resolve_exact(
+      fixed_names, "intercept_fm_female", ".i_is_female_x_male_female"
+    ),
+    intercept_fm_male = resolve_exact(
+      fixed_names, "intercept_fm_male", ".i_is_female_x_male_male"
+    ),
+    intercept_ff = resolve_exact(
+      fixed_names, "intercept_ff", ".i_is_female_x_female"
+    ),
+    intercept_mm = resolve_exact(
+      fixed_names, "intercept_mm", ".i_is_male_x_male"
+    )
+  )
+  random_terms <- c(
+    random_fm_female = resolve_exact(
+      components$random_terms, "random_fm_female",
+      ".i_is_female_x_male_female", "random-effect"
+    ),
+    random_fm_male = resolve_exact(
+      components$random_terms, "random_fm_male",
+      ".i_is_female_x_male_male", "random-effect"
+    ),
+    random_ff_mean = resolve_exact(
+      components$random_terms, "random_ff_mean",
+      ".i_is_female_x_female", "random-effect"
+    ),
+    random_ff_difference = resolve_exact(
+      components$random_terms, "random_ff_difference",
+      ".i_diff_female_x_female_arbitrary", "random-effect"
+    ),
+    random_mm_mean = resolve_exact(
+      components$random_terms, "random_mm_mean",
+      ".i_is_male_x_male", "random-effect"
+    ),
+    random_mm_difference = resolve_exact(
+      components$random_terms, "random_mm_difference",
+      ".i_diff_male_x_male_arbitrary", "random-effect"
+    )
+  )
+
+  fm_residuals <- c(
+    sd_female = .extract_diagram_random_sd(
+      components$random, random_terms[["random_fm_female"]]
+    ),
+    sd_male = .extract_diagram_random_sd(
+      components$random, random_terms[["random_fm_male"]]
+    ),
+    correlation = .extract_diagram_random_correlation(
+      components$random,
+      random_terms[["random_fm_female"]],
+      random_terms[["random_fm_male"]]
+    )
+  )
+  ff_residuals <- .exchangeable_member_residuals(
+    .extract_diagram_random_sd(
+      components$random, random_terms[["random_ff_mean"]]
+    ),
+    .extract_diagram_random_sd(
+      components$random, random_terms[["random_ff_difference"]]
+    )
+  )
+  mm_residuals <- .exchangeable_member_residuals(
+    .extract_diagram_random_sd(
+      components$random, random_terms[["random_mm_mean"]]
+    ),
+    .extract_diagram_random_sd(
+      components$random, random_terms[["random_mm_difference"]]
+    )
+  )
+
+  list(
+    estimates = stats::setNames(
+      unname(components$fixed[fixed_terms]), names(fixed_terms)
+    ),
+    residuals = list(fm = fm_residuals, ff = ff_residuals, mm = mm_residuals),
+    terms = c(fixed_terms, random_terms)
+  )
+}
+
+draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
+  fitted_values <- NULL
+  if (!is.null(model)) {
+    fitted_values <- .extract_mixed_apim_diagram_values(model, terms)
+  } else if (!is.null(terms)) {
+    stop("`terms` can only be used together with `model`.", call. = FALSE)
+  }
+
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
   node_fill <- "#F8FAFC"
@@ -1548,43 +2037,78 @@ draw_mixed_apim_diagram <- function() {
     gp = grid::gpar(col = ink_colour, fontsize = 16, fontface = "bold")
   )
 
+  fitted_intercept <- function(symbol, name) {
+    if (is.null(fitted_values)) {
+      return(symbol)
+    }
+    .diagram_estimate_label(symbol, fitted_values$estimates[[name]])
+  }
+  fitted_sd <- function(symbol, block, name = "sd") {
+    if (is.null(fitted_values)) {
+      return(symbol)
+    }
+    .diagram_estimate_label(
+      expression(plain(SD)), fitted_values$residuals[[block]][[name]]
+    )
+  }
+  fitted_correlation <- function(symbol, block) {
+    if (is.null(fitted_values)) {
+      return(symbol)
+    }
+    .diagram_estimate_label(
+      expression(rho), fitted_values$residuals[[block]][["correlation"]]
+    )
+  }
+
   draw_panel(
     0.18, "Female-male", "Distinguishable",
     list(expression(Y[plain(F)]), expression(Y[plain(M)])),
     list(
-      expression(b[0 * "," * plain(FM) * "," * plain(F)]),
-      expression(b[0 * "," * plain(FM) * "," * plain(M)])
+      fitted_intercept(
+        expression(b[0 * "," * plain(FM) * "," * plain(F)]),
+        "intercept_fm_female"
+      ),
+      fitted_intercept(
+        expression(b[0 * "," * plain(FM) * "," * plain(M)]),
+        "intercept_fm_male"
+      )
     ),
     list(expression(epsilon[plain(F)]), expression(epsilon[plain(M)])),
     list(
-      expression(plain(SD) == sigma[plain(F)]),
-      expression(plain(SD) == sigma[plain(M)])
+      fitted_sd(expression(plain(SD) == sigma[plain(F)]), "fm", "sd_female"),
+      fitted_sd(expression(plain(SD) == sigma[plain(M)]), "fm", "sd_male")
     ),
-    expression(rho[plain(FM)]),
+    fitted_correlation(expression(rho[plain(FM)]), "fm"),
     "Unrestricted residual block"
   )
   draw_panel(
     0.50, "Female-female", "Exchangeable",
     list(expression(Y[1]), expression(Y[2])),
-    list(expression(b[0 * "," * plain(FF)]), expression(b[0 * "," * plain(FF)])),
+    list(
+      fitted_intercept(expression(b[0 * "," * plain(FF)]), "intercept_ff"),
+      fitted_intercept(expression(b[0 * "," * plain(FF)]), "intercept_ff")
+    ),
     list(expression(epsilon[1]), expression(epsilon[2])),
     list(
-      expression(plain(SD) == sigma[plain(FF)]),
-      expression(plain(SD) == sigma[plain(FF)])
+      fitted_sd(expression(plain(SD) == sigma[plain(FF)]), "ff"),
+      fitted_sd(expression(plain(SD) == sigma[plain(FF)]), "ff")
     ),
-    expression(rho[plain(FF)]),
+    fitted_correlation(expression(rho[plain(FF)]), "ff"),
     "Exchangeable residual block"
   )
   draw_panel(
     0.82, "Male-male", "Exchangeable",
     list(expression(Y[1]), expression(Y[2])),
-    list(expression(b[0 * "," * plain(MM)]), expression(b[0 * "," * plain(MM)])),
+    list(
+      fitted_intercept(expression(b[0 * "," * plain(MM)]), "intercept_mm"),
+      fitted_intercept(expression(b[0 * "," * plain(MM)]), "intercept_mm")
+    ),
     list(expression(epsilon[1]), expression(epsilon[2])),
     list(
-      expression(plain(SD) == sigma[plain(MM)]),
-      expression(plain(SD) == sigma[plain(MM)])
+      fitted_sd(expression(plain(SD) == sigma[plain(MM)]), "mm"),
+      fitted_sd(expression(plain(SD) == sigma[plain(MM)]), "mm")
     ),
-    expression(rho[plain(MM)]),
+    fitted_correlation(expression(rho[plain(MM)]), "mm"),
     "Exchangeable residual block"
   )
 
@@ -1598,6 +2122,119 @@ draw_mixed_apim_diagram <- function() {
   invisible(NULL)
 }
 
+.extract_cfm_diagram_values <- function(model, parameter_labels = NULL) {
+  if (!inherits(model, "lavaan")) {
+    stop("`model` for the CFM diagram must inherit from `lavaan`.",
+         call. = FALSE)
+  }
+  if (!requireNamespace("lavaan", quietly = TRUE)) {
+    stop("Package `lavaan` is required to extract fitted CFM values.",
+         call. = FALSE)
+  }
+  if (!isTRUE(lavaan::lavInspect(model, "converged"))) {
+    stop("The supplied CFM did not converge; a fitted diagram was not drawn.",
+         call. = FALSE)
+  }
+
+  estimates <- lavaan::parameterEstimates(model, standardized = TRUE)
+  allowed <- c("level", "residual_1", "residual_2")
+  labels <- .diagram_term_map(parameter_labels, allowed, "CFM")
+  available_labels <- estimates$label[nzchar(estimates$label)]
+
+  if (is.null(labels$residual_1) && is.null(labels$residual_2) &&
+      !all(c("c_female", "c_male") %in% available_labels)) {
+    covariance_labels <- unique(estimates$label[
+      nzchar(estimates$label) & estimates$op == "~~" &
+        estimates$lhs != estimates$rhs
+    ])
+    if (length(covariance_labels) == 2L) {
+      labels$residual_1 <- covariance_labels[[1]]
+      labels$residual_2 <- covariance_labels[[2]]
+    }
+  }
+
+  resolve_label <- function(parameter, default, predicate) {
+    supplied <- labels[[parameter]]
+    if (is.null(supplied) && default %in% available_labels) {
+      supplied <- default
+    }
+    .diagram_resolve_term(
+      available_labels, supplied,
+      function(label) {
+        rows <- estimates[estimates$label == label, , drop = FALSE]
+        nrow(rows) == 1L && predicate(rows)
+      },
+      parameter, "lavaan parameter-label"
+    )
+  }
+
+  level_label <- resolve_label(
+    "level", "b_level", function(row) row$op == "~"
+  )
+  residual_1_label <- resolve_label(
+    "residual_1", "c_female",
+    function(row) row$op == "~~" && row$lhs != row$rhs
+  )
+  residual_2_label <- resolve_label(
+    "residual_2", "c_male",
+    function(row) row$op == "~~" && row$lhs != row$rhs
+  )
+  if (identical(residual_1_label, residual_2_label)) {
+    stop("The two CFM residual-correlation labels must be different.",
+         call. = FALSE)
+  }
+
+  level_row <- estimates[estimates$label == level_label, , drop = FALSE]
+  residual_rows <- estimates[
+    match(c(residual_1_label, residual_2_label), estimates$label),
+    , drop = FALSE
+  ]
+  outcome_latent <- level_row$lhs[[1]]
+  variance_row <- estimates[
+    estimates$op == "~~" & estimates$lhs == outcome_latent &
+      estimates$rhs == outcome_latent,
+    , drop = FALSE
+  ]
+  if (nrow(variance_row) != 1L) {
+    stop(
+      "Could not identify one residual variance for the latent outcome `",
+      outcome_latent, "`.",
+      call. = FALSE
+    )
+  }
+
+  admissible <- isTRUE(suppressWarnings(
+    lavaan::lavInspect(model, "post.check")
+  ))
+  r_squared <- NA_real_
+  if (admissible) {
+    model_r_squared <- lavaan::lavInspect(model, "r2")
+    if (!outcome_latent %in% names(model_r_squared)) {
+      stop(
+        "Could not extract R-squared for the latent outcome `",
+        outcome_latent, "`.",
+        call. = FALSE
+      )
+    }
+    r_squared <- unname(model_r_squared[[outcome_latent]])
+  }
+
+  list(
+    b_level = unname(level_row$est[[1]]),
+    beta_level = unname(level_row$std.all[[1]]),
+    residual_correlations = unname(residual_rows$std.all),
+    r_squared = r_squared,
+    outcome_residual_variance = unname(variance_row$est[[1]]),
+    admissible = admissible,
+    labels = c(
+      level = level_label,
+      residual_1 = residual_1_label,
+      residual_2 = residual_2_label
+    ),
+    outcome_latent = outcome_latent
+  )
+}
+
 draw_cfm_diagram <- function(
   b_level = NULL,
   beta_level = NULL,
@@ -1608,8 +2245,36 @@ draw_cfm_diagram <- function(
   member_ids = c("1", "2"),
   member_names = c("Member 1", "Member 2"),
   predictor_name = "predictor",
-  outcome_name = "outcome"
+  outcome_name = "outcome",
+  model = NULL,
+  parameter_labels = NULL
 ) {
+  if (!is.null(model)) {
+    manual_values <- list(
+      b_level, beta_level, residual_correlations, r_squared,
+      outcome_residual_variance, admissible
+    )
+    if (any(!vapply(manual_values, is.null, logical(1)))) {
+      stop(
+        "Supply either `model` or manual fitted CFM quantities, not both.",
+        call. = FALSE
+      )
+    }
+    fitted_model_values <- .extract_cfm_diagram_values(
+      model, parameter_labels
+    )
+    b_level <- fitted_model_values$b_level
+    beta_level <- fitted_model_values$beta_level
+    residual_correlations <- fitted_model_values$residual_correlations
+    r_squared <- fitted_model_values$r_squared
+    outcome_residual_variance <-
+      fitted_model_values$outcome_residual_variance
+    admissible <- fitted_model_values$admissible
+  } else if (!is.null(parameter_labels)) {
+    stop("`parameter_labels` can only be used together with `model`.",
+         call. = FALSE)
+  }
+
   level_colour <- .interdep_diagram_colours$mean
   member_specific_colour <- .interdep_diagram_colours$within
   ink_colour <- "#263238"

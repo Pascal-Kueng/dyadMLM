@@ -291,12 +291,12 @@ which are easier to compare than scale-dependent covariances.
 
 ```{r fitted-cfm-diagram, echo=FALSE, fig.width=10, fig.height=5.8, out.width="100%", fig.cap=cfm_fitted_caption, fig.alt=cfm_fitted_alt}
 draw_cfm_diagram(
-  b_level = cfm_b$est,
-  beta_level = cfm_b$std.all,
-  residual_correlations = cfm_residual_correlations,
-  r_squared = cfm_r_squared,
-  outcome_residual_variance = outcome_variance$est,
-  admissible = cfm_admissible,
+  model = cfm_fit,
+  parameter_labels = c(
+    level = "b_level",
+    residual_1 = "c_female",
+    residual_2 = "c_male"
+  ),
   member_ids = c("F", "M"),
   member_names = c("Female", "Male"),
   predictor_name = "communication",

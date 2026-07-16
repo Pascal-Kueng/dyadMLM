@@ -169,24 +169,9 @@ The same mean-and-deviation diagram can now be labelled with the estimated
 fixed effects and residual-component standard deviations:
 
 ```{r prepare-fitted-dim-diagram, include=FALSE, eval=has_glmmTMB}
-dim_fixed_effects <- glmmTMB::fixef(dim_1)$cond
-dim_random_components <- glmmTMB::VarCorr(dim_1)$cond
-
-dim_diagram_estimates <- c(
-  b0 = dim_fixed_effects[["(Intercept)"]],
-  b_mean = dim_fixed_effects[[".i_communication_dyad_mean_gmc"]],
-  b_dev = dim_fixed_effects[[".i_communication_within_dyad_dev"]]
-)
-dim_diagram_residuals <- c(
-  sd_mean = .extract_diagram_random_sd(
-    dim_random_components,
-    "(Intercept)"
-  ),
-  sd_difference = .extract_diagram_random_sd(
-    dim_random_components,
-    ".i_diff_assumed_exchangeable_arbitrary"
-  )
-)
+dim_diagram_values <- .extract_dim_diagram_values(dim_1)
+dim_diagram_estimates <- dim_diagram_values$estimates
+dim_diagram_residuals <- dim_diagram_values$residuals
 
 dim_fitted_alt <- sprintf(
   paste(
@@ -204,8 +189,7 @@ dim_fitted_alt <- sprintf(
 
 ```{r fitted-dim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Estimated fixed effects and residual-component standard deviations from the cross-sectional Gaussian DIM in its mean-and-deviation representation. The intercept belongs to the outcome-mean equation.", fig.alt=dim_fitted_alt}
 draw_dim_diagram(
-  estimates = dim_diagram_estimates,
-  residuals = dim_diagram_residuals,
+  model = dim_1,
   effect_unit = "couple"
 )
 ```
@@ -356,8 +340,16 @@ dim_grid_slopes <- c(
   within = NA_real_
 )
 
-if (has_glmmTMB) {
-  dim_grid_slopes[] <- unname(c(b_actor, b_partner, b_mean, b_dev))
+if (has_glmmTMB && exists("apim_1") && exists("dim_1")) {
+  apim_grid_coef <- glmmTMB::fixef(apim_1)$cond
+  dim_grid_coef <- glmmTMB::fixef(dim_1)$cond
+
+  dim_grid_slopes[] <- unname(c(
+    apim_grid_coef[[".i_communication_actor"]],
+    apim_grid_coef[[".i_communication_partner"]],
+    dim_grid_coef[[".i_communication_dyad_mean_gmc"]],
+    dim_grid_coef[[".i_communication_within_dyad_dev"]]
+  ))
 }
 
 dim_grid_js_number <- function(name) {

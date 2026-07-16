@@ -19,6 +19,7 @@ RoxygenNote: 8.0.0
 Suggests: 
     glmmTMB,
     knitr,
+    lavaan,
     marginaleffects,
     MASS,
     rmarkdown,
