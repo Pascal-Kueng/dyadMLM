@@ -67,12 +67,13 @@ data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds
 
 pilot <- readRDS(data_file) |>
   select(
-    coupleID, userID, ss_pa, ss_pa_min_solo, ss_pa_min_collab,
+    coupleID, userID, gender, ss_pa, ss_pa_min_solo, ss_pa_min_collab,
     ss_emo_pleasure, sc_actionplan
   ) |>
   transmute(
     couple_id = coupleID,
     person_id = userID,
+    role = factor(gender, levels = c(1, 2), labels = c("female", "male")),
     provided_emotional_support = ss_emo_pleasure,
     collaborative_planning = sc_actionplan,
     mvpa_solo = if_else(ss_pa == 0, 0, ss_pa_min_solo),
@@ -245,9 +246,9 @@ obtain a "cross-sectional" dataset.
 library(dplyr)
 
 pilot_aggregated <- pilot |>
-  group_by(couple_id, person_id) |>
+  group_by(couple_id, person_id, role) |>
   summarise(
-    across(everything(), ~ mean(.x, na.rm = TRUE)),
+    across(where(is.numeric), ~ mean(.x, na.rm = TRUE)),
     .groups = "drop"
   )
 ```
@@ -377,7 +378,7 @@ glmmTMB(
 
 ## Can we just estimate separate regression equations for each partner?
 
-Yes! But then we: 
+**Yes! But then we: **
 
 :::{.incremental}
 - can't test whether the two actor effects or partner effects are equal
@@ -398,10 +399,10 @@ within-dyad covariance is accounted for by the predictors.
   
 :::
 
-<!-- ca. 2 minutes -->
+<!-- ca. 3 minutes -->
 
 :::{.notes}
-Thus, we need to properly account for non-explained non-independence! 
+Thus, we should model non-explained non-independence! 
 E.g., correlated residuals.
 :::
 
@@ -431,10 +432,23 @@ And correlated residuals?
 
 -->
 
-## Interpreting the fit of the actor partner interdependence model
+## Fitting the APIM
 
-<!-- insert the fit model, discuss that in this model we have correlated residuals (and what that means)
-And then interpret the actor path values and residual values and correlation -->
+```{r}
+#| label: fitted-distinguishable-apim
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted distinguishable APIM for provided support and total MVPA."
+
+fit_and_draw_distinguishable_apim(
+  pilot_aggregated,
+  predictor = provided_emotional_support,
+  outcome = mvpa_total
+)
+```
 
 
 <!------------- BELOW HERE IS JUST STRUCTURE  -------------------->
@@ -477,6 +491,24 @@ draw_apim_diagram("exchangeable", show_residuals = FALSE)
 draw_apim_diagram("exchangeable")
 ```
 
+## Interpreting the fit of the exchangeable APIM
+
+```{r}
+#| label: fitted-exchangeable-apim
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted exchangeable APIM for provided support and total MVPA."
+
+fit_and_draw_exchangeable_apim(
+  pilot_aggregated,
+  predictor = provided_emotional_support,
+  outcome = mvpa_total
+)
+```
+
 ## The DIM: another parameterization of an exchangeable APIM
 
 ```{r}
@@ -505,6 +537,24 @@ draw_dim_diagram(show_residuals = FALSE)
 draw_dim_diagram()
 ```
 
+## Interpreting the fit of the DIM
+
+```{r}
+#| label: fitted-dim
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted DIM for provided support and total MVPA."
+
+fit_and_draw_dim(
+  pilot_aggregated,
+  predictor = provided_emotional_support,
+  outcome = mvpa_total
+)
+```
+
 ## The DSM: a mean-and-difference parameterization of the distinguishable APIM
 
 ```{r}
@@ -531,6 +581,24 @@ draw_dsm_diagram(show_residuals = FALSE)
 #| fig-alt: "Conceptual DSM linking predictor mean and difference to outcome mean and difference."
 
 draw_dsm_diagram()
+```
+
+## Interpreting the fit of the DSM
+
+```{r}
+#| label: fitted-dsm
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted DSM for provided support and total MVPA."
+
+fit_and_draw_dsm(
+  pilot_aggregated,
+  predictor = provided_emotional_support,
+  outcome = mvpa_total
+)
 ```
 
 
@@ -605,6 +673,8 @@ draw_cfm_diagram()
 ```
 
 
+
+<!-- ILD-part: see dev note on ar1 processes -->
 
 
 ## References
