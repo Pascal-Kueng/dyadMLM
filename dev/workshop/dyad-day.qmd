@@ -31,6 +31,24 @@ editor: source
 library(dplyr)
 library(ggplot2)
 
+diagram_helper_candidates <- c(
+  "diagram-helpers.Rinc",
+  file.path("vignettes", "diagram-helpers.Rinc"),
+  file.path("..", "..", "vignettes", "diagram-helpers.Rinc")
+)
+diagram_helper <- diagram_helper_candidates[
+  file.exists(diagram_helper_candidates)
+][1]
+
+if (is.na(diagram_helper)) {
+  stop("Could not find vignettes/diagram-helpers.Rinc.")
+}
+
+sys.source(
+  normalizePath(diagram_helper),
+  envir = knitr::knit_global()
+)
+
 data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds"
 
 pilot <- readRDS(data_file) |>
@@ -132,11 +150,15 @@ distribution_plot <- function(data, variables, bin_widths) {
 > “Much of what we think, do, and feel is determined not by who we are but by
 > whom we are with.” [@kennyPartnerEffectsRelationship1999, p. 446]
 
-- A person's response may reflect both **their own characteristics** and **their
-partner's characteristics**.
-- Partner effects reveal **relational processes**: Does something
-about *you* predict something about *me*?
-- 
+- **Partners influence each other:** An outcome may depend on both *my
+characteristics* and *my partner's characteristics*.
+- **Some experiences belong to the couple:** Shared contexts and relationship
+processes can describe *us*, not either partner alone.
+- **The configuration matters:** Partners' similarity, mismatch, or
+complementarity may predict outcomes beyond either individual score.
+
+[@kennyPartnerEffectsRelationship1999;
+@iidaModelsInterdependentIndividuals2018]{.subtle}
 
 ## Introducing today's dyadic dataset!
 
@@ -195,8 +217,25 @@ pilot_aggregated <- pilot |>
 
 The variables now represent person-level daily averages across the study:
 
-- `provided_social_support`: average daily support provided
+- `provided_emotional_support`: average daily support provided
 - `mvpa_total`: average daily total MVPA (minutes)
+
+## Why separate regressions are not enough
+
+- **Omitted-variable bias:** Own and partner predictors are often correlated;
+leaving either out can bias the other effect.
+- **No direct comparisons:** Separate equations cannot test whether actor and
+partner effects differ across partners—or from each other.
+- **Less power:** Equal paths cannot be pooled into a common, more precise
+estimate.
+- **Residual interdependence is lost:** The remaining association between
+partners' outcomes is not modeled.
+- **Other dyadic processes remain hidden:** Shared couple levels and
+within-couple differences require a CFM or DSM.
+
+[@kennyPartnerEffectsRelationship1999;
+@iidaModelsInterdependentIndividuals2018;
+@laurenceauIntroductionIntensiveLongitudinal2026]{.subtle}
 
 ## Pilot data: APIM variables
 
@@ -222,7 +261,7 @@ distribution_plot(
 
 ### Dyadic predictor: collaborative planning
 
-> **Rough english translations of the original German item**<br>
+> **Rough english translation of the original German item**<br>
 > “We have already planned precisely for tomorrow when, where, and how we will
 be physically active together.”
 [Adapted from @scholzBeyondBehaviouralIntentions2008]{.subtle}
@@ -255,5 +294,3 @@ distribution_plot(
 ```
 
 ## References
-
-
