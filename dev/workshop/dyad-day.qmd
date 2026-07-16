@@ -9,6 +9,8 @@ csl: apa.csl
 resources:
   - uzh-logo.svg
   - charite-logo.svg
+  - js/residual-concepts.js
+  - js/dim-grid.js
 format:
   revealjs:
     css: workshop.css
@@ -60,6 +62,17 @@ early_models_file <- if (file.exists(file.path("R", "fit-early-models.R"))) {
 
 sys.source(
   normalizePath(early_models_file),
+  envir = knitr::knit_global()
+)
+
+dim_grid_file <- if (file.exists(file.path("R", "dim-grid.R"))) {
+  file.path("R", "dim-grid.R")
+} else {
+  file.path("dev", "workshop", "R", "dim-grid.R")
+}
+
+sys.source(
+  normalizePath(dim_grid_file),
   envir = knitr::knit_global()
 )
 
@@ -406,7 +419,78 @@ Thus, we should model non-explained non-independence!
 E.g., correlated residuals.
 :::
 
-## The distinguishable APIM
+## What remains after prediction?
+
+```{r}
+#| label: residual-variance-and-correlation
+#| echo: false
+#| results: asis
+#| fig-width: 12
+#| fig-height: 5.6
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Schematic residual plot showing a fixed prediction, smaller residual variance for female partners, larger residual variance for male partners, and a positive association between partners' residuals."
+
+residual_helper_candidates <- c(
+  file.path("R", "draw-residual-concepts.R"),
+  file.path("dev", "workshop", "R", "draw-residual-concepts.R")
+)
+residual_helper <- residual_helper_candidates[
+  file.exists(residual_helper_candidates)
+][1]
+
+if (is.na(residual_helper)) {
+  stop("Could not find dev/workshop/R/draw-residual-concepts.R.")
+}
+
+sys.source(
+  normalizePath(residual_helper),
+  envir = knitr::knit_global()
+)
+
+if (knitr::is_html_output()) {
+  residual_concepts_widget()
+} else {
+  print(draw_residual_concepts())
+}
+```
+
+:::{.notes}
+
+Start with the left-hand side:
+
+- Everyone has the same predicted value in this simplified example.
+- The x-axis identifies illustrative dyads in an arbitrary order; it is not
+  time and has no substantive ordering.
+- A residual is the observed value minus that predicted value. The vertical
+  lines make the residuals visible.
+- Move the female variance slider: only the female residual spread changes.
+- Move the male variance slider: only the male residual spread changes.
+- Reset to restore the intentionally unequal residual variances.
+
+Then move to the right-hand side:
+
+- Every numbered point is the same dyad as on the left, combining its two
+  partners' residuals.
+- Move either variance slider. The corresponding raw residuals and paired
+  points move, but the displayed correlation stays exactly the same.
+- A raw-score regression line would rotate because its slope also depends on
+  the ratio of the two residual standard deviations. The small scale-free guide
+  therefore represents correlation without being mistaken for that slope.
+- Move the correlation toward zero, then negative, and finally positive.
+- With a positive correlation, partners who are above their predictions tend
+  to be above them together, and partners who are below tend to be below
+  together.
+- Residual correlation describes interdependence that remains after accounting
+  for the predictors. It is separate from the size of either residual variance.
+- Move the correlation while watching both sides: the residuals change, but
+  both selected residual variances stay exactly the same.
+
+:::
+
+<!-- ca. 3 Minutes -->
+
+## Residual interdependence in the distinguishable APIM
 
 ```{r}
 #| label: conceptual-distinguishable-apim
@@ -421,16 +505,17 @@ draw_apim_diagram("distinguishable")
 ```
 
 :::{.notes}
-Explain correlated residuals and explain residual variances and how they have 
-a variance that can be different, and why. 
+
+Map the preceding visual onto the APIM notation:
+
+- Each outcome has a residual, epsilon.
+- The residual standard deviations, sigma, may differ between distinguishable
+  partners. Their squares are the residual variances from the previous slide.
+- The curved double-headed arrow is the residual correlation, rho(FM).
+
 :::
 
-<!-- ca. 2 Minutes 
-
-Should we have a slide that explains residual covariances visually?
-And correlated residuals?
-
--->
+<!-- ca. 1 Minute -->
 
 ## Fitting the APIM
 
@@ -446,12 +531,20 @@ And correlated residuals?
 fit_and_draw_distinguishable_apim(
   pilot_aggregated,
   predictor = provided_emotional_support,
-  outcome = mvpa_total
+  outcome = mvpa_total,
+  labels = c(predictor = "Provided support", outcome = "Total MVPA")
 )
 ```
 
+<!-- 
 
-<!------------- BELOW HERE IS JUST STRUCTURE  -------------------->
+@codex add a talking script with a clear interpretation of each parameter. What does the 
+SD actually mean, what does the correlation imply... Always in relateion to the
+values. E.g., each 1 unit increase in...
+
+-->
+
+<!-- ca. 2 Minutes -->
 
 ## The exchangeable APIM
 
@@ -462,6 +555,8 @@ Sometimes:
 - we want to test whether partners are meaningfully distinguishable
 
 $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
+
+<!-- ca. 1 Minutes -->
 
 ## The exchangeable APIM
 
@@ -477,6 +572,9 @@ $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
 draw_apim_diagram("exchangeable", show_residuals = FALSE)
 ```
 
+<!-- ca. 1 Minute -->
+
+
 ## The exchangeable APIM
 
 ```{r}
@@ -491,6 +589,12 @@ draw_apim_diagram("exchangeable", show_residuals = FALSE)
 draw_apim_diagram("exchangeable")
 ```
 
+<!-- @codex, would you recommend an additinal slide or info here about residuals and constraints? Or address all talking points while the
+diagram is on stage? If so, add brief talking points for that. -->
+
+<!-- ca. 3 Minutes -->
+
+
 ## Interpreting the fit of the exchangeable APIM
 
 ```{r}
@@ -502,14 +606,49 @@ draw_apim_diagram("exchangeable")
 #| fig-align: center
 #| fig-alt: "Fitted exchangeable APIM for provided support and total MVPA."
 
-fit_and_draw_exchangeable_apim(
+workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
   pilot_aggregated,
   predictor = provided_emotional_support,
-  outcome = mvpa_total
+  outcome = mvpa_total,
+  labels = c(predictor = "Provided support", outcome = "Total MVPA")
 )
 ```
 
-## The DIM: another parameterization of an exchangeable APIM
+<!-- ca. 3 Minutes -->
+
+
+## The DIM
+
+- No more actor and partner effects
+- We decompose (center) predictors into between-couple and within-couple components
+  - Between-couple variable: $\bar{X} - \mu_{X}$
+  - Within-couple variable: $Xi - \bar{X}$
+  
+<!-- insert a table?  --> 
+In other words, these predictors express: 
+
+- A couples' average level compared to the average of all couples
+- A partners' level compared to the average of their couple
+
+<!-- ca. 2 Minutes -->
+
+## The DIM
+
+```{r}
+#| label: interactive-apim-dim-grid
+#| echo: false
+#| results: asis
+
+dim_reparameterization_grid(
+  workshop_exchangeable_apim,
+  predictor_label = "Provided support"
+)
+```
+
+<!-- ca. 4 Minutes -->
+
+
+## The DIM
 
 ```{r}
 #| label: conceptual-dim-paths-only
@@ -523,7 +662,9 @@ fit_and_draw_exchangeable_apim(
 draw_dim_diagram(show_residuals = FALSE)
 ```
 
-## The DIM: another parameterization of an exchangeable APIM
+<!-- ca. 3 Minutes -->
+
+## The DIM
 
 ```{r}
 #| label: conceptual-dim
@@ -536,6 +677,11 @@ draw_dim_diagram(show_residuals = FALSE)
 
 draw_dim_diagram()
 ```
+
+<!-- ca. 2 Minutes 
+no details on why no correlations, just saying that info of both partners are in both resids
+-->
+
 
 ## Interpreting the fit of the DIM
 
@@ -551,9 +697,14 @@ draw_dim_diagram()
 fit_and_draw_dim(
   pilot_aggregated,
   predictor = provided_emotional_support,
-  outcome = mvpa_total
+  outcome = mvpa_total,
+  labels = c(predictor = "Provided support", outcome = "Total MVPA")
 )
 ```
+
+<!-- ca. 3 Minutes -->
+
+
 
 ## The DSM: a mean-and-difference parameterization of the distinguishable APIM
 
@@ -597,7 +748,8 @@ draw_dsm_diagram()
 fit_and_draw_dsm(
   pilot_aggregated,
   predictor = provided_emotional_support,
-  outcome = mvpa_total
+  outcome = mvpa_total,
+  labels = c(predictor = "Provided support", outcome = "Total MVPA")
 )
 ```
 

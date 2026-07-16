@@ -190,7 +190,8 @@ dim_fitted_alt <- sprintf(
 ```{r fitted-dim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Estimated fixed effects and residual-component standard deviations from the cross-sectional Gaussian DIM in its mean-and-deviation representation. The intercept belongs to the outcome-mean equation.", fig.alt=dim_fitted_alt}
 draw_dim_diagram(
   model = dim_1,
-  effect_unit = "couple"
+  effect_unit = "couple",
+  labels = c(predictor = "Communication", outcome = "Satisfaction")
 )
 ```
 

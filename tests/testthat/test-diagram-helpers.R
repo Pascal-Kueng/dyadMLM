@@ -71,8 +71,18 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
     distinguishable_values$residuals,
     c("sd_female", "sd_male", "correlation")
   )
+  expect_named(
+    distinguishable_values$p_values,
+    c(
+      "intercept_female", "intercept_male",
+      "actor_female", "actor_male",
+      "partner_female", "partner_male"
+    )
+  )
   expect_no_error(draw_to_temporary_pdf(draw_apim_diagram(
-    "distinguishable", model = distinguishable_fit
+    "distinguishable",
+    model = distinguishable_fit,
+    labels = c(predictor = "Communication", outcome = "Satisfaction")
   )))
 
   exchangeable_data <- prepare_interdep_data(
@@ -103,6 +113,10 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
     c("intercept", "actor", "partner")
   )
   expect_named(exchangeable_values$residuals, c("sd", "correlation"))
+  expect_named(
+    exchangeable_values$p_values,
+    c("intercept", "actor", "partner")
+  )
   expect_no_error(draw_to_temporary_pdf(draw_apim_diagram(
     "exchangeable", model = exchangeable_fit
   )))
@@ -139,8 +153,12 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
   dim_values <- .extract_dim_diagram_values(dim_fit)
 
   expect_named(dim_values$estimates, c("b0", "b_mean", "b_dev"))
+  expect_named(dim_values$p_values, c("b0", "b_mean", "b_dev"))
   expect_named(dim_values$residuals, c("sd_mean", "sd_difference"))
-  expect_no_error(draw_to_temporary_pdf(draw_dim_diagram(model = dim_fit)))
+  expect_no_error(draw_to_temporary_pdf(draw_dim_diagram(
+    model = dim_fit,
+    labels = c(predictor = "Communication", outcome = "Satisfaction")
+  )))
 
   dsm_data <- prepare_interdep_data(
     example_dyadic_crosssectional,
@@ -173,7 +191,14 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
     dsm_values$residuals,
     c("sd_mean", "sd_difference", "correlation")
   )
-  expect_no_error(draw_to_temporary_pdf(draw_dsm_diagram(model = dsm_fit)))
+  expect_named(
+    dsm_values$p_values,
+    c("a10", "a11", "a12", "a20", "a21", "a22")
+  )
+  expect_no_error(draw_to_temporary_pdf(draw_dsm_diagram(
+    model = dsm_fit,
+    labels = c(predictor = "Communication", outcome = "Satisfaction")
+  )))
 })
 
 test_that("mixed APIM diagrams extract every composition block", {
@@ -261,10 +286,12 @@ test_that("CFM diagrams extract fitted lavaan objects", {
   expect_named(
     values,
     c(
-      "b_level", "beta_level", "residual_correlations", "r_squared",
+      "b_level", "beta_level", "residual_correlations", "p_values",
+      "r_squared",
       "outcome_residual_variance", "admissible", "labels", "outcome_latent"
     )
   )
+  expect_named(values$p_values, c("level", "residual_1", "residual_2"))
   expect_length(values$residual_correlations, 2)
   expect_no_error(draw_to_temporary_pdf(draw_cfm_diagram(
     model = cfm_fit,
@@ -323,4 +350,17 @@ test_that("conceptual diagrams can omit residual components", {
     "`show_residuals` must be TRUE or FALSE.",
     fixed = TRUE
   )
+  expect_error(
+    draw_apim_diagram(labels = c(predictor = "Communication")),
+    "`labels` must contain non-empty character values named `predictor` and `outcome`.",
+    fixed = TRUE
+  )
+})
+
+test_that("diagram significance stars use conventional cutoffs", {
+  expect_identical(.diagram_significance_stars(0.0009), "***")
+  expect_identical(.diagram_significance_stars(0.009), "**")
+  expect_identical(.diagram_significance_stars(0.049), "*")
+  expect_identical(.diagram_significance_stars(0.05), "")
+  expect_identical(.diagram_significance_stars(NA_real_), "")
 })

@@ -259,6 +259,161 @@
   line-height: 1.28;
 }
 
+/* Interactive APIM-to-DIM reparameterization ------------------------- */
+.reveal .workshop-dim-grid {
+  --wdg-actor: #1769aa;
+  --wdg-partner: #7b3fa1;
+  --wdg-mean: #c43c35;
+  --wdg-within: #8a6500;
+  display: grid;
+  grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.55fr);
+  gap: 0.65em;
+  width: 100%;
+  margin-top: -0.25em;
+  padding: 0.5em;
+  border: 1px solid var(--uzh-rule);
+  border-radius: 8px;
+  background: var(--uzh-surface);
+  color: var(--uzh-ink);
+  font-size: 0.54em;
+  line-height: 1.25;
+  box-sizing: border-box;
+}
+
+.reveal .workshop-dim-grid * {
+  box-sizing: border-box;
+}
+
+.reveal .wdg-controls,
+.reveal .wdg-visual,
+.reveal .wdg-control-group {
+  display: grid;
+  align-content: start;
+  gap: 0.48em;
+  min-width: 0;
+}
+
+.reveal .wdg-toolbar,
+.reveal .wdg-control > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+}
+
+.reveal .wdg-toolbar {
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--uzh-rule);
+}
+
+.reveal .wdg-toolbar button,
+.reveal .wdg-demos button {
+  margin: 0;
+  padding: 0.28em 0.5em;
+  border: 1px solid var(--uzh-rule);
+  border-radius: 5px;
+  background: white;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reveal .wdg-group-title {
+  padding-bottom: 0.2em;
+  border-bottom: 2px solid currentColor;
+  font-weight: 700;
+}
+
+.reveal .wdg-apim-title { color: var(--wdg-actor); }
+.reveal .wdg-dim-title { color: var(--wdg-mean); }
+.reveal .wdg-control { display: grid; gap: 0.12em; }
+.reveal .wdg-control output { min-width: 4.6ch; text-align: right; font-weight: 700; }
+.reveal .wdg-control input { width: 100%; margin: 0; }
+.reveal .wdg-actor input { accent-color: var(--wdg-actor); }
+.reveal .wdg-partner input { accent-color: var(--wdg-partner); }
+.reveal .wdg-mean input { accent-color: var(--wdg-mean); }
+.reveal .wdg-within input { accent-color: var(--wdg-within); }
+
+.reveal .wdg-relations {
+  display: grid;
+  gap: 0.18em;
+  padding-top: 0.35em;
+  border-top: 1px solid var(--uzh-rule);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.reveal .wdg-equations {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.18em 0.7em;
+  padding: 0.38em 0.55em;
+  border: 1px solid var(--uzh-rule);
+  border-radius: 6px;
+  background: white;
+  font-family: Georgia, "Times New Roman", serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.reveal .wdg-equations b {
+  display: inline-block;
+  width: 3.1em;
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.86em;
+}
+
+.reveal .wdg-slope-summary {
+  grid-column: 1 / -1;
+  color: var(--uzh-muted);
+  font-size: 0.9em;
+}
+
+.reveal .wdg-stage {
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) minmax(180px, 0.72fr);
+  gap: 0.65em;
+  align-items: center;
+}
+
+.reveal .wdg-plot {
+  display: block;
+  width: min(100%, 330px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border: 1px solid var(--uzh-rule);
+  border-radius: 6px;
+  background: white;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.reveal .wdg-demos {
+  display: grid;
+  gap: 0.38em;
+}
+
+.reveal .wdg-demos button {
+  display: grid;
+  gap: 0.08em;
+  text-align: left;
+}
+
+.reveal .wdg-demos button span,
+.reveal .wdg-demos p {
+  color: var(--uzh-muted);
+  font-size: 0.9em;
+}
+
+.reveal .wdg-demos p { margin: 0.25em 0 0; }
+.reveal .wdg-halo { fill: var(--wdg-actor); fill-opacity: 0.14; }
+.reveal .wdg-point { fill: var(--wdg-actor); stroke: white; stroke-width: 2; }
+
+@media screen and (max-width: 900px) {
+  .reveal .workshop-dim-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .reveal .progress {
   color: var(--uzh-blue);
 }
@@ -269,6 +424,227 @@
   background: transparent;
   color: var(--uzh-muted);
   font-size: 14px;
+}
+
+/* Interactive residual-variance and residual-correlation explanation. */
+.reveal .residual-concepts-widget {
+  width: 100%;
+  margin: -0.35em auto 0;
+  color: var(--uzh-ink);
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+.reveal .residual-concepts-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: stretch;
+  margin: 0 2.8% 7px;
+  font-size: 15px;
+  text-align: left;
+}
+
+.reveal .residual-control {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 10px 6px;
+  border: 1px solid var(--uzh-rule);
+  border-radius: 8px;
+  background: var(--uzh-surface);
+  color: var(--uzh-ink);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.reveal .residual-control-input {
+  display: grid;
+  grid-template-columns: 1fr 34px;
+  gap: 8px;
+  align-items: center;
+}
+
+.reveal .residual-control input[type="range"] {
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.reveal .residual-control-female input[type="range"] {
+  accent-color: #c43c35;
+}
+
+.reveal .residual-control-male input[type="range"] {
+  accent-color: #1769aa;
+}
+
+.reveal .residual-control-correlation input[type="range"] {
+  accent-color: var(--uzh-blue);
+}
+
+.reveal .residual-control output {
+  color: var(--uzh-blue-dark);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+}
+
+.reveal .rc-math {
+  white-space: nowrap;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+.reveal .residual-reset {
+  align-self: stretch;
+  min-width: 68px;
+  padding: 0 12px;
+  border: 1px solid var(--uzh-blue);
+  border-radius: 8px;
+  background: white;
+  color: var(--uzh-blue);
+  font: 650 15px/1 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.reveal .residual-reset:hover,
+.reveal .residual-reset:focus-visible {
+  background: var(--uzh-blue-light);
+}
+
+.reveal .residual-control input:focus-visible,
+.reveal .residual-reset:focus-visible {
+  outline: 3px solid rgba(0, 40, 165, 0.25);
+  outline-offset: 2px;
+}
+
+.reveal .residual-concepts-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  margin: 0;
+  overflow: visible;
+}
+
+.reveal .residual-concepts-svg text {
+  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+.reveal .residual-concepts-svg text[text-anchor="end"] {
+  text-anchor: end !important;
+}
+
+.reveal .residual-concepts-svg .rc-title {
+  fill: #263238;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.reveal .residual-concepts-svg .rc-subtitle {
+  fill: #64748b;
+  font-size: 15px;
+}
+
+.reveal .residual-concepts-svg .rc-panel-background {
+  fill: #f8fafc;
+  stroke: #e2e8f0;
+  stroke-width: 1;
+}
+
+.reveal .residual-concepts-svg .rc-facet-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.reveal .residual-concepts-svg .rc-prediction-line {
+  stroke: #64748b;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.reveal .residual-concepts-svg .rc-prediction-label,
+.reveal .residual-concepts-svg .rc-tick-label {
+  fill: #64748b;
+  font-size: 13px;
+}
+
+.reveal .residual-concepts-svg .rc-residual-line {
+  stroke-width: 4;
+  stroke-linecap: round;
+  opacity: 0.72;
+  transition: y2 90ms linear;
+}
+
+.reveal .residual-concepts-svg .rc-observed-point {
+  stroke: white;
+  stroke-width: 1.3;
+  transition: cy 90ms linear;
+}
+
+.reveal .residual-concepts-svg .rc-axis-title {
+  fill: #263238;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.reveal .residual-concepts-svg .rc-zero-line {
+  stroke: #cbd5e1;
+  stroke-width: 1.2;
+}
+
+.reveal .residual-concepts-svg .rc-quadrant-label {
+  fill: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reveal .residual-concepts-svg .rc-correlation-line {
+  stroke: #64748b;
+  stroke-width: 2;
+  stroke-dasharray: 7 5;
+}
+
+.reveal .residual-concepts-svg .rc-correlation-guide-background {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: #cbd5e1;
+  stroke-width: 1;
+}
+
+.reveal .residual-concepts-svg .rc-correlation-guide-axis {
+  stroke: #cbd5e1;
+  stroke-width: 1;
+}
+
+.reveal .residual-concepts-svg .rc-correlation-guide-label {
+  fill: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reveal .residual-concepts-svg .rc-paired-point circle {
+  fill: #d9eaf7;
+  stroke: #263238;
+  stroke-width: 1.4;
+}
+
+.reveal .residual-concepts-svg .rc-point-number-box div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #263238;
+  font: 700 11px/1 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+}
+
+.reveal .residual-concepts-caption {
+  margin: -2px 0 0;
+  color: var(--uzh-muted);
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: center;
 }
 
 @media print {

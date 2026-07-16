@@ -144,7 +144,8 @@ apim_distinguishable_fitted_alt <- sprintf(
 ```{r fitted-distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional distinguishable APIM for the example data. Fixed effects, residual standard deviations, and the residual correlation are extracted from the fitted model.", fig.alt=apim_distinguishable_fitted_alt}
 draw_apim_diagram(
   "distinguishable",
-  model = apim_distinguishable_model
+  model = apim_distinguishable_model,
+  labels = c(predictor = "Communication", outcome = "Satisfaction")
 )
 ```
 
@@ -373,7 +374,8 @@ apim_exchangeable_fitted_alt <- sprintf(
 ```{r fitted-exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
 draw_apim_diagram(
   "exchangeable",
-  model = apim_exchangeable_model
+  model = apim_exchangeable_model,
+  labels = c(predictor = "Communication", outcome = "Satisfaction")
 )
 ```
 
