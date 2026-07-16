@@ -13,7 +13,8 @@
   --interdep-member-deviation-effect: #8a6500;
   /* Supporting residual colors deliberately avoid the effect palette. */
   --interdep-residual-female: #004d40;
-  --interdep-residual-male: #007a8c;
+  --interdep-residual-male: #00a6b2;
+  --interdep-residual-male-text: #007486;
   --interdep-residual-correlation: #546e7a;
 }
 
@@ -507,7 +508,7 @@
 }
 
 .reveal .residual-control-male input[type="range"] {
-  accent-color: var(--interdep-residual-male);
+  accent-color: var(--interdep-residual-male-text);
 }
 
 .reveal .residual-control-correlation input[type="range"] {

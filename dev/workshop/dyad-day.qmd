@@ -459,7 +459,7 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 <!-- ca. 2 Minutes -->
 
 
-## The distinguishable APIM - Conceptually
+## The distinguishable APIM
 
 ```{r}
 #| label: conceptual-distinguishable-apim-paths-only
@@ -473,23 +473,47 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 draw_apim_diagram("distinguishable", show_residuals = FALSE)
 ```
 
-::: {.notes}
-
-Explain actor and partner effects only and briefly. Not talking about residuals yet. 
--> to set up next slide
-
+::: {.fragment}
+Actor and partner effects together explain some of the covariance between partners' 
+outcomes. 
 :::
+
+<!-- Explain actor and partner effects only and briefly. Then reveal the final
+statement to foreshadow that some interdependence may remain after prediction;
+do not introduce residual parameters yet.-->
+
+## The distinguishable APIM -->
+
 
 <!-- ca. 2 Minutes -->
 
-## Can we just estimate separate regression equations for each partner?
 
-Do two separate models like this work?
+```{r}
+#| label: conceptual-distinguishable-apim_brief
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
 
+draw_apim_diagram("distinguishable")
+```
+
+Actor and partner effects together explain some of the covariance between partners' 
+outcomes.  $\rightarrow$ But some covariance may remain!
+
+:::{.notes}
+But more on the residuals later!!!
+:::
+
+## How to estimate actor and partner effects?
+
+Conceptually (and practically), we are esimating these two equations in a single model:
 
 $$
   \begin{gathered}
-  \\[1em]
+  \\[0.5em]
   Y_{male_i}
   = b_{0M} + b_{1M}X_{male_i} + b_{2M}X_{female_i} + \epsilon_{male_i}
   \\[2em]
@@ -497,6 +521,8 @@ $$
   = b_{0F} + b_{1F}X_{female_i} + b_{2F}X_{male_i} + \epsilon_{female_i}
   \end{gathered}
 $$
+<br>
+[Could we just use two separate models?]{.fragment}
 
 
 <!-- ca. 1 minute 
@@ -517,16 +543,15 @@ glmmTMB(
 
 -->
 
-## Can we just estimate separate regression equations for each partner?
+## Could we just use two separate models?
 
-**Yes! But then we: **
+**Yes, we could! But then we: **
 
 :::{.incremental}
 - can't test whether the two actor effects or partner effects are equal
 - can't pool equal paths into a shared estimate, which can increase power
 - ignore unmodelled sources of interdependence between partners
   - joint modelling tells us how much interdependence remains after accounting for the predictors
-  - we can find out how much covariance is explained by our predictors
 
 :::
 
@@ -704,13 +729,13 @@ These are associations in the aggregated observational data, not causal effects.
 
 Sometimes: 
 
-- partners may not be theoretically distinguishable
-- we may have mixed dyad types that we want to pool
-- we want to test whether partners are meaningfully distinguishable
+- partners may not be theoretically meaningfully distinguishable
+- no evidence of difference in effects $\rightarrow$ pool effects for greater power
+- we want to formally test distinguishability
 
 $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
 
-<!-- ca. 1 Minutes -->
+<!-- ca. 2 Minutes -->
 
 ## The exchangeable APIM
 

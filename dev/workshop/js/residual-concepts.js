@@ -7,7 +7,8 @@
     ROOT_STYLES.getPropertyValue(name).trim() || fallback
   );
   const FEMALE = cssColor("--interdep-residual-female", "#004d40");
-  const MALE = cssColor("--interdep-residual-male", "#007a8c");
+  const MALE = cssColor("--interdep-residual-male", "#00a6b2");
+  const MALE_TEXT = cssColor("--interdep-residual-male-text", "#007486");
   const INK = "#263238";
   const MUTED = "#64748b";
   const GRID = "#dbe3ec";
@@ -158,7 +159,9 @@
       const outcomeMax = 16;
       const predicted = 10;
 
-      function drawResidualPanel(top, bottom, residuals, colour, label) {
+      function drawResidualPanel(
+        top, bottom, residuals, colour, label, labelColour = colour
+      ) {
         append(left, "rect", {
           x: panelLeft,
           y: top,
@@ -177,7 +180,9 @@
           y2: predictedY,
           class: "rc-prediction-line"
         });
-        drawText(left, panelLeft + 13, top + 20, label, "rc-facet-title", { fill: colour });
+        drawText(left, panelLeft + 13, top + 20, label, "rc-facet-title", {
+          fill: labelColour
+        });
         drawText(left, panelRight - 13, predictedY - 6, "ŷ = 10", "rc-prediction-label", {
           "text-anchor": "end"
         });
@@ -215,7 +220,8 @@
         404,
         maleResiduals,
         MALE,
-        `Male: residual variance σ²M = ${maleVariance.toFixed(1)}`
+        `Male: residual variance σ²M = ${maleVariance.toFixed(1)}`,
+        MALE_TEXT
       );
 
       femaleResiduals.forEach((unused, index) => {

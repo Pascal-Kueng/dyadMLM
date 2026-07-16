@@ -16,7 +16,7 @@ draw_residual_concepts <- function() {
 
   role_colours <- c(
     "Female partner" = "#004D40",
-    "Male partner" = "#007A8C"
+    "Male partner" = "#00A6B2"
   )
   ink_colour <- "#263238"
   muted_colour <- "#64748B"
