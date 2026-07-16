@@ -344,7 +344,7 @@
 
 .reveal .wdg-equations {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.18em 0.7em;
   padding: 0.38em 0.55em;
   border: 1px solid var(--uzh-rule);
@@ -354,12 +354,38 @@
   font-variant-numeric: tabular-nums;
 }
 
+.reveal .wdg-equations > div:not(.wdg-slope-summary) {
+  white-space: nowrap;
+}
+
 .reveal .wdg-equations b {
   display: inline-block;
   width: 3.1em;
   font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
   font-size: 0.86em;
 }
+
+.reveal .wdg-eq-number,
+.reveal .wdg-eq-result {
+  display: inline-block;
+  width: 5.2ch;
+  text-align: right;
+}
+
+.reveal .wdg-eq-operator {
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+}
+
+.reveal .wdg-eq-result {
+  width: 6.2ch;
+}
+
+.reveal .wdg-eq-actor { color: var(--wdg-actor); }
+.reveal .wdg-eq-partner { color: var(--wdg-partner); }
+.reveal .wdg-eq-mean { color: var(--wdg-mean); }
+.reveal .wdg-eq-within { color: var(--wdg-within); }
 
 .reveal .wdg-slope-summary {
   grid-column: 1 / -1;
@@ -607,9 +633,20 @@
 }
 
 .reveal .residual-concepts-svg .rc-correlation-guide-background {
-  fill: rgba(255, 255, 255, 0.9);
-  stroke: #cbd5e1;
-  stroke-width: 1;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.reveal .residual-concepts-svg .rc-correlation-guide-background div {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(3px) saturate(0.85);
+  backdrop-filter: blur(3px) saturate(0.85);
+  box-shadow: 0 2px 7px rgba(15, 23, 42, 0.08);
 }
 
 .reveal .residual-concepts-svg .rc-correlation-guide-axis {

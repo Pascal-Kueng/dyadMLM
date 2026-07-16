@@ -53,6 +53,23 @@
       return value < 0 ? " − " + magnitude : " + " + magnitude;
     }
 
+    function equation(
+      firstSlope, firstValue, secondSlope, secondValue, result,
+      firstRole, secondRole
+    ) {
+      var operator = secondSlope < 0 ? "−" : "+";
+      return '<span class="wdg-eq-number wdg-eq-' + firstRole + '">' +
+        coefficient(firstSlope, false) + "</span> × " +
+        '<span class="wdg-eq-number wdg-eq-' + firstRole + '">' +
+        format(firstValue, 2) + "</span> " +
+        '<span class="wdg-eq-operator">' + operator + "</span> " +
+        '<span class="wdg-eq-number wdg-eq-' + secondRole + '">' +
+        Math.abs(secondSlope).toFixed(2) + "</span> × " +
+        '<span class="wdg-eq-number wdg-eq-' + secondRole + '">' +
+        format(secondValue, 2) + "</span> = " +
+        '<strong class="wdg-eq-result">' + format(result, 2) + "</strong>";
+    }
+
     function xPixel(value) { return 160 + value * scale; }
     function yPixel(value) { return 160 - value * scale; }
 
@@ -68,14 +85,14 @@
       outputs.partner.value = format(partner, 2);
       outputs.mean.value = format(mean, 2);
       outputs.within.value = format(within, 2);
-      equationAPIM.innerHTML =
-        coefficient(slopes.actor, false) + " × " + format(actor, 2) +
-        coefficient(slopes.partner, true) + " × " + format(partner, 2) +
-        " = <strong>" + format(apimResult, 2) + "</strong>";
-      equationDIM.innerHTML =
-        coefficient(slopes.mean, false) + " × " + format(mean, 2) +
-        coefficient(slopes.within, true) + " × " + format(within, 2) +
-        " = <strong>" + format(dimResult, 2) + "</strong>";
+      equationAPIM.innerHTML = equation(
+        slopes.actor, actor, slopes.partner, partner, apimResult,
+        "actor", "partner"
+      );
+      equationDIM.innerHTML = equation(
+        slopes.mean, mean, slopes.within, within, dimResult,
+        "mean", "within"
+      );
       slopeSummary.innerHTML =
         "Fitted slopes: <i>b</i><sub>mean</sub> = <i>a</i> + <i>p</i> = " +
         coefficient(slopes.mean, false) +
@@ -102,13 +119,16 @@
       render();
     }
 
-    function setFromDIM(mean, within) {
+    function setFromDIM(mean, within, changed) {
       mean = Number(mean);
       within = Number(within);
-      var bound = limit - Math.abs(within);
-      mean = Math.min(bound, Math.max(-bound, mean));
-      bound = limit - Math.abs(mean);
-      within = Math.min(bound, Math.max(-bound, within));
+      if (changed === "within") {
+        var withinBound = limit - Math.abs(mean);
+        within = Math.min(withinBound, Math.max(-withinBound, within));
+      } else {
+        var meanBound = limit - Math.abs(within);
+        mean = Math.min(meanBound, Math.max(-meanBound, mean));
+      }
       inputs.mean.value = mean;
       inputs.within.value = within;
       inputs.actor.value = mean + within;
@@ -123,10 +143,10 @@
       setFromAPIM(inputs.actor.value, inputs.partner.value);
     });
     inputs.mean.addEventListener("input", function () {
-      setFromDIM(inputs.mean.value, inputs.within.value);
+      setFromDIM(inputs.mean.value, inputs.within.value, "mean");
     });
     inputs.within.addEventListener("input", function () {
-      setFromDIM(inputs.mean.value, inputs.within.value);
+      setFromDIM(inputs.mean.value, inputs.within.value, "within");
     });
     root.querySelector("[data-wdg-reset]").addEventListener("click", function () {
       setFromAPIM(0, 0);
@@ -182,16 +202,19 @@
         lines.appendChild(line);
       }
 
-      [-limit, -limit / 2, 0, limit / 2, limit].forEach(function (tick) {
-        var dash = tick === 0 ? null : "3 3";
-        var opacity = tick === 0 ? "0.62" : "0.22";
+      for (var tick = -limit; tick <= limit + 1e-10; tick += 1) {
+        var isAxis = Math.abs(tick) < 1e-10;
+        var isMajor = Math.abs(tick % 2) < 1e-10;
+        var dash = isAxis ? null : "3 3";
+        var opacity = isAxis ? "0.68" : (isMajor ? "0.32" : "0.24");
         addLine(xPixel(tick), 30, xPixel(tick), 290, colors.actor, opacity, dash);
         addLine(30, yPixel(tick), 290, yPixel(tick), colors.partner, opacity, dash);
+        // Diagonal lines are colored by the coordinate direction they trace.
         addLine(xPixel(-limit), yPixel(2 * tick + limit), xPixel(limit),
-          yPixel(2 * tick - limit), colors.mean, opacity, dash);
+          yPixel(2 * tick - limit), colors.within, opacity, dash);
         addLine(xPixel(-limit), yPixel(-limit - 2 * tick), xPixel(limit),
-          yPixel(limit - 2 * tick), colors.within, opacity, dash);
-      });
+          yPixel(limit - 2 * tick), colors.mean, opacity, dash);
+      }
 
       function addLabel(text, x, y, color, anchor) {
         var label = document.createElementNS(namespace, "text");

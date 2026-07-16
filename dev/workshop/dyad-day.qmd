@@ -152,7 +152,7 @@ distribution_plot <- function(data, variables, bin_widths) {
 
 ## Introduction
 
-- Turu & Pascal
+- Turu & Pascal <!-- ca. 5 min -->
 - Tell us about you and your dyadic data!
   - Name, affiliation & career stage
   - Your dyadic data and RQ
@@ -296,6 +296,18 @@ distribution_plot(
 
 <!-- ca. 1 Minute -->
 
+<!-- TODO: implement plots for females and males separately! 
+
+see for ref:
+ggplot(data = BLdyads_doubleentry, aes(x = reldis)) +
+  geom_histogram(fill = "white", color = "black") + 
+  labs(x = "Relationship Dissatisfaction") +
+  facet_grid(. ~ gender) # creating a separate plot for each gender
+
+can we have a similar little code block so participants can re-use it and also print it on the slide?
+With a very short code block, can we still style it a bit nicer and closer to what we have currently?
+-->
+
 ## Many models to choose from
 
 **Various dyadic models** can be used, each answering different questions!
@@ -308,7 +320,8 @@ distribution_plot(
 
 ::: {.fragment}
 Other approaches include **mutual-influence models**, which represent reciprocal
-influence between partners [@iidaModelsInterdependentIndividuals2018, p. 63].
+influence between partners [@iidaModelsInterdependentIndividuals2018], <!-- @codex verify if this was really discussed in that paper. paper is in dev/references. -->
+and the truth and bias model (REF), which ... <!-- @codex please finish and add a reference -->
 :::
 
 <!-- ca. 3 Minutes -->
@@ -327,9 +340,11 @@ see how we can use it to answer our research question (in what way). "
 - **Common fate model (CFM)**: latent dyadic process
 
 Other approaches include **mutual-influence models**, which represent reciprocal
-influence between partners [@iidaModelsInterdependentIndividuals2018, p. 63].
+influence between partners [@iidaModelsInterdependentIndividuals2018], <!-- @codex duplicate the text here from the fragment above.
 
-<!-- ca. 3 Minutes -->
+<!-- ca. 1 Minutes -->
+
+<!-- potentially add a slide here showing how much the APIM is used vs. other models if we find a reference -->
 
 ## The distinguishable APIM - Conceptually
 
@@ -753,7 +768,11 @@ fit_and_draw_dsm(
 )
 ```
 
+## Honorable mention: The truth and bias model 
 
+<!-- add ref, basic idea, example graphic and basic interpretation of paths -->
+
+<!-- ca. 2 minutes -->
 
 ## Research Question 2
 
@@ -824,9 +843,35 @@ draw_cfm_diagram(show_residuals = FALSE)
 draw_cfm_diagram()
 ```
 
+<!----------------- APPLIED PART (plus MLM vs. SEM and software) -------------->
+
+TODO: Probably create a second slide deck!
+
+- DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
+
+- glmmTMB -> as required 
+- interdep -> as required (via pak, see instructions; or should we already try a CRAN release now?? We may want to still add additional functions like rotating variance structs back, so probably not). -> maybe just require pak and we install newest version on workshop-day?
+- dplyr -> required
+- tibble -> required
+- lavaan -> required
+- ggplot2 -> required
 
 
-<!-- ILD-part: see dev note on ar1 processes -->
+
+<!-- ILD-part: 
+
+- see dev note on ar1 processes 
+- see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
+
+-->
+
+<!-- Excercises part
+
+Create exercises with data visalization, etc. Panel plots, histograms
+correlations (wb corr)?
+
+-->
+
 
 
 ## References

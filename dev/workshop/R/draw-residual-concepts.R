@@ -71,7 +71,7 @@ draw_residual_concepts <- function() {
       breaks = seq_len(10),
       expand = ggplot2::expansion(mult = c(0.03, 0.04))
     ) +
-    ggplot2::coord_cartesian(ylim = c(6.8, 13.2), clip = "off") +
+    ggplot2::coord_cartesian(ylim = c(6.8, 14.0), clip = "off") +
     ggplot2::labs(
       title = "Residual = observed − predicted",
       subtitle = "Line length shows the size of each residual",

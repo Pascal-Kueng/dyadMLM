@@ -148,8 +148,10 @@
       const panelRight = 704;
       const pointLeft = 88;
       const pointRight = 678;
+      // Leave extra room above the prediction so large positive residuals do not
+      // collide with the facet title. This places the baseline just below centre.
       const outcomeMin = 5;
-      const outcomeMax = 15;
+      const outcomeMax = 16;
       const predicted = 10;
 
       function drawResidualPanel(top, bottom, residuals, colour, label) {
@@ -310,6 +312,13 @@
         { transform: `rotate(-90 736 ${(plotTop + plotBottom) / 2})` }
       );
 
+      // Reserve the lower-right corner for the scale-free correlation guide.
+      // Negative-correlation text is kept immediately to its left.
+      const guideCenterX = plotRight - 56;
+      const guideCenterY = plotBottom - 49;
+      const guideRadius = 36;
+      const guideLeft = guideCenterX - 48;
+
       if (correlation > 0.05) {
         addMultilineText(right, ["both above", "prediction"], plotRight - 10, plotTop + 19, {
           class: "rc-quadrant-label",
@@ -324,7 +333,7 @@
           class: "rc-quadrant-label",
           "text-anchor": "start"
         });
-        addMultilineText(right, ["male above", "female below"], plotRight - 10, plotBottom - 27, {
+        addMultilineText(right, ["male above", "female below"], guideLeft - 8, plotBottom - 27, {
           class: "rc-quadrant-label",
           "text-anchor": "end"
         });
@@ -339,50 +348,6 @@
           600
         );
       }
-
-      // A small standardized guide represents rho without masquerading as a
-      // raw-score regression line, whose slope also depends on SD_F / SD_M.
-      const guideCenterX = plotRight - 49;
-      const guideCenterY = plotBottom - 47;
-      const guideRadius = 31;
-      append(right, "rect", {
-        x: guideCenterX - 42,
-        y: guideCenterY - 38,
-        width: 84,
-        height: 76,
-        rx: 7,
-        class: "rc-correlation-guide-background"
-      });
-      drawCenteredText(
-        right,
-        guideCenterX,
-        guideCenterY - 22,
-        "scale-free ρ",
-        "rc-correlation-guide-label",
-        11,
-        600
-      );
-      append(right, "line", {
-        x1: guideCenterX - guideRadius,
-        y1: guideCenterY,
-        x2: guideCenterX + guideRadius,
-        y2: guideCenterY,
-        class: "rc-correlation-guide-axis"
-      });
-      append(right, "line", {
-        x1: guideCenterX,
-        y1: guideCenterY - 18,
-        x2: guideCenterX,
-        y2: guideCenterY + 18,
-        class: "rc-correlation-guide-axis"
-      });
-      append(right, "line", {
-        x1: guideCenterX - guideRadius,
-        y1: guideCenterY + correlation * 18,
-        x2: guideCenterX + guideRadius,
-        y2: guideCenterY - correlation * 18,
-        class: "rc-correlation-line"
-      });
 
       femaleResiduals.forEach((femaleResidual, index) => {
         const group = append(right, "g", { class: "rc-paired-point" });
@@ -403,6 +368,48 @@
         const number = document.createElement("div");
         number.textContent = String(index + 1);
         numberBox.appendChild(number);
+      });
+
+      // Draw the standardized guide last so it behaves like an inset above the
+      // raw points. Its opaque background hides any observations beneath it.
+      const guideBackground = append(right, "foreignObject", {
+        x: guideLeft,
+        y: guideCenterY - 42,
+        width: 96,
+        height: 84,
+        class: "rc-correlation-guide-background"
+      });
+      const guideGlass = document.createElement("div");
+      guideBackground.appendChild(guideGlass);
+      drawCenteredText(
+        right,
+        guideCenterX,
+        guideCenterY - 25,
+        "scale-free ρ",
+        "rc-correlation-guide-label",
+        12,
+        600
+      );
+      append(right, "line", {
+        x1: guideCenterX - guideRadius,
+        y1: guideCenterY,
+        x2: guideCenterX + guideRadius,
+        y2: guideCenterY,
+        class: "rc-correlation-guide-axis"
+      });
+      append(right, "line", {
+        x1: guideCenterX,
+        y1: guideCenterY - 21,
+        x2: guideCenterX,
+        y2: guideCenterY + 21,
+        class: "rc-correlation-guide-axis"
+      });
+      append(right, "line", {
+        x1: guideCenterX - guideRadius,
+        y1: guideCenterY + correlation * 21,
+        x2: guideCenterX + guideRadius,
+        y2: guideCenterY - correlation * 21,
+        class: "rc-correlation-line"
       });
     }
 
