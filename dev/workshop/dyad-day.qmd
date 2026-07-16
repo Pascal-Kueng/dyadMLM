@@ -200,6 +200,12 @@ may predict outcomes beyond either individual score.
 :::
 :::
 
+:::{.notes}
+This is intentionally broad, since we will look at it through different lenses
+and analyze this with different models. 
+
+Basically answering differt sub-RQs each time that I will introduce.
+:::
 
 ## Measurement - Predictor
 
@@ -290,7 +296,7 @@ distribution_plot(
 
 ::: {.fragment}
 Other noteable models include the mutual influence model (iida?) and the 
-truth-and bias model (ref?). !TODO: also add others?
+truth-and bias model (ref?). !TODO: also add others? or omit?
 :::
 
 <!-- ca. 3 Minutes -->
@@ -308,11 +314,14 @@ see how we can use it to answer our research question (in what way). "
 - **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
 - **Common fate model (CFM)**: latent dyadic process
 
-
 Other noteable models include the mutual influence model (iida?) and the 
 truth-and bias model (ref?). !TODO: also add others?
 
 <!-- ca. 3 Minutes -->
+
+## The distinguishable APIM
+
+<!-- probably add sub-RQ here -->
 
 ## The distinguishable APIM
 
@@ -335,7 +344,23 @@ Explain actor and partner effects only and briefly. Not talking about residuals 
 
 :::
 
-<!-- ca. 2 Minutes -->
+<!-- ca. 2 Minutes 
+
+
+!TODO: 
+  The current APIM diagram already shows residuals and their correlation, even though the notes say not to discuss them yet.
+  That reveals the answer before the separate-regressions question.
+
+  A cleaner progression would be:
+
+  - APIM diagram with only actor and partner paths
+  - “Could these simply be two separate regressions?”
+  - Same APIM diagram, now adding correlated residuals
+  - “This is what fitting both equations jointly adds”
+
+  That would make the regression slides an effective problem–solution transition.
+
+-->
 
 ## Can we just estimate separate regression equations for each partner?
 
@@ -343,23 +368,22 @@ Do two separate models like this work?
 
 <br>
 
-**Male model:** $\qquad Y_{male_i} = b_0 + b_1 \times X_{male_i} + b_2 \times  X_{female_i} + \epsilon_{male_i}$ 
+**Male model:** $\qquad Y_{male_i} = b_{0M} + b_{1M} \times X_{male_i} + b_{2M} \times  X_{female_i} + \epsilon_{male_i}$ 
 
 <br>
 
-**Female model:** $\quad Y_{female_i} = b_0 + b_1 \times X_{male_i} + b_2 \times  X_{female_i} + \epsilon_{female_i}$ 
+**Female model:** $\quad Y_{female_i} = b_{0F} + b_{1F} \times X_{male_i} + b_{2F} \times  X_{female_i} + \epsilon_{female_i}$ 
 
 <!-- ca. 2 minutes (ask students what issues) -->
 
 ## Why not just separate regression equations for each partner?
 
-Probably not a good idea because of:
+Yes, but there are downsides:
 
 :::{.incremental}
-- Ignores unmodelled sources of non-independence between partners, which can
-bias results. 
 - No formal tests of whether the two actor effects or partner effects are different for males and females.
 - Equal paths cannot be pooled into a shared estimate, which can increase power.
+- Ignores unmodelled sources of non-independence between partners. 
 - A joint dyadic model can tell us how much of the interdependence is explained.
 :::
 
@@ -382,6 +406,15 @@ And then interpret the actor path values and residual values and correlation -->
 
 ## The exchangeable APIM
 
+Sometimes: 
+- partners may not be theoretically distinguishable
+- we may have mixed dyad types that we want to pool
+- we want to test whether partners are meaningfully distinguishable
+
+Then, we may fit an exchangeable model that imposes symmetry
+
+## The exchangeable APIM
+
 ```{r}
 #| label: conceptual-exchangeable-apim
 #| echo: false
@@ -394,7 +427,7 @@ And then interpret the actor path values and residual values and correlation -->
 draw_apim_diagram("exchangeable")
 ```
 
-## The DIM (equivalent to exchangeable APIM)
+## The DIM: another parameterization of an exchangeable APIM
 
 ```{r}
 #| label: conceptual-dim
@@ -408,7 +441,7 @@ draw_apim_diagram("exchangeable")
 draw_dim_diagram()
 ```
 
-## The DSM (equivalent to distinguishable APIM)
+## The DSM: a mean-and-difference parameterization of the distinguishable APIM
 
 ```{r}
 #| label: conceptual-dsm
