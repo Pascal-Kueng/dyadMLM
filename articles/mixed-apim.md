@@ -189,6 +189,21 @@ summary(mixed_cross_gaussian_model)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
+The same composition-specific blocks can be labelled directly from the
+fitted model. For the exchangeable blocks, the common member residual
+standard deviation and correlation are back-transformed from their
+fitted sum-and- difference components.
+
+![Fitted mixed-composition APIM. Female-male intercepts 5.50 and 4.50,
+residual SDs 1.10 and 1.39, and residual correlation -0.30.
+Female-female intercept 5.80, residual SD 0.99, and correlation 0.35.
+Male-male intercept 4.20, residual SD 1.29, and correlation
+-0.25.](mixed-apim_files/figure-html/fitted-mixed-apim-diagram-1.png)
+
+Fitted intercept-only mixed-composition APIM. Intercepts and
+composition-specific residual parameters are extracted from the fitted
+joint model; the two exchangeable blocks are shown on the member scale.
+
 The four fixed-effect indicators are mutually exclusive. With $`I`$
 denoting the generated `.i_is_{composition_role}` indicator and $`b_0`$
 a fixed intercept, the fixed part of the full model can be written as:

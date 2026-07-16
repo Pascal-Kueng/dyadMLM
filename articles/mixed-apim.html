@@ -232,6 +232,17 @@ intercept-only model):</p>
 <span><span class="co">#&gt; .i_is_male_x_male           4.20000    0.07921   53.02   &lt;2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<p>The same composition-specific blocks can be labelled directly from
+the fitted model. For the exchangeable blocks, the common member
+residual standard deviation and correlation are back-transformed from
+their fitted sum-and- difference components.</p>
+<div class="figure">
+<img src="mixed-apim_files/figure-html/fitted-mixed-apim-diagram-1.png" class="r-plt" alt="Fitted mixed-composition APIM. Female-male intercepts 5.50 and 4.50, residual SDs 1.10 and 1.39, and residual correlation -0.30. Female-female intercept 5.80, residual SD 0.99, and correlation 0.35. Male-male intercept 4.20, residual SD 1.29, and correlation -0.25." width="100%"><p class="caption">
+Fitted intercept-only mixed-composition APIM. Intercepts and
+composition-specific residual parameters are extracted from the fitted
+joint model; the two exchangeable blocks are shown on the member scale.
+</p>
+</div>
 <p>The four fixed-effect indicators are mutually exclusive. With
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>I</mi><annotation encoding="application/x-tex">I</annotation></semantics></math>
 denoting the generated <code>.i_is_{composition_role}</code> indicator
