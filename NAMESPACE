@@ -3,6 +3,7 @@
 S3method(print,interdep_data)
 S3method(print,interdep_model_comparison)
 export(compare_interdep_models)
+export(interdep_colors)
 export(prepare_interdep_data)
 importFrom(rlang,":=")
 importFrom(rlang,.data)

@@ -14,10 +14,10 @@
       within: Number(root.dataset.within)
     };
     var colors = {
-      actor: "var(--wdg-actor)",
-      partner: "var(--wdg-partner)",
-      mean: "var(--wdg-mean)",
-      within: "var(--wdg-within)"
+      actor: "var(--interdep-actor-effect)",
+      partner: "var(--interdep-partner-effect)",
+      mean: "var(--interdep-dyad-mean-effect)",
+      within: "var(--interdep-member-deviation-effect)"
     };
     var inputs = {};
     var outputs = {};

@@ -410,7 +410,7 @@ between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
 accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 @westTruthBiasModel2011].
 
-<!-- ca. 1 Minutes -->
+<!-- ca. 2 Minutes -->
 
 ## One model dominates dyadic research
 
@@ -874,7 +874,7 @@ fit_and_draw_dim(
 
 
 
-## The DSM: a mean-and-difference parameterization of the distinguishable APIM
+## The DSM
 
 ```{r}
 #| label: conceptual-dsm-paths-only

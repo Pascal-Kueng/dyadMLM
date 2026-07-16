@@ -2,8 +2,12 @@
   "use strict";
 
   const SVG_NS = "http://www.w3.org/2000/svg";
-  const FEMALE = "#c43c35";
-  const MALE = "#1769aa";
+  const ROOT_STYLES = window.getComputedStyle(document.documentElement);
+  const cssColor = (name, fallback) => (
+    ROOT_STYLES.getPropertyValue(name).trim() || fallback
+  );
+  const FEMALE = cssColor("--interdep-residual-female", "#00695c");
+  const MALE = cssColor("--interdep-residual-male", "#2a7f78");
   const INK = "#263238";
   const MUTED = "#64748b";
   const GRID = "#dbe3ec";

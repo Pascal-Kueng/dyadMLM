@@ -394,10 +394,10 @@ from both displayed equations.
 ```{=html}
 <style>
 .interdep-dim-grid {
-  --idg-actor: #1769aa;
-  --idg-partner: #7b3fa1;
-  --idg-mean: #c43c35;
-  --idg-within: #8a6500;
+  --idg-actor: `r unname(interdep_colors("actor"))`;
+  --idg-partner: `r unname(interdep_colors("partner"))`;
+  --idg-mean: `r unname(interdep_colors("dyad_mean"))`;
+  --idg-within: `r unname(interdep_colors("member_deviation"))`;
   --idg-border: var(--bs-border-color, #c9ced6);
   --idg-surface: var(--bs-tertiary-bg, #f5f6f8);
   --idg-ink: var(--bs-body-color, #202428);

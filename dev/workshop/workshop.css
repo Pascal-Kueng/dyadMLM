@@ -6,6 +6,15 @@
   --uzh-muted: #5f6b78;
   --uzh-rule: #d9dee7;
   --uzh-surface: #f6f8fb;
+  /* Semantic effect colors; keep synchronized with interdep_colors(). */
+  --interdep-actor-effect: #1769aa;
+  --interdep-partner-effect: #7b3fa1;
+  --interdep-dyad-mean-effect: #c43c35;
+  --interdep-member-deviation-effect: #8a6500;
+  /* Supporting residual colors deliberately avoid the effect palette. */
+  --interdep-residual-female: #00695c;
+  --interdep-residual-male: #2a7f78;
+  --interdep-residual-correlation: #546e7a;
 }
 
 .reveal {
@@ -261,10 +270,6 @@
 
 /* Interactive APIM-to-DIM reparameterization ------------------------- */
 .reveal .workshop-dim-grid {
-  --wdg-actor: #1769aa;
-  --wdg-partner: #7b3fa1;
-  --wdg-mean: #c43c35;
-  --wdg-within: #8a6500;
   display: grid;
   grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.55fr);
   gap: 0.65em;
@@ -324,15 +329,15 @@
   font-weight: 700;
 }
 
-.reveal .wdg-apim-title { color: var(--wdg-actor); }
-.reveal .wdg-dim-title { color: var(--wdg-mean); }
+.reveal .wdg-apim-title { color: var(--interdep-actor-effect); }
+.reveal .wdg-dim-title { color: var(--interdep-dyad-mean-effect); }
 .reveal .wdg-control { display: grid; gap: 0.12em; }
 .reveal .wdg-control output { min-width: 4.6ch; text-align: right; font-weight: 700; }
 .reveal .wdg-control input { width: 100%; margin: 0; }
-.reveal .wdg-actor input { accent-color: var(--wdg-actor); }
-.reveal .wdg-partner input { accent-color: var(--wdg-partner); }
-.reveal .wdg-mean input { accent-color: var(--wdg-mean); }
-.reveal .wdg-within input { accent-color: var(--wdg-within); }
+.reveal .wdg-actor input { accent-color: var(--interdep-actor-effect); }
+.reveal .wdg-partner input { accent-color: var(--interdep-partner-effect); }
+.reveal .wdg-mean input { accent-color: var(--interdep-dyad-mean-effect); }
+.reveal .wdg-within input { accent-color: var(--interdep-member-deviation-effect); }
 
 .reveal .wdg-relations {
   display: grid;
@@ -382,10 +387,10 @@
   width: 6.2ch;
 }
 
-.reveal .wdg-eq-actor { color: var(--wdg-actor); }
-.reveal .wdg-eq-partner { color: var(--wdg-partner); }
-.reveal .wdg-eq-mean { color: var(--wdg-mean); }
-.reveal .wdg-eq-within { color: var(--wdg-within); }
+.reveal .wdg-eq-actor { color: var(--interdep-actor-effect); }
+.reveal .wdg-eq-partner { color: var(--interdep-partner-effect); }
+.reveal .wdg-eq-mean { color: var(--interdep-dyad-mean-effect); }
+.reveal .wdg-eq-within { color: var(--interdep-member-deviation-effect); }
 
 .reveal .wdg-slope-summary {
   grid-column: 1 / -1;
@@ -431,8 +436,8 @@
 }
 
 .reveal .wdg-demos p { margin: 0.25em 0 0; }
-.reveal .wdg-halo { fill: var(--wdg-actor); fill-opacity: 0.14; }
-.reveal .wdg-point { fill: var(--wdg-actor); stroke: white; stroke-width: 2; }
+.reveal .wdg-halo { fill: var(--interdep-actor-effect); fill-opacity: 0.14; }
+.reveal .wdg-point { fill: var(--interdep-actor-effect); stroke: white; stroke-width: 2; }
 
 @media screen and (max-width: 900px) {
   .reveal .workshop-dim-grid {
@@ -498,15 +503,15 @@
 }
 
 .reveal .residual-control-female input[type="range"] {
-  accent-color: #c43c35;
+  accent-color: var(--interdep-residual-female);
 }
 
 .reveal .residual-control-male input[type="range"] {
-  accent-color: #1769aa;
+  accent-color: var(--interdep-residual-male);
 }
 
 .reveal .residual-control-correlation input[type="range"] {
-  accent-color: var(--uzh-blue);
+  accent-color: var(--interdep-residual-correlation);
 }
 
 .reveal .residual-control output {
