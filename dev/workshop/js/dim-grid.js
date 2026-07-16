@@ -197,7 +197,7 @@
         line.setAttribute("y2", y2);
         line.setAttribute("stroke", color);
         line.setAttribute("stroke-opacity", opacity);
-        line.setAttribute("stroke-width", dash ? "1" : "1.5");
+        line.setAttribute("stroke-width", dash ? "1" : "2");
         if (dash) line.setAttribute("stroke-dasharray", dash);
         lines.appendChild(line);
       }
@@ -206,7 +206,7 @@
         var isAxis = Math.abs(tick) < 1e-10;
         var isMajor = Math.abs(tick % 2) < 1e-10;
         var dash = isAxis ? null : "3 3";
-        var opacity = isAxis ? "0.68" : (isMajor ? "0.32" : "0.24");
+        var opacity = isAxis ? "0.68" : (isMajor ? "0.44" : "0.24");
         addLine(xPixel(tick), 30, xPixel(tick), 290, colors.actor, opacity, dash);
         addLine(30, yPixel(tick), 290, yPixel(tick), colors.partner, opacity, dash);
         // Diagonal lines are colored by the coordinate direction they trace.

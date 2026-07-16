@@ -319,9 +319,10 @@ With a very short code block, can we still style it a bit nicer and closer to wh
 :::
 
 ::: {.fragment}
-Other approaches include **mutual-influence models**, which represent reciprocal
-influence between partners [@iidaModelsInterdependentIndividuals2018], <!-- @codex verify if this was really discussed in that paper. paper is in dev/references. -->
-and the truth and bias model (REF), which ... <!-- @codex please finish and add a reference -->
+Other approaches include the **mutual-influence model**, for reciprocal influence
+between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
+**Truth and Bias model**, for separating mean-level bias from correlational
+accuracy in judgments of a partner [@sternAssessingAccuracyClose2018].
 :::
 
 <!-- ca. 3 Minutes -->
@@ -339,8 +340,10 @@ see how we can use it to answer our research question (in what way). "
 - **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
 - **Common fate model (CFM)**: latent dyadic process
 
-Other approaches include **mutual-influence models**, which represent reciprocal
-influence between partners [@iidaModelsInterdependentIndividuals2018], <!-- @codex duplicate the text here from the fragment above.
+Other approaches include the **mutual-influence model**, for reciprocal influence
+between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
+**Truth and Bias model**, for separating mean-level bias from correlational
+accuracy in judgments of a partner [@sternAssessingAccuracyClose2018].
 
 <!-- ca. 1 Minutes -->
 
@@ -551,13 +554,39 @@ fit_and_draw_distinguishable_apim(
 )
 ```
 
-<!-- 
+:::{.notes}
 
-@codex add a talking script with a clear interpretation of each parameter. What does the 
-SD actually mean, what does the correlation imply... Always in relateion to the
-values. E.g., each 1 unit increase in...
+Read the diagram from left to right. All outcome values are minutes of average
+daily total MVPA, and all associations are conditional on both partners'
+provided support.
 
--->
+- The intercepts, 25.68 for female partners and 23.85 for male partners, are the
+  predicted daily MVPA when both partners' average provided support is zero.
+- Female actor effect, -4.61: for each one-unit higher support provided by a
+  female partner, her own predicted daily MVPA is 4.61 minutes lower, holding
+  her male partner's support constant.
+- Female partner effect, 15.06: for each one-unit higher support provided by a
+  male partner, the female partner's predicted daily MVPA is 15.06 minutes
+  higher, holding her own support constant.
+- Male actor effect, 17.92: for each one-unit higher support provided by a male
+  partner, his own predicted daily MVPA is 17.92 minutes higher, holding his
+  female partner's support constant.
+- Male partner effect, -9.87: for each one-unit higher support provided by a
+  female partner, the male partner's predicted daily MVPA is 9.87 minutes lower,
+  holding his own support constant.
+- The residual SDs, 21.40 minutes for female partners and 16.73 minutes for male
+  partners, describe the remaining person-to-person spread around those
+  predictions. An SD is a typical scale of residual deviation, not a variance
+  and not the uncertainty of a coefficient.
+- The residual correlation, .78, indicates strong positive remaining
+  within-couple interdependence: couples in which the female partner is above
+  her prediction also tend to have a male partner above his prediction, and
+  likewise for being below prediction. This remains after accounting for both
+  support scores.
+
+These are associations in the aggregated observational data, not causal effects.
+
+:::
 
 <!-- ca. 2 Minutes -->
 
@@ -604,8 +633,25 @@ draw_apim_diagram("exchangeable", show_residuals = FALSE)
 draw_apim_diagram("exchangeable")
 ```
 
-<!-- @codex, would you recommend an additinal slide or info here about residuals and constraints? Or address all talking points while the
-diagram is on stage? If so, add brief talking points for that. -->
+:::{.notes}
+
+Keep these points on this diagram rather than adding another slide; the residual
+concepts were introduced visually just a few slides earlier.
+
+- The two members are now labelled arbitrarily because their roles are not used
+  to define different parameters.
+- Exchangeability constrains the actor paths to be equal across members and the
+  partner paths to be equal across members. The diagram therefore shows one
+  pooled actor effect and one pooled partner effect.
+- The two residual SDs are also constrained to be equal. This says that the
+  unexplained outcome spread is the same for both arbitrary member positions.
+- The curved arrow remains: exchangeability does not assume that partners are
+  independent. Their residual correlation is still estimated.
+- These are testable symmetry assumptions, not facts about the dyads. Compare
+  the exchangeable and distinguishable models if substantive distinguishability
+  is uncertain.
+
+:::
 
 <!-- ca. 3 Minutes -->
 
