@@ -300,3 +300,27 @@ test_that("fitted glmmTMB diagrams reject incomplete residual structures", {
     fixed = TRUE
   )
 })
+
+test_that("conceptual diagrams can omit residual components", {
+  expect_no_error(draw_to_temporary_pdf(draw_apim_diagram(
+    "distinguishable", show_residuals = FALSE
+  )))
+  expect_no_error(draw_to_temporary_pdf(draw_apim_diagram(
+    "exchangeable", show_residuals = FALSE
+  )))
+  expect_no_error(draw_to_temporary_pdf(draw_dim_diagram(
+    show_residuals = FALSE
+  )))
+  expect_no_error(draw_to_temporary_pdf(draw_dsm_diagram(
+    show_residuals = FALSE
+  )))
+  expect_no_error(draw_to_temporary_pdf(draw_cfm_diagram(
+    show_residuals = FALSE
+  )))
+
+  expect_error(
+    draw_apim_diagram(show_residuals = NA),
+    "`show_residuals` must be TRUE or FALSE.",
+    fixed = TRUE
+  )
+})

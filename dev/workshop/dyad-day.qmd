@@ -24,21 +24,6 @@ execute:
 editor: source
 ---
 
-<!--
-!TODO: 
-
-  Development checklist:
-
-  - Fit and interpret the distinguishable APIM
-  - Explain residual interdependence
-  - Introduce distinguishability and equality constraints
-  - Fit and interpret the exchangeable APIM
-  - Demonstrate APIM–DIM equivalence
-  - Add brief DSM and CFM examples
-  - Add model-choice recap
-
--->
-
 ```{r}
 #| label: setup-pilot-data
 #| include: false
@@ -61,6 +46,20 @@ if (is.na(diagram_helper)) {
 
 sys.source(
   normalizePath(diagram_helper),
+  envir = knitr::knit_global()
+)
+
+
+# FUNCTION TO FIT EARLY MODELS --------------------------------------
+
+early_models_file <- if (file.exists(file.path("R", "fit-early-models.R"))) {
+  file.path("R", "fit-early-models.R")
+} else {
+  file.path("dev", "workshop", "R", "fit-early-models.R")
+}
+
+sys.source(
+  normalizePath(early_models_file),
   envir = knitr::knit_global()
 )
 
@@ -141,7 +140,7 @@ distribution_plot <- function(data, variables, bin_widths) {
 
 - Turu & Pascal
 - Tell us about you and your dyadic data!
-  - Name, Affiliation & Career stage
+  - Name, affiliation & career stage
   - Your dyadic data and RQ
   
 <!-- ca. 15 Minutes -->
@@ -294,8 +293,8 @@ distribution_plot(
 :::
 
 ::: {.fragment}
-Other noteable models include the mutual influence model (iida?) and the 
-truth-and bias model (ref?). !TODO: also add others? or omit?
+Other approaches include **mutual-influence models**, which represent reciprocal
+influence between partners [@iidaModelsInterdependentIndividuals2018, p. 63].
 :::
 
 <!-- ca. 3 Minutes -->
@@ -313,14 +312,98 @@ see how we can use it to answer our research question (in what way). "
 - **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
 - **Common fate model (CFM)**: latent dyadic process
 
-Other noteable models include the mutual influence model (iida?) and the 
-truth-and bias model (ref?). !TODO: also add others?
+Other approaches include **mutual-influence models**, which represent reciprocal
+influence between partners [@iidaModelsInterdependentIndividuals2018, p. 63].
 
 <!-- ca. 3 Minutes -->
 
-## The distinguishable APIM
+## The distinguishable APIM - Conceptually
 
-<!-- probably add sub-RQ here -->
+```{r}
+#| label: conceptual-distinguishable-apim-paths-only
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual distinguishable APIM with actor and partner paths."
+
+draw_apim_diagram("distinguishable", show_residuals = FALSE)
+```
+
+::: {.notes}
+
+Explain actor and partner effects only and briefly. Not talking about residuals yet. 
+-> to set up next slide
+
+:::
+
+<!-- ca. 2 Minutes -->
+
+## Can we just estimate separate regression equations for each partner?
+
+Do two separate models like this work?
+
+
+$$
+  \begin{gathered}
+  \\[1em]
+  Y_{male_i}
+  = b_{0M} + b_{1M}X_{male_i} + b_{2M}X_{female_i} + \epsilon_{male_i}
+  \\[2em]
+  Y_{female_i}
+  = b_{0F} + b_{1F}X_{female_i} + b_{2F}X_{male_i} + \epsilon_{female_i}
+  \end{gathered}
+$$
+
+
+<!-- ca. 1 minute 
+
+glmmTMB(
+  outcome_male ~ 1 + X_male + X_female,
+  
+  data = data,
+  family = gaussian()
+) 
+
+glmmTMB(
+  outcome_female ~ 1 + X_male + X_female,
+  
+  data = data,
+  family = gaussian()
+) 
+
+-->
+
+## Can we just estimate separate regression equations for each partner?
+
+Yes! But then we: 
+
+:::{.incremental}
+- can't test whether the two actor effects or partner effects are equal
+- can't pool equal paths into a shared estimate, which can increase power
+- ignore unmodelled sources of interdependence between partners
+  - joint modelling tells us how much interdependence remains after accounting for the predictors
+  - we can find out how much covariance is explained by our predictors
+
+:::
+
+[@kennyPartnerEffectsRelationship1999, pp. 439–440;
+@iidaModelsInterdependentIndividuals2018, pp. 68–69]{.subtle}
+
+:::{.notes}
+
+The reduction in residual covariance indicates how much of the original 
+within-dyad covariance is accounted for by the predictors.
+  
+:::
+
+<!-- ca. 2 minutes -->
+
+:::{.notes}
+Thus, we need to properly account for non-explained non-independence! 
+E.g., correlated residuals.
+:::
 
 ## The distinguishable APIM
 
@@ -336,64 +419,17 @@ truth-and bias model (ref?). !TODO: also add others?
 draw_apim_diagram("distinguishable")
 ```
 
-::: {.notes}
-
-Explain actor and partner effects only and briefly. Not talking about residuals yet. 
--> to set up next slide
-
+:::{.notes}
+Explain correlated residuals and explain residual variances and how they have 
+a variance that can be different, and why. 
 :::
 
 <!-- ca. 2 Minutes 
 
-
-!TODO: 
-  The current APIM diagram already shows residuals and their correlation, even though the notes say not to discuss them yet.
-  That reveals the answer before the separate-regressions question.
-
-  A cleaner progression would be:
-
-  - APIM diagram with only actor and partner paths
-  - “Could these simply be two separate regressions?”
-  - Same APIM diagram, now adding correlated residuals
-  - “This is what fitting both equations jointly adds”
-
-  That would make the regression slides an effective problem–solution transition.
+Should we have a slide that explains residual covariances visually?
+And correlated residuals?
 
 -->
-
-## Can we just estimate separate regression equations for each partner?
-
-Do two separate models like this work?
-
-<br>
-
-**Male model:** $\qquad Y_{male_i} = b_{0M} + b_{1M} \times X_{male_i} + b_{2M} \times  X_{female_i} + \epsilon_{male_i}$ 
-
-<br>
-
-**Female model:** $\quad Y_{female_i} = b_{0F} + b_{1F} \times X_{male_i} + b_{2F} \times  X_{female_i} + \epsilon_{female_i}$ 
-
-<!-- ca. 2 minutes (ask students what issues) -->
-
-## Why not just separate regression equations for each partner?
-
-Yes, but:
-
-:::{.incremental}
-- Can't formally test whether the two actor effects or partner effects are different for males and females.
-- Can't pool equal paths into a shared estimate, which can increase power.
-- Ignores unmodelled sources of non-independence between partners. 
-- A joint dyadic model can tell us how much of the interdependence is explained.
-:::
-
-[@kenny2006dyadic; @laurenceauBolger2026]{.subtle}
-
-<!-- ca. 2 minutes -->
-
-:::{.notes}
-Thus, we need to properly account for non-explained non-independence! 
-E.g., correlated residuals.
-:::
 
 ## Interpreting the fit of the actor partner interdependence model
 
@@ -406,11 +442,26 @@ And then interpret the actor path values and residual values and correlation -->
 ## The exchangeable APIM
 
 Sometimes: 
+
 - partners may not be theoretically distinguishable
 - we may have mixed dyad types that we want to pool
 - we want to test whether partners are meaningfully distinguishable
 
-Then, we may fit an exchangeable model that imposes symmetry
+$\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
+
+## The exchangeable APIM
+
+```{r}
+#| label: conceptual-exchangeable-apim-paths-only
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual exchangeable APIM with pooled actor and partner paths."
+
+draw_apim_diagram("exchangeable", show_residuals = FALSE)
+```
 
 ## The exchangeable APIM
 
@@ -429,6 +480,20 @@ draw_apim_diagram("exchangeable")
 ## The DIM: another parameterization of an exchangeable APIM
 
 ```{r}
+#| label: conceptual-dim-paths-only
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual DIM with dyad-mean and member-deviation paths."
+
+draw_dim_diagram(show_residuals = FALSE)
+```
+
+## The DIM: another parameterization of an exchangeable APIM
+
+```{r}
 #| label: conceptual-dim
 #| echo: false
 #| fig-width: 9
@@ -438,6 +503,20 @@ draw_apim_diagram("exchangeable")
 #| fig-alt: "Conceptual DIM separating dyad-mean and member-deviation effects."
 
 draw_dim_diagram()
+```
+
+## The DSM: a mean-and-difference parameterization of the distinguishable APIM
+
+```{r}
+#| label: conceptual-dsm-paths-only
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual DSM with paths between predictor and outcome scores."
+
+draw_dsm_diagram(show_residuals = FALSE)
 ```
 
 ## The DSM: a mean-and-difference parameterization of the distinguishable APIM
@@ -495,6 +574,20 @@ distribution_plot(
     mvpa_joint = 7.5
   )
 )
+```
+
+## The CFM
+
+```{r}
+#| label: conceptual-cfm-paths-only
+#| echo: false
+#| fig-width: 10
+#| fig-height: 5.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual Common Fate Model with shared latent levels."
+
+draw_cfm_diagram(show_residuals = FALSE)
 ```
 
 ## The CFM

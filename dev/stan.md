@@ -3,7 +3,7 @@
 **Status:** implementation roadmap  
 **Target:** future inclusion in an R package for dyadic longitudinal models  
 **Model class:** Gaussian two-person dyadic residual VAR(1) models  
-**Last updated:** 2026-07-14
+**Last updated:** 2026-07-16
 
 ---
 
@@ -36,7 +36,9 @@ The central corrections and design choices are:
 
 - Treat `rho` as an **innovation correlation**, not as the total marginal same-day residual correlation.
 - Report marginal residual correlations separately as derived quantities.
-- Use an **orthonormal sum--difference transform** internally for exchangeable dyads.
+- Treat the dyad-occasion and its two-member vector as the canonical dynamic unit, while retaining stacked member rows for flexible mean-model design matrices.
+- Use the **orthonormal sum--difference transform** as an exact exchangeable Gaussian parameterization and computational specialization, not as a separate univariate model architecture.
+- Treat any later non-Gaussian dynamic model as a new observation/state design decision, not as a mechanical family substitution.
 - Enforce exchangeable label invariance in both the residual VAR and the random-effect structure.
 - For exchangeable dyads, do **not** freely estimate covariance between shared and arbitrary difference random effects by default.
 - Use stationary initial likelihoods for exchangeable models.
@@ -53,7 +55,7 @@ This roadmap intentionally starts with a specialized and constrained model. It i
 
 The purpose of this roadmap is to define how to implement dyadic VAR-style residual models in Stan in a way that is statistically coherent, computationally stable, and eventually package-ready.
 
-The package should cover a class of models that high-level interfaces such as `brms`, `glmmTMB`, `lme4`, and `nlme` do not currently express cleanly:
+The package should cover combinations of residual dynamics, exchangeability constraints, mixed dyad compositions, and state or missingness handling that high-level interfaces such as `brms`, `glmmTMB`, `lme4`, and `nlme` do not currently express together cleanly:
 
 - exchangeable or indistinguishable dyads, such as same-gender couples, friends, siblings, or same-role pairs;
 - distinguishable dyads, such as female--male couples, mother--child dyads, therapist--client dyads, or patient--caregiver dyads;
@@ -151,9 +153,10 @@ expanding the first Stan implementation:
   separating the trend from residual autoregression. The planned residual VAR
   should keep the mean trend and residual transition equations distinct.
 - A full multivariate dynamic model should estimate own- and cross-partner
-  transitions jointly with same-occasion innovation covariance. Separate
-  univariate mixed models cannot generally recover all innovation and
-  cross-outcome random-coefficient correlations directly.
+  transitions jointly with same-occasion innovation covariance. Conditionally
+  independent scalar observation equations do not themselves supply innovation
+  covariance, although a joint hierarchical model can still correlate group
+  effects across equations. These levels of dependence must not be conflated.
 - Discrete lag coefficients are tied to a specific elapsed-time unit. Ragged
   records and omitted occasions must not silently turn the previous available
   observation into a lag-1 observation. Gap-aware transitions, and eventually
@@ -201,7 +204,7 @@ The mean model should eventually support:
 
 However, the implementation should begin with simple mean models, because dynamic residual parameters can be hard to identify when the mean model is too rich.
 
-The dynamic process should always be applied to residuals:
+Within the current Gaussian RDSEM target, the dynamic process is applied to residuals:
 
 $$
 r_{cmt} = y_{cmt} - \mu_{cmt}.
@@ -326,6 +329,125 @@ Gamma_0        = stationary marginal residual covariance matrix
 
 This distinction should appear in documentation, printed summaries, tidy output, and generated quantities.
 
+## 2.4 Likelihood architecture and future extensibility
+
+"Univariate" versus "multivariate" Stan can refer to several different things:
+
+- whether the input data contain one member row or one paired dyad-occasion row;
+- whether the mean model is written as one stacked equation or as two response-specific equations;
+- whether Stan evaluates independent scalar likelihood contributions or one joint density for the member pair.
+
+These choices should not be conflated. A long scalar-response design and two
+response-specific formulas can encode the same Gaussian VAR mean. The important
+statistical distinction is whether the two member innovations at a dyad-occasion
+are modeled jointly. Merely stacking two scalar likelihood contributions implies
+conditional independence unless dependence is introduced elsewhere.
+
+The package should therefore use a hybrid architecture:
+
+1. Build the mean model from stacked member or equation design rows. This keeps
+   actor and partner terms, role interactions, random slopes, and parameter
+   sharing manageable in R.
+2. Pair those rows by dyad-occasion and assemble the raw observations and, as
+   required by the model class, Gaussian residuals or latent states into vectors.
+3. Apply the dyad-vector transition and observation kernels appropriate to the
+   model class, with the correct parameter map for the dyad type. In the initial
+   Gaussian residual VAR, these reduce to one joint residual transition density.
+
+For the initial Gaussian residual VAR, the canonical raw-space transition is:
+
+$$
+\mathbf r_{ct}
+\mid
+\mathbf r_{c,t-1}
+\sim
+MVN(A_g\mathbf r_{c,t-1}, \Sigma_{\epsilon,g}).
+$$
+
+Distinguishable dyads use a free role-ordered \(A_g\) and
+\(\Sigma_{\epsilon,g}\). Exchangeable dyads use swap-invariant parameter maps
+for those same objects. The \(U/V\) representation is an exact diagonalization
+of this constrained Gaussian vector likelihood. It may be used internally for
+stationarity, sampling efficiency, and validation, but it should not define a
+different public model family or require transformed outcomes in the package
+interface.
+
+Multivariate `brms` Gaussian models are useful reference implementations where
+their manifest or residual specification matches the target likelihood. Their
+multiple-response syntax illustrates equation-specific design matrices and
+correlated group effects. It does not settle the package architecture: in
+`brms`, residual correlations are currently available only for multivariate
+Gaussian and Student models. See the official
+[`brms` multivariate documentation](https://paulbuerkner.com/brms/articles/brms_multivariate.html)
+and [`mvbrmsformula` reference](https://paulbuerkner.com/brms/reference/mvbrmsformula.html).
+
+### Non-Gaussian boundary
+
+Non-Gaussian outcomes must not be treated as a drop-in family replacement for
+the Gaussian residual VAR. Binary and count outcomes do not have a freely
+estimated additive residual covariance on their observed scale, and transforming
+their observed values to \(U/V\) does not preserve Bernoulli, Poisson, or related
+families.
+
+A later non-Gaussian design review should distinguish at least:
+
+1. an observation-driven or manifest generalized VAR that conditions each
+   outcome on the observed lagged outcome vector;
+2. a latent vector-state model in which a Gaussian dyadic state follows a VAR
+   and each observed member outcome has a family-specific observation model;
+3. a purpose-built joint model, such as multivariate probit or a justified
+   copula construction.
+
+If retaining correlated dynamic innovations is the priority, the latent
+vector-state route is the leading candidate. In that case \(U/V\) may still
+diagonalize an exchangeable latent Gaussian state, while the observation model
+remains in the original member basis. This is a later model-class decision, not
+part of the first Gaussian implementation.
+
+A generic form to evaluate later is:
+
+$$
+\mathbf h_{ct}
+\mid
+\mathbf h_{c,t-1}
+\sim
+MVN(A_g\mathbf h_{c,t-1}, Q_g),
+\qquad
+y_{cmt}
+\mid
+h_{cmt}
+\sim
+F_m\!\left(g_m^{-1}(\mu_{cmt}+h_{cmt})\right).
+$$
+
+Here dynamic innovation covariance lives on the latent or link scale, not as a
+free residual correlation between the observed non-Gaussian outcomes. For
+exchangeable dyads, the observation family, link, dispersion parameters, and
+loadings would also have to be swap-invariant.
+
+### Interactions and later multiple-process models
+
+Interactions among exogenous predictors in the conditional mean belong in the
+stacked design matrices and do not require a different dynamic kernel. For
+exchangeable dyads, however, the complete generated mean must remain equivariant
+to swapping members; arbitrary member-label interactions are not allowed.
+Interactions involving latent processes, observation parameters, mediated paths,
+or entries of \(A_g\) belong to their respective future model layers. In
+particular, moderation of \(A_g\) makes stationarity predictor-dependent.
+
+If \(P\) swaps the two members, the required mean-model condition is:
+
+$$
+\mu(Px)=P\mu(x).
+$$
+
+Keep the member index and the outcome or process index distinct in internal
+metadata, even though the first implementation has two members and one outcome
+per member. With \(K\) substantive processes, a later joint dynamic model could
+use a \(2K\)-dimensional state without redefining what a member is. This only
+preserves an extension path. Longitudinal mediation would still require its own
+temporal ordering, structural assumptions, and identification review.
+
 ---
 
 ## 3. Technical implementation principles
@@ -344,6 +466,7 @@ Relevant Stan resources:
 
 - Stan User's Guide: multivariate hierarchical priors and Cholesky/non-centered parameterizations  
   <https://mc-stan.org/docs/2_31/stan-users-guide/multivariate-hierarchical-priors.html>
+- Stan User's Guide: [multivariate outcomes and joint error structures](https://mc-stan.org/docs/stan-users-guide/regression.html#multivariate-outcomes)
 - Stan User's Guide: time-series models and autoregressive likelihoods  
   <https://mc-stan.org/docs/stan-users-guide/time-series.html>
 - Stan User's Guide: missing data  
@@ -452,7 +575,8 @@ Later versions should use transition records rather than relying on rectangular 
 
 ## 4.3 Orthonormal sum--difference parameterization
 
-Use the orthonormal transform internally:
+For the exchangeable Gaussian kernel, use the orthonormal transform internally
+while retaining the raw member vector as the canonical model interface:
 
 $$
 U_{ct}
@@ -579,6 +703,12 @@ V_t \mid V_{t-1}
 \sim
 N(\phi_D V_{t-1}, \sigma_V).
 $$
+
+This independence holds in the transformed Gaussian basis under the
+exchangeability constraints. The resulting density is algebraically identical
+to the constrained bivariate normal transition in raw member space. Both forms
+should be retained in validation code even if the \(U/V\) form is used for
+sampling.
 
 ## 4.5 Exchangeable marginal residual correlation
 
@@ -1391,6 +1521,28 @@ Partner carryover should usually remain more type-specific because directional p
 
 # 7. Data representation
 
+The public R data contract should remain one long row per member-occasion. The
+mean-model builder can therefore construct stacked member-level design matrices,
+while the transition table pairs the two rows and connects each dyad-occasion to
+its predecessor. Stan may receive `vector[2]` outcomes or states even though the
+user never reshapes the data to a wide multivariate response.
+
+Input shape does not determine likelihood independence. The transition table is
+the indexing bridge between the long observation and design layer and the joint
+dyad-vector dynamic layer.
+
+The two internal axes should be named separately:
+
+```text
+member index:   the two people in a dyad
+process index:  the substantive outcome, initially one
+```
+
+For exchangeable dyads, member slots are arbitrary but must remain stable for the
+entire observed trajectory. Label invariance means that the two complete member
+trajectories may be swapped without changing the likelihood; it does not mean
+that member slots may be reassigned independently at each occasion.
+
 ## 7.1 Balanced arrays for early prototypes
 
 For version 0.1, balanced arrays are acceptable:
@@ -1407,7 +1559,11 @@ This is simple and ideal for proving the first exchangeable model.
 
 ## 7.2 Transition records for the package data layer
 
-For the package, the internal R data builder should move toward one row per complete dyad-day or dyad transition.
+The package should retain the long member table and build a separate paired
+occasion/transition index. Give that index one row per current complete
+dyad-occasion. The two member-row indices identify the current pair, and
+`prev_obs_index` identifies the preceding paired occasion and therefore the
+transition edge. Initial occasions have no preceding edge.
 
 A robust transition table should include:
 
@@ -1527,9 +1683,16 @@ One-partner missingness should not be included early. In a dynamic dyadic VAR, a
 
 # 8. Stan implementation architecture
 
+The exchangeable and distinguishable templates implement one canonical
+dyad-vector model through different parameter maps and, where useful, different
+Gaussian factorizations. A raw-member-space multivariate normal transition should
+serve as the common reference density. The exchangeable \(U/V\) implementation
+is an exact specialized kernel whose stationarity and sampling advantages can be
+retained without making transformed outcomes the package architecture.
+
 ## 8.1 Exchangeable Stan skeleton
 
-Use orthonormal \(U,V\) internally.
+The first exchangeable skeleton uses orthonormal \(U,V\) internally.
 
 ```stan
 data {
@@ -2252,6 +2415,7 @@ simulate_mixed_composition_var()
 check_parameter_recovery()
 check_label_invariance()
 check_stationarity()
+check_basis_likelihood_equivalence()
 ```
 
 Tasks:
@@ -2262,6 +2426,9 @@ store true parameters in structured objects
 write log-density checkers
 write simple plotting helpers
 create tiny deterministic test datasets
+build long-to-paired transition indexing
+verify raw dyad-vector and exchangeable U/V log-density equivalence
+compare against an independent multivariate Gaussian reference where the likelihoods coincide
 ```
 
 No real-data modeling should happen before this stage works.
@@ -2456,6 +2623,12 @@ measurement models
 
 These are valid future extensions, but including them early would make it much harder to know whether failures are caused by the core VAR model, random effects, missingness, code generation, or identifiability.
 
+Before adding any non-Gaussian family, require a separate architecture gate that
+defines whether the target is manifest and observation-driven, latent-state, or
+a purpose-built joint observation model. Document the scale on which dynamics
+and same-occasion dependence live. Do not advertise non-Gaussian support through
+a mechanical `family` substitution.
+
 ---
 
 # 13. Practical implementation notes
@@ -2583,21 +2756,29 @@ The core implementation path is:
 ```text
 1. Build simulators and validation tools.
 2. Implement exchangeable Gaussian balanced models.
-3. Use orthonormal sum-difference residual VAR internally.
-4. Treat rho as rho_innov, not marginal residual correlation.
-5. Report rho_marginal separately.
-6. Use stationary initial likelihood for exchangeable models.
-7. Use block-diagonal shared/difference random-effect covariance for exchangeable dyads.
-8. Implement distinguishable role-ordered VAR with regularizing priors and posterior stationarity checks.
-9. Build transition-record preprocessing before serious missing-data support.
-10. Implement mixed-composition models without partial pooling.
-11. Add partial pooling only after separate type-specific mixed-composition models are validated.
-12. Add one-partner missingness and DSEM-style extensions only after the core package is stable.
+3. Use a joint two-member transition as the canonical dynamic kernel.
+4. Use orthonormal sum-difference coordinates as the exact exchangeable Gaussian specialization.
+5. Treat rho as rho_innov, not marginal residual correlation.
+6. Report rho_marginal separately.
+7. Use stationary initial likelihood for exchangeable models.
+8. Use block-diagonal shared/difference random-effect covariance for exchangeable dyads.
+9. Implement distinguishable role-ordered VAR with regularizing priors and posterior stationarity checks.
+10. Build transition-record preprocessing before serious missing-data support.
+11. Implement mixed-composition models without partial pooling.
+12. Add partial pooling only after separate type-specific mixed-composition models are validated.
+13. Add one-partner missingness and DSEM-style extensions only after the core package is stable.
+14. Treat non-Gaussian dynamics as a separate model-class design gate rather than a family substitution.
 ```
 
 The central conceptual distinction is:
 
 ```text
+shared architecture:
+  stacked long member/equation mean-model layer
+  paired two-member transition or state layer
+  separate transition and observation kernels
+  distinct member and substantive-process indices
+
 exchangeable dyads:
   label-invariant actor/partner dynamics
   sum-difference diagonalization
@@ -2616,4 +2797,8 @@ mixed-composition models:
   partial pooling later
 ```
 
-The custom Stan route is harder than forcing the problem into existing high-level mixed-model syntax, but it is statistically cleaner. The dyadic residual VAR process is explicit, exchangeability constraints are transparent, distinguishable roles are modeled directly, and the eventual package can generate models that match the substantive dyadic structure instead of approximating it indirectly.
+Custom Stan should reuse the equation-design and parameter-sharing ideas
+demonstrated by multivariate interfaces such as `brms`. Its justification is the
+explicit joint residual transition process, exchangeability-safe parameter maps,
+mixed-composition support, and later state or missingness extensions—not the use
+of different surface syntax.
