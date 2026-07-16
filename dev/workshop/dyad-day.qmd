@@ -76,6 +76,18 @@ sys.source(
   envir = knitr::knit_global()
 )
 
+apim_exchangeability_file <- if (
+    file.exists(file.path("R", "draw-apim-exchangeability.R"))) {
+  file.path("R", "draw-apim-exchangeability.R")
+} else {
+  file.path("dev", "workshop", "R", "draw-apim-exchangeability.R")
+}
+
+sys.source(
+  normalizePath(apim_exchangeability_file),
+  envir = knitr::knit_global()
+)
+
 data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds"
 
 pilot <- readRDS(data_file) |>
@@ -308,6 +320,7 @@ support_distribution_plot <- ggplot(
 ```{r}
 #| label: pilot-support-distributions-by-role
 #| echo: false
+#| dev: svglite
 #| fig-width: 12
 #| fig-height: 5.1
 #| out-width: 100%
@@ -336,6 +349,7 @@ support_distribution_plot
 ```{r}
 #| label: pilot-mvpa-distributions-by-role
 #| echo: false
+#| dev: svglite
 #| fig-width: 12
 #| fig-height: 5.1
 #| out-width: 100%
@@ -376,6 +390,7 @@ ggplot(pilot_aggregated,
 ```{r}
 #| label: apim-use-plot
 #| echo: false
+#| dev: svglite
 #| fig-alt: "A horizontal bar showing that more than 85% of 998 coded dyadic studies used an APIM or APIM variant, leaving fewer than 15% for all other model specifications combined."
 #| out-width: 100%
 
@@ -482,7 +497,7 @@ outcomes.
 statement to foreshadow that some interdependence may remain after prediction;
 do not introduce residual parameters yet.-->
 
-## The distinguishable APIM -->
+## The distinguishable APIM
 
 
 <!-- ca. 2 Minutes -->
@@ -509,7 +524,7 @@ But more on the residuals later!!!
 
 ## How to estimate actor and partner effects?
 
-Conceptually (and practically), we are esimating these two equations in a single model:
+Conceptually (simplified), we are esimating these two equations in a single model:
 
 $$
   \begin{gathered}
@@ -524,24 +539,31 @@ $$
 <br>
 [Could we just use two separate models?]{.fragment}
 
+## Could we just use two separate models?
 
-<!-- ca. 1 minute 
+### Male model
 
-glmmTMB(
-  outcome_male ~ 1 + X_male + X_female,
+```{r eval = FALSE}
+male_model <- glmmTMB(
   
-  data = data,
-  family = gaussian()
+  outcome_male ~ X_male + X_female,
+  
+  data = data
+)
+```
+<br>
+
+### Female model
+
+```{r eval = FALSE}
+female_model <- glmmTMB(
+  
+  outcome_female ~ X_female + X_male,
+  
+  data = data
 ) 
 
-glmmTMB(
-  outcome_female ~ 1 + X_male + X_female,
-  
-  data = data,
-  family = gaussian()
-) 
-
--->
+```
 
 ## Could we just use two separate models?
 
@@ -555,14 +577,16 @@ glmmTMB(
 
 :::
 
+::: {.bottom-reference}
 [@kennyPartnerEffectsRelationship1999, pp. 439–440;
-@iidaModelsInterdependentIndividuals2018, pp. 68–69]{.subtle}
+@iidaModelsInterdependentIndividuals2018, pp. 68–69]
+:::
 
 :::{.notes}
 
 The reduction in residual covariance indicates how much of the original 
 within-dyad covariance is accounted for by the predictors.
-  
+
 :::
 
 <!-- ca. 3 minutes -->
@@ -571,6 +595,33 @@ within-dyad covariance is accounted for by the predictors.
 Thus, we should model non-explained non-independence! 
 E.g., correlated residuals.
 :::
+
+## Residual interdependence in the distinguishable APIM
+
+```{r}
+#| label: conceptual-distinguishable-apim
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
+
+draw_apim_diagram("distinguishable")
+```
+
+:::{.notes}
+
+Map the preceding visual onto the APIM notation:
+
+- Each outcome has a residual, epsilon.
+- The residual standard deviations, sigma, may differ between distinguishable
+  partners. Their squares are the residual variances from the previous slide.
+- The curved double-headed arrow is the residual correlation, rho(FM).
+
+:::
+
+<!-- ca. 1 Minute -->
 
 ## What remains after prediction?
 
@@ -643,34 +694,7 @@ Then move to the right-hand side:
 
 <!-- ca. 3 Minutes -->
 
-## Residual interdependence in the distinguishable APIM
-
-```{r}
-#| label: conceptual-distinguishable-apim
-#| echo: false
-#| fig-width: 9
-#| fig-height: 4.8
-#| out-width: 100%
-#| fig-align: center
-#| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
-
-draw_apim_diagram("distinguishable")
-```
-
-:::{.notes}
-
-Map the preceding visual onto the APIM notation:
-
-- Each outcome has a residual, epsilon.
-- The residual standard deviations, sigma, may differ between distinguishable
-  partners. Their squares are the residual variances from the previous slide.
-- The curved double-headed arrow is the residual correlation, rho(FM).
-
-:::
-
-<!-- ca. 1 Minute -->
-
-## Fitting the APIM
+## Fitting the distinguishable APIM
 
 ```{r}
 #| label: fitted-distinguishable-apim
@@ -790,8 +814,47 @@ concepts were introduced visually just a few slides earlier.
 
 <!-- ca. 3 Minutes -->
 
+## Exchangeability constraints
 
-## Interpreting the fit of the exchangeable APIM
+```{r}
+#| label: apim-exchangeability-comparison
+#| echo: false
+#| dev: svglite
+#| fig-width: 10.5
+#| fig-height: 5.2
+#| out-width: 95%
+#| fig-align: center
+#| fig-alt: "Distinguishable and exchangeable APIM equations, predictions, and residual constraints."
+
+draw_apim_exchangeability_comparison()
+```
+
+:::{.notes}
+
+- On the left, intercepts, actor effects, partner effects, and residual standard
+  deviations may differ by role.
+- Follow each prediction from its intercept through the actor contribution in
+  blue and the partner contribution in purple. The arrows are offset downward
+  only to keep the labels readable; their horizontal lengths are the modeled
+  contributions.
+- The open circle is the conditional prediction. The nearby dots represent
+  illustrative observed outcomes, and the arrow labelled epsilon isolates one
+  residual as the distance from the prediction to an observation.
+- On the right, the same intercept, actor effect, partner effect, and residual
+  standard deviation are used for both arbitrary member positions.
+- The shared values are refitted under the equality constraints; they are not
+  arithmetic averages of the role-specific estimates.
+- Shared coefficients do not imply identical predictions: the actor and partner
+  predictor values are exchanged between the two equations.
+- Equal residual variance is a constraint on the modeled residual distribution,
+  not a claim that the two members have identical residual values.
+- In both models, partners' residuals may still be correlated.
+
+:::
+
+<!-- ca. 2 Minutes -->
+
+## Fitting the exchangeable APIM
 
 ```{r}
 #| label: fitted-exchangeable-apim
@@ -828,7 +891,7 @@ In other words, these predictors express:
 
 <!-- ca. 2 Minutes -->
 
-## The DIM
+## DIM predictors are APIM predictors in disguise!
 
 ```{r}
 #| label: interactive-apim-dim-grid
@@ -878,8 +941,24 @@ draw_dim_diagram()
 no details on why no correlations, just saying that info of both partners are in both resids
 -->
 
+:::{.notes}
 
-## Interpreting the fit of the DIM
+Where did the residual correlation go? It is built into these two residuals. 
+
+The mean residual captures whether both partners are higher or lower than 
+predicted. --> Can capture positive correlation between the partners!
+
+The deviation residual captures whether one partner is higher while the
+other is lower. --> can capture negative correlation between the partners!
+
+$$
+\operatorname{Cov}(e_1,e_2)
+=\operatorname{Var}(M)-\operatorname{Var}(D).
+$$
+
+:::
+
+## Fitting the DIM
 
 ```{r}
 #| label: fitted-dim
@@ -930,7 +1009,7 @@ draw_dsm_diagram(show_residuals = FALSE)
 draw_dsm_diagram()
 ```
 
-## Interpreting the fit of the DSM
+## Fitting the DSM
 
 ```{r}
 #| label: fitted-dsm
@@ -980,6 +1059,7 @@ planning** across the 55 days.
 ```{r}
 #| label: pilot-planning-distributions-by-role
 #| echo: false
+#| dev: svglite
 #| fig-width: 12
 #| fig-height: 5.1
 #| out-width: 100%
@@ -1018,6 +1098,7 @@ ggplot(pilot_aggregated,
 ```{r}
 #| label: pilot-joint-mvpa-distributions-by-role
 #| echo: false
+#| dev: svglite
 #| fig-width: 12
 #| fig-height: 5.1
 #| out-width: 100%

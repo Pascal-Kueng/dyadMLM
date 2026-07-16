@@ -217,6 +217,25 @@
   color: inherit;
 }
 
+/* Keep source citations stable while preceding fragments are revealed. */
+.reveal .bottom-reference {
+  position: absolute;
+  right: 0;
+  bottom: 1.45em;
+  left: 0;
+  margin: 0;
+  color: var(--uzh-muted);
+  font-size: 0.76em;
+}
+
+.reveal .bottom-reference p {
+  margin: 0;
+}
+
+.reveal .bottom-reference a {
+  color: inherit;
+}
+
 .reveal .text-highlight {
   padding: 0;
   border-radius: 0.12em;
@@ -472,7 +491,7 @@
   gap: 12px;
   align-items: stretch;
   margin: 0 2.8% 7px;
-  font-size: 15px;
+  font-size: 17px;
   text-align: left;
 }
 
@@ -536,7 +555,7 @@
   border-radius: 8px;
   background: white;
   color: var(--uzh-blue);
-  font: 650 15px/1 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  font: 650 17px/1 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
   cursor: pointer;
 }
 
@@ -576,7 +595,7 @@
 
 .reveal .residual-concepts-svg .rc-subtitle {
   fill: #64748b;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .reveal .residual-concepts-svg .rc-panel-background {
@@ -586,7 +605,7 @@
 }
 
 .reveal .residual-concepts-svg .rc-facet-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -599,7 +618,29 @@
 .reveal .residual-concepts-svg .rc-prediction-label,
 .reveal .residual-concepts-svg .rc-tick-label {
   fill: #64748b;
-  font-size: 13px;
+  font-size: 16px;
+}
+
+.reveal .residual-concepts-svg .rc-prediction-label {
+  font-weight: 600;
+}
+
+.reveal .residual-concepts-svg .rc-prediction-label-box {
+  overflow: visible;
+  pointer-events: none;
+}
+
+.reveal .residual-concepts-svg .rc-prediction-label-box div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 4px;
+  background: rgba(248, 250, 252, 0.94);
+  color: #64748b;
+  font: 600 16px/1 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
 }
 
 .reveal .residual-concepts-svg .rc-residual-line {
@@ -617,7 +658,7 @@
 
 .reveal .residual-concepts-svg .rc-axis-title {
   fill: #263238;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
 }
 
@@ -628,7 +669,7 @@
 
 .reveal .residual-concepts-svg .rc-quadrant-label {
   fill: #94a3b8;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -660,10 +701,22 @@
   stroke-width: 1;
 }
 
-.reveal .residual-concepts-svg .rc-correlation-guide-label {
-  fill: #64748b;
-  font-size: 11px;
+.reveal .residual-concepts-svg .rc-correlation-guide-heading {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  width: 100%;
+  color: #64748b;
+  font-size: 15px;
   font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
+.reveal .residual-concepts-svg .rc-correlation-guide-heading .rc-rho {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
 }
 
 .reveal .residual-concepts-svg .rc-paired-point circle {
@@ -679,13 +732,13 @@
   width: 100%;
   height: 100%;
   color: #263238;
-  font: 700 11px/1 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  font: 700 15px/1 "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
 }
 
 .reveal .residual-concepts-caption {
   margin: -2px 0 0;
   color: var(--uzh-muted);
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.15;
   text-align: center;
 }

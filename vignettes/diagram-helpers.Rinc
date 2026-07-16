@@ -141,15 +141,20 @@ rm(
   }
 }
 
-.draw_diagram_significance_key <- function(p_values, y = 0.018) {
+.draw_diagram_significance_key <- function(
+    p_values, y = 0.018, fontsize = 10.5) {
   if (is.null(p_values)) {
     return(invisible(NULL))
   }
   grid::grid.text(
-    "* p < .05; ** p < .01; *** p < .001",
+    expression(
+      "*" ~ italic(p) < .05 * ";" ~~
+        "**" ~ italic(p) < .01 * ";" ~~
+        "***" ~ italic(p) < .001
+    ),
     x = grid::unit(0.50, "native"),
     y = grid::unit(y, "native"),
-    gp = grid::gpar(col = "#64748B", fontsize = 7.5)
+    gp = grid::gpar(col = "#64748B", fontsize = fontsize)
   )
   invisible(NULL)
 }
@@ -975,7 +980,7 @@ draw_apim_diagram <- function(
     text_x = c(0.415, 0.695),
     fontsize = 11
   )
-  .draw_diagram_significance_key(p_values, y = 0.025)
+  .draw_diagram_significance_key(p_values, y = 0.015)
 
   grid::popViewport()
   invisible(NULL)
@@ -1476,7 +1481,7 @@ draw_dsm_diagram <- function(
     text_x = c(0.35, 0.72),
     fontsize = 10
   )
-  .draw_diagram_significance_key(p_values, y = 0.012)
+  .draw_diagram_significance_key(p_values, y = 0.015)
 
   grid::popViewport()
   invisible(NULL)
@@ -1919,7 +1924,7 @@ draw_dim_diagram <- function(
     segment_starts = c(0.22, 0.56),
     text_x = c(0.405, 0.745)
   )
-  .draw_diagram_significance_key(p_values, y = 0.025)
+  .draw_diagram_significance_key(p_values, y = 0.015)
 
   grid::popViewport()
   invisible(NULL)

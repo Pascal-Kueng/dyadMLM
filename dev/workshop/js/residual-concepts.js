@@ -183,10 +183,6 @@
         drawText(left, panelLeft + 13, top + 20, label, "rc-facet-title", {
           fill: labelColour
         });
-        drawText(left, panelRight - 13, predictedY - 6, "ŷ = 10", "rc-prediction-label", {
-          "text-anchor": "end"
-        });
-
         residuals.forEach((residual, index) => {
           const x = scale(index, 0, residuals.length - 1, pointLeft, pointRight);
           const observedY = y(predicted + residual);
@@ -206,6 +202,19 @@
             class: "rc-observed-point"
           });
         });
+
+        // Keep the prediction label above the observations so the last dyad's
+        // residual cannot obscure this small but important reference value.
+        const predictionLabelBox = append(left, "foreignObject", {
+          x: panelRight - 83,
+          y: predictedY - 25,
+          width: 68,
+          height: 22,
+          class: "rc-prediction-label-box"
+        });
+        const predictionLabel = document.createElement("div");
+        predictionLabel.textContent = "ŷ = 10";
+        predictionLabelBox.appendChild(predictionLabel);
       }
 
       drawResidualPanel(
@@ -226,7 +235,7 @@
 
       femaleResiduals.forEach((unused, index) => {
         const x = scale(index, 0, femaleResiduals.length - 1, pointLeft, pointRight);
-        drawCenteredText(left, x, 427, String(index + 1), "rc-tick-label", 13, 400);
+        drawCenteredText(left, x, 429, String(index + 1), "rc-tick-label", 16, 400);
       });
       drawCenteredText(
         left,
@@ -234,12 +243,12 @@
         466,
         "Illustrative dyad (arbitrary order)",
         "rc-axis-title",
-        15,
+        17,
         600
       );
 
       const right = append(svg, "g", { class: "residual-right-panel" });
-      drawText(right, 760, 24, "Same dyads: do residuals move together?", "rc-title");
+      drawText(right, 760, 24, "Residual correlation: do partners move together?", "rc-title");
       const association = correlation > 0.05
         ? "positive association"
         : correlation < -0.05
@@ -293,7 +302,7 @@
           plotBottom + 21,
           String(tick),
           "rc-tick-label",
-          13,
+          16,
           400
         );
       });
@@ -309,13 +318,13 @@
         466,
         "Male partner residual",
         "rc-axis-title",
-        15,
+        17,
         600
       );
       const femaleAxisLabel = "Female partner residual";
       drawText(
         right,
-        736 - textWidth(femaleAxisLabel, 15, 600) / 2,
+        736 - textWidth(femaleAxisLabel, 17, 600) / 2,
         (plotTop + plotBottom) / 2,
         femaleAxisLabel,
         "rc-axis-title",
@@ -324,10 +333,10 @@
 
       // Reserve the lower-right corner for the scale-free correlation guide.
       // Negative-correlation text is kept immediately to its left.
-      const guideCenterX = plotRight - 56;
-      const guideCenterY = plotBottom - 49;
-      const guideRadius = 36;
-      const guideLeft = guideCenterX - 48;
+      const guideCenterX = plotRight - 62;
+      const guideCenterY = plotBottom - 53;
+      const guideRadius = 42;
+      const guideLeft = guideCenterX - 56;
 
       if (correlation > 0.05) {
         addMultilineText(right, ["both above", "prediction"], plotRight - 10, plotTop + 19, {
@@ -354,7 +363,7 @@
           plotTop + 19,
           "no systematic pairing",
           "rc-quadrant-label",
-          13,
+          16,
           600
         );
       }
@@ -366,13 +375,13 @@
         append(group, "circle", {
           cx: pointX,
           cy: pointY,
-          r: 10.5
+          r: 12.5
         });
         const numberBox = append(group, "foreignObject", {
-          x: pointX - 10.5,
-          y: pointY - 10.5,
-          width: 21,
-          height: 21,
+          x: pointX - 12.5,
+          y: pointY - 12.5,
+          width: 25,
+          height: 25,
           class: "rc-point-number-box"
         });
         const number = document.createElement("div");
@@ -384,22 +393,21 @@
       // raw points. Its opaque background hides any observations beneath it.
       const guideBackground = append(right, "foreignObject", {
         x: guideLeft,
-        y: guideCenterY - 42,
-        width: 96,
-        height: 84,
+        y: guideCenterY - 48,
+        width: 112,
+        height: 96,
         class: "rc-correlation-guide-background"
       });
       const guideGlass = document.createElement("div");
       guideBackground.appendChild(guideGlass);
-      drawCenteredText(
-        right,
-        guideCenterX,
-        guideCenterY - 25,
-        "scale-free ρ",
-        "rc-correlation-guide-label",
-        12,
-        600
-      );
+      const guideHeading = document.createElement("span");
+      guideHeading.className = "rc-correlation-guide-heading";
+      guideHeading.appendChild(document.createTextNode("scale-free "));
+      const guideRho = document.createElement("span");
+      guideRho.className = "rc-rho";
+      guideRho.textContent = "ρ";
+      guideHeading.appendChild(guideRho);
+      guideGlass.appendChild(guideHeading);
       append(right, "line", {
         x1: guideCenterX - guideRadius,
         y1: guideCenterY,
@@ -409,16 +417,16 @@
       });
       append(right, "line", {
         x1: guideCenterX,
-        y1: guideCenterY - 21,
+        y1: guideCenterY - 24,
         x2: guideCenterX,
-        y2: guideCenterY + 21,
+        y2: guideCenterY + 24,
         class: "rc-correlation-guide-axis"
       });
       append(right, "line", {
         x1: guideCenterX - guideRadius,
-        y1: guideCenterY + correlation * 21,
+        y1: guideCenterY + correlation * 24,
         x2: guideCenterX + guideRadius,
-        y2: guideCenterY - correlation * 21,
+        y2: guideCenterY - correlation * 24,
         class: "rc-correlation-line"
       });
     }
