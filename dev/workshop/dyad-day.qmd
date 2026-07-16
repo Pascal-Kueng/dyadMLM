@@ -347,7 +347,7 @@ accuracy in judgments of a partner [@sternAssessingAccuracyClose2018].
 
 <!-- ca. 1 Minutes -->
 
-<!-- potentially add a slide here showing how much the APIM is used vs. other models if we find a reference -->
+<!-- TODO: potentially add a slide here showing how much the APIM is used vs. other models if we find a reference -->
 
 ## The distinguishable APIM - Conceptually
 
@@ -889,7 +889,7 @@ draw_cfm_diagram(show_residuals = FALSE)
 draw_cfm_diagram()
 ```
 
-<!----------------- APPLIED PART (plus MLM vs. SEM and software) -------------->
+<!----------------- APPLIED PART (plus MLM vs. SEM and software) 
 
 TODO: Probably create a second slide deck!
 
@@ -902,7 +902,7 @@ TODO: Probably create a second slide deck!
 - lavaan -> required
 - ggplot2 -> required
 
-
+-------------->
 
 <!-- ILD-part: 
 

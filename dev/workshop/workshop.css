@@ -395,14 +395,14 @@
 
 .reveal .wdg-stage {
   display: grid;
-  grid-template-columns: minmax(250px, 1fr) minmax(180px, 0.72fr);
-  gap: 0.65em;
+  grid-template-columns: minmax(285px, 1fr) minmax(160px, 0.58fr);
+  gap: 0.55em;
   align-items: center;
 }
 
 .reveal .wdg-plot {
   display: block;
-  width: min(100%, 330px);
+  width: min(100%, 380px);
   aspect-ratio: 1;
   margin: 0 auto;
   border: 1px solid var(--uzh-rule);
