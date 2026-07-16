@@ -6,7 +6,7 @@
   --uzh-muted: #5f6b78;
   --uzh-rule: #d9dee7;
   --uzh-surface: #f6f8fb;
-  /* Semantic effect colors; keep synchronized with interdep_colors(). */
+  /* Semantic effect colors; mirror the internal vignette diagram palette. */
   --interdep-actor-effect: #1769aa;
   --interdep-partner-effect: #7b3fa1;
   --interdep-dyad-mean-effect: #c43c35;

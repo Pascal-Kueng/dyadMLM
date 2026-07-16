@@ -14,6 +14,22 @@ if (is.na(diagram_helper)) {
 }
 sys.source(diagram_helper, envir = environment())
 
+test_that("diagram effect colors retain their semantic meanings", {
+  expected <- c(
+    actor = "#1769AA",
+    partner = "#7B3FA1",
+    dyad_mean = "#C43C35",
+    member_deviation = "#8A6500"
+  )
+
+  expect_identical(.interdep_effect_colors(), expected)
+  expect_identical(
+    .interdep_effect_colors(c("partner", "actor")),
+    expected[c("partner", "actor")]
+  )
+  expect_error(.interdep_effect_colors("residual"), "Unknown effect")
+})
+
 draw_to_temporary_pdf <- function(code) {
   path <- tempfile(fileext = ".pdf")
   grDevices::pdf(path)

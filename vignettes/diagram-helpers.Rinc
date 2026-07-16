@@ -1,28 +1,31 @@
-.interdep_palette_source_candidates <- c(
-  file.path("R", "interdep-colors.R"),
-  file.path("..", "..", "R", "interdep-colors.R")
-)
-.interdep_palette_source <- .interdep_palette_source_candidates[
-  file.exists(.interdep_palette_source_candidates)
-][1]
-
-if (!exists("interdep_colors", mode = "function", inherits = TRUE) &&
-    !is.na(.interdep_palette_source)) {
-  sys.source(
-    normalizePath(.interdep_palette_source),
-    envir = environment()
+.interdep_effect_colors <- function(
+    effect = c("actor", "partner", "dyad_mean", "member_deviation")) {
+  palette <- c(
+    actor = "#1769AA",
+    partner = "#7B3FA1",
+    dyad_mean = "#C43C35",
+    member_deviation = "#8A6500"
   )
+
+  if (!is.character(effect) || anyNA(effect) || any(!nzchar(effect))) {
+    stop("`effect` must be a character vector without missing values.",
+         call. = FALSE)
+  }
+
+  unknown <- setdiff(effect, names(palette))
+  if (length(unknown) > 0L) {
+    stop(
+      "Unknown effect", if (length(unknown) == 1L) "" else "s", ": ",
+      paste(unknown, collapse = ", "), ". Available effects are: ",
+      paste(names(palette), collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+
+  palette[effect]
 }
 
-.interdep_effect_palette <- if (
-    exists("interdep_colors", mode = "function", inherits = TRUE)) {
-  interdep_colors()
-} else if (requireNamespace("interdep", quietly = TRUE) &&
-           "interdep_colors" %in% getNamespaceExports("interdep")) {
-  interdep::interdep_colors()
-} else {
-  stop("Could not load the shared `interdep_colors()` palette.", call. = FALSE)
-}
+.interdep_effect_palette <- .interdep_effect_colors()
 
 .interdep_diagram_colours <- as.list(c(
   actor = unname(.interdep_effect_palette[["actor"]]),
@@ -32,8 +35,6 @@ if (!exists("interdep_colors", mode = "function", inherits = TRUE) &&
 ))
 
 rm(
-  .interdep_palette_source_candidates,
-  .interdep_palette_source,
   .interdep_effect_palette
 )
 

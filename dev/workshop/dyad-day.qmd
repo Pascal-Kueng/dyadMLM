@@ -451,9 +451,8 @@ ggplot(model_use) +
 ```
 
 ::: {.subtle}
-Preliminary results from an ongoing systematic review ($n = 998$ coded
-articles). The authors report bounds rather than exact percentages
-[@sakalukRenewalDyadicStructural2025, p. 5].
+Preliminary results from an ongoing systematic review (APIM use coded for
+$n = 998$ eligible articles). 
 :::
 
 ## The distinguishable APIM - Conceptually
