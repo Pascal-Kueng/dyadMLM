@@ -46,9 +46,9 @@ model-specific vignettes, including the
 
 ## Preparing DSM Data
 
-A DSM requires a substantively meaningful direction. We therefore supply the
-two roles in `dsm_role_order`. In this example, `c("female", "male")` defines every
-difference as female minus male.
+A DSM requires an explicitly declared direction. This direction should be
+substantively meaningful when the directional coefficients are interpreted.
+Here, `c("female", "male")` defines every difference as female minus male.
 
 ```{r prepare-cross-dsm}
 cross_dsm_data <- prepare_interdep_data(
@@ -226,6 +226,35 @@ The random intercept variance is unexplained variation in outcome level, and
 the random role-contrast slope variance is unexplained variation in the full
 directional outcome difference. Their covariance indicates whether unexplained
 outcome level and unexplained outcome difference are associated.
+
+The curved arrow $\rho_{md}$ is the scale-free correlation between the
+outcome-mean residual and the outcome-difference residual. It is **not** the
+female-male residual correlation $\rho_{FM}$ from the APIM.
+
+The DSM uses the full female-minus-male difference:
+
+$$
+e_F = r_m + \frac{1}{2}r_d,
+\qquad
+e_M = r_m - \frac{1}{2}r_d.
+$$
+
+Therefore, this relationship applies:
+
+$$
+\operatorname{Cov}(r_m,r_d)
+=
+\frac{\operatorname{Var}(e_F)-\operatorname{Var}(e_M)}{2}.
+$$
+
+For this reason, a nonzero $\rho_{md}$ indicates that the two roles have different
+residual variances. The remaining covariance between the partners' residuals is
+
+$$
+\operatorname{Cov}(e_F,e_M)
+=
+\operatorname{Var}(r_m)-\frac{1}{4}\operatorname{Var}(r_d).
+$$
 
 ### Reversing the coding
 

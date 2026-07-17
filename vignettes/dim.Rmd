@@ -118,7 +118,8 @@ draw_dim_diagram()
 ```
 
 Uncorrelated $r_m$ and $r_{d,i}$ in the conceptual representation do not imply
-that the member residuals are independent
+that the member residuals are independent: the two component variances together
+determine the covariance between the members' residuals.
 
 The second diagram translates the same decomposition to the individual-member
 rows used by the long-format multilevel model. Each member's outcome is predicted
@@ -138,7 +139,9 @@ In `glmmTMB`, with `dispformula = ~ 0`, these random effects represent the two
 members' Gaussian residual variance and covariance.
 
 The intercept and difference contrast are specified as separate random-effects
-terms, which constrains their correlation to zero, preserving exchangeability
+terms. No additional correlation is needed because the two residual variances already
+determine the partners' residual correlation. Under exchangeability, the
+mean-deviation residual correlation is therefore fixed to zero
 [@delrosarioPracticalGuideSpecifying2025].
 
 The full model can be estimated as:
