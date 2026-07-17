@@ -18,6 +18,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
 Suggests: 
     glmmTMB,
+    htmltools,
     knitr,
     lavaan,
     marginaleffects,

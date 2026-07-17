@@ -10,7 +10,6 @@ resources:
   - uzh-logo.svg
   - charite-logo.svg
   - js/residual-concepts.js
-  - js/dim-grid.js
 format:
   revealjs:
     css: workshop.css
@@ -65,10 +64,15 @@ sys.source(
   envir = knitr::knit_global()
 )
 
-dim_grid_file <- if (file.exists(file.path("R", "dim-grid.R"))) {
-  file.path("R", "dim-grid.R")
-} else {
-  file.path("dev", "workshop", "R", "dim-grid.R")
+dim_grid_candidates <- c(
+  "dim-grid.Rinc",
+  file.path("vignettes", "dim-grid.Rinc"),
+  file.path("..", "..", "vignettes", "dim-grid.Rinc")
+)
+dim_grid_file <- dim_grid_candidates[file.exists(dim_grid_candidates)][1]
+
+if (is.na(dim_grid_file)) {
+  stop("Could not find vignettes/dim-grid.Rinc.")
 }
 
 sys.source(
@@ -229,7 +233,7 @@ may predict outcomes beyond either individual score.
 [@kuengDailyAssociationsSocialControl2026;
 @hoehenerEffectivenessSmartphoneDyadic2026]{.subtle}
 
-<!-- ca. 1 Minute -->
+<!-- ca. 1.5 Minutes -->
 
 ## Research Question 1 {.rq-slide}
 
@@ -245,6 +249,8 @@ and analyze this with different models.
 
 Basically answering differt sub-RQs each time that I will introduce.
 :::
+
+<!-- ca. 0.5 Minutes -->
 
 ## Measurement - Predictor
 
@@ -342,18 +348,6 @@ support_distribution_plot <- ggplot(
 support_distribution_plot
 ```
 
-:::{.notes}
-
-- Each panel contains one person per included dyad and shows their average daily
-  provided support across the study.
-- The histogram and density curve use the same density scale. The curve is
-  boundary-corrected at zero, so it does not extend to impossible negative
-  support values.
-- These are descriptive differences. They do not by themselves establish that
-  APIM parameters differ between roles.
-
-:::
-
 <!-- ca. 1 Minute -->
 
 ## Total MVPA by partner role
@@ -381,17 +375,6 @@ ggplot(pilot_aggregated,
   labs(x = "Average total MVPA (minutes/day)", y = "Density") +
   see::theme_modern(base_size = 16)
 ```
-
-:::{.notes}
-
-- Each panel shows person-level average daily total MVPA for one partner role.
-- Both panels use the same axes, allowing direct comparison of distributional
-  shape and spread.
-- The long right tails reflect a few participants with much higher average
-  daily MVPA. These descriptive differences should not be overinterpreted as
-  evidence that APIM parameters differ by role.
-
-:::
 
 <!-- ca. 1 Minute -->
 
@@ -443,6 +426,7 @@ $n = 998$ eligible articles)
 [@sakalukRenewalDyadicStructural2025, p. 5].
 :::
 
+<!-- ca. 1 Minute -->
 
 ## Many models to choose from
 
@@ -464,11 +448,6 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 
 <!-- ca. 3 Minutes -->
 
-::: {.notes}
-"For RQ 1 we first go with the Actor-Partner interdependence model and 
-see how we can use it to answer our research question (in what way). "
-:::
-
 ## Many models to choose from
 
 **Various dyadic models** can be used, each answering different questions!
@@ -483,7 +462,12 @@ between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
 accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 @westTruthBiasModel2011].
 
-<!-- ca. 2 Minutes -->
+::: {.notes}
+"For broad RQ 1 we first use Actor-Partner interdependence model"
+:::
+
+
+<!-- ca. 1 Minute -->
 
 
 ## The distinguishable APIM
@@ -506,15 +490,16 @@ Actor and partner effects together explain some of the covariance between partne
 outcomes. 
 :::
 
-<!-- Explain actor and partner effects only and briefly. Then reveal the final
-statement to foreshadow that some interdependence may remain after prediction;
-do not introduce residual parameters yet.-->
 
-## The distinguishable APIM
+<!-- 
+1. Explain actor and partner effects only and briefly. 
 
+2. Reveal the final statement 
+-->
 
 <!-- ca. 2 Minutes -->
 
+## The distinguishable APIM
 
 ```{r}
 #| label: conceptual-distinguishable-apim_brief
@@ -536,6 +521,8 @@ outcomes.  $\rightarrow$ But some covariance may remain!
 But more on the residuals later!!!
 :::
 
+<!-- ca. 0.5 Minutes -->
+
 ## How to estimate actor and partner effects?
 
 Conceptually (simplified), we are esimating these two equations in a single model:
@@ -552,6 +539,8 @@ $$
 $$
 <br>
 [Could we just use two separate models?]{.fragment}
+
+<!-- ca. 1 Minutes -->
 
 ## Could we just use two separate models?
 
@@ -579,6 +568,8 @@ female_model <- glmmTMB(
 
 ```
 
+<!-- ca. 0.5 Minutes -->
+
 ## Could we just use two separate models?
 
 **Yes, we could! But then we: **
@@ -605,10 +596,6 @@ within-dyad covariance is accounted for by the predictors.
 
 <!-- ca. 3 minutes -->
 
-:::{.notes}
-Thus, we should model non-explained non-independence! 
-E.g., correlated residuals.
-:::
 
 ## Residual interdependence in the distinguishable APIM
 
@@ -636,7 +623,7 @@ Map the preceding visual onto the APIM notation:
 
 :::
 
-<!-- ca. 1 Minute -->
+<!-- ca. 2 Minutes -->
 
 ## What remains after prediction?
 
@@ -676,7 +663,7 @@ if (knitr::is_html_output()) {
 
 :::{.notes}
 
-Start with the left-hand side:
+From the left:
 
 - Everyone has the same predicted value in this simplified example.
 - The x-axis identifies illustrative dyads in an arbitrary order; it is not
@@ -687,7 +674,7 @@ Start with the left-hand side:
 - Move the male variance slider: only the male residual spread changes.
 - Reset to restore the intentionally unequal residual variances.
 
-Then move to the right-hand side:
+On the right:
 
 - Every numbered point is the same dyad as on the left, combining its two
   partners' residuals.
@@ -920,7 +907,9 @@ In other words, these predictors express:
 
 dim_reparameterization_grid(
   workshop_exchangeable_apim,
-  predictor_label = "Provided support"
+  predictor_label = "Provided support",
+  outcome_label = "MVPA",
+  compact = TRUE
 )
 ```
 
@@ -1341,7 +1330,5 @@ Create exercises with data visalization, etc. Panel plots, histograms
 correlations (wb corr)?
 
 -->
-
-
 
 ## References

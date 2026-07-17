@@ -33,6 +33,22 @@
     var equationAPIM = root.querySelector('[data-wdg-equation="apim"]');
     var equationDIM = root.querySelector('[data-wdg-equation="dim"]');
     var slopeSummary = root.querySelector("[data-wdg-slopes]");
+    var fitted = Object.keys(slopes).every(function (name) {
+      return Number.isFinite(slopes[name]);
+    });
+
+    if (!fitted) {
+      equationAPIM.textContent = "Fitted slopes unavailable";
+      equationDIM.textContent = "Fitted slopes unavailable";
+      slopeSummary.textContent =
+        "Install glmmTMB and refit the models to activate this figure.";
+      root.querySelectorAll("input, button").forEach(function (control) {
+        control.disabled = true;
+      });
+      description.textContent =
+        "The coordinate grid is inactive because fitted slopes are unavailable.";
+      return;
+    }
 
     function clamp(value) {
       return Math.min(limit, Math.max(-limit, Number(value)));
@@ -106,8 +122,7 @@
       description.textContent =
         "Actor " + format(actor, 2) + ", partner " + format(partner, 2) +
         ", dyad mean " + format(mean, 2) +
-        ", and within-dyad member deviation " +
-        format(within, 2) + ".";
+        ", and within-dyad member deviation " + format(within, 2) + ".";
     }
 
     function setFromAPIM(actor, partner) {
@@ -208,9 +223,10 @@
         var isMajor = Math.abs(tick % 2) < 1e-10;
         var dash = isAxis ? null : "3 3";
         var opacity = isAxis ? "0.68" : (isMajor ? "0.44" : "0.24");
-        addLine(xPixel(tick), 30, xPixel(tick), 290, colors.partner, opacity, dash);
-        addLine(30, yPixel(tick), 290, yPixel(tick), colors.actor, opacity, dash);
-        // Diagonal lines are colored by the coordinate direction they trace.
+        addLine(xPixel(tick), 30, xPixel(tick), 290,
+          colors.partner, opacity, dash);
+        addLine(30, yPixel(tick), 290, yPixel(tick),
+          colors.actor, opacity, dash);
         addLine(xPixel(-limit), yPixel(2 * tick + limit), xPixel(limit),
           yPixel(2 * tick - limit), colors.within, opacity, dash);
         addLine(xPixel(-limit), yPixel(-limit - 2 * tick), xPixel(limit),
@@ -240,7 +256,7 @@
   }
 
   function initializeAll() {
-    document.querySelectorAll(".workshop-dim-grid").forEach(initialize);
+    document.querySelectorAll("[data-interdep-dim-grid]").forEach(initialize);
   }
 
   if (document.readyState === "loading") {
