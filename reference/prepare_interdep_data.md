@@ -75,7 +75,7 @@ prepare_interdep_data(
 
   Model-ready column families to construct. Can contain one or more of
   `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates actor and partner
-  predictors. `"dim"` creates dyad-mean and within-dyad-deviation
+  predictors. `"dim"` creates dyad-mean and within-dyad member-deviation
   predictors. `"dsm"` creates dyadic-score model predictor columns.
   `"none"` skips model-specific predictor construction after validation,
   composition inference, and optional temporal predictor decomposition,

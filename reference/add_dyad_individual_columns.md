@@ -1,7 +1,7 @@
 # Add dyad-individual predictor columns
 
-Adds Dyad-Individual Model (DIM) style dyad-mean and
-within-dyad-deviation columns for the predictors recorded in an
+Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad
+member-deviation columns for the predictors recorded in an
 `interdep_data` object. For currently supported DIMs, the data must
 contain one exchangeable dyad composition. This means distinguishable
 dyads and multiple exchangeable compositions are not supported by DIM
@@ -13,10 +13,10 @@ raw predictors and within-person components are decomposed within each
 dyad-time occasion, while between-person components are decomposed once
 within each dyad. For raw predictors, the dyad-mean column is centered
 around the grand mean of dyad means, or dyad-occasion means in
-longitudinal data, while the within-dyad-deviation column is the
+longitudinal data, while the within-dyad member-deviation column is the
 person's deviation from the uncentered dyad mean. Selected lag
 predictors additionally create lag-1 raw and within-person dyad-mean and
-within-dyad-deviation columns.
+within-dyad member-deviation columns.
 
 ## Usage
 
@@ -33,8 +33,9 @@ add_dyad_individual_columns(data)
 
 ## Value
 
-An `interdep_data` object with dyad-mean and within-dyad-deviation
-predictor columns added and DIM predictor metadata recorded.
+An `interdep_data` object with dyad-mean and within-dyad
+member-deviation predictor columns added and DIM predictor metadata
+recorded.
 
 ## Details
 

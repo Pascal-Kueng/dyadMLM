@@ -85,10 +85,10 @@ model-specific vignettes, including the <a href="apim.html">Actor-Partner Interd
 <div class="section level2">
 <h2 id="preparing-dsm-data">Preparing DSM Data<a class="anchor" aria-label="anchor" href="#preparing-dsm-data"></a>
 </h2>
-<p>A DSM requires a substantively meaningful direction. We therefore
-supply the two roles in <code>dsm_role_order</code>. In this example,
-<code>c("female", "male")</code> defines every difference as female
-minus male.</p>
+<p>A DSM requires an explicitly declared direction. This direction
+should be substantively meaningful when the directional coefficients are
+interpreted. Here, <code>c("female", "male")</code> defines every
+difference as female minus male.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -380,6 +380,34 @@ level, and the random role-contrast slope variance is unexplained
 variation in the full directional outcome difference. Their covariance
 indicates whether unexplained outcome level and unexplained outcome
 difference are associated.</p>
+<p>The curved arrow
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>m</mi><mi>d</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{md}</annotation></semantics></math>
+is the scale-free correlation between the outcome-mean residual and the
+outcome-difference residual. It is <strong>not</strong> the female-male
+residual correlation
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>F</mi><mi>M</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{FM}</annotation></semantics></math>
+from the APIM.</p>
+<p>The DSM uses the full female-minus-male difference:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mi>F</mi></msub><mo>=</mo><msub><mi>r</mi><mi>m</mi></msub><mo>+</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msub><mi>r</mi><mi>d</mi></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>e</mi><mi>M</mi></msub><mo>=</mo><msub><mi>r</mi><mi>m</mi></msub><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msub><mi>r</mi><mi>d</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+e_F = r_m + \frac{1}{2}r_d,
+\qquad
+e_M = r_m - \frac{1}{2}r_d.
+</annotation></semantics></math></p>
+<p>Therefore, this relationship applies:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Cov</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>r</mi><mi>m</mi></msub><mo>,</mo><msub><mi>r</mi><mi>d</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>e</mi><mi>F</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>e</mi><mi>M</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{Cov}(r_m,r_d)
+=
+\frac{\operatorname{Var}(e_F)-\operatorname{Var}(e_M)}{2}.
+</annotation></semantics></math></p>
+<p>For this reason, a nonzero
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>m</mi><mi>d</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{md}</annotation></semantics></math>
+indicates that the two roles have different residual variances. The
+remaining covariance between the partners’ residuals is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Cov</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>e</mi><mi>F</mi></msub><mo>,</mo><msub><mi>e</mi><mi>M</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>r</mi><mi>m</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mfrac><mn>1</mn><mn>4</mn></mfrac><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>r</mi><mi>d</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{Cov}(e_F,e_M)
+=
+\operatorname{Var}(r_m)-\frac{1}{4}\operatorname{Var}(r_d).
+</annotation></semantics></math></p>
 </div>
 <div class="section level3">
 <h3 id="reversing-the-coding">Reversing the coding<a class="anchor" aria-label="anchor" href="#reversing-the-coding"></a>

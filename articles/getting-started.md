@@ -300,8 +300,8 @@ print(cross_dim_data, n = 4)
 #> #                              or other exchangeable compositions
 #> #   .i_{pred}_dyad_mean_gmc    dyad-mean predictor: dyad's average predictor
 #> #                              level, grand-mean centered
-#> #   .i_{pred}_within_dyad_dev  DIM within-dyad predictor deviation: person's
-#> #                              difference from the dyad average
+#> #   .i_{pred}_within_dyad_dev  DIM within-dyad member-deviation predictor:
+#> #                              member's difference from the dyad mean
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .i_composition      
