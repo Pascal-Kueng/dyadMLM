@@ -27,7 +27,7 @@ Model](https://pascal-kueng.github.io/interdep/articles/dsm.md), see the
 male outcomes have separate intercepts. Female and male predictors each
 have an actor path to their own outcome and a partner path to the other
 member's outcome. The female and male outcome residuals
-covary.](apim_files/figure-html/distinguishable-apim-diagram-1.png)
+covary.](apim_files/figure-html/distinguishable-apim-diagram-1.svg)
 
 Conceptual cross-sectional APIM for distinguishable female-male dyads.
 Intercepts, actor effects, and partner effects can differ by the role of
@@ -59,7 +59,7 @@ predictor of female Y, with coefficients a F and p F. In the male
 outcome panel, male X is the actor predictor and female X is the partner
 predictor of male Y, with coefficients a M and p M. The female and male
 outcome residuals
-covary.](apim_files/figure-html/distinguishable-apim-member-diagram-1.png)
+covary.](apim_files/figure-html/distinguishable-apim-member-diagram-1.svg)
 
 Individual-level representation of the distinguishable cross-sectional
 APIM used for the long-format multilevel model. For the female outcome,
@@ -122,7 +122,7 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 ![Fitted distinguishable APIM. Female and male intercepts -4.37 and
 -6.04; actor effects 1.67 and 1.80; partner effects 0.25 and 0.25;
 residual SDs 1.15 and 1.34, with correlation
--0.19.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.png)
+-0.19.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg)
 
 Fitted cross-sectional distinguishable APIM for the example data. Fixed
 effects, residual standard deviations, and the residual correlation are
@@ -158,7 +158,7 @@ their covariance.
 have the same intercept. Each member's predictor has the same actor
 effect on their own outcome and the same partner effect on the other
 member's outcome. The two outcome residuals have equal variances and
-covary.](apim_files/figure-html/exchangeable-apim-diagram-1.png)
+covary.](apim_files/figure-html/exchangeable-apim-diagram-1.svg)
 
 Conceptual cross-sectional APIM for exchangeable dyads. The two members
 share one intercept, one actor effect, and one partner effect; their
@@ -184,7 +184,7 @@ and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is
 the actor predictor and X 1 is the partner predictor of Y 2. Both panels
 use the same actor coefficient a and partner coefficient p, and their
 outcome residuals
-covary.](apim_files/figure-html/exchangeable-apim-member-diagram-1.png)
+covary.](apim_files/figure-html/exchangeable-apim-member-diagram-1.svg)
 
 Individual-level representation of the exchangeable cross-sectional APIM
 used for the long-format multilevel model. Both members share the same
@@ -354,7 +354,7 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 
 ![Fitted exchangeable APIM. Intercept -5.23, actor effect 1.76, partner
 effect 0.24, common residual SD 1.34, and residual correlation
--0.29.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.png)
+-0.29.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.svg)
 
 Fitted cross-sectional exchangeable APIM for the example data. The
 common member residual standard deviation and residual correlation are

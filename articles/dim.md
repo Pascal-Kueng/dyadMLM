@@ -141,7 +141,7 @@ between-dyad effect b mean. Member i's within-dyad member deviation
 predicts the same member's outcome deviation through the within-dyad
 effect b dev. There are no cross-paths, and only the outcome-mean
 equation has intercept b
-zero.](dim_files/figure-html/conceptual-dim-diagram-1.png)
+zero.](dim_files/figure-html/conceptual-dim-diagram-1.svg)
 
 Cross-sectional DIM. The dyad mean has a between-dyad effect, and the
 within-dyad member deviation has a within-dyad effect. Mean and
@@ -167,7 +167,7 @@ member's own within-dyad member deviation predict the individual
 outcome. Both members share the same between-dyad and within-dyad
 coefficients and residual standard deviation, while their outcome
 residuals are
-correlated.](dim_files/figure-html/conceptual-dim-member-diagram-1.png)
+correlated.](dim_files/figure-html/conceptual-dim-member-diagram-1.svg)
 
 Individual-level representation of the cross-sectional DIM used for the
 long-format multilevel model.
@@ -246,7 +246,7 @@ estimated fixed effects and residual-component standard deviations:
 ![Fitted DIM. Intercept 5.04, between-dyad effect 2.00, within-dyad
 effect 1.52, and mean/deviation residual SDs 0.80 and 1.07; their
 correlation is fixed at
-zero.](dim_files/figure-html/fitted-dim-diagram-1.png)
+zero.](dim_files/figure-html/fitted-dim-diagram-1.svg)
 
 Estimated fixed effects and residual-component standard deviations from
 the cross-sectional Gaussian DIM in its mean-and-deviation

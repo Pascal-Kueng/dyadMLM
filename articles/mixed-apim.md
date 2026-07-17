@@ -107,7 +107,7 @@ separate residual variances, and their covariance. Female-female and
 male-male blocks each have one shared intercept, equal member residual
 variances, and a covariance. No covariance parameters connect the three
 composition
-blocks.](mixed-apim_files/figure-html/mixed-composition-diagram-1.png)
+blocks.](mixed-apim_files/figure-html/mixed-composition-diagram-1.svg)
 
 Structure of the cross-sectional mixed-composition APIM (Intercept only
 example). Female-male dyads have distinguishable member intercepts and
@@ -198,7 +198,7 @@ fitted sum-and- difference components.
 residual SDs 1.10 and 1.39, and residual correlation -0.30.
 Female-female intercept 5.80, residual SD 0.99, and correlation 0.35.
 Male-male intercept 4.20, residual SD 1.29, and correlation
--0.25.](mixed-apim_files/figure-html/fitted-mixed-apim-diagram-1.png)
+-0.25.](mixed-apim_files/figure-html/fitted-mixed-apim-diagram-1.svg)
 
 Fitted intercept-only mixed-composition APIM. Intercepts and
 composition-specific residual parameters are extracted from the fitted

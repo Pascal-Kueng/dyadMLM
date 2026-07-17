@@ -102,7 +102,7 @@ female-male predictor mean and female-minus-male predictor difference
 each predict the female-male outcome mean and female-minus-male outcome
 difference. Paths are labelled a11, a12, a21, and a22, and outcome
 intercepts are labelled a10 and
-a20.](dsm_files/figure-html/conceptual-dsm-diagram-1.png)
+a20.](dsm_files/figure-html/conceptual-dsm-diagram-1.svg)
 
 Conceptual cross-sectional DSM. Predictor mean and predictor difference
 each predict both outcome scores.
@@ -116,7 +116,7 @@ predictor difference. For the female outcome, the intercept is a10 plus
 half a20, the predictor-mean coefficient is a11 plus half a21, and the
 predictor-difference coefficient is a12 plus half a22. For the male
 outcome, the same combinations use minus signs. The two member residuals
-covary.](dsm_files/figure-html/conceptual-dsm-member-diagram-1.png)
+covary.](dsm_files/figure-html/conceptual-dsm-member-diagram-1.svg)
 
 Individual-level representation of the cross-sectional DSM used for the
 long-format multilevel model. The centered predictor mean and
@@ -245,7 +245,7 @@ The fitted paths for this example are:
 
 ![Fitted DSM. Intercepts a10 5.04 and a20 0.96; paths a11 1.99, a12
 -0.03, a21 -0.14, and a22 1.49; residual SDs 0.79 and 1.92, with
-correlation -0.16.](dsm_files/figure-html/fitted-dsm-diagram-1.png)
+correlation -0.16.](dsm_files/figure-html/fitted-dsm-diagram-1.svg)
 
 Fitted cross-sectional DSM for the example data. The nodes identify the
 mean and difference scores; edge and intercept labels show the estimated
