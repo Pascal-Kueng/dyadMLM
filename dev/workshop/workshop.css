@@ -18,6 +18,72 @@
   --interdep-residual-correlation: #546e7a;
 }
 
+/* Elevator/seesaw residual slides ----------------------------------------- */
+.reveal .seesaw-swap {
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.38rem;
+  display: flex;
+  font-size: 0.72em;
+  justify-content: center;
+  gap: 2.2rem;
+  margin: -0.12rem auto 0.25rem;
+  padding: 0.26rem 0.75rem;
+  width: 78%;
+}
+
+.reveal .seesaw-swap p,
+.reveal .seesaw-equation p,
+.reveal .seesaw-takeaway p,
+.reveal .seesaw-footnote p {
+  margin: 0;
+}
+
+.reveal .seesaw-swap .math.inline {
+  font-size: 1.14em;
+}
+
+.reveal .seesaw-equation {
+  color: #64748b;
+  font-size: 0.58em;
+  text-align: center;
+}
+
+.reveal .seesaw-equation .math.display {
+  color: #263238;
+  font-size: 1.34em;
+  margin: 0.14rem 0 0.2rem;
+}
+
+.reveal .seesaw-equation-dsm .math.display {
+  font-size: 1.55em;
+  margin: 0.02rem 0 0.28rem;
+}
+
+.reveal .seesaw-takeaway {
+  background: #e7f3f3;
+  border-radius: 0.4rem;
+  color: #263238;
+  font-size: 0.62em;
+  line-height: 1.32;
+  margin: 0 auto;
+  padding: 0.32rem 0.75rem;
+  text-align: center;
+  width: 92%;
+}
+
+.reveal .seesaw-takeaway .math.inline {
+  font-size: 1.08em;
+  margin-left: 0.3rem;
+}
+
+.reveal .seesaw-footnote {
+  color: #64748b;
+  font-size: 0.52em;
+  margin-top: 0.34rem;
+  text-align: center;
+}
+
 .reveal {
   color: var(--uzh-ink);
   font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;

@@ -1498,12 +1498,12 @@ draw_dsm_diagram <- function(
   .draw_diagram_legend(
     labels = c("Predictor-mean paths", "Predictor-difference paths"),
     colours = c(mean_colour, difference_colour),
-    y = 0.052,
+    y = 0.065,
     segment_starts = c(0.085, 0.435),
     text_x = c(0.255, 0.625),
     fontsize = 11
   )
-  .draw_diagram_significance_key(p_values, y = 0.005, x = 0.405)
+  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.405)
 
   grid::popViewport()
   invisible(NULL)

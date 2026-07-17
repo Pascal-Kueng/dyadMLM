@@ -208,8 +208,8 @@
         var isMajor = Math.abs(tick % 2) < 1e-10;
         var dash = isAxis ? null : "3 3";
         var opacity = isAxis ? "0.68" : (isMajor ? "0.44" : "0.24");
-        addLine(xPixel(tick), 30, xPixel(tick), 290, colors.actor, opacity, dash);
-        addLine(30, yPixel(tick), 290, yPixel(tick), colors.partner, opacity, dash);
+        addLine(xPixel(tick), 30, xPixel(tick), 290, colors.partner, opacity, dash);
+        addLine(30, yPixel(tick), 290, yPixel(tick), colors.actor, opacity, dash);
         // Diagonal lines are colored by the coordinate direction they trace.
         addLine(xPixel(-limit), yPixel(2 * tick + limit), xPixel(limit),
           yPixel(2 * tick - limit), colors.within, opacity, dash);

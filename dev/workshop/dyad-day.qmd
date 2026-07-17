@@ -88,6 +88,18 @@ sys.source(
   envir = knitr::knit_global()
 )
 
+residual_seesaw_file <- if (
+    file.exists(file.path("R", "draw-residual-seesaw.R"))) {
+  file.path("R", "draw-residual-seesaw.R")
+} else {
+  file.path("dev", "workshop", "R", "draw-residual-seesaw.R")
+}
+
+sys.source(
+  normalizePath(residual_seesaw_file),
+  envir = knitr::knit_global()
+)
+
 data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds"
 
 pilot <- readRDS(data_file) |>
@@ -885,7 +897,6 @@ workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
 
 ## The DIM
 
-- No more actor and partner effects? No, they just hide!
 - We decompose predictors into two variables:
   - Dyad mean (GM-centered): $\bar{X} - \mu_{X}$
   - Within-dyad member deviation: $X_i - \bar{X}$
@@ -895,6 +906,8 @@ In other words, these predictors express:
 
 - A couple's average level compared with the average of all couples
 - A partner's level compared with the average of their couple
+
+<!-- TODO: insert an interactive Seasaw diagram? 
 
 <!-- ca. 2 Minutes -->
 
@@ -967,6 +980,68 @@ $$
 
 :::
 
+## Why are the DIM residuals uncorrelated?
+
+```{r}
+#| label: dim-residual-seesaw
+#| echo: false
+#| dev: svg
+#| fig-width: 10.8
+#| fig-height: 3.15
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "An elevator represents the dyad mean residual, which moves both partners together; a seesaw represents the within-dyad residual, which moves partners in opposite directions. Swapping arbitrary member labels reverses only the seesaw, requiring zero covariance under exchangeability."
+
+draw_residual_seesaw("dim")
+```
+
+::: {.seesaw-swap}
+**Swap the arbitrary member labels:**
+$r_M \mapsto r_M \qquad r_D \mapsto -r_D$
+:::
+
+::: {.seesaw-equation}
+Exchangeability requires the same covariance after relabelling:
+
+$$
+\operatorname{Cov}(r_M,r_D)
+= \operatorname{Cov}(r_M,-r_D)
+= -\operatorname{Cov}(r_M,r_D)
+\quad\Longrightarrow\quad
+\operatorname{Cov}(r_M,r_D)=0
+$$
+:::
+
+::: {.seesaw-takeaway}
+**Zero does not mean independent partners:**
+$\operatorname{Cov}(e_1,e_2)
+=\operatorname{Var}(r_M)-\operatorname{Var}(r_D)$
+
+Their residual association is encoded by the relative elevator and seesaw variances.
+:::
+
+:::{.notes}
+
+- The elevator and seesaw are two coordinates for describing what remains
+  unexplained across the sample of dyads. They are not a temporal process
+  occurring within one couple.
+- The dyad mean residual is the elevator: both partners are higher or lower
+  than predicted together.
+- The within-dyad residual is the seesaw: one partner is higher while the other
+  is lower.
+- In the DIM, the member positions are arbitrary. Swapping them leaves the
+  elevator coordinate unchanged but reverses the sign of the seesaw coordinate.
+- An exchangeable model must be unchanged by that swap. Its mean–deviation
+  residual covariance must therefore equal its own negative, which is possible
+  only when it is zero.
+- This does not make the partners independent. Whether their person-level
+  residuals are positively or negatively associated depends on the relative
+  sizes of the elevator and seesaw variances.
+
+:::
+
+<!-- ca. 3 Minutes -->
+
 ## Fitting the DIM
 
 ```{r}
@@ -1025,6 +1100,57 @@ draw_dsm_diagram(show_residuals = FALSE)
 
 draw_dsm_diagram()
 ```
+
+## In the DSM, the seats are labelled
+
+```{r}
+#| label: dsm-residual-seesaw
+#| echo: false
+#| dev: svg
+#| fig-width: 10.8
+#| fig-height: 3.15
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "A seesaw with female and male seats illustrates that the DSM outcome difference has a meaningful direction. Because the labels cannot be swapped arbitrarily, the outcome mean and difference residuals may correlate."
+
+draw_residual_seesaw("dsm")
+```
+
+::: {.seesaw-equation .seesaw-equation-dsm}
+$$
+D_Y=Y_F-Y_M
+\qquad\text{and}\qquad
+\operatorname{Cov}(r_M,r_D)\ \text{may be non-zero.}
+$$
+:::
+
+::: {.seesaw-takeaway}
+**A positive $\rho_{MD}$ means:** couples whose outcomes are higher than predicted
+on average also tend to have a larger female–male difference than predicted.
+:::
+
+::: {.seesaw-footnote}
+The correlation describes a pattern across couples—not two residuals varying
+within one couple.
+:::
+
+:::{.notes}
+
+- The DSM uses the same elevator and seesaw idea, but the two seats now have
+  substantively meaningful labels.
+- If the outcome difference is defined as female minus male, reversing its sign
+  changes the meaning of the variable. Relabelling is therefore not a symmetry
+  that the distinguishable model must obey.
+- The mean and difference residuals may consequently be correlated.
+- A positive correlation means that, across couples, couples whose outcomes are
+  higher than predicted on average also tend to have a larger female–male
+  difference than predicted.
+- This correlation describes a pattern across couples. It is not a correlation
+  calculated from two changing residuals inside a single couple.
+
+:::
+
+<!-- ca. 2 Minutes -->
 
 ## Fitting the DSM
 
