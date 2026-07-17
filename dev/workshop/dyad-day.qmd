@@ -885,7 +885,7 @@ workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
 
 ## The DIM
 
-- No more actor and partner effects
+- No more actor and partner effects? No, they just hide!
 - We decompose (center) predictors into between-couple and within-couple components
   - Between-couple variable: $\bar{X} - \mu_{X}$
   - Within-couple variable: $Xi - \bar{X}$
