@@ -12,11 +12,12 @@ resources:
   - js/residual-concepts.js
 format:
   revealjs:
+    embed-resources: true
     css: workshop.css
     include-after-body: branding.html
     footer: "Dyadic Data Analysis"
     slide-number: true
-    chalkboard: true
+    chalkboard: false
     preview-links: auto
 execute:
   echo: true

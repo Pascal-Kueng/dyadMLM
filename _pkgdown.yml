@@ -5,7 +5,7 @@ template:
 
 navbar:
   structure:
-    left: [reference, articles]
+    left: [reference, articles, workshop]
     right: [search, github]
   components:
     articles:
@@ -21,6 +21,9 @@ navbar:
         href: articles/dim.html
       - text: Dyadic Score Model
         href: articles/dsm.html
+    workshop:
+      text: Workshop
+      href: workshop/
     github:
       icon: fa-github
       href: https://github.com/Pascal-Kueng/interdep
