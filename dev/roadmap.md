@@ -59,10 +59,16 @@ Recently completed cleanup:
   final analysis compositions, while pooling metadata records the pooled source
   compositions in a compact `pooled_from` summary
 
-Immediate next step: finish vignette and release-facing polish. The
-getting-started and DIM vignettes have completed detailed review. The APIM,
-mixed-APIM, and DSM vignettes still need final review, and the DSM vignette
-still needs its planned ILD section.
+Immediate sequence:
+
+1. implement and test the core covariance back-transformation
+2. document the bounded diagnostics workflow, without adding a general
+   diagnostics API
+3. finish release-facing APIM, mixed-APIM, and DSM vignette polish, including
+   the planned DSM ILD section
+4. rerun checks and prepare the first release
+
+The getting-started and DIM vignettes have completed detailed review.
 
 ## Vignette Architecture
 
@@ -112,9 +118,39 @@ Target vignette structure:
 
 ## Version 0.0.1 - First CRAN Release Candidate
 
-Goal: ship a small, reliable data-preparation workflow with enough ILD support
-to be useful for composition-aware dyadic MLMs before adding larger
-model-building features.
+Goal: ship a small, reliable data-preparation and interpretation workflow with
+enough ILD support to be useful for composition-aware dyadic MLMs before adding
+larger model-building features.
+
+### v0.0.1 Release Gate
+
+The first release milestone is complete when all of the following are true:
+
+- [x] Core composition-aware validation and APIM, DIM, and DSM column
+  construction are implemented and tested.
+- [x] Cross-sectional and ILD temporal predictor decomposition, composition
+  filtering, exchangeability overrides, pooling, metadata, and printing are
+  implemented and tested for the documented scope.
+- [ ] A public, engine-independent covariance back-transformation converts the
+  exchangeable shared/`.i_diff_*` residual representation to an interpretable
+  member-level covariance matrix, with scalar summaries and focused tests.
+- [ ] Documentation shows a correct `glmmTMB`/DHARMa workflow for
+  `dispformula = ~ 0`, role-specific checks, and clear limitations concerning
+  autocorrelation and multicollinearity.
+- [ ] APIM, mixed-APIM, DIM, and DSM vignettes are internally consistent and
+  clearly distinguish implemented workflows from methodological limitations.
+- [ ] Mixed-composition ILD convergence examples are either supported by the
+  example data or explicitly presented as advanced/diagnostic specifications.
+- [ ] Documentation, README, citation metadata, pkgdown, tests, and multi-platform
+  R CMD checks are clean.
+- [ ] Version `0.0.1` is released, tagged, and archived.
+
+Not required for v0.0.1: model fitting or syntax-generation wrappers, public
+fitted-diagram functions, automated AR(1)/VAR diagnostics, a universal
+multicollinearity rule, generalized-family diagnostic automation, or a full
+diagnostics plotting interface.
+
+Detailed implemented scope and final checks follow.
 
 - Validate dyadic data and return a model-ready tibble with metadata
 - Support cross-sectional and ILD data for distinguishable and exchangeable
@@ -395,159 +431,62 @@ Complete these before calling the feature set CRAN-ready:
     model is aspirational/diagnostic and may require more data or Bayesian
     regularization
 - Add public covariance back-transformation helpers for v0.0.1
-  - Make the engine-independent matrix transformation the core implementation,
-    rather than hard-coding only the scalar residual-SD formulas currently used
-    by the vignette diagrams. For a fitted shared/difference covariance matrix
-    `Sigma_score` and the appropriate member contrast matrix `T`, compute
-    `Sigma_member = T %*% Sigma_score %*% t(T)`.
-  - Provide a clear convenience path for the exchangeable `.i_diff_*`
-    parameterization used by DIMs and exchangeable APIMs. With shared and
-    difference coefficient vectors `u_shared` and `u_diff`, use
+  - Implement the mathematics independently of a model engine. Given a
+    shared/difference covariance matrix `Sigma_score` and member contrast matrix
+    `T`, compute `Sigma_member = T %*% Sigma_score %*% t(T)`.
+  - Make the v0.0.1 public interface focus on the exchangeable residual
+    structure used by DIMs and exchangeable APIMs:
     `member_1 = u_shared + u_diff` and
     `member_2 = u_shared - u_diff`.
-  - Accept covariance matrices, not only standard deviations, so the same
-    implementation covers:
-    - scalar residual variance/covariance blocks
-    - stable dyad-level and same-occasion ILD blocks separately
-    - random intercepts and multiple random slopes, including covariances among
-      their coefficients
-    - each exchangeable composition in a mixed-composition model
-  - Keep arbitrary exchangeable members labelled as member 1 and member 2;
-    never relabel them as female and male. Reversing the arbitrary `+1/-1`
-    assignment must leave the implied member covariance unchanged.
-  - Return the complete named member-level covariance matrix and convenient
-    derived summaries such as member standard deviations and correlations.
-    Preserve coefficient names and make the ordering of members and random
-    coefficients explicit in the output.
-  - Separate the mathematical transformation from model-engine extraction:
-    - first implement and test a small function that transforms supplied
-      covariance matrices
-    - add a thin `glmmTMB` adapter only if it can identify or receive the shared
-      and `.i_diff_*` terms explicitly; do not guess silently when several
-      random-effect blocks are present
-    - design the matrix-level function so bootstrap draws or other uncertainty
-      estimates can be transformed later, without claiming that the v0.0.1
-      point-estimate helper itself supplies confidence intervals
-  - Reuse the general transformation core for the directional DSM only after
-    validating its different `+0.5/-0.5` role contrast and its potentially
-    correlated outcome-mean/outcome-difference block. Do not treat the DSM
-    transformation as identical to the independent shared/`.i_diff_*` blocks
-    required by exchangeability.
-  - Validate the back-transformation before release:
-    - reproduce the scalar identities already documented in `apim.Rmd`,
-      including member variance equal to shared variance plus difference
-      variance and member covariance equal to shared variance minus difference
-      variance
-    - test the documented example where shared variance `1.2` and difference
-      variance `0.3` imply member variances `1.5` and covariance `0.9`
-    - test dimensions, names, symmetry, and positive-semidefiniteness, with
-      actionable errors for incompatible inputs
-    - test round trips between exchangeable member and shared/difference
-      covariance representations within numerical tolerance
-    - compare transformed multi-coefficient blocks with direct transformations
-      of simulated random effects
-    - verify the same member-level results after reversing arbitrary member
-      assignments
-  - Replace duplicated diagram-only arithmetic with the tested helper where
-    practical, so vignettes, diagrams, and future summaries use one definition
-    of the transformation.
+  - Accept covariance matrices rather than only standard deviations, but keep
+    the first documented use case narrow: transform one residual block at a
+    time, including stable and same-occasion ILD blocks.
+  - Return a named member-level covariance matrix plus member standard
+    deviations and correlations. Use arbitrary member 1/member 2 labels, never
+    female/male labels, for exchangeable dyads.
+  - Validate dimensions, names, symmetry, and positive-semidefiniteness; test
+    the scalar identities, the documented `1.2`/`0.3` example, numerical round
+    trips, and invariance to reversing the arbitrary `+1/-1` assignment.
+  - Reuse the tested helper in the vignette diagrams where practical, so the
+    package and teaching materials share one definition.
+  - Defer automatic `glmmTMB` block extraction, comprehensive random-slope and
+    mixed-composition adapters, DSM `+0.5/-0.5` transformations, and uncertainty
+    intervals to the next milestone. Keep the matrix API compatible with those
+    extensions.
 - Add a bounded `glmmTMB` diagnostics workflow for v0.0.1
-  - Treat this as validated documentation and release guidance, not as a full
-    exported diagnostics or plotting API. Prefer one focused diagnostics
-    vignette or section that the APIM, mixed-APIM, DIM, and DSM vignettes can
-    link to rather than repeating slightly different recipes.
-  - Begin with model-integrity checks before inspecting residuals:
-    - check optimizer convergence and a positive-definite Hessian
-    - check that standard errors are finite
-    - flag covariance estimates near zero and correlations near `-1` or `1`
-      as possible boundary or identifiability problems
-    - use `glmmTMB::diagnose()` as supporting information, while explaining
-      that a large coefficient Z-statistic alone does not establish model
-      failure
-  - Document the special DHARMa requirement for the Gaussian dyadic models:
-    - with `dispformula = ~ 0`, the ordinary Gaussian residual variance is
-      fixed near zero and the member residual variance/covariance is represented
-      by random-effect blocks
-    - DHARMa 0.5.0 defaults to simulations conditional on all fitted random
-      effects; that default conditions on the blocks serving as dyadic
-      residuals and therefore simulates only the tiny remaining Gaussian
-      nugget
-    - use `DHARMa::simulateResiduals(..., simulateREs = "unconditional")` for
-      the primary whole-model check; use a sufficiently stable simulation count
-      such as `n = 1000` in documentation
-    - if executable examples are added, list DHARMa in `Suggests`, require a
-      version supporting `simulateREs`, guard examples with
-      `requireNamespace()`, and keep expensive simulation out of routine CRAN
-      vignette builds where necessary
-  - Make residual and predictive checks composition- and role-aware:
-    - map the rows actually used by the fitted model before subsetting, because
-      missing outcomes can make the fitted rows differ from the original data
-    - use `DHARMa::recalculateResiduals(..., sel = ...)` to inspect one
-      composition-role at a time; for a cross-sectional distinguishable model,
-      each such subset contains one independent member observation per dyad
-    - do not treat a combined role comparison as an ordinary independent-groups
-      test, because the two partner residuals are paired
-    - compare observed and simulated role-specific means, standard deviations,
-      and selected quantiles, as well as dyad-level summaries that directly
-      represent the model: partner covariance/correlation and the distribution
-      of partner differences
-    - investigate `rotation = "estimated"` only for joint residual checks and
-      validate its behavior by simulation before recommending it generally;
-      the role-specific displays should remain the simpler first-line workflow
-  - Address temporal autocorrelation explicitly for ILD models:
-    - state that the current concurrent ILD examples model stable dyad
-      dependence and same-occasion partner dependence, but do not by themselves
-      model residual serial dependence
-    - do not apply `DHARMa::testTemporalAutocorrelation()` once to all rows:
-      diary-day values repeat across people, whereas the test requires unique
-      time values within the tested series
-    - do not aggregate all people at the same diary day and call that a
-      within-person AR(1) check; it instead tests a calendar-day aggregate
-    - for a valid dyadic check, compute an adjacent-occasion lag-1 statistic
-      within each member series, summarize it across members or dyads, and
-      compare the observed statistic with the same statistic calculated from
-      unconditional full-model simulations
-    - respect actual time indexes and gaps when defining adjacency; never bridge
-      missing occasions merely because two rows are adjacent after sorting
-    - if an `ar1()` structure is later fitted, explain that unconditional
-      DHARMa residuals can retain the modeled serial correlation. Selective
-      conditioning on only the relevant `glmmTMB` random-effect block is not
-      generally available, so use a validated covariance rotation or compare
-      observed autocorrelation directly with autocorrelation in simulated data
-    - keep own-series AR(1) distinct from a dyadic residual VAR: AR(1) does not
-      estimate partner cross-lag paths
-    - keep an automated AR(1)/VAR diagnostic helper out of v0.0.1 unless its
-      false-positive behavior and power have been validated across the
-      supported ILD structures
-  - Handle multicollinearity as a design question rather than a generic VIF
-    threshold:
-    - do not use `performance::check_collinearity()` on the complete
-      no-intercept, role-indicator interaction formula as a package-level
-      pass/fail check; structural zeroes and indicator interactions can make
-      the resulting VIFs misleadingly large
-    - check exact fixed-design rank and numerical conditioning
-    - inspect correlations among the substantive actor, partner, dyad-mean, and
-      member-deviation predictors within the relevant composition-role, before
-      multiplying them by role indicators
-    - retain the existing warning that raw, CWP, and CBP versions of the same
-      predictor must not all enter one formula because they are algebraically
-      dependent
-    - if a future `check_interdep_fit()` helper is added, report these results
-      descriptively and identify the implicated columns; do not reduce them to
-      a universal VIF cutoff
-  - Validate the documented workflow before release:
-    - cover distinguishable, exchangeable, and at least one mixed-composition
-      cross-sectional model
-    - verify that conditional DHARMa simulations are rejected as inappropriate
-      for the `dispformula = ~ 0` parameterization and that unconditional
-      simulations exercise the full fitted covariance structure
-    - verify role/composition row mapping when fitted rows were removed for
-      missing outcomes
-    - use seeded simulation studies for the autocorrelation procedure rather
-      than unit tests that expect one particular random p-value
-    - keep generalized-family diagnostics, automated influence analysis,
-      high-dimensional DHARMa rotation, and a general diagnostics plotting
-      interface outside the v0.0.1 release scope
+  - Keep this documentation-first: one focused section that other model
+    vignettes can link to, with no exported diagnostics or plotting API.
+  - Start with optimizer convergence, positive-definite Hessian, finite standard
+    errors, and boundary covariance estimates; present `glmmTMB::diagnose()` as
+    supporting evidence rather than an automatic verdict.
+  - Explain that `dispformula = ~ 0` places the dyadic residual covariance in
+    random-effect blocks. DHARMa 0.5.0 conditions on all random effects by
+    default, so use
+    `simulateResiduals(..., simulateREs = "unconditional")` for the primary
+    whole-model check. If examples run during builds, add a versioned DHARMa
+    `Suggests` entry and guard or precompute expensive work.
+  - Show role-/composition-specific checks using only fitted rows, because
+    missing outcomes can change row alignment. Do not treat paired partner
+    residuals as independent groups.
+  - Compare role-specific means, standard deviations, and quantiles, and show
+    the dyadic quantities most directly tied to the model: partner
+    covariance/correlation and partner-difference variability.
+  - State the autocorrelation limitation clearly: one pooled
+    `testTemporalAutocorrelation()` call is invalid when time values repeat
+    across members, and aggregating everyone by diary day does not test
+    within-person AR(1). Respect gaps and distinguish own-series AR(1) from a
+    dyadic residual VAR. Defer an automated lag-1 simulation test and covariance
+    rotation to the next milestone.
+  - Treat multicollinearity as a design issue. Full-formula VIFs can be
+    misleading for no-intercept role-indicator interactions; instead document
+    fixed-design rank, numerical conditioning, and substantive predictor
+    correlations within composition-role. Retain the warning against jointly
+    entering algebraically dependent raw, CWP, and CBP versions.
+  - Validate the documented cross-sectional workflow with distinguishable and
+    exchangeable examples and verify row mapping under missing outcomes. Defer
+    comprehensive mixed/ILD diagnostic simulation, `check_interdep_fit()`,
+    generalized-family diagnostics, influence analysis, and a general plotting
+    interface.
 - Rerun final release checks after vignette/doc cleanup
   - release checks have already been run during development, but must be run
     again after building and polishing the vignettes
@@ -565,7 +504,22 @@ Complete these before calling the feature set CRAN-ready:
   - Add the Zenodo concept DOI to README and citation metadata on `main`
   - Include the DOI in the next CRAN release
 
-## Version 0.2.0
+## Version 0.1.0
+
+- Extend the v0.0.1 covariance back-transformation only where applied use
+  justifies it:
+  - add explicit `glmmTMB` extraction of named shared and `.i_diff_*` blocks
+  - validate random-slope and mixed-composition adapters
+  - add the distinct DSM `+0.5/-0.5` transformation
+  - consider bootstrap-draw or other uncertainty transformations
+- Develop advanced diagnostics only after validating the v0.0.1 guidance:
+  - evaluate a within-member lag-1 statistic against unconditional full-model
+    simulations, respecting gaps and repeated series
+  - validate joint DHARMa covariance rotation and mixed/ILD diagnostic behavior
+  - consider a narrow `check_interdep_fit()` for convergence, design rank,
+    boundary covariance estimates, and row alignment
+  - do not export these helpers until false-positive behavior and interpretation
+    are understood for the supported structures
 
 - Add a dedicated, validated simulation of lagged-outcome bias if this remains
   useful after the v0.0.1 tutorial review
@@ -593,14 +547,15 @@ Complete these before calling the feature set CRAN-ready:
 - Add tests that generated syntax matches intended estimands and model
   structures
 
-## Version 0.3.0
+## Version 0.2.0
 
 - Estimation helpers for supported model engines
   - Prefer thin wrappers around established engines
   - Do not add a custom Stan backend unless the package contribution becomes a
     new estimator rather than preparation/syntax infrastructure
 - Model summaries focused on dyadic interpretation
-- Diagnostics and sparse-composition guidance
+- Exported or advanced diagnostic helpers and sparse-composition guidance,
+  building on the documentation-first v0.0.1 workflow and v0.1 validation
 - Optional wide-to-long preprocessing helper
   - Keep `prepare_interdep_data()` strict: it should continue to validate one
     canonical long-format dyadic structure
@@ -612,7 +567,7 @@ Complete these before calling the feature set CRAN-ready:
   - Cite the Zenodo software DOI for the implementation
   - Use the preprint for the composition-aware dyadic MLM framework
 
-## Version 0.4.0
+## Version 0.3.0
 
 - Advanced ILD/EMA data infrastructure
   - Add `time_3l` temporal predictor decomposition only after the `time_2l`
@@ -633,7 +588,7 @@ Complete these before calling the feature set CRAN-ready:
   - Keep one-partner missingness and latent-state handling out of the core
     preparation API until a modeling layer needs them
 
-## Version 0.5.0 and Later
+## Version 0.4.0 and Later
 
 - Evaluate a custom Stan track only after the package has stable validation,
   temporal predictor decomposition, actor/partner helpers, syntax generation,
@@ -690,8 +645,8 @@ Target state before JOSS submission:
 - Robust temporal predictor decomposition for ILD data
 - Composition filtering, exchangeability, and pooling helpers
 - `.i_diff_*` / Idiff interpretation helpers
-- Formula or syntax generation for at least `glmmTMB`
-- Preferably `brms` syntax generation as a second modeling backend
+- Formula or syntax generation for at least `glmmTMB`; a second modeling
+  backend is optional and is not a JOSS submission gate
 - Reproducible vignettes showing composition-aware dyadic MLM workflows
 - Clear statement that `interdep` supplies dyadic composition logic, temporal
   predictor decomposition, indicators, constraints, interpretation helpers, and
