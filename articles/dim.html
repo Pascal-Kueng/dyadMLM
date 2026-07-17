@@ -59,8 +59,8 @@
 
 
 
-<link href="dim_files/interdep-dim-grid-1.0.0/dim-grid.css" rel="stylesheet">
-<script src="dim_files/interdep-dim-grid-1.0.0/dim-grid.js"></script><div class="row">
+<link href="dim_files/interdep-dim-grid-1.0.1/dim-grid.css" rel="stylesheet">
+<script src="dim_files/interdep-dim-grid-1.0.1/dim-grid.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Dyad-Individual Model</h1>
@@ -210,9 +210,9 @@ residuals.
 </p>
 </div>
 <p>Uncorrelated
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mi>m</mi></msub><annotation encoding="application/x-tex">r_m</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mi mathvariant="normal">m</mi></msub><annotation encoding="application/x-tex">r_{\mathrm{m}}</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi>d</mi><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">r_{d,i}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi mathvariant="normal">d</mi><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">r_{\mathrm{d},i}</annotation></semantics></math>
 in the conceptual representation do not imply that the member residuals
 are independent: the two component variances together determine the
 covariance between the members’ residuals.</p>
@@ -483,26 +483,26 @@ equations.</p>
     <div class="wdg-control-group">
       <div class="wdg-group-title wdg-apim-title">APIM coordinates</div>
       <label class="wdg-control wdg-actor">
-        <span><span>Grand-mean-centered actor, <i>x</i><sub>actor</sub></span><output data-wdg-output="actor">0.00</output></span>
+        <span><span>Grand-mean-centered actor, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>actor</sub></span></span><output data-wdg-output="actor">0.00</output></span>
         <input data-wdg-input="actor" type="range" min="-5" max="5" step="0.1" value="0"></label>
       <label class="wdg-control wdg-partner">
-        <span><span>Grand-mean-centered partner, <i>x</i><sub>partner</sub></span><output data-wdg-output="partner">0.00</output></span>
+        <span><span>Grand-mean-centered partner, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>partner</sub></span></span><output data-wdg-output="partner">0.00</output></span>
         <input data-wdg-input="partner" type="range" min="-5" max="5" step="0.1" value="0"></label>
     </div>
 
     <div class="wdg-control-group">
       <div class="wdg-group-title wdg-dim-title">DIM coordinates</div>
       <label class="wdg-control wdg-mean">
-        <span><span>Dyad mean, <i>x</i><sub>mean</sub></span><output data-wdg-output="mean">0.00</output></span>
+        <span><span>Dyad mean, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>mean</sub></span></span><output data-wdg-output="mean">0.00</output></span>
         <input data-wdg-input="mean" type="range" min="-5" max="5" step="0.05" value="0"></label>
       <label class="wdg-control wdg-within">
-        <span><span>Within-dyad member deviation, <i>x</i><sub>dev</sub></span><output data-wdg-output="within">0.00</output></span>
+        <span><span>Within-dyad member deviation, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>dev</sub></span></span><output data-wdg-output="within">0.00</output></span>
         <input data-wdg-input="within" type="range" min="-5" max="5" step="0.05" value="0"></label>
     </div>
 
     <div class="wdg-relations">
-      <span><i>x</i><sub>mean</sub> = (<i>x</i><sub>actor</sub> + <i>x</i><sub>partner</sub>) / 2</span>
-      <span><i>x</i><sub>dev</sub> = (<i>x</i><sub>actor</sub> − <i>x</i><sub>partner</sub>) / 2</span>
+      <span><span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>mean</sub></span> = (<span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>actor</sub></span> + <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>partner</sub></span>) / 2</span>
+      <span><span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>dev</sub></span> = (<span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>actor</sub></span> − <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>partner</sub></span>) / 2</span>
     </div>
   </div>
 
@@ -522,11 +522,11 @@ equations.</p>
 <desc id="interdep-dim-grid-description" data-wdg-description>The selected point is the grand-mean reference.</desc><defs><clippath id="interdep-dim-grid-clip"><rect x="30" y="30" width="260" height="260" rx="4"></rect></clippath></defs><rect x="30" y="30" width="260" height="260" rx="4" fill="none" stroke="currentColor" stroke-opacity="0.32"></rect><g data-wdg-grid-lines clip-path="url(#interdep-dim-grid-clip)"></g><g data-wdg-axis-labels></g><circle class="wdg-halo" data-wdg-halo cx="160" cy="160" r="13"></circle><circle class="wdg-point" data-wdg-point cx="160" cy="160" r="6"></circle></svg><div class="wdg-demos">
         <button type="button" data-wdg-demo="mean"><b>Shared dyad level</b><span>Both members +1</span></button>
         <div>
-<i>b</i><sub>mean</sub> = <i>a</i> + <i>p</i>
+<span class="wdg-math"><span class="wdg-math-symbol">b</span><sub>mean</sub></span> = <span class="wdg-math-symbol">a</span> + <span class="wdg-math-symbol">p</span>
 </div>
         <button type="button" data-wdg-demo="within"><b>Within-dyad member deviation</b><span>Actor +1, partner −1</span></button>
         <div>
-<i>b</i><sub>dev</sub> = <i>a</i> − <i>p</i>
+<span class="wdg-math"><span class="wdg-math-symbol">b</span><sub>dev</sub></span> = <span class="wdg-math-symbol">a</span> − <span class="wdg-math-symbol">p</span>
 </div>
         <p>Drag the dot or move either set of sliders. Both equations give the same fitted change in the linear predictor.</p>
       </div>

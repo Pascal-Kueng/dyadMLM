@@ -110,9 +110,11 @@
         "mean", "within"
       );
       slopeSummary.innerHTML =
-        "Fitted slopes: <i>b</i><sub>mean</sub> = <i>a</i> + <i>p</i> = " +
+        'Fitted slopes: <span class="wdg-math"><span class="wdg-math-symbol">b</span><sub>mean</sub></span> = ' +
+        '<span class="wdg-math-symbol">a</span> + <span class="wdg-math-symbol">p</span> = ' +
         coefficient(slopes.mean, false) +
-        "; <i>b</i><sub>dev</sub> = <i>a</i> − <i>p</i> = " +
+        '; <span class="wdg-math"><span class="wdg-math-symbol">b</span><sub>dev</sub></span> = ' +
+        '<span class="wdg-math-symbol">a</span> − <span class="wdg-math-symbol">p</span> = ' +
         coefficient(slopes.within, false);
 
       point.setAttribute("cx", xPixel(actor));

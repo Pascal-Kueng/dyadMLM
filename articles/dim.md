@@ -149,10 +149,10 @@ deviation residuals are uncorrelated under exchangeability. Both
 members’ residuals and their correlation can be obtained from these
 residuals.
 
-Uncorrelated $`r_m`$ and $`r_{d,i}`$ in the conceptual representation do
-not imply that the member residuals are independent: the two component
-variances together determine the covariance between the members’
-residuals.
+Uncorrelated $`r_{\mathrm{m}}`$ and $`r_{\mathrm{d},i}`$ in the
+conceptual representation do not imply that the member residuals are
+independent: the two component variances together determine the
+covariance between the members’ residuals.
 
 The second diagram translates the same decomposition to the
 individual-member rows used by the long-format multilevel model. Each
@@ -448,26 +448,26 @@ Reset
 
 APIM coordinates
 
-Grand-mean-centered actor, *x*_(actor)
+Grand-mean-centered actor, x_(actor)
 
 0.00
 
-Grand-mean-centered partner, *x*_(partner)
+Grand-mean-centered partner, x_(partner)
 
 0.00
 
 DIM coordinates
 
-Dyad mean, *x*_(mean)
+Dyad mean, x_(mean)
 
 0.00
 
-Within-dyad member deviation, *x*_(dev)
+Within-dyad member deviation, x_(dev)
 
 0.00
 
-*x*_(mean) = (*x*_(actor) + *x*_(partner)) / 2 *x*_(dev) = (*x*_(actor)
-− *x*_(partner)) / 2
+x_(mean) = (x_(actor) + x_(partner)) / 2 x_(dev) = (x_(actor) −
+x_(partner)) / 2
 
 **APIM**
 
@@ -477,11 +477,11 @@ Within-dyad member deviation, *x*_(dev)
 
 **Shared dyad level**Both members +1
 
-*b*_(mean) = *a* + *p*
+b_(mean) = a + p
 
 **Within-dyad member deviation**Actor +1, partner −1
 
-*b*_(dev) = *a* − *p*
+b_(dev) = a − p
 
 Drag the dot or move either set of sliders. Both equations give the same
 fitted change in the linear predictor.
