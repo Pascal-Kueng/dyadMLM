@@ -128,15 +128,15 @@ draw_residual_seesaw("dim")
 For outcome residuals,
 
 $$
-e_{1j}=r_{Mj}+r_{Dj},
+e_{1j}=r_{\mathrm{M},j}+r_{\mathrm{D},j},
 \qquad
-e_{2j}=r_{Mj}-r_{Dj}.
+e_{2j}=r_{\mathrm{M},j}-r_{\mathrm{D},j}.
 $$
 
 Swapping the two arbitrary member labels produces
 
 $$
-(r_M,r_D)\longmapsto(r_M,-r_D).
+(r_{\mathrm{M}},r_{\mathrm{D}})\longmapsto(r_{\mathrm{M}},-r_{\mathrm{D}}).
 $$
 
 > **Central idea.** Exchangeability says that the seesaw has no preferred
@@ -152,11 +152,11 @@ the scale slope introduced below do not change.
 In these score coordinates, a full linear Dyadic Score Model (DSM) is
 
 $$
-M_Y=a_{10}+a_{11}M_X+a_{12}D_X+r_M,
+M_Y=a_{10}+a_{11}M_X+a_{12}D_X+r_{\mathrm{M}},
 $$
 
 $$
-D_Y=a_{20}+a_{21}M_X+a_{22}D_X+r_D.
+D_Y=a_{20}+a_{21}M_X+a_{22}D_X+r_{\mathrm{D}}.
 $$
 
 After a member-label swap, $M_X$ and $M_Y$ stay unchanged, whereas $D_X$ and
@@ -166,27 +166,27 @@ residual covariance matrix, exchangeability therefore requires
 $$
 a_{12}=a_{20}=a_{21}=0,
 \qquad
-\operatorname{Cov}(r_M,r_D)=0.
+\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})=0.
 $$
 
 What remains is the standard DIM:
 
 $$
-M_Y=\beta_0+\beta_BM_X+r_M,
+M_Y=\beta_0+\beta_{\mathrm{B}}M_X+r_{\mathrm{M}},
 $$
 
 $$
-D_Y=\beta_WD_X+r_D.
+D_Y=\beta_{\mathrm{W}}D_X+r_{\mathrm{D}}.
 $$
 
-$\beta_B$ is the between-dyad effect and $\beta_W$ is the within-dyad effect.
+$\beta_{\mathrm{B}}$ is the between-dyad effect and $\beta_{\mathrm{W}}$ is the within-dyad effect.
 The missing extension is not an ordinary mean–difference correlation. It is a
 model for how the **variance** of the signed difference changes.
 
 To see why, write
 
 $$
-r_D=SA,
+r_{\mathrm{D}}=SA,
 \qquad
 S\in\{-1,+1\},
 \qquad
@@ -194,21 +194,21 @@ A\geq 0.
 $$
 
 $A$ records how far the seesaw tilts, and $S$ records its arbitrary direction.
-Under exchangeability, both signs are equally likely conditional on $r_M$ and
-$A$. Thus $E(r_D\mid r_M,A)=0$ and consequently
+Under exchangeability, both signs are equally likely conditional on $r_{\mathrm{M}}$ and
+$A$. Thus $E(r_{\mathrm{D}}\mid r_{\mathrm{M}},A)=0$ and consequently
 
 $$
 \begin{aligned}
-\operatorname{Cov}(r_M,r_D)
-&=E(r_Mr_D) \\
-&=E\!\left[r_ME(r_D\mid r_M)\right] \\
+\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})
+&=E(r_{\mathrm{M}}r_{\mathrm{D}}) \\
+&=E\!\left[r_{\mathrm{M}}E(r_{\mathrm{D}}\mid r_{\mathrm{M}})\right] \\
 &=0.
 \end{aligned}
 $$
 
-The signed covariance cancels even if $A$ changes strongly with $r_M$. The
+The signed covariance cancels even if $A$ changes strongly with $r_{\mathrm{M}}$. The
 usual Gaussian DIM goes further: zero covariance plus joint normality makes
-$r_M$ and $r_D$ independent, implying one constant seesaw variance.
+$r_{\mathrm{M}}$ and $r_{\mathrm{D}}$ independent, implying one constant seesaw variance.
 Exchangeability itself does not require that constant variance.
 
 ## The location–scale extension
@@ -216,26 +216,26 @@ Exchangeability itself does not require that constant variance.
 Standardize the elevator residual:
 
 $$
-z_{Mj}=\frac{r_{Mj}}{\sigma_M},
+z_{\mathrm{M},j}=\frac{r_{\mathrm{M},j}}{\sigma_{\mathrm{M}}},
 \qquad
-r_{Mj}\sim\mathcal{N}(0,\sigma_M^2).
+r_{\mathrm{M},j}\sim\mathcal{N}(0,\sigma_{\mathrm{M}}^2).
 $$
 
 Keep the seesaw residual centered and symmetric, but allow its variance to
 depend on elevator position:
 
 $$
-r_{Dj}\mid r_{Mj}
+r_{\mathrm{D},j}\mid r_{\mathrm{M},j}
 \sim
-\mathcal{N}\!\left(0,v_D(z_{Mj})\right),
+\mathcal{N}\!\left(0,v_{\mathrm{D}}(z_{\mathrm{M},j})\right),
 $$
 
 $$
-\log v_D(z_{Mj})
-=2\log(\sigma_{D0})+\lambda z_{Mj}.
+\log v_{\mathrm{D}}(z_{\mathrm{M},j})
+=2\log(\sigma_{\mathrm{D}0})+\lambda z_{\mathrm{M},j}.
 $$
 
-Here $\sigma_{D0}$ is the seesaw residual standard deviation at $z_M=0$—that
+Here $\sigma_{\mathrm{D}0}$ is the seesaw residual standard deviation at $z_{\mathrm{M}}=0$—that
 is, for dyads whose outcome mean is exactly as predicted.
 The scale slope $\lambda$ has a direct interpretation:
 
@@ -243,12 +243,12 @@ The scale slope $\lambda$ has a direct interpretation:
 - $\lambda>0$ means that the seesaw spreads out as the residual elevator rises;
 - $\lambda<0$ means that the seesaw tightens as the residual elevator rises.
 
-A one-standard-deviation increase in $r_M$ multiplies the seesaw variance by
+A one-standard-deviation increase in $r_{\mathrm{M}}$ multiplies the seesaw variance by
 $\exp(\lambda)$ and its standard deviation by $\exp(\lambda/2)$. At every
 elevator position, however,
 
 $$
-E(r_D\mid r_M)=0.
+E(r_{\mathrm{D}}\mid r_{\mathrm{M}})=0.
 $$
 
 The model changes gap **magnitude**, not gap **direction**, and therefore
@@ -367,7 +367,7 @@ compare the standard and extended DIM on exactly the same likelihood. That
 likelihood factorizes as
 
 $$
-p(r_M,r_D)=p(r_M)\,p(r_D\mid r_M).
+p(r_{\mathrm{M}},r_{\mathrm{D}})=p(r_{\mathrm{M}})\,p(r_{\mathrm{D}}\mid r_{\mathrm{M}}).
 $$
 
 The standard model fixes $\lambda=0$; the extended model estimates it.
@@ -729,11 +729,11 @@ knitr::kable(
 )
 ```
 
-The extended estimate $\hat\beta_B=`r fmt(fit_extended$par[["b_between"]])`$
+The extended estimate $\hat\beta_{\mathrm{B}}=`r fmt(fit_extended$par[["b_between"]])`$
 means that a one-unit higher dyad-average $X$ is associated with a
 `r fmt(fit_extended$par[["b_between"]])`-unit higher expected dyad-average
 $Y$. The estimate
-$\hat\beta_W=`r fmt(fit_extended$par[["b_within"]])`$ means that a one-unit
+$\hat\beta_{\mathrm{W}}=`r fmt(fit_extended$par[["b_within"]])`$ means that a one-unit
 larger member difference in $X$ is associated with a
 `r fmt(fit_extended$par[["b_within"]])`-unit larger expected member difference
 in $Y$ in the same direction, holding the dyad-average $X$ constant.
@@ -745,8 +745,8 @@ is correct and the predictors are exogenous.
 
 The standard DIM instead compresses the changing seesaw spread into one
 marginal root-mean-square standard deviation,
-$\sqrt{E\{v_D(z_M)\}}$. It has no separate baseline $\sigma_{D0}$ at
-$z_M=0$. The extended model estimates both the baseline and the implied
+$\sqrt{E\{v_{\mathrm{D}}(z_{\mathrm{M}})\}}$. It has no separate baseline $\sigma_{\mathrm{D}0}$ at
+$z_{\mathrm{M}}=0$. The extended model estimates both the baseline and the implied
 marginal spread, so the table keeps those quantities on separate rows.
 
 ```{r model-comparison, echo=FALSE}
@@ -924,7 +924,7 @@ par(old_par)
 > are the seats?” These are different questions.
 
 The binned residual plot is a useful diagnostic, not a valid two-stage
-estimator. Regressing $|\hat r_D|$ on $\hat r_M$ would treat estimated residuals
+estimator. Regressing $|\hat r_{\mathrm{D}}|$ on $\hat r_{\mathrm{M}}$ would treat estimated residuals
 as observed without error. The joint model instead estimates the mean and scale
 parts together.
 
@@ -982,7 +982,7 @@ knitr::kable(
 ```
 
 The standard model must use the same seesaw SD everywhere. The extended model
-estimates a much narrower residual member gap at $z_M=-1$ than at $z_M=1$.
+estimates a much narrower residual member gap at $z_{\mathrm{M}}=-1$ than at $z_{\mathrm{M}}=1$.
 
 ```{r extended-scale-figure, echo=FALSE, fig.width=9.5, fig.height=4.3, out.width="100%", fig.cap="Left: the fitted scale function tracks the changing seesaw spread. Right: after division by the fitted conditional SD, the standardized residual spread is approximately constant.", fig.alt="Two model-checking panels. The left shows empirical binned seesaw spread increasing with elevator position, tracked by the fitted extended DIM and the simulation truth while the standard DIM remains horizontal. The right shows that binned standardized residual spread is approximately one after applying the extended model."}
 old_par <- par(
@@ -1132,7 +1132,7 @@ unname(
 ```
 
 The difference is exactly zero apart from possible machine rounding. The
-extension changes the size of $r_D$, never its preferred sign.
+extension changes the size of $r_{\mathrm{D}}$, never its preferred sign.
 
 ## Translate the fitted result to APIM language
 
@@ -1146,16 +1146,16 @@ For member $i$ with partner $k$,
 $$
 E(Y_i\mid X_i,X_k)
 =\beta_0
-+\frac{\beta_B+\beta_W}{2}X_i
-+\frac{\beta_B-\beta_W}{2}X_k.
++\frac{\beta_{\mathrm{B}}+\beta_{\mathrm{W}}}{2}X_i
++\frac{\beta_{\mathrm{B}}-\beta_{\mathrm{W}}}{2}X_k.
 $$
 
 Thus the exchangeable actor and partner effects are
 
 $$
-a=\frac{\beta_B+\beta_W}{2},
+a=\frac{\beta_{\mathrm{B}}+\beta_{\mathrm{W}}}{2},
 \qquad
-p=\frac{\beta_B-\beta_W}{2}.
+p=\frac{\beta_{\mathrm{B}}-\beta_{\mathrm{W}}}{2}.
 $$
 
 ```{r apim-fixed-table, echo=FALSE}
@@ -1190,52 +1190,52 @@ effect is `r fmt(partner_hat)`.
 Recall that
 
 $$
-e_1=r_M+r_D,
+e_1=r_{\mathrm{M}}+r_{\mathrm{D}},
 \qquad
-e_2=r_M-r_D.
+e_2=r_{\mathrm{M}}-r_{\mathrm{D}}.
 $$
 
-With constant component variances $v_M$ and $v_D$ and
-$\operatorname{Cov}(r_M,r_D)=0$, the expanded exchangeable APIM residual
+With constant component variances $v_{\mathrm{M}}$ and $v_{\mathrm{D}}$ and
+$\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})=0$, the expanded exchangeable APIM residual
 covariance matrix is
 
 $$
-\boldsymbol{\Sigma}_e
+\boldsymbol{\Sigma}_{\mathrm{e}}
 =
 \begin{pmatrix}
-v_M+v_D & v_M-v_D\\
-v_M-v_D & v_M+v_D
+v_{\mathrm{M}}+v_{\mathrm{D}} & v_{\mathrm{M}}-v_{\mathrm{D}}\\
+v_{\mathrm{M}}-v_{\mathrm{D}} & v_{\mathrm{M}}+v_{\mathrm{D}}
 \end{pmatrix}.
 $$
 
 The partner residual correlation is therefore
 
 $$
-\rho_e=\frac{v_M-v_D}{v_M+v_D}.
+\rho_{\mathrm{e}}=\frac{v_{\mathrm{M}}-v_{\mathrm{D}}}{v_{\mathrm{M}}+v_{\mathrm{D}}}.
 $$
 
 In the extended model, let
 
 $$
-\bar v_D=E\!\left[v_D(z_M)\right]
+\bar v_{\mathrm{D}}=E\!\left[v_{\mathrm{D}}(z_{\mathrm{M}})\right]
 $$
 
-denote the average seesaw variance. Because $z_M\sim\mathcal{N}(0,1)$ here,
+denote the average seesaw variance. Because $z_{\mathrm{M}}\sim\mathcal{N}(0,1)$ here,
 
 $$
-\bar v_D
-=\sigma_{D0}^2\exp\!\left(\frac{\lambda^2}{2}\right).
+\bar v_{\mathrm{D}}
+=\sigma_{\mathrm{D}0}^2\exp\!\left(\frac{\lambda^2}{2}\right).
 $$
 
 A conventional Gaussian exchangeable APIM with one constant covariance matrix
 can match the extended model's **marginal** covariance matrix,
 
 $$
-\boldsymbol{\Sigma}_e
+\boldsymbol{\Sigma}_{\mathrm{e}}
 =
 \begin{pmatrix}
-\sigma_M^2+\bar v_D & \sigma_M^2-\bar v_D\\
-\sigma_M^2-\bar v_D & \sigma_M^2+\bar v_D
+\sigma_{\mathrm{M}}^2+\bar v_{\mathrm{D}} & \sigma_{\mathrm{M}}^2-\bar v_{\mathrm{D}}\\
+\sigma_{\mathrm{M}}^2-\bar v_{\mathrm{D}} & \sigma_{\mathrm{M}}^2+\bar v_{\mathrm{D}}
 \end{pmatrix}.
 $$
 
@@ -1254,7 +1254,7 @@ $$
 \ \middle|\
 \frac{e_1+e_2}{2}=m
 \right)
-=2\log(\sigma_{D0})+\lambda\frac{m}{\sigma_M}.
+=2\log(\sigma_{\mathrm{D}0})+\lambda\frac{m}{\sigma_{\mathrm{M}}}.
 $$
 
 In plain language: the residual **average** is associated with the residual
@@ -1370,7 +1370,7 @@ par(old_par)
 > matrix can match the overall covariance ellipse while missing the funnel
 > inside it. The DIM rotation makes that hidden structure visible.
 
-The two plots use the same $\sigma_M^2$ and the same marginal $\bar v_D$, so
+The two plots use the same $\sigma_{\mathrm{M}}^2$ and the same marginal $\bar v_{\mathrm{D}}$, so
 their model-implied member residual variance, covariance, and correlation are
 the same. The standard panel has one constant anti-diagonal width. The extended
 panel redistributes that same average seesaw variation across the elevator.
@@ -1386,33 +1386,33 @@ An easier distributional model uses an observed, standardized dyad-level
 predictor $z_X$:
 
 $$
-\log v_D(z_X)=2\log(\sigma_{D0})+\lambda_Xz_X.
+\log v_{\mathrm{D}}(z_X)=2\log(\sigma_{\mathrm{D}0})+\lambda_Xz_X.
 $$
 
 $\lambda_X$ asks whether dyads with a higher average $X$ show larger or smaller
 unexplained outcome differences, without predicting which member is higher.
-Suppose $r_M\mid z_X\sim\mathcal{N}(0,v_M)$ with constant $v_M$,
-$r_D\mid z_X\sim\mathcal{N}(0,v_D(z_X))$, and the two components are
+Suppose $r_{\mathrm{M}}\mid z_X\sim\mathcal{N}(0,v_{\mathrm{M}})$ with constant $v_{\mathrm{M}}$,
+$r_{\mathrm{D}}\mid z_X\sim\mathcal{N}(0,v_{\mathrm{D}}(z_X))$, and the two components are
 conditionally independent. The member-level conditional covariance matrix is
 
 $$
-\boldsymbol{\Sigma}_e(z_X)
+\boldsymbol{\Sigma}_{\mathrm{e}}(z_X)
 =
 \begin{pmatrix}
-v_M+v_D(z_X) & v_M-v_D(z_X)\\
-v_M-v_D(z_X) & v_M+v_D(z_X)
+v_{\mathrm{M}}+v_{\mathrm{D}}(z_X) & v_{\mathrm{M}}-v_{\mathrm{D}}(z_X)\\
+v_{\mathrm{M}}-v_{\mathrm{D}}(z_X) & v_{\mathrm{M}}+v_{\mathrm{D}}(z_X)
 \end{pmatrix},
 $$
 
 with conditional residual correlation
 
 $$
-\rho_e(z_X)
-=\frac{v_M-v_D(z_X)}{v_M+v_D(z_X)}.
+\rho_{\mathrm{e}}(z_X)
+=\frac{v_{\mathrm{M}}-v_{\mathrm{D}}(z_X)}{v_{\mathrm{M}}+v_{\mathrm{D}}(z_X)}.
 $$
 
 This varying-correlation expression belongs to the **observed-predictor**
-version. In the residual-driven model, conditioning on $r_M$ fixes the
+version. In the residual-driven model, conditioning on $r_{\mathrm{M}}$ fixes the
 elevator coordinate, so an ordinary conditional member correlation is not the
 right summary.
 
@@ -1422,11 +1422,11 @@ Exchangeability also permits nonlinear conditional-mean relationships that
 have no preferred member direction:
 
 $$
-M_Y=\beta_0+\beta_BM_X+qD_X^2+r_M,
+M_Y=\beta_0+\beta_{\mathrm{B}}M_X+qD_X^2+r_{\mathrm{M}},
 $$
 
 $$
-D_Y=(\beta_W+hM_X)D_X+r_D.
+D_Y=(\beta_{\mathrm{W}}+hM_X)D_X+r_{\mathrm{D}}.
 $$
 
 | Exchangeable term | Substantive question |
@@ -1448,8 +1448,8 @@ $$
 \begin{aligned}
 E(Y_i\mid X_i,X_k)
 &=\beta_0
-+\frac{\beta_B+\beta_W}{2}X_i
-+\frac{\beta_B-\beta_W}{2}X_k \\
++\frac{\beta_{\mathrm{B}}+\beta_{\mathrm{W}}}{2}X_i
++\frac{\beta_{\mathrm{B}}-\beta_{\mathrm{W}}}{2}X_k \\
 &\quad
 +\frac{q+h}{4}X_i^2
 +\frac{q-h}{4}X_k^2
@@ -1468,8 +1468,8 @@ standard **linear** APIM.
 
 A substantive application should report at least:
 
-- the between- and within-dyad effects, $\beta_B$ and $\beta_W$;
-- the baseline seesaw SD $\sigma_{D0}$ and where $z_M=0$ lies;
+- the between- and within-dyad effects, $\beta_{\mathrm{B}}$ and $\beta_{\mathrm{W}}$;
+- the baseline seesaw SD $\sigma_{\mathrm{D}0}$ and where $z_{\mathrm{M}}=0$ lies;
 - $\lambda$ and the variance multiplier $\exp(\lambda)$;
 - predicted seesaw or full member-gap SDs at meaningful elevator positions;
 - diagnostics for the elevator residual and the standardized seesaw residual;
@@ -1487,7 +1487,7 @@ Four cautions matter:
    can link a dyad's mean to its possible member gap even without a substantive
    scale process.
 4. **One gap per dyad is data-hungry.** $\lambda$ is learned from the association
-   between $r_M$ and $r_D^2$, making it sensitive to unusual dyads. A paper-ready
+   between $r_{\mathrm{M}}$ and $r_{\mathrm{D}}^2$, making it sensitive to unusual dyads. A paper-ready
    implementation should use TMB or Stan, regularization where appropriate,
    profile or bootstrap inference, and simulation-based calibration.
 

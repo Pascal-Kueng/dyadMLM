@@ -50,7 +50,8 @@ draw_residual_concepts <- function() {
       "label",
       x = 1.1,
       y = predicted_value + 0.35,
-      label = "Ŷ = 10",
+      label = "hat(italic(Y)) == 10",
+      parse = TRUE,
       hjust = 0,
       size = 3.7,
       colour = muted_colour,
@@ -59,12 +60,15 @@ draw_residual_concepts <- function() {
     ) +
     ggplot2::facet_grid(
       rows = ggplot2::vars(role),
-      labeller = ggplot2::labeller(
-        role = c(
-          "Female partner" = "Female: smaller σ²",
-          "Male partner" = "Male: larger σ²"
-        )
-      )
+      labeller = ggplot2::labeller(role = ggplot2::as_labeller(
+        c(
+          "Female partner" =
+            "plain('Female: smaller')~italic(sigma)[plain(F)]^2",
+          "Male partner" =
+            "plain('Male: larger')~italic(sigma)[plain(M)]^2"
+        ),
+        default = ggplot2::label_parsed
+      ))
     ) +
     ggplot2::scale_colour_manual(values = role_colours) +
     ggplot2::scale_x_continuous(
@@ -178,7 +182,8 @@ draw_residual_concepts <- function() {
     ggplot2::labs(
       title = "Same dyads: residuals move together",
       subtitle = expression(
-        "Each numbered point pairs two partners; " * rho[FM] > 0
+        "Each numbered point pairs two partners; " *
+          italic(rho)[plain(FM)] > 0
       ),
       x = "Male partner residual",
       y = "Female partner residual"
@@ -262,7 +267,8 @@ residual_concepts_widget <- function(
       "role=\"img\" aria-live=\"polite\"></svg>\n",
       "  <p class=\"residual-concepts-caption\">",
       "One linked set of dyads: changing a variance rescales one partner's residuals ",
-      "while preserving ρ; changing ρ preserves both residual variances. ",
+      "while preserving <span class=\"rc-math\">ρ</span>; changing ",
+      "<span class=\"rc-math\">ρ</span> preserves both residual variances. ",
       "The correlation guide is scale-free, not a fitted regression line.",
       "</p>\n",
       "</div>\n",

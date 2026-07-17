@@ -125,7 +125,7 @@ $b_{\mathrm{dev}}$ unchanged.
 draw_dim_diagram()
 ```
 
-Uncorrelated $r_m$ and $r_{d,i}$ in the conceptual representation do not imply
+Uncorrelated $r_{\mathrm{m}}$ and $r_{\mathrm{d},i}$ in the conceptual representation do not imply
 that the member residuals are independent: the two component variances together
 determine the covariance between the members' residuals.
 

@@ -84,6 +84,15 @@
   text-align: center;
 }
 
+/* Compact notation reference without changing mathematics elsewhere. */
+.reveal .matrix-notation {
+  font-size: 0.82em;
+}
+
+.reveal .matrix-notation .math.display {
+  margin-top: 0.1em;
+}
+
 .reveal {
   color: var(--uzh-ink);
   font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
@@ -433,6 +442,19 @@
   font-family: Georgia, "Times New Roman", serif;
 }
 
+.reveal .workshop-dim-grid .wdg-math,
+.reveal .workshop-dim-grid .wdg-math-symbol {
+  font-family: "STIX Two Math", "Cambria Math", Georgia, "Times New Roman", serif;
+}
+
+.reveal .workshop-dim-grid .wdg-math-symbol {
+  font-style: italic !important;
+}
+
+.reveal .workshop-dim-grid .wdg-math sub {
+  font-style: normal;
+}
+
 .reveal .wdg-equations {
   display: grid;
   grid-template-columns: 1fr;
@@ -610,7 +632,13 @@
 .reveal .rc-math {
   white-space: nowrap;
   font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
   font-weight: 400;
+}
+
+.reveal .rc-math sub,
+.reveal .rc-math sup {
+  font-style: normal;
 }
 
 .reveal .residual-reset {
@@ -673,6 +701,18 @@
 .reveal .residual-concepts-svg .rc-facet-title {
   font-size: 18px;
   font-weight: 700;
+}
+
+.reveal .residual-concepts-svg .rc-svg-math-symbol {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.reveal .residual-concepts-svg .rc-svg-math-script {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .reveal .residual-concepts-svg .rc-prediction-line {

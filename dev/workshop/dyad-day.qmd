@@ -530,11 +530,13 @@ Conceptually (simplified), we are esimating these two equations in a single mode
 $$
   \begin{gathered}
   \\[0.5em]
-  Y_{male_i}
-  = b_{0M} + b_{1M}X_{male_i} + b_{2M}X_{female_i} + \epsilon_{male_i}
+  Y_{\mathrm{male},i}
+  = b_{0,\mathrm{M}} + b_{1,\mathrm{M}}X_{\mathrm{male},i}
+  + b_{2,\mathrm{M}}X_{\mathrm{female},i} + \epsilon_{\mathrm{male},i}
   \\[2em]
-  Y_{female_i}
-  = b_{0F} + b_{1F}X_{female_i} + b_{2F}X_{male_i} + \epsilon_{female_i}
+  Y_{\mathrm{female},i}
+  = b_{0,\mathrm{F}} + b_{1,\mathrm{F}}X_{\mathrm{female},i}
+  + b_{2,\mathrm{F}}X_{\mathrm{male},i} + \epsilon_{\mathrm{female},i}
   \end{gathered}
 $$
 <br>
@@ -616,10 +618,11 @@ draw_apim_diagram("distinguishable")
 
 Map the preceding visual onto the APIM notation:
 
-- Each outcome has a residual, epsilon.
-- The residual standard deviations, sigma, may differ between distinguishable
+- Each outcome has a residual, $\epsilon$.
+- The residual standard deviations, $\sigma$, may differ between distinguishable
   partners. Their squares are the residual variances from the previous slide.
-- The curved double-headed arrow is the residual correlation, rho(FM).
+- The curved double-headed arrow is the residual correlation,
+  $\rho_{\mathrm{FM}}$.
 
 :::
 
@@ -847,7 +850,7 @@ On the left:
   
 - The open circle is the conditional prediction. 
   - The nearby dots represent illustrative observed outcomes, 
-  - and the arrow labelled epsilon isolates one residual as the distance from the prediction to an observation.
+  - and the arrow labelled $\epsilon$ isolates one residual as the distance from the prediction to an observation.
   
 - The shaded area is supposed to visualize the residual variance  
   
@@ -893,6 +896,7 @@ workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
 
 ## The DIM
 
+- A re-parametrization of the APIM!
 - We decompose predictors into two variables:
   - Dyad mean (GM-centered): $\bar{X} - \mu_{X}$
   - Within-dyad member deviation: $X_i - \bar{X}$
@@ -903,7 +907,13 @@ In other words, these predictors express:
 - A couple's average level compared with the average of all couples
 - A partner's level compared with the average of their couple
 
-<!-- TODO: insert an interactive Seasaw diagram? 
+:::{.notes}
+
+So, you can see how this would answer different research questions than an
+APIM, even though both model encode the exact same information and are
+interchangeable.
+
+:::
 
 <!-- ca. 2 Minutes -->
 
@@ -940,7 +950,17 @@ dim_reparameterization_grid(
 draw_dim_diagram(show_residuals = FALSE)
 ```
 
-<!-- ca. 3 Minutes -->
+:::{.notes}
+
+- Is a couple that is higher on X than others also higher on Y than others?
+
+- is a person within a couple that is higher than their partner on X, also higher
+than their partner on Y?
+<!-- TODO @codex fact check these interpretations -->
+
+:::
+
+<!-- ca. 1 Minute -->
 
 ## The DIM
 
@@ -957,19 +977,17 @@ draw_dim_diagram(show_residuals = FALSE)
 draw_dim_diagram()
 ```
 
-<!-- ca. 2 Minutes 
-no details on why no correlations, just saying that info of both partners are in both resids
--->
-
 :::{.notes}
 
-Where did the residual correlation go? It is built into these two residuals. 
+Ask people: where did the residual correlation between partners go? Are they no longer correlated?
+
+$\rightarrow$ No, the residual correlation between individuals residuals are encoded in these two residuals.
 
 The mean residual captures whether both partners are higher or lower than 
-predicted. --> Can capture positive correlation between the partners!
+predicted $\rightarrow$ Can capture positive correlation between the partners!
 
 The deviation residual captures whether one partner is higher while the
-other is lower. --> can capture negative correlation between the partners!
+other is lower $\rightarrow$ can capture negative correlation between the partners!
 
 $$
 \operatorname{Cov}(e_1,e_2)
@@ -977,6 +995,9 @@ $$
 $$
 
 :::
+
+<!-- ca. 2 Minutes -->
+
 
 ## Why are the DIM residuals uncorrelated?
 
@@ -995,50 +1016,58 @@ draw_residual_seesaw("dim")
 
 ::: {.seesaw-swap}
 **Swap the arbitrary member labels:**
-$r_M \mapsto r_M \qquad r_D \mapsto -r_D$
+$r_{\mathrm{M}} \mapsto r_{\mathrm{M}} \qquad
+r_{\mathrm{D}} \mapsto -r_{\mathrm{D}}$
 :::
 
 ::: {.seesaw-equation}
 Exchangeability requires the same covariance after relabelling:
 
 $$
-\operatorname{Cov}(r_M,r_D)
-= \operatorname{Cov}(r_M,-r_D)
-= -\operatorname{Cov}(r_M,r_D)
+\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})
+= \operatorname{Cov}(r_{\mathrm{M}},-r_{\mathrm{D}})
+= -\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})
 \quad\Longrightarrow\quad
-\operatorname{Cov}(r_M,r_D)=0
+\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})=0
 $$
 :::
 
 ::: {.seesaw-takeaway}
 **Zero does not mean independent partners:**
 $\operatorname{Cov}(e_1,e_2)
-=\operatorname{Var}(r_M)-\operatorname{Var}(r_D)$
+=\operatorname{Var}(r_{\mathrm{M}})-\operatorname{Var}(r_{\mathrm{D}})$
 
 Their residual association is encoded by the relative elevator and seesaw variances.
 :::
 
 :::{.notes}
 
-- The elevator and seesaw are two coordinates for describing what remains
-  unexplained across the sample of dyads. They are not a temporal process
-  occurring within one couple.
-- The dyad mean residual is the elevator: both partners are higher or lower
-  than predicted together.
-- The within-dyad residual is the seesaw: one partner is higher while the other
-  is lower.
-- In the DIM, the member positions are arbitrary. Swapping them leaves the
-  elevator coordinate unchanged but reverses the sign of the seesaw coordinate.
-- An exchangeable model must be unchanged by that swap. Its mean–deviation
-  residual covariance must therefore equal its own negative, which is possible
-  only when it is zero.
-- This does not make the partners independent. Whether their person-level
-  residuals are positively or negatively associated depends on the relative
-  sizes of the elevator and seesaw variances.
+POTENTIALLY SKIP FOR TIME
+
+Elevator: once the couples' mean value X has accounted for some variance in the
+couples' outcome Y, there might still be some movement up or down that is unaccounted. $\rightarrow$ residual
+
+Seasaw: once a persons' difference from the couple mean has accounted for some variance
+in the persons' difference from the couple mean in Y, there might still be some additional deviation $\rightarrow$ residual
+
+In the DIM, the DIM, the member positions on the seasaw are arbitrary.
+Swapping them leaves the elevator coordinate unchanged but reverses the sign of
+the seesaw coordinate.
+
+---
+
+You might wonder, why the elevator and seasaw residuals are not correlated.
+
+- A positive correlation for example would imply that higher Y1 + Y2 is linked to, Y1 being higher than Y2.
+- If partners are exchangeable, across all partners, the differences in the seasaw cancel out to
+zero. ! TODO @codex fact check this interpretation for correctness.
+
+But again, this does not make the partners independent, and this model
+IS exactly equivalent to the APIM
 
 :::
 
-<!-- ca. 3 Minutes -->
+<!-- ca. 4 Minutes -->
 
 ## Fitting the DIM
 
@@ -1065,9 +1094,68 @@ fit_and_draw_dim(
 
 ## DIM to APIM coefficients
 
-<!-- Practical quick demonstration and showing formula -->
+Once we fit an APIM, we have already fitted a DIM - And vice-versa
+
+We can transform values from a fitted APIM into DIM values.
+
+Suppose X1 = 1 and X2 = 1, 
+
+then our DIM coordinates are: 
+
+Xmean = 2, Xdiff = 0
+
+So,  
+
+Y = 1 x b_a + 1 x b_p 
+
+implies
+
+Y = 1 x b_mean + 0 x b_dev = b_mean
+
+therefore b_mean = b_a + b_p
+
+Now, suppose: 
+
+X1 = 1 and X2 = -1, (imagine centered)
+
+then the DIM coordinate are: 
+
+Xmean = 0, Xdiff = 1 (I am 1 higher than our mean, 2 higher than my partner)
+
+So, 
+
+Y_apim = 1 x b_a + (-1) x b_p
+
+implies for the "higher" partner: 
+
+Y_dim = 0 x b_mean + 1 x b_diff = b_diff
+
+therefore b_diff = b_a - b_p
+
+TODO @codex, this slide with consistent notatino please. 
+
+## DIM to APIM coefficients
+
+```{r}
+#| label: interactive-apim-dim-grid-coefficients
+#| echo: false
+#| results: asis
+
+dim_reparameterization_grid(
+  workshop_exchangeable_apim,
+  predictor_label = "Provided support",
+  outcome_label = "MVPA",
+  compact = TRUE
+)
+```
+
+<!-- Practical quick demonstration and showing formulas -->
 
 <!-- ca. 5 Minutes -->
+
+## The DSM
+
+<!-- INTRO -->
 
 ## The DSM
 
@@ -1116,16 +1204,18 @@ draw_residual_seesaw("dsm")
 
 ::: {.seesaw-equation .seesaw-equation-dsm}
 $$
-D_Y=Y_F-Y_M
+D_Y=Y_{\mathrm{F}}-Y_{\mathrm{M}}
 \qquad\text{and}\qquad
-\operatorname{Cov}(r_M,r_D)\ \text{may be non-zero.}
+\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})\ \text{may be non-zero.}
 $$
 :::
 
+
 ::: {.seesaw-takeaway}
-**A positive $\rho_{MD}$ means:** couples whose outcomes are higher than predicted
+**A positive $\rho_{\mathrm{MD}}$ means:** couples whose outcomes are higher than predicted
 on average also tend to have a larger female–male difference than predicted.
 :::
+
 
 ::: {.seesaw-footnote}
 The correlation describes a pattern across couples—not two residuals varying
@@ -1136,9 +1226,10 @@ within one couple.
 
 - The DSM uses the same elevator and seesaw idea, but the two seats now have
   substantively meaningful labels.
+
 - If the outcome difference is defined as female minus male, reversing its sign
-  changes the meaning of the variable. Relabelling is therefore not a symmetry
-  that the distinguishable model must obey.
+  changes the meaning of the variable. (different than before, where swapping seats did not change the model)
+
 - The mean and difference residuals may consequently be correlated.
 - A positive correlation means that, across couples, couples whose outcomes are
   higher than predicted on average also tend to have a larger female–male
@@ -1309,6 +1400,41 @@ draw_cfm_diagram()
 <!-- add ref, basic idea, example graphic and basic interpretation of paths -->
 
 <!-- ca. 2 minutes -->
+
+## Matrices
+
+::: {.matrix-notation}
+$$
+\begin{aligned}
+y_i
+&\quad &&\text{scalar},
+\\[0.7em]
+\boldsymbol{y}
+&= \begin{bmatrix} y_1 & y_2 \end{bmatrix}^{\mathsf T}
+&&\text{vector},
+\\[0.7em]
+\boldsymbol{X}
+&= \begin{bmatrix}
+1 & x_{11} & x_{12} \\
+1 & x_{21} & x_{22}
+\end{bmatrix}
+&&\text{design matrix},
+\\[0.7em]
+\boldsymbol{\beta}
+&= \begin{bmatrix} b_0 & b_1 & b_2 \end{bmatrix}^{\mathsf T}
+&&\text{coefficient vector},
+\\[0.7em]
+\boldsymbol{\Sigma}
+&= \begin{bmatrix}
+\sigma_{\mathrm F}^{2}
+& \rho_{\mathrm{FM}}\sigma_{\mathrm F}\sigma_{\mathrm M} \\
+\rho_{\mathrm{FM}}\sigma_{\mathrm F}\sigma_{\mathrm M}
+& \sigma_{\mathrm M}^{2}
+\end{bmatrix}
+&&\text{covariance matrix}.
+\end{aligned}
+$$
+:::
 
 <!----------------- APPLIED PART (plus MLM vs. SEM and software) 
 

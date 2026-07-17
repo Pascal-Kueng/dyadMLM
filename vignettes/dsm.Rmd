@@ -227,33 +227,33 @@ the random role-contrast slope variance is unexplained variation in the full
 directional outcome difference. Their covariance indicates whether unexplained
 outcome level and unexplained outcome difference are associated.
 
-The curved arrow $\rho_{md}$ is the scale-free correlation between the
+The curved arrow $\rho_{\mathrm{md}}$ is the scale-free correlation between the
 outcome-mean residual and the outcome-difference residual. It is **not** the
-female-male residual correlation $\rho_{FM}$ from the APIM.
+female-male residual correlation $\rho_{\mathrm{FM}}$ from the APIM.
 
 The DSM uses the full female-minus-male difference:
 
 $$
-e_F = r_m + \frac{1}{2}r_d,
+e_{\mathrm{F}} = r_{\mathrm{m}} + \frac{1}{2}r_{\mathrm{d}},
 \qquad
-e_M = r_m - \frac{1}{2}r_d.
+e_{\mathrm{M}} = r_{\mathrm{m}} - \frac{1}{2}r_{\mathrm{d}}.
 $$
 
 Therefore, this relationship applies:
 
 $$
-\operatorname{Cov}(r_m,r_d)
+\operatorname{Cov}(r_{\mathrm{m}},r_{\mathrm{d}})
 =
-\frac{\operatorname{Var}(e_F)-\operatorname{Var}(e_M)}{2}.
+\frac{\operatorname{Var}(e_{\mathrm{F}})-\operatorname{Var}(e_{\mathrm{M}})}{2}.
 $$
 
-For this reason, a nonzero $\rho_{md}$ indicates that the two roles have different
+For this reason, a nonzero $\rho_{\mathrm{md}}$ indicates that the two roles have different
 residual variances. The remaining covariance between the partners' residuals is
 
 $$
-\operatorname{Cov}(e_F,e_M)
+\operatorname{Cov}(e_{\mathrm{F}},e_{\mathrm{M}})
 =
-\operatorname{Var}(r_m)-\frac{1}{4}\operatorname{Var}(r_d).
+\operatorname{Var}(r_{\mathrm{m}})-\frac{1}{4}\operatorname{Var}(r_{\mathrm{d}}).
 $$
 
 ### Reversing the coding

@@ -76,6 +76,24 @@
     return append(parent, "text", { x, y, class: className, ...(extra || {}) }, text);
   }
 
+  function appendMathSymbol(parent, symbol, subscript, superscript) {
+    append(parent, "tspan", { class: "rc-svg-math-symbol" }, symbol);
+    if (superscript) {
+      append(parent, "tspan", {
+        class: "rc-svg-math-script",
+        "baseline-shift": "super",
+        "font-size": "70%"
+      }, superscript);
+    }
+    if (subscript) {
+      append(parent, "tspan", {
+        class: "rc-svg-math-script",
+        "baseline-shift": "sub",
+        "font-size": "70%"
+      }, subscript);
+    }
+  }
+
   const textMeasureContext = document.createElement("canvas").getContext("2d");
 
   function textWidth(text, size, weight) {
@@ -160,7 +178,8 @@
       const predicted = 10;
 
       function drawResidualPanel(
-        top, bottom, residuals, colour, label, labelColour = colour
+        top, bottom, residuals, colour, role, variance,
+        labelColour = colour
       ) {
         append(left, "rect", {
           x: panelLeft,
@@ -180,9 +199,15 @@
           y2: predictedY,
           class: "rc-prediction-line"
         });
-        drawText(left, panelLeft + 13, top + 20, label, "rc-facet-title", {
+        const facetTitle = append(left, "text", {
+          x: panelLeft + 13,
+          y: top + 20,
+          class: "rc-facet-title",
           fill: labelColour
         });
+        append(facetTitle, "tspan", {}, `${role}: residual variance `);
+        appendMathSymbol(facetTitle, "σ", role === "Female" ? "F" : "M", "2");
+        append(facetTitle, "tspan", {}, ` = ${variance.toFixed(1)}`);
         residuals.forEach((residual, index) => {
           const x = scale(index, 0, residuals.length - 1, pointLeft, pointRight);
           const observedY = y(predicted + residual);
@@ -213,7 +238,11 @@
           class: "rc-prediction-label-box"
         });
         const predictionLabel = document.createElement("div");
-        predictionLabel.textContent = "ŷ = 10";
+        const predictionSymbol = document.createElement("span");
+        predictionSymbol.className = "rc-math";
+        predictionSymbol.textContent = "Ŷ";
+        predictionLabel.appendChild(predictionSymbol);
+        predictionLabel.appendChild(document.createTextNode(" = 10"));
         predictionLabelBox.appendChild(predictionLabel);
       }
 
@@ -222,14 +251,16 @@
         220,
         femaleResiduals,
         FEMALE,
-        `Female: residual variance σ²F = ${femaleVariance.toFixed(1)}`
+        "Female",
+        femaleVariance
       );
       drawResidualPanel(
         246,
         404,
         maleResiduals,
         MALE,
-        `Male: residual variance σ²M = ${maleVariance.toFixed(1)}`,
+        "Male",
+        maleVariance,
         MALE_TEXT
       );
 
@@ -254,12 +285,19 @@
         : correlation < -0.05
           ? "negative association"
           : "no linear association";
-      drawText(
-        right,
-        760,
-        46,
-        `Each point pairs two partners; ρFM = ${correlation.toFixed(1)} (${association})`,
-        "rc-subtitle"
+      const correlationSubtitle = append(right, "text", {
+        x: 760,
+        y: 46,
+        class: "rc-subtitle"
+      });
+      append(
+        correlationSubtitle, "tspan", {},
+        "Each point pairs two partners; "
+      );
+      appendMathSymbol(correlationSubtitle, "ρ", "FM");
+      append(
+        correlationSubtitle, "tspan", {},
+        ` = ${correlation.toFixed(1)} (${association})`
       );
 
       const plotLeft = 785;

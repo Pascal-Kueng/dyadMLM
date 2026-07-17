@@ -30,6 +30,35 @@ test_that("diagram effect colors retain their semantic meanings", {
   expect_error(.interdep_effect_colors("residual"), "Unknown effect")
 })
 
+test_that("diagram math labels distinguish quantities from descriptors", {
+  expect_identical(
+    .diagram_math_label(expression(rho[plain(FM)])),
+    expression(rho[plain(FM)])
+  )
+  expect_identical(
+    .diagram_math_label(expression(plain(SD) == sigma[plain(F)])),
+    expression(plain(SD) == sigma[plain(F)])
+  )
+  expect_identical(
+    .diagram_math_label(
+      expression(hat(Y)[i] == b[0] + a * X[i] + epsilon[i])
+    ),
+    expression(
+      hat(italic(Y))[italic(i)] ==
+        italic(b)[0] + italic(a) * italic(X)[italic(i)] +
+          epsilon[italic(i)]
+    )
+  )
+
+  path <- tempfile(fileext = ".png")
+  grDevices::png(path)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_identical(
+    .diagram_math_label(expression(rho[plain(FM)])),
+    expression(italic("ρ")[plain(FM)])
+  )
+})
+
 draw_to_temporary_pdf <- function(code) {
   path <- tempfile(fileext = ".pdf")
   grDevices::pdf(path)

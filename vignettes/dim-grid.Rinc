@@ -31,7 +31,7 @@
 
   htmltools::htmlDependency(
     name = "interdep-dim-grid",
-    version = "1.0.0",
+    version = "1.0.1",
     src = c(file = .dim_grid_asset_dir()),
     stylesheet = "dim-grid.css",
     script = "dim-grid.js"
@@ -116,11 +116,11 @@ dim_reparameterization_grid <- function(
     <div class="wdg-control-group">
       <div class="wdg-group-title wdg-apim-title">APIM coordinates</div>
       <label class="wdg-control wdg-actor">
-        <span><span>%s, <i>x</i><sub>actor</sub></span><output data-wdg-output="actor">0.00</output></span>
+        <span><span>%s, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>actor</sub></span></span><output data-wdg-output="actor">0.00</output></span>
         <input data-wdg-input="actor" type="range" min="-%s" max="%s" step="0.1" value="0">
       </label>
       <label class="wdg-control wdg-partner">
-        <span><span>%s, <i>x</i><sub>partner</sub></span><output data-wdg-output="partner">0.00</output></span>
+        <span><span>%s, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>partner</sub></span></span><output data-wdg-output="partner">0.00</output></span>
         <input data-wdg-input="partner" type="range" min="-%s" max="%s" step="0.1" value="0">
       </label>
     </div>
@@ -128,18 +128,18 @@ dim_reparameterization_grid <- function(
     <div class="wdg-control-group">
       <div class="wdg-group-title wdg-dim-title">DIM coordinates</div>
       <label class="wdg-control wdg-mean">
-        <span><span>Dyad mean, <i>x</i><sub>mean</sub></span><output data-wdg-output="mean">0.00</output></span>
+        <span><span>Dyad mean, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>mean</sub></span></span><output data-wdg-output="mean">0.00</output></span>
         <input data-wdg-input="mean" type="range" min="-%s" max="%s" step="0.05" value="0">
       </label>
       <label class="wdg-control wdg-within">
-        <span><span>%s, <i>x</i><sub>dev</sub></span><output data-wdg-output="within">0.00</output></span>
+        <span><span>%s, <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>dev</sub></span></span><output data-wdg-output="within">0.00</output></span>
         <input data-wdg-input="within" type="range" min="-%s" max="%s" step="0.05" value="0">
       </label>
     </div>
 
     <div class="wdg-relations">
-      <span><i>x</i><sub>mean</sub> = (<i>x</i><sub>actor</sub> + <i>x</i><sub>partner</sub>) / 2</span>
-      <span><i>x</i><sub>dev</sub> = (<i>x</i><sub>actor</sub> − <i>x</i><sub>partner</sub>) / 2</span>
+      <span><span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>mean</sub></span> = (<span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>actor</sub></span> + <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>partner</sub></span>) / 2</span>
+      <span><span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>dev</sub></span> = (<span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>actor</sub></span> − <span class="wdg-math"><span class="wdg-math-symbol">x</span><sub>partner</sub></span>) / 2</span>
     </div>
   </div>
 
@@ -165,9 +165,9 @@ dim_reparameterization_grid <- function(
 
       <div class="wdg-demos">
         <button type="button" data-wdg-demo="mean"><b>Shared dyad level</b><span>Both members +1</span></button>
-        <div><i>b</i><sub>mean</sub> = <i>a</i> + <i>p</i></div>
+        <div><span class="wdg-math"><span class="wdg-math-symbol">b</span><sub>mean</sub></span> = <span class="wdg-math-symbol">a</span> + <span class="wdg-math-symbol">p</span></div>
         <button type="button" data-wdg-demo="within"><b>Within-dyad member deviation</b><span>Actor +1, partner −1</span></button>
-        <div><i>b</i><sub>dev</sub> = <i>a</i> − <i>p</i></div>
+        <div><span class="wdg-math"><span class="wdg-math-symbol">b</span><sub>dev</sub></span> = <span class="wdg-math-symbol">a</span> − <span class="wdg-math-symbol">p</span></div>
         <p>%s</p>
       </div>
     </div>

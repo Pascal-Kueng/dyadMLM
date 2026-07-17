@@ -139,6 +139,19 @@
   line-height: 1.5;
 }
 
+.interdep-dim-grid--article .wdg-math,
+.interdep-dim-grid--article .wdg-math-symbol {
+  font-family: "STIX Two Math", "Cambria Math", Georgia, "Times New Roman", serif;
+}
+
+.interdep-dim-grid--article .wdg-math-symbol {
+  font-style: italic !important;
+}
+
+.interdep-dim-grid--article .wdg-math sub {
+  font-style: normal;
+}
+
 .interdep-dim-grid--article .wdg-equations {
   display: grid;
   gap: 0.4rem;

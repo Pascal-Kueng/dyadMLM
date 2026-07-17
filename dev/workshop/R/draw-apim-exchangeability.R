@@ -17,6 +17,52 @@ draw_apim_exchangeability_comparison <- function() {
 
   native <- function(value) grid::unit(value, "native")
 
+  # Plotmath's implicit styling can depend on the active graphics device and
+  # font. Mark quantities explicitly so the workshop SVGs follow the same
+  # notation rules as the surrounding equations: quantities are italic,
+  # while descriptive subscripts remain upright inside plain().
+  format_math <- function(label) {
+    quantity_symbols <- c(
+      "a", "b", "p", "r", "R", "X", "Y", "i", "j"
+    )
+    italic_greek <- c(
+      beta = "β", epsilon = "ε", mu = "μ", rho = "ρ", sigma = "σ"
+    )
+    device <- names(grDevices::dev.cur())
+    unicode_greek <- length(device) == 1L &&
+      !device %in% c("null device", "pdf", "postscript", "xfig", "pictex")
+
+    transform <- function(node) {
+      if (is.name(node)) {
+        symbol <- as.character(node)
+        if (symbol %in% quantity_symbols) {
+          return(call("italic", node))
+        }
+        if (unicode_greek && symbol %in% names(italic_greek)) {
+          return(call("italic", unname(italic_greek[[symbol]])))
+        }
+      }
+      if (!is.call(node)) {
+        return(node)
+      }
+
+      operator <- node[[1L]]
+      if (is.name(operator) && as.character(operator) %in% c("plain", "italic")) {
+        return(node)
+      }
+
+      as.call(c(list(operator), lapply(as.list(node)[-1L], transform)))
+    }
+
+    if (is.expression(label)) {
+      return(as.expression(lapply(as.list(label), transform)))
+    }
+    if (is.language(label)) {
+      return(transform(label))
+    }
+    label
+  }
+
   draw_panel <- function(x) {
     grid::grid.roundrect(
       x = native(x), y = native(0.504),
@@ -34,6 +80,7 @@ draw_apim_exchangeability_comparison <- function() {
       col = colour, fontsize = fontsize, fontface = fontface
     )
     if (is_math) {
+      label <- format_math(label)
       text_gp$fontfamily <- math_family
     }
     grid::grid.text(
@@ -48,6 +95,9 @@ draw_apim_exchangeability_comparison <- function() {
       math = rep(TRUE, length(parts)), gap = 0.006) {
     grobs <- Map(
       function(label, colour, use_math) {
+        if (use_math && (is.expression(label) || is.language(label))) {
+          label <- format_math(label)
+        }
         label_gp <- grid::gpar(
           col = colour, fontsize = fontsize,
           fontfamily = if (use_math) math_family else sans_family
@@ -293,7 +343,7 @@ draw_apim_exchangeability_comparison <- function() {
   draw_coloured_equation(
     list(
       expression(Y[plain(F)] ~~ "="),
-      expression(b[0 * "," * plain(F)]),
+      expression(italic(b)[0 * "," * plain(F)]),
       expression(+a[plain(F)] * X[plain(F)]),
       expression(+p[plain(F)] * X[plain(M)]),
       expression(+epsilon[plain(F)])
@@ -306,7 +356,7 @@ draw_apim_exchangeability_comparison <- function() {
   draw_coloured_equation(
     list(
       expression(Y[plain(M)] ~~ "="),
-      expression(b[0 * "," * plain(M)]),
+      expression(italic(b)[0 * "," * plain(M)]),
       expression(+a[plain(M)] * X[plain(M)]),
       expression(+p[plain(M)] * X[plain(F)]),
       expression(+epsilon[plain(M)])
@@ -319,7 +369,7 @@ draw_apim_exchangeability_comparison <- function() {
   draw_coloured_equation(
     list(
       expression(Y[i] ~~ "="),
-      expression(b[0]),
+      expression(italic(b)[0]),
       expression(+a * X[i]),
       expression(+p * X[j]),
       expression(+epsilon[i])
@@ -374,7 +424,7 @@ draw_apim_exchangeability_comparison <- function() {
     "Female", 0.485,
     intercept = 8, actor_change = 2, partner_change = 1,
     domain = c(7, 13), panel_left = 0.110, panel_right = 0.455,
-    intercept_label = expression(b[0 * "," * plain(F)] == 8),
+    intercept_label = expression(italic(b)[0 * "," * plain(F)] == 8),
     actor_label = expression(a[plain(F)] * X[plain(F)] == +2),
     partner_label = expression(p[plain(F)] * X[plain(M)] == +1),
     prediction_label = expression(hat(Y)[plain(F)] == 11),
@@ -388,7 +438,7 @@ draw_apim_exchangeability_comparison <- function() {
     "Male", 0.200,
     intercept = 9, actor_change = 0.5, partner_change = 2,
     domain = c(7, 13), panel_left = 0.110, panel_right = 0.455,
-    intercept_label = expression(b[0 * "," * plain(M)] == 9),
+    intercept_label = expression(italic(b)[0 * "," * plain(M)] == 9),
     actor_label = expression(a[plain(M)] * X[plain(M)] == +0.5),
     partner_label = expression(p[plain(M)] * X[plain(F)] == +2),
     prediction_label = expression(hat(Y)[plain(M)] == 11.5),
@@ -403,7 +453,7 @@ draw_apim_exchangeability_comparison <- function() {
     "Member 1", 0.485,
     intercept = 9, actor_change = 1.5, partner_change = 1,
     domain = c(7, 13), panel_left = 0.610, panel_right = 0.945,
-    intercept_label = expression(b[0] == 9),
+    intercept_label = expression(italic(b)[0] == 9),
     actor_label = expression(a * X[1] == +1.5),
     partner_label = expression(p * X[2] == +1),
     prediction_label = expression(hat(Y)[1] == 11.5),
@@ -417,7 +467,7 @@ draw_apim_exchangeability_comparison <- function() {
     "Member 2", 0.200,
     intercept = 9, actor_change = 1.5, partner_change = 1,
     domain = c(7, 13), panel_left = 0.610, panel_right = 0.945,
-    intercept_label = expression(b[0] == 9),
+    intercept_label = expression(italic(b)[0] == 9),
     actor_label = expression(a * X[2] == +1.5),
     partner_label = expression(p * X[1] == +1),
     prediction_label = expression(hat(Y)[2] == 11.5),

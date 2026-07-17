@@ -1,0 +1,1184 @@
+---
+title: "Explaining Interdependence in the Actor–Partner Interdependence Model"
+subtitle: "A visual paper outline and covariance-decomposition prototype"
+author: "Pascal Küng"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    fig_caption: true
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  dpi = 144
+)
+
+helper_candidates <- c(
+  "../vignettes/diagram-helpers.Rinc",
+  "vignettes/diagram-helpers.Rinc",
+  "../../vignettes/diagram-helpers.Rinc"
+)
+helper_file <- helper_candidates[file.exists(helper_candidates)][1]
+
+if (!is.na(helper_file)) {
+  sys.source(helper_file, envir = knitr::knit_global())
+  diagram_device <- .vignette_diagram_device()
+  effect_colours <- .interdep_effect_colors(c("actor", "partner"))
+} else {
+  diagram_device <- "png"
+  effect_colours <- c(actor = "#1769AA", partner = "#7B3FA1")
+}
+
+knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
+
+colours <- c(
+  actor = unname(effect_colours[["actor"]]),
+  partner = unname(effect_colours[["partner"]]),
+  mixed_1 = "#3F5EAE",
+  mixed_2 = "#6250A7",
+  residual = "#546E7A",
+  covariance = "#334155",
+  ink = "#263238",
+  muted = "#64748B",
+  faint = "#DCE3EA",
+  surface = "#F8FAFC",
+  white = "#FFFFFF"
+)
+
+fade <- function(colour, alpha = 0.22) {
+  grDevices::adjustcolor(colour, alpha.f = alpha)
+}
+
+.paper_math_label <- function(label) {
+  symbols <- c("X", "Y", "a", "p", "sigma", "psi", "epsilon")
+
+  format_node <- function(node) {
+    if (is.name(node) && as.character(node) %in% symbols) {
+      return(call("italic", node))
+    }
+    if (!is.call(node)) {
+      return(node)
+    }
+
+    head <- as.character(node[[1L]])
+    if (head %in% c("italic", "plain")) {
+      return(node)
+    }
+
+    as.call(lapply(node, format_node))
+  }
+
+  if (is.expression(label)) {
+    return(as.expression(lapply(as.list(label), format_node)))
+  }
+  if (is.language(label)) {
+    return(format_node(label))
+  }
+  label
+}
+
+draw_box <- function(x, y, label, width = 0.18, height = 0.105,
+                     fill = colours[["white"]], border = colours[["ink"]],
+                     cex = 1.2, lwd = 2) {
+  graphics::rect(
+    x - width / 2, y - height / 2,
+    x + width / 2, y + height / 2,
+    col = fill, border = border, lwd = lwd
+  )
+  graphics::text(
+    x, y, .paper_math_label(label), cex = cex, col = colours[["ink"]]
+  )
+}
+
+draw_circle <- function(x, y, label, radius = 0.043,
+                        fill = colours[["white"]],
+                        border = colours[["ink"]], cex = 1.05, lwd = 2) {
+  theta <- seq(0, 2 * pi, length.out = 100)
+  graphics::polygon(
+    x + radius * cos(theta), y + radius * sin(theta),
+    col = fill, border = border, lwd = lwd
+  )
+  graphics::text(
+    x, y, .paper_math_label(label), cex = cex, col = colours[["ink"]]
+  )
+}
+
+draw_path <- function(x0, y0, x1, y1, label = NULL,
+                      colour = colours[["faint"]], lwd = 2.3,
+                      label_x = mean(c(x0, x1)),
+                      label_y = mean(c(y0, y1)),
+                      label_cex = 0.9) {
+  graphics::arrows(
+    x0, y0, x1, y1,
+    length = 0.075, angle = 18, lwd = lwd, col = colour
+  )
+  if (!is.null(label)) {
+    graphics::text(
+      label_x, label_y, .paper_math_label(label),
+      cex = label_cex, col = colour, font = 2
+    )
+  }
+}
+
+draw_covariance <- function(x0, y0, x1, y1, label = NULL,
+                            colour = colours[["faint"]], lwd = 2.1,
+                            label_y = y0 + 0.045, label_cex = 0.82) {
+  graphics::arrows(
+    x0, y0, x1, y1,
+    code = 3, length = 0.06, angle = 18, lwd = lwd, col = colour
+  )
+  if (!is.null(label)) {
+    graphics::text(
+      mean(c(x0, x1)), label_y, .paper_math_label(label),
+      cex = label_cex, col = colour
+    )
+  }
+}
+
+component_state <- function(component) {
+  all_on <- identical(component, "TOTAL")
+  c(
+    actor_1 = all_on || component %in% c("AA", "AP"),
+    actor_2 = all_on || component %in% c("AA", "PA"),
+    partner_1 = all_on || component %in% c("PA", "PP"),
+    partner_2 = all_on || component %in% c("AP", "PP"),
+    predictor_covariance = all_on || component %in% c("AA", "PP"),
+    residual_covariance = all_on || component == "R"
+  )
+}
+
+on_colour <- function(on, colour) {
+  if (isTRUE(on)) colour else colours[["faint"]]
+}
+
+draw_apim_paths <- function(component = "TOTAL", panel_title = NULL,
+                            show_formula = FALSE) {
+  state <- component_state(component)
+
+  graphics::plot.new()
+  graphics::plot.window(xlim = c(0, 1), ylim = c(0, 1), asp = 1)
+  graphics::rect(0.01, 0.01, 0.99, 0.99,
+                 col = colours[["surface"]], border = NA)
+
+  # Predictor covariance and the four directed APIM paths.
+  draw_covariance(
+    0.29, 0.84, 0.71, 0.84,
+    expression(sigma[X[12]]),
+    on_colour(state[["predictor_covariance"]], colours[["covariance"]]),
+    label_y = 0.905
+  )
+
+  draw_path(
+    0.20, 0.735, 0.20, 0.365, expression(a[1]),
+    on_colour(state[["actor_1"]], colours[["actor"]]),
+    label_x = 0.155, label_y = 0.55
+  )
+  draw_path(
+    0.80, 0.735, 0.80, 0.365, expression(a[2]),
+    on_colour(state[["actor_2"]], colours[["actor"]]),
+    label_x = 0.845, label_y = 0.55
+  )
+  draw_path(
+    0.73, 0.755, 0.27, 0.345, expression(p[1]),
+    on_colour(state[["partner_1"]], colours[["partner"]]),
+    label_x = 0.57, label_y = 0.53
+  )
+  draw_path(
+    0.27, 0.755, 0.73, 0.345, expression(p[2]),
+    on_colour(state[["partner_2"]], colours[["partner"]]),
+    label_x = 0.43, label_y = 0.43
+  )
+
+  # Residual paths and residual covariance.
+  residual_node_colour <- on_colour(
+    state[["residual_covariance"]], colours[["residual"]]
+  )
+  draw_path(0.20, 0.115, 0.20, 0.245, NULL, residual_node_colour, lwd = 2)
+  draw_path(0.80, 0.115, 0.80, 0.245, NULL, residual_node_colour, lwd = 2)
+  draw_covariance(
+    0.245, 0.09, 0.755, 0.09, expression(psi[12]),
+    residual_node_colour, label_y = 0.035
+  )
+
+  # Nodes are drawn last, so crossing paths disappear behind them.
+  draw_box(0.20, 0.79, expression(X[1]))
+  draw_box(0.80, 0.79, expression(X[2]))
+  draw_box(0.20, 0.31, expression(Y[1]))
+  draw_box(0.80, 0.31, expression(Y[2]))
+  draw_circle(0.20, 0.09, expression(epsilon[1]), border = residual_node_colour)
+  draw_circle(0.80, 0.09, expression(epsilon[2]), border = residual_node_colour)
+
+  if (!is.null(panel_title)) {
+    graphics::mtext(panel_title, side = 3, line = -1.2,
+                    cex = 1.05, font = 2, col = colours[["ink"]])
+  }
+
+  if (isTRUE(show_formula)) {
+    formulas <- c(
+      AA = "a1 a2 Cov(X1, X2)",
+      AP = "a1 p2 Var(X1)",
+      PA = "p1 a2 Var(X2)",
+      PP = "p1 p2 Cov(X1, X2)",
+      R = "Cov(e1, e2)",
+      TOTAL = "all five paths"
+    )
+    graphics::mtext(formulas[[component]], side = 1, line = -1.3,
+                    cex = 0.82, col = colours[["muted"]])
+  }
+}
+
+component_colours <- c(
+  "Actor–actor" = colours[["actor"]],
+  "Actor–partner" = colours[["mixed_1"]],
+  "Partner–actor" = colours[["mixed_2"]],
+  "Partner–partner" = colours[["partner"]],
+  "Residual" = colours[["residual"]]
+)
+```
+
+> **Working claim.** An APIM should not only *account for* interdependence. It
+> can also explain where the covariance between partners' outcomes comes from.
+
+This document first develops the argument as it could appear in the paper and
+checks the underlying path tracing visually and numerically. The final section
+collects the proposed contribution, study plan, manuscript structure, open
+questions, and next steps.
+
+# The idea in one paragraph
+
+The APIM is commonly introduced through actor effects, partner effects, and a
+residual correlation. That presentation says how predictors relate to each
+person's outcome, but it does not by itself answer a natural dyadic question:
+
+> Why are the two partners' outcomes correlated, and how much of that
+> interdependence is associated with each modeled route?
+
+For one predictor construct measured on both partners, standard path tracing
+gives an exact additive answer under the usual APIM assumption that predictors
+are uncorrelated with the outcome residuals. Outcome covariance can travel through four
+predictor-side path pairs: actor–actor, actor–partner, partner–actor, and
+partner–partner. A fifth component is the remaining residual covariance. These
+five signed quantities sum exactly to the outcome covariance implied by the
+model. Dividing every component by the same two model-implied outcome standard
+deviations makes them sum to the model-implied outcome correlation.
+
+# The complete one-construct APIM
+
+For distinguishable members 1 and 2, write
+
+$$
+Y_1=a_1X_1+p_1X_2+\varepsilon_1,
+$$
+
+$$
+Y_2=a_2X_2+p_2X_1+\varepsilon_2.
+$$
+
+Intercepts are omitted because they do not affect variances or covariances.
+The subscript on an actor or partner effect identifies the **outcome member**:
+$p_1$ is the effect of member 2's predictor on member 1's outcome; $p_2$ is the
+effect of member 1's predictor on member 2's outcome.
+
+Unless stated otherwise, $a_1,a_2,p_1,p_2$ are unstandardized coefficients and
+all predictor moments are computed on the matching original scales. A fully
+standardized presentation is possible, but coefficients, predictor moments,
+residual covariance, and the outcome denominator must then be transformed
+consistently.
+
+```{r complete-apim, echo=FALSE, fig.width=8.8, fig.height=6.2, out.width="82%", fig.cap="Complete distinguishable APIM used for the decomposition. Blue paths are actor effects, purple paths are partner effects, the upper double-headed arrow is predictor covariance, and the lower double-headed arrow is residual outcome covariance.", fig.alt="Path diagram with predictors X1 and X2, outcomes Y1 and Y2, blue actor paths, purple crossed partner paths, covariance between predictors, and covariance between outcome residuals."}
+draw_apim_paths("TOTAL")
+```
+
+## Assumptions and what "exact" means
+
+The proposed paper concerns independent dyads, continuous outcomes, and a
+linear, fixed-slope, cross-sectional APIM. The variables are viewed as random
+over a target population of dyads, so the result below decomposes **marginal
+across-dyad covariance**. Intercepts are omitted and all variances and
+covariances are taken around the appropriate role-specific means.
+
+Assume finite second moments and
+
+$$
+\operatorname{E}(\boldsymbol\varepsilon\mid X_1,X_2)=\boldsymbol 0,
+\qquad
+\operatorname{Cov}(\boldsymbol\varepsilon\mid X_1,X_2)
+=\boldsymbol\Psi,
+$$
+
+which implies that each predictor is uncorrelated with each outcome residual:
+
+$$
+\operatorname{Cov}(X_j,\varepsilon_k)=0
+\qquad\text{for }j,k\in\{1,2\}.
+$$
+
+This is the usual exogeneity or residual-orthogonality assumption in the APIM.
+It is part of the statistical model, not an identity that holds for any four
+variables. Normality is not required for the covariance algebra. If
+predictor–residual covariances are allowed, four additional terms enter the
+outcome covariance and the five-part decomposition is incomplete.
+
+Conditional on the observed predictors, the fixed-slope model implies
+$\operatorname{Cov}(Y_1,Y_2\mid X_1,X_2)=\psi_{12}$. The predictor-side routes
+appear when moving to marginal covariance across dyads whose predictor values
+vary. Random slopes, nonlinear links, and longitudinal carryover paths create
+additional terms and are outside the first paper's scope.
+
+The derivation itself is short. By the linearity of covariance,
+
+$$
+\begin{aligned}
+\operatorname{Cov}(Y_1,Y_2)
+={}&\operatorname{Cov}\!\left(
+a_1X_1+p_1X_2+\varepsilon_1,
+a_2X_2+p_2X_1+\varepsilon_2
+\right).
+\end{aligned}
+$$
+
+Expanding this expression and applying the assumption above gives
+
+$$
+\begin{aligned}
+\operatorname{Cov}(Y_1,Y_2)
+={}&
+\underbrace{a_1a_2\operatorname{Cov}(X_1,X_2)}_{\text{actor--actor}}
++\underbrace{a_1p_2\operatorname{Var}(X_1)}_{\text{actor--partner}}\\
+&+\underbrace{p_1a_2\operatorname{Var}(X_2)}_{\text{partner--actor}}
++\underbrace{p_1p_2\operatorname{Cov}(X_1,X_2)}_{\text{partner--partner}}
++\underbrace{\operatorname{Cov}(\varepsilon_1,\varepsilon_2)}_{\text{residual}}.
+\end{aligned}
+$$
+
+The four predictor–residual terms that disappear are
+$a_1\operatorname{Cov}(X_1,\varepsilon_2)$,
+$p_1\operatorname{Cov}(X_2,\varepsilon_2)$,
+$a_2\operatorname{Cov}(X_2,\varepsilon_1)$, and
+$p_2\operatorname{Cov}(X_1,\varepsilon_1)$. No more elaborate proof is needed:
+the five remaining terms are precisely the five covariance-carrying routes in
+the diagram.
+
+# The five covariance-carrying routes
+
+```{r path-components, echo=FALSE, fig.width=12, fig.height=8.1, out.width="100%", fig.cap="The five covariance-carrying routes in a distinguishable APIM with one predictor construct measured on both partners. Pale paths are present in the APIM but do not belong to the highlighted component. The final panel restores all paths.", fig.alt="Six small APIM path diagrams. Five panels separately highlight actor-actor, actor-partner, partner-actor, partner-partner, and residual covariance routes. A sixth panel shows their sum."}
+old_par <- graphics::par(
+  mfrow = c(2, 3),
+  mar = c(0.8, 0.5, 1.5, 0.5),
+  oma = c(0, 0, 0.4, 0),
+  xpd = NA
+)
+draw_apim_paths("AA", "1. Actor–actor", show_formula = TRUE)
+draw_apim_paths("AP", "2. Actor–partner", show_formula = TRUE)
+draw_apim_paths("PA", "3. Partner–actor", show_formula = TRUE)
+draw_apim_paths("PP", "4. Partner–partner", show_formula = TRUE)
+draw_apim_paths("R", "5. Residual", show_formula = TRUE)
+draw_apim_paths("TOTAL", "Their exact sum", show_formula = TRUE)
+graphics::par(old_par)
+```
+
+The four predictor-side combinations form a useful $2\times2$ table:
+
+| Path into $Y_1$ | Path into $Y_2$ | Shared predictor quantity | Contribution |
+|:--|:--|:--|:--|
+| actor $a_1$ | actor $a_2$ | $\operatorname{Cov}(X_1,X_2)$ | $C_{\mathrm{AA}}=a_1a_2\operatorname{Cov}(X_1,X_2)$ |
+| actor $a_1$ | partner $p_2$ | $\operatorname{Var}(X_1)$ | $C_{\mathrm{AP}}=a_1p_2\operatorname{Var}(X_1)$ |
+| partner $p_1$ | actor $a_2$ | $\operatorname{Var}(X_2)$ | $C_{\mathrm{PA}}=p_1a_2\operatorname{Var}(X_2)$ |
+| partner $p_1$ | partner $p_2$ | $\operatorname{Cov}(X_1,X_2)$ | $C_{\mathrm{PP}}=p_1p_2\operatorname{Cov}(X_1,X_2)$ |
+
+The residual component is
+
+$$
+C_{\mathrm{R}}=\operatorname{Cov}(\varepsilon_1,\varepsilon_2).
+$$
+
+Therefore,
+
+$$
+\operatorname{Cov}(Y_1,Y_2)
+=C_{\mathrm{AA}}+C_{\mathrm{AP}}+C_{\mathrm{PA}}+C_{\mathrm{PP}}+C_{\mathrm{R}}.
+$$
+
+## Plain-language interpretation
+
+- **Actor–actor:** partners resemble each other on $X$, and each person's own
+  $X$ predicts their own $Y$.
+- **Actor–partner:** member 1's $X$ reaches both outcomes—through an actor path
+  into $Y_1$ and a partner path into $Y_2$.
+- **Partner–actor:** member 2's $X$ reaches both outcomes in the analogous way.
+- **Partner–partner:** partners resemble each other on $X$, and each predictor
+  crosses to the other member's outcome.
+- **Residual:** outcome interdependence that remains after the modeled
+  predictor routes.
+
+## Female-driven and male-driven interdependence
+
+For a female--male dyad, let member 1 be the female partner and member 2 the
+male partner. The two routes carried by a single member's predictor variance
+then have an especially intuitive interpretation:
+
+$$
+\underbrace{a_1p_2\operatorname{Var}(X_1)}_{\text{female-driven}}
+\qquad\text{and}\qquad
+\underbrace{p_1a_2\operatorname{Var}(X_2)}_{\text{male-driven}}.
+$$
+
+The first is female-driven because the female partner's predictor reaches both
+outcomes: through her actor path into her own outcome and through her partner
+path into the male partner's outcome. The second is male-driven in the
+corresponding way. Here, "driven" describes a model-implied covariance route;
+it is causal only when the design and assumptions support a causal
+interpretation.
+
+This yields two broader substantive families:
+
+$$
+\underbrace{C_{\mathrm{AP}}+C_{\mathrm{PA}}}_{\text{predictor-transmission routes}}
+\qquad\text{and}\qquad
+\underbrace{C_{\mathrm{AA}}+C_{\mathrm{PP}}}_{\text{cross-member predictor-covariance routes}}.
+$$
+
+"Predictor transmission" is an algebraic route label, not by itself a claim
+that one partner causally transmits something to the other. The second family
+can be called **predictor similarity** when
+$\operatorname{Cov}(X_1,X_2)>0$; a negative predictor covariance instead
+represents dissimilarity.
+
+The phrase "actor-driven covariance" by itself is potentially misleading. One
+person's predictor variance creates covariance between the two outcomes only
+when that predictor reaches **both** outcomes—once through an actor path and
+once through a partner path. Actor and partner paths work in pairs.
+
+# From covariance to correlation points
+
+The five components above are in the original units of $Y_1$ times the units
+of $Y_2$. That scale is exact but often difficult to interpret. To express each
+component on the familiar correlation scale, define the model-implied
+denominator
+
+$$
+s_Y=\operatorname{SD}(Y_1)\operatorname{SD}(Y_2).
+$$
+
+For every component $C_k$, define a correlation-point contribution
+
+$$
+c_k=\frac{C_k}{s_Y}.
+$$
+
+These are signed additive contributions on the outcome-correlation scale. An
+individual $c_k$ is not itself a correlation, a proportion, or a variance
+share, and it need not lie between $-1$ and $1$. Percentages are especially
+misleading when positive and negative routes cancel: they can be negative,
+exceed 100%, or become unstable when the total covariance is near zero.
+
+Because every component uses the same denominator,
+
+$$
+\rho^{\mathrm{model}}_{Y_1Y_2}
+=c_{\mathrm{AA}}+c_{\mathrm{AP}}+c_{\mathrm{PA}}+c_{\mathrm{PP}}+c_{\mathrm{R}}.
+$$
+
+The required total outcome variances are
+
+$$
+\begin{aligned}
+\operatorname{Var}(Y_1)
+={}&a_1^2\operatorname{Var}(X_1)
++p_1^2\operatorname{Var}(X_2)
++2a_1p_1\operatorname{Cov}(X_1,X_2)
++\operatorname{Var}(\varepsilon_1),\\
+\operatorname{Var}(Y_2)
+={}&a_2^2\operatorname{Var}(X_2)
++p_2^2\operatorname{Var}(X_1)
++2a_2p_2\operatorname{Cov}(X_1,X_2)
++\operatorname{Var}(\varepsilon_2).
+\end{aligned}
+$$
+
+The observed sample correlation, $r_{Y_1Y_2}$, should be reported alongside
+the model-implied correlation as a descriptive reference. They are conceptually
+different quantities and are equal only when the fitted model reproduces the
+relevant sample moments. The five components should therefore not be rescaled
+afterward merely to force them to sum to the observed correlation.
+
+> **Important distinction.** The residual correlation
+> $\operatorname{Cor}(\varepsilon_1,\varepsilon_2)$ divides residual covariance
+> by the two **residual** standard deviations. The residual contribution $c_{\mathrm{R}}$
+> divides the same covariance by the two **total model-implied outcome** standard
+> deviations. Only $c_{\mathrm{R}}$ is on the same scale as the other pieces of
+> the model-implied outcome correlation.
+
+# Worked numerical example
+
+Suppose
+
+$$
+\operatorname{Var}(X_1)=\operatorname{Var}(X_2)=1,
+\qquad
+\operatorname{Cov}(X_1,X_2)=0.40,
+$$
+
+$$
+a_1=0.50,\quad a_2=0.40,\quad p_1=0.20,\quad p_2=0.30,
+$$
+
+and
+
+$$
+\boldsymbol\Psi=
+\begin{pmatrix}
+0.50 & 0.15\\
+0.15 & 0.55
+\end{pmatrix}.
+$$
+
+```{r calculate-example, include=FALSE}
+example_parameters <- list(
+  var_x1 = 1,
+  var_x2 = 1,
+  cov_x12 = 0.40,
+  a1 = 0.50,
+  a2 = 0.40,
+  p1 = 0.20,
+  p2 = 0.30,
+  psi11 = 0.50,
+  psi22 = 0.55,
+  psi12 = 0.15
+)
+
+with(example_parameters, {
+  example_components <<- c(
+    "Actor–actor" = a1 * a2 * cov_x12,
+    "Actor–partner" = a1 * p2 * var_x1,
+    "Partner–actor" = p1 * a2 * var_x2,
+    "Partner–partner" = p1 * p2 * cov_x12,
+    "Residual" = psi12
+  )
+
+  example_var_y1 <<-
+    a1^2 * var_x1 + p1^2 * var_x2 +
+    2 * a1 * p1 * cov_x12 + psi11
+  example_var_y2 <<-
+    a2^2 * var_x2 + p2^2 * var_x1 +
+    2 * a2 * p2 * cov_x12 + psi22
+})
+
+example_cov_y12 <- sum(example_components)
+example_denominator <- sqrt(example_var_y1 * example_var_y2)
+example_correlation_components <- example_components / example_denominator
+example_rho_y12 <- sum(example_correlation_components)
+example_residual_rho <- with(
+  example_parameters,
+  psi12 / sqrt(psi11 * psi22)
+)
+
+example_table <- data.frame(
+  Route = names(example_components),
+  `Covariance contribution` = unname(example_components),
+  `Correlation-point contribution` = unname(example_correlation_components),
+  check.names = FALSE
+)
+```
+
+```{r example-table, echo=FALSE}
+knitr::kable(
+  example_table,
+  digits = 3,
+  align = c("l", "r", "r")
+)
+```
+
+```{r example-contributions, echo=FALSE, fig.width=9.4, fig.height=5.4, out.width="92%", fig.cap="Waterfall decomposition of the model-implied outcome correlation. Each route starts where the preceding route ended; the five signed increments arrive exactly at the model-implied total.", fig.alt="Waterfall chart in which actor-actor, actor-partner, partner-actor, partner-partner, and residual correlation-point contributions accumulate to the model-implied outcome correlation."}
+old_par <- graphics::par(mar = c(7.0, 4.8, 1.2, 1.0), xpd = NA)
+increments <- unname(example_correlation_components)
+starts <- c(0, head(cumsum(increments), -1))
+ends <- cumsum(increments)
+x <- seq_along(increments)
+
+graphics::plot(
+  NA,
+  xlim = c(0.45, length(increments) + 0.75),
+  ylim = c(0, example_rho_y12 * 1.16),
+  xaxt = "n",
+  xlab = "",
+  ylab = "Outcome-correlation points",
+  bty = "l"
+)
+
+for (index in seq_along(increments)) {
+  graphics::rect(
+    x[index] - 0.34,
+    min(starts[index], ends[index]),
+    x[index] + 0.34,
+    max(starts[index], ends[index]),
+    col = component_colours[index],
+    border = NA
+  )
+  if (index < length(increments)) {
+    graphics::segments(
+      x[index] + 0.34, ends[index],
+      x[index + 1] - 0.34, ends[index],
+      col = colours[["muted"]], lty = 3, lwd = 1.4
+    )
+  }
+  graphics::text(
+    x[index], ends[index] + example_rho_y12 * 0.025,
+    sprintf("%+.3f", increments[index]),
+    cex = 0.82, col = colours[["ink"]]
+  )
+}
+
+graphics::axis(
+  1,
+  at = x,
+  labels = names(example_correlation_components),
+  las = 2,
+  tick = FALSE,
+  line = -0.3,
+  cex.axis = 0.85
+)
+graphics::abline(h = example_rho_y12, lty = 2, lwd = 2.1,
+                 col = colours[["covariance"]])
+graphics::text(
+  0.55, example_rho_y12 + example_rho_y12 * 0.025,
+  sprintf("total ρ = %.3f", example_rho_y12),
+  pos = 4, offset = 0.25, cex = 0.92,
+  col = colours[["covariance"]], font = 2
+)
+graphics::par(old_par)
+```
+
+Here,
+
+$$
+\operatorname{Cov}(Y_1,Y_2)=`r sprintf('%.3f', example_cov_y12)`,
+\qquad
+\rho^{\mathrm{model}}_{Y_1Y_2}=`r sprintf('%.3f', example_rho_y12)`.
+$$
+
+The residual correlation is
+`r sprintf('%.3f', example_residual_rho)`, but its contribution to the total
+outcome correlation is only
+`r sprintf('%.3f', unname(example_correlation_components[['Residual']]))`.
+These numbers answer different questions.
+
+# Same interdependence, different route profiles
+
+The decomposition is useful because the same total partner correlation can
+hide very different model-implied route profiles. The second hypothetical
+model below is chosen to have the **same** outcome variances and covariance as the first model, but
+stronger actor paths, weaker partner paths, and more residual covariance.
+
+```{r same-total-calculation, include=FALSE}
+scenario_a <- example_components
+
+scenario_b_parameters <- list(
+  var_x1 = 1,
+  var_x2 = 1,
+  cov_x12 = 0.40,
+  a1 = 0.70,
+  a2 = 0.60,
+  p1 = 0.05,
+  p2 = 0.05,
+  psi12 = 0.25
+)
+
+with(scenario_b_parameters, {
+  scenario_b <<- c(
+    "Actor–actor" = a1 * a2 * cov_x12,
+    "Actor–partner" = a1 * p2 * var_x1,
+    "Partner–actor" = p1 * a2 * var_x2,
+    "Partner–partner" = p1 * p2 * cov_x12,
+    "Residual" = psi12
+  )
+})
+
+# The residual variances in scenario B can be set to preserve both total
+# outcome variances from scenario A; they are positive and Psi remains valid.
+scenario_b_psi11 <- example_var_y1 - with(
+  scenario_b_parameters,
+  a1^2 * var_x1 + p1^2 * var_x2 + 2 * a1 * p1 * cov_x12
+)
+scenario_b_psi22 <- example_var_y2 - with(
+  scenario_b_parameters,
+  a2^2 * var_x2 + p2^2 * var_x1 + 2 * a2 * p2 * cov_x12
+)
+
+stopifnot(
+  isTRUE(all.equal(sum(scenario_a), sum(scenario_b))),
+  scenario_b_psi11 > 0,
+  scenario_b_psi22 > 0,
+  scenario_b_psi11 * scenario_b_psi22 >
+    scenario_b_parameters$psi12^2
+)
+
+scenario_matrix <- rbind(
+  "A: stronger transmission" = scenario_a,
+  "B: similarity + residual" = scenario_b
+) / example_denominator
+```
+
+```{r same-total-figure, echo=FALSE, fig.width=10, fig.height=5.2, out.width="96%", fig.cap="Two APIMs with the same model-implied outcome correlation but different route profiles. Each horizontal stack has exactly the same length.", fig.alt="Two horizontal stacked bars of identical total length. Scenario A has larger actor-partner and partner-actor sections; scenario B has larger actor-actor and residual sections."}
+old_par <- graphics::par(mar = c(7.2, 10.2, 1.0, 1.0), xpd = NA)
+graphics::barplot(
+  t(scenario_matrix),
+  horiz = TRUE,
+  beside = FALSE,
+  col = component_colours,
+  border = colours[["white"]],
+  names.arg = rownames(scenario_matrix),
+  las = 1,
+  xlim = c(0, example_rho_y12 * 1.04),
+  xlab = "Outcome-correlation points",
+  cex.names = 0.9
+)
+graphics::legend(
+  "bottom", inset = c(0, -0.36),
+  legend = names(component_colours),
+  fill = component_colours, border = NA,
+  horiz = TRUE, bty = "n", cex = 0.78, xpd = NA
+)
+graphics::par(old_par)
+```
+
+This is the paper's most intuitive motivation: reporting only the total or
+residual correlation cannot distinguish these model-implied route profiles.
+
+# From a fitted APIM to estimated contributions
+
+The formulas define population or model-implied quantities. In an empirical
+analysis, estimate them by plugging the fitted APIM coefficients and predictor
+moments into the same expressions. Let
+$\widehat\sigma_{X1}^2$, $\widehat\sigma_{X2}^2$, and
+$\widehat\sigma_{X12}$ denote the estimated predictor variances and covariance,
+and let $\widehat\psi_{12}$ denote the fitted residual covariance. Then
+
+$$
+\begin{aligned}
+\widehat C_{\mathrm{AA}}
+&=\widehat a_1\widehat a_2\widehat\sigma_{X12}, &
+\widehat C_{\mathrm{AP}}
+&=\widehat a_1\widehat p_2\widehat\sigma_{X1}^2,\\
+\widehat C_{\mathrm{PA}}
+&=\widehat p_1\widehat a_2\widehat\sigma_{X2}^2, &
+\widehat C_{\mathrm{PP}}
+&=\widehat p_1\widehat p_2\widehat\sigma_{X12},\\
+\widehat C_{\mathrm{R}}
+&=\widehat\psi_{12}.&&
+\end{aligned}
+$$
+
+The estimated model-implied outcome variances supply the denominator for the
+correlation-point contributions. For example,
+
+$$
+\widehat c_{\mathrm{AP}}
+=\frac{\widehat C_{\mathrm{AP}}}
+{\sqrt{\widehat{\operatorname{Var}}(Y_1)
+       \widehat{\operatorname{Var}}(Y_2)}}.
+$$
+
+In an SEM, predictor moments may be estimated as part of the joint model or
+supplied from the observed exogenous variables, depending on how the model is
+specified. In a multilevel or regression implementation that conditions on the
+predictors, use their empirical dyad-level variance–covariance matrix. In both
+cases, the reported decomposition should state where those moments came from.
+
+Likewise, $\widehat\psi_{12}$ must represent the **total model-implied
+covariance remaining between the two members** after the fixed predictor paths.
+Depending on the mixed-model parameterization, that quantity may be represented
+by a shared dyad effect, a covariance between member-specific random effects,
+a residual covariance, or a sum of such components. It should not be replaced
+uncritically by whichever single variance component is easiest to extract.
+
+## Uncertainty without complicated mathematics
+
+A dyad bootstrap provides a direct uncertainty procedure and avoids deriving a
+large delta-method covariance matrix:
+
+1. Resample whole dyads with replacement, keeping both partners together and
+   preserving their role labels.
+2. Refit the APIM in the bootstrap sample.
+3. Recompute the predictor moments, all five covariance components, the
+   model-implied outcome variances, and the correlation-point contributions.
+4. Repeat and form intervals from the bootstrap distribution of each signed
+   component.
+
+Resampling whole dyads preserves the dependence that the model is designed to
+represent. Recomputing both the fitted paths and predictor moments carries both
+sources of sampling uncertainty forward. The analysis plan should prespecify
+the interval type and how nonconverged bootstrap fits are handled.
+
+Within the fitted predictor model, the exact identity is
+
+$$
+\Sigma^{\mathrm{model}}_{Y,12}-\Psi_{12}
+=C_{\mathrm{AA}}+C_{\mathrm{AP}}+C_{\mathrm{PA}}+C_{\mathrm{PP}}.
+$$
+
+An intercept-only model attributes all model-implied outcome covariance to its
+residual covariance. However, the reduction in residual covariance between two
+separately fitted models equals the predictor-side sum above only when both
+models reproduce the same marginal outcome covariance under compatible
+estimation and sample-moment conventions. The within-model identity is the
+safer primary result.
+
+# Matrix form and extension to several predictors
+
+The scalar derivation is easiest to teach, but the same result can be written
+compactly in matrix form. For the one-construct APIM, let
+
+$$
+\boldsymbol Y=
+\begin{pmatrix}Y_1\\Y_2\end{pmatrix},
+\qquad
+\boldsymbol X=
+\begin{pmatrix}X_1\\X_2\end{pmatrix},
+\qquad
+\boldsymbol B=
+\begin{pmatrix}
+a_1 & p_1\\
+p_2 & a_2
+\end{pmatrix},
+$$
+
+and
+
+$$
+\boldsymbol\Sigma_X=
+\begin{pmatrix}
+\sigma_{X1}^2 & \sigma_{X12}\\
+\sigma_{X12} & \sigma_{X2}^2
+\end{pmatrix},
+\qquad
+\boldsymbol\Psi=
+\begin{pmatrix}
+\psi_{11} & \psi_{12}\\
+\psi_{12} & \psi_{22}
+\end{pmatrix}.
+$$
+
+With $\boldsymbol Y=\boldsymbol B\boldsymbol X+\boldsymbol\varepsilon$ and
+$\operatorname{Cov}(\boldsymbol X,\boldsymbol\varepsilon)=\boldsymbol 0$,
+
+$$
+\boldsymbol\Sigma_Y
+=\boldsymbol B\boldsymbol\Sigma_X\boldsymbol B^\mathsf{T}
++\boldsymbol\Psi.
+$$
+
+For the covariance between the two outcomes,
+
+$$
+\operatorname{Cov}(Y_1,Y_2)
+=\sum_r\sum_s B_{1r}\Sigma_{X,rs}B_{2s}+\Psi_{12}.
+$$
+
+Thus, for a linear APIM with exogenous predictors, every contribution combines
+one coefficient into $Y_1$, one predictor variance or covariance, and one
+coefficient into $Y_2$.
+
+However, several predictors introduce cross-predictor covariance terms. Their
+allocation to a named construct may depend on how predictors are grouped or
+parameterized. The first paper should therefore make the single dyadic
+predictor pair the transparent core result, then present the matrix expression
+and a prespecified grouping rule as the extension.
+
+# Brief closing extension: exchangeable dyads
+
+The paper's main case is cross-sectional and distinguishable: member 1 is the
+female partner and member 2 is the male partner, so the female-driven and
+male-driven components can differ. A short closing section can show that the
+same logic also applies to exchangeable dyads without turning exchangeability
+into a second focus of the paper.
+
+For exchangeable dyads, the member labels are arbitrary. The
+covariance-relevant constraints are
+
+$$
+a_1=a_2=a,
+\qquad
+p_1=p_2=p,
+$$
+
+$$
+\operatorname{Var}(X_1)=\operatorname{Var}(X_2)=\sigma_X^2,
+\qquad
+\operatorname{Cov}(X_1,X_2)=\sigma_{X12}.
+$$
+
+These are only the constraints needed to simplify the covariance components.
+Second-order exchangeability also requires equal role-specific predictor
+means, equal outcome intercepts, and equal residual variances. A full
+distributional claim additionally requires a joint distribution that is
+unchanged when the two member labels are swapped.
+
+Keeping every path-tracing component visible gives
+
+$$
+\begin{aligned}
+\operatorname{Cov}(Y_1,Y_2)
+={}&
+\underbrace{a^2\sigma_{X12}}_{\text{actor--actor}}
++\underbrace{ap\sigma_X^2}_{\text{member 1 driven}}\\
+&+\underbrace{pa\sigma_X^2}_{\text{member 2 driven}}
++\underbrace{p^2\sigma_{X12}}_{\text{partner--partner}}
++\underbrace{\psi_{12}}_{\text{residual}}.
+\end{aligned}
+$$
+
+The two member-driven contributions are now necessarily equal. Because
+"member 1" and "member 2" are arbitrary seats, neither component has a stable
+substantive identity. They should be combined:
+
+$$
+\underbrace{ap\sigma_X^2+ap\sigma_X^2}_{\text{member-driven transmission}}
+=2ap\sigma_X^2.
+$$
+
+The complete compact form is therefore
+
+$$
+\operatorname{Cov}(Y_1,Y_2)
+=\underbrace{2ap\sigma_X^2}_{\text{member-driven transmission}}
++\underbrace{(a^2+p^2)\sigma_{X12}}_{\text{cross-member predictor covariance}}
++\underbrace{\psi_{12}}_{\text{residual interdependence}}.
+$$
+
+Thus, exchangeability does not change the path-tracing logic. It changes what
+can be named and compared: an exchangeable APIM estimates one symmetric
+member-driven contribution, not separate female-driven and male-driven
+contributions. Female–male dyads remain substantively distinguishable even if
+some paths are constrained to equality. Such constraints test or impose
+symmetry within a distinguishable model; they do not make the member labels
+exchangeable. Under the full exchangeability constraints above, equality of
+the two member-driven components follows from the model structure rather than
+from evidence favoring one label assignment over another.
+
+# Plan for the paper
+
+The sections above form a teaching-oriented prototype of the paper's argument.
+This final section records the intended scope, contribution, evidence, and
+remaining work.
+
+## Working scope
+
+The first paper should focus on:
+
+- cross-sectional, independent, distinguishable dyads;
+- female and male partners as the motivating distinguishable roles;
+- one predictor construct measured on both partners;
+- continuous outcomes and a linear, fixed-slope APIM;
+- marginal, model-implied outcome covariance and correlation;
+- descriptive statistical attribution rather than automatic causal claims.
+
+Several predictors and exchangeable dyads can appear as compact extensions.
+Longitudinal paths, random slopes, nonlinear outcome models, and formal causal
+identification should remain outside the first paper.
+
+## Central claim and contributions
+
+The central claim is that dyadic interdependence need not be treated only as a
+nuisance to accommodate. Within a fitted APIM, the model-implied covariance
+between partners' outcomes can be decomposed into interpretable, signed route
+contributions.
+
+The paper should contribute the following package:
+
+1. Present the exact five-part decomposition for a distinguishable APIM in one
+   diagram, one table, and a short covariance expansion.
+2. Name and interpret the female-driven and male-driven components while
+   retaining the complete actor–actor, actor–partner, partner–actor,
+   partner–partner, and residual breakdown.
+3. Distinguish predictor-transmission routes from cross-member
+   predictor-covariance routes, without treating either label as automatically
+   causal.
+4. Put all five components on a common signed correlation-point scale and show
+   why they are not percentages or separate correlations.
+5. Explain why the residual correlation is not the residual contribution to
+   the total outcome correlation.
+6. Provide a plug-in estimator, dyad-bootstrap uncertainty intervals, and a
+   reproducible table plus waterfall visualization.
+7. Demonstrate that the same total interdependence can have different
+   model-implied route profiles.
+8. End with the compact exchangeable special case, where the two member-driven
+   terms become equal and lose their role-specific interpretation.
+
+## Novelty boundary and literature work
+
+The covariance identity follows from standard path tracing and covariance
+algebra; it should not be claimed as a newly discovered theorem. Existing APIM
+teaching material contains versions of the standardized expression, and prior
+dyadic work, including work by Bolger and Shrout, treats observed dyadic
+covariance as potentially arising from interpersonal influence or shared
+events.
+
+The potentially publishable contribution is the coherent framework around the
+identity: treating total interdependence as an estimand to explain, naming all
+routes, placing them on one additive scale, quantifying uncertainty, providing
+visualizations and software, and showing why equal total correlations need not
+have equal explanations.
+
+Before making a novelty claim, the literature review should establish:
+
+- where the full distinguishable five-term expression has appeared;
+- whether anyone has already estimated uncertainty for the individual terms;
+- whether outcome-correlation-point contributions have been proposed;
+- whether female-driven and male-driven interdependence have been named or
+  compared explicitly;
+- how previous work distinguishes residual covariance, explained covariance,
+  and total interdependence.
+
+The literature review should also establish how commonly APIM applications
+report or decompose total outcome interdependence rather than only individual
+paths and residual correlation.
+
+## Mathematics in the manuscript
+
+The main text needs only:
+
+1. the two APIM equations;
+2. the exogeneity and constant-residual-covariance assumptions;
+3. the short covariance expansion producing the five terms;
+4. the model-implied outcome-variance denominator;
+5. the plug-in estimates and dyad-bootstrap recipe.
+
+The expanded predictor–residual cross-terms, matrix generalization, and full
+bootstrap implementation can go in an appendix or supplement. Delta-method
+gradients, asymptotic proofs, elaborate matrix calculus, and longitudinal
+derivations are not needed for the first paper.
+
+## Proposed evidence
+
+### Analytical and visual demonstration
+
+- Derive the five components directly and by path tracing.
+- Show how female-driven and male-driven covariance arise because one member's
+  predictor reaches both outcomes.
+- Contrast covariance contributions, correlation-point contributions,
+  residual covariance, and residual correlation.
+- Use the waterfall and same-total/different-profile figures as the primary
+  intuitive demonstrations.
+
+### Simulation study
+
+The algebraic identity does not need simulation. Simulation is useful only to
+study estimation and uncertainty. Vary sample size, predictor covariance,
+unequal predictor variances, female–male coefficient differences, path signs,
+and residual covariance. Evaluate:
+
+- finite-sample bias of each plug-in component;
+- coverage and width of dyad-bootstrap intervals;
+- behavior when positive and negative components cancel;
+- stability when total covariance is near zero;
+- convergence and interval behavior in smaller samples.
+
+Signed covariance and correlation-point contributions should be the primary
+estimands. Percentage shares should not be a primary analysis.
+
+### Empirical demonstration
+
+Use one substantively clear predictor construct and outcome. Report:
+
+1. raw partner outcome covariance and correlation;
+2. the fitted model-implied covariance and correlation;
+3. all five route contributions in covariance units;
+4. all five correlation-point contributions;
+5. the female-driven and male-driven comparison;
+6. grouped predictor-transmission and predictor-covariance routes;
+7. dyad-bootstrap uncertainty intervals;
+8. one path diagram, one results table, and one signed waterfall plot.
+
+The strongest example would compare two outcomes, predictors, or substantively
+meaningful groups with similar total interdependence but different route
+profiles.
+
+## Planned manuscript structure
+
+1. **The missing question:** APIMs quantify actor and partner paths, but what
+   explains the covariance between the two outcomes?
+2. **One picture, five routes:** introduce the full distinguishable APIM and
+   the visual path tracing.
+3. **Exact decomposition:** state assumptions, show the short derivation, and
+   interpret female-driven, male-driven, predictor-covariance, and residual
+   routes.
+4. **A common reporting scale:** introduce signed correlation-point
+   contributions and distinguish them from residual correlation.
+5. **Estimation and uncertainty:** define plug-in estimates and the dyad
+   bootstrap.
+6. **Simulation:** assess finite-sample behavior and interval coverage.
+7. **Empirical example:** show how similar total interdependence can have
+   different route profiles.
+8. **Extensions and limits:** several predictors, the brief exchangeable
+   special case, and causal caution.
+9. **Discussion:** reporting recommendations, substantive uses, and future
+   longitudinal work.
+
+## Planned displays
+
+- **Figure 1:** complete distinguishable APIM.
+- **Figure 2:** the five covariance-carrying routes plus their exact sum.
+- **Figure 3:** signed waterfall decomposition of one outcome correlation.
+- **Figure 4:** equal total interdependence with different route profiles.
+- **Table 1:** formulas, substantive interpretations, and grouped route family.
+- **Table 2:** empirical estimates with dyad-bootstrap intervals.
+
+## Candidate titles
+
+**Preferred**
+
+> Explaining Interdependence in the Actor–Partner Interdependence Model:  
+> Decomposing Dyadic Outcome Covariance
+
+Alternatives:
+
+- *Where Does Dyadic Interdependence Come From? A Covariance Decomposition for
+  the APIM*
+- *Beyond the Residual Correlation: Explaining Interdependence in the APIM*
+- *From Actor and Partner Paths to Dyadic Interdependence*
+- *Partitioning Interdependence in the Actor–Partner Interdependence Model*
+
+## What to verify with Niall
+
+The remembered scope is a cross-sectional APIM for distinguishable partners,
+with particular interest in female-driven and male-driven interdependence. A
+concise check would be:
+
+> I reconstructed five sources of model-implied APIM outcome covariance:
+> actor–actor and partner–partner routes carried by predictor covariance;
+> actor–partner and partner–actor routes carried by each member's predictor
+> variance; and residual covariance. For female–male dyads, the actor–partner
+> term is female-driven and the partner–actor term is male-driven. Putting all
+> five over the same model-implied outcome standard deviations makes them sum
+> exactly to the model-implied outcome correlation. Is this the set of
+> combinations you had in mind?
+
+Further questions:
+
+- Did he intend all four predictor-side components or mainly the female-driven
+  and male-driven terms?
+- Was covariance, correlation, or reduction in residual covariance his primary
+  reporting target?
+- Does he know an earlier derivation that should be the acknowledged starting
+  point?
+- Does he have a preferred empirical example or dataset?
+
+## Immediate next steps
+
+1. Show Niall the six-panel path figure and the concise question above.
+2. Confirm intellectual provenance and naming before presenting a novelty
+   claim.
+3. Conduct the focused literature review described above.
+4. Prototype an internal function that extracts model coefficients, predictor
+   moments, total residual covariance, and all five contributions.
+5. Test the decomposition and extraction logic on the workshop APIM example.
+6. Choose an empirical example with a clear substantive story.
+7. Run a small bootstrap prototype before designing the full simulation.

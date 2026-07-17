@@ -74,7 +74,57 @@ rm(
   ""
 }
 
+# Keep mathematical quantities italic across graphics devices while preserving
+# descriptive subscripts and abbreviations explicitly wrapped in plain().
+.diagram_math_label <- function(label) {
+  mathematical_symbols <- c(
+    "a", "b", "c", "p", "r", "R", "X", "Y", "i", "j"
+  )
+  # Base R's plotmath ignores italic() for Greek symbol names because it draws
+  # them from the upright Adobe Symbol font. Raster and SVG devices can instead
+  # italicize ordinary Unicode Greek letters. Retain plotmath's named symbols
+  # on legacy PDF/PostScript devices, where Unicode font metrics are unreliable.
+  italic_greek <- c(
+    alpha = "α", beta = "β", epsilon = "ε", mu = "μ",
+    phi = "φ", rho = "ρ", sigma = "σ"
+  )
+  device <- names(grDevices::dev.cur())
+  unicode_greek <- length(device) == 1L &&
+    !device %in% c("null device", "pdf", "postscript", "xfig", "pictex")
+
+  transform_label <- function(node) {
+    if (is.name(node)) {
+      symbol <- as.character(node)
+      if (symbol %in% mathematical_symbols) {
+        return(call("italic", node))
+      }
+      if (unicode_greek && symbol %in% names(italic_greek)) {
+        return(call("italic", unname(italic_greek[[symbol]])))
+      }
+    }
+    if (!is.call(node)) {
+      return(node)
+    }
+
+    operator <- as.character(node[[1L]])
+    if (operator %in% c("plain", "italic")) {
+      return(node)
+    }
+
+    as.call(lapply(node, transform_label))
+  }
+
+  if (is.expression(label)) {
+    return(as.expression(lapply(as.list(label), transform_label)))
+  }
+  if (is.language(label)) {
+    return(transform_label(label))
+  }
+  label
+}
+
 .diagram_estimate_label <- function(label, value, p_value = NULL) {
+  label <- .diagram_math_label(label)
   if (is.expression(label)) {
     label <- label[[1L]]
   }
@@ -183,6 +233,7 @@ rm(
 
 .draw_residual_annotation <- function(
     label, x, y, fontsize = 10.5, colour = "#64748B") {
+  label <- .diagram_math_label(label)
   label_grob <- grid::textGrob(
     label,
     x = grid::unit(x, "native"),
@@ -665,8 +716,8 @@ draw_apim_diagram <- function(
       partner_to_bottom = expression(p[plain(M)])
     )
     intercept_labels <- list(
-      top = expression(b[0 * "," * plain(F)]),
-      bottom = expression(b[0 * "," * plain(M)])
+      top = expression(italic(b)[0 * "," * plain(F)]),
+      bottom = expression(italic(b)[0 * "," * plain(M)])
     )
     required_estimates <- c(
       "intercept_female", "intercept_male",
@@ -690,8 +741,8 @@ draw_apim_diagram <- function(
       partner_to_bottom = expression(p)
     )
     intercept_labels <- list(
-      top = expression(b[0]),
-      bottom = expression(b[0])
+      top = expression(italic(b)[0]),
+      bottom = expression(italic(b)[0])
     )
     required_estimates <- c("intercept", "actor", "partner")
     required_residuals <- c("sd", "correlation")
@@ -747,12 +798,12 @@ draw_apim_diagram <- function(
       )
       intercept_labels <- list(
         top = .diagram_estimate_label(
-          expression(b[0 * "," * plain(F)]),
+          expression(italic(b)[0 * "," * plain(F)]),
           estimates[["intercept_female"]],
           p_values[["intercept_female"]]
         ),
         bottom = .diagram_estimate_label(
-          expression(b[0 * "," * plain(M)]),
+          expression(italic(b)[0 * "," * plain(M)]),
           estimates[["intercept_male"]],
           p_values[["intercept_male"]]
         )
@@ -774,10 +825,12 @@ draw_apim_diagram <- function(
       )
       intercept_labels <- list(
         top = .diagram_estimate_label(
-          expression(b[0]), estimates[["intercept"]], p_values[["intercept"]]
+          expression(italic(b)[0]), estimates[["intercept"]],
+          p_values[["intercept"]]
         ),
         bottom = .diagram_estimate_label(
-          expression(b[0]), estimates[["intercept"]], p_values[["intercept"]]
+          expression(italic(b)[0]), estimates[["intercept"]],
+          p_values[["intercept"]]
         )
       )
     }
@@ -822,6 +875,7 @@ draw_apim_diagram <- function(
   )
 
   draw_node <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -846,6 +900,7 @@ draw_apim_diagram <- function(
   }
 
   draw_residual <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x),
       y = native(y),
@@ -872,6 +927,7 @@ draw_apim_diagram <- function(
   }
 
   draw_path_label <- function(x, y, label, colour) {
+    label <- .diagram_math_label(label)
     label_grob <- grid::textGrob(
       label,
       x = native(x),
@@ -890,6 +946,7 @@ draw_apim_diagram <- function(
   }
 
   draw_intercept <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -1035,8 +1092,8 @@ draw_apim_member_diagram <- function(
       actor_bottom = expression(a[plain(M)]),
       partner_top = expression(p[plain(F)]),
       partner_bottom = expression(p[plain(M)]),
-      intercept_top = expression(b[0 * "," * plain(F)]),
-      intercept_bottom = expression(b[0 * "," * plain(M)])
+      intercept_top = expression(italic(b)[0 * "," * plain(F)]),
+      intercept_bottom = expression(italic(b)[0 * "," * plain(M)])
     )
   } else {
     labels <- list(
@@ -1055,8 +1112,8 @@ draw_apim_member_diagram <- function(
       actor_bottom = expression(a),
       partner_top = expression(p),
       partner_bottom = expression(p),
-      intercept_top = expression(b[0]),
-      intercept_bottom = expression(b[0])
+      intercept_top = expression(italic(b)[0]),
+      intercept_bottom = expression(italic(b)[0])
     )
   }
 
@@ -1074,6 +1131,7 @@ draw_apim_member_diagram <- function(
   )
 
   draw_node <- function(x, y, label, subtitle, width = 0.26) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(width), height = native(0.16),
@@ -1091,6 +1149,7 @@ draw_apim_member_diagram <- function(
   }
 
   draw_residual <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x), y = native(y), r = grid::unit(0.047, "snpc"),
       gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
@@ -1111,6 +1170,7 @@ draw_apim_member_diagram <- function(
   }
 
   draw_label <- function(x, y, label, colour) {
+    label <- .diagram_math_label(label)
     label_grob <- grid::textGrob(
       label, x = native(x), y = native(y),
       gp = grid::gpar(col = colour, fontsize = 14)
@@ -1126,6 +1186,7 @@ draw_apim_member_diagram <- function(
   }
 
   draw_intercept <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(0.09), height = native(0.06),
@@ -1289,7 +1350,9 @@ draw_dsm_diagram <- function(
 
   residual_sd_label <- function(name, subscript) {
     if (is.null(residuals)) {
-      return(parse(text = sprintf("plain(SD) == sigma[%s]", subscript)))
+      return(parse(
+        text = sprintf("plain(SD) == sigma[plain(%s)]", subscript)
+      ))
     }
     .diagram_estimate_label(expression(plain(SD)), residuals[[name]])
   }
@@ -1317,6 +1380,7 @@ draw_dsm_diagram <- function(
   )
 
   draw_node <- function(x, y, label, subtitle) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -1340,6 +1404,7 @@ draw_dsm_diagram <- function(
   }
 
   draw_residual <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x),
       y = native(y),
@@ -1366,6 +1431,7 @@ draw_dsm_diagram <- function(
   }
 
   draw_label <- function(x, y, label, colour) {
+    label <- .diagram_math_label(label)
     label_grob <- grid::textGrob(
       label,
       x = native(x), y = native(y),
@@ -1383,6 +1449,7 @@ draw_dsm_diagram <- function(
   }
 
   draw_intercept <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -1448,8 +1515,8 @@ draw_dsm_diagram <- function(
     node_labels$outcome_difference_subtitle
   )
   if (show_residuals) {
-    draw_residual(0.91, 0.72, expression(r[m]))
-    draw_residual(0.91, 0.28, expression(r[d]))
+    draw_residual(0.91, 0.72, expression(r[plain(m)]))
+    draw_residual(0.91, 0.28, expression(r[plain(d)]))
   }
 
   # Paths from predictor level.
@@ -1532,6 +1599,7 @@ draw_dsm_member_diagram <- function() {
   draw_node <- function(
       x, y, label, subtitle, width = 0.30,
       label_nudge = 0, subtitle_nudge = 0) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(width), height = native(0.18),
@@ -1549,6 +1617,7 @@ draw_dsm_member_diagram <- function() {
   }
 
   draw_residual <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x), y = native(y), r = grid::unit(0.047, "snpc"),
       gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
@@ -1569,6 +1638,7 @@ draw_dsm_member_diagram <- function() {
   }
 
   draw_label <- function(x, y, label, colour) {
+    label <- .diagram_math_label(label)
     label_y <- y - 0.006
     label_grob <- grid::textGrob(
       label, x = native(x), y = native(label_y),
@@ -1585,6 +1655,7 @@ draw_dsm_member_diagram <- function() {
   }
 
   draw_intercept <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     label_y <- y - 0.006
     label_grob <- grid::textGrob(
       label, x = native(x), y = native(label_y),
@@ -1748,13 +1819,13 @@ draw_dim_diagram <- function(
 
   parameter_label <- function(name, subscript) {
     if (is.null(estimates)) {
-      return(parse(text = sprintf("b[%s]", subscript)))
+      return(parse(text = sprintf("italic(b)[%s]", subscript)))
     }
     if (!name %in% names(estimates)) {
       stop("`estimates` must contain a value named ", name, ".", call. = FALSE)
     }
     .diagram_estimate_label(
-      parse(text = sprintf("b[%s]", subscript)), estimates[[name]],
+      parse(text = sprintf("italic(b)[%s]", subscript)), estimates[[name]],
       p_values[[name]]
     )
   }
@@ -1777,7 +1848,9 @@ draw_dim_diagram <- function(
 
   residual_sd_label <- function(name, subscript) {
     if (is.null(residuals)) {
-      return(parse(text = sprintf("plain(SD) == sigma[%s]", subscript)))
+      return(parse(
+        text = sprintf("plain(SD) == sigma[plain(%s)]", subscript)
+      ))
     }
     .diagram_estimate_label(expression(plain(SD)), residuals[[name]])
   }
@@ -1789,6 +1862,7 @@ draw_dim_diagram <- function(
     type = "closed"
   )
   draw_node <- function(x, y, label, subtitle) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(0.25), height = native(0.22),
@@ -1806,6 +1880,7 @@ draw_dim_diagram <- function(
   }
 
   draw_residual <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x), y = native(y), r = grid::unit(0.052, "snpc"),
       gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
@@ -1826,6 +1901,7 @@ draw_dim_diagram <- function(
   }
 
   draw_label <- function(x, y, label, colour) {
+    label <- .diagram_math_label(label)
     label_grob <- grid::textGrob(
       label, x = native(x), y = native(y),
       gp = grid::gpar(col = colour, fontsize = 14)
@@ -1842,6 +1918,7 @@ draw_dim_diagram <- function(
 
   draw_intercept <- function(x, y) {
     label <- parameter_label("b0", "0")
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(if (is.null(estimates)) 0.07 else 0.14),
@@ -1917,8 +1994,8 @@ draw_dim_diagram <- function(
     node_labels$outcome_deviation_subtitle
   )
   if (show_residuals) {
-    draw_residual(0.91, 0.72, expression(r[m]))
-    draw_residual(0.91, 0.28, expression(r[d * "," * i]))
+    draw_residual(0.91, 0.72, expression(r[plain(m)]))
+    draw_residual(0.91, 0.28, expression(r[plain(d) * "," * i]))
   }
 
   # Exchangeability retains the parallel mean and deviation paths and removes
@@ -1982,6 +2059,7 @@ draw_dim_member_diagram <- function() {
   )
 
   draw_node <- function(x, y, label, subtitle = NULL, width = 0.26) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(width), height = native(0.16),
@@ -2001,6 +2079,7 @@ draw_dim_member_diagram <- function() {
   }
 
   draw_residual <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x), y = native(y), r = grid::unit(0.047, "snpc"),
       gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
@@ -2021,6 +2100,7 @@ draw_dim_member_diagram <- function() {
   }
 
   draw_label <- function(x, y, label, colour) {
+    label <- .diagram_math_label(label)
     label_grob <- grid::textGrob(
       label, x = native(x), y = native(y),
       gp = grid::gpar(col = colour, fontsize = 14)
@@ -2069,10 +2149,10 @@ draw_dim_member_diagram <- function() {
   draw_path(0.28, 0.60, 0.54, 0.675, deviation_colour)
   draw_path(0.28, 0.40, 0.54, 0.325, mean_colour)
   draw_path(0.28, 0.21, 0.54, 0.285, deviation_colour)
-  draw_label(0.40, 0.752, expression(b[plain(mean)]), mean_colour)
-  draw_label(0.40, 0.638, expression(b[plain(dev)]), deviation_colour)
-  draw_label(0.40, 0.362, expression(b[plain(mean)]), mean_colour)
-  draw_label(0.40, 0.248, expression(b[plain(dev)]), deviation_colour)
+  draw_label(0.40, 0.752, expression(italic(b)[plain(mean)]), mean_colour)
+  draw_label(0.40, 0.638, expression(italic(b)[plain(dev)]), deviation_colour)
+  draw_label(0.40, 0.362, expression(italic(b)[plain(mean)]), mean_colour)
+  draw_label(0.40, 0.248, expression(italic(b)[plain(dev)]), deviation_colour)
 
   draw_path(0.86, 0.695, 0.78, 0.695, muted_colour)
   draw_path(0.86, 0.305, 0.78, 0.305, muted_colour)
@@ -2248,6 +2328,8 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
   )
 
   draw_outcome <- function(x, y, outcome, intercept) {
+    outcome <- .diagram_math_label(outcome)
+    intercept <- .diagram_math_label(intercept)
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(0.135), height = native(0.16),
@@ -2265,6 +2347,7 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
   }
 
   draw_residual <- function(x, y, label) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x), y = native(y), r = grid::unit(0.038, "snpc"),
       gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.6)
@@ -2386,11 +2469,11 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
     list(expression(Y[plain(F)]), expression(Y[plain(M)])),
     list(
       fitted_intercept(
-        expression(b[0 * "," * plain(FM) * "," * plain(F)]),
+        expression(italic(b)[0 * "," * plain(FM) * "," * plain(F)]),
         "intercept_fm_female"
       ),
       fitted_intercept(
-        expression(b[0 * "," * plain(FM) * "," * plain(M)]),
+        expression(italic(b)[0 * "," * plain(FM) * "," * plain(M)]),
         "intercept_fm_male"
       )
     ),
@@ -2406,8 +2489,12 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
     0.50, "Female-female", "Exchangeable",
     list(expression(Y[1]), expression(Y[2])),
     list(
-      fitted_intercept(expression(b[0 * "," * plain(FF)]), "intercept_ff"),
-      fitted_intercept(expression(b[0 * "," * plain(FF)]), "intercept_ff")
+      fitted_intercept(
+        expression(italic(b)[0 * "," * plain(FF)]), "intercept_ff"
+      ),
+      fitted_intercept(
+        expression(italic(b)[0 * "," * plain(FF)]), "intercept_ff"
+      )
     ),
     list(expression(epsilon[1]), expression(epsilon[2])),
     list(
@@ -2421,8 +2508,12 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
     0.82, "Male-male", "Exchangeable",
     list(expression(Y[1]), expression(Y[2])),
     list(
-      fitted_intercept(expression(b[0 * "," * plain(MM)]), "intercept_mm"),
-      fitted_intercept(expression(b[0 * "," * plain(MM)]), "intercept_mm")
+      fitted_intercept(
+        expression(italic(b)[0 * "," * plain(MM)]), "intercept_mm"
+      ),
+      fitted_intercept(
+        expression(italic(b)[0 * "," * plain(MM)]), "intercept_mm"
+      )
     ),
     list(expression(epsilon[1]), expression(epsilon[2])),
     list(
@@ -2655,7 +2746,11 @@ draw_cfm_diagram <- function(
     )
   }
   member_symbols <- lapply(as.character(member_ids), function(value) {
-    if (grepl("^[0-9]+$", value)) as.integer(value) else as.name(value)
+    if (grepl("^[0-9]+$", value)) {
+      as.integer(value)
+    } else {
+      call("plain", as.name(value))
+    }
   })
 
   native <- function(value) grid::unit(value, "native")
@@ -2672,6 +2767,7 @@ draw_cfm_diagram <- function(
   )
 
   draw_observed <- function(x, label, subtitle) {
+    label <- .diagram_math_label(label)
     grid::grid.roundrect(
       x = native(x), y = native(0.60),
       width = native(0.19), height = native(0.17),
@@ -2689,6 +2785,7 @@ draw_cfm_diagram <- function(
   }
 
   draw_latent <- function(x, label, subtitle) {
+    label <- .diagram_math_label(label)
     theta <- seq(0, 2 * pi, length.out = 101)
     grid::grid.polygon(
       x = native(x + 0.13 * cos(theta)),
@@ -2706,6 +2803,7 @@ draw_cfm_diagram <- function(
   }
 
   draw_residual <- function(x, label, y = 0.84) {
+    label <- .diagram_math_label(label)
     grid::grid.circle(
       x = native(x), y = native(y), r = grid::unit(0.043, "snpc"),
       gp = grid::gpar(fill = "white", col = ink_colour, lwd = 1.8)
@@ -2726,6 +2824,7 @@ draw_cfm_diagram <- function(
   }
 
   draw_label <- function(x, y, label, colour, fontsize = 13) {
+    label <- .diagram_math_label(label)
     label_grob <- grid::textGrob(
       label, x = native(x), y = native(y),
       gp = grid::gpar(col = colour, fontsize = fontsize)
@@ -2805,16 +2904,17 @@ draw_cfm_diagram <- function(
   draw_path(0.355, 0.25, 0.615, 0.25, level_colour, lwd = 2.3)
   structural_label <- if (show_estimates && isTRUE(admissible)) {
     bquote(
-      b[plain(level)] ==
+      italic(b)[plain(level)] ==
         .(format_estimate(b_level, p_values[["level"]])) ~
         "(" * beta == .(format_estimate(beta_level)) * ")"
     )
   } else if (show_estimates) {
     bquote(
-      b[plain(level)] == .(format_estimate(b_level, p_values[["level"]]))
+      italic(b)[plain(level)] ==
+        .(format_estimate(b_level, p_values[["level"]]))
     )
   } else {
-    expression(b[plain(level)])
+    expression(italic(b)[plain(level)])
   }
   draw_label(0.485, 0.25, structural_label, level_colour, 14)
 
