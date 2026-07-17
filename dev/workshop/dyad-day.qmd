@@ -890,7 +890,7 @@ workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
   - Dyad mean (GM-centered): $\bar{X} - \mu_{X}$
   - Within-dyad member deviation: $X_i - \bar{X}$
   
-<!-- insert a table?  --> 
+<!-- TODO: insert a data frame?  --> 
 In other words, these predictors express: 
 
 - A couple's average level compared with the average of all couples
