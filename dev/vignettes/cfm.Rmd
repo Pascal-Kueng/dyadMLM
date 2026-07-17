@@ -27,7 +27,8 @@ if (is.na(diagram_helper)) {
 
 sys.source(diagram_helper, envir = knitr::knit_global())
 
-knitr::opts_chunk$set(dev = .vignette_diagram_device())
+diagram_device <- .vignette_diagram_device()
+knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 ```
 
 ```{r setup, message=FALSE}
