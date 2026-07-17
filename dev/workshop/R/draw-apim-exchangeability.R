@@ -9,6 +9,10 @@ draw_apim_exchangeability_comparison <- function() {
   grid_colour <- "#E2E8F0"
   node_fill <- "#F8FAFC"
   shared_colour <- "#64748B"
+  # Use the same STIX face distributed with MathJax for every mathematical
+  # expression.  This keeps the SVG self-contained while giving equations and
+  # symbols consistent LaTeX-like typography.
+  math_family <- "STIX MathJax Main"
 
   native <- function(value) grid::unit(value, "native")
 
@@ -24,11 +28,13 @@ draw_apim_exchangeability_comparison <- function() {
   draw_text <- function(
       label, x, y, colour = ink_colour, fontsize = 11,
       fontface = "plain", just = "centre") {
+    is_math <- is.expression(label) || is.language(label)
     grid::grid.text(
       label,
       x = native(x), y = native(y), just = just,
       gp = grid::gpar(
-        col = colour, fontsize = fontsize, fontface = fontface
+        col = colour, fontsize = fontsize, fontface = fontface,
+        fontfamily = if (is_math) math_family else ""
       )
     )
   }
@@ -38,7 +44,9 @@ draw_apim_exchangeability_comparison <- function() {
       function(label, colour) {
         grid::textGrob(
           label,
-          gp = grid::gpar(col = colour, fontsize = fontsize)
+          gp = grid::gpar(
+            col = colour, fontsize = fontsize, fontfamily = math_family
+          )
         )
       },
       parts, colours
@@ -50,7 +58,8 @@ draw_apim_exchangeability_comparison <- function() {
       },
       numeric(1)
     )
-    gap <- 0.0035
+    # A modest visual space between differently coloured formula terms.
+    gap <- 0.006
     total_width <- sum(widths) + gap * (length(widths) - 1)
     left <- x - total_width / 2
 

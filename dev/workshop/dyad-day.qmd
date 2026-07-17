@@ -1041,16 +1041,15 @@ fit_and_draw_dsm(
 )
 ```
 
-## Honorable mention: The truth and bias model 
 
-<!-- add ref, basic idea, example graphic and basic interpretation of paths -->
+## Research Question 2 {.rq-slide}
 
-<!-- ca. 2 minutes -->
-
-## Research Question 2
-
-RQ2: In romantic couples, how is collaborative planning linked to physical 
-activity?
+::: {.rq-center}
+::: {.rq-card}
+[RQ2:]{.rq-label} [In romantic couples, how is collaborative planning linked to physical 
+activity?]{.rq-text}
+:::
+:::
 
 ## Measurement - CFM predictor
 
@@ -1174,6 +1173,13 @@ draw_cfm_diagram(show_residuals = FALSE)
 
 draw_cfm_diagram()
 ```
+
+
+## Honorable mention: The truth and bias model 
+
+<!-- add ref, basic idea, example graphic and basic interpretation of paths -->
+
+<!-- ca. 2 minutes -->
 
 <!----------------- APPLIED PART (plus MLM vs. SEM and software) 
 

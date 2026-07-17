@@ -975,10 +975,10 @@ draw_apim_diagram <- function(
   .draw_diagram_legend(
     labels = c("Actor effect", "Partner effect"),
     colours = c(actor_colour, partner_colour),
-    y = 0.075,
+    y = 0.065,
     segment_starts = c(0.29, 0.56),
     text_x = c(0.415, 0.695),
-    fontsize = 11
+    fontsize = 12
   )
   .draw_diagram_significance_key(p_values, y = 0.015)
 
@@ -1298,7 +1298,7 @@ draw_dsm_diagram <- function(
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
-      width = native(0.30),
+      width = native(0.25),
       height = native(0.22),
       r = grid::unit(0.09, "snpc"),
       gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
@@ -1416,12 +1416,12 @@ draw_dsm_diagram <- function(
     node_labels$predictor_difference_subtitle
   )
   draw_node(
-    0.65, 0.72,
+    0.64, 0.72,
     node_labels$outcome_mean,
     node_labels$outcome_mean_subtitle
   )
   draw_node(
-    0.65, 0.28,
+    0.64, 0.28,
     node_labels$outcome_difference,
     node_labels$outcome_difference_subtitle
   )
@@ -1431,25 +1431,25 @@ draw_dsm_diagram <- function(
   }
 
   # Paths from predictor level.
-  draw_path(0.32, 0.72, 0.50, 0.72, mean_colour)
-  draw_path(0.32, 0.72, 0.50, 0.34, mean_colour)
+  draw_path(0.295, 0.72, 0.515, 0.72, mean_colour)
+  draw_path(0.295, 0.72, 0.515, 0.34, mean_colour)
 
   # Paths from predictor difference.
-  draw_path(0.32, 0.28, 0.50, 0.66, difference_colour)
-  draw_path(0.32, 0.28, 0.50, 0.28, difference_colour)
+  draw_path(0.295, 0.28, 0.515, 0.66, difference_colour)
+  draw_path(0.295, 0.28, 0.515, 0.28, difference_colour)
 
   draw_label(0.41, 0.72, parameter_label("11"), mean_colour)
   draw_label(0.38, 0.56, parameter_label("21"), mean_colour)
   draw_label(0.38, 0.44, parameter_label("12"), difference_colour)
   draw_label(0.41, 0.28, parameter_label("22"), difference_colour)
 
-  draw_intercept(0.65, 0.86, parameter_label("10"))
-  draw_intercept(0.65, 0.14, parameter_label("20"))
+  draw_intercept(0.64, 0.86, parameter_label("10"))
+  draw_intercept(0.64, 0.14, parameter_label("20"))
 
   if (show_residuals) {
     # Residuals point to their outcomes and may covary.
-    draw_path(0.855, 0.72, 0.80, 0.72, muted_colour)
-    draw_path(0.855, 0.28, 0.80, 0.28, muted_colour)
+    draw_path(0.855, 0.72, 0.768, 0.72, muted_colour)
+    draw_path(0.855, 0.28, 0.768, 0.28, muted_colour)
     grid::grid.curve(
       x1 = native(0.956),
       y1 = native(0.68),
@@ -1476,12 +1476,12 @@ draw_dsm_diagram <- function(
   .draw_diagram_legend(
     labels = c("Predictor-mean paths", "Predictor-difference paths"),
     colours = c(mean_colour, difference_colour),
-    y = 0.055,
+    y = 0.052,
     segment_starts = c(0.18, 0.53),
     text_x = c(0.35, 0.72),
-    fontsize = 10
+    fontsize = 11
   )
-  .draw_diagram_significance_key(p_values, y = 0.015)
+  .draw_diagram_significance_key(p_values, y = 0.010)
 
   grid::popViewport()
   invisible(NULL)
@@ -1769,7 +1769,7 @@ draw_dim_diagram <- function(
   draw_node <- function(x, y, label, subtitle) {
     grid::grid.roundrect(
       x = native(x), y = native(y),
-      width = native(0.30), height = native(0.22),
+      width = native(0.25), height = native(0.22),
       r = grid::unit(0.09, "snpc"),
       gp = grid::gpar(fill = node_fill, col = ink_colour, lwd = 1.8)
     )
@@ -1877,12 +1877,12 @@ draw_dim_diagram <- function(
     node_labels$predictor_deviation_subtitle
   )
   draw_node(
-    0.65, 0.72,
+    0.64, 0.72,
     node_labels$outcome_mean,
     node_labels$outcome_mean_subtitle
   )
   draw_node(
-    0.65, 0.28,
+    0.64, 0.28,
     node_labels$outcome_deviation,
     node_labels$outcome_deviation_subtitle
   )
@@ -1893,19 +1893,19 @@ draw_dim_diagram <- function(
 
   # Exchangeability retains the parallel mean and deviation paths and removes
   # the DSM cross-paths.
-  draw_path(0.32, 0.72, 0.50, 0.72, mean_colour)
-  draw_path(0.32, 0.28, 0.50, 0.28, deviation_colour)
+  draw_path(0.295, 0.72, 0.515, 0.72, mean_colour)
+  draw_path(0.295, 0.28, 0.515, 0.28, deviation_colour)
   draw_label(0.41, 0.72, mean_label, mean_colour)
   draw_label(0.41, 0.28, deviation_label, deviation_colour)
 
   # Only the outcome-mean equation has an intercept under exchangeability.
-  draw_intercept(0.65, 0.86)
+  draw_intercept(0.64, 0.86)
 
   if (show_residuals) {
     # Mean and deviation residual components are uncorrelated under the
     # exchangeability constraints.
-    draw_path(0.855, 0.72, 0.80, 0.72, muted_colour)
-    draw_path(0.855, 0.28, 0.80, 0.28, muted_colour)
+    draw_path(0.855, 0.72, 0.768, 0.72, muted_colour)
+    draw_path(0.855, 0.28, 0.768, 0.28, muted_colour)
     .draw_residual_annotation(
       residual_sd_label("sd_mean", "m"), 0.91, 0.84
     )
@@ -1920,9 +1920,10 @@ draw_dim_diagram <- function(
   .draw_diagram_legend(
     labels = paste0(c("Between-", "Within-"), effect_unit, " effect"),
     colours = c(mean_colour, deviation_colour),
-    y = 0.075,
+    y = 0.065,
     segment_starts = c(0.22, 0.56),
-    text_x = c(0.405, 0.745)
+    text_x = c(0.405, 0.745),
+    fontsize = 12
   )
   .draw_diagram_significance_key(p_values, y = 0.015)
 
@@ -2877,19 +2878,19 @@ draw_cfm_diagram <- function(
         }
       ),
       colours = c(level_colour, member_specific_colour),
-      y = 0.055,
+      y = 0.045,
       segment_starts = c(0.20, 0.53),
       text_x = c(0.38, 0.75),
-      fontsize = 10
+      fontsize = 12
     )
   } else {
     .draw_diagram_legend(
       labels = "Dyad-level effect",
       colours = level_colour,
-      y = 0.055,
+      y = 0.045,
       segment_starts = 0.40,
       text_x = 0.58,
-      fontsize = 10
+      fontsize = 12
     )
   }
   .draw_diagram_significance_key(p_values, y = 0.015)
