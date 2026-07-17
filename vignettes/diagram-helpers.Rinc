@@ -142,7 +142,7 @@ rm(
 }
 
 .draw_diagram_significance_key <- function(
-    p_values, y = 0.018, fontsize = 10.5) {
+    p_values, y = 0.018, fontsize = 10.5, x = 0.50) {
   if (is.null(p_values)) {
     return(invisible(NULL))
   }
@@ -152,7 +152,7 @@ rm(
         "**" ~ italic(p) < .01 * ";" ~~
         "***" ~ italic(p) < .001
     ),
-    x = grid::unit(0.50, "native"),
+    x = grid::unit(x, "native"),
     y = grid::unit(y, "native"),
     gp = grid::gpar(col = "#64748B", fontsize = fontsize)
   )
@@ -910,8 +910,8 @@ draw_apim_diagram <- function(
 
   draw_path_label(0.405, 0.72, edge_labels$actor_top, actor_colour)
   draw_path_label(0.405, 0.28, edge_labels$actor_bottom, actor_colour)
-  draw_path_label(0.345, 0.62, edge_labels$partner_to_bottom, partner_colour)
-  draw_path_label(0.345, 0.38, edge_labels$partner_to_top, partner_colour)
+  draw_path_label(0.38, 0.56, edge_labels$partner_to_bottom, partner_colour)
+  draw_path_label(0.38, 0.44, edge_labels$partner_to_top, partner_colour)
 
   if (show_residuals) {
     # Residuals point to their outcomes. Their curved double-headed path
@@ -976,11 +976,11 @@ draw_apim_diagram <- function(
     labels = c("Actor effect", "Partner effect"),
     colours = c(actor_colour, partner_colour),
     y = 0.065,
-    segment_starts = c(0.29, 0.56),
-    text_x = c(0.415, 0.695),
+    segment_starts = c(0.17, 0.44),
+    text_x = c(0.295, 0.575),
     fontsize = 12
   )
-  .draw_diagram_significance_key(p_values, y = 0.015)
+  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.405)
 
   grid::popViewport()
   invisible(NULL)
@@ -1477,11 +1477,11 @@ draw_dsm_diagram <- function(
     labels = c("Predictor-mean paths", "Predictor-difference paths"),
     colours = c(mean_colour, difference_colour),
     y = 0.052,
-    segment_starts = c(0.18, 0.53),
-    text_x = c(0.35, 0.72),
+    segment_starts = c(0.085, 0.435),
+    text_x = c(0.255, 0.625),
     fontsize = 11
   )
-  .draw_diagram_significance_key(p_values, y = 0.010)
+  .draw_diagram_significance_key(p_values, y = 0.005, x = 0.405)
 
   grid::popViewport()
   invisible(NULL)
@@ -1921,11 +1921,11 @@ draw_dim_diagram <- function(
     labels = paste0(c("Between-", "Within-"), effect_unit, " effect"),
     colours = c(mean_colour, deviation_colour),
     y = 0.065,
-    segment_starts = c(0.22, 0.56),
-    text_x = c(0.405, 0.745),
+    segment_starts = c(0.105, 0.445),
+    text_x = c(0.290, 0.630),
     fontsize = 12
   )
-  .draw_diagram_significance_key(p_values, y = 0.015)
+  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.405)
 
   grid::popViewport()
   invisible(NULL)
@@ -2879,8 +2879,8 @@ draw_cfm_diagram <- function(
       ),
       colours = c(level_colour, member_specific_colour),
       y = 0.045,
-      segment_starts = c(0.20, 0.53),
-      text_x = c(0.38, 0.75),
+      segment_starts = c(0.145, 0.475),
+      text_x = c(0.325, 0.695),
       fontsize = 12
     )
   } else {
@@ -2888,12 +2888,12 @@ draw_cfm_diagram <- function(
       labels = "Dyad-level effect",
       colours = level_colour,
       y = 0.045,
-      segment_starts = 0.40,
-      text_x = 0.58,
+      segment_starts = 0.345,
+      text_x = 0.525,
       fontsize = 12
     )
   }
-  .draw_diagram_significance_key(p_values, y = 0.015)
+  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.485)
 
   grid::popViewport()
   invisible(NULL)

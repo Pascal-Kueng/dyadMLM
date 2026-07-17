@@ -13,6 +13,7 @@ draw_apim_exchangeability_comparison <- function() {
   # expression.  This keeps the SVG self-contained while giving equations and
   # symbols consistent LaTeX-like typography.
   math_family <- "STIX MathJax Main"
+  sans_family <- "Liberation Sans"
 
   native <- function(value) grid::unit(value, "native")
 
@@ -29,27 +30,34 @@ draw_apim_exchangeability_comparison <- function() {
       label, x, y, colour = ink_colour, fontsize = 11,
       fontface = "plain", just = "centre") {
     is_math <- is.expression(label) || is.language(label)
+    text_gp <- grid::gpar(
+      col = colour, fontsize = fontsize, fontface = fontface
+    )
+    if (is_math) {
+      text_gp$fontfamily <- math_family
+    }
     grid::grid.text(
       label,
       x = native(x), y = native(y), just = just,
-      gp = grid::gpar(
-        col = colour, fontsize = fontsize, fontface = fontface,
-        fontfamily = if (is_math) math_family else ""
-      )
+      gp = text_gp
     )
   }
 
-  draw_coloured_equation <- function(parts, colours, x, y, fontsize = 12.2) {
+  draw_coloured_equation <- function(
+      parts, colours, x, y, fontsize = 12.2,
+      math = rep(TRUE, length(parts)), gap = 0.006) {
     grobs <- Map(
-      function(label, colour) {
+      function(label, colour, use_math) {
+        label_gp <- grid::gpar(
+          col = colour, fontsize = fontsize,
+          fontfamily = if (use_math) math_family else sans_family
+        )
         grid::textGrob(
           label,
-          gp = grid::gpar(
-            col = colour, fontsize = fontsize, fontfamily = math_family
-          )
+          gp = label_gp
         )
       },
-      parts, colours
+      parts, colours, math
     )
     widths <- vapply(
       grobs,
@@ -58,8 +66,6 @@ draw_apim_exchangeability_comparison <- function() {
       },
       numeric(1)
     )
-    # A modest visual space between differently coloured formula terms.
-    gap <- 0.006
     total_width <- sum(widths) + gap * (length(widths) - 1)
     left <- x - total_width / 2
 
@@ -112,10 +118,10 @@ draw_apim_exchangeability_comparison <- function() {
 
     grid::grid.roundrect(
       x = native(prediction_x), y = native(y),
-      width = native(2 * residual_envelope * residual_scale),
-      height = native(0.030),
-      r = grid::unit(0.015, "snpc"),
-      gp = grid::gpar(fill = residual_colour, col = NA, alpha = 0.10)
+      width = native(2.7 * residual_envelope * residual_scale),
+      height = native(0.040),
+      r = grid::unit(0.025, "snpc"),
+      gp = grid::gpar(fill = residual_colour, col = NA, alpha = 0.16)
     )
     grid::grid.segments(
       x0 = native(map_x(domain[1])), x1 = native(map_x(domain[2])),
@@ -288,15 +294,21 @@ draw_apim_exchangeability_comparison <- function() {
     0.745, 0.775, fontsize = 15.2
   )
 
-  draw_text(
-    expression("Illustrative example:" ~~ X[plain(F)] == +1 ~~ "," ~~
-      X[plain(M)] == +1),
-    0.255, 0.708, colour = muted_colour, fontsize = 12.0
+  draw_coloured_equation(
+    list(
+      "Illustrative example:",
+      expression(X[plain(F)] == +1 * "," ~~ X[plain(M)] == +1)
+    ),
+    rep(muted_colour, 2), 0.255, 0.708, fontsize = 12.0,
+    math = c(FALSE, TRUE), gap = 0.004
   )
-  draw_text(
-    expression("Illustrative example:" ~~ X[1] == +1 ~~ "," ~~
-      X[2] == +1),
-    0.745, 0.708, colour = muted_colour, fontsize = 12.0
+  draw_coloured_equation(
+    list(
+      "Illustrative example:",
+      expression(X[1] == +1 * "," ~~ X[2] == +1)
+    ),
+    rep(muted_colour, 2), 0.745, 0.708, fontsize = 12.0,
+    math = c(FALSE, TRUE), gap = 0.004
   )
 
   draw_divider(0.04, 0.47, 0.675)
@@ -309,10 +321,13 @@ draw_apim_exchangeability_comparison <- function() {
     "Predictions and residual variation", 0.745, 0.642,
     fontsize = 13.5, fontface = "bold"
   )
-  draw_text(
-    expression(sigma[plain(F)] ~~ "and" ~~ sigma[plain(M)] ~~
-      "estimated separately"),
-    0.255, 0.603, colour = muted_colour, fontsize = 11.8
+  draw_coloured_equation(
+    list(
+      expression(sigma[plain(F)]), "and", expression(sigma[plain(M)]),
+      "estimated separately"
+    ),
+    rep(muted_colour, 4), 0.255, 0.603, fontsize = 11.8,
+    math = c(TRUE, FALSE, TRUE, FALSE), gap = 0.004
   )
   draw_text(
     expression(sigma[1] == sigma[2] ~~ "=" ~~ sigma),
@@ -373,12 +388,13 @@ draw_apim_exchangeability_comparison <- function() {
     residual_envelope = 1
   )
 
-  draw_text(
-    expression(
-      "Symmetry constraints do not imply identical predictions or residuals; " *
-        rho * " remains estimated."
+  draw_coloured_equation(
+    list(
+      "Symmetry constraints do not imply identical predictions or residuals;",
+      expression(rho), "remains estimated."
     ),
-    0.5, 0.017, colour = muted_colour, fontsize = 10.4
+    rep(muted_colour, 3), 0.5, 0.017, fontsize = 10.4,
+    math = c(FALSE, TRUE, FALSE), gap = 0.003
   )
 
   grid::popViewport()
