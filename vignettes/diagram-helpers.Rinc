@@ -1186,10 +1186,10 @@ draw_apim_member_diagram <- function(
   .draw_diagram_legend(
     labels = c("Actor effect", "Partner effect"),
     colours = c(actor_colour, partner_colour),
-    y = 0.025,
-    segment_starts = c(0.29, 0.56),
-    text_x = c(0.415, 0.695),
-    fontsize = 10
+    y = 0.020,
+    segment_starts = c(0.17, 0.44),
+    text_x = c(0.295, 0.575),
+    fontsize = 11
   )
   grid::popViewport()
   invisible(NULL)
@@ -1670,10 +1670,10 @@ draw_dsm_member_diagram <- function() {
   .draw_diagram_legend(
     labels = c("Predictor-mean contribution", "Predictor-difference contribution"),
     colours = c(mean_colour, difference_colour),
-    y = -0.008,
-    segment_starts = c(0.14, 0.53),
-    text_x = c(0.345, 0.755),
-    fontsize = 9.5
+    y = -0.010,
+    segment_starts = c(0.04, 0.43),
+    text_x = c(0.245, 0.655),
+    fontsize = 10.5
   )
 
   grid::popViewport()
@@ -2080,10 +2080,10 @@ draw_dim_member_diagram <- function() {
   .draw_diagram_legend(
     labels = c("Between-dyad effect", "Within-dyad effect"),
     colours = c(mean_colour, deviation_colour),
-    y = 0.018,
-    segment_starts = c(0.20, 0.56),
-    text_x = c(0.385, 0.745),
-    fontsize = 10
+    y = 0.015,
+    segment_starts = c(0.105, 0.445),
+    text_x = c(0.290, 0.630),
+    fontsize = 11
   )
 
   grid::popViewport()

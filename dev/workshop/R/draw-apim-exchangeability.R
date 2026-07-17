@@ -111,17 +111,40 @@ draw_apim_exchangeability_comparison <- function() {
     prediction_x <- map_x(prediction)
     example_i <- which.max(abs(residual_values))
     example_x <- prediction_x + residual_values[example_i] * residual_scale
+    residual_band_width <- max(
+      3.1 * residual_envelope * residual_scale,
+      0.060
+    )
+    residual_band_height <- 0.045
+    cap_radius <- grid::unit(residual_band_height / 2, "snpc")
+    cap_radius_x <- grid::convertWidth(
+      cap_radius, "native", valueOnly = TRUE
+    )
+    cap_offset <- residual_band_width / 2 - cap_radius_x
+    band_rgb <- grDevices::colorRamp(
+      c(node_fill, residual_colour)
+    )(0.18)
+    band_colour <- grDevices::rgb(
+      band_rgb[1], band_rgb[2], band_rgb[3], maxColorValue = 255
+    )
+    band_gp <- grid::gpar(fill = band_colour, col = NA)
 
     draw_text(
       label, label_x, y, fontsize = 13.8, fontface = "bold", just = "right"
     )
 
-    grid::grid.roundrect(
+    # Construct the band as a rectangle with circular caps. This produces a
+    # true pill and avoids SVG-device artefacts at a 50% corner radius.
+    grid::grid.rect(
       x = native(prediction_x), y = native(y),
-      width = native(2.7 * residual_envelope * residual_scale),
-      height = native(0.040),
-      r = grid::unit(0.025, "snpc"),
-      gp = grid::gpar(fill = residual_colour, col = NA, alpha = 0.16)
+      width = native(residual_band_width - 2 * cap_radius_x),
+      height = native(residual_band_height),
+      gp = band_gp
+    )
+    grid::grid.circle(
+      x = native(prediction_x + c(-cap_offset, cap_offset)),
+      y = native(rep(y, 2)), r = cap_radius,
+      gp = band_gp
     )
     grid::grid.segments(
       x0 = native(map_x(domain[1])), x1 = native(map_x(domain[2])),
