@@ -26,6 +26,9 @@ if (is.na(diagram_helper)) {
 }
 
 sys.source(diagram_helper, envir = knitr::knit_global())
+
+diagram_device <- if (isTRUE(capabilities("cairo"))) "svg" else "png"
+knitr::opts_chunk$set(dev = diagram_device)
 ```
 
 ```{r setup, message=FALSE}

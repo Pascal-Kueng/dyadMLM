@@ -19,8 +19,8 @@ draw_apim_exchangeability_comparison <- function() {
 
   draw_panel <- function(x) {
     grid::grid.roundrect(
-      x = native(x), y = native(0.51),
-      width = native(0.47), height = native(0.94),
+      x = native(x), y = native(0.504),
+      width = native(0.47), height = native(0.928),
       r = grid::unit(0.03, "snpc"),
       gp = grid::gpar(fill = node_fill, col = border_colour, lwd = 1.25)
     )
@@ -84,6 +84,19 @@ draw_apim_exchangeability_comparison <- function() {
       x0 = native(x0), x1 = native(x1),
       y0 = native(y), y1 = native(y),
       gp = grid::gpar(col = grid_colour, lwd = 1)
+    )
+  }
+
+  draw_panel_heading <- function(label, x) {
+    # Mask the border behind the heading so it reads like a fieldset legend.
+    grid::grid.rect(
+      x = native(x), y = native(0.968),
+      width = native(0.29), height = native(0.052),
+      gp = grid::gpar(fill = node_fill, col = NA)
+    )
+    draw_text(
+      label, x, 0.968,
+      fontsize = 18.0, fontface = "bold"
     )
   }
 
@@ -259,20 +272,14 @@ draw_apim_exchangeability_comparison <- function() {
   draw_panel(0.745)
 
   # Panel headings and symmetric equations.
+  draw_panel_heading("Distinguishable APIM", 0.255)
   draw_text(
-    "Distinguishable APIM", 0.255, 0.935,
-    fontsize = 18.0, fontface = "bold"
-  )
-  draw_text(
-    "Role-specific parameters", 0.255, 0.897,
+    "Role-specific parameters", 0.255, 0.927,
     colour = muted_colour, fontsize = 12.5
   )
+  draw_panel_heading("Exchangeable APIM", 0.745)
   draw_text(
-    "Exchangeable APIM", 0.745, 0.935,
-    fontsize = 18.0, fontface = "bold"
-  )
-  draw_text(
-    "Shared parameters are refitted—not averaged", 0.745, 0.897,
+    "Shared parameters are refitted—not averaged", 0.745, 0.927,
     colour = muted_colour, fontsize = 12.5
   )
 
@@ -284,7 +291,7 @@ draw_apim_exchangeability_comparison <- function() {
       expression(+p[plain(F)] * X[plain(M)])
     ),
     c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.255, 0.837, fontsize = 15.2
+    0.255, 0.850, fontsize = 15.2
   )
   draw_coloured_equation(
     list(
@@ -294,7 +301,7 @@ draw_apim_exchangeability_comparison <- function() {
       expression(+p[plain(M)] * X[plain(F)])
     ),
     c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.255, 0.775, fontsize = 15.2
+    0.255, 0.790, fontsize = 15.2
   )
   draw_coloured_equation(
     list(
@@ -304,7 +311,7 @@ draw_apim_exchangeability_comparison <- function() {
       expression(+p * X[2])
     ),
     c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.745, 0.837, fontsize = 15.2
+    0.745, 0.850, fontsize = 15.2
   )
   draw_coloured_equation(
     list(
@@ -314,7 +321,7 @@ draw_apim_exchangeability_comparison <- function() {
       expression(+p * X[1])
     ),
     c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.745, 0.775, fontsize = 15.2
+    0.745, 0.790, fontsize = 15.2
   )
 
   draw_coloured_equation(
@@ -322,7 +329,7 @@ draw_apim_exchangeability_comparison <- function() {
       "Illustrative example:",
       expression(X[plain(F)] == +1 * "," ~~ X[plain(M)] == +1)
     ),
-    rep(muted_colour, 2), 0.255, 0.708, fontsize = 12.0,
+    rep(muted_colour, 2), 0.255, 0.716, fontsize = 12.0,
     math = c(FALSE, TRUE), gap = 0.004
   )
   draw_coloured_equation(
@@ -330,7 +337,7 @@ draw_apim_exchangeability_comparison <- function() {
       "Illustrative example:",
       expression(X[1] == +1 * "," ~~ X[2] == +1)
     ),
-    rep(muted_colour, 2), 0.745, 0.708, fontsize = 12.0,
+    rep(muted_colour, 2), 0.745, 0.716, fontsize = 12.0,
     math = c(FALSE, TRUE), gap = 0.004
   )
 
@@ -360,7 +367,7 @@ draw_apim_exchangeability_comparison <- function() {
   draw_prediction_row(
     "Female", 0.485,
     intercept = 8, actor_change = 2, partner_change = 1,
-    domain = c(7, 13), panel_left = 0.095, panel_right = 0.455,
+    domain = c(7, 13), panel_left = 0.110, panel_right = 0.455,
     intercept_label = expression(b[0 * "," * plain(F)] == 8),
     actor_label = expression(a[plain(F)] * X[plain(F)] == +2),
     partner_label = expression(p[plain(F)] * X[plain(M)] == +1),
@@ -373,7 +380,7 @@ draw_apim_exchangeability_comparison <- function() {
   draw_prediction_row(
     "Male", 0.200,
     intercept = 9, actor_change = 0.5, partner_change = 2,
-    domain = c(7, 13), panel_left = 0.095, panel_right = 0.455,
+    domain = c(7, 13), panel_left = 0.110, panel_right = 0.455,
     intercept_label = expression(b[0 * "," * plain(M)] == 9),
     actor_label = expression(a[plain(M)] * X[plain(M)] == +0.5),
     partner_label = expression(p[plain(M)] * X[plain(F)] == +2),
@@ -387,7 +394,7 @@ draw_apim_exchangeability_comparison <- function() {
   draw_prediction_row(
     "Member 1", 0.485,
     intercept = 9, actor_change = 1.5, partner_change = 1,
-    domain = c(7, 13), panel_left = 0.585, panel_right = 0.945,
+    domain = c(7, 13), panel_left = 0.610, panel_right = 0.945,
     intercept_label = expression(b[0] == 9),
     actor_label = expression(a * X[1] == +1.5),
     partner_label = expression(p * X[2] == +1),
@@ -400,7 +407,7 @@ draw_apim_exchangeability_comparison <- function() {
   draw_prediction_row(
     "Member 2", 0.200,
     intercept = 9, actor_change = 1.5, partner_change = 1,
-    domain = c(7, 13), panel_left = 0.585, panel_right = 0.945,
+    domain = c(7, 13), panel_left = 0.610, panel_right = 0.945,
     intercept_label = expression(b[0] == 9),
     actor_label = expression(a * X[2] == +1.5),
     partner_label = expression(p * X[1] == +1),

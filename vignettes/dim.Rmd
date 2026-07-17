@@ -25,6 +25,9 @@ diagram_helper <- if (file.exists("diagram-helpers.Rinc")) {
   file.path("vignettes", "diagram-helpers.Rinc")
 }
 sys.source(diagram_helper, envir = knitr::knit_global())
+
+diagram_device <- if (isTRUE(capabilities("cairo"))) "svg" else "png"
+knitr::opts_chunk$set(dev = diagram_device)
 ```
 
 ```{r setup}
