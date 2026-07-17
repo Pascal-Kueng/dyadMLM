@@ -1094,45 +1094,67 @@ fit_and_draw_dim(
 
 ## DIM to APIM coefficients
 
-Once we fit an APIM, we have already fitted a DIM - And vice-versa
+Once we fit an APIM, we have already fitted a DIM—and vice versa.
 
 We can transform values from a fitted APIM into DIM values.
 
-Suppose X1 = 1 and X2 = 1, 
+Suppose $X_i=1$ and $X_j=1$,
 
-then our DIM coordinates are: 
+then our DIM coordinates are:
 
-Xmean = 2, Xdiff = 0
+$$
+X_{\mathrm{mean}}=1,\qquad X_{\mathrm{dev},i}=0.
+$$
 
-So,  
+So,
 
-Y = 1 x b_a + 1 x b_p 
+$$
+\hat Y_i=1\times a+1\times p
+$$
 
 implies
 
-Y = 1 x b_mean + 0 x b_dev = b_mean
+$$
+\hat Y_i=1\times b_{\mathrm{mean}}+0\times b_{\mathrm{dev}}
+=b_{\mathrm{mean}}.
+$$
 
-therefore b_mean = b_a + b_p
+Therefore,
 
-Now, suppose: 
+$$
+b_{\mathrm{mean}}=a+p.
+$$
 
-X1 = 1 and X2 = -1, (imagine centered)
+Now suppose $X_i=1$ and $X_j=-1$ (imagine centered values),
 
-then the DIM coordinate are: 
+then the DIM coordinates are:
 
-Xmean = 0, Xdiff = 1 (I am 1 higher than our mean, 2 higher than my partner)
+$$
+X_{\mathrm{mean}}=0,\qquad X_{\mathrm{dev},i}=1
+$$
 
-So, 
+($i$ is 1 higher than the mean and 2 higher than partner $j$).
 
-Y_apim = 1 x b_a + (-1) x b_p
+So,
 
-implies for the "higher" partner: 
+$$
+\hat Y_i=1\times a+(-1)\times p
+$$
 
-Y_dim = 0 x b_mean + 1 x b_diff = b_diff
+implies for the higher partner:
 
-therefore b_diff = b_a - b_p
+$$
+\hat Y_i=0\times b_{\mathrm{mean}}+1\times b_{\mathrm{dev}}
+=b_{\mathrm{dev}}.
+$$
 
-TODO @codex, this slide with consistent notatino please. 
+Therefore,
+
+$$
+b_{\mathrm{dev}}=a-p.
+$$
+
+## elim
 
 ## DIM to APIM coefficients
 
