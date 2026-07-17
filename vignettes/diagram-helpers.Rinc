@@ -1,3 +1,25 @@
+.vignette_diagram_device <- function() {
+  svg_file <- tempfile(fileext = ".svg")
+  device_before <- grDevices::dev.cur()
+
+  invisible(tryCatch(
+    withCallingHandlers(
+      grDevices::svg(svg_file, width = 1, height = 1),
+      warning = function(warning) invokeRestart("muffleWarning")
+    ),
+    error = function(error) NULL
+  ))
+
+  svg_opened <- grDevices::dev.cur() != device_before
+
+  if (isTRUE(svg_opened)) {
+    grDevices::dev.off()
+  }
+  unlink(svg_file)
+
+  if (isTRUE(svg_opened)) "svg" else "png"
+}
+
 .interdep_effect_colors <- function(
     effect = c("actor", "partner", "dyad_mean", "member_deviation")) {
   palette <- c(
