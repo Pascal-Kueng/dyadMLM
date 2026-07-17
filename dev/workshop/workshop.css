@@ -18,6 +18,36 @@
   --interdep-residual-correlation: #546e7a;
 }
 
+/* Transition between the two workshop decks ------------------------------ */
+.reveal .workshop-next {
+  display: grid;
+  gap: 1.25rem;
+  place-items: center;
+  min-height: 45vh;
+  text-align: center;
+}
+
+.reveal .workshop-next p {
+  margin: 0;
+}
+
+.reveal .workshop-next-link {
+  display: inline-block;
+  border-radius: 0.35rem;
+  background: var(--uzh-blue);
+  color: #ffffff;
+  font-size: 1.08em;
+  font-weight: 650;
+  padding: 0.55em 0.9em;
+  text-decoration: none;
+}
+
+.reveal .workshop-next-link:hover,
+.reveal .workshop-next-link:focus {
+  background: var(--uzh-blue-dark);
+  color: #ffffff;
+}
+
 /* Elevator/seesaw residual slides ----------------------------------------- */
 .reveal .seesaw-swap {
   align-items: center;

@@ -1,0 +1,28 @@
+---
+title: "Dyadic Data Analysis with R"
+subtitle: "Part II: Applied Tutorial"
+author:
+  - "Pascal Küng"
+  - "Turu Stadler"
+resources:
+  - uzh-logo.svg
+  - charite-logo.svg
+format:
+  revealjs:
+    embed-resources: true
+    css: workshop.css
+    include-after-body: branding.html
+    footer: "Dyadic Data Analysis"
+    slide-number: true
+    chalkboard: false
+    preview-links: auto
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+---
+
+## Applied tutorial
+
+Content in development.

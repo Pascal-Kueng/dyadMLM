@@ -131,9 +131,10 @@ The first release milestone is complete when all of the following are true:
 - [x] Cross-sectional and ILD temporal predictor decomposition, composition
   filtering, exchangeability overrides, pooling, metadata, and printing are
   implemented and tested for the documented scope.
-- [ ] A public, engine-independent covariance back-transformation converts the
-  exchangeable shared/`.i_diff_*` residual representation to an interpretable
-  member-level covariance matrix, with scalar summaries and focused tests.
+- [ ] A public fitted-`glmmTMB` covariance back-transformation, backed by an
+  engine-independent mathematical core, converts the exchangeable
+  shared/`.i_diff_*` residual representation to an interpretable member-level
+  covariance matrix, with scalar summaries and focused tests.
 - [ ] Documentation shows a correct `glmmTMB`/DHARMa workflow for
   `dispformula = ~ 0`, role-specific checks, and clear limitations concerning
   autocorrelation and multicollinearity.
@@ -431,6 +432,9 @@ Complete these before calling the feature set CRAN-ready:
     model is aspirational/diagnostic and may require more data or Bayesian
     regularization
 - Add public covariance back-transformation helpers for v0.0.1
+  - Follow the implementation specification in
+    [`backtransform.md`](backtransform.md). Where the older bullets below are
+    narrower, `backtransform.md` records the current decision.
   - Implement the mathematics independently of a model engine. Given a
     shared/difference covariance matrix `Sigma_score` and member contrast matrix
     `T`, compute `Sigma_member = T %*% Sigma_score %*% t(T)`.
@@ -438,9 +442,10 @@ Complete these before calling the feature set CRAN-ready:
     structure used by DIMs and exchangeable APIMs:
     `member_1 = u_shared + u_diff` and
     `member_2 = u_shared - u_diff`.
-  - Accept covariance matrices rather than only standard deviations, but keep
-    the first documented use case narrow: transform one residual block at a
-    time, including stable and same-occasion ILD blocks.
+  - Let the internal mathematical core accept covariance matrices rather than
+    only standard deviations. Keep the public v0.0.1 use case narrow: discover
+    and transform scalar residual-block pairs, including separate stable and
+    same-occasion ILD pairs.
   - Return a named member-level covariance matrix plus member standard
     deviations and correlations. Use arbitrary member 1/member 2 labels, never
     female/male labels, for exchangeable dyads.
@@ -449,10 +454,11 @@ Complete these before calling the feature set CRAN-ready:
     trips, and invariance to reversing the arbitrary `+1/-1` assignment.
   - Reuse the tested helper in the vignette diagrams where practical, so the
     package and teaching materials share one definition.
-  - Defer automatic `glmmTMB` block extraction, comprehensive random-slope and
-    mixed-composition adapters, DSM `+0.5/-0.5` transformations, and uncertainty
-    intervals to the next milestone. Keep the matrix API compatible with those
-    extensions.
+  - The public v0.0.1 helper takes a fitted `glmmTMB` model, automatically
+    discovers scalar shared/`.i_diff_*` pairs, and supports multiple
+    exchangeable compositions and grouping levels. Defer random-slope blocks,
+    DSM `+0.5/-0.5` transformations, uncertainty intervals, renamed generated
+    columns, and `brms` extraction to the next milestone.
 - Add a bounded `glmmTMB` diagnostics workflow for v0.0.1
   - Keep this documentation-first: one focused section that other model
     vignettes can link to, with no exported diagnostics or plotting API.
@@ -508,8 +514,9 @@ Complete these before calling the feature set CRAN-ready:
 
 - Extend the v0.0.1 covariance back-transformation only where applied use
   justifies it:
-  - add explicit `glmmTMB` extraction of named shared and `.i_diff_*` blocks
-  - validate random-slope and mixed-composition adapters
+  - validate random-slope covariance blocks
+  - add a draw-wise `brms` adapter where a concrete model still requires the
+    shared/difference back-transformation
   - add the distinct DSM `+0.5/-0.5` transformation
   - consider bootstrap-draw or other uncertainty transformations
 - Develop advanced diagnostics only after validating the v0.0.1 guidance:

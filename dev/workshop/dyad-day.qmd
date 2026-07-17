@@ -1,6 +1,6 @@
 ---
 title: "Dyadic Data Analysis with R"
-subtitle: "From Cross-Sectional Models to Intensive Longitudinal Data"
+subtitle: "Part I: Conceptual Foundations"
 author:
   - "Pascal Küng"
   - "Turu Stadler"
@@ -1490,3 +1490,15 @@ correlations (wb corr)?
 -->
 
 ## References
+
+::: {#refs}
+:::
+
+## Continue with the applied tutorial {.rq-slide}
+
+::: {.workshop-next}
+
+Thank you for your attention!
+
+[Continue to Part II: Applied Tutorial →](https://pascal-kueng.github.io/interdep/workshop/applied/){.workshop-next-link}
+:::
