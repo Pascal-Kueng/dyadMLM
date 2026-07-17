@@ -6,7 +6,7 @@ description: >
   the dyad-mean residual is associated with within-dyad residual variability.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Beyond Zero Correlation: An Exchangeable Location-Scale DIM}
+  %\VignetteIndexEntry{Beyond Zero Correlation: An Exchangeable Location–Scale DIM}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,11 +26,12 @@ diagram_candidates <- c(
 )
 diagram_helper <- diagram_candidates[file.exists(diagram_candidates)][1]
 
-if (!is.na(diagram_helper)) {
-  sys.source(diagram_helper, envir = knitr::knit_global())
-  diagram_device <- .vignette_diagram_device()
-  knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
+if (is.na(diagram_helper)) {
+  stop("Could not find vignettes/diagram-helpers.Rinc.", call. = FALSE)
 }
+sys.source(diagram_helper, envir = knitr::knit_global())
+diagram_device <- .vignette_diagram_device()
+knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 
 seesaw_candidates <- c(
   "../workshop/R/draw-residual-seesaw.R",
@@ -39,9 +40,10 @@ seesaw_candidates <- c(
 )
 seesaw_helper <- seesaw_candidates[file.exists(seesaw_candidates)][1]
 
-if (!is.na(seesaw_helper)) {
-  sys.source(seesaw_helper, envir = knitr::knit_global())
+if (is.na(seesaw_helper)) {
+  stop("Could not find dev/workshop/R/draw-residual-seesaw.R.", call. = FALSE)
 }
+sys.source(seesaw_helper, envir = knitr::knit_global())
 
 fmt <- function(x, digits = 2) {
   formatC(x, format = "f", digits = digits)
@@ -83,9 +85,13 @@ Interdependence Model (APIM) language.
 
 By the end, the distinction should be clear:
 
-- signed residual correlation asks which arbitrary seat tends to be higher;
+- signed residual correlation summarizes whether elevator position is
+  **linearly** associated with a preferred signed seat difference;
+- conditional sign symmetry—not zero correlation alone—is what makes the
+  residual model exchangeable;
 - residual scale asks how far apart the two seats tend to be;
-- exchangeability removes the first pattern but does not forbid the second.
+- exchangeability forbids a preferred arbitrary direction but does not forbid
+  changing residual scale.
 
 Everything used to fit the extension below lives inside this development
 vignette. It is a mathematical prototype, not an exported `interdep` function.
@@ -100,8 +106,9 @@ M_{Xj}=\frac{X_{1j}+X_{2j}}{2},
 D_{Xj}=\frac{X_{1j}-X_{2j}}{2},
 $$
 
-and analogously for $M_{Yj}$ and $D_{Yj}$. The half-difference equals each
-member's deviation from the dyad mean. We can return to the member scores using
+and analogously for $M_{Yj}$ and $D_{Yj}$. $D_X$ is member 1's deviation from
+the dyad mean; member 2's deviation is $-D_X$. We can return to the member
+scores using
 
 $$
 X_{1j}=M_{Xj}+D_{Xj},
@@ -115,9 +122,7 @@ The two coordinates have a useful physical interpretation:
 - the **seesaw** $D$ moves one partner up and the other down.
 
 ```{r elevator-seesaw, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="The elevator residual moves both members together. The seesaw residual moves them apart. Swapping arbitrary seats reverses the seesaw but not the elevator.", fig.alt="Two-panel illustration. An elevator moves both members of a dyad together and represents the dyad-mean residual. A seesaw moves the members in opposite directions and represents the within-dyad residual."}
-if (exists("draw_residual_seesaw", mode = "function")) {
-  draw_residual_seesaw("dim")
-}
+draw_residual_seesaw("dim")
 ```
 
 For outcome residuals,
@@ -230,7 +235,8 @@ $$
 =2\log(\sigma_{D0})+\lambda z_{Mj}.
 $$
 
-Here $\sigma_{D0}$ is the seesaw residual standard deviation at $z_M=0$.
+Here $\sigma_{D0}$ is the seesaw residual standard deviation at $z_M=0$—that
+is, for dyads whose outcome mean is exactly as predicted.
 The scale slope $\lambda$ has a direct interpretation:
 
 - $\lambda=0$ gives the standard Gaussian DIM;
@@ -250,21 +256,39 @@ remains exchangeable.
 
 ## A worked simulation
 
-We simulate `r J <- 1500` complete dyads. The true between-dyad effect is 0.60,
-the true within-dyad effect is 0.30, and the true scale slope is 0.90. Both
-predictor coordinates are centered, so the intercept is the expected outcome
-mean for a dyad at the average predictor level.
+```{r simulation-values}
+simulation_truth <- list(
+  J = 1500L,
+  beta_0 = 5,
+  beta_between = 0.60,
+  beta_within = 0.30,
+  sigma_mean = 0.80,
+  sigma_dev0 = 0.55,
+  lambda = 0.90,
+  seed = 123L
+)
+```
 
-```{r simulate-data}
+We simulate `r format(simulation_truth$J, big.mark = ",")` complete dyads. The
+true between-dyad effect is `r fmt(simulation_truth$beta_between)`, the true
+within-dyad effect is `r fmt(simulation_truth$beta_within)`, and the true scale
+slope is `r fmt(simulation_truth$lambda)`. Both predictor coordinates are
+centered, so the intercept is the expected outcome mean for a dyad at the
+average predictor level.
+
+<details>
+<summary><strong>Show the complete simulation helper</strong></summary>
+
+```{r simulation-helper}
 simulate_location_scale_dim <- function(
-    J = 1500,
-    beta_0 = 5,
-    beta_between = 0.60,
-    beta_within = 0.30,
-    sigma_mean = 0.80,
-    sigma_dev0 = 0.55,
-    lambda = 0.90,
-    seed = 20260717
+    J,
+    beta_0,
+    beta_between,
+    beta_within,
+    sigma_mean,
+    sigma_dev0,
+    lambda,
+    seed
 ) {
   set.seed(seed)
 
@@ -272,6 +296,7 @@ simulate_location_scale_dim <- function(
   m_x <- rnorm(J)
   m_x <- m_x - mean(m_x)
   d_x <- rnorm(J, sd = 0.75)
+  d_x <- d_x - mean(d_x)
 
   # Exchangeable residual elevator and seesaw
   z_mean <- rnorm(J)
@@ -294,8 +319,12 @@ simulate_location_scale_dim <- function(
     r_mean, r_dev, z_mean, z_dev, sd_dev
   )
 }
+```
 
-dat <- simulate_location_scale_dim()
+</details>
+
+```{r simulate-data}
+dat <- do.call(simulate_location_scale_dim, simulation_truth)
 
 with(dat, c(
   signed_correlation = cor(r_mean, r_dev),
@@ -303,9 +332,12 @@ with(dat, c(
 ))
 ```
 
-The signed correlation is close to zero: neither arbitrary seat tends to be
-higher when the elevator rises. The magnitude association is positive: the
-seesaw tends to tilt farther at higher elevator residuals.
+The signed correlation is close to zero, as expected from the conditionally
+symmetric construction: there is essentially no **linear** association between
+elevator position and the signed tilt. The magnitude association is positive:
+the seesaw tends to tilt farther at higher elevator residuals. Conditional sign
+symmetry—not the sample correlation by itself—is what guarantees that neither
+arbitrary seat is preferred.
 
 The simulation core is only four lines:
 
@@ -324,29 +356,28 @@ changes.
 For one complete cross-sectional pair per dyad, the two score-coordinate mean
 equations can be fitted as
 
-```{r standard-dim-equations}
-standard_mean_equation <- lm(m_y ~ m_x, data = dat)
-standard_dev_equation <- lm(d_y ~ 0 + d_x, data = dat)
-
-coef(standard_mean_equation)
-coef(standard_dev_equation)
+```{r standard-dim-equations, eval=FALSE}
+lm(m_y ~ m_x, data = dat)
+lm(d_y ~ 0 + d_x, data = dat)
 ```
 
-These regressions recover the familiar DIM mean effects. To compare the
-standard and extended residual models on exactly the same likelihood, we now
-fit both jointly. The likelihood factorizes as
+These calls show the two conditional-mean equations. The joint fit below
+estimates the same mean effects together with the residual model needed to
+compare the standard and extended DIM on exactly the same likelihood. That
+likelihood factorizes as
 
 $$
 p(r_M,r_D)=p(r_M)\,p(r_D\mid r_M).
 $$
 
-The standard model fixes $\lambda=0$; the extended model estimates it. The
-constant Jacobian for transforming each raw outcome pair $(Y_1,Y_2)$ to
-$(M_Y,D_Y)$ is included, so the reported log likelihood and AIC are on the raw
-member-outcome scale.
+The standard model fixes $\lambda=0$; the extended model estimates it.
 
 <details>
 <summary><strong>Show the internal joint maximum-likelihood implementation</strong></summary>
+
+The implementation includes the constant Jacobian for transforming each raw
+outcome pair $(Y_1,Y_2)$ to $(M_Y,D_Y)$. The reported log likelihood and AIC are
+therefore on the raw member-outcome scale.
 
 ```{r joint-likelihood}
 dim_ls_nll <- function(par, dat, extended = TRUE) {
@@ -455,13 +486,25 @@ fit_dim_ls <- function(dat, extended = TRUE) {
     function(x) x$convergence == 0 && is.finite(x$objective),
     logical(1)
   )
-  candidates <- if (any(converged)) fits[converged] else fits
+  if (!any(converged)) {
+    stop("No multistart optimization converged.", call. = FALSE)
+  }
+  candidates <- fits[converged]
   best <- candidates[[which.min(vapply(
     candidates,
     `[[`,
     numeric(1),
     "objective"
   ))]]
+
+  at_bound <- (
+    is.finite(lower) & abs(best$par - lower) < 1e-6
+  ) | (
+    is.finite(upper) & abs(best$par - upper) < 1e-6
+  )
+  if (any(at_bound)) {
+    stop("The optimum reached an imposed parameter bound.", call. = FALSE)
+  }
 
   hessian <- tryCatch(
     optimHess(
@@ -470,26 +513,32 @@ fit_dim_ls <- function(dat, extended = TRUE) {
       dat = dat,
       extended = extended
     ),
-    error = function(error) NULL
+    error = function(error) {
+      stop("Could not compute the observed Hessian.", call. = FALSE)
+    }
   )
 
-  if (!is.null(hessian)) {
-    hessian <- (hessian + t(hessian)) / 2
+  if (any(!is.finite(hessian))) {
+    stop("The observed Hessian contains non-finite values.", call. = FALSE)
   }
-  eigenvalues <- if (is.null(hessian)) {
-    NA_real_
-  } else {
-    eigen(hessian, symmetric = TRUE, only.values = TRUE)$values
-  }
-
-  vcov <- if (
-    !is.null(hessian) &&
-      min(eigenvalues) > sqrt(.Machine$double.eps) * max(eigenvalues)
+  hessian <- (hessian + t(hessian)) / 2
+  eigenvalues <- tryCatch(
+    eigen(hessian, symmetric = TRUE, only.values = TRUE)$values,
+    error = function(error) {
+      stop("Could not decompose the observed Hessian.", call. = FALSE)
+    }
+  )
+  if (
+    min(eigenvalues) <= sqrt(.Machine$double.eps) * max(eigenvalues)
   ) {
-    chol2inv(chol(hessian))
-  } else {
-    matrix(NA_real_, length(best$par), length(best$par))
+    stop("The observed Hessian is not positive definite.", call. = FALSE)
   }
+  vcov <- tryCatch(
+    chol2inv(chol(hessian)),
+    error = function(error) {
+      stop("Could not invert the observed Hessian.", call. = FALSE)
+    }
+  )
   dimnames(vcov) <- list(names(best$par), names(best$par))
 
   list(
@@ -501,7 +550,7 @@ fit_dim_ls <- function(dat, extended = TRUE) {
     convergence = best$convergence,
     message = best$message,
     hessian_eigenvalues = eigenvalues,
-    start_objectives = vapply(fits, `[[`, numeric(1), "objective")
+    multistart_objectives = vapply(fits, `[[`, numeric(1), "objective")
   )
 }
 ```
@@ -513,23 +562,17 @@ The actual model calls are deliberately short:
 ```{r fit-models}
 fit_standard <- fit_dim_ls(dat, extended = FALSE)
 fit_extended <- fit_dim_ls(dat, extended = TRUE)
-
-c(
-  standard_convergence = fit_standard$convergence,
-  extended_convergence = fit_extended$convergence,
-  smallest_hessian_eigenvalue = min(fit_extended$hessian_eigenvalues)
-)
 ```
 
-Both convergence codes should be zero, and the positive Hessian eigenvalue is a
-basic local check that the extended optimum is well determined in this
-simulation.
+In this run, both models converged and the extended optimum passed the local
+curvature check.
 
 ```{r prepare-model-results, include=FALSE}
 se_standard <- sqrt(diag(fit_standard$vcov))
 se_extended <- sqrt(diag(fit_extended$vcov))
 
-estimate_row <- function(parameter, truth, standard, extended, standard_se, extended_se) {
+estimate_row <- function(
+    parameter, truth, standard, extended, standard_se, extended_se) {
   data.frame(
     Parameter = parameter,
     Truth = truth,
@@ -541,34 +584,67 @@ estimate_row <- function(parameter, truth, standard, extended, standard_se, exte
   )
 }
 
+truth_marginal_sd_dev <- simulation_truth$sigma_dev0 * exp(
+  simulation_truth$lambda^2 / 4
+)
+extended_baseline_sd_dev <- exp(
+  fit_extended$par[["log_sd_dev0"]]
+)
+extended_marginal_sd_dev <- extended_baseline_sd_dev * exp(
+  fit_extended$par[["lambda"]]^2 / 4
+)
+extended_marginal_gradient <- c(
+  log_sd_dev0 = extended_marginal_sd_dev,
+  lambda = extended_marginal_sd_dev * fit_extended$par[["lambda"]] / 2
+)
+extended_marginal_vcov <- fit_extended$vcov[
+  names(extended_marginal_gradient),
+  names(extended_marginal_gradient),
+  drop = FALSE
+]
+extended_marginal_se_dev <- sqrt(drop(
+  t(extended_marginal_gradient) %*%
+    extended_marginal_vcov %*%
+    extended_marginal_gradient
+))
+
 model_results <- rbind(
   estimate_row(
-    "Between-dyad effect (beta_B)", 0.60,
+    "Between-dyad effect (beta_B)", simulation_truth$beta_between,
     fit_standard$par[["b_between"]], fit_extended$par[["b_between"]],
     se_standard[["b_between"]], se_extended[["b_between"]]
   ),
   estimate_row(
-    "Within-dyad effect (beta_W)", 0.30,
+    "Within-dyad effect (beta_W)", simulation_truth$beta_within,
     fit_standard$par[["b_within"]], fit_extended$par[["b_within"]],
     se_standard[["b_within"]], se_extended[["b_within"]]
   ),
   estimate_row(
-    "Elevator residual SD (sigma_M)", 0.80,
+    "Elevator residual SD (sigma_M)", simulation_truth$sigma_mean,
     exp(fit_standard$par[["log_sd_mean"]]),
     exp(fit_extended$par[["log_sd_mean"]]),
     exp(fit_standard$par[["log_sd_mean"]]) * se_standard[["log_sd_mean"]],
     exp(fit_extended$par[["log_sd_mean"]]) * se_extended[["log_sd_mean"]]
   ),
   estimate_row(
-    "Seesaw residual SD at z_M = 0 (sigma_D0)", 0.55,
-    exp(fit_standard$par[["log_sd_dev0"]]),
-    exp(fit_extended$par[["log_sd_dev0"]]),
-    exp(fit_standard$par[["log_sd_dev0"]]) * se_standard[["log_sd_dev0"]],
+    "Baseline seesaw residual SD at z_M = 0 (sigma_D0)",
+    simulation_truth$sigma_dev0,
+    NA_real_,
+    extended_baseline_sd_dev,
+    NA_real_,
     exp(fit_extended$par[["log_sd_dev0"]]) * se_extended[["log_sd_dev0"]]
   ),
   estimate_row(
-    "Log-variance slope (lambda)", 0.90,
-    0, fit_extended$par[["lambda"]],
+    "Marginal seesaw residual SD (sqrt(E[v_D]))",
+    truth_marginal_sd_dev,
+    exp(fit_standard$par[["log_sd_dev0"]]),
+    extended_marginal_sd_dev,
+    exp(fit_standard$par[["log_sd_dev0"]]) * se_standard[["log_sd_dev0"]],
+    extended_marginal_se_dev
+  ),
+  estimate_row(
+    "Log-variance slope (lambda)", simulation_truth$lambda,
+    NA_real_, fit_extended$par[["lambda"]],
     NA_real_, se_extended[["lambda"]]
   )
 )
@@ -613,24 +689,65 @@ res_extended <- residual_components(fit_extended, dat, extended = TRUE)
 ```
 
 ```{r parameter-table, echo=FALSE}
-display_results <- model_results
-display_results[-1] <- lapply(display_results[-1], round, digits = 3)
+format_estimate_se <- function(estimate, se) {
+  if (!is.finite(estimate)) {
+    return("—")
+  }
+  if (!is.finite(se)) {
+    return(fmt(estimate, 3))
+  }
+  paste0(fmt(estimate, 3), " (", fmt(se, 3), ")")
+}
+
+display_results <- data.frame(
+  Parameter = model_results$Parameter,
+  Truth = vapply(model_results$Truth, fmt, character(1), digits = 3),
+  `Standard DIM estimate (SE)` = mapply(
+    format_estimate_se,
+    model_results[["Standard DIM"]],
+    model_results[["Standard SE"]]
+  ),
+  `Extended DIM estimate (SE)` = mapply(
+    format_estimate_se,
+    model_results[["Extended DIM"]],
+    model_results[["Extended SE"]]
+  ),
+  check.names = FALSE
+)
+display_results[
+  display_results$Parameter == "Log-variance slope (lambda)",
+  "Standard DIM estimate (SE)"
+] <- "0 (fixed)"
+
 knitr::kable(
   display_results,
-  align = c("l", rep("r", 6)),
-  caption = "True and fitted parameters. The standard DIM fixes lambda to zero."
+  align = c("l", "r", "r", "r"),
+  caption = paste(
+    "True and fitted parameters (model-based SEs).",
+    "The standard DIM is misspecified by design and fixes lambda to zero."
+  )
 )
 ```
+
+The extended estimate $\hat\beta_B=`r fmt(fit_extended$par[["b_between"]])`$
+means that a one-unit higher dyad-average $X$ is associated with a
+`r fmt(fit_extended$par[["b_between"]])`-unit higher expected dyad-average
+$Y$. The estimate
+$\hat\beta_W=`r fmt(fit_extended$par[["b_within"]])`$ means that a one-unit
+larger member difference in $X$ is associated with a
+`r fmt(fit_extended$par[["b_within"]])`-unit larger expected member difference
+in $Y$ in the same direction, holding the dyad-average $X$ constant.
 
 The mean effects are recovered well by both models. This illustrates an
 important limit on the claim: a missed scale relationship does **not**
 automatically bias the between- or within-dyad slopes when the conditional mean
 is correct and the predictors are exogenous.
 
-The standard DIM instead compresses the changing seesaw spread into one average
-standard deviation. Its estimate of $\sigma_{D0}$ is therefore not a genuine
-baseline estimate and is not directly comparable with the extended model's
-$\sigma_{D0}$ at $z_M=0$.
+The standard DIM instead compresses the changing seesaw spread into one
+marginal root-mean-square standard deviation,
+$\sqrt{E\{v_D(z_M)\}}$. It has no separate baseline $\sigma_{D0}$ at
+$z_M=0$. The extended model estimates both the baseline and the implied
+marginal spread, so the table keeps those quantities on separate rows.
 
 ```{r model-comparison, echo=FALSE}
 comparison_display <- comparison
@@ -656,7 +773,7 @@ The next figure uses **fitted standard-DIM residuals**, not the known simulation
 errors. This is how the problem could first appear in a real analysis.
 
 ```{r residual-plot-helpers, include=FALSE}
-equal_count_summary <- function(x, residual, groups = 10) {
+equal_count_sd <- function(x, residual, groups = 10) {
   breaks <- unique(quantile(
     x,
     probs = seq(0, 1, length.out = groups + 1),
@@ -666,7 +783,7 @@ equal_count_summary <- function(x, residual, groups = 10) {
 
   data.frame(
     x = as.numeric(tapply(x, group, mean)),
-    rms = sqrt(as.numeric(tapply(residual^2, group, mean))),
+    sd = as.numeric(tapply(residual, group, stats::sd)),
     n = as.numeric(table(group))
   )
 }
@@ -695,7 +812,7 @@ draw_plot_frame <- function(xlim, ylim, xlab, ylab, main) {
 }
 ```
 
-```{r standard-misses, echo=FALSE, fig.width=9.5, fig.height=4.3, out.width="100%", fig.cap="The signed residual correlation is near zero, yet the seesaw spread increases with the elevator residual. The standard DIM captures the center but misses the changing uncertainty.", fig.alt="Two residual diagnostic panels. The left panel shows a fan-shaped cloud of signed seesaw residuals around zero as the standardized elevator residual increases, despite near-zero signed correlation. The right panel shows binned seesaw residual standard deviations rising while the standard DIM predicts one horizontal constant."}
+```{r standard-misses, echo=FALSE, fig.width=9.5, fig.height=4.3, out.width="100%", fig.cap="The signed residual correlation is near zero, yet the seesaw spread increases with the elevator residual. The standard DIM captures the center but misses the changing residual spread.", fig.alt="Two residual diagnostic panels. The left panel shows a fan-shaped cloud of signed seesaw residuals around zero as the standardized elevator residual increases, despite near-zero signed correlation. The right panel shows binned seesaw residual standard deviations rising while the standard DIM predicts one horizontal constant."}
 old_par <- par(
   mfrow = c(1, 2),
   mar = c(4.5, 4.7, 3.2, 1),
@@ -706,6 +823,13 @@ old_par <- par(
 
 x_limit <- as.numeric(quantile(res_standard$z_mean, c(0.005, 0.995)))
 y_limit <- max(abs(quantile(res_standard$r_dev, c(0.003, 0.997)))) * c(-1, 1)
+signed_residual_correlation <- cor(
+  res_standard$r_mean,
+  res_standard$r_dev
+)
+if (abs(signed_residual_correlation) < 0.005) {
+  signed_residual_correlation <- 0
+}
 
 draw_plot_frame(
   x_limit,
@@ -733,7 +857,7 @@ legend(
   legend = c(
     paste0(
       "signed r = ",
-      fmt(cor(res_standard$r_mean, res_standard$r_dev), 2)
+      fmt(signed_residual_correlation, 2)
     ),
     "standard 95% limits"
   ),
@@ -746,11 +870,11 @@ legend(
   cex = 0.88
 )
 
-binned_standard <- equal_count_summary(
+binned_standard <- equal_count_sd(
   res_standard$z_mean,
   res_standard$r_dev
 )
-y_sd_limit <- c(0, max(binned_standard$rms) * 1.18)
+y_sd_limit <- c(0, max(binned_standard$sd) * 1.18)
 draw_plot_frame(
   x_limit,
   y_sd_limit,
@@ -766,13 +890,13 @@ abline(
 )
 lines(
   binned_standard$x,
-  binned_standard$rms,
+  binned_standard$sd,
   col = transparent(plot_colours$residual_scale, 0.55),
   lwd = 1.5
 )
 points(
   binned_standard$x,
-  binned_standard$rms,
+  binned_standard$sd,
   pch = 21,
   bg = plot_colours$residual_scale,
   col = "white",
@@ -781,7 +905,7 @@ points(
 )
 legend(
   "topleft",
-  legend = c("empirical binned RMS", "standard DIM"),
+  legend = c("empirical binned SD", "standard DIM"),
   pch = c(21, NA),
   pt.bg = c(plot_colours$residual_scale, NA),
   col = c(plot_colours$residual_scale, plot_colours$standard),
@@ -794,8 +918,10 @@ legend(
 par(old_par)
 ```
 
-> Zero correlation answers “Which seat tends to be higher?” The scale pattern
-> answers “How far apart are the seats?” These are different questions.
+> Signed mean–difference correlation asks “Is elevator position linearly
+> associated with a preferred seat difference?” Conditional sign symmetry
+> rules out a preferred arbitrary seat. The scale pattern asks “How far apart
+> are the seats?” These are different questions.
 
 The binned residual plot is a useful diagnostic, not a valid two-stage
 estimator. Regressing $|\hat r_D|$ on $\hat r_M$ would treat estimated residuals
@@ -826,7 +952,7 @@ the **gap** becomes more variable, with either sign still equally likely.
 scale_positions <- c(-1, 0, 1)
 scale_table <- data.frame(
   `Elevator residual z_M` = scale_positions,
-  `Standard seesaw SD` = rep(
+  `Standard constant SD` = rep(
     exp(fit_standard$par[["log_sd_dev0"]]),
     length(scale_positions)
   ),
@@ -858,7 +984,7 @@ knitr::kable(
 The standard model must use the same seesaw SD everywhere. The extended model
 estimates a much narrower residual member gap at $z_M=-1$ than at $z_M=1$.
 
-```{r extended-scale-figure, echo=FALSE, fig.width=9.5, fig.height=4.3, out.width="100%", fig.cap="The extended DIM replaces one average seesaw SD with an exchangeable variance function. After dividing by that fitted conditional SD, the remaining seesaw residual scale is approximately constant.", fig.alt="Two model-checking panels. The left shows empirical binned seesaw spread increasing with elevator position, tracked by the fitted extended DIM and the simulation truth while the standard DIM remains horizontal. The right shows that binned standardized residual spread is approximately one after applying the extended model."}
+```{r extended-scale-figure, echo=FALSE, fig.width=9.5, fig.height=4.3, out.width="100%", fig.cap="Left: the fitted scale function tracks the changing seesaw spread. Right: after division by the fitted conditional SD, the standardized residual spread is approximately constant.", fig.alt="Two model-checking panels. The left shows empirical binned seesaw spread increasing with elevator position, tracked by the fitted extended DIM and the simulation truth while the standard DIM remains horizontal. The right shows that binned standardized residual spread is approximately one after applying the extended model."}
 old_par <- par(
   mfrow = c(1, 2),
   mar = c(4.5, 4.7, 3.2, 1),
@@ -868,16 +994,18 @@ old_par <- par(
 )
 
 x_grid <- seq(-3, 3, length.out = 300)
-binned_extended <- equal_count_summary(
+binned_extended <- equal_count_sd(
   res_extended$z_mean,
   res_extended$r_dev
 )
 extended_curve <- exp(
   fit_extended$par[["log_sd_dev0"]] + lambda_hat * x_grid / 2
 )
-truth_curve <- 0.55 * exp(0.90 * x_grid / 2)
+truth_curve <- simulation_truth$sigma_dev0 * exp(
+  simulation_truth$lambda * x_grid / 2
+)
 standard_curve <- exp(fit_standard$par[["log_sd_dev0"]])
-y_max <- max(c(binned_extended$rms, extended_curve, truth_curve)) * 1.08
+y_max <- max(c(binned_extended$sd, extended_curve, truth_curve)) * 1.08
 
 draw_plot_frame(
   c(-3, 3),
@@ -907,7 +1035,7 @@ lines(
 )
 points(
   binned_extended$x,
-  binned_extended$rms,
+  binned_extended$sd,
   pch = 21,
   bg = plot_colours$residual_scale,
   col = "white",
@@ -917,7 +1045,7 @@ points(
 legend(
   "topleft",
   legend = c(
-    "empirical binned RMS",
+    "empirical binned SD",
     "extended DIM",
     "simulation truth",
     "standard DIM"
@@ -936,27 +1064,27 @@ legend(
   cex = 0.84
 )
 
-binned_z_dev <- equal_count_summary(
+binned_z_dev <- equal_count_sd(
   res_extended$z_mean,
   res_extended$z_dev
 )
 draw_plot_frame(
   c(-3, 3),
-  c(0, max(1.35, max(binned_z_dev$rms) * 1.12)),
+  c(0, max(1.35, max(binned_z_dev$sd) * 1.12)),
   expression(hat(z)[M]),
-  expression("RMS of standardized " * hat(r)[D]),
+  expression("SD of fitted " * hat(z)[D]),
   "After modeling the spread"
 )
 abline(h = 1, col = plot_colours$residual_2_text, lwd = 2.5)
 lines(
   binned_z_dev$x,
-  binned_z_dev$rms,
+  binned_z_dev$sd,
   col = transparent(plot_colours$residual_scale, 0.55),
   lwd = 1.5
 )
 points(
   binned_z_dev$x,
-  binned_z_dev$rms,
+  binned_z_dev$sd,
   pch = 21,
   bg = plot_colours$residual_scale,
   col = "white",
@@ -965,7 +1093,7 @@ points(
 )
 legend(
   "topleft",
-  legend = c("empirical binned RMS", "expected value"),
+  legend = c("binned SD", "expected value"),
   pch = c(21, NA),
   pt.bg = c(plot_colours$residual_scale, NA),
   col = c(plot_colours$residual_scale, plot_colours$residual_2_text),
@@ -993,7 +1121,7 @@ $D_Y$ for that dyad.
 ```{r label-swap-check}
 set.seed(2468)
 swap_sign <- sample(c(-1, 1), nrow(dat), replace = TRUE)
-dat_swapped <- dat
+dat_swapped <- dat[c("m_x", "d_x", "m_y", "d_y")]
 dat_swapped$d_x <- swap_sign * dat$d_x
 dat_swapped$d_y <- swap_sign * dat$d_y
 
@@ -1043,13 +1171,19 @@ partner_hat <- (
 apim_fixed <- data.frame(
   Effect = c("Actor effect", "Partner effect"),
   Formula = c("(beta_B + beta_W) / 2", "(beta_B - beta_W) / 2"),
+  Truth = round(c(
+    (simulation_truth$beta_between + simulation_truth$beta_within) / 2,
+    (simulation_truth$beta_between - simulation_truth$beta_within) / 2
+  ), 3),
   Estimate = round(c(actor_hat, partner_hat), 3)
 )
-knitr::kable(apim_fixed, align = c("l", "l", "r"))
+knitr::kable(apim_fixed, align = c("l", "l", "r", "r"))
 ```
 
 The location–scale extension does not change this mapping. It changes the
-residual distribution around the member-level predictions.
+residual distribution around the member-level predictions. In member-level
+language, the fitted actor effect is `r fmt(actor_hat)` and the fitted partner
+effect is `r fmt(partner_hat)`.
 
 ### Residual covariance
 
@@ -1061,8 +1195,9 @@ e_1=r_M+r_D,
 e_2=r_M-r_D.
 $$
 
-With constant component variances $v_M$ and $v_D$, the expanded exchangeable
-APIM residual covariance matrix is
+With constant component variances $v_M$ and $v_D$ and
+$\operatorname{Cov}(r_M,r_D)=0$, the expanded exchangeable APIM residual
+covariance matrix is
 
 $$
 \boldsymbol{\Sigma}_e
@@ -1092,8 +1227,8 @@ $$
 =\sigma_{D0}^2\exp\!\left(\frac{\lambda^2}{2}\right).
 $$
 
-A conventional exchangeable APIM can match the extended model's **marginal**
-covariance matrix,
+A conventional Gaussian exchangeable APIM with one constant covariance matrix
+can match the extended model's **marginal** covariance matrix,
 
 $$
 \boldsymbol{\Sigma}_e
@@ -1104,7 +1239,7 @@ $$
 \end{pmatrix}.
 $$
 
-But the covariance matrix alone cannot identify $\lambda$. The extended model
+But that covariance matrix alone cannot identify $\lambda$. The extended model
 is identified by the association between elevator position and the squared or
 absolute seesaw residual—that is, by the **changing shape** of the residual
 cloud.
@@ -1158,7 +1293,13 @@ cloud_extended <- make_member_residuals(
 )
 ```
 
-```{r apim-cloud, echo=FALSE, fig.width=9.5, fig.height=4.7, out.width="100%", fig.cap="Both APIM residual clouds have the same model-implied marginal variance and correlation. Only the extended model captures how the anti-diagonal seesaw width changes along the diagonal elevator.", fig.alt="Two scatterplots of member 1 against member 2 residuals with identical axes. The conventional APIM forms one roughly elliptical cloud. The extended APIM has the same average covariance but its anti-diagonal width fans out along the diagonal elevator direction."}
+For this fitted model, the marginal residual variance of either member is
+`r fmt(member_variance)`, the partner residual covariance is
+`r fmt(member_covariance)`, and the resulting marginal residual correlation is
+`r fmt(member_rho)`. These are average summaries; they do not describe how the
+cloud's width changes internally.
+
+```{r apim-cloud, echo=FALSE, fig.width=9.5, fig.height=4.7, out.width="100%", fig.cap="Both APIM residual clouds have the same model-implied marginal variance and correlation. Only the extended model captures how the anti-diagonal seesaw width changes along the diagonal elevator.", fig.alt="Two scatterplots of member 1 against member 2 residuals with identical axes. The conventional Gaussian exchangeable APIM forms one roughly elliptical cloud. The extended APIM has the same average covariance but its anti-diagonal width fans out along the diagonal elevator direction."}
 old_par <- par(
   mfrow = c(1, 2),
   mar = c(4.5, 4.6, 3.2, 1),
@@ -1225,15 +1366,16 @@ draw_cloud(cloud_extended, "Location-scale APIM")
 par(old_par)
 ```
 
-> A conventional APIM can match the overall covariance ellipse while missing
-> the funnel inside it. The DIM rotation makes that hidden structure visible.
+> A conventional Gaussian exchangeable APIM with one constant covariance
+> matrix can match the overall covariance ellipse while missing the funnel
+> inside it. The DIM rotation makes that hidden structure visible.
 
 The two plots use the same $\sigma_M^2$ and the same marginal $\bar v_D$, so
 their model-implied member residual variance, covariance, and correlation are
 the same. The standard panel has one constant anti-diagonal width. The extended
 panel redistributes that same average seesaw variation across the elevator.
 
-## Two nearby extensions
+## Optional extensions
 
 The residual-driven model is only one symmetry-compatible extension. Two
 related ideas answer different questions.
@@ -1248,9 +1390,10 @@ $$
 $$
 
 $\lambda_X$ asks whether dyads with a higher average $X$ show larger or smaller
-unexplained outcome differences, without predicting which member is higher. If
-$r_M$ and $r_D$ are conditionally independent given $z_X$, the member-level
-conditional covariance matrix is
+unexplained outcome differences, without predicting which member is higher.
+Suppose $r_M\mid z_X\sim\mathcal{N}(0,v_M)$ with constant $v_M$,
+$r_D\mid z_X\sim\mathcal{N}(0,v_D(z_X))$, and the two components are
+conditionally independent. The member-level conditional covariance matrix is
 
 $$
 \boldsymbol{\Sigma}_e(z_X)
@@ -1296,6 +1439,9 @@ with $D_Y$. Both terms are therefore exchangeable. They extend the conditional
 mean rather than the residual variance and are not needed for the fitted
 location–scale model above.
 
+<details>
+<summary><strong>Show the nonlinear APIM back-transformation</strong></summary>
+
 In APIM coordinates, their full expansion is
 
 $$
@@ -1316,6 +1462,8 @@ become actor-squared, partner-squared, and actor-by-partner terms in APIM
 coordinates. The model remains an exchangeable APIM, but it is no longer the
 standard **linear** APIM.
 
+</details>
+
 ## What to report—and what not to claim
 
 A substantive application should report at least:
@@ -1325,8 +1473,8 @@ A substantive application should report at least:
 - $\lambda$ and the variance multiplier $\exp(\lambda)$;
 - predicted seesaw or full member-gap SDs at meaningful elevator positions;
 - diagnostics for the elevator residual and the standardized seesaw residual;
-- a direct check that reversing arbitrary member labels leaves the fit
-  unchanged.
+- for a new implementation, verification that reversing arbitrary member
+  labels leaves the likelihood unchanged.
 
 Four cautions matter:
 
@@ -1350,18 +1498,18 @@ Repeated observations require a different multilevel location–scale model.
 
 The standard linear Gaussian DIM is the exchangeability-constrained DSM. Its
 zero signed mean–difference residual covariance is a genuine consequence of
-arbitrary member labels. One constant difference variance, however, is an
-additional Gaussian restriction—not a requirement of exchangeability.
+arbitrary member labels. One constant **conditional** difference variance,
+however, is an additional homoscedastic Gaussian restriction—not a requirement
+of exchangeability.
 
 The location–scale DIM relaxes that restriction while preserving symmetry. In
 APIM coordinates, the same model says that the residual average is associated
-with the residual gap magnitude. A conventional APIM can reproduce its average
-covariance matrix but not the changing residual-cloud shape that identifies
-$\lambda$.
+with the residual gap magnitude. A conventional Gaussian exchangeable APIM
+with one constant covariance matrix can reproduce its average covariance but
+not the changing residual-cloud shape that identifies $\lambda$.
 
 > Exchangeability removes the direction of an arbitrary member difference. It
 > does not require the magnitude of that difference to be constant.
 
 For the more technical derivations and the developing paper plan, see
 [`paper-idea-exchangeable-location-scale-dim-apim.md`](../paper-idea-exchangeable-location-scale-dim-apim.md).
-

@@ -663,38 +663,30 @@ if (knitr::is_html_output()) {
 
 :::{.notes}
 
-From the left:
+On the left:
 
 - Everyone has the same predicted value in this simplified example.
-- The x-axis identifies illustrative dyads in an arbitrary order; it is not
-  time and has no substantive ordering.
-- A residual is the observed value minus that predicted value. The vertical
-  lines make the residuals visible.
-- Move the female variance slider: only the female residual spread changes.
-- Move the male variance slider: only the male residual spread changes.
-- Reset to restore the intentionally unequal residual variances.
+- The x-axis identifies illustrative dyads in an arbitrary order.
+
+- *A residual is the observed value minus that predicted value. *
 
 On the right:
 
 - Every numbered point is the same dyad as on the left, combining its two
-  partners' residuals.
-- Move either variance slider. The corresponding raw residuals and paired
+  partners' raw residuals.
+  
+- **Move variance sliders** $\rightarrow$ raw residuals and paired
   points move, but the displayed correlation stays exactly the same.
-- A raw-score regression line would rotate because its slope also depends on
-  the ratio of the two residual standard deviations. The small scale-free guide
-  therefore represents correlation without being mistaken for that slope.
-- Move the correlation toward zero, then negative, and finally positive.
-- With a positive correlation, partners who are above their predictions tend
-  to be above them together, and partners who are below tend to be below
-  together.
-- Residual correlation describes interdependence that remains after accounting
+
+- Residual **correlation describes interdependence** that remains after accounting
   for the predictors. It is separate from the size of either residual variance.
-- Move the correlation while watching both sides: the residuals change, but
+
+- **Move the correlation** while watching both sides: the residuals change, but
   both selected residual variances stay exactly the same.
 
 :::
 
-<!-- ca. 3 Minutes -->
+<!-- ca. 4 Minutes -->
 
 ## Fitting the distinguishable APIM
 
@@ -718,28 +710,36 @@ fit_and_draw_distinguishable_apim(
 
 :::{.notes}
 
-Read the diagram from left to right. All outcome values are minutes of average
-daily total MVPA, and all associations are conditional on both partners'
-provided support.
+**Ask participants to interpret** 
+
+**MVPA: ** minutes of average daily total MVPA across the 55 days
+
+- All associations are conditional on both partners' provided support.
 
 - The intercepts, 25.68 for female partners and 23.85 for male partners, are the
   predicted daily MVPA when both partners' average provided support is zero.
+  
 - Female actor effect, -4.61: for each one-unit higher support provided by a
   female partner, her own predicted daily MVPA is 4.61 minutes lower, holding
   her male partner's support constant.
+  
 - Female partner effect, 15.06: for each one-unit higher support provided by a
   male partner, the female partner's predicted daily MVPA is 15.06 minutes
   higher, holding her own support constant.
+  
 - Male actor effect, 17.92: for each one-unit higher support provided by a male
   partner, his own predicted daily MVPA is 17.92 minutes higher, holding his
   female partner's support constant.
+  
 - Male partner effect, -9.87: for each one-unit higher support provided by a
   female partner, the male partner's predicted daily MVPA is 9.87 minutes lower,
   holding his own support constant.
+  
 - The residual SDs, 21.40 minutes for female partners and 16.73 minutes for male
   partners, describe the remaining person-to-person spread around those
   predictions. An SD is a typical scale of residual deviation, not a variance
   and not the uncertainty of a coefficient.
+  
 - The residual correlation, .78, indicates strong positive remaining
   within-couple interdependence: couples in which the female partner is above
   her prediction also tend to have a male partner above his prediction, and
@@ -750,7 +750,7 @@ These are associations in the aggregated observational data, not causal effects.
 
 :::
 
-<!-- ca. 2 Minutes -->
+<!-- ca. 5 Minutes -->
 
 ## The exchangeable APIM
 
@@ -779,6 +779,16 @@ $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
 draw_apim_diagram("exchangeable", show_residuals = FALSE)
 ```
 
+:::{.notes}
+
+Two members are now named arbitrarily. Swapping labels will NOT change the model
+
+Pooled actor and partner effects
+
+pooled intercepts pooling
+
+:::
+
 <!-- ca. 1 Minute -->
 
 
@@ -799,25 +809,16 @@ draw_apim_diagram("exchangeable")
 
 :::{.notes}
 
-Keep these points on this diagram rather than adding another slide; the residual
-concepts were introduced visually just a few slides earlier.
+The two residual SDs are also constrained to be equal (e.g., pooled) 
 
-- The two members are now labelled arbitrarily because their roles are not used
-  to define different parameters.
-- Exchangeability constrains the actor paths to be equal across members and the
-  partner paths to be equal across members. The diagram therefore shows one
-  pooled actor effect and one pooled partner effect.
-- The two residual SDs are also constrained to be equal. This says that the
-  unexplained outcome spread is the same for both arbitrary member positions.
-- The curved arrow remains: exchangeability does not assume that partners are
-  independent. Their residual correlation is still estimated.
-- These are testable symmetry assumptions, not facts about the dyads. Compare
-  the exchangeable and distinguishable models if substantive distinguishability
-  is uncertain.
+This says that the unexplained outcome spread is the same for both arbitrary member positions.
+
+The curved arrow remains: exchangeability does not assume that partners are
+independent!!!! Their residual correlation is still estimated.
 
 :::
 
-<!-- ca. 3 Minutes -->
+<!-- ca. 2 Minutes -->
 
 ## Exchangeability constraints
 
@@ -836,28 +837,36 @@ draw_apim_exchangeability_comparison()
 
 :::{.notes}
 
-- On the left, intercepts, actor effects, partner effects, and residual standard
+On the left: 
+
+- intercepts, actor effects, partner effects, and residual standard
   deviations may differ by role.
+  
 - Follow each prediction from its intercept through the actor contribution in
-  blue and the partner contribution in purple. The arrows are offset downward
-  only to keep the labels readable; their horizontal lengths are the modeled
-  contributions.
-- The open circle is the conditional prediction. The nearby dots represent
-  illustrative observed outcomes, and the arrow labelled epsilon isolates one
-  residual as the distance from the prediction to an observation.
-- On the right, the same intercept, actor effect, partner effect, and residual
+  blue and the partner contribution in purple. 
+  
+- The open circle is the conditional prediction. 
+  - The nearby dots represent illustrative observed outcomes, 
+  - and the arrow labelled epsilon isolates one residual as the distance from the prediction to an observation.
+  
+- The shaded area is supposed to visualize the residual variance  
+  
+On the right:
+
+- the same intercept, actor effect, partner effect, and residual
   standard deviation are used for both arbitrary member positions.
-- The shared values are refitted under the equality constraints; they are not
-  arithmetic averages of the role-specific estimates.
-- Shared coefficients do not imply identical predictions: the actor and partner
+
+- **Shared coefficients do not imply identical predictions!!**: the actor and partner
   predictor values are exchanged between the two equations.
+  
 - Equal residual variance is a constraint on the modeled residual distribution,
   not a claim that the two members have identical residual values.
-- In both models, partners' residuals may still be correlated.
+  
+- In both models, partners' residuals may still be correlated!
 
 :::
 
-<!-- ca. 2 Minutes -->
+<!-- ca. 4 Minutes -->
 
 ## Fitting the exchangeable APIM
 

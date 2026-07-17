@@ -292,33 +292,42 @@ draw_apim_exchangeability_comparison <- function() {
 
   draw_coloured_equation(
     list(
-      expression(hat(Y)[plain(F)] ~~ "="),
+      expression(Y[plain(F)] ~~ "="),
       expression(b[0 * "," * plain(F)]),
       expression(+a[plain(F)] * X[plain(F)]),
-      expression(+p[plain(F)] * X[plain(M)])
+      expression(+p[plain(F)] * X[plain(M)]),
+      expression(+epsilon[plain(F)])
     ),
-    c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.255, 0.850, fontsize = 15.2
+    c(
+      ink_colour, muted_colour, actor_colour, partner_colour, female_colour
+    ),
+    0.255, 0.850, fontsize = 14.2, gap = 0.004
   )
   draw_coloured_equation(
     list(
-      expression(hat(Y)[plain(M)] ~~ "="),
+      expression(Y[plain(M)] ~~ "="),
       expression(b[0 * "," * plain(M)]),
       expression(+a[plain(M)] * X[plain(M)]),
-      expression(+p[plain(M)] * X[plain(F)])
+      expression(+p[plain(M)] * X[plain(F)]),
+      expression(+epsilon[plain(M)])
     ),
-    c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.255, 0.790, fontsize = 15.2
+    c(
+      ink_colour, muted_colour, actor_colour, partner_colour, male_colour
+    ),
+    0.255, 0.790, fontsize = 14.2, gap = 0.004
   )
   draw_coloured_equation(
     list(
-      expression(hat(Y)[i] ~~ "="),
+      expression(Y[i] ~~ "="),
       expression(b[0]),
       expression(+a * X[i]),
-      expression(+p * X[j])
+      expression(+p * X[j]),
+      expression(+epsilon[i])
     ),
-    c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.745, 0.820, fontsize = 15.2
+    c(
+      ink_colour, muted_colour, actor_colour, partner_colour, shared_colour
+    ),
+    0.745, 0.820, fontsize = 14.2, gap = 0.004
   )
 
   draw_coloured_equation(
