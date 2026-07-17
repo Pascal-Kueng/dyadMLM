@@ -1683,11 +1683,13 @@ draw_dsm_member_diagram <- function() {
 draw_dim_diagram <- function(
     estimates = NULL,
     residuals = NULL,
+    effect_unit = c("dyad", "couple"),
     model = NULL,
     terms = NULL,
     show_residuals = TRUE,
     labels = NULL,
     p_values = NULL) {
+  effect_unit <- match.arg(effect_unit)
   labels <- .diagram_variable_labels(labels)
   if (!is.logical(show_residuals) || length(show_residuals) != 1L ||
       is.na(show_residuals)) {
@@ -1836,16 +1838,24 @@ draw_dim_diagram <- function(
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
+  unit_title <- paste0(
+    toupper(substr(effect_unit, 1, 1)),
+    substring(effect_unit, 2)
+  )
   node_labels <- if (is.null(labels)) {
     list(
       predictor_mean = expression(bar(X) - mu[X]),
       predictor_deviation = expression(X[i] - bar(X)),
       outcome_mean = expression(bar(Y)),
       outcome_deviation = expression(Y[i] - bar(Y)),
-      predictor_mean_subtitle = "Dyad mean (GM-centered)",
-      predictor_deviation_subtitle = "Within-dyad member deviation",
-      outcome_mean_subtitle = "Dyad mean",
-      outcome_deviation_subtitle = "Within-dyad member deviation"
+      predictor_mean_subtitle = paste0(unit_title, " mean (GM-centered)"),
+      predictor_deviation_subtitle = paste0(
+        "Within-", effect_unit, " member deviation"
+      ),
+      outcome_mean_subtitle = paste0(unit_title, " mean"),
+      outcome_deviation_subtitle = paste0(
+        "Within-", effect_unit, " member deviation"
+      )
     )
   } else {
     list(
@@ -1853,10 +1863,14 @@ draw_dim_diagram <- function(
       predictor_deviation = labels[["predictor"]],
       outcome_mean = labels[["outcome"]],
       outcome_deviation = labels[["outcome"]],
-      predictor_mean_subtitle = "Dyad mean (GM-centered)",
-      predictor_deviation_subtitle = "Within-dyad member deviation",
-      outcome_mean_subtitle = "Dyad mean",
-      outcome_deviation_subtitle = "Within-dyad member deviation"
+      predictor_mean_subtitle = paste0(unit_title, " mean (GM-centered)"),
+      predictor_deviation_subtitle = paste0(
+        "Within-", effect_unit, " member deviation"
+      ),
+      outcome_mean_subtitle = paste0(unit_title, " mean"),
+      outcome_deviation_subtitle = paste0(
+        "Within-", effect_unit, " member deviation"
+      )
     )
   }
 
@@ -1912,7 +1926,7 @@ draw_dim_diagram <- function(
   }
 
   .draw_diagram_legend(
-    labels = c("Between-dyad effect", "Within-dyad effect"),
+    labels = paste0(c("Between-", "Within-"), effect_unit, " effect"),
     colours = c(mean_colour, deviation_colour),
     y = 0.065,
     segment_starts = c(0.105, 0.445),

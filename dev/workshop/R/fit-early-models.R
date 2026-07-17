@@ -140,7 +140,7 @@ fit_and_draw_dim <- function(data, predictor, outcome, labels = NULL) {
   )
   model <- .fit_early_gaussian_model(model_formula, prepared)
 
-  draw_dim_diagram(model = model, labels = labels)
+  draw_dim_diagram(model = model, effect_unit = "dyad", labels = labels)
   invisible(model)
 }
 

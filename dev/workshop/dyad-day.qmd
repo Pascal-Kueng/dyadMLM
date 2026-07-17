@@ -990,6 +990,11 @@ fit_and_draw_dim(
 <!-- ca. 3 Minutes -->
 
 
+## DIM to APIM coefficients
+
+<!-- Practical quick demonstration and showing formula -->
+
+<!-- ca. 5 Minutes -->
 
 ## The DSM
 
