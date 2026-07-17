@@ -435,12 +435,14 @@ systems. The horizontal and vertical axes are actor and partner values
 centered at the sample grand mean. The diagonal axes are their dyad mean
 and within-dyad member deviation.
 
-The displayed slope values are read directly from the fitted APIM and
-DIM models above. They illustrate that the two forms make the same
-change in the linear predictor relative to the grand-mean reference. The
-intercept is omitted from both displayed equations.
+The displayed actor and partner slopes are read from the fitted APIM.
+The DIM slopes are their exact sum-and-difference transformation; the
+directly fitted DIM estimates above confirm the equivalence. Both forms
+therefore make the same change in the linear predictor relative to the
+grand-mean reference. The intercept is omitted from both displayed
+equations.
 
-**Predictor coordinates**
+**Communication coordinates**
 
 Reset
 
@@ -448,57 +450,44 @@ APIM coordinates
 
 Grand-mean-centered actor, *x*_(actor)
 
-0.0
+0.00
 
 Grand-mean-centered partner, *x*_(partner)
 
-0.0
+0.00
 
 DIM coordinates
 
 Dyad mean, *x*_(mean)
 
-0.0
+0.00
 
 Within-dyad member deviation, *x*_(dev)
 
-0.0
+0.00
 
-*x*_(mean) = (*x*_(actor) + *x*_(partner)) / 2
+*x*_(mean) = (*x*_(actor) + *x*_(partner)) / 2 *x*_(dev) = (*x*_(actor)
+− *x*_(partner)) / 2
 
-*x*_(dev) = (*x*_(actor) - *x*_(partner)) / 2
+**APIM**
 
-APIM0.00 = 0.00
+**DIM**
 
-DIM0.00 = 0.00
+![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0id2RnLXBsb3QiIGRhdGEtd2RnLXBsb3Qgdmlld2JveD0iMCAwIDMyMCAzMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbGxlZGJ5PSJpbnRlcmRlcC1kaW0tZ3JpZC10aXRsZSBpbnRlcmRlcC1kaW0tZ3JpZC1kZXNjcmlwdGlvbiI+PHRpdGxlIGlkPSJpbnRlcmRlcC1kaW0tZ3JpZC10aXRsZSI+QVBJTSBhbmQgRElNIGNvb3JkaW5hdGUgZ3JpZDwvdGl0bGU+CjxkZXNjIGlkPSJpbnRlcmRlcC1kaW0tZ3JpZC1kZXNjcmlwdGlvbiIgZGF0YS13ZGctZGVzY3JpcHRpb24+VGhlIHNlbGVjdGVkIHBvaW50IGlzIHRoZSBncmFuZC1tZWFuIHJlZmVyZW5jZS48L2Rlc2M+PGRlZnM+PGNsaXBwYXRoIGlkPSJpbnRlcmRlcC1kaW0tZ3JpZC1jbGlwIj48cmVjdCB4PSIzMCIgeT0iMzAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiByeD0iNCIgLz48L2NsaXBwYXRoPjwvZGVmcz48cmVjdCB4PSIzMCIgeT0iMzAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiByeD0iNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS1vcGFjaXR5PSIwLjMyIiAvPjxnIGRhdGEtd2RnLWdyaWQtbGluZXMgY2xpcC1wYXRoPSJ1cmwoI2ludGVyZGVwLWRpbS1ncmlkLWNsaXApIj48L2c+PGcgZGF0YS13ZGctYXhpcy1sYWJlbHM+PC9nPjxjaXJjbGUgY2xhc3M9IndkZy1oYWxvIiBkYXRhLXdkZy1oYWxvIGN4PSIxNjAiIGN5PSIxNjAiIHI9IjEzIj48L2NpcmNsZT48Y2lyY2xlIGNsYXNzPSJ3ZGctcG9pbnQiIGRhdGEtd2RnLXBvaW50IGN4PSIxNjAiIGN5PSIxNjAiIHI9IjYiPjwvY2lyY2xlPjwvc3ZnPg==)
 
-SlopesLoading fitted slopes...
+**Shared dyad level**Both members +1
 
-![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iaWRnLXBsb3QiIGRhdGEtaWRnLXBsb3Qgdmlld2JveD0iMCAwIDMyMCAzMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbGxlZGJ5PSJpZGctcGxvdC10aXRsZSBpZGctcGxvdC1kZXNjcmlwdGlvbiI+PHRpdGxlIGlkPSJpZGctcGxvdC10aXRsZSI+QVBJTSBhbmQgRElNIGNvb3JkaW5hdGUgZ3JpZDwvdGl0bGU+CjxkZXNjIGlkPSJpZGctcGxvdC1kZXNjcmlwdGlvbiI+VGhlIHNlbGVjdGVkIHBvaW50IGhhcyBhY3RvciwgcGFydG5lciwgZHlhZCBtZWFuLCBhbmQgd2l0aGluLWR5YWQgbWVtYmVyLWRldmlhdGlvbiB2YWx1ZXMgb2YgemVyby48L2Rlc2M+PGRlZnM+PGNsaXBwYXRoIGlkPSJpZGctcGxvdC1jbGlwIj48cmVjdCB4PSIzMCIgeT0iMzAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiByeD0iNCIgLz48L2NsaXBwYXRoPjwvZGVmcz48cmVjdCB4PSIzMCIgeT0iMzAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjYwIiByeD0iNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS1vcGFjaXR5PSIwLjM1IiAvPjxnIGRhdGEtaWRnLWdyaWQtbGluZXMgY2xpcC1wYXRoPSJ1cmwoI2lkZy1wbG90LWNsaXApIj48L2c+PGcgZGF0YS1pZGctYXhpcy1sYWJlbHM+PC9nPjxjaXJjbGUgY2xhc3M9ImlkZy1oYWxvIiBkYXRhLWlkZy1oYWxvIGN4PSIxNjAiIGN5PSIxNjAiIHI9IjEzIj48L2NpcmNsZT48Y2lyY2xlIGNsYXNzPSJpZGctcG9pbnQiIGRhdGEtaWRnLXBvaW50IGN4PSIxNjAiIGN5PSIxNjAiIHI9IjYiPjwvY2lyY2xlPjwvc3ZnPg==)
+*b*_(mean) = *a* + *p*
 
-**Shared dyad level**
+**Within-dyad member deviation**Actor +1, partner −1
 
-Show
+*b*_(dev) = *a* − *p*
 
-When both members are one point higher, the dyad mean is one point
-higher and the deviation is unchanged.
+Drag the dot or move either set of sliders. Both equations give the same
+fitted change in the linear predictor.
 
-*b*_(mean) = *b*_(actor) + *b*_(partner)
-
-**Within-dyad member deviation**
-
-Show
-
-When one member is one point higher and the other one point lower, the
-dyad mean is unchanged and the deviation is one point.
-
-*b*_(dev) = *b*_(actor) - *b*_(partner)
-
-The dot uses APIM coordinates. The diagonal lines show the same point in
-DIM coordinates.
-
-Enable JavaScript to manipulate this figure. The equations and
-discussion above provide the same transformation.
+Enable JavaScript to manipulate this figure. The equations above provide
+the same transformation.
 
 ### Random-effect transformation
 

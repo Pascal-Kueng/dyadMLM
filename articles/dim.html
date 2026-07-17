@@ -59,8 +59,8 @@
 
 
 
-
-<div class="row">
+<link href="dim_files/interdep-dim-grid-1.0.0/dim-grid.css" rel="stylesheet">
+<script src="dim_files/interdep-dim-grid-1.0.0/dim-grid.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Dyad-Individual Model</h1>
@@ -467,652 +467,73 @@ actor effect - the partner effect.</p></li>
 systems. The horizontal and vertical axes are actor and partner values
 centered at the sample grand mean. The diagonal axes are their dyad mean
 and within-dyad member deviation.</p>
-<p>The displayed slope values are read directly from the fitted APIM and
-DIM models above. They illustrate that the two forms make the same
-change in the linear predictor relative to the grand-mean reference. The
-intercept is omitted from both displayed equations.</p>
-<style>
-.interdep-dim-grid {
-  --idg-actor: #1769AA;
-  --idg-partner: #7B3FA1;
-  --idg-mean: #C43C35;
-  --idg-within: #8A6500;
-  --idg-border: var(--bs-border-color, #c9ced6);
-  --idg-surface: var(--bs-tertiary-bg, #f5f6f8);
-  --idg-ink: var(--bs-body-color, #202428);
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr);
-  gap: 1.25rem;
-  margin: 1.25rem 0 2rem;
-  padding: 1rem;
-  color: var(--idg-ink);
-  background: var(--idg-surface);
-  border: 1px solid var(--idg-border);
-  border-radius: 8px;
-}
-.interdep-dim-grid *,
-.interdep-dim-grid *::before,
-.interdep-dim-grid *::after {
-  box-sizing: border-box;
-}
-.idg-controls,
-.idg-visual,
-.idg-control-group {
-  display: grid;
-  align-content: start;
-  gap: 0.9rem;
-  min-width: 0;
-}
-.idg-toolbar,
-.idg-group-title,
-.idg-control-head,
-.idg-demo-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-.idg-toolbar {
-  padding-bottom: 0.7rem;
-  border-bottom: 1px solid var(--idg-border);
-}
-.idg-toolbar strong,
-.idg-group-title {
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-.idg-reset,
-.idg-demo {
-  padding: 0.35rem 0.6rem;
-  color: inherit;
-  background: var(--bs-body-bg, #fff);
-  border: 1px solid var(--idg-border);
-  border-radius: 5px;
-  font: inherit;
-  font-size: 0.78rem;
-  line-height: 1.2;
-  cursor: pointer;
-}
-.idg-reset:hover,
-.idg-demo:hover {
-  border-color: currentColor;
-}
-.idg-reset:focus-visible,
-.idg-demo:focus-visible,
-.interdep-dim-grid input:focus-visible {
-  outline: 3px solid rgba(23, 105, 170, 0.35);
-  outline-offset: 2px;
-}
-.idg-group-title {
-  justify-content: flex-start;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid var(--idg-border);
-}
-.idg-swatches {
-  display: inline-flex;
-  gap: 0.25rem;
-}
-.idg-swatch {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
-}
-.idg-control {
-  display: grid;
-  gap: 0.25rem;
-}
-.idg-control label {
-  min-width: 0;
-  font-size: 0.84rem;
-  font-weight: 600;
-}
-.idg-control output {
-  flex: 0 0 5.5ch;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-}
-.idg-control input[type="range"] {
-  width: 100%;
-  min-height: 1.75rem;
-  margin: 0;
-  cursor: pointer;
-}
-.idg-actor input { accent-color: var(--idg-actor); }
-.idg-partner input { accent-color: var(--idg-partner); }
-.idg-mean input { accent-color: var(--idg-mean); }
-.idg-within input { accent-color: var(--idg-within); }
-.idg-relations {
-  padding-top: 0.7rem;
-  border-top: 1px solid var(--idg-border);
-  font-size: 0.8rem;
-  line-height: 1.6;
-}
-.idg-equations {
-  display: grid;
-  gap: 0.4rem;
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  padding: 0.75rem;
-  background: var(--bs-body-bg, #fff);
-  border: 1px solid var(--idg-border);
-  border-radius: 6px;
-  overflow-x: auto;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.94rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.idg-equations > div:last-child {
-  white-space: normal;
-}
-.idg-equation-label {
-  display: inline-block;
-  width: 3.3rem;
-  font-family: var(--bs-body-font-family, sans-serif);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.idg-equation-number {
-  display: inline-block;
-  text-align: right;
-}
-.idg-equation-number--apim {
-  width: 4ch;
-}
-.idg-equation-number--dim {
-  width: 5ch;
-}
-.idg-equation-number--result {
-  width: 6ch;
-}
-.idg-stage {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-  gap: 1rem;
-  align-items: start;
-}
-.idg-plot {
-  display: block;
-  width: 100%;
-  max-width: 29rem;
-  aspect-ratio: 1;
-  margin: 0 auto;
-  background: var(--bs-body-bg, #fff);
-  border: 1px solid var(--idg-border);
-  border-radius: 6px;
-  cursor: crosshair;
-  touch-action: none;
-  user-select: none;
-}
-.idg-explanation {
-  display: grid;
-  gap: 1rem;
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-.idg-explanation p {
-  margin: 0.3rem 0 0;
-}
-.idg-demo-row {
-  align-items: flex-start;
-}
-.idg-demo-row strong {
-  display: block;
-}
-.idg-mini-equation {
-  margin-top: 0.4rem;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.86rem;
-}
-.idg-result {
-  font-weight: 700;
-}
-.idg-halo {
-  fill: var(--idg-actor);
-  fill-opacity: 0.14;
-}
-.idg-point {
-  fill: var(--idg-actor);
-  stroke: var(--bs-body-bg, #fff);
-  stroke-width: 2;
-}
-.idg-sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-@media (max-width: 860px) {
-  .interdep-dim-grid {
-    grid-template-columns: 1fr;
-  }
-  .idg-controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .idg-toolbar,
-  .idg-relations {
-    grid-column: 1 / -1;
-  }
-}
-@media (max-width: 620px) {
-  .interdep-dim-grid {
-    margin-right: -0.35rem;
-    margin-left: -0.35rem;
-    padding: 0.75rem;
-  }
-  .idg-controls,
-  .idg-stage {
-    grid-template-columns: 1fr;
-  }
-  .idg-toolbar,
-  .idg-relations {
-    grid-column: auto;
-  }
-  .idg-equations {
-    font-size: 0.84rem;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .interdep-dim-grid * {
-    scroll-behavior: auto !important;
-  }
-}
-[data-bs-theme="dark"] .interdep-dim-grid {
-  --idg-actor: #75b7ff;
-  --idg-partner: #d0a6ff;
-  --idg-mean: #ff8c82;
-  --idg-within: #f0c75e;
-}
-</style>
-<div class="interdep-dim-grid" id="interdep-dim-grid">
-  <div class="idg-controls">
-    <div class="idg-toolbar">
-      <strong>Predictor coordinates</strong>
-      <button class="idg-reset" type="button" data-idg-reset>Reset</button>
+<p>The displayed actor and partner slopes are read from the fitted APIM.
+The DIM slopes are their exact sum-and-difference transformation; the
+directly fitted DIM estimates above confirm the equivalence. Both forms
+therefore make the same change in the linear predictor relative to the
+grand-mean reference. The intercept is omitted from both displayed
+equations.</p>
+<div class="interdep-dim-grid interdep-dim-grid--article" id="interdep-dim-grid" data-interdep-dim-grid data-limit="5" data-actor="1.7577551727306386" data-partner="0.23787304955494726" data-mean="1.9956282222855859" data-within="1.5198821231756914">
+  <div class="wdg-controls">
+    <div class="wdg-toolbar">
+      <strong>Communication coordinates</strong>
+      <button type="button" data-wdg-reset>Reset</button>
     </div>
 
-    <div class="idg-control-group">
-      <div class="idg-group-title">
-        <span class="idg-swatches" aria-hidden="true">
-          <span class="idg-swatch" style="background: var(--idg-actor)"></span>
-          <span class="idg-swatch" style="background: var(--idg-partner)"></span>
-        </span>
-        APIM coordinates
-      </div>
-      <div class="idg-control idg-actor">
-        <div class="idg-control-head">
-          <label for="idg-actor">Grand-mean-centered actor, <i>x</i><sub>actor</sub></label>
-          <output for="idg-actor" data-idg-output="actor">0.0</output>
-</div>
-        <input id="idg-actor" data-idg-input="actor" type="range" min="-5" max="5" step="0.1" value="0">
-</div>
-      <div class="idg-control idg-partner">
-        <div class="idg-control-head">
-          <label for="idg-partner">Grand-mean-centered partner, <i>x</i><sub>partner</sub></label>
-          <output for="idg-partner" data-idg-output="partner">0.0</output>
-</div>
-        <input id="idg-partner" data-idg-input="partner" type="range" min="-5" max="5" step="0.1" value="0">
-</div>
+    <div class="wdg-control-group">
+      <div class="wdg-group-title wdg-apim-title">APIM coordinates</div>
+      <label class="wdg-control wdg-actor">
+        <span><span>Grand-mean-centered actor, <i>x</i><sub>actor</sub></span><output data-wdg-output="actor">0.00</output></span>
+        <input data-wdg-input="actor" type="range" min="-5" max="5" step="0.1" value="0"></label>
+      <label class="wdg-control wdg-partner">
+        <span><span>Grand-mean-centered partner, <i>x</i><sub>partner</sub></span><output data-wdg-output="partner">0.00</output></span>
+        <input data-wdg-input="partner" type="range" min="-5" max="5" step="0.1" value="0"></label>
     </div>
 
-    <div class="idg-control-group">
-      <div class="idg-group-title">
-        <span class="idg-swatches" aria-hidden="true">
-          <span class="idg-swatch" style="background: var(--idg-mean)"></span>
-          <span class="idg-swatch" style="background: var(--idg-within)"></span>
-        </span>
-        DIM coordinates
-      </div>
-      <div class="idg-control idg-mean">
-        <div class="idg-control-head">
-          <label for="idg-mean">Dyad mean, <i>x</i><sub>mean</sub></label>
-          <output for="idg-mean" data-idg-output="mean">0.0</output>
-</div>
-        <input id="idg-mean" data-idg-input="mean" type="range" min="-5" max="5" step="0.05" value="0">
-</div>
-      <div class="idg-control idg-within">
-        <div class="idg-control-head">
-          <label for="idg-within">Within-dyad member deviation, <i>x</i><sub>dev</sub></label>
-          <output for="idg-within" data-idg-output="within">0.0</output>
-</div>
-        <input id="idg-within" data-idg-input="within" type="range" min="-5" max="5" step="0.05" value="0">
-</div>
+    <div class="wdg-control-group">
+      <div class="wdg-group-title wdg-dim-title">DIM coordinates</div>
+      <label class="wdg-control wdg-mean">
+        <span><span>Dyad mean, <i>x</i><sub>mean</sub></span><output data-wdg-output="mean">0.00</output></span>
+        <input data-wdg-input="mean" type="range" min="-5" max="5" step="0.05" value="0"></label>
+      <label class="wdg-control wdg-within">
+        <span><span>Within-dyad member deviation, <i>x</i><sub>dev</sub></span><output data-wdg-output="within">0.00</output></span>
+        <input data-wdg-input="within" type="range" min="-5" max="5" step="0.05" value="0"></label>
     </div>
 
-    <div class="idg-relations">
-      <div>
-<i>x</i><sub>mean</sub> = (<i>x</i><sub>actor</sub> + <i>x</i><sub>partner</sub>) / 2</div>
-      <div>
-<i>x</i><sub>dev</sub> = (<i>x</i><sub>actor</sub> - <i>x</i><sub>partner</sub>) / 2</div>
+    <div class="wdg-relations">
+      <span><i>x</i><sub>mean</sub> = (<i>x</i><sub>actor</sub> + <i>x</i><sub>partner</sub>) / 2</span>
+      <span><i>x</i><sub>dev</sub> = (<i>x</i><sub>actor</sub> − <i>x</i><sub>partner</sub>) / 2</span>
     </div>
   </div>
 
-  <div class="idg-visual">
-    <div class="idg-equations">
+  <div class="wdg-visual">
+    <div class="wdg-equations">
       <div>
-<span class="idg-equation-label">APIM</span><span data-idg-equation="apim">0.00 = 0.00</span>
+<b>APIM</b> <span data-wdg-equation="apim"></span>
 </div>
       <div>
-<span class="idg-equation-label">DIM</span><span data-idg-equation="dim">0.00 = 0.00</span>
+<b>DIM</b> <span data-wdg-equation="dim"></span>
 </div>
-      <div>
-<span class="idg-equation-label">Slopes</span><span data-idg-slopes>Loading fitted slopes...</span>
-</div>
+      <div class="wdg-slope-summary" data-wdg-slopes></div>
     </div>
 
-    <div class="idg-stage">
-      <svg class="idg-plot" data-idg-plot viewbox="0 0 320 320" role="img" aria-labelledby="idg-plot-title idg-plot-description"><title id="idg-plot-title">APIM and DIM coordinate grid</title>
-<desc id="idg-plot-description">The selected point has actor, partner, dyad mean, and within-dyad member-deviation values of zero.</desc><defs><clippath id="idg-plot-clip"><rect x="30" y="30" width="260" height="260" rx="4"></rect></clippath></defs><rect x="30" y="30" width="260" height="260" rx="4" fill="none" stroke="currentColor" stroke-opacity="0.35"></rect><g data-idg-grid-lines clip-path="url(#idg-plot-clip)"></g><g data-idg-axis-labels></g><circle class="idg-halo" data-idg-halo cx="160" cy="160" r="13"></circle><circle class="idg-point" data-idg-point cx="160" cy="160" r="6"></circle></svg><div class="idg-explanation">
+    <div class="wdg-stage">
+      <svg class="wdg-plot" data-wdg-plot viewbox="0 0 320 320" role="img" aria-labelledby="interdep-dim-grid-title interdep-dim-grid-description"><title id="interdep-dim-grid-title">APIM and DIM coordinate grid</title>
+<desc id="interdep-dim-grid-description" data-wdg-description>The selected point is the grand-mean reference.</desc><defs><clippath id="interdep-dim-grid-clip"><rect x="30" y="30" width="260" height="260" rx="4"></rect></clippath></defs><rect x="30" y="30" width="260" height="260" rx="4" fill="none" stroke="currentColor" stroke-opacity="0.32"></rect><g data-wdg-grid-lines clip-path="url(#interdep-dim-grid-clip)"></g><g data-wdg-axis-labels></g><circle class="wdg-halo" data-wdg-halo cx="160" cy="160" r="13"></circle><circle class="wdg-point" data-wdg-point cx="160" cy="160" r="6"></circle></svg><div class="wdg-demos">
+        <button type="button" data-wdg-demo="mean"><b>Shared dyad level</b><span>Both members +1</span></button>
         <div>
-          <div class="idg-demo-row">
-            <strong>Shared dyad level</strong>
-            <button class="idg-demo" type="button" data-idg-demo="mean">Show</button>
-          </div>
-          <p>When both members are one point higher, the dyad mean is one point higher and the deviation is unchanged.</p>
-          <div class="idg-mini-equation">
-<i>b</i><sub>mean</sub> = <i>b</i><sub>actor</sub> + <i>b</i><sub>partner</sub>
+<i>b</i><sub>mean</sub> = <i>a</i> + <i>p</i>
 </div>
-        </div>
+        <button type="button" data-wdg-demo="within"><b>Within-dyad member deviation</b><span>Actor +1, partner −1</span></button>
         <div>
-          <div class="idg-demo-row">
-            <strong>Within-dyad member deviation</strong>
-            <button class="idg-demo" type="button" data-idg-demo="within">Show</button>
-          </div>
-          <p>When one member is one point higher and the other one point lower, the dyad mean is unchanged and the deviation is one point.</p>
-          <div class="idg-mini-equation">
-<i>b</i><sub>dev</sub> = <i>b</i><sub>actor</sub> - <i>b</i><sub>partner</sub>
+<i>b</i><sub>dev</sub> = <i>a</i> − <i>p</i>
 </div>
-        </div>
-        <p>The dot uses APIM coordinates. The diagonal lines show the same point in DIM coordinates.</p>
+        <p>Drag the dot or move either set of sliders. Both equations give the same fitted change in the linear predictor.</p>
       </div>
     </div>
   </div>
-  <noscript><p>Enable JavaScript to manipulate this figure. The equations and discussion above provide the same transformation.</p></noscript>
+  <noscript><p>Enable JavaScript to manipulate this figure. The equations above provide the same transformation.</p></noscript>
 </div>
-
-<script>
-(function () {
-  "use strict";
-
-  var root = document.getElementById("interdep-dim-grid");
-  if (!root || root.dataset.initialized === "true") return;
-  root.dataset.initialized = "true";
-
-  var limit = 5;
-  var plotScale = 130 / limit;
-  var slopes = {
-    actor: 1.7577551727306386,
-    partner: 0.23787304955494726,
-    mean: 1.9956254260554023,
-    within: 1.5198922225044085
-  };
-  var colors = {
-    actor: "var(--idg-actor)",
-    partner: "var(--idg-partner)",
-    mean: "var(--idg-mean)",
-    within: "var(--idg-within)"
-  };
-  var inputs = {};
-  var outputs = {};
-  ["actor", "partner", "mean", "within"].forEach(function (name) {
-    inputs[name] = root.querySelector('[data-idg-input="' + name + '"]');
-    outputs[name] = root.querySelector('[data-idg-output="' + name + '"]');
-  });
-
-  var plot = root.querySelector("[data-idg-plot]");
-  var point = root.querySelector("[data-idg-point]");
-  var halo = root.querySelector("[data-idg-halo]");
-  var description = root.querySelector("#idg-plot-description");
-  var equationAPIM = root.querySelector('[data-idg-equation="apim"]');
-  var equationDIM = root.querySelector('[data-idg-equation="dim"]');
-  var slopeSummary = root.querySelector("[data-idg-slopes]");
-
-  var hasFittedSlopes = [
-    slopes.actor,
-    slopes.partner,
-    slopes.mean,
-    slopes.within
-  ].every(Number.isFinite);
-
-  if (!hasFittedSlopes) {
-    equationAPIM.textContent = "Fitted slopes unavailable";
-    equationDIM.textContent = "Fitted slopes unavailable";
-    slopeSummary.textContent =
-      "Install glmmTMB and refit the models to activate this figure.";
-    root.querySelectorAll("input, button").forEach(function (control) {
-      control.disabled = true;
-    });
-    description.textContent =
-      "The coordinate grid is inactive because fitted slopes are unavailable.";
-    return;
-  }
-
-  function roundAPIM(value) {
-    return Math.round(Number(value) * 10) / 10;
-  }
-
-  function roundDIM(value) {
-    return Math.round(Number(value) * 20) / 20;
-  }
-
-  function clamp(value, min, max) {
-    return Math.min(max, Math.max(min, Number(value)));
-  }
-
-  function format(value, digits) {
-    var normalized = Math.abs(value) < 1e-10 ? 0 : value;
-    return normalized.toFixed(digits);
-  }
-
-  function formatSigned(value, digits) {
-    var normalized = Math.abs(value) < 1e-10 ? 0 : value;
-    var sign = normalized < 0 ? "\u2212" : "\u2007";
-    return sign + Math.abs(normalized).toFixed(digits);
-  }
-
-  function formatEquationNumber(value, digits, widthClass) {
-    return '<span class="idg-equation-number idg-equation-number--' +
-      widthClass + '">' + formatSigned(value, digits) + '</span>';
-  }
-
-  function formatCoefficient(value, following) {
-    var normalized = Math.abs(value) < 1e-10 ? 0 : value;
-    var magnitude = Math.abs(normalized).toFixed(2);
-    if (following) {
-      return normalized < 0 ? " \u2212 " + magnitude : " + " + magnitude;
-    }
-    return normalized < 0 ? "\u2212" + magnitude : magnitude;
-  }
-
-  function xPixel(value) {
-    return 160 + value * plotScale;
-  }
-
-  function yPixel(value) {
-    return 160 - value * plotScale;
-  }
-
-  function feasibleMean(within) {
-    var bound = roundDIM(limit - Math.abs(within));
-    return [-bound, bound];
-  }
-
-  function feasibleWithin(mean) {
-    var bound = roundDIM(limit - Math.abs(mean));
-    return [-bound, bound];
-  }
-
-  function render() {
-    var actor = Number(inputs.actor.value);
-    var partner = Number(inputs.partner.value);
-    var mean = Number(inputs.mean.value);
-    var within = Number(inputs.within.value);
-    var apimContribution = slopes.actor * actor + slopes.partner * partner;
-    var dimContribution = slopes.mean * mean + slopes.within * within;
-
-    outputs.actor.value = formatSigned(actor, 1);
-    outputs.partner.value = formatSigned(partner, 1);
-    outputs.mean.value = formatSigned(mean, 2);
-    outputs.within.value = formatSigned(within, 2);
-    equationAPIM.innerHTML = formatCoefficient(slopes.actor, false) + " \u00d7 " +
-      formatEquationNumber(actor, 1, "apim") +
-      formatCoefficient(slopes.partner, true) + " \u00d7 " +
-      formatEquationNumber(partner, 1, "apim") + " = " +
-      formatEquationNumber(apimContribution, 2, "result");
-    equationDIM.innerHTML = formatCoefficient(slopes.mean, false) + " \u00d7 " +
-      formatEquationNumber(mean, 2, "dim") +
-      formatCoefficient(slopes.within, true) + " \u00d7 " +
-      formatEquationNumber(within, 2, "dim") + " = " +
-      formatEquationNumber(dimContribution, 2, "result");
-    slopeSummary.innerHTML =
-      "<i>b</i><sub>mean</sub> = <i>b</i><sub>actor</sub> + " +
-      "<i>b</i><sub>partner</sub> = " + formatCoefficient(slopes.mean, false) +
-      "; <i>b</i><sub>dev</sub> = <i>b</i><sub>actor</sub> \u2212 " +
-      "<i>b</i><sub>partner</sub> = " + formatCoefficient(slopes.within, false);
-
-    point.setAttribute("cx", xPixel(actor));
-    point.setAttribute("cy", yPixel(partner));
-    halo.setAttribute("cx", xPixel(actor));
-    halo.setAttribute("cy", yPixel(partner));
-    description.textContent = "The selected point has actor " + format(actor, 1) +
-      ", partner " + format(partner, 1) + ", dyad mean " + format(mean, 2) +
-      ", and within-dyad member deviation " + format(within, 2) + ".";
-  }
-
-  function setFromAPIM(actor, partner) {
-    actor = roundAPIM(clamp(actor, -limit, limit));
-    partner = roundAPIM(clamp(partner, -limit, limit));
-    var mean = roundDIM((actor + partner) / 2);
-    var within = roundDIM((actor - partner) / 2);
-    inputs.actor.value = actor;
-    inputs.partner.value = partner;
-    inputs.mean.value = mean;
-    inputs.within.value = within;
-    render();
-  }
-
-  function setFromDIM(mean, within) {
-    var meanBounds = feasibleMean(within);
-    mean = roundDIM(clamp(mean, meanBounds[0], meanBounds[1]));
-    var withinBounds = feasibleWithin(mean);
-    within = roundDIM(clamp(within, withinBounds[0], withinBounds[1]));
-    inputs.mean.value = mean;
-    inputs.within.value = within;
-    inputs.actor.value = roundAPIM(mean + within);
-    inputs.partner.value = roundAPIM(mean - within);
-    render();
-  }
-
-  inputs.actor.addEventListener("input", function () {
-    setFromAPIM(inputs.actor.value, inputs.partner.value);
-  });
-  inputs.partner.addEventListener("input", function () {
-    setFromAPIM(inputs.actor.value, inputs.partner.value);
-  });
-  inputs.mean.addEventListener("input", function () {
-    var within = roundDIM(inputs.within.value);
-    var bounds = feasibleMean(within);
-    var mean = roundDIM(clamp(inputs.mean.value, bounds[0], bounds[1]));
-    setFromDIM(mean, within);
-  });
-  inputs.within.addEventListener("input", function () {
-    var mean = roundDIM(inputs.mean.value);
-    var bounds = feasibleWithin(mean);
-    var within = roundDIM(clamp(inputs.within.value, bounds[0], bounds[1]));
-    setFromDIM(mean, within);
-  });
-
-  root.querySelector("[data-idg-reset]").addEventListener("click", function () {
-    setFromAPIM(0, 0);
-  });
-  root.querySelector('[data-idg-demo="mean"]').addEventListener("click", function () {
-    setFromAPIM(1, 1);
-  });
-  root.querySelector('[data-idg-demo="within"]').addEventListener("click", function () {
-    setFromAPIM(1, -1);
-  });
-
-  function setFromPointer(event) {
-    var bounds = plot.getBoundingClientRect();
-    var svgX = (event.clientX - bounds.left) / bounds.width * 320;
-    var svgY = (event.clientY - bounds.top) / bounds.height * 320;
-    setFromAPIM((svgX - 160) / plotScale, (160 - svgY) / plotScale);
-  }
-
-  var dragging = false;
-  plot.addEventListener("pointerdown", function (event) {
-    dragging = true;
-    plot.setPointerCapture(event.pointerId);
-    setFromPointer(event);
-  });
-  plot.addEventListener("pointermove", function (event) {
-    if (dragging) setFromPointer(event);
-  });
-  plot.addEventListener("pointerup", function (event) {
-    dragging = false;
-    if (plot.hasPointerCapture(event.pointerId)) plot.releasePointerCapture(event.pointerId);
-  });
-  plot.addEventListener("pointercancel", function () {
-    dragging = false;
-  });
-  function drawGrid() {
-    var namespace = "http://www.w3.org/2000/svg";
-    var lines = root.querySelector("[data-idg-grid-lines]");
-    var labels = root.querySelector("[data-idg-axis-labels]");
-
-    function addLine(x1, y1, x2, y2, color, opacity, dash) {
-      var line = document.createElementNS(namespace, "line");
-      line.setAttribute("x1", x1);
-      line.setAttribute("y1", y1);
-      line.setAttribute("x2", x2);
-      line.setAttribute("y2", y2);
-      line.setAttribute("stroke", color);
-      line.setAttribute("stroke-opacity", opacity);
-      line.setAttribute("stroke-width", dash ? "1" : "1.5");
-      if (dash) line.setAttribute("stroke-dasharray", dash);
-      lines.appendChild(line);
-    }
-
-    [-4, -2, 0, 2, 4].forEach(function (tick) {
-      var secondary = tick === 0 ? null : "3 3";
-      var opacity = tick === 0 ? "0.65" : "0.24";
-      addLine(xPixel(tick), 30, xPixel(tick), 290, colors.actor, opacity, secondary);
-      addLine(30, yPixel(tick), 290, yPixel(tick), colors.partner, opacity, secondary);
-      addLine(xPixel(-limit), yPixel(2 * tick + limit), xPixel(limit), yPixel(2 * tick - limit), colors.mean, opacity, secondary);
-      addLine(xPixel(-limit), yPixel(-limit - 2 * tick), xPixel(limit), yPixel(limit - 2 * tick), colors.within, opacity, secondary);
-    });
-
-    function addLabel(text, x, y, color, anchor) {
-      var label = document.createElementNS(namespace, "text");
-      label.setAttribute("x", x);
-      label.setAttribute("y", y);
-      label.setAttribute("fill", color);
-      label.setAttribute("font-size", "11");
-      label.setAttribute("font-weight", "700");
-      label.setAttribute("text-anchor", anchor || "middle");
-      label.textContent = text;
-      labels.appendChild(label);
-    }
-
-    addLabel("actor", 286, 151, colors.actor, "end");
-    addLabel("partner", 160, 22, colors.partner);
-    addLabel("dyad mean", 247, 66, colors.mean);
-    addLabel("deviation", 248, 261, colors.within);
-  }
-
-  drawGrid();
-  setFromAPIM(0, 0);
-})();
-</script>
 </div>
 <div class="section level3">
 <h3 id="random-effect-transformation">Random-effect transformation<a class="anchor" aria-label="anchor" href="#random-effect-transformation"></a>
