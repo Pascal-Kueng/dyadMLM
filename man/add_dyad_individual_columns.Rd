@@ -10,12 +10,14 @@ add_dyad_individual_columns(data)
 \item{data}{An \code{interdep_data} object returned by \code{\link[=prepare_interdep_data]{prepare_interdep_data()}}.}
 }
 \value{
-An \code{interdep_data} object with dyad-mean and within-dyad-deviation
-predictor columns added and DIM predictor metadata recorded.
+An \code{interdep_data} object with dyad-mean and within-dyad
+member-deviation predictor columns added and DIM predictor metadata
+recorded.
 }
 \description{
-Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad-deviation
-columns for the predictors recorded in an \code{interdep_data} object. For
+Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad
+member-deviation columns for the predictors recorded in an \code{interdep_data}
+object. For
 currently supported DIMs, the data must
 contain one exchangeable dyad composition. This means distinguishable dyads
 and multiple exchangeable compositions are not supported by DIM
@@ -27,10 +29,10 @@ occasion, while between-person components are decomposed once within each
 dyad.
 For raw predictors, the dyad-mean column is centered around the grand mean
 of dyad means, or dyad-occasion means in longitudinal data, while the
-within-dyad-deviation column is the person's deviation from the uncentered
-dyad mean.
+within-dyad member-deviation column is the person's deviation from the
+uncentered dyad mean.
 Selected lag predictors additionally create lag-1 raw and within-person
-dyad-mean and within-dyad-deviation columns.
+dyad-mean and within-dyad member-deviation columns.
 }
 \details{
 The function reads \code{attr(data, "interdep")$temporal_predictor_decompositions} and

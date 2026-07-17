@@ -312,23 +312,13 @@ draw_apim_exchangeability_comparison <- function() {
   )
   draw_coloured_equation(
     list(
-      expression(hat(Y)[1] ~~ "="),
+      expression(hat(Y)[i] ~~ "="),
       expression(b[0]),
-      expression(+a * X[1]),
-      expression(+p * X[2])
+      expression(+a * X[i]),
+      expression(+p * X[j])
     ),
     c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.745, 0.850, fontsize = 15.2
-  )
-  draw_coloured_equation(
-    list(
-      expression(hat(Y)[2] ~~ "="),
-      expression(b[0]),
-      expression(+a * X[2]),
-      expression(+p * X[1])
-    ),
-    c(ink_colour, muted_colour, actor_colour, partner_colour),
-    0.745, 0.790, fontsize = 15.2
+    0.745, 0.820, fontsize = 15.2
   )
 
   draw_coloured_equation(

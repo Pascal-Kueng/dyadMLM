@@ -350,7 +350,7 @@ test_that("interdep data print describes cross-sectional DIM columns", {
   expect_added_column_description(
     printed,
     ".i_{pred}_within_dyad_dev",
-    "DIM within-dyad predictor deviation: person's difference from the dyad average"
+    "DIM within-dyad member-deviation predictor: member's difference from the dyad mean"
   )
 })
 
@@ -386,7 +386,7 @@ test_that("interdep data print describes longitudinal DIM columns", {
   expect_added_column_description(
     printed,
     ".i_{pred}_cwp_within_dyad_dev",
-    "DIM within-person within-dyad predictor deviation: person's momentary deviation from the dyad average"
+    "DIM within-person, within-dyad member-deviation predictor: member's momentary deviation from the dyad mean"
   )
   expect_true(any(grepl(".i_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
   expect_added_column_description(
@@ -398,7 +398,7 @@ test_that("interdep data print describes longitudinal DIM columns", {
   expect_added_column_description(
     printed,
     ".i_{pred}_cbp_within_dyad_dev",
-    "DIM between-person within-dyad predictor deviation: person's stable difference from the dyad's usual level"
+    "DIM between-person, within-dyad member-deviation predictor: member's stable difference from the dyad's usual level"
   )
 })
 

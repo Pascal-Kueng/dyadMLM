@@ -886,15 +886,15 @@ workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
 ## The DIM
 
 - No more actor and partner effects? No, they just hide!
-- We decompose (center) predictors into between-couple and within-couple components
-  - Between-couple variable: $\bar{X} - \mu_{X}$
-  - Within-couple variable: $Xi - \bar{X}$
+- We decompose predictors into two variables:
+  - Dyad mean (GM-centered): $\bar{X} - \mu_{X}$
+  - Within-dyad member deviation: $X_i - \bar{X}$
   
 <!-- insert a table?  --> 
 In other words, these predictors express: 
 
-- A couples' average level compared to the average of all couples
-- A partners' level compared to the average of their couple
+- A couple's average level compared with the average of all couples
+- A partner's level compared with the average of their couple
 
 <!-- ca. 2 Minutes -->
 
@@ -924,7 +924,7 @@ dim_reparameterization_grid(
 #| fig-height: 4.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Conceptual DIM with dyad-mean and member-deviation paths."
+#| fig-alt: "Conceptual DIM with a between-dyad path from the dyad mean and a within-dyad path from the within-dyad member deviation."
 
 draw_dim_diagram(show_residuals = FALSE)
 ```
@@ -941,7 +941,7 @@ draw_dim_diagram(show_residuals = FALSE)
 #| fig-height: 4.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Conceptual DIM separating dyad-mean and member-deviation effects."
+#| fig-alt: "Conceptual DIM separating the between-dyad effect of the dyad mean from the within-dyad effect of the within-dyad member deviation."
 
 draw_dim_diagram()
 ```

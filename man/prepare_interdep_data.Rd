@@ -54,7 +54,7 @@ lagged. Stable between-person versions are not.}
 \item{model_type}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
 actor and partner predictors. \code{"dim"} creates dyad-mean and
-within-dyad-deviation predictors. \code{"dsm"} creates dyadic-score model
+within-dyad member-deviation predictors. \code{"dsm"} creates dyadic-score model
 predictor columns. \code{"none"} skips model-specific predictor
 construction after validation, composition inference, and optional
 temporal predictor decomposition, and must be used alone. \code{"dim"} and

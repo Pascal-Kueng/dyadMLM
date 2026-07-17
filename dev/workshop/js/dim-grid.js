@@ -105,7 +105,8 @@
       halo.setAttribute("cy", yPixel(partner));
       description.textContent =
         "Actor " + format(actor, 2) + ", partner " + format(partner, 2) +
-        ", dyad mean " + format(mean, 2) + ", and member deviation " +
+        ", dyad mean " + format(mean, 2) +
+        ", and within-dyad member deviation " +
         format(within, 2) + ".";
     }
 

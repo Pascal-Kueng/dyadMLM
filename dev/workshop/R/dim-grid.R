@@ -55,7 +55,7 @@ dim_reparameterization_grid <- function(
         <input data-wdg-input="mean" type="range" min="-%s" max="%s" step="0.05" value="0">
       </label>
       <label class="wdg-control wdg-within">
-        <span><span>Member deviation, <i>x</i><sub>dev</sub></span><output data-wdg-output="within">0.00</output></span>
+        <span><span>Within-dyad member deviation, <i>x</i><sub>dev</sub></span><output data-wdg-output="within">0.00</output></span>
         <input data-wdg-input="within" type="range" min="-%s" max="%s" step="0.05" value="0">
       </label>
     </div>
@@ -89,7 +89,7 @@ dim_reparameterization_grid <- function(
       <div class="wdg-demos">
         <button type="button" data-wdg-demo="mean"><b>Shared dyad level</b><span>Both members +1</span></button>
         <div><i>b</i><sub>mean</sub> = <i>a</i> + <i>p</i></div>
-        <button type="button" data-wdg-demo="within"><b>Member deviation</b><span>Actor +1, partner −1</span></button>
+        <button type="button" data-wdg-demo="within"><b>Within-dyad member deviation</b><span>Actor +1, partner −1</span></button>
         <div><i>b</i><sub>dev</sub> = <i>a</i> − <i>p</i></div>
         <p>Drag the dot or move either set of sliders. Both equations give the same fitted change in MVPA.</p>
       </div>
