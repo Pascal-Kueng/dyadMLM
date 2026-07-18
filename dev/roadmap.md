@@ -61,12 +61,16 @@ Recently completed cleanup:
 
 Immediate sequence:
 
-1. implement and test the core covariance back-transformation
-2. document the bounded diagnostics workflow, without adding a general
+1. implement and test internal `glmmTMB` and `brms` random-block extraction and
+   shared/difference matching, returning the extracted structure and parameters
+   without transforming them yet
+2. implement and test the engine-independent covariance back-transformation,
+   then connect the validated `glmmTMB` extractor to the public v0.0.1 helper
+3. document the bounded diagnostics workflow, without adding a general
    diagnostics API
-3. finish release-facing APIM, mixed-APIM, and DSM vignette polish, including
+4. finish release-facing APIM, mixed-APIM, and DSM vignette polish, including
    the planned DSM ILD section
-4. rerun checks and prepare the first release
+5. rerun checks and prepare the first release
 
 The getting-started and DIM vignettes have completed detailed review.
 
@@ -134,7 +138,8 @@ The first release milestone is complete when all of the following are true:
 - [ ] A public fitted-`glmmTMB` covariance back-transformation, backed by an
   engine-independent mathematical core, converts the exchangeable
   shared/`.i_diff_*` residual representation to an interpretable member-level
-  covariance matrix, with scalar summaries and focused tests.
+  covariance matrix, with scalar summaries and focused tests. Its block
+  discovery is first validated independently through internal engine adapters.
 - [ ] Documentation shows a correct `glmmTMB`/DHARMa workflow for
   `dispformula = ~ 0`, role-specific checks, and clear limitations concerning
   autocorrelation and multicollinearity.
@@ -432,9 +437,43 @@ Complete these before calling the feature set CRAN-ready:
     model is aspirational/diagnostic and may require more data or Bayesian
     regularization
 - Add public covariance back-transformation helpers for v0.0.1
-  - Follow the implementation specification in
-    [`backtransform.md`](backtransform.md). Where the older bullets below are
-    narrower, `backtransform.md` records the current decision.
+  - Use the mathematical, validation, and output requirements in
+    [`backtransform.md`](backtransform.md). The extraction-first decisions below
+    supersede its current formula-reparsing section and should be folded back
+    into that specification during implementation.
+  - Start with an internal extraction-only function, provisionally
+    `.extract_exchangeable_residual_blocks(model)`. It should identify and
+    match candidate shared/`.i_diff_*` blocks and return their normalized
+    structure and extracted parameters, but should not yet back-transform or
+    expose a public API. This makes block discovery independently testable.
+  - Put model-specific access behind thin adapters and normalize both engines
+    to one common block/pair representation. Matching, validation, matrix
+    algebra, and result formatting should not depend on the fitted-model class.
+  - For `glmmTMB`, use the normalized structures already stored in the fitted
+    object: `model$modelInfo$reTrms$cond` for coefficient and grouping
+    information, `model$modelInfo$reStruc$condReStruc` for block order and
+    covariance structure, and `glmmTMB::VarCorr(model)$cond` for estimates.
+    Map repeated grouping factors with `flist` and its `assign` attribute rather
+    than relying on sanitized `VarCorr()` list names such as `g.1`.
+  - For `brms`, use `model$ranef` for its already-normalized group-level term
+    structure, `brms::VarCorr(model, summary = FALSE)` for draw-wise parameter
+    arrays, and `model$data` only for fitted-data validation. The internal
+    extractor may support and test this structure now; public draw-wise
+    back-transformation remains outside v0.0.1.
+  - Do not add or call `reformulas` solely to reparse fitted formulas.
+    `glmmTMB` has already created and stored the relevant `reformulas`-derived
+    structures, while `brms` uses and stores its own richer representation.
+    Avoid `brms::brmsterms()` here because it is an internal-facing parser and
+    does not improve on `model$ranef` for this task.
+  - Validate that stored block records, covariance structures, and extracted
+    parameters have compatible lengths, order, coefficient names, and grouping
+    factors before matching. Fail clearly instead of guessing when an older or
+    unusual fitted object lacks the expected structure; suggest
+    `glmmTMB::up2date()` or `brms::restructure()` where applicable.
+  - Test extraction in increasing complexity: one scalar pair, multiple pairs
+    for different compositions, and the same composition at stable and
+    same-occasion grouping levels. Only after these records and matches are
+    correct should the transformation layer consume them.
   - Implement the mathematics independently of a model engine. Given a
     shared/difference covariance matrix `Sigma_score` and member contrast matrix
     `T`, compute `Sigma_member = T %*% Sigma_score %*% t(T)`.
@@ -458,7 +497,7 @@ Complete these before calling the feature set CRAN-ready:
     discovers scalar shared/`.i_diff_*` pairs, and supports multiple
     exchangeable compositions and grouping levels. Defer random-slope blocks,
     DSM `+0.5/-0.5` transformations, uncertainty intervals, renamed generated
-    columns, and `brms` extraction to the next milestone.
+    columns, and public `brms` transformation to the next milestone.
 - Add a bounded `glmmTMB` diagnostics workflow for v0.0.1
   - Keep this documentation-first: one focused section that other model
     vignettes can link to, with no exported diagnostics or plotting API.
@@ -515,7 +554,8 @@ Complete these before calling the feature set CRAN-ready:
 - Extend the v0.0.1 covariance back-transformation only where applied use
   justifies it:
   - validate random-slope covariance blocks
-  - add a draw-wise `brms` adapter where a concrete model still requires the
+  - turn the tested internal `brms` extraction adapter into a public draw-wise
+    transformation only where a concrete model still requires the
     shared/difference back-transformation
   - add the distinct DSM `+0.5/-0.5` transformation
   - consider bootstrap-draw or other uncertainty transformations
