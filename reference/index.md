@@ -7,8 +7,8 @@
 - [`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
   : Compare nested models fitted to equivalent interdep data
 - [`exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md)
-  : Recover member-level residual covariance from the shared/difference
-  parameterization of exchangeable APIMs and DIMs
+  : Recover member-level residual covariance from exchangeable
+  random-effect blocks
 
 ## Example data
 

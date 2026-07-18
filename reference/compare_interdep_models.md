@@ -10,7 +10,7 @@ contain the same original observations before comparing the models.
 ## Usage
 
 ``` r
-compare_interdep_models(full, restricted, alpha = 0.05)
+compare_interdep_models(full, restricted)
 ```
 
 ## Arguments
@@ -23,23 +23,22 @@ compare_interdep_models(full, restricted, alpha = 0.05)
 
   The restricted (smaller) fitted `glmmTMB` model.
 
-- alpha:
-
-  Significance level used for the printed interpretation.
-
 ## Value
 
 An `anova`-style data frame containing model degrees of freedom,
 information criteria, log-likelihoods, the likelihood-ratio statistic,
-and its chi-squared p-value. Printing the result adds a cautious
-interpretation based on `alpha`.
+and its chi-squared p-value.
 
 ## Details
 
-Both model calls must use named `interdep_data` objects. The function
-checks the original, non-`.i_` columns, structural dyad metadata,
-outcome values and missingness, fitted row identities, model family and
-link, maximum-likelihood estimation, and model convergence.
+Both model calls must use named `interdep_data` objects that remain
+available when the models are compared. The checks assume these objects
+have not been modified since fitting. Each model must use the same
+untransformed response column. The function requires exactly identical
+original, non-`.i_` columns, including their types and attributes. It
+also checks structural dyad metadata, fitted rows, outcomes, weights and
+offsets, model family and link, maximum-likelihood estimation, and model
+convergence.
 
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the
@@ -82,6 +81,4 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #> full_model        4 908.52 921.45 -450.26   900.52 10.765      1   0.001034 **
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#> 
-#> Under the assumed nesting and chi-squared reference distribution, the test provides evidence that `restricted_model` fits the data worse than `full_model` (likelihood-ratio test: χ²(1) = 10.77, p = 0.001).
 ```

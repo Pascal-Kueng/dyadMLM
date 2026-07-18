@@ -59,7 +59,7 @@ observations before comparing the models.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compare_interdep_models</span><span class="op">(</span><span class="va">full</span>, <span class="va">restricted</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compare_interdep_models</span><span class="op">(</span><span class="va">full</span>, <span class="va">restricted</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -73,23 +73,21 @@ observations before comparing the models.</p>
 <dt id="arg-restricted">restricted<a class="anchor" aria-label="anchor" href="#arg-restricted"></a></dt>
 <dd><p>The restricted (smaller) fitted <code>glmmTMB</code> model.</p></dd>
 
-
-<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Significance level used for the printed interpretation.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>anova</code>-style data frame containing model degrees of freedom,
 information criteria, log-likelihoods, the likelihood-ratio statistic, and
-its chi-squared p-value. Printing the result adds a cautious interpretation
-based on <code>alpha</code>.</p>
+its chi-squared p-value.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Both model calls must use named <code>interdep_data</code> objects. The function checks
-the original, non-<code>.i_</code> columns, structural dyad metadata, outcome values and
-missingness, fitted row identities, model family and link,
+    <p>Both model calls must use named <code>interdep_data</code> objects that remain available
+when the models are compared. The checks assume these objects have not been
+modified since fitting. Each model must use the same untransformed response
+column. The function requires exactly identical original, non-<code>.i_</code> columns,
+including their types and attributes. It also checks structural dyad
+metadata, fitted rows, outcomes, weights and offsets, model family and link,
 maximum-likelihood estimation, and model convergence.</p>
 <p>These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the other.
@@ -132,8 +130,6 @@ on the boundary.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> full_model        4 908.52 921.45 -450.26   900.52 10.765      1   0.001034 **</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Under the assumed nesting and chi-squared reference distribution, the test provides evidence that `restricted_model` fits the data worse than `full_model` (likelihood-ratio test: χ²(1) = 10.77, p = 0.001).</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

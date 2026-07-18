@@ -379,8 +379,6 @@ compare_interdep_models(
 #> mixed_cross_gaussian_model             87.856      5  < 2.2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Under the assumed nesting and chi-squared reference distribution, the test provides evidence that `mixed_cross_gaussian_model_constrained` fits the data worse than `mixed_cross_gaussian_model` (likelihood-ratio test: χ²(5) = 87.86, p < .001).
 ```
 
 Here, the constrained model fits substantially worse than the full
