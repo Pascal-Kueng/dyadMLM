@@ -11,10 +11,10 @@ exchangeable_rescov(model)
 \item{model}{A fitted \code{glmmTMB} or \code{brmsfit} model.}
 }
 \value{
-A data frame with one row per matched composition and grouping-factor
-pair. It contains the fitted shared and difference variances, member-level
-residual variances, covariance, standard deviations, correlation, and the
-named member-level covariance matrix.
+A named list with one element per matched shared/difference block
+pair. Each element contains the member-level variance-covariance matrix in
+\code{varcov} and its standard-deviation/correlation representation in \code{sdcor}.
+Element names reproduce the two matched random-effect terms.
 }
 \description{
 Back-transforms exchangeable shared/difference residual-block pairs from a

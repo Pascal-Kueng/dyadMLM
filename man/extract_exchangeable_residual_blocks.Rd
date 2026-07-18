@@ -28,6 +28,7 @@ structures.
 For \code{glmmTMB} models, the function uses the normalized random-effect
 structures stored in \code{model$modelInfo} together with the fitted covariance
 estimates. For \code{brmsfit} models, it uses the stored group-level term
-structure and raw posterior covariance draws.
+structure and raw posterior covariance draws. Distributional and nonlinear
+\code{brms} random-effect terms are ignored.
 }
 \keyword{internal}
