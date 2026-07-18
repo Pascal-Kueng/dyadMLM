@@ -29,7 +29,16 @@
 #'
 #' @export
 exchangeable_rescov <- function(model) {
-  extract_exchangeable_residual_blocks(model)
+
+  re_blocks <- extract_exchangeable_residual_blocks(model)
+
+  # warn if brms used a residual-level re-term and advise to use as described in the details above.
+
+  # backtransform each block
+
+  # return
+
+  return(re_blocks) # potentially return model with changed strucutre so summary prints the exch() struct?
 }
 
 #' Extract exchangeable residual blocks from a fitted model
