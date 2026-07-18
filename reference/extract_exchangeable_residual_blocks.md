@@ -3,8 +3,7 @@
 Extracts the fitted random-effect structure and covariance parameters
 needed to identify exchangeable shared/difference residual-block pairs.
 Model-engine specific information is normalized to a common
-representation so that block matching and subsequent covariance
-back-transformation do not depend on the fitted-model class.
+representation.
 
 ## Usage
 
@@ -34,6 +33,4 @@ same-occasion residual structures.
 For `glmmTMB` models, the function uses the normalized random-effect
 structures stored in `model$modelInfo` together with the fitted
 covariance estimates. For `brmsfit` models, it uses the stored
-group-level term structure and raw posterior covariance draws. It does
-not reparse the fitted formula or back-transform the extracted
-covariance parameters.
+group-level term structure and raw posterior covariance draws.
