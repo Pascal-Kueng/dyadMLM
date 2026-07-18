@@ -69,6 +69,7 @@ compare_interdep_models <- function(full, restricted) {
     full_data
   )
 
+  # Use the argument expressions as row labels in the result.
   labels <- c(
     deparse1(substitute(restricted)),
     deparse1(substitute(full))
@@ -111,6 +112,9 @@ interdep_model_data <- function(model, caller_env, argument) {
 
   data_name <- as.character(data_call)
   model_formula <- stats::formula(model, component = "cond")
+
+  # A model fitted inside a helper may keep its data with its formula.
+  # Search there first, then where compare_interdep_models() was called.
   environments <- list(environment(model_formula), caller_env)
 
   for (search_env in environments) {
@@ -144,6 +148,7 @@ validate_interdep_model_data <- function(restricted, full,
     "The two prepared datasets have different numbers of rows."
   )
 
+  # Both preparations must agree on the columns that define the dyadic data.
   restricted_meta <- attr(restricted_data, "interdep")
   full_meta <- attr(full_data, "interdep")
   for (field in c("group", "member", "role", "time")) {
@@ -153,6 +158,8 @@ validate_interdep_model_data <- function(restricted, full,
     )
   }
 
+  # Generated .i_ columns may differ across model parameterizations.
+  # The original columns must still be identical.
   restricted_original <- names(restricted_data)[
     !startsWith(names(restricted_data), ".i_")
   ]
@@ -172,6 +179,7 @@ validate_interdep_model_data <- function(restricted, full,
     )
   }
 
+  # Inspect the left side directly so transformations such as log(y) fail.
   restricted_formula <- stats::formula(restricted, component = "cond")
   full_formula <- stats::formula(full, component = "cond")
   restricted_response <- restricted_formula[[2L]]
@@ -193,12 +201,15 @@ validate_interdep_model_data <- function(restricted, full,
     "Only an untransformed outcome stored in the prepared data is supported."
   )
 
+  # Row names show which observations glmmTMB kept after handling missing data.
   restricted_rows <- row.names(restricted$frame)
   full_rows <- row.names(full$frame)
   comparison_check(
     identical(restricted_rows, full_rows),
     "The two models were fitted to different observation rows."
   )
+
+  # Compare what the models actually fitted, not only the current data objects.
   comparison_check(
     identical(
       unname(stats::model.response(restricted$frame)),
@@ -207,6 +218,7 @@ validate_interdep_model_data <- function(restricted, full,
     "The fitted outcome values differ between the two models."
   )
 
+  # No weights means all observations have weight one.
   restricted_weights <- stats::model.weights(restricted$frame)
   full_weights <- stats::model.weights(full$frame)
   if (is.null(restricted_weights)) restricted_weights <- rep(1, length(restricted_rows))
@@ -216,6 +228,7 @@ validate_interdep_model_data <- function(restricted, full,
     "The two models use different observation weights."
   )
 
+  # No offset means an offset of zero for every observation.
   restricted_offset <- stats::model.offset(restricted$frame)
   full_offset <- stats::model.offset(full$frame)
   if (is.null(restricted_offset)) restricted_offset <- rep(0, length(restricted_rows))
@@ -266,6 +279,8 @@ interdep_likelihood_ratio <- function(full, restricted, labels) {
   restricted_log_lik <- as.numeric(restricted_log_lik)
   full_log_lik <- as.numeric(full_log_lik)
   statistic <- 2 * (full_log_lik - restricted_log_lik)
+
+  # Allow only a negligible negative value caused by numerical rounding.
   comparison_check(
     is.finite(statistic) && statistic >= -sqrt(.Machine$double.eps),
     paste0(
@@ -277,6 +292,8 @@ interdep_likelihood_ratio <- function(full, restricted, labels) {
   statistic <- max(0, statistic)
   df_difference <- full_df - restricted_df
   p_value <- stats::pchisq(statistic, df_difference, lower.tail = FALSE)
+
+  # Build the table here because anova.glmmTMB() rejects different data names.
   out <- data.frame(
     Df = c(restricted_df, full_df),
     AIC = c(stats::AIC(restricted), stats::AIC(full)),

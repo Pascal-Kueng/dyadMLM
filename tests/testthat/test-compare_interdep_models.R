@@ -159,7 +159,7 @@ test_that("compare_interdep_models checks source and fitted rows", {
   )
 })
 
-test_that("compare_interdep_models supports binomial models", {
+test_that("compare_interdep_models supports and checks model families", {
   skip_if_not_installed("glmmTMB")
 
   data <- example_dyadic_crosssectional
@@ -189,6 +189,11 @@ test_that("compare_interdep_models supports binomial models", {
     family = stats::binomial(),
     data = full_data
   )
+  gaussian_model <- glmmTMB::glmmTMB(
+    binary_outcome ~ gender,
+    family = stats::gaussian(),
+    data = full_data
+  )
 
   comparison <- compare_interdep_models(
     full = full_model,
@@ -200,6 +205,13 @@ test_that("compare_interdep_models supports binomial models", {
   expect_equal(
     comparison$Chisq[2],
     2 * as.numeric(logLik(full_model) - logLik(restricted_model))
+  )
+  expect_error(
+    compare_interdep_models(
+      full = gaussian_model,
+      restricted = restricted_model
+    ),
+    "same family and link"
   )
 })
 
