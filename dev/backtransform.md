@@ -7,15 +7,15 @@ back-transformation helper in `interdep`. It records the decisions made for
 v0.0.1 and the intended path to later model engines and more complex covariance
 structures.
 
-Working public function name:
+Public function name:
 
 ```r
-backtransform_residual_covariance(model)
+exchangeable_rescov(model)
 ```
 
-The name should be finalized before export. The v0.0.1 function takes a fitted
-model, discovers all supported shared/difference residual-block pairs, and
-returns their member-level covariance structures.
+The v0.0.1 function takes a fitted model, discovers all supported
+shared/difference residual-block pairs, and returns their member-level
+covariance structures.
 
 ## Purpose
 

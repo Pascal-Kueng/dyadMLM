@@ -441,11 +441,14 @@ Complete these before calling the feature set CRAN-ready:
     [`backtransform.md`](backtransform.md). The extraction-first decisions below
     supersede its current formula-reparsing section and should be folded back
     into that specification during implementation.
-  - Start with an internal extraction-only function, provisionally
-    `.extract_exchangeable_residual_blocks(model)`. It should identify and
-    match candidate shared/`.i_diff_*` blocks and return their normalized
-    structure and extracted parameters, but should not yet back-transform or
-    expose a public API. This makes block discovery independently testable.
+  - Start with the internal extraction-only function
+    `extract_exchangeable_residual_blocks(model)`. It should identify and match
+    candidate shared/`.i_diff_*` blocks and return their normalized structure
+    and extracted parameters without back-transforming them. The exported
+    `exchangeable_rescov(model)` development scaffold currently
+    delegates to this extractor and returns the model unchanged. This makes
+    block discovery independently testable while reserving the intended public
+    function name.
   - Put model-specific access behind thin adapters and normalize both engines
     to one common block/pair representation. Matching, validation, matrix
     algebra, and result formatting should not depend on the fitted-model class.
