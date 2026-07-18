@@ -6,13 +6,95 @@
 #' deviations, and correlation.
 #'
 #' @param model A fitted `glmmTMB` or `brmsfit` model.
+#' @param pairs `NULL` for automatic matching, or explicit random-effect block
+#'   pairs for constrained, renamed, or ambiguous models. Each pair must contain
+#'   `dyad_mean`, `member_deviation`, and `idiff`; it may also contain
+#'   `mean_indicator`. Multiple pairs are supplied in an outer list. Identify
+#'   each block by a model-style random-effect term copied from the model
+#'   formula. Common equivalent forms such as
+#'   `(1 | group)` and `us(1 | group)`,
+#'   or `(0 + x || group)` and `diag(0 + x | group)`, are recognized. Use a named
+#'   list and set one component to `NULL`
+#'   only when that entire block is absent from the fitted model formula. Do not
+#'   use `NULL` for a block that is present but estimated at zero or that you do
+#'   not want to report. `idiff` is the exact member-deviation indicator name,
+#'   such as `.i_diff_assumed_exchangeable_arbitrary`, `IDIFF`, or
+#'   `difference_indicator`. `mean_indicator` is the exact composition-specific
+#'   dyad-mean indicator name. It defaults to `"1"`, meaning that the ordinary
+#'   random intercept represents the dyad mean.
 #'
 #' @details
-#' The function identifies dyad-mean and member-deviation blocks, matches them by
-#' dyad composition and grouping factor, and back-transforms each matched pair
-#' to the covariance structure of two arbitrarily labelled members. It supports
-#' multiple exchangeable compositions and grouping levels in the same model.
-#' The fitted model is not refitted or modified.
+#' The function automatically identifies dyad-mean and member-deviation blocks,
+#' matches them by dyad composition and grouping factor, and back-transforms each
+#' matched pair to the covariance structure of two arbitrarily labelled members.
+#' It supports multiple exchangeable compositions and grouping levels in the
+#' same model. The fitted model is not refitted or modified.
+#'
+#' Automatic matching requires complete, unambiguous pairs. Use `pairs` to
+#' assign blocks explicitly when terms were omitted to impose constraints or
+#' when more than one match is possible. Terms present in one supplied block but
+#' absent from the other are treated as constrained to zero.
+#'
+#' **Important:** `dyad_mean = NULL` or `member_deviation = NULL` has a narrower
+#' meaning: the corresponding *entire random-effect block was not included in
+#' the fitted model formula*. If the block exists in the fitted model, supply
+#' it—even if its estimated variance is zero, some of its terms were omitted, or
+#' you do not plan to report the resulting matrix. Missing terms are determined
+#' from the supplied blocks; users do not declare them with `NULL`.
+#'
+#' When `pairs` is supplied, only those pairs are returned; all other blocks are
+#' left alone. Unlisted blocks are inspected only to verify that a component
+#' declared as `NULL` does not have an existing compatible block.
+#'
+#' The explicit interface can be used for one pair:
+#'
+#' ```r
+#' pairs = list(
+#'   dyad_mean = "(1 | coupleID)",
+#'   member_deviation =
+#'     "(0 + IDIFF | coupleID)",
+#'   idiff = "IDIFF"
+#' )
+#' ```
+#'
+#' For a composition-specific dyad-mean block, supply both indicators:
+#'
+#' ```r
+#' pairs = list(
+#'   dyad_mean = "(0 + SAMESEX + SAMESEX:time | coupleID)",
+#'   member_deviation =
+#'     "(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)",
+#'   idiff = "IDIFF_SAMESEX",
+#'   mean_indicator = "SAMESEX"
+#' )
+#' ```
+#'
+#' For multiple pairs, use an outer list:
+#'
+#' ```r
+#' pairs = list(
+#'   list(
+#'     dyad_mean = "(1 | coupleID)",
+#'     member_deviation =
+#'       "(0 + IDIFF | coupleID)",
+#'     idiff = "IDIFF"
+#'   ),
+#'   # No member-deviation block was included for this grouping level:
+#'   list(
+#'     dyad_mean = "(1 | coupleID:day)",
+#'     member_deviation = NULL,
+#'     idiff = "IDIFF"
+#'   )
+#' )
+#' ```
+#'
+#' Within every supplied member-deviation block, `idiff` must appear in every
+#' coefficient, either alone for the member-deviation intercept or in an
+#' interaction such as `IDIFF:time` for a slope. Literal products of two columns,
+#' such as `I(IDIFF * time)` or `I(time * IDIFF)`, are also recognized as the
+#' member-deviation counterpart of `time`. More complex arithmetic inside
+#' `I()` is not supported. Similarly, a non-default `mean_indicator` must appear
+#' in every dyad-mean coefficient.
 #'
 #' In Gaussian `brms` models, cross-sectional and same-occasion partner residual
 #' dependence is usually represented directly with
@@ -28,23 +110,19 @@
 #'   `sdcor`. Element names reproduce the two matched random-effect terms.
 #'
 #' @export
-exchangeable_rescov <- function(model, pairs = NULL, ignore = NULL) {
-  if (!is.null(ignore) && is.null(pairs)) {
-    stop("`ignore` requires `pairs` to be supplied, such as ... insert example...")
-  }
-
+exchangeable_rescov <- function(model, pairs = NULL) {
   model_data <- extract_exchangeable_residual_blocks(model)
 
-  # warn if brms used a residual-level re-term and advise to use as described in the details above.
-
+  # TODO: Warn about brms residual-level random-effect terms.
 
   if (is.null(pairs)) {
     model_data$pairs <- match_exchangeable_residual_blocks(model_data$blocks)
   } else {
-    model_data$paris <- apply_pairs...
+    model_data$pairs <- match_supplied_exchangeable_residual_blocks(
+      model_data$blocks,
+      pairs
+    )
   }
-
-
   return(model_data)
 }
 
@@ -89,9 +167,154 @@ extract_exchangeable_residual_blocks <- function(model) {
   )
 }
 
+normalize_exchangeable_block_label <- function(term) {
+  term <- trimws(term)
+  structure <- NULL
+  core <- term
+
+  # glmmTMB shows the covariance structure as an outer wrapper; brms does not.
+  wrapper_match <- regexec(
+    "^([[:alnum:]_.]+)[[:space:]]*\\((.*)\\)[[:space:]]*$",
+    term,
+    perl = TRUE
+  )
+  wrapper_parts <- regmatches(term, wrapper_match)[[1L]]
+  has_wrapper <- length(wrapper_parts) == 3L &&
+    grepl("|", wrapper_parts[[3L]], fixed = TRUE)
+  if (has_wrapper) {
+    structure <- wrapper_parts[[2L]]
+    core <- wrapper_parts[[3L]]
+  } else if (
+    startsWith(core, "(") &&
+      endsWith(core, ")")
+  ) {
+    core <- substr(core, 2L, nchar(core) - 1L)
+  }
+
+  uncorrelated <- grepl("||", core, fixed = TRUE)
+  core <- gsub("||", "|", core, fixed = TRUE)
+  bar_parts <- strsplit(core, "|", fixed = TRUE)[[1L]]
+  if (length(bar_parts) != 2L) {
+    return(NA_character_)
+  }
+
+  if (is.null(structure)) {
+    structure <- if (uncorrelated) "diag" else "us"
+  }
+
+  lhs <- trimws(bar_parts[[1L]])
+  group <- trimws(bar_parts[[2L]])
+  lhs_terms <- tryCatch(
+    stats::terms(stats::as.formula(paste("~", lhs))),
+    error = function(e) NULL
+  )
+  group_expression <- tryCatch(str2lang(group), error = function(e) NULL)
+  if (is.null(lhs_terms) || is.null(group_expression)) {
+    return(NA_character_)
+  }
+
+  coefficients <- attr(lhs_terms, "term.labels")
+  for (i in seq_along(coefficients)) {
+    interaction_parts <- strsplit(coefficients[[i]], ":", fixed = TRUE)[[1L]]
+    coefficients[[i]] <- paste(sort(interaction_parts), collapse = ":")
+  }
+  lhs <- c(
+    if (attr(lhs_terms, "intercept") == 1L) "1" else "0",
+    sort(coefficients)
+  )
+
+  normalized_term <- paste0(
+    structure,
+    "(", paste(lhs, collapse = "+"),
+    "|", deparse1(group_expression), ")"
+  )
+  return(normalized_term)
+}
+
+format_exchangeable_block_inventory <- function(blocks) {
+  terms <- vapply(blocks, `[[`, character(1L), "term")
+  inventory <- paste0(
+    "\nAvailable extracted random-effect blocks:\n",
+    paste0("  [", seq_along(terms), "] `", terms, "`", collapse = "\n")
+  )
+  return(inventory)
+}
+
+parse_exchangeable_coefficient <- function(coefficient) {
+  expression <- tryCatch(
+    str2lang(coefficient),
+    error = function(e) NULL
+  )
+  if (is.null(expression)) {
+    return(list(variables = character(), i_product = NULL))
+  }
+
+  i_product <- NULL
+  if (
+    is.call(expression) &&
+      length(expression) == 2L &&
+      identical(expression[[1L]], as.name("I"))
+  ) {
+    product <- expression[[2L]]
+    if (
+      is.call(product) &&
+        length(product) == 3L &&
+        identical(product[[1L]], as.name("*")) &&
+        is.symbol(product[[2L]]) &&
+        is.symbol(product[[3L]])
+    ) {
+      i_product <- c(
+        as.character(product[[2L]]),
+        as.character(product[[3L]])
+      )
+    }
+  }
+
+  return(list(
+    variables = all.vars(expression),
+    i_product = i_product
+  ))
+}
+
+brms_stored_coefficient_name <- function(coefficient) {
+  patterns <- c(" ", "(", ")", "[", "]", ",", "\"", "'", "?", "+", "-", "*", "/", "^", "=", "$")
+  replacements <- c(rep("", 9L), "P", "M", "MU", "D", "E", "EQ", "USD")
+
+  for (i in seq_along(patterns)) {
+    coefficient <- gsub(
+      patterns[[i]],
+      replacements[[i]],
+      coefficient,
+      fixed = TRUE
+    )
+  }
+  return(coefficient)
+}
+
+restore_brms_i_product_coefficients <- function(coefficients, formula) {
+  formula_terms <- attr(stats::terms(formula), "term.labels")
+  i_products <- formula_terms[vapply(
+    formula_terms,
+    function(term) {
+      !is.null(parse_exchangeable_coefficient(term)$i_product)
+    },
+    logical(1L)
+  )]
+
+  for (term in i_products) {
+    stored_term <- brms_stored_coefficient_name(term)
+    coefficient_index <- which(coefficients == stored_term)
+    if (length(coefficient_index) == 1L) {
+      coefficients[[coefficient_index]] <- term
+    }
+  }
+  return(coefficients)
+}
+
 match_exchangeable_residual_blocks <- function(blocks) {
   matched_pairs <- list()
   used_dyad_mean_indices <- integer()
+  block_inventory <- format_exchangeable_block_inventory(blocks)
 
   # Identify all exchangeable compositions before matching. An unmarked
   # dyad-mean block is safe only when the model has one exchangeable composition.
@@ -106,6 +329,7 @@ match_exchangeable_residual_blocks <- function(blocks) {
   if (length(member_deviation_indices) == 0L) {
     stop(
       "No supported `.i_diff_*_arbitrary` member-deviation block was found.",
+      block_inventory,
       call. = FALSE
     )
   }
@@ -199,8 +423,9 @@ match_exchangeable_residual_blocks <- function(blocks) {
       stop(
         "No dyad-mean block matched the member-deviation block `",
         member_deviation_block$term, "`. Automatic matching requires the same ",
-        "grouping factor and identical terms. Explicit matching ",
-        "of intentionally constrained structures will be added through a `pairs` argument.",
+        "grouping factor and identical terms. Use `pairs` to match an ",
+        "intentionally constrained structure explicitly.",
+        block_inventory,
         call. = FALSE
       )
     }
@@ -214,7 +439,9 @@ match_exchangeable_residual_blocks <- function(blocks) {
         "More than one dyad-mean block matched the member-deviation block `",
         member_deviation_block$term, "`: `",
         paste(candidate_terms, collapse = "`, `"),
-        "`. Automatic matching requires exactly one unambiguous match.",
+        "`. Automatic matching requires exactly one unambiguous match; use ",
+        "`pairs` to identify the intended match explicitly.",
+        block_inventory,
         call. = FALSE
       )
     }
@@ -223,6 +450,7 @@ match_exchangeable_residual_blocks <- function(blocks) {
     if (dyad_mean_index %in% used_dyad_mean_indices) {
       stop(
         "A dyad-mean block matched more than one member-deviation block.",
+        block_inventory,
         call. = FALSE
       )
     }
@@ -235,9 +463,12 @@ match_exchangeable_residual_blocks <- function(blocks) {
     )
     # Otherwise, return the generic block if it is a match
     if (is.null(dyad_mean_terms)) {
+      mean_indicator <- "1"
       dyad_mean_terms <- exchangeable_base_terms(
         blocks[[dyad_mean_index]]$coefficients
       )
+    } else {
+      mean_indicator <- composition_marker
     }
 
 
@@ -246,7 +477,10 @@ match_exchangeable_residual_blocks <- function(blocks) {
     matched_pairs[[length(matched_pairs) + 1L]] <- list(
       dyad_mean_index = dyad_mean_index,
       member_deviation_index = member_deviation_index,
+      idiff = member_deviation_marker,
+      mean_indicator = mean_indicator,
       terms = dyad_mean_terms,
+      dyad_mean_order = seq_along(dyad_mean_terms),
       member_deviation_order = match(
         dyad_mean_terms,
         member_deviation_terms
@@ -258,14 +492,384 @@ match_exchangeable_residual_blocks <- function(blocks) {
   return(matched_pairs)
 }
 
+normalize_supplied_exchangeable_pairs <- function(pairs) {
+  required_names <- c("dyad_mean", "member_deviation", "idiff")
+  allowed_names <- c(required_names, "mean_indicator")
+  is_pair <- function(x) {
+    !is.null(names(x)) &&
+      !anyDuplicated(names(x)) &&
+      all(required_names %in% names(x)) &&
+      all(names(x) %in% allowed_names)
+  }
+
+  # A single named pair does not need an additional outer list.
+  if (is_pair(pairs)) {
+    pairs <- list(pairs)
+  }
+  if (!is.list(pairs) || length(pairs) == 0L) {
+    stop(
+      "`pairs` must be a named pair or a list of named pairs containing `dyad_mean`, `member_deviation`, and `idiff`.",
+      call. = FALSE
+    )
+  }
+  for (i in seq_along(pairs)) {
+    if (!is_pair(pairs[[i]])) {
+      stop(
+        "Each element of `pairs` must contain `dyad_mean`, `member_deviation`, and `idiff`, with optional `mean_indicator`.",
+        call. = FALSE
+      )
+    }
+
+    pairs[[i]] <- as.list(pairs[[i]])
+    if (!"mean_indicator" %in% names(pairs[[i]])) {
+      pairs[[i]]$mean_indicator <- "1"
+    }
+  }
+
+  return(pairs)
+}
+
+resolve_exchangeable_block <- function(selector, location, block_info) {
+  if (
+    !is.character(selector) ||
+      length(selector) != 1L ||
+      is.na(selector) ||
+      !nzchar(selector)
+  ) {
+    stop(
+      location,
+      " must be one random-effect term copied from the model formula.",
+      block_info$inventory,
+      call. = FALSE
+    )
+  }
+
+  matches <- which(block_info$terms == selector)
+  if (length(matches) == 0L) {
+    normalized_selector <- normalize_exchangeable_block_label(selector)
+    if (!is.na(normalized_selector)) {
+      matches <- which(block_info$normalized_terms == normalized_selector)
+    }
+  }
+  if (length(matches) == 0L) {
+    stop(
+      location,
+      " does not match an extracted random-effect block.",
+      block_info$inventory,
+      call. = FALSE
+    )
+  }
+  if (length(matches) > 1L) {
+    stop(
+      location,
+      " matches more than one random-effect block and cannot be selected uniquely.",
+      block_info$inventory,
+      call. = FALSE
+    )
+  }
+  return(matches[[1L]])
+}
+
+validate_exchangeable_indicator <- function(
+  indicator,
+  location,
+  allow_intercept = FALSE
+) {
+  if (
+    !is.character(indicator) ||
+      length(indicator) != 1L ||
+      is.na(indicator) ||
+      !nzchar(indicator) ||
+      (!allow_intercept && identical(indicator, "1"))
+  ) {
+    description <- if (allow_intercept) {
+      "one column name or `\"1\"` for the ordinary random intercept"
+    } else {
+      "one member-deviation indicator column name"
+    }
+    stop(location, " must be ", description, ".", call. = FALSE)
+  }
+}
+
+contains_exchangeable_indicator <- function(coefficients, indicator) {
+  return(any(vapply(
+    coefficients,
+    function(coefficient) {
+      indicator %in% parse_exchangeable_coefficient(coefficient)$variables
+    },
+    logical(1L)
+  )))
+}
+
+exchangeable_component_terms <- function(coefficients, indicator, component) {
+  component <- match.arg(component, c("dyad_mean", "member_deviation"))
+  if (identical(component, "dyad_mean") && identical(indicator, "1")) {
+    return(exchangeable_base_terms(coefficients))
+  }
+  return(exchangeable_base_terms(
+    coefficients,
+    indicator,
+    require_marker = TRUE
+  ))
+}
+
+find_compatible_exchangeable_blocks <- function(
+  blocks,
+  groups,
+  group,
+  indicator,
+  component,
+  required_terms = NULL
+) {
+  indices <- which(groups == group)
+  compatible <- logical(length(indices))
+
+  for (i in seq_along(indices)) {
+    terms <- exchangeable_component_terms(
+      blocks[[indices[[i]]]]$coefficients,
+      indicator,
+      component
+    )
+    compatible[[i]] <- !is.null(terms) &&
+      (is.null(required_terms) || any(terms %in% required_terms))
+  }
+  return(indices[compatible])
+}
+
+match_one_supplied_exchangeable_pair <- function(
+  blocks,
+  pair,
+  pair_number,
+  paired_indices,
+  block_info
+) {
+  idiff <- pair[["idiff"]]
+  mean_indicator <- pair[["mean_indicator"]]
+  validate_exchangeable_indicator(
+    idiff,
+    paste0("`pairs[[", pair_number, "]]$idiff`")
+  )
+  validate_exchangeable_indicator(
+    mean_indicator,
+    paste0("`pairs[[", pair_number, "]]$mean_indicator`"),
+    allow_intercept = TRUE
+  )
+  if (identical(idiff, mean_indicator)) {
+    stop(
+      "`idiff` and `mean_indicator` must identify different model columns.",
+      call. = FALSE
+    )
+  }
+
+  dyad_mean_index <- if (is.null(pair[["dyad_mean"]])) {
+    NA_integer_
+  } else {
+    resolve_exchangeable_block(
+      pair[["dyad_mean"]],
+      paste0("`pairs[[", pair_number, "]]$dyad_mean`"),
+      block_info
+    )
+  }
+  member_deviation_index <- if (is.null(pair[["member_deviation"]])) {
+    NA_integer_
+  } else {
+    resolve_exchangeable_block(
+      pair[["member_deviation"]],
+      paste0("`pairs[[", pair_number, "]]$member_deviation`"),
+      block_info
+    )
+  }
+
+  if (is.na(dyad_mean_index) && is.na(member_deviation_index)) {
+    stop(
+      "A supplied pair cannot have both `dyad_mean = NULL` and `member_deviation = NULL`.",
+      call. = FALSE
+    )
+  }
+
+  current_indices <- c(dyad_mean_index, member_deviation_index)
+  current_indices <- current_indices[!is.na(current_indices)]
+  if (
+    anyDuplicated(current_indices) ||
+      any(current_indices %in% paired_indices)
+  ) {
+    stop(
+      "Each random-effect block can occur in only one supplied pair.",
+      call. = FALSE
+    )
+  }
+
+  if (
+    !is.na(dyad_mean_index) &&
+      !is.na(member_deviation_index) &&
+      !identical(
+        blocks[[dyad_mean_index]]$group,
+        blocks[[member_deviation_index]]$group
+      )
+  ) {
+    stop(
+      "The dyad-mean and member-deviation blocks in a pair must use the same grouping factor.",
+      call. = FALSE
+    )
+  }
+
+  member_deviation_terms <- character()
+  if (!is.na(member_deviation_index)) {
+    member_deviation_block <- blocks[[member_deviation_index]]
+    if (
+      !identical(mean_indicator, "1") &&
+        contains_exchangeable_indicator(
+          member_deviation_block$coefficients,
+          mean_indicator
+        )
+    ) {
+      stop(
+        "The supplied member-deviation block contains its `mean_indicator`.",
+        call. = FALSE
+      )
+    }
+    member_deviation_terms <- exchangeable_component_terms(
+      member_deviation_block$coefficients,
+      idiff,
+      "member_deviation"
+    )
+    if (is.null(member_deviation_terms)) {
+      stop(
+        "`idiff = \"", idiff,
+        "\"` must appear in every coefficient of the supplied member-deviation block.",
+        call. = FALSE
+      )
+    }
+  }
+
+  dyad_mean_terms <- character()
+  if (!is.na(dyad_mean_index)) {
+    dyad_mean_block <- blocks[[dyad_mean_index]]
+    if (contains_exchangeable_indicator(dyad_mean_block$coefficients, idiff)) {
+      stop(
+        "The supplied dyad-mean block contains its `idiff` indicator.",
+        call. = FALSE
+      )
+    }
+    dyad_mean_terms <- exchangeable_component_terms(
+      dyad_mean_block$coefficients,
+      mean_indicator,
+      "dyad_mean"
+    )
+    if (is.null(dyad_mean_terms)) {
+      stop(
+        "`mean_indicator = \"", mean_indicator,
+        "\"` must appear in every coefficient of the supplied dyad-mean block.",
+        call. = FALSE
+      )
+    }
+  }
+
+  # `NULL` means that no compatible block exists in the fitted model.
+  if (is.na(member_deviation_index)) {
+    candidate_indices <- find_compatible_exchangeable_blocks(
+      blocks,
+      block_info$groups,
+      dyad_mean_block$group,
+      idiff,
+      "member_deviation"
+    )
+    if (length(candidate_indices) > 0L) {
+      stop(
+        "`member_deviation = NULL` was supplied, but a compatible block exists: `",
+        paste(block_info$terms[candidate_indices], collapse = "`, `"),
+        "`. Supply that block instead of `NULL`.",
+        call. = FALSE
+      )
+    }
+  }
+
+  if (is.na(dyad_mean_index)) {
+    candidate_indices <- find_compatible_exchangeable_blocks(
+      blocks,
+      block_info$groups,
+      member_deviation_block$group,
+      mean_indicator,
+      "dyad_mean",
+      required_terms = member_deviation_terms
+    )
+    if (length(candidate_indices) > 0L) {
+      stop(
+        "`dyad_mean = NULL` was supplied, but a compatible block exists: `",
+        paste(block_info$terms[candidate_indices], collapse = "`, `"),
+        "`. Supply that block instead of `NULL`.",
+        call. = FALSE
+      )
+    }
+  }
+
+  if (anyDuplicated(dyad_mean_terms) || anyDuplicated(member_deviation_terms)) {
+    stop(
+      "A supplied block contains coefficients that map to the same exchangeable term.",
+      call. = FALSE
+    )
+  }
+
+  # Keep the dyad-mean order and append terms found only in the
+  # member-deviation block. Missing indices represent structural zeros.
+  terms <- unique(c(dyad_mean_terms, member_deviation_terms))
+  return(list(
+    dyad_mean_index = dyad_mean_index,
+    member_deviation_index = member_deviation_index,
+    idiff = idiff,
+    mean_indicator = mean_indicator,
+    terms = terms,
+    dyad_mean_order = match(terms, dyad_mean_terms),
+    member_deviation_order = match(terms, member_deviation_terms)
+  ))
+}
+
+match_supplied_exchangeable_residual_blocks <- function(blocks, pairs) {
+  pairs <- normalize_supplied_exchangeable_pairs(pairs)
+
+  block_terms <- vapply(blocks, `[[`, character(1L), "term")
+  block_info <- list(
+    terms = block_terms,
+    groups = vapply(blocks, `[[`, character(1L), "group"),
+    normalized_terms = vapply(
+      block_terms,
+      normalize_exchangeable_block_label,
+      character(1L)
+    ),
+    inventory = format_exchangeable_block_inventory(blocks)
+  )
+  matched_pairs <- vector("list", length(pairs))
+  paired_indices <- integer()
+
+  for (i in seq_along(pairs)) {
+    matched_pairs[[i]] <- match_one_supplied_exchangeable_pair(
+      blocks,
+      pairs[[i]],
+      pair_number = i,
+      paired_indices,
+      block_info
+    )
+    paired_indices <- c(
+      paired_indices,
+      matched_pairs[[i]]$dyad_mean_index,
+      matched_pairs[[i]]$member_deviation_index
+    )
+    paired_indices <- paired_indices[!is.na(paired_indices)]
+  }
+
+  return(matched_pairs)
+}
+
 find_exchangeable_member_deviation_marker <- function(coefficients) {
-  parts <- unlist(
-    strsplit(coefficients, ":", fixed = TRUE),
+  variables <- unlist(
+    lapply(coefficients, function(coefficient) {
+      parse_exchangeable_coefficient(coefficient)$variables
+    }),
     use.names = FALSE
   )
   markers <- unique(grep(
     "^\\.i_diff_.+_arbitrary$",
-    parts,
+    variables,
     value = TRUE
   ))
 
@@ -291,8 +895,21 @@ exchangeable_base_terms <- function(
   contains_marker <- logical(length(coefficients))
 
   for (i in seq_along(coefficients)) {
+    parsed_coefficient <- parse_exchangeable_coefficient(coefficients[[i]])
+    contains_marker[[i]] <-
+      !is.null(marker) && marker %in% parsed_coefficient$variables
+
+    i_product <- parsed_coefficient$i_product
+    if (!is.null(i_product) && sum(i_product == marker) == 1L) {
+      terms[[i]] <- i_product[i_product != marker][[1L]]
+      next
+    }
+
     parts <- strsplit(coefficients[[i]], ":", fixed = TRUE)[[1L]]
-    contains_marker[[i]] <- !is.null(marker) && marker %in% parts
+    # Marker use inside any other expression is not a supported interaction.
+    if (contains_marker[[i]] && !marker %in% parts) {
+      return(NULL)
+    }
     parts <- parts[!parts %in% marker]
     terms[[i]] <- if (length(parts) == 0L) {
       "(Intercept)"
@@ -497,7 +1114,12 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     # Values within one validated block share their group and correlation flag.
     group <- block$group[[1L]]
     correlated <- isTRUE(block$cor[[1L]])
-    coefficients <- unname(block$coef)
+    stored_coefficients <- unname(block$coef)
+    coefficients <- restore_brms_i_product_coefficients(
+      stored_coefficients,
+      block$form[[1L]]
+    )
+    stored_coefficients[stored_coefficients == "Intercept"] <- "(Intercept)"
     coefficients[coefficients == "Intercept"] <- "(Intercept)"
     formula_rhs <- trimws(sub("^~", "", deparse1(block$form[[1L]])))
     bar <- if (correlated) "|" else "||"
@@ -514,7 +1136,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
 
     covariance_names <- colnames(group_covariance$sd)
     covariance_names[covariance_names == "Intercept"] <- "(Intercept)"
-    coefficient_index <- match(coefficients, covariance_names)
+    coefficient_index <- match(stored_coefficients, covariance_names)
     if (anyNA(coefficient_index)) {
       stop(
         "Internal error: `brms` covariance draws could not be aligned with their random-effect coefficients.",

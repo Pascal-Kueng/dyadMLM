@@ -11,19 +11,18 @@ extract_exchangeable_residual_blocks(model)
 }
 \value{
 A normalized internal representation containing the model engine,
-extracted random-effect blocks, matched shared/difference block pairs, and
-their fitted covariance parameters.
+extracted random-effect blocks and their fitted covariance parameters.
 }
 \description{
 Extracts the fitted random-effect structure and covariance parameters needed
-to identify exchangeable shared/difference residual-block pairs. Model-engine
-specific information is normalized to a common representation.
+to identify exchangeable dyad-mean/member-deviation random-effect pairs.
+Model-engine-specific information is normalized to a common representation.
 }
 \details{
-Shared and \verb{.i_diff_*} blocks are matched by dyad composition and grouping
-factor. This permits more than one exchangeable composition and more than one
-grouping level, such as separate stable dyad and same-occasion residual
-structures.
+Dyad-mean and \verb{.i_diff_*} member-deviation blocks are matched by dyad
+composition and grouping factor. This permits more than one exchangeable
+composition and more than one grouping level, such as separate stable dyad
+and same-occasion residual structures.
 
 For \code{glmmTMB} models, the function uses the normalized random-effect
 structures stored in \code{model$modelInfo} together with the fitted covariance

@@ -279,18 +279,26 @@ exchangeable shared/difference residual structure was found.
 
 Users may freely name their original variables, grouping variables, outcomes,
 and predictors. Automatic discovery requires the `interdep`-generated
-`.i_is_*` and `.i_diff_*` columns to retain their generated names.
-
-Arbitrary renaming is not safely inferable from the fitted formula alone. A
-future explicit escape hatch may accept user-supplied pairs, for example:
+`.i_is_*` and `.i_diff_*` columns to retain their generated names. Explicit
+matching also supports user-created indicator names because the user declares
+their meaning:
 
 ```r
 pairs = list(
-  list(shared = "my_shared", difference = "my_difference")
+  dyad_mean = "(1 + time | coupleID)",
+  member_deviation = "(0 + IDIFF + IDIFF:time | coupleID)",
+  idiff = "IDIFF"
 )
 ```
 
-This is not part of v0.0.1.
+Here `mean_indicator = "1"` is implied: the ordinary random intercept is the
+dyad mean. A composition-specific block instead supplies its indicator, for
+example `mean_indicator = "SAMESEX"`. The term strings select fitted blocks;
+the two indicator fields define how their coefficients map to the same
+intercept and slope terms. The member-deviation slope may use either ordinary
+interaction syntax (`IDIFF:time`) or a literal two-column product
+(`I(IDIFF * time)` or `I(time * IDIFF)`). More complex arithmetic inside `I()`
+is deliberately not matched.
 
 ## Model and estimate validation
 

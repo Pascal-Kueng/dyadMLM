@@ -18,6 +18,10 @@ helpers, and eventually model syntax explicit and reproducible.
   - the note is provisional and must be revised against the methodological
     papers in [`References/`](References/) before implementation
 - Directional DSM derivation and implementation record: [`dsm.md`](dsm.md)
+- Initial covariance back-transformation mathematics and design history:
+  [`backtransform.md`](backtransform.md)
+  - its original API scope and implementation-status sections are stale; use
+    the current-state section below and the code as authoritative
 - ILD non-independence evidence and tutorial policy:
   [`ild-nonindependence.md`](ild-nonindependence.md)
 - Composition-inference debugging scratch code:
@@ -58,14 +62,22 @@ Recently completed cleanup:
 - accepted the current composition metadata shape for v0.0.1: returned data use
   final analysis compositions, while pooling metadata records the pooled source
   compositions in a compact `pooled_from` summary
+- implemented common extraction of `glmmTMB` and `brms` random-effect blocks,
+  including covariance arrays, normalized labels, and focused rejection of
+  unsupported backend structures
+- implemented automatic and explicit matching of dyad-mean and
+  `.i_diff_*_arbitrary` member-deviation blocks, including random slopes,
+  multiple compositions/grouping levels, coefficient reordering, and
+  structurally omitted terms
 
 Immediate sequence:
 
-1. implement and test internal `glmmTMB` and `brms` random-block extraction and
-   shared/difference matching, returning the extracted structure and parameters
-   without transforming them yet
-2. implement and test the engine-independent covariance back-transformation,
-   then connect the validated `glmmTMB` extractor to the public v0.0.1 helper
+1. implement and test the engine-independent covariance-array
+   back-transformation, including coefficient alignment and structural-zero
+   padding for explicitly constrained pairs
+2. make `exchangeable_rescov()` return final named variance-covariance and
+   SD-correlation results for `glmmTMB` estimates and draw-wise `brms`
+   transformations
 3. document the bounded diagnostics workflow, without adding a general
    diagnostics API
 4. finish release-facing APIM, mixed-APIM, and DSM vignette polish, including
@@ -135,11 +147,11 @@ The first release milestone is complete when all of the following are true:
 - [x] Cross-sectional and ILD temporal predictor decomposition, composition
   filtering, exchangeability overrides, pooling, metadata, and printing are
   implemented and tested for the documented scope.
-- [ ] A public fitted-`glmmTMB` covariance back-transformation, backed by an
-  engine-independent mathematical core, converts the exchangeable
-  shared/`.i_diff_*` residual representation to an interpretable member-level
-  covariance matrix, with scalar summaries and focused tests. Its block
-  discovery is first validated independently through internal engine adapters.
+- [ ] `exchangeable_rescov()` converts fitted dyad-mean/`.i_diff_*` random-
+  effect structures to interpretable member-level covariance matrices. Backend
+  extraction and matching are implemented for `glmmTMB` and single-response
+  `brms`; the engine-independent transformation, final return value, and
+  end-to-end tests remain.
 - [ ] Documentation shows a correct `glmmTMB`/DHARMa workflow for
   `dispformula = ~ 0`, role-specific checks, and clear limitations concerning
   autocorrelation and multicollinearity.
@@ -437,70 +449,61 @@ Complete these before calling the feature set CRAN-ready:
     model is aspirational/diagnostic and may require more data or Bayesian
     regularization
 - Add public covariance back-transformation helpers for v0.0.1
-  - Use the mathematical, validation, and output requirements in
-    [`backtransform.md`](backtransform.md). The extraction-first decisions below
-    supersede its current formula-reparsing section and should be folded back
-    into that specification during implementation.
-  - Start with the internal extraction-only function
-    `extract_exchangeable_residual_blocks(model)`. It should identify and match
-    candidate shared/`.i_diff_*` blocks and return their normalized structure
-    and extracted parameters without back-transforming them. The exported
-    `exchangeable_rescov(model)` development scaffold currently
-    delegates to this extractor and returns the model unchanged. This makes
-    block discovery independently testable while reserving the intended public
-    function name.
-  - Put model-specific access behind thin adapters and normalize both engines
-    to one common block/pair representation. Matching, validation, matrix
-    algebra, and result formatting should not depend on the fitted-model class.
-  - For `glmmTMB`, use the normalized structures already stored in the fitted
-    object: `model$modelInfo$reTrms$cond` for coefficient and grouping
-    information, `model$modelInfo$reStruc$condReStruc` for block order and
-    covariance structure, and `glmmTMB::VarCorr(model)$cond` for estimates.
-    Map repeated grouping factors with `flist` and its `assign` attribute rather
-    than relying on sanitized `VarCorr()` list names such as `g.1`.
-  - For `brms`, use `model$ranef` for its already-normalized group-level term
-    structure, `brms::VarCorr(model, summary = FALSE)` for draw-wise parameter
-    arrays, and `model$data` only for fitted-data validation. The internal
-    extractor may support and test this structure now; public draw-wise
-    back-transformation remains outside v0.0.1.
-  - Do not add or call `reformulas` solely to reparse fitted formulas.
-    `glmmTMB` has already created and stored the relevant `reformulas`-derived
-    structures, while `brms` uses and stores its own richer representation.
-    Avoid `brms::brmsterms()` here because it is an internal-facing parser and
-    does not improve on `model$ranef` for this task.
-  - Validate that stored block records, covariance structures, and extracted
-    parameters have compatible lengths, order, coefficient names, and grouping
-    factors before matching. Fail clearly instead of guessing when an older or
-    unusual fitted object lacks the expected structure; suggest
-    `glmmTMB::up2date()` or `brms::restructure()` where applicable.
-  - Test extraction in increasing complexity: one scalar pair, multiple pairs
-    for different compositions, and the same composition at stable and
-    same-occasion grouping levels. Only after these records and matches are
-    correct should the transformation layer consume them.
-  - Implement the mathematics independently of a model engine. Given a
-    shared/difference covariance matrix `Sigma_score` and member contrast matrix
-    `T`, compute `Sigma_member = T %*% Sigma_score %*% t(T)`.
-  - Make the v0.0.1 public interface focus on the exchangeable residual
-    structure used by DIMs and exchangeable APIMs:
-    `member_1 = u_shared + u_diff` and
-    `member_2 = u_shared - u_diff`.
-  - Let the internal mathematical core accept covariance matrices rather than
-    only standard deviations. Keep the public v0.0.1 use case narrow: discover
-    and transform scalar residual-block pairs, including separate stable and
-    same-occasion ILD pairs.
-  - Return a named member-level covariance matrix plus member standard
-    deviations and correlations. Use arbitrary member 1/member 2 labels, never
-    female/male labels, for exchangeable dyads.
-  - Validate dimensions, names, symmetry, and positive-semidefiniteness; test
-    the scalar identities, the documented `1.2`/`0.3` example, numerical round
-    trips, and invariance to reversing the arbitrary `+1/-1` assignment.
-  - Reuse the tested helper in the vignette diagrams where practical, so the
-    package and teaching materials share one definition.
-  - The public v0.0.1 helper takes a fitted `glmmTMB` model, automatically
-    discovers scalar shared/`.i_diff_*` pairs, and supports multiple
-    exchangeable compositions and grouping levels. Defer random-slope blocks,
-    DSM `+0.5/-0.5` transformations, uncertainty intervals, renamed generated
-    columns, and public `brms` transformation to the next milestone.
+  - Current implementation status:
+    - `extract_exchangeable_residual_blocks()` dispatches to thin `glmmTMB` and
+      `brms` adapters and returns one common block representation.
+    - Each block retains its grouping factor, coefficient names, correlation
+      structure, recognizable normalized term, and a
+      `draws x coefficients x coefficients` covariance array. `glmmTMB` uses
+      one draw; `brms` retains posterior draws.
+    - Automatic matching supports complete, unambiguous pairs across multiple
+      compositions and grouping levels. It aligns coefficient and interaction
+      order and leaves unrelated blocks alone.
+    - `pairs` supports explicit selection for ambiguous or constrained models
+      using model-style random-effect terms. Numeric indices are deliberately
+      unsupported because `brms` may reorder its stored blocks. Missing terms
+      within a supplied pair are recorded as structural zeros. A `NULL` side
+      means that the entire block was absent, and compatible unlisted blocks
+      are detected to prevent a false omission claim.
+    - Every explicit pair supplies its exact member-deviation indicator through
+      `idiff`. `mean_indicator` defaults to `"1"` for an ordinary intercept and
+      may instead identify a composition-specific dyad-mean column. This makes
+      explicit matching work with clearly declared custom column names, while
+      automatic matching remains a convenience for package-generated columns.
+      Both `idiff:time` and the equivalent literal numeric products
+      `I(idiff * time)` and `I(time * idiff)` are recognized. The brms adapter
+      restores brms's internally sanitized `I()` coefficient labels before the
+      shared matching step.
+    - With explicit `pairs`, only the supplied pairs are selected; all other
+      blocks are ignored rather than auto-matched.
+    - Tests cover both backend adapters, correlated and uncorrelated blocks,
+      multiple blocks, order changes, automatic ambiguity/failure cases,
+      explicit pairs, custom indicator names, literal `I()` products in both
+      backends, incomplete structures, selector normalization, and `NULL`
+      validation.
+  - Remaining implementation:
+    - validate the observed coding and transformation scale of each selected
+      `idiff` column (normally generated `+1/-1` coding);
+    - reorder and zero-pad each pair's covariance arrays from the stored order
+      mappings;
+    - apply the same engine-independent matrix transformation to every
+      `glmmTMB` estimate or `brms` posterior draw;
+    - create clear named `varcov` and `sdcor` output for every selected pair and
+      replace the public function's temporary extraction-object return;
+    - decide the minimal posterior summary stored alongside draw-wise `brms`
+      results, while keeping `glmmTMB` point-estimate-only for v0.0.1;
+    - validate numerical dimensions, finiteness, symmetry, and
+      positive-semidefiniteness and add mathematical plus end-to-end tests;
+    - warn clearly if a `brms` residual-level random-effect construction is
+      supplied where direct `unstr()` residual modeling is appropriate.
+  - Keep model discovery, matching, matrix algebra, and output formatting
+    separate. Do not introduce `reformulas`: both fitted backends already store
+    the normalized structures used by the adapters.
+  - Use arbitrary member 1/member 2 labels, never female/male labels, for the
+    transformed covariance of exchangeable dyads.
+  - `dev/backtransform.md` remains useful for mathematical motivation, but its
+    scalar-only, `glmmTMB`-only, formula-reparsing, return-value, and status
+    sections are superseded by this roadmap and the current implementation.
 - Add a bounded `glmmTMB` diagnostics workflow for v0.0.1
   - Keep this documentation-first: one focused section that other model
     vignettes can link to, with no exported diagnostics or plotting API.
@@ -556,12 +559,12 @@ Complete these before calling the feature set CRAN-ready:
 
 - Extend the v0.0.1 covariance back-transformation only where applied use
   justifies it:
-  - validate random-slope covariance blocks
-  - turn the tested internal `brms` extraction adapter into a public draw-wise
-    transformation only where a concrete model still requires the
-    shared/difference back-transformation
   - add the distinct DSM `+0.5/-0.5` transformation
-  - consider bootstrap-draw or other uncertainty transformations
+  - consider bootstrap or delta-method uncertainty for `glmmTMB`
+  - consider explicitly mapped custom member contrasts only if their coding and
+    scale can be validated safely
+  - extend posterior summaries for `brms` only where the v0.0.1 return proves
+    insufficient in applied use
 - Develop advanced diagnostics only after validating the v0.0.1 guidance:
   - evaluate a within-member lag-1 statistic against unconditional full-model
     simulations, respecting gaps and repeated series

@@ -2,37 +2,117 @@
 % Please edit documentation in R/backtransform_residual_covariance.R
 \name{exchangeable_rescov}
 \alias{exchangeable_rescov}
-\title{Recover member-level residual covariance from the shared/difference
+\title{Recover member-level residual covariance from the dyad-mean/member-deviation
 parameterization of exchangeable APIMs and DIMs}
 \usage{
-exchangeable_rescov(model)
+exchangeable_rescov(model, pairs = NULL)
 }
 \arguments{
 \item{model}{A fitted \code{glmmTMB} or \code{brmsfit} model.}
+
+\item{pairs}{\code{NULL} for automatic matching, or explicit random-effect block
+pairs for constrained, renamed, or ambiguous models. Each pair must contain
+\code{dyad_mean}, \code{member_deviation}, and \code{idiff}; it may also contain
+\code{mean_indicator}. Multiple pairs are supplied in an outer list. Identify
+each block by a model-style random-effect term copied from the model
+formula. Common equivalent forms such as
+\code{(1 | group)} and \code{us(1 | group)},
+or \code{(0 + x || group)} and \code{diag(0 + x | group)}, are recognized. Use a named
+list and set one component to \code{NULL}
+only when that entire block is absent from the fitted model formula. Do not
+use \code{NULL} for a block that is present but estimated at zero or that you do
+not want to report. \code{idiff} is the exact member-deviation indicator name,
+such as \code{.i_diff_assumed_exchangeable_arbitrary}, \code{IDIFF}, or
+\code{difference_indicator}. \code{mean_indicator} is the exact composition-specific
+dyad-mean indicator name. It defaults to \code{"1"}, meaning that the ordinary
+random intercept represents the dyad mean.}
 }
 \value{
-A named list with one element per matched shared/difference block
-pair. Each element contains the member-level variance-covariance matrix in
-\code{varcov} and its standard-deviation/correlation representation in \code{sdcor}.
-Element names reproduce the two matched random-effect terms.
+A named list with one element per matched dyad-mean/member-deviation
+block pair. Each element contains the member-level variance-covariance
+matrix in \code{varcov} and its standard-deviation/correlation representation in
+\code{sdcor}. Element names reproduce the two matched random-effect terms.
 }
 \description{
-Back-transforms exchangeable shared/difference residual-block pairs from a
-fitted model to member-level residual variances, covariance, standard
+Back-transforms exchangeable dyad-mean/member-deviation random-effect pairs
+from a fitted model to member-level residual variances, covariance, standard
 deviations, and correlation.
 }
 \details{
-The function identifies shared and difference residual blocks, matches them
-by dyad composition and grouping factor, and back-transforms each matched
-pair to the covariance structure of two arbitrarily labelled members. It
-supports multiple exchangeable compositions and grouping levels in the same
-model. The fitted model is not refitted or modified.
+The function automatically identifies dyad-mean and member-deviation blocks,
+matches them by dyad composition and grouping factor, and back-transforms each
+matched pair to the covariance structure of two arbitrarily labelled members.
+It supports multiple exchangeable compositions and grouping levels in the
+same model. The fitted model is not refitted or modified.
+
+Automatic matching requires complete, unambiguous pairs. Use \code{pairs} to
+assign blocks explicitly when terms were omitted to impose constraints or
+when more than one match is possible. Terms present in one supplied block but
+absent from the other are treated as constrained to zero.
+
+\strong{Important:} \code{dyad_mean = NULL} or \code{member_deviation = NULL} has a narrower
+meaning: the corresponding \emph{entire random-effect block was not included in
+the fitted model formula}. If the block exists in the fitted model, supply
+it—even if its estimated variance is zero, some of its terms were omitted, or
+you do not plan to report the resulting matrix. Missing terms are determined
+from the supplied blocks; users do not declare them with \code{NULL}.
+
+When \code{pairs} is supplied, only those pairs are returned; all other blocks are
+left alone. Unlisted blocks are inspected only to verify that a component
+declared as \code{NULL} does not have an existing compatible block.
+
+The explicit interface can be used for one pair:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
+  dyad_mean = "(1 | coupleID)",
+  member_deviation =
+    "(0 + IDIFF | coupleID)",
+  idiff = "IDIFF"
+)
+}\if{html}{\out{</div>}}
+
+For a composition-specific dyad-mean block, supply both indicators:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
+  dyad_mean = "(0 + SAMESEX + SAMESEX:time | coupleID)",
+  member_deviation =
+    "(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)",
+  idiff = "IDIFF_SAMESEX",
+  mean_indicator = "SAMESEX"
+)
+}\if{html}{\out{</div>}}
+
+For multiple pairs, use an outer list:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
+  list(
+    dyad_mean = "(1 | coupleID)",
+    member_deviation =
+      "(0 + IDIFF | coupleID)",
+    idiff = "IDIFF"
+  ),
+  # No member-deviation block was included for this grouping level:
+  list(
+    dyad_mean = "(1 | coupleID:day)",
+    member_deviation = NULL,
+    idiff = "IDIFF"
+  )
+)
+}\if{html}{\out{</div>}}
+
+Within every supplied member-deviation block, \code{idiff} must appear in every
+coefficient, either alone for the member-deviation intercept or in an
+interaction such as \code{IDIFF:time} for a slope. Literal products of two columns,
+such as \code{I(IDIFF * time)} or \code{I(time * IDIFF)}, are also recognized as the
+member-deviation counterpart of \code{time}. More complex arithmetic inside
+\code{I()} is not supported. Similarly, a non-default \code{mean_indicator} must appear
+in every dyad-mean coefficient.
 
 In Gaussian \code{brms} models, cross-sectional and same-occasion partner residual
 dependence is usually represented directly with
 \code{unstr(time = member, gr = pair_id)}. Use \code{sigma ~ 1} for equal residual
 standard deviations in exchangeable dyads and \code{sigma ~ 0 + role} for
-role-specific standard deviations in distinguishable dyads. Shared/difference
-group-level blocks remain relevant for stable dyad effects in intensive
-longitudinal data and are back-transformed by this function.
+role-specific standard deviations in distinguishable dyads. Dyad-mean and
+member-deviation group-level blocks remain relevant for stable dyad effects
+in intensive longitudinal data and are back-transformed by this function.
 }
