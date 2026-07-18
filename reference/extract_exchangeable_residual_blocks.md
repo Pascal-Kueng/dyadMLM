@@ -34,3 +34,4 @@ For `glmmTMB` models, the function uses the normalized random-effect
 structures stored in `model$modelInfo` together with the fitted
 covariance estimates. For `brmsfit` models, it uses the stored
 group-level term structure and raw posterior covariance draws.
+Distributional and nonlinear `brms` random-effect terms are ignored.
