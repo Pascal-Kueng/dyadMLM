@@ -35,3 +35,5 @@ structures stored in `model$modelInfo` together with the fitted
 covariance estimates. For `brmsfit` models, it uses the stored
 group-level term structure and raw posterior covariance draws.
 Distributional and nonlinear `brms` random-effect terms are ignored.
+Multivariate models, linked multi-term blocks, and terms using
+`gr(..., by = ...)` are currently not supported.

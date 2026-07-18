@@ -279,10 +279,10 @@ the full directional outcome difference. Their covariance indicates
 whether unexplained outcome level and unexplained outcome difference are
 associated.
 
-The curved arrow $`\rho_{\mathrm{md}}`$ is the scale-free correlation
+The curved arrow $`\rho_{r_m r_d}`$ is the scale-free correlation
 between the outcome-mean residual and the outcome-difference residual.
 It is **not** the female-male residual correlation
-$`\rho_{\mathrm{FM}}`$ from the APIM.
+$`\rho_{\epsilon_F\epsilon_M}`$ from the APIM.
 
 The DSM uses the full female-minus-male difference:
 
@@ -300,7 +300,7 @@ Therefore, this relationship applies:
 \frac{\operatorname{Var}(e_{\mathrm{F}})-\operatorname{Var}(e_{\mathrm{M}})}{2}.
 ```
 
-For this reason, a nonzero $`\rho_{\mathrm{md}}`$ indicates that the two
+For this reason, a nonzero $`\rho_{r_m r_d}`$ indicates that the two
 roles have different residual variances. The remaining covariance
 between the partners’ residuals is
 

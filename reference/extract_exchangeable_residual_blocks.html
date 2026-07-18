@@ -80,7 +80,9 @@ structures.</p>
 structures stored in <code>model$modelInfo</code> together with the fitted covariance
 estimates. For <code>brmsfit</code> models, it uses the stored group-level term
 structure and raw posterior covariance draws. Distributional and nonlinear
-<code>brms</code> random-effect terms are ignored.</p>
+<code>brms</code> random-effect terms are ignored. Multivariate models, linked
+multi-term blocks, and terms using <code>gr(..., by = ...)</code> are currently not
+supported.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
