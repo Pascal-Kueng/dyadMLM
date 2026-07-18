@@ -29,7 +29,6 @@
 #'
 #' @export
 exchangeable_rescov <- function(model) {
-
   re_blocks <- extract_exchangeable_residual_blocks(model)
 
   # warn if brms used a residual-level re-term and advise to use as described in the details above.
@@ -66,5 +65,61 @@ exchangeable_rescov <- function(model) {
 #'
 #' @keywords internal
 extract_exchangeable_residual_blocks <- function(model) {
-  return(model)
+  if (inherits(model, "glmmTMB")) {
+    return(glmmTMB_extract_exchangeable_residual_blocks(model))
+  }
+
+  if (inherits(model, "brmsfit")) {
+    return(brms_extract_exchangeable_residual_blocks(model))
+  }
+
+  stop(
+    "`model` must be a fitted `glmmTMB` or `brmsfit` model.",
+    call. = FALSE
+  )
+}
+
+glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
+  if (!inherits(model, "glmmTMB")) {
+    stop(
+      "Internal error: the `glmmTMB` extractor received a model that does not inherit from `glmmTMB`.",
+      call. = FALSE
+    )
+  }
+  if (!requireNamespace("glmmTMB", quietly = TRUE)) {
+    stop(
+      "Package `glmmTMB` must be installed to extract covariance parameters from a `glmmTMB` model.",
+      call. = FALSE
+    )
+  }
+
+  list(
+    backend = "glmmTMB",
+    re_terms = model$modelInfo$reTrms$cond,
+    re_structure = model$modelInfo$reStruc$condReStruc,
+    covariance = glmmTMB::VarCorr(model)$cond,
+    data = model$frame
+  )
+}
+
+brms_extract_exchangeable_residual_blocks <- function(model) {
+  if (!inherits(model, "brmsfit")) {
+    stop(
+      "Internal error: the `brms` extractor received a model that does not inherit from `brmsfit`.",
+      call. = FALSE
+    )
+  }
+  if (!requireNamespace("brms", quietly = TRUE)) {
+    stop(
+      "Package `brms` must be installed to extract covariance parameters from a `brmsfit` model.",
+      call. = FALSE
+    )
+  }
+
+  list(
+    backend = "brms",
+    re_terms = model$ranef,
+    covariance = brms::VarCorr(model, summary = FALSE),
+    data = model$data
+  )
 }
