@@ -33,13 +33,13 @@ exchangeable_rescov <- function(model) {
 
   # warn if brms used a residual-level re-term and advise to use as described in the details above.
 
-  # match shared/difference blocks
+  matched_blocks <- match_exchangeable_residual_blocks(model_data, model)
 
   # backtransform each block
 
   # return
 
-  return(model_data)
+  return(matched_blocks)
 }
 
 #' Extract exchangeable residual blocks from a fitted model
@@ -60,7 +60,9 @@ exchangeable_rescov <- function(model) {
 #' structures stored in `model$modelInfo` together with the fitted covariance
 #' estimates. For `brmsfit` models, it uses the stored group-level term
 #' structure and raw posterior covariance draws. Distributional and nonlinear
-#' `brms` random-effect terms are ignored.
+#' `brms` random-effect terms are ignored. Multivariate models, linked
+#' multi-term blocks, and terms using `gr(..., by = ...)` are currently not
+#' supported.
 #'
 #' @return A normalized internal representation containing the model engine,
 #'   extracted random-effect blocks, matched shared/difference block pairs, and
@@ -82,6 +84,11 @@ extract_exchangeable_residual_blocks <- function(model) {
   )
 }
 
+match_exchangeable_residual_blocks <- function(model_data, model) {
+  # TODO: Identify and validate shared/difference block pairs.
+  return(model_data)
+}
+
 glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
   if (!requireNamespace("glmmTMB", quietly = TRUE)) {
     stop(
@@ -97,16 +104,27 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
 
   # `cnms` has one named entry per random-effect block, including repeated groups.
   groups <- names(re_terms$cnms)
+  term_labels <- names(re_structure)
 
   # Misaligned blocks could produce plausible but incorrect transformations,
   # so we fail if we can't cleanly align.
   if (
     length(re_terms$cnms) != n_blocks ||
       length(groups) != n_blocks ||
+      length(term_labels) != n_blocks ||
       length(covariance) != n_blocks
   ) {
     stop(
       "Internal error: the stored `glmmTMB` random-effect structures could not be aligned.",
+      call. = FALSE
+    )
+  }
+  if (
+    any(is.na(groups) | !nzchar(groups)) ||
+      any(is.na(term_labels) | !nzchar(term_labels))
+  ) {
+    stop(
+      "Internal error: stored `glmmTMB` random-effect labels are missing.",
       call. = FALSE
     )
   }
@@ -115,18 +133,55 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
   for (i in seq_len(n_blocks)) {
     coefficients <- unname(re_terms$cnms[[i]])
 
-    # `blockCode`, unlike `fullCor`, reliably distinguishes `|` from `||` in
-    # the normalized glmmTMB structure.
+    # `blockCode` records the normalized covariance structure (`us`, `diag`,
+    # `homdiag`, and so on); it does not preserve the user's exact syntax.
     structure <- names(re_structure[[i]]$blockCode)
+    if (
+      length(structure) != 1L ||
+        is.na(structure) ||
+        !nzchar(structure)
+    ) {
+      stop(
+        "Internal error: a stored `glmmTMB` covariance structure is missing.",
+        call. = FALSE
+      )
+    }
     correlated <- !structure %in% c("diag", "homdiag")
 
     # Show the covariance structure explicitly; glmmTMB stores all normalized
     # terms with a single bar, including terms originally specified with `||`.
-    term <- paste0(structure, "(", names(re_structure)[[i]], ")")
+    term <- paste0(structure, "(", term_labels[[i]], ")")
 
     # glmmTMB supplies one fitted covariance matrix. Add a leading dimension so
     # downstream code can treat it like the posterior-draw arrays from brms.
     covariance_matrix <- covariance[[i]]
+    expected_dimension <- rep(length(coefficients), 2L)
+    if (!identical(dim(covariance_matrix), expected_dimension)) {
+      stop(
+        "Internal error: a stored `glmmTMB` covariance matrix has unexpected dimensions.",
+        call. = FALSE
+      )
+    }
+
+    covariance_rows <- rownames(covariance_matrix)
+    covariance_columns <- colnames(covariance_matrix)
+    if (
+      is.null(covariance_rows) ||
+        is.null(covariance_columns) ||
+        anyDuplicated(coefficients) ||
+        !setequal(covariance_rows, coefficients) ||
+        !setequal(covariance_columns, coefficients)
+    ) {
+      stop(
+        "Internal error: `glmmTMB` covariance parameters could not be aligned with their random-effect coefficients.",
+        call. = FALSE
+      )
+    }
+    covariance_matrix <- covariance_matrix[
+      coefficients,
+      coefficients,
+      drop = FALSE
+    ]
     covariance_array <- array(
       covariance_matrix,
       dim = c(1L, length(coefficients), length(coefficients)),
@@ -178,6 +233,24 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     )
   }
   re_terms <- re_terms[!unsupported, ]
+
+  if (nrow(re_terms) == 0L) {
+    block_list <- list(
+      backend = "brms",
+      blocks = list()
+    )
+    return(block_list)
+  }
+
+  if (
+    "by" %in% names(re_terms) &&
+      any(!is.na(re_terms$by) & nzchar(re_terms$by))
+  ) {
+    stop(
+      "Random-effect terms using `gr(..., by = ...)` are currently not supported.",
+      call. = FALSE
+    )
+  }
 
   # A brms ID identifies one covariance block. Different `gn` values reveal
   # explicit `|ID|` syntax linking several formula terms within that block.
@@ -254,8 +327,10 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     )
   }
 
-  list(
+  block_list <- list(
     backend = "brms",
     blocks = blocks
   )
+
+  return(block_list)
 }

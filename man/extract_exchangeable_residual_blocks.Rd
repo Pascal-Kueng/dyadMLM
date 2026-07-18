@@ -29,6 +29,8 @@ For \code{glmmTMB} models, the function uses the normalized random-effect
 structures stored in \code{model$modelInfo} together with the fitted covariance
 estimates. For \code{brmsfit} models, it uses the stored group-level term
 structure and raw posterior covariance draws. Distributional and nonlinear
-\code{brms} random-effect terms are ignored.
+\code{brms} random-effect terms are ignored. Multivariate models, linked
+multi-term blocks, and terms using \code{gr(..., by = ...)} are currently not
+supported.
 }
 \keyword{internal}

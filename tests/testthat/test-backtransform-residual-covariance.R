@@ -112,6 +112,29 @@ test_that("random-effect blocks have a common backend-independent structure", {
   }
 
   expect_equal(
+    unname(brms_blocks$blocks[[1]]$covariance),
+    unname(couple_cov[, 1:2, 1:2, drop = FALSE])
+  )
+  expect_equal(
+    unname(brms_blocks$blocks[[2]]$covariance),
+    unname(couple_cov[, 3:4, 3:4, drop = FALSE])
+  )
+  expect_equal(
+    unname(brms_blocks$blocks[[3]]$covariance[, 1, 1]),
+    family_sd[, 1]^2
+  )
+  expect_equal(
+    unname(brms_blocks$blocks[[4]]$covariance[, 1, 1]),
+    family_sd[, 2]^2
+  )
+
+  fitted_glmm_covariance <- glmmTMB::VarCorr(glmm_model)$cond
+  expect_equal(
+    as.numeric(glmm_blocks$blocks[[1]]$covariance[1, , ]),
+    as.numeric(fitted_glmm_covariance[[1]])
+  )
+
+  expect_equal(
     vapply(glmm_common_blocks, `[[`, logical(1), "correlated"),
     c(TRUE, FALSE, TRUE, FALSE)
   )
@@ -133,6 +156,27 @@ test_that("random-effect blocks have a common backend-independent structure", {
       "(0 + diff2 || familyID)"
     )
   )
+
+  uncorrelated_model <- brms::brm(
+    outcome ~ 1 + (0 + idiff + idiff:day || coupleID),
+    data = data,
+    empty = TRUE
+  )
+  uncorrelated_sd <- couple_sd[, 3:4, drop = FALSE]
+  uncorrelated_blocks <- testthat::with_mocked_bindings(
+    brms_extract_exchangeable_residual_blocks(uncorrelated_model),
+    VarCorr = function(...) {
+      list(coupleID = list(sd = uncorrelated_sd))
+    },
+    .package = "brms"
+  )
+  expected_uncorrelated_covariance <- array(0, dim = c(3, 2, 2))
+  expected_uncorrelated_covariance[, 1, 1] <- uncorrelated_sd[, 1]^2
+  expected_uncorrelated_covariance[, 2, 2] <- uncorrelated_sd[, 2]^2
+  expect_equal(
+    unname(uncorrelated_blocks$blocks[[1]]$covariance),
+    expected_uncorrelated_covariance
+  )
 })
 
 test_that("unsupported brms random-effect structures fail clearly", {
@@ -142,7 +186,8 @@ test_that("unsupported brms random-effect structures fail clearly", {
     outcome = stats::rnorm(20),
     second_outcome = stats::rnorm(20),
     couple = factor(rep(seq_len(10), each = 2)),
-    time = rep(0:1, 10)
+    time = rep(0:1, 10),
+    role = factor(rep(rep(c("a", "b"), each = 5), each = 2))
   )
 
   multivariate_model <- brms::brm(
@@ -166,6 +211,17 @@ test_that("unsupported brms random-effect structures fail clearly", {
   expect_error(
     brms_extract_exchangeable_residual_blocks(linked_terms_model),
     "more than one formula term",
+    fixed = TRUE
+  )
+
+  by_model <- brms::brm(
+    outcome ~ 1 + (1 + time | gr(couple, by = role)),
+    data = data,
+    empty = TRUE
+  )
+  expect_error(
+    brms_extract_exchangeable_residual_blocks(by_model),
+    "using `gr(..., by = ...)`",
     fixed = TRUE
   )
 })
@@ -234,7 +290,7 @@ test_that("brms distributional and nonlinear random effects are ignored", {
   expect_warning(
     nonlinear_blocks <- testthat::with_mocked_bindings(
       brms_extract_exchangeable_residual_blocks(nonlinear_model),
-      VarCorr = function(...) list(),
+      VarCorr = function(...) stop("VarCorr should not be called"),
       .package = "brms"
     ),
     "were ignored",
