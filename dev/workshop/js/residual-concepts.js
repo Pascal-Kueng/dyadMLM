@@ -206,7 +206,12 @@
           fill: labelColour
         });
         append(facetTitle, "tspan", {}, `${role}: residual variance `);
-        appendMathSymbol(facetTitle, "σ", role === "Female" ? "F" : "M", "2");
+        appendMathSymbol(
+          facetTitle,
+          "σ",
+          role === "Female" ? "εF" : "εM",
+          "2"
+        );
         append(facetTitle, "tspan", {}, ` = ${variance.toFixed(1)}`);
         residuals.forEach((residual, index) => {
           const x = scale(index, 0, residuals.length - 1, pointLeft, pointRight);
@@ -294,7 +299,7 @@
         correlationSubtitle, "tspan", {},
         "Each point pairs two partners; "
       );
-      appendMathSymbol(correlationSubtitle, "ρ", "FM");
+      appendMathSymbol(correlationSubtitle, "ρ", "εF εM");
       append(
         correlationSubtitle, "tspan", {},
         ` = ${correlation.toFixed(1)} (${association})`
@@ -445,6 +450,9 @@
       guideRho.className = "rc-rho";
       guideRho.textContent = "ρ";
       guideHeading.appendChild(guideRho);
+      const guideRhoSubscript = document.createElement("sub");
+      guideRhoSubscript.textContent = "εF εM";
+      guideHeading.appendChild(guideRhoSubscript);
       guideGlass.appendChild(guideHeading);
       append(right, "line", {
         x1: guideCenterX - guideRadius,

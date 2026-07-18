@@ -623,7 +623,7 @@ Map the preceding visual onto the APIM notation:
 - The residual standard deviations, $\sigma$, may differ between distinguishable
   partners. Their squares are the residual variances from the previous slide.
 - The curved double-headed arrow is the residual correlation,
-  $\rho_{\mathrm{FM}}$.
+  $\rho_{\epsilon_F\epsilon_M}$.
 
 :::
 
@@ -1257,7 +1257,7 @@ $$
 
 
 ::: {.seesaw-takeaway}
-**A positive $\rho_{\mathrm{MD}}$ means:** couples whose outcomes are higher than predicted
+**A positive $\rho_{r_m r_d}$ means:** couples whose outcomes are higher than predicted
 on average also tend to have a larger female–male difference than predicted.
 :::
 
@@ -1434,10 +1434,20 @@ draw_cfm_diagram(show_residuals = FALSE)
 #| fig-height: 5.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Conceptual Common Fate Model with shared latent predictor and outcome levels."
+#| fig-alt: "Conceptual Common Fate Model with shared latent predictor and outcome levels and symbolic standard deviations for all four indicator residuals."
 
 draw_cfm_diagram()
 ```
+
+
+:::{.notes}
+
+Member 1 and Member 2 can be distinguishable like F/M. OR 
+
+they can also be exchangeable with arbitrary assignment, but then residuals should
+be constrained to be equal and correlations too! 
+
+:::
 
 ## Fitting the CFM
 
@@ -1455,15 +1465,13 @@ Without it, the estimated male outcome residual variance was negative.
 #| fig-height: 5.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Fitted Common Fate Model for collaborative planning and joint MVPA."
+#| fig-alt: "Fitted Common Fate Model for collaborative planning and joint MVPA, including unstandardized standard deviations for all four indicator residuals."
 
 fit_and_draw_cfm(pilot_aggregated)
 ```
 
 :::{.notes}
 
-- The CFM uses the 36 female-male couples because its wide indicator positions
-  represent the two partner roles.
 - The unconstrained model converged but estimated a negative male joint-MVPA
   residual variance. Female and male reports of their joint activity correlate
   almost perfectly.
@@ -1509,10 +1517,10 @@ y_i
 \\[0.7em]
 \boldsymbol{\Sigma}
 &= \begin{bmatrix}
-\sigma_{\mathrm F}^{2}
-& \rho_{\mathrm{FM}}\sigma_{\mathrm F}\sigma_{\mathrm M} \\
-\rho_{\mathrm{FM}}\sigma_{\mathrm F}\sigma_{\mathrm M}
-& \sigma_{\mathrm M}^{2}
+\sigma_{\epsilon_F}^{2}
+& \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M} \\
+\rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M}
+& \sigma_{\epsilon_M}^{2}
 \end{bmatrix}
 &&\text{covariance matrix}.
 \end{aligned}

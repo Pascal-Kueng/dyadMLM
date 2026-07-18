@@ -63,9 +63,9 @@ draw_residual_concepts <- function() {
       labeller = ggplot2::labeller(role = ggplot2::as_labeller(
         c(
           "Female partner" =
-            "plain('Female: smaller')~italic(sigma)[plain(F)]^2",
+            "plain('Female: smaller')~italic(sigma)[italic(epsilon)[plain(F)]]^2",
           "Male partner" =
-            "plain('Male: larger')~italic(sigma)[plain(M)]^2"
+            "plain('Male: larger')~italic(sigma)[italic(epsilon)[plain(M)]]^2"
         ),
         default = ggplot2::label_parsed
       ))
@@ -183,7 +183,7 @@ draw_residual_concepts <- function() {
       title = "Same dyads: residuals move together",
       subtitle = expression(
         "Each numbered point pairs two partners; " *
-          italic(rho)[plain(FM)] > 0
+          italic(rho)[italic(epsilon)[plain(F)] * italic(epsilon)[plain(M)]] > 0
       ),
       x = "Male partner residual",
       y = "Female partner residual"
@@ -232,7 +232,7 @@ residual_concepts_widget <- function(
       "aria-label=\"Residual parameter controls\">\n",
       "    <label class=\"residual-control residual-control-female\">\n",
       "      <span>Female residual variance, ",
-      "<span class=\"rc-math\">σ<sup>2</sup><sub>F</sub></span></span>\n",
+      "<span class=\"rc-math\">σ<sup>2</sup><sub>εF</sub></span></span>\n",
       "      <span class=\"residual-control-input\">\n",
       "        <input type=\"range\" min=\"0.1\" max=\"7\" step=\"0.1\" ",
       "value=\"0.5\" data-parameter=\"female-variance\" ",
@@ -242,7 +242,7 @@ residual_concepts_widget <- function(
       "    </label>\n",
       "    <label class=\"residual-control residual-control-male\">\n",
       "      <span>Male residual variance, ",
-      "<span class=\"rc-math\">σ<sup>2</sup><sub>M</sub></span></span>\n",
+      "<span class=\"rc-math\">σ<sup>2</sup><sub>εM</sub></span></span>\n",
       "      <span class=\"residual-control-input\">\n",
       "        <input type=\"range\" min=\"0.1\" max=\"7\" step=\"0.1\" ",
       "value=\"3\" data-parameter=\"male-variance\" ",
@@ -252,7 +252,7 @@ residual_concepts_widget <- function(
       "    </label>\n",
       "    <label class=\"residual-control residual-control-correlation\">\n",
       "      <span>Residual correlation, ",
-      "<span class=\"rc-math\">ρ<sub>FM</sub></span></span>\n",
+      "<span class=\"rc-math\">ρ<sub>εF εM</sub></span></span>\n",
       "      <span class=\"residual-control-input\">\n",
       "        <input type=\"range\" min=\"-0.9\" max=\"0.9\" step=\"0.1\" ",
       "value=\"0.7\" data-parameter=\"correlation\" ",
@@ -267,8 +267,9 @@ residual_concepts_widget <- function(
       "role=\"img\" aria-live=\"polite\"></svg>\n",
       "  <p class=\"residual-concepts-caption\">",
       "One linked set of dyads: changing a variance rescales one partner's residuals ",
-      "while preserving <span class=\"rc-math\">ρ</span>; changing ",
-      "<span class=\"rc-math\">ρ</span> preserves both residual variances. ",
+      "while preserving <span class=\"rc-math\">ρ<sub>εF εM</sub></span>; ",
+      "changing <span class=\"rc-math\">ρ<sub>εF εM</sub></span> ",
+      "preserves both residual variances. ",
       "The correlation guide is scale-free, not a fitted regression line.",
       "</p>\n",
       "</div>\n",

@@ -409,14 +409,17 @@ draw_apim_exchangeability_comparison <- function() {
   )
   draw_coloured_equation(
     list(
-      expression(sigma[plain(F)]), "and", expression(sigma[plain(M)]),
+      expression(sigma[epsilon[plain(F)]]), "and",
+      expression(sigma[epsilon[plain(M)]]),
       "estimated separately"
     ),
     rep(muted_colour, 4), 0.255, 0.603, fontsize = 11.8,
     math = c(TRUE, FALSE, TRUE, FALSE), gap = 0.004
   )
   draw_text(
-    expression(sigma[1] == sigma[2] ~~ "=" ~~ sigma),
+    expression(
+      sigma[epsilon[1]] == sigma[epsilon[2]] ~~ "=" ~~ sigma[epsilon]
+    ),
     0.745, 0.603, colour = muted_colour, fontsize = 12.2
   )
 
@@ -430,7 +433,7 @@ draw_apim_exchangeability_comparison <- function() {
     prediction_label = expression(hat(Y)[plain(F)] == 11),
     residual_values = c(-0.55, -0.34, -0.18, 0.08, 0.24, 0.39, 0.58),
     residual_colour = female_colour,
-    sd_label = expression(sigma[plain(F)] == 0.5),
+    sd_label = expression(sigma[epsilon[plain(F)]] == 0.5),
     residual_envelope = 0.5,
     row_label_x = 0.035
   )
@@ -444,7 +447,7 @@ draw_apim_exchangeability_comparison <- function() {
     prediction_label = expression(hat(Y)[plain(M)] == 11.5),
     residual_values = c(-1.55, -1.08, -0.62, 0.22, 0.74, 1.16, 1.48),
     residual_colour = male_colour,
-    sd_label = expression(sigma[plain(M)] == 1.5),
+    sd_label = expression(sigma[epsilon[plain(M)]] == 1.5),
     residual_envelope = 1.5,
     row_label_x = 0.035
   )
@@ -459,7 +462,7 @@ draw_apim_exchangeability_comparison <- function() {
     prediction_label = expression(hat(Y)[1] == 11.5),
     residual_values = c(-1.14, -0.71, -0.33, 0.12, 0.48, 0.82, 1.06),
     residual_colour = shared_colour,
-    sd_label = expression(sigma == plain("1.0")),
+    sd_label = expression(sigma[epsilon] == plain("1.0")),
     residual_envelope = 1,
     row_label_x = 0.525
   )
@@ -473,18 +476,19 @@ draw_apim_exchangeability_comparison <- function() {
     prediction_label = expression(hat(Y)[2] == 11.5),
     residual_values = c(-1.02, -0.78, -0.26, 0.18, 0.43, 0.76, 1.17),
     residual_colour = shared_colour,
-    sd_label = expression(sigma == plain("1.0")),
+    sd_label = expression(sigma[epsilon] == plain("1.0")),
     residual_envelope = 1,
     row_label_x = 0.525
   )
 
   draw_coloured_equation(
     list(
-      "Symmetry constraints do not imply identical predictions or residuals;",
-      expression(rho), "remains estimated."
+      "Symmetry constraints do not imply identical residuals;",
+      expression(rho[epsilon[plain(F)] * epsilon[plain(M)]]), "and",
+      expression(rho[epsilon[1] * epsilon[2]]), "remain estimated."
     ),
-    rep(muted_colour, 3), 0.5, 0.017, fontsize = 10.4,
-    math = c(FALSE, TRUE, FALSE), gap = 0.003
+    rep(muted_colour, 5), 0.5, 0.017, fontsize = 11.8,
+    math = c(FALSE, TRUE, FALSE, TRUE, FALSE), gap = 0.003
   )
 
   grid::popViewport()

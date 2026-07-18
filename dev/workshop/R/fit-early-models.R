@@ -233,7 +233,8 @@ fit_and_draw_cfm <- function(data) {
     member_ids = c("F", "M"),
     member_names = c("Female", "Male"),
     predictor_name = "collaborative planning",
-    outcome_name = "joint MVPA"
+    outcome_name = "joint MVPA",
+    show_standardized_effect = FALSE
   )
   invisible(model)
 }

@@ -44,10 +44,12 @@ of a shared latent dyad-level construct [@ledermannAnalyzingDyadicData2017;
 below, the shared predictor level predicts the shared outcome level. The
 unit-loading paths define each latent variable from the two member reports.
 
-```{r conceptual-cfm-diagram, echo=FALSE, fig.width=10, fig.height=5.8, out.width="100%", fig.cap="SEM representation of a predictor-to-outcome Common Fate Model. Each pair of member reports loads with a fixed unit loading on a shared latent dyad-level construct. The latent predictor level predicts the latent outcome level. Same-member predictor and outcome residuals may covary, and the latent outcome level has a residual disturbance.", fig.alt="Structural equation path diagram for a Common Fate Model. X 1 and X 2 are unit-loading indicators of latent X level, and Y 1 and Y 2 are unit-loading indicators of latent Y level. Latent X level predicts latent Y level with coefficient b level. The residuals of X 1 and Y 1 covary, as do the residuals of X 2 and Y 2. Latent Y level has a residual disturbance."}
+```{r conceptual-cfm-diagram, echo=FALSE, fig.width=10, fig.height=5.8, out.width="100%", fig.cap="SEM representation of a predictor-to-outcome Common Fate Model. Each pair of member reports loads with a fixed unit loading on a shared latent dyad-level construct. The latent predictor level predicts the latent outcome level. Same-member predictor and outcome residuals may covary, and the latent outcome level has a residual disturbance. Labels beside the indicator residuals denote their standard deviations.", fig.alt="Structural equation path diagram for a Common Fate Model. X 1 and X 2 are unit-loading indicators of latent X level, and Y 1 and Y 2 are unit-loading indicators of latent Y level. Latent X level predicts latent Y level with coefficient b level. Each indicator residual has a symbolic standard-deviation label beside it. The residuals of X 1 and Y 1 covary, as do the residuals of X 2 and Y 2. Latent Y level has a residual disturbance."}
 draw_cfm_diagram()
 ```
 
+The four $\sigma$ labels refer to the unstandardized residual variation in
+the member reports after accounting for their shared latent levels.
 The curved paths, labelled $c_{\mathrm{res},1}$ and
 $c_{\mathrm{res},2}$, retain the predictor--outcome association specific to
 each member rather than assigning it to the shared dyad-level effect. To match
@@ -218,32 +220,41 @@ cfm_b <- cfm_estimates[cfm_estimates$label == "b_level", ]
 cfm_residual_correlations <- cfm_estimates$std.all[
   cfm_estimates$label %in% c("c_female", "c_male")
 ]
+cfm_indicator_residual_sds <-
+  .extract_cfm_diagram_values(cfm_fit)$indicator_residual_sds
 
 cfm_fitted_caption <- paste(
   "Fitted standard CFM for the package's cross-sectional example.",
   "All four unstandardized loadings are fixed at 1.",
   "The shared-level path and same-member residual correlations are read",
-  "directly from the fitted model. The label below the latent outcome reports",
+  "directly from the fitted model. Indicator residual labels report",
+  "unstandardized standard deviations. The label below the latent outcome reports",
   "R-squared for an admissible solution or flags an inadmissible variance."
 )
 cfm_fitted_alt <- if (cfm_admissible) {
   sprintf(
     paste(
       "Fitted CFM. Dyad-level effect %.2f, standardized effect %.2f, female",
-      "and male residual correlations %.2f and %.2f, and outcome R-squared %.2f."
+      "and male residual correlations %.2f and %.2f, indicator residual",
+      "standard deviations %.2f, %.2f, %.2f, and %.2f, and outcome R-squared %.2f."
     ),
     cfm_b$est, cfm_b$std.all,
     cfm_residual_correlations[1], cfm_residual_correlations[2],
+    cfm_indicator_residual_sds[1], cfm_indicator_residual_sds[2],
+    cfm_indicator_residual_sds[3], cfm_indicator_residual_sds[4],
     cfm_r_squared
   )
 } else if (outcome_variance_negative) {
   sprintf(
     paste(
       "Fitted CFM. Dyad-level effect %.2f, female and male residual correlations",
-      "%.2f and %.2f, and outcome disturbance variance %.2f (inadmissible)."
+      "%.2f and %.2f, indicator residual standard deviations %.2f, %.2f,",
+      "%.2f, and %.2f, and outcome disturbance variance %.2f (inadmissible)."
     ),
     cfm_b$est,
     cfm_residual_correlations[1], cfm_residual_correlations[2],
+    cfm_indicator_residual_sds[1], cfm_indicator_residual_sds[2],
+    cfm_indicator_residual_sds[3], cfm_indicator_residual_sds[4],
     outcome_variance$est
   )
 } else {
@@ -289,8 +300,9 @@ The fitted diagram is generated from `cfm_fit`: none of its displayed numbers
 are typed into the figure. For an admissible solution, the shared-level path
 shows both the unstandardized effect and standardized $\beta$, and the latent
 outcome shows $R^2$. For an inadmissible solution, the diagram instead displays
-the offending variance. The curved-path labels are residual **correlations**,
-which are easier to compare than scale-dependent covariances.
+the offending variance. The four indicator-residual labels are unstandardized
+SDs. The curved-path labels are residual **correlations**, which are easier to
+compare than scale-dependent covariances.
 
 ```{r fitted-cfm-diagram, echo=FALSE, fig.width=10, fig.height=5.8, out.width="100%", fig.cap=cfm_fitted_caption, fig.alt=cfm_fitted_alt}
 draw_cfm_diagram(
