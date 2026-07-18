@@ -927,6 +927,7 @@ interchangeable.
 
 dim_reparameterization_grid(
   workshop_exchangeable_apim,
+  id = "dim-grid-introduction",
   predictor_label = "Provided support",
   outcome_label = "MVPA",
   compact = TRUE
@@ -1126,6 +1127,9 @@ $$
 b_{\mathrm{mean}}=a+p.
 $$
 
+
+## DIM to APIM coefficients
+
 Now suppose $X_i=1$ and $X_j=-1$ (imagine centered values),
 
 then the DIM coordinates are:
@@ -1155,7 +1159,9 @@ $$
 b_{\mathrm{dev}}=a-p.
 $$
 
-## elim
+<!-- TODO @codex how to bring all this info onto one or two slides without 
+overloading them and not loosing valuable clarity? -->
+
 
 ## DIM to APIM coefficients
 
@@ -1166,6 +1172,7 @@ $$
 
 dim_reparameterization_grid(
   workshop_exchangeable_apim,
+  id = "dim-grid-coefficients",
   predictor_label = "Provided support",
   outcome_label = "MVPA",
   compact = TRUE
@@ -1178,7 +1185,22 @@ dim_reparameterization_grid(
 
 ## The DSM
 
-<!-- INTRO -->
+### The dyadic score model (DSM) is: 
+
+- the unconstrained distinguishable version of the DIM
+- a re-parametrization of the distinguishable APIM
+
+- Just like the DIM, it estimates how predictor dyad mean and differences
+- While the DIM uses deviation from the couple mean which is opposite for each
+partners $X_i - \bar{X}$, the DSM uses meaningful directed differences, e.g.,
+$X_\mathrm{female} - X_\mathrm{male}$. 
+  - This allows the estimation of cross-paths, since both partners' values do not
+  cancel out like in the DIM$ 
+  
+<!-- TODO @coded verify the correctness and clarity of this slide, and how
+layout could be improved-->
+
+<!-- ca. 3 Minutes -->
 
 ## The DSM
 
