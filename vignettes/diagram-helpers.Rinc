@@ -2764,6 +2764,23 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
   names(indicator_residual_sds) <- c(
     "predictor_1", "predictor_2", "outcome_1", "outcome_2"
   )
+  intercept_rows <- estimates[
+    estimates$op == "~1",
+    , drop = FALSE
+  ]
+  indicator_intercept_matches <- match(indicator_names, intercept_rows$lhs)
+  if (anyNA(indicator_intercept_matches)) {
+    stop("Could not identify the four CFM indicator intercepts.",
+         call. = FALSE)
+  }
+  indicator_intercept_rows <- intercept_rows[
+    indicator_intercept_matches,
+    , drop = FALSE
+  ]
+  indicator_intercepts <- indicator_intercept_rows$est
+  names(indicator_intercepts) <- c(
+    "predictor_1", "predictor_2", "outcome_1", "outcome_2"
+  )
   variance_row <- estimates[
     estimates$op == "~~" & estimates$lhs == outcome_latent &
       estimates$rhs == outcome_latent,
@@ -2798,10 +2815,15 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
     beta_level = unname(level_row$std.all[[1]]),
     residual_correlations = unname(residual_rows$std.all),
     indicator_residual_sds = indicator_residual_sds,
+    indicator_intercepts = indicator_intercepts,
     p_values = c(
       level = unname(level_row$pvalue[[1]]),
       residual_1 = unname(residual_rows$pvalue[[1]]),
-      residual_2 = unname(residual_rows$pvalue[[2]])
+      residual_2 = unname(residual_rows$pvalue[[2]]),
+      intercept_predictor_1 = unname(indicator_intercept_rows$pvalue[[1]]),
+      intercept_predictor_2 = unname(indicator_intercept_rows$pvalue[[2]]),
+      intercept_outcome_1 = unname(indicator_intercept_rows$pvalue[[3]]),
+      intercept_outcome_2 = unname(indicator_intercept_rows$pvalue[[4]])
     ),
     r_squared = r_squared,
     outcome_residual_variance = unname(variance_row$est[[1]]),
@@ -2820,6 +2842,7 @@ draw_cfm_diagram <- function(
   beta_level = NULL,
   residual_correlations = NULL,
   indicator_residual_sds = NULL,
+  indicator_intercepts = NULL,
   r_squared = NULL,
   outcome_residual_variance = NULL,
   admissible = NULL,
@@ -2846,7 +2869,7 @@ draw_cfm_diagram <- function(
   if (!is.null(model)) {
     manual_values <- list(
       b_level, beta_level, residual_correlations, indicator_residual_sds,
-      r_squared,
+      indicator_intercepts, r_squared,
       outcome_residual_variance, admissible, p_values
     )
     if (any(!vapply(manual_values, is.null, logical(1)))) {
@@ -2862,6 +2885,7 @@ draw_cfm_diagram <- function(
     beta_level <- fitted_model_values$beta_level
     residual_correlations <- fitted_model_values$residual_correlations
     indicator_residual_sds <- fitted_model_values$indicator_residual_sds
+    indicator_intercepts <- fitted_model_values$indicator_intercepts
     p_values <- fitted_model_values$p_values
     r_squared <- fitted_model_values$r_squared
     outcome_residual_variance <-
@@ -2880,7 +2904,7 @@ draw_cfm_diagram <- function(
 
   fitted_values <- list(
     b_level, beta_level, residual_correlations, indicator_residual_sds,
-    r_squared,
+    indicator_intercepts, r_squared,
     outcome_residual_variance,
     admissible
   )
@@ -2899,9 +2923,17 @@ draw_cfm_diagram <- function(
   if (show_estimates && length(indicator_residual_sds) != 4L) {
     stop("`indicator_residual_sds` must contain one value per indicator.")
   }
+  if (show_estimates && length(indicator_intercepts) != 4L) {
+    stop("`indicator_intercepts` must contain one value per indicator.")
+  }
   if (!is.null(p_values)) {
     p_values <- .diagram_p_values(
-      p_values, c("level", "residual_1", "residual_2")
+      p_values,
+      c(
+        "level", "residual_1", "residual_2",
+        "intercept_predictor_1", "intercept_predictor_2",
+        "intercept_outcome_1", "intercept_outcome_2"
+      )
     )
   }
   if (length(member_ids) != 2 || length(member_names) != 2) {
@@ -2983,6 +3015,22 @@ draw_cfm_diagram <- function(
     )
   }
 
+  draw_intercept <- function(x, label) {
+    label <- .diagram_math_label(label)
+    label_grob <- grid::textGrob(
+      label, x = native(x), y = native(0.505),
+      gp = grid::gpar(col = muted_colour, fontsize = 13)
+    )
+    grid::grid.roundrect(
+      x = native(x), y = native(0.505),
+      width = grid::grobWidth(label_grob) + grid::unit(3, "mm"),
+      height = native(0.060),
+      r = grid::unit(0.02, "snpc"),
+      gp = grid::gpar(fill = "white", col = muted_colour, lwd = 1)
+    )
+    grid::grid.draw(label_grob)
+  }
+
   draw_path <- function(x0, y0, x1, y1, colour, lwd = 2) {
     grid::grid.segments(
       x0 = native(x0), y0 = native(y0),
@@ -3012,7 +3060,7 @@ draw_cfm_diagram <- function(
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
-  indicator_x <- c(0.10, 0.35, 0.62, 0.87)
+  indicator_x <- c(0.135, 0.36, 0.64, 0.865)
   draw_observed(
     indicator_x[1], bquote(X[.(member_symbols[[1]])]),
     paste(member_names[1], predictor_name)
@@ -3030,8 +3078,35 @@ draw_cfm_diagram <- function(
     paste(member_names[2], outcome_name)
   )
 
-  draw_latent(0.225, expression(X[plain(level)]), "Latent predictor level")
-  draw_latent(0.745, expression(Y[plain(level)]), "Latent outcome level")
+  intercept_symbols <- list(
+    bquote(nu[X[.(member_symbols[[1]])]]),
+    bquote(nu[X[.(member_symbols[[2]])]]),
+    bquote(nu[Y[.(member_symbols[[1]])]]),
+    bquote(nu[Y[.(member_symbols[[2]])]])
+  )
+  intercept_labels <- intercept_symbols
+  if (show_estimates) {
+    intercept_p_values <- rep(NA_real_, 4L)
+    if (!is.null(p_values)) {
+      intercept_p_values <- p_values[c(
+        "intercept_predictor_1", "intercept_predictor_2",
+        "intercept_outcome_1", "intercept_outcome_2"
+      )]
+    }
+    for (index in seq_along(indicator_intercepts)) {
+      intercept_labels[[index]] <- .diagram_estimate_label(
+        intercept_symbols[[index]], indicator_intercepts[[index]],
+        intercept_p_values[[index]]
+      )
+    }
+  }
+  intercept_x <- indicator_x + c(-0.07, 0.07, -0.07, 0.07)
+  for (index in seq_along(indicator_x)) {
+    draw_intercept(intercept_x[[index]], intercept_labels[[index]])
+  }
+
+  draw_latent(0.2475, expression(X[plain(level)]), "Latent predictor level")
+  draw_latent(0.7525, expression(Y[plain(level)]), "Latent outcome level")
 
   if (show_residuals) {
     residual_labels <- list(
@@ -3082,12 +3157,12 @@ draw_cfm_diagram <- function(
   # Unit loadings identify each latent dyad-level construct as the shared
   # level underlying the two member reports.
   loading_paths <- list(
-    c(0.18, 0.337, 0.10, 0.515 - .diagram_arrow_clearance),
-    c(0.27, 0.337, 0.35, 0.515 - .diagram_arrow_clearance),
-    c(0.70, 0.337, 0.62, 0.515 - .diagram_arrow_clearance),
-    c(0.79, 0.337, 0.87, 0.515 - .diagram_arrow_clearance)
+    c(0.2025, 0.337, indicator_x[1], 0.515 - .diagram_arrow_clearance),
+    c(0.2925, 0.337, indicator_x[2], 0.515 - .diagram_arrow_clearance),
+    c(0.7075, 0.337, indicator_x[3], 0.515 - .diagram_arrow_clearance),
+    c(0.7975, 0.337, indicator_x[4], 0.515 - .diagram_arrow_clearance)
   )
-  loading_label_x <- c(0.135, 0.315, 0.655, 0.835)
+  loading_label_x <- c(0.17, 0.325, 0.675, 0.83)
   for (index in seq_along(loading_paths)) {
     path <- loading_paths[[index]]
     draw_path(path[1], path[2], path[3], path[4], muted_colour, lwd = 1.8)
@@ -3100,7 +3175,7 @@ draw_cfm_diagram <- function(
 
   # The structural CFM path links the two shared dyad-level constructs.
   draw_path(
-    0.355, 0.25, 0.615 - .diagram_arrow_clearance, 0.25,
+    0.3775, 0.25, 0.6225 - .diagram_arrow_clearance, 0.25,
     level_colour, lwd = 2.3
   )
   structural_label <- if (show_estimates && isTRUE(admissible) &&
@@ -3118,7 +3193,7 @@ draw_cfm_diagram <- function(
   } else {
     expression(italic(b)[plain(level)])
   }
-  draw_label(0.485, 0.25, structural_label, level_colour, fontsize = 13)
+  draw_label(0.50, 0.25, structural_label, level_colour, fontsize = 13)
 
   if (show_residuals) {
     # Same-member residual covariances retain the association unique to each
@@ -3215,7 +3290,7 @@ draw_cfm_diagram <- function(
     } else {
       expression(plain("inadmissible solution"))
     }
-    draw_label(0.745, 0.135, outcome_diagnostic, ink_colour, fontsize = 13)
+    draw_label(0.7525, 0.135, outcome_diagnostic, ink_colour, fontsize = 13)
   }
 
   if (show_residuals) {

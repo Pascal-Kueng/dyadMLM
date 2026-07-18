@@ -526,18 +526,18 @@ But more on the residuals later!!!
 
 ## How to estimate actor and partner effects?
 
-Conceptually (simplified), we are esimating these two equations in a single model:
+Conceptually, we are esimating these two equations in a single model:
 
 $$
   \begin{gathered}
   \\[0.5em]
   Y_{\mathrm{male},i}
-  = b_{0,\mathrm{M}} + b_{1,\mathrm{M}}X_{\mathrm{male},i}
-  + b_{2,\mathrm{M}}X_{\mathrm{female},i} + \epsilon_{\mathrm{male},i}
+  = b_{0,\mathrm{M}} + b_{1,\mathrm{M}} \times X_{\mathrm{male},i}
+  + b_{2,\mathrm{M}} \times X_{\mathrm{female},i} + \epsilon_{\mathrm{male},i}
   \\[2em]
   Y_{\mathrm{female},i}
-  = b_{0,\mathrm{F}} + b_{1,\mathrm{F}}X_{\mathrm{female},i}
-  + b_{2,\mathrm{F}}X_{\mathrm{male},i} + \epsilon_{\mathrm{female},i}
+  = b_{0,\mathrm{F}} + b_{1,\mathrm{F}} \times X_{\mathrm{female},i}
+  + b_{2,\mathrm{F}} \times X_{\mathrm{male},i} + \epsilon_{\mathrm{female},i}
   \end{gathered}
 $$
 <br>
@@ -1434,7 +1434,7 @@ draw_cfm_diagram(show_residuals = FALSE)
 #| fig-height: 5.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Conceptual Common Fate Model with shared latent predictor and outcome levels and symbolic standard deviations for all four indicator residuals."
+#| fig-alt: "Conceptual Common Fate Model with four observed indicator intercepts, shared latent predictor and outcome levels, and symbolic standard deviations for all four indicator residuals."
 
 draw_cfm_diagram()
 ```
@@ -1442,12 +1442,56 @@ draw_cfm_diagram()
 
 :::{.notes}
 
-Member 1 and Member 2 can be **distinguishable** like F/M. OR 
+- The intercepts are measurement intercepts. The expected values of each members' report
+when the corresponding latent dyad level is zero. 
+  - because latent means are fixed to zero (as a reference point) they represent the mean reported values.
 
-they can also be **exchangeable** with arbitrary assignment. 
+- Member 1 and Member 2 may be meaningful, **distinguishable** roles, such as
+  female and male.
+- Alternatively, the positions may be assigned arbitrarily and the members
+  treated as **exchangeable**.
+- The next slide shows the equality constraints required so that swapping the
+  arbitrary labels does not change the model.
 
- - Then, residual variances and correlations need to be constrained to be equal
- - So that the model does not change if arbitrary labels are swapped (required by exchangeability)
+:::
+
+## The exchangeable CFM
+
+Positions 1 and 2 are arbitrary. The model must be unchanged when they are
+swapped [@ledermannMediationDyadicData2009; @peughAnalyzingMixedDyadic2013].
+
+$$
+\begin{aligned}
+\nu_{X_1} &= \nu_{X_2}, & \nu_{Y_1} &= \nu_{Y_2} \\
+\sigma^2_{\epsilon_{X_1}} &= \sigma^2_{\epsilon_{X_2}}, &
+\sigma^2_{\epsilon_{Y_1}} &= \sigma^2_{\epsilon_{Y_2}} \\
+\operatorname{Cov}(\epsilon_{X_1},\epsilon_{Y_1})
+&= \operatorname{Cov}(\epsilon_{X_2},\epsilon_{Y_2})
+\end{aligned}
+$$
+
+- All four loadings remain fixed to 1.
+- The ordinary wide-data model has **df = 6**; relative to the
+  exchangeable saturated model, it has **0 additional df**.
+- Within the CFM, comparing it with the distinguishable model tests the five
+  added equality constraints: $\Delta df = 5$.
+
+:::{.notes}
+
+- Equality is imposed on the two same-member residual covariances. Because the
+  corresponding residual variances are also equal, the residual correlations
+  are equal as a consequence.
+- `lavaan` reports 6 degrees of freedom because its default saturated reference
+  model is fully unrestricted. Six observed-moment restrictions are required
+  for exchangeability.
+- The exchangeable CFM reproduces the exchangeable saturated model, so it has
+  zero degrees of freedom relative to that appropriate reference model. Its
+  ordinary chi-square is therefore a test of exchangeability, not an additional
+  test of the basic CFM structure.
+- Comparing the distinguishable CFM (df = 1) with this model (df = 6) gives a
+  five-degree-of-freedom nested test of the added equality constraints.
+- A well-fitting constrained model does not make substantively meaningful roles
+  exchangeable; that decision must also follow the research question.
 
 :::
 
@@ -1467,7 +1511,7 @@ Without it, the estimated male outcome residual variance was negative.
 #| fig-height: 5.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Fitted Common Fate Model for collaborative planning and joint MVPA, including unstandardized standard deviations for all four indicator residuals."
+#| fig-alt: "Fitted Common Fate Model for collaborative planning and joint MVPA, including four observed indicator intercepts and unstandardized standard deviations for all four indicator residuals."
 
 fit_and_draw_cfm(pilot_aggregated)
 ```
