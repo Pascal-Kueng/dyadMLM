@@ -299,3 +299,244 @@ test_that("brms distributional and nonlinear random effects are ignored", {
 
   expect_length(nonlinear_blocks$blocks, 0)
 })
+
+test_that("complete exchangeable blocks are matched by group and terms", {
+  block <- function(group, coefficients, term) {
+    list(group = group, coefficients = coefficients, term = term)
+  }
+  model_data <- list(blocks = list(
+    block("coupleID", c("time", "(Intercept)"), "dyad mean"),
+    block(
+      "coupleID",
+      c(
+        ".i_diff_assumed_exchangeable_arbitrary",
+        "time:.i_diff_assumed_exchangeable_arbitrary"
+      ),
+      "member deviation"
+    ),
+    block("coupleID", "support", "unrelated"),
+    block("study", c("(Intercept)", "time"), "other group")
+  ))
+
+  pairs <- match_exchangeable_residual_blocks(model_data$blocks)
+
+  expect_length(pairs, 1)
+  expect_equal(pairs[[1]]$dyad_mean_index, 1)
+  expect_equal(pairs[[1]]$member_deviation_index, 2)
+  expect_equal(pairs[[1]]$terms, c("time", "(Intercept)"))
+  expect_equal(pairs[[1]]$member_deviation_order, c(2L, 1L))
+
+  expect_equal(
+    exchangeable_base_terms(
+      "time:time:.i_diff_same_sex_arbitrary",
+      ".i_diff_same_sex_arbitrary"
+    ),
+    "time:time"
+  )
+})
+
+test_that("composition-specific blocks are matched in mixed models", {
+  block <- function(group, coefficients, term) {
+    list(group = group, coefficients = coefficients, term = term)
+  }
+  blocks <- list(
+    block("coupleID", "(Intercept)", "generic"),
+    block("coupleID", ".i_is_same_sex", "same-sex dyad mean"),
+    block(
+      "coupleID",
+      ".i_diff_same_sex_arbitrary",
+      "same-sex member deviation"
+    ),
+    block("coupleID", ".i_is_friends", "friends dyad mean"),
+    block(
+      "coupleID",
+      ".i_diff_friends_arbitrary",
+      "friends member deviation"
+    )
+  )
+
+  pairs <- match_exchangeable_residual_blocks(blocks)
+
+  expect_equal(
+    pairs,
+    list(
+      list(
+        dyad_mean_index = 2L,
+        member_deviation_index = 3L,
+        terms = "(Intercept)",
+        member_deviation_order = 1L
+      ),
+      list(
+        dyad_mean_index = 4L,
+        member_deviation_index = 5L,
+        terms = "(Intercept)",
+        member_deviation_order = 1L
+      )
+    )
+  )
+})
+
+test_that("composition-specific blocks are preferred in single-composition models", {
+  blocks <- list(
+    list(group = "coupleID", coefficients = "(Intercept)", term = "generic"),
+    list(
+      group = "coupleID",
+      coefficients = ".i_is_same_sex",
+      term = "dyad mean"
+    ),
+    list(
+      group = "coupleID",
+      coefficients = ".i_diff_same_sex_arbitrary",
+      term = "member deviation"
+    )
+  )
+
+  pairs <- match_exchangeable_residual_blocks(blocks)
+
+  expect_equal(
+    pairs,
+    list(list(
+      dyad_mean_index = 2L,
+      member_deviation_index = 3L,
+      terms = "(Intercept)",
+      member_deviation_order = 1L
+    ))
+  )
+})
+
+test_that("one composition can be matched at multiple grouping levels", {
+  block <- function(group, coefficients, term) {
+    list(group = group, coefficients = coefficients, term = term)
+  }
+  blocks <- list(
+    block("coupleID", "(Intercept)", "stable dyad mean"),
+    block(
+      "coupleID",
+      ".i_diff_assumed_exchangeable_arbitrary",
+      "stable member deviation"
+    ),
+    block("coupleID:day", "(Intercept)", "occasion dyad mean"),
+    block(
+      "coupleID:day",
+      ".i_diff_assumed_exchangeable_arbitrary",
+      "occasion member deviation"
+    )
+  )
+
+  pairs <- match_exchangeable_residual_blocks(blocks)
+
+  expect_equal(
+    pairs,
+    list(
+      list(
+        dyad_mean_index = 1L,
+        member_deviation_index = 2L,
+        terms = "(Intercept)",
+        member_deviation_order = 1L
+      ),
+      list(
+        dyad_mean_index = 3L,
+        member_deviation_index = 4L,
+        terms = "(Intercept)",
+        member_deviation_order = 1L
+      )
+    )
+  )
+})
+
+test_that("incomplete exchangeable blocks are not matched automatically", {
+  model_data <- list(blocks = list(
+    list(
+      group = "coupleID",
+      coefficients = c("(Intercept)", "time", "support"),
+      term = "dyad mean"
+    ),
+    list(
+      group = "coupleID",
+      coefficients = c(
+        ".i_diff_assumed_exchangeable_arbitrary",
+        ".i_diff_assumed_exchangeable_arbitrary:time"
+      ),
+      term = "member deviation"
+    )
+  ))
+
+  expect_error(
+    match_exchangeable_residual_blocks(model_data$blocks),
+    "No dyad-mean block matched the member-deviation block `member deviation`",
+    fixed = TRUE
+  )
+
+  partial_member_deviation <- list(
+    list(
+      group = "coupleID",
+      coefficients = c("(Intercept)", "time"),
+      term = "dyad mean"
+    ),
+    list(
+      group = "coupleID",
+      coefficients = c(
+        ".i_diff_assumed_exchangeable_arbitrary",
+        "time"
+      ),
+      term = "partial member deviation"
+    )
+  )
+  expect_error(
+    match_exchangeable_residual_blocks(partial_member_deviation),
+    "No dyad-mean block matched the member-deviation block `partial member deviation`",
+    fixed = TRUE
+  )
+})
+
+test_that("missing and ambiguous exchangeable structures fail clearly", {
+  no_member_deviation <- list(list(
+    group = "coupleID",
+    coefficients = "(Intercept)",
+    term = "dyad mean"
+  ))
+  expect_error(
+    match_exchangeable_residual_blocks(no_member_deviation),
+    "No supported `.i_diff_*_arbitrary` member-deviation block was found.",
+    fixed = TRUE
+  )
+
+  ambiguous <- list(
+    list(group = "coupleID", coefficients = "(Intercept)", term = "dyad mean 1"),
+    list(group = "coupleID", coefficients = "(Intercept)", term = "dyad mean 2"),
+    list(
+      group = "coupleID",
+      coefficients = ".i_diff_assumed_exchangeable_arbitrary",
+      term = "member deviation"
+    )
+  )
+  expect_error(
+    match_exchangeable_residual_blocks(ambiguous),
+    "More than one dyad-mean block matched the member-deviation block `member deviation`: `dyad mean 1`, `dyad mean 2`.",
+    fixed = TRUE
+  )
+
+  reused_dyad_mean <- list(
+    list(group = "coupleID", coefficients = "(Intercept)", term = "generic"),
+    list(
+      group = "coupleID",
+      coefficients = ".i_is_same_sex",
+      term = "dyad mean"
+    ),
+    list(
+      group = "coupleID",
+      coefficients = ".i_diff_same_sex_arbitrary",
+      term = "member deviation 1"
+    ),
+    list(
+      group = "coupleID",
+      coefficients = ".i_diff_same_sex_arbitrary",
+      term = "member deviation 2"
+    )
+  )
+  expect_error(
+    match_exchangeable_residual_blocks(reused_dyad_mean),
+    "A dyad-mean block matched more than one member-deviation block.",
+    fixed = TRUE
+  )
+})

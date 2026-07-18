@@ -127,7 +127,7 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
   expect_no_error(draw_to_temporary_pdf(draw_apim_diagram(
     "distinguishable",
     model = distinguishable_fit,
-    labels = c(predictor = "Communication", outcome = "Satisfaction")
+    labels = c(predictor = "Provided\nsupport", outcome = "Satisfaction")
   )))
 
   exchangeable_data <- prepare_interdep_data(
@@ -332,17 +332,30 @@ test_that("CFM diagrams extract fitted lavaan objects", {
     values,
     c(
       "b_level", "beta_level", "residual_correlations",
-      "indicator_residual_sds", "p_values", "r_squared",
+      "indicator_residual_sds", "indicator_intercepts", "p_values",
+      "r_squared",
       "outcome_residual_variance", "admissible", "labels", "outcome_latent"
     )
   )
-  expect_named(values$p_values, c("level", "residual_1", "residual_2"))
+  expect_named(
+    values$p_values,
+    c(
+      "level", "residual_1", "residual_2",
+      "intercept_predictor_1", "intercept_predictor_2",
+      "intercept_outcome_1", "intercept_outcome_2"
+    )
+  )
   expect_length(values$residual_correlations, 2)
   expect_named(
     values$indicator_residual_sds,
     c("predictor_1", "predictor_2", "outcome_1", "outcome_2")
   )
   expect_true(all(is.finite(values$indicator_residual_sds)))
+  expect_named(
+    values$indicator_intercepts,
+    c("predictor_1", "predictor_2", "outcome_1", "outcome_2")
+  )
+  expect_true(all(is.finite(values$indicator_intercepts)))
   expect_no_error(draw_to_temporary_pdf(draw_cfm_diagram(
     model = cfm_fit,
     member_ids = c("F", "M"),
