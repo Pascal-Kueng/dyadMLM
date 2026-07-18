@@ -1442,10 +1442,12 @@ draw_cfm_diagram()
 
 :::{.notes}
 
-Member 1 and Member 2 can be distinguishable like F/M. OR 
+Member 1 and Member 2 can be **distinguishable** like F/M. OR 
 
-they can also be exchangeable with arbitrary assignment, but then residuals should
-be constrained to be equal and correlations too! 
+they can also be **exchangeable** with arbitrary assignment. 
+
+ - Then, residual variances and correlations need to be constrained to be equal
+ - So that the model does not change if arbitrary labels are swapped (required by exchangeability)
 
 :::
 
