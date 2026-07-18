@@ -4,20 +4,17 @@
 \alias{compare_interdep_models}
 \title{Compare nested models fitted to equivalent interdep data}
 \usage{
-compare_interdep_models(full, restricted, alpha = 0.05)
+compare_interdep_models(full, restricted)
 }
 \arguments{
 \item{full}{The full (larger) fitted \code{glmmTMB} model.}
 
 \item{restricted}{The restricted (smaller) fitted \code{glmmTMB} model.}
-
-\item{alpha}{Significance level used for the printed interpretation.}
 }
 \value{
 An \code{anova}-style data frame containing model degrees of freedom,
 information criteria, log-likelihoods, the likelihood-ratio statistic, and
-its chi-squared p-value. Printing the result adds a cautious interpretation
-based on \code{alpha}.
+its chi-squared p-value.
 }
 \description{
 Performs a likelihood-ratio test for two nested \code{glmmTMB} models fitted to
@@ -27,9 +24,12 @@ The function instead checks that the prepared data contain the same original
 observations before comparing the models.
 }
 \details{
-Both model calls must use named \code{interdep_data} objects. The function checks
-the original, non-\code{.i_} columns, structural dyad metadata, outcome values and
-missingness, fitted row identities, model family and link,
+Both model calls must use named \code{interdep_data} objects that remain available
+when the models are compared. The checks assume these objects have not been
+modified since fitting. Each model must use the same untransformed response
+column. The function requires exactly identical original, non-\code{.i_} columns,
+including their types and attributes. It also checks structural dyad
+metadata, fitted rows, outcomes, weights and offsets, model family and link,
 maximum-likelihood estimation, and model convergence.
 
 These checks establish that the models use equivalent observations. They

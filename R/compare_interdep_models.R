@@ -8,12 +8,14 @@
 #'
 #' @param full The full (larger) fitted `glmmTMB` model.
 #' @param restricted The restricted (smaller) fitted `glmmTMB` model.
-#' @param alpha Significance level used for the printed interpretation.
 #'
 #' @details
-#' Both model calls must use named `interdep_data` objects. The function checks
-#' the original, non-`.i_` columns, structural dyad metadata, outcome values and
-#' missingness, fitted row identities, model family and link,
+#' Both model calls must use named `interdep_data` objects that remain available
+#' when the models are compared. The checks assume these objects have not been
+#' modified since fitting. Each model must use the same untransformed response
+#' column. The function requires exactly identical original, non-`.i_` columns,
+#' including their types and attributes. It also checks structural dyad
+#' metadata, fitted rows, outcomes, weights and offsets, model family and link,
 #' maximum-likelihood estimation, and model convergence.
 #'
 #' These checks establish that the models use equivalent observations. They
@@ -25,8 +27,7 @@
 #'
 #' @return An `anova`-style data frame containing model degrees of freedom,
 #'   information criteria, log-likelihoods, the likelihood-ratio statistic, and
-#'   its chi-squared p-value. Printing the result adds a cautious interpretation
-#'   based on `alpha`.
+#'   its chi-squared p-value.
 #'
 #' @examples
 #' if (requireNamespace("glmmTMB", quietly = TRUE)) {
@@ -54,69 +55,48 @@
 #' }
 #'
 #' @export
-compare_interdep_models <- function(full, restricted, alpha = 0.05) {
-  comparison_check(
-    is.numeric(alpha) && length(alpha) == 1L && !is.na(alpha) &&
-      alpha > 0 && alpha < 1,
-    "`alpha` must be a single number between 0 and 1."
+compare_interdep_models <- function(full, restricted) {
+  validate_interdep_model(restricted, "restricted")
+  validate_interdep_model(full, "full")
+
+  caller_env <- parent.frame()
+  restricted_data <- interdep_model_data(restricted, caller_env, "restricted")
+  full_data <- interdep_model_data(full, caller_env, "full")
+  validate_interdep_model_data(
+    restricted,
+    full,
+    restricted_data,
+    full_data
   )
 
-  models <- list(restricted = restricted, full = full)
   labels <- c(
-    restricted = deparse1(substitute(restricted)),
-    full = deparse1(substitute(full))
+    deparse1(substitute(restricted)),
+    deparse1(substitute(full))
   )
-  validate_interdep_models(models)
-
-  model_data <- list(
-    restricted = interdep_model_data(restricted, parent.frame(), "restricted"),
-    full = interdep_model_data(full, parent.frame(), "full")
-  )
-  validate_interdep_model_data(models, model_data)
-
-  test <- interdep_likelihood_ratio(models)
-  new_interdep_model_comparison(models, labels, test, alpha)
-}
-
-#' @export
-print.interdep_model_comparison <- function(x, ...) {
-  interpretation <- attr(x, "interpretation", exact = TRUE)
-
-  modified <- x
-  class(modified) <- setdiff(class(modified), "interdep_model_comparison")
-  print(modified, ...)
-
-  if (!is.null(interpretation)) {
-    cat("\n", interpretation, "\n", sep = "")
-  }
-  invisible(x)
+  interdep_likelihood_ratio(full, restricted, labels)
 }
 
 # Model and data checks -----------------------------------------------------
 
-validate_interdep_models <- function(models) {
+validate_interdep_model <- function(model, name) {
   comparison_check(
-    all(vapply(models, inherits, logical(1), what = "glmmTMB")),
-    "`restricted` and `full` must both be fitted `glmmTMB` models."
+    inherits(model, "glmmTMB"),
+    sprintf("`%s` must be a fitted `glmmTMB` model.", name)
+  )
+  comparison_check(
+    !isTRUE(model$modelInfo$REML),
+    "Both models must be fitted with maximum likelihood, not REML."
+  )
+  comparison_check(
+    is.null(model$fit$convergence) || model$fit$convergence == 0,
+    sprintf("The `%s` model did not converge.", name)
+  )
+  comparison_check(
+    is.null(model$sdr$pdHess) || isTRUE(model$sdr$pdHess),
+    sprintf("The `%s` model has a non-positive-definite Hessian matrix.", name)
   )
 
-  for (name in names(models)) {
-    model <- models[[name]]
-    comparison_check(
-      !isTRUE(model$modelInfo$REML),
-      "Both models must be fitted with maximum likelihood, not REML."
-    )
-    comparison_check(
-      is.null(model$fit$convergence) || model$fit$convergence == 0,
-      sprintf("The `%s` model did not converge.", name)
-    )
-    comparison_check(
-      is.null(model$sdr$pdHess) || isTRUE(model$sdr$pdHess),
-      sprintf("The `%s` model has a non-positive-definite Hessian matrix.", name)
-    )
-  }
-
-  invisible(TRUE)
+  invisible(model)
 }
 
 interdep_model_data <- function(model, caller_env, argument) {
@@ -130,33 +110,35 @@ interdep_model_data <- function(model, caller_env, argument) {
   )
 
   data_name <- as.character(data_call)
-  environments <- list(caller_env, environment(stats::formula(model)))
-  for (env in environments) {
-    if (is.environment(env) && exists(data_name, envir = env, inherits = TRUE)) {
-      data <- get(data_name, envir = env, inherits = TRUE)
-      comparison_check(
-        inherits(data, "interdep_data"),
-        sprintf("The data used by `%s` must inherit from `interdep_data`.", argument)
-      )
-      return(data)
+  model_formula <- stats::formula(model, component = "cond")
+  environments <- list(environment(model_formula), caller_env)
+
+  for (search_env in environments) {
+    if (!is.environment(search_env)) {
+      next
+    }
+    if (exists(data_name, envir = search_env, inherits = TRUE)) {
+      candidate <- get(data_name, envir = search_env, inherits = TRUE)
+      if (inherits(candidate, "interdep_data")) {
+        return(candidate)
+      }
     }
   }
 
   stop(
     sprintf(
-      "Could not recover the data object used by `%s`; keep it available when comparing models.",
+      paste0(
+        "Could not recover the named `interdep_data` object used by `%s`; ",
+        "keep it available when comparing models."
+      ),
       argument
     ),
     call. = FALSE
   )
 }
 
-validate_interdep_model_data <- function(models, model_data) {
-  restricted <- models$restricted
-  full <- models$full
-  restricted_data <- model_data$restricted
-  full_data <- model_data$full
-
+validate_interdep_model_data <- function(restricted, full,
+                                         restricted_data, full_data) {
   comparison_check(
     nrow(restricted_data) == nrow(full_data),
     "The two prepared datasets have different numbers of rows."
@@ -180,55 +162,79 @@ validate_interdep_model_data <- function(models, model_data) {
     "The two prepared datasets do not contain the same original columns."
   )
 
-  restricted_response_name <- all.vars(stats::formula(restricted))[1]
-  full_response_name <- all.vars(stats::formula(full))[1]
-  comparison_check(
-    identical(restricted_response_name, full_response_name),
-    "The two models use different outcome variables."
-  )
-  comparison_check(
-    restricted_response_name %in% restricted_original,
-    "Only an untransformed outcome stored in the prepared data is supported."
-  )
-
-  restricted_missing <- is.na(restricted_data[[restricted_response_name]])
-  full_missing <- is.na(full_data[[full_response_name]])
-  comparison_check(
-    sum(restricted_missing) == sum(full_missing),
-    "The two datasets have different numbers of missing outcome values."
-  )
-  comparison_check(
-    identical(restricted_missing, full_missing),
-    "The outcome has a different missing-value pattern."
-  )
-
   for (column in restricted_original) {
     comparison_check(
-      same_values(restricted_data[[column]], full_data[[column]]),
-      sprintf("Original column `%s` differs between the two prepared datasets.", column)
+      identical(restricted_data[[column]], full_data[[column]]),
+      sprintf(
+        "Original column `%s` differs between the two prepared datasets.",
+        column
+      )
     )
   }
 
-  restricted_frame <- restricted$frame
-  full_frame <- full$frame
+  restricted_formula <- stats::formula(restricted, component = "cond")
+  full_formula <- stats::formula(full, component = "cond")
+  restricted_response <- restricted_formula[[2L]]
+  full_response <- full_formula[[2L]]
+
   comparison_check(
-    identical(row.names(restricted_frame), row.names(full_frame)),
+    is.symbol(restricted_response) && is.symbol(full_response),
+    "Only an untransformed outcome stored in the prepared data is supported."
+  )
+
+  restricted_response <- as.character(restricted_response)
+  full_response <- as.character(full_response)
+  comparison_check(
+    identical(restricted_response, full_response),
+    "The two models use different outcome variables."
+  )
+  comparison_check(
+    restricted_response %in% restricted_original,
+    "Only an untransformed outcome stored in the prepared data is supported."
+  )
+
+  restricted_rows <- row.names(restricted$frame)
+  full_rows <- row.names(full$frame)
+  comparison_check(
+    identical(restricted_rows, full_rows),
     "The two models were fitted to different observation rows."
+  )
+  comparison_check(
+    identical(
+      unname(stats::model.response(restricted$frame)),
+      unname(stats::model.response(full$frame))
+    ),
+    "The fitted outcome values differ between the two models."
+  )
+
+  restricted_weights <- stats::model.weights(restricted$frame)
+  full_weights <- stats::model.weights(full$frame)
+  if (is.null(restricted_weights)) restricted_weights <- rep(1, length(restricted_rows))
+  if (is.null(full_weights)) full_weights <- rep(1, length(full_rows))
+  comparison_check(
+    identical(as.numeric(restricted_weights), as.numeric(full_weights)),
+    "The two models use different observation weights."
+  )
+
+  restricted_offset <- stats::model.offset(restricted$frame)
+  full_offset <- stats::model.offset(full$frame)
+  if (is.null(restricted_offset)) restricted_offset <- rep(0, length(restricted_rows))
+  if (is.null(full_offset)) full_offset <- rep(0, length(full_rows))
+  comparison_check(
+    identical(as.numeric(restricted_offset), as.numeric(full_offset)),
+    "The two models use different offsets."
   )
 
   restricted_family <- restricted$modelInfo$family
   full_family <- full$modelInfo$family
+  same_family <- identical(restricted_family$family, full_family$family)
+  same_link <- identical(restricted_family$link, full_family$link)
   comparison_check(
-    identical(restricted_family$family, full_family$family) &&
-      identical(restricted_family$link, full_family$link),
+    same_family && same_link,
     "The two models must use the same family and link."
   )
 
   invisible(TRUE)
-}
-
-same_values <- function(x, y) {
-  isTRUE(all.equal(x, y, check.attributes = FALSE))
 }
 
 comparison_check <- function(condition, message) {
@@ -240,17 +246,26 @@ comparison_check <- function(condition, message) {
 
 # Likelihood-ratio test and output -----------------------------------------
 
-interdep_likelihood_ratio <- function(models) {
-  log_lik <- lapply(models, stats::logLik)
-  df <- vapply(log_lik, attr, numeric(1), which = "df")
+interdep_likelihood_ratio <- function(full, restricted, labels) {
+  restricted_log_lik <- stats::logLik(restricted)
+  full_log_lik <- stats::logLik(full)
+  restricted_df <- attr(restricted_log_lik, "df")
+  full_df <- attr(full_log_lik, "df")
 
+  valid_df <- length(restricted_df) == 1L && length(full_df) == 1L &&
+    is.finite(restricted_df) && is.finite(full_df)
   comparison_check(
-    df["full"] > df["restricted"],
+    valid_df,
+    "Could not determine the models' numbers of parameters."
+  )
+  comparison_check(
+    full_df > restricted_df,
     "`full` must have more estimated parameters than `restricted`."
   )
 
-  log_lik <- vapply(log_lik, as.numeric, numeric(1))
-  statistic <- 2 * (log_lik["full"] - log_lik["restricted"])
+  restricted_log_lik <- as.numeric(restricted_log_lik)
+  full_log_lik <- as.numeric(full_log_lik)
+  statistic <- 2 * (full_log_lik - restricted_log_lik)
   comparison_check(
     is.finite(statistic) && statistic >= -sqrt(.Machine$double.eps),
     paste0(
@@ -259,27 +274,18 @@ interdep_likelihood_ratio <- function(models) {
     )
   )
 
-  statistic <- max(0, unname(statistic))
-  df_difference <- unname(df["full"] - df["restricted"])
-  list(
-    log_lik = log_lik,
-    df = df,
-    statistic = statistic,
-    df_difference = df_difference,
-    p_value = stats::pchisq(statistic, df_difference, lower.tail = FALSE)
-  )
-}
-
-new_interdep_model_comparison <- function(models, labels, test, alpha) {
+  statistic <- max(0, statistic)
+  df_difference <- full_df - restricted_df
+  p_value <- stats::pchisq(statistic, df_difference, lower.tail = FALSE)
   out <- data.frame(
-    Df = test$df,
-    AIC = vapply(models, stats::AIC, numeric(1)),
-    BIC = vapply(models, stats::BIC, numeric(1)),
-    logLik = test$log_lik,
-    deviance = -2 * test$log_lik,
-    Chisq = c(NA_real_, test$statistic),
-    `Chi Df` = c(NA_real_, test$df_difference),
-    `Pr(>Chisq)` = c(NA_real_, test$p_value),
+    Df = c(restricted_df, full_df),
+    AIC = c(stats::AIC(restricted), stats::AIC(full)),
+    BIC = c(stats::BIC(restricted), stats::BIC(full)),
+    logLik = c(restricted_log_lik, full_log_lik),
+    deviance = -2 * c(restricted_log_lik, full_log_lik),
+    Chisq = c(NA_real_, statistic),
+    `Chi Df` = c(NA_real_, df_difference),
+    `Pr(>Chisq)` = c(NA_real_, p_value),
     check.names = FALSE,
     row.names = labels
   )
@@ -289,37 +295,6 @@ new_interdep_model_comparison <- function(models, labels, test, alpha) {
     "Mathematical nesting is assumed and cannot be verified from the data alone.",
     ""
   )
-  attr(out, "interpretation") <- interdep_comparison_interpretation(labels, test, alpha)
-  class(out) <- c("interdep_model_comparison", "anova", "data.frame")
+  class(out) <- c("anova", "data.frame")
   out
-}
-
-interdep_comparison_interpretation <- function(labels, test, alpha) {
-  p <- if (test$p_value < 0.001) {
-    "p < .001"
-  } else {
-    sprintf("p = %.3f", test$p_value)
-  }
-  test_text <- sprintf(
-    "likelihood-ratio test: \u03c7\u00b2(%d) = %.2f, %s",
-    test$df_difference,
-    test$statistic,
-    p
-  )
-
-  significant <- test$p_value < alpha
-  conclusion <- sprintf(
-    "the test %s that `%s` fits the data worse than `%s`",
-    if (significant) "provides evidence" else "does not provide evidence",
-    labels["restricted"],
-    labels["full"]
-  )
-  caveat <- if (significant) "." else "; this does not establish equivalent fit."
-
-  paste0(
-    "Under the assumed nesting and chi-squared reference distribution, ",
-    conclusion,
-    " (", test_text, ")",
-    caveat
-  )
 }

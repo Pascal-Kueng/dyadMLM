@@ -65,16 +65,18 @@ Recently completed cleanup:
 - implemented common extraction of `glmmTMB` and `brms` random-effect blocks,
   including covariance arrays, normalized labels, and focused rejection of
   unsupported backend structures
-- implemented automatic and explicit matching of dyad-mean and
-  `.i_diff_*_arbitrary` member-deviation blocks, including random slopes,
-  multiple compositions/grouping levels, coefficient reordering, and
-  structurally omitted terms
+- implemented automatic matching of package-generated shared/difference blocks
+  and exact formula-block pairs for custom or constrained models, including
+  random slopes, multiple compositions/grouping levels, partial or wholly
+  omitted components, coefficient reordering, literal `I(idiff * time)`
+  products, and fitted-row coding validation when the indicator columns remain
+  available
 
 Immediate sequence:
 
 1. implement and test the engine-independent covariance-array
-   back-transformation, including coefficient alignment and structural-zero
-   padding for explicitly constrained pairs
+   back-transformation, including structural-zero padding for partial and
+   wholly omitted components
 2. make `exchangeable_rescov()` return final named variance-covariance and
    SD-correlation results for `glmmTMB` estimates and draw-wise `brms`
    transformations
@@ -147,11 +149,11 @@ The first release milestone is complete when all of the following are true:
 - [x] Cross-sectional and ILD temporal predictor decomposition, composition
   filtering, exchangeability overrides, pooling, metadata, and printing are
   implemented and tested for the documented scope.
-- [ ] `exchangeable_rescov()` converts fitted dyad-mean/`.i_diff_*` random-
-  effect structures to interpretable member-level covariance matrices. Backend
+- [ ] `exchangeable_rescov()` converts fitted shared/`.i_diff_*` random-effect
+  structures to interpretable member-level covariance matrices. Backend
   extraction and matching are implemented for `glmmTMB` and single-response
   `brms`; the engine-independent transformation, final return value, and
-  end-to-end tests remain.
+  numerical end-to-end tests remain.
 - [ ] Documentation shows a correct `glmmTMB`/DHARMa workflow for
   `dispformula = ~ 0`, role-specific checks, and clear limitations concerning
   autocorrelation and multicollinearity.
@@ -459,33 +461,28 @@ Complete these before calling the feature set CRAN-ready:
     - Automatic matching supports complete, unambiguous pairs across multiple
       compositions and grouping levels. It aligns coefficient and interaction
       order and leaves unrelated blocks alone.
-    - `pairs` supports explicit selection for ambiguous or constrained models
-      using model-style random-effect terms. Numeric indices are deliberately
-      unsupported because `brms` may reorder its stored blocks. Missing terms
-      within a supplied pair are recorded as structural zeros. A `NULL` side
-      means that the entire block was absent, and compatible unlisted blocks
-      are detected to prevent a false omission claim.
-    - Every explicit pair supplies its exact member-deviation indicator through
-      `idiff`. `mean_indicator` defaults to `"1"` for an ordinary intercept and
-      may instead identify a composition-specific dyad-mean column. This makes
-      explicit matching work with clearly declared custom column names, while
-      automatic matching remains a convenience for package-generated columns.
-      Both `idiff:time` and the equivalent literal numeric products
-      `I(idiff * time)` and `I(time * idiff)` are recognized. The brms adapter
-      restores brms's internally sanitized `I()` coefficient labels before the
-      shared matching step.
-    - With explicit `pairs`, only the supplied pairs are selected; all other
-      blocks are ignored rather than auto-matched.
+    - `pairs` selects exact shared and difference random-effect terms copied
+      from the fitted formula, plus `idiff` and optional `shared_indicator`.
+      Backend-normalized equivalents such as `(1 | group)`/`us(1 | group)` and
+      `(0 + x || group)`/`diag(0 + x | group)` are recognized.
+    - Supplied pairs may contain different coefficient sets or set one whole
+      block to `NULL`. The common term union and `NA` order entries record where
+      the numerical transformation must insert structural zeros.
+    - Difference slopes support `idiff:time`, `time:idiff`, and the narrow
+      literal products `I(idiff * time)` and `I(time * idiff)`. More complex
+      arithmetic inside `I()` is rejected.
+    - Fitted rows are validated when their indicator columns remain available:
+      the difference column must use `-1/+1` where the shared indicator equals
+      one, zero elsewhere, and contain both signs. A wholly omitted formula
+      column cannot be recovered from either backend, so that check is skipped
+      with a warning.
     - Tests cover both backend adapters, correlated and uncorrelated blocks,
       multiple blocks, order changes, automatic ambiguity/failure cases,
-      explicit pairs, custom indicator names, literal `I()` products in both
-      backends, incomplete structures, selector normalization, and `NULL`
-      validation.
+      exact custom pairs, partial and omitted structures, fitted-row contrast
+      coding, literal products in both backends, and one public end-to-end
+      `glmmTMB` call.
   - Remaining implementation:
-    - validate the observed coding and transformation scale of each selected
-      `idiff` column (normally generated `+1/-1` coding);
-    - reorder and zero-pad each pair's covariance arrays from the stored order
-      mappings;
+    - reorder each pair's covariance arrays from the stored order mappings;
     - apply the same engine-independent matrix transformation to every
       `glmmTMB` estimate or `brms` posterior draw;
     - create clear named `varcov` and `sdcor` output for every selected pair and

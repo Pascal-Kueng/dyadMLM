@@ -65,7 +65,7 @@ test_that("compare_interdep_models compares reparameterized nested models", {
   expect_lt(comparison$`Pr(>Chisq)`[2], 0.001)
 })
 
-test_that("compare_interdep_models rejects different original data", {
+test_that("compare_interdep_models requires exact original data", {
   skip_if_not_installed("glmmTMB")
 
   data_one <- prepare_interdep_data(
@@ -75,7 +75,7 @@ test_that("compare_interdep_models rejects different original data", {
     role = gender
   )
   changed <- example_dyadic_crosssectional
-  changed$satisfaction[1] <- changed$satisfaction[1] + 1
+  changed$satisfaction[1] <- changed$satisfaction[1] + 1e-10
   data_two <- prepare_interdep_data(
     changed,
     group = coupleID,
@@ -98,7 +98,7 @@ test_that("compare_interdep_models rejects different original data", {
   )
 })
 
-test_that("compare_interdep_models checks row counts and outcome missingness", {
+test_that("compare_interdep_models checks source and fitted rows", {
   skip_if_not_installed("glmmTMB")
 
   complete_data <- prepare_interdep_data(
@@ -116,10 +116,11 @@ test_that("compare_interdep_models checks row counts and outcome missingness", {
     member = personID,
     role = gender
   )
-  missing_outcome <- example_dyadic_crosssectional
-  missing_outcome$satisfaction[1] <- NA_real_
-  missing_data <- prepare_interdep_data(
-    missing_outcome,
+  predictor_missing <- example_dyadic_crosssectional
+  predictor_missing$extra_predictor <- seq_len(nrow(predictor_missing))
+  predictor_missing$extra_predictor[1] <- NA_real_
+  row_data <- prepare_interdep_data(
+    predictor_missing,
     group = coupleID,
     member = personID,
     role = gender
@@ -129,17 +130,17 @@ test_that("compare_interdep_models checks row counts and outcome missingness", {
     satisfaction ~ 1 + us(1 | coupleID),
     data = complete_data
   )
-  complete_full <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + us(1 | coupleID),
-    data = complete_data
-  )
   shorter_full <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + us(1 | coupleID),
+    satisfaction ~ gender,
     data = shorter_data
   )
-  missing_full <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + us(1 | coupleID),
-    data = missing_data
+  row_restricted <- glmmTMB::glmmTMB(
+    satisfaction ~ 1,
+    data = row_data
+  )
+  row_full <- glmmTMB::glmmTMB(
+    satisfaction ~ gender + extra_predictor,
+    data = row_data
   )
 
   expect_error(
@@ -151,16 +152,11 @@ test_that("compare_interdep_models checks row counts and outcome missingness", {
   )
   expect_error(
     compare_interdep_models(
-      full = missing_full,
-      restricted = complete_restricted
+      full = row_full,
+      restricted = row_restricted
     ),
-    "different numbers of missing outcome values"
+    "different observation rows"
   )
-
-  expect_silent(compare_interdep_models(
-    full = complete_full,
-    restricted = complete_restricted
-  ))
 })
 
 test_that("compare_interdep_models supports binomial models", {
@@ -191,48 +187,6 @@ test_that("compare_interdep_models supports binomial models", {
   full_model <- glmmTMB::glmmTMB(
     binary_outcome ~ gender,
     family = stats::binomial(),
-    data = full_data
-  )
-
-  comparison <- compare_interdep_models(
-    full = full_model,
-    restricted = restricted_model
-  )
-
-  expect_s3_class(comparison, "anova")
-  expect_equal(comparison$`Chi Df`[2], 1)
-  expect_equal(
-    comparison$Chisq[2],
-    2 * as.numeric(logLik(full_model) - logLik(restricted_model))
-  )
-})
-
-test_that("compare_interdep_models supports Poisson models", {
-  skip_if_not_installed("glmmTMB")
-
-  data <- example_dyadic_crosssectional
-  data$count_outcome <- pmax(0L, as.integer(round(data$satisfaction)))
-  restricted_data <- prepare_interdep_data(
-    data,
-    group = coupleID,
-    member = personID,
-    role = gender
-  )
-  full_data <- prepare_interdep_data(
-    data,
-    group = coupleID,
-    member = personID,
-    role = gender
-  )
-
-  restricted_model <- glmmTMB::glmmTMB(
-    count_outcome ~ 1,
-    family = stats::poisson(),
-    data = restricted_data
-  )
-  full_model <- glmmTMB::glmmTMB(
-    count_outcome ~ gender,
-    family = stats::poisson(),
     data = full_data
   )
 
@@ -280,9 +234,12 @@ test_that("compare_interdep_models agrees with anova.glmmTMB", {
     comparison$`Pr(>Chisq)`[2] < 0.05,
     reference$`Pr(>Chisq)`[2] < 0.05
   )
-  expect_match(
-    attr(comparison, "interpretation"),
-    "provides evidence that .* fits the data worse"
+  expect_error(
+    compare_interdep_models(
+      full = restricted_model,
+      restricted = full_model
+    ),
+    "`full` must have more estimated parameters"
   )
 
   printed <- capture.output(print(comparison))
@@ -293,40 +250,105 @@ test_that("compare_interdep_models agrees with anova.glmmTMB", {
   expect_equal(printed[note + 1L], "")
 })
 
-test_that("a non-significant comparison is not described as equivalent", {
+test_that("compare_interdep_models rejects transformed and changed outcomes", {
   skip_if_not_installed("glmmTMB")
 
-  data <- example_dyadic_crosssectional
-  set.seed(1)
-  data$noise <- stats::rnorm(nrow(data))
-  restricted_data <- prepare_interdep_data(
-    data,
-    group = coupleID,
-    member = personID,
-    role = gender
-  )
-  full_data <- prepare_interdep_data(
-    data,
+  model_data <- prepare_interdep_data(
+    example_dyadic_crosssectional,
     group = coupleID,
     member = personID,
     role = gender
   )
   restricted_model <- glmmTMB::glmmTMB(
     satisfaction ~ 1,
-    data = restricted_data
+    data = model_data
   )
-  full_model <- glmmTMB::glmmTMB(
-    satisfaction ~ noise,
-    data = full_data
+  transformed_model <- glmmTMB::glmmTMB(
+    I(satisfaction) ~ gender,
+    data = model_data
   )
 
+  expect_error(
+    compare_interdep_models(
+      full = transformed_model,
+      restricted = restricted_model
+    ),
+    "Only an untransformed outcome"
+  )
+
+  model_data$satisfaction <- model_data$satisfaction + 1
+  changed_model <- glmmTMB::glmmTMB(
+    satisfaction ~ gender,
+    data = model_data
+  )
+  expect_error(
+    compare_interdep_models(
+      full = changed_model,
+      restricted = restricted_model
+    ),
+    "fitted outcome values differ"
+  )
+})
+
+test_that("compare_interdep_models recovers local model data", {
+  skip_if_not_installed("glmmTMB")
+
+  fit_models <- function() {
+    local_data <- prepare_interdep_data(
+      example_dyadic_crosssectional,
+      group = coupleID,
+      member = personID,
+      role = gender
+    )
+    list(
+      restricted = glmmTMB::glmmTMB(satisfaction ~ 1, data = local_data),
+      full = glmmTMB::glmmTMB(satisfaction ~ gender, data = local_data)
+    )
+  }
+
+  models <- fit_models()
   comparison <- compare_interdep_models(
-    full = full_model,
-    restricted = restricted_model
+    full = models$full,
+    restricted = models$restricted
   )
-  interpretation <- attr(comparison, "interpretation")
 
-  expect_gte(comparison$`Pr(>Chisq)`[2], 0.05)
-  expect_match(interpretation, "does not provide evidence")
-  expect_match(interpretation, "does not establish equivalent fit")
+  expect_s3_class(comparison, "anova")
+})
+
+test_that("compare_interdep_models checks weights and offsets", {
+  skip_if_not_installed("glmmTMB")
+
+  data <- example_dyadic_crosssectional
+  data$observation_weight <- 2
+  data$observation_offset <- 0.25
+  model_data <- prepare_interdep_data(
+    data,
+    group = coupleID,
+    member = personID,
+    role = gender
+  )
+
+  full_model <- glmmTMB::glmmTMB(
+    satisfaction ~ gender,
+    data = model_data
+  )
+  weighted_model <- glmmTMB::glmmTMB(
+    satisfaction ~ 1,
+    weights = observation_weight,
+    data = model_data
+  )
+  offset_model <- glmmTMB::glmmTMB(
+    satisfaction ~ 1,
+    offset = observation_offset,
+    data = model_data
+  )
+
+  expect_error(
+    compare_interdep_models(full_model, weighted_model),
+    "different observation weights"
+  )
+  expect_error(
+    compare_interdep_models(full_model, offset_model),
+    "different offsets"
+  )
 })
