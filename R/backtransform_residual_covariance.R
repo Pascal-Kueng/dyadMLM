@@ -28,14 +28,22 @@
 #'   `sdcor`. Element names reproduce the two matched random-effect terms.
 #'
 #' @export
-exchangeable_rescov <- function(model) {
+exchangeable_rescov <- function(model, pairs = NULL, ignore = NULL) {
+  if (!is.null(ignore) && is.null(pairs)) {
+    stop("`ignore` requires `pairs` to be supplied, such as ... insert example...")
+  }
+
   model_data <- extract_exchangeable_residual_blocks(model)
 
   # warn if brms used a residual-level re-term and advise to use as described in the details above.
 
-  model_data$pairs <- match_exchangeable_residual_blocks(model_data$blocks)
 
-  # backtransform each block
+  if (is.null(pairs)) {
+    model_data$pairs <- match_exchangeable_residual_blocks(model_data$blocks)
+  } else {
+    model_data$paris <- apply_pairs...
+  }
+
 
   return(model_data)
 }
