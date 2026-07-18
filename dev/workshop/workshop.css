@@ -879,6 +879,14 @@
   text-align: center;
 }
 
+.reveal .cfm-constraint {
+  margin: 0 auto 4px;
+  color: var(--uzh-muted);
+  font-size: 16px;
+  line-height: 1.2;
+  text-align: center;
+}
+
 @media print {
   .workshop-branding,
   .summer-school-label {
