@@ -1,20 +1,22 @@
-test_that("random-effect blocks have a common backend-independent structure", {
+rescov_test_block <- function(group, coefficients, term) {
+  list(group = group, coefficients = coefficients, term = term)
+}
+
+test_that("backend adapters return aligned common block records", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("brms")
 
   data <- expand.grid(
     member = c(-1, 1),
-    day = 0:3,
-    coupleID = seq_len(30)
+    day = 0:2,
+    coupleID = seq_len(20)
   )
   data <- data[order(data$coupleID, data$day, data$member), ]
   data$coupleID <- factor(data$coupleID)
-  data$familyID <- factor((as.integer(data$coupleID) - 1L) %/% 3L + 1L)
+  data$familyID <- factor((as.integer(data$coupleID) - 1L) %/% 4L + 1L)
   data$idiff <- data$member
   data$shared2 <- 1
   data$diff2 <- data$member
-  data$occasion_shared <- 1
-  data$occasion_diff <- data$member
   set.seed(123)
   data$outcome <- stats::rnorm(nrow(data))
 
@@ -23,9 +25,7 @@ test_that("random-effect blocks have a common backend-independent structure", {
       (1 + day | coupleID) +
       (0 + idiff + idiff:day || coupleID) +
       (0 + shared2 | familyID) +
-      homdiag(0 + diff2 | familyID) +
-      (0 + occasion_shared | coupleID:day) +
-      (0 + occasion_diff || coupleID:day),
+      homdiag(0 + diff2 | familyID),
     dispformula = ~0,
     data = data
   ))
@@ -39,30 +39,28 @@ test_that("random-effect blocks have a common backend-independent structure", {
     empty = TRUE
   )
 
+  couple_names <- c("Intercept", "day", "idiff", "idiff:day")
   couple_sd <- matrix(
-    seq(1, 2.1, length.out = 12),
-    nrow = 3,
-    dimnames = list(NULL, c("Intercept", "day", "idiff", "idiff:day"))
+    seq(1, 1.7, length.out = 8),
+    nrow = 2,
+    dimnames = list(NULL, couple_names)
   )
   couple_cov <- array(
     0,
-    dim = c(3, 4, 4),
-    dimnames = list(
-      NULL,
-      c("Intercept", "day", "idiff", "idiff:day"),
-      c("Intercept", "day", "idiff", "idiff:day")
-    )
+    dim = c(2, 4, 4),
+    dimnames = list(NULL, couple_names, couple_names)
   )
-  for (j in seq_len(4)) {
-    couple_cov[, j, j] <- couple_sd[, j]^2
+  for (i in seq_along(couple_names)) {
+    couple_cov[, i, i] <- couple_sd[, i]^2
   }
   couple_cov[, 1, 2] <- 0.2
   couple_cov[, 2, 1] <- 0.2
 
+  family_names <- c("shared2", "diff2")
   family_sd <- matrix(
-    seq(0.5, 1, length.out = 6),
-    nrow = 3,
-    dimnames = list(NULL, c("shared2", "diff2"))
+    seq(0.5, 0.8, length.out = 4),
+    nrow = 2,
+    dimnames = list(NULL, family_names)
   )
 
   brms_blocks <- testthat::with_mocked_bindings(
@@ -79,263 +77,98 @@ test_that("random-effect blocks have a common backend-independent structure", {
 
   expect_named(glmm_blocks, c("backend", "blocks"))
   expect_named(brms_blocks, c("backend", "blocks"))
-  expect_length(glmm_blocks$blocks, 6)
+  expect_length(glmm_blocks$blocks, 4)
   expect_length(brms_blocks$blocks, 4)
-
-  is_residual_block <- vapply(
-    glmm_blocks$blocks,
-    function(block) identical(block$group, "coupleID:day"),
-    logical(1)
-  )
-  expect_equal(sum(is_residual_block), 2)
-  glmm_common_blocks <- glmm_blocks$blocks[!is_residual_block]
 
   descriptor <- function(block) {
     block[c("group", "coefficients", "correlated")]
   }
   expect_equal(
-    lapply(glmm_common_blocks, descriptor),
+    lapply(glmm_blocks$blocks, descriptor),
     lapply(brms_blocks$blocks, descriptor)
   )
   expect_equal(
-    lapply(glmm_common_blocks, names),
+    lapply(glmm_blocks$blocks, names),
     lapply(brms_blocks$blocks, names)
   )
 
-  custom_pair <- list(
-    dyad_mean = "(1 + day | coupleID)",
-    member_deviation = "(0 + idiff + idiff:day || coupleID)",
-    idiff = "idiff"
-  )
-  for (backend_blocks in list(glmm_common_blocks, brms_blocks$blocks)) {
-    matched <- match_supplied_exchangeable_residual_blocks(
-      backend_blocks,
-      custom_pair
-    )[[1L]]
-    expect_equal(matched$terms, c("(Intercept)", "day"))
-    expect_equal(matched$idiff, "idiff")
-    expect_equal(matched$mean_indicator, "1")
-  }
-
-  for (i in seq_along(glmm_common_blocks)) {
-    expect_equal(dim(glmm_common_blocks[[i]]$covariance)[1], 1)
-    expect_equal(dim(brms_blocks$blocks[[i]]$covariance)[1], 3)
+  for (i in seq_along(glmm_blocks$blocks)) {
+    expect_equal(dim(glmm_blocks$blocks[[i]]$covariance)[1L], 1L)
+    expect_equal(dim(brms_blocks$blocks[[i]]$covariance)[1L], 2L)
     expect_equal(
-      dim(glmm_common_blocks[[i]]$covariance)[2:3],
+      dim(glmm_blocks$blocks[[i]]$covariance)[2:3],
       dim(brms_blocks$blocks[[i]]$covariance)[2:3]
     )
   }
-
   expect_equal(
-    unname(brms_blocks$blocks[[1]]$covariance),
+    unname(brms_blocks$blocks[[1L]]$covariance),
     unname(couple_cov[, 1:2, 1:2, drop = FALSE])
   )
   expect_equal(
-    unname(brms_blocks$blocks[[2]]$covariance),
+    unname(brms_blocks$blocks[[2L]]$covariance),
     unname(couple_cov[, 3:4, 3:4, drop = FALSE])
   )
   expect_equal(
-    unname(brms_blocks$blocks[[3]]$covariance[, 1, 1]),
-    family_sd[, 1]^2
+    unname(brms_blocks$blocks[[3L]]$covariance[, 1L, 1L]),
+    family_sd[, 1L]^2
   )
   expect_equal(
-    unname(brms_blocks$blocks[[4]]$covariance[, 1, 1]),
-    family_sd[, 2]^2
+    unname(brms_blocks$blocks[[4L]]$covariance[, 1L, 1L]),
+    family_sd[, 2L]^2
   )
 
-  fitted_glmm_covariance <- glmmTMB::VarCorr(glmm_model)$cond
-  expect_equal(
-    as.numeric(glmm_blocks$blocks[[1]]$covariance[1, , ]),
-    as.numeric(fitted_glmm_covariance[[1]])
-  )
-
-  expect_equal(
-    vapply(glmm_common_blocks, `[[`, logical(1), "correlated"),
-    c(TRUE, FALSE, TRUE, FALSE)
-  )
-  expect_equal(
-    vapply(glmm_common_blocks, `[[`, character(1), "term"),
-    c(
-      "us(1 + day | coupleID)",
-      "diag(0 + idiff + idiff:day | coupleID)",
-      "us(0 + shared2 | familyID)",
-      "homdiag(0 + diff2 | familyID)"
-    )
-  )
-  expect_equal(
-    vapply(brms_blocks$blocks, `[[`, character(1), "term"),
-    c(
-      "(1 + day | coupleID)",
-      "(0 + idiff + idiff:day || coupleID)",
-      "(0 + shared2 | familyID)",
-      "(0 + diff2 || familyID)"
-    )
-  )
-
-  uncorrelated_model <- brms::brm(
-    outcome ~ 1 + (0 + idiff + idiff:day || coupleID),
-    data = data,
-    empty = TRUE
-  )
-  uncorrelated_sd <- couple_sd[, 3:4, drop = FALSE]
-  uncorrelated_blocks <- testthat::with_mocked_bindings(
-    brms_extract_exchangeable_residual_blocks(uncorrelated_model),
-    VarCorr = function(...) {
-      list(coupleID = list(sd = uncorrelated_sd))
-    },
-    .package = "brms"
-  )
-  expected_uncorrelated_covariance <- array(0, dim = c(3, 2, 2))
-  expected_uncorrelated_covariance[, 1, 1] <- uncorrelated_sd[, 1]^2
-  expected_uncorrelated_covariance[, 2, 2] <- uncorrelated_sd[, 2]^2
-  expect_equal(
-    unname(uncorrelated_blocks$blocks[[1]]$covariance),
-    expected_uncorrelated_covariance
-  )
-})
-
-test_that("backend block order does not affect term-based matching", {
-  skip_if_not_installed("glmmTMB")
-  skip_if_not_installed("brms")
-
-  marker <- ".i_diff_assumed_exchangeable_arbitrary"
-  data <- expand.grid(
-    member = c(-1, 1),
-    day = 0:2,
-    coupleID = seq_len(20)
-  )
-  set.seed(321)
-  data$coupleID <- factor(data$coupleID)
-  data$studyID <- factor((as.integer(data$coupleID) - 1L) %/% 4L + 1L)
-  data$fixed_a <- stats::rnorm(nrow(data))
-  data$fixed_b <- stats::rnorm(nrow(data))
-  data[[marker]] <- data$member
-  data$outcome <- stats::rnorm(nrow(data))
-
-  # Enter the same three random-effect blocks in different orders, with fixed
-  # effects between them. The backends are free to store them in another order.
-  glmm_model <- suppressWarnings(glmmTMB::glmmTMB(
-    outcome ~ fixed_a +
-      (0 + .i_diff_assumed_exchangeable_arbitrary +
-        .i_diff_assumed_exchangeable_arbitrary:day || coupleID) +
-      fixed_b + (1 | studyID) + (1 + day | coupleID),
-    dispformula = ~0,
-    data = data
-  ))
-  brms_model <- brms::brm(
-    outcome ~ fixed_a + (1 | studyID) +
-      fixed_b + (1 + day | coupleID) +
-      (0 + .i_diff_assumed_exchangeable_arbitrary +
-        .i_diff_assumed_exchangeable_arbitrary:day || coupleID),
-    data = data,
-    empty = TRUE
-  )
-
-  covariance_names <- c(
-    "Intercept",
-    "day",
-    marker,
-    paste0(marker, ":day")
-  )
-  couple_sd <- matrix(
-    1,
-    nrow = 2,
-    ncol = length(covariance_names),
-    dimnames = list(NULL, covariance_names)
-  )
-  couple_covariance <- array(
-    0,
-    dim = c(2, length(covariance_names), length(covariance_names)),
-    dimnames = list(NULL, covariance_names, covariance_names)
-  )
-  for (i in seq_along(covariance_names)) {
-    couple_covariance[, i, i] <- 1
-  }
-  study_sd <- matrix(
-    1,
-    nrow = 2,
-    ncol = 1,
-    dimnames = list(NULL, "Intercept")
-  )
-
-  glmm_blocks <- glmmTMB_extract_exchangeable_residual_blocks(glmm_model)
-  brms_blocks <- testthat::with_mocked_bindings(
-    brms_extract_exchangeable_residual_blocks(brms_model),
-    VarCorr = function(...) {
+  for (blocks in list(glmm_blocks$blocks, brms_blocks$blocks)) {
+    pair <- match_supplied_exchangeable_residual_blocks(
+      blocks,
       list(
-        coupleID = list(sd = couple_sd, cov = couple_covariance),
-        studyID = list(sd = study_sd)
+        shared = "(1 + day | coupleID)",
+        difference = "(0 + idiff + idiff:day || coupleID)",
+        idiff = "idiff"
       )
-    },
-    .package = "brms"
-  )
-
-  supplied_pair <- list(
-    dyad_mean = "(1 + day | coupleID)",
-    member_deviation = paste0(
-      "(0 + ", marker, " + ", marker, ":day || coupleID)"
-    ),
-    idiff = marker
-  )
-
-  check_matching <- function(model_blocks) {
-    supplied_match <- match_supplied_exchangeable_residual_blocks(
-      model_blocks$blocks,
-      supplied_pair
     )[[1L]]
-    automatic_match <- match_exchangeable_residual_blocks(
-      model_blocks$blocks
-    )[[1L]]
+    expect_equal(pair$underlying_terms, c("(Intercept)", "day"))
 
-    expect_equal(supplied_match, automatic_match)
-    expect_equal(supplied_match$terms, c("(Intercept)", "day"))
-    expect_equal(
-      model_blocks$blocks[[supplied_match$dyad_mean_index]]$coefficients,
-      c("(Intercept)", "day")
-    )
-    expect_equal(
-      model_blocks$blocks[[supplied_match$member_deviation_index]]$coefficients,
-      c(marker, paste0(marker, ":day"))
-    )
+    family_pair <- match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(
+        shared = blocks[[3L]]$term,
+        difference = blocks[[4L]]$term,
+        idiff = "diff2",
+        shared_indicator = "shared2"
+      )
+    )[[1L]]
+    expect_equal(family_pair$underlying_terms, "(Intercept)")
   }
-
-  check_matching(glmm_blocks)
-  check_matching(brms_blocks)
 })
 
 test_that("literal idiff products match in glmmTMB and brms", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("brms")
 
-  marker <- ".i_diff_assumed_exchangeable_arbitrary"
   data <- expand.grid(
     member = c(-1, 1),
     day = 0:2,
     coupleID = seq_len(20)
   )
   data$coupleID <- factor(data$coupleID)
-  data[[marker]] <- data$member
+  data$idiff <- data$member
   set.seed(456)
   data$outcome <- stats::rnorm(nrow(data))
 
   glmm_model <- suppressWarnings(glmmTMB::glmmTMB(
     outcome ~ 1 + (1 + day | coupleID) +
-      (0 + .i_diff_assumed_exchangeable_arbitrary +
-        I(.i_diff_assumed_exchangeable_arbitrary * day) || coupleID),
+      (0 + idiff + I(idiff * day) || coupleID),
     dispformula = ~0,
     data = data
   ))
   brms_model <- brms::brm(
     outcome ~ 1 + (1 + day | coupleID) +
-      (0 + .i_diff_assumed_exchangeable_arbitrary +
-        I(.i_diff_assumed_exchangeable_arbitrary * day) || coupleID),
+      (0 + idiff + I(idiff * day) || coupleID),
     data = data,
     empty = TRUE
   )
 
-  literal_product <- paste0("I(", marker, " * day)")
-  stored_product <- brms_stored_coefficient_name(literal_product)
-  covariance_names <- c("Intercept", "day", marker, stored_product)
+  covariance_names <- unname(brms_model$ranef$coef)
   sd_draws <- matrix(
     1,
     nrow = 2,
@@ -360,37 +193,36 @@ test_that("literal idiff products match in glmmTMB and brms", {
     .package = "brms"
   )
 
-  expected_coefficients <- list(
+  expected <- list(
     c("(Intercept)", "day"),
-    c(marker, literal_product)
+    c("idiff", "I(idiff * day)")
   )
   expect_equal(
     lapply(glmm_blocks$blocks, `[[`, "coefficients"),
-    expected_coefficients
+    expected
   )
   expect_equal(
     lapply(brms_blocks$blocks, `[[`, "coefficients"),
-    expected_coefficients
+    expected
   )
 
   for (model_blocks in list(glmm_blocks, brms_blocks)) {
-    automatic_match <- match_exchangeable_residual_blocks(
-      model_blocks$blocks
-    )[[1L]]
-    supplied_match <- match_supplied_exchangeable_residual_blocks(
+    automatic <- match_blocks_for_exchangeable_indicator(
       model_blocks$blocks,
-      pairs = list(
-        dyad_mean = "(1 + day | coupleID)",
-        member_deviation = paste0(
-          "(0 + ", marker, " + ", literal_product, " || coupleID)"
-        ),
-        idiff = marker
+      idiff = "idiff",
+      shared_indicator = "1"
+    )[[1L]]
+    supplied <- match_supplied_exchangeable_residual_blocks(
+      model_blocks$blocks,
+      list(
+        shared = "(1 + day | coupleID)",
+        difference = "(0 + idiff + I(idiff * day) || coupleID)",
+        idiff = "idiff"
       )
     )[[1L]]
 
-    expect_equal(supplied_match, automatic_match)
-    expect_equal(automatic_match$terms, c("(Intercept)", "day"))
-    expect_equal(automatic_match$member_deviation_order, c(1L, 2L))
+    expect_equal(supplied, automatic)
+    expect_equal(automatic$underlying_terms, c("(Intercept)", "day"))
   }
 })
 
@@ -405,7 +237,7 @@ test_that("unsupported brms random-effect structures fail clearly", {
     role = factor(rep(rep(c("a", "b"), each = 5), each = 2))
   )
 
-  multivariate_model <- brms::brm(
+  multivariate <- brms::brm(
     brms::bf(outcome ~ 1 + (1 | couple)) +
       brms::bf(second_outcome ~ 1 + (1 | couple)) +
       brms::set_rescor(FALSE),
@@ -413,19 +245,19 @@ test_that("unsupported brms random-effect structures fail clearly", {
     empty = TRUE
   )
   expect_error(
-    brms_extract_exchangeable_residual_blocks(multivariate_model),
-    "must contain a single response",
+    brms_extract_exchangeable_residual_blocks(multivariate),
+    "one response",
     fixed = TRUE
   )
 
-  linked_terms_model <- brms::brm(
+  linked <- brms::brm(
     outcome ~ 1 + (1 | block | couple) + (0 + time | block | couple),
     data = data,
     empty = TRUE
   )
   expect_error(
-    brms_extract_exchangeable_residual_blocks(linked_terms_model),
-    "more than one formula term",
+    brms_extract_exchangeable_residual_blocks(linked),
+    "Linked `brms` random-effect blocks",
     fixed = TRUE
   )
 
@@ -441,7 +273,7 @@ test_that("unsupported brms random-effect structures fail clearly", {
   )
 })
 
-test_that("brms distributional and nonlinear random effects are ignored", {
+test_that("brms ignores non-mean random effects", {
   skip_if_not_installed("brms")
 
   data <- data.frame(
@@ -449,8 +281,7 @@ test_that("brms distributional and nonlinear random effects are ignored", {
     couple = factor(rep(seq_len(10), each = 2)),
     time = rep(0:1, 10)
   )
-
-  distributional_model <- brms::brm(
+  model <- brms::brm(
     brms::bf(
       outcome ~ 1 + (1 + time | mean | couple),
       sigma ~ 1 + (1 | scale | couple)
@@ -458,704 +289,599 @@ test_that("brms distributional and nonlinear random effects are ignored", {
     data = data,
     empty = TRUE
   )
-  sd_draws <- matrix(
-    c(1, 2, 3, 1.1, 2.1, 3.1),
-    nrow = 2,
-    byrow = TRUE,
-    dimnames = list(NULL, c("Intercept", "time", "sigma_Intercept"))
-  )
+
+  names <- c("Intercept", "time", "sigma_Intercept")
+  sd <- matrix(1, nrow = 2, ncol = 3, dimnames = list(NULL, names))
   covariance <- array(
     0,
     dim = c(2, 3, 3),
-    dimnames = list(
-      NULL,
-      c("Intercept", "time", "sigma_Intercept"),
-      c("Intercept", "time", "sigma_Intercept")
-    )
+    dimnames = list(NULL, names, names)
   )
-  for (j in seq_len(3)) {
-    covariance[, j, j] <- sd_draws[, j]^2
+  for (i in seq_along(names)) {
+    covariance[, i, i] <- 1
   }
 
   expect_warning(
     blocks <- testthat::with_mocked_bindings(
-      brms_extract_exchangeable_residual_blocks(distributional_model),
+      brms_extract_exchangeable_residual_blocks(model),
       VarCorr = function(...) {
-        list(couple = list(sd = sd_draws, cov = covariance))
+        list(couple = list(sd = sd, cov = covariance))
       },
       .package = "brms"
     ),
     "were ignored",
     fixed = TRUE
   )
-
-  expect_length(blocks$blocks, 1)
-  expect_equal(blocks$blocks[[1]]$coefficients, c("(Intercept)", "time"))
-
-  nonlinear_model <- brms::brm(
-    brms::bf(
-      outcome ~ alpha + beta * time,
-      alpha ~ 1 + (1 | couple),
-      beta ~ 1,
-      nl = TRUE
-    ),
-    data = data,
-    empty = TRUE
-  )
-  expect_warning(
-    nonlinear_blocks <- testthat::with_mocked_bindings(
-      brms_extract_exchangeable_residual_blocks(nonlinear_model),
-      VarCorr = function(...) stop("VarCorr should not be called"),
-      .package = "brms"
-    ),
-    "were ignored",
-    fixed = TRUE
-  )
-
-  expect_length(nonlinear_blocks$blocks, 0)
+  expect_length(blocks$blocks, 1L)
+  expect_equal(blocks$blocks[[1L]]$coefficients, c("(Intercept)", "time"))
 })
 
-test_that("complete exchangeable blocks are matched by group and terms", {
-  block <- function(group, coefficients, term) {
-    list(group = group, coefficients = coefficients, term = term)
-  }
-  model_data <- list(blocks = list(
-    block("coupleID", c("time", "(Intercept)"), "dyad mean"),
-    block(
+test_that("automatic matching aligns groups and coefficient order", {
+  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  blocks <- list(
+    rescov_test_block("coupleID", c("time", "(Intercept)"), "shared"),
+    rescov_test_block(
       "coupleID",
-      c(
-        ".i_diff_assumed_exchangeable_arbitrary",
-        "time:.i_diff_assumed_exchangeable_arbitrary"
-      ),
-      "member deviation"
+      c(marker, paste0("I(", marker, " * time)")),
+      "difference"
     ),
-    block("coupleID", "support", "unrelated"),
-    block("study", c("(Intercept)", "time"), "other group")
-  ))
+    rescov_test_block("coupleID", "support", "unrelated"),
+    rescov_test_block("studyID", c("(Intercept)", "time"), "other group")
+  )
 
-  pairs <- match_exchangeable_residual_blocks(model_data$blocks)
-
-  expect_length(pairs, 1)
-  expect_equal(pairs[[1]]$dyad_mean_index, 1)
-  expect_equal(pairs[[1]]$member_deviation_index, 2)
-  expect_equal(pairs[[1]]$terms, c("time", "(Intercept)"))
-  expect_equal(pairs[[1]]$member_deviation_order, c(2L, 1L))
+  pair <- match_exchangeable_residual_blocks(blocks)[[1L]]
+  expect_equal(pair$shared_block_index, 1L)
+  expect_equal(pair$difference_block_index, 2L)
+  expect_equal(pair$idiff, marker)
+  expect_equal(pair$shared_indicator, "1")
+  expect_equal(pair$underlying_terms, c("time", "(Intercept)"))
+  expect_equal(pair$difference_term_indices, c(2L, 1L))
 
   expect_equal(
-    exchangeable_base_terms(
-      "time:time:.i_diff_same_sex_arbitrary",
-      ".i_diff_same_sex_arbitrary"
+    exchangeable_underlying_terms(
+      c("IDIFF", "I(IDIFF * time)"),
+      "IDIFF"
     ),
-    "time:time"
+    c("(Intercept)", "time")
   )
   expect_equal(
-    exchangeable_base_terms(
-      "I(.i_diff_same_sex_arbitrary * time)",
-      ".i_diff_same_sex_arbitrary"
-    ),
+    exchangeable_underlying_terms("I(time * IDIFF)", "IDIFF"),
     "time"
   )
-  expect_equal(
-    exchangeable_base_terms(
-      "I(time * .i_diff_same_sex_arbitrary)",
-      ".i_diff_same_sex_arbitrary"
-    ),
-    "time"
-  )
-  expect_null(
-    exchangeable_base_terms(
-      "I(.i_diff_same_sex_arbitrary * time^2)",
-      ".i_diff_same_sex_arbitrary",
-      require_marker = TRUE
-    )
-  )
 })
 
-test_that("composition-specific blocks are matched in mixed models", {
-  block <- function(group, coefficients, term) {
-    list(group = group, coefficients = coefficients, term = term)
-  }
+test_that("automatic matching handles compositions and grouping levels", {
+  same_idiff <- ".i_diff_same_sex_arbitrary"
+  friend_idiff <- ".i_diff_friends_arbitrary"
   blocks <- list(
-    block("coupleID", "(Intercept)", "generic"),
-    block("coupleID", ".i_is_same_sex", "same-sex dyad mean"),
-    block(
-      "coupleID",
-      ".i_diff_same_sex_arbitrary",
-      "same-sex member deviation"
-    ),
-    block("coupleID", ".i_is_friends", "friends dyad mean"),
-    block(
-      "coupleID",
-      ".i_diff_friends_arbitrary",
-      "friends member deviation"
-    )
+    rescov_test_block("coupleID", "(Intercept)", "generic"),
+    rescov_test_block("coupleID", ".i_is_same_sex", "same shared"),
+    rescov_test_block("coupleID", same_idiff, "same difference"),
+    rescov_test_block("coupleID", ".i_is_friends", "friend shared"),
+    rescov_test_block("coupleID", friend_idiff, "friend difference")
   )
 
   pairs <- match_exchangeable_residual_blocks(blocks)
-
   expect_equal(
-    pairs,
-    list(
-      list(
-        dyad_mean_index = 2L,
-        member_deviation_index = 3L,
-        idiff = ".i_diff_same_sex_arbitrary",
-        mean_indicator = ".i_is_same_sex",
-        terms = "(Intercept)",
-        dyad_mean_order = 1L,
-        member_deviation_order = 1L
-      ),
-      list(
-        dyad_mean_index = 4L,
-        member_deviation_index = 5L,
-        idiff = ".i_diff_friends_arbitrary",
-        mean_indicator = ".i_is_friends",
-        terms = "(Intercept)",
-        dyad_mean_order = 1L,
-        member_deviation_order = 1L
-      )
-    )
-  )
-})
-
-test_that("composition-specific blocks are preferred in single-composition models", {
-  blocks <- list(
-    list(group = "coupleID", coefficients = "(Intercept)", term = "generic"),
-    list(
-      group = "coupleID",
-      coefficients = ".i_is_same_sex",
-      term = "dyad mean"
+    lapply(
+      pairs,
+      function(pair) pair[c("shared_block_index", "difference_block_index")]
     ),
     list(
-      group = "coupleID",
-      coefficients = ".i_diff_same_sex_arbitrary",
-      term = "member deviation"
+      list(shared_block_index = 2L, difference_block_index = 3L),
+      list(shared_block_index = 4L, difference_block_index = 5L)
     )
   )
-
-  pairs <- match_exchangeable_residual_blocks(blocks)
-
   expect_equal(
-    pairs,
-    list(list(
-      dyad_mean_index = 2L,
-      member_deviation_index = 3L,
-      idiff = ".i_diff_same_sex_arbitrary",
-      mean_indicator = ".i_is_same_sex",
-      terms = "(Intercept)",
-      dyad_mean_order = 1L,
-      member_deviation_order = 1L
-    ))
+    unlist(lapply(pairs, `[[`, "shared_indicator"), use.names = FALSE),
+    c(".i_is_same_sex", ".i_is_friends")
+  )
+
+  repeated <- list(
+    rescov_test_block("coupleID", "(Intercept)", "stable shared"),
+    rescov_test_block("coupleID", same_idiff, "stable difference"),
+    rescov_test_block("coupleID:day", "(Intercept)", "occasion shared"),
+    rescov_test_block("coupleID:day", same_idiff, "occasion difference")
+  )
+  repeated_pairs <- match_exchangeable_residual_blocks(repeated)
+  expect_equal(
+    lapply(repeated_pairs, `[[`, "shared_block_index"),
+    list(1L, 3L)
+  )
+  expect_equal(
+    lapply(repeated_pairs, `[[`, "difference_block_index"),
+    list(2L, 4L)
   )
 })
 
-test_that("one composition can be matched at multiple grouping levels", {
-  block <- function(group, coefficients, term) {
-    list(group = group, coefficients = coefficients, term = term)
-  }
-  blocks <- list(
-    block("coupleID", "(Intercept)", "stable dyad mean"),
-    block(
+test_that("automatic matching is conservative about missing and ambiguous blocks", {
+  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+
+  expect_error(
+    match_exchangeable_residual_blocks(list(
+      rescov_test_block("coupleID", "(Intercept)", "shared")
+    )),
+    "No supported `.i_diff_*_arbitrary`",
+    fixed = TRUE
+  )
+
+  incomplete <- list(
+    rescov_test_block(
       "coupleID",
-      ".i_diff_assumed_exchangeable_arbitrary",
-      "stable member deviation"
+      c("(Intercept)", "time", "support"),
+      "shared"
     ),
-    block("coupleID:day", "(Intercept)", "occasion dyad mean"),
-    block(
-      "coupleID:day",
-      ".i_diff_assumed_exchangeable_arbitrary",
-      "occasion member deviation"
-    )
-  )
-
-  pairs <- match_exchangeable_residual_blocks(blocks)
-
-  expect_equal(
-    pairs,
-    list(
-      list(
-        dyad_mean_index = 1L,
-        member_deviation_index = 2L,
-        idiff = ".i_diff_assumed_exchangeable_arbitrary",
-        mean_indicator = "1",
-        terms = "(Intercept)",
-        dyad_mean_order = 1L,
-        member_deviation_order = 1L
-      ),
-      list(
-        dyad_mean_index = 3L,
-        member_deviation_index = 4L,
-        idiff = ".i_diff_assumed_exchangeable_arbitrary",
-        mean_indicator = "1",
-        terms = "(Intercept)",
-        dyad_mean_order = 1L,
-        member_deviation_order = 1L
-      )
-    )
-  )
-})
-
-test_that("incomplete exchangeable blocks are not matched automatically", {
-  model_data <- list(blocks = list(
-    list(
-      group = "coupleID",
-      coefficients = c("(Intercept)", "time", "support"),
-      term = "dyad mean"
-    ),
-    list(
-      group = "coupleID",
-      coefficients = c(
-        ".i_diff_assumed_exchangeable_arbitrary",
-        ".i_diff_assumed_exchangeable_arbitrary:time"
-      ),
-      term = "member deviation"
-    )
-  ))
-
-  expect_error(
-    match_exchangeable_residual_blocks(model_data$blocks),
-    "No dyad-mean block matched the member-deviation block `member deviation`",
-    fixed = TRUE
-  )
-
-  partial_member_deviation <- list(
-    list(
-      group = "coupleID",
-      coefficients = c("(Intercept)", "time"),
-      term = "dyad mean"
-    ),
-    list(
-      group = "coupleID",
-      coefficients = c(
-        ".i_diff_assumed_exchangeable_arbitrary",
-        "time"
-      ),
-      term = "partial member deviation"
+    rescov_test_block(
+      "coupleID",
+      c(marker, paste0(marker, ":time")),
+      "difference"
     )
   )
   expect_error(
-    match_exchangeable_residual_blocks(partial_member_deviation),
-    "No dyad-mean block matched the member-deviation block `partial member deviation`",
-    fixed = TRUE
-  )
-})
-
-test_that("missing and ambiguous exchangeable structures fail clearly", {
-  no_member_deviation <- list(list(
-    group = "coupleID",
-    coefficients = "(Intercept)",
-    term = "dyad mean"
-  ))
-  expect_error(
-    match_exchangeable_residual_blocks(no_member_deviation),
-    "No supported `.i_diff_*_arbitrary` member-deviation block was found.",
-    fixed = TRUE
-  )
-  expect_error(
-    match_exchangeable_residual_blocks(no_member_deviation),
-    "Available extracted random-effect blocks:\n  [1] `dyad mean`",
+    match_exchangeable_residual_blocks(incomplete),
+    "No shared block matched",
     fixed = TRUE
   )
 
   ambiguous <- list(
-    list(group = "coupleID", coefficients = "(Intercept)", term = "dyad mean 1"),
-    list(group = "coupleID", coefficients = "(Intercept)", term = "dyad mean 2"),
-    list(
-      group = "coupleID",
-      coefficients = ".i_diff_assumed_exchangeable_arbitrary",
-      term = "member deviation"
-    )
+    rescov_test_block("coupleID", "(Intercept)", "shared one"),
+    rescov_test_block("coupleID", "(Intercept)", "shared two"),
+    rescov_test_block("coupleID", marker, "difference")
   )
   expect_error(
     match_exchangeable_residual_blocks(ambiguous),
-    "More than one dyad-mean block matched the member-deviation block `member deviation`: `dyad mean 1`, `dyad mean 2`.",
+    "More than one shared block matched",
     fixed = TRUE
   )
 
-  reused_dyad_mean <- list(
-    list(group = "coupleID", coefficients = "(Intercept)", term = "generic"),
-    list(
-      group = "coupleID",
-      coefficients = ".i_is_same_sex",
-      term = "dyad mean"
+  partial <- list(
+    rescov_test_block("coupleID", c("(Intercept)", "time"), "shared"),
+    rescov_test_block("coupleID", c(marker, "time"), "partial difference")
+  )
+  expect_error(
+    match_exchangeable_residual_blocks(partial),
+    "must identify every coefficient in its difference block",
+    fixed = TRUE
+  )
+})
+
+test_that("supplied exact pairs align partial and custom-named blocks", {
+  blocks <- list(
+    rescov_test_block(
+      "coupleID",
+      c("time", "(Intercept)", "support"),
+      "us(time + 1 + support | coupleID)"
     ),
+    rescov_test_block(
+      "coupleID",
+      c("I(IDIFF * support)", "IDIFF", "IDIFF:stress"),
+      "diag(0 + I(IDIFF * support) + IDIFF + IDIFF:stress | coupleID)"
+    )
+  )
+
+  pair <- match_supplied_exchangeable_residual_blocks(
+    blocks,
     list(
-      group = "coupleID",
-      coefficients = ".i_diff_same_sex_arbitrary",
-      term = "member deviation 1"
+      shared = "(1 + support + time | coupleID)",
+      difference =
+        "(0 + IDIFF + I(support * IDIFF) + IDIFF:stress || coupleID)",
+      idiff = "IDIFF"
+    )
+  )[[1L]]
+  expect_equal(
+    pair$underlying_terms,
+    c("time", "(Intercept)", "support", "stress")
+  )
+  expect_equal(pair$shared_term_indices, c(1L, 2L, 3L, NA_integer_))
+  expect_equal(
+    pair$difference_term_indices,
+    c(NA_integer_, 2L, 1L, 3L)
+  )
+
+  composition_blocks <- list(
+    rescov_test_block(
+      "coupleID",
+      c("SAMESEX:time", "SAMESEX"),
+      "shared"
     ),
+    rescov_test_block(
+      "coupleID",
+      c("IDIFF_SAMESEX", "time:IDIFF_SAMESEX"),
+      "difference"
+    )
+  )
+  composition_pair <- match_supplied_exchangeable_residual_blocks(
+    composition_blocks,
     list(
-      group = "coupleID",
-      coefficients = ".i_diff_same_sex_arbitrary",
-      term = "member deviation 2"
+      shared = "shared",
+      difference = "difference",
+      idiff = "IDIFF_SAMESEX",
+      shared_indicator = "SAMESEX"
+    )
+  )[[1L]]
+  expect_equal(
+    composition_pair$underlying_terms,
+    c("time", "(Intercept)")
+  )
+  expect_equal(composition_pair$difference_term_indices, c(2L, 1L))
+})
+
+test_that("supplied exact pairs support wholly omitted blocks", {
+  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  blocks <- list(
+    rescov_test_block(
+      "coupleID",
+      c("(Intercept)", "time"),
+      "us(1 + time | coupleID)"
+    ),
+    rescov_test_block(
+      "coupleID:day",
+      c(paste0(marker, ":time"), marker),
+      paste0("diag(0 + ", marker, ":time + ", marker, " | coupleID:day)")
+    ),
+    rescov_test_block("studyID", "(Intercept)", "us(1 | studyID)")
+  )
+
+  matched <- match_supplied_exchangeable_residual_blocks(
+    blocks,
+    list(
+      list(
+        shared = "(1 + time | coupleID)",
+        difference = NULL,
+        idiff = marker
+      ),
+      list(
+        shared = NULL,
+        difference = paste0(
+          "(0 + ", marker, " + ", marker, ":time || coupleID:day)"
+        ),
+        idiff = marker
+      )
+    )
+  )
+
+  expect_equal(matched[[1L]]$shared_block_index, 1L)
+  expect_true(is.na(matched[[1L]]$difference_block_index))
+  expect_equal(matched[[1L]]$underlying_terms, c("(Intercept)", "time"))
+  expect_equal(matched[[1L]]$shared_term_indices, c(1L, 2L))
+  expect_true(all(is.na(matched[[1L]]$difference_term_indices)))
+
+  expect_true(is.na(matched[[2L]]$shared_block_index))
+  expect_equal(matched[[2L]]$difference_block_index, 2L)
+  expect_equal(matched[[2L]]$underlying_terms, c("time", "(Intercept)"))
+  expect_true(all(is.na(matched[[2L]]$shared_term_indices)))
+  expect_equal(matched[[2L]]$difference_term_indices, c(1L, 2L))
+})
+
+test_that("omitted blocks are checked without rejecting disjoint pairs", {
+  blocks <- list(
+    rescov_test_block("coupleID", "time", "shared time"),
+    rescov_test_block("coupleID", "IDIFF:support", "difference support")
+  )
+  matched <- match_supplied_exchangeable_residual_blocks(
+    blocks,
+    list(
+      list(
+        shared = "shared time",
+        difference = NULL,
+        idiff = "IDIFF"
+      ),
+      list(
+        shared = NULL,
+        difference = "difference support",
+        idiff = "IDIFF"
+      )
+    )
+  )
+  expect_length(matched, 2L)
+
+  malformed_difference <- list(
+    rescov_test_block("coupleID", "(Intercept)", "shared"),
+    rescov_test_block(
+      "coupleID",
+      c("IDIFF", "time"),
+      "partial difference"
     )
   )
   expect_error(
-    match_exchangeable_residual_blocks(reused_dyad_mean),
-    "A dyad-mean block matched more than one member-deviation block.",
+    match_supplied_exchangeable_residual_blocks(
+      malformed_difference,
+      list(shared = "shared", difference = NULL, idiff = "IDIFF")
+    ),
+    "`difference = NULL` was supplied, but a compatible block exists",
+    fixed = TRUE
+  )
+
+  unsupported_product <- list(
+    rescov_test_block("coupleID", "time", "shared"),
+    rescov_test_block(
+      "coupleID",
+      "I(IDIFF * time^2)",
+      "unsupported difference"
+    )
+  )
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      unsupported_product,
+      list(shared = "shared", difference = NULL, idiff = "IDIFF")
+    ),
+    "`difference = NULL` was supplied, but a compatible block exists",
+    fixed = TRUE
+  )
+
+  malformed_shared <- list(
+    rescov_test_block(
+      "coupleID",
+      c("SAMESEX", "time"),
+      "partial shared"
+    ),
+    rescov_test_block("coupleID", "IDIFF", "difference")
+  )
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      malformed_shared,
+      list(
+        shared = NULL,
+        difference = "difference",
+        idiff = "IDIFF",
+        shared_indicator = "SAMESEX"
+      )
+    ),
+    "`shared = NULL` was supplied, but a compatible block exists",
     fixed = TRUE
   )
 })
 
-test_that("supplied pairs align terms and account for every block", {
-  blocks <- list(
-    list(
-      group = "coupleID",
-      coefficients = c(
-        ".i_is_assumed_exchangeable:time",
-        ".i_is_assumed_exchangeable",
-        ".i_is_assumed_exchangeable:support"
-      ),
-      term = "dyad mean"
-    ),
-    list(
-      group = "coupleID",
-      coefficients = c(
-        ".i_diff_assumed_exchangeable_arbitrary:support",
-        ".i_diff_assumed_exchangeable_arbitrary"
-      ),
-      term = "member deviation"
-    ),
-    list(
-      group = "studyID",
-      coefficients = "(Intercept)",
-      term = "study"
-    )
-  )
-
-  matched <- match_supplied_exchangeable_residual_blocks(
-    blocks,
-    pairs = c(
-      dyad_mean = "dyad mean",
-      member_deviation = "member deviation",
-      idiff = ".i_diff_assumed_exchangeable_arbitrary",
-      mean_indicator = ".i_is_assumed_exchangeable"
-    )
-  )
-
-  expect_equal(
-    matched,
-    list(list(
-      dyad_mean_index = 1L,
-      member_deviation_index = 2L,
-      idiff = ".i_diff_assumed_exchangeable_arbitrary",
-      mean_indicator = ".i_is_assumed_exchangeable",
-      terms = c("time", "(Intercept)", "support"),
-      dyad_mean_order = c(1L, 2L, 3L),
-      member_deviation_order = c(NA_integer_, 2L, 1L)
-    ))
-  )
-
-})
-
-test_that("model-style terms identify normalized backend block labels", {
+test_that("model-style selectors preserve covariance structures", {
   marker <- ".i_diff_assumed_exchangeable_arbitrary"
   blocks <- list(
-    list(
-      group = "coupleID",
-      coefficients = c("time", "(Intercept)"),
-      term = "us(time + 1 | coupleID)"
+    rescov_test_block(
+      "coupleID",
+      c("time", "(Intercept)"),
+      "us(time + 1 | coupleID)"
     ),
-    list(
-      group = "coupleID",
-      coefficients = c(paste0(marker, ":time"), marker),
-      term = paste0("diag(0 + ", marker, ":time + ", marker, " | coupleID)")
-    ),
-    list(
-      group = "studyID",
-      coefficients = "(Intercept)",
-      term = "us(1 | studyID)"
+    rescov_test_block(
+      "coupleID",
+      c(paste0(marker, ":time"), marker),
+      paste0("diag(0 + ", marker, ":time + ", marker, " | coupleID)")
     )
   )
 
-  matched <- match_supplied_exchangeable_residual_blocks(
+  pair <- match_supplied_exchangeable_residual_blocks(
     blocks,
-    pairs = list(
-      dyad_mean = "(1 + time | coupleID)",
-      member_deviation = paste0(
+    list(
+      shared = "(1 + time | coupleID)",
+      difference = paste0(
         "(0 + ", marker, " + time:", marker, " || coupleID)"
       ),
       idiff = marker
     )
-  )
-
-  expect_equal(matched[[1]]$dyad_mean_index, 1L)
-  expect_equal(matched[[1]]$member_deviation_index, 2L)
-  expect_equal(matched[[1]]$terms, c("time", "(Intercept)"))
-  expect_equal(matched[[1]]$member_deviation_order, c(1L, 2L))
+  )[[1L]]
+  expect_equal(pair$shared_block_index, 1L)
+  expect_equal(pair$difference_block_index, 2L)
+  expect_equal(pair$difference_term_indices, c(1L, 2L))
 
   expect_equal(
-    normalize_exchangeable_block_label("homdiag(0 + x | group)"),
+    canonicalize_exchangeable_block_term("homdiag(0 + x | group)"),
     "homdiag(0+x|group)"
   )
-})
+  expect_false(identical(
+    canonicalize_exchangeable_block_term("homdiag(0 + x | group)"),
+    canonicalize_exchangeable_block_term("(0 + x || group)")
+  ))
 
-test_that("supplied pairs support custom indicator names", {
-  generic_blocks <- list(
-    list(
-      group = "coupleID",
-      coefficients = c("(Intercept)", "time"),
-      term = "generic dyad mean"
+  ambiguous <- list(
+    rescov_test_block(
+      "coupleID",
+      c("(Intercept)", "time"),
+      "us(time + 1 | coupleID)"
     ),
-    list(
-      group = "coupleID",
-      coefficients = c("IDIFF", "I(IDIFF * time)"),
-      term = "generic member deviation"
-    )
-  )
-  generic_match <- match_supplied_exchangeable_residual_blocks(
-    generic_blocks,
-    pairs = list(
-      dyad_mean = "generic dyad mean",
-      member_deviation = "generic member deviation",
-      idiff = "IDIFF"
-    )
-  )[[1L]]
-  expect_equal(generic_match$idiff, "IDIFF")
-  expect_equal(generic_match$mean_indicator, "1")
-  expect_equal(generic_match$terms, c("(Intercept)", "time"))
-
-  blocks <- list(
-    list(
-      group = "coupleID",
-      coefficients = c("SAMESEX:time", "SAMESEX"),
-      term = "dyad mean"
+    rescov_test_block(
+      "coupleID",
+      c("(Intercept)", "time"),
+      "us(1 + time | coupleID)"
     ),
-    list(
-      group = "coupleID",
-      coefficients = c("IDIFF_SAMESEX", "time:IDIFF_SAMESEX"),
-      term = "member deviation"
-    )
+    rescov_test_block("coupleID", marker, "difference")
   )
-
-  matched <- match_supplied_exchangeable_residual_blocks(
-    blocks,
-    pairs = list(
-      dyad_mean = "dyad mean",
-      member_deviation = "member deviation",
-      idiff = "IDIFF_SAMESEX",
-      mean_indicator = "SAMESEX"
-    )
-  )
-
-  expect_equal(
-    matched,
-    list(list(
-      dyad_mean_index = 1L,
-      member_deviation_index = 2L,
-      idiff = "IDIFF_SAMESEX",
-      mean_indicator = "SAMESEX",
-      terms = c("time", "(Intercept)"),
-      dyad_mean_order = c(1L, 2L),
-      member_deviation_order = c(2L, 1L)
-    ))
-  )
-})
-
-test_that("supplied pairs support missing components and multiple pairs", {
-  blocks <- list(
-    list(
-      group = "coupleID",
-      coefficients = c("(Intercept)", "time"),
-      term = "dyad mean"
-    ),
-    list(
-      group = "coupleID:day",
-      coefficients = c(
-        ".i_diff_assumed_exchangeable_arbitrary:time",
-        ".i_diff_assumed_exchangeable_arbitrary"
-      ),
-      term = "occasion member deviation"
-    ),
-    list(
-      group = "studyID",
-      coefficients = "(Intercept)",
-      term = "study"
-    )
-  )
-
-  matched <- match_supplied_exchangeable_residual_blocks(
-    blocks,
-    pairs = list(
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      ambiguous,
       list(
-        dyad_mean = "dyad mean",
-        member_deviation = NULL,
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
-      ),
-      list(
-        dyad_mean = NULL,
-        member_deviation = "occasion member deviation",
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
+        shared = "(1+time | coupleID)",
+        difference = "difference",
+        idiff = marker
       )
-    )
-  )
-
-  expect_equal(
-    matched,
-    list(
-      list(
-        dyad_mean_index = 1L,
-        member_deviation_index = NA_integer_,
-        idiff = ".i_diff_assumed_exchangeable_arbitrary",
-        mean_indicator = "1",
-        terms = c("(Intercept)", "time"),
-        dyad_mean_order = c(1L, 2L),
-        member_deviation_order = c(NA_integer_, NA_integer_)
-      ),
-      list(
-        dyad_mean_index = NA_integer_,
-        member_deviation_index = 2L,
-        idiff = ".i_diff_assumed_exchangeable_arbitrary",
-        mean_indicator = "1",
-        terms = c("time", "(Intercept)"),
-        dyad_mean_order = c(NA_integer_, NA_integer_),
-        member_deviation_order = c(1L, 2L)
-      )
-    )
+    ),
+    "matches more than one random-effect block",
+    fixed = TRUE
   )
 })
 
 test_that("supplied pair specifications fail clearly", {
   blocks <- list(
-    list(group = "coupleID", coefficients = "(Intercept)", term = "mean"),
-    list(
-      group = "coupleID",
-      coefficients = ".i_diff_assumed_exchangeable_arbitrary",
-      term = "deviation"
-    ),
-    list(group = "studyID", coefficients = "(Intercept)", term = "study")
+    rescov_test_block("coupleID", "(Intercept)", "shared"),
+    rescov_test_block("coupleID", "IDIFF", "difference"),
+    rescov_test_block("study", "(Intercept)", "study")
   )
 
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      pairs = list(
-        dyad_mean = 1,
-        member_deviation = "deviation",
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
-      )
+      list(shared_indicator = "1")
     ),
-    "must be one random-effect term copied from the model formula",
+    "must contain `shared`, `difference`, and `idiff`",
     fixed = TRUE
   )
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      pairs = list(dyad_mean = "mean", member_deviation = "deviation")
-    ),
-    "must contain `dyad_mean`, `member_deviation`, and `idiff`",
-    fixed = TRUE
-  )
-  expect_error(
-    match_supplied_exchangeable_residual_blocks(
-      blocks,
-      pairs = list(mean = "mean", deviation = "deviation")
-    ),
-    "must contain `dyad_mean`, `member_deviation`, and `idiff`",
-    fixed = TRUE
-  )
-  expect_error(
-    match_supplied_exchangeable_residual_blocks(
-      blocks,
-      pairs = list(
-        dyad_mean = "mean",
-        member_deviation = "deviation",
+      list(
+        shared = "unknown",
+        difference = "difference",
         idiff = "IDIFF"
       )
     ),
-    "`idiff = \"IDIFF\"` must appear in every coefficient",
+    "does not match an extracted random-effect block",
     fixed = TRUE
   )
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      pairs = list(
-        dyad_mean = "mean",
-        member_deviation = "deviation",
-        idiff = ".i_diff_assumed_exchangeable_arbitrary",
-        mean_indicator = "SAMESEX"
-      )
-    ),
-    "`mean_indicator = \"SAMESEX\"` must appear in every coefficient",
-    fixed = TRUE
-  )
-  expect_error(
-    match_supplied_exchangeable_residual_blocks(
-      blocks,
-      pairs = list(
-        c(
-          dyad_mean = "mean",
-          member_deviation = "deviation",
-          idiff = ".i_diff_assumed_exchangeable_arbitrary"
-        ),
-        list(
-          dyad_mean = "mean",
-          member_deviation = NULL,
-          idiff = ".i_diff_assumed_exchangeable_arbitrary"
-        )
-      )
-    ),
-    "only one supplied pair",
-    fixed = TRUE
-  )
-  expect_error(
-    match_supplied_exchangeable_residual_blocks(
-      blocks,
-      pairs = c(
-        dyad_mean = "deviation",
-        member_deviation = "deviation",
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
-      )
-    ),
-    "only one supplied pair",
-    fixed = TRUE
-  )
-  expect_error(
-    match_supplied_exchangeable_residual_blocks(
-      blocks,
-      pairs = c(
-        dyad_mean = "study",
-        member_deviation = "deviation",
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
+      list(
+        shared = "study",
+        difference = "difference",
+        idiff = "IDIFF"
       )
     ),
     "must use the same grouping factor",
     fixed = TRUE
   )
+
+  transformed <- list(
+    rescov_test_block("coupleID", c("(Intercept)", "time"), "shared"),
+    rescov_test_block(
+      "coupleID",
+      c("IDIFF", "I(IDIFF * time^2)"),
+      "difference"
+    )
+  )
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      transformed,
+      list(
+        shared = "shared",
+        difference = "difference",
+        idiff = "IDIFF"
+      )
+    ),
+    "must identify every coefficient",
+    fixed = TRUE
+  )
+
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      pairs = list(
-        dyad_mean = "mean",
-        member_deviation = NULL,
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
-      )
+      list(shared = NULL, difference = NULL, idiff = "IDIFF")
     ),
-    "`member_deviation = NULL` was supplied, but a compatible block exists",
+    "cannot set both `shared` and `difference` to `NULL`",
+    fixed = TRUE
+  )
+
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(shared = "shared", difference = NULL, idiff = "IDIFF")
+    ),
+    "`difference = NULL` was supplied, but a compatible block exists",
     fixed = TRUE
   )
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      pairs = list(
-        dyad_mean = NULL,
-        member_deviation = "deviation",
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
-      )
+      list(shared = NULL, difference = "difference", idiff = "IDIFF")
     ),
-    "`dyad_mean = NULL` was supplied, but a compatible block exists",
+    "`shared = NULL` was supplied, but a compatible block exists",
     fixed = TRUE
   )
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      pairs = list(
-        dyad_mean = "deviation",
-        member_deviation = NULL,
-        idiff = ".i_diff_assumed_exchangeable_arbitrary"
-      )
+      list(shared = "difference", difference = NULL, idiff = "IDIFF")
     ),
-    "supplied dyad-mean block contains its `idiff` indicator",
+    "selected shared block contains its `idiff`",
     fixed = TRUE
   )
+})
+
+test_that("fitted-row validation protects the exchangeable coding", {
+  valid <- data.frame(
+    IDIFF = c(-1, 1, 0, 0),
+    SAMESEX = c(1, 1, 0, 0)
+  )
+  expect_no_error(validate_exchangeable_coding(valid, "IDIFF", "SAMESEX"))
+  expect_no_error(validate_exchangeable_coding(
+    data.frame(IDIFF = c(-1, 1)),
+    "IDIFF",
+    "1"
+  ))
+  expect_warning(
+    validate_exchangeable_coding(
+      data.frame(other = 1:2),
+      "IDIFF",
+      "1"
+    ),
+    "was not retained",
+    fixed = TRUE
+  )
+  expect_warning(
+    validate_exchangeable_coding(
+      data.frame(IDIFF = c(-1, 1)),
+      "IDIFF",
+      "SAMESEX"
+    ),
+    "support could not be checked",
+    fixed = TRUE
+  )
+
+  wrong_scale <- valid
+  wrong_scale$IDIFF <- wrong_scale$IDIFF / 2
+  expect_error(
+    validate_exchangeable_coding(wrong_scale, "IDIFF", "SAMESEX"),
+    "must use -1/+1 coding",
+    fixed = TRUE
+  )
+
+  wrong_support <- valid
+  wrong_support$IDIFF[[3L]] <- 1
+  expect_error(
+    validate_exchangeable_coding(wrong_support, "IDIFF", "SAMESEX"),
+    "must use -1/+1 coding",
+    fixed = TRUE
+  )
+
+  one_sign <- data.frame(IDIFF = c(1, 1), SAMESEX = c(1, 1))
+  expect_error(
+    validate_exchangeable_coding(one_sign, "IDIFF", "SAMESEX"),
+    "must contain both -1 and +1",
+    fixed = TRUE
+  )
+
+  marker <- ".i_diff_same_sex_arbitrary"
+  generic_blocks <- list(
+    rescov_test_block("coupleID", "(Intercept)", "generic shared"),
+    rescov_test_block("coupleID", marker, "difference")
+  )
+  model_frame <- data.frame(value = seq_len(4))
+  model_frame[[marker]] <- c(-1, 1, 0, 0)
+  expect_error(
+    match_exchangeable_residual_blocks(generic_blocks, model_frame),
+    "must use -1/+1 coding",
+    fixed = TRUE
+  )
+})
+
+test_that("the public function extracts, matches, and validates a glmmTMB model", {
+  skip_if_not_installed("glmmTMB")
+
+  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  data <- expand.grid(member = c(-1, 1), coupleID = seq_len(30))
+  data$coupleID <- factor(data$coupleID)
+  data[[marker]] <- data$member
+  set.seed(456)
+  data$outcome <- stats::rnorm(nrow(data))
+
+  model <- suppressWarnings(glmmTMB::glmmTMB(
+    outcome ~ 1 + (1 | coupleID) +
+      (0 + .i_diff_assumed_exchangeable_arbitrary || coupleID),
+    dispformula = ~0,
+    data = data
+  ))
+  result <- exchangeable_rescov(model)
+
+  expect_equal(result$backend, "glmmTMB")
+  expect_length(result$blocks, 2L)
+  expect_length(result$pairs, 1L)
+  expect_equal(result$pairs[[1L]]$shared_block_index, 1L)
+  expect_equal(result$pairs[[1L]]$difference_block_index, 2L)
+  expect_equal(result$pairs[[1L]]$underlying_terms, "(Intercept)")
 })

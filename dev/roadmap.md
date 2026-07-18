@@ -466,8 +466,8 @@ Complete these before calling the feature set CRAN-ready:
       Backend-normalized equivalents such as `(1 | group)`/`us(1 | group)` and
       `(0 + x || group)`/`diag(0 + x | group)` are recognized.
     - Supplied pairs may contain different coefficient sets or set one whole
-      block to `NULL`. The common term union and `NA` order entries record where
-      the numerical transformation must insert structural zeros.
+      block to `NULL`. The common term union and `NA` term-index entries record
+      where the numerical transformation must insert structural zeros.
     - Difference slopes support `idiff:time`, `time:idiff`, and the narrow
       literal products `I(idiff * time)` and `I(time * idiff)`. More complex
       arithmetic inside `I()` is rejected.
@@ -498,9 +498,8 @@ Complete these before calling the feature set CRAN-ready:
     the normalized structures used by the adapters.
   - Use arbitrary member 1/member 2 labels, never female/male labels, for the
     transformed covariance of exchangeable dyads.
-  - `dev/backtransform.md` remains useful for mathematical motivation, but its
-    scalar-only, `glmmTMB`-only, formula-reparsing, return-value, and status
-    sections are superseded by this roadmap and the current implementation.
+  - `dev/backtransform.md` records the matching contract, mathematical
+    transformation, backend boundaries, and remaining implementation sequence.
 - Add a bounded `glmmTMB` diagnostics workflow for v0.0.1
   - Keep this documentation-first: one focused section that other model
     vignettes can link to, with no exported diagnostics or plotting API.

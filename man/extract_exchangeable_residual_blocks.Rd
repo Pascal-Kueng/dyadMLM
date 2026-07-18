@@ -2,7 +2,7 @@
 % Please edit documentation in R/backtransform_residual_covariance.R
 \name{extract_exchangeable_residual_blocks}
 \alias{extract_exchangeable_residual_blocks}
-\title{Extract exchangeable residual blocks from a fitted model}
+\title{Extract exchangeable random-effect blocks from a fitted model}
 \usage{
 extract_exchangeable_residual_blocks(model)
 }
@@ -10,26 +10,14 @@ extract_exchangeable_residual_blocks(model)
 \item{model}{A fitted model. Supported classes are \code{glmmTMB} and \code{brmsfit}.}
 }
 \value{
-A normalized internal representation containing the model engine,
-extracted random-effect blocks and their fitted covariance parameters.
+A list containing the model \code{backend} and one normalized record per
+random-effect block. Every record contains \code{group}, \code{coefficients},
+\code{correlated}, \code{term}, and an estimate/draw-by-coefficients covariance
+array.
 }
 \description{
-Extracts the fitted random-effect structure and covariance parameters needed
-to identify exchangeable dyad-mean/member-deviation random-effect pairs.
-Model-engine-specific information is normalized to a common representation.
-}
-\details{
-Dyad-mean and \verb{.i_diff_*} member-deviation blocks are matched by dyad
-composition and grouping factor. This permits more than one exchangeable
-composition and more than one grouping level, such as separate stable dyad
-and same-occasion residual structures.
-
-For \code{glmmTMB} models, the function uses the normalized random-effect
-structures stored in \code{model$modelInfo} together with the fitted covariance
-estimates. For \code{brmsfit} models, it uses the stored group-level term
-structure and raw posterior covariance draws. Distributional and nonlinear
-\code{brms} random-effect terms are ignored. Multivariate models, linked
-multi-term blocks, and terms using \code{gr(..., by = ...)} are currently not
-supported.
+Normalizes the random-effect coefficients and fitted covariance parameters
+needed by \code{\link[=exchangeable_rescov]{exchangeable_rescov()}} while keeping backend-specific work in two
+small adapters.
 }
 \keyword{internal}

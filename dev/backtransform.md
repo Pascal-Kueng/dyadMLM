@@ -13,9 +13,11 @@ Public function name:
 exchangeable_rescov(model)
 ```
 
-The v0.0.1 function takes a fitted model, discovers all supported
-shared/difference residual-block pairs, and returns their member-level
-covariance structures.
+The extraction and matching layer is implemented for `glmmTMB` and
+single-response `brmsfit` models. `exchangeable_rescov()` currently returns its
+normalized blocks and matched-pair records while the numerical
+back-transformation is developed. Its documented final contract is a named
+list of member-level covariance structures.
 
 ## Purpose
 
@@ -128,37 +130,36 @@ for discovering blocks and extracting `Sigma_score`.
 
 ## Public scope for v0.0.1
 
-The public function supports fitted `glmmTMB` models containing at least one
-valid scalar shared/difference pair. It should support:
+The function supports fitted `glmmTMB` and single-response `brmsfit` models
+containing one or more shared/difference random-effect pairs. The common block
+representation already supports:
 
-- a single exchangeable composition;
-- exchangeable DIMs and exchangeable APIMs;
-- multiple exchangeable compositions in one mixed-composition APIM;
-- pooled exchangeable compositions;
-- the same composition at multiple grouping levels, such as stable
-  `coupleID` and same-occasion `coupleID:diaryday` blocks;
-- models that also contain distinguishable-composition covariance blocks,
-  which are left unchanged and omitted from the result.
-
-Mixed-composition support is part of the intended v0.0.1 public contract, but
-implementation and validation should proceed from one pair to many pairs.
+- one or multiple exchangeable compositions;
+- the same composition at several grouping levels;
+- random intercepts and random slopes;
+- correlated (`|`/`us`) and uncorrelated (`||`/`diag`/`homdiag`) blocks;
+- posterior covariance draws for `brms` and point estimates for `glmmTMB`;
+- unrelated or distinguishable-composition blocks, which are left alone;
+- explicit partial pairs and wholly omitted components, represented by
+  structural zeros.
 
 ### Deliberate v0.0.1 restrictions
 
-The first version supports one scalar coefficient in each shared and difference
-block. It does not support:
+The first version does not support:
 
-- random-slope covariance matrices;
-- a shared and difference term placed in the same correlated block;
+- a shared and difference coordinate placed in the same correlated block;
+- multivariate `brms` models;
+- linked multi-term `brms` blocks, `gr(..., by = ...)` blocks, or random
+  effects for distributional/nonlinear parameters;
 - DSM `+0.5/-0.5` score transformations;
 - uncertainty intervals for `glmmTMB` transformations;
-- automatically renamed `interdep`-generated columns;
-- arbitrary user-created contrast columns that merely resemble `.i_diff_*`;
-- `brmsfit` objects;
-- transforming ordinary model dispersion or unrelated residual structures.
+- transforming ordinary dispersion or `brms`
+  `unstr(time = member, gr = pair_id)` residual structures that are already on
+  the member scale.
 
-Unsupported structures should produce specific errors rather than partial or
-guessed results.
+Automatic matching requires untouched `interdep` `.i_diff_*` names and complete,
+unambiguous pairs. Exact supplied pairs support custom indicator names and
+constrained structures.
 
 ## Source of structural information
 
@@ -168,68 +169,59 @@ fitted, not what the original preparation metadata suggests was intended.
 Do not require the original named data object to remain in the calling
 environment. Saved and reloaded models should continue to work. In particular:
 
+- neither backend retains unused original data columns in its model frame;
 - `glmmTMB` does not retain `attr(data, "interdep")` on `model$frame`;
 - package metadata therefore cannot be the primary discovery mechanism;
 - recovering the original data would make the helper fragile across sessions.
 
-Use these sources for distinct purposes:
+Two small backend adapters normalize the information already stored by each
+model:
 
-1. `stats::formula(model, component = "cond")` supplies the fitted conditional
-   formula.
-2. `reformulas` parses the random-effect terms and their covariance wrappers.
-3. Canonical `.i_is_*` and `.i_diff_*` names identify semantic candidates.
-4. `model$frame` validates the observed support of proposed pairs on the rows
-   actually used for fitting.
-5. `glmmTMB::VarCorr(model)$cond` supplies fitted covariance estimates.
+1. The `glmmTMB` adapter aligns
+   `model$modelInfo$reTrms$cond`,
+   `model$modelInfo$reStruc$condReStruc`, and
+   `glmmTMB::VarCorr(model)$cond`.
+2. The `brms` adapter aligns `model$ranef` with raw draws from
+   `brms::VarCorr(model, summary = FALSE)`. It keeps stored coefficient names
+   for draw lookup and restores readable formula names separately.
+3. Both return `group`, `coefficients`, `correlated`, `term`, and an
+   `estimate/draw x coefficients x coefficients` covariance array.
+4. `stats::model.frame(model)` validates indicator coding on fitted rows when
+   the raw columns remain available.
 
-Do not build the parser directly around undocumented
-`model$modelInfo$reTrms` internals. Engine-specific internals may be used only
-behind a small, well-tested adapter if no public alternative can establish a
-necessary mapping.
+The engine-specific internals stay confined to these tested adapters. From that
+point onward, matching and transformation are backend-independent.
 
 ## Parsing random-effect terms
 
-Add `reformulas` to `Suggests` beside `glmmTMB`, declare its direct use, and
-check it with `requireNamespace()` in the model-facing function.
+No `reformulas` dependency is needed for the current implementation. The
+backend adapters already expose normalized fitted blocks, and exact supplied
+selectors are resolved by a small canonicalizer:
 
-Parse the fitted formula rather than `model$call$formula`:
+- bare `(1 + time | group)` is equivalent to `us(1 + time | group)`;
+- bare `(0 + x || group)` is equivalent to `diag(0 + x | group)`;
+- `homdiag` remains distinct;
+- coefficient and interaction order do not affect selection;
+- simple literal products are canonicalized without evaluating them.
 
-```r
-formula <- stats::formula(model, component = "cond")
-parts <- reformulas::splitForm(formula)
-```
-
-`reformulas::findbars_x()` may be used where the complete structured expression
-is useful. Unlike ordinary `findbars()`, it retains or normalizes covariance
-wrappers such as `us()`.
-
-Normalize each random-effect term to one internal record containing at least:
-
-- its index in the fitted formula;
-- covariance-structure class;
-- coefficient expression and expanded coefficient names;
-- grouping expression;
-- candidate composition;
-- candidate role: `shared`, `difference`, or `other`;
-- the corresponding `VarCorr()` block.
-
-Do not use the `.1`, `.2`, and similar suffixes that `VarCorr()` adds to repeated
-group names as semantic composition identifiers. Align parsed terms with
-covariance blocks by fitted term order, then verify the grouping expression and
-coefficient names before extracting an estimate.
+Coefficient interpretation is separate from block selection. A narrow
+expression-tree parser recognizes `idiff`, `idiff:time`, `time:idiff`,
+`I(idiff * time)`, and `I(time * idiff)`. It rejects more complex arithmetic
+rather than guessing.
 
 ## Automatic discovery and matching
 
 ### Difference candidates
 
-A v0.0.1 difference block must contain exactly one unmodified canonical column
-matching
+Automatic matching starts from a canonical column matching
 
 ```text
 .i_diff_{composition}_arbitrary
 ```
 
-The `{composition}` substring becomes the composition key.
+The `{composition}` substring becomes the composition key. Every coefficient in
+that block must contain the same indicator, either alone or in one supported
+interaction.
 
 ### Shared candidates
 
@@ -240,7 +232,7 @@ block contains exactly
 .i_is_{composition}
 ```
 
-For a single-composition DIM or APIM, an intercept-only random-effect block may
+For a single exchangeable composition, a generic intercept-and-slope block may
 serve as the shared block.
 
 Call this the *shared block* even when its model term is an intercept.
@@ -250,22 +242,22 @@ Call this the *shared block* even when its model term is an intercept.
 A difference and shared block form a valid pair only when all applicable rules
 hold:
 
-1. They occur in the same model component.
-2. They have the same grouping expression.
-3. Their canonical composition keys agree, unless the shared term is the
+1. They have the same grouping expression.
+2. Their canonical composition keys agree, unless the shared term is the
    permitted single-composition intercept.
-4. They are separate random-effect terms, and are therefore fitted as
+3. They are separate random-effect terms, and are therefore fitted as
    independent blocks.
-5. Each block has exactly one coefficient in v0.0.1.
-6. On `model$frame`, the support agrees:
+4. After removing the shared/difference indicator, their term sets are
+   identical. Formula order may differ.
+5. On `model$frame`, the support agrees when both raw columns are retained:
 
    ```r
    abs(difference_column) == shared_indicator
    ```
 
    for a composition indicator.
-7. An intercept may match only when there is one exchangeable composition on
-   all fitted rows and `abs(difference_column) == 1` throughout.
+6. A generic shared block may match only when there is one exchangeable
+   composition, and `abs(difference_column) == 1` throughout its fitted rows.
 
 Grouping expressions are part of the pair key. Thus the same composition may
 produce separate results for `coupleID` and `coupleID:diaryday`.
@@ -285,36 +277,42 @@ their meaning:
 
 ```r
 pairs = list(
-  dyad_mean = "(1 + time | coupleID)",
-  member_deviation = "(0 + IDIFF + IDIFF:time | coupleID)",
+  shared = "(1 + time | coupleID)",
+  difference = "(0 + IDIFF + I(IDIFF * time) || coupleID)",
   idiff = "IDIFF"
 )
 ```
 
-Here `mean_indicator = "1"` is implied: the ordinary random intercept is the
-dyad mean. A composition-specific block instead supplies its indicator, for
-example `mean_indicator = "SAMESEX"`. The term strings select fitted blocks;
-the two indicator fields define how their coefficients map to the same
-intercept and slope terms. The member-deviation slope may use either ordinary
-interaction syntax (`IDIFF:time`) or a literal two-column product
-(`I(IDIFF * time)` or `I(time * IDIFF)`). More complex arithmetic inside `I()`
-is deliberately not matched.
+Here `shared_indicator = "1"` is implied: an ordinary random intercept is the
+shared coordinate. A composition-specific block instead supplies its indicator,
+for example `shared_indicator = "SAMESEX"`. The term strings select fitted
+blocks; the two indicators define how their coefficients map to common
+intercept and slope terms.
+
+Automatic matching accepts only identical term sets. Exact supplied pairs may
+have terms on only one side; missing positions are stored as `NA` term indices
+and later padded with zeros. Setting `shared = NULL` or `difference = NULL` is
+reserved for a whole block that was absent from the fitted formula. Unlisted
+blocks are otherwise ignored.
 
 ## Model and estimate validation
 
-Before transformation, validate that:
+The implemented extraction and matching layer validates:
 
-- `model` inherits from `glmmTMB`;
-- the required optional packages are installed;
-- the optimizer reports convergence;
-- the Hessian is positive definite when that information is available;
-- the conditional random-effect formula can be parsed;
-- every difference block has one unambiguous shared partner;
-- all paired terms are scalar and structurally supported;
-- the fitted covariance blocks are finite, symmetric, and positive
-  semidefinite within numerical tolerance;
-- the resulting member covariance matrix is finite, symmetric, and positive
-  semidefinite within numerical tolerance.
+- a supported `glmmTMB` or single-response `brmsfit` model;
+- backend block/covariance alignment;
+- supported `brms` random-effect structures;
+- one unambiguous shared block per automatically discovered difference block;
+- exact block selection, grouping-factor agreement, and non-reuse for supplied
+  pairs;
+- valid indicators in every selected coefficient;
+- unnormalised `-1/+1` contrast coding and composition support whenever those
+  columns remain in the fitted model frame.
+
+The numerical layer must additionally validate that fitted and transformed
+covariance arrays are finite, symmetric, and positive semidefinite within
+numerical tolerance. It should also surface optimizer or Hessian problems when
+the backend exposes them reliably.
 
 Boundary variance estimates are valid mathematical inputs and should not be
 rejected solely for being zero. If needed, warn that interpretation may be
@@ -322,39 +320,25 @@ unstable rather than preventing the transformation.
 
 ## Return value
 
-Return one row per matched `composition × grouping expression` pair. A tibble is
-the simplest initial public value. It should contain at least:
+Return a named list with one element per matched block pair. The element name
+reproduces the recognizable shared and difference terms so users can connect
+the result to their formula. Use an explicit `<omitted>` label for an absent
+side.
 
-- `composition`;
-- `grouping`;
-- `shared_term`;
-- `difference_term`;
-- `shared_variance`;
-- `difference_variance`;
-- `member_1_variance`;
-- `member_2_variance`;
-- `member_covariance`;
-- `member_correlation`;
-- `member_1_sd`;
-- `member_2_sd`;
-- `covariance_matrix`, as a list-column containing the named $2 \times 2$
-  matrix.
+Each element contains:
 
-Use the labels `member_1` and `member_2`, never female/male labels, because the
-exchangeable members' `+1/-1` assignment is arbitrary. Give rows a deterministic
-order based on fitted term order, with grouping and composition retained
-explicitly rather than encoded only in row names.
+- `varcov`: the member-level variance-covariance representation;
+- `sdcor`: the same result represented by standard deviations and
+  correlations.
 
-The returned covariance matrix should be named:
+For `glmmTMB` these are based on one fitted covariance estimate. For `brms` the
+transformation is applied to every posterior draw before any summaries or
+intervals are computed. The exact final draw-summary shape remains the next
+formatter decision; raw draw-wise transformations must not be replaced by
+transforming posterior means.
 
-```text
-         member_1  member_2
-member_1
-member_2
-```
-
-A custom print class is optional and should be added only if the raw tibble is
-not sufficiently clear.
+Use arbitrary `member_1`/`member_2` labels, never female/male labels. With
+random slopes, names must also retain the underlying coefficient term.
 
 ## Architecture
 
@@ -372,29 +356,28 @@ fitted model
 Suggested internal layers:
 
 1. A pure matrix helper that knows nothing about model classes.
-2. A `reformulas`-based parser returning normalized random-term records.
+2. Thin `glmmTMB` and `brms` adapters returning the same block records.
 3. A matcher operating only on normalized records and fitted-frame columns.
-4. A `glmmTMB` covariance adapter.
-5. The exported orchestration function.
+4. A common covariance-array aligner that inserts structural zeros according to
+   each pair's term-order vectors.
+5. A common result formatter and exported orchestration function.
 
 This separation allows later engines to reuse the parser, matcher, mathematics,
 and output while replacing only formula access and covariance extraction.
 
 ## Implementation sequence
 
-Implement and test in this order:
+Extraction, normalized block records, automatic matching, exact supplied pairs,
+mixed compositions, repeated grouping levels, partial terms, omitted blocks,
+and both backend tests are implemented. Remaining sequence:
 
-1. Pure scalar and matrix back-transformation.
-2. Normalized parsing of `glmmTMB` random-effect terms with `reformulas`.
-3. Discovery, validation, and transformation of one pair.
-4. Generalize the internal representation to a list of pairs.
-5. Add mixed compositions and repeated grouping levels.
-6. Connect the public result to the vignette diagrams where practical.
-7. Export and document only after the multi-pair return structure is stable.
-
-The implementation should internally use a list of pairs even when only one
-pair exists. This avoids redesigning the public function when mixed-composition
-support is added.
+1. Embed each component covariance array in the common term order, filling
+   missing positions with zeros.
+2. Apply the shared/difference-to-member transformation draw by draw.
+3. Construct `varcov` and `sdcor` outputs and deterministic names.
+4. Add numerical boundary/validity tests.
+5. Replace the public function's temporary normalized return with the final
+   result and then polish examples.
 
 ## Test specification
 
@@ -420,8 +403,11 @@ support is added.
 - Pooled composition with a generated pool name.
 - One composition at both stable and same-occasion grouping levels.
 - Missing outcome rows, ensuring support validation uses fitted rows.
-- Repeated grouping-factor names in `VarCorr()` with synthetic `.1` suffixes.
 - Formula terms appearing in a different valid order.
+- Correlated and uncorrelated random slopes in both backends.
+- Exact formula selectors across normalized `us`/`diag` syntax.
+- Partial term sets and wholly omitted blocks.
+- `idiff:time` and narrow literal `I(idiff * time)` products in both backends.
 
 ### Failure tests
 
@@ -430,32 +416,28 @@ support is added.
 - Multiple possible shared matches.
 - Shared and difference columns with inconsistent row support.
 - Renamed generated columns.
-- Random slopes or multi-coefficient blocks.
 - Shared and difference coefficients placed in one correlated block.
 - Unsupported model class.
-- Non-converged model or non-positive-definite Hessian.
+- Unsupported linked, multivariate, distributional, or `gr(..., by = ...)`
+  `brms` structures.
+- Invalid exact selectors, cross-group pairs, reused blocks, or false `NULL`
+  declarations.
+- Unsupported arithmetic involving the difference indicator.
 - Non-finite or invalid covariance estimates.
 
-Use small fitted models and `skip_if_not_installed("glmmTMB")` for
-engine-facing tests. Test the pure mathematical layer without optional model
-engines.
+Use small fitted models and `skip_if_not_installed()` for engine-facing tests.
+Test the pure mathematical layer without optional model engines.
 
-## Future `brms` adapter
+## `brms` behavior
 
-Ordinary `brms` group-level terms share the basic bar syntax, so the common
-`reformulas` parser and matcher should remain usable. The engine boundary is
-nevertheless real:
+The `brms` adapter is implemented. Its engine boundary remains important:
 
 - a `brmsfit` stores a `brmsformula`, potentially containing multiple response,
   distributional, or nonlinear formulas;
 - bare `(terms | group)` syntax is usual, with additional ID and `gr()` forms;
 - covariance estimates are posterior distributions, not one fitted matrix;
-- any required transformation must be applied draw by draw before posterior
-  summaries and intervals are calculated.
-
-A future adapter should obtain the relevant formula from `model$formula`, use
-`brms::brmsterms()` when necessary, and extract raw covariance draws with
-`brms::VarCorr(model, summary = FALSE)`.
+- the transformation must be applied draw by draw before posterior summaries
+  and intervals are calculated.
 
 Some `brms` ILD specifications estimate the desired member-level residual
 covariance directly. Those structures are already on the target scale and must
@@ -463,9 +445,9 @@ not be sent through the shared/difference back-transformation. Supporting them
 means recognizing and returning or explaining the direct parameterization, not
 transforming it again.
 
-Do not add `brms` support to v0.0.1 merely because its simplest formulas can be
-parsed. Add it when there is a concrete model whose extracted covariance needs
-this transformation and can be validated draw by draw.
+Distributional and nonlinear random effects are ignored with a warning.
+Multivariate models, linked multi-term blocks, and `gr(..., by = ...)` remain
+explicitly unsupported.
 
 ## Documentation requirements
 
@@ -478,5 +460,8 @@ The function documentation and vignette should:
 - show one mixed or stable/same-occasion example;
 - distinguish covariance, correlation, and the computational
   shared/difference variances;
-- explain why generated-column renaming is unsupported;
-- state the scalar-block and `glmmTMB` limits prominently.
+- explain automatic generated-name matching versus exact supplied pairs;
+- show partial terms, structural-zero padding, and one wholly omitted block;
+- document supported `I(idiff * time)` products and coding-validation limits;
+- distinguish transformed group-level blocks from `brms` residual structures
+  that are already on the member scale.
