@@ -331,13 +331,18 @@ test_that("CFM diagrams extract fitted lavaan objects", {
   expect_named(
     values,
     c(
-      "b_level", "beta_level", "residual_correlations", "p_values",
-      "r_squared",
+      "b_level", "beta_level", "residual_correlations",
+      "indicator_residual_sds", "p_values", "r_squared",
       "outcome_residual_variance", "admissible", "labels", "outcome_latent"
     )
   )
   expect_named(values$p_values, c("level", "residual_1", "residual_2"))
   expect_length(values$residual_correlations, 2)
+  expect_named(
+    values$indicator_residual_sds,
+    c("predictor_1", "predictor_2", "outcome_1", "outcome_2")
+  )
+  expect_true(all(is.finite(values$indicator_residual_sds)))
   expect_no_error(draw_to_temporary_pdf(draw_cfm_diagram(
     model = cfm_fit,
     member_ids = c("F", "M"),

@@ -90,22 +90,19 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
     )
   }
 
-  # These objects describe the same ordered set of conditional random-effect
-  # blocks: coefficient names, covariance structures, and fitted covariances.
   re_terms <- model$modelInfo$reTrms$cond
   re_structure <- model$modelInfo$reStruc$condReStruc
   covariance <- glmmTMB::VarCorr(model)$cond
   n_blocks <- length(re_structure)
 
-  # `flist` contains unique grouping factors; `assign` maps each block back to
-  # its grouping factor when several blocks use the same factor.
-  group_assign <- attr(re_terms$flist, "assign")
+  # `cnms` has one named entry per random-effect block, including repeated groups.
+  groups <- names(re_terms$cnms)
 
   # Misaligned blocks could produce plausible but incorrect transformations,
-  # so fail rather than relying on positional recycling.
+  # so we fail if we can't cleanly align.
   if (
     length(re_terms$cnms) != n_blocks ||
-      length(group_assign) != n_blocks ||
+      length(groups) != n_blocks ||
       length(covariance) != n_blocks
   ) {
     stop(
@@ -114,8 +111,8 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
     )
   }
 
-  groups <- names(re_terms$flist)[group_assign]
-  blocks <- lapply(seq_len(n_blocks), function(i) {
+  blocks <- vector("list", n_blocks)
+  for (i in seq_len(n_blocks)) {
     coefficients <- unname(re_terms$cnms[[i]])
 
     # `blockCode`, unlike `fullCor`, reliably distinguishes `|` from `||` in
@@ -123,13 +120,9 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
     structure <- names(re_structure[[i]]$blockCode)
     correlated <- !structure %in% c("diag", "homdiag")
 
-    # Reconstruct a recognizable term label from glmmTMB's normalized names.
-    formula_terms <- coefficients
-    formula_terms[formula_terms == "(Intercept)"] <- "1"
-    if (!"(Intercept)" %in% coefficients) {
-      formula_terms <- c("0", formula_terms)
-    }
-    bar <- if (correlated) "|" else "||"
+    # Show the covariance structure explicitly; glmmTMB stores all normalized
+    # terms with a single bar, including terms originally specified with `||`.
+    term <- paste0(structure, "(", names(re_structure)[[i]], ")")
 
     # glmmTMB supplies one fitted covariance matrix. Add a leading dimension so
     # downstream code can treat it like the posterior-draw arrays from brms.
@@ -140,22 +133,21 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
       dimnames = list(NULL, coefficients, coefficients)
     )
 
-    list(
+    blocks[[i]] <- list(
       group = groups[[i]],
       coefficients = coefficients,
       correlated = correlated,
-      term = paste0(
-        "(", paste(formula_terms, collapse = " + "),
-        " ", bar, " ", groups[[i]], ")"
-      ),
+      term = term,
       covariance = covariance_array
     )
-  })
+  }
 
-  list(
+  block_list <- list(
     backend = "glmmTMB",
     blocks = blocks
   )
+
+  return(block_list)
 }
 
 brms_extract_exchangeable_residual_blocks <- function(model) {
@@ -178,17 +170,21 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
   # for distributional or nonlinear parameters have different interpretations
   # and are therefore left out rather than making the whole model unsupported.
   re_terms <- model$ranef
-  re_terms <- re_terms[!nzchar(re_terms$dpar) & !nzchar(re_terms$nlpar), ]
+  unsupported <- nzchar(re_terms$dpar) | nzchar(re_terms$nlpar)
+  if (any(unsupported)) {
+    warning(
+      "Random-effect terms for distributional or nonlinear parameters were ignored because they are currently not supported.",
+      call. = FALSE
+    )
+  }
+  re_terms <- re_terms[!unsupported, ]
 
-  # A brms ID identifies one covariance block. Explicit `|ID|` syntax can link
-  # several formula terms into one block, which the first implementation does
-  # not yet normalize safely.
-  block_ids <- unique(re_terms$id)
-  block_rows <- lapply(block_ids, function(id) which(re_terms$id == id))
-  block_formulas <- lapply(block_rows, function(rows) {
-    unique(vapply(re_terms$form[rows], deparse1, character(1)))
-  })
-  if (any(lengths(block_formulas) != 1L)) {
+  # A brms ID identifies one covariance block. Different `gn` values reveal
+  # explicit `|ID|` syntax linking several formula terms within that block.
+  re_blocks <- unname(split(re_terms, re_terms$id))
+  if (any(vapply(re_blocks, function(block) {
+    length(unique(block$gn)) != 1L
+  }, logical(1)))) {
     stop(
       "Random-effect blocks containing more than one formula term are currently not supported.",
       call. = FALSE
@@ -198,14 +194,17 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
   # Keep every posterior draw; transformation and summarization happen later.
   covariance <- brms::VarCorr(model, summary = FALSE)
 
-  blocks <- Map(function(rows, formulas) {
+  blocks <- vector("list", length(re_blocks))
+  for (i in seq_along(re_blocks)) {
+    block <- re_blocks[[i]]
+
     # Values within one validated block share their group and correlation flag.
-    group <- re_terms$group[rows[[1L]]]
-    correlated <- re_terms$cor[rows[[1L]]]
-    coefficients <- unname(re_terms$coef[rows])
+    group <- block$group[[1L]]
+    correlated <- isTRUE(block$cor[[1L]])
+    coefficients <- unname(block$coef)
     coefficients[coefficients == "Intercept"] <- "(Intercept)"
-    formula_rhs <- trimws(sub("^~", "", formulas))
-    bar <- if (isTRUE(correlated)) "|" else "||"
+    formula_rhs <- trimws(sub("^~", "", deparse1(block$form[[1L]])))
+    bar <- if (correlated) "|" else "||"
 
     # VarCorr combines all coefficients using the same grouping factor. Match
     # by coefficient name so separate blocks are not confused by their order.
@@ -246,14 +245,14 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     }
     dimnames(covariance_array) <- list(NULL, coefficients, coefficients)
 
-    list(
+    blocks[[i]] <- list(
       group = group,
       coefficients = coefficients,
-      correlated = isTRUE(correlated),
+      correlated = correlated,
       term = paste0("(", formula_rhs, " ", bar, " ", group, ")"),
       covariance = covariance_array
     )
-  }, block_rows, block_formulas)
+  }
 
   list(
     backend = "brms",
