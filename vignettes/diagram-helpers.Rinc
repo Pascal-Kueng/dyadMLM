@@ -168,6 +168,16 @@ rm(
 }
 
 .diagram_member_label <- function(label, member) {
+  lines <- strsplit(unname(label), "\n", fixed = TRUE)[[1]]
+  if (length(lines) == 2L) {
+    return(list(
+      substitute(plain(VARIABLE), list(VARIABLE = lines[[1]])),
+      substitute(
+        plain(VARIABLE)[MEMBER],
+        list(VARIABLE = lines[[2]], MEMBER = member)
+      )
+    ))
+  }
   substitute(
     plain(VARIABLE)[MEMBER],
     list(VARIABLE = unname(label), MEMBER = member)
@@ -218,7 +228,7 @@ rm(
 }
 
 .draw_diagram_significance_key <- function(
-    p_values, y = 0.018, fontsize = 10.5, x = 0.50) {
+    p_values, y = 0.018, fontsize = 12, x = 0.50) {
   if (is.null(p_values)) {
     return(invisible(NULL))
   }
@@ -879,7 +889,13 @@ draw_apim_diagram <- function(
   )
 
   draw_node <- function(x, y, label) {
-    label <- .diagram_math_label(label)
+    node_fontsize <- if (is.null(labels)) 20 else 18
+    if (is.list(label) && !is.expression(label)) {
+      line_labels <- lapply(label, .diagram_math_label)
+    } else {
+      line_labels <- NULL
+      label <- .diagram_math_label(label)
+    }
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -892,15 +908,27 @@ draw_apim_diagram <- function(
         lwd = 1.8
       )
     )
-    grid::grid.text(
-      label,
-      x = native(x),
-      y = native(y),
-      gp = grid::gpar(
-        col = ink_colour,
-        fontsize = if (is.null(labels)) 20 else 15
+    if (is.null(line_labels)) {
+      grid::grid.text(
+        label,
+        x = native(x),
+        y = native(y),
+        gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
       )
-    )
+    } else {
+      grid::grid.text(
+        line_labels[[1]],
+        x = native(x),
+        y = native(y + 0.035),
+        gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
+      )
+      grid::grid.text(
+        line_labels[[2]],
+        x = native(x),
+        y = native(y - 0.035),
+        gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
+      )
+    }
   }
 
   draw_residual <- function(x, y, label) {
@@ -1070,7 +1098,7 @@ draw_apim_diagram <- function(
       residual_sd_labels[[2]], 0.91, 0.16, fontsize = 14
     )
     .draw_residual_annotation(
-      residual_correlation_label, 0.955, 0.50, fontsize = 14
+      residual_correlation_label, 0.90, 0.50, fontsize = 14
     )
   }
 
@@ -1078,12 +1106,12 @@ draw_apim_diagram <- function(
   .draw_diagram_legend(
     labels = c("Actor effect", "Partner effect"),
     colours = c(actor_colour, partner_colour),
-    y = 0.065,
+    y = 0.077,
     segment_starts = c(0.17, 0.44),
     text_x = c(0.295, 0.575),
     fontsize = 12
   )
-  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.405)
+  .draw_diagram_significance_key(p_values, y = 0.022, x = 0.405)
 
   grid::popViewport()
   invisible(NULL)
@@ -1431,6 +1459,7 @@ draw_dsm_diagram <- function(
 
   draw_node <- function(x, y, label, subtitle) {
     label <- .diagram_math_label(label)
+    node_fontsize <- if (is.null(labels)) 16 else 17
     grid::grid.roundrect(
       x = native(x),
       y = native(y),
@@ -1443,7 +1472,7 @@ draw_dsm_diagram <- function(
       label,
       x = native(x),
       y = native(y + 0.025),
-      gp = grid::gpar(col = ink_colour, fontsize = 16)
+      gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
     )
     grid::grid.text(
       subtitle,
@@ -1532,11 +1561,19 @@ draw_dsm_diagram <- function(
       outcome_difference_subtitle = "Outcome difference"
     )
   } else {
+    predictor_label <- unname(labels[["predictor"]])
+    outcome_label <- unname(labels[["outcome"]])
+    predictor_title <- paste0(
+      toupper(substr(predictor_label, 1, 1)), substring(predictor_label, 2)
+    )
+    outcome_title <- paste0(
+      toupper(substr(outcome_label, 1, 1)), substring(outcome_label, 2)
+    )
     list(
-      predictor_mean = labels[["predictor"]],
-      predictor_difference = labels[["predictor"]],
-      outcome_mean = labels[["outcome"]],
-      outcome_difference = labels[["outcome"]],
+      predictor_mean = paste("Mean", predictor_label),
+      predictor_difference = paste(predictor_title, "difference"),
+      outcome_mean = paste("Mean", outcome_label),
+      outcome_difference = paste(outcome_title, "difference"),
       predictor_mean_subtitle = "Dyad mean (GM-centered)",
       predictor_difference_subtitle = "Female-minus-male difference",
       outcome_mean_subtitle = "Dyad mean",
@@ -1622,19 +1659,19 @@ draw_dsm_diagram <- function(
       residual_sd_labels$difference, 0.91, 0.16, fontsize = 14
     )
     .draw_residual_annotation(
-      residual_correlation_label(), 0.955, 0.50, fontsize = 14
+      residual_correlation_label(), 0.90, 0.50, fontsize = 14
     )
   }
 
   .draw_diagram_legend(
     labels = c("Predictor-mean paths", "Predictor-difference paths"),
     colours = c(mean_colour, difference_colour),
-    y = 0.065,
+    y = 0.077,
     segment_starts = c(0.085, 0.435),
     text_x = c(0.255, 0.625),
     fontsize = 11
   )
-  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.405)
+  .draw_diagram_significance_key(p_values, y = 0.022, x = 0.405)
 
   grid::popViewport()
   invisible(NULL)
@@ -1952,6 +1989,7 @@ draw_dim_diagram <- function(
   )
   draw_node <- function(x, y, label, subtitle) {
     label <- .diagram_math_label(label)
+    node_fontsize <- if (is.null(labels)) 18 else 17
     grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(0.25), height = native(0.22),
@@ -1960,7 +1998,7 @@ draw_dim_diagram <- function(
     )
     grid::grid.text(
       label, x = native(x), y = native(y + 0.023),
-      gp = grid::gpar(col = ink_colour, fontsize = 16)
+      gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
     )
     grid::grid.text(
       subtitle, x = native(x), y = native(y - 0.043),
@@ -2046,11 +2084,19 @@ draw_dim_diagram <- function(
       )
     )
   } else {
+    predictor_label <- unname(labels[["predictor"]])
+    outcome_label <- unname(labels[["outcome"]])
+    predictor_title <- paste0(
+      toupper(substr(predictor_label, 1, 1)), substring(predictor_label, 2)
+    )
+    outcome_title <- paste0(
+      toupper(substr(outcome_label, 1, 1)), substring(outcome_label, 2)
+    )
     list(
-      predictor_mean = labels[["predictor"]],
-      predictor_deviation = labels[["predictor"]],
-      outcome_mean = labels[["outcome"]],
-      outcome_deviation = labels[["outcome"]],
+      predictor_mean = paste("Mean", predictor_label),
+      predictor_deviation = paste(predictor_title, "deviation"),
+      outcome_mean = paste("Mean", outcome_label),
+      outcome_deviation = paste(outcome_title, "deviation"),
       predictor_mean_subtitle = paste0(unit_title, " mean (GM-centered)"),
       predictor_deviation_subtitle = paste0(
         "Within-", effect_unit, " member deviation"
@@ -2119,19 +2165,19 @@ draw_dim_diagram <- function(
     )
     .draw_residual_annotation(
       expression(rho[r[plain(m)] * r[plain(d) * "," * i]] == 0),
-      0.91, 0.50, fontsize = 13
+      0.90, 0.50, fontsize = 13
     )
   }
 
   .draw_diagram_legend(
     labels = paste0(c("Between-", "Within-"), effect_unit, " effect"),
     colours = c(mean_colour, deviation_colour),
-    y = 0.065,
+    y = 0.077,
     segment_starts = c(0.105, 0.445),
     text_x = c(0.290, 0.630),
     fontsize = 12
   )
-  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.405)
+  .draw_diagram_significance_key(p_values, y = 0.022, x = 0.405)
 
   grid::popViewport()
   invisible(NULL)
@@ -3145,7 +3191,8 @@ draw_cfm_diagram <- function(
         }
       }
     }
-    residual_sd_x <- indicator_x + c(-0.055, 0.055, -0.055, 0.055)
+    # Leave enough room for fitted labels such as sigma_epsilon = 0.39.
+    residual_sd_x <- indicator_x + c(-0.075, 0.075, -0.075, 0.075)
     for (index in seq_along(indicator_x)) {
       .draw_residual_annotation(
         residual_sd_labels[[index]], residual_sd_x[index], 0.785,
@@ -3198,10 +3245,11 @@ draw_cfm_diagram <- function(
   if (show_residuals) {
     # Same-member residual covariances retain the association unique to each
     # member rather than attributing it to the shared dyad-level path.
+    residual_curve_y <- 0.84 + 0.043 + .diagram_arrow_clearance
     grid::grid.curve(
-      x1 = native(0.10), y1 = native(0.895),
-      x2 = native(0.62), y2 = native(0.895),
-      curvature = -0.10, angle = 90, ncp = 14, square = FALSE,
+      x1 = native(indicator_x[1]), y1 = native(residual_curve_y),
+      x2 = native(indicator_x[3]), y2 = native(residual_curve_y),
+      curvature = -0.12, angle = 90, ncp = 14, square = FALSE,
       arrow = covariance_arrow,
       gp = grid::gpar(
         col = member_specific_colour, fill = member_specific_colour, lwd = 1.8
@@ -3209,9 +3257,9 @@ draw_cfm_diagram <- function(
     )
 
     grid::grid.curve(
-      x1 = native(0.35), y1 = native(0.895),
-      x2 = native(0.87), y2 = native(0.895),
-      curvature = -0.15, angle = 90, ncp = 14, square = FALSE,
+      x1 = native(indicator_x[2]), y1 = native(residual_curve_y),
+      x2 = native(indicator_x[4]), y2 = native(residual_curve_y),
+      curvature = -0.12, angle = 90, ncp = 14, square = FALSE,
       arrow = covariance_arrow,
       gp = grid::gpar(
         col = member_specific_colour, fill = member_specific_colour, lwd = 1.8
@@ -3300,7 +3348,7 @@ draw_cfm_diagram <- function(
         "Member-specific residual correlation"
       ),
       colours = c(level_colour, member_specific_colour),
-      y = 0.045,
+      y = 0.077,
       segment_starts = c(0.145, 0.475),
       text_x = c(0.325, 0.695),
       fontsize = 12
@@ -3309,13 +3357,13 @@ draw_cfm_diagram <- function(
     .draw_diagram_legend(
       labels = "Dyad-level effect",
       colours = level_colour,
-      y = 0.045,
+      y = 0.077,
       segment_starts = 0.345,
       text_x = 0.525,
       fontsize = 12
     )
   }
-  .draw_diagram_significance_key(p_values, y = 0.010, x = 0.485)
+  .draw_diagram_significance_key(p_values, y = 0.022, x = 0.485)
 
   grid::popViewport()
   invisible(NULL)

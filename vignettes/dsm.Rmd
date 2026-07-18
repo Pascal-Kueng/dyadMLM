@@ -199,7 +199,7 @@ dsm_fitted_alt <- sprintf(
 ```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. The nodes identify the mean and difference scores; edge and intercept labels show the estimated DSM coefficients, and the residual labels show the estimated score-component standard deviations and correlation.", fig.alt=dsm_fitted_alt}
 draw_dsm_diagram(
   model = dsm_model,
-  labels = c(predictor = "Communication", outcome = "Satisfaction")
+  labels = c(predictor = "communication", outcome = "satisfaction")
 )
 ```
 

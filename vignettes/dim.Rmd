@@ -205,7 +205,7 @@ dim_fitted_alt <- sprintf(
 draw_dim_diagram(
   model = dim_1,
   effect_unit = "dyad",
-  labels = c(predictor = "Communication", outcome = "Satisfaction")
+  labels = c(predictor = "communication", outcome = "satisfaction")
 )
 ```
 

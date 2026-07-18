@@ -129,7 +129,7 @@ distribution_plot <- function(data, variables, bin_widths) {
     collaborative_planning = "Collaborative planning (daily mean)",
     mvpa_solo = "Mean solo MVPA (minutes/day)",
     mvpa_joint = "Mean joint MVPA (minutes/day)",
-    mvpa_total = "Mean total MVPA (minutes/day)"
+    mvpa_total = "Mean MVPA (minutes/day)"
   )
 
   missing_widths <- setdiff(variables, names(bin_widths))
@@ -351,7 +351,7 @@ support_distribution_plot
 
 <!-- ca. 1 Minute -->
 
-## Total MVPA by partner role
+## MVPA by partner role
 
 ```{r}
 #| label: pilot-mvpa-distributions-by-role
@@ -361,7 +361,7 @@ support_distribution_plot
 #| fig-height: 5.1
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Histograms and boundary-corrected density curves of average daily total MVPA, shown separately for female and male partners."
+#| fig-alt: "Histograms and boundary-corrected density curves of average daily MVPA, shown separately for female and male partners."
 
 ggplot(pilot_aggregated,
        aes(mvpa_total, y = after_stat(density))) +
@@ -373,7 +373,7 @@ ggplot(pilot_aggregated,
     bounds = c(0, Inf), color = "navy", linewidth = 1.1
   ) +
   facet_wrap(~role, nrow = 1) +
-  labs(x = "Average total MVPA (minutes/day)", y = "Density") +
+  labs(x = "Average MVPA (minutes/day)", y = "Density") +
   see::theme_modern(base_size = 16)
 ```
 
@@ -702,13 +702,13 @@ On the right:
 #| fig-height: 4.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Fitted distinguishable APIM for provided support and total MVPA."
+#| fig-alt: "Fitted distinguishable APIM for provided support and MVPA."
 
 fit_and_draw_distinguishable_apim(
   pilot_aggregated,
   predictor = provided_emotional_support,
   outcome = mvpa_total,
-  labels = c(predictor = "Provided support", outcome = "Total MVPA")
+  labels = c(predictor = "Provided\nsupport", outcome = "MVPA")
 )
 ```
 
@@ -882,13 +882,13 @@ On the right:
 #| fig-height: 4.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Fitted exchangeable APIM for provided support and total MVPA."
+#| fig-alt: "Fitted exchangeable APIM for provided support and MVPA."
 
 workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
   pilot_aggregated,
   predictor = provided_emotional_support,
   outcome = mvpa_total,
-  labels = c(predictor = "Provided support", outcome = "Total MVPA")
+  labels = c(predictor = "Provided\nsupport", outcome = "MVPA")
 )
 ```
 
@@ -1081,13 +1081,13 @@ IS exactly equivalent to the APIM
 #| fig-height: 4.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Fitted DIM for provided support and total MVPA."
+#| fig-alt: "Fitted DIM for provided support and MVPA."
 
 fit_and_draw_dim(
   pilot_aggregated,
   predictor = provided_emotional_support,
   outcome = mvpa_total,
-  labels = c(predictor = "Provided support", outcome = "Total MVPA")
+  labels = c(predictor = "support", outcome = "MVPA")
 )
 ```
 
@@ -1296,13 +1296,13 @@ within one couple.
 #| fig-height: 4.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Fitted DSM for provided support and total MVPA."
+#| fig-alt: "Fitted DSM for provided support and MVPA."
 
 fit_and_draw_dsm(
   pilot_aggregated,
   predictor = provided_emotional_support,
   outcome = mvpa_total,
-  labels = c(predictor = "Provided support", outcome = "Total MVPA")
+  labels = c(predictor = "support", outcome = "MVPA")
 )
 ```
 
@@ -1455,47 +1455,7 @@ when the corresponding latent dyad level is zero.
 
 :::
 
-## The exchangeable CFM
-
-Positions 1 and 2 are arbitrary. The model must be unchanged when they are
-swapped [@ledermannMediationDyadicData2009; @peughAnalyzingMixedDyadic2013].
-
-$$
-\begin{aligned}
-\nu_{X_1} &= \nu_{X_2}, & \nu_{Y_1} &= \nu_{Y_2} \\
-\sigma^2_{\epsilon_{X_1}} &= \sigma^2_{\epsilon_{X_2}}, &
-\sigma^2_{\epsilon_{Y_1}} &= \sigma^2_{\epsilon_{Y_2}} \\
-\operatorname{Cov}(\epsilon_{X_1},\epsilon_{Y_1})
-&= \operatorname{Cov}(\epsilon_{X_2},\epsilon_{Y_2})
-\end{aligned}
-$$
-
-- All four loadings remain fixed to 1.
-- The ordinary wide-data model has **df = 6**; relative to the
-  exchangeable saturated model, it has **0 additional df**.
-- Within the CFM, comparing it with the distinguishable model tests the five
-  added equality constraints: $\Delta df = 5$.
-
-:::{.notes}
-
-- Equality is imposed on the two same-member residual covariances. Because the
-  corresponding residual variances are also equal, the residual correlations
-  are equal as a consequence.
-- `lavaan` reports 6 degrees of freedom because its default saturated reference
-  model is fully unrestricted. Six observed-moment restrictions are required
-  for exchangeability.
-- The exchangeable CFM reproduces the exchangeable saturated model, so it has
-  zero degrees of freedom relative to that appropriate reference model. Its
-  ordinary chi-square is therefore a test of exchangeability, not an additional
-  test of the basic CFM structure.
-- Comparing the distinguishable CFM (df = 1) with this model (df = 6) gives a
-  five-degree-of-freedom nested test of the added equality constraints.
-- A well-fitting constrained model does not make substantively meaningful roles
-  exchangeable; that decision must also follow the research question.
-
-:::
-
-## Fitting the CFM
+## Fitted distinguishable CFM
 
 ::: {.cfm-constraint}
 **Constraint:**
@@ -1513,7 +1473,53 @@ Without it, the estimated male outcome residual variance was negative.
 #| fig-align: center
 #| fig-alt: "Fitted Common Fate Model for collaborative planning and joint MVPA, including four observed indicator intercepts and unstandardized standard deviations for all four indicator residuals."
 
-fit_and_draw_cfm(pilot_aggregated)
+cfm_data <- pilot_aggregated |>
+  group_by(couple_id) |>
+  filter(n_distinct(role) == 2) |>
+  ungroup() |>
+  select(couple_id, role, collaborative_planning, mvpa_joint) |>
+  tidyr::pivot_wider(
+    names_from = role,
+    values_from = c(collaborative_planning, mvpa_joint),
+    names_sep = "_"
+  )
+
+distinguishable_cfm_model <- '
+  # Shared dyad levels: fix all four loadings to 1.
+  planning_level =~
+    1 * collaborative_planning_female +
+    1 * collaborative_planning_male
+  joint_mvpa_level =~
+    1 * mvpa_joint_female +
+    1 * mvpa_joint_male
+
+  # Association between the two shared levels.
+  joint_mvpa_level ~ b_level * planning_level
+
+  # Same-member residual covariances.
+  collaborative_planning_female ~~ c_female * mvpa_joint_female
+  collaborative_planning_male ~~ c_male * mvpa_joint_male
+
+  # Both partners report the same jointly performed activity.
+  mvpa_joint_female ~~ e_mvpa * mvpa_joint_female
+  mvpa_joint_male ~~ e_mvpa * mvpa_joint_male
+'
+
+workshop_distinguishable_cfm <- lavaan::sem(
+  distinguishable_cfm_model,
+  data = cfm_data,
+  missing = "fiml",
+  meanstructure = TRUE
+)
+
+draw_cfm_diagram(
+  model = workshop_distinguishable_cfm,
+  member_ids = c("F", "M"),
+  member_names = c("Female", "Male"),
+  predictor_name = "collaborative planning",
+  outcome_name = "joint MVPA",
+  show_standardized_effect = FALSE
+)
 ```
 
 :::{.notes}
@@ -1530,6 +1536,160 @@ fit_and_draw_cfm(pilot_aggregated)
 :::
 
 <!-- ca. 2 Minutes -->
+
+## The exchangeable CFM
+
+Positions 1 and 2 are arbitrary. The model must be unchanged when they are
+swapped [@ledermannMediationDyadicData2009; @peughAnalyzingMixedDyadic2013].
+
+$$
+\begin{aligned}
+\nu_{X_1} &= \nu_{X_2}, & \nu_{Y_1} &= \nu_{Y_2} \\
+\sigma^2_{\epsilon_{X_1}} &= \sigma^2_{\epsilon_{X_2}}, &
+\sigma^2_{\epsilon_{Y_1}} &= \sigma^2_{\epsilon_{Y_2}} \\
+\operatorname{Cov}(\epsilon_{X_1},\epsilon_{Y_1})
+&= \operatorname{Cov}(\epsilon_{X_2},\epsilon_{Y_2})
+\end{aligned}
+$$
+
+- All four loadings remain fixed to 1.
+- Ordinary wide-data **df = 6**; **df = 0** against the exchangeable saturated
+  model.
+- Usual exchangeability test: $\Delta df = 5$; here: $\Delta df = 4$
+  ($\sigma^2_{\epsilon_Y}$ is already equal).
+
+:::{.notes}
+
+- Equality is imposed on the two same-member residual covariances. Because the
+  corresponding residual variances are also equal, the residual correlations
+  are equal as a consequence.
+- `lavaan` reports 6 degrees of freedom because its default saturated reference
+  model is fully unrestricted. Six observed-moment restrictions are required
+  for exchangeability.
+- The exchangeable CFM reproduces the exchangeable saturated model, so it has
+  zero degrees of freedom relative to that appropriate reference model. Its
+  ordinary chi-square is therefore a test of exchangeability, not an additional
+  test of the basic CFM structure.
+- An unconstrained distinguishable CFM has df = 1, giving the usual five-degree-
+  of-freedom exchangeability test. Our distinguishable model already equates the
+  two outcome residual variances and has df = 2, so the comparison on the next
+  slide tests the four remaining equality constraints.
+- A well-fitting constrained model does not make substantively meaningful roles
+  exchangeable; that decision must also follow the research question.
+
+:::
+
+## Fitted exchangeable CFM
+
+```{r}
+#| label: fitted-exchangeable-cfm
+#| echo: false
+#| dev: svg
+#| fig-width: 10
+#| fig-height: 5.35
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted exchangeable Common Fate Model for collaborative planning and joint MVPA. Female and male indicator intercepts, corresponding residual variances, and same-member residual covariances are constrained to equality."
+
+exchangeable_cfm_model <- '
+  # Shared dyad levels: fix all four loadings to 1.
+  planning_level =~
+    1 * collaborative_planning_female +
+    1 * collaborative_planning_male
+  joint_mvpa_level =~
+    1 * mvpa_joint_female +
+    1 * mvpa_joint_male
+
+  # Association between the two shared levels.
+  joint_mvpa_level ~ b_level * planning_level
+
+  # Equal indicator intercepts across positions.
+  collaborative_planning_female ~ i_planning * 1
+  collaborative_planning_male ~ i_planning * 1
+  mvpa_joint_female ~ i_mvpa * 1
+  mvpa_joint_male ~ i_mvpa * 1
+
+  # Equal residual variances across positions.
+  collaborative_planning_female ~~ e_planning * collaborative_planning_female
+  collaborative_planning_male ~~ e_planning * collaborative_planning_male
+  mvpa_joint_female ~~ e_mvpa * mvpa_joint_female
+  mvpa_joint_male ~~ e_mvpa * mvpa_joint_male
+
+  # Equal same-member residual covariances across positions.
+  collaborative_planning_female ~~ c_female * mvpa_joint_female
+  collaborative_planning_male ~~ c_male * mvpa_joint_male
+  c_female == c_male
+'
+
+workshop_exchangeable_cfm <- lavaan::sem(
+  exchangeable_cfm_model,
+  data = cfm_data,
+  missing = "fiml",
+  meanstructure = TRUE
+)
+
+cfm_model_comparison <- lavaan::lavTestLRT(
+  workshop_distinguishable_cfm,
+  workshop_exchangeable_cfm
+)
+
+cfm_chisq_difference <- cfm_model_comparison$`Chisq diff`[2]
+cfm_df_difference <- cfm_model_comparison$`Df diff`[2]
+cfm_comparison_p <- cfm_model_comparison$`Pr(>Chisq)`[2]
+
+cfm_distinguishable_aic <- lavaan::fitMeasures(
+  workshop_distinguishable_cfm, "aic"
+)
+cfm_exchangeable_aic <- lavaan::fitMeasures(
+  workshop_exchangeable_cfm, "aic"
+)
+cfm_distinguishable_bic <- lavaan::fitMeasures(
+  workshop_distinguishable_cfm, "bic"
+)
+cfm_exchangeable_bic <- lavaan::fitMeasures(
+  workshop_exchangeable_cfm, "bic"
+)
+
+draw_cfm_diagram(
+  model = workshop_exchangeable_cfm,
+  parameter_labels = c(
+    level = "b_level",
+    residual_1 = "c_female",
+    residual_2 = "c_male"
+  ),
+  member_ids = c("F", "M"),
+  member_names = c("Female", "Male"),
+  predictor_name = "collaborative planning",
+  outcome_name = "joint MVPA",
+  show_standardized_effect = FALSE
+)
+```
+
+::: {.cfm-constraint}
+**No detectable loss of fit:**
+$\Delta\chi^2(`r cfm_df_difference`) = `r sprintf("%.2f", cfm_chisq_difference)`$,
+$p = `r sub("^0", "", sprintf("%.3f", cfm_comparison_p))`$.
+**Parsimony favours the exchangeable model:**
+AIC `r sprintf("%.2f", cfm_distinguishable_aic)` $\rightarrow$
+`r sprintf("%.2f", cfm_exchangeable_aic)`;
+BIC `r sprintf("%.2f", cfm_distinguishable_bic)` $\rightarrow$
+`r sprintf("%.2f", cfm_exchangeable_bic)`.
+:::
+
+:::{.notes}
+
+- The four additional equality constraints fit the data very well. The
+  likelihood-ratio test provides no evidence that they worsen fit.
+- AIC and BIC are lower for the exchangeable model because it achieves almost
+  the same likelihood with four fewer free parameters.
+- This is evidence that pooling the female and male measurement parameters is
+  compatible with this small sample; it does not establish that gender is
+  substantively irrelevant or that the partners were arbitrarily assigned.
+- The fitted shared-level association remains observational.
+
+:::
+
+<!-- ca. 3 Minutes -->
 
 
 ## Honorable mention: The truth and bias model 
