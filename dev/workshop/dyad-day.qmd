@@ -1439,6 +1439,44 @@ draw_cfm_diagram(show_residuals = FALSE)
 draw_cfm_diagram()
 ```
 
+## Fitting the CFM
+
+::: {.cfm-constraint}
+**Constraint:**
+$\sigma^2_{\epsilon_{Y_F}} = \sigma^2_{\epsilon_{Y_M}}$.
+Without it, the estimated male outcome residual variance was negative.
+:::
+
+```{r}
+#| label: fitted-cfm
+#| echo: false
+#| dev: svg
+#| fig-width: 10
+#| fig-height: 5.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted Common Fate Model for collaborative planning and joint MVPA."
+
+fit_and_draw_cfm(pilot_aggregated)
+```
+
+:::{.notes}
+
+- The CFM uses the 36 female-male couples because its wide indicator positions
+  represent the two partner roles.
+- The unconstrained model converged but estimated a negative male joint-MVPA
+  residual variance. Female and male reports of their joint activity correlate
+  almost perfectly.
+- We therefore constrain the two joint-MVPA residual variances to equality.
+  This is defensible because both partners report the same jointly performed
+  activity using the same measure.
+- The shared-level association is observational and is estimated from a small
+  sample.
+
+:::
+
+<!-- ca. 2 Minutes -->
+
 
 ## Honorable mention: The truth and bias model 
 

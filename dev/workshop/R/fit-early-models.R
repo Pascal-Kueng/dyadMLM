@@ -169,3 +169,71 @@ fit_and_draw_dsm <- function(data, predictor, outcome, labels = NULL) {
   draw_dsm_diagram(model = model, labels = labels)
   invisible(model)
 }
+
+fit_and_draw_cfm <- function(data) {
+  required <- c(
+    "couple_id", "role", "collaborative_planning", "mvpa_joint"
+  )
+  missing <- setdiff(required, names(data))
+  if (length(missing)) {
+    stop(
+      "The workshop data is missing: ", paste(missing, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  cfm_data <- data |>
+    dplyr::group_by(couple_id) |>
+    dplyr::filter(dplyr::n_distinct(role) == 2) |>
+    dplyr::ungroup() |>
+    dplyr::select(
+      couple_id, role, collaborative_planning, mvpa_joint
+    ) |>
+    tidyr::pivot_wider(
+      names_from = role,
+      values_from = c(collaborative_planning, mvpa_joint),
+      names_sep = "_"
+    )
+
+  model <- lavaan::sem(
+    '
+    # The partners indicate each shared dyad-level construct.
+    planning_level =~
+      1 * collaborative_planning_female +
+      1 * collaborative_planning_male
+    joint_mvpa_level =~
+      1 * mvpa_joint_female +
+      1 * mvpa_joint_male
+
+    # Association between the two shared levels.
+    joint_mvpa_level ~ b_level * planning_level
+
+    # Correlated residuals for measures reported by the same person.
+    collaborative_planning_female ~~ c_female * mvpa_joint_female
+    collaborative_planning_male ~~ c_male * mvpa_joint_male
+
+    # Both partners report the same activity with the same measure.
+    mvpa_joint_female ~~ e_mvpa * mvpa_joint_female
+    mvpa_joint_male ~~ e_mvpa * mvpa_joint_male
+    ',
+    data = cfm_data,
+    missing = "fiml",
+    meanstructure = TRUE
+  )
+
+  if (!lavaan::lavInspect(model, "converged")) {
+    stop("The workshop CFM did not converge.", call. = FALSE)
+  }
+  if (!lavaan::lavInspect(model, "post.check")) {
+    stop("The workshop CFM has an inadmissible solution.", call. = FALSE)
+  }
+
+  draw_cfm_diagram(
+    model = model,
+    member_ids = c("F", "M"),
+    member_names = c("Female", "Male"),
+    predictor_name = "collaborative planning",
+    outcome_name = "joint MVPA"
+  )
+  invisible(model)
+}
