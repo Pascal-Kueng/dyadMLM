@@ -10,14 +10,15 @@ exchangeable_rescov(model, pairs = NULL)
 \item{model}{A fitted \code{glmmTMB} or single-response \code{brmsfit} model.}
 
 \item{pairs}{\code{NULL} (default) for automatic block matching. Otherwise, supply
-one block-pair list or a list of block-pair lists. Each pair contains:
+one block-pair specification or a list of block-pair specifications. Each
+pair contains:
 \itemize{
-\item \code{shared}: one character string containing the shared random-effect term
+\item \code{shared}: a single string naming the shared random-effect term
 copied from the fitted model formula or an equivalent selector (see
 Details), or \code{NULL} if the entire shared block was omitted when fitting;
-\item \code{difference}: one character string containing the member-difference
-random-effect term or an equivalent selector, or \code{NULL} if the entire
-difference block was omitted;
+\item \code{difference}: a single string naming the member-difference random-effect
+term or an equivalent selector, or \code{NULL} if the entire difference block
+was omitted;
 \item \code{difference_indicator}: the exact name of the difference-indicator
 column used in \code{difference}. It is required when \code{difference} selects a
 block and optional when \code{difference = NULL};
@@ -25,9 +26,7 @@ block and optional when \code{difference = NULL};
 needed only for composition-specific blocks in mixed-dyad models. It
 defaults to \code{"1"}, meaning that every fitted row belongs to the pair and
 an ordinary intercept is the shared intercept coordinate.
-}
-
-At least one of \code{shared} and \code{difference} must select a fitted block.}
+}}
 }
 \value{
 A named list with one element per matched block pair. Each element
@@ -51,10 +50,6 @@ only:
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(model)
 }\if{html}{\out{</div>}}
 
-The shared block moves both members together; the member-difference block
-moves them in opposite directions. The APIM vignette derives the resulting
-member-level covariance.
-
 Supply \code{pairs} when automatic matching is ambiguous or when a model uses
 custom indicators, multiple covariance levels, or deliberately omitted
 blocks or terms. To specify one pair with a custom difference indicator:
@@ -63,9 +58,8 @@ blocks or terms. To specify one pair with a custom difference indicator:
   model,
   pairs = list(
     shared = "(1 + time | coupleID)",
-    difference =
-      "(0 + hallelujah + I(hallelujah * time) || coupleID)",
-    difference_indicator = "hallelujah"
+    difference = "(0 + my_diff + I(my_diff * time) | coupleID)",
+    difference_indicator = "my_diff"
   )
 )
 }\if{html}{\out{</div>}}
@@ -79,14 +73,14 @@ same-occasion partner residual covariance:
   model,
   pairs = list(
     dyad = list(
-      shared = "us(1 | coupleID)",
-      difference = "us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
+      shared = "(1 | coupleID)",
+      difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
       difference_indicator =
         ".i_diff_assumed_exchangeable_arbitrary"
     ),
     same_occasion = list(
-      shared = "us(1 | coupleID:diaryday)",
-      difference = "us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+      shared = "(1 | coupleID:diaryday)",
+      difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
       difference_indicator =
         ".i_diff_assumed_exchangeable_arbitrary"
     )
@@ -105,14 +99,14 @@ When a difference block is supplied and the fitted model frame retains the
 indicator columns, \code{difference_indicator} must assign \code{-1} and \code{+1} to the
 two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where \code{shared_indicator} is
-zero. A column omitted entirely from the fitted formula cannot be recovered
-from either supported backend, so its coding cannot be checked.
+zero.
 }
 \section{What omitted blocks and terms mean}{
 
 \code{exchangeable_rescov()} only describes constraints that were already imposed
 when the model was fitted. It does not remove a block, set a variance to zero,
-or otherwise constrain the supplied model.
+or otherwise constrain the supplied model. Describe only the structure that
+was actually fitted.
 
 If a term occurs in only one selected block, the function represents the
 missing coordinate as a structural zero:
@@ -123,28 +117,27 @@ members have identical random effects for that term.
 members have equal-magnitude, opposite-sign random effects for that term.
 }
 
-Setting \code{difference = NULL} or \code{shared = NULL} makes the corresponding rule
-apply to every term in the other block. \code{NULL} therefore means that the whole
-block was absent from the fitted model; it must never be used merely to ignore
-an existing block. The function warns whenever \code{NULL} is supplied. When
-\code{difference = NULL} and \code{difference_indicator} is supplied, it also errors if
-it can identify a compatible fitted difference block that contradicts the
-claimed omission. See the constrained-block example in the
+Setting \code{difference = NULL} or \code{shared = NULL} applies the corresponding rule
+to the entire omitted block. This is valid only when that block is truly
+absent from the fitted model. Do not use \code{NULL} merely to ignore an existing
+block; the resulting back-transformation would be incorrect.
+
+See the constrained-block example in the
 \href{https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks}{exchangeable APIM vignette}.
 }
 
 \section{Backend note}{
 
 In Gaussian \code{brms} models, cross-sectional and same-occasion partner
-residual dependence is usually represented directly with
+residual dependence should usually be represented directly with
 \code{unstr(time = member, gr = pair_id)}. The blocks handled here remain relevant
-for higher-level shared and difference random effects.
+only for higher-level shared and difference random effects.
 }
 
 \seealso{
 The
 \href{https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}
 for the model specification, covariance derivation, and constrained-block
-examples. Run \code{vignette("apim", package = "interdep")} to open the installed
+example. Run \code{vignette("apim", package = "interdep")} to open the installed
 version.
 }
