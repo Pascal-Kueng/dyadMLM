@@ -295,7 +295,7 @@ test_that("compare_interdep_models directs ordinary models to anova", {
 
   expect_error(
     compare_interdep_models(smaller_model, larger_model),
-    "Use `stats::anova()`",
+    "`stats::anova()`",
     fixed = TRUE
   )
 })
@@ -371,7 +371,12 @@ test_that("compare_interdep_models sorts models and agrees with anova.glmmTMB", 
   )
   expect_match(
     tail(printed, 1L),
-    "This does not establish equal fit",
+    "this does not establish equal fit",
+    fixed = TRUE
+  )
+  expect_match(
+    tail(printed, 1L),
+    "prefer `smaller_model` for parsimony",
     fixed = TRUE
   )
   expect_match(
@@ -468,6 +473,11 @@ test_that("compare_interdep_models checks weights and offsets", {
     offset = observation_offset,
     data = model_data
   )
+  zero_inflation_offset_model <- glmmTMB::glmmTMB(
+    satisfaction ~ 1,
+    ziformula = ~0 + offset(observation_offset),
+    data = model_data
+  )
 
   expect_error(
     compare_interdep_models(full_model, weighted_model),
@@ -475,6 +485,10 @@ test_that("compare_interdep_models checks weights and offsets", {
   )
   expect_error(
     compare_interdep_models(full_model, offset_model),
+    "different offsets"
+  )
+  expect_error(
+    compare_interdep_models(offset_model, zero_inflation_offset_model),
     "different offsets"
   )
 })

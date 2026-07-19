@@ -31,8 +31,8 @@ column. The function requires exactly identical original, non-\code{.i_} columns
 including their types and attributes. It also checks structural dyad
 metadata, fitted rows, outcomes, weights and offsets, model family and link,
 maximum-likelihood estimation, and model convergence.
-Models fitted to ordinary data frames are outside this function's scope; use
-\code{\link[stats:anova]{stats::anova()}} for those models.
+Models fitted to ordinary data frames are outside this function's scope. If
+they use the same data object, compare them with \code{\link[stats:anova]{stats::anova()}}.
 
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the other.

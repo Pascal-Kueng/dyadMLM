@@ -17,8 +17,8 @@
 #' including their types and attributes. It also checks structural dyad
 #' metadata, fitted rows, outcomes, weights and offsets, model family and link,
 #' maximum-likelihood estimation, and model convergence.
-#' Models fitted to ordinary data frames are outside this function's scope; use
-#' [stats::anova()] for those models.
+#' Models fitted to ordinary data frames are outside this function's scope. If
+#' they use the same data object, compare them with [stats::anova()].
 #'
 #' These checks establish that the models use equivalent observations. They
 #' cannot establish that one model is mathematically nested within the other.
@@ -117,8 +117,8 @@ interdep_model_data <- function(model, caller_env, argument) {
       sprintf(
         paste0(
           "The `%s` model must have been fitted with a named ",
-          "`interdep_data` object in `data`. Use `stats::anova()` to compare ",
-          "ordinary `glmmTMB` models."
+          "`interdep_data` object in `data`. For ordinary `glmmTMB` models ",
+          "fitted to the same data object, use `stats::anova()`."
         ),
         argument
       ),
@@ -132,6 +132,7 @@ interdep_model_data <- function(model, caller_env, argument) {
   # A model fitted inside a helper may keep its data with its formula.
   # Search there first, then where compare_interdep_models() was called.
   environments <- list(environment(model_formula), caller_env)
+  ordinary_data_found <- FALSE
 
   for (search_env in environments) {
     if (!is.environment(search_env)) {
@@ -139,20 +140,25 @@ interdep_model_data <- function(model, caller_env, argument) {
     }
     if (exists(data_name, envir = search_env, inherits = TRUE)) {
       candidate <- get(data_name, envir = search_env, inherits = TRUE)
-      if (!inherits(candidate, "interdep_data")) {
-        stop(
-          sprintf(
-            paste0(
-              "The `%s` model was not fitted with an `interdep_data` object. ",
-              "Use `stats::anova()` to compare ordinary `glmmTMB` models."
-            ),
-            argument
-          ),
-          call. = FALSE
-        )
+      if (inherits(candidate, "interdep_data")) {
+        return(candidate)
       }
-      return(candidate)
+      ordinary_data_found <- TRUE
     }
+  }
+
+  if (ordinary_data_found) {
+    stop(
+      sprintf(
+        paste0(
+          "The `%s` model was not fitted with an `interdep_data` object. ",
+          "For ordinary `glmmTMB` models fitted to the same data object, ",
+          "use `stats::anova()`."
+        ),
+        argument
+      ),
+      call. = FALSE
+    )
   }
 
   stop(
@@ -270,12 +276,11 @@ validate_interdep_model_data <- function(model1, model2,
     stop("The two models use different observation weights.", call. = FALSE)
   }
 
-  # No offset means an offset of zero for every observation.
-  model1_offset <- stats::model.offset(model1$frame)
-  model2_offset <- stats::model.offset(model2$frame)
-  if (is.null(model1_offset)) model1_offset <- rep(0, length(model1_rows))
-  if (is.null(model2_offset)) model2_offset <- rep(0, length(model2_rows))
-  if (!identical(as.numeric(model1_offset), as.numeric(model2_offset))) {
+  # glmmTMB stores separate offsets for its three model components.
+  offset_names <- c("offset", "zioffset", "dispoffset")
+  model1_offsets <- model1$obj$env$data[offset_names]
+  model2_offsets <- model2$obj$env$data[offset_names]
+  if (!identical(model1_offsets, model2_offsets)) {
     stop("The two models use different offsets.", call. = FALSE)
   }
 
@@ -368,9 +373,10 @@ interdep_likelihood_ratio <- function(model1, model2, labels) {
     conclusion <- sprintf(
       paste0(
         "Conclusion (5%% level): The likelihood-ratio test finds no clear ",
-        "improvement from `%s` to `%s` (%s). This does not establish equal fit."
+        "improvement from `%s` to `%s` (%s). Based on this test, prefer `%s` ",
+        "for parsimony; this does not establish equal fit."
       ),
-      labels[1], labels[2], p_text
+      labels[1], labels[2], p_text, labels[1]
     )
   }
 
