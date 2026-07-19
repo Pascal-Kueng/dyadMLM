@@ -619,7 +619,7 @@ draw_apim_diagram("distinguishable")
 
 Map the preceding visual onto the APIM notation:
 
-- Each outcome has a residual, $\epsilon$.
+- Each outcome has a residual, which is what's not explained by the predictors.
 - The residual standard deviations, $\sigma$, may differ between distinguishable
   partners. Their squares are the residual variances from the previous slide.
 - The curved double-headed arrow is the residual correlation,
@@ -691,6 +691,7 @@ On the right:
 :::
 
 <!-- ca. 4 Minutes -->
+
 
 ## Fitting the distinguishable APIM
 
@@ -1710,40 +1711,7 @@ BIC `r sprintf("%.2f", cfm_distinguishable_bic)` $\rightarrow$
 
 <!-- ca. 2 minutes -->
 
-## Matrices
 
-::: {.matrix-notation}
-$$
-\begin{aligned}
-y_i
-&\quad &&\text{scalar},
-\\[0.7em]
-\boldsymbol{y}
-&= \begin{bmatrix} y_1 & y_2 \end{bmatrix}^{\mathsf T}
-&&\text{vector},
-\\[0.7em]
-\boldsymbol{X}
-&= \begin{bmatrix}
-1 & x_{11} & x_{12} \\
-1 & x_{21} & x_{22}
-\end{bmatrix}
-&&\text{design matrix},
-\\[0.7em]
-\boldsymbol{\beta}
-&= \begin{bmatrix} b_0 & b_1 & b_2 \end{bmatrix}^{\mathsf T}
-&&\text{coefficient vector},
-\\[0.7em]
-\boldsymbol{\Sigma}
-&= \begin{bmatrix}
-\sigma_{\epsilon_F}^{2}
-& \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M} \\
-\rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M}
-& \sigma_{\epsilon_M}^{2}
-\end{bmatrix}
-&&\text{covariance matrix}.
-\end{aligned}
-$$
-:::
 
 <!----------------- APPLIED PART (plus MLM vs. SEM and software) 
 
@@ -1788,3 +1756,175 @@ Thank you for your attention!
 
 [Continue to Part II: Applied Tutorial →](https://pascal-kueng.github.io/interdep/workshop/applied/){.workshop-next-link}
 :::
+
+
+
+# Appendix
+
+## Distinguishable APIM: residual covariance
+
+### Within-dyad residual covariance block (shared across dyads):
+$$
+\operatorname{Cov}
+\begin{pmatrix}
+\epsilon_{Fi} \\
+\epsilon_{Mi}
+\end{pmatrix}
+= \boldsymbol{\Sigma}_{\epsilon}
+= \begin{bmatrix}
+\sigma_{\epsilon_F}^{2}
+& \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M} \\
+\rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M}
+& \sigma_{\epsilon_M}^{2}
+\end{bmatrix}
+$$
+
+### Residual covariance matrix for all dyads (first three shown):
+$$
+\boldsymbol{\Sigma}_{\mathrm{model}}
+= \begin{bmatrix}
+\boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \boldsymbol{0} & \cdots \\
+\boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \cdots \\
+\boldsymbol{0} & \boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \cdots \\
+\vdots & \vdots & \vdots & \ddots
+\end{bmatrix}
+$$
+
+<!-- ca. 1.5 minutes -->
+
+## Exchangeable APIM: residual covariance
+
+For arbitrary member positions 1 and 2, the residual variances must be equal:
+
+$$
+\operatorname{Cov}
+\begin{pmatrix}
+\epsilon_{1i} \\
+\epsilon_{2i}
+\end{pmatrix}
+= \boldsymbol{\Sigma}_{\epsilon,\mathrm{exch}}
+= \begin{bmatrix}
+\sigma_{\epsilon}^{2}
+& \rho_{\epsilon_1\epsilon_2}\sigma_{\epsilon}^{2} \\
+\rho_{\epsilon_1\epsilon_2}\sigma_{\epsilon}^{2}
+& \sigma_{\epsilon}^{2}
+\end{bmatrix}
+$$
+
+- The equal diagonal elements express exchangeability.
+- The off-diagonal element still allows residual interdependence.
+- Across dyads, these blocks form the same block-diagonal model matrix as on
+  the previous slide.
+
+<!-- ca. 1.5 minutes -->
+
+## DIM: residual covariance
+
+$$
+\begin{aligned}
+r_{\mathrm{M}i}
+&= \bar{\epsilon}_i
+= \frac{\epsilon_{1i}+\epsilon_{2i}}{2}, \\
+r_{\mathrm{D},mi}
+&= \epsilon_{mi}-r_{\mathrm{M}i}
+\quad (m=1,2),
+\qquad
+r_{\mathrm{D},1i}
+= \frac{\epsilon_{1i}-\epsilon_{2i}}{2}
+= -r_{\mathrm{D},2i}.
+\end{aligned}
+$$
+
+Using the arbitrary orientation $r_{\mathrm{D}i}=r_{\mathrm{D},1i}$,
+exchangeability gives:
+
+$$
+\operatorname{Cov}
+\begin{pmatrix}
+r_{\mathrm{M}i} \\
+r_{\mathrm{D}i}
+\end{pmatrix}
+= \begin{bmatrix}
+\sigma_{r_\mathrm{M}}^{2} & 0 \\
+0 & \sigma_{r_\mathrm{D}}^{2}
+\end{bmatrix}.
+$$
+
+Back-transform to the exchangeable APIM: partner covariance need not be zero.
+
+::: {.covariance-backtransform .dim-backtransform}
+$$
+\begin{bmatrix}
+\color{#1769AA}{\sigma_{r_\mathrm{M}}^{2}+\sigma_{r_\mathrm{D}}^{2}}
+& \color{#7B3FA1}{\sigma_{r_\mathrm{M}}^{2}-\sigma_{r_\mathrm{D}}^{2}} \\[0.35em]
+\color{#7B3FA1}{\sigma_{r_\mathrm{M}}^{2}-\sigma_{r_\mathrm{D}}^{2}}
+& \color{#1769AA}{\sigma_{r_\mathrm{M}}^{2}+\sigma_{r_\mathrm{D}}^{2}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\color{#1769AA}{\sigma_{\epsilon}^{2}}
+& \color{#7B3FA1}{\rho_{\epsilon_1\epsilon_2}\sigma_{\epsilon}^{2}} \\[0.35em]
+\color{#7B3FA1}{\rho_{\epsilon_1\epsilon_2}\sigma_{\epsilon}^{2}}
+& \color{#1769AA}{\sigma_{\epsilon}^{2}}
+\end{bmatrix}.
+$$
+:::
+
+<!-- ca. 2 minutes -->
+
+## DSM: residual covariance
+
+With distinguishable roles, the directed difference may covary with the mean:
+
+$$
+r_{\mathrm{M}i}=\frac{\epsilon_{Fi}+\epsilon_{Mi}}{2},
+\qquad
+r_{\mathrm{D}i}=\epsilon_{Fi}-\epsilon_{Mi}.
+$$
+
+$$
+\operatorname{Cov}
+\begin{pmatrix}
+r_{\mathrm{M}i} \\
+r_{\mathrm{D}i}
+\end{pmatrix}
+= \begin{bmatrix}
+\sigma_{r_\mathrm{M}}^{2}
+& \rho_{r_\mathrm{M}r_\mathrm{D}}
+  \sigma_{r_\mathrm{M}}\sigma_{r_\mathrm{D}} \\
+\rho_{r_\mathrm{M}r_\mathrm{D}}
+  \sigma_{r_\mathrm{M}}\sigma_{r_\mathrm{D}}
+& \sigma_{r_\mathrm{D}}^{2}
+\end{bmatrix}.
+$$
+
+Back-transform to the distinguishable APIM, with
+$c_{\mathrm{MD}}
+=\rho_{r_\mathrm{M}r_\mathrm{D}}
+\sigma_{r_\mathrm{M}}\sigma_{r_\mathrm{D}}$.
+
+::: {.covariance-backtransform}
+$$
+\begin{bmatrix}
+\color{#1769AA}{
+  \sigma_{r_\mathrm{M}}^{2}+\frac{1}{4}\sigma_{r_\mathrm{D}}^{2}+c_{\mathrm{MD}}}
+& \color{#7B3FA1}{
+  \sigma_{r_\mathrm{M}}^{2}-\frac{1}{4}\sigma_{r_\mathrm{D}}^{2}} \\[0.35em]
+\color{#7B3FA1}{
+  \sigma_{r_\mathrm{M}}^{2}-\frac{1}{4}\sigma_{r_\mathrm{D}}^{2}}
+& \color{#B45309}{
+  \sigma_{r_\mathrm{M}}^{2}+\frac{1}{4}\sigma_{r_\mathrm{D}}^{2}-c_{\mathrm{MD}}}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\color{#1769AA}{\sigma_{\epsilon_F}^{2}}
+& \color{#7B3FA1}{
+  \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M}} \\[0.35em]
+\color{#7B3FA1}{
+  \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M}}
+& \color{#B45309}{\sigma_{\epsilon_M}^{2}}
+\end{bmatrix}.
+$$
+:::
+
+<!-- ca. 2 minutes -->

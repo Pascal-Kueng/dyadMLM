@@ -52,10 +52,6 @@ model-specific vignettes, including the
 [Dyad-Individual Model](dim.html), and
 [Dyadic Score Model](dsm.html), see the [Overview](index.html).
 
-For an in-depth tutorial covering data preparation and model fitting, but also
-additional steps like diagnostics and assumption checks, see
-[Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
-
 ## Prerequisites
 
 The basic data structure needed for `interdep` is a long data frame where dyads
@@ -63,7 +59,7 @@ are stacked on top of each other and both members of a dyad appear as separate
 rows.
 
 If your raw data are currently in wide format (for time or dyads or both),
-reshape them to this long structure before using `prepare_interdep_data()`. See the
+reshape them to this long structure first. See the
 [tidyr pivoting vignette](https://tidyr.tidyverse.org/articles/pivot.html) or
 the [`pivot_longer()` reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
 
@@ -164,13 +160,9 @@ print(cross_exchangeable_data, n = 4)
 
 The generated `.i_diff_assumed_exchangeable_arbitrary` contrast assigns `-1`
 and `1` to the two members of each exchangeable dyad. Its direction is
-arbitrary, and `seed` makes the assignment reproducible. When role compositions
-are available, each exchangeable composition receives its own contrast, such as
-`.i_diff_female_x_female_arbitrary`, which is `0` for all other compositions
-[@delrosarioPracticalGuideSpecifying2025]. We use a fixed seed in the examples
-below for consistent results.
+arbitrary, and `seed` makes the assignment reproducible. 
 
-Alternatively, for more control, we can explicitly set dyad types to exchangeable:
+Alternatively, we can explicitly set a dyad composition to exchangeable:
 
 ```{r prepare-cross-set-exchangeable}
 cross_exchangeable_data <- prepare_interdep_data(
@@ -206,7 +198,7 @@ cross_dim_data <- prepare_interdep_data(
 print(cross_dim_data, n = 4)
 ```
 
-For distinguishable dyads, DSM columns can be requested. These additionally require 
+For distinguishable dyads, DSM columns can be requested, instead. These additionally require 
 an explicit role order. The role order defines the direction of
 all DSM predictor differences and the DSM role contrast
 [@iidaModelsInterdependentIndividuals2018].
@@ -254,13 +246,14 @@ incomplete_dropped_data <- prepare_interdep_data(
   member = personID,
   role = gender,
   incomplete_dyads = "drop",
-  missing_role = "drop",
+  # missing_role = "drop",
   seed = 123
 )
 
 print(incomplete_dropped_data)
 ```
 
+@codex, I think this section can be removed, if errors are cleare enough, right? ensure the errors are clear.
 
 ## Intensive longitudinal dyadic data 
 
@@ -358,16 +351,19 @@ mixed_cross_data <- prepare_interdep_data(
 print(mixed_cross_data, n = 4)
 ```
 
+Note that when role compositions are available, each exchangeable composition 
+receives its own difference contrast, such as `.i_diff_female_x_female_arbitrary`, which 
+is `0` for all other compositions [@delrosarioPracticalGuideSpecifying2025]. 
+
 We can use this data to model these dyad types as separate or in the same model.
-The [APIMs with Mixed Dyad Compositions vignette](mixed-apim.html) shows both
+The [APIMs with Mixed Dyad Compositions vignette](mixed-apim.html) shows
 mixed-composition formulas and practical convergence notes.
 
 ### Keeping only selected dyad compositions (filtering)
 
 Sometimes a mixed dataset contains dyad compositions that should not be part of
 a given analysis. Use `include_compositions` to keep only dyads whose *observed*
-composition matches the requested labels. The filtering happens before exchangeability constraints and pooling, so `set_exchangeable_compositions` and
-`pool_compositions` arguments can only refer to retained types of dyads.
+composition matches the requested labels. 
 
 ```{r prepare-mixed-cross-sectional-included}
 mixed_cross_data_included <- prepare_interdep_data(
@@ -384,13 +380,11 @@ print(mixed_cross_data_included, n = 4)
 
 ### Setting distinguishable dyads to be treated as exchangeable
 
-As mentioned earlier, omitting the `role` argument treated all
-dyads as one exchangeable composition, effectively pooling them.
-
-For more control, a distinguishable dyad composition in a mixed dataset can be
-treated as exchangeable. This specification
+As mentioned earlier, a distinguishable dyad composition can be
+treated as exchangeable. In a mixed dyad composition dataset, this specification
 keeps the differentiation between the kinds of dyads
-(e.g., `male-male`, `female-female`, and `male-female`).
+(e.g., `male-male`, `female-female`, and `male-female`), as opposed to omitting
+role, which would pool all dyad compositions into one exchangeable composition.
 
 
 ```{r prepare-mixed-cross-sectional-exchangeable}
@@ -410,7 +404,7 @@ print(mixed_cross_exchangeable_data, n = 4)
 ### Pooling different dyad compositions
 
 Sometimes for theoretical or practical reasons, we may want to
-pool different exchangeable dyad compositions and analyze them as if they were one.
+pool selected exchangeable dyad compositions and analyze them as if they were one.
 This also allows testing various constraints via model comparisons.
 
 For instance, let's pool `male-male` and `female-female` dyads
@@ -431,9 +425,8 @@ mixed_cross_data_pooled <- prepare_interdep_data(
 print(mixed_cross_data_pooled)
 ```
 
-Note that you cannot pool distinguishable dyads. To pool `female-male` with
-`male-male`, we first have to treat
-`female-male` as exchangeable:
+Note that you cannot pool distinguishable dyads. If we wanted to pool `female-male` with
+`male-male`, we first had to treat `female-male` as exchangeable:
 
 
 ```{r prepare-mixed-cross-sectional_pooled_constrained}

@@ -522,14 +522,22 @@ test_that("supplied exact pairs support wholly omitted blocks", {
     rescov_test_block("studyID", "(Intercept)", "us(1 | studyID)")
   )
 
-  matched <- match_supplied_exchangeable_residual_blocks(
-    blocks,
-    list(
+  expect_warning(
+    shared_only <- match_supplied_exchangeable_residual_blocks(
+      blocks,
       list(
         shared = "(1 + time | coupleID)",
         difference = NULL,
         idiff = marker
       ),
+      model_frame = data.frame(other = 1:2)
+    ),
+    "identical random effects for these terms",
+    fixed = TRUE
+  )
+  expect_warning(
+    difference_only <- match_supplied_exchangeable_residual_blocks(
+      blocks,
       list(
         shared = NULL,
         difference = paste0(
@@ -537,8 +545,11 @@ test_that("supplied exact pairs support wholly omitted blocks", {
         ),
         idiff = marker
       )
-    )
+    ),
+    "equal-magnitude, opposite-sign random effects",
+    fixed = TRUE
   )
+  matched <- c(shared_only, difference_only)
 
   expect_equal(matched[[1L]]$shared_block_index, 1L)
   expect_true(is.na(matched[[1L]]$difference_block_index))
@@ -558,20 +569,24 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
     rescov_test_block("coupleID", "time", "shared time"),
     rescov_test_block("coupleID", "IDIFF:support", "difference support")
   )
-  matched <- match_supplied_exchangeable_residual_blocks(
-    blocks,
-    list(
+  expect_warning(
+    matched <- match_supplied_exchangeable_residual_blocks(
+      blocks,
       list(
-        shared = "shared time",
-        difference = NULL,
-        idiff = "IDIFF"
-      ),
-      list(
-        shared = NULL,
-        difference = "difference support",
-        idiff = "IDIFF"
+        list(
+          shared = "shared time",
+          difference = NULL,
+          idiff = "IDIFF"
+        ),
+        list(
+          shared = NULL,
+          difference = "difference support",
+          idiff = "IDIFF"
+        )
       )
-    )
+    ),
+    "fitted model actually excluded the entire difference random-effect block",
+    fixed = TRUE
   )
   expect_length(matched, 2L)
 

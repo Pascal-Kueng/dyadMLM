@@ -23,7 +23,12 @@
 #' were used, or when terms were omitted to impose constraints. Terms found in
 #' only one selected block are represented as structural zeros in the other.
 #' `shared = NULL` or `difference = NULL` means that the whole corresponding
-#' block was absent—not that an existing fitted block should be ignored.
+#' block was absent—not that an existing fitted block should be ignored. The
+#' function warns when `NULL` is used. This reports a constraint already imposed
+#' by the fitted model; the back-transformation does not impose it. An omitted
+#' difference block means that the members have identical random effects for
+#' those terms, whereas an omitted shared block means that they have
+#' equal-magnitude, opposite-sign random effects.
 #'
 #' ```r
 #' pairs = list(
@@ -127,6 +132,8 @@ extract_exchangeable_residual_blocks <- function(model) {
   )
 }
 
+# For error messages printing blocks, we create a list of all
+# available blocks
 format_exchangeable_block_inventory <- function(blocks) {
   labels <- character(length(blocks))
   for (i in seq_along(blocks)) {
@@ -151,18 +158,20 @@ parse_exchangeable_coefficient <- function(coefficient) {
 
   literal_product <- NULL
   if (
-    is.call(expression) &&
-      length(expression) == 2L &&
-      identical(expression[[1L]], as.name("I"))
+    is.call(expression) && # this is a function call (I)
+      length(expression) == 2L && # the call has a function (I) and exactly one arg (idiff * x) is one arg
+      identical(expression[[1L]], as.name("I")) # the function call is exactly I
   ) {
-    product <- expression[[2L]]
+    product <- expression[[2L]]  # has the form idiff * time
+    # check that it really HAS that form
     if (
       is.call(product) &&
-        length(product) == 3L &&
+        length(product) == 3L && # 3 terms, "idiff", "*", "x"
         identical(product[[1L]], as.name("*")) &&
-        is.symbol(product[[2L]]) &&
+        is.symbol(product[[2L]]) && # both other expression shoudl be simple var names
         is.symbol(product[[3L]])
     ) {
+      # has form c('idiff', 'x')
       literal_product <- c(
         as.character(product[[2L]]),
         as.character(product[[3L]])
@@ -176,6 +185,7 @@ parse_exchangeable_coefficient <- function(coefficient) {
   ))
 }
 
+# Check whether an indicator occurs anywhere in a random-effect block.
 block_contains_indicator <- function(block, indicator) {
   for (coefficient in block$coefficients) {
     parsed <- parse_exchangeable_coefficient(coefficient)
@@ -186,11 +196,20 @@ block_contains_indicator <- function(block, indicator) {
   return(FALSE)
 }
 
+# Remove the shared/difference indicator so both blocks use common term names.
 exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
+  # Keep one normalized term per coefficient, in the same order as the
+  # covariance matrix rows and columns.
   terms <- character(length(coefficients))
 
+  # Determine the underlying intercept, slope, or interaction for each
+  # coefficient.
   for (i in seq_along(coefficients)) {
     coefficient <- coefficients[[i]]
+
+    # `indicator = "1"` denotes an ordinary shared random intercept. For
+    # example, c("(Intercept)", "time:support") is split into character()
+    # and c("time", "support") before normalization below.
     if (identical(indicator, "1")) {
       parts <- if (identical(coefficient, "(Intercept)")) {
         character()
@@ -201,11 +220,15 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
       parsed <- parse_exchangeable_coefficient(coefficient)
       product <- parsed$literal_product
 
+      # For I(idiff * time), `product` is c("idiff", "time"). Removing the
+      # indicator therefore leaves the underlying term "time".
       if (!is.null(product) && sum(product == indicator) == 1L) {
         terms[[i]] <- product[product != indicator][[1L]]
         next
       }
 
+      # For regular interaction syntax, "support:idiff:time" becomes
+      # c("support", "idiff", "time").
       parts <- strsplit(coefficient, ":", fixed = TRUE)[[1L]]
       # Uses of the indicator inside any other expression are not interpreted.
       if (
@@ -217,6 +240,8 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
       parts <- parts[parts != indicator]
     }
 
+    # The indicator alone maps to the intercept. Sorting makes
+    # idiff:time:support and support:idiff:time equivalent.
     terms[[i]] <- if (length(parts) == 0L) {
       "(Intercept)"
     } else {
@@ -224,6 +249,8 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
     }
   }
 
+  # A covariance block cannot contain two coefficients that map to the same
+  # term, such as idiff:time and I(idiff * time) both becoming "time".
   if (anyDuplicated(terms)) {
     stop(
       "A random-effect block contains coefficients that reduce to the same exchangeable term.",
@@ -259,30 +286,43 @@ find_exchangeable_difference_indicator <- function(coefficients) {
   return(markers[[1L]])
 }
 
+# Validate correct -1/+1 difference coding on the rows supported by the shared block.
 validate_exchangeable_coding <- function(
   model_frame,
   idiff,
   shared_indicator
 ) {
+  # Matching can also be tested without fitted data. In that case, there is no
+  # coding to validate.
   if (is.null(model_frame)) {
     return(invisible(NULL))
   }
 
+  # If a selected difference block did not retain its source column, warn that
+  # its coding cannot be verified. Wholly omitted difference blocks never call
+  # this validator.
   if (!idiff %in% names(model_frame)) {
     warning(
       "`", idiff,
-      "` was not retained in the fitted model frame, so its -1/+1 coding could not be checked.",
+      "` was not retained in the fitted model frame, so its -1/+1 coding could not be verified. Please ensure correct coding yourself.",
       call. = FALSE
     )
     return(invisible(NULL))
   }
 
   difference <- model_frame[[idiff]]
+
+  # `shared_indicator = "1"` means every fitted row belongs to one exchangeable
+  # composition. A named indicator instead marks the supported rows in a mixed
+  # model, where idiff must be zero for all other dyad compositions.
   if (identical(shared_indicator, "1")) {
     shared <- rep(1, nrow(model_frame))
   } else if (shared_indicator %in% names(model_frame)) {
     shared <- model_frame[[shared_indicator]]
   } else {
+    # Recover the support implied by idiff when the fitted model did not retain
+    # the named shared indicator, but warn because it cannot be checked
+    # independently.
     warning(
       "`", shared_indicator,
       "` was not retained in the fitted model frame, so its support could not be checked.",
@@ -303,6 +343,10 @@ validate_exchangeable_coding <- function(
     )
   }
 
+  # Valid mixed-composition coding looks like shared = c(1, 1, 0, 0) and
+  # difference = c(-1, 1, 0, 0). The absolute difference must equal the shared
+  # indicator so that the selected shared and difference blocks refer to the
+  # same rows and therefore the same dyad composition.
   valid_coding <- all(difference %in% c(-1, 0, 1)) &&
     all(shared %in% c(0, 1)) &&
     all(abs(difference) == shared)
@@ -314,6 +358,8 @@ validate_exchangeable_coding <- function(
     )
   }
 
+  # Both arbitrary member positions must occur among the supported fitted rows;
+  # otherwise the difference coordinate cannot represent both dyad members.
   supported <- shared == 1
   if (!any(difference[supported] == -1) ||
       !any(difference[supported] == 1)) {
@@ -908,11 +954,13 @@ match_one_supplied_exchangeable_pair <- function(
     }
   }
 
-  validate_exchangeable_coding(
-    model_frame,
-    pair$idiff,
-    pair$shared_indicator
-  )
+  if (!is.na(difference_block_index)) {
+    validate_exchangeable_coding(
+      model_frame,
+      pair$idiff,
+      pair$shared_indicator
+    )
+  }
   return(matched_pair)
 }
 
@@ -958,6 +1006,45 @@ match_supplied_exchangeable_residual_blocks <- function(
   if (anyDuplicated(paired_block_indices)) {
     stop(
       "Each random-effect block can occur in only one supplied pair.",
+      call. = FALSE
+    )
+  }
+
+  omitted_block_warnings <- character()
+  for (i in seq_along(pairs)) {
+    if (is.null(pairs[[i]]$difference)) {
+      omitted_block_warnings <- c(
+        omitted_block_warnings,
+        paste0(
+          "You set `pairs[[", i, "]]$difference` to `NULL`. Ensure that the ",
+          "fitted model actually excluded the entire difference random-effect ",
+          "block; otherwise, the back-transformation is not meaningful. Here, ",
+          "`NULL` tells `exchangeable_rescov()` that the fitted model constrained ",
+          "this block's variances and covariances to zero; the function does not ",
+          "impose this constraint. For a difference block, this means that the ",
+          "two members have identical random effects for these terms."
+        )
+      )
+    }
+    if (is.null(pairs[[i]]$shared)) {
+      omitted_block_warnings <- c(
+        omitted_block_warnings,
+        paste0(
+          "You set `pairs[[", i, "]]$shared` to `NULL`. Ensure that the fitted ",
+          "model actually excluded the entire shared random-effect block; ",
+          "otherwise, the back-transformation is not meaningful. Here, `NULL` ",
+          "tells `exchangeable_rescov()` that the fitted model constrained this ",
+          "block's variances and covariances to zero; the function does not ",
+          "impose this constraint. For a shared block, this means that the two ",
+          "members have equal-magnitude, opposite-sign random effects for these ",
+          "terms."
+        )
+      )
+    }
+  }
+  if (length(omitted_block_warnings) > 0L) {
+    warning(
+      paste(omitted_block_warnings, collapse = "\n"),
       call. = FALSE
     )
   }

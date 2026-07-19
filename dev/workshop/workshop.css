@@ -123,6 +123,29 @@
   margin-top: 0.1em;
 }
 
+/* Compact side-by-side covariance mappings in the appendix. */
+.reveal .covariance-backtransform {
+  margin-top: -1.05em;
+}
+
+.reveal .covariance-backtransform p {
+  margin: 0;
+}
+
+.reveal .covariance-backtransform .math.display {
+  font-size: 0.9em;
+  margin-bottom: 0;
+  margin-left: -0.8em;
+  margin-right: -0.8em;
+  margin-top: 0;
+}
+
+/* The DIM slide has one extra definition line; lift its final mapping clear
+   of the persistent reveal.js footer while preserving the matrix spacing. */
+.reveal .dim-backtransform {
+  transform: translateY(-0.65em);
+}
+
 .reveal {
   color: var(--uzh-ink);
   font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;

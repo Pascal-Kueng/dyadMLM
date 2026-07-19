@@ -293,7 +293,11 @@ Automatic matching accepts only identical term sets. Exact supplied pairs may
 have terms on only one side; missing positions are stored as `NA` term indices
 and later padded with zeros. Setting `shared = NULL` or `difference = NULL` is
 reserved for a whole block that was absent from the fitted formula. Unlisted
-blocks are otherwise ignored.
+blocks are otherwise ignored. The function warns whenever a whole block is set
+to `NULL`. This reports a constraint already imposed by the fitted model; the
+back-transformation does not impose it. An omitted difference block means that
+both members have identical random effects for those terms, whereas an omitted
+shared block means that they have equal-magnitude, opposite-sign random effects.
 
 ## Model and estimate validation
 
