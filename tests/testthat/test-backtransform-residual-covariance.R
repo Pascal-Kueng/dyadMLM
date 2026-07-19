@@ -1,5 +1,28 @@
-rescov_test_block <- function(group, coefficients, term) {
-  list(group = group, coefficients = coefficients, term = term)
+rescov_test_block <- function(
+  group,
+  coefficients,
+  term,
+  covariance = NULL
+) {
+  block <- list(group = group, coefficients = coefficients, term = term)
+  if (!is.null(covariance)) {
+    block$covariance <- covariance
+  }
+  return(block)
+}
+
+rescov_test_covariance <- function(variances) {
+  n_terms <- length(variances)
+  covariance <- array(
+    rep(diag(variances), each = 2L),
+    dim = c(2L, n_terms, n_terms)
+  )
+  covariance[2L, , ] <- covariance[2L, , ] * 2
+  if (n_terms > 1L) {
+    covariance[, 1L, 2L] <- c(0.1, 0.2)
+    covariance[, 2L, 1L] <- c(0.1, 0.2)
+  }
+  return(covariance)
 }
 
 test_that("backend adapters return aligned common block records", {
@@ -467,16 +490,21 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
 })
 
 test_that("supplied exact pairs align partial and custom-named blocks", {
+  shared_covariance <- rescov_test_covariance(1:3)
+  difference_covariance <- rescov_test_covariance(4:6)
+
   blocks <- list(
     rescov_test_block(
       "coupleID",
       c("time", "(Intercept)", "support"),
-      "us(time + 1 + support | coupleID)"
+      "us(time + 1 + support | coupleID)",
+      shared_covariance
     ),
     rescov_test_block(
       "coupleID",
       c("I(IDIFF * support)", "IDIFF", "IDIFF:stress"),
-      "diag(0 + I(IDIFF * support) + IDIFF + IDIFF:stress | coupleID)"
+      "diag(0 + I(IDIFF * support) + IDIFF + IDIFF:stress | coupleID)",
+      difference_covariance
     )
   )
 
@@ -497,6 +525,33 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
   expect_equal(
     pair$difference_term_indices,
     c(NA_integer_, 2L, 1L, 3L)
+  )
+
+  aligned <- align_exchangeable_pair_covariances(blocks, pair)
+  expect_equal(
+    unname(aligned$shared[, 1:3, 1:3, drop = FALSE]),
+    unname(shared_covariance)
+  )
+  expect_true(all(aligned$shared[, 4, ] == 0))
+  expect_true(all(aligned$shared[, , 4] == 0))
+  expect_equal(
+    unname(aligned$difference[
+      , c(3, 2, 4), c(3, 2, 4), drop = FALSE
+    ]),
+    unname(difference_covariance)
+  )
+  expect_true(all(aligned$difference[, 1, ] == 0))
+  expect_true(all(aligned$difference[, , 1] == 0))
+  expect_equal(
+    dimnames(aligned$shared)[2:3],
+    list(pair$underlying_terms, pair$underlying_terms)
+  )
+
+  blocks[[2L]]$covariance <- array(0, dim = c(3, 3, 3))
+  expect_error(
+    align_exchangeable_pair_covariances(blocks, pair),
+    "different numbers of estimates or posterior draws",
+    fixed = TRUE
   )
 
   composition_blocks <- list(
@@ -529,16 +584,20 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
 
 test_that("supplied exact pairs support wholly omitted blocks", {
   marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  shared_covariance <- rescov_test_covariance(1:2)
+  difference_covariance <- rescov_test_covariance(3:4)
   blocks <- list(
     rescov_test_block(
       "coupleID",
       c("(Intercept)", "time"),
-      "us(1 + time | coupleID)"
+      "us(1 + time | coupleID)",
+      shared_covariance
     ),
     rescov_test_block(
       "coupleID:day",
       c(paste0(marker, ":time"), marker),
-      paste0("diag(0 + ", marker, ":time + ", marker, " | coupleID:day)")
+      paste0("diag(0 + ", marker, ":time + ", marker, " | coupleID:day)"),
+      difference_covariance
     ),
     rescov_test_block("studyID", "(Intercept)", "us(1 | studyID)")
   )
@@ -581,6 +640,26 @@ test_that("supplied exact pairs support wholly omitted blocks", {
   expect_equal(matched[[2L]]$underlying_terms, c("time", "(Intercept)"))
   expect_true(all(is.na(matched[[2L]]$shared_term_indices)))
   expect_equal(matched[[2L]]$difference_term_indices, c(1L, 2L))
+
+  aligned_shared_only <- align_exchangeable_pair_covariances(
+    blocks,
+    matched[[1L]]
+  )
+  expect_equal(
+    unname(aligned_shared_only$shared),
+    unname(shared_covariance)
+  )
+  expect_true(all(aligned_shared_only$difference == 0))
+
+  aligned_difference_only <- align_exchangeable_pair_covariances(
+    blocks,
+    matched[[2L]]
+  )
+  expect_true(all(aligned_difference_only$shared == 0))
+  expect_equal(
+    unname(aligned_difference_only$difference),
+    unname(difference_covariance)
+  )
 })
 
 test_that("omitted blocks are checked without rejecting disjoint pairs", {

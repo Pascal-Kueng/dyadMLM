@@ -1,3 +1,5 @@
+# Public interface ------------------------------------------------------------
+
 #' Recover member-level residual covariance from exchangeable random-effect blocks
 #'
 #' Back-transforms covariance matrices from paired shared and member-difference
@@ -129,7 +131,10 @@
 #'
 #' @export
 exchangeable_rescov <- function(model, pairs = NULL) {
-  model_structure <- extract_exchangeable_residual_blocks(model)
+  # 1. Normalize backend-specific random-effect blocks and covariance estimates.
+  extracted <- extract_exchangeable_residual_blocks(model)
+
+  # 2. Recover the fitted rows so indicator coding can be checked.
   model_frame <- tryCatch(
     stats::model.frame(model),
     error = function(e) NULL
@@ -144,20 +149,25 @@ exchangeable_rescov <- function(model, pairs = NULL) {
     )
   }
 
+  # 3. Match each shared block to its member-difference block.
   if (is.null(pairs)) {
-    model_structure$pairs <- match_exchangeable_residual_blocks(
-      model_structure$blocks,
+    matched_pairs <- match_exchangeable_residual_blocks(
+      extracted$blocks,
       model_frame
     )
   } else {
-    model_structure$pairs <- match_supplied_exchangeable_residual_blocks(
-      model_structure$blocks,
+    matched_pairs <- match_supplied_exchangeable_residual_blocks(
+      extracted$blocks,
       pairs,
       model_frame
     )
   }
-  return(model_structure)
+
+  extracted$pairs <- matched_pairs
+  return(extracted)
 }
+
+# Backend dispatch ------------------------------------------------------------
 
 #' Extract exchangeable random-effect blocks from a fitted model
 #'
@@ -186,8 +196,9 @@ extract_exchangeable_residual_blocks <- function(model) {
   )
 }
 
-# For error messages printing blocks, we create a list of all
-# available blocks
+# Parsing and validation helpers ---------------------------------------------
+
+# Format the extracted blocks so selection errors show users what is available.
 format_exchangeable_block_inventory <- function(blocks) {
   labels <- character(length(blocks))
   for (i in seq_along(blocks)) {
@@ -199,42 +210,45 @@ format_exchangeable_block_inventory <- function(blocks) {
   ))
 }
 
-# Parse without evaluating. Only `I(a * b)` with two simple symbols is
-# recognized as a literal product.
+# Parse a coefficient without evaluating it. In addition to all variable names,
+# recognize the exact form `I(a * b)` because it represents one literal product.
 parse_exchangeable_coefficient <- function(coefficient) {
-  expression <- tryCatch(
+  # 1. Convert the printed coefficient to a language object without evaluating
+  # it. Invalid expressions simply cannot be interpreted for matching.
+  parsed_expression <- tryCatch(
     str2lang(coefficient),
     error = function(e) NULL
   )
-  if (is.null(expression)) {
+  if (is.null(parsed_expression)) {
     return(list(variables = character(), literal_product = NULL))
   }
 
+  # 2. Recognize only I(symbol * symbol), for example I(idiff * time).
   literal_product <- NULL
-  if (
-    is.call(expression) && # this is a function call (I)
-      length(expression) == 2L && # the call has a function (I) and exactly one arg (idiff * x) is one arg
-      identical(expression[[1L]], as.name("I")) # the function call is exactly I
-  ) {
-    product <- expression[[2L]]  # has the form idiff * time
-    # check that it really HAS that form
-    if (
-      is.call(product) &&
-        length(product) == 3L && # 3 terms, "idiff", "*", "x"
-        identical(product[[1L]], as.name("*")) &&
-        is.symbol(product[[2L]]) && # both other expression shoudl be simple var names
-        is.symbol(product[[3L]])
-    ) {
-      # has form c('idiff', 'x')
+  is_I_call <- is.call(parsed_expression) &&
+    length(parsed_expression) == 2L &&
+    identical(parsed_expression[[1L]], as.name("I"))
+
+  if (is_I_call) {
+    product_call <- parsed_expression[[2L]]
+    is_two_symbol_product <- is.call(product_call) &&
+      length(product_call) == 3L &&
+      identical(product_call[[1L]], as.name("*")) &&
+      is.symbol(product_call[[2L]]) &&
+      is.symbol(product_call[[3L]])
+
+    if (is_two_symbol_product) {
       literal_product <- c(
-        as.character(product[[2L]]),
-        as.character(product[[3L]])
+        as.character(product_call[[2L]]),
+        as.character(product_call[[3L]])
       )
     }
   }
 
+  # 3. Retain every referenced variable for general indicator detection, plus
+  # the optional literal product for the special I(a * b) matching rule.
   return(list(
-    variables = all.vars(expression),
+    variables = all.vars(parsed_expression),
     literal_product = literal_product
   ))
 }
@@ -242,8 +256,8 @@ parse_exchangeable_coefficient <- function(coefficient) {
 # Check whether an indicator occurs anywhere in a random-effect block.
 block_contains_indicator <- function(block, indicator) {
   for (coefficient in block$coefficients) {
-    parsed <- parse_exchangeable_coefficient(coefficient)
-    if (indicator %in% parsed$variables) {
+    parsed_coefficient <- parse_exchangeable_coefficient(coefficient)
+    if (indicator %in% parsed_coefficient$variables) {
       return(TRUE)
     }
   }
@@ -253,21 +267,24 @@ block_contains_indicator <- function(block, indicator) {
 # Split only formula interactions. Backticked symbols are returned as their
 # exact column names, while expressions such as `log(time)` remain intact.
 split_exchangeable_interaction <- function(coefficient) {
-  expression <- tryCatch(
+  parsed_expression <- tryCatch(
     str2lang(coefficient),
     error = function(e) NULL
   )
-  if (is.null(expression)) {
+  if (is.null(parsed_expression)) {
     return(NULL)
   }
 
-  split_parts <- function(x) {
+  flatten_interaction_parts <- function(x) {
     if (
       is.call(x) &&
         length(x) == 3L &&
         identical(x[[1L]], as.name(":"))
     ) {
-      return(c(split_parts(x[[2L]]), split_parts(x[[3L]])))
+      return(c(
+        flatten_interaction_parts(x[[2L]]),
+        flatten_interaction_parts(x[[3L]])
+      ))
     }
     if (is.symbol(x)) {
       return(as.character(x))
@@ -275,69 +292,68 @@ split_exchangeable_interaction <- function(coefficient) {
     return(deparse1(x))
   }
 
-  return(split_parts(expression))
+  return(flatten_interaction_parts(parsed_expression))
 }
 
 # Remove the shared/difference indicator so both blocks use common term names.
 exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
-  # Keep one normalized term per coefficient, in the same order as the
-  # covariance matrix rows and columns.
+  # Keep one normalized term per coefficient, preserving the covariance-matrix
+  # row and column order. `NULL` means the coefficients could not all be mapped
+  # under the requested indicator convention.
   terms <- character(length(coefficients))
 
-  # Determine the underlying intercept, slope, or interaction for each
-  # coefficient.
+  # 1. Interpret each coefficient as an ordinary shared term, a literal
+  # I(indicator * term) product, or a formula interaction.
   for (i in seq_along(coefficients)) {
     coefficient <- coefficients[[i]]
 
-    # `indicator = "1"` denotes an ordinary shared random intercept. For
-    # example, c("(Intercept)", "time:support") is parsed into character()
-    # and c("time", "support") before normalization below.
+    # `indicator = "1"` denotes an ordinary shared block, whose intercept is
+    # `(Intercept)`. For example, c("(Intercept)", "time:support") is parsed
+    # into character() and c("time", "support") before normalization below.
     if (identical(indicator, "1")) {
-      parts <- if (identical(coefficient, "(Intercept)")) {
+      term_parts <- if (identical(coefficient, "(Intercept)")) {
         character()
       } else {
         split_exchangeable_interaction(coefficient)
       }
     } else {
-      parsed <- parse_exchangeable_coefficient(coefficient)
-      product <- parsed$literal_product
+      parsed_coefficient <- parse_exchangeable_coefficient(coefficient)
+      literal_product <- parsed_coefficient$literal_product
 
-      # For I(idiff * time), `product` is c("idiff", "time"). Removing the
-      # indicator therefore leaves the underlying term "time".
-      if (!is.null(product) && sum(product == indicator) == 1L) {
-        terms[[i]] <- product[product != indicator][[1L]]
-        next
+      if (!is.null(literal_product) &&
+          sum(literal_product == indicator) == 1L) {
+        # I(idiff * time) becomes c("idiff", "time").
+        term_parts <- literal_product
+      } else {
+        # support:idiff:time becomes c("support", "idiff", "time"). Uses of
+        # the indicator inside any other expression are not interpreted.
+        term_parts <- split_exchangeable_interaction(coefficient)
+        if (
+          is.null(term_parts) ||
+            !indicator %in% parsed_coefficient$variables ||
+            sum(term_parts == indicator) != 1L
+        ) {
+          return(NULL)
+        }
       }
-
-      # For regular interaction syntax, "support:idiff:time" becomes
-      # c("support", "idiff", "time").
-      parts <- split_exchangeable_interaction(coefficient)
-      # Uses of the indicator inside any other expression are not interpreted.
-      if (
-        is.null(parts) ||
-        !indicator %in% parsed$variables ||
-          sum(parts == indicator) != 1L
-      ) {
-        return(NULL)
-      }
-      parts <- parts[parts != indicator]
+      term_parts <- term_parts[term_parts != indicator]
     }
 
-    if (is.null(parts)) {
+    if (is.null(term_parts)) {
       return(NULL)
     }
 
-    # The indicator alone maps to the intercept. Sorting makes
+    # 2. Removing the indicator alone leaves the intercept. Sorting makes
     # idiff:time:support and support:idiff:time equivalent.
-    terms[[i]] <- if (length(parts) == 0L) {
+    terms[[i]] <- if (length(term_parts) == 0L) {
       "(Intercept)"
     } else {
-      paste(sort(parts), collapse = ":")
+      paste(sort(term_parts), collapse = ":")
     }
   }
 
-  # A covariance block cannot contain two coefficients that map to the same
-  # term, such as idiff:time and I(idiff * time) both becoming "time".
+  # 3. Reject coefficients that collapse to the same underlying term, such as
+  # idiff:time and I(idiff * time) both becoming "time".
   if (anyDuplicated(terms)) {
     duplicated_terms <- unique(terms[duplicated(terms)])
     collisions <- character(length(duplicated_terms))
@@ -368,27 +384,28 @@ find_exchangeable_difference_indicator <- function(coefficients) {
       parse_exchangeable_coefficient(coefficient)$variables
     )
   }
-  markers <- unique(grep(
+  generated_indicators <- unique(grep(
     "^\\.i_diff_.+_arbitrary$",
     variables,
     value = TRUE
   ))
 
-  if (length(markers) > 1L) {
+  if (length(generated_indicators) > 1L) {
     stop(
       "A difference block contains more than one generated difference ",
-      "indicator: `", paste(markers, collapse = "`, `"), "`. Put each ",
+      "indicator: `", paste(generated_indicators, collapse = "`, `"),
+      "`. Put each ",
       "exchangeable composition in a separate random-effect block.",
       call. = FALSE
     )
   }
-  if (length(markers) == 0L) {
+  if (length(generated_indicators) == 0L) {
     return(NA_character_)
   }
-  return(markers[[1L]])
+  return(generated_indicators[[1L]])
 }
 
-# Validate correct -1/+1 difference coding on the rows supported by the shared block.
+# Validate -1/+1 difference coding on rows designated by `shared_indicator`.
 validate_exchangeable_coding <- function(
   model_frame,
   idiff,
@@ -397,15 +414,15 @@ validate_exchangeable_coding <- function(
 ) {
   pair_context <- if (is.null(pair_label)) "" else paste0(pair_label, ": ")
 
-  # Matching can also be tested without fitted data. In that case, there is no
+  # 1. Matching helpers can be tested without fitted data. There is then no
   # coding to validate.
   if (is.null(model_frame)) {
     return(invisible(NULL))
   }
 
-  # If a selected difference block did not retain its source column, warn that
-  # its coding cannot be verified. Wholly omitted difference blocks never call
-  # this validator.
+  # 2. Obtain the difference values. The fitted frame may not retain the source
+  # column, so warn when validation is impossible. Wholly omitted difference
+  # blocks never call this validator.
   if (!idiff %in% names(model_frame)) {
     warning(
       pair_context, "`", idiff,
@@ -418,19 +435,18 @@ validate_exchangeable_coding <- function(
     return(invisible(NULL))
   }
 
-  difference <- model_frame[[idiff]]
+  difference_values <- model_frame[[idiff]]
+  all_rows_supported <- identical(shared_indicator, "1")
 
-  # `shared_indicator = "1"` means every fitted row belongs to one exchangeable
-  # composition. A named indicator instead marks the supported rows in a mixed
-  # model, where idiff must be zero for all other dyad compositions.
-  if (identical(shared_indicator, "1")) {
-    shared <- rep(1, nrow(model_frame))
+  # 3. Obtain the support values. `shared_indicator = "1"` supports every row;
+  # a named indicator marks one composition in a mixed-dyad model.
+  if (all_rows_supported) {
+    support_values <- rep(1, nrow(model_frame))
   } else if (shared_indicator %in% names(model_frame)) {
-    shared <- model_frame[[shared_indicator]]
+    support_values <- model_frame[[shared_indicator]]
   } else {
-    # Recover the support implied by idiff when the fitted model did not retain
-    # the named shared indicator, but warn because it cannot be checked
-    # independently.
+    # Infer support from idiff if the fitted frame omitted the named indicator,
+    # but warn because the two columns can no longer be checked independently.
     warning(
       pair_context, "`", shared_indicator,
       "` was not retained in the fitted model frame, so its support could not ",
@@ -438,19 +454,25 @@ validate_exchangeable_coding <- function(
       ") == 1` and 0 elsewhere.",
       call. = FALSE
     )
-    shared <- if (is.numeric(difference)) abs(difference) else difference
+    support_values <- if (is.numeric(difference_values)) {
+      abs(difference_values)
+    } else {
+      difference_values
+    }
   }
-  if (is.logical(shared)) {
-    shared <- as.numeric(shared)
+  if (is.logical(support_values)) {
+    support_values <- as.numeric(support_values)
   }
 
-  if (!is.numeric(difference) || !is.numeric(shared) ||
-      anyNA(difference) || anyNA(shared)) {
+  # 4. Require complete numeric columns before checking their allowed values
+  # and whether both components refer to exactly the same fitted rows.
+  if (!is.numeric(difference_values) || !is.numeric(support_values) ||
+      anyNA(difference_values) || anyNA(support_values)) {
     column_names <- paste0("`", idiff, "`")
     coding_requirement <- paste0(
       "Code `", idiff, "` as -1/+1 before fitting."
     )
-    if (!identical(shared_indicator, "1")) {
+    if (!all_rows_supported) {
       column_names <- paste0(column_names, " and `", shared_indicator, "`")
       coding_requirement <- paste0(
         "Code `", idiff, "` as -1/0/+1 and `", shared_indicator,
@@ -469,11 +491,14 @@ validate_exchangeable_coding <- function(
   # difference = c(-1, 1, 0, 0). The absolute difference must equal the shared
   # indicator so that the selected shared and difference blocks refer to the
   # same rows and therefore the same dyad composition.
-  valid_coding <- all(difference %in% c(-1, 0, 1)) &&
-    all(shared %in% c(0, 1)) &&
-    all(abs(difference) == shared)
+  valid_difference_values <- all(difference_values %in% c(-1, 0, 1))
+  valid_support_values <- all(support_values %in% c(0, 1))
+  matching_support <- all(abs(difference_values) == support_values)
+  valid_coding <- valid_difference_values &&
+    valid_support_values &&
+    matching_support
   if (!valid_coding) {
-    if (identical(shared_indicator, "1")) {
+    if (all_rows_supported) {
       stop(
         pair_context, "`", idiff,
         "` must use -1/+1 coding on every fitted row because ",
@@ -492,11 +517,11 @@ validate_exchangeable_coding <- function(
     )
   }
 
-  # Both arbitrary member positions must occur among the supported fitted rows;
-  # otherwise the difference coordinate cannot represent both dyad members.
-  supported <- shared == 1
-  if (!any(difference[supported] == -1) ||
-      !any(difference[supported] == 1)) {
+  # 5. Both arbitrary member positions must occur on supported rows; otherwise
+  # the difference coordinate cannot represent both dyad members.
+  supported_rows <- support_values == 1
+  if (!any(difference_values[supported_rows] == -1) ||
+      !any(difference_values[supported_rows] == 1)) {
     stop(
       pair_context, "`", idiff,
       "` must contain both -1 and +1 on its supported fitted ",
@@ -508,6 +533,9 @@ validate_exchangeable_coding <- function(
   return(invisible(NULL))
 }
 
+# Pair construction and automatic matching -----------------------------------
+
+# Describe one shared/difference pair in a common underlying term space.
 build_exchangeable_pair <- function(
   blocks,
   shared_block_index,
@@ -515,14 +543,19 @@ build_exchangeable_pair <- function(
   idiff,
   shared_indicator
 ) {
-  if (is.na(shared_block_index) && is.na(difference_block_index)) {
+  has_shared_block <- !is.na(shared_block_index)
+  has_difference_block <- !is.na(difference_block_index)
+
+  # 1. At least one component must be fitted. If both are present, they must
+  # describe random effects at the same grouping level.
+  if (!has_shared_block && !has_difference_block) {
     stop("A pair cannot omit both its shared and difference blocks.",
       call. = FALSE
     )
   }
   if (
-    !is.na(shared_block_index) &&
-      !is.na(difference_block_index) &&
+    has_shared_block &&
+      has_difference_block &&
       !identical(
         blocks[[shared_block_index]]$group,
         blocks[[difference_block_index]]$group
@@ -539,8 +572,10 @@ build_exchangeable_pair <- function(
     )
   }
 
+  # 2. Map the shared block to underlying term names, removing a named shared
+  # indicator when present.
   shared_terms <- character()
-  if (!is.na(shared_block_index)) {
+  if (has_shared_block) {
     shared_block <- blocks[[shared_block_index]]
     if (!is.null(idiff) && block_contains_indicator(shared_block, idiff)) {
       stop(
@@ -564,8 +599,9 @@ build_exchangeable_pair <- function(
     }
   }
 
+  # 3. Map the difference block in the same way, removing its indicator.
   difference_terms <- character()
-  if (!is.na(difference_block_index)) {
+  if (has_difference_block) {
     difference_block <- blocks[[difference_block_index]]
     if (
       !identical(shared_indicator, "1") &&
@@ -592,8 +628,8 @@ build_exchangeable_pair <- function(
     }
   }
 
-  # The union is the common coefficient space for both blocks. `NA` indices
-  # mark terms whose covariance rows and columns must later be filled with zero.
+  # 4. Form the common coefficient space. `NA` indices mark rows and columns
+  # that must later be supplied as structural zeros for one component.
   underlying_terms <- unique(c(shared_terms, difference_terms))
 
   return(list(
@@ -614,7 +650,7 @@ find_exchangeable_shared_candidates <- function(
   shared_indicator,
   excluded_difference_indices = integer()
 ) {
-  candidate_indices <- integer()
+  shared_candidate_indices <- integer()
   difference_group <- blocks[[difference_block_index]]$group
 
   for (i in seq_along(blocks)) {
@@ -634,12 +670,14 @@ find_exchangeable_shared_candidates <- function(
       !is.null(shared_terms) &&
         setequal(shared_terms, difference_terms)
     ) {
-      candidate_indices <- c(candidate_indices, i)
+      shared_candidate_indices <- c(shared_candidate_indices, i)
     }
   }
-  return(candidate_indices)
+  return(shared_candidate_indices)
 }
 
+# Match every block containing one generated difference indicator to exactly
+# one shared block with the same group and underlying terms.
 match_blocks_for_exchangeable_indicator <- function(
   blocks,
   idiff,
@@ -650,6 +688,7 @@ match_blocks_for_exchangeable_indicator <- function(
   inventory <- format_exchangeable_block_inventory(blocks)
   difference_block_indices <- integer()
 
+  # 1. Find all valid difference blocks using this indicator.
   for (i in seq_along(blocks)) {
     if (!block_contains_indicator(blocks[[i]], idiff)) {
       next
@@ -679,33 +718,42 @@ match_blocks_for_exchangeable_indicator <- function(
     )
   }
 
+  # 2. For each difference block, try the requested shared indicator first.
+  # Try the fallback only when that first search finds no candidates.
   matched_pairs <- list()
   for (difference_block_index in difference_block_indices) {
     difference_terms <- exchangeable_underlying_terms(
       blocks[[difference_block_index]]$coefficients,
       idiff
     )
-    matched_shared_indicator <- shared_indicator
-    candidate_indices <- find_exchangeable_shared_candidates(
+    selected_shared_indicator <- shared_indicator
+    shared_candidate_indices <- find_exchangeable_shared_candidates(
       blocks,
       difference_block_index,
       difference_terms,
-      matched_shared_indicator,
+      selected_shared_indicator,
       excluded_difference_indices = difference_block_indices
     )
-    if (length(candidate_indices) == 0L && !is.null(fallback_indicator)) {
-      matched_shared_indicator <- fallback_indicator
-      candidate_indices <- find_exchangeable_shared_candidates(
+    if (length(shared_candidate_indices) == 0L &&
+        !is.null(fallback_indicator)) {
+      selected_shared_indicator <- fallback_indicator
+      shared_candidate_indices <- find_exchangeable_shared_candidates(
         blocks,
         difference_block_index,
         difference_terms,
-        matched_shared_indicator,
+        selected_shared_indicator,
         excluded_difference_indices = difference_block_indices
       )
     }
 
-    if (length(candidate_indices) != 1L) {
-      problem <- if (length(candidate_indices) == 0L) "No" else "More than one"
+    # 3. Automatic matching is deliberately strict: exactly one shared block
+    # must fit. Partial or ambiguous structures require explicit `pairs`.
+    if (length(shared_candidate_indices) != 1L) {
+      problem <- if (length(shared_candidate_indices) == 0L) {
+        "No"
+      } else {
+        "More than one"
+      }
       stop(
         problem, " shared block matched difference block `",
         blocks[[difference_block_index]]$term,
@@ -719,15 +767,15 @@ match_blocks_for_exchangeable_indicator <- function(
 
     pair <- build_exchangeable_pair(
       blocks,
-      candidate_indices[[1L]],
+      shared_candidate_indices[[1L]],
       difference_block_index,
       idiff,
-      matched_shared_indicator
+      selected_shared_indicator
     )
     validate_exchangeable_coding(
       model_frame,
       idiff,
-      matched_shared_indicator
+      selected_shared_indicator
     )
     matched_pairs[[length(matched_pairs) + 1L]] <- pair
   }
@@ -738,6 +786,7 @@ match_exchangeable_residual_blocks <- function(
   blocks,
   model_frame = NULL
 ) {
+  # 1. Discover generated difference indicators across all extracted blocks.
   difference_indicators <- rep(NA_character_, length(blocks))
   for (i in seq_along(blocks)) {
     difference_indicators[[i]] <- find_exchangeable_difference_indicator(
@@ -757,6 +806,8 @@ match_exchangeable_residual_blocks <- function(
     )
   }
 
+  # 2. Match every discovered composition independently. An ordinary shared
+  # intercept is a safe fallback only when there is one exchangeable type.
   matched_pairs <- list()
   for (idiff in difference_indicators) {
     composition <- sub("^\\.i_diff_(.+)_arbitrary$", "\\1", idiff)
@@ -770,6 +821,8 @@ match_exchangeable_residual_blocks <- function(
     matched_pairs <- c(matched_pairs, indicator_pairs)
   }
 
+  # 3. Ensure no shared block was assigned to more than one difference block,
+  # then return pairs in the fitted difference-block order.
   shared_block_indices <- integer()
   difference_block_indices <- integer()
   for (pair in matched_pairs) {
@@ -792,6 +845,10 @@ match_exchangeable_residual_blocks <- function(
   return(matched_pairs[order(difference_block_indices)])
 }
 
+# User-supplied pair matching -------------------------------------------------
+
+# Convert equivalent backend/formula spellings to one lookup key. For example,
+# `(1 + time | group)` and `us(time + 1 | group)` receive the same key.
 canonicalize_exchangeable_block_term <- function(term) {
   if (
     !is.character(term) ||
@@ -802,81 +859,101 @@ canonicalize_exchangeable_block_term <- function(term) {
     return(NA_character_)
   }
 
+  # 1. Unwrap backend-specific covariance syntax, or start with a plain bar
+  # term. The covariance structure is inferred below when no wrapper is present.
   term <- trimws(term)
-  structure <- NULL
-  core <- term
+  covariance_structure <- NULL
+  bar_term <- term
 
-  # glmmTMB prints structures such as `us(...)` or `diag(...)`; brms prints a
-  # bar term.
   wrapper_match <- regexec(
     "^([[:alnum:]_.]+)[[:space:]]*\\((.*)\\)[[:space:]]*$",
     term,
     perl = TRUE
   )
-  wrapper <- regmatches(term, wrapper_match)[[1L]]
-  if (length(wrapper) == 3L && grepl("|", wrapper[[3L]], fixed = TRUE)) {
-    structure <- wrapper[[2L]]
-    core <- wrapper[[3L]]
-  } else if (startsWith(core, "(") && endsWith(core, ")")) {
-    core <- substr(core, 2L, nchar(core) - 1L)
+  wrapper_parts <- regmatches(term, wrapper_match)[[1L]]
+  if (length(wrapper_parts) == 3L &&
+      grepl("|", wrapper_parts[[3L]], fixed = TRUE)) {
+    covariance_structure <- wrapper_parts[[2L]]
+    bar_term <- wrapper_parts[[3L]]
+  } else if (startsWith(bar_term, "(") && endsWith(bar_term, ")")) {
+    bar_term <- substr(bar_term, 2L, nchar(bar_term) - 1L)
   }
 
-  uncorrelated <- grepl("||", core, fixed = TRUE)
-  core <- gsub("||", "|", core, fixed = TRUE)
-  bar_parts <- strsplit(core, "|", fixed = TRUE)[[1L]]
+  # 2. Normalize `||` to one bar for parsing and infer `diag` versus `us` when
+  # the user supplied no explicit covariance-structure wrapper.
+  uncorrelated <- grepl("||", bar_term, fixed = TRUE)
+  bar_term <- gsub("||", "|", bar_term, fixed = TRUE)
+  bar_parts <- strsplit(bar_term, "|", fixed = TRUE)[[1L]]
   if (length(bar_parts) != 2L) {
     return(NA_character_)
   }
-  if (is.null(structure)) {
-    structure <- if (uncorrelated) "diag" else "us"
+  if (is.null(covariance_structure)) {
+    covariance_structure <- if (uncorrelated) "diag" else "us"
   }
 
-  lhs_terms <- tryCatch(
+  # 3. Parse the coefficient and grouping sides as R expressions.
+  coefficient_terms <- tryCatch(
     stats::terms(stats::as.formula(paste("~", trimws(bar_parts[[1L]])))),
     error = function(e) NULL
   )
-  group <- tryCatch(
+  group_expression <- tryCatch(
     str2lang(trimws(bar_parts[[2L]])),
     error = function(e) NULL
   )
-  if (is.null(lhs_terms) || is.null(group)) {
+  if (is.null(coefficient_terms) || is.null(group_expression)) {
     return(NA_character_)
   }
 
-  coefficients <- attr(lhs_terms, "term.labels")
-  for (i in seq_along(coefficients)) {
-    parts <- strsplit(coefficients[[i]], ":", fixed = TRUE)[[1L]]
-    for (j in seq_along(parts)) {
-      parsed <- parse_exchangeable_coefficient(parts[[j]])
-      if (!is.null(parsed$literal_product)) {
-        parts[[j]] <- paste0(
+  # 4. Canonicalize interaction order and literal products, then rebuild a
+  # compact key whose coefficient order no longer matters.
+  coefficient_labels <- attr(coefficient_terms, "term.labels")
+  for (i in seq_along(coefficient_labels)) {
+    coefficient_parts <- strsplit(
+      coefficient_labels[[i]],
+      ":",
+      fixed = TRUE
+    )[[1L]]
+    for (j in seq_along(coefficient_parts)) {
+      parsed_coefficient <- parse_exchangeable_coefficient(
+        coefficient_parts[[j]]
+      )
+      if (!is.null(parsed_coefficient$literal_product)) {
+        coefficient_parts[[j]] <- paste0(
           "I(",
-          paste(sort(parsed$literal_product), collapse = " * "),
+          paste(sort(parsed_coefficient$literal_product), collapse = " * "),
           ")"
         )
         next
       }
 
-      expression <- tryCatch(str2lang(parts[[j]]), error = function(e) NULL)
-      parts[[j]] <- if (is.null(expression)) {
-        trimws(parts[[j]])
+      part_expression <- tryCatch(
+        str2lang(coefficient_parts[[j]]),
+        error = function(e) NULL
+      )
+      coefficient_parts[[j]] <- if (is.null(part_expression)) {
+        trimws(coefficient_parts[[j]])
       } else {
-        deparse1(expression)
+        deparse1(part_expression)
       }
     }
-    coefficients[[i]] <- paste(sort(parts), collapse = ":")
+    coefficient_labels[[i]] <- paste(
+      sort(coefficient_parts),
+      collapse = ":"
+    )
   }
 
-  lhs <- c(
-    if (attr(lhs_terms, "intercept") == 1L) "1" else "0",
-    sort(coefficients)
+  canonical_lhs <- c(
+    if (attr(coefficient_terms, "intercept") == 1L) "1" else "0",
+    sort(coefficient_labels)
   )
   return(paste0(
-    structure, "(", paste(lhs, collapse = "+"),
-    "|", deparse1(group), ")"
+    covariance_structure, "(", paste(canonical_lhs, collapse = "+"),
+    "|", deparse1(group_expression), ")"
   ))
 }
 
+# Normalize the convenient single-pair form and the general list-of-pairs form
+# to one validated internal representation.
 normalize_supplied_exchangeable_pairs <- function(pairs) {
   required_names <- c("shared", "difference")
   allowed_names <- c(
@@ -901,6 +978,8 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
     )
   }
 
+  # 1. A top-level list of fields describes one pair; otherwise each top-level
+  # element must itself describe one pair.
   pair_names <- names(pairs)
   has_top_level_names <- !is.null(pair_names) && any(nzchar(pair_names))
   all_values_are_lists <- all(vapply(pairs, is.list, logical(1L)))
@@ -923,6 +1002,8 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
   for (i in seq_along(pair_specs)) {
     pair <- pair_specs[[i]]
     pair_label <- pair_labels[[i]]
+
+    # 2. Validate the pair's field names and required fields.
     if (!is.list(pair)) {
       stop(
         pair_label, " must be a named list describing one block pair.",
@@ -968,6 +1049,8 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
       )
     }
 
+    # 3. Fill and validate indicator names. The ordinary shared intercept uses
+    # the special default `shared_indicator = "1"`.
     if (
       !is.null(pair$difference) &&
         (
@@ -1025,6 +1108,7 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
       )
     }
 
+    # 4. Validate the two block selectors and forbid an entirely empty pair.
     for (field in c("shared", "difference")) {
       selector <- pair[[field]]
       if (!is.null(selector) && !is_nonempty_string(selector)) {
@@ -1049,6 +1133,8 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
   return(pair_specs)
 }
 
+# Resolve an exact printed block label first, then try canonical-equivalent
+# formula/backend syntax.
 resolve_exchangeable_block_selector <- function(
   selector,
   selector_label,
@@ -1096,7 +1182,7 @@ find_potential_exchangeable_blocks <- function(
   exclude_indicator = NULL,
   overlap_terms = NULL
 ) {
-  candidate_indices <- integer()
+  potential_block_indices <- integer()
   for (i in seq_along(blocks)) {
     if (!identical(blocks[[i]]$group, group)) {
       next
@@ -1117,7 +1203,7 @@ find_potential_exchangeable_blocks <- function(
         !identical(indicator, "1") &&
           block_contains_indicator(block, indicator)
       ) {
-        candidate_indices <- c(candidate_indices, i)
+        potential_block_indices <- c(potential_block_indices, i)
       }
       next
     }
@@ -1127,11 +1213,12 @@ find_potential_exchangeable_blocks <- function(
     ) {
       next
     }
-    candidate_indices <- c(candidate_indices, i)
+    potential_block_indices <- c(potential_block_indices, i)
   }
-  return(candidate_indices)
+  return(potential_block_indices)
 }
 
+# Add the supplied pair label to lower-level parsing and matching errors.
 with_exchangeable_pair_error_context <- function(code, pair_label) {
   tryCatch(
     force(code),
@@ -1151,22 +1238,29 @@ match_one_supplied_exchangeable_pair <- function(
   block_lookup,
   model_frame = NULL
 ) {
+  pair_reference <- substr(pair_label, 1L, nchar(pair_label) - 1L)
+  shared_field_label <- paste0(pair_reference, "$shared`")
+  difference_field_label <- paste0(pair_reference, "$difference`")
+
+  # 1. Resolve the two user selectors to extracted block positions. `NULL`
+  # becomes `NA`, so one fitted component is enough to define a pair.
   shared_block_index <- resolve_exchangeable_block_selector(
     pair$shared,
-    paste0(substr(pair_label, 1L, nchar(pair_label) - 1L), "$shared`"),
+    shared_field_label,
     block_lookup
   )
   difference_block_index <- resolve_exchangeable_block_selector(
     pair$difference,
-    paste0(substr(pair_label, 1L, nchar(pair_label) - 1L), "$difference`"),
+    difference_field_label,
     block_lookup
   )
 
-  selected_block_indices <- c(shared_block_index, difference_block_index)
-  selected_block_indices <- selected_block_indices[
-    !is.na(selected_block_indices)
+  fitted_block_indices <- c(shared_block_index, difference_block_index)
+  fitted_block_indices <- fitted_block_indices[
+    !is.na(fitted_block_indices)
   ]
 
+  # 2. Remove indicators and build the common underlying term map.
   matched_pair <- with_exchangeable_pair_error_context(
     build_exchangeable_pair(
       blocks,
@@ -1178,11 +1272,11 @@ match_one_supplied_exchangeable_pair <- function(
     pair_label
   )
 
-  present_block_index <- selected_block_indices[[1L]]
-  group <- blocks[[present_block_index]]$group
+  reference_block_index <- fitted_block_indices[[1L]]
+  pair_group <- blocks[[reference_block_index]]$group
 
-  # `NULL` declares that the corresponding block was not fitted. Catch clear
-  # contradictions rather than silently inserting structural zeros.
+  # 3. `NULL` declares that a component was not fitted. Search for clear
+  # contradictions before structural zeros are inserted.
   if (
     is.na(difference_block_index) &&
       !is.null(pair$difference_indicator)
@@ -1190,7 +1284,7 @@ match_one_supplied_exchangeable_pair <- function(
     potential_block_indices <- with_exchangeable_pair_error_context(
       find_potential_exchangeable_blocks(
         blocks,
-        group,
+        pair_group,
         pair$difference_indicator,
         overlap_terms = matched_pair$underlying_terms
       ),
@@ -1198,15 +1292,11 @@ match_one_supplied_exchangeable_pair <- function(
     )
     potential_block_indices <- setdiff(
       potential_block_indices,
-      selected_block_indices
+      fitted_block_indices
     )
     if (length(potential_block_indices) > 0L) {
-      difference_reference <- paste0(
-        substr(pair_label, 1L, nchar(pair_label) - 1L),
-        "$difference`"
-      )
       stop(
-        difference_reference,
+        difference_field_label,
         " is `NULL`, but a compatible fitted block exists: `",
         paste(
           block_lookup$term_labels[potential_block_indices],
@@ -1222,7 +1312,7 @@ match_one_supplied_exchangeable_pair <- function(
     potential_block_indices <- with_exchangeable_pair_error_context(
       find_potential_exchangeable_blocks(
         blocks,
-        group,
+        pair_group,
         pair$shared_indicator,
         exclude_indicator = pair$difference_indicator,
         overlap_terms = matched_pair$underlying_terms
@@ -1231,15 +1321,11 @@ match_one_supplied_exchangeable_pair <- function(
     )
     potential_block_indices <- setdiff(
       potential_block_indices,
-      selected_block_indices
+      fitted_block_indices
     )
     if (length(potential_block_indices) > 0L) {
-      shared_reference <- paste0(
-        substr(pair_label, 1L, nchar(pair_label) - 1L),
-        "$shared`"
-      )
       stop(
-        shared_reference,
+        shared_field_label,
         " is `NULL`, but a compatible fitted block exists: `",
         paste(
           block_lookup$term_labels[potential_block_indices],
@@ -1251,6 +1337,7 @@ match_one_supplied_exchangeable_pair <- function(
     }
   }
 
+  # 4. Check the difference coding whenever that block was actually fitted.
   if (!is.na(difference_block_index)) {
     validate_exchangeable_coding(
       model_frame,
@@ -1267,8 +1354,10 @@ match_supplied_exchangeable_residual_blocks <- function(
   pairs,
   model_frame = NULL
 ) {
-  pairs <- normalize_supplied_exchangeable_pairs(pairs)
-  pair_labels <- attr(pairs, "pair_labels")
+  # 1. Normalize pair specifications and prepare exact and canonical block
+  # labels for selector lookup.
+  pair_specs <- normalize_supplied_exchangeable_pairs(pairs)
+  pair_labels <- attr(pair_specs, "pair_labels")
   term_labels <- vapply(blocks, `[[`, character(1L), "term")
   block_lookup <- list(
     term_labels = term_labels,
@@ -1280,37 +1369,39 @@ match_supplied_exchangeable_residual_blocks <- function(
     inventory = format_exchangeable_block_inventory(blocks)
   )
 
-  matched_pairs <- vector("list", length(pairs))
-  names(matched_pairs) <- names(pairs)
-  for (i in seq_along(pairs)) {
+  # 2. Resolve and validate each supplied pair independently.
+  matched_pairs <- vector("list", length(pair_specs))
+  names(matched_pairs) <- names(pair_specs)
+  for (i in seq_along(pair_specs)) {
     matched_pairs[[i]] <- match_one_supplied_exchangeable_pair(
       blocks,
-      pairs[[i]],
+      pair_specs[[i]],
       pair_labels[[i]],
       block_lookup,
       model_frame
     )
   }
 
-  paired_block_indices <- integer()
+  # 3. A fitted block can belong to only one requested transformation.
+  used_block_indices <- integer()
   for (pair in matched_pairs) {
-    paired_block_indices <- c(
-      paired_block_indices,
+    used_block_indices <- c(
+      used_block_indices,
       pair$shared_block_index,
       pair$difference_block_index
     )
   }
-  paired_block_indices <- paired_block_indices[!is.na(paired_block_indices)]
-  duplicated_block_indices <- unique(
-    paired_block_indices[duplicated(paired_block_indices)]
+  used_block_indices <- used_block_indices[!is.na(used_block_indices)]
+  reused_block_indices <- unique(
+    used_block_indices[duplicated(used_block_indices)]
   )
-  if (length(duplicated_block_indices) > 0L) {
+  if (length(reused_block_indices) > 0L) {
     reused_blocks <- paste0(
-      "`", term_labels[duplicated_block_indices], "`",
+      "`", term_labels[reused_block_indices], "`",
       collapse = ", "
     )
     reused_pair_assignments <- vapply(
-      duplicated_block_indices,
+      reused_block_indices,
       function(block_index) {
         pair_indices <- which(vapply(
           matched_pairs,
@@ -1331,7 +1422,7 @@ match_supplied_exchangeable_residual_blocks <- function(
     )
     stop(
       "Each random-effect block can occur in only one supplied pair. ",
-      "Reused block", if (length(duplicated_block_indices) > 1L) "s" else "",
+      "Reused block", if (length(reused_block_indices) > 1L) "s" else "",
       ": ", reused_blocks, ". Remove each reused block from all but one pair.",
       " Pair assignments: ", paste(reused_pair_assignments, collapse = "; "),
       ".",
@@ -1339,11 +1430,13 @@ match_supplied_exchangeable_residual_blocks <- function(
     )
   }
 
+  # 4. Warn when an omitted difference component cannot be checked against the
+  # fitted blocks because no indicator name was supplied.
   unverifiable_difference_warnings <- character()
-  for (i in seq_along(pairs)) {
+  for (i in seq_along(pair_specs)) {
     if (
-      is.null(pairs[[i]]$difference) &&
-        is.null(pairs[[i]]$difference_indicator)
+      is.null(pair_specs[[i]]$difference) &&
+        is.null(pair_specs[[i]]$difference_indicator)
     ) {
       unverifiable_difference_warnings <- c(
         unverifiable_difference_warnings,
@@ -1368,6 +1461,69 @@ match_supplied_exchangeable_residual_blocks <- function(
   return(matched_pairs)
 }
 
+# Covariance alignment --------------------------------------------------------
+
+# Align the shared and difference covariance arrays to one common term order.
+# Terms absent from either fitted component are represented by structural zeros.
+align_exchangeable_pair_covariances <- function(blocks, pair) {
+  # 1. Identify the fitted shared and difference blocks. One of the two may
+  # be absent because it was deliberately omitted from the fitted model.
+  block_indices <- c(
+    shared = pair$shared_block_index,
+    difference = pair$difference_block_index
+  )
+  fitted_block_indices <- block_indices[!is.na(block_indices)]
+
+  # All fitted blocks must contain the same number of covariance estimates:
+  # one for glmmTMB or one per posterior draw for brms.
+  n_estimates <- dim(
+    blocks[[fitted_block_indices[[1L]]]]$covariance
+  )[[1L]]
+
+  for (block_index in fitted_block_indices) {
+    if (dim(blocks[[block_index]]$covariance)[[1L]] != n_estimates) {
+      stop(
+        "Internal error: paired covariance blocks contain different numbers ",
+        "of estimates or posterior draws.",
+        call. = FALSE
+      )
+    }
+  }
+
+  # 2. The common term order is the union of terms from both blocks. It may be
+  # larger than either fitted block when each one contains unique terms.
+  terms <- pair$underlying_terms
+
+  # 3. Start both aligned covariance arrays at zero. Positions that have no
+  # fitted shared or difference term remain structural zeros.
+  empty_covariance <- array(
+    0,
+    dim = c(n_estimates, length(terms), length(terms)),
+    dimnames = list(NULL, terms, terms)
+  )
+  aligned <- list(
+    shared = empty_covariance,
+    difference = empty_covariance
+  )
+
+  # 4. Copy each fitted covariance block into its matching rows and columns in
+  # the common term order.
+  for (component in names(fitted_block_indices)) {
+    source_term_indices <- pair[[paste0(component, "_term_indices")]]
+    output_positions <- which(!is.na(source_term_indices))
+    source_positions <- source_term_indices[output_positions]
+    covariance <- blocks[[fitted_block_indices[[component]]]]$covariance
+
+    aligned[[component]][, output_positions, output_positions] <-
+      covariance[, source_positions, source_positions, drop = FALSE]
+  }
+  return(aligned)
+}
+
+# Backend adapters ------------------------------------------------------------
+
+# Extract normalized random-effect blocks and point-estimate covariances from
+# a fitted glmmTMB model.
 glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
   if (!requireNamespace("glmmTMB", quietly = TRUE)) {
     stop(
@@ -1379,9 +1535,9 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
 
   re_terms <- model$modelInfo$reTrms$cond
   re_structure <- model$modelInfo$reStruc$condReStruc
-  fitted_covariance <- glmmTMB::VarCorr(model)$cond
+  fitted_covariances <- glmmTMB::VarCorr(model)$cond
 
-  # These stored objects use the same normalized random-effect block order.
+  # These stored objects use corresponding backend block order.
   groups <- names(re_terms$cnms)
   term_labels <- names(re_structure)
   n_blocks <- length(re_structure)
@@ -1390,7 +1546,7 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
     length(re_terms$cnms) != n_blocks ||
       length(groups) != n_blocks ||
       length(term_labels) != n_blocks ||
-      length(fitted_covariance) != n_blocks
+      length(fitted_covariances) != n_blocks
   ) {
     stop(
       "Internal error: stored `glmmTMB` random-effect blocks could not be ",
@@ -1402,13 +1558,15 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
   }
 
   blocks <- vector("list", n_blocks)
+  # Each iteration aligns stored coefficient names with one fitted covariance
+  # matrix, restores coefficient order, and adds the leading estimate dimension.
   for (i in seq_len(n_blocks)) {
     coefficients <- unname(re_terms$cnms[[i]])
-    covariance_matrix <- fitted_covariance[[i]]
-    structure <- names(re_structure[[i]]$blockCode)
+    covariance_matrix <- fitted_covariances[[i]]
+    covariance_structure <- names(re_structure[[i]]$blockCode)
 
     if (
-      length(structure) != 1L ||
+      length(covariance_structure) != 1L ||
         anyDuplicated(coefficients) ||
         !setequal(rownames(covariance_matrix), coefficients) ||
         !setequal(colnames(covariance_matrix), coefficients)
@@ -1436,28 +1594,37 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
     blocks[[i]] <- list(
       group = groups[[i]],
       coefficients = coefficients,
-      correlated = !structure %in% c("diag", "homdiag"),
-      term = paste0(structure, "(", term_labels[[i]], ")"),
+      correlated = !covariance_structure %in% c("diag", "homdiag"),
+      term = paste0(covariance_structure, "(", term_labels[[i]], ")"),
       covariance = covariance_array
     )
   }
   return(list(backend = "glmmTMB", blocks = blocks))
 }
 
+# Recover readable coefficient names while preserving brms' stored covariance
+# order.
 brms_readable_exchangeable_coefficients <- function(block, model_frame) {
+  # `cn` records the coefficient order used by the stored covariance draws.
   block <- block[order(block$cn), , drop = FALSE]
-  stored <- unname(block$coef)
-  readable <- tryCatch(
+  stored_names <- unname(block$coef)
+
+  # model.matrix() restores names users recognize from their formula. Fall back
+  # to the stored names if the formula cannot be reconstructed safely.
+  readable_names <- tryCatch(
     colnames(stats::model.matrix(block$form[[1L]], data = model_frame)),
     error = function(e) NULL
   )
-  if (is.null(readable) || length(readable) != length(stored)) {
-    readable <- stored
+  if (is.null(readable_names) ||
+      length(readable_names) != length(stored_names)) {
+    readable_names <- stored_names
   }
-  readable[readable == "Intercept"] <- "(Intercept)"
-  return(list(stored = stored, readable = readable))
+  readable_names[readable_names == "Intercept"] <- "(Intercept)"
+  return(list(stored_names = stored_names, readable_names = readable_names))
 }
 
+# Extract normalized random-effect blocks and posterior covariance draws from a
+# fitted single-response brms model.
 brms_extract_exchangeable_residual_blocks <- function(model) {
   if (!requireNamespace("brms", quietly = TRUE)) {
     stop(
@@ -1475,8 +1642,8 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
   re_terms <- model$ranef
   # Only ordinary response-mean random effects have the covariance
   # interpretation needed here.
-  unsupported <- nzchar(re_terms$dpar) | nzchar(re_terms$nlpar)
-  if (any(unsupported)) {
+  unsupported_parameter_rows <- nzchar(re_terms$dpar) | nzchar(re_terms$nlpar)
+  if (any(unsupported_parameter_rows)) {
     warning(
       "Random effects for distributional or nonlinear parameters were ",
       "ignored; `exchangeable_rescov()` only processes ordinary response-mean ",
@@ -1484,7 +1651,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
       call. = FALSE
     )
   }
-  re_terms <- re_terms[!unsupported, , drop = FALSE]
+  re_terms <- re_terms[!unsupported_parameter_rows, , drop = FALSE]
   if (nrow(re_terms) == 0L) {
     return(list(backend = "brms", blocks = list()))
   }
@@ -1500,6 +1667,8 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     )
   }
 
+  # `id` identifies one fitted covariance block; `group` identifies its
+  # grouping factor. Several independent blocks may therefore share a group.
   re_blocks <- unname(split(re_terms, re_terms$id))
   for (block in re_blocks) {
     if (length(unique(block$gn)) != 1L) {
@@ -1513,7 +1682,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     }
   }
 
-  fitted_covariance <- brms::VarCorr(model, summary = FALSE)
+  fitted_covariances <- brms::VarCorr(model, summary = FALSE)
   model_frame <- stats::model.frame(model)
   blocks <- vector("list", length(re_blocks))
 
@@ -1525,13 +1694,14 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
       block,
       model_frame
     )
-    stored_coefficients <- coefficient_names$stored
-    coefficients <- coefficient_names$readable
+    stored_coefficients <- coefficient_names$stored_names
+    coefficients <- coefficient_names$readable_names
     stored_coefficients[stored_coefficients == "Intercept"] <- "(Intercept)"
 
     group <- block$group[[1L]]
-    group_covariance <- fitted_covariance[[group]]
-    if (is.null(group_covariance) || is.null(group_covariance$sd)) {
+    group_covariance_draws <- fitted_covariances[[group]]
+    if (is.null(group_covariance_draws) ||
+        is.null(group_covariance_draws$sd)) {
       stop(
         "Internal error: `brms` covariance draws were not found for a ",
         "random-effect block. This is unexpected for a supported model; please ",
@@ -1541,7 +1711,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
       )
     }
 
-    covariance_names <- colnames(group_covariance$sd)
+    covariance_names <- colnames(group_covariance_draws$sd)
     covariance_names[covariance_names == "Intercept"] <- "(Intercept)"
     if (anyDuplicated(covariance_names)) {
       stop(
@@ -1563,10 +1733,10 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
       )
     }
 
-    sd_draws <- group_covariance$sd[, coefficient_index, drop = FALSE]
-    if (is.null(group_covariance$cov)) {
-      # Uncorrelated blocks store SD draws only; reconstruct diagonal
-      # covariance draws.
+    sd_draws <- group_covariance_draws$sd[, coefficient_index, drop = FALSE]
+    if (is.null(group_covariance_draws$cov)) {
+      # When VarCorr() supplies only SD draws, reconstruct this block's
+      # diagonal covariance draws.
       covariance_array <- array(
         0,
         dim = c(nrow(sd_draws), length(coefficients), length(coefficients))
@@ -1575,7 +1745,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
         covariance_array[, j, j] <- sd_draws[, j]^2
       }
     } else {
-      covariance_array <- group_covariance$cov[
+      covariance_array <- group_covariance_draws$cov[
         , coefficient_index, coefficient_index,
         drop = FALSE
       ]
