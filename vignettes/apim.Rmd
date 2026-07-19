@@ -52,7 +52,7 @@ A vignette for non-Gaussian generalized models is planned.
 
 A conceptual example for distinguishable female-male dyads:
 
-```{r distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads. Intercepts $b_\mathrm{0}$, actor effects $a$, and partner effects $p$ can differ by the role of the outcome member (F and M), and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Female and male outcomes have separate intercepts. Female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. The female and male outcome residuals covary."}
+```{r distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads. Intercepts $b_\\mathrm{0}$, actor effects $a$, and partner effects $p$ can differ by the role of the outcome member (F and M), and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Female and male outcomes have separate intercepts. Female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. The female and male outcome residuals covary."}
 draw_apim_diagram("distinguishable")
 ```
 
@@ -363,7 +363,7 @@ draw_apim_diagram(
 The function can also recover the member-level implication of constraints that
 were imposed when fitting the model. For example, we can omit the entire shared block:
 
-```{r fit-cross-distinguishability}
+```{r fit-exchangeable-no-shared}
 apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
   satisfaction ~  1 +
     .i_communication_actor +
@@ -409,6 +409,8 @@ any of the two blocks to allow for several restraints. Speficications such
 as `diag(1 + x1 + x2 + x3 | coupleID) + homcs(0 + idiff + x3:idiff | coupleID)` 
 are possible, for instance. <!-- TODO: test if it really is -->
 
+Or something like like: 
+`(1 + x1 || coupleID) + (0 + x3:idiff | coupleID)` <!-- TODO: should we describe implications, or no? -->
 
 ### Interpretation
 
