@@ -41,11 +41,6 @@ Model](https://pascal-kueng.github.io/interdep/articles/dim.md), and
 Model](https://pascal-kueng.github.io/interdep/articles/dsm.md), see the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
-For an in-depth tutorial covering data preparation and model fitting,
-but also additional steps like diagnostics and assumption checks, see
-[Distinguishable and Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
-
 ## Prerequisites
 
 The basic data structure needed for `interdep` is a long data frame
@@ -53,11 +48,9 @@ where dyads are stacked on top of each other and both members of a dyad
 appear as separate rows.
 
 If your raw data are currently in wide format (for time or dyads or
-both), reshape them to this long structure before using
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
-See the [tidyr pivoting
-vignette](https://tidyr.tidyverse.org/articles/pivot.html) or the
-[`pivot_longer()`
+both), reshape them to this long structure first. See the [tidyr
+pivoting vignette](https://tidyr.tidyverse.org/articles/pivot.html) or
+the [`pivot_longer()`
 reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
 
 Roughly, the expected structure for `interdep` is:
@@ -214,15 +207,17 @@ print(cross_exchangeable_data, n = 4)
 ```
 
 The generated `.i_diff_assumed_exchangeable_arbitrary` contrast assigns
-`-1` and `1` to the two members of each exchangeable dyad. Its direction
-is arbitrary, and `seed` makes the assignment reproducible. When role
-compositions are available, each exchangeable composition receives its
-own contrast, such as `.i_diff_female_x_female_arbitrary`, which is `0`
-for all other compositions (del Rosario and West 2025). We use a fixed
-seed in the examples below for consistent results.
+`-1` and `1` to the two members of each exchangeable dyad (del Rosario
+and West 2025). Its direction is arbitrary, and `seed` makes the
+assignment reproducible.
 
-Alternatively, for more control, we can explicitly set dyad types to
-exchangeable:
+Refer to the [exchangeable APIM
+section](https://pascal-kueng.github.io/interdep/articles/apim.html#the-cross-sectional-gaussian-exchangeable-apim)
+for how to use these columns to specify an exchangeable dyadic APIM and
+recover the constrained actor-partner variance-covariance structure with
+[`interdep::exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md).
+
+Alternatively, we can explicitly set a dyad composition to exchangeable:
 
 ``` r
 
@@ -318,7 +313,7 @@ print(cross_dim_data, n = 4)
 #> #   .i_communication_within_dyad_dev <dbl>
 ```
 
-For distinguishable dyads, DSM columns can be requested. These
+For distinguishable dyads, DSM columns can be requested instead. These
 additionally require an explicit role order. The role order defines the
 direction of all DSM predictor differences and the DSM role contrast
 (Iida et al. 2018).
@@ -367,77 +362,6 @@ print(cross_dsm_data, n = 4)
 #> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
 #> #   .i_dsm_role_contrast <dbl>, .i_communication_dyad_mean_gmc <dbl>,
 #> #   .i_communication_within_dyad_diff <dbl>
-```
-
-## Incomplete dyads and missing roles
-
-By default,
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-stops when a dyad has only one observed member or when a member’s role
-cannot be resolved from the observed rows. These cases can also be
-dropped before validation continues.
-
-``` r
-
-incomplete_data <- tibble::tribble(
-  
-    ~coupleID, ~personID, ~gender,  ~satisfaction,
-    1,         1,         "female", 5.2,
-  # Note missing row
-    2,         3,         "female", 4.8,
-    2,         4,          NA,      4.9,
-    3,         5,         "female", 5.1,
-    3,         6,         "female", 5.0,
-    4,         7,         "female", 4.7,
-    4,         8,         "male",   4.6,
-  # Note missing row
-    5,         10,         NA,      3.0
-    
-  )
-
-incomplete_dropped_data <- prepare_interdep_data(
-  incomplete_data,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  incomplete_dyads = "drop",
-  missing_role = "drop",
-  seed = 123
-)
-#> Dropped 2 incomplete dyads, with IDs: 1, 5.
-#> Dropped 1 dyad with incomplete role information, with ID: 2.
-
-print(incomplete_dropped_data)
-#> # interdep data
-#> # Rows: 4 | Dyads: 2 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
-#> #
-#> # Dropped incomplete dyads: 2 dyads, with IDs: 1, 5
-#> #
-#> # Dropped dyads with incomplete role information: 1 dyad, with ID: 2
-#> #
-#> # Dyad compositions:
-#> # female_x_female exchangeable    1 dyad
-#> # female_x_male   distinguishable 1 dyad
-#> #
-#> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_{comp-role}    composition-role indicator columns
-#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
-#> #                        direction; 0 for distinguishable dyads or other
-#> #                        exchangeable compositions
-#> #
-#> # A tibble: 4 × 10
-#>   coupleID personID gender satisfaction .i_composition  .i_composition_role 
-#>      <dbl>    <dbl> <chr>         <dbl> <fct>           <fct>               
-#> 1        3        5 female          5.1 female_x_female female_x_female     
-#> 2        3        6 female          5   female_x_female female_x_female     
-#> 3        4        7 female          4.7 female_x_male   female_x_male_female
-#> 4        4        8 male            4.6 female_x_male   female_x_male_male  
-#> # ℹ 4 more variables: .i_is_female_x_female <dbl>,
-#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_diff_female_x_female_arbitrary <dbl>
 ```
 
 ## Intensive longitudinal dyadic data
@@ -670,10 +594,15 @@ print(mixed_cross_data, n = 4)
 #> #   .i_diff_male_x_male_arbitrary <dbl>
 ```
 
+Note that when role compositions are available, each exchangeable
+composition receives its own difference contrast, such as
+`.i_diff_female_x_female_arbitrary`, which is `0` for all other
+compositions (del Rosario and West 2025).
+
 We can use this data to model these dyad types as separate or in the
 same model. The [APIMs with Mixed Dyad Compositions
 vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md)
-shows both mixed-composition formulas and practical convergence notes.
+shows mixed-composition formulas and practical convergence notes.
 
 ### Keeping only selected dyad compositions (filtering)
 
@@ -681,8 +610,8 @@ Sometimes a mixed dataset contains dyad compositions that should not be
 part of a given analysis. Use `include_compositions` to keep only dyads
 whose *observed* composition matches the requested labels. The filtering
 happens before exchangeability constraints and pooling, so
-`set_exchangeable_compositions` and `pool_compositions` arguments can
-only refer to retained types of dyads.
+`set_exchangeable_compositions` and `pool_compositions` can only refer
+to retained dyad compositions.
 
 ``` r
 
@@ -727,13 +656,11 @@ print(mixed_cross_data_included, n = 4)
 
 ### Setting distinguishable dyads to be treated as exchangeable
 
-As mentioned earlier, omitting the `role` argument treated all dyads as
-one exchangeable composition, effectively pooling them.
-
-For more control, a distinguishable dyad composition in a mixed dataset
-can be treated as exchangeable. This specification keeps the
-differentiation between the kinds of dyads (e.g., `male-male`,
-`female-female`, and `male-female`).
+As mentioned earlier, a distinguishable dyad composition can be treated
+as exchangeable. In a mixed dyad composition dataset, this specification
+keeps the differentiation between the kinds of dyads (e.g., `male-male`,
+`female-female`, and `male-female`), as opposed to omitting role, which
+would pool all dyad compositions into one exchangeable composition.
 
 ``` r
 
@@ -780,9 +707,14 @@ print(mixed_cross_exchangeable_data, n = 4)
 ### Pooling different dyad compositions
 
 Sometimes for theoretical or practical reasons, we may want to pool
-different exchangeable dyad compositions and analyze them as if they
-were one. This also allows testing various constraints via model
-comparisons.
+selected exchangeable dyad compositions and analyze them as if they were
+one. Pooling can impose equality constraints among compositions. After
+fitting nested pooled and unpooled models to the same observations,
+these constraints can be tested with
+[`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md);
+see [Testing distinguishability in the APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability)
+for the model-comparison workflow.
 
 For instance, let’s pool `male-male` and `female-female` dyads and name
 them `same-sex` dyads:
@@ -838,8 +770,9 @@ print(mixed_cross_data_pooled)
 #> #   .i_diff_same_sex_arbitrary <dbl>
 ```
 
-Note that you cannot pool distinguishable dyads. To pool `female-male`
-with `male-male`, we first have to treat `female-male` as exchangeable:
+Note that you cannot pool distinguishable dyads. If we wanted to pool
+`female-male` with `male-male`, we would first have to treat
+`female-male` as exchangeable:
 
 ``` r
 

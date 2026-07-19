@@ -323,6 +323,7 @@ sign of
 but not its variance or the implied member-level covariance matrix. In
 longitudinal models, the same transformation applies separately to
 stable dyad-level and same-occasion dyad-level covariance blocks.</p>
+<!-- TODO: insert our new function -->
 <div class="section level4">
 <h4 id="exchangeable-random-slope-back-transformation">Extension to exchangeable random slopes<a class="anchor" aria-label="anchor" href="#exchangeable-random-slope-back-transformation"></a>
 </h4>
@@ -409,9 +410,9 @@ common member residual standard deviation and residual correlation are
 back-transformed from the fitted mean and difference components.
 </p>
 </div>
-<p><code><a href="../reference/compare_interdep_models.html">compare_interdep_models()</a></code> verifies that both models use
-equivalent original observations before performing the likelihood-ratio
-test:</p>
+<p><a href="../reference/compare_interdep_models.html"><code>compare_interdep_models()</code></a>
+verifies that both models use equivalent original observations before
+performing the likelihood-ratio test:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/compare_interdep_models.html">compare_interdep_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_exchangeable_model</span>,</span>
@@ -601,10 +602,10 @@ bridged.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
-<span><span class="co">#&gt; diaryday                  -0.005281   0.007643  -0.691    0.490    </span></span>
+<span><span class="co">#&gt; (Intercept)                4.213055   0.300180  14.035  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143976   0.035326   4.076 4.59e-05 ***</span></span>
+<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028761   0.035386   0.813    0.416    </span></span>
+<span><span class="co">#&gt; diaryday                  -0.005280   0.007643  -0.691    0.490    </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This model can be extended with contemporaneous actor and partner

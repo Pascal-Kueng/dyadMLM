@@ -45,7 +45,12 @@ names were used, or when terms were omitted to impose constraints. Terms
 found in only one selected block are represented as structural zeros in
 the other. `shared = NULL` or `difference = NULL` means that the whole
 corresponding block was absent—not that an existing fitted block should
-be ignored.
+be ignored. The function warns when `NULL` is used. This reports a
+constraint already imposed by the fitted model; the back-transformation
+does not impose it. An omitted difference block means that the members
+have identical random effects for those terms, whereas an omitted shared
+block means that they have equal-magnitude, opposite-sign random
+effects.
 
     pairs = list(
       shared = "(1 + time | coupleID)",

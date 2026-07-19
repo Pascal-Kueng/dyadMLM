@@ -89,7 +89,12 @@ and contain the same underlying terms.</p>
 were used, or when terms were omitted to impose constraints. Terms found in
 only one selected block are represented as structural zeros in the other.
 <code>shared = NULL</code> or <code>difference = NULL</code> means that the whole corresponding
-block was absent—not that an existing fitted block should be ignored.</p>
+block was absent—not that an existing fitted block should be ignored. The
+function warns when <code>NULL</code> is used. This reports a constraint already imposed
+by the fitted model; the back-transformation does not impose it. An omitted
+difference block means that the members have identical random effects for
+those terms, whereas an omitted shared block means that they have
+equal-magnitude, opposite-sign random effects.</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">pairs</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  shared <span class="op">=</span> <span class="st">"(1 + time | coupleID)"</span>,</span>
 <span>  difference <span class="op">=</span> <span class="st">"(0 + IDIFF + I(IDIFF * time) || coupleID)"</span>,</span>

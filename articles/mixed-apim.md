@@ -310,7 +310,11 @@ formal parameter comparisons can be made within one fitted model, and
 that models with different versions of pooling can be compared. For
 example, it can be tested whether pooling male-male and female-female
 couples as same-sex substantially worsens model fit, considering both
-the fixed effects and random-effects structure. Such model comparisons
+the fixed effects and random-effects structure. Such model comparisons,
+performed with
+[`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+as demonstrated in [Testing distinguishability in the APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability),
 require the restricted and unrestricted models to use the same
 observations and require the restricted model to be nested within the
 unrestricted model.

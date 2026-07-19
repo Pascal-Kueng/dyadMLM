@@ -102,9 +102,6 @@ structural equation modeling (SEM) approaches to dyadic data, see <span class="c
 <p>For the broader package workflow and an overview of the available
 model-specific vignettes, including the <a href="apim.html">Actor-Partner Interdependence Model</a>, <a href="mixed-apim.html">Mixed-Composition APIM</a>, <a href="dim.html">Dyad-Individual Model</a>, and <a href="dsm.html">Dyadic
 Score Model</a>, see the <a href="index.html">Overview</a>.</p>
-<p>For an in-depth tutorial covering data preparation and model fitting,
-but also additional steps like diagnostics and assumption checks, see <a href="https://pascal-kueng.github.io/05DyadicDataAnalysis/" class="external-link">Distinguishable
-and Exchangeable Dyads: Bayesian Multilevel Modelling</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
@@ -113,8 +110,7 @@ and Exchangeable Dyads: Bayesian Multilevel Modelling</a>.</p>
 data frame where dyads are stacked on top of each other and both members
 of a dyad appear as separate rows.</p>
 <p>If your raw data are currently in wide format (for time or dyads or
-both), reshape them to this long structure before using
-<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>. See the <a href="https://tidyr.tidyverse.org/articles/pivot.html" class="external-link">tidyr pivoting
+both), reshape them to this long structure first. See the <a href="https://tidyr.tidyverse.org/articles/pivot.html" class="external-link">tidyr pivoting
 vignette</a> or the <a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link"><code>pivot_longer()</code>
 reference</a>.</p>
 <p>Roughly, the expected structure for <code>interdep</code> is:</p>
@@ -362,13 +358,14 @@ exchangeable, omit the <code>role</code> argument:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>The generated <code>.i_diff_assumed_exchangeable_arbitrary</code>
 contrast assigns <code>-1</code> and <code>1</code> to the two members
-of each exchangeable dyad. Its direction is arbitrary, and
-<code>seed</code> makes the assignment reproducible. When role
-compositions are available, each exchangeable composition receives its
-own contrast, such as <code>.i_diff_female_x_female_arbitrary</code>,
-which is <code>0</code> for all other compositions <span class="citation">(del Rosario and West 2025)</span>. We use a fixed seed
-in the examples below for consistent results.</p>
-<p>Alternatively, for more control, we can explicitly set dyad types to
+of each exchangeable dyad <span class="citation">(del Rosario and West
+2025)</span>. Its direction is arbitrary, and <code>seed</code> makes
+the assignment reproducible.</p>
+<p>Refer to the <a href="apim.html#the-cross-sectional-gaussian-exchangeable-apim">exchangeable
+APIM section</a> for how to use these columns to specify an exchangeable
+dyadic APIM and recover the constrained actor-partner
+variance-covariance structure with <a href="../reference/exchangeable_rescov.html"><code>interdep::exchangeable_rescov()</code></a>.</p>
+<p>Alternatively, we can explicitly set a dyad composition to
 exchangeable:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
@@ -457,10 +454,10 @@ single exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>For distinguishable dyads, DSM columns can be requested. These
-additionally require an explicit role order. The role order defines the
-direction of all DSM predictor differences and the DSM role contrast
-<span class="citation">(Iida et al. 2018)</span>.</p>
+<p>For distinguishable dyads, DSM columns can be requested instead.
+These additionally require an explicit role order. The role order
+defines the direction of all DSM predictor differences and the DSM role
+contrast <span class="citation">(Iida et al. 2018)</span>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -506,74 +503,6 @@ direction of all DSM predictor differences and the DSM role contrast
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="incomplete-dyads-and-missing-roles">Incomplete dyads and missing roles<a class="anchor" aria-label="anchor" href="#incomplete-dyads-and-missing-roles"></a>
-</h2>
-<p>By default, <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code> stops when a dyad
-has only one observed member or when a member’s role cannot be resolved
-from the observed rows. These cases can also be dropped before
-validation continues.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">incomplete_data</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
-<span>  </span>
-<span>    <span class="op">~</span><span class="va">coupleID</span>, <span class="op">~</span><span class="va">personID</span>, <span class="op">~</span><span class="va">gender</span>,  <span class="op">~</span><span class="va">satisfaction</span>,</span>
-<span>    <span class="fl">1</span>,         <span class="fl">1</span>,         <span class="st">"female"</span>, <span class="fl">5.2</span>,</span>
-<span>  <span class="co"># Note missing row</span></span>
-<span>    <span class="fl">2</span>,         <span class="fl">3</span>,         <span class="st">"female"</span>, <span class="fl">4.8</span>,</span>
-<span>    <span class="fl">2</span>,         <span class="fl">4</span>,          <span class="cn">NA</span>,      <span class="fl">4.9</span>,</span>
-<span>    <span class="fl">3</span>,         <span class="fl">5</span>,         <span class="st">"female"</span>, <span class="fl">5.1</span>,</span>
-<span>    <span class="fl">3</span>,         <span class="fl">6</span>,         <span class="st">"female"</span>, <span class="fl">5.0</span>,</span>
-<span>    <span class="fl">4</span>,         <span class="fl">7</span>,         <span class="st">"female"</span>, <span class="fl">4.7</span>,</span>
-<span>    <span class="fl">4</span>,         <span class="fl">8</span>,         <span class="st">"male"</span>,   <span class="fl">4.6</span>,</span>
-<span>  <span class="co"># Note missing row</span></span>
-<span>    <span class="fl">5</span>,         <span class="fl">10</span>,         <span class="cn">NA</span>,      <span class="fl">3.0</span></span>
-<span>    </span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="va">incomplete_dropped_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
-<span>  <span class="va">incomplete_data</span>,</span>
-<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  incomplete_dyads <span class="op">=</span> <span class="st">"drop"</span>,</span>
-<span>  missing_role <span class="op">=</span> <span class="st">"drop"</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Dropped 2 incomplete dyads, with IDs: 1, 5.</span></span>
-<span><span class="co">#&gt; Dropped 1 dyad with incomplete role information, with ID: 2.</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">incomplete_dropped_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 4 | Dyads: 2 | Intensive longitudinal: no</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; </span># <span style="color: #BB0000;">Dropped incomplete dyads:</span> 2 dyads, with IDs: 1, 5</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # <span style="color: #BB0000;">Dropped dyads with incomplete role information:</span> 1 dyad, with ID: 2</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female exchangeable    1 dyad</span></span>
-<span><span class="co">#&gt; # female_x_male   distinguishable 1 dyad</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary</span></span>
-<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 10</span></span></span>
-<span><span class="co">#&gt;   coupleID personID gender satisfaction .i_composition  .i_composition_role </span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        3        5 female          5.1 female_x_female female_x_female     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        3        6 female          5   female_x_female female_x_female     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        4        7 female          4.7 female_x_male   female_x_male_female</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        8 male            4.6 female_x_male   female_x_male_male  </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_female_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="intensive-longitudinal-dyadic-data">Intensive longitudinal dyadic data<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dyadic-data"></a>
 </h2>
 <p><code>example_dyadic_ILD</code> is a simulated intensive longitudinal
@@ -581,7 +510,7 @@ dyadic dataset. Each dyad has repeated observations over
 <code>diaryday</code>, with one row per person-day.</p>
 <p>To prepare intensive longitudinal data, pass the <code>time</code>
 variable to <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -662,7 +591,7 @@ contemporaneous versions. Lagging respects the dyad and member
 structure, matches observations at exactly <code>time - 1</code>, and
 does not bridge missing occasions.</p>
 <p>Brief example:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -753,7 +682,7 @@ compositions in the same data object: distinguishable female-male dyads
 and exchangeable female-female and male-male dyads <span class="citation">(Bolger et al. 2025)</span>.</p>
 <p>Let’s have <code>interdep</code> infer the compositions
 automatically:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -792,10 +721,15 @@ automatically:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_male_x_male &lt;dbl&gt;, .i_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Note that when role compositions are available, each exchangeable
+composition receives its own difference contrast, such as
+<code>.i_diff_female_x_female_arbitrary</code>, which is <code>0</code>
+for all other compositions <span class="citation">(del Rosario and West
+2025)</span>.</p>
 <p>We can use this data to model these dyad types as separate or in the
 same model. The <a href="mixed-apim.html">APIMs with Mixed Dyad
-Compositions vignette</a> shows both mixed-composition formulas and
-practical convergence notes.</p>
+Compositions vignette</a> shows mixed-composition formulas and practical
+convergence notes.</p>
 <div class="section level3">
 <h3 id="keeping-only-selected-dyad-compositions-filtering">Keeping only selected dyad compositions (filtering)<a class="anchor" aria-label="anchor" href="#keeping-only-selected-dyad-compositions-filtering"></a>
 </h3>
@@ -804,9 +738,9 @@ be part of a given analysis. Use <code>include_compositions</code> to
 keep only dyads whose <em>observed</em> composition matches the
 requested labels. The filtering happens before exchangeability
 constraints and pooling, so <code>set_exchangeable_compositions</code>
-and <code>pool_compositions</code> arguments can only refer to retained
-types of dyads.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+and <code>pool_compositions</code> can only refer to retained dyad
+compositions.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_included</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -848,14 +782,13 @@ types of dyads.</p>
 <div class="section level3">
 <h3 id="setting-distinguishable-dyads-to-be-treated-as-exchangeable">Setting distinguishable dyads to be treated as exchangeable<a class="anchor" aria-label="anchor" href="#setting-distinguishable-dyads-to-be-treated-as-exchangeable"></a>
 </h3>
-<p>As mentioned earlier, omitting the <code>role</code> argument treated
-all dyads as one exchangeable composition, effectively pooling them.</p>
-<p>For more control, a distinguishable dyad composition in a mixed
-dataset can be treated as exchangeable. This specification keeps the
-differentiation between the kinds of dyads (e.g.,
-<code>male-male</code>, <code>female-female</code>, and
-<code>male-female</code>).</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>As mentioned earlier, a distinguishable dyad composition can be
+treated as exchangeable. In a mixed dyad composition dataset, this
+specification keeps the differentiation between the kinds of dyads
+(e.g., <code>male-male</code>, <code>female-female</code>, and
+<code>male-female</code>), as opposed to omitting role, which would pool
+all dyad compositions into one exchangeable composition.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -899,13 +832,17 @@ differentiation between the kinds of dyads (e.g.,
 <h3 id="pooling-different-dyad-compositions">Pooling different dyad compositions<a class="anchor" aria-label="anchor" href="#pooling-different-dyad-compositions"></a>
 </h3>
 <p>Sometimes for theoretical or practical reasons, we may want to pool
-different exchangeable dyad compositions and analyze them as if they
-were one. This also allows testing various constraints via model
-comparisons.</p>
+selected exchangeable dyad compositions and analyze them as if they were
+one. Pooling can impose equality constraints among compositions. After
+fitting nested pooled and unpooled models to the same observations,
+these constraints can be tested with <a href="../reference/compare_interdep_models.html"><code>compare_interdep_models()</code></a>;
+see <a href="apim.html#testing-distinguishability">Testing
+distinguishability in the APIM vignette</a> for the model-comparison
+workflow.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
 dyads:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -953,10 +890,10 @@ dyads:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .i_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_male &lt;dbl&gt;, .i_is_same_sex &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_same_sex_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Note that you cannot pool distinguishable dyads. To pool
-<code>female-male</code> with <code>male-male</code>, we first have to
-treat <code>female-male</code> as exchangeable:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>Note that you cannot pool distinguishable dyads. If we wanted to pool
+<code>female-male</code> with <code>male-male</code>, we would first
+have to treat <code>female-male</code> as exchangeable:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
