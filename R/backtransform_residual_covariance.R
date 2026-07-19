@@ -1339,47 +1339,29 @@ match_supplied_exchangeable_residual_blocks <- function(
     )
   }
 
-  omitted_block_warnings <- character()
+  unverifiable_difference_warnings <- character()
   for (i in seq_along(pairs)) {
-    if (is.null(pairs[[i]]$difference)) {
-      omitted_block_warnings <- c(
-        omitted_block_warnings,
+    if (
+      is.null(pairs[[i]]$difference) &&
+        is.null(pairs[[i]]$difference_indicator)
+    ) {
+      unverifiable_difference_warnings <- c(
+        unverifiable_difference_warnings,
         paste0(
-          "You set ",
           paste0(substr(pair_labels[[i]], 1L, nchar(pair_labels[[i]]) - 1L),
             "$difference`"),
-          " to `NULL`. Ensure that the ",
-          "fitted model actually excluded the entire difference random-effect ",
-          "block; otherwise, the back-transformation is not meaningful. Here, ",
-          "`NULL` tells `exchangeable_rescov()` that the fitted model constrained ",
-          "this block's variances and covariances to zero; the function does not ",
-          "impose this constraint. For a difference block, this means that the ",
-          "two members have identical random effects for these terms."
-        )
-      )
-    }
-    if (is.null(pairs[[i]]$shared)) {
-      omitted_block_warnings <- c(
-        omitted_block_warnings,
-        paste0(
-          "You set ",
-          paste0(substr(pair_labels[[i]], 1L, nchar(pair_labels[[i]]) - 1L),
-            "$shared`"),
-          " to `NULL`. Ensure that the fitted ",
-          "model actually excluded the entire shared random-effect block; ",
-          "otherwise, the back-transformation is not meaningful. Here, `NULL` ",
-          "tells `exchangeable_rescov()` that the fitted model constrained this ",
-          "block's variances and covariances to zero; the function does not ",
-          "impose this constraint. For a shared block, this means that the two ",
-          "members have equal-magnitude, opposite-sign random effects for these ",
-          "terms."
+          " is `NULL`, and no `difference_indicator` was supplied, so the ",
+          "fitted model could not be checked for a corresponding difference ",
+          "block. The block will be treated as omitted. Use `NULL` only if ",
+          "that block was omitted from the fitted model; otherwise, the ",
+          "back-transformed result is incorrect."
         )
       )
     }
   }
-  if (length(omitted_block_warnings) > 0L) {
+  if (length(unverifiable_difference_warnings) > 0L) {
     warning(
-      paste(omitted_block_warnings, collapse = "\n"),
+      paste(unverifiable_difference_warnings, collapse = "\n"),
       call. = FALSE
     )
   }

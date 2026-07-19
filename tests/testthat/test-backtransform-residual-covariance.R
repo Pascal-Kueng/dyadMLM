@@ -552,10 +552,10 @@ test_that("supplied exact pairs support wholly omitted blocks", {
       ),
       model_frame = data.frame(other = 1:2)
     ),
-    "identical random effects for these terms",
+    "Use `NULL` only if that block was omitted from the fitted model",
     fixed = TRUE
   )
-  expect_warning(
+  expect_no_warning(
     difference_only <- match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
@@ -565,9 +565,7 @@ test_that("supplied exact pairs support wholly omitted blocks", {
         ),
         difference_indicator = marker
       )
-    ),
-    "equal-magnitude, opposite-sign random effects",
-    fixed = TRUE
+    )
   )
   matched <- c(shared_only, difference_only)
 
@@ -590,7 +588,7 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
     rescov_test_block("coupleID", "time", "shared time"),
     rescov_test_block("coupleID", "IDIFF:support", "difference support")
   )
-  expect_warning(
+  expect_no_warning(
     matched <- match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
@@ -605,9 +603,7 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
           difference_indicator = "IDIFF"
         )
       )
-    ),
-    "fitted model actually excluded the entire difference random-effect block",
-    fixed = TRUE
+    )
   )
   expect_length(matched, 2L)
 
