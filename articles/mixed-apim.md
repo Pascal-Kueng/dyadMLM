@@ -37,12 +37,12 @@ imply the within-dyad correlation.
     #> 9     male_x_male diff_variance  1.05625
 
 We first prepare the data with
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md),
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md),
 which identifies all observed dyad compositions.
 
 ``` r
 
-mixed_cross_data <- prepare_interdep_data(
+mixed_cross_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
@@ -91,7 +91,7 @@ variances while allowing their within-dyad covariance to be estimated
 The returned `.i_diff_*` variables contain `-1` and `1` for the
 corresponding exchangeable composition and `0` for all other
 compositions.
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
 creates this structure automatically. The [APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
 derives the resulting covariance matrix and shows how to back-transform
@@ -312,7 +312,7 @@ example, it can be tested whether pooling male-male and female-female
 couples as same-sex substantially worsens model fit, considering both
 the fixed effects and random-effects structure. Such model comparisons,
 performed with
-[`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+[`interdep::compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
 as demonstrated in [Testing distinguishability in the APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability),
 require the restricted and unrestricted models to use the same
@@ -328,7 +328,7 @@ as a common effect plus composition deviations.
 The [regular APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability)
 introduces
-[`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+[`interdep::compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
 by comparing a distinguishable APIM with its exchangeable restriction.
 Here, we use the same approach for a mixed-composition constraint. We
 treat female-male dyads as exchangeable and pool them with male-male
@@ -338,7 +338,7 @@ justification.
 
 ``` r
 
-mixed_cross_data_constrained <- prepare_interdep_data(
+mixed_cross_data_constrained <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
@@ -368,7 +368,7 @@ mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
   , data = mixed_cross_data_constrained
 )
 
-compare_interdep_models(
+interdep::compare_interdep_models(
   mixed_cross_gaussian_model_constrained,
   mixed_cross_gaussian_model
 )
@@ -410,7 +410,7 @@ Aside from the pooling, we prepare the data in the same way, now adding
 
 ``` r
 
-mixed_ild_data <- prepare_interdep_data(
+mixed_ild_data <- interdep::prepare_interdep_data(
   example_dyadic_ILD_mixed,
   group = coupleID,
   member = personID,

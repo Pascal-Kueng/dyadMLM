@@ -1,7 +1,10 @@
 # Recover member-level residual covariance from exchangeable random-effect blocks
 
-Back-transforms paired shared and difference random-effect covariance
-matrices to the covariance structure of two exchangeable members.
+Back-transforms covariance matrices from paired shared and
+member-difference random-effect blocks to the covariance structure of
+two exchangeable members. For the model specification, derivation, and
+interpretation, see the [exchangeable APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure).
 
 ## Usage
 
@@ -17,28 +20,27 @@ exchangeable_rescov(model, pairs = NULL)
 
 - pairs:
 
-  `NULL` (default) for automatic block matching, one named block pair,
-  or an outer list of named block pairs. A pair has these fields:
+  `NULL` (default) for automatic block matching. Otherwise, supply one
+  block-pair specification or a list of block-pair specifications. Each
+  pair contains:
 
-  - `shared`: the exact shared random-effect term from the fitted model
-    formula, or `NULL` if the entire shared block was omitted when
+  - `shared`: a single string naming the shared random-effect term
+    copied from the fitted model formula or an equivalent selector (see
+    Details), or `NULL` if the entire shared block was omitted when
     fitting;
 
-  - `difference`: the exact difference random-effect term, or `NULL` if
-    the entire difference block was omitted when fitting;
+  - `difference`: a single string naming the member-difference
+    random-effect term or an equivalent selector, or `NULL` if the
+    entire difference block was omitted;
 
   - `difference_indicator`: the exact name of the difference-indicator
-    column used in `difference`, regardless of what the column is
-    called. If `difference = NULL`, name the column that defines (or
-    would define) the opposite signs for this pair in the original data;
+    column used in `difference`. It is required when `difference`
+    selects a block and optional when `difference = NULL`;
 
-  - `shared_indicator`: optionally, the exact shared
-    composition-indicator column. It defaults to `"1"`, meaning that an
-    ordinary random intercept is the shared block and every fitted row
-    belongs to this pair.
-
-  At least one of `shared` and `difference` must name a fitted block.
-  See Details for examples and the meaning of `NULL`.
+  - `shared_indicator`: the exact shared composition-indicator column,
+    needed only for composition-specific blocks in mixed-dyad models. It
+    defaults to `"1"`, meaning that every fitted row belongs to the pair
+    and an ordinary intercept is the shared intercept coordinate.
 
 ## Value
 
@@ -51,80 +53,68 @@ reproduce the matched random-effect terms.
 
 Automatic matching recognizes exact `.i_diff_*_arbitrary` coefficient
 names and first looks for the corresponding `.i_is_*` shared block. It
-remains deliberately conservative: the two blocks must use the same
-grouping factor and contain the same underlying terms. Supply `pairs`
-for custom indicator names, ambiguous matches, or models that
-deliberately omit blocks or terms.
+requires the two blocks to use the same grouping factor and the same
+underlying terms. Most models fitted with `interdep`-generated columns
+therefore need only:
 
-Here “shared” and “difference” describe random-effect coordinates. If
-`u_shared` moves both members together and `u_difference` moves them in
-opposite directions, the member effects are
-`u1 = u_shared + u_difference` and `u2 = u_shared - u_difference`. These
-coordinates are distinct from dyad-mean and within-dyad member-deviation
-predictor columns, even though both use the same mean/difference logic.
+    result <- interdep::exchangeable_rescov(model)
 
-The selected shared and difference coordinates must be separate
-random-effect blocks, so their covariance is fixed to zero by the fitted
-model. On the member scale, that constraint produces equal member
-variances while still allowing a nonzero covariance between members.
-This is the exchangeable actor-partner covariance structure that the
-function recovers; the function does not assume that the members' random
-effects are independent.
+Supply `pairs` when automatic matching is ambiguous or when a model uses
+custom indicators, multiple covariance levels, or deliberately omitted
+blocks or terms. To specify one pair with a custom difference indicator:
 
-A custom difference-indicator name is supplied literally. For example,
-if the model used a `-1/+1` column named `hallelujah`:
-
-    pairs = list(
-      shared = "(1 + time | coupleID)",
-      difference =
-        "(0 + hallelujah + I(hallelujah * time) || coupleID)",
-      difference_indicator = "hallelujah"
-    )
-
-A composition-specific pair also names its shared indicator:
-
-    pairs = list(
-      shared = "(0 + SAMESEX + SAMESEX:time | coupleID)",
-      difference =
-        "(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)",
-      difference_indicator = "IDIFF_SAMESEX",
-      shared_indicator = "SAMESEX"
-    )
-
-For multiple pairs, wrap the pair specifications in an outer list.
-Naming the outer elements makes later errors easier to locate:
-
-    pairs = list(
-      stable = list(
-        shared = "(1 | coupleID)",
-        difference = "(0 + hallelujah | coupleID)",
-        difference_indicator = "hallelujah"
-      ),
-      occasion = list(
-        shared = "(1 | coupleID:time)",
-        difference = "(0 + hallelujah | coupleID:time)",
-        difference_indicator = "hallelujah"
+    result <- interdep::exchangeable_rescov(
+      model,
+      pairs = list(
+        shared = "(1 + time | coupleID)",
+        difference = "(0 + my_diff + I(my_diff * time) | coupleID)",
+        difference_indicator = "my_diff"
       )
     )
 
-Model-style equivalents are recognized across backends, such as
-`(1 + time | group)` and `us(1 + time | group)`, or `(0 + x || group)`
-and `diag(0 + x | group)`. Difference slopes may be written as
-`hallelujah:time`, `time:hallelujah`, `I(hallelujah * time)`, or
-`I(time * hallelujah)`. More complex arithmetic inside
-[`I()`](https://rdrr.io/r/base/AsIs.html) is not interpreted.
+For multiple covariance levels, wrap the pairs in an outer list. For
+example, in a Gaussian `glmmTMB` model fitted with `dispformula = ~ 0`,
+this call recovers both the stable dyad-level random-intercept
+covariance and the same-occasion partner residual covariance:
 
-When the fitted model frame retains the indicator columns,
-`difference_indicator` must use unnormalised `-1/+1` coding where
-`shared_indicator` is one and must be zero elsewhere. A column omitted
-entirely from the fitted formula cannot be recovered from either
-supported backend, so its coding cannot be checked.
+    result <- interdep::exchangeable_rescov(
+      model,
+      pairs = list(
+        dyad = list(
+          shared = "(1 | coupleID)",
+          difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
+          difference_indicator =
+            ".i_diff_assumed_exchangeable_arbitrary"
+        ),
+        same_occasion = list(
+          shared = "(1 | coupleID:diaryday)",
+          difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+          difference_indicator =
+            ".i_diff_assumed_exchangeable_arbitrary"
+        )
+      )
+    )
+
+The random-effect terms may be copied exactly from the model formula.
+Equivalent backend syntax is also recognized, such as
+`(1 + time | group)` and `us(1 + time | group)`, or `(0 + x || group)`
+and `diag(0 + x | group)`. A custom difference-indicator name is
+supplied literally. Difference slopes may be written in either
+interaction order or as a simple product inside
+[`I()`](https://rdrr.io/r/base/AsIs.html).
+
+When a difference block is supplied and the fitted model frame retains
+the indicator columns, `difference_indicator` must assign `-1` and `+1`
+to the two arbitrary member positions consistently within each dyad. For
+composition-specific blocks, it must be zero where `shared_indicator` is
+zero.
 
 ## What omitted blocks and terms mean
 
 `exchangeable_rescov()` only describes constraints that were already
 imposed when the model was fitted. It does not remove a block, set a
-variance to zero, or otherwise constrain the supplied model.
+variance to zero, or otherwise constrain the supplied model. Describe
+only the structure that was actually fitted.
 
 If a term occurs in only one selected block, the function represents the
 missing coordinate as a structural zero:
@@ -136,16 +126,26 @@ missing coordinate as a structural zero:
   two members have equal-magnitude, opposite-sign random effects for
   that term.
 
-Setting `difference = NULL` or `shared = NULL` makes the corresponding
-rule apply to every term in the other block. `NULL` therefore means that
-the whole block was absent from the fitted model; it must never be used
-merely to ignore an existing block. The function warns whenever `NULL`
-is supplied and errors if it can identify a compatible fitted block that
-contradicts the claimed omission.
+Setting `difference = NULL` or `shared = NULL` applies the corresponding
+rule to the entire omitted block. This is valid only when that block is
+truly absent from the fitted model. Do not use `NULL` merely to ignore
+an existing block; the resulting back-transformation would be incorrect.
+
+See the constrained-block example in the [exchangeable APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks).
 
 ## Backend note
 
 In Gaussian `brms` models, cross-sectional and same-occasion partner
-residual dependence is usually represented directly with
+residual dependence should usually be represented directly with
 `unstr(time = member, gr = pair_id)`. The blocks handled here remain
-relevant for higher-level shared and difference random effects.
+relevant only for higher-level shared and difference random effects.
+
+## See also
+
+The [exchangeable APIM
+vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
+for the model specification, covariance derivation, and
+constrained-block example. Run
+[`vignette("apim", package = "interdep")`](https://pascal-kueng.github.io/interdep/articles/apim.md)
+to open the installed version.

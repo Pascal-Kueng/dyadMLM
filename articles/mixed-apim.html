@@ -98,10 +98,11 @@ and <code>diff_variance</code> imply the within-dyad correlation.</p>
 <span><span class="co">#&gt; 7     male_x_male          mean  4.20000</span></span>
 <span><span class="co">#&gt; 8     male_x_male  sum_variance  0.63375</span></span>
 <span><span class="co">#&gt; 9     male_x_male diff_variance  1.05625</span></span></code></pre>
-<p>We first prepare the data with <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>,
-which identifies all observed dyad compositions.</p>
+<p>We first prepare the data with
+<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code>, which identifies all
+observed dyad compositions.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -147,7 +148,7 @@ variances while allowing their within-dyad covariance to be estimated
 <p>The returned <code>.i_diff_*</code> variables contain <code>-1</code>
 and <code>1</code> for the corresponding exchangeable composition and
 <code>0</code> for all other compositions.
-<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code> creates this structure
+<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code> creates this structure
 automatically. The <a href="apim.html#exchangeable-residual-structure">APIM vignette</a>
 derives the resulting covariance matrix and shows how to back-transform
 the sum and difference variances to the usual equal-variance
@@ -388,7 +389,7 @@ that models with different versions of pooling can be compared. For
 example, it can be tested whether pooling male-male and female-female
 couples as same-sex substantially worsens model fit, considering both
 the fixed effects and random-effects structure. Such model comparisons,
-performed with <a href="../reference/compare_interdep_models.html"><code>compare_interdep_models()</code></a>
+performed with <a href="../reference/compare_interdep_models.html"><code>interdep::compare_interdep_models()</code></a>
 as demonstrated in <a href="apim.html#testing-distinguishability">Testing distinguishability
 in the APIM vignette</a>, require the restricted and unrestricted models
 to use the same observations and require the restricted model to be
@@ -401,7 +402,7 @@ as a common effect plus composition deviations.</p>
 <h3 id="model-comparison-with-a-restricted-model">Model comparison with a restricted model<a class="anchor" aria-label="anchor" href="#model-comparison-with-a-restricted-model"></a>
 </h3>
 <p>The <a href="apim.html#testing-distinguishability">regular APIM
-vignette</a> introduces <a href="../reference/compare_interdep_models.html"><code>compare_interdep_models()</code></a>
+vignette</a> introduces <a href="../reference/compare_interdep_models.html"><code>interdep::compare_interdep_models()</code></a>
 by comparing a distinguishable APIM with its exchangeable restriction.
 Here, we use the same approach for a mixed-composition constraint. We
 treat female-male dyads as exchangeable and pool them with male-male
@@ -409,7 +410,7 @@ dyads, while modeling female-female dyads separately. In an applied
 analysis, these constraints would require a theoretical or empirical
 justification.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mixed_cross_data_constrained</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">mixed_cross_data_constrained</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -439,7 +440,7 @@ justification.</p>
 <span>  , data <span class="op">=</span> <span class="va">mixed_cross_data_constrained</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/compare_interdep_models.html">compare_interdep_models</a></span><span class="op">(</span></span>
+<span><span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_interdep_models.html">compare_interdep_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">mixed_cross_gaussian_model_constrained</span>,</span>
 <span>  <span class="va">mixed_cross_gaussian_model</span></span>
 <span><span class="op">)</span></span>
@@ -478,7 +479,7 @@ the same observations.</p>
 <p>Aside from the pooling, we prepare the data in the same way, now
 adding <code>time</code> and a predictor:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mixed_ild_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">mixed_ild_data</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD_mixed</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>

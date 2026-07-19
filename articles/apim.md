@@ -5,9 +5,12 @@
 library(interdep)
 ```
 
-This vignette focuses on the cross-sectional and intensive longitudinal
-Actor-Partner Interdependence model for distinguishable and exchangeable
-dyads.
+> This vignette is under construction and preliminary. Please check back
+> soon!
+
+This vignette focuses on the Gaussian cross-sectional and intensive
+longitudinal Actor-Partner Interdependence model for distinguishable and
+exchangeable dyads.
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the [Mixed-Composition
@@ -18,10 +21,13 @@ Model](https://pascal-kueng.github.io/interdep/articles/dim.md), and
 Model](https://pascal-kueng.github.io/interdep/articles/dsm.md), see the
 [Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
 
-> This vignette is under construction and preliminary. Please check back
-> soon!
+A vignette for non-Gaussian generalized models is planned.
 
-## The cross sectional Gaussian distinguishable APIM
+## Cross sectional APIMs
+
+### The distinguishable APIM
+
+A conceptual example for distinguishable female-male dyads:
 
 ![Path diagram for a distinguishable cross-sectional APIM. Female and
 male outcomes have separate intercepts. Female and male predictors each
@@ -30,27 +36,12 @@ member's outcome. The female and male outcome residuals
 covary.](apim_files/figure-html/distinguishable-apim-diagram-1.svg)
 
 Conceptual cross-sectional APIM for distinguishable female-male dyads.
-Intercepts, actor effects, and partner effects can differ by the role of
-the outcome member, and the two outcome residuals covary within dyads.
+Intercepts $`b_\mathrm{0}`$, actor effects $`a`$, and partner effects
+$`p`$ can differ by the role of the outcome member (F and M), and the
+two outcome residuals covary within dyads.
 
-Here, $`b_{\mathrm{actor},\mathrm{female}}`$ and
-$`b_{\mathrm{actor},\mathrm{male}}`$ are the actor effects on the female
-and male outcomes, whereas $`b_{\mathrm{partner},\mathrm{female}}`$ and
-$`b_{\mathrm{partner},\mathrm{male}}`$ are the corresponding partner
-effects. The diagram abbreviates these paths as $`a_{\mathrm{F}}`$,
-$`a_{\mathrm{M}}`$, $`p_{\mathrm{F}}`$, and $`p_{\mathrm{M}}`$, with the
-subscript identifying the outcome member. In the text and equations,
-fixed coefficients use $`b`$ and write out actor and partner explicitly.
-The corresponding intercepts are $`b_{0,\mathrm{female}}`$ and
-$`b_{0,\mathrm{male}}`$. All four paths can differ in a distinguishable
-APIM.
-
-The conceptual diagram places both members in one SEM-style path model.
-The same model is fitted in long format with one outcome row per member.
-In the individual-level representation below, the female predictor is
-the actor predictor for the female outcome and the partner predictor for
-the male outcome; the male predictor changes roles in the same way. The
-coefficient subscript identifies the outcome member.
+For univariate MLM software like `glmmTMB`, this model is fitted in long
+format with one outcome row per member, which can be visualized as:
 
 ![Two-panel path diagram for a distinguishable female-male APIM. The
 female and male outcomes have separate intercepts. In the female outcome
@@ -69,12 +60,53 @@ Intercepts, actor coefficients, and partner coefficients may differ by
 outcome role, and the two member residuals may have different variances
 and covary.
 
+#### Residual random-effects structure
+
+For a distinguishable female-male dyad, the two members can have
+different residual variances. The within-dyad residual covariance block
+(shared across dyads) is:
+
+``` math
+\operatorname{Cov}
+\begin{pmatrix}
+\epsilon_{Fi} \\
+\epsilon_{Mi}
+\end{pmatrix}
+= \boldsymbol{\Sigma}_{\epsilon}
+= \begin{bmatrix}
+\sigma_{\epsilon_F}^{2}
+& \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M} \\
+\rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M}
+& \sigma_{\epsilon_M}^{2}
+\end{bmatrix}
+```
+
+And the full residual covariance matrix for all dyads (first three
+shown) is then block-diagonal:
+
+``` math
+\boldsymbol{\Sigma}_{\mathrm{model}}
+= \begin{bmatrix}
+\boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \boldsymbol{0} & \cdots \\
+\boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \cdots \\
+\boldsymbol{0} & \boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \cdots \\
+\vdots & \vdots & \vdots & \ddots
+\end{bmatrix}
+```
+
+This structure is estimated with an unstructured random-effects block
+such as
+`us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)`
+and `dispformula = ~ 0`.
+
+#### Fitting the distinguishable APIM with glmmTMB
+
 We first prepare the example data with
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md):
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md):
 
 ``` r
 
-apim_distinguishable_data <- prepare_interdep_data(
+apim_distinguishable_data <- interdep::prepare_interdep_data(
   data = example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -82,6 +114,35 @@ apim_distinguishable_data <- prepare_interdep_data(
   predictors = communication,
   model_type = "apim"
 )
+
+print(apim_distinguishable_data, n=4)
+#> # interdep data
+#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Structure: group = coupleID, member = personID, role = gender
+#> #
+#> # Dyad compositions:
+#> # female_x_male distinguishable 95 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                        values
+#> #
+#> # A tibble: 190 × 11
+#>   personID coupleID gender communication satisfaction .i_composition
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
+#> 1        1        1 female          4.79         4.37 female_x_male 
+#> 2        2        1 male            3.80         2.34 female_x_male 
+#> 3        3        2 female          2.91         2.44 female_x_male 
+#> 4        4        2 male            6.51         6.08 female_x_male 
+#> # ℹ 186 more rows
+#> # ℹ 5 more variables: .i_composition_role <fct>,
+#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
+#> #   .i_communication_actor <dbl>, .i_communication_partner <dbl>
 ```
 
 The generated `.i_*` columns can be used directly in the model formula.
@@ -107,7 +168,7 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
-    # This is glmmTMB-specific syntax! lme4 and brms use different syntax.
+    # This is glmmTMB-specific syntax! `brms` uses different syntax.
     us(0 +
          .i_is_female_x_male_female +
          .i_is_female_x_male_male
@@ -117,7 +178,49 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
   , family = gaussian()
   , data = apim_distinguishable_data
 )
+
+summary(apim_distinguishable_model)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
+#>     .i_is_female_x_male_female:.i_communication_actor + .i_is_female_x_male_male:.i_communication_actor +  
+#>     .i_is_female_x_male_female:.i_communication_partner + .i_is_female_x_male_male:.i_communication_partner +  
+#>     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
+#>         coupleID)
+#> Dispersion:                    ~0
+#> Data: apim_distinguishable_data
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>     589.5     618.0    -285.7     571.5       167 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups   Name                       Variance Std.Dev. Corr  
+#>  coupleID .i_is_female_x_male_female 1.311    1.145          
+#>           .i_is_female_x_male_male   1.792    1.339    -0.19 
+#> Number of obs: 176, groups:  coupleID, 88
+#> 
+#> Conditional model:
+#>                                                     Estimate Std. Error z value
+#> .i_is_female_x_male_female                          -4.36874    0.59416  -7.353
+#> .i_is_female_x_male_male                            -6.03808    0.69452  -8.694
+#> .i_is_female_x_male_female:.i_communication_actor    1.67170    0.10089  16.570
+#> .i_is_female_x_male_male:.i_communication_actor      1.80495    0.10562  17.090
+#> .i_is_female_x_male_female:.i_communication_partner  0.24930    0.09035   2.759
+#> .i_is_female_x_male_male:.i_communication_partner    0.25453    0.11793   2.158
+#>                                                     Pr(>|z|)    
+#> .i_is_female_x_male_female                          1.94e-13 ***
+#> .i_is_female_x_male_male                             < 2e-16 ***
+#> .i_is_female_x_male_female:.i_communication_actor    < 2e-16 ***
+#> .i_is_female_x_male_male:.i_communication_actor      < 2e-16 ***
+#> .i_is_female_x_male_female:.i_communication_partner  0.00579 ** 
+#> .i_is_female_x_male_male:.i_communication_partner    0.03090 *  
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
+
+The estimated coefficients map as follows:
 
 ![Fitted distinguishable APIM. Female and male intercepts -4.37 and
 -6.04; actor effects 1.67 and 1.80; partner effects 0.25 and 0.25;
@@ -128,31 +231,10 @@ Fitted cross-sectional distinguishable APIM for the example data. Fixed
 effects, residual standard deviations, and the residual correlation are
 extracted from the fitted model.
 
-### Residual random-effects structure
+### The exchangeable APIM
 
-For a distinguishable female-male dyad, the two members can have
-different residual variances. Their residual covariance matrix is
-
-``` math
-\boldsymbol{\Sigma}_{\mathrm{FM}} =
-\begin{pmatrix}
-\sigma_{\mathrm{FM,F}}^2 & c_{\mathrm{FM}} \\
-c_{\mathrm{FM}} & \sigma_{\mathrm{FM,M}}^2
-\end{pmatrix}.
-```
-
-Rows and columns are ordered female, male.
-
-With one outcome row per member, this structure is estimated with an
-unstructured random-effects block such as
-`us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)`
-and `dispformula = ~ 0`. The two indicator columns select the female and
-male rows, respectively. The `us()` block estimates both variances and
-their covariance.
-
-### Interpretation
-
-## The cross-sectional Gaussian exchangeable APIM
+Conceptually, the exchangeable APIM constrains several of the effects to
+be equal:
 
 ![Path diagram for an exchangeable cross-sectional APIM. Both outcomes
 have the same intercept. Each member's predictor has the same actor
@@ -161,22 +243,14 @@ member's outcome. The two outcome residuals have equal variances and
 covary.](apim_files/figure-html/exchangeable-apim-diagram-1.svg)
 
 Conceptual cross-sectional APIM for exchangeable dyads. The two members
-share one intercept, one actor effect, and one partner effect; their
-outcome residuals have equal variances and covary within dyads.
+share one intercept, one actor effect, and one partner effect. Their
+outcome residuals have equal variances, yet still covary within dyads.
 
 Because the member labels are arbitrary, swapping members 1 and 2 does
-not change the model. The two actor paths therefore share the
-coefficient $`b_{\mathrm{actor}}`$, and the two partner paths share
-$`b_{\mathrm{partner}}`$. The members also share the intercept $`b_0`$.
-The two residual variances are constrained to be equal, while their
-covariance is estimated. The diagram abbreviates the shared actor and
-partner effects as $`a`$ and $`p`$.
+**not** change the model.
 
-The individual-level representation makes the long-format model
-explicit. For each outcome row, that member’s own predictor is the actor
-predictor and the other member’s predictor is the partner predictor.
-Swapping the arbitrary member labels swaps the two panels but does not
-change either coefficient.
+To estimate this model in a univariate MLM framework, we can draw a
+conceptual diagram as such:
 
 ![Two-panel path diagram for an exchangeable APIM. Both outcomes have
 the same intercept. For arbitrary member 1, X 1 is the actor predictor
@@ -192,125 +266,254 @@ intercept. Each member’s own predictor has the shared actor effect, and
 the other member’s predictor has the shared partner effect. The two
 residual variances are equal and the residuals may covary.
 
-### Assumptions
+#### Modeling the residual random-effects structure
 
-### Residual random-effects structure and back-transformation
+Currently, glmmTMB and brms allow us to specify the relevant residual
+correlation structure, but any additional random effects structure that
+includes more than just a random intercept presents a problem:
 
-For an exchangeable dyad, `interdep` generates an arbitrary
-member-difference column, named `.i_diff_*`, that is `+1` for one member
-and `-1` for the other. The exchangeable residual structure is
-represented by two separate random-effects terms: a shared dyad random
-intercept and a random coefficient for this difference column (del
-Rosario and West 2025). If their random effects are denoted by
-$`u_{\mathrm{mean},j}`$ and $`u_{\mathrm{diff},j}`$, the two members
-receive
+For instance, in glmmTMB the expression
+`homcs(0 + arbitrary_member_1 + arbitrary_member_2 | coupleID)` would
+achieve in setting both residual variances equal while still estimating
+a correlation between the residuals. However, if we want to model
+intensive longitudinal data, like we do below, using
+`homcs(0 + arbitrary_member_1 + arbitrary_member_2 + time:arbitrary_member1 + arbitrary_member_2 | coupleID)`
+would impose a single variance shared by both intercepts *and* both time
+slopes.
+`homcs(0 + arbitrary_member_1 + arbitrary_member_2) + homcs(time:arbitrary_member1 + arbitrary_member_2 | coupleID)`
+would produce the correct variance restrictions, but does then not model
+a correlation between slopes and intercepts anymore.
 
-``` math
-r_{1j} = u_{\mathrm{mean},j} + u_{\mathrm{diff},j}, \qquad
-r_{2j} = u_{\mathrm{mean},j} - u_{\mathrm{diff},j}.
+Therefore, we introduce a solution that works for residuals and other
+random effect terms regardless of slopes. Following del Rosario and West
+(2025),
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+generates an arbitrary member-difference column, named `.i_diff_*`, that
+is `+1` for one member and `-1` for the other. The exchangeable residual
+structure is represented by two separate random-effects terms: a shared
+dyad random intercept and a random coefficient for this difference
+column.
+
+We will now fit the model and then use the
+[`interdep::exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md)
+function that “rotates” the structure back to the often more
+interpretable actor-partner residual-covariance matrix we are used to.
+
+#### Fitting the exchangeable APIM with glmmTMB
+
+We use the same dataset as before, but do not distinguish males and
+females, so we can test distinguishability later. Another option here
+would be to omit roles, especially if there is no clear role in the
+data.
+
+``` r
+
+apim_exchangeable_data <- interdep::prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  set_exchangeable_compositions = "female-male"
+)
+
+print(apim_exchangeable_data, n = 4)
+#> # interdep data
+#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Structure: group = coupleID, member = personID, role = gender
+#> #
+#> # Dyad compositions:
+#> # female_x_male exchangeable (set by user) 95 dyads
+#> #
+#> # Added columns:
+#> #   .i_composition       inferred dyad composition
+#> #   .i_composition_role  composition-specific member role
+#> #   .i_is_{comp-role}    composition-role indicator columns
+#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
+#> #                        direction; 0 for distinguishable dyads or other
+#> #                        exchangeable compositions
+#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                        values
+#> #
+#> # A tibble: 190 × 11
+#>   personID coupleID gender communication satisfaction .i_composition
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
+#> 1        1        1 female          4.79         4.37 female_x_male 
+#> 2        2        1 male            3.80         2.34 female_x_male 
+#> 3        3        2 female          2.91         2.44 female_x_male 
+#> 4        4        2 male            6.51         6.08 female_x_male 
+#> # ℹ 186 more rows
+#> # ℹ 5 more variables: .i_composition_role <fct>, .i_is_female_x_male <dbl>,
+#> #   .i_diff_female_x_male_arbitrary <dbl>, .i_communication_actor <dbl>,
+#> #   .i_communication_partner <dbl>
 ```
 
-Because the shared and difference effects are fitted in separate
-random-effects terms, they are uncorrelated. Writing their variances as
-$`\sigma_{\mathrm{mean}}^2`$ and $`\sigma_{\mathrm{diff}}^2`$ gives
+We then use the columns to fit the model as follows:
 
-``` math
-\begin{pmatrix}
-u_{\mathrm{mean},j} \\
-u_{\mathrm{diff},j}
-\end{pmatrix}
-\sim
-\mathcal{N}
-\left[
-\begin{pmatrix}
-0 \\
-0
-\end{pmatrix},
-\begin{pmatrix}
-\sigma_{\mathrm{mean}}^2 & 0 \\
-0 & \sigma_{\mathrm{diff}}^2
-\end{pmatrix}
-\right].
+``` r
+
+apim_exchangeable_model <- glmmTMB::glmmTMB(
+  satisfaction ~ 
+    
+    # Pooled single intercept
+    1 +
+    
+    # Pooled single actor and partner effects
+    .i_communication_actor +
+    .i_communication_partner +
+    
+    # Residual variance covariance matrix via the shared/difference
+    # specification in two uncorrelated blocks
+    us(1 | coupleID) +
+    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = apim_exchangeable_data
+)
+
+summary(apim_exchangeable_model)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  
+#>     us(1 | coupleID) + us(0 + .i_diff_female_x_male_arbitrary |      coupleID)
+#> Dispersion:                    ~0
+#> Data: apim_exchangeable_data
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>     604.0     619.8    -297.0     594.0       171 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups     Name                            Variance Std.Dev.
+#>  coupleID   (Intercept)                     0.6346   0.7966  
+#>  coupleID.1 .i_diff_female_x_male_arbitrary 1.1532   1.0739  
+#> Number of obs: 176, groups:  coupleID, 88
+#> 
+#> Conditional model:
+#>                          Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)               -5.2330     0.4103 -12.754  < 2e-16 ***
+#> .i_communication_actor     1.7578     0.0819  21.461  < 2e-16 ***
+#> .i_communication_partner   0.2379     0.0819   2.904  0.00368 ** 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-The implied member-level residual covariance matrix is therefore
+We use the
+[`interdep::exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md)
+to recover the interpretable variance-covariance matrix:
 
-``` math
-\boldsymbol{\Sigma}_{\mathrm{exch}} =
-\begin{pmatrix}
-\sigma_{\mathrm{mean}}^2 + \sigma_{\mathrm{diff}}^2 &
-\sigma_{\mathrm{mean}}^2 - \sigma_{\mathrm{diff}}^2 \\
-\sigma_{\mathrm{mean}}^2 - \sigma_{\mathrm{diff}}^2 &
-\sigma_{\mathrm{mean}}^2 + \sigma_{\mathrm{diff}}^2
-\end{pmatrix}.
+``` r
+
+backtransformed <- interdep::exchangeable_rescov(apim_exchangeable_model)
+
+# residual variance-covariance matrix
+backtransformed$varcov
+#> NULL
+
+# residual standard deviation and correlation matrix
+backtransformed$sdcor
+#> NULL
 ```
 
-Thus, both members have the same residual variance
-$`v = \sigma_{\mathrm{mean}}^2 + \sigma_{\mathrm{diff}}^2`$, their
-covariance is
-$`c = \sigma_{\mathrm{mean}}^2 - \sigma_{\mathrm{diff}}^2`$, and their
-residual correlation is $`c/v`$. Conversely, the shared and difference
-variances can be recovered from a member-level variance and covariance
-as
+The output can now be mapped as follows:
 
-``` math
-\sigma_{\mathrm{mean}}^2 = \frac{v + c}{2}, \qquad
-\sigma_{\mathrm{diff}}^2 = \frac{v - c}{2}.
+![Fitted exchangeable APIM. Intercept -5.23, actor effect 1.76, partner
+effect 0.24, common residual SD 1.34, and residual correlation
+-0.29.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.svg)
+
+Fitted cross-sectional exchangeable APIM for the example data. The
+common member residual standard deviation and residual correlation are
+back-transformed from the fitted mean and difference components.
+
+##### Fitted constraints and omitted blocks
+
+The function can also recover the member-level implication of
+constraints that were imposed when fitting the model. For example, we
+can omit the entire shared block:
+
+``` r
+
+apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
+  satisfaction ~  1 +
+    .i_communication_actor +
+    .i_communication_partner +
+    
+    # Residual variance covariance matrix
+    # omitting the us(1 | coupleID) block
+    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = apim_exchangeable_data
+)
+
+summary(apim_exchangeable_model)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  
+#>     us(1 | coupleID) + us(0 + .i_diff_female_x_male_arbitrary |      coupleID)
+#> Dispersion:                    ~0
+#> Data: apim_exchangeable_data
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>     604.0     619.8    -297.0     594.0       171 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups     Name                            Variance Std.Dev.
+#>  coupleID   (Intercept)                     0.6346   0.7966  
+#>  coupleID.1 .i_diff_female_x_male_arbitrary 1.1532   1.0739  
+#> Number of obs: 176, groups:  coupleID, 88
+#> 
+#> Conditional model:
+#>                          Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)               -5.2330     0.4103 -12.754  < 2e-16 ***
+#> .i_communication_actor     1.7578     0.0819  21.461  < 2e-16 ***
+#> .i_communication_partner   0.2379     0.0819   2.904  0.00368 ** 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-For example, a random-intercept variance of 1.2 and a difference
-variance of 0.3 imply a member variance of 1.5 and a covariance between
-partners of 0.9.
+Since matching is now not automatically possible anymore, we need to
+tell the function where both blocks are. Since we completely omitted one
+block, we tell the function:
 
-Reversing the arbitrary `+1/-1` assignment changes the sign of
-$`u_{\mathrm{diff},j}`$ but not its variance or the implied member-level
-covariance matrix. In longitudinal models, the same transformation
-applies separately to stable dyad-level and same-occasion dyad-level
-covariance blocks.
+``` r
 
-#### Extension to exchangeable random slopes
+backtransformed <- interdep::exchangeable_rescov(
+  apim_exchangeable_model_no_shared, 
+  pairs = list(
+    shared = NULL,
+    difference = "us(0 + .i_diff_female_x_male_arbitrary | coupleID)",
+    difference_indicator =".i_diff_female_x_male_arbitrary"
+  )
+)
 
-The same shared/difference back-transformation applies to random slopes
-(del Rosario and West 2025). For example, let $`u_{\mathrm{actor},j}`$
-denote the shared actor random slope for dyad $`j`$ and
-$`\widetilde{u}_{\mathrm{actor},j}`$ the corresponding `.i_diff_*`
-random slope. The tilde marks random coefficients from the
-member-difference block. The actor slopes for the members assigned `+1`
-and `-1` are
+# residual variance-covariance matrix
+backtransformed$varcov
+#> NULL
 
-``` math
-u_{\mathrm{actor},1j}
-= u_{\mathrm{actor},j} + \widetilde{u}_{\mathrm{actor},j},
-\qquad
-u_{\mathrm{actor},2j}
-= u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
+# residual standard deviation and correlation matrix
+backtransformed$sdcor
+#> NULL
 ```
 
-Because the shared and `.i_diff_*` blocks are fitted as separate
-random-effects terms, they are independent. Therefore,
+If we fit a model that allows us to also specify higher-level random
+effect terms, such as an intensive longitudinal model, we can also omit
+individual terms from any of the two blocks to allow for several
+restraints. Speficications such as
+`diag(1 + x1 + x2 + x3 | coupleID) + homcs(0 + idiff + x3:idiff | coupleID)`
+are possible, for instance.
 
-``` math
-\operatorname{Var}(u_{\mathrm{actor},1j})
-= \operatorname{Var}(u_{\mathrm{actor},2j})
-= \operatorname{Var}(u_{\mathrm{actor},j})
-+ \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}),
-```
+Or something like like:
+`(1 + x1 || coupleID) + (0 + x3:idiff | coupleID)`
 
-and
+#### Interpretation
 
-``` math
-\operatorname{Cov}(u_{\mathrm{actor},1j}, u_{\mathrm{actor},2j})
-= \operatorname{Var}(u_{\mathrm{actor},j})
-- \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}).
-```
-
-The same calculation applies to the partner slopes and random
-intercepts. Any covariances among the random intercept, actor slope, and
-partner slope can be back-transformed in the same way.
-
-### Interpretation
-
-## Testing distinguishability
+### Testing distinguishability
 
 Distinguishability can be evaluated by comparing a full model in which
 the two roles may differ with a restricted exchangeable model. This
@@ -322,51 +525,13 @@ The two parameterizations require different generated columns. The full
 distinguishable model was fitted above, so we now prepare the same
 original observations as exchangeable:
 
-``` r
-
-apim_exchangeable_data <- prepare_interdep_data(
-  example_dyadic_crosssectional,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = communication,
-  set_exchangeable_compositions = "female-male"
-)
-```
-
-The exchangeable model constrains the corresponding fixed effects and
-residual variances to be equal across members:
-
-``` r
-
-apim_exchangeable_model <- glmmTMB::glmmTMB(
-  satisfaction ~ 0 +
-    .i_is_female_x_male +
-    .i_communication_actor +
-    .i_communication_partner +
-    us(0 + .i_is_female_x_male | coupleID) +
-    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
-  dispformula = ~ 0,
-  family = gaussian(),
-  data = apim_exchangeable_data
-)
-```
-
-![Fitted exchangeable APIM. Intercept -5.23, actor effect 1.76, partner
-effect 0.24, common residual SD 1.34, and residual correlation
--0.29.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.svg)
-
-Fitted cross-sectional exchangeable APIM for the example data. The
-common member residual standard deviation and residual correlation are
-back-transformed from the fitted mean and difference components.
-
-[`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+[`interdep::compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:
 
 ``` r
 
-compare_interdep_models(
+interdep::compare_interdep_models(
   apim_exchangeable_model,
   apim_distinguishable_model
 )
@@ -391,9 +556,9 @@ whether the models are mathematically nested; that remains a modeling
 requirement. The usual chi-squared reference distribution may be
 unreliable when a tested variance parameter lies on its boundary.
 
-## Intensive longitudinal APIMs
+### Intensive longitudinal APIMs
 
-### Concurrent ILD Gaussian APIM for distinguishable dyads
+#### Concurrent ILD Gaussian APIM for distinguishable dyads
 
 Observed person means used to construct the between-person (`cbp`)
 predictors can be unreliable when each member contributes few occasions,
@@ -450,7 +615,7 @@ ild_distinguishable_model <- glmmTMB(
 summary(ild_distinguishable_model)
 ```
 
-### Concurrent ILD Gaussian APIM for exchangeable dyads
+#### Concurrent ILD Gaussian APIM for exchangeable dyads
 
 Following del Rosario and West, the stable dyad covariance can be
 represented using sum-and-difference random effects (del Rosario and
@@ -458,7 +623,47 @@ West 2025). In longitudinal Gaussian APIMs fitted with `glmmTMB`, the
 same parameterization can be extended to the dyad-occasion level to
 represent same-occasion residual dependence.
 
-### Current limitations of dyadic ILD designs in R
+##### Extension to exchangeable random slopes
+
+The same shared/difference back-transformation applies to random slopes
+(del Rosario and West 2025). For example, let $`u_{\mathrm{actor},j}`$
+denote the shared actor random slope for dyad $`j`$ and
+$`\widetilde{u}_{\mathrm{actor},j}`$ the corresponding `.i_diff_*`
+random slope. The tilde marks random coefficients from the
+member-difference block. The actor slopes for the members assigned `+1`
+and `-1` are
+
+``` math
+u_{\mathrm{actor},1j}
+= u_{\mathrm{actor},j} + \widetilde{u}_{\mathrm{actor},j},
+\qquad
+u_{\mathrm{actor},2j}
+= u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
+```
+
+Because the shared and `.i_diff_*` blocks are fitted as separate
+random-effects terms, they are independent. Therefore,
+
+``` math
+\operatorname{Var}(u_{\mathrm{actor},1j})
+= \operatorname{Var}(u_{\mathrm{actor},2j})
+= \operatorname{Var}(u_{\mathrm{actor},j})
++ \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}),
+```
+
+and
+
+``` math
+\operatorname{Cov}(u_{\mathrm{actor},1j}, u_{\mathrm{actor},2j})
+= \operatorname{Var}(u_{\mathrm{actor},j})
+- \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}).
+```
+
+The same calculation applies to the partner slopes and random
+intercepts. Any covariances among the random intercept, actor slope, and
+partner slope can be back-transformed in the same way.
+
+#### Current limitations of dyadic ILD designs in R
 
 Concurrent dyadic ILD models can adjust for a time trend and account for
 stable dyadic dependence and same-occasion partner dependence. They do
@@ -476,7 +681,7 @@ interface used here, and open-source support for dyadic dynamic models
 remains very limited (del Rosario and West 2025). Within open-source R,
 such a model generally requires custom TMB or Stan code.
 
-#### Dynamic models
+##### Dynamic models
 
 A **practical alternative** is a model with lagged outcomes, especially
 when carryover or temporal dynamics are part of the research question
@@ -486,7 +691,7 @@ conditional on the members’ prior outcomes.
 
 By adding the outcome to `predictors` and selecting it with
 `lag_predictors`,
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
 returns lag-1 raw and within-person scores alongside the contemporaneous
 scores. Between-person scores are not lagged because they describe
 stable differences between members.
@@ -496,7 +701,7 @@ through the `lag_predictors` argument:
 
 ``` r
 
-ild_apim_data_dynamic <- prepare_interdep_data(
+ild_apim_data_dynamic <- interdep::prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -631,7 +836,7 @@ Or return to the
 
 A vignette with non-Gaussian generalized APIM examples is planned.
 
-## References
+### References
 
 Asparouhov, Tihomir, and Bengt Muthén. 2020. “Comparison of Models for
 the Analysis of Intensive Longitudinal Data.” *Structural Equation

@@ -31,7 +31,7 @@ female minus male.
 
 ``` r
 
-cross_dsm_data <- prepare_interdep_data(
+cross_dsm_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -319,7 +319,7 @@ of the differences, but not the substantive model.
 
 ``` r
 
-cross_dsm_data_inverted <- prepare_interdep_data(
+cross_dsm_data_inverted <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,

@@ -37,7 +37,7 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-dis
 
 One way to make this assumption in `interdep` at the data-preparation
 step is to omit `role` from
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
 This treats all dyads as the same exchangeable composition. Passing a
 `role` is also possible when it leads to exactly one exchangeable
 composition (e.g., only female-female dyads). Otherwise, refer to the
@@ -48,7 +48,7 @@ single exchangeable dyad composition.
 
 ``` r
 
-cross_exchangeable_data <- prepare_interdep_data(
+cross_exchangeable_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -99,7 +99,7 @@ print(cross_exchangeable_data, n = 4)
 ```
 
 For the exchangeable random-effects specification,
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
 creates a member-difference contrast `.i_diff_*`, coded as `+1` for one
 partner and `-1` for the other. Because these member labels are
 arbitrary, setting `seed` makes their assignment reproducible.
@@ -299,7 +299,7 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-dis
 
 The same model can be written in APIM form. Since we have requested both
 sets of variables from
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md),
+[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md),
 we can fit one directly. For more guidance on APIM specifications and
 different models, see the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md).
@@ -528,7 +528,7 @@ raw dyad-occasion mean and within-dyad member deviation.
 
 ``` r
 
-ild_exchangeable_data <- prepare_interdep_data(
+ild_exchangeable_data <- interdep::prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -961,7 +961,7 @@ of the outcome:
 
 ``` r
 
-ild_exchangeable_data_dynamic <- prepare_interdep_data(
+ild_exchangeable_data_dynamic <- interdep::prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,

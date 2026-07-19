@@ -103,14 +103,14 @@ a substantive assumption (see <a href="apim.html#testing-distinguishability">Tes
 in the APIM vignette</a>).</p>
 <p>One way to make this assumption in <code>interdep</code> at the
 data-preparation step is to omit <code>role</code> from
-<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>. This treats all dyads as the same
-exchangeable composition. Passing a <code>role</code> is also possible
-when it leads to exactly one exchangeable composition (e.g., only
-female-female dyads). Otherwise, refer to the <a href="getting-started.html">Getting Started vignette</a> for how to
+<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code>. This treats all dyads as
+the same exchangeable composition. Passing a <code>role</code> is also
+possible when it leads to exactly one exchangeable composition (e.g.,
+only female-female dyads). Otherwise, refer to the <a href="getting-started.html">Getting Started vignette</a> for how to
 filter, pool, and constrain dyad compositions to obtain a single
 exchangeable dyad composition.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -159,11 +159,11 @@ exchangeable dyad composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_partner &lt;dbl&gt;, .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For the exchangeable random-effects specification,
-<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code> creates a member-difference
-contrast <code>.i_diff_*</code>, coded as <code>+1</code> for one
-partner and <code>-1</code> for the other. Because these member labels
-are arbitrary, setting <code>seed</code> makes their assignment
-reproducible.</p>
+<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code> creates a
+member-difference contrast <code>.i_diff_*</code>, coded as
+<code>+1</code> for one partner and <code>-1</code> for the other.
+Because these member labels are arbitrary, setting <code>seed</code>
+makes their assignment reproducible.</p>
 <div class="section level3">
 <h3 id="example-dim-model">Example DIM Model<a class="anchor" aria-label="anchor" href="#example-dim-model"></a>
 </h3>
@@ -347,9 +347,10 @@ in the APIM vignette</a>.</p>
 <h3 id="demonstrating-model-equivalence-to-apim">Demonstrating model equivalence to APIM<a class="anchor" aria-label="anchor" href="#demonstrating-model-equivalence-to-apim"></a>
 </h3>
 <p>The same model can be written in APIM form. Since we have requested
-both sets of variables from <code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>, we can
-fit one directly. For more guidance on APIM specifications and different
-models, see the <a href="apim.html">Actor-Partner Interdependence Model
+both sets of variables from
+<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code>, we can fit one directly.
+For more guidance on APIM specifications and different models, see the
+<a href="apim.html">Actor-Partner Interdependence Model
 vignette</a>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -581,7 +582,7 @@ cautiously <span class="citation">(Gottfredson 2019)</span>.</p>
 construct only the raw dyad-occasion mean and within-dyad member
 deviation.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ild_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">ild_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -979,7 +980,7 @@ models</a>.</p>
 <p>Brief example to obtain lagged raw and within-person centered
 versions of the outcome:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ild_exchangeable_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">ild_exchangeable_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
