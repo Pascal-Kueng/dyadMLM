@@ -10,13 +10,14 @@ exchangeable_rescov(model, pairs = NULL)
 \item{model}{A fitted \code{glmmTMB} or single-response \code{brmsfit} model.}
 
 \item{pairs}{\code{NULL} (default) for automatic block matching. Otherwise, supply
-one named block pair or a named list of block pairs. Each pair contains:
+one block-pair list or a list of block-pair lists. Each pair contains:
 \itemize{
-\item \code{shared}: the shared random-effect term copied from the fitted model
-formula, an equivalent selector (see Details), or \code{NULL} if the entire
-shared block was omitted when fitting;
-\item \code{difference}: the member-difference random-effect term, an equivalent
-selector, or \code{NULL} if the entire difference block was omitted;
+\item \code{shared}: one character string containing the shared random-effect term
+copied from the fitted model formula or an equivalent selector (see
+Details), or \code{NULL} if the entire shared block was omitted when fitting;
+\item \code{difference}: one character string containing the member-difference
+random-effect term or an equivalent selector, or \code{NULL} if the entire
+difference block was omitted;
 \item \code{difference_indicator}: the exact name of the difference-indicator
 column used in \code{difference}. It is required when \code{difference} selects a
 block and optional when \code{difference = NULL};
@@ -50,18 +51,29 @@ only:
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(model)
 }\if{html}{\out{</div>}}
 
-Here, a shared random effect moves both members together, whereas a
-member-difference random effect moves them in opposite directions. Thus,
-\code{u1 = u_shared + u_difference} and
-\code{u2 = u_shared - u_difference}. The difference indicator must be assigned
-\code{-1} and \code{+1} arbitrarily to the two members and remain stable within dyads.
+The shared block moves both members together; the member-difference block
+moves them in opposite directions. The APIM vignette derives the resulting
+member-level covariance.
 
 Supply \code{pairs} when automatic matching is ambiguous or when a model uses
 custom indicators, multiple covariance levels, or deliberately omitted
-blocks or terms. For example, in a Gaussian \code{glmmTMB} model fitted with
-\code{dispformula = ~ 0}, this call recovers both the stable dyad-level
-random-intercept covariance and the same-occasion partner residual
-covariance:
+blocks or terms. To specify one pair with a custom difference indicator:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(
+  model,
+  pairs = list(
+    shared = "(1 + time | coupleID)",
+    difference =
+      "(0 + hallelujah + I(hallelujah * time) || coupleID)",
+    difference_indicator = "hallelujah"
+  )
+)
+}\if{html}{\out{</div>}}
+
+For multiple covariance levels, wrap the pairs in an outer list. For example,
+in a Gaussian \code{glmmTMB} model fitted with \code{dispformula = ~ 0}, this call
+recovers both the stable dyad-level random-intercept covariance and the
+same-occasion partner residual covariance:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(
   model,
@@ -90,11 +102,11 @@ name is supplied literally. Difference slopes may be written in either
 interaction order or as a simple product inside \code{I()}.
 
 When a difference block is supplied and the fitted model frame retains the
-indicator columns, \code{difference_indicator} must use unscaled \code{-1/+1}
-coding where
-\code{shared_indicator} is one and must be zero elsewhere. A column omitted
-entirely from the fitted formula cannot be recovered from either supported
-backend, so its coding cannot be checked.
+indicator columns, \code{difference_indicator} must assign \code{-1} and \code{+1} to the
+two arbitrary member positions consistently within each dyad. For
+composition-specific blocks, it must be zero where \code{shared_indicator} is
+zero. A column omitted entirely from the fitted formula cannot be recovered
+from either supported backend, so its coding cannot be checked.
 }
 \section{What omitted blocks and terms mean}{
 

@@ -7,13 +7,14 @@
 #'
 #' @param model A fitted `glmmTMB` or single-response `brmsfit` model.
 #' @param pairs `NULL` (default) for automatic block matching. Otherwise, supply
-#'   one named block pair or a named list of block pairs. Each pair contains:
+#'   one block-pair list or a list of block-pair lists. Each pair contains:
 #'
-#'   - `shared`: the shared random-effect term copied from the fitted model
-#'     formula, an equivalent selector (see Details), or `NULL` if the entire
-#'     shared block was omitted when fitting;
-#'   - `difference`: the member-difference random-effect term, an equivalent
-#'     selector, or `NULL` if the entire difference block was omitted;
+#'   - `shared`: one character string containing the shared random-effect term
+#'     copied from the fitted model formula or an equivalent selector (see
+#'     Details), or `NULL` if the entire shared block was omitted when fitting;
+#'   - `difference`: one character string containing the member-difference
+#'     random-effect term or an equivalent selector, or `NULL` if the entire
+#'     difference block was omitted;
 #'   - `difference_indicator`: the exact name of the difference-indicator
 #'     column used in `difference`. It is required when `difference` selects a
 #'     block and optional when `difference = NULL`;
@@ -35,18 +36,30 @@
 #' result <- interdep::exchangeable_rescov(model)
 #' ```
 #'
-#' Here, a shared random effect moves both members together, whereas a
-#' member-difference random effect moves them in opposite directions. Thus,
-#' `u1 = u_shared + u_difference` and
-#' `u2 = u_shared - u_difference`. The difference indicator must be assigned
-#' `-1` and `+1` arbitrarily to the two members and remain stable within dyads.
+#' The shared block moves both members together; the member-difference block
+#' moves them in opposite directions. The APIM vignette derives the resulting
+#' member-level covariance.
 #'
 #' Supply `pairs` when automatic matching is ambiguous or when a model uses
 #' custom indicators, multiple covariance levels, or deliberately omitted
-#' blocks or terms. For example, in a Gaussian `glmmTMB` model fitted with
-#' `dispformula = ~ 0`, this call recovers both the stable dyad-level
-#' random-intercept covariance and the same-occasion partner residual
-#' covariance:
+#' blocks or terms. To specify one pair with a custom difference indicator:
+#'
+#' ```r
+#' result <- interdep::exchangeable_rescov(
+#'   model,
+#'   pairs = list(
+#'     shared = "(1 + time | coupleID)",
+#'     difference =
+#'       "(0 + hallelujah + I(hallelujah * time) || coupleID)",
+#'     difference_indicator = "hallelujah"
+#'   )
+#' )
+#' ```
+#'
+#' For multiple covariance levels, wrap the pairs in an outer list. For example,
+#' in a Gaussian `glmmTMB` model fitted with `dispformula = ~ 0`, this call
+#' recovers both the stable dyad-level random-intercept covariance and the
+#' same-occasion partner residual covariance:
 #'
 #' ```r
 #' result <- interdep::exchangeable_rescov(
@@ -76,11 +89,11 @@
 #' interaction order or as a simple product inside `I()`.
 #'
 #' When a difference block is supplied and the fitted model frame retains the
-#' indicator columns, `difference_indicator` must use unscaled `-1/+1`
-#' coding where
-#' `shared_indicator` is one and must be zero elsewhere. A column omitted
-#' entirely from the fitted formula cannot be recovered from either supported
-#' backend, so its coding cannot be checked.
+#' indicator columns, `difference_indicator` must assign `-1` and `+1` to the
+#' two arbitrary member positions consistently within each dyad. For
+#' composition-specific blocks, it must be zero where `shared_indicator` is
+#' zero. A column omitted entirely from the fitted formula cannot be recovered
+#' from either supported backend, so its coding cannot be checked.
 #'
 #' @section What omitted blocks and terms mean:
 #' `exchangeable_rescov()` only describes constraints that were already imposed

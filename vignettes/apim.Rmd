@@ -103,9 +103,14 @@ and `dispformula = ~ 0`.
 
 <!-- TODO: what is the best order? This shows the RE before we prepped the data.
 But if we move this whole stuff after data-prep, it interrupts before interpretation. 
+
+
+TODO: should we discuss constraints briefly too, since we do it for exchnageable dyads? 
+Like removeing the correlation, or enforcing equal variances as well (homcs()), 
+if the model does not converge etc.?
 -->
 
-### Estimating the distinguishable APIM with glmmTMB
+### Fitting the distinguishable APIM with glmmTMB
 
 We first prepare the example data with `interdep::prepare_interdep_data()`:
 
@@ -203,7 +208,6 @@ draw_apim_diagram(
 
 ### Interpretation
 
-
 Maybe like on:
 https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
 
@@ -217,7 +221,7 @@ Conceptually, the exchangeable APIM constrains several of the effects to be equa
 draw_apim_diagram("exchangeable")
 ```
 
-Because the member labels are arbitrary, swapping members 1 and 2 does not
+Because the member labels are arbitrary, swapping members 1 and 2 does **not**
 change the model. 
 
 To estimate this model in a univariate MLM framework, we can draw a conceptual
@@ -227,15 +231,137 @@ diagram as such:
 draw_apim_member_diagram("exchangeable")
 ```
 
+
 ### Modeling the residual random-effects structure {#exchangeable-residual-structure}
 
+Currently, glmmTMB and brms allow us to specify the relevant residual correlation structure, 
+but any additional random effects structure that includes more than just a random intercept presents a problem:
+
+For instance, in glmmTMB the expression `homcs(0 + arbitrary_member_1 + arbitrary_member_2 | coupleID)` 
+would achieve in setting both residual variances equal while still estimating a correlation between
+the residuals. However, if we want to model intensive longitudinal data, like we do below, 
+using `homcs(0 + arbitrary_member_1 + arbitrary_member_2 + time:arbitrary_member1 + arbitrary_member_2 | coupleID)` 
+would impose a single variance shared by both intercepts *and* both time slopes. 
+`homcs(0 + arbitrary_member_1 + arbitrary_member_2)  + homcs(time:arbitrary_member1 + arbitrary_member_2 | coupleID)` 
+would produce the correct variance restrictions, but does then not model a correlation between slopes and intercepts
+anymore. 
+
+Therefore, we introduce a solution that works for residuals and other random effect terms regardless of slopes. 
 Following @delrosarioPracticalGuideSpecifying2025, `interdep::prepare_interdep_data()` generates an 
 arbitrary member-difference column, named `.i_diff_*`, that is `+1` for one member and `-1` for the other.
-
 The exchangeable residual structure is represented by two separate
 random-effects terms: a shared dyad random intercept and a random coefficient
-for this difference column [@delrosarioPracticalGuideSpecifying2025]. If their
-random effects are denoted by $u_{\mathrm{mean},j}$ and
+for this difference column. 
+
+<!-- TODO: do we need a brief explanation of why this is possible? -->
+
+We will now fit the model and then use the `interdep::exchangeable_rescov()` 
+function that "rotates" the structure back to the often more interpretable 
+actor-partner residual-covariance matrix we are used to. 
+
+
+
+### Fitting the exchangeable APIM with glmmTMB
+
+<!-- TODO: insert the model fitting here, and then the applied back-transform, and only then explain
+all the back-transform math? maybe here just say that this is discussed below, alongside constraints? -->
+
+We use the same dataset as before, but do not distinguish males and females, 
+so we can test distinguishability later. Another option here would be to omit
+roles, especially if there is no clear role in the data.
+
+```{r prepare-cross-distinguishability}
+apim_exchangeable_data <- interdep::prepare_interdep_data(
+  example_dyadic_crosssectional,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  predictors = communication,
+  set_exchangeable_compositions = "female-male"
+)
+
+print(apim_exchangeable_data, n = 4)
+```
+
+We then use the columns to fit the model as follows: 
+
+```{r fit-cross-distinguishability}
+apim_exchangeable_model <- glmmTMB::glmmTMB(
+  satisfaction ~ 
+    
+    # Pooled single intercept
+    1 +
+    
+    # Pooled single actor and partner effects
+    .i_communication_actor +
+    .i_communication_partner +
+    
+    # Residual variance covariance matrix via the shared/difference
+    # specification in two uncorrelated blocks
+    us(1 | coupleID) +
+    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = apim_exchangeable_data
+)
+
+summary(apim_exchangeable_model)
+```
+
+
+```{r prepare-fitted-exchangeable-apim-diagram, include=FALSE}
+apim_exchangeable_diagram_values <- .extract_apim_diagram_values(
+  apim_exchangeable_model,
+  type = "exchangeable"
+)
+apim_exchangeable_diagram_estimates <-
+  apim_exchangeable_diagram_values$estimates
+apim_exchangeable_diagram_residuals <-
+  apim_exchangeable_diagram_values$residuals
+
+apim_exchangeable_fitted_alt <- sprintf(
+  paste(
+    "Fitted exchangeable APIM. Intercept %.2f, actor effect %.2f, partner",
+    "effect %.2f, common residual SD %.2f, and residual correlation %.2f."
+  ),
+  apim_exchangeable_diagram_estimates[["intercept"]],
+  apim_exchangeable_diagram_estimates[["actor"]],
+  apim_exchangeable_diagram_estimates[["partner"]],
+  apim_exchangeable_diagram_residuals[["sd"]],
+  apim_exchangeable_diagram_residuals[["correlation"]]
+)
+```
+
+We use the `interdep::exchangeable_rescov()` to recover the interpretable 
+variance-covariance matrix: 
+
+```{r}
+backtransformed <- interdep::exchangeable_rescov(apim_exchangeable_model)
+
+# residual variance-covariance matrix
+backtransformed$varcov
+
+# residual standard deviation and correlation matrix
+backtransformed$sdcor
+```
+
+
+
+The output can now be mapped as follows:
+
+```{r fitted-exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
+draw_apim_diagram(
+  "exchangeable",
+  model = apim_exchangeable_model,
+  labels = c(predictor = "Communication", outcome = "Satisfaction")
+)
+```
+
+<!-- TODO: do we need a brief interpretation section? -->
+
+
+### Explanation of back-transformation
+If their random effects are denoted by $u_{\mathrm{mean},j}$ and
 $u_{\mathrm{diff},j}$, the two members receive
 
 $$
@@ -267,6 +393,7 @@ u_{\mathrm{diff},j}
 $$
 
 The implied member-level residual covariance matrix is therefore
+<!-- BUT WHY? -->
 
 $$
 \boldsymbol{\Sigma}_{\mathrm{exch}} =
@@ -282,16 +409,6 @@ Thus, both members have the same residual variance
 $v = \sigma_{\mathrm{mean}}^2 + \sigma_{\mathrm{diff}}^2$, their covariance is
 $c = \sigma_{\mathrm{mean}}^2 - \sigma_{\mathrm{diff}}^2$, and their residual
 correlation is $c/v$.
-Conversely, the shared and difference variances can be recovered from a
-member-level variance and covariance as
-
-$$
-\sigma_{\mathrm{mean}}^2 = \frac{v + c}{2}, \qquad
-\sigma_{\mathrm{diff}}^2 = \frac{v - c}{2}.
-$$
-
-For example, a random-intercept variance of 1.2 and a difference variance of
-0.3 imply a member variance of 1.5 and a covariance between partners of 0.9.
 
 Reversing the arbitrary `+1/-1` assignment changes the sign of
 $u_{\mathrm{diff},j}$ but not its variance or the implied member-level
@@ -328,7 +445,7 @@ interdep::exchangeable_rescov(
 )
 ```
 
-#### Fitted constraints and omitted blocks
+#### Fitted constraints and omitted blocks {#fitted-constraints-and-omitted-blocks}
 
 The function can also recover the member-level implication of constraints that
 were imposed when fitting the model. For example, if the entire stable
@@ -351,44 +468,7 @@ variance is represented by a structural zero, so the two members have
 identical stable random intercepts. Likewise, a slope present in only one of a
 selected pair of blocks is treated as structurally absent from the other.
 
-#### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
 
-The same shared/difference back-transformation applies to random slopes
-[@delrosarioPracticalGuideSpecifying2025]. For example, let
-$u_{\mathrm{actor},j}$ denote the shared actor random slope for dyad $j$ and
-$\widetilde{u}_{\mathrm{actor},j}$ the corresponding `.i_diff_*` random slope.
-The tilde marks random coefficients from the member-difference block. The actor
-slopes for the members assigned `+1` and `-1` are
-
-$$
-u_{\mathrm{actor},1j}
-= u_{\mathrm{actor},j} + \widetilde{u}_{\mathrm{actor},j},
-\qquad
-u_{\mathrm{actor},2j}
-= u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
-$$
-
-Because the shared and `.i_diff_*` blocks are fitted as separate random-effects
-terms, they are independent. Therefore,
-
-$$
-\operatorname{Var}(u_{\mathrm{actor},1j})
-= \operatorname{Var}(u_{\mathrm{actor},2j})
-= \operatorname{Var}(u_{\mathrm{actor},j})
-+ \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}),
-$$
-
-and
-
-$$
-\operatorname{Cov}(u_{\mathrm{actor},1j}, u_{\mathrm{actor},2j})
-= \operatorname{Var}(u_{\mathrm{actor},j})
-- \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}).
-$$
-
-The same calculation applies to the partner slopes and random intercepts. Any
-covariances among the random intercept, actor slope, and partner slope can be
-back-transformed in the same way.
 
 ### Interpretation
 
@@ -403,64 +483,6 @@ The two parameterizations require different generated columns. The full
 distinguishable model was fitted above, so we now prepare the same original
 observations as exchangeable:
 
-```{r prepare-cross-distinguishability}
-apim_exchangeable_data <- interdep::prepare_interdep_data(
-  example_dyadic_crosssectional,
-  group = coupleID,
-  member = personID,
-  role = gender,
-  predictors = communication,
-  set_exchangeable_compositions = "female-male"
-)
-```
-
-The exchangeable model constrains the corresponding fixed effects and residual
-variances to be equal across members:
-
-```{r fit-cross-distinguishability}
-apim_exchangeable_model <- glmmTMB::glmmTMB(
-  satisfaction ~ 0 +
-    .i_is_female_x_male +
-    .i_communication_actor +
-    .i_communication_partner +
-    us(0 + .i_is_female_x_male | coupleID) +
-    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
-  dispformula = ~ 0,
-  family = gaussian(),
-  data = apim_exchangeable_data
-)
-```
-
-```{r prepare-fitted-exchangeable-apim-diagram, include=FALSE}
-apim_exchangeable_diagram_values <- .extract_apim_diagram_values(
-  apim_exchangeable_model,
-  type = "exchangeable"
-)
-apim_exchangeable_diagram_estimates <-
-  apim_exchangeable_diagram_values$estimates
-apim_exchangeable_diagram_residuals <-
-  apim_exchangeable_diagram_values$residuals
-
-apim_exchangeable_fitted_alt <- sprintf(
-  paste(
-    "Fitted exchangeable APIM. Intercept %.2f, actor effect %.2f, partner",
-    "effect %.2f, common residual SD %.2f, and residual correlation %.2f."
-  ),
-  apim_exchangeable_diagram_estimates[["intercept"]],
-  apim_exchangeable_diagram_estimates[["actor"]],
-  apim_exchangeable_diagram_estimates[["partner"]],
-  apim_exchangeable_diagram_residuals[["sd"]],
-  apim_exchangeable_diagram_residuals[["correlation"]]
-)
-```
-
-```{r fitted-exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
-draw_apim_diagram(
-  "exchangeable",
-  model = apim_exchangeable_model,
-  labels = c(predictor = "Communication", outcome = "Satisfaction")
-)
-```
 
 [`interdep::compare_interdep_models()`](../reference/compare_interdep_models.html)
 verifies that both models use equivalent original
@@ -547,6 +569,45 @@ using sum-and-difference random effects
 [@delrosarioPracticalGuideSpecifying2025]. In longitudinal Gaussian APIMs fitted
 with `glmmTMB`, the same parameterization can be extended to the dyad-occasion
 level to represent same-occasion residual dependence.
+
+#### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
+
+The same shared/difference back-transformation applies to random slopes
+[@delrosarioPracticalGuideSpecifying2025]. For example, let
+$u_{\mathrm{actor},j}$ denote the shared actor random slope for dyad $j$ and
+$\widetilde{u}_{\mathrm{actor},j}$ the corresponding `.i_diff_*` random slope.
+The tilde marks random coefficients from the member-difference block. The actor
+slopes for the members assigned `+1` and `-1` are
+
+$$
+u_{\mathrm{actor},1j}
+= u_{\mathrm{actor},j} + \widetilde{u}_{\mathrm{actor},j},
+\qquad
+u_{\mathrm{actor},2j}
+= u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
+$$
+
+Because the shared and `.i_diff_*` blocks are fitted as separate random-effects
+terms, they are independent. Therefore,
+
+$$
+\operatorname{Var}(u_{\mathrm{actor},1j})
+= \operatorname{Var}(u_{\mathrm{actor},2j})
+= \operatorname{Var}(u_{\mathrm{actor},j})
++ \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}),
+$$
+
+and
+
+$$
+\operatorname{Cov}(u_{\mathrm{actor},1j}, u_{\mathrm{actor},2j})
+= \operatorname{Var}(u_{\mathrm{actor},j})
+- \operatorname{Var}(\widetilde{u}_{\mathrm{actor},j}).
+$$
+
+The same calculation applies to the partner slopes and random intercepts. Any
+covariances among the random intercept, actor slope, and partner slope can be
+back-transformed in the same way.
 
 
 ### Current limitations of dyadic ILD designs in R
