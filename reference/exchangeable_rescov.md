@@ -17,14 +17,28 @@ exchangeable_rescov(model, pairs = NULL)
 
 - pairs:
 
-  `NULL` for automatic matching, or one exact block pair (or an outer
-  list of block pairs). Each pair must contain `shared`, `difference`,
-  and `idiff`, and may contain `shared_indicator`. Copy `shared` and
-  `difference` from the model formula. Either block may be `NULL` only
-  when that entire block was omitted from the fitted model. `idiff` is
-  the exact difference-indicator column name. `shared_indicator` is the
-  exact composition indicator and defaults to `"1"`, meaning an ordinary
-  random intercept.
+  `NULL` (default) for automatic block matching, one named block pair,
+  or an outer list of named block pairs. A pair has these fields:
+
+  - `shared`: the exact shared random-effect term from the fitted model
+    formula, or `NULL` if the entire shared block was omitted when
+    fitting;
+
+  - `difference`: the exact difference random-effect term, or `NULL` if
+    the entire difference block was omitted when fitting;
+
+  - `difference_indicator`: the exact name of the difference-indicator
+    column used in `difference`, regardless of what the column is
+    called. If `difference = NULL`, name the column that defines (or
+    would define) the opposite signs for this pair in the original data;
+
+  - `shared_indicator`: optionally, the exact shared
+    composition-indicator column. It defaults to `"1"`, meaning that an
+    ordinary random intercept is the shared block and every fitted row
+    belongs to this pair.
+
+  At least one of `shared` and `difference` must name a fitted block.
+  See Details for examples and the meaning of `NULL`.
 
 ## Value
 
@@ -38,24 +52,33 @@ reproduce the matched random-effect terms.
 Automatic matching recognizes exact `.i_diff_*_arbitrary` coefficient
 names and first looks for the corresponding `.i_is_*` shared block. It
 remains deliberately conservative: the two blocks must use the same
-grouping factor and contain the same underlying terms.
+grouping factor and contain the same underlying terms. Supply `pairs`
+for custom indicator names, ambiguous matches, or models that
+deliberately omit blocks or terms.
 
-Use `pairs` when block matching is ambiguous, when custom indicator
-names were used, or when terms were omitted to impose constraints. Terms
-found in only one selected block are represented as structural zeros in
-the other. `shared = NULL` or `difference = NULL` means that the whole
-corresponding block was absent—not that an existing fitted block should
-be ignored. The function warns when `NULL` is used. This reports a
-constraint already imposed by the fitted model; the back-transformation
-does not impose it. An omitted difference block means that the members
-have identical random effects for those terms, whereas an omitted shared
-block means that they have equal-magnitude, opposite-sign random
-effects.
+Here “shared” and “difference” describe random-effect coordinates. If
+`u_shared` moves both members together and `u_difference` moves them in
+opposite directions, the member effects are
+`u1 = u_shared + u_difference` and `u2 = u_shared - u_difference`. These
+coordinates are distinct from dyad-mean and within-dyad member-deviation
+predictor columns, even though both use the same mean/difference logic.
+
+The selected shared and difference coordinates must be separate
+random-effect blocks, so their covariance is fixed to zero by the fitted
+model. On the member scale, that constraint produces equal member
+variances while still allowing a nonzero covariance between members.
+This is the exchangeable actor-partner covariance structure that the
+function recovers; the function does not assume that the members' random
+effects are independent.
+
+A custom difference-indicator name is supplied literally. For example,
+if the model used a `-1/+1` column named `hallelujah`:
 
     pairs = list(
       shared = "(1 + time | coupleID)",
-      difference = "(0 + IDIFF + I(IDIFF * time) || coupleID)",
-      idiff = "IDIFF"
+      difference =
+        "(0 + hallelujah + I(hallelujah * time) || coupleID)",
+      difference_indicator = "hallelujah"
     )
 
 A composition-specific pair also names its shared indicator:
@@ -64,28 +87,63 @@ A composition-specific pair also names its shared indicator:
       shared = "(0 + SAMESEX + SAMESEX:time | coupleID)",
       difference =
         "(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)",
-      idiff = "IDIFF_SAMESEX",
+      difference_indicator = "IDIFF_SAMESEX",
       shared_indicator = "SAMESEX"
+    )
+
+For multiple pairs, wrap the pair specifications in an outer list.
+Naming the outer elements makes later errors easier to locate:
+
+    pairs = list(
+      stable = list(
+        shared = "(1 | coupleID)",
+        difference = "(0 + hallelujah | coupleID)",
+        difference_indicator = "hallelujah"
+      ),
+      occasion = list(
+        shared = "(1 | coupleID:time)",
+        difference = "(0 + hallelujah | coupleID:time)",
+        difference_indicator = "hallelujah"
+      )
     )
 
 Model-style equivalents are recognized across backends, such as
 `(1 + time | group)` and `us(1 + time | group)`, or `(0 + x || group)`
 and `diag(0 + x | group)`. Difference slopes may be written as
-`IDIFF:time`, `time:IDIFF`, `I(IDIFF * time)`, or `I(time * IDIFF)`.
-More complex arithmetic inside [`I()`](https://rdrr.io/r/base/AsIs.html)
-is not interpreted.
+`hallelujah:time`, `time:hallelujah`, `I(hallelujah * time)`, or
+`I(time * hallelujah)`. More complex arithmetic inside
+[`I()`](https://rdrr.io/r/base/AsIs.html) is not interpreted.
 
-Here “shared” and “difference” describe the random-effect coordinates:
-one moves both members together and the other moves them in opposite
-directions. They are distinct from dyad-mean and within-dyad
-member-deviation predictor columns, even though both use the same
-mean/difference logic.
+When the fitted model frame retains the indicator columns,
+`difference_indicator` must use unnormalised `-1/+1` coding where
+`shared_indicator` is one and must be zero elsewhere. A column omitted
+entirely from the fitted formula cannot be recovered from either
+supported backend, so its coding cannot be checked.
 
-When the fitted model frame retains the indicator columns, `idiff` must
-use unnormalised `-1/+1` coding where `shared_indicator` is one and be
-zero elsewhere. A column omitted entirely from the fitted formula cannot
-be recovered from either supported backend, so its coding cannot be
-checked.
+## What omitted blocks and terms mean
+
+`exchangeable_rescov()` only describes constraints that were already
+imposed when the model was fitted. It does not remove a block, set a
+variance to zero, or otherwise constrain the supplied model.
+
+If a term occurs in only one selected block, the function represents the
+missing coordinate as a structural zero:
+
+- A term present only in `shared` has no difference component, so the
+  two members have identical random effects for that term.
+
+- A term present only in `difference` has no shared component, so the
+  two members have equal-magnitude, opposite-sign random effects for
+  that term.
+
+Setting `difference = NULL` or `shared = NULL` makes the corresponding
+rule apply to every term in the other block. `NULL` therefore means that
+the whole block was absent from the fitted model; it must never be used
+merely to ignore an existing block. The function warns whenever `NULL`
+is supplied and errors if it can identify a compatible fitted block that
+contradicts the claimed omission.
+
+## Backend note
 
 In Gaussian `brms` models, cross-sectional and same-occasion partner
 residual dependence is usually represented directly with

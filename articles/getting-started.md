@@ -108,7 +108,7 @@ for distinguishable dyads. Each dyad has two rows: one for each member.
     #> 6        6        3   male      8.215332     9.661295
 
 We validate and prepare the data with the function
-[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+[`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
 
 ``` r
 
@@ -215,7 +215,7 @@ Refer to the [exchangeable APIM
 section](https://pascal-kueng.github.io/interdep/articles/apim.html#the-cross-sectional-gaussian-exchangeable-apim)
 for how to use these columns to specify an exchangeable dyadic APIM and
 recover the constrained actor-partner variance-covariance structure with
-[`interdep::exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md).
+[`exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md).
 
 Alternatively, we can explicitly set a dyad composition to exchangeable:
 
@@ -262,6 +262,8 @@ print(cross_exchangeable_data, n = 4)
 members does not matter (e.g., `male-female` and `female-male` will both
 work), and you can use different separators like `male_female`,
 `male_x_female`, or `male female`.
+
+## Generating DIM and DSM columns
 
 For exchangeable dyads, we can request DIM predictor columns. This works
 here because omitting `role` treats all dyads as a single exchangeable
@@ -313,10 +315,9 @@ print(cross_dim_data, n = 4)
 #> #   .i_communication_within_dyad_dev <dbl>
 ```
 
-For distinguishable dyads, DSM columns can be requested instead. These
-additionally require an explicit role order. The role order defines the
-direction of all DSM predictor differences and the DSM role contrast
-(Iida et al. 2018).
+Generating DSM columns for distinguishable dyads additionally requires
+an explicit role order. The role order defines the direction of all DSM
+predictor differences and the DSM role contrast (Iida et al. 2018).
 
 ``` r
 
@@ -456,7 +457,8 @@ columns alongside their contemporaneous versions. Lagging respects the
 dyad and member structure, matches observations at exactly `time - 1`,
 and does not bridge missing occasions.
 
-Brief example:
+For a simpler dynamic model, this example omits `role` and therefore
+treats all couples as exchangeable:
 
 ``` r
 

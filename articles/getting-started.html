@@ -269,7 +269,7 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; 5        5        3 female      5.696995     5.865494</span></span>
 <span><span class="co">#&gt; 6        6        3   male      8.215332     9.661295</span></span></code></pre>
 <p>We validate and prepare the data with the function
-<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code></p>
+<code><a href="../reference/prepare_interdep_data.html">prepare_interdep_data()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -364,7 +364,7 @@ the assignment reproducible.</p>
 <p>Refer to the <a href="apim.html#the-cross-sectional-gaussian-exchangeable-apim">exchangeable
 APIM section</a> for how to use these columns to specify an exchangeable
 dyadic APIM and recover the constrained actor-partner
-variance-covariance structure with <a href="../reference/exchangeable_rescov.html"><code>interdep::exchangeable_rescov()</code></a>.</p>
+variance-covariance structure with <a href="../reference/exchangeable_rescov.html"><code>exchangeable_rescov()</code></a>.</p>
 <p>Alternatively, we can explicitly set a dyad composition to
 exchangeable:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -408,6 +408,10 @@ order of members does not matter (e.g., <code>male-female</code> and
 <code>female-male</code> will both work), and you can use different
 separators like <code>male_female</code>, <code>male_x_female</code>, or
 <code>male female</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="generating-dim-and-dsm-columns">Generating DIM and DSM columns<a class="anchor" aria-label="anchor" href="#generating-dim-and-dsm-columns"></a>
+</h2>
 <p>For exchangeable dyads, we can request DIM predictor columns. This
 works here because omitting <code>role</code> treats all dyads as a
 single exchangeable composition.</p>
@@ -454,10 +458,9 @@ single exchangeable composition.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>For distinguishable dyads, DSM columns can be requested instead.
-These additionally require an explicit role order. The role order
-defines the direction of all DSM predictor differences and the DSM role
-contrast <span class="citation">(Iida et al. 2018)</span>.</p>
+<p>Generating DSM columns for distinguishable dyads additionally
+requires an explicit role order. The role order defines the direction of
+all DSM predictor differences and the DSM role contrast <span class="citation">(Iida et al. 2018)</span>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
@@ -590,7 +593,8 @@ within-person-centered actor and partner columns alongside their
 contemporaneous versions. Lagging respects the dyad and member
 structure, matches observations at exactly <code>time - 1</code>, and
 does not bridge missing occasions.</p>
-<p>Brief example:</p>
+<p>For a simpler dynamic model, this example omits <code>role</code> and
+therefore treats all couples as exchangeable:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>

@@ -62,14 +62,20 @@ matrices to the covariance structure of two exchangeable members.</p>
 
 
 <dt id="arg-pairs">pairs<a class="anchor" aria-label="anchor" href="#arg-pairs"></a></dt>
-<dd><p><code>NULL</code> for automatic matching, or one exact block pair (or an
-outer list of block pairs). Each pair must contain <code>shared</code>, <code>difference</code>,
-and <code>idiff</code>, and may contain <code>shared_indicator</code>. Copy <code>shared</code> and
-<code>difference</code> from the model formula. Either block may be <code>NULL</code> only when
-that entire block was omitted from the fitted model. <code>idiff</code> is the exact
-difference-indicator column name. <code>shared_indicator</code> is the exact
-composition indicator and defaults to <code>"1"</code>, meaning an ordinary random
-intercept.</p></dd>
+<dd><p><code>NULL</code> (default) for automatic block matching, one named block
+pair, or an outer list of named block pairs. A pair has these fields:</p><ul><li><p><code>shared</code>: the exact shared random-effect term from the fitted model
+formula, or <code>NULL</code> if the entire shared block was omitted when fitting;</p></li>
+<li><p><code>difference</code>: the exact difference random-effect term, or <code>NULL</code> if the
+entire difference block was omitted when fitting;</p></li>
+<li><p><code>difference_indicator</code>: the exact name of the difference-indicator
+column used in <code>difference</code>, regardless of what the column is called. If
+<code>difference = NULL</code>, name the column that defines (or would define) the
+opposite signs for this pair in the original data;</p></li>
+<li><p><code>shared_indicator</code>: optionally, the exact shared composition-indicator
+column. It defaults to <code>"1"</code>, meaning that an ordinary random intercept
+is the shared block and every fitted row belongs to this pair.</p></li>
+</ul><p>At least one of <code>shared</code> and <code>difference</code> must name a fitted block. See
+Details for examples and the meaning of <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -84,43 +90,86 @@ the matched random-effect terms.</p>
     <p>Automatic matching recognizes exact <code>.i_diff_*_arbitrary</code> coefficient names
 and first looks for the corresponding <code>.i_is_*</code> shared block. It remains
 deliberately conservative: the two blocks must use the same grouping factor
-and contain the same underlying terms.</p>
-<p>Use <code>pairs</code> when block matching is ambiguous, when custom indicator names
-were used, or when terms were omitted to impose constraints. Terms found in
-only one selected block are represented as structural zeros in the other.
-<code>shared = NULL</code> or <code>difference = NULL</code> means that the whole corresponding
-block was absent—not that an existing fitted block should be ignored. The
-function warns when <code>NULL</code> is used. This reports a constraint already imposed
-by the fitted model; the back-transformation does not impose it. An omitted
-difference block means that the members have identical random effects for
-those terms, whereas an omitted shared block means that they have
-equal-magnitude, opposite-sign random effects.</p>
+and contain the same underlying terms. Supply <code>pairs</code> for custom indicator
+names, ambiguous matches, or models that deliberately omit blocks or terms.</p>
+<p>Here “shared” and “difference” describe random-effect coordinates. If
+<code>u_shared</code> moves both members together and <code>u_difference</code> moves them in
+opposite directions, the member effects are <code>u1 = u_shared + u_difference</code>
+and <code>u2 = u_shared - u_difference</code>. These coordinates are distinct from
+dyad-mean and within-dyad member-deviation predictor columns, even though
+both use the same mean/difference logic.</p>
+<p>The selected shared and difference coordinates must be separate
+random-effect blocks, so their covariance is fixed to zero by the fitted
+model. On the member scale, that constraint produces equal member variances
+while still allowing a nonzero covariance between members. This is the
+exchangeable actor-partner covariance structure that the function recovers;
+the function does not assume that the members' random effects are
+independent.</p>
+<p>A custom difference-indicator name is supplied literally. For example, if
+the model used a <code>-1/+1</code> column named <code>hallelujah</code>:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">pairs</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  shared <span class="op">=</span> <span class="st">"(1 + time | coupleID)"</span>,</span>
-<span>  difference <span class="op">=</span> <span class="st">"(0 + IDIFF + I(IDIFF * time) || coupleID)"</span>,</span>
-<span>  idiff <span class="op">=</span> <span class="st">"IDIFF"</span></span>
+<span>  difference <span class="op">=</span></span>
+<span>    <span class="st">"(0 + hallelujah + I(hallelujah * time) || coupleID)"</span>,</span>
+<span>  difference_indicator <span class="op">=</span> <span class="st">"hallelujah"</span></span>
 <span><span class="op">)</span></span></code></pre><p></p></div>
 <p>A composition-specific pair also names its shared indicator:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">pairs</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  shared <span class="op">=</span> <span class="st">"(0 + SAMESEX + SAMESEX:time | coupleID)"</span>,</span>
 <span>  difference <span class="op">=</span></span>
 <span>    <span class="st">"(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)"</span>,</span>
-<span>  idiff <span class="op">=</span> <span class="st">"IDIFF_SAMESEX"</span>,</span>
+<span>  difference_indicator <span class="op">=</span> <span class="st">"IDIFF_SAMESEX"</span>,</span>
 <span>  shared_indicator <span class="op">=</span> <span class="st">"SAMESEX"</span></span>
+<span><span class="op">)</span></span></code></pre><p></p></div>
+<p>For multiple pairs, wrap the pair specifications in an outer list. Naming
+the outer elements makes later errors easier to locate:</p>
+<p></p><div class="sourceCode r"><pre><code><span><span class="va">pairs</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  stable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    shared <span class="op">=</span> <span class="st">"(1 | coupleID)"</span>,</span>
+<span>    difference <span class="op">=</span> <span class="st">"(0 + hallelujah | coupleID)"</span>,</span>
+<span>    difference_indicator <span class="op">=</span> <span class="st">"hallelujah"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  occasion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    shared <span class="op">=</span> <span class="st">"(1 | coupleID:time)"</span>,</span>
+<span>    difference <span class="op">=</span> <span class="st">"(0 + hallelujah | coupleID:time)"</span>,</span>
+<span>    difference_indicator <span class="op">=</span> <span class="st">"hallelujah"</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre><p></p></div>
 <p>Model-style equivalents are recognized across backends, such as
 <code>(1 + time | group)</code> and <code>us(1 + time | group)</code>, or
 <code>(0 + x || group)</code> and <code>diag(0 + x | group)</code>. Difference slopes may be
-written as <code>IDIFF:time</code>, <code>time:IDIFF</code>, <code>I(IDIFF * time)</code>, or
-<code>I(time * IDIFF)</code>. More complex arithmetic inside <code><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I()</a></code> is not interpreted.</p>
-<p>Here “shared” and “difference” describe the random-effect coordinates: one
-moves both members together and the other moves them in opposite directions.
-They are distinct from dyad-mean and within-dyad member-deviation predictor
-columns, even though both use the same mean/difference logic.</p>
-<p>When the fitted model frame retains the indicator columns, <code>idiff</code> must use
-unnormalised <code>-1/+1</code> coding where <code>shared_indicator</code> is one and be zero
-elsewhere. A column omitted entirely from the fitted formula cannot be
-recovered from either supported backend, so its coding cannot be checked.</p>
+written as <code>hallelujah:time</code>, <code>time:hallelujah</code>,
+<code>I(hallelujah * time)</code>, or <code>I(time * hallelujah)</code>. More complex arithmetic
+inside <code><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I()</a></code> is not interpreted.</p>
+<p>When the fitted model frame retains the indicator columns,
+<code>difference_indicator</code> must use unnormalised <code>-1/+1</code> coding where
+<code>shared_indicator</code> is one and must be zero elsewhere. A column omitted
+entirely from the fitted formula cannot be recovered from either supported
+backend, so its coding cannot be checked.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="what-omitted-blocks-and-terms-mean">What omitted blocks and terms mean<a class="anchor" aria-label="anchor" href="#what-omitted-blocks-and-terms-mean"></a></h2>
+
+
+<p><code>exchangeable_rescov()</code> only describes constraints that were already imposed
+when the model was fitted. It does not remove a block, set a variance to zero,
+or otherwise constrain the supplied model.</p>
+<p>If a term occurs in only one selected block, the function represents the
+missing coordinate as a structural zero:</p><ul><li><p>A term present only in <code>shared</code> has no difference component, so the two
+members have identical random effects for that term.</p></li>
+<li><p>A term present only in <code>difference</code> has no shared component, so the two
+members have equal-magnitude, opposite-sign random effects for that term.</p></li>
+</ul><p>Setting <code>difference = NULL</code> or <code>shared = NULL</code> makes the corresponding rule
+apply to every term in the other block. <code>NULL</code> therefore means that the whole
+block was absent from the fitted model; it must never be used merely to ignore
+an existing block. The function warns whenever <code>NULL</code> is supplied and errors
+if it can identify a compatible fitted block that contradicts the claimed
+omission.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="backend-note">Backend note<a class="anchor" aria-label="anchor" href="#backend-note"></a></h2>
+
+
 <p>In Gaussian <code>brms</code> models, cross-sectional and same-occasion partner
 residual dependence is usually represented directly with
 <code>unstr(time = member, gr = pair_id)</code>. The blocks handled here remain relevant
