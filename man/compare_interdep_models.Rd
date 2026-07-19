@@ -4,24 +4,24 @@
 \alias{compare_interdep_models}
 \title{Compare nested models fitted to equivalent interdep data}
 \usage{
-compare_interdep_models(full, restricted)
+compare_interdep_models(model1, model2)
 }
 \arguments{
-\item{full}{The full (larger) fitted \code{glmmTMB} model.}
-
-\item{restricted}{The restricted (smaller) fitted \code{glmmTMB} model.}
+\item{model1, model2}{Two fitted \code{glmmTMB} models to compare.}
 }
 \value{
 An \code{anova}-style data frame containing model degrees of freedom,
 information criteria, log-likelihoods, the likelihood-ratio statistic, and
-its chi-squared p-value.
+its chi-squared p-value. When printed, a short conclusion interprets the
+test at the 5\% significance level.
 }
 \description{
 Performs a likelihood-ratio test for two nested \code{glmmTMB} models fitted to
 separate \link[=prepare_interdep_data]{interdep_data} objects. Unlike
 \code{anova.glmmTMB()}, the model calls do not need to refer to the same R object.
 The function instead checks that the prepared data contain the same original
-observations before comparing the models.
+observations before comparing the models. Models may be supplied in either
+order; the model with fewer estimated parameters is shown first.
 }
 \details{
 Both model calls must use named \code{interdep_data} objects that remain available
@@ -31,13 +31,14 @@ column. The function requires exactly identical original, non-\code{.i_} columns
 including their types and attributes. It also checks structural dyad
 metadata, fitted rows, outcomes, weights and offsets, model family and link,
 maximum-likelihood estimation, and model convergence.
+Models fitted to ordinary data frames are outside this function's scope; use
+\code{\link[stats:anova]{stats::anova()}} for those models.
 
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the other.
-The caller remains responsible for supplying a genuinely restricted model
-and its corresponding full model. The usual chi-squared reference
-distribution may also be inappropriate when tested variance parameters are
-on the boundary.
+The caller remains responsible for supplying genuinely nested models. The
+usual chi-squared reference distribution may also be inappropriate when
+tested variance parameters are on the boundary.
 }
 \examples{
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
@@ -58,10 +59,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     data = full_data
   )
 
-  compare_interdep_models(
-    full = full_model,
-    restricted = restricted_model
-  )
+  compare_interdep_models(restricted_model, full_model)
 }
 
 }

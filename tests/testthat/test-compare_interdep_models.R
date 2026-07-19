@@ -51,10 +51,7 @@ test_that("compare_interdep_models compares reparameterized nested models", {
     data = restricted_data
   )
 
-  comparison <- compare_interdep_models(
-    full = full_model,
-    restricted = restricted_model
-  )
+  comparison <- compare_interdep_models(restricted_model, full_model)
 
   expect_s3_class(comparison, "anova")
   expect_equal(comparison$`Chi Df`[2], 5)
@@ -93,7 +90,7 @@ test_that("compare_interdep_models requires exact original data", {
   )
 
   expect_error(
-    compare_interdep_models(full = model_two, restricted = model_one),
+    compare_interdep_models(model_one, model_two),
     "Original column `satisfaction` differs"
   )
 })
@@ -144,17 +141,11 @@ test_that("compare_interdep_models checks source and fitted rows", {
   )
 
   expect_error(
-    compare_interdep_models(
-      full = shorter_full,
-      restricted = complete_restricted
-    ),
+    compare_interdep_models(complete_restricted, shorter_full),
     "different numbers of rows"
   )
   expect_error(
-    compare_interdep_models(
-      full = row_full,
-      restricted = row_restricted
-    ),
+    compare_interdep_models(row_restricted, row_full),
     "different observation rows"
   )
 })
@@ -195,10 +186,7 @@ test_that("compare_interdep_models supports and checks model families", {
     data = full_data
   )
 
-  comparison <- compare_interdep_models(
-    full = full_model,
-    restricted = restricted_model
-  )
+  comparison <- compare_interdep_models(restricted_model, full_model)
 
   expect_s3_class(comparison, "anova")
   expect_equal(comparison$`Chi Df`[2], 1)
@@ -207,15 +195,112 @@ test_that("compare_interdep_models supports and checks model families", {
     2 * as.numeric(logLik(full_model) - logLik(restricted_model))
   )
   expect_error(
-    compare_interdep_models(
-      full = gaussian_model,
-      restricted = restricted_model
-    ),
+    compare_interdep_models(restricted_model, gaussian_model),
     "same family and link"
   )
 })
 
-test_that("compare_interdep_models agrees with anova.glmmTMB", {
+test_that("compare_interdep_models compares APIM, DIM, and DSM models", {
+  skip_if_not_installed("glmmTMB")
+
+  distinguishable_data <- prepare_interdep_data(
+    example_dyadic_crosssectional,
+    group = coupleID,
+    member = personID,
+    role = gender,
+    predictors = communication,
+    model_type = c("apim", "dsm"),
+    dsm_role_order = c("female", "male")
+  )
+  exchangeable_data <- prepare_interdep_data(
+    example_dyadic_crosssectional,
+    group = coupleID,
+    member = personID,
+    role = gender,
+    predictors = communication,
+    model_type = c("apim", "dim"),
+    set_exchangeable_compositions = "female-male",
+    seed = 123
+  )
+
+  distinguishable_dsm <- glmmTMB::glmmTMB(
+    satisfaction ~ 1 +
+      .i_communication_dyad_mean_gmc +
+      .i_communication_within_dyad_diff +
+      .i_dsm_role_contrast +
+      .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
+      .i_communication_within_dyad_diff:.i_dsm_role_contrast +
+      us(1 + .i_dsm_role_contrast | coupleID),
+    dispformula = ~0,
+    family = gaussian(),
+    data = distinguishable_data
+  )
+  exchangeable_apim <- glmmTMB::glmmTMB(
+    satisfaction ~ 0 + .i_is_female_x_male +
+      .i_communication_actor +
+      .i_communication_partner +
+      us(0 + .i_is_female_x_male | coupleID) +
+      us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+    dispformula = ~0,
+    family = gaussian(),
+    data = exchangeable_data
+  )
+  distinguishable_apim <- glmmTMB::glmmTMB(
+    satisfaction ~ 0 +
+      .i_is_female_x_male_female +
+      .i_is_female_x_male_male +
+      .i_is_female_x_male_female:.i_communication_actor +
+      .i_is_female_x_male_male:.i_communication_actor +
+      .i_is_female_x_male_female:.i_communication_partner +
+      .i_is_female_x_male_male:.i_communication_partner +
+      us(
+        0 + .i_is_female_x_male_female + .i_is_female_x_male_male |
+          coupleID
+      ),
+    dispformula = ~0,
+    family = gaussian(),
+    data = distinguishable_data
+  )
+  exchangeable_dim <- glmmTMB::glmmTMB(
+    satisfaction ~ 1 +
+      .i_communication_dyad_mean_gmc +
+      .i_communication_within_dyad_dev +
+      us(1 | coupleID) +
+      us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+    dispformula = ~0,
+    family = gaussian(),
+    data = exchangeable_data
+  )
+
+  dsm_comparison <- compare_interdep_models(
+    distinguishable_dsm,
+    exchangeable_apim
+  )
+  apim_dim_comparison <- compare_interdep_models(
+    distinguishable_apim,
+    exchangeable_dim
+  )
+
+  expect_equal(dsm_comparison$`Chi Df`[2], 4)
+  expect_equal(apim_dim_comparison$`Chi Df`[2], 4)
+  expect_equal(dsm_comparison$Chisq[2], apim_dim_comparison$Chisq[2])
+})
+
+test_that("compare_interdep_models directs ordinary models to anova", {
+  skip_if_not_installed("glmmTMB")
+
+  plain_data <- example_dyadic_crosssectional
+  smaller_model <- glmmTMB::glmmTMB(satisfaction ~ 1, data = plain_data)
+  larger_model <- glmmTMB::glmmTMB(satisfaction ~ gender, data = plain_data)
+
+  expect_error(
+    compare_interdep_models(smaller_model, larger_model),
+    "Use `stats::anova()`",
+    fixed = TRUE
+  )
+})
+
+test_that("compare_interdep_models sorts models and agrees with anova.glmmTMB", {
   skip_if_not_installed("glmmTMB")
 
   model_data <- prepare_interdep_data(
@@ -234,32 +319,70 @@ test_that("compare_interdep_models agrees with anova.glmmTMB", {
   )
 
   reference <- stats::anova(restricted_model, full_model)
-  comparison <- compare_interdep_models(
-    full = full_model,
-    restricted = restricted_model
-  )
+  comparison <- compare_interdep_models(restricted_model, full_model)
+  reversed <- compare_interdep_models(full_model, restricted_model)
 
   expect_equal(comparison$Chisq[2], reference$Chisq[2])
   expect_equal(comparison$`Chi Df`[2], reference$`Chi Df`[2])
   expect_equal(comparison$`Pr(>Chisq)`[2], reference$`Pr(>Chisq)`[2])
+  expect_identical(reversed, comparison)
+  expect_identical(row.names(comparison), c("restricted_model", "full_model"))
   expect_identical(
     comparison$`Pr(>Chisq)`[2] < 0.05,
     reference$`Pr(>Chisq)`[2] < 0.05
   )
   expect_error(
-    compare_interdep_models(
-      full = restricted_model,
-      restricted = full_model
-    ),
-    "`full` must have more estimated parameters"
+    compare_interdep_models(restricted_model, restricted_model),
+    "different numbers of estimated parameters"
   )
 
   printed <- capture.output(print(comparison))
   note <- match(
-    "Mathematical nesting is assumed and cannot be verified from the data alone.",
+    paste0(
+      "Assumes mathematical nesting and an appropriate chi-squared ",
+      "reference distribution."
+    ),
     printed
   )
   expect_equal(printed[note + 1L], "")
+  expect_match(
+    tail(printed, 1L),
+    "`full_model` fits better than `restricted_model`",
+    fixed = TRUE
+  )
+  expect_match(
+    tail(printed, 1L),
+    format.pval(comparison$`Pr(>Chisq)`[2], digits = 3, eps = 0.001),
+    fixed = TRUE
+  )
+
+  set.seed(194)
+  model_data$noise <- stats::rnorm(nrow(model_data))
+  smaller_model <- glmmTMB::glmmTMB(satisfaction ~ 1, data = model_data)
+  larger_model <- glmmTMB::glmmTMB(satisfaction ~ noise, data = model_data)
+  no_clear_improvement <- compare_interdep_models(smaller_model, larger_model)
+  printed <- capture.output(print(no_clear_improvement))
+
+  expect_gt(no_clear_improvement$`Pr(>Chisq)`[2], 0.05)
+  expect_match(
+    tail(printed, 1L),
+    "finds no clear improvement from `smaller_model` to `larger_model`",
+    fixed = TRUE
+  )
+  expect_match(
+    tail(printed, 1L),
+    "This does not establish equal fit",
+    fixed = TRUE
+  )
+  expect_match(
+    tail(printed, 1L),
+    format.pval(
+      no_clear_improvement$`Pr(>Chisq)`[2],
+      digits = 3,
+      eps = 0.001
+    ),
+    fixed = TRUE
+  )
 })
 
 test_that("compare_interdep_models rejects transformed and changed outcomes", {
@@ -281,10 +404,7 @@ test_that("compare_interdep_models rejects transformed and changed outcomes", {
   )
 
   expect_error(
-    compare_interdep_models(
-      full = transformed_model,
-      restricted = restricted_model
-    ),
+    compare_interdep_models(restricted_model, transformed_model),
     "Only an untransformed outcome"
   )
 
@@ -294,10 +414,7 @@ test_that("compare_interdep_models rejects transformed and changed outcomes", {
     data = model_data
   )
   expect_error(
-    compare_interdep_models(
-      full = changed_model,
-      restricted = restricted_model
-    ),
+    compare_interdep_models(restricted_model, changed_model),
     "fitted outcome values differ"
   )
 })
@@ -319,10 +436,7 @@ test_that("compare_interdep_models recovers local model data", {
   }
 
   models <- fit_models()
-  comparison <- compare_interdep_models(
-    full = models$full,
-    restricted = models$restricted
-  )
+  comparison <- compare_interdep_models(models$restricted, models$full)
 
   expect_s3_class(comparison, "anova")
 })

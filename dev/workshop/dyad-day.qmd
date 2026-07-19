@@ -704,7 +704,7 @@ On the right:
 #| fig-align: center
 #| fig-alt: "Fitted distinguishable APIM for provided support and MVPA."
 
-fit_and_draw_distinguishable_apim(
+distinguishable_apim <- fit_and_draw_distinguishable_apim(
   pilot_aggregated,
   predictor = provided_emotional_support,
   outcome = mvpa_total,
@@ -884,7 +884,7 @@ On the right:
 #| fig-align: center
 #| fig-alt: "Fitted exchangeable APIM for provided support and MVPA."
 
-workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
+exchangeable_apim <- fit_and_draw_exchangeable_apim(
   pilot_aggregated,
   predictor = provided_emotional_support,
   outcome = mvpa_total,
@@ -893,6 +893,18 @@ workshop_exchangeable_apim <- fit_and_draw_exchangeable_apim(
 ```
 
 <!-- ca. 3 Minutes -->
+
+## Testing exchangeability
+
+```{r}
+library(interdep)
+
+compare_interdep_models(
+  exchangeable_apim,
+  distinguishable_apim
+)
+```
+
 
 
 ## The DIM
@@ -926,7 +938,7 @@ interchangeable.
 #| results: asis
 
 dim_reparameterization_grid(
-  workshop_exchangeable_apim,
+  exchangeable_apim,
   id = "dim-grid-introduction",
   predictor_label = "Provided support",
   outcome_label = "MVPA",
@@ -1171,7 +1183,7 @@ overloading them and not loosing valuable clarity? -->
 #| results: asis
 
 dim_reparameterization_grid(
-  workshop_exchangeable_apim,
+  exchangeable_apim,
   id = "dim-grid-coefficients",
   predictor_label = "Provided support",
   outcome_label = "MVPA",

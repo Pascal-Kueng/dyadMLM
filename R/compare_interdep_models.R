@@ -4,10 +4,10 @@
 #' separate [interdep_data][prepare_interdep_data()] objects. Unlike
 #' `anova.glmmTMB()`, the model calls do not need to refer to the same R object.
 #' The function instead checks that the prepared data contain the same original
-#' observations before comparing the models.
+#' observations before comparing the models. Models may be supplied in either
+#' order; the model with fewer estimated parameters is shown first.
 #'
-#' @param full The full (larger) fitted `glmmTMB` model.
-#' @param restricted The restricted (smaller) fitted `glmmTMB` model.
+#' @param model1,model2 Two fitted `glmmTMB` models to compare.
 #'
 #' @details
 #' Both model calls must use named `interdep_data` objects that remain available
@@ -17,17 +17,19 @@
 #' including their types and attributes. It also checks structural dyad
 #' metadata, fitted rows, outcomes, weights and offsets, model family and link,
 #' maximum-likelihood estimation, and model convergence.
+#' Models fitted to ordinary data frames are outside this function's scope; use
+#' [stats::anova()] for those models.
 #'
 #' These checks establish that the models use equivalent observations. They
 #' cannot establish that one model is mathematically nested within the other.
-#' The caller remains responsible for supplying a genuinely restricted model
-#' and its corresponding full model. The usual chi-squared reference
-#' distribution may also be inappropriate when tested variance parameters are
-#' on the boundary.
+#' The caller remains responsible for supplying genuinely nested models. The
+#' usual chi-squared reference distribution may also be inappropriate when
+#' tested variance parameters are on the boundary.
 #'
 #' @return An `anova`-style data frame containing model degrees of freedom,
 #'   information criteria, log-likelihoods, the likelihood-ratio statistic, and
-#'   its chi-squared p-value.
+#'   its chi-squared p-value. When printed, a short conclusion interprets the
+#'   test at the 5% significance level.
 #'
 #' @examples
 #' if (requireNamespace("glmmTMB", quietly = TRUE)) {
@@ -48,67 +50,81 @@
 #'     data = full_data
 #'   )
 #'
-#'   compare_interdep_models(
-#'     full = full_model,
-#'     restricted = restricted_model
-#'   )
+#'   compare_interdep_models(restricted_model, full_model)
 #' }
 #'
 #' @export
-compare_interdep_models <- function(full, restricted) {
-  validate_interdep_model(restricted, "restricted")
-  validate_interdep_model(full, "full")
+compare_interdep_models <- function(model1, model2) {
+  validate_interdep_model(model1, "model1")
+  validate_interdep_model(model2, "model2")
 
+  # Save the calling environment so we can find the original data objects.
   caller_env <- parent.frame()
-  restricted_data <- interdep_model_data(restricted, caller_env, "restricted")
-  full_data <- interdep_model_data(full, caller_env, "full")
+  model1_data <- interdep_model_data(model1, caller_env, "model1")
+  model2_data <- interdep_model_data(model2, caller_env, "model2")
   validate_interdep_model_data(
-    restricted,
-    full,
-    restricted_data,
-    full_data
+    model1,
+    model2,
+    model1_data,
+    model2_data
   )
 
   # Use the argument expressions as row labels in the result.
   labels <- c(
-    deparse1(substitute(restricted)),
-    deparse1(substitute(full))
+    deparse1(substitute(model1)),
+    deparse1(substitute(model2))
   )
-  interdep_likelihood_ratio(full, restricted, labels)
+  return(interdep_likelihood_ratio(model1, model2, labels))
 }
 
 # Model and data checks -----------------------------------------------------
 
 validate_interdep_model <- function(model, name) {
-  comparison_check(
-    inherits(model, "glmmTMB"),
-    sprintf("`%s` must be a fitted `glmmTMB` model.", name)
-  )
-  comparison_check(
-    !isTRUE(model$modelInfo$REML),
-    "Both models must be fitted with maximum likelihood, not REML."
-  )
-  comparison_check(
-    is.null(model$fit$convergence) || model$fit$convergence == 0,
-    sprintf("The `%s` model did not converge.", name)
-  )
-  comparison_check(
-    is.null(model$sdr$pdHess) || isTRUE(model$sdr$pdHess),
-    sprintf("The `%s` model has a non-positive-definite Hessian matrix.", name)
-  )
+  if (!inherits(model, "glmmTMB")) {
+    stop(
+      sprintf("`%s` must be a fitted `glmmTMB` model.", name),
+      call. = FALSE
+    )
+  }
+  if (isTRUE(model$modelInfo$REML)) {
+    stop(
+      "Both models must be fitted with maximum likelihood, not REML.",
+      call. = FALSE
+    )
+  }
+  if (!is.null(model$fit$convergence) &&
+      !isTRUE(model$fit$convergence == 0)) {
+    stop(sprintf("The `%s` model did not converge.", name), call. = FALSE)
+  }
+  # pdHess is NULL when the Hessian was not calculated, e.g. with se = FALSE.
+  if (!is.null(model$sdr$pdHess) && !isTRUE(model$sdr$pdHess)) {
+    stop(
+      sprintf(
+        "The `%s` model has a non-positive-definite Hessian matrix.",
+        name
+      ),
+      call. = FALSE
+    )
+  }
 
   invisible(model)
 }
 
 interdep_model_data <- function(model, caller_env, argument) {
   data_call <- model$call$data
-  comparison_check(
-    is.symbol(data_call),
-    sprintf(
-      "The `%s` model must have been fitted with a named `interdep_data` object in `data`.",
-      argument
+  if (!is.symbol(data_call)) {
+    stop(
+      sprintf(
+        paste0(
+          "The `%s` model must have been fitted with a named ",
+          "`interdep_data` object in `data`. Use `stats::anova()` to compare ",
+          "ordinary `glmmTMB` models."
+        ),
+        argument
+      ),
+      call. = FALSE
     )
-  )
+  }
 
   data_name <- as.character(data_call)
   model_formula <- stats::formula(model, component = "cond")
@@ -123,9 +139,19 @@ interdep_model_data <- function(model, caller_env, argument) {
     }
     if (exists(data_name, envir = search_env, inherits = TRUE)) {
       candidate <- get(data_name, envir = search_env, inherits = TRUE)
-      if (inherits(candidate, "interdep_data")) {
-        return(candidate)
+      if (!inherits(candidate, "interdep_data")) {
+        stop(
+          sprintf(
+            paste0(
+              "The `%s` model was not fitted with an `interdep_data` object. ",
+              "Use `stats::anova()` to compare ordinary `glmmTMB` models."
+            ),
+            argument
+          ),
+          call. = FALSE
+        )
       }
+      return(candidate)
     }
   }
 
@@ -141,157 +167,212 @@ interdep_model_data <- function(model, caller_env, argument) {
   )
 }
 
-validate_interdep_model_data <- function(restricted, full,
-                                         restricted_data, full_data) {
-  comparison_check(
-    nrow(restricted_data) == nrow(full_data),
-    "The two prepared datasets have different numbers of rows."
-  )
+validate_interdep_model_data <- function(model1, model2,
+                                         model1_data, model2_data) {
+  if (nrow(model1_data) != nrow(model2_data)) {
+    stop(
+      "The two prepared datasets have different numbers of rows.",
+      call. = FALSE
+    )
+  }
 
   # Both preparations must agree on the columns that define the dyadic data.
-  restricted_meta <- attr(restricted_data, "interdep")
-  full_meta <- attr(full_data, "interdep")
+  model1_meta <- attr(model1_data, "interdep")
+  model2_meta <- attr(model2_data, "interdep")
   for (field in c("group", "member", "role", "time")) {
-    comparison_check(
-      identical(restricted_meta[[field]], full_meta[[field]]),
-      sprintf("The two prepared datasets use different `%s` variables.", field)
-    )
+    if (!identical(model1_meta[[field]], model2_meta[[field]])) {
+      stop(
+        sprintf(
+          "The two prepared datasets use different `%s` variables.",
+          field
+        ),
+        call. = FALSE
+      )
+    }
   }
 
   # Generated .i_ columns may differ across model parameterizations.
   # The original columns must still be identical.
-  restricted_original <- names(restricted_data)[
-    !startsWith(names(restricted_data), ".i_")
+  model1_original <- names(model1_data)[
+    !startsWith(names(model1_data), ".i_")
   ]
-  full_original <- names(full_data)[!startsWith(names(full_data), ".i_")]
-  comparison_check(
-    setequal(restricted_original, full_original),
-    "The two prepared datasets do not contain the same original columns."
-  )
-
-  for (column in restricted_original) {
-    comparison_check(
-      identical(restricted_data[[column]], full_data[[column]]),
-      sprintf(
-        "Original column `%s` differs between the two prepared datasets.",
-        column
-      )
+  model2_original <- names(model2_data)[!startsWith(names(model2_data), ".i_")]
+  if (!setequal(model1_original, model2_original)) {
+    stop(
+      "The two prepared datasets do not contain the same original columns.",
+      call. = FALSE
     )
   }
 
+  for (column in model1_original) {
+    if (!identical(model1_data[[column]], model2_data[[column]])) {
+      stop(
+        sprintf(
+          "Original column `%s` differs between the two prepared datasets.",
+          column
+        ),
+        call. = FALSE
+      )
+    }
+  }
+
   # Inspect the left side directly so transformations such as log(y) fail.
-  restricted_formula <- stats::formula(restricted, component = "cond")
-  full_formula <- stats::formula(full, component = "cond")
-  restricted_response <- restricted_formula[[2L]]
-  full_response <- full_formula[[2L]]
+  model1_formula <- stats::formula(model1, component = "cond")
+  model2_formula <- stats::formula(model2, component = "cond")
+  model1_response <- model1_formula[[2L]]
+  model2_response <- model2_formula[[2L]]
 
-  comparison_check(
-    is.symbol(restricted_response) && is.symbol(full_response),
-    "Only an untransformed outcome stored in the prepared data is supported."
-  )
+  if (!is.symbol(model1_response) || !is.symbol(model2_response)) {
+    stop(
+      "Only an untransformed outcome stored in the prepared data is supported.",
+      call. = FALSE
+    )
+  }
 
-  restricted_response <- as.character(restricted_response)
-  full_response <- as.character(full_response)
-  comparison_check(
-    identical(restricted_response, full_response),
-    "The two models use different outcome variables."
-  )
-  comparison_check(
-    restricted_response %in% restricted_original,
-    "Only an untransformed outcome stored in the prepared data is supported."
-  )
+  model1_response <- as.character(model1_response)
+  model2_response <- as.character(model2_response)
+  if (!identical(model1_response, model2_response)) {
+    stop("The two models use different outcome variables.", call. = FALSE)
+  }
+  if (!model1_response %in% model1_original) {
+    stop(
+      "Only an untransformed outcome stored in the prepared data is supported.",
+      call. = FALSE
+    )
+  }
 
   # Row names show which observations glmmTMB kept after handling missing data.
-  restricted_rows <- row.names(restricted$frame)
-  full_rows <- row.names(full$frame)
-  comparison_check(
-    identical(restricted_rows, full_rows),
-    "The two models were fitted to different observation rows."
-  )
+  model1_rows <- row.names(model1$frame)
+  model2_rows <- row.names(model2$frame)
+  if (!identical(model1_rows, model2_rows)) {
+    stop(
+      "The two models were fitted to different observation rows.",
+      call. = FALSE
+    )
+  }
 
   # Compare what the models actually fitted, not only the current data objects.
-  comparison_check(
-    identical(
-      unname(stats::model.response(restricted$frame)),
-      unname(stats::model.response(full$frame))
-    ),
-    "The fitted outcome values differ between the two models."
-  )
+  model1_outcome <- unname(stats::model.response(model1$frame))
+  model2_outcome <- unname(stats::model.response(model2$frame))
+  if (!identical(model1_outcome, model2_outcome)) {
+    stop(
+      "The fitted outcome values differ between the two models.",
+      call. = FALSE
+    )
+  }
 
   # No weights means all observations have weight one.
-  restricted_weights <- stats::model.weights(restricted$frame)
-  full_weights <- stats::model.weights(full$frame)
-  if (is.null(restricted_weights)) restricted_weights <- rep(1, length(restricted_rows))
-  if (is.null(full_weights)) full_weights <- rep(1, length(full_rows))
-  comparison_check(
-    identical(as.numeric(restricted_weights), as.numeric(full_weights)),
-    "The two models use different observation weights."
-  )
+  model1_weights <- stats::model.weights(model1$frame)
+  model2_weights <- stats::model.weights(model2$frame)
+  if (is.null(model1_weights)) model1_weights <- rep(1, length(model1_rows))
+  if (is.null(model2_weights)) model2_weights <- rep(1, length(model2_rows))
+  if (!identical(as.numeric(model1_weights), as.numeric(model2_weights))) {
+    stop("The two models use different observation weights.", call. = FALSE)
+  }
 
   # No offset means an offset of zero for every observation.
-  restricted_offset <- stats::model.offset(restricted$frame)
-  full_offset <- stats::model.offset(full$frame)
-  if (is.null(restricted_offset)) restricted_offset <- rep(0, length(restricted_rows))
-  if (is.null(full_offset)) full_offset <- rep(0, length(full_rows))
-  comparison_check(
-    identical(as.numeric(restricted_offset), as.numeric(full_offset)),
-    "The two models use different offsets."
-  )
-
-  restricted_family <- restricted$modelInfo$family
-  full_family <- full$modelInfo$family
-  same_family <- identical(restricted_family$family, full_family$family)
-  same_link <- identical(restricted_family$link, full_family$link)
-  comparison_check(
-    same_family && same_link,
-    "The two models must use the same family and link."
-  )
-
-  invisible(TRUE)
-}
-
-comparison_check <- function(condition, message) {
-  if (!isTRUE(condition)) {
-    stop(message, call. = FALSE)
+  model1_offset <- stats::model.offset(model1$frame)
+  model2_offset <- stats::model.offset(model2$frame)
+  if (is.null(model1_offset)) model1_offset <- rep(0, length(model1_rows))
+  if (is.null(model2_offset)) model2_offset <- rep(0, length(model2_rows))
+  if (!identical(as.numeric(model1_offset), as.numeric(model2_offset))) {
+    stop("The two models use different offsets.", call. = FALSE)
   }
+
+  model1_family <- model1$modelInfo$family
+  model2_family <- model2$modelInfo$family
+  same_family <- identical(model1_family$family, model2_family$family)
+  same_link <- identical(model1_family$link, model2_family$link)
+  if (!same_family || !same_link) {
+    stop("The two models must use the same family and link.", call. = FALSE)
+  }
+
   invisible(TRUE)
 }
 
 # Likelihood-ratio test and output -----------------------------------------
 
-interdep_likelihood_ratio <- function(full, restricted, labels) {
-  restricted_log_lik <- stats::logLik(restricted)
-  full_log_lik <- stats::logLik(full)
-  restricted_df <- attr(restricted_log_lik, "df")
-  full_df <- attr(full_log_lik, "df")
+interdep_likelihood_ratio <- function(model1, model2, labels) {
+  model1_log_lik <- stats::logLik(model1)
+  model2_log_lik <- stats::logLik(model2)
+  model1_df <- attr(model1_log_lik, "df")
+  model2_df <- attr(model2_log_lik, "df")
 
-  valid_df <- length(restricted_df) == 1L && length(full_df) == 1L &&
-    is.finite(restricted_df) && is.finite(full_df)
-  comparison_check(
-    valid_df,
-    "Could not determine the models' numbers of parameters."
-  )
-  comparison_check(
-    full_df > restricted_df,
-    "`full` must have more estimated parameters than `restricted`."
-  )
+  valid_df <- length(model1_df) == 1L && length(model2_df) == 1L &&
+    is.finite(model1_df) && is.finite(model2_df)
+  if (!valid_df) {
+    stop(
+      "Could not determine the models' numbers of parameters.",
+      call. = FALSE
+    )
+  }
+  if (model1_df == model2_df) {
+    stop(
+      "The two models must have different numbers of estimated parameters.",
+      call. = FALSE
+    )
+  }
+
+  if (model1_df < model2_df) {
+    restricted <- model1
+    full <- model2
+    restricted_log_lik <- model1_log_lik
+    full_log_lik <- model2_log_lik
+    restricted_df <- model1_df
+    full_df <- model2_df
+  } else {
+    restricted <- model2
+    full <- model1
+    restricted_log_lik <- model2_log_lik
+    full_log_lik <- model1_log_lik
+    restricted_df <- model2_df
+    full_df <- model1_df
+    labels <- rev(labels)
+  }
 
   restricted_log_lik <- as.numeric(restricted_log_lik)
   full_log_lik <- as.numeric(full_log_lik)
   statistic <- 2 * (full_log_lik - restricted_log_lik)
 
   # Allow only a negligible negative value caused by numerical rounding.
-  comparison_check(
-    is.finite(statistic) && statistic >= -sqrt(.Machine$double.eps),
-    paste0(
-      "The full model has a lower log-likelihood than the restricted model. ",
-      "Check the model order, convergence, and nesting."
+  if (!is.finite(statistic) || statistic < -sqrt(.Machine$double.eps)) {
+    stop(
+      paste0(
+        "The larger model has a lower log-likelihood than the smaller model. ",
+        "Check convergence and nesting."
+      ),
+      call. = FALSE
     )
-  )
+  }
 
   statistic <- max(0, statistic)
   df_difference <- full_df - restricted_df
   p_value <- stats::pchisq(statistic, df_difference, lower.tail = FALSE)
+
+  formatted_p <- format.pval(p_value, digits = 3, eps = 0.001)
+  if (startsWith(formatted_p, "<")) {
+    p_text <- paste("p <", substring(formatted_p, 2L))
+  } else {
+    p_text <- paste("p =", formatted_p)
+  }
+
+  if (p_value < 0.05) {
+    conclusion <- sprintf(
+      paste0(
+        "Conclusion (5%% level): The likelihood-ratio test provides evidence ",
+        "that `%s` fits better than `%s` (%s)."
+      ),
+      labels[2], labels[1], p_text
+    )
+  } else {
+    conclusion <- sprintf(
+      paste0(
+        "Conclusion (5%% level): The likelihood-ratio test finds no clear ",
+        "improvement from `%s` to `%s` (%s). This does not establish equal fit."
+      ),
+      labels[1], labels[2], p_text
+    )
+  }
 
   # Build the table here because anova.glmmTMB() rejects different data names.
   out <- data.frame(
@@ -309,9 +390,19 @@ interdep_likelihood_ratio <- function(full, restricted, labels) {
 
   attr(out, "heading") <- c(
     "Likelihood-ratio test for nested models fitted to equivalent interdep data",
-    "Mathematical nesting is assumed and cannot be verified from the data alone.",
+    "Assumes mathematical nesting and an appropriate chi-squared reference distribution.",
     ""
   )
-  class(out) <- c("anova", "data.frame")
+  attr(out, "conclusion") <- conclusion
+  class(out) <- c("interdep_model_comparison", "anova", "data.frame")
   out
+}
+
+#' @export
+#' @noRd
+print.interdep_model_comparison <- function(x, ...) {
+  # Print the usual ANOVA table first, then the plain-language conclusion.
+  NextMethod()
+  cat("\n", attr(x, "conclusion"), "\n", sep = "")
+  invisible(x)
 }

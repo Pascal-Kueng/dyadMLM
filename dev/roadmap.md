@@ -551,6 +551,11 @@ Complete these before calling the feature set CRAN-ready:
   - Add the Zenodo concept DOI to README and citation metadata on `main`
   - Include the DOI in the next CRAN release
 
+## Version 0.0.2
+
+- Extend `compare_interdep_models()` to support fitted `brms` models, using a
+  Bayesian-appropriate comparison method and similarly clear output.
+
 ## Version 0.1.0
 
 - Extend the v0.0.1 covariance back-transformation only where applied use

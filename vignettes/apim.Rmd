@@ -387,8 +387,8 @@ observations before performing the likelihood-ratio test:
 
 ```{r compare-cross-distinguishability}
 compare_interdep_models(
-  restricted = apim_exchangeable_model,
-  full = apim_distinguishable_model
+  apim_exchangeable_model,
+  apim_distinguishable_model
 )
 ```
 
@@ -397,7 +397,6 @@ show which parameter differs. The helper also cannot determine whether the
 models are mathematically nested; that remains a modeling requirement. The
 usual chi-squared reference distribution may be unreliable when a tested
 variance parameter lies on its boundary.
-
 
 
 ## Intensive longitudinal APIMs

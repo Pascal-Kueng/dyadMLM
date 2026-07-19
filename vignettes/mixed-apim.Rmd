@@ -350,8 +350,8 @@ mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
 )
 
 compare_interdep_models(
-  restricted = mixed_cross_gaussian_model_constrained,
-  full = mixed_cross_gaussian_model
+  mixed_cross_gaussian_model_constrained,
+  mixed_cross_gaussian_model
 )
 ```
 
