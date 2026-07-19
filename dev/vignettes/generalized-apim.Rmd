@@ -51,7 +51,7 @@ observation-level Tweedie variance remains part of the model.
 ### Distinguishable Tweedie APIM
 
 ```{r prepare-tweedie-distinguishable}
-tweedie_distinguishable_data <- prepare_interdep_data(
+tweedie_distinguishable_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional_tweedie,
   group = coupleID,
   member = personID,
@@ -96,7 +96,7 @@ summary(tweedie_distinguishable_model)
 ### Exchangeable Tweedie APIM
 
 ```{r prepare-tweedie-exchangeable}
-tweedie_exchangeable_data <- prepare_interdep_data(
+tweedie_exchangeable_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional_tweedie,
   group = coupleID,
   member = personID,

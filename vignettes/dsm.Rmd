@@ -51,7 +51,7 @@ substantively meaningful when the directional coefficients are interpreted.
 Here, `c("female", "male")` defines every difference as female minus male.
 
 ```{r prepare-cross-dsm}
-cross_dsm_data <- prepare_interdep_data(
+cross_dsm_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -263,7 +263,7 @@ the direction and compute $X_{\mathrm{male}} - X_{\mathrm{female}}$. This
 changes the direction of the differences, but not the substantive model.
 
 ```{r prepare-cross-dsm-inverted}
-cross_dsm_data_inverted <- prepare_interdep_data(
+cross_dsm_data_inverted <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,

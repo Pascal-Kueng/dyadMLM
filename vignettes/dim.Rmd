@@ -65,7 +65,7 @@ change the model [@kenny2006dyadic]. Whether roles can and should be treated as
 exchangeable is a substantive assumption (see [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability)).
 
 One way to make this assumption in `interdep` at the data-preparation step is
-to omit `role` from `prepare_interdep_data()`. This treats all dyads as the
+to omit `role` from `interdep::prepare_interdep_data()`. This treats all dyads as the
 same exchangeable composition. Passing a `role` is also possible when it leads
 to exactly one exchangeable composition (e.g., only female-female dyads).
 Otherwise, refer to the [Getting Started vignette](getting-started.html) for how
@@ -73,7 +73,7 @@ to filter, pool, and constrain dyad compositions to obtain a single exchangeable
 dyad composition.
 
 ```{r prepare-cross-exchangeable}
-cross_exchangeable_data <- prepare_interdep_data(
+cross_exchangeable_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -88,7 +88,7 @@ print(cross_exchangeable_data, n = 4)
 ```
 
 For the exchangeable random-effects specification,
-`prepare_interdep_data()` creates a member-difference contrast `.i_diff_*`,
+`interdep::prepare_interdep_data()` creates a member-difference contrast `.i_diff_*`,
 coded as `+1` for one partner and `-1` for the other. Because these member labels
 are arbitrary, setting `seed` makes their assignment reproducible.
 
@@ -250,7 +250,7 @@ is equivalent to the comparison shown in [Testing distinguishability in the APIM
 ### Demonstrating model equivalence to APIM
 
 The same model can be written in APIM form. Since we have requested both sets of
-variables from `prepare_interdep_data()`, we can fit one directly. For more
+variables from `interdep::prepare_interdep_data()`, we can fit one directly. For more
 guidance on APIM specifications and different models, see the
 [Actor-Partner Interdependence Model vignette](apim.html).
 
@@ -423,7 +423,7 @@ Use `temporal_predictor_decomposition = "none"` to construct only the raw
 dyad-occasion mean and within-dyad member deviation.
 
 ```{r prepare-ild-exchangeable}
-ild_exchangeable_data <- prepare_interdep_data(
+ild_exchangeable_data <- interdep::prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -724,7 +724,7 @@ addressed in the [APIM vignette's discussion of dynamic models](apim.html#dynami
 Brief example to obtain lagged raw and within-person centered versions of the outcome:
 
 ```{r prepare-ild-dim-dynamic}
-ild_exchangeable_data_dynamic <- prepare_interdep_data(
+ild_exchangeable_data_dynamic <- interdep::prepare_interdep_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,

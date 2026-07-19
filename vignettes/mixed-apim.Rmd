@@ -87,11 +87,11 @@ mixed_cross_targets <- data.frame(
 mixed_cross_targets
 ```
 
-We first prepare the data with `prepare_interdep_data()`, which identifies all
+We first prepare the data with `interdep::prepare_interdep_data()`, which identifies all
 observed dyad compositions.
 
 ```{r prepare-mixed-cross-sectional}
-mixed_cross_data <- prepare_interdep_data(
+mixed_cross_data <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
@@ -110,7 +110,7 @@ their within-dyad covariance to be estimated
 
 The returned `.i_diff_*` variables contain `-1` and `1` for the corresponding
 exchangeable composition and `0` for all other compositions.
-`prepare_interdep_data()` creates this structure automatically.
+`interdep::prepare_interdep_data()` creates this structure automatically.
 The [APIM vignette](apim.html#exchangeable-residual-structure) derives
 the resulting covariance matrix and shows how to back-transform the sum and
 difference variances to the usual equal-variance member-level covariance
@@ -301,7 +301,7 @@ different versions of pooling can be compared. For example, it can be tested
 whether pooling male-male and female-female couples as same-sex substantially
 worsens model fit, considering both the fixed effects and random-effects
 structure. Such model comparisons, performed with
-[`compare_interdep_models()`](../reference/compare_interdep_models.html) as
+[`interdep::compare_interdep_models()`](../reference/compare_interdep_models.html) as
 demonstrated in [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability),
 require the restricted and unrestricted models to use the same observations and
 require the restricted model to be nested within the unrestricted model.
@@ -313,7 +313,7 @@ plus composition deviations.
 ### Model comparison with a restricted model
 
 The [regular APIM vignette](apim.html#testing-distinguishability) introduces
-[`compare_interdep_models()`](../reference/compare_interdep_models.html) by
+[`interdep::compare_interdep_models()`](../reference/compare_interdep_models.html) by
 comparing a distinguishable APIM with its
 exchangeable restriction. Here, we use the same approach for a
 mixed-composition constraint. We treat female-male dyads as exchangeable and
@@ -322,7 +322,7 @@ In an applied analysis, these constraints would require a theoretical or empiric
 justification.
 
 ```{r prepare-mixed-cross-sectional-constrained}
-mixed_cross_data_constrained <- prepare_interdep_data(
+mixed_cross_data_constrained <- interdep::prepare_interdep_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
   member = personID,
@@ -352,7 +352,7 @@ mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
   , data = mixed_cross_data_constrained
 )
 
-compare_interdep_models(
+interdep::compare_interdep_models(
   mixed_cross_gaussian_model_constrained,
   mixed_cross_gaussian_model
 )
@@ -379,7 +379,7 @@ Aside from the pooling, we prepare the data in the same way, now adding `time`
 and a predictor:
 
 ```{r prepare-mixed-ild}
-mixed_ild_data <- prepare_interdep_data(
+mixed_ild_data <- interdep::prepare_interdep_data(
   example_dyadic_ILD_mixed,
   group = coupleID,
   member = personID,
