@@ -365,11 +365,11 @@ mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
 )
 
 compare_interdep_models(
-  restricted = mixed_cross_gaussian_model_constrained,
-  full = mixed_cross_gaussian_model
+  mixed_cross_gaussian_model_constrained,
+  mixed_cross_gaussian_model
 )
-#> Likelihood-ratio test for nested models fitted to equivalent interdep data
-#> Mathematical nesting is assumed and cannot be verified from the data alone.
+#> Likelihood-ratio test for nested models fitted to equivalent data
+#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                                        Df    AIC    BIC   logLik deviance
 #> mixed_cross_gaussian_model_constrained  6 2087.8 2114.6 -1037.90   2075.8
@@ -379,6 +379,8 @@ compare_interdep_models(
 #> mixed_cross_gaussian_model             87.856      5  < 2.2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Conclusion (5% level): The likelihood-ratio test provides evidence that `mixed_cross_gaussian_model` fits better than `mixed_cross_gaussian_model_constrained` (p < 0.001).
 ```
 
 Here, the constrained model fits substantially worse than the full

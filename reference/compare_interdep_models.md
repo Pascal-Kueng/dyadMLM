@@ -1,51 +1,49 @@
-# Compare nested models fitted to equivalent interdep data
+# Compare nested glmmTMB models fitted to equivalent data
 
-Performs a likelihood-ratio test for two nested `glmmTMB` models fitted
-to separate
+Performs a likelihood-ratio test for two nested `glmmTMB` models. The
+models may use ordinary data frames or
 [interdep_data](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-objects. Unlike `anova.glmmTMB()`, the model calls do not need to refer
-to the same R object. The function instead checks that the prepared data
-contain the same original observations before comparing the models.
+objects, and their calls do not need to refer to the same R object.
+Models may be supplied in either order. The model with fewer estimated
+parameters is shown first in the result.
 
 ## Usage
 
 ``` r
-compare_interdep_models(full, restricted)
+compare_interdep_models(model1, model2)
 ```
 
 ## Arguments
 
-- full:
+- model1, model2:
 
-  The full (larger) fitted `glmmTMB` model.
-
-- restricted:
-
-  The restricted (smaller) fitted `glmmTMB` model.
+  Two fitted `glmmTMB` models to compare.
 
 ## Value
 
 An `anova`-style data frame containing model degrees of freedom,
 information criteria, log-likelihoods, the likelihood-ratio statistic,
-and its chi-squared p-value.
+and its chi-squared p-value. When printed, a short conclusion interprets
+the test at the 5% significance level.
 
 ## Details
 
-Both model calls must use named `interdep_data` objects that remain
-available when the models are compared. The checks assume these objects
-have not been modified since fitting. Each model must use the same
-untransformed response column. The function requires exactly identical
-original, non-`.i_` columns, including their types and attributes. It
-also checks structural dyad metadata, fitted rows, outcomes, weights and
-offsets, model family and link, maximum-likelihood estimation, and model
-convergence.
+Both model calls must use named data-frame objects that remain available
+when the models are compared. The checks assume these objects have not
+been modified since fitting. All ordinary data columns must be
+identical, including their types and attributes. For `interdep_data`,
+generated `.i_` columns may differ, but the original columns must be
+identical. Ordinary and prepared data may be compared with each other.
+Dyad metadata are checked when both models use `interdep_data`. The
+function also checks fitted rows, outcomes, weights and offsets, model
+family and link, maximum-likelihood estimation, and model convergence.
+Each model must use the same untransformed response column.
 
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the
-other. The caller remains responsible for supplying a genuinely
-restricted model and its corresponding full model. The usual chi-squared
-reference distribution may also be inappropriate when tested variance
-parameters are on the boundary.
+other. The caller remains responsible for supplying genuinely nested
+models. The usual chi-squared reference distribution may also be
+inappropriate when tested variance parameters are on the boundary.
 
 ## Examples
 
@@ -68,17 +66,16 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     data = full_data
   )
 
-  compare_interdep_models(
-    full = full_model,
-    restricted = restricted_model
-  )
+  compare_interdep_models(restricted_model, full_model)
 }
-#> Likelihood-ratio test for nested models fitted to equivalent interdep data
-#> Mathematical nesting is assumed and cannot be verified from the data alone.
+#> Likelihood-ratio test for nested models fitted to equivalent data
+#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                  Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)   
 #> restricted_model  3 917.29 926.98 -455.64   911.29                            
 #> full_model        4 908.52 921.45 -450.26   900.52 10.765      1   0.001034 **
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#> 
+#> Conclusion (5% level): The likelihood-ratio test provides evidence that `full_model` fits better than `restricted_model` (p = 0.00103).
 ```

@@ -414,11 +414,11 @@ equivalent original observations before performing the likelihood-ratio
 test:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/compare_interdep_models.html">compare_interdep_models</a></span><span class="op">(</span></span>
-<span>  restricted <span class="op">=</span> <span class="va">apim_exchangeable_model</span>,</span>
-<span>  full <span class="op">=</span> <span class="va">apim_distinguishable_model</span></span>
+<span>  <span class="va">apim_exchangeable_model</span>,</span>
+<span>  <span class="va">apim_distinguishable_model</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent interdep data</span></span>
-<span><span class="co">#&gt; Mathematical nesting is assumed and cannot be verified from the data alone.</span></span>
+<span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent data</span></span>
+<span><span class="co">#&gt; Assumes mathematical nesting and an appropriate chi-squared reference distribution.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
 <span><span class="co">#&gt; apim_exchangeable_model     5 603.98 619.84 -296.99   593.98              </span></span>
@@ -427,7 +427,9 @@ test:</p>
 <span><span class="co">#&gt; apim_exchangeable_model                  </span></span>
 <span><span class="co">#&gt; apim_distinguishable_model  0.0001599 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Conclusion (5% level): The likelihood-ratio test provides evidence that `apim_distinguishable_model` fits better than `apim_exchangeable_model` (p &lt; 0.001).</span></span></code></pre></div>
 <p>The test provides evidence against all restrictions jointly, but it
 does not show which parameter differs. The helper also cannot determine
 whether the models are mathematically nested; that remains a modeling

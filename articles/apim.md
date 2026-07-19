@@ -367,11 +367,11 @@ performing the likelihood-ratio test:
 ``` r
 
 compare_interdep_models(
-  restricted = apim_exchangeable_model,
-  full = apim_distinguishable_model
+  apim_exchangeable_model,
+  apim_distinguishable_model
 )
-#> Likelihood-ratio test for nested models fitted to equivalent interdep data
-#> Mathematical nesting is assumed and cannot be verified from the data alone.
+#> Likelihood-ratio test for nested models fitted to equivalent data
+#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
 #> apim_exchangeable_model     5 603.98 619.84 -296.99   593.98              
@@ -381,6 +381,8 @@ compare_interdep_models(
 #> apim_distinguishable_model  0.0001599 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Conclusion (5% level): The likelihood-ratio test provides evidence that `apim_distinguishable_model` fits better than `apim_exchangeable_model` (p < 0.001).
 ```
 
 The test provides evidence against all restrictions jointly, but it does
