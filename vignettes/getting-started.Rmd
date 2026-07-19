@@ -114,7 +114,7 @@ distinguishable dyads. Each dyad has two rows: one for each member.
 head(example_dyadic_crosssectional)
 ```
 
-We validate and prepare the data with the function `prepare_interdep_data()`
+We validate and prepare the data with the function `prepare_interdep_data()`.
 
 ```{r prepare-cross-distinguishable}
 cross_distinguishable_data <- prepare_interdep_data(
@@ -166,7 +166,7 @@ and `1` to the two members of each exchangeable dyad
 Refer to the [exchangeable APIM section](apim.html#the-cross-sectional-gaussian-exchangeable-apim)
 for how to use these columns to specify an exchangeable dyadic APIM and recover
 the constrained actor-partner variance-covariance structure with
-[`interdep::exchangeable_rescov()`](../reference/exchangeable_rescov.html).
+[`exchangeable_rescov()`](../reference/exchangeable_rescov.html).
 
 Alternatively, we can explicitly set a dyad composition to exchangeable:
 
@@ -188,6 +188,8 @@ print(cross_exchangeable_data, n = 4)
 (e.g., `male-female` and `female-male` will both work), and you can use different separators
 like `male_female`, `male_x_female`, or `male female`.
 
+## Generating DIM and DSM columns
+
 For exchangeable dyads, we can request DIM predictor columns. This works here
 because omitting `role` treats all dyads as a single exchangeable composition.
 
@@ -204,9 +206,9 @@ cross_dim_data <- prepare_interdep_data(
 print(cross_dim_data, n = 4)
 ```
 
-For distinguishable dyads, DSM columns can be requested instead. These additionally require
-an explicit role order. The role order defines the direction of
-all DSM predictor differences and the DSM role contrast
+Generating DSM columns for distinguishable dyads additionally requires an
+explicit role order. The role order defines the direction of all DSM predictor
+differences and the DSM role contrast
 [@iidaModelsInterdependentIndividuals2018].
 
 ```{r prepare-cross-dsm}
@@ -224,7 +226,7 @@ print(cross_dsm_data, n = 4)
 ```
 
 
-## Intensive longitudinal dyadic data 
+## Intensive longitudinal dyadic data
 
 `example_dyadic_ILD` is a simulated intensive longitudinal dyadic dataset. Each
 dyad has repeated observations over `diaryday`, with one row per person-day.
@@ -233,7 +235,7 @@ dyad has repeated observations over `diaryday`, with one row per person-day.
 example_dyadic_ILD <- example_dyadic_ILD |>
   dplyr::arrange(
     coupleID, diaryday
-  ) 
+  )
 ```
 
 To prepare intensive longitudinal data, pass the `time` variable to
@@ -275,7 +277,8 @@ and partner columns alongside their contemporaneous versions. Lagging respects
 the dyad and member structure, matches observations at exactly `time - 1`, and
 does not bridge missing occasions.
 
-Brief example:
+For a simpler dynamic model, this example omits `role` and therefore treats all
+couples as exchangeable:
 
 ```{r prepare-ild-apim-dynamic}
 ild_apim_data_dynamic <- prepare_interdep_data(
@@ -294,10 +297,10 @@ print(ild_apim_data_dynamic, n = 6)
 ```
 
 **Note:** Whether to use the raw or within-person-centered lagged outcome depends
-on the research question and the data. Including a lagged **outcome** in dynamic 
-models can introduce bias, especially in shorter time series 
+on the research question and the data. Including a lagged **outcome** in dynamic
+models can introduce bias, especially in shorter time series
 [@hamakerCenterNotCenter2015; @nickellBiasesDynamicModels1981;
-@gistelinckMultilevelAutoregressiveSmall2021]. See the [APIM vignette](apim.html) 
+@gistelinckMultilevelAutoregressiveSmall2021]. See the [APIM vignette](apim.html)
 for a more detailed discussion and guidance.
 
 ## Data with multiple and mixed-composition dyads
@@ -320,9 +323,10 @@ mixed_cross_data <- prepare_interdep_data(
 print(mixed_cross_data, n = 4)
 ```
 
-Note that when role compositions are available, each exchangeable composition 
-receives its own difference contrast, such as `.i_diff_female_x_female_arbitrary`, which 
-is `0` for all other compositions [@delrosarioPracticalGuideSpecifying2025]. 
+Note that when role compositions are available, each exchangeable composition
+receives its own difference contrast, such as
+`.i_diff_female_x_female_arbitrary`, which is `0` for all other compositions
+[@delrosarioPracticalGuideSpecifying2025].
 
 We can use this data to model these dyad types as separate or in the same model.
 The [APIMs with Mixed Dyad Compositions vignette](mixed-apim.html) shows
@@ -423,7 +427,7 @@ print(mixed_cross_data_pooled_constrained)
 
 ---
 
-**Continue** with the 
+**Continue** with the
 [Actor-Partner Interdependence Model (APIM) vignette](apim.html).
 
 Related model-specific vignettes:
