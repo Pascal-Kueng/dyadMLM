@@ -1,24 +1,24 @@
-#' Compare nested models fitted to equivalent interdep data
+#' Compare nested glmmTMB models fitted to equivalent data
 #'
-#' Performs a likelihood-ratio test for two nested `glmmTMB` models fitted to
-#' separate [interdep_data][prepare_interdep_data()] objects. Unlike
-#' `anova.glmmTMB()`, the model calls do not need to refer to the same R object.
-#' The function instead checks that the prepared data contain the same original
-#' observations before comparing the models. Models may be supplied in either
-#' order. The model with fewer estimated parameters is shown first in the result.
+#' Performs a likelihood-ratio test for two nested `glmmTMB` models. The models
+#' may use ordinary data frames or [interdep_data][prepare_interdep_data()]
+#' objects, and their calls do not need to refer to the same R object. Models may
+#' be supplied in either order. The model with fewer estimated parameters is
+#' shown first in the result.
 #'
 #' @param model1,model2 Two fitted `glmmTMB` models to compare.
 #'
 #' @details
-#' Both model calls must use named `interdep_data` objects that remain available
-#' when the models are compared. The checks assume these objects have not been
-#' modified since fitting. Each model must use the same untransformed response
-#' column. The function requires exactly identical original, non-`.i_` columns,
-#' including their types and attributes. It also checks structural dyad
-#' metadata, fitted rows, outcomes, weights and offsets, model family and link,
-#' maximum-likelihood estimation, and model convergence.
-#' Models fitted to ordinary data frames are outside this function's scope. If
-#' they use the same data object, compare them with [stats::anova()].
+#' Both model calls must use named data-frame objects that remain available when
+#' the models are compared. The checks assume these objects have not been
+#' modified since fitting. All ordinary data columns must be identical,
+#' including their types and attributes. For `interdep_data`, generated `.i_`
+#' columns may differ, but the original columns must be identical. Ordinary and
+#' prepared data may be compared with each other. Dyad metadata are checked when
+#' both models use `interdep_data`. The function also checks fitted rows,
+#' outcomes, weights and offsets, model family and link, maximum-likelihood
+#' estimation, and model convergence. Each model must use the same untransformed
+#' response column.
 #'
 #' These checks establish that the models use equivalent observations. They
 #' cannot establish that one model is mathematically nested within the other.
@@ -55,14 +55,14 @@
 #'
 #' @export
 compare_interdep_models <- function(model1, model2) {
-  validate_interdep_model(model1, "model1")
-  validate_interdep_model(model2, "model2")
+  validate_comparison_model(model1, "model1")
+  validate_comparison_model(model2, "model2")
 
   # Save the calling environment so we can find the original data objects.
   caller_env <- parent.frame()
-  model1_data <- interdep_model_data(model1, caller_env, "model1")
-  model2_data <- interdep_model_data(model2, caller_env, "model2")
-  validate_interdep_model_data(
+  model1_data <- comparison_model_data(model1, caller_env, "model1")
+  model2_data <- comparison_model_data(model2, caller_env, "model2")
+  validate_comparison_data(
     model1,
     model2,
     model1_data,
@@ -74,12 +74,12 @@ compare_interdep_models <- function(model1, model2) {
     deparse1(substitute(model1)),
     deparse1(substitute(model2))
   )
-  return(interdep_likelihood_ratio(model1, model2, labels))
+  return(likelihood_ratio_comparison(model1, model2, labels))
 }
 
 # Model and data checks -----------------------------------------------------
 
-validate_interdep_model <- function(model, name) {
+validate_comparison_model <- function(model, name) {
   if (!inherits(model, "glmmTMB")) {
     stop(
       sprintf("`%s` must be a fitted `glmmTMB` model.", name),
@@ -110,16 +110,12 @@ validate_interdep_model <- function(model, name) {
   invisible(model)
 }
 
-interdep_model_data <- function(model, caller_env, argument) {
+comparison_model_data <- function(model, caller_env, argument) {
   data_call <- model$call$data
   if (!is.symbol(data_call)) {
     stop(
       sprintf(
-        paste0(
-          "The `%s` model must have been fitted with a named ",
-          "`interdep_data` object in `data`. For ordinary `glmmTMB` models ",
-          "fitted to the same data object, use `stats::anova()`."
-        ),
+        "The `%s` model must have been fitted with a named data frame in `data`.",
         argument
       ),
       call. = FALSE
@@ -132,7 +128,6 @@ interdep_model_data <- function(model, caller_env, argument) {
   # A model fitted inside a helper may keep its data with its formula.
   # Search there first, then where compare_interdep_models() was called.
   environments <- list(environment(model_formula), caller_env)
-  ordinary_data_found <- FALSE
 
   for (search_env in environments) {
     if (!is.environment(search_env)) {
@@ -140,31 +135,16 @@ interdep_model_data <- function(model, caller_env, argument) {
     }
     if (exists(data_name, envir = search_env, inherits = TRUE)) {
       candidate <- get(data_name, envir = search_env, inherits = TRUE)
-      if (inherits(candidate, "interdep_data")) {
+      if (is.data.frame(candidate)) {
         return(candidate)
       }
-      ordinary_data_found <- TRUE
     }
-  }
-
-  if (ordinary_data_found) {
-    stop(
-      sprintf(
-        paste0(
-          "The `%s` model was not fitted with an `interdep_data` object. ",
-          "For ordinary `glmmTMB` models fitted to the same data object, ",
-          "use `stats::anova()`."
-        ),
-        argument
-      ),
-      call. = FALSE
-    )
   }
 
   stop(
     sprintf(
       paste0(
-        "Could not recover the named `interdep_data` object used by `%s`. ",
+        "Could not recover the named data frame used by `%s`. ",
         "Keep it available when comparing models."
       ),
       argument
@@ -173,48 +153,57 @@ interdep_model_data <- function(model, caller_env, argument) {
   )
 }
 
-validate_interdep_model_data <- function(model1, model2,
-                                         model1_data, model2_data) {
+validate_comparison_data <- function(model1, model2,
+                                     model1_data, model2_data) {
   if (nrow(model1_data) != nrow(model2_data)) {
     stop(
-      "The two prepared datasets have different numbers of rows.",
+      "The two data objects have different numbers of rows.",
       call. = FALSE
     )
   }
 
-  # Both preparations must agree on the columns that define the dyadic data.
-  model1_meta <- attr(model1_data, "interdep")
-  model2_meta <- attr(model2_data, "interdep")
-  for (field in c("group", "member", "role", "time")) {
-    if (!identical(model1_meta[[field]], model2_meta[[field]])) {
-      stop(
-        sprintf(
-          "The two prepared datasets use different `%s` variables.",
-          field
-        ),
-        call. = FALSE
-      )
+  both_interdep <- inherits(model1_data, "interdep_data") &&
+    inherits(model2_data, "interdep_data")
+
+  if (both_interdep) {
+    # Both preparations must agree on the columns that define the dyadic data.
+    model1_meta <- attr(model1_data, "interdep")
+    model2_meta <- attr(model2_data, "interdep")
+    for (field in c("group", "member", "role", "time")) {
+      if (!identical(model1_meta[[field]], model2_meta[[field]])) {
+        stop(
+          sprintf(
+            "The two prepared datasets use different `%s` variables.",
+            field
+          ),
+          call. = FALSE
+        )
+      }
     }
   }
 
-  # Generated .i_ columns may differ across model parameterizations.
-  # The original columns must still be identical.
-  model1_original <- names(model1_data)[
-    !startsWith(names(model1_data), ".i_")
-  ]
-  model2_original <- names(model2_data)[!startsWith(names(model2_data), ".i_")]
-  if (!setequal(model1_original, model2_original)) {
+  # Generated interdep columns may differ across model parameterizations.
+  model1_columns <- names(model1_data)
+  model2_columns <- names(model2_data)
+  if (inherits(model1_data, "interdep_data")) {
+    model1_columns <- model1_columns[!startsWith(model1_columns, ".i_")]
+  }
+  if (inherits(model2_data, "interdep_data")) {
+    model2_columns <- model2_columns[!startsWith(model2_columns, ".i_")]
+  }
+
+  if (!setequal(model1_columns, model2_columns)) {
     stop(
-      "The two prepared datasets do not contain the same original columns.",
+      "The two data objects do not contain the same original columns.",
       call. = FALSE
     )
   }
 
-  for (column in model1_original) {
+  for (column in model1_columns) {
     if (!identical(model1_data[[column]], model2_data[[column]])) {
       stop(
         sprintf(
-          "Original column `%s` differs between the two prepared datasets.",
+          "Column `%s` differs between the two data objects.",
           column
         ),
         call. = FALSE
@@ -230,7 +219,7 @@ validate_interdep_model_data <- function(model1, model2,
 
   if (!is.symbol(model1_response) || !is.symbol(model2_response)) {
     stop(
-      "Only an untransformed outcome stored in the prepared data is supported.",
+      "Only an untransformed outcome stored in the data is supported.",
       call. = FALSE
     )
   }
@@ -240,9 +229,9 @@ validate_interdep_model_data <- function(model1, model2,
   if (!identical(model1_response, model2_response)) {
     stop("The two models use different outcome variables.", call. = FALSE)
   }
-  if (!model1_response %in% model1_original) {
+  if (!model1_response %in% model1_columns) {
     stop(
-      "Only an untransformed outcome stored in the prepared data is supported.",
+      "Only an untransformed outcome stored in the data is supported.",
       call. = FALSE
     )
   }
@@ -297,7 +286,7 @@ validate_interdep_model_data <- function(model1, model2,
 
 # Likelihood-ratio test and output -----------------------------------------
 
-interdep_likelihood_ratio <- function(model1, model2, labels) {
+likelihood_ratio_comparison <- function(model1, model2, labels) {
   model1_log_lik <- stats::logLik(model1)
   model2_log_lik <- stats::logLik(model2)
   model1_df <- attr(model1_log_lik, "df")
@@ -395,7 +384,7 @@ interdep_likelihood_ratio <- function(model1, model2, labels) {
   )
 
   attr(out, "heading") <- c(
-    "Likelihood-ratio test for nested models fitted to equivalent interdep data",
+    "Likelihood-ratio test for nested models fitted to equivalent data",
     "Assumes mathematical nesting and an appropriate chi-squared reference distribution.",
     ""
   )

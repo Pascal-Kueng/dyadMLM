@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_interdep_models.R
 \name{compare_interdep_models}
 \alias{compare_interdep_models}
-\title{Compare nested models fitted to equivalent interdep data}
+\title{Compare nested glmmTMB models fitted to equivalent data}
 \usage{
 compare_interdep_models(model1, model2)
 }
@@ -16,23 +16,23 @@ its chi-squared p-value. When printed, a short conclusion interprets the
 test at the 5\% significance level.
 }
 \description{
-Performs a likelihood-ratio test for two nested \code{glmmTMB} models fitted to
-separate \link[=prepare_interdep_data]{interdep_data} objects. Unlike
-\code{anova.glmmTMB()}, the model calls do not need to refer to the same R object.
-The function instead checks that the prepared data contain the same original
-observations before comparing the models. Models may be supplied in either
-order. The model with fewer estimated parameters is shown first in the result.
+Performs a likelihood-ratio test for two nested \code{glmmTMB} models. The models
+may use ordinary data frames or \link[=prepare_interdep_data]{interdep_data}
+objects, and their calls do not need to refer to the same R object. Models may
+be supplied in either order. The model with fewer estimated parameters is
+shown first in the result.
 }
 \details{
-Both model calls must use named \code{interdep_data} objects that remain available
-when the models are compared. The checks assume these objects have not been
-modified since fitting. Each model must use the same untransformed response
-column. The function requires exactly identical original, non-\code{.i_} columns,
-including their types and attributes. It also checks structural dyad
-metadata, fitted rows, outcomes, weights and offsets, model family and link,
-maximum-likelihood estimation, and model convergence.
-Models fitted to ordinary data frames are outside this function's scope. If
-they use the same data object, compare them with \code{\link[stats:anova]{stats::anova()}}.
+Both model calls must use named data-frame objects that remain available when
+the models are compared. The checks assume these objects have not been
+modified since fitting. All ordinary data columns must be identical,
+including their types and attributes. For \code{interdep_data}, generated \code{.i_}
+columns may differ, but the original columns must be identical. Ordinary and
+prepared data may be compared with each other. Dyad metadata are checked when
+both models use \code{interdep_data}. The function also checks fitted rows,
+outcomes, weights and offsets, model family and link, maximum-likelihood
+estimation, and model convergence. Each model must use the same untransformed
+response column.
 
 These checks establish that the models use equivalent observations. They
 cannot establish that one model is mathematically nested within the other.

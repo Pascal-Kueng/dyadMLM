@@ -91,7 +91,7 @@ test_that("compare_interdep_models requires exact original data", {
 
   expect_error(
     compare_interdep_models(model_one, model_two),
-    "Original column `satisfaction` differs"
+    "Column `satisfaction` differs"
   )
 })
 
@@ -286,17 +286,60 @@ test_that("compare_interdep_models compares APIM, DIM, and DSM models", {
   expect_equal(dsm_comparison$Chisq[2], apim_dim_comparison$Chisq[2])
 })
 
-test_that("compare_interdep_models directs ordinary models to anova", {
+test_that("compare_interdep_models supports ordinary and mixed named data", {
   skip_if_not_installed("glmmTMB")
 
-  plain_data <- example_dyadic_crosssectional
-  smaller_model <- glmmTMB::glmmTMB(satisfaction ~ 1, data = plain_data)
-  larger_model <- glmmTMB::glmmTMB(satisfaction ~ gender, data = plain_data)
+  plain_data_one <- example_dyadic_crosssectional
+  plain_data_two <- plain_data_one
+  prepared_data <- prepare_interdep_data(
+    example_dyadic_crosssectional,
+    group = coupleID,
+    member = personID,
+    role = gender
+  )
 
+  plain_smaller <- glmmTMB::glmmTMB(
+    satisfaction ~ 1,
+    data = plain_data_one
+  )
+  plain_larger <- glmmTMB::glmmTMB(
+    satisfaction ~ gender,
+    data = plain_data_two
+  )
+  prepared_larger <- glmmTMB::glmmTMB(
+    satisfaction ~ gender,
+    data = prepared_data
+  )
+  changed_data <- plain_data_two
+  changed_data$communication[1] <- changed_data$communication[1] + 1
+  changed_model <- glmmTMB::glmmTMB(
+    satisfaction ~ gender,
+    data = changed_data
+  )
+  inline_model <- glmmTMB::glmmTMB(
+    satisfaction ~ 1,
+    data = as.data.frame(plain_data_one)
+  )
+
+  plain_comparison <- compare_interdep_models(plain_smaller, plain_larger)
+  mixed_comparison <- compare_interdep_models(plain_smaller, prepared_larger)
+
+  expect_equal(plain_comparison$`Chi Df`[2], 1)
+  expect_equal(
+    plain_comparison$Chisq[2],
+    2 * as.numeric(logLik(plain_larger) - logLik(plain_smaller))
+  )
+  expect_equal(
+    mixed_comparison$Chisq[2],
+    plain_comparison$Chisq[2]
+  )
   expect_error(
-    compare_interdep_models(smaller_model, larger_model),
-    "`stats::anova()`",
-    fixed = TRUE
+    compare_interdep_models(plain_smaller, changed_model),
+    "Column `communication` differs"
+  )
+  expect_error(
+    compare_interdep_models(inline_model, plain_larger),
+    "must have been fitted with a named data frame"
   )
 })
 
@@ -371,7 +414,7 @@ test_that("compare_interdep_models sorts models and agrees with anova.glmmTMB", 
   )
   expect_match(
     tail(printed, 1L),
-    "this does not establish equal fit",
+    "This does not establish equal fit",
     fixed = TRUE
   )
   expect_match(
