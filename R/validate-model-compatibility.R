@@ -13,7 +13,10 @@
 #' @keywords internal
 validate_dim_compatibility <- function(data) {
   if (!inherits(data, "interdep_data")) {
-    stop("`data` must be an `interdep_data` object.", call. = FALSE)
+    stop(
+      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      call. = FALSE
+    )
   }
 
   dyad_compositions <- attr(data, "interdep")$dyad_compositions
@@ -59,7 +62,10 @@ validate_dim_compatibility <- function(data) {
 #' @keywords internal
 validate_dsm_compatibility <- function(data) {
   if (!inherits(data, "interdep_data")) {
-    stop("`data` must be an `interdep_data` object.", call. = FALSE)
+    stop(
+      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      call. = FALSE
+    )
   }
 
   meta <- attr(data, "interdep")
@@ -99,7 +105,7 @@ validate_dsm_compatibility <- function(data) {
       paste(sort(observed_roles), collapse = ", "),
       ". Supplied role order: ",
       paste(meta$dsm_role_order, collapse = " - "),
-      ".",
+      ". Set `dsm_role_order` to the two observed roles in the direction the DSM should use.",
       call. = FALSE
     )
   }

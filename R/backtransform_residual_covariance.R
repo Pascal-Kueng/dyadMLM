@@ -4,7 +4,7 @@
 #' matrices to the covariance structure of two exchangeable members.
 #'
 #' @param model A fitted `glmmTMB` or single-response `brmsfit` model.
-#' @param pairs `NULL` for automatic matching, or one exact block pair (or an
+#' @param pairs `NULL` (default) for automatic matching, or one exact block pair (or an
 #'   outer list of block pairs). Each pair must contain `shared`, `difference`,
 #'   and `idiff`, and may contain `shared_indicator`. Copy `shared` and
 #'   `difference` from the model formula. Either block may be `NULL` only when

@@ -25,7 +25,10 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
                                     set_exchangeable_compositions = NULL,
                                     pool_compositions = NULL) {
   if (!inherits(data, "interdep_data")) {
-    stop("`data` must be an `interdep_data` object.", call. = FALSE)
+    stop(
+      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      call. = FALSE
+    )
   }
 
   meta_data <- attr(data, "interdep")
@@ -230,8 +233,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions,
 
   if (length(include_compositions) == 0) {
     stop(
-      "`include_compositions` must contain at least one dyad composition. Otherwise,
-      it must be `NULL` (default).",
+      "`include_compositions` must contain at least one dyad composition. Otherwise, use `NULL` (the default).",
       call. = FALSE
     )
   }
@@ -330,7 +332,7 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_exchangeabl
       "`set_exchangeable_compositions` can only contain compositions that are otherwise not already inferred as exchangeable. ",
       "Already exchangeable composition(s): ",
       paste(sort(already_exchangeable_compositions), collapse = ", "),
-      ".",
+      ". Remove these compositions from `set_exchangeable_compositions`.",
       call. = FALSE
     )
   }
@@ -381,7 +383,9 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
   }
   if (any(duplicated(pool_names))) {
     stop(
-      "`pool_compositions` names must be unique.",
+      "`pool_compositions` names must be unique. Duplicated name(s): ",
+      paste(sort(unique(pool_names[duplicated(pool_names)])), collapse = ", "),
+      ". Rename the duplicated pools.",
       call. = FALSE
     )
   }
@@ -395,7 +399,8 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
 
     if (!is.character(references_to_pool) || length(references_to_pool) < 2) {
       stop(
-        "Each `pool_compositions` element must be a character vector of at least two dyad compositions, ",
+        "Pool `", pool_name,
+        "` in `pool_compositions` must be a character vector of at least two dyad compositions, ",
         "for example `c(\"female-female\", \"male-male\")`.",
         call. = FALSE
       )
@@ -423,9 +428,9 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
     if (length(duplicated_compositions) > 0) {
       stop(
         "`pool_compositions` cannot assign the same composition to more than one pool. ",
-        "Repeated composition(s): ",
+        "Pool `", pool_name, "` reuses composition(s): ",
         paste(sort(duplicated_compositions), collapse = ", "),
-        ".",
+        ". Remove each composition from all but one pool.",
         call. = FALSE
       )
     }

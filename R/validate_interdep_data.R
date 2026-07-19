@@ -150,15 +150,30 @@ validate_interdep_data <- function(
 
   # Validate that required structural columns are complete.
   if (any(is.na(out[[group_name]]))) {
-    stop("`group` must not contain missing values.", call. = FALSE)
+    stop(
+      "`group` must not contain missing values. Found ",
+      sum(is.na(out[[group_name]])),
+      " affected row(s); fill or remove them before preparing the data.",
+      call. = FALSE
+    )
   }
 
   if (any(is.na(out[[member_name]]))) {
-    stop("`member` must not contain missing values.", call. = FALSE)
+    stop(
+      "`member` must not contain missing values. Found ",
+      sum(is.na(out[[member_name]])),
+      " affected row(s); fill or remove them before preparing the data.",
+      call. = FALSE
+    )
   }
 
   if (has_time && any(is.na(out[[time_name]]))) {
-    stop("`time` must not contain missing values.", call. = FALSE)
+    stop(
+      "`time` must not contain missing values. Found ",
+      sum(is.na(out[[time_name]])),
+      " affected row(s); fill or remove them before preparing the data.",
+      call. = FALSE
+    )
   }
 
 
@@ -464,11 +479,14 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
 
   # Reject role labels that contain the reserved composition separator.
   if (any(grepl(interdep_composition_sep, as.character(known_roles), fixed = TRUE))) {
+    offending_roles <- unique(known_roles[
+      grepl(interdep_composition_sep, as.character(known_roles), fixed = TRUE)
+    ])
     stop(
-      sprintf(
-        "`role` values must not contain `%s`; this separator is reserved by interdep.",
-        interdep_composition_sep
-      ),
+      "`role` values must not contain `", interdep_composition_sep,
+      "`; this separator is reserved by interdep. Offending value(s): ",
+      paste(sort(as.character(offending_roles)), collapse = ", "),
+      ". Rename these role values before preparing the data.",
       call. = FALSE
     )
   }

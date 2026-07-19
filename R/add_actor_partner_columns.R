@@ -22,7 +22,10 @@
 #' @keywords internal
 add_actor_partner_columns <- function(data) {
   if (!inherits(data, "interdep_data")) {
-    stop("`data` must be an `interdep_data` object.", call. = FALSE)
+    stop(
+      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      call. = FALSE
+    )
   }
 
   # Extracting all needed metadata
