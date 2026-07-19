@@ -21,7 +21,7 @@ separate \link[=prepare_interdep_data]{interdep_data} objects. Unlike
 \code{anova.glmmTMB()}, the model calls do not need to refer to the same R object.
 The function instead checks that the prepared data contain the same original
 observations before comparing the models. Models may be supplied in either
-order; the model with fewer estimated parameters is shown first.
+order. The model with fewer estimated parameters is shown first in the result.
 }
 \details{
 Both model calls must use named \code{interdep_data} objects that remain available

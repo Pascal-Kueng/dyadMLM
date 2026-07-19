@@ -5,7 +5,7 @@
 #' `anova.glmmTMB()`, the model calls do not need to refer to the same R object.
 #' The function instead checks that the prepared data contain the same original
 #' observations before comparing the models. Models may be supplied in either
-#' order; the model with fewer estimated parameters is shown first.
+#' order. The model with fewer estimated parameters is shown first in the result.
 #'
 #' @param model1,model2 Two fitted `glmmTMB` models to compare.
 #'
@@ -164,8 +164,8 @@ interdep_model_data <- function(model, caller_env, argument) {
   stop(
     sprintf(
       paste0(
-        "Could not recover the named `interdep_data` object used by `%s`; ",
-        "keep it available when comparing models."
+        "Could not recover the named `interdep_data` object used by `%s`. ",
+        "Keep it available when comparing models."
       ),
       argument
     ),
@@ -374,7 +374,7 @@ interdep_likelihood_ratio <- function(model1, model2, labels) {
       paste0(
         "Conclusion (5%% level): The likelihood-ratio test finds no clear ",
         "improvement from `%s` to `%s` (%s). Based on this test, prefer `%s` ",
-        "for parsimony; this does not establish equal fit."
+        "for parsimony. This does not establish equal fit."
       ),
       labels[1], labels[2], p_text, labels[1]
     )
