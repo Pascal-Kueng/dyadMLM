@@ -289,6 +289,11 @@ for example `shared_indicator = "SAMESEX"`. The term strings select fitted
 blocks; the two indicators define how their coefficients map to common
 intercept and slope terms.
 
+`difference_indicator` is required when `difference` selects a fitted block.
+When `difference = NULL`, it may be omitted because no difference coordinate
+needs to be parsed or validated. Supplying it remains useful for checking
+whether a compatible difference block was fitted despite the claimed omission.
+
 Automatic matching accepts only identical term sets. Exact supplied pairs may
 have terms on only one side; missing positions are stored as `NA` term indices
 and later padded with zeros. Setting `shared = NULL` or `difference = NULL` is

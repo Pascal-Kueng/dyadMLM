@@ -9,24 +9,24 @@ exchangeable_rescov(model, pairs = NULL)
 \arguments{
 \item{model}{A fitted \code{glmmTMB} or single-response \code{brmsfit} model.}
 
-\item{pairs}{\code{NULL} (default) for automatic block matching, one named block
-pair, or an outer list of named block pairs. A pair has these fields:
+\item{pairs}{\code{NULL} (default) for automatic block matching. Otherwise, supply
+one named block pair or a named list of block pairs. Each pair contains:
 \itemize{
-\item \code{shared}: the exact shared random-effect term from the fitted model
-formula, or \code{NULL} if the entire shared block was omitted when fitting;
-\item \code{difference}: the exact difference random-effect term, or \code{NULL} if the
-entire difference block was omitted when fitting;
+\item \code{shared}: the shared random-effect term copied from the fitted model
+formula, an equivalent selector (see Details), or \code{NULL} if the entire
+shared block was omitted when fitting;
+\item \code{difference}: the member-difference random-effect term, an equivalent
+selector, or \code{NULL} if the entire difference block was omitted;
 \item \code{difference_indicator}: the exact name of the difference-indicator
-column used in \code{difference}, regardless of what the column is called. If
-\code{difference = NULL}, name the column that defines (or would define) the
-opposite signs for this pair in the original data;
-\item \code{shared_indicator}: optionally, the exact shared composition-indicator
-column. It defaults to \code{"1"}, meaning that an ordinary random intercept
-is the shared block and every fitted row belongs to this pair.
+column used in \code{difference}. It is required when \code{difference} selects a
+block and optional when \code{difference = NULL};
+\item \code{shared_indicator}: the exact shared composition-indicator column,
+needed only for composition-specific blocks in mixed-dyad models. It
+defaults to \code{"1"}, meaning that every fitted row belongs to the pair and
+an ordinary intercept is the shared intercept coordinate.
 }
 
-At least one of \code{shared} and \code{difference} must name a fitted block. See
-Details for examples and the meaning of \code{NULL}.}
+At least one of \code{shared} and \code{difference} must select a fitted block.}
 }
 \value{
 A named list with one element per matched block pair. Each element
@@ -35,79 +35,63 @@ standard-deviation/correlation representation in \code{sdcor}. Names reproduce
 the matched random-effect terms.
 }
 \description{
-Back-transforms paired shared and difference random-effect covariance
-matrices to the covariance structure of two exchangeable members.
+Back-transforms covariance matrices from paired shared and member-difference
+random-effect blocks to the covariance structure of two exchangeable
+members. For the model specification, derivation, and interpretation, see the
+\href{https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}.
 }
 \details{
 Automatic matching recognizes exact \verb{.i_diff_*_arbitrary} coefficient names
-and first looks for the corresponding \verb{.i_is_*} shared block. It remains
-deliberately conservative: the two blocks must use the same grouping factor
-and contain the same underlying terms. Supply \code{pairs} for custom indicator
-names, ambiguous matches, or models that deliberately omit blocks or terms.
+and first looks for the corresponding \verb{.i_is_*} shared block. It requires
+the two blocks to use the same grouping factor and the same underlying
+terms. Most models fitted with \code{interdep}-generated columns therefore need
+only:
 
-Here “shared” and “difference” describe random-effect coordinates. If
-\code{u_shared} moves both members together and \code{u_difference} moves them in
-opposite directions, the member effects are \code{u1 = u_shared + u_difference}
-and \code{u2 = u_shared - u_difference}. These coordinates are distinct from
-dyad-mean and within-dyad member-deviation predictor columns, even though
-both use the same mean/difference logic.
-
-The selected shared and difference coordinates must be separate
-random-effect blocks, so their covariance is fixed to zero by the fitted
-model. On the member scale, that constraint produces equal member variances
-while still allowing a nonzero covariance between members. This is the
-exchangeable actor-partner covariance structure that the function recovers;
-the function does not assume that the members' random effects are
-independent.
-
-A custom difference-indicator name is supplied literally. For example, if
-the model used a \code{-1/+1} column named \code{hallelujah}:
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
-  shared = "(1 + time | coupleID)",
-  difference =
-    "(0 + hallelujah + I(hallelujah * time) || coupleID)",
-  difference_indicator = "hallelujah"
-)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(model)
 }\if{html}{\out{</div>}}
 
-A composition-specific pair also names its shared indicator:
+Here, a shared random effect moves both members together, whereas a
+member-difference random effect moves them in opposite directions. Thus,
+\code{u1 = u_shared + u_difference} and
+\code{u2 = u_shared - u_difference}. The difference indicator must be assigned
+\code{-1} and \code{+1} arbitrarily to the two members and remain stable within dyads.
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
-  shared = "(0 + SAMESEX + SAMESEX:time | coupleID)",
-  difference =
-    "(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)",
-  difference_indicator = "IDIFF_SAMESEX",
-  shared_indicator = "SAMESEX"
-)
-}\if{html}{\out{</div>}}
+Supply \code{pairs} when automatic matching is ambiguous or when a model uses
+custom indicators, multiple covariance levels, or deliberately omitted
+blocks or terms. For example, in a Gaussian \code{glmmTMB} model fitted with
+\code{dispformula = ~ 0}, this call recovers both the stable dyad-level
+random-intercept covariance and the same-occasion partner residual
+covariance:
 
-For multiple pairs, wrap the pair specifications in an outer list. Naming
-the outer elements makes later errors easier to locate:
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
-  stable = list(
-    shared = "(1 | coupleID)",
-    difference = "(0 + hallelujah | coupleID)",
-    difference_indicator = "hallelujah"
-  ),
-  occasion = list(
-    shared = "(1 | coupleID:time)",
-    difference = "(0 + hallelujah | coupleID:time)",
-    difference_indicator = "hallelujah"
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(
+  model,
+  pairs = list(
+    dyad = list(
+      shared = "us(1 | coupleID)",
+      difference = "us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
+      difference_indicator =
+        ".i_diff_assumed_exchangeable_arbitrary"
+    ),
+    same_occasion = list(
+      shared = "us(1 | coupleID:diaryday)",
+      difference = "us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+      difference_indicator =
+        ".i_diff_assumed_exchangeable_arbitrary"
+    )
   )
 )
 }\if{html}{\out{</div>}}
 
-Model-style equivalents are recognized across backends, such as
+The random-effect terms may be copied exactly from the model formula.
+Equivalent backend syntax is also recognized, such as
 \code{(1 + time | group)} and \code{us(1 + time | group)}, or
-\code{(0 + x || group)} and \code{diag(0 + x | group)}. Difference slopes may be
-written as \code{hallelujah:time}, \code{time:hallelujah},
-\code{I(hallelujah * time)}, or \code{I(time * hallelujah)}. More complex arithmetic
-inside \code{I()} is not interpreted.
+\code{(0 + x || group)} and \code{diag(0 + x | group)}. A custom difference-indicator
+name is supplied literally. Difference slopes may be written in either
+interaction order or as a simple product inside \code{I()}.
 
-When the fitted model frame retains the indicator columns,
-\code{difference_indicator} must use unnormalised \code{-1/+1} coding where
+When a difference block is supplied and the fitted model frame retains the
+indicator columns, \code{difference_indicator} must use unscaled \code{-1/+1}
+coding where
 \code{shared_indicator} is one and must be zero elsewhere. A column omitted
 entirely from the fitted formula cannot be recovered from either supported
 backend, so its coding cannot be checked.
@@ -130,9 +114,11 @@ members have equal-magnitude, opposite-sign random effects for that term.
 Setting \code{difference = NULL} or \code{shared = NULL} makes the corresponding rule
 apply to every term in the other block. \code{NULL} therefore means that the whole
 block was absent from the fitted model; it must never be used merely to ignore
-an existing block. The function warns whenever \code{NULL} is supplied and errors
-if it can identify a compatible fitted block that contradicts the claimed
-omission.
+an existing block. The function warns whenever \code{NULL} is supplied. When
+\code{difference = NULL} and \code{difference_indicator} is supplied, it also errors if
+it can identify a compatible fitted difference block that contradicts the
+claimed omission. See the constrained-block example in the
+\href{https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks}{exchangeable APIM vignette}.
 }
 
 \section{Backend note}{
@@ -141,4 +127,12 @@ In Gaussian \code{brms} models, cross-sectional and same-occasion partner
 residual dependence is usually represented directly with
 \code{unstr(time = member, gr = pair_id)}. The blocks handled here remain relevant
 for higher-level shared and difference random effects.
+}
+
+\seealso{
+The
+\href{https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}
+for the model specification, covariance derivation, and constrained-block
+examples. Run \code{vignette("apim", package = "interdep")} to open the installed
+version.
 }

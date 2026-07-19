@@ -348,6 +348,18 @@ test_that("automatic matching aligns groups and coefficient order", {
     exchangeable_underlying_terms("I(time * IDIFF)", "IDIFF"),
     "time"
   )
+
+  nonsyntactic_indicators <- c("my diff", "difference-indicator", "1difference")
+  for (indicator in nonsyntactic_indicators) {
+    quoted_indicator <- paste0("`", indicator, "`")
+    expect_equal(
+      exchangeable_underlying_terms(
+        c(quoted_indicator, paste0(quoted_indicator, ":`study time`")),
+        indicator
+      ),
+      c("(Intercept)", "study time")
+    )
+  }
 })
 
 test_that("automatic matching handles compositions and grouping levels", {
@@ -536,8 +548,7 @@ test_that("supplied exact pairs support wholly omitted blocks", {
       blocks,
       list(
         shared = "(1 + time | coupleID)",
-        difference = NULL,
-        difference_indicator = marker
+        difference = NULL
       ),
       model_frame = data.frame(other = 1:2)
     ),
@@ -562,6 +573,7 @@ test_that("supplied exact pairs support wholly omitted blocks", {
 
   expect_equal(matched[[1L]]$shared_block_index, 1L)
   expect_true(is.na(matched[[1L]]$difference_block_index))
+  expect_null(matched[[1L]]$difference_indicator)
   expect_equal(matched[[1L]]$underlying_terms, c("(Intercept)", "time"))
   expect_equal(matched[[1L]]$shared_term_indices, c(1L, 2L))
   expect_true(all(is.na(matched[[1L]]$difference_term_indices)))
@@ -773,17 +785,18 @@ test_that("supplied pair specifications fail clearly", {
     fixed = TRUE
   )
   expect_error(
-    match_supplied_exchangeable_residual_blocks(
-      blocks,
-      list(shared = "shared", difference = NULL)
-    ),
-    paste0(
-      "`pairs` is missing required field `difference_indicator`. Set it to ",
-      "the exact name of the -1/+1 difference-indicator column that defines ",
-      "(or would define) the opposite member signs for this pair"
-    ),
+    normalize_supplied_exchangeable_pairs(list(
+      shared = "shared",
+      difference = "difference",
+      difference_indicator = NULL
+    )),
+    "`pairs` is missing required field `difference_indicator`",
     fixed = TRUE
   )
+  omitted_difference <- normalize_supplied_exchangeable_pairs(
+    list(shared = "shared", difference = NULL)
+  )
+  expect_null(omitted_difference[[1L]]$difference_indicator)
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
@@ -804,10 +817,7 @@ test_that("supplied pair specifications fail clearly", {
       blocks,
       list(shared_indicator = "1")
     ),
-    paste0(
-      "`pairs` is missing required fields `shared`, `difference`, ",
-      "`difference_indicator`."
-    ),
+    "`pairs` is missing required fields `shared`, `difference`.",
     fixed = TRUE
   )
   expect_error(
@@ -901,6 +911,87 @@ test_that("supplied pair specifications fail clearly", {
       list(repeated_pair, repeated_pair)
     ),
     "Reused blocks: `shared`, `difference`. Remove each reused block",
+    fixed = TRUE
+  )
+})
+
+test_that("named supplied pairs retain their labels in downstream diagnostics", {
+  blocks <- list(
+    rescov_test_block("coupleID", "(Intercept)", "shared"),
+    rescov_test_block("coupleID", "IDIFF", "difference"),
+    rescov_test_block("study", "(Intercept)", "study")
+  )
+
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(stable = list(
+        shared = "study",
+        difference = "difference",
+        difference_indicator = "IDIFF"
+      ))
+    ),
+    paste0(
+      "`pairs[[\"stable\"]]`: The selected shared block groups by `study`, ",
+      "but the selected difference block groups by `coupleID`"
+    ),
+    fixed = TRUE
+  )
+
+  malformed_coefficients <- list(
+    rescov_test_block("coupleID", "(Intercept)", "shared"),
+    rescov_test_block(
+      "coupleID",
+      c("IDIFF", "I(IDIFF * time^2)"),
+      "difference"
+    )
+  )
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      malformed_coefficients,
+      list(stable = list(
+        shared = "shared",
+        difference = "difference",
+        difference_indicator = "IDIFF"
+      ))
+    ),
+    "`pairs[[\"stable\"]]`: Difference indicator `IDIFF` must identify every coefficient",
+    fixed = TRUE
+  )
+
+  stable_pair <- list(
+    shared = "shared",
+    difference = "difference",
+    difference_indicator = "IDIFF"
+  )
+  expect_warning(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(stable = stable_pair),
+      model_frame = data.frame(other = 1:2)
+    ),
+    "`pairs[[\"stable\"]]`: `IDIFF` was not retained",
+    fixed = TRUE
+  )
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(stable = stable_pair),
+      model_frame = data.frame(IDIFF = c(1, 1))
+    ),
+    "`pairs[[\"stable\"]]`: `IDIFF` must contain both -1 and +1",
+    fixed = TRUE
+  )
+
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(stable = stable_pair, follow_up = stable_pair)
+    ),
+    paste0(
+      "Pair assignments: `shared` in `pairs[[\"stable\"]]`, ",
+      "`pairs[[\"follow_up\"]]`"
+    ),
     fixed = TRUE
   )
 })

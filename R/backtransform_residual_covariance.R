@@ -1,100 +1,83 @@
 #' Recover member-level residual covariance from exchangeable random-effect blocks
 #'
-#' Back-transforms paired shared and difference random-effect covariance
-#' matrices to the covariance structure of two exchangeable members.
+#' Back-transforms covariance matrices from paired shared and member-difference
+#' random-effect blocks to the covariance structure of two exchangeable
+#' members. For the model specification, derivation, and interpretation, see the
+#' [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure).
 #'
 #' @param model A fitted `glmmTMB` or single-response `brmsfit` model.
-#' @param pairs `NULL` (default) for automatic block matching, one named block
-#'   pair, or an outer list of named block pairs. A pair has these fields:
+#' @param pairs `NULL` (default) for automatic block matching. Otherwise, supply
+#'   one named block pair or a named list of block pairs. Each pair contains:
 #'
-#'   - `shared`: the exact shared random-effect term from the fitted model
-#'     formula, or `NULL` if the entire shared block was omitted when fitting;
-#'   - `difference`: the exact difference random-effect term, or `NULL` if the
-#'     entire difference block was omitted when fitting;
+#'   - `shared`: the shared random-effect term copied from the fitted model
+#'     formula, an equivalent selector (see Details), or `NULL` if the entire
+#'     shared block was omitted when fitting;
+#'   - `difference`: the member-difference random-effect term, an equivalent
+#'     selector, or `NULL` if the entire difference block was omitted;
 #'   - `difference_indicator`: the exact name of the difference-indicator
-#'     column used in `difference`, regardless of what the column is called. If
-#'     `difference = NULL`, name the column that defines (or would define) the
-#'     opposite signs for this pair in the original data;
-#'   - `shared_indicator`: optionally, the exact shared composition-indicator
-#'     column. It defaults to `"1"`, meaning that an ordinary random intercept
-#'     is the shared block and every fitted row belongs to this pair.
+#'     column used in `difference`. It is required when `difference` selects a
+#'     block and optional when `difference = NULL`;
+#'   - `shared_indicator`: the exact shared composition-indicator column,
+#'     needed only for composition-specific blocks in mixed-dyad models. It
+#'     defaults to `"1"`, meaning that every fitted row belongs to the pair and
+#'     an ordinary intercept is the shared intercept coordinate.
 #'
-#'   At least one of `shared` and `difference` must name a fitted block. See
-#'   Details for examples and the meaning of `NULL`.
+#'   At least one of `shared` and `difference` must select a fitted block.
 #'
 #' @details
 #' Automatic matching recognizes exact `.i_diff_*_arbitrary` coefficient names
-#' and first looks for the corresponding `.i_is_*` shared block. It remains
-#' deliberately conservative: the two blocks must use the same grouping factor
-#' and contain the same underlying terms. Supply `pairs` for custom indicator
-#' names, ambiguous matches, or models that deliberately omit blocks or terms.
-#'
-#' Here “shared” and “difference” describe random-effect coordinates. If
-#' `u_shared` moves both members together and `u_difference` moves them in
-#' opposite directions, the member effects are `u1 = u_shared + u_difference`
-#' and `u2 = u_shared - u_difference`. These coordinates are distinct from
-#' dyad-mean and within-dyad member-deviation predictor columns, even though
-#' both use the same mean/difference logic.
-#'
-#' The selected shared and difference coordinates must be separate
-#' random-effect blocks, so their covariance is fixed to zero by the fitted
-#' model. On the member scale, that constraint produces equal member variances
-#' while still allowing a nonzero covariance between members. This is the
-#' exchangeable actor-partner covariance structure that the function recovers;
-#' the function does not assume that the members' random effects are
-#' independent.
-#'
-#' A custom difference-indicator name is supplied literally. For example, if
-#' the model used a `-1/+1` column named `hallelujah`:
+#' and first looks for the corresponding `.i_is_*` shared block. It requires
+#' the two blocks to use the same grouping factor and the same underlying
+#' terms. Most models fitted with `interdep`-generated columns therefore need
+#' only:
 #'
 #' ```r
-#' pairs = list(
-#'   shared = "(1 + time | coupleID)",
-#'   difference =
-#'     "(0 + hallelujah + I(hallelujah * time) || coupleID)",
-#'   difference_indicator = "hallelujah"
-#' )
+#' result <- interdep::exchangeable_rescov(model)
 #' ```
 #'
-#' A composition-specific pair also names its shared indicator:
+#' Here, a shared random effect moves both members together, whereas a
+#' member-difference random effect moves them in opposite directions. Thus,
+#' `u1 = u_shared + u_difference` and
+#' `u2 = u_shared - u_difference`. The difference indicator must be assigned
+#' `-1` and `+1` arbitrarily to the two members and remain stable within dyads.
+#'
+#' Supply `pairs` when automatic matching is ambiguous or when a model uses
+#' custom indicators, multiple covariance levels, or deliberately omitted
+#' blocks or terms. For example, in a Gaussian `glmmTMB` model fitted with
+#' `dispformula = ~ 0`, this call recovers both the stable dyad-level
+#' random-intercept covariance and the same-occasion partner residual
+#' covariance:
 #'
 #' ```r
-#' pairs = list(
-#'   shared = "(0 + SAMESEX + SAMESEX:time | coupleID)",
-#'   difference =
-#'     "(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)",
-#'   difference_indicator = "IDIFF_SAMESEX",
-#'   shared_indicator = "SAMESEX"
-#' )
-#' ```
-#'
-#' For multiple pairs, wrap the pair specifications in an outer list. Naming
-#' the outer elements makes later errors easier to locate:
-#'
-#' ```r
-#' pairs = list(
-#'   stable = list(
-#'     shared = "(1 | coupleID)",
-#'     difference = "(0 + hallelujah | coupleID)",
-#'     difference_indicator = "hallelujah"
-#'   ),
-#'   occasion = list(
-#'     shared = "(1 | coupleID:time)",
-#'     difference = "(0 + hallelujah | coupleID:time)",
-#'     difference_indicator = "hallelujah"
+#' result <- interdep::exchangeable_rescov(
+#'   model,
+#'   pairs = list(
+#'     dyad = list(
+#'       shared = "us(1 | coupleID)",
+#'       difference = "us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
+#'       difference_indicator =
+#'         ".i_diff_assumed_exchangeable_arbitrary"
+#'     ),
+#'     same_occasion = list(
+#'       shared = "us(1 | coupleID:diaryday)",
+#'       difference = "us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+#'       difference_indicator =
+#'         ".i_diff_assumed_exchangeable_arbitrary"
+#'     )
 #'   )
 #' )
 #' ```
 #'
-#' Model-style equivalents are recognized across backends, such as
+#' The random-effect terms may be copied exactly from the model formula.
+#' Equivalent backend syntax is also recognized, such as
 #' `(1 + time | group)` and `us(1 + time | group)`, or
-#' `(0 + x || group)` and `diag(0 + x | group)`. Difference slopes may be
-#' written as `hallelujah:time`, `time:hallelujah`,
-#' `I(hallelujah * time)`, or `I(time * hallelujah)`. More complex arithmetic
-#' inside `I()` is not interpreted.
+#' `(0 + x || group)` and `diag(0 + x | group)`. A custom difference-indicator
+#' name is supplied literally. Difference slopes may be written in either
+#' interaction order or as a simple product inside `I()`.
 #'
-#' When the fitted model frame retains the indicator columns,
-#' `difference_indicator` must use unnormalised `-1/+1` coding where
+#' When a difference block is supplied and the fitted model frame retains the
+#' indicator columns, `difference_indicator` must use unscaled `-1/+1`
+#' coding where
 #' `shared_indicator` is one and must be zero elsewhere. A column omitted
 #' entirely from the fitted formula cannot be recovered from either supported
 #' backend, so its coding cannot be checked.
@@ -115,9 +98,11 @@
 #' Setting `difference = NULL` or `shared = NULL` makes the corresponding rule
 #' apply to every term in the other block. `NULL` therefore means that the whole
 #' block was absent from the fitted model; it must never be used merely to ignore
-#' an existing block. The function warns whenever `NULL` is supplied and errors
-#' if it can identify a compatible fitted block that contradicts the claimed
-#' omission.
+#' an existing block. The function warns whenever `NULL` is supplied. When
+#' `difference = NULL` and `difference_indicator` is supplied, it also errors if
+#' it can identify a compatible fitted difference block that contradicts the
+#' claimed omission. See the constrained-block example in the
+#' [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks).
 #'
 #' @section Backend note:
 #' In Gaussian `brms` models, cross-sectional and same-occasion partner
@@ -129,6 +114,12 @@
 #'   contains the member-level variance-covariance matrix in `varcov` and its
 #'   standard-deviation/correlation representation in `sdcor`. Names reproduce
 #'   the matched random-effect terms.
+#'
+#' @seealso The
+#'   [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
+#'   for the model specification, covariance derivation, and constrained-block
+#'   examples. Run `vignette("apim", package = "interdep")` to open the installed
+#'   version.
 #'
 #' @export
 exchangeable_rescov <- function(model, pairs = NULL) {
@@ -253,6 +244,34 @@ block_contains_indicator <- function(block, indicator) {
   return(FALSE)
 }
 
+# Split only formula interactions. Backticked symbols are returned as their
+# exact column names, while expressions such as `log(time)` remain intact.
+split_exchangeable_interaction <- function(coefficient) {
+  expression <- tryCatch(
+    str2lang(coefficient),
+    error = function(e) NULL
+  )
+  if (is.null(expression)) {
+    return(NULL)
+  }
+
+  split_parts <- function(x) {
+    if (
+      is.call(x) &&
+        length(x) == 3L &&
+        identical(x[[1L]], as.name(":"))
+    ) {
+      return(c(split_parts(x[[2L]]), split_parts(x[[3L]])))
+    }
+    if (is.symbol(x)) {
+      return(as.character(x))
+    }
+    return(deparse1(x))
+  }
+
+  return(split_parts(expression))
+}
+
 # Remove the shared/difference indicator so both blocks use common term names.
 exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
   # Keep one normalized term per coefficient, in the same order as the
@@ -265,13 +284,13 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
     coefficient <- coefficients[[i]]
 
     # `indicator = "1"` denotes an ordinary shared random intercept. For
-    # example, c("(Intercept)", "time:support") is split into character()
+    # example, c("(Intercept)", "time:support") is parsed into character()
     # and c("time", "support") before normalization below.
     if (identical(indicator, "1")) {
       parts <- if (identical(coefficient, "(Intercept)")) {
         character()
       } else {
-        strsplit(coefficient, ":", fixed = TRUE)[[1L]]
+        split_exchangeable_interaction(coefficient)
       }
     } else {
       parsed <- parse_exchangeable_coefficient(coefficient)
@@ -286,15 +305,20 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
 
       # For regular interaction syntax, "support:idiff:time" becomes
       # c("support", "idiff", "time").
-      parts <- strsplit(coefficient, ":", fixed = TRUE)[[1L]]
+      parts <- split_exchangeable_interaction(coefficient)
       # Uses of the indicator inside any other expression are not interpreted.
       if (
+        is.null(parts) ||
         !indicator %in% parsed$variables ||
           sum(parts == indicator) != 1L
       ) {
         return(NULL)
       }
       parts <- parts[parts != indicator]
+    }
+
+    if (is.null(parts)) {
+      return(NULL)
     }
 
     # The indicator alone maps to the intercept. Sorting makes
@@ -362,8 +386,11 @@ find_exchangeable_difference_indicator <- function(coefficients) {
 validate_exchangeable_coding <- function(
   model_frame,
   idiff,
-  shared_indicator
+  shared_indicator,
+  pair_label = NULL
 ) {
+  pair_context <- if (is.null(pair_label)) "" else paste0(pair_label, ": ")
+
   # Matching can also be tested without fitted data. In that case, there is no
   # coding to validate.
   if (is.null(model_frame)) {
@@ -375,7 +402,7 @@ validate_exchangeable_coding <- function(
   # this validator.
   if (!idiff %in% names(model_frame)) {
     warning(
-      "`", idiff,
+      pair_context, "`", idiff,
       "` was not retained in the fitted model frame, so its coding could not ",
       "be verified. Before interpreting the result, verify that the fitted ",
       "model used unnormalised -1/+1 coding on the supported rows and zero ",
@@ -399,7 +426,7 @@ validate_exchangeable_coding <- function(
     # the named shared indicator, but warn because it cannot be checked
     # independently.
     warning(
-      "`", shared_indicator,
+      pair_context, "`", shared_indicator,
       "` was not retained in the fitted model frame, so its support could not ",
       "be checked. Verify that it was coded 1 exactly where `abs(", idiff,
       ") == 1` and 0 elsewhere.",
@@ -425,7 +452,8 @@ validate_exchangeable_coding <- function(
       )
     }
     stop(
-      column_names, " must be complete numeric columns in the fitted data. ",
+      pair_context, column_names,
+      " must be complete numeric columns in the fitted data. ",
       coding_requirement,
       call. = FALSE
     )
@@ -441,14 +469,15 @@ validate_exchangeable_coding <- function(
   if (!valid_coding) {
     if (identical(shared_indicator, "1")) {
       stop(
-        "`", idiff, "` must use -1/+1 coding on every fitted row because ",
+        pair_context, "`", idiff,
+        "` must use -1/+1 coding on every fitted row because ",
         "`shared_indicator = \"1\"` means that every row is supported. ",
         "Correct the coding and refit the model.",
         call. = FALSE
       )
     }
     stop(
-      "`", idiff, "` and `", shared_indicator,
+      pair_context, "`", idiff, "` and `", shared_indicator,
       "` have incompatible coding. `", shared_indicator,
       "` must be 0/1; `", idiff, "` must use -1/+1 coding where `",
       shared_indicator, "` is 1 and zero where it is 0. Correct the coding ",
@@ -463,7 +492,8 @@ validate_exchangeable_coding <- function(
   if (!any(difference[supported] == -1) ||
       !any(difference[supported] == 1)) {
     stop(
-      "`", idiff, "` must contain both -1 and +1 on its supported fitted ",
+      pair_context, "`", idiff,
+      "` must contain both -1 and +1 on its supported fitted ",
       "rows. Check the coding and whether fitted-row filtering removed one ",
       "member position, then refit the model.",
       call. = FALSE
@@ -506,7 +536,7 @@ build_exchangeable_pair <- function(
   shared_terms <- character()
   if (!is.na(shared_block_index)) {
     shared_block <- blocks[[shared_block_index]]
-    if (block_contains_indicator(shared_block, idiff)) {
+    if (!is.null(idiff) && block_contains_indicator(shared_block, idiff)) {
       stop(
         "The selected shared block contains the difference indicator `", idiff,
         "`. Select the block that represents shared random effects instead.",
@@ -842,8 +872,12 @@ canonicalize_exchangeable_block_term <- function(term) {
 }
 
 normalize_supplied_exchangeable_pairs <- function(pairs) {
-  required_names <- c("shared", "difference", "difference_indicator")
-  allowed_names <- c(required_names, "shared_indicator")
+  required_names <- c("shared", "difference")
+  allowed_names <- c(
+    required_names,
+    "difference_indicator",
+    "shared_indicator"
+  )
   is_nonempty_string <- function(x) {
     is.character(x) && length(x) == 1L && !is.na(x) && nzchar(x)
   }
@@ -891,9 +925,9 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
     }
     if (is.null(names(pair)) || any(!nzchar(names(pair)))) {
       stop(
-        pair_label, " must be a named list with fields `shared`, ",
-        "`difference`, and `difference_indicator`, and optional field ",
-        "`shared_indicator`.",
+        pair_label, " must be a named list with fields `shared` ",
+        "and `difference`, plus `difference_indicator` when a difference ",
+        "block is supplied. `shared_indicator` is optional.",
         call. = FALSE
       )
     }
@@ -920,26 +954,6 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
 
     missing_fields <- setdiff(required_names, names(pair))
     if (length(missing_fields) > 0L) {
-      if (identical(missing_fields, "difference_indicator")) {
-        indicator_explanation <- if (is.null(pair$difference)) {
-          paste0(
-            "Set it to the exact name of the -1/+1 difference-indicator ",
-            "column that defines (or would define) the opposite member signs ",
-            "for this pair, for example "
-          )
-        } else {
-          paste0(
-            "Set it to the exact name of the -1/+1 difference-indicator ",
-            "column used in the selected difference block, for example "
-          )
-        }
-        stop(
-          pair_label, " is missing required field `difference_indicator`. ",
-          indicator_explanation,
-          "`difference_indicator = \"hallelujah\"`.",
-          call. = FALSE
-        )
-      }
       stop(
         pair_label, " is missing required field",
         if (length(missing_fields) > 1L) "s " else " ",
@@ -948,18 +962,42 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
       )
     }
 
+    if (
+      !is.null(pair$difference) &&
+        (
+          !"difference_indicator" %in% names(pair) ||
+            is.null(pair$difference_indicator)
+        )
+    ) {
+      stop(
+        pair_label, " is missing required field `difference_indicator`. ",
+        "Set it to the exact name of the -1/+1 difference-indicator ",
+        "column used in the selected difference block, for example ",
+        "`difference_indicator = \"hallelujah\"`.",
+        call. = FALSE
+      )
+    }
+
     if (!"shared_indicator" %in% names(pair)) {
       pair$shared_indicator <- "1"
     }
 
-    for (field in c("difference_indicator", "shared_indicator")) {
-      if (!is_nonempty_string(pair[[field]])) {
-        stop(
-          pair_field_reference(pair_label, field),
-          " must be one non-empty string giving an exact column name.",
-          call. = FALSE
-        )
-      }
+    if (
+      !is.null(pair$difference_indicator) &&
+        !is_nonempty_string(pair$difference_indicator)
+    ) {
+      stop(
+        pair_field_reference(pair_label, "difference_indicator"),
+        " must be one non-empty string giving an exact column name.",
+        call. = FALSE
+      )
+    }
+    if (!is_nonempty_string(pair$shared_indicator)) {
+      stop(
+        pair_field_reference(pair_label, "shared_indicator"),
+        " must be one non-empty string giving an exact column name.",
+        call. = FALSE
+      )
     }
     if (identical(pair$difference_indicator, "1")) {
       stop(
@@ -969,7 +1007,10 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
         call. = FALSE
       )
     }
-    if (identical(pair$difference_indicator, pair$shared_indicator)) {
+    if (
+      !is.null(pair$difference_indicator) &&
+        identical(pair$difference_indicator, pair$shared_indicator)
+    ) {
       stop(
         pair_field_reference(pair_label, "difference_indicator"), " and ",
         pair_field_reference(pair_label, "shared_indicator"),
@@ -983,7 +1024,8 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
       if (!is.null(selector) && !is_nonempty_string(selector)) {
         stop(
           pair_field_reference(pair_label, field),
-          " must be one random-effect term copied from the model formula, or `NULL`.",
+          " must be one random-effect term selector copied from the model ",
+          "formula, written in an equivalent syntax, or `NULL`.",
           call. = FALSE
         )
       }
@@ -1084,6 +1126,18 @@ find_potential_exchangeable_blocks <- function(
   return(candidate_indices)
 }
 
+with_exchangeable_pair_error_context <- function(code, pair_label) {
+  tryCatch(
+    force(code),
+    error = function(error) {
+      stop(
+        pair_label, ": ", conditionMessage(error),
+        call. = FALSE
+      )
+    }
+  )
+}
+
 match_one_supplied_exchangeable_pair <- function(
   blocks,
   pair,
@@ -1107,12 +1161,15 @@ match_one_supplied_exchangeable_pair <- function(
     !is.na(selected_block_indices)
   ]
 
-  matched_pair <- build_exchangeable_pair(
-    blocks,
-    shared_block_index,
-    difference_block_index,
-    pair$difference_indicator,
-    pair$shared_indicator
+  matched_pair <- with_exchangeable_pair_error_context(
+    build_exchangeable_pair(
+      blocks,
+      shared_block_index,
+      difference_block_index,
+      pair$difference_indicator,
+      pair$shared_indicator
+    ),
+    pair_label
   )
 
   present_block_index <- selected_block_indices[[1L]]
@@ -1120,12 +1177,18 @@ match_one_supplied_exchangeable_pair <- function(
 
   # `NULL` declares that the corresponding block was not fitted. Catch clear
   # contradictions rather than silently inserting structural zeros.
-  if (is.na(difference_block_index)) {
-    potential_block_indices <- find_potential_exchangeable_blocks(
-      blocks,
-      group,
-      pair$difference_indicator,
-      overlap_terms = matched_pair$underlying_terms
+  if (
+    is.na(difference_block_index) &&
+      !is.null(pair$difference_indicator)
+  ) {
+    potential_block_indices <- with_exchangeable_pair_error_context(
+      find_potential_exchangeable_blocks(
+        blocks,
+        group,
+        pair$difference_indicator,
+        overlap_terms = matched_pair$underlying_terms
+      ),
+      pair_label
     )
     potential_block_indices <- setdiff(
       potential_block_indices,
@@ -1150,12 +1213,15 @@ match_one_supplied_exchangeable_pair <- function(
   }
 
   if (is.na(shared_block_index)) {
-    potential_block_indices <- find_potential_exchangeable_blocks(
-      blocks,
-      group,
-      pair$shared_indicator,
-      exclude_indicator = pair$difference_indicator,
-      overlap_terms = matched_pair$underlying_terms
+    potential_block_indices <- with_exchangeable_pair_error_context(
+      find_potential_exchangeable_blocks(
+        blocks,
+        group,
+        pair$shared_indicator,
+        exclude_indicator = pair$difference_indicator,
+        overlap_terms = matched_pair$underlying_terms
+      ),
+      pair_label
     )
     potential_block_indices <- setdiff(
       potential_block_indices,
@@ -1183,7 +1249,8 @@ match_one_supplied_exchangeable_pair <- function(
     validate_exchangeable_coding(
       model_frame,
       pair$difference_indicator,
-      pair$shared_indicator
+      pair$shared_indicator,
+      pair_label
     )
   }
   return(matched_pair)
@@ -1236,10 +1303,32 @@ match_supplied_exchangeable_residual_blocks <- function(
       "`", term_labels[duplicated_block_indices], "`",
       collapse = ", "
     )
+    reused_pair_assignments <- vapply(
+      duplicated_block_indices,
+      function(block_index) {
+        pair_indices <- which(vapply(
+          matched_pairs,
+          function(pair) {
+            block_index %in% c(
+              pair$shared_block_index,
+              pair$difference_block_index
+            )
+          },
+          logical(1L)
+        ))
+        paste0(
+          "`", term_labels[[block_index]], "` in ",
+          paste(pair_labels[pair_indices], collapse = ", ")
+        )
+      },
+      character(1L)
+    )
     stop(
       "Each random-effect block can occur in only one supplied pair. ",
       "Reused block", if (length(duplicated_block_indices) > 1L) "s" else "",
       ": ", reused_blocks, ". Remove each reused block from all but one pair.",
+      " Pair assignments: ", paste(reused_pair_assignments, collapse = "; "),
+      ".",
       call. = FALSE
     )
   }
