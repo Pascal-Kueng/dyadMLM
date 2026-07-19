@@ -279,7 +279,7 @@ their meaning:
 pairs = list(
   shared = "(1 + time | coupleID)",
   difference = "(0 + IDIFF + I(IDIFF * time) || coupleID)",
-  idiff = "IDIFF"
+  difference_indicator = "IDIFF"
 )
 ```
 

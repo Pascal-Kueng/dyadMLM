@@ -38,6 +38,17 @@ test_that("DSM role order is required exactly with DSM preparation", {
       no_role_data,
       group = dyad_id,
       member = person_id,
+      model_type = "dsm"
+    ),
+    '`model_type = "dsm"` requires `role` to be supplied.',
+    fixed = TRUE
+  )
+
+  expect_error(
+    validate_interdep_data(
+      no_role_data,
+      group = dyad_id,
+      member = person_id,
       model_type = "dsm",
       dsm_role_order = c("female", "male")
     ),
@@ -79,6 +90,7 @@ test_that("DSM role order contains two distinct role values", {
     c("female", "female"),
     c("female", NA_character_),
     c("female", " "),
+    c("female", " female "),
     c(1, 2)
   )
   expected_message <- paste0(
@@ -121,6 +133,19 @@ test_that("DSM role order is stored and matched to the final composition", {
 
   expect_equal(attr(result, "interdep")$dsm_role_order, c("male", "female"))
   expect_equal(attr(result, "interdep")$dyad_compositions$dyad_type, "distinguishable")
+
+  trimmed_result <- prepare_interdep_data(
+    data,
+    group = dyad_id,
+    member = person_id,
+    role = role,
+    model_type = "dsm",
+    dsm_role_order = c(" male ", " female ")
+  )
+  expect_equal(
+    attr(trimmed_result, "interdep")$dsm_role_order,
+    c("male", "female")
+  )
 
   expect_error(
     prepare_interdep_data(

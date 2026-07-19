@@ -567,7 +567,20 @@ test_that("validate_interdep_data rejects duplicate members within group-time", 
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, time = time),
-    "Each `member` must appear at most once per `group`-`time` combination.",
+    "`dyad_id` = 1, `time` = 2, `person_id` = A",
+    fixed = TRUE
+  )
+
+  date_data <- data
+  date_data$time <- as.Date("2026-01-01") + date_data$time
+  expect_error(
+    validate_interdep_data(
+      date_data,
+      group = dyad_id,
+      member = person_id,
+      time = time
+    ),
+    "`time` = 2026-01-03",
     fixed = TRUE
   )
 })
@@ -764,7 +777,7 @@ test_that("validate_interdep_data rejects inconsistent roles within member", {
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, role = role, time = time),
-    "Found at least one group-member pair with conflicting roles",
+    "`dyad_id` = 1, `person_id` = A",
     fixed = TRUE
   )
 })
@@ -821,7 +834,7 @@ test_that("validate_interdep_data rejects duplicate cross-sectional member rows"
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id),
-    "If these are repeated measurements, supply `time`",
+    "`dyad_id` = 1, `person_id` = A",
     fixed = TRUE
   )
 })

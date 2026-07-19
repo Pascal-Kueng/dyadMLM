@@ -110,7 +110,8 @@ center_predictors <- function(data) {
   stop(
     "Internal error: unsupported `attr(data, \"interdep\")$temporal_predictor_decomposition` value `",
     temporal_predictor_decomposition,
-    "`. Expected one of `none` or `time_2l` after validation.",
+    "`. Expected one of `none` or `time_2l` after validation. ",
+    "Please report this as an interdep bug with a reproducible example and your package version.",
     call. = FALSE
   )
 }

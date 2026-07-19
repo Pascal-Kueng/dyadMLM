@@ -88,19 +88,31 @@ validate_comparison_model <- function(model, name) {
   }
   if (isTRUE(model$modelInfo$REML)) {
     stop(
-      "Both models must be fitted with maximum likelihood, not REML.",
+      sprintf(
+        "The `%s` model was fitted with REML. Refit both models with `REML = FALSE` before comparing them.",
+        name
+      ),
       call. = FALSE
     )
   }
   if (!is.null(model$fit$convergence) &&
       !isTRUE(model$fit$convergence == 0)) {
-    stop(sprintf("The `%s` model did not converge.", name), call. = FALSE)
+    stop(
+      sprintf(
+        "The `%s` model did not converge. Diagnose and refit it before comparing models.",
+        name
+      ),
+      call. = FALSE
+    )
   }
   # pdHess is NULL when the Hessian was not calculated, e.g. with se = FALSE.
   if (!is.null(model$sdr$pdHess) && !isTRUE(model$sdr$pdHess)) {
     stop(
       sprintf(
-        "The `%s` model has a non-positive-definite Hessian matrix.",
+        paste0(
+          "The `%s` model has a non-positive-definite Hessian matrix. ",
+          "Diagnose and refit it before comparing models."
+        ),
         name
       ),
       call. = FALSE
@@ -157,7 +169,9 @@ validate_comparison_data <- function(model1, model2,
                                      model1_data, model2_data) {
   if (nrow(model1_data) != nrow(model2_data)) {
     stop(
-      "The two data objects have different numbers of rows.",
+      "The two data objects have different numbers of rows (",
+      nrow(model1_data), " and ", nrow(model2_data),
+      "). Fit both models from the same analysis data.",
       call. = FALSE
     )
   }
@@ -194,7 +208,8 @@ validate_comparison_data <- function(model1, model2,
 
   if (!setequal(model1_columns, model2_columns)) {
     stop(
-      "The two data objects do not contain the same original columns.",
+      "The two data objects do not contain the same original columns. ",
+      "Prepare both models from data with the same original columns.",
       call. = FALSE
     )
   }
@@ -203,7 +218,10 @@ validate_comparison_data <- function(model1, model2,
     if (!identical(model1_data[[column]], model2_data[[column]])) {
       stop(
         sprintf(
-          "Column `%s` differs between the two data objects.",
+          paste0(
+            "Column `%s` differs between the two data objects. ",
+            "Fit both models from the same unchanged analysis data."
+          ),
           column
         ),
         call. = FALSE
@@ -219,7 +237,8 @@ validate_comparison_data <- function(model1, model2,
 
   if (!is.symbol(model1_response) || !is.symbol(model2_response)) {
     stop(
-      "Only an untransformed outcome stored in the data is supported.",
+      "Only an untransformed outcome stored in the data is supported. ",
+      "Create the transformed outcome as a new data column and refit both models with that column on the left-hand side.",
       call. = FALSE
     )
   }
@@ -227,11 +246,17 @@ validate_comparison_data <- function(model1, model2,
   model1_response <- as.character(model1_response)
   model2_response <- as.character(model2_response)
   if (!identical(model1_response, model2_response)) {
-    stop("The two models use different outcome variables.", call. = FALSE)
+    stop(
+      "The two models use different outcome variables (`",
+      model1_response, "` and `", model2_response,
+      "`). Use the same outcome in both models.",
+      call. = FALSE
+    )
   }
   if (!model1_response %in% model1_columns) {
     stop(
-      "Only an untransformed outcome stored in the data is supported.",
+      "Only an untransformed outcome stored in the data is supported. ",
+      "Create the transformed outcome as a new data column and refit both models with that column on the left-hand side.",
       call. = FALSE
     )
   }
@@ -241,7 +266,8 @@ validate_comparison_data <- function(model1, model2,
   model2_rows <- row.names(model2$frame)
   if (!identical(model1_rows, model2_rows)) {
     stop(
-      "The two models were fitted to different observation rows.",
+      "The two models were fitted to different observation rows. ",
+      "Check missing-data patterns and refit both models on the same rows.",
       call. = FALSE
     )
   }
@@ -251,7 +277,8 @@ validate_comparison_data <- function(model1, model2,
   model2_outcome <- unname(stats::model.response(model2$frame))
   if (!identical(model1_outcome, model2_outcome)) {
     stop(
-      "The fitted outcome values differ between the two models.",
+      "The fitted outcome values differ between the two models. ",
+      "Refit both models from the same unchanged analysis data.",
       call. = FALSE
     )
   }
@@ -262,7 +289,11 @@ validate_comparison_data <- function(model1, model2,
   if (is.null(model1_weights)) model1_weights <- rep(1, length(model1_rows))
   if (is.null(model2_weights)) model2_weights <- rep(1, length(model2_rows))
   if (!identical(as.numeric(model1_weights), as.numeric(model2_weights))) {
-    stop("The two models use different observation weights.", call. = FALSE)
+    stop(
+      "The two models use different observation weights. ",
+      "Use identical weights when comparing their likelihoods.",
+      call. = FALSE
+    )
   }
 
   # glmmTMB stores separate offsets for its three model components.
@@ -270,7 +301,11 @@ validate_comparison_data <- function(model1, model2,
   model1_offsets <- model1$obj$env$data[offset_names]
   model2_offsets <- model2$obj$env$data[offset_names]
   if (!identical(model1_offsets, model2_offsets)) {
-    stop("The two models use different offsets.", call. = FALSE)
+    stop(
+      "The two models use different offsets. ",
+      "Use identical offsets when comparing their likelihoods.",
+      call. = FALSE
+    )
   }
 
   model1_family <- model1$modelInfo$family
@@ -278,7 +313,13 @@ validate_comparison_data <- function(model1, model2,
   same_family <- identical(model1_family$family, model2_family$family)
   same_link <- identical(model1_family$link, model2_family$link)
   if (!same_family || !same_link) {
-    stop("The two models must use the same family and link.", call. = FALSE)
+    stop(
+      "The two models must use the same family and link. Found `",
+      model1_family$family, "` with `", model1_family$link,
+      "` and `", model2_family$family, "` with `", model2_family$link,
+      "`.",
+      call. = FALSE
+    )
   }
 
   invisible(TRUE)

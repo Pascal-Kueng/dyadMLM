@@ -9,14 +9,24 @@ exchangeable_rescov(model, pairs = NULL)
 \arguments{
 \item{model}{A fitted \code{glmmTMB} or single-response \code{brmsfit} model.}
 
-\item{pairs}{\code{NULL} for automatic matching, or one exact block pair (or an
-outer list of block pairs). Each pair must contain \code{shared}, \code{difference},
-and \code{idiff}, and may contain \code{shared_indicator}. Copy \code{shared} and
-\code{difference} from the model formula. Either block may be \code{NULL} only when
-that entire block was omitted from the fitted model. \code{idiff} is the exact
-difference-indicator column name. \code{shared_indicator} is the exact
-composition indicator and defaults to \code{"1"}, meaning an ordinary random
-intercept.}
+\item{pairs}{\code{NULL} (default) for automatic block matching, one named block
+pair, or an outer list of named block pairs. A pair has these fields:
+\itemize{
+\item \code{shared}: the exact shared random-effect term from the fitted model
+formula, or \code{NULL} if the entire shared block was omitted when fitting;
+\item \code{difference}: the exact difference random-effect term, or \code{NULL} if the
+entire difference block was omitted when fitting;
+\item \code{difference_indicator}: the exact name of the difference-indicator
+column used in \code{difference}, regardless of what the column is called. If
+\code{difference = NULL}, name the column that defines (or would define) the
+opposite signs for this pair in the original data;
+\item \code{shared_indicator}: optionally, the exact shared composition-indicator
+column. It defaults to \code{"1"}, meaning that an ordinary random intercept
+is the shared block and every fitted row belongs to this pair.
+}
+
+At least one of \code{shared} and \code{difference} must name a fitted block. See
+Details for examples and the meaning of \code{NULL}.}
 }
 \value{
 A named list with one element per matched block pair. Each element
@@ -32,23 +42,32 @@ matrices to the covariance structure of two exchangeable members.
 Automatic matching recognizes exact \verb{.i_diff_*_arbitrary} coefficient names
 and first looks for the corresponding \verb{.i_is_*} shared block. It remains
 deliberately conservative: the two blocks must use the same grouping factor
-and contain the same underlying terms.
+and contain the same underlying terms. Supply \code{pairs} for custom indicator
+names, ambiguous matches, or models that deliberately omit blocks or terms.
 
-Use \code{pairs} when block matching is ambiguous, when custom indicator names
-were used, or when terms were omitted to impose constraints. Terms found in
-only one selected block are represented as structural zeros in the other.
-\code{shared = NULL} or \code{difference = NULL} means that the whole corresponding
-block was absent—not that an existing fitted block should be ignored. The
-function warns when \code{NULL} is used. This reports a constraint already imposed
-by the fitted model; the back-transformation does not impose it. An omitted
-difference block means that the members have identical random effects for
-those terms, whereas an omitted shared block means that they have
-equal-magnitude, opposite-sign random effects.
+Here “shared” and “difference” describe random-effect coordinates. If
+\code{u_shared} moves both members together and \code{u_difference} moves them in
+opposite directions, the member effects are \code{u1 = u_shared + u_difference}
+and \code{u2 = u_shared - u_difference}. These coordinates are distinct from
+dyad-mean and within-dyad member-deviation predictor columns, even though
+both use the same mean/difference logic.
+
+The selected shared and difference coordinates must be separate
+random-effect blocks, so their covariance is fixed to zero by the fitted
+model. On the member scale, that constraint produces equal member variances
+while still allowing a nonzero covariance between members. This is the
+exchangeable actor-partner covariance structure that the function recovers;
+the function does not assume that the members' random effects are
+independent.
+
+A custom difference-indicator name is supplied literally. For example, if
+the model used a \code{-1/+1} column named \code{hallelujah}:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
   shared = "(1 + time | coupleID)",
-  difference = "(0 + IDIFF + I(IDIFF * time) || coupleID)",
-  idiff = "IDIFF"
+  difference =
+    "(0 + hallelujah + I(hallelujah * time) || coupleID)",
+  difference_indicator = "hallelujah"
 )
 }\if{html}{\out{</div>}}
 
@@ -58,26 +77,65 @@ A composition-specific pair also names its shared indicator:
   shared = "(0 + SAMESEX + SAMESEX:time | coupleID)",
   difference =
     "(0 + IDIFF_SAMESEX + IDIFF_SAMESEX:time | coupleID)",
-  idiff = "IDIFF_SAMESEX",
+  difference_indicator = "IDIFF_SAMESEX",
   shared_indicator = "SAMESEX"
+)
+}\if{html}{\out{</div>}}
+
+For multiple pairs, wrap the pair specifications in an outer list. Naming
+the outer elements makes later errors easier to locate:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{pairs = list(
+  stable = list(
+    shared = "(1 | coupleID)",
+    difference = "(0 + hallelujah | coupleID)",
+    difference_indicator = "hallelujah"
+  ),
+  occasion = list(
+    shared = "(1 | coupleID:time)",
+    difference = "(0 + hallelujah | coupleID:time)",
+    difference_indicator = "hallelujah"
+  )
 )
 }\if{html}{\out{</div>}}
 
 Model-style equivalents are recognized across backends, such as
 \code{(1 + time | group)} and \code{us(1 + time | group)}, or
 \code{(0 + x || group)} and \code{diag(0 + x | group)}. Difference slopes may be
-written as \code{IDIFF:time}, \code{time:IDIFF}, \code{I(IDIFF * time)}, or
-\code{I(time * IDIFF)}. More complex arithmetic inside \code{I()} is not interpreted.
+written as \code{hallelujah:time}, \code{time:hallelujah},
+\code{I(hallelujah * time)}, or \code{I(time * hallelujah)}. More complex arithmetic
+inside \code{I()} is not interpreted.
 
-Here “shared” and “difference” describe the random-effect coordinates: one
-moves both members together and the other moves them in opposite directions.
-They are distinct from dyad-mean and within-dyad member-deviation predictor
-columns, even though both use the same mean/difference logic.
+When the fitted model frame retains the indicator columns,
+\code{difference_indicator} must use unnormalised \code{-1/+1} coding where
+\code{shared_indicator} is one and must be zero elsewhere. A column omitted
+entirely from the fitted formula cannot be recovered from either supported
+backend, so its coding cannot be checked.
+}
+\section{What omitted blocks and terms mean}{
 
-When the fitted model frame retains the indicator columns, \code{idiff} must use
-unnormalised \code{-1/+1} coding where \code{shared_indicator} is one and be zero
-elsewhere. A column omitted entirely from the fitted formula cannot be
-recovered from either supported backend, so its coding cannot be checked.
+\code{exchangeable_rescov()} only describes constraints that were already imposed
+when the model was fitted. It does not remove a block, set a variance to zero,
+or otherwise constrain the supplied model.
+
+If a term occurs in only one selected block, the function represents the
+missing coordinate as a structural zero:
+\itemize{
+\item A term present only in \code{shared} has no difference component, so the two
+members have identical random effects for that term.
+\item A term present only in \code{difference} has no shared component, so the two
+members have equal-magnitude, opposite-sign random effects for that term.
+}
+
+Setting \code{difference = NULL} or \code{shared = NULL} makes the corresponding rule
+apply to every term in the other block. \code{NULL} therefore means that the whole
+block was absent from the fitted model; it must never be used merely to ignore
+an existing block. The function warns whenever \code{NULL} is supplied and errors
+if it can identify a compatible fitted block that contradicts the claimed
+omission.
+}
+
+\section{Backend note}{
 
 In Gaussian \code{brms} models, cross-sectional and same-occasion partner
 residual dependence is usually represented directly with

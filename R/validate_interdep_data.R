@@ -133,19 +133,35 @@ validate_interdep_data <- function(
 
   # Validate that structural columns exist.
   if (!group_name %in% names(out)) {
-    stop("`group` must refer to an existing column in `data`.", call. = FALSE)
+    stop(
+      "`group` must refer to an existing column in `data`. Column `",
+      group_name, "` was not found.",
+      call. = FALSE
+    )
   }
 
   if (!member_name %in% names(out)) {
-    stop("`member` must refer to an existing column in `data`.", call. = FALSE)
+    stop(
+      "`member` must refer to an existing column in `data`. Column `",
+      member_name, "` was not found.",
+      call. = FALSE
+    )
   }
 
   if (has_role && !role_name %in% names(out)) {
-    stop("`role` must refer to an existing column in `data`.", call. = FALSE)
+    stop(
+      "`role` must refer to an existing column in `data`. Column `",
+      role_name, "` was not found.",
+      call. = FALSE
+    )
   }
 
   if (has_time && !time_name %in% names(out)) {
-    stop("`time` must refer to an existing column in `data`.", call. = FALSE)
+    stop(
+      "`time` must refer to an existing column in `data`. Column `",
+      time_name, "` was not found.",
+      call. = FALSE
+    )
   }
 
   # Validate that required structural columns are complete.
@@ -251,13 +267,24 @@ validate_interdep_data <- function(
   # Validate that each member has at most one row per dyad or dyad-time.
   if (has_time) {
     if (anyDuplicated(out[c(group_name, time_name, member_name)]) > 0) {
-      stop("Each `member` must appear at most once per `group`-`time` combination.", call. = FALSE)
+      stop(
+        "Each `member` must appear at most once per `group`-`time` combination. ",
+        "Affected combination(s): ",
+        format_duplicate_combinations(
+          out,
+          c(group_name, time_name, member_name)
+        ),
+        ". Remove or combine these duplicate rows.",
+        call. = FALSE
+      )
     }
   } else {
     if (anyDuplicated(out[c(group_name, member_name)]) > 0) {
       stop(
         "Each `member` must appear at most once per `group`. ",
-        "If these are repeated measurements, supply `time` so rows are validated within each `group`-`time` combination.",
+        "Affected combination(s): ",
+        format_duplicate_combinations(out, c(group_name, member_name)),
+        ". If these are repeated measurements, supply `time` so rows are validated within each `group`-`time` combination.",
         call. = FALSE
       )
     }
@@ -368,6 +395,13 @@ resolve_dsm_role_order <- function(dsm_role_order, model_type, has_role) {
     return(NULL)
   }
 
+  if (!has_role) {
+    stop(
+      "`model_type = \"dsm\"` requires `role` to be supplied.",
+      call. = FALSE
+    )
+  }
+
   if (is.null(dsm_role_order)) {
     stop(
       paste0(
@@ -382,7 +416,7 @@ resolve_dsm_role_order <- function(dsm_role_order, model_type, has_role) {
       length(dsm_role_order) != 2L ||
       anyNA(dsm_role_order) ||
       any(!nzchar(trimws(dsm_role_order))) ||
-      anyDuplicated(dsm_role_order)) {
+      anyDuplicated(trimws(dsm_role_order))) {
     stop(
       paste0(
         "`dsm_role_order` must be a character vector containing exactly two ",
@@ -393,14 +427,32 @@ resolve_dsm_role_order <- function(dsm_role_order, model_type, has_role) {
     )
   }
 
-  if (!has_role) {
-    stop(
-      "`model_type = \"dsm\"` requires `role` to be supplied.",
-      call. = FALSE
+  unname(trimws(dsm_role_order))
+}
+
+format_duplicate_combinations <- function(data, columns, max_combinations = 5L) {
+  duplicated_rows <- duplicated(data[columns]) |
+    duplicated(data[columns], fromLast = TRUE)
+  combinations <- unique(data[duplicated_rows, columns, drop = FALSE])
+  shown <- utils::head(combinations, max_combinations)
+  labels <- character(nrow(shown))
+
+  for (i in seq_len(nrow(shown))) {
+    values <- vapply(
+      shown[i, , drop = FALSE],
+      function(value) as.character(value[1L]),
+      character(1L)
+    )
+    labels[[i]] <- paste0(
+      "`", columns, "` = ", values,
+      collapse = ", "
     )
   }
 
-  unname(dsm_role_order)
+  if (nrow(combinations) > nrow(shown)) {
+    labels <- c(labels, paste0("... and ", nrow(combinations) - nrow(shown), " more"))
+  }
+  return(paste(labels, collapse = "; "))
 }
 
 resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dyads) {
@@ -499,7 +551,12 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   if (anyDuplicated(known_member_roles[c(group_name, member_name)]) > 0) {
     stop(
       "Within each `group`, each `member` must have only one non-missing `role` value. ",
-      "Found at least one group-member pair with conflicting roles; check rows with the same `group` and `member`.",
+      "Group-member pair(s) with conflicting roles: ",
+      format_duplicate_combinations(
+        known_member_roles,
+        c(group_name, member_name)
+      ),
+      ". Correct the `role` values for these pairs.",
       call. = FALSE
     )
   }

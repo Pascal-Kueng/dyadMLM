@@ -53,8 +53,12 @@ select_interdep_columns <- function(data, cols_quo, arg) {
     error = function(e) {
       stop(
         sprintf(
-          "`%s` must select columns from `data`. Check that the selected columns exist and that the tidyselect expression is valid.",
-          arg
+          paste0(
+            "`%s` must select columns from `data`. Check that the selected columns exist and that the tidyselect expression is valid. ",
+            "Underlying selection error: %s"
+          ),
+          arg,
+          conditionMessage(e)
         ),
         call. = FALSE
       )

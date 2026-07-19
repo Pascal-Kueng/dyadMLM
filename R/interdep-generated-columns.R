@@ -216,7 +216,7 @@ attach_generated_column_specs <- function(columns) {
         apply(missing_keys, 1, paste, collapse = "/"),
         collapse = ", "
       ),
-      ". Add the missing key(s) to `generated_column_spec_lookup()`.",
+      ". Please report this as an interdep bug with a reproducible example and your package version.",
       call. = FALSE
     )
   }
