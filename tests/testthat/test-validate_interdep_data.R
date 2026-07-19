@@ -608,7 +608,10 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
 
   expect_error(
     validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
-    "Found 1 incomplete dyad, with ID: 1.",
+    paste0(
+      "Found 1 incomplete dyad, with ID: 1. Add the missing member rows or ",
+      "use `incomplete_dyads = \"drop\"` to drop these dyads."
+    ),
     fixed = TRUE
   )
 

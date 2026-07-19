@@ -433,7 +433,8 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
           singular = "incomplete dyad",
           plural = "incomplete dyads"
         ),
-        "."
+        ". Add the missing member rows or use `incomplete_dyads = \"drop\"` ",
+        "to drop these dyads."
       ),
       call. = FALSE
     )

@@ -271,6 +271,8 @@ $u_{\mathrm{diff},j}$ but not its variance or the implied member-level
 covariance matrix. In longitudinal models, the same transformation applies
 separately to stable dyad-level and same-occasion dyad-level covariance blocks.
 
+<!-- TODO: insert our new function -->
+
 #### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
 
 The same shared/difference back-transformation applies to random slopes
@@ -382,7 +384,8 @@ draw_apim_diagram(
 )
 ```
 
-`compare_interdep_models()` verifies that both models use equivalent original
+[`compare_interdep_models()`](../reference/compare_interdep_models.html)
+verifies that both models use equivalent original
 observations before performing the likelihood-ratio test:
 
 ```{r compare-cross-distinguishability}

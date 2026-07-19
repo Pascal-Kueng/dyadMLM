@@ -257,7 +257,7 @@ test_that("unsupported brms random-effect structures fail clearly", {
   )
   expect_error(
     brms_extract_exchangeable_residual_blocks(linked),
-    "Linked `brms` random-effect blocks",
+    "different `| ID |` labels or no shared ID",
     fixed = TRUE
   )
 
@@ -268,7 +268,7 @@ test_that("unsupported brms random-effect structures fail clearly", {
   )
   expect_error(
     brms_extract_exchangeable_residual_blocks(by_model),
-    "using `gr(..., by = ...)`",
+    "Refit the exchangeable blocks without `by`",
     fixed = TRUE
   )
 })
@@ -309,7 +309,7 @@ test_that("brms ignores non-mean random effects", {
       },
       .package = "brms"
     ),
-    "were ignored",
+    "only processes ordinary response-mean random effects",
     fixed = TRUE
   )
   expect_length(blocks$blocks, 1L)
@@ -401,7 +401,7 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
     match_exchangeable_residual_blocks(list(
       rescov_test_block("coupleID", "(Intercept)", "shared")
     )),
-    "No supported `.i_diff_*_arbitrary`",
+    "Supply `pairs` explicitly",
     fixed = TRUE
   )
 
@@ -419,7 +419,7 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
   )
   expect_error(
     match_exchangeable_residual_blocks(incomplete),
-    "No shared block matched",
+    "Supply `pairs` explicitly to select the intended blocks",
     fixed = TRUE
   )
 
@@ -430,7 +430,7 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
   )
   expect_error(
     match_exchangeable_residual_blocks(ambiguous),
-    "More than one shared block matched",
+    "Supply `pairs` explicitly to select the intended blocks",
     fixed = TRUE
   )
 
@@ -441,6 +441,15 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
   expect_error(
     match_exchangeable_residual_blocks(partial),
     "must identify every coefficient in its difference block",
+    fixed = TRUE
+  )
+
+  expect_error(
+    exchangeable_underlying_terms(
+      c("IDIFF:time", "I(IDIFF * time)"),
+      "IDIFF"
+    ),
+    "both represent the underlying term `time`. Keep only one representation",
     fixed = TRUE
   )
 })
@@ -707,7 +716,7 @@ test_that("model-style selectors preserve covariance structures", {
         idiff = marker
       )
     ),
-    "matches more than one random-effect block",
+    "Refit without duplicate equivalent random-effect blocks",
     fixed = TRUE
   )
 })
@@ -736,7 +745,7 @@ test_that("supplied pair specifications fail clearly", {
         idiff = "IDIFF"
       )
     ),
-    "does not match an extracted random-effect block",
+    "Copy the intended term from the available blocks below",
     fixed = TRUE
   )
   expect_error(
@@ -748,7 +757,7 @@ test_that("supplied pair specifications fail clearly", {
         idiff = "IDIFF"
       )
     ),
-    "must use the same grouping factor",
+    "shared block groups by `study`, but the selected difference block groups by `coupleID`",
     fixed = TRUE
   )
 
@@ -803,7 +812,21 @@ test_that("supplied pair specifications fail clearly", {
       blocks,
       list(shared = "difference", difference = NULL, idiff = "IDIFF")
     ),
-    "selected shared block contains its `idiff`",
+    "selected shared block contains the difference indicator `IDIFF`",
+    fixed = TRUE
+  )
+
+  repeated_pair <- list(
+    shared = "shared",
+    difference = "difference",
+    idiff = "IDIFF"
+  )
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(repeated_pair, repeated_pair)
+    ),
+    "Reused blocks: `shared`, `difference`. Remove each reused block",
     fixed = TRUE
   )
 })
@@ -825,7 +848,7 @@ test_that("fitted-row validation protects the exchangeable coding", {
       "IDIFF",
       "1"
     ),
-    "was not retained",
+    "Before interpreting the result, verify",
     fixed = TRUE
   )
   expect_warning(
@@ -833,6 +856,27 @@ test_that("fitted-row validation protects the exchangeable coding", {
       data.frame(IDIFF = c(-1, 1)),
       "IDIFF",
       "SAMESEX"
+    ),
+    "coded 1 exactly where `abs(IDIFF) == 1` and 0 elsewhere",
+    fixed = TRUE
+  )
+
+  character_coding <- valid
+  character_coding$IDIFF <- as.character(character_coding$IDIFF)
+  expect_error(
+    validate_exchangeable_coding(character_coding, "IDIFF", "SAMESEX"),
+    "`IDIFF` and `SAMESEX` must be complete numeric columns",
+    fixed = TRUE
+  )
+  expect_warning(
+    expect_error(
+      validate_exchangeable_coding(
+        character_coding["IDIFF"],
+        "IDIFF",
+        "SAMESEX"
+      ),
+      "must be complete numeric columns",
+      fixed = TRUE
     ),
     "support could not be checked",
     fixed = TRUE
@@ -857,7 +901,7 @@ test_that("fitted-row validation protects the exchangeable coding", {
   one_sign <- data.frame(IDIFF = c(1, 1), SAMESEX = c(1, 1))
   expect_error(
     validate_exchangeable_coding(one_sign, "IDIFF", "SAMESEX"),
-    "must contain both -1 and +1",
+    "whether fitted-row filtering removed one member position",
     fixed = TRUE
   )
 

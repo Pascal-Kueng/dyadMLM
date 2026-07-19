@@ -85,7 +85,10 @@ exchangeable_rescov <- function(model, pairs = NULL) {
   )
   if (!is.data.frame(model_frame)) {
     stop(
-      "The fitted model data could not be recovered to validate the exchangeable coding.",
+      "The fitted model frame could not be recovered from `model`, so the ",
+      "exchangeable coding cannot be validated. This is unexpected for a ",
+      "supported model; please report an issue with a reproducible model and ",
+      "your installed package versions.",
       call. = FALSE
     )
   }
@@ -252,8 +255,21 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
   # A covariance block cannot contain two coefficients that map to the same
   # term, such as idiff:time and I(idiff * time) both becoming "time".
   if (anyDuplicated(terms)) {
+    duplicated_terms <- unique(terms[duplicated(terms)])
+    collisions <- character(length(duplicated_terms))
+    for (i in seq_along(duplicated_terms)) {
+      term <- duplicated_terms[[i]]
+      coefficient_labels <- paste0("`", coefficients[terms == term], "`")
+      separator <- if (length(coefficient_labels) == 2L) " and " else ", "
+      collisions[[i]] <- paste0(
+        paste(coefficient_labels, collapse = separator),
+        if (length(coefficient_labels) == 2L) " both" else " all",
+        " represent the underlying term `", term, "`."
+      )
+    }
     stop(
-      "A random-effect block contains coefficients that reduce to the same exchangeable term.",
+      paste(collisions, collapse = " "),
+      " Keep only one representation of each term in this random-effect block.",
       call. = FALSE
     )
   }
@@ -276,7 +292,9 @@ find_exchangeable_difference_indicator <- function(coefficients) {
 
   if (length(markers) > 1L) {
     stop(
-      "A difference block contains more than one `.i_diff_*_arbitrary` column.",
+      "A difference block contains more than one generated difference ",
+      "indicator: `", paste(markers, collapse = "`, `"), "`. Put each ",
+      "exchangeable composition in a separate random-effect block.",
       call. = FALSE
     )
   }
@@ -304,7 +322,10 @@ validate_exchangeable_coding <- function(
   if (!idiff %in% names(model_frame)) {
     warning(
       "`", idiff,
-      "` was not retained in the fitted model frame, so its -1/+1 coding could not be verified. Please ensure correct coding yourself.",
+      "` was not retained in the fitted model frame, so its coding could not ",
+      "be verified. Before interpreting the result, verify that the fitted ",
+      "model used unnormalised -1/+1 coding on the supported rows and zero ",
+      "elsewhere.",
       call. = FALSE
     )
     return(invisible(NULL))
@@ -325,10 +346,12 @@ validate_exchangeable_coding <- function(
     # independently.
     warning(
       "`", shared_indicator,
-      "` was not retained in the fitted model frame, so its support could not be checked.",
+      "` was not retained in the fitted model frame, so its support could not ",
+      "be checked. Verify that it was coded 1 exactly where `abs(", idiff,
+      ") == 1` and 0 elsewhere.",
       call. = FALSE
     )
-    shared <- abs(difference)
+    shared <- if (is.numeric(difference)) abs(difference) else difference
   }
   if (is.logical(shared)) {
     shared <- as.numeric(shared)
@@ -336,9 +359,20 @@ validate_exchangeable_coding <- function(
 
   if (!is.numeric(difference) || !is.numeric(shared) ||
       anyNA(difference) || anyNA(shared)) {
+    column_names <- paste0("`", idiff, "`")
+    coding_requirement <- paste0(
+      "Code `", idiff, "` as -1/+1 before fitting."
+    )
+    if (!identical(shared_indicator, "1")) {
+      column_names <- paste0(column_names, " and `", shared_indicator, "`")
+      coding_requirement <- paste0(
+        "Code `", idiff, "` as -1/0/+1 and `", shared_indicator,
+        "` as 0/1 before fitting."
+      )
+    }
     stop(
-      "Exchangeable difference and shared-indicator columns must be ",
-      "complete numeric columns in the fitted data.",
+      column_names, " must be complete numeric columns in the fitted data. ",
+      coding_requirement,
       call. = FALSE
     )
   }
@@ -351,9 +385,20 @@ validate_exchangeable_coding <- function(
     all(shared %in% c(0, 1)) &&
     all(abs(difference) == shared)
   if (!valid_coding) {
+    if (identical(shared_indicator, "1")) {
+      stop(
+        "`", idiff, "` must use -1/+1 coding on every fitted row because ",
+        "`shared_indicator = \"1\"` means that every row is supported. ",
+        "Correct the coding and refit the model.",
+        call. = FALSE
+      )
+    }
     stop(
-      "`", idiff, "` must use -1/+1 coding where `",
-      shared_indicator, "` is one and zero elsewhere in the fitted data.",
+      "`", idiff, "` and `", shared_indicator,
+      "` have incompatible coding. `", shared_indicator,
+      "` must be 0/1; `", idiff, "` must use -1/+1 coding where `",
+      shared_indicator, "` is 1 and zero where it is 0. Correct the coding ",
+      "and refit the model.",
       call. = FALSE
     )
   }
@@ -364,7 +409,9 @@ validate_exchangeable_coding <- function(
   if (!any(difference[supported] == -1) ||
       !any(difference[supported] == 1)) {
     stop(
-      "`", idiff, "` must contain both -1 and +1 on its supported fitted rows.",
+      "`", idiff, "` must contain both -1 and +1 on its supported fitted ",
+      "rows. Check the coding and whether fitted-row filtering removed one ",
+      "member position, then refit the model.",
       call. = FALSE
     )
   }
@@ -391,8 +438,13 @@ build_exchangeable_pair <- function(
         blocks[[difference_block_index]]$group
       )
   ) {
+    shared_group <- blocks[[shared_block_index]]$group
+    difference_group <- blocks[[difference_block_index]]$group
     stop(
-      "The shared and difference blocks in a pair must use the same grouping factor.",
+      "The selected shared block groups by `", shared_group,
+      "`, but the selected difference block groups by `", difference_group,
+      "`; both blocks must use the same grouping factor. Select a shared and ",
+      "difference block from the same grouping level.",
       call. = FALSE
     )
   }
@@ -402,7 +454,8 @@ build_exchangeable_pair <- function(
     shared_block <- blocks[[shared_block_index]]
     if (block_contains_indicator(shared_block, idiff)) {
       stop(
-        "The selected shared block contains its `idiff` indicator.",
+        "The selected shared block contains the difference indicator `", idiff,
+        "`. Select the block that represents shared random effects instead.",
         call. = FALSE
       )
     }
@@ -413,7 +466,9 @@ build_exchangeable_pair <- function(
     if (is.null(shared_terms)) {
       stop(
         "`shared_indicator = \"", shared_indicator,
-        "\"` must identify every coefficient in the selected shared block.",
+        "\"` must identify every coefficient in the selected shared block. ",
+        "Use `", shared_indicator, "` alone for its intercept and `",
+        shared_indicator, ":term` for its slopes.",
         call. = FALSE
       )
     }
@@ -427,7 +482,9 @@ build_exchangeable_pair <- function(
         block_contains_indicator(difference_block, shared_indicator)
     ) {
       stop(
-        "The selected difference block contains its `shared_indicator`.",
+        "The selected difference block contains the shared indicator `",
+        shared_indicator, "`. ",
+        "Select the block that represents difference random effects instead.",
         call. = FALSE
       )
     }
@@ -524,6 +581,8 @@ match_blocks_for_exchangeable_indicator <- function(
   if (length(difference_block_indices) == 0L) {
     stop(
       "No difference block contains `", idiff, "`.",
+      " Check the indicator name, or supply `pairs` explicitly if the model ",
+      "uses custom block definitions.",
       inventory,
       call. = FALSE
     )
@@ -560,6 +619,8 @@ match_blocks_for_exchangeable_indicator <- function(
         problem, " shared block matched difference block `",
         blocks[[difference_block_index]]$term,
         "`. Matching requires the same group and underlying terms.",
+        " Supply `pairs` explicitly to select the intended blocks or to match ",
+        "partial term sets.",
         inventory,
         call. = FALSE
       )
@@ -598,6 +659,8 @@ match_exchangeable_residual_blocks <- function(
   if (length(difference_indicators) == 0L) {
     stop(
       "No supported `.i_diff_*_arbitrary` difference block was found.",
+      " Supply `pairs` explicitly if the model uses custom ",
+      "difference-indicator names or unequal shared and difference term sets.",
       format_exchangeable_block_inventory(blocks),
       call. = FALSE
     )
@@ -629,7 +692,11 @@ match_exchangeable_residual_blocks <- function(
     )
   }
   if (anyDuplicated(shared_block_indices)) {
-    stop("A shared block matched more than one difference block.", call. = FALSE)
+    stop(
+      "A shared block matched more than one difference block. Supply `pairs` ",
+      "explicitly so that each shared block is assigned only once.",
+      call. = FALSE
+    )
   }
   return(matched_pairs[order(difference_block_indices)])
 }
@@ -747,7 +814,7 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
     pair <- pairs[[i]]
     if (!is_pair(pair)) {
       stop(
-        "Each `pairs` element must contain `shared`, `difference`, and ",
+        "`pairs[[", i, "]]` must contain `shared`, `difference`, and ",
         "`idiff`, with optional `shared_indicator`.",
         call. = FALSE
       )
@@ -758,28 +825,42 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
 
     for (field in c("idiff", "shared_indicator")) {
       if (!is_nonempty_string(pair[[field]])) {
-        stop("`", field, "` must be one non-empty column name.", call. = FALSE)
+        stop(
+          "`pairs[[", i, "]]$", field,
+          "` must be one non-empty column name.",
+          call. = FALSE
+        )
       }
     }
     if (identical(pair$idiff, "1")) {
-      stop("`idiff` must name a difference-indicator column.", call. = FALSE)
+      stop(
+        "`pairs[[", i, "]]$idiff` must name a difference-indicator column; ",
+        "use `shared_indicator = \"1\"` for an ordinary shared intercept.",
+        call. = FALSE
+      )
     }
     if (identical(pair$idiff, pair$shared_indicator)) {
-      stop("`idiff` and `shared_indicator` must be different.", call. = FALSE)
+      stop(
+        "`pairs[[", i, "]]$idiff` and `pairs[[", i,
+        "]]$shared_indicator` must name different columns.",
+        call. = FALSE
+      )
     }
 
     for (field in c("shared", "difference")) {
       selector <- pair[[field]]
       if (!is.null(selector) && !is_nonempty_string(selector)) {
         stop(
-          "`", field,
+          "`pairs[[", i, "]]$", field,
           "` must be one random-effect term copied from the model formula, or `NULL`.",
           call. = FALSE
         )
       }
     }
     if (is.null(pair$shared) && is.null(pair$difference)) {
-      stop("A pair cannot set both `shared` and `difference` to `NULL`.",
+      stop("`pairs[[", i,
+        "]]` cannot set both `shared` and `difference` to `NULL`; supply at ",
+        "least one fitted random-effect block.",
         call. = FALSE
       )
     }
@@ -808,7 +889,8 @@ resolve_exchangeable_block_selector <- function(
   }
   if (length(matches) == 0L) {
     stop(
-      selector_label, " does not match an extracted random-effect block.",
+      selector_label, " does not match an extracted random-effect block. Copy ",
+      "the intended term from the available blocks below.",
       block_lookup$inventory,
       call. = FALSE
     )
@@ -816,7 +898,8 @@ resolve_exchangeable_block_selector <- function(
   if (length(matches) > 1L) {
     stop(
       selector_label,
-      " matches more than one random-effect block and cannot be selected uniquely.",
+      " matches more than one random-effect block and cannot be selected ",
+      "uniquely. Refit without duplicate equivalent random-effect blocks.",
       block_lookup$inventory,
       call. = FALSE
     )
@@ -1000,12 +1083,19 @@ match_supplied_exchangeable_residual_blocks <- function(
       pair$difference_block_index
     )
   }
-  paired_block_indices <- paired_block_indices[
-    !is.na(paired_block_indices)
-  ]
-  if (anyDuplicated(paired_block_indices)) {
+  paired_block_indices <- paired_block_indices[!is.na(paired_block_indices)]
+  duplicated_block_indices <- unique(
+    paired_block_indices[duplicated(paired_block_indices)]
+  )
+  if (length(duplicated_block_indices) > 0L) {
+    reused_blocks <- paste0(
+      "`", term_labels[duplicated_block_indices], "`",
+      collapse = ", "
+    )
     stop(
-      "Each random-effect block can occur in only one supplied pair.",
+      "Each random-effect block can occur in only one supplied pair. ",
+      "Reused block", if (length(duplicated_block_indices) > 1L) "s" else "",
+      ": ", reused_blocks, ". Remove each reused block from all but one pair.",
       call. = FALSE
     )
   }
@@ -1076,7 +1166,10 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
       length(fitted_covariance) != n_blocks
   ) {
     stop(
-      "Internal error: stored `glmmTMB` random-effect blocks could not be aligned.",
+      "Internal error: stored `glmmTMB` random-effect blocks could not be ",
+      "aligned. This is unexpected for a supported model; please report an ",
+      "issue with a reproducible model and the installed versions of ",
+      "`interdep` and `glmmTMB`.",
       call. = FALSE
     )
   }
@@ -1094,7 +1187,10 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
         !setequal(colnames(covariance_matrix), coefficients)
     ) {
       stop(
-        "Internal error: a `glmmTMB` covariance block could not be aligned with its coefficients.",
+        "Internal error: a `glmmTMB` covariance block could not be aligned ",
+        "with its coefficients. This is unexpected for a supported model; ",
+        "please report an issue with a reproducible model and the installed ",
+        "versions of `interdep` and `glmmTMB`.",
         call. = FALSE
       )
     }
@@ -1155,7 +1251,9 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
   unsupported <- nzchar(re_terms$dpar) | nzchar(re_terms$nlpar)
   if (any(unsupported)) {
     warning(
-      "Random effects for distributional or nonlinear parameters were ignored.",
+      "Random effects for distributional or nonlinear parameters were ",
+      "ignored; `exchangeable_rescov()` only processes ordinary response-mean ",
+      "random effects.",
       call. = FALSE
     )
   }
@@ -1168,7 +1266,9 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
       any(!is.na(re_terms$by) & nzchar(re_terms$by))
   ) {
     stop(
-      "Random-effect terms using `gr(..., by = ...)` are not supported.",
+      "Random-effect terms using `gr(..., by = ...)` are not supported. Refit ",
+      "the exchangeable blocks without `by` before using ",
+      "`exchangeable_rescov()`.",
       call. = FALSE
     )
   }
@@ -1178,7 +1278,9 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     if (length(unique(block$gn)) != 1L) {
       stop(
         "Linked `brms` random-effect blocks containing more than one ",
-        "formula term are not supported.",
+        "formula term are not supported. Fit the shared and difference terms ",
+        "as separate random-effect blocks, using different `| ID |` labels or ",
+        "no shared ID.",
         call. = FALSE
       )
     }
@@ -1204,7 +1306,10 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     group_covariance <- fitted_covariance[[group]]
     if (is.null(group_covariance) || is.null(group_covariance$sd)) {
       stop(
-        "Internal error: `brms` covariance draws were not found for a random-effect block.",
+        "Internal error: `brms` covariance draws were not found for a ",
+        "random-effect block. This is unexpected for a supported model; please ",
+        "report an issue with a reproducible model and the installed versions ",
+        "of `interdep` and `brms`.",
         call. = FALSE
       )
     }
@@ -1213,14 +1318,20 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     covariance_names[covariance_names == "Intercept"] <- "(Intercept)"
     if (anyDuplicated(covariance_names)) {
       stop(
-        "Internal error: duplicated `brms` covariance names cannot be aligned to separate blocks.",
+        "Internal error: duplicated `brms` covariance names cannot be aligned ",
+        "to separate blocks. This is unexpected for a supported model; please ",
+        "report an issue with a reproducible model and the installed versions ",
+        "of `interdep` and `brms`.",
         call. = FALSE
       )
     }
     coefficient_index <- match(stored_coefficients, covariance_names)
     if (anyNA(coefficient_index)) {
       stop(
-        "Internal error: `brms` covariance draws could not be aligned with their coefficients.",
+        "Internal error: `brms` covariance draws could not be aligned with ",
+        "their coefficients. This is unexpected for a supported model; please ",
+        "report an issue with a reproducible model and the installed versions ",
+        "of `interdep` and `brms`.",
         call. = FALSE
       )
     }
