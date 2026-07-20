@@ -1,10 +1,10 @@
 #' Infer dyad compositions
 #'
 #' Builds a dyad-level summary of role compositions from a validated
-#' `interdep_data` object.
+#' `dyadMLM_data` object.
 #'
-#' @param data An `interdep_data` object returned by [validate_interdep_data()].
-#' @param seed Optional seed for random `.i_diff_*` sign assignment in
+#' @param data A `dyadMLM_data` object returned by [validate_dyad_data()].
+#' @param seed Optional seed for random `.dy_diff_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #' @param include_compositions Optional observed dyad compositions to keep
 #'   before exchangeability overrides and pooling.
@@ -14,9 +14,9 @@
 #'   compositions into user-named final composition labels. Each pool must
 #'   resolve to at least two distinct observed compositions.
 #'
-#' @return An `interdep_data` object with added `.i_composition` and
-#'   `.i_composition_role` factor columns, `.i_is_*` numeric indicator columns,
-#'   composition-specific numeric `.i_diff_*` contrast columns coded `-1` and
+#' @return A `dyadMLM_data` object with added `.dy_composition` and
+#'   `.dy_composition_role` factor columns, `.dy_is_*` numeric indicator columns,
+#'   composition-specific numeric `.dy_diff_*` contrast columns coded `-1` and
 #'   `1` for the two members of matching exchangeable dyads and `0` otherwise,
 #'   and dyad composition metadata.
 #'
@@ -24,14 +24,14 @@
 infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NULL,
                                     set_exchangeable_compositions = NULL,
                                     pool_compositions = NULL) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   group_name <- meta_data$group
   member_name <- meta_data$member
 
@@ -61,8 +61,8 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
       )
     }
 
-    data[[interdep_composition_col]] <- interdep_assumed_exchangeable_label
-    data[[interdep_composition_role_col]] <- interdep_assumed_exchangeable_label
+    data[[dyad_composition_col]] <- dyad_assumed_exchangeable_label
+    data[[dyad_composition_role_col]] <- dyad_assumed_exchangeable_label
 
     data <- add_arbitrary_member_roles(
       data,
@@ -71,17 +71,17 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
       seed = seed
     )
 
-    attr(data, "interdep")$dyad_compositions <- tibble::tibble(
-      composition = interdep_assumed_exchangeable_label,
+    attr(data, "dyadMLM")$dyad_compositions <- tibble::tibble(
+      composition = dyad_assumed_exchangeable_label,
       dyad_type = "exchangeable",
       dyad_type_source = "assumed_no_role",
       pooled_from = NA_character_,
       n_dyads = meta_data$n_dyads
     )
 
-    data[[interdep_diff_col]] <- ifelse(data[[interdep_arbitrary_role_col]] == "arbitrary_1", -1, 1)
+    data[[dyad_diff_col]] <- ifelse(data[[dyad_arbitrary_role_col]] == "arbitrary_1", -1, 1)
 
-    # convert to factors, sanitize role names, construct .i_is_{indicator} variables.
+    # convert to factors, sanitize role names, construct .dy_is_{indicator} variables.
     # remove temporary cols, create composition-specific diff cols for exchangeable dyads.
     data <- finalize_composition_columns(data)
 
@@ -101,10 +101,10 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
     ) |>
     dplyr::group_by(.data[[group_name]]) |>
     dplyr::summarise(
-      .i_raw_composition = {
+      .dy_raw_composition = {
         canonical_composition(.data[[role_name]])
       },
-      .i_dyad_type = {
+      .dy_dyad_type = {
         has_one_role <- dplyr::n_distinct(.data[[role_name]]) == 1
 
         if (has_one_role) {
@@ -113,12 +113,12 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
           "distinguishable"
         }
       },
-      .i_dyad_type_source = "inferred",
+      .dy_dyad_type_source = "inferred",
       .groups = "drop"
     ) |>
     dplyr::mutate(
-      .i_composition = .data$.i_raw_composition,
-      .i_pool_member = NA_character_
+      .dy_composition = .data$.dy_raw_composition,
+      .dy_pool_member = NA_character_
     )
 
   # Apply composition filtering before exchangeability overrides and pooling.
@@ -147,20 +147,20 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
 
   # Summarize dyad compositions and attach to attributes.
   # From dataset to 1 row per composition summary
-  attr(data, "interdep")$dyad_compositions <- dyad_roles |>
+  attr(data, "dyadMLM")$dyad_compositions <- dyad_roles |>
     dplyr::group_by(
-      composition = .data[[interdep_composition_col]]
+      composition = .data[[dyad_composition_col]]
     ) |>
     dplyr::summarise( # for each composition
-      dyad_type = dplyr::first(.data[[interdep_dyad_type_col]]), # always identical per composition, so use first.
+      dyad_type = dplyr::first(.data[[dyad_type_col]]), # always identical per composition, so use first.
       dyad_type_source = ifelse(
         # Check whether all are either inferred or set by user, otherwise use mixed
-        dplyr::n_distinct(.data[[interdep_dyad_type_source_col]]) == 1L,
-        dplyr::first(.data[[interdep_dyad_type_source_col]]),
+        dplyr::n_distinct(.data[[dyad_type_source_col]]) == 1L,
+        dplyr::first(.data[[dyad_type_source_col]]),
         "mixed"
       ),
       pooled_from = {
-        pool_members <- stats::na.omit(.data[[interdep_pool_member_col]])
+        pool_members <- stats::na.omit(.data[[dyad_pool_member_col]])
         if (length(pool_members) == 0) {
           NA_character_ # if not pooled.
         } else {
@@ -180,7 +180,7 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
 
   # Only exchangeable dyads need arbitrary labels for their difference
   # contrasts.
-  exchangeable_data <- data[data[[interdep_dyad_type_col]] == "exchangeable", , drop = FALSE]
+  exchangeable_data <- data[data[[dyad_type_col]] == "exchangeable", , drop = FALSE]
   arbitrary_roles <- assign_arbitrary_member_roles(
     exchangeable_data,
     group_name = group_name,
@@ -196,27 +196,27 @@ infer_dyad_compositions <- function(data, seed = NULL, include_compositions = NU
 
   # Distinguishable dyads use observed member roles. Exchangeable dyads use
   # just the composition.
-  data[[interdep_composition_role_col]] <- ifelse(
-    data[[interdep_dyad_type_col]] == "distinguishable",
-    composition_role_label(data[[interdep_composition_col]], data[[role_name]]),
-    as.character(data[[interdep_composition_col]])
+  data[[dyad_composition_role_col]] <- ifelse(
+    data[[dyad_type_col]] == "distinguishable",
+    composition_role_label(data[[dyad_composition_col]], data[[role_name]]),
+    as.character(data[[dyad_composition_col]])
   )
 
   # Add a temporary pooled contrast, then expand it into one contrast column
   # per exchangeable composition in finalize_composition_columns().
-  data[[interdep_diff_col]] <- ifelse(
-    data[[interdep_dyad_type_col]] == "exchangeable",
-    ifelse(data[[interdep_arbitrary_role_col]] == "arbitrary_1", -1, 1),
+  data[[dyad_diff_col]] <- ifelse(
+    data[[dyad_type_col]] == "exchangeable",
+    ifelse(data[[dyad_arbitrary_role_col]] == "arbitrary_1", -1, 1),
     0
   )
 
   # Remove columns that are no longer needed after constructing contrasts.
-  data[[interdep_raw_composition_col]] <- NULL
-  data[[interdep_dyad_type_col]] <- NULL
-  data[[interdep_dyad_type_source_col]] <- NULL
-  data[[interdep_pool_member_col]] <- NULL
+  data[[dyad_raw_composition_col]] <- NULL
+  data[[dyad_type_col]] <- NULL
+  data[[dyad_type_source_col]] <- NULL
+  data[[dyad_pool_member_col]] <- NULL
 
-  # convert to factors, sanitize role names, construct .i_is_{indicator} variables.
+  # convert to factors, sanitize role names, construct .dy_is_{indicator} variables.
   # remove temporary cols, create composition-specific diff cols for exchangeable dyads.
   data <- finalize_composition_columns(data)
 
@@ -241,7 +241,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions,
   # Get canonical composition labels for the filter.
   include_compositions_resolved <- resolve_composition_references(
     references = include_compositions,
-    observed_compositions = dyad_roles[[interdep_composition_col]],
+    observed_compositions = dyad_roles[[dyad_composition_col]],
     arg_name = "include_compositions"
   )
 
@@ -249,7 +249,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions,
   # the filter and provide a clearer error.
   set_exchangeable_compositions_resolved <- resolve_composition_references(
     references = set_exchangeable_compositions,
-    observed_compositions = dyad_roles[[interdep_composition_col]],
+    observed_compositions = dyad_roles[[dyad_composition_col]],
     arg_name = "set_exchangeable_compositions"
   )
 
@@ -259,7 +259,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions,
   }
   pool_compositions_resolved <- resolve_composition_references(
     references = pool_composition_references,
-    observed_compositions = dyad_roles[[interdep_composition_col]],
+    observed_compositions = dyad_roles[[dyad_composition_col]],
     arg_name = "pool_compositions"
   )
 
@@ -278,7 +278,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions,
 
   # Get dyad-ids that we keep
   keep_dyads <- dyad_roles |>
-    dplyr::filter(.data[[interdep_composition_col]] %in% include_compositions_resolved) |>
+    dplyr::filter(.data[[dyad_composition_col]] %in% include_compositions_resolved) |>
     # extract ids with pull (vector)
     dplyr::pull(.data[[group_name]]) |>
     unique() # probably not needed, as it should be unique already, but leave as safeguard
@@ -297,7 +297,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions,
   # Also filter actual dataframe so later joins will work properly
   data <- data |>
     dplyr::filter(.data[[group_name]] %in% keep_dyads)
-  attr(data, "interdep")$n_dyads <- length(keep_dyads)
+  attr(data, "dyadMLM")$n_dyads <- length(keep_dyads)
 
   return(list(data = data, dyad_roles = dyad_roles))
 }
@@ -306,7 +306,7 @@ apply_include_compositions <- function(data, dyad_roles, include_compositions,
 apply_exchangeable_composition_overrides <- function(dyad_roles, set_exchangeable_compositions) {
   set_exchangeable_compositions_resolved <- resolve_composition_references(
     references = set_exchangeable_compositions,
-    observed_compositions = dyad_roles[[interdep_composition_col]],
+    observed_compositions = dyad_roles[[dyad_composition_col]],
     arg_name = "set_exchangeable_compositions"
   )
 
@@ -318,14 +318,14 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_exchangeabl
   already_exchangeable_rows <- dyad_roles |>
     dplyr::filter(
       # filter those that are requested to be set exchangeable
-      .data[[interdep_composition_col]] %in% set_exchangeable_compositions_resolved,
+      .data[[dyad_composition_col]] %in% set_exchangeable_compositions_resolved,
       # and those that are already inferred to as exchangeable
-      .data[[interdep_dyad_type_col]] == "exchangeable"
+      .data[[dyad_type_col]] == "exchangeable"
     )
 
   if (nrow(already_exchangeable_rows) > 0) {
     already_exchangeable_compositions <- already_exchangeable_rows |>
-      dplyr::pull(.data[[interdep_composition_col]]) |>
+      dplyr::pull(.data[[dyad_composition_col]]) |>
       unique()
 
     stop(
@@ -337,19 +337,19 @@ apply_exchangeable_composition_overrides <- function(dyad_roles, set_exchangeabl
     )
   }
 
-  # Actually "constraining" the roles by simply changing .i_dyad_type from
+  # Actually "constraining" the roles by simply changing .dy_dyad_type from
   # the inferred "distinguishable" to "exchangeable". (Apply the requested exchangeability override)
   dyad_roles_constrained <- dyad_roles |>
     dplyr::mutate(
-      "{interdep_dyad_type_col}" := dplyr::if_else(
-        .data[[interdep_composition_col]] %in% set_exchangeable_compositions_resolved,
+      "{dyad_type_col}" := dplyr::if_else(
+        .data[[dyad_composition_col]] %in% set_exchangeable_compositions_resolved,
         "exchangeable",
-        .data[[interdep_dyad_type_col]]
+        .data[[dyad_type_col]]
       ),
-      "{interdep_dyad_type_source_col}" := dplyr::if_else(
-        .data[[interdep_composition_col]] %in% set_exchangeable_compositions_resolved,
+      "{dyad_type_source_col}" := dplyr::if_else(
+        .data[[dyad_composition_col]] %in% set_exchangeable_compositions_resolved,
         "set_by_user",
-        .data[[interdep_dyad_type_source_col]]
+        .data[[dyad_type_source_col]]
       )
     )
 
@@ -390,7 +390,7 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
     )
   }
 
-  observed_compositions <- dyad_roles[[interdep_composition_col]]
+  observed_compositions <- dyad_roles[[dyad_composition_col]]
   already_pooled_compositions <- character()
 
   for (i in seq_along(pool_compositions)) { # for each requested pool
@@ -449,13 +449,13 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
     # check if user tries to pool distinguishable dyads
     non_exchangeable_rows <- dyad_roles |>
       dplyr::filter(
-        .data[[interdep_composition_col]] %in% resolved_compositions_to_pool,
-        .data[[interdep_dyad_type_col]] != "exchangeable"
+        .data[[dyad_composition_col]] %in% resolved_compositions_to_pool,
+        .data[[dyad_type_col]] != "exchangeable"
       )
 
     if (nrow(non_exchangeable_rows) > 0) {
       non_exchangeable_compositions <- non_exchangeable_rows |>
-        dplyr::pull(.data[[interdep_composition_col]]) |>
+        dplyr::pull(.data[[dyad_composition_col]]) |>
         unique()
 
       stop(
@@ -470,13 +470,13 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
 
     # Actual pooling
     ## subsetting all rows **within the current pooling step**.
-    is_pooled <- dyad_roles[[interdep_composition_col]] %in% resolved_compositions_to_pool
+    is_pooled <- dyad_roles[[dyad_composition_col]] %in% resolved_compositions_to_pool
 
-    # Before overwriting .i_composition, copy the old composition into .i_pool_member.
-    dyad_roles[[interdep_pool_member_col]][is_pooled] <- dyad_roles[[interdep_composition_col]][is_pooled]
+    # Before overwriting .dy_composition, copy the old composition into .dy_pool_member.
+    dyad_roles[[dyad_pool_member_col]][is_pooled] <- dyad_roles[[dyad_composition_col]][is_pooled]
 
     # Now replace the current composition with the pool name.
-    dyad_roles[[interdep_composition_col]][is_pooled] <- pool_name
+    dyad_roles[[dyad_composition_col]][is_pooled] <- pool_name
 
     already_pooled_compositions <- c(already_pooled_compositions, resolved_compositions_to_pool)
   }
@@ -488,18 +488,18 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
 finalize_composition_columns <- function(data) {
 
   # convert to factors before returning
-  data[[interdep_composition_col]] <- factor(data[[interdep_composition_col]])
-  data[[interdep_composition_role_col]] <- factor(data[[interdep_composition_role_col]])
+  data[[dyad_composition_col]] <- factor(data[[dyad_composition_col]])
+  data[[dyad_composition_role_col]] <- factor(data[[dyad_composition_role_col]])
 
   # This was only needed for contrast construction, we remove it.
-  data[[interdep_arbitrary_role_col]] <- NULL
+  data[[dyad_arbitrary_role_col]] <- NULL
 
-  indicator_suffixes <- make_interdep_suffixes(data[[interdep_composition_role_col]])
+  indicator_suffixes <- make_dyad_suffixes(data[[dyad_composition_role_col]])
 
-  # Create numeric indicator columns .i_is_{composition_role}
+  # Create numeric indicator columns .dy_is_{composition_role}
   for (label in sort(names(indicator_suffixes))) {
-    data[[paste0(interdep_reserved_prefix, "is_", indicator_suffixes[[label]])]] <- ifelse(
-      as.character(data[[interdep_composition_role_col]]) == label,
+    data[[paste0(dyad_reserved_prefix, "is_", indicator_suffixes[[label]])]] <- ifelse(
+      as.character(data[[dyad_composition_role_col]]) == label,
       1,
       0
     )
@@ -507,26 +507,26 @@ finalize_composition_columns <- function(data) {
 
   # Composition-specific diff columns let mixed-composition models target each
   # exchangeable composition.
-  composition_suffixes <- make_interdep_suffixes(
-    data[[interdep_composition_col]][data[[interdep_diff_col]] != 0]
+  composition_suffixes <- make_dyad_suffixes(
+    data[[dyad_composition_col]][data[[dyad_diff_col]] != 0]
   )
 
   for (composition in sort(names(composition_suffixes))) {
-    is_composition <- as.character(data[[interdep_composition_col]]) == composition
+    is_composition <- as.character(data[[dyad_composition_col]]) == composition
     diff_column <- paste0(
-      interdep_reserved_prefix,
+      dyad_reserved_prefix,
       "diff_",
       composition_suffixes[[composition]],
       "_arbitrary"
     )
     data[[diff_column]] <- ifelse(
       is_composition,
-      data[[interdep_diff_col]],
+      data[[dyad_diff_col]],
       0
     )
   }
 
-  data[[interdep_diff_col]] <- NULL
+  data[[dyad_diff_col]] <- NULL
 
   data
 }

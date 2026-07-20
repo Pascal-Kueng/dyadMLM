@@ -1,7 +1,7 @@
 #' Validate dyadic input data
 #'
 #' Checks whether `data` has a valid long-format dyadic structure and returns it
-#' as a tibble with an additional `interdep_data` class. Cross-sectional data
+#' as a tibble with an additional `dyadMLM_data` class. Cross-sectional data
 #' may contain at most one row per member within each dyad. Intensive
 #' longitudinal data may contain at most one row per member and measurement
 #' occasion within each dyad.
@@ -41,12 +41,12 @@
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
 #'   information. Ignored when no `role` column is supplied.
 #'
-#' @return A tibble with class `interdep_data` and metadata about the dyad,
+#' @return A tibble with class `dyadMLM_data` and metadata about the dyad,
 #'   member, optional role, and optional time columns.
 #' @importFrom rlang .data :=
 #'
 #' @keywords internal
-validate_interdep_data <- function(
+validate_dyad_data <- function(
     data,
     group,
     member,
@@ -66,10 +66,10 @@ validate_interdep_data <- function(
     stop("`data` must be a data frame or tibble.", call. = FALSE)
   }
 
-  if (inherits(data, "interdep_data")) {
+  if (inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` has already been prepared by interdep. ",
-      "`prepare_interdep_data()` expects raw data; start from the original data frame instead.",
+      "`data` has already been prepared by dyadMLM. ",
+      "`prepare_dyad_data()` expects raw data; start from the original data frame instead.",
       call. = FALSE
     )
   }
@@ -77,12 +77,12 @@ validate_interdep_data <- function(
   out <- tibble::as_tibble(data)
 
   # Validate that package-owned columns are not already present.
-  reserved_columns <- names(out)[startsWith(names(out), interdep_reserved_prefix)]
+  reserved_columns <- names(out)[startsWith(names(out), dyad_reserved_prefix)]
   if (length(reserved_columns) > 0) {
     stop(
       "`data` must not contain columns starting with `",
-      interdep_reserved_prefix,
-      "`; these names are reserved by interdep. Reserved column(s): ",
+      dyad_reserved_prefix,
+      "`; these names are reserved by dyadMLM. Reserved column(s): ",
       paste(reserved_columns, collapse = ", "),
       ".",
       call. = FALSE
@@ -195,16 +195,16 @@ validate_interdep_data <- function(
 
   # Extract and validate user-owned model columns!!!
   predictors_quo <- rlang::enquo(predictors)
-  predictor_names <- select_interdep_columns(out, predictors_quo, "predictors")
+  predictor_names <- select_dyad_columns(out, predictors_quo, "predictors")
   # Avoid different predictors resolving to the same sanitized name later.
-  make_interdep_suffixes(
+  make_dyad_suffixes(
     predictor_names,
     label_type = "`predictors`",
     rename_hint = "variables"
   )
 
   lag_predictors_quo <- rlang::enquo(lag_predictors)
-  lag_predictor_names <- select_interdep_columns(
+  lag_predictor_names <- select_dyad_columns(
     out,
     lag_predictors_quo,
     "lag_predictors"
@@ -253,7 +253,7 @@ validate_interdep_data <- function(
   # Resolve sparse or missing role information.
   dropped_missing_role_dyads <- out[[group_name]][0]
   if (has_role) {
-    out_list <- resolve_interdep_roles(
+    out_list <- resolve_dyad_roles(
       out = out,
       group_name = group_name,
       member_name = member_name,
@@ -344,7 +344,7 @@ validate_interdep_data <- function(
     }
   }
 
-  attr(out, "interdep") <- list(
+  attr(out, "dyadMLM") <- list(
     group = group_name,
     member = member_name,
     role = role_name,
@@ -360,7 +360,7 @@ validate_interdep_data <- function(
     dropped_incomplete_dyads = dropped_incomplete_dyads
   )
 
-  class(out) <- unique(c("interdep_data", class(out)))
+  class(out) <- unique(c("dyadMLM_data", class(out)))
 
   out
 }
@@ -526,17 +526,17 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
   out
 }
 
-resolve_interdep_roles <- function(out, group_name, member_name, role_name, missing_role) {
+resolve_dyad_roles <- function(out, group_name, member_name, role_name, missing_role) {
   known_roles <- out[[role_name]][!is.na(out[[role_name]])]
 
   # Reject role labels that contain the reserved composition separator.
-  if (any(grepl(interdep_composition_sep, as.character(known_roles), fixed = TRUE))) {
+  if (any(grepl(dyad_composition_sep, as.character(known_roles), fixed = TRUE))) {
     offending_roles <- unique(known_roles[
-      grepl(interdep_composition_sep, as.character(known_roles), fixed = TRUE)
+      grepl(dyad_composition_sep, as.character(known_roles), fixed = TRUE)
     ])
     stop(
-      "`role` values must not contain `", interdep_composition_sep,
-      "`; this separator is reserved by interdep. Offending value(s): ",
+      "`role` values must not contain `", dyad_composition_sep,
+      "`; this separator is reserved by dyadMLM. Offending value(s): ",
       paste(sort(as.character(offending_roles)), collapse = ", "),
       ". Rename these role values before preparing the data.",
       call. = FALSE
@@ -562,7 +562,7 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   }
 
   # Rename the known role column before joining it back to the full data.
-  known_member_roles[[interdep_resolved_role_col]] <- known_member_roles[[role_name]]
+  known_member_roles[[dyad_resolved_role_col]] <- known_member_roles[[role_name]]
   known_member_roles[[role_name]] <- NULL
 
   # Create a lookup table with one resolved role per observed member.
@@ -574,7 +574,7 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
 
   # Find dyads where at least one member has no known role.
   missing_role_groups <- unique(
-    member_roles[[group_name]][is.na(member_roles[[interdep_resolved_role_col]])]
+    member_roles[[group_name]][is.na(member_roles[[dyad_resolved_role_col]])]
   )
 
   if (length(missing_role_groups) > 0) {
@@ -609,8 +609,8 @@ resolve_interdep_roles <- function(out, group_name, member_name, role_name, miss
   # Join the resolved member roles back to every original row.
   out <- dplyr::left_join(out, member_roles, by = c(group_name, member_name))
 
-  out[[role_name]] <- out[[interdep_resolved_role_col]]
-  out[[interdep_resolved_role_col]] <- NULL
+  out[[role_name]] <- out[[dyad_resolved_role_col]]
+  out[[dyad_resolved_role_col]] <- NULL
 
   return(list(out = out, dropped_missing_role_dyads = missing_role_groups))
 }

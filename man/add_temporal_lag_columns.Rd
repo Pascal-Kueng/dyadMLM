@@ -7,10 +7,10 @@
 add_temporal_lag_columns(data)
 }
 \arguments{
-\item{data}{An \code{interdep_data} object returned by \code{\link[=prepare_interdep_data]{prepare_interdep_data()}}.}
+\item{data}{A \code{dyadMLM_data} object returned by \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 }
 \value{
-An \code{interdep_data} object with lagged temporal predictor columns and
+A \code{dyadMLM_data} object with lagged temporal predictor columns and
 updated predictor metadata.
 }
 \description{

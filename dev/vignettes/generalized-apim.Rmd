@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(interdep)
+library(dyadMLM)
 ```
 
 
@@ -51,7 +51,7 @@ observation-level Tweedie variance remains part of the model.
 ### Distinguishable Tweedie APIM
 
 ```{r prepare-tweedie-distinguishable}
-tweedie_distinguishable_data <- interdep::prepare_interdep_data(
+tweedie_distinguishable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_tweedie,
   group = coupleID,
   member = personID,
@@ -71,20 +71,20 @@ summary(tweedie_distinguishable_data)
 tweedie_distinguishable_model <- glmmTMB(
   physical_activity ~ 
     # remove standard intercept and model separate intercepts for male and female
-    0 + .i_is_female_x_male_female + .i_is_female_x_male_male + 
+    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
     
     # gender-specific slopes for motivation actor effect
-    .i_is_female_x_male_female:.i_motivation_actor + .i_is_female_x_male_male:.i_motivation_actor +
+    .dy_is_female_x_male_female:.dy_motivation_actor + .dy_is_female_x_male_male:.dy_motivation_actor +
     
     # gender-specific slopes for motivation partner effect
-    .i_is_female_x_male_female:.i_motivation_partner + .i_is_female_x_male_male:.i_motivation_partner +
+    .dy_is_female_x_male_female:.dy_motivation_partner + .dy_is_female_x_male_male:.dy_motivation_partner +
     
     # keep a simple couple-level latent effect for stable non-independence
     # important limitation: this can only induce positive partner dependence
     (1 | coupleID) 
   
   # allow role-specific Tweedie dispersion
-  , dispformula = ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male
+  , dispformula = ~ 0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male
   , family = tweedie()
   , data = tweedie_distinguishable_data
 )
@@ -96,7 +96,7 @@ summary(tweedie_distinguishable_model)
 ### Exchangeable Tweedie APIM
 
 ```{r prepare-tweedie-exchangeable}
-tweedie_exchangeable_data <- interdep::prepare_interdep_data(
+tweedie_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_tweedie,
   group = coupleID,
   member = personID,
@@ -117,13 +117,13 @@ tweedie_exchangeable_model <- glmmTMB(
     1 + 
     
     # pooled actor slope for motivation
-    .i_motivation_actor +
+    .dy_motivation_actor +
     
     # pooled partner slope for motivation
-    .i_motivation_partner +
+    .dy_motivation_partner +
     
     # exchangeable latent dyad block on the log-mean scale
-    (1 | coupleID) + (0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+    (1 | coupleID) + (0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)
     
   # estimate a single pooled Tweedie dispersion parameter
   , dispformula = ~ 1

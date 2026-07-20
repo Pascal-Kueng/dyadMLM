@@ -32,7 +32,7 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 ```
 
 ```{r setup, message=FALSE}
-library(interdep)
+library(dyadMLM)
 library(lavaan)
 ```
 

@@ -5,21 +5,21 @@
 #' does not depend on row order and does not bridge gaps in the measurement
 #' index. Stable between-person components are not lagged.
 #'
-#' @param data An `interdep_data` object returned by [prepare_interdep_data()].
+#' @param data A `dyadMLM_data` object returned by [prepare_dyad_data()].
 #'
-#' @return An `interdep_data` object with lagged temporal predictor columns and
+#' @return A `dyadMLM_data` object with lagged temporal predictor columns and
 #'   updated predictor metadata.
 #'
 #' @keywords internal
 add_temporal_lag_columns <- function(data) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   lag_predictors <- meta_data$lag_predictors
 
   if (length(lag_predictors) == 0) {
@@ -38,11 +38,11 @@ add_temporal_lag_columns <- function(data) {
     )
 
   out <- data |>
-    dplyr::mutate(.i_lag_row_order = dplyr::row_number()) |>
+    dplyr::mutate(.dy_lag_row_order = dplyr::row_number()) |>
     dplyr::group_by(.data[[group]], .data[[member]]) |>
     dplyr::arrange(.data[[time]], .by_group = TRUE) |>
     dplyr::mutate(
-      .i_lag_is_consecutive = .data[[time]] == dplyr::lag(.data[[time]]) + 1
+      .dy_lag_is_consecutive = .data[[time]] == dplyr::lag(.data[[time]]) + 1
     )
 
   for (i in seq_len(nrow(lag_sources))) {
@@ -52,14 +52,14 @@ add_temporal_lag_columns <- function(data) {
 
     lag_col <- paste0(source_col, "_lag1")
     if (component == "raw") {
-      predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
-      lag_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_lag1")
+      predictor_suffix <- make_dyad_suffixes(predictor)[[predictor]]
+      lag_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_lag1")
     }
 
     out <- out |>
       dplyr::mutate(
         "{lag_col}" := dplyr::if_else(
-          .data$.i_lag_is_consecutive,
+          .data$.dy_lag_is_consecutive,
           dplyr::lag(.data[[source_col]]),
           NA
         )
@@ -77,14 +77,14 @@ add_temporal_lag_columns <- function(data) {
 
   out <- out |>
     dplyr::ungroup() |>
-    dplyr::arrange(.data$.i_lag_row_order) |>
+    dplyr::arrange(.data$.dy_lag_row_order) |>
     dplyr::select(-dplyr::all_of(c(
-      ".i_lag_row_order",
-      ".i_lag_is_consecutive"
+      ".dy_lag_row_order",
+      ".dy_lag_is_consecutive"
     )))
 
   meta_data$temporal_predictor_decompositions <- decompositions
-  attr(out, "interdep") <- meta_data
+  attr(out, "dyadMLM") <- meta_data
   class(out) <- class(data)
   out
 }

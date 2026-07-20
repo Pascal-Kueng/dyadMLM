@@ -13,14 +13,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-# interdep
+# dyadMLM
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/Pascal-Kueng/interdep/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pascal-Kueng/interdep/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-`interdep` helps researchers prepare cross-sectional and intensive longitudinal
-dyadic data for multilevel models, including generalized multilevel models.
+`dyadMLM` provides tools for dyadic multilevel modeling with linear and
+generalized linear mixed-effects models. It validates and prepares
+cross-sectional and intensive longitudinal dyadic data.
 
 It supports dyadic datasets with distinguishable dyads, exchangeable dyads, or
 mixed dyad types in the same data, such as female-male, female-female,
@@ -29,20 +30,24 @@ dyadic multilevel model parameterizations such as the Actor-Partner
 Interdependence Model (APIM), Dyad-Individual Model (DIM), and Dyadic Score
 Model (DSM).
 
+Selected post-estimation tools compare compatible fitted models and
+back-transform exchangeable random-effect covariance structures into
+member-level quantities.
+
 Start with the vignettes, or scroll down for a quick-start.
 
 | Vignette | Focus |
 |---|---|
-| [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
-| [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
-| [Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
+| [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
+| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
+| [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
+| [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
 
 For an in-depth tutorial covering data preparation, model fitting, diagnostics,
 and assumption checks, see
 [Distinguishable and Exchangeable Dyads: Bayesian Multilevel Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/).
-It uses `interdep` for cross-sectional and intensive longitudinal APIM and DIM
+It uses `dyadMLM` for cross-sectional and intensive longitudinal APIM and DIM
 workflows, with models fitted primarily using `brms`
 ([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
 [DOI](https://doi.org/10.5281/zenodo.17400655)).
@@ -50,11 +55,11 @@ workflows, with models fitted primarily using `brms`
 
 ## Installation
 
-You can install the development version of `interdep` from GitHub with:
+You can install the development version of `dyadMLM` from GitHub with:
 
 ``` r
 # install.packages("pak")
-pak::pak("Pascal-Kueng/interdep")
+pak::pak("Pascal-Kueng/dyadMLM")
 ```
 
 ## Simple Cross-Sectional Example
@@ -62,9 +67,9 @@ pak::pak("Pascal-Kueng/interdep")
 Prepare distinguishable dyads for a cross-sectional APIM:
 
 ```{r cross-sectional-prep}
-library(interdep)
+library(dyadMLM)
 
-prepared_data <- prepare_interdep_data(
+prepared_data <- prepare_dyad_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -86,19 +91,19 @@ simple_apim <- glmmTMB::glmmTMB(
   satisfaction ~ 
 
     # Gender-specific intercepts
-    0 + .i_is_female_x_male_female + .i_is_female_x_male_male +
+    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_communication_actor:.i_is_female_x_male_female +
-    .i_communication_actor:.i_is_female_x_male_male +
+    .dy_communication_actor:.dy_is_female_x_male_female +
+    .dy_communication_actor:.dy_is_female_x_male_male +
 
     # Gender-specific partner effects
-    .i_communication_partner:.i_is_female_x_male_female +
-    .i_communication_partner:.i_is_female_x_male_male +
+    .dy_communication_partner:.dy_is_female_x_male_female +
+    .dy_communication_partner:.dy_is_female_x_male_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID),
+    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID),
 
   # With the residual covariance represented by the dyad-level
   # random effects above, the Gaussian residual dispersion is fixed near zero.
@@ -110,15 +115,15 @@ simple_apim <- glmmTMB::glmmTMB(
 
 ## Citation
 
-If you use `interdep`, please cite the package directly:
+If you use `dyadMLM`, please cite the package directly:
 
 ```bibtex
-@Manual{interdep,
-  title = {interdep: Prepare Dyadic Data for Multilevel Models},
+@Manual{dyadMLM,
+  title = {dyadMLM: Tools for Dyadic Multilevel Models},
   author = {Pascal Küng},
   year = {2026},
   note = {R package version 0.0.0.9000},
-  url = {https://github.com/Pascal-Kueng/interdep},
+  url = {https://github.com/Pascal-Kueng/dyadMLM},
 }
 ```
 
@@ -126,11 +131,11 @@ An archival DOI will be added once the package has a public release archive.
 
 ---
 
-**Continue** with the [Getting Started Vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.html).
+**Continue** with the [Getting Started Vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html).
 
 Or go directly to a model-specific vignette:
 
-- [Actor-Partner Interdependence Model (APIM) vignette](https://pascal-kueng.github.io/interdep/articles/apim.html),
-- [Mixed-Composition APIM vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html),
-- [Dyad-Individual Model vignette](https://pascal-kueng.github.io/interdep/articles/dim.html), or
-- [Dyadic Score Model vignette](https://pascal-kueng.github.io/interdep/articles/dsm.html).
+- [Actor-Partner Interdependence Model (APIM) vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html),
+- [Mixed-Composition APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html),
+- [Dyad-Individual Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html), or
+- [Dyadic Score Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html).

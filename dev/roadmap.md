@@ -1,5 +1,5 @@
 
-# Roadmap for 'interdep' R-Package
+# Roadmap for 'dyadMLM' R-Package
 
 This package provides functions for preparing composition-aware dyadic
 multilevel models, focusing on cross-sectional and intensive longitudinal (ILD)
@@ -109,7 +109,7 @@ Target vignette structure:
   - distinguishable and exchangeable APIMs
   - within-person and between-person actor/partner effects
   - generalized outcomes, including Tweedie examples
-  - `.i_is_*`, `.i_diff_*`, and raw actor/partner predictor columns
+  - `.dy_is_*`, `.dy_diff_*`, and raw actor/partner predictor columns
   - a brief comparison of manifest raw outcome lags and separately estimated
     within-/between-person outcome-lag components, with their different
     interpretations and small-T cautions
@@ -147,7 +147,7 @@ The first release milestone is complete when all of the following are true:
 - [x] Cross-sectional and ILD temporal predictor decomposition, composition
   filtering, exchangeability overrides, pooling, metadata, and printing are
   implemented and tested for the documented scope.
-- [x] `exchangeable_rescov()` converts fitted shared/`.i_diff_*` random-effect
+- [x] `exchangeable_rescov()` converts fitted shared/`.dy_diff_*` random-effect
   structures to interpretable member-level covariance matrices. Backend
   extraction and matching are implemented for `glmmTMB` and single-response
   `brms`, including draw-wise transformation, constrained components, final
@@ -189,7 +189,7 @@ Detailed implemented scope and final checks follow.
     - infer canonical raw compositions first, resolve `include_compositions`
       against those raw observed compositions, then keep all rows for retained
       dyads and drop all rows for excluded dyads
-    - update `attr(data, "interdep")$n_dyads` and all downstream
+    - update `attr(data, "dyadMLM")$n_dyads` and all downstream
       `dyad_compositions` metadata to describe only the retained dyads
     - excluded-composition metadata and print summaries are intentionally not
       part of the current minimal implementation
@@ -213,16 +213,16 @@ Detailed implemented scope and final checks follow.
     3. apply `set_exchangeable_compositions`
     4. apply `pool_compositions` only to compositions that are exchangeable
        after step 3
-    5. build `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
+    5. build `.dy_composition`, `.dy_composition_role`, `.dy_is_*`, `.dy_diff_*`,
        print summaries, and metadata from the final analysis compositions
   - Keep raw observed compositions out of the returned data columns, but
-    preserve pooling provenance in `attr(data, "interdep")$dyad_compositions`
+    preserve pooling provenance in `attr(data, "dyadMLM")$dyad_compositions`
   - Error clearly for unknown aliases, ambiguous aliases, overlapping pooling
     definitions, or pooling requests that include non-exchangeable compositions
 - Handle incomplete dyads and missing roles with explicit `error` and `drop`
   behavior
-- Return factor columns for `.i_composition` and
-  `.i_composition_role`
+- Return factor columns for `.dy_composition` and
+  `.dy_composition_role`
 - Add temporal predictor decomposition and predictor-shape helpers for ILD data
   - Keep the implemented `time_2l` workflow described in [`centering.md`](centering.md)
   - Keep APIM, DIM, and DSM on the same temporal predictor decomposition
@@ -241,7 +241,7 @@ Detailed implemented scope and final checks follow.
       from the shared metadata
     - decompose raw longitudinal DIM/DSM predictors within dyad-occasion, while
       retaining dyad-level construction for CBP components
-    - keep the established `.i_{pred}_actor` and `.i_{pred}_partner` names; do
+    - keep the established `.dy_{pred}_actor` and `.dy_{pred}_partner` names; do
       not reintroduce `_raw_` into generated column names
     - document that raw and decomposed versions of the same contemporaneous
       predictor should not all be included in one formula because they are
@@ -260,24 +260,24 @@ Detailed implemented scope and final checks follow.
   - Reuse neutral dyad-mean/member-deviation calculations internally
   - Create full signed predictor differences and a `+0.5/-0.5` role contrast
   - Leave outcomes unchanged
-- Add a print method for `interdep_data`
-  - Keep normal tibble/data-frame printing; add a compact interdep header above
+- Add a print method for `dyadMLM_data`
+  - Keep normal tibble/data-frame printing; add a compact dyadMLM header above
     the data output
   - Show number of dyads, whether data are longitudinal, and inferred
     composition counts
   - Show structural columns: group, member, optional role, optional time
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
-    `.i_composition`, `.i_composition_role`, `.i_is_*`, `.i_diff_*`,
+    `.dy_composition`, `.dy_composition_role`, `.dy_is_*`, `.dy_diff_*`,
     temporal predictor components, APIM predictor columns, DIM deviations, and
     DSM directional predictor columns
-  - Drive generated-column printing from `interdep_generated_columns()`, which
+  - Drive generated-column printing from `dyad_generated_columns()`, which
     normalizes temporal predictor, APIM, DIM, and DSM metadata into
     one row per concrete generated column
   - Make dropped incomplete dyads and missing roles visible
   - Target display:
     ```r
-    # interdep data
+    # dyadMLM data
     # Rows: 5,600 | Dyads: 200 | Intensive longitudinal: yes
     # Structure: group = coupleID, member = personID, role = gender, time = diaryday
     #
@@ -287,53 +287,53 @@ Detailed implemented scope and final checks follow.
     # male_x_male     exchangeable    60 dyads
     #
     # Added columns:
-    #   .i_composition                  inferred dyad composition
-    #   .i_composition_role             composition-specific member role
-    #   .i_is_{comp-role}               composition-role indicator columns
-    #   .i_diff_{comp}                  composition-specific sum-diff contrasts; 0
+    #   .dy_composition                  inferred dyad composition
+    #   .dy_composition_role             composition-specific member role
+    #   .dy_is_{comp-role}               composition-role indicator columns
+    #   .dy_diff_{comp}                  composition-specific sum-diff contrasts; 0
     #                                   for distinguishable dyads or other
     #                                   exchangeable compositions
-    #   .i_{pred}_cwp                   within-person predictor: momentary
+    #   .dy_{pred}_cwp                   within-person predictor: momentary
     #                                   deviations from each person's usual level
-    #   .i_{pred}_cbp                   between-person predictor: stable
+    #   .dy_{pred}_cbp                   between-person predictor: stable
     #                                   differences from the average person's usual
     #                                   level
-    #   .i_{pred}_actor                 APIM actor predictor: actor's original values
-    #   .i_{pred}_partner               APIM partner predictor: partner's original values
-    #   .i_{pred}_cwp_actor             APIM within-person actor predictor: actor's
+    #   .dy_{pred}_actor                 APIM actor predictor: actor's original values
+    #   .dy_{pred}_partner               APIM partner predictor: partner's original values
+    #   .dy_{pred}_cwp_actor             APIM within-person actor predictor: actor's
     #                                   momentary deviations from their usual level
-    #   .i_{pred}_cwp_partner           APIM within-person partner predictor:
+    #   .dy_{pred}_cwp_partner           APIM within-person partner predictor:
     #                                   partner's momentary deviations from their
     #                                   usual level
-    #   .i_{pred}_cbp_actor             APIM between-person actor predictor:
+    #   .dy_{pred}_cbp_actor             APIM between-person actor predictor:
     #                                   actor's stable difference from the average
     #                                   person's usual level
-    #   .i_{pred}_cbp_partner           APIM between-person partner predictor:
+    #   .dy_{pred}_cbp_partner           APIM between-person partner predictor:
     #                                   partner's stable difference from the
     #                                   average person's usual level
-    #   .i_{pred}_dyad_mean_gmc         raw dyad-mean predictor, grand-mean centered
-    #   .i_{pred}_within_dyad_dev       DIM raw within-dyad predictor deviation
-    #   .i_{pred}_within_dyad_diff      DSM raw signed predictor difference
-    #   .i_{pred}_cwp_dyad_mean         within-person dyad-mean predictor:
+    #   .dy_{pred}_dyad_mean_gmc         raw dyad-mean predictor, grand-mean centered
+    #   .dy_{pred}_within_dyad_dev       DIM raw within-dyad predictor deviation
+    #   .dy_{pred}_within_dyad_diff      DSM raw signed predictor difference
+    #   .dy_{pred}_cwp_dyad_mean         within-person dyad-mean predictor:
     #                                   shared momentary deviations in the dyad
-    #   .i_{pred}_cwp_within_dyad_dev
+    #   .dy_{pred}_cwp_within_dyad_dev
     #                                   DIM within-person within-dyad predictor
     #                                   deviation: person's momentary deviation
     #                                   from the dyad average
-    #   .i_{pred}_cbp_dyad_mean         between-person dyad-mean predictor:
+    #   .dy_{pred}_cbp_dyad_mean         between-person dyad-mean predictor:
     #                                   dyad's stable usual level, grand-mean
     #                                   centered
-    #   .i_{pred}_cbp_within_dyad_dev
+    #   .dy_{pred}_cbp_within_dyad_dev
     #                                   DIM between-person within-dyad predictor
     #                                   deviation: person's stable difference from
     #                                   the dyad's usual level
-    #   .i_dsm_role_contrast            DSM +0.5/-0.5 directional role contrast
-    #   .i_{pred}_cwp_within_dyad_diff   DSM within-person signed predictor difference
-    #   .i_{pred}_cbp_within_dyad_diff   DSM between-person signed predictor difference
+    #   .dy_dsm_role_contrast            DSM +0.5/-0.5 directional role contrast
+    #   .dy_{pred}_cwp_within_dyad_diff   DSM within-person signed predictor difference
+    #   .dy_{pred}_cbp_within_dyad_diff   DSM between-person signed predictor difference
     #
     # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more
     # A tibble: 5,600 x 17
-       personID coupleID diaryday gender closeness provided_support .i_composition ...
+       personID coupleID diaryday gender closeness provided_support .dy_composition ...
           <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          ...
      1        1        1        0 female      5.91             4.72 female_x_male  ...
      2        1        1        1 female      6.10             5.01 female_x_male  ...
@@ -344,9 +344,9 @@ Detailed implemented scope and final checks follow.
     arbitrary for a compact display
 - Add composition role indicator columns for cross-sectional model workflows
 - Keep generated-column inspection internal for v0.0.1
-  - `interdep_generated_columns()` remains the internal normalized table used by
+  - `dyad_generated_columns()` remains the internal normalized table used by
     printing
-  - generated-column meanings are exposed through `print.interdep_data()`
+  - generated-column meanings are exposed through `print.dyadMLM_data()`
   - public inspection helpers and sparse-composition diagnostics are deferred
     until there is a concrete user need
 - Keep README and `getting-started.Rmd` focused on the data-preparation
@@ -400,10 +400,10 @@ Complete these before calling the feature set CRAN-ready:
   - keep downstream print/vignette code reading metadata rather than guessing
     column names where possible
 - Generated-column metadata: done for v0.0.1
-  - `interdep_generated_columns()` stays internal as the single normalized table
+  - `dyad_generated_columns()` stays internal as the single normalized table
     used by printing and documentation-facing summaries of generated temporal
     predictor, APIM, DIM, and DSM columns
-  - expose generated-column meanings through `print.interdep_data()` for
+  - expose generated-column meanings through `print.dyadMLM_data()` for
     v0.0.1;
     consider a public wrapper later only if users need programmatic inspection
   - preserve explicit fields for `temporal_decomposition`,
@@ -411,7 +411,7 @@ Complete these before calling the feature set CRAN-ready:
   - keep source-metadata fields such as `dim_predictors$dyad_decomposition_level`
     out of the normalized generated-column interpretation table unless they
     answer a user-facing interpretation question
-- `print.interdep_data()` descriptions for DIM column families: done for
+- `print.dyadMLM_data()` descriptions for DIM column families: done for
   v0.0.1
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
@@ -529,7 +529,7 @@ Complete these before calling the feature set CRAN-ready:
     entering algebraically dependent raw, CWP, and CBP versions.
   - Validate the documented cross-sectional workflow with distinguishable and
     exchangeable examples and verify row mapping under missing outcomes. Defer
-    comprehensive mixed/ILD diagnostic simulation, `check_interdep_fit()`,
+    comprehensive mixed/ILD diagnostic simulation, `check_dyad_fit()`,
     generalized-family diagnostics, influence analysis, and a general plotting
     interface.
 - Rerun final release checks after vignette/doc cleanup
@@ -551,7 +551,7 @@ Complete these before calling the feature set CRAN-ready:
 
 ## Version 0.0.2
 
-- Extend `compare_interdep_models()` to support fitted `brms` models, using a
+- Extend `compare_dyad_models()` to support fitted `brms` models, using a
   Bayesian-appropriate comparison method and similarly clear output.
 
 ## Version 0.1.0
@@ -568,7 +568,7 @@ Complete these before calling the feature set CRAN-ready:
   - evaluate a within-member lag-1 statistic against unconditional full-model
     simulations, respecting gaps and repeated series
   - validate joint DHARMa covariance rotation and mixed/ILD diagnostic behavior
-  - consider a narrow `check_interdep_fit()` for convergence, design rank,
+  - consider a narrow `check_dyad_fit()` for convergence, design rank,
     boundary covariance estimates, and row alignment
   - do not export these helpers until false-positive behavior and interpretation
     are understood for the supported structures
@@ -609,10 +609,10 @@ Complete these before calling the feature set CRAN-ready:
 - Exported or advanced diagnostic helpers and sparse-composition guidance,
   building on the documentation-first v0.0.1 workflow and v0.1 validation
 - Optional wide-to-long preprocessing helper
-  - Keep `prepare_interdep_data()` strict: it should continue to validate one
+  - Keep `prepare_dyad_data()` strict: it should continue to validate one
     canonical long-format dyadic structure
   - Add reshaping only as a separate helper that converts common two-person
-    wide formats into the long structure expected by `prepare_interdep_data()`
+    wide formats into the long structure expected by `prepare_dyad_data()`
   - Treat this as convenience infrastructure, not part of the core validation
     contract
 - Optional preprint or methods note
@@ -667,7 +667,7 @@ not need routine breaking changes.
 
 Minimum expected state:
 
-- stable `prepare_interdep_data()` argument names and semantics
+- stable `prepare_dyad_data()` argument names and semantics
 - stable generated-column families for compositions, temporal predictor
   components, APIM predictors, and DIM/DSM predictors
 - stable analysis-composition controls:
@@ -676,7 +676,7 @@ Minimum expected state:
 - clear metadata for raw observed compositions versus final analysis
   compositions
 - complete getting-started, APIM, mixed-APIM, DIM, and DSM documentation paths
-- interpretation helpers for `.i_diff_*` structures
+- interpretation helpers for `.dy_diff_*` structures
 - syntax generation for at least one primary model engine, preferably
   `glmmTMB`, with tests that protect intended estimands
 - CRAN release history and pkgdown documentation that match the current API
@@ -684,7 +684,7 @@ Minimum expected state:
 ## JOSS Readiness
 
 JOSS should be a later milestone, not a first-release target. A JOSS submission
-does not require `interdep` to estimate models itself, but it should be more
+does not require `dyadMLM` to estimate models itself, but it should be more
 than a thin data-preparation wrapper.
 
 Target state before JOSS submission:
@@ -696,10 +696,10 @@ Target state before JOSS submission:
   package
 - Robust temporal predictor decomposition for ILD data
 - Composition filtering, exchangeability, and pooling helpers
-- `.i_diff_*` / Idiff interpretation helpers
+- `.dy_diff_*` / Idiff interpretation helpers
 - Formula or syntax generation for at least `glmmTMB`; a second modeling
   backend is optional and is not a JOSS submission gate
 - Reproducible vignettes showing composition-aware dyadic MLM workflows
-- Clear statement that `interdep` supplies dyadic composition logic, temporal
+- Clear statement that `dyadMLM` supplies dyadic composition logic, temporal
   predictor decomposition, indicators, constraints, interpretation helpers, and
   syntax for established model engines

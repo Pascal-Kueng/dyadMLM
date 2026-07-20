@@ -8,7 +8,7 @@ equivalence tests, and the planned ILD section remain open.
 ## Purpose
 
 This document records how the directional Dyadic Score Model (DSM) described
-by Iida et al. (2017) can be represented in `interdep`'s long, one-row-per-member
+by Iida et al. (2017) can be represented in `dyadMLM`'s long, one-row-per-member
 data structure. It also distinguishes that model from the package's current
 Dyad-Individual Model (DIM), explains why the reduced label-invariant DSM is
 DIM-equivalent, and records the package implementation.
@@ -231,8 +231,8 @@ The package must generate a signed dyad-level predictor difference. For an
 order `c("female", "male")`, for example:
 
 ```text
-.i_communication_dyad_mean_gmc
-.i_communication_within_dyad_diff
+.dy_communication_dyad_mean_gmc
+.dy_communication_within_dyad_diff
 ```
 
 Both values must be repeated on both member rows of a dyad. The difference
@@ -242,7 +242,7 @@ This constant column is necessary for the `XDiff -> YLevel` main effect.
 The existing column
 
 ```text
-.i_communication_within_dyad_dev
+.dy_communication_within_dyad_dev
 ```
 
 is not a DSM difference score. It contains `Xi - XLevel`, so its two values are
@@ -266,11 +266,11 @@ adding unused outcome transformations to the MLM-focused API.
 The package needs a DSM-specific contrast such as
 
 ```text
-.i_dsm_role_contrast
+.dy_dsm_role_contrast
 ```
 
 with `+0.5` for the first declared role and `-0.5` for the second. Existing
-`.i_diff_{comp}` columns are not suitable: they are arbitrary contrasts for
+`.dy_diff_{comp}` columns are not suitable: they are arbitrary contrasts for
 exchangeable dyads and are currently zero for distinguishable dyads. DSM
 direction must instead be stable and substantively interpretable. Their
 different scaling is intentional: a `-1/+1` exchangeable contrast makes its
@@ -310,8 +310,8 @@ The clean conceptual division is:
 
 ## Why the preliminary separate models are problematic
 
-Fitting the repeated `.i_*_dyad_mean` and
-`.i_*_within_dyad_dev` columns as two ordinary univariate mixed models is
+Fitting the repeated `.dy_*_dyad_mean` and
+`.dy_*_within_dyad_dev` columns as two ordinary univariate mixed models is
 not Iida's full DSM:
 
 - the cross-paths are omitted;
@@ -334,7 +334,7 @@ the exact long-format interaction formulation.
 ## Package API
 
 ```r
-prepare_interdep_data(
+prepare_dyad_data(
   data,
   group = coupleID,
   member = personID,
@@ -358,7 +358,7 @@ The DSM implementation deliberately supports a narrow, clear case:
 - exactly one distinguishable dyad composition is required;
 - exchangeable compositions are rejected for `model_type = "dsm"`;
 - both roles must be present in every structurally complete dyad;
-- each difference direction is recorded in `attr(data, "interdep")`;
+- each difference direction is recorded in `attr(data, "dyadMLM")`;
 - multiple predictors use the same declared role order.
 
 Mixed compositions and multiple distinguishable compositions can be designed
@@ -374,7 +374,7 @@ would obscure the core implementation.
    same internal dyad-mean and member-deviation calculations.
 3. `dsm_role_order` must contain exactly the two observed roles without
    duplicates or missing values.
-4. `.i_dsm_role_contrast` is coded `+0.5/-0.5` from the declared order.
+4. `.dy_dsm_role_contrast` is coded `+0.5/-0.5` from the declared order.
 5. Each predictor receives a dyad level and full signed dyad difference,
    repeated on both member rows.
 6. Outcome variables remain unchanged and are selected in the model formula.
@@ -386,13 +386,13 @@ would obscure the core implementation.
 Generated-column patterns are:
 
 ```text
-.i_dsm_role_contrast
-.i_{pred}_dyad_mean_gmc
-.i_{pred}_within_dyad_diff
-.i_{pred}_cwp_dyad_mean
-.i_{pred}_cwp_within_dyad_diff
-.i_{pred}_cbp_dyad_mean
-.i_{pred}_cbp_within_dyad_diff
+.dy_dsm_role_contrast
+.dy_{pred}_dyad_mean_gmc
+.dy_{pred}_within_dyad_diff
+.dy_{pred}_cwp_dyad_mean
+.dy_{pred}_cwp_within_dyad_diff
+.dy_{pred}_cbp_dyad_mean
+.dy_{pred}_cbp_within_dyad_diff
 ```
 
 The exact use of `_gmc` should continue to reflect actual centering. Signed

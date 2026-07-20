@@ -16,7 +16,7 @@ check_mixed_dyad_type_ild_dataset <- function(data, outcome) {
   expect_gt(sum(is.na(data[measured_columns])), 0)
   expect_true(all(colSums(is.na(data[setdiff(names(data), measured_columns)])) == 0))
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = coupleID,
     member = personID,
@@ -25,7 +25,7 @@ check_mixed_dyad_type_ild_dataset <- function(data, outcome) {
     seed = 123
   )
 
-  dyad_compositions <- attr(prepared, "interdep")$dyad_compositions
+  dyad_compositions <- attr(prepared, "dyadMLM")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(
@@ -37,26 +37,26 @@ check_mixed_dyad_type_ild_dataset <- function(data, outcome) {
     c("exchangeable", "distinguishable", "exchangeable")
   )
   expect_equal(dyad_compositions$n_dyads, c(60L, 80L, 60L))
-  expect_false(interdep_diff_col %in% names(prepared))
-  expect_true(".i_diff_female_x_female_arbitrary" %in% names(prepared))
-  expect_true(".i_diff_male_x_male_arbitrary" %in% names(prepared))
+  expect_false(dyad_diff_col %in% names(prepared))
+  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(prepared))
+  expect_true(".dy_diff_male_x_male_arbitrary" %in% names(prepared))
 
-  female_female <- prepared$.i_composition == "female_x_female"
-  male_male <- prepared$.i_composition == "male_x_male"
-  expect_true(all(abs(prepared$.i_diff_female_x_female_arbitrary[female_female]) == 1))
-  expect_true(all(prepared$.i_diff_female_x_female_arbitrary[!female_female] == 0))
-  expect_true(all(abs(prepared$.i_diff_male_x_male_arbitrary[male_male]) == 1))
-  expect_true(all(prepared$.i_diff_male_x_male_arbitrary[!male_male] == 0))
+  female_female <- prepared$.dy_composition == "female_x_female"
+  male_male <- prepared$.dy_composition == "male_x_male"
+  expect_true(all(abs(prepared$.dy_diff_female_x_female_arbitrary[female_female]) == 1))
+  expect_true(all(prepared$.dy_diff_female_x_female_arbitrary[!female_female] == 0))
+  expect_true(all(abs(prepared$.dy_diff_male_x_male_arbitrary[male_male]) == 1))
+  expect_true(all(prepared$.dy_diff_male_x_male_arbitrary[!male_male] == 0))
 }
 
 test_that("ILD Gaussian example data with mixed dyad types has expected structure", {
-  data("example_dyadic_ILD_mixed", package = "interdep")
+  data("example_dyadic_ILD_mixed", package = "dyadMLM")
 
   check_mixed_dyad_type_ild_dataset(example_dyadic_ILD_mixed, "closeness")
 })
 
 test_that("ILD Tweedie example data with mixed dyad types has expected structure", {
-  data("example_dyadic_ILD_mixed_tweedie", package = "interdep")
+  data("example_dyadic_ILD_mixed_tweedie", package = "dyadMLM")
 
   check_mixed_dyad_type_ild_dataset(example_dyadic_ILD_mixed_tweedie, "physical_activity")
 })

@@ -1,7 +1,7 @@
 #' Add actor and partner predictor columns
 #'
 #' Adds APIM-style actor and partner columns for the predictors recorded in an
-#' `interdep_data` object. For uncentered predictors, this will create actor and
+#' `dyadMLM_data` object. For uncentered predictors, this will create actor and
 #' partner versions of the raw predictor. For centered intensive longitudinal
 #' predictors, this will create actor and partner versions of the raw predictor
 #' and each recorded predictor component, such as the within-person and
@@ -10,26 +10,26 @@
 #' actor and partner columns.
 #'
 #' The function will use the predictor decomposition metadata stored in
-#' `attr(data, "interdep")$temporal_predictor_decompositions`, so downstream code does
+#' `attr(data, "dyadMLM")$temporal_predictor_decompositions`, so downstream code does
 #' not need to infer generated predictor columns from their names. It stores the
-#' constructed APIM columns in `attr(data, "interdep")$apim_predictors`.
+#' constructed APIM columns in `attr(data, "dyadMLM")$apim_predictors`.
 #'
-#' @param data An `interdep_data` object returned by [prepare_interdep_data()].
+#' @param data A `dyadMLM_data` object returned by [prepare_dyad_data()].
 #'
-#' @return An `interdep_data` object with actor and partner predictor columns
+#' @return A `dyadMLM_data` object with actor and partner predictor columns
 #'   added and APIM predictor metadata recorded.
 #'
 #' @keywords internal
 add_actor_partner_columns <- function(data) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
 
   # Extracting all needed metadata
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
 
   group <- meta_data$group
   member <- meta_data$member
@@ -49,7 +49,7 @@ add_actor_partner_columns <- function(data) {
 
   # if no predictor was provided
   if (nrow(temporal_predictor_decompositions) == 0) {
-    attr(data, "interdep")$apim_predictors <- apim_predictors
+    attr(data, "dyadMLM")$apim_predictors <- apim_predictors
     return(data)
   }
 
@@ -66,8 +66,8 @@ add_actor_partner_columns <- function(data) {
       column_stem <- sub(paste0("_lag", lag, "$"), "", column_stem)
     }
     if (component == "raw") {
-      predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
-      column_stem <- paste0(interdep_reserved_prefix, predictor_suffix)
+      predictor_suffix <- make_dyad_suffixes(predictor)[[predictor]]
+      column_stem <- paste0(dyad_reserved_prefix, predictor_suffix)
     }
 
     lag_suffix <- make_predictor_lag_suffix(lag)
@@ -101,7 +101,7 @@ add_actor_partner_columns <- function(data) {
       # Rename each row's source value so it can be matched back as the
       # partner value for the other member in the dyad.
       dplyr::rename(
-        .i_partner_member = dplyr::all_of(member),
+        .dy_partner_member = dplyr::all_of(member),
         "{partner_col}" := dplyr::all_of(source_col)
       )
 
@@ -113,7 +113,7 @@ add_actor_partner_columns <- function(data) {
         dplyr::all_of(c(join_keys, member))
       ) |>
       dplyr::rename(
-        .i_actor_member = dplyr::all_of(member)
+        .dy_actor_member = dplyr::all_of(member)
       ) |>
       # Now we join the partner_lookup rows to the original member table.
       # This leads to the partner-values of both partners being matched to both
@@ -124,15 +124,15 @@ add_actor_partner_columns <- function(data) {
         relationship = "many-to-many"
       ) |>
       # we remove the self-matches
-      dplyr::filter(.data$.i_partner_member != .data$.i_actor_member) |>
+      dplyr::filter(.data$.dy_partner_member != .data$.dy_actor_member) |>
       # We keep only the cols needed for matching and the _partner column.
       dplyr::select(
         dplyr::all_of(join_keys),
-        dplyr::all_of(".i_actor_member"),
+        dplyr::all_of(".dy_actor_member"),
         dplyr::all_of(partner_col)
       ) |>
       dplyr::rename(
-        "{member}" := dplyr::all_of(".i_actor_member")
+        "{member}" := dplyr::all_of(".dy_actor_member")
       )
 
     out <- out |>
@@ -143,7 +143,7 @@ add_actor_partner_columns <- function(data) {
 
   }
 
-  attr(out, "interdep")$apim_predictors <- apim_predictors
+  attr(out, "dyadMLM")$apim_predictors <- apim_predictors
 
   return(out)
 }

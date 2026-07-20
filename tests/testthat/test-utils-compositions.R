@@ -39,14 +39,14 @@ test_that("composition_role_label supports a custom separator", {
   )
 })
 
-test_that("make_interdep_suffixes sanitizes labels and rejects collisions", {
+test_that("make_dyad_suffixes sanitizes labels and rejects collisions", {
   expect_equal(
-    make_interdep_suffixes(c("female partner", "male-partner")),
+    make_dyad_suffixes(c("female partner", "male-partner")),
     c("female partner" = "female_partner", "male-partner" = "male_partner")
   )
 
   expect_error(
-    make_interdep_suffixes(c("female partner", "female-partner")),
+    make_dyad_suffixes(c("female partner", "female-partner")),
     "same generated column-name suffix",
     fixed = TRUE
   )

@@ -1,35 +1,35 @@
-test_that("interdep_generated_columns returns empty metadata without model columns", {
-  result <- interdep_generated_columns(list())
+test_that("dyad_generated_columns returns empty metadata without model columns", {
+  result <- dyad_generated_columns(list())
 
   expect_equal(result, empty_generated_columns())
 })
 
-test_that("interdep_generated_columns errors when generated column specs are missing", {
+test_that("dyad_generated_columns errors when generated column specs are missing", {
   meta <- list(
     apim_predictors = tibble::tibble(
       predictor = "x",
       component = "unsupported",
       lag = 0L,
       source_column = "x",
-      actor_column = ".i_x_unsupported_actor",
-      partner_column = ".i_x_unsupported_partner"
+      actor_column = ".dy_x_unsupported_actor",
+      partner_column = ".dy_x_unsupported_partner"
     )
   )
 
   expect_error(
-    interdep_generated_columns(meta),
+    dyad_generated_columns(meta),
     "no generated-column specification.*apim/predictor/unsupported/actor"
   )
 })
 
-test_that("interdep_generated_columns collects APIM columns", {
+test_that("dyad_generated_columns collects APIM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     x = c(1, 10, 20, 30)
   )
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -38,7 +38,7 @@ test_that("interdep_generated_columns collects APIM columns", {
     seed = 123
   )
 
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
 
   expect_equal(
     result,
@@ -49,13 +49,13 @@ test_that("interdep_generated_columns collects APIM columns", {
       component = c("raw", "raw"),
       lag = c(0L, 0L),
       column_role = c("actor", "partner"),
-      column = c(".i_x_actor", ".i_x_partner"),
+      column = c(".dy_x_actor", ".dy_x_partner"),
       source_column = c("x", "x"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("none", "none"),
       column_centering = c("none", "none"),
       print_order = c(10L, 11L),
-      column_pattern = c(".i_{pred}_actor", ".i_{pred}_partner"),
+      column_pattern = c(".dy_{pred}_actor", ".dy_{pred}_partner"),
       description = c(
         "APIM actor predictor: actor's original predictor values",
         "APIM partner predictor: partner's original predictor values"
@@ -64,14 +64,14 @@ test_that("interdep_generated_columns collects APIM columns", {
   )
 })
 
-test_that("interdep_generated_columns excludes raw temporal predictor records", {
+test_that("dyad_generated_columns excludes raw temporal predictor records", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     x = c(1, 10, 20, 30)
   )
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -81,12 +81,12 @@ test_that("interdep_generated_columns excludes raw temporal predictor records", 
     seed = 123
   )
 
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
 
   expect_equal(nrow(result), 0)
 })
 
-test_that("interdep_generated_columns records temporal decomposition for APIM columns", {
+test_that("dyad_generated_columns records temporal decomposition for APIM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -94,7 +94,7 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
     x = c(1, 10, 3, 14, 20, 30, 24, 34)
   )
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -103,7 +103,7 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
     seed = 123
   )
 
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
 
   expect_equal(
     result,
@@ -124,16 +124,16 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
         "partner"
       ),
       column = c(
-        ".i_x_cwp",
-        ".i_x_cbp",
-        ".i_x_actor",
-        ".i_x_cwp_actor",
-        ".i_x_cbp_actor",
-        ".i_x_partner",
-        ".i_x_cwp_partner",
-        ".i_x_cbp_partner"
+        ".dy_x_cwp",
+        ".dy_x_cbp",
+        ".dy_x_actor",
+        ".dy_x_cwp_actor",
+        ".dy_x_cbp_actor",
+        ".dy_x_partner",
+        ".dy_x_cwp_partner",
+        ".dy_x_cbp_partner"
       ),
-      source_column = c("x", "x", "x", ".i_x_cwp", ".i_x_cbp", "x", ".i_x_cwp", ".i_x_cbp"),
+      source_column = c("x", "x", "x", ".dy_x_cwp", ".dy_x_cbp", "x", ".dy_x_cwp", ".dy_x_cbp"),
       temporal_decomposition = c(
         "within_person",
         "between_person_grand_mean",
@@ -148,14 +148,14 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
       column_centering = rep("none", 8),
       print_order = c(8L, 9L, 10L, 12L, 14L, 11L, 13L, 15L),
       column_pattern = c(
-        ".i_{pred}_cwp",
-        ".i_{pred}_cbp",
-        ".i_{pred}_actor",
-        ".i_{pred}_cwp_actor",
-        ".i_{pred}_cbp_actor",
-        ".i_{pred}_partner",
-        ".i_{pred}_cwp_partner",
-        ".i_{pred}_cbp_partner"
+        ".dy_{pred}_cwp",
+        ".dy_{pred}_cbp",
+        ".dy_{pred}_actor",
+        ".dy_{pred}_cwp_actor",
+        ".dy_{pred}_cbp_actor",
+        ".dy_{pred}_partner",
+        ".dy_{pred}_cwp_partner",
+        ".dy_{pred}_cbp_partner"
       ),
       description = c(
         "within-person predictor: momentary deviations from each person's usual level",
@@ -171,14 +171,14 @@ test_that("interdep_generated_columns records temporal decomposition for APIM co
   )
 })
 
-test_that("interdep_generated_columns collects DIM columns", {
+test_that("dyad_generated_columns collects DIM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     x = c(1, 10, 20, 30)
   )
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -188,7 +188,7 @@ test_that("interdep_generated_columns collects DIM columns", {
     seed = 123
   )
 
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
 
   expect_equal(
     result,
@@ -199,13 +199,13 @@ test_that("interdep_generated_columns collects DIM columns", {
       component = c("raw", "raw"),
       lag = c(0L, 0L),
       column_role = c("dyad_mean", "within_dyad_deviation"),
-      column = c(".i_x_dyad_mean_gmc", ".i_x_within_dyad_dev"),
+      column = c(".dy_x_dyad_mean_gmc", ".dy_x_within_dyad_dev"),
       source_column = c("x", "x"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
       column_centering = c("grand_mean", "none"),
       print_order = c(20L, 21L),
-      column_pattern = c(".i_{pred}_dyad_mean_gmc", ".i_{pred}_within_dyad_dev"),
+      column_pattern = c(".dy_{pred}_dyad_mean_gmc", ".dy_{pred}_within_dyad_dev"),
       description = c(
         "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
         "DIM within-dyad member-deviation predictor: member's difference from the dyad mean"
@@ -214,7 +214,7 @@ test_that("interdep_generated_columns collects DIM columns", {
   )
 })
 
-test_that("interdep_generated_columns records temporal and dyadic decomposition for DIM columns", {
+test_that("dyad_generated_columns records temporal and dyadic decomposition for DIM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -222,7 +222,7 @@ test_that("interdep_generated_columns records temporal and dyadic decomposition 
     x = c(1, 10, 3, 14, 20, 30, 24, 34)
   )
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -232,7 +232,7 @@ test_that("interdep_generated_columns records temporal and dyadic decomposition 
     seed = 123
   )
 
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
 
   expect_equal(
     result$temporal_decomposition,
@@ -274,14 +274,14 @@ test_that("interdep_generated_columns records temporal and dyadic decomposition 
   )
 })
 
-test_that("interdep_generated_columns combines requested model families", {
+test_that("dyad_generated_columns combines requested model families", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     x = c(1, 10, 20, 30)
   )
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -291,7 +291,7 @@ test_that("interdep_generated_columns combines requested model families", {
     seed = 123
   )
 
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
 
   expect_equal(
     result$model_family,
@@ -303,7 +303,7 @@ test_that("interdep_generated_columns combines requested model families", {
   )
 })
 
-test_that("interdep_generated_columns collects DSM columns", {
+test_that("dyad_generated_columns collects DSM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -311,7 +311,7 @@ test_that("interdep_generated_columns collects DSM columns", {
     x = c(1, 10, 20, 30)
   )
 
-  prepared <- prepare_interdep_data(
+  prepared <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -323,7 +323,7 @@ test_that("interdep_generated_columns collects DSM columns", {
     seed = 123
   )
 
-  result <- interdep_generated_columns(attr(prepared, "interdep"))
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
 
   expect_equal(
     result$model_family,
@@ -340,9 +340,9 @@ test_that("interdep_generated_columns collects DSM columns", {
   expect_equal(
     result$column,
     c(
-      ".i_dsm_role_contrast",
-      ".i_x_dyad_mean_gmc",
-      ".i_x_within_dyad_diff"
+      ".dy_dsm_role_contrast",
+      ".dy_x_dyad_mean_gmc",
+      ".dy_x_within_dyad_diff"
     )
   )
   expect_equal(result$dyadic_decomposition, c("role_contrast", "dyad_mean", "dyad_difference"))

@@ -6,7 +6,7 @@ test_that("center_predictors creates time_2l centered predictor columns", {
     x = c(1, 3, 3, 5, 5, 7, 7, 9)
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -15,16 +15,16 @@ test_that("center_predictors creates time_2l centered predictor columns", {
   ) |>
     center_predictors()
 
-  expect_true(".i_x_cwp" %in% names(result))
-  expect_true(".i_x_cbp" %in% names(result))
+  expect_true(".dy_x_cwp" %in% names(result))
+  expect_true(".dy_x_cbp" %in% names(result))
 
-  expect_equal(result$.i_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
-  expect_equal(result$.i_x_cbp, c(-3, -1, -3, -1, 1, 3, 1, 3))
+  expect_equal(result$.dy_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
+  expect_equal(result$.dy_x_cbp, c(-3, -1, -3, -1, 1, 3, 1, 3))
 
   person_summary <- dplyr::summarise(
     dplyr::group_by(result, .data$dyad_id, .data$person_id),
-    cwp_mean = mean(.data$.i_x_cwp),
-    cbp_n = dplyr::n_distinct(.data$.i_x_cbp),
+    cwp_mean = mean(.data$.dy_x_cwp),
+    cbp_n = dplyr::n_distinct(.data$.dy_x_cbp),
     .groups = "drop"
   )
 
@@ -39,11 +39,11 @@ test_that("center_predictors creates time_2l centered predictor columns", {
   )
 
   expect_equal(
-    attr(result, "interdep")$temporal_predictor_decompositions,
+    attr(result, "dyadMLM")$temporal_predictor_decompositions,
     tibble::tibble(
       predictor = c("x", "x", "x"),
       component = c("raw", "cwp", "cbp"),
-      column = c("x", ".i_x_cwp", ".i_x_cbp"),
+      column = c("x", ".dy_x_cwp", ".dy_x_cbp"),
       temporal_predictor_decomposition = c("none", "time_2l", "time_2l"),
       lag = c(0L, 0L, 0L)
     )
@@ -58,7 +58,7 @@ test_that("center_predictors weights people equally for between-person centering
     x = c(0, 0, 30, 20, 40, 60)
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -67,8 +67,8 @@ test_that("center_predictors weights people equally for between-person centering
   ) |>
     center_predictors()
 
-  expect_equal(result$.i_x_cwp, c(-10, -10, 20, 0, 0, 0))
-  expect_equal(result$.i_x_cbp, c(-22.5, -22.5, -22.5, -12.5, 7.5, 27.5))
+  expect_equal(result$.dy_x_cwp, c(-10, -10, 20, 0, 0, 0))
+  expect_equal(result$.dy_x_cbp, c(-22.5, -22.5, -22.5, -12.5, 7.5, 27.5))
 })
 
 test_that("center_predictors handles missing predictor values", {
@@ -79,7 +79,7 @@ test_that("center_predictors handles missing predictor values", {
     x = c(1, 3, NA, 5, NA, NA, NA, NA)
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -88,9 +88,9 @@ test_that("center_predictors handles missing predictor values", {
   ) |>
     center_predictors()
 
-  expect_equal(result$.i_x_cwp[1:4], c(0, -1, NA, 1))
-  expect_true(all(is.na(result$.i_x_cwp[5:8])))
-  expect_true(all(is.na(result$.i_x_cbp[5:8])))
+  expect_equal(result$.dy_x_cwp[1:4], c(0, -1, NA, 1))
+  expect_true(all(is.na(result$.dy_x_cwp[5:8])))
+  expect_true(all(is.na(result$.dy_x_cbp[5:8])))
 })
 
 test_that("center_predictors does not remove user-owned person mean columns", {
@@ -102,7 +102,7 @@ test_that("center_predictors does not remove user-owned person mean columns", {
     x_person_mean = 101:108
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -112,8 +112,8 @@ test_that("center_predictors does not remove user-owned person mean columns", {
     center_predictors()
 
   expect_equal(result$x_person_mean, 101:108)
-  expect_equal(result$.i_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
-  expect_false(".i_x_person_mean" %in% names(result))
+  expect_equal(result$.dy_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
+  expect_false(".dy_x_person_mean" %in% names(result))
 })
 
 test_that("center_predictors leaves uncentered data unchanged", {
@@ -123,7 +123,7 @@ test_that("center_predictors leaves uncentered data unchanged", {
     x = 1:4
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -134,7 +134,7 @@ test_that("center_predictors leaves uncentered data unchanged", {
 
   expect_equal(names(result), c("dyad_id", "person_id", "x"))
   expect_equal(
-    attr(result, "interdep")$temporal_predictor_decompositions,
+    attr(result, "dyadMLM")$temporal_predictor_decompositions,
     tibble::tibble(
       predictor = "x",
       component = "raw",

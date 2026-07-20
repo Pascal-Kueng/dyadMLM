@@ -898,9 +898,9 @@ exchangeable_apim <- fit_and_draw_exchangeable_apim(
 ## Testing exchangeability
 
 ```{r}
-library(interdep)
+library(dyadMLM)
 
-compare_interdep_models(
+compare_dyad_models(
   exchangeable_apim,
   distinguishable_apim
 )
@@ -1720,7 +1720,7 @@ TODO: Probably create a second slide deck!
 - DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
 
 - glmmTMB -> as required 
-- interdep -> as required (via pak, see instructions; or should we already try a CRAN release now?? We may want to still add additional functions like rotating variance structs back, so probably not). -> maybe just require pak and we install newest version on workshop-day?
+- dyadMLM -> as required (via pak, see instructions; or should we already try a CRAN release now?? We may want to still add additional functions like rotating variance structs back, so probably not). -> maybe just require pak and we install newest version on workshop-day?
 - dplyr -> required
 - tibble -> required
 - lavaan -> required
@@ -1754,7 +1754,7 @@ correlations (wb corr)?
 
 Thank you for your attention!
 
-[Continue to Part II: Applied Tutorial →](https://pascal-kueng.github.io/interdep/workshop/applied/){.workshop-next-link}
+[Continue to Part II: Applied Tutorial →](https://pascal-kueng.github.io/dyadMLM/workshop/applied/){.workshop-next-link}
 :::
 
 

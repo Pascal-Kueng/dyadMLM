@@ -1,7 +1,7 @@
 #' Compare nested glmmTMB models fitted to equivalent data
 #'
 #' Performs a likelihood-ratio test for two nested `glmmTMB` models. The models
-#' may use ordinary data frames or [interdep_data][prepare_interdep_data()]
+#' may use ordinary data frames or [dyadMLM_data][prepare_dyad_data()]
 #' objects, and their calls do not need to refer to the same R object. Models may
 #' be supplied in either order. The model with fewer estimated parameters is
 #' shown first in the result.
@@ -12,10 +12,10 @@
 #' Both model calls must use named data-frame objects that remain available when
 #' the models are compared. The checks assume these objects have not been
 #' modified since fitting. All ordinary data columns must be identical,
-#' including their types and attributes. For `interdep_data`, generated `.i_`
+#' including their types and attributes. For `dyadMLM_data`, generated `.dy_`
 #' columns may differ, but the original columns must be identical. Ordinary and
 #' prepared data may be compared with each other. Dyad metadata are checked when
-#' both models use `interdep_data`. The function also checks fitted rows,
+#' both models use `dyadMLM_data`. The function also checks fitted rows,
 #' outcomes, weights and offsets, model family and link, maximum-likelihood
 #' estimation, and model convergence. Each model must use the same untransformed
 #' response column.
@@ -33,7 +33,7 @@
 #'
 #' @examples
 #' if (requireNamespace("glmmTMB", quietly = TRUE)) {
-#'   restricted_data <- prepare_interdep_data(
+#'   restricted_data <- prepare_dyad_data(
 #'     example_dyadic_crosssectional,
 #'     group = coupleID,
 #'     member = personID,
@@ -50,11 +50,11 @@
 #'     data = full_data
 #'   )
 #'
-#'   compare_interdep_models(restricted_model, full_model)
+#'   compare_dyad_models(restricted_model, full_model)
 #' }
 #'
 #' @export
-compare_interdep_models <- function(model1, model2) {
+compare_dyad_models <- function(model1, model2) {
   validate_comparison_model(model1, "model1")
   validate_comparison_model(model2, "model2")
 
@@ -138,7 +138,7 @@ comparison_model_data <- function(model, caller_env, argument) {
   model_formula <- stats::formula(model, component = "cond")
 
   # A model fitted inside a helper may keep its data with its formula.
-  # Search there first, then where compare_interdep_models() was called.
+  # Search there first, then where compare_dyad_models() was called.
   environments <- list(environment(model_formula), caller_env)
 
   for (search_env in environments) {
@@ -176,13 +176,13 @@ validate_comparison_data <- function(model1, model2,
     )
   }
 
-  both_interdep <- inherits(model1_data, "interdep_data") &&
-    inherits(model2_data, "interdep_data")
+  both_prepared <- inherits(model1_data, "dyadMLM_data") &&
+    inherits(model2_data, "dyadMLM_data")
 
-  if (both_interdep) {
+  if (both_prepared) {
     # Both preparations must agree on the columns that define the dyadic data.
-    model1_meta <- attr(model1_data, "interdep")
-    model2_meta <- attr(model2_data, "interdep")
+    model1_meta <- attr(model1_data, "dyadMLM")
+    model2_meta <- attr(model2_data, "dyadMLM")
     for (field in c("group", "member", "role", "time")) {
       if (!identical(model1_meta[[field]], model2_meta[[field]])) {
         stop(
@@ -196,14 +196,14 @@ validate_comparison_data <- function(model1, model2,
     }
   }
 
-  # Generated interdep columns may differ across model parameterizations.
+  # Generated dyadMLM columns may differ across model parameterizations.
   model1_columns <- names(model1_data)
   model2_columns <- names(model2_data)
-  if (inherits(model1_data, "interdep_data")) {
-    model1_columns <- model1_columns[!startsWith(model1_columns, ".i_")]
+  if (inherits(model1_data, "dyadMLM_data")) {
+    model1_columns <- model1_columns[!startsWith(model1_columns, ".dy_")]
   }
-  if (inherits(model2_data, "interdep_data")) {
-    model2_columns <- model2_columns[!startsWith(model2_columns, ".i_")]
+  if (inherits(model2_data, "dyadMLM_data")) {
+    model2_columns <- model2_columns[!startsWith(model2_columns, ".dy_")]
   }
 
   if (!setequal(model1_columns, model2_columns)) {
@@ -430,13 +430,13 @@ likelihood_ratio_comparison <- function(model1, model2, labels) {
     ""
   )
   attr(out, "conclusion") <- conclusion
-  class(out) <- c("interdep_model_comparison", "anova", "data.frame")
+  class(out) <- c("dyadMLM_model_comparison", "anova", "data.frame")
   out
 }
 
 #' @export
 #' @noRd
-print.interdep_model_comparison <- function(x, ...) {
+print.dyadMLM_model_comparison <- function(x, ...) {
   # Print the usual ANOVA table first, then the plain-language conclusion.
   NextMethod()
   cat("\n", attr(x, "conclusion"), "\n", sep = "")

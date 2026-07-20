@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(interdep)
+library(dyadMLM)
 
-test_check("interdep")
+test_check("dyadMLM")

@@ -86,14 +86,14 @@
 #' @param missing_role How to handle missing values in the `role` column.
 #'   `"error"` stops with an error, `"drop"` removes dyads with incomplete role
 #'   information. Ignored when no `role` column is supplied.
-#' @param seed Optional seed for random `.i_diff_*` sign assignment in
+#' @param seed Optional seed for random `.dy_diff_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #'
-#' @return The original data as a tibble with class `interdep_data`,
-#'   `.i_composition` and `.i_composition_role` factor columns,
-#'   `.i_is_*` numeric indicator columns, composition-specific
-#'   numeric `.i_diff_*` contrast columns coded `-1` and `1` for the two members
-#'   of matching exchangeable dyads and `0` otherwise, and an `interdep` attribute
+#' @return The original data as a tibble with class `dyadMLM_data`,
+#'   `.dy_composition` and `.dy_composition_role` factor columns,
+#'   `.dy_is_*` numeric indicator columns, composition-specific
+#'   numeric `.dy_diff_*` contrast columns coded `-1` and `1` for the two members
+#'   of matching exchangeable dyads and `0` otherwise, and a `dyadMLM` attribute
 #'   containing structural metadata, `dyad_compositions`, and predictor metadata
 #'   such as `temporal_predictor_decompositions`, `lag_predictors`,
 #'   `apim_predictors`, and
@@ -108,7 +108,7 @@
 #'   x = c(4, 7, 5, 6, 3, 8)
 #' )
 #'
-#' prepared <- prepare_interdep_data(
+#' prepared <- prepare_dyad_data(
 #'   data,
 #'   group = dyad_id,
 #'   member = person_id,
@@ -119,7 +119,7 @@
 #'
 #' print(prepared)
 #'
-#' pooled <- prepare_interdep_data(
+#' pooled <- prepare_dyad_data(
 #'   data,
 #'   group = dyad_id,
 #'   member = person_id,
@@ -141,7 +141,7 @@
 #'   x = c(4, 7, 5, 8, 3, 6, 4, 7)
 #' )
 #'
-#' ild_prepared <- prepare_interdep_data(
+#' ild_prepared <- prepare_dyad_data(
 #'   ild_data,
 #'   group = dyad_id,
 #'   member = person_id,
@@ -155,7 +155,7 @@
 #' print(ild_prepared)
 #'
 #' @export
-prepare_interdep_data <- function(
+prepare_dyad_data <- function(
     data,
     group,
     member,
@@ -179,7 +179,7 @@ prepare_interdep_data <- function(
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
 
-  out <- validate_interdep_data(
+  out <- validate_dyad_data(
     data = data,
     group = {{ group }},
     member = {{ member }},

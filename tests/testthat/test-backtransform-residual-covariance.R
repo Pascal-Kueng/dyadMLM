@@ -349,7 +349,7 @@ test_that("brms ignores non-mean random effects", {
 })
 
 test_that("automatic matching aligns groups and coefficient order", {
-  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
   blocks <- list(
     rescov_test_block("coupleID", c("time", "(Intercept)"), "shared"),
     rescov_test_block(
@@ -395,13 +395,13 @@ test_that("automatic matching aligns groups and coefficient order", {
 })
 
 test_that("automatic matching handles compositions and grouping levels", {
-  same_idiff <- ".i_diff_same_sex_arbitrary"
-  friend_idiff <- ".i_diff_friends_arbitrary"
+  same_idiff <- ".dy_diff_same_sex_arbitrary"
+  friend_idiff <- ".dy_diff_friends_arbitrary"
   blocks <- list(
     rescov_test_block("coupleID", "(Intercept)", "generic"),
-    rescov_test_block("coupleID", ".i_is_same_sex", "same shared"),
+    rescov_test_block("coupleID", ".dy_is_same_sex", "same shared"),
     rescov_test_block("coupleID", same_idiff, "same difference"),
-    rescov_test_block("coupleID", ".i_is_friends", "friend shared"),
+    rescov_test_block("coupleID", ".dy_is_friends", "friend shared"),
     rescov_test_block("coupleID", friend_idiff, "friend difference")
   )
 
@@ -418,7 +418,7 @@ test_that("automatic matching handles compositions and grouping levels", {
   )
   expect_equal(
     unlist(lapply(pairs, `[[`, "shared_indicator"), use.names = FALSE),
-    c(".i_is_same_sex", ".i_is_friends")
+    c(".dy_is_same_sex", ".dy_is_friends")
   )
 
   repeated <- list(
@@ -439,7 +439,7 @@ test_that("automatic matching handles compositions and grouping levels", {
 })
 
 test_that("automatic matching is conservative about missing and ambiguous blocks", {
-  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
 
   expect_error(
     match_exchangeable_residual_blocks(list(
@@ -611,7 +611,7 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
 })
 
 test_that("supplied exact pairs support wholly omitted blocks", {
-  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
   shared_covariance <- rescov_test_covariance(1:2)
   difference_covariance <- rescov_test_covariance(3:4)
   blocks <- list(
@@ -901,7 +901,7 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
 })
 
 test_that("model-style selectors preserve covariance structures", {
-  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
   blocks <- list(
     rescov_test_block(
       "coupleID",
@@ -1302,7 +1302,7 @@ test_that("fitted-row validation protects the exchangeable coding", {
     fixed = TRUE
   )
 
-  marker <- ".i_diff_same_sex_arbitrary"
+  marker <- ".dy_diff_same_sex_arbitrary"
   generic_blocks <- list(
     rescov_test_block("coupleID", "(Intercept)", "generic shared"),
     rescov_test_block("coupleID", marker, "difference")
@@ -1416,7 +1416,7 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
   )
 
   mixed_pair <- pair
-  mixed_pair$shared_indicator <- ".i_is_same_sex"
+  mixed_pair$shared_indicator <- ".dy_is_same_sex"
   expect_warning(
     warn_about_exchangeable_residual_level(
       extracted,
@@ -1488,7 +1488,7 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
 test_that("the public function returns member-level glmmTMB matrices", {
   skip_if_not_installed("glmmTMB")
 
-  marker <- ".i_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
   data <- expand.grid(member = c(-1, 1), coupleID = seq_len(30))
   data$coupleID <- factor(data$coupleID)
   data[[marker]] <- data$member
@@ -1497,7 +1497,7 @@ test_that("the public function returns member-level glmmTMB matrices", {
 
   model <- suppressWarnings(glmmTMB::glmmTMB(
     outcome ~ 1 + (1 | coupleID) +
-      (0 + .i_diff_assumed_exchangeable_arbitrary || coupleID),
+      (0 + .dy_diff_assumed_exchangeable_arbitrary || coupleID),
     dispformula = ~0,
     data = data
   ))
@@ -1584,7 +1584,7 @@ test_that("the public function retains brms draws and labels omitted blocks", {
         )
       ),
       extract_exchangeable_residual_blocks = function(model) extracted,
-      .package = "interdep"
+      .package = "dyadMLM"
     ),
     "standard deviation is zero",
     fixed = TRUE

@@ -13,9 +13,9 @@ infer_dyad_compositions(
 )
 }
 \arguments{
-\item{data}{An \code{interdep_data} object returned by \code{\link[=validate_interdep_data]{validate_interdep_data()}}.}
+\item{data}{A \code{dyadMLM_data} object returned by \code{\link[=validate_dyad_data]{validate_dyad_data()}}.}
 
-\item{seed}{Optional seed for random \verb{.i_diff_*} sign assignment in
+\item{seed}{Optional seed for random \verb{.dy_diff_*} sign assignment in
 exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 
 \item{include_compositions}{Optional observed dyad compositions to keep
@@ -29,14 +29,14 @@ compositions into user-named final composition labels. Each pool must
 resolve to at least two distinct observed compositions.}
 }
 \value{
-An \code{interdep_data} object with added \code{.i_composition} and
-\code{.i_composition_role} factor columns, \verb{.i_is_*} numeric indicator columns,
-composition-specific numeric \verb{.i_diff_*} contrast columns coded \code{-1} and
+A \code{dyadMLM_data} object with added \code{.dy_composition} and
+\code{.dy_composition_role} factor columns, \verb{.dy_is_*} numeric indicator columns,
+composition-specific numeric \verb{.dy_diff_*} contrast columns coded \code{-1} and
 \code{1} for the two members of matching exchangeable dyads and \code{0} otherwise,
 and dyad composition metadata.
 }
 \description{
 Builds a dyad-level summary of role compositions from a validated
-\code{interdep_data} object.
+\code{dyadMLM_data} object.
 }
 \keyword{internal}

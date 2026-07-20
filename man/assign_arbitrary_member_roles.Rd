@@ -18,7 +18,7 @@ assign_arbitrary_member_roles(data, group_name, member_name, seed = NULL)
 }
 \value{
 A data frame with \code{group_name}, \code{member_name}, and
-\code{.i_arbitrary_role}.
+\code{.dy_arbitrary_role}.
 }
 \description{
 Creates a member-level lookup with one arbitrary role per observed member.

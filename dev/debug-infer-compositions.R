@@ -1,4 +1,4 @@
-# Scratch helpers for developing interdep internals.
+# Scratch helpers for developing dyadMLM internals.
 #
 # Source this file, then call one of:
 #   setup_validate_debug()
@@ -21,11 +21,11 @@
 # to copy lines from the function body into the console and run them manually.
 
 
-load_interdep_debug_internals <- function() {
+load_dyad_debug_internals <- function() {
   source("R/utils-args.R")
   source("R/utils-compositions.R")
   source("R/assign_arbitrary_member_roles.R")
-  source("R/validate_interdep_data.R")
+  source("R/validate_dyad_data.R")
   source("R/infer_dyad_compositions.R")
   source("R/center_predictors.R")
   source("R/add_temporal_lag_columns.R")
@@ -101,9 +101,9 @@ setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
 setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
                               set_exchangeable_compositions = NULL,
                               pool_compositions = NULL) {
-  load_interdep_debug_internals()
+  load_dyad_debug_internals()
 
-  data <- validate_interdep_data(
+  data <- validate_dyad_data(
     load_debug_ild_data(dataset),
     group = coupleID,
     member = personID,
@@ -112,7 +112,7 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
     predictors = provided_support
   )
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   group_name <- meta_data$group
   member_name <- meta_data$member
   role_name <- meta_data$role
@@ -126,10 +126,10 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
     ) |>
     dplyr::group_by(.data[[group_name]]) |>
     dplyr::summarise(
-      .i_raw_composition = {
+      .dy_raw_composition = {
         canonical_composition(.data[[role_name]])
       },
-      .i_dyad_type = {
+      .dy_dyad_type = {
         has_one_role <- dplyr::n_distinct(.data[[role_name]]) == 1
 
         if (has_one_role) {
@@ -138,17 +138,17 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
           "distinguishable"
         }
       },
-      .i_dyad_type_source = "inferred",
+      .dy_dyad_type_source = "inferred",
       .groups = "drop"
     ) |>
     dplyr::mutate(
-      .i_composition = .data$.i_raw_composition,
-      .i_pool_member = NA_character_
+      .dy_composition = .data$.dy_raw_composition,
+      .dy_pool_member = NA_character_
     )
 
   resolved_set_exchangeable_compositions <- resolve_composition_references(
     references = set_exchangeable_compositions,
-    observed_compositions = dyad_roles[[interdep_composition_col]],
+    observed_compositions = dyad_roles[[dyad_composition_col]],
     arg_name = "set_exchangeable_compositions"
   )
 
@@ -164,16 +164,16 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 
   dyad_compositions <- dyad_roles_after_pooling |>
     dplyr::group_by(
-      composition = .data[[interdep_composition_col]]
+      composition = .data[[dyad_composition_col]]
     ) |>
     dplyr::summarise(
-      dyad_type = dplyr::first(.data[[interdep_dyad_type_col]]),
+      dyad_type = dplyr::first(.data[[dyad_type_col]]),
       dyad_type_source = ifelse(
-        dplyr::n_distinct(.data[[interdep_dyad_type_source_col]]) == 1L,
-        dplyr::first(.data[[interdep_dyad_type_source_col]]),
+        dplyr::n_distinct(.data[[dyad_type_source_col]]) == 1L,
+        dplyr::first(.data[[dyad_type_source_col]]),
         "mixed"
       ),
-      pooled_from = paste(sort(unique(stats::na.omit(.data[[interdep_pool_member_col]]))), collapse = ", "),
+      pooled_from = paste(sort(unique(stats::na.omit(.data[[dyad_pool_member_col]]))), collapse = ", "),
       n_dyads = dplyr::n(),
       .groups = "drop"
     ) |>
@@ -212,9 +212,9 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
                                set_exchangeable_compositions = NULL,
                                pool_compositions = NULL) {
-  load_interdep_debug_internals()
+  load_dyad_debug_internals()
 
-  data <- validate_interdep_data(
+  data <- validate_dyad_data(
     load_debug_ild_data(dataset),
     group = coupleID,
     member = personID,
@@ -229,7 +229,7 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
     pool_compositions = pool_compositions
   )
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   out <- data
   group <- meta_data$group
   member <- meta_data$member
@@ -255,9 +255,9 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
                                           set_exchangeable_compositions = NULL,
                                           pool_compositions = NULL) {
-  load_interdep_debug_internals()
+  load_dyad_debug_internals()
 
-  data <- validate_interdep_data(
+  data <- validate_dyad_data(
     load_debug_ild_data(dataset),
     group = coupleID,
     member = personID,
@@ -273,7 +273,7 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
   )
   data <- center_predictors(data)
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   out <- data
   group <- meta_data$group
   member <- meta_data$member
@@ -303,9 +303,9 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
 setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
                                             set_exchangeable_compositions = NULL,
                                             pool_compositions = NULL) {
-  load_interdep_debug_internals()
+  load_dyad_debug_internals()
 
-  data <- validate_interdep_data(
+  data <- validate_dyad_data(
     load_debug_ild_data(dataset),
     group = coupleID,
     member = personID,
@@ -322,7 +322,7 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
   )
   data <- center_predictors(data)
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   out <- data
   group <- meta_data$group
   member <- meta_data$member
@@ -393,9 +393,9 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 
 setup_add_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
                                          dsm_role_order = c("female", "male")) {
-  load_interdep_debug_internals()
+  load_dyad_debug_internals()
 
-  data <- validate_interdep_data(
+  data <- validate_dyad_data(
     load_debug_ild_data(dataset),
     group = coupleID,
     member = personID,
@@ -413,7 +413,7 @@ setup_add_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), see
   validate_dsm_compatibility(data)
   data <- center_predictors(data)
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   dsm_role_order <- meta_data$dsm_role_order
   role <- meta_data$role
 

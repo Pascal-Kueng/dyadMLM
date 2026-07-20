@@ -14,11 +14,11 @@ test_that("assign_arbitrary_member_roles returns one role per member", {
 
   expect_equal(nrow(result), 4)
   expect_equal(
-    sort(unique(result[[interdep_arbitrary_role_col]])),
+    sort(unique(result[[dyad_arbitrary_role_col]])),
     c("arbitrary_1", "arbitrary_2")
   )
   expect_equal(
-    dplyr::count(result, .data$dyad_id, .data[[interdep_arbitrary_role_col]])$n,
+    dplyr::count(result, .data$dyad_id, .data[[dyad_arbitrary_role_col]])$n,
     rep(1L, 4)
   )
 })
@@ -41,14 +41,14 @@ test_that("add_arbitrary_member_roles preserves repeated member rows", {
   expect_equal(nrow(result), nrow(data))
   expect_equal(result$outcome, data$outcome)
   expect_equal(
-    dplyr::count(result, .data$dyad_id, .data$person_id, .data[[interdep_arbitrary_role_col]])$n,
+    dplyr::count(result, .data$dyad_id, .data$person_id, .data[[dyad_arbitrary_role_col]])$n,
     rep(2L, 4)
   )
   expect_equal(
     dplyr::count(
-      dplyr::distinct(result, .data$dyad_id, .data$person_id, .data[[interdep_arbitrary_role_col]]),
+      dplyr::distinct(result, .data$dyad_id, .data$person_id, .data[[dyad_arbitrary_role_col]]),
       .data$dyad_id,
-      .data[[interdep_arbitrary_role_col]]
+      .data[[dyad_arbitrary_role_col]]
     )$n,
     rep(1L, 4)
   )

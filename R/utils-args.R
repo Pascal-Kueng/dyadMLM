@@ -43,7 +43,7 @@ normalize_model_type <- function(model_type) {
 }
 
 
-select_interdep_columns <- function(data, cols_quo, arg) {
+select_dyad_columns <- function(data, cols_quo, arg) {
   if (rlang::quo_is_null(cols_quo)) {
     return(NULL)
   }

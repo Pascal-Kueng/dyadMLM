@@ -3,28 +3,28 @@
 ############################################################################
 
 # Package-wide separator for composition labels.
-interdep_composition_sep <- "_x_"
+dyad_composition_sep <- "_x_"
 
 # Separator for appending a member role to a dyad composition label.
-interdep_composition_role_sep <- "_"
+dyad_composition_role_sep <- "_"
 
 # Label used when no role column is supplied.
-interdep_assumed_exchangeable_label <- "assumed_exchangeable"
+dyad_assumed_exchangeable_label <- "assumed_exchangeable"
 
 # Prefix to be used for package-owned / reserved columns.
-interdep_reserved_prefix <- ".i_"
+dyad_reserved_prefix <- ".dy_"
 
 # Package generated columns will use the following names consistently
-interdep_composition_col <- paste0(interdep_reserved_prefix, "composition")
-interdep_composition_role_col <- paste0(interdep_reserved_prefix, "composition_role")
-interdep_dyad_type_col <- paste0(interdep_reserved_prefix, "dyad_type")
-interdep_dyad_type_source_col <- paste0(interdep_reserved_prefix, "dyad_type_source")
-interdep_raw_composition_col <- paste0(interdep_reserved_prefix, "raw_composition")
-interdep_pool_member_col <- paste0(interdep_reserved_prefix, "pool_member")
-interdep_resolved_role_col <- paste0(interdep_reserved_prefix, "resolved_role")
-interdep_diff_col <- paste0(interdep_reserved_prefix, "diff")
-interdep_arbitrary_role_col <- paste0(interdep_reserved_prefix, "arbitrary_role")
-interdep_dsm_role_contrast_col <- paste0(interdep_reserved_prefix, "dsm_role_contrast")
+dyad_composition_col <- paste0(dyad_reserved_prefix, "composition")
+dyad_composition_role_col <- paste0(dyad_reserved_prefix, "composition_role")
+dyad_type_col <- paste0(dyad_reserved_prefix, "dyad_type")
+dyad_type_source_col <- paste0(dyad_reserved_prefix, "dyad_type_source")
+dyad_raw_composition_col <- paste0(dyad_reserved_prefix, "raw_composition")
+dyad_pool_member_col <- paste0(dyad_reserved_prefix, "pool_member")
+dyad_resolved_role_col <- paste0(dyad_reserved_prefix, "resolved_role")
+dyad_diff_col <- paste0(dyad_reserved_prefix, "diff")
+dyad_arbitrary_role_col <- paste0(dyad_reserved_prefix, "arbitrary_role")
+dyad_dsm_role_contrast_col <- paste0(dyad_reserved_prefix, "dsm_role_contrast")
 
 ############################################################################
 # HELPER FUNCTIONS
@@ -40,7 +40,7 @@ interdep_dsm_role_contrast_col <- paste0(interdep_reserved_prefix, "dsm_role_con
 #'
 #' @return A single composition label.
 #' @keywords internal
-canonical_composition <- function(roles, sep = interdep_composition_sep) {
+canonical_composition <- function(roles, sep = dyad_composition_sep) {
   paste(sort(as.character(roles)), collapse = sep)
 }
 
@@ -49,19 +49,19 @@ canonical_composition <- function(roles, sep = interdep_composition_sep) {
 #' @param composition A composition label.
 #' @param role A row-level role label.
 #' @keywords internal
-composition_role_label <- function(composition, role, sep = interdep_composition_role_sep) {
+composition_role_label <- function(composition, role, sep = dyad_composition_role_sep) {
   paste(as.character(composition), as.character(role), sep = sep)
 }
 
 
-#' Create safe suffixes for generated interdep columns
+#' Create safe suffixes for generated dyadMLM columns
 #'
 #' @param labels Labels that will be used to build generated column names.
 #'
 #' @return A named character vector. Names are the original labels; values are
 #'   sanitized column-name suffixes.
 #' @keywords internal
-make_interdep_suffixes <- function(labels, label_type = "labels",
+make_dyad_suffixes <- function(labels, label_type = "labels",
                                    rename_hint = "role or composition labels") {
   labels <- unique(as.character(labels))
   suffixes <- gsub("[^[:alnum:]_]+", "_", labels)
@@ -78,7 +78,7 @@ make_interdep_suffixes <- function(labels, label_type = "labels",
     stop(
       "Some ",
       label_type,
-      " would create the same generated column-name suffix because interdep replaces spaces and punctuation with underscores: ",
+      " would create the same generated column-name suffix because dyadMLM replaces spaces and punctuation with underscores: ",
       paste(conflicts, collapse = "; "),
       ". Rename these ",
       rename_hint,
@@ -130,8 +130,8 @@ resolve_composition_references <- function(references, observed_compositions, ar
   for (i in seq_along(references)) {
     reference <- trimws(references[[i]])
 
-    if (grepl(interdep_composition_sep, reference, fixed = TRUE)) {
-      roles <- strsplit(reference, interdep_composition_sep, fixed = TRUE)[[1]]
+    if (grepl(dyad_composition_sep, reference, fixed = TRUE)) {
+      roles <- strsplit(reference, dyad_composition_sep, fixed = TRUE)[[1]]
     } else if (grepl("-", reference, fixed = TRUE)) {
       roles <- strsplit(reference, "-", fixed = TRUE)[[1]]
     } else if (grepl("_", reference, fixed = TRUE)) {

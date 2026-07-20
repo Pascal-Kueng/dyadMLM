@@ -21,14 +21,14 @@ expect_added_column_description <- function(printed, column_pattern, description
   expect_true(any(grepl(description, printed, fixed = TRUE)))
 }
 
-test_that("interdep data prints a header before the tibble", {
+test_that("dyadMLM data prints a header before the tibble", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
     role = c("female", "male", "female", "female")
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -37,12 +37,12 @@ test_that("interdep data prints a header before the tibble", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl("# interdep data", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_is_{comp-role}", printed, fixed = TRUE)))
+  expect_true(any(grepl("# dyadMLM data", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_is_{comp-role}", printed, fixed = TRUE)))
   expect_true(any(grepl("# A tibble:", printed, fixed = TRUE)))
 })
 
-test_that("interdep data header and structure wrap to console width", {
+test_that("dyadMLM data header and structure wrap to console width", {
   old_options <- options(width = 46)
   on.exit(options(old_options), add = TRUE)
 
@@ -52,7 +52,7 @@ test_that("interdep data header and structure wrap to console width", {
     very_long_role_identifier = c("female", "male", "female", "female")
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = very_long_dyad_identifier,
     member = very_long_member_identifier,
@@ -70,14 +70,14 @@ test_that("interdep data header and structure wrap to console width", {
   expect_true(any(grepl("#   role = very_long_role_identifier", printed, fixed = TRUE)))
 })
 
-test_that("interdep data prints dropped incomplete dyads", {
+test_that("dyadMLM data prints dropped incomplete dyads", {
   data <- tibble::tibble(
     dyad_id = c(1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E")
   )
 
   expect_message(
-    result <- prepare_interdep_data(
+    result <- prepare_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -116,14 +116,14 @@ test_that("comment field label styling is limited to the label", {
   )
 })
 
-test_that("interdep data print describes generated predictor columns", {
+test_that("dyadMLM data print describes generated predictor columns", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
     x = c(1, 2, 3, 4)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -134,26 +134,26 @@ test_that("interdep data print describes generated predictor columns", {
   printed <- capture_wide_print(result)
 
   expect_false(any(grepl("sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_diff_{comp}", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_diff_{comp}", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_diff_{comp}",
+    ".dy_diff_{comp}",
     "composition-specific sum-diff contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
   )
-  expect_true(any(grepl(".i_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_actor",
+    ".dy_{pred}_actor",
     "APIM actor predictor: actor's original predictor values"
   )
-  expect_true(any(grepl(".i_{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_partner",
+    ".dy_{pred}_partner",
     "APIM partner predictor: partner's original predictor values"
   )
-  expect_false(any(grepl(".i_{pred}_actor           actor", printed, fixed = TRUE)))
-  expect_false(any(grepl(".i_{pred}_partner         partner", printed, fixed = TRUE)))
+  expect_false(any(grepl(".dy_{pred}_actor           actor", printed, fixed = TRUE)))
+  expect_false(any(grepl(".dy_{pred}_partner         partner", printed, fixed = TRUE)))
 })
 
 test_that("added column descriptions align and wrap to console width", {
@@ -174,14 +174,14 @@ test_that("added column descriptions align and wrap to console width", {
   expect_equal(as.integer(regexpr("across", printed[[3]], fixed = TRUE)), description_column)
 })
 
-test_that("interdep data print does not describe removed generated model column families", {
+test_that("dyadMLM data print does not describe removed generated model column families", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
     x = c(1, 2, 3, 4)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -189,16 +189,16 @@ test_that("interdep data print does not describe removed generated model column 
     seed = 123
   )
 
-  result$.i_x_actor <- NULL
+  result$.dy_x_actor <- NULL
 
   printed <- capture_wide_print(result)
 
-  expect_false(any(grepl(".i_{pred}_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_diff_{comp}", printed, fixed = TRUE)))
+  expect_false(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_diff_{comp}", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print describes longitudinal APIM columns", {
+test_that("dyadMLM data print describes longitudinal APIM columns", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
@@ -206,7 +206,7 @@ test_that("interdep data print describes longitudinal APIM columns", {
     x = c(1, 2, 3, 4, 5, 6, 7, 8)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -217,27 +217,27 @@ test_that("interdep data print describes longitudinal APIM columns", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".i_{pred}_cwp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_cwp",
+    ".dy_{pred}_cwp",
     "within-person predictor: momentary deviations from each person's usual level"
   )
-  expect_true(any(grepl(".i_{pred}_cbp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_cbp",
+    ".dy_{pred}_cbp",
     "between-person predictor: stable differences from the average person's usual level"
   )
-  expect_true(any(grepl(".i_{pred}_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cwp_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cwp_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cbp_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cbp_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp_partner", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print orders generated column descriptions", {
+test_that("dyadMLM data print orders generated column descriptions", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
@@ -247,7 +247,7 @@ test_that("interdep data print orders generated column descriptions", {
     y = c(2, 3, 4, 5, 6, 7, 8, 9)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -261,12 +261,12 @@ test_that("interdep data print orders generated column descriptions", {
 
   lines <- added_column_lines(capture_wide_print(result))
 
-  expect_lt(added_column_index(lines, ".i_{pred}_cwp"), added_column_index(lines, ".i_{pred}_cwp_actor"))
-  expect_lt(added_column_index(lines, ".i_{pred}_cbp"), added_column_index(lines, ".i_{pred}_cbp_actor"))
-  expect_lt(added_column_index(lines, ".i_{pred}_cbp_partner"), added_column_index(lines, ".i_{pred}_cwp_dyad_mean"))
+  expect_lt(added_column_index(lines, ".dy_{pred}_cwp"), added_column_index(lines, ".dy_{pred}_cwp_actor"))
+  expect_lt(added_column_index(lines, ".dy_{pred}_cbp"), added_column_index(lines, ".dy_{pred}_cbp_actor"))
+  expect_lt(added_column_index(lines, ".dy_{pred}_cbp_partner"), added_column_index(lines, ".dy_{pred}_cwp_dyad_mean"))
 })
 
-test_that("interdep data print collapses repeated generated column types", {
+test_that("dyadMLM data print collapses repeated generated column types", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
@@ -275,7 +275,7 @@ test_that("interdep data print collapses repeated generated column types", {
     z = c(8, 7, 6, 5, 4, 3, 2, 1)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -286,17 +286,17 @@ test_that("interdep data print collapses repeated generated column types", {
 
   lines <- added_column_lines(capture_wide_print(result))
 
-  expect_equal(added_column_count(lines, ".i_{pred}_cwp"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_cbp"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_actor"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_partner"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_cwp_actor"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_cwp_partner"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_cbp_actor"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_cbp_partner"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cwp"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cbp"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_actor"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_partner"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cwp_actor"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cwp_partner"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cbp_actor"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cbp_partner"), 1)
 })
 
-test_that("interdep data print does not describe removed temporal source columns", {
+test_that("dyadMLM data print does not describe removed temporal source columns", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
@@ -304,7 +304,7 @@ test_that("interdep data print does not describe removed temporal source columns
     x = c(1, 2, 3, 4, 5, 6, 7, 8)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -313,23 +313,23 @@ test_that("interdep data print does not describe removed temporal source columns
     seed = 123
   )
 
-  result$.i_x_cwp <- NULL
+  result$.dy_x_cwp <- NULL
 
   lines <- added_column_lines(capture_wide_print(result))
 
-  expect_equal(added_column_count(lines, ".i_{pred}_cwp"), 0)
-  expect_equal(added_column_count(lines, ".i_{pred}_cbp"), 1)
-  expect_equal(added_column_count(lines, ".i_{pred}_cwp_actor"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cwp"), 0)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cbp"), 1)
+  expect_equal(added_column_count(lines, ".dy_{pred}_cwp_actor"), 1)
 })
 
-test_that("interdep data print describes cross-sectional DIM columns", {
+test_that("dyadMLM data print describes cross-sectional DIM columns", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
     x = c(1, 2, 3, 4)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -340,21 +340,21 @@ test_that("interdep data print describes cross-sectional DIM columns", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_dyad_mean_gmc",
+    ".dy_{pred}_dyad_mean_gmc",
     "dyad-mean predictor: dyad's average predictor level, grand-mean centered"
   )
-  expect_true(any(grepl(".i_{pred}_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_within_dyad_dev", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_within_dyad_dev",
+    ".dy_{pred}_within_dyad_dev",
     "DIM within-dyad member-deviation predictor: member's difference from the dyad mean"
   )
 })
 
-test_that("interdep data print describes longitudinal DIM columns", {
+test_that("dyadMLM data print describes longitudinal DIM columns", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
@@ -362,7 +362,7 @@ test_that("interdep data print describes longitudinal DIM columns", {
     x = c(1, 2, 3, 4, 5, 6, 7, 8)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -374,35 +374,35 @@ test_that("interdep data print describes longitudinal DIM columns", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_within_dyad_dev", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_cwp_dyad_mean",
+    ".dy_{pred}_cwp_dyad_mean",
     "within-person dyad-mean predictor: shared momentary deviations in the dyad"
   )
-  expect_true(any(grepl(".i_{pred}_cwp_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp_within_dyad_dev", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_cwp_within_dyad_dev",
+    ".dy_{pred}_cwp_within_dyad_dev",
     "DIM within-person, within-dyad member-deviation predictor: member's momentary deviation from the dyad mean"
   )
-  expect_true(any(grepl(".i_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_cbp_dyad_mean",
+    ".dy_{pred}_cbp_dyad_mean",
     "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered"
   )
-  expect_true(any(grepl(".i_{pred}_cbp_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp_within_dyad_dev", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_cbp_within_dyad_dev",
+    ".dy_{pred}_cbp_within_dyad_dev",
     "DIM between-person, within-dyad member-deviation predictor: member's stable difference from the dyad's usual level"
   )
 })
 
-test_that("interdep data print describes longitudinal DSM predictors", {
+test_that("dyadMLM data print describes longitudinal DSM predictors", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c(1, 2, 1, 2, 3, 4, 3, 4),
@@ -412,7 +412,7 @@ test_that("interdep data print describes longitudinal DSM predictors", {
     y = c(2, 3, 4, 5, 6, 7, 8, 9)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -426,27 +426,27 @@ test_that("interdep data print describes longitudinal DSM predictors", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".i_{pred}_cwp", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cbp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp", printed, fixed = TRUE)))
   expect_true(any(grepl("DSM direction: female - male", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_dsm_role_contrast", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_within_dyad_diff", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cwp_within_dyad_diff", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_cbp_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_dsm_role_contrast", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cwp_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_cbp_within_dyad_diff", printed, fixed = TRUE)))
   expect_false(any(grepl("within_dyad_dev", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print combines APIM and DIM column descriptions", {
+test_that("dyadMLM data print combines APIM and DIM column descriptions", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
     x = c(1, 2, 3, 4)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -457,13 +457,13 @@ test_that("interdep data print combines APIM and DIM column descriptions", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".i_{pred}_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_within_dyad_dev", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print combines APIM and DSM predictors", {
+test_that("dyadMLM data print combines APIM and DSM predictors", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
@@ -472,7 +472,7 @@ test_that("interdep data print combines APIM and DSM predictors", {
     y = c(5, 6, 7, 8)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -485,17 +485,17 @@ test_that("interdep data print combines APIM and DSM predictors", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".i_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".i_{pred}_actor",
+    ".dy_{pred}_actor",
     "APIM actor predictor: actor's original predictor values"
   )
-  expect_true(any(grepl(".i_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".i_{pred}_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_{pred}_within_dyad_diff", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print describes dropped dyads with missing role information", {
+test_that("dyadMLM data print describes dropped dyads with missing role information", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),
@@ -503,7 +503,7 @@ test_that("interdep data print describes dropped dyads with missing role informa
   )
 
   expect_message(
-    result <- prepare_interdep_data(
+    result <- prepare_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -525,14 +525,14 @@ test_that("interdep data print describes dropped dyads with missing role informa
   expect_true(any(grepl("with ID: 1", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print truncates many dropped incomplete dyad IDs", {
+test_that("dyadMLM data print truncates many dropped incomplete dyad IDs", {
   data <- tibble::tibble(
     dyad_id = c(1:14, 15, 15, 16, 16),
     person_id = c(paste0("single", 1:14), "A", "B", "C", "D")
   )
 
   suppressMessages(
-    result <- prepare_interdep_data(
+    result <- prepare_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -547,7 +547,7 @@ test_that("interdep data print truncates many dropped incomplete dyad IDs", {
   expect_true(any(grepl("14 dyads, with IDs: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ... and 4 more", printed, fixed = TRUE)))
 })
 
-test_that("interdep data print includes role and time in structure line", {
+test_that("dyadMLM data print includes role and time in structure line", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -555,7 +555,7 @@ test_that("interdep data print includes role and time in structure line", {
     day = c(1, 1, 2, 2, 1, 1, 2, 2)
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -573,14 +573,14 @@ test_that("interdep data print includes role and time in structure line", {
   )))
 })
 
-test_that("interdep data print describes mixed dyad types", {
+test_that("dyadMLM data print describes mixed dyad types", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),
     role = c("female", "male", "female", "female", "male", "male")
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -596,14 +596,14 @@ test_that("interdep data print describes mixed dyad types", {
   expect_true(any(grepl("male_x_male\\s+exchangeable\\s+1 dyad", printed)))
 })
 
-test_that("interdep data print marks dyad types set by user", {
+test_that("dyadMLM data print marks dyad types set by user", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     role = c("female", "male", "female", "male")
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -620,14 +620,14 @@ test_that("interdep data print marks dyad types set by user", {
   )))
 })
 
-test_that("interdep data print describes pooled compositions", {
+test_that("dyadMLM data print describes pooled compositions", {
   data <- tibble::tibble(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),
     role = c("female", "male", "female", "female", "male", "male")
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,

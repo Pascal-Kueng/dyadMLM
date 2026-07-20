@@ -1,25 +1,25 @@
 #' Validate DIM compatibility
 #'
-#' Checks whether an `interdep_data` object can be used for the currently
+#' Checks whether a `dyadMLM_data` object can be used for the currently
 #' supported undirected DIM construction. These models
 #' currently support only data with exactly one exchangeable dyad composition. Distinguishable or
 #' multiple exchangeable compositions are rejected until explicit role-contrast,
 #' composition-specific, or pooling support is added.
 #'
-#' @param data An `interdep_data` object after composition inference.
+#' @param data A `dyadMLM_data` object after composition inference.
 #'
 #' @return Invisibly returns `data` when compatible.
 #'
 #' @keywords internal
 validate_dim_compatibility <- function(data) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
 
-  dyad_compositions <- attr(data, "interdep")$dyad_compositions
+  dyad_compositions <- attr(data, "dyadMLM")$dyad_compositions
 
   if (nrow(dyad_compositions) != 1L || dyad_compositions$dyad_type[[1]] != "exchangeable") {
     dyad_composition_text <- paste(
@@ -55,20 +55,20 @@ validate_dim_compatibility <- function(data) {
 #' composition required by the DSM and whether its observed roles match the
 #' declared directional role order.
 #'
-#' @param data An `interdep_data` object after composition inference.
+#' @param data A `dyadMLM_data` object after composition inference.
 #'
 #' @return Invisibly returns `data` when compatible.
 #'
 #' @keywords internal
 validate_dsm_compatibility <- function(data) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
 
-  meta <- attr(data, "interdep")
+  meta <- attr(data, "dyadMLM")
   dyad_compositions <- meta$dyad_compositions
 
   if (nrow(dyad_compositions) != 1L ||

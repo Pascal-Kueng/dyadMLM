@@ -38,7 +38,7 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 ```
 
 ```{r setup}
-library(interdep)
+library(dyadMLM)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 dim_fitted_alt <- "Fitted DIM diagram unavailable."
 ```
@@ -64,8 +64,8 @@ Exchangeability means that swapping the two member labels does not
 change the model [@kenny2006dyadic]. Whether roles can and should be treated as
 exchangeable is a substantive assumption (see [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability)).
 
-One way to make this assumption in `interdep` at the data-preparation step is
-to omit `role` from `interdep::prepare_interdep_data()`. This treats all dyads as the
+One way to make this assumption in `dyadMLM` at the data-preparation step is
+to omit `role` from `dyadMLM::prepare_dyad_data()`. This treats all dyads as the
 same exchangeable composition. Passing a `role` is also possible when it leads
 to exactly one exchangeable composition (e.g., only female-female dyads).
 Otherwise, refer to the [Getting Started vignette](getting-started.html) for how
@@ -73,7 +73,7 @@ to filter, pool, and constrain dyad compositions to obtain a single exchangeable
 dyad composition.
 
 ```{r prepare-cross-exchangeable}
-cross_exchangeable_data <- interdep::prepare_interdep_data(
+cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -88,7 +88,7 @@ print(cross_exchangeable_data, n = 4)
 ```
 
 For the exchangeable random-effects specification,
-`interdep::prepare_interdep_data()` creates a member-difference contrast `.i_diff_*`,
+`dyadMLM::prepare_dyad_data()` creates a member-difference contrast `.dy_diff_*`,
 coded as `+1` for one partner and `-1` for the other. Because these member labels
 are arbitrary, setting `seed` makes their assignment reproducible.
 
@@ -142,7 +142,7 @@ draw_dim_member_diagram()
 The resulting estimated fixed effects are a reparameterization of the APIM actor
 and partner effects [@Bolger2025Unified]. And just like the exchangeable APIM,
 the random-effects structure comprises a dyad-level intercept
-and a dyad-level difference contrast indexed by `.i_diff_assumed_exchangeable_arbitrary`.
+and a dyad-level difference contrast indexed by `.dy_diff_assumed_exchangeable_arbitrary`.
 In `glmmTMB`, with `dispformula = ~ 0`, these random effects represent the two
 members' Gaussian residual variance and covariance.
 
@@ -163,14 +163,14 @@ dim_1 <- glmmTMB::glmmTMB(
     1 +
 
     # Between-dyad effect
-    .i_communication_dyad_mean_gmc +
+    .dy_communication_dyad_mean_gmc +
 
     # Within-dyad effect
-    .i_communication_within_dyad_dev +
+    .dy_communication_within_dyad_dev +
 
     # Residual Gaussian covariance structure
     us(1 | coupleID) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -250,7 +250,7 @@ is equivalent to the comparison shown in [Testing distinguishability in the APIM
 ### Demonstrating model equivalence to APIM
 
 The same model can be written in APIM form. Since we have requested both sets of
-variables from `interdep::prepare_interdep_data()`, we can fit one directly. For more
+variables from `dyadMLM::prepare_dyad_data()`, we can fit one directly. For more
 guidance on APIM specifications and different models, see the
 [Actor-Partner Interdependence Model vignette](apim.html).
 
@@ -260,13 +260,13 @@ apim_1 <- glmmTMB::glmmTMB(
   satisfaction ~ 1 +
 
     # Fixed effects APIM
-    .i_communication_actor + .i_communication_partner +
+    .dy_communication_actor + .dy_communication_partner +
 
     # Since both models are equivalent, the same random-effects structure
     # can be used. See the APIM vignette to learn how to back-transform
     # these blocks to a full actor-partner covariance matrix.
     us(1 | coupleID) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -325,11 +325,11 @@ In this example we can see that the transformations work:
 apim_coef <- glmmTMB::fixef(apim_1)$cond
 dim_coef <- glmmTMB::fixef(dim_1)$cond
 
-b_actor <- apim_coef[[".i_communication_actor"]]
-b_partner <- apim_coef[[".i_communication_partner"]]
+b_actor <- apim_coef[[".dy_communication_actor"]]
+b_partner <- apim_coef[[".dy_communication_partner"]]
 
-b_mean <- dim_coef[[".i_communication_dyad_mean_gmc"]]
-b_dev <- dim_coef[[".i_communication_within_dyad_dev"]]
+b_mean <- dim_coef[[".dy_communication_dyad_mean_gmc"]]
+b_dev <- dim_coef[[".dy_communication_within_dyad_dev"]]
 
 
 cat("From APIM model:\n",
@@ -423,7 +423,7 @@ Use `temporal_predictor_decomposition = "none"` to construct only the raw
 dyad-occasion mean and within-dyad member deviation.
 
 ```{r prepare-ild-exchangeable}
-ild_exchangeable_data <- interdep::prepare_interdep_data(
+ild_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -448,20 +448,20 @@ dim_ILD <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person DIM
-    .i_provided_support_cwp_dyad_mean +
-    .i_provided_support_cwp_within_dyad_dev +
+    .dy_provided_support_cwp_dyad_mean +
+    .dy_provided_support_cwp_within_dyad_dev +
 
     # Between-person DIM
-    .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_dev +
+    .dy_provided_support_cbp_dyad_mean +
+    .dy_provided_support_cbp_within_dyad_dev +
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Residual (same-day) exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -521,19 +521,19 @@ apim_ILD <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person APIM
-    .i_provided_support_cwp_actor +
-    .i_provided_support_cwp_partner +
+    .dy_provided_support_cwp_actor +
+    .dy_provided_support_cwp_partner +
 
     # Between-person APIM
-    .i_provided_support_cbp_actor +
-    .i_provided_support_cbp_partner +
+    .dy_provided_support_cbp_actor +
+    .dy_provided_support_cbp_partner +
 
     # Stable exchangeable dyad-level covariance
-    us(1 | coupleID)  + us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(1 | coupleID)  + us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Residual (same-day) exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -590,19 +590,19 @@ apim_dim_ILD <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person APIM
-    .i_provided_support_cwp_actor +
-    .i_provided_support_cwp_partner +
+    .dy_provided_support_cwp_actor +
+    .dy_provided_support_cwp_partner +
 
     # Between-person DIM
-    .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_dev +
+    .dy_provided_support_cbp_dyad_mean +
+    .dy_provided_support_cbp_within_dyad_dev +
 
     # Stable exchangeable dyad-level covariance
-    us(1 | coupleID)  + us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(1 | coupleID)  + us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -644,27 +644,27 @@ dim_ILD_random <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person DIM
-    .i_provided_support_cwp_dyad_mean +
-    .i_provided_support_cwp_within_dyad_dev +
+    .dy_provided_support_cwp_dyad_mean +
+    .dy_provided_support_cwp_within_dyad_dev +
 
     # Between-person DIM
-    .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_dev +
+    .dy_provided_support_cbp_dyad_mean +
+    .dy_provided_support_cbp_within_dyad_dev +
 
     # Stable dyad-level covariance with within-person random slopes
     us(1 +
-       .i_provided_support_cwp_dyad_mean +
-       .i_provided_support_cwp_within_dyad_dev
+       .dy_provided_support_cwp_dyad_mean +
+       .dy_provided_support_cwp_within_dyad_dev
      | coupleID)  +
     us(0 +
-       .i_diff_assumed_exchangeable_arbitrary +
-       .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_dyad_mean +
-       .i_diff_assumed_exchangeable_arbitrary:.i_provided_support_cwp_within_dyad_dev
+       .dy_diff_assumed_exchangeable_arbitrary +
+       .dy_diff_assumed_exchangeable_arbitrary:.dy_provided_support_cwp_dyad_mean +
+       .dy_diff_assumed_exchangeable_arbitrary:.dy_provided_support_cwp_within_dyad_dev
      | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -675,7 +675,7 @@ dim_ILD_random <- glmmTMB::glmmTMB(
 
 The first stable dyad-level random effects block contains the shared DIM intercept,
 dyad-mean slope, and within-dyad member-deviation slope. The second block contains
-their member-difference counterparts, included through the `.i_diff_*` interactions.
+their member-difference counterparts, included through the `.dy_diff_*` interactions.
 These uncorrelated blocks allow the two members to have different random slopes while preserving
 exchangeability.
 
@@ -695,7 +695,7 @@ u_{\mathrm{partner},j}
 = \frac{u_{\mathrm{mean},j} - u_{\mathrm{dev},j}}{2},
 $$
 
-and for the `.i_diff_*` block, marked by a tilde,
+and for the `.dy_diff_*` block, marked by a tilde,
 
 $$
 \widetilde{u}_{\mathrm{actor},j}
@@ -705,9 +705,9 @@ $$
 = \frac{\widetilde{u}_{\mathrm{mean},j} - \widetilde{u}_{\mathrm{dev},j}}{2}.
 $$
 
-The shared and `.i_diff_*` random intercepts remain unchanged.
+The shared and `.dy_diff_*` random intercepts remain unchanged.
 
-We now have the shared and `.i_diff_*` actor and partner effects which are then
+We now have the shared and `.dy_diff_*` actor and partner effects which are then
 back-transformed into the complete and more readily interpretable member-specific
 actor-partner covariance matrix. This is described in the
 [exchangeable random-slope back-transformation in the APIM vignette](apim.html#exchangeable-random-slope-back-transformation).
@@ -724,7 +724,7 @@ addressed in the [APIM vignette's discussion of dynamic models](apim.html#dynami
 Brief example to obtain lagged raw and within-person centered versions of the outcome:
 
 ```{r prepare-ild-dim-dynamic}
-ild_exchangeable_data_dynamic <- interdep::prepare_interdep_data(
+ild_exchangeable_data_dynamic <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -749,25 +749,25 @@ dim_ILD_lag_raw <- glmmTMB::glmmTMB(
     1 +
 
     # Raw lagged outcomes
-    .i_closeness_dyad_mean_gmc_lag1 + .i_closeness_within_dyad_dev_lag1 +
+    .dy_closeness_dyad_mean_gmc_lag1 + .dy_closeness_within_dyad_dev_lag1 +
 
     diaryday +
 
     # Within-person DIM
-    .i_provided_support_cwp_dyad_mean +
-    .i_provided_support_cwp_within_dyad_dev +
+    .dy_provided_support_cwp_dyad_mean +
+    .dy_provided_support_cwp_within_dyad_dev +
 
     # Between-person DIM
-    .i_provided_support_cbp_dyad_mean +
-    .i_provided_support_cbp_within_dyad_dev +
+    .dy_provided_support_cbp_dyad_mean +
+    .dy_provided_support_cbp_within_dyad_dev +
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID)  +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()

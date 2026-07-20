@@ -5,7 +5,7 @@ test_that("infer_dyad_compositions counts role compositions", {
     role = c("female", "male", "female", "male", "female", "female", "male", "male")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -13,31 +13,31 @@ test_that("infer_dyad_compositions counts role compositions", {
   )
 
   result <- infer_dyad_compositions(validated, seed = 123)
-  expect_s3_class(result, "interdep_data")
-  expect_false(".i_raw_composition" %in% names(result))
-  expect_false(".i_arbitrary_role" %in% names(result))
-  expect_true(".i_composition" %in% names(result))
-  expect_true(".i_composition_role" %in% names(result))
-  expect_true(is.factor(result$.i_composition))
-  expect_true(is.factor(result$.i_composition_role))
-  indicator_names <- grep("^\\.i_is_", names(result), value = TRUE)
+  expect_s3_class(result, "dyadMLM_data")
+  expect_false(".dy_raw_composition" %in% names(result))
+  expect_false(".dy_arbitrary_role" %in% names(result))
+  expect_true(".dy_composition" %in% names(result))
+  expect_true(".dy_composition_role" %in% names(result))
+  expect_true(is.factor(result$.dy_composition))
+  expect_true(is.factor(result$.dy_composition_role))
+  indicator_names <- grep("^\\.dy_is_", names(result), value = TRUE)
   expect_equal(
     indicator_names,
     c(
-      ".i_is_female_x_female",
-      ".i_is_female_x_male_female",
-      ".i_is_female_x_male_male",
-      ".i_is_male_x_male"
+      ".dy_is_female_x_female",
+      ".dy_is_female_x_male_female",
+      ".dy_is_female_x_male_male",
+      ".dy_is_male_x_male"
     )
   )
-  expect_true(".i_diff_female_x_female_arbitrary" %in% names(result))
-  expect_true(".i_diff_male_x_male_arbitrary" %in% names(result))
-  expect_false(".i_diff_female_x_female" %in% names(result))
-  expect_false(".i_diff_male_x_male" %in% names(result))
+  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(result))
+  expect_true(".dy_diff_male_x_male_arbitrary" %in% names(result))
+  expect_false(".dy_diff_female_x_female" %in% names(result))
+  expect_false(".dy_diff_male_x_male" %in% names(result))
   expect_true(all(sapply(result[indicator_names], is.numeric)))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
 
-  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- attr(result, "dyadMLM")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(
@@ -58,22 +58,22 @@ test_that("infer_dyad_compositions counts role compositions", {
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L, 1L))
   expect_equal(
-    as.character(result$.i_composition),
+    as.character(result$.dy_composition),
     c("female_x_male", "female_x_male", "female_x_male", "female_x_male",
       "female_x_female", "female_x_female", "male_x_male", "male_x_male")
   )
   expect_equal(
-    as.character(result$.i_composition_role),
+    as.character(result$.dy_composition_role),
     c("female_x_male_female", "female_x_male_male",
       "female_x_male_female", "female_x_male_male",
       "female_x_female", "female_x_female",
       "male_x_male", "male_x_male")
   )
-  expect_false(interdep_diff_col %in% names(result))
-  expect_equal(abs(result$.i_diff_female_x_female_arbitrary[result$dyad_id == 3]), rep(1, 2))
-  expect_equal(abs(result$.i_diff_male_x_male_arbitrary[result$dyad_id == 4]), rep(1, 2))
-  expect_equal(result$.i_diff_female_x_female_arbitrary[result$dyad_id != 3], rep(0, 6))
-  expect_equal(result$.i_diff_male_x_male_arbitrary[result$dyad_id != 4], rep(0, 6))
+  expect_false(dyad_diff_col %in% names(result))
+  expect_equal(abs(result$.dy_diff_female_x_female_arbitrary[result$dyad_id == 3]), rep(1, 2))
+  expect_equal(abs(result$.dy_diff_male_x_male_arbitrary[result$dyad_id == 4]), rep(1, 2))
+  expect_equal(result$.dy_diff_female_x_female_arbitrary[result$dyad_id != 3], rep(0, 6))
+  expect_equal(result$.dy_diff_male_x_male_arbitrary[result$dyad_id != 4], rep(0, 6))
 })
 
 test_that("composition-specific diff signs do not depend on distinguishable dyads", {
@@ -91,7 +91,7 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
     exchangeable_only
   )
 
-  exchangeable_result <- validate_interdep_data(
+  exchangeable_result <- validate_dyad_data(
     exchangeable_only,
     group = dyad_id,
     member = person_id,
@@ -99,7 +99,7 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
   ) |>
     infer_dyad_compositions(seed = 123)
 
-  mixed_result <- validate_interdep_data(
+  mixed_result <- validate_dyad_data(
     mixed,
     group = dyad_id,
     member = person_id,
@@ -108,12 +108,12 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
     infer_dyad_compositions(seed = 123)
 
   expect_equal(
-    mixed_result$.i_diff_female_x_female_arbitrary[mixed_result$dyad_id == 2],
-    exchangeable_result$.i_diff_female_x_female_arbitrary[exchangeable_result$dyad_id == 2]
+    mixed_result$.dy_diff_female_x_female_arbitrary[mixed_result$dyad_id == 2],
+    exchangeable_result$.dy_diff_female_x_female_arbitrary[exchangeable_result$dyad_id == 2]
   )
   expect_equal(
-    mixed_result$.i_diff_male_x_male_arbitrary[mixed_result$dyad_id == 3],
-    exchangeable_result$.i_diff_male_x_male_arbitrary[exchangeable_result$dyad_id == 3]
+    mixed_result$.dy_diff_male_x_male_arbitrary[mixed_result$dyad_id == 3],
+    exchangeable_result$.dy_diff_male_x_male_arbitrary[exchangeable_result$dyad_id == 3]
   )
 })
 
@@ -124,7 +124,7 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
     role = c("female", "male", "female", "male")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -137,16 +137,16 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
     set_exchangeable_compositions = "male-female"
   )
 
-  expect_true(".i_is_female_x_male" %in% names(result))
-  expect_false(".i_is_female_x_male_female" %in% names(result))
-  expect_false(".i_is_female_x_male_male" %in% names(result))
-  expect_true(".i_diff_female_x_male_arbitrary" %in% names(result))
-  expect_false(".i_diff_female_x_male" %in% names(result))
-  expect_equal(abs(result$.i_diff_female_x_male_arbitrary), rep(1, 4))
-  expect_equal(as.character(result$.i_composition), rep("female_x_male", 4))
-  expect_equal(as.character(result$.i_composition_role), rep("female_x_male", 4))
+  expect_true(".dy_is_female_x_male" %in% names(result))
+  expect_false(".dy_is_female_x_male_female" %in% names(result))
+  expect_false(".dy_is_female_x_male_male" %in% names(result))
+  expect_true(".dy_diff_female_x_male_arbitrary" %in% names(result))
+  expect_false(".dy_diff_female_x_male" %in% names(result))
+  expect_equal(abs(result$.dy_diff_female_x_male_arbitrary), rep(1, 4))
+  expect_equal(as.character(result$.dy_composition), rep("female_x_male", 4))
+  expect_equal(as.character(result$.dy_composition_role), rep("female_x_male", 4))
   expect_equal(
-    attr(result, "interdep")$dyad_compositions,
+    attr(result, "dyadMLM")$dyad_compositions,
     tibble::tibble(
       composition = "female_x_male",
       dyad_type = "exchangeable",
@@ -156,7 +156,7 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
     )
   )
   expect_equal(
-    attr(result, "interdep")$dyad_compositions$dyad_type_source,
+    attr(result, "dyadMLM")$dyad_compositions$dyad_type_source,
     "set_by_user"
   )
 })
@@ -168,7 +168,7 @@ test_that("infer_dyad_compositions accepts separated composition references", {
     role = c("female", "male", "female", "male")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -196,10 +196,10 @@ test_that("infer_dyad_compositions accepts separated composition references", {
       set_exchangeable_compositions = "female_x_male"
     )
 
-  expect_equal(attr(result_hyphen, "interdep")$dyad_compositions$dyad_type, "exchangeable")
-  expect_equal(attr(result_underscore, "interdep")$dyad_compositions$dyad_type, "exchangeable")
-  expect_equal(attr(result_space, "interdep")$dyad_compositions$dyad_type, "exchangeable")
-  expect_equal(attr(result_canonical, "interdep")$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(attr(result_hyphen, "dyadMLM")$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(attr(result_underscore, "dyadMLM")$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(attr(result_space, "dyadMLM")$dyad_compositions$dyad_type, "exchangeable")
+  expect_equal(attr(result_canonical, "dyadMLM")$dyad_compositions$dyad_type, "exchangeable")
 })
 
 test_that("infer_dyad_compositions accepts a vector of separated composition references", {
@@ -209,7 +209,7 @@ test_that("infer_dyad_compositions accepts a vector of separated composition ref
     role = c("female", "male", "younger", "older")
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -220,7 +220,7 @@ test_that("infer_dyad_compositions accepts a vector of separated composition ref
       set_exchangeable_compositions = c("female-male", "older younger")
     )
 
-  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- attr(result, "dyadMLM")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(dyad_compositions$composition, c("female_x_male", "older_x_younger"))
@@ -235,7 +235,7 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
     role = c("female", "female", "male", "male")
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -246,16 +246,16 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
       pool_compositions = list(same_sex = c("female-female", "male male"))
     )
 
-  expect_true(".i_is_same_sex" %in% names(result))
-  expect_true(".i_diff_same_sex_arbitrary" %in% names(result))
-  expect_false(".i_diff_same_sex" %in% names(result))
-  expect_false(".i_diff_female_x_female_arbitrary" %in% names(result))
-  expect_false(".i_diff_male_x_male_arbitrary" %in% names(result))
-  expect_equal(as.character(result$.i_composition), rep("same_sex", 4))
-  expect_equal(as.character(result$.i_composition_role), rep("same_sex", 4))
+  expect_true(".dy_is_same_sex" %in% names(result))
+  expect_true(".dy_diff_same_sex_arbitrary" %in% names(result))
+  expect_false(".dy_diff_same_sex" %in% names(result))
+  expect_false(".dy_diff_female_x_female_arbitrary" %in% names(result))
+  expect_false(".dy_diff_male_x_male_arbitrary" %in% names(result))
+  expect_equal(as.character(result$.dy_composition), rep("same_sex", 4))
+  expect_equal(as.character(result$.dy_composition_role), rep("same_sex", 4))
 
   expect_equal(
-    attr(result, "interdep")$dyad_compositions,
+    attr(result, "dyadMLM")$dyad_compositions,
     tibble::tibble(
       composition = "same_sex",
       dyad_type = "exchangeable",
@@ -273,7 +273,7 @@ test_that("role-aware pools named assumed_exchangeable retain composition-specif
     role = c("female", "female", "male", "male")
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -286,10 +286,10 @@ test_that("role-aware pools named assumed_exchangeable retain composition-specif
       )
     )
 
-  expect_true(".i_diff_assumed_exchangeable_arbitrary" %in% names(result))
-  expect_false(".i_diff_arbitrary" %in% names(result))
+  expect_true(".dy_diff_assumed_exchangeable_arbitrary" %in% names(result))
+  expect_false(".dy_diff_arbitrary" %in% names(result))
   expect_equal(
-    abs(result$.i_diff_assumed_exchangeable_arbitrary),
+    abs(result$.dy_diff_assumed_exchangeable_arbitrary),
     rep(1, 4)
   )
 })
@@ -301,7 +301,7 @@ test_that("infer_dyad_compositions preserves unpooled exchangeable compositions"
     role = c("female", "female", "male", "male", "friend", "friend")
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -312,7 +312,7 @@ test_that("infer_dyad_compositions preserves unpooled exchangeable compositions"
       pool_compositions = list(same_sex = c("female-female", "male male"))
     )
 
-  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- attr(result, "dyadMLM")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(dyad_compositions$composition, c("friend_x_friend", "same_sex"))
@@ -322,17 +322,17 @@ test_that("infer_dyad_compositions preserves unpooled exchangeable compositions"
   )
   expect_equal(dyad_compositions$n_dyads, c(1L, 2L))
   expect_equal(
-    as.character(result$.i_composition),
+    as.character(result$.dy_composition),
     c(rep("same_sex", 4), rep("friend_x_friend", 2))
   )
   expect_equal(
-    as.character(result$.i_composition_role),
+    as.character(result$.dy_composition_role),
     c(rep("same_sex", 4), rep("friend_x_friend", 2))
   )
-  expect_true(".i_diff_friend_x_friend_arbitrary" %in% names(result))
-  expect_false(".i_diff_friend_x_friend" %in% names(result))
-  expect_false(".i_diff_female_x_female_arbitrary" %in% names(result))
-  expect_false(".i_diff_male_x_male_arbitrary" %in% names(result))
+  expect_true(".dy_diff_friend_x_friend_arbitrary" %in% names(result))
+  expect_false(".dy_diff_friend_x_friend" %in% names(result))
+  expect_false(".dy_diff_female_x_female_arbitrary" %in% names(result))
+  expect_false(".dy_diff_male_x_male_arbitrary" %in% names(result))
 })
 
 test_that("infer_dyad_compositions pools after setting compositions exchangeable", {
@@ -342,7 +342,7 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
     role = c("female", "female", "male", "male", "female", "male")
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -354,7 +354,7 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
       pool_compositions = list(romantic_couples = c("female-female", "male-male", "female-male"))
     )
 
-  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- attr(result, "dyadMLM")$dyad_compositions
 
   expect_equal(dyad_compositions$composition, "romantic_couples")
   expect_equal(dyad_compositions$dyad_type, "exchangeable")
@@ -364,9 +364,9 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
     "female_x_female, female_x_male, male_x_male"
   )
   expect_equal(dyad_compositions$n_dyads, 3L)
-  expect_true(".i_is_romantic_couples" %in% names(result))
-  expect_true(".i_diff_romantic_couples_arbitrary" %in% names(result))
-  expect_false(".i_diff_romantic_couples" %in% names(result))
+  expect_true(".dy_is_romantic_couples" %in% names(result))
+  expect_true(".dy_diff_romantic_couples_arbitrary" %in% names(result))
+  expect_false(".dy_diff_romantic_couples" %in% names(result))
 })
 
 test_that("infer_dyad_compositions rejects pooling distinguishable compositions", {
@@ -376,7 +376,7 @@ test_that("infer_dyad_compositions rejects pooling distinguishable compositions"
     role = c("female", "female", "female", "male")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -401,7 +401,7 @@ test_that("infer_dyad_compositions validates composition pooling input", {
     role = c("female", "female", "male", "male", "friend", "friend")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -467,7 +467,7 @@ test_that("infer_dyad_compositions does not treat role vectors as one compositio
     role = c("female", "male", "female", "male")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -492,7 +492,7 @@ test_that("infer_dyad_compositions errors for unknown composition references", {
     role = c("female", "male", "female", "male")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -517,7 +517,7 @@ test_that("infer_dyad_compositions errors when setting already exchangeable comp
     role = c("female", "female", "female", "male")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -541,7 +541,7 @@ test_that("infer_dyad_compositions treats unsplittable aliases as unknown compos
     role = c("a_b", "c", "a", "b_c")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -567,7 +567,7 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
     time = c(1, 1, 2, 2, 1, 1, 2, 2)
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -576,9 +576,9 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   )
 
   result <- infer_dyad_compositions(validated, seed = 123)
-  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- attr(result, "dyadMLM")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
-  indicator_names <- grep("^\\.i_is_", names(result), value = TRUE)
+  indicator_names <- grep("^\\.dy_is_", names(result), value = TRUE)
 
   expect_equal(dyad_compositions$composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$dyad_type, c("exchangeable", "distinguishable"))
@@ -587,20 +587,20 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
   expect_equal(
-    as.character(result$.i_composition),
+    as.character(result$.dy_composition),
     c("female_x_male", "female_x_male", "female_x_male", "female_x_male",
       "female_x_female", "female_x_female", "female_x_female", "female_x_female")
   )
   expect_equal(
-    as.character(result$.i_composition_role),
+    as.character(result$.dy_composition_role),
     c("female_x_male_female", "female_x_male_male",
       "female_x_male_female", "female_x_male_male",
       "female_x_female", "female_x_female",
       "female_x_female", "female_x_female")
   )
-  expect_true(".i_diff_female_x_female_arbitrary" %in% names(result))
-  expect_equal(result$.i_diff_female_x_female_arbitrary[result$dyad_id == 1], rep(0, 4))
-  expect_equal(abs(result$.i_diff_female_x_female_arbitrary[result$dyad_id == 2]), rep(1, 4))
+  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(result))
+  expect_equal(result$.dy_diff_female_x_female_arbitrary[result$dyad_id == 1], rep(0, 4))
+  expect_equal(abs(result$.dy_diff_female_x_female_arbitrary[result$dyad_id == 2]), rep(1, 4))
 })
 
 test_that("infer_dyad_compositions handles ragged longitudinal rows", {
@@ -611,7 +611,7 @@ test_that("infer_dyad_compositions handles ragged longitudinal rows", {
     time = c(1, 1, 2, 1, 1, 2, 2)
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -620,13 +620,13 @@ test_that("infer_dyad_compositions handles ragged longitudinal rows", {
   ) |>
     infer_dyad_compositions(seed = 123)
 
-  dyad_compositions <- attr(result, "interdep")$dyad_compositions
+  dyad_compositions <- attr(result, "dyadMLM")$dyad_compositions
   dyad_compositions <- dyad_compositions[order(dyad_compositions$composition), ]
 
   expect_equal(dyad_compositions$composition, c("female_x_female", "female_x_male"))
   expect_equal(dyad_compositions$n_dyads, c(1L, 1L))
-  expect_equal(as.character(result$.i_composition[result$dyad_id == 1]), rep("female_x_male", 3))
-  expect_equal(as.character(result$.i_composition[result$dyad_id == 2]), rep("female_x_female", 4))
+  expect_equal(as.character(result$.dy_composition[result$dyad_id == 1]), rep("female_x_male", 3))
+  expect_equal(as.character(result$.dy_composition[result$dyad_id == 2]), rep("female_x_female", 4))
 })
 
 test_that("infer_dyad_compositions creates formula-friendly indicator names", {
@@ -636,7 +636,7 @@ test_that("infer_dyad_compositions creates formula-friendly indicator names", {
     role = c("female partner", "male-partner", "female partner", "male-partner")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -645,8 +645,8 @@ test_that("infer_dyad_compositions creates formula-friendly indicator names", {
 
   result <- infer_dyad_compositions(validated, seed = 123)
 
-  expect_true(".i_is_female_partner_x_male_partner_female_partner" %in% names(result))
-  expect_true(".i_is_female_partner_x_male_partner_male_partner" %in% names(result))
+  expect_true(".dy_is_female_partner_x_male_partner_female_partner" %in% names(result))
+  expect_true(".dy_is_female_partner_x_male_partner_male_partner" %in% names(result))
 })
 
 test_that("infer_dyad_compositions rejects generated indicator name collisions", {
@@ -656,7 +656,7 @@ test_that("infer_dyad_compositions rejects generated indicator name collisions",
     role = c("a b", "a-b", "a b", "a-b")
   )
 
-  validated <- validate_interdep_data(
+  validated <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -676,29 +676,29 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
     person_id = c("A", "B", "C", "D")
   )
 
-  validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
+  validated <- validate_dyad_data(data, group = dyad_id, member = person_id)
   result <- infer_dyad_compositions(validated, seed = 123)
 
-  expect_false(".i_raw_composition" %in% names(result))
-  expect_false(".i_arbitrary_role" %in% names(result))
-  expect_true(is.factor(result$.i_composition))
-  expect_true(is.factor(result$.i_composition_role))
-  expect_true(".i_is_assumed_exchangeable" %in% names(result))
-  expect_true(".i_diff_assumed_exchangeable_arbitrary" %in% names(result))
-  expect_false(".i_diff_arbitrary" %in% names(result))
-  expect_false(".i_diff_assumed_exchangeable" %in% names(result))
-  expect_false(interdep_diff_col %in% names(result))
-  expect_equal(abs(result$.i_diff_assumed_exchangeable_arbitrary), rep(1, 4))
+  expect_false(".dy_raw_composition" %in% names(result))
+  expect_false(".dy_arbitrary_role" %in% names(result))
+  expect_true(is.factor(result$.dy_composition))
+  expect_true(is.factor(result$.dy_composition_role))
+  expect_true(".dy_is_assumed_exchangeable" %in% names(result))
+  expect_true(".dy_diff_assumed_exchangeable_arbitrary" %in% names(result))
+  expect_false(".dy_diff_arbitrary" %in% names(result))
+  expect_false(".dy_diff_assumed_exchangeable" %in% names(result))
+  expect_false(dyad_diff_col %in% names(result))
+  expect_equal(abs(result$.dy_diff_assumed_exchangeable_arbitrary), rep(1, 4))
   expect_equal(
-    as.character(result$.i_composition),
+    as.character(result$.dy_composition),
     rep("assumed_exchangeable", 4)
   )
   expect_equal(
-    as.character(result$.i_composition_role),
+    as.character(result$.dy_composition_role),
     rep("assumed_exchangeable", 4)
   )
   expect_equal(
-    attr(result, "interdep")$dyad_compositions,
+    attr(result, "dyadMLM")$dyad_compositions,
     tibble::tibble(
       composition = "assumed_exchangeable",
       dyad_type = "exchangeable",
@@ -715,7 +715,7 @@ test_that("infer_dyad_compositions treats empty exchangeability overrides as no 
     person_id = c("A", "B", "C", "D")
   )
 
-  validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
+  validated <- validate_dyad_data(data, group = dyad_id, member = person_id)
 
   expect_no_error(
     infer_dyad_compositions(

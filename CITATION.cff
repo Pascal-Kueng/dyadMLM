@@ -1,19 +1,17 @@
 cff-version: 1.2.0
-message: "If you use interdep, please cite it using the metadata from this file."
+message: "If you use dyadMLM, please cite it using the metadata from this file."
 type: software
-title: "interdep: Prepare Dyadic Data for Multilevel Models"
+title: "dyadMLM: Tools for Dyadic Multilevel Models"
 authors:
   - family-names: "Küng"
     given-names: "Pascal"
-repository-code: "https://github.com/Pascal-Kueng/interdep"
-url: "https://github.com/Pascal-Kueng/interdep"
+repository-code: "https://github.com/Pascal-Kueng/dyadMLM"
+url: "https://github.com/Pascal-Kueng/dyadMLM"
 abstract: >-
-  interdep provides tools for validating and preparing cross-sectional and
-  intensive longitudinal dyadic data for multilevel models, including
-  generalized multilevel models. It derives composition metadata and
-  model-ready columns for distinguishable, exchangeable, and mixed-composition
-  dyads. Prepared data can be used with multilevel model engines to estimate
-  dyadic model parameterizations such as APIM, DIM, and DSM.
+  dyadMLM provides tools for dyadic multilevel modeling with linear and
+  generalized linear mixed-effects models. It prepares cross-sectional and
+  intensive longitudinal data for APIM, DSM, and DIM parameterizations and
+  provides selected model-comparison and covariance back-transformation tools.
 keywords:
   - dyadic data
   - multilevel models

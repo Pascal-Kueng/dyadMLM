@@ -7,15 +7,15 @@
 add_actor_partner_columns(data)
 }
 \arguments{
-\item{data}{An \code{interdep_data} object returned by \code{\link[=prepare_interdep_data]{prepare_interdep_data()}}.}
+\item{data}{A \code{dyadMLM_data} object returned by \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 }
 \value{
-An \code{interdep_data} object with actor and partner predictor columns
+A \code{dyadMLM_data} object with actor and partner predictor columns
 added and APIM predictor metadata recorded.
 }
 \description{
 Adds APIM-style actor and partner columns for the predictors recorded in an
-\code{interdep_data} object. For uncentered predictors, this will create actor and
+\code{dyadMLM_data} object. For uncentered predictors, this will create actor and
 partner versions of the raw predictor. For centered intensive longitudinal
 predictors, this will create actor and partner versions of the raw predictor
 and each recorded predictor component, such as the within-person and
@@ -25,8 +25,8 @@ actor and partner columns.
 }
 \details{
 The function will use the predictor decomposition metadata stored in
-\code{attr(data, "interdep")$temporal_predictor_decompositions}, so downstream code does
+\code{attr(data, "dyadMLM")$temporal_predictor_decompositions}, so downstream code does
 not need to infer generated predictor columns from their names. It stores the
-constructed APIM columns in \code{attr(data, "interdep")$apim_predictors}.
+constructed APIM columns in \code{attr(data, "dyadMLM")$apim_predictors}.
 }
 \keyword{internal}

@@ -7,7 +7,7 @@
 validate_dsm_compatibility(data)
 }
 \arguments{
-\item{data}{An \code{interdep_data} object after composition inference.}
+\item{data}{A \code{dyadMLM_data} object after composition inference.}
 }
 \value{
 Invisibly returns \code{data} when compatible.

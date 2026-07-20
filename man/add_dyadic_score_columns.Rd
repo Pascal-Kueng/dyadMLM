@@ -7,17 +7,17 @@
 add_dyadic_score_columns(data)
 }
 \arguments{
-\item{data}{An \code{interdep_data} object returned by \code{\link[=prepare_interdep_data]{prepare_interdep_data()}}.}
+\item{data}{A \code{dyadMLM_data} object returned by \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 }
 \value{
-An \code{interdep_data} object with dyad-mean and signed dyad-difference
+A \code{dyadMLM_data} object with dyad-mean and signed dyad-difference
 predictor columns and a DSM role contrast added.
 }
 \description{
 Adds Dyadic Score Model (DSM) dyad-mean and signed dyad-difference columns
-for the predictors recorded in an \code{interdep_data} object, together with a
+for the predictors recorded in a \code{dyadMLM_data} object, together with a
 DSM role contrast coded \code{+0.5} and \code{-0.5}. DSM differences follow the role
-order recorded in \code{attr(data, "interdep")$dsm_role_order}. The supported DSM
+order recorded in \code{attr(data, "dyadMLM")$dsm_role_order}. The supported DSM
 structure contains one distinguishable dyad composition; exchangeable dyads
 and multiple compositions are not supported.
 }
@@ -30,7 +30,7 @@ Selected lag predictors additionally create lag-1 raw and within-person
 dyad-mean and signed-difference columns.
 
 Constructed predictor columns are recorded in
-\code{attr(data, "interdep")$dsm_predictors}, and the contrast column name is
-recorded in \code{attr(data, "interdep")$dsm_role_contrast_column}.
+\code{attr(data, "dyadMLM")$dsm_predictors}, and the contrast column name is
+recorded in \code{attr(data, "dyadMLM")$dsm_role_contrast_column}.
 }
 \keyword{internal}

@@ -44,7 +44,7 @@
 
 .prepare_early_model_data <- function(
     data, predictor, model_type, exchangeable = FALSE) {
-  interdep::prepare_interdep_data(
+  dyadMLM::prepare_dyad_data(
     data,
     group = couple_id,
     member = person_id,
@@ -71,10 +71,10 @@ fit_and_draw_distinguishable_apim <- function(
     data, variables$predictor, model_type = "apim"
   )
 
-  actor <- paste0(".i_", variables$predictor, "_actor")
-  partner <- paste0(".i_", variables$predictor, "_partner")
-  female <- ".i_is_female_x_male_female"
-  male <- ".i_is_female_x_male_male"
+  actor <- paste0(".dy_", variables$predictor, "_actor")
+  partner <- paste0(".dy_", variables$predictor, "_partner")
+  female <- ".dy_is_female_x_male_female"
+  male <- ".dy_is_female_x_male_male"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -100,10 +100,10 @@ fit_and_draw_exchangeable_apim <- function(
     data, variables$predictor, model_type = "apim", exchangeable = TRUE
   )
 
-  actor <- paste0(".i_", variables$predictor, "_actor")
-  partner <- paste0(".i_", variables$predictor, "_partner")
-  intercept <- ".i_is_female_x_male"
-  difference <- ".i_diff_female_x_male_arbitrary"
+  actor <- paste0(".dy_", variables$predictor, "_actor")
+  partner <- paste0(".dy_", variables$predictor, "_partner")
+  intercept <- ".dy_is_female_x_male"
+  difference <- ".dy_diff_female_x_male_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -127,9 +127,9 @@ fit_and_draw_dim <- function(data, predictor, outcome, labels = NULL) {
     data, variables$predictor, model_type = "dim", exchangeable = TRUE
   )
 
-  mean <- paste0(".i_", variables$predictor, "_dyad_mean_gmc")
-  deviation <- paste0(".i_", variables$predictor, "_within_dyad_dev")
-  difference <- ".i_diff_female_x_male_arbitrary"
+  mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")
+  deviation <- paste0(".dy_", variables$predictor, "_within_dyad_dev")
+  difference <- ".dy_diff_female_x_male_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -152,9 +152,9 @@ fit_and_draw_dsm <- function(data, predictor, outcome, labels = NULL) {
     data, variables$predictor, model_type = "dsm"
   )
 
-  mean <- paste0(".i_", variables$predictor, "_dyad_mean_gmc")
-  difference <- paste0(".i_", variables$predictor, "_within_dyad_diff")
-  role <- ".i_dsm_role_contrast"
+  mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")
+  difference <- paste0(".dy_", variables$predictor, "_within_dyad_diff")
+  role <- ".dy_dsm_role_contrast"
 
   model_formula <- .early_model_formula(
     variables$outcome,

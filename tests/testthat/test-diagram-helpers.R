@@ -1,7 +1,7 @@
 diagram_helper_candidates <- c(
   testthat::test_path("..", "..", "vignettes", "diagram-helpers.Rinc"),
   testthat::test_path(
-    "..", "..", "00_pkg_src", "interdep", "vignettes",
+    "..", "..", "00_pkg_src", "dyadMLM", "vignettes",
     "diagram-helpers.Rinc"
   ),
   file.path("vignettes", "diagram-helpers.Rinc")
@@ -77,7 +77,7 @@ draw_to_temporary_pdf <- function(code) {
 test_that("APIM diagrams extract distinguishable and exchangeable fits", {
   skip_if_not_installed("glmmTMB")
 
-  distinguishable_data <- prepare_interdep_data(
+  distinguishable_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
     group = coupleID,
     member = personID,
@@ -86,14 +86,14 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
   )
   distinguishable_fit <- glmmTMB::glmmTMB(
     satisfaction ~ 0 +
-      .i_is_female_x_male_female +
-      .i_is_female_x_male_male +
-      .i_is_female_x_male_female:.i_communication_actor +
-      .i_is_female_x_male_male:.i_communication_actor +
-      .i_is_female_x_male_female:.i_communication_partner +
-      .i_is_female_x_male_male:.i_communication_partner +
+      .dy_is_female_x_male_female +
+      .dy_is_female_x_male_male +
+      .dy_is_female_x_male_female:.dy_communication_actor +
+      .dy_is_female_x_male_male:.dy_communication_actor +
+      .dy_is_female_x_male_female:.dy_communication_partner +
+      .dy_is_female_x_male_male:.dy_communication_partner +
       us(
-        0 + .i_is_female_x_male_female + .i_is_female_x_male_male |
+        0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |
           coupleID
       ),
     dispformula = ~0,
@@ -130,7 +130,7 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
     labels = c(predictor = "Provided\nsupport", outcome = "Satisfaction")
   )))
 
-  exchangeable_data <- prepare_interdep_data(
+  exchangeable_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
     group = coupleID,
     member = personID,
@@ -140,11 +140,11 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
   )
   exchangeable_fit <- glmmTMB::glmmTMB(
     satisfaction ~ 0 +
-      .i_is_female_x_male +
-      .i_communication_actor +
-      .i_communication_partner +
-      us(0 + .i_is_female_x_male | coupleID) +
-      us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+      .dy_is_female_x_male +
+      .dy_communication_actor +
+      .dy_communication_partner +
+      us(0 + .dy_is_female_x_male | coupleID) +
+      us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = exchangeable_data
@@ -177,7 +177,7 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
 test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
   skip_if_not_installed("glmmTMB")
 
-  dim_data <- prepare_interdep_data(
+  dim_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
     group = coupleID,
     member = personID,
@@ -187,10 +187,10 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
   )
   dim_fit <- glmmTMB::glmmTMB(
     satisfaction ~
-      .i_communication_dyad_mean_gmc +
-      .i_communication_within_dyad_dev +
+      .dy_communication_dyad_mean_gmc +
+      .dy_communication_within_dyad_dev +
       us(1 | coupleID) +
-      us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID),
+      us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = dim_data
@@ -205,7 +205,7 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
     labels = c(predictor = "Communication", outcome = "Satisfaction")
   )))
 
-  dsm_data <- prepare_interdep_data(
+  dsm_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
     group = coupleID,
     member = personID,
@@ -216,12 +216,12 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
   )
   dsm_fit <- glmmTMB::glmmTMB(
     satisfaction ~
-      .i_communication_dyad_mean_gmc +
-      .i_communication_within_dyad_diff +
-      .i_dsm_role_contrast +
-      .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
-      .i_communication_within_dyad_diff:.i_dsm_role_contrast +
-      us(1 + .i_dsm_role_contrast | coupleID),
+      .dy_communication_dyad_mean_gmc +
+      .dy_communication_within_dyad_diff +
+      .dy_dsm_role_contrast +
+      .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +
+      .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +
+      us(1 + .dy_dsm_role_contrast | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = dsm_data
@@ -249,7 +249,7 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
 test_that("mixed APIM diagrams extract every composition block", {
   skip_if_not_installed("glmmTMB")
 
-  mixed_data <- prepare_interdep_data(
+  mixed_data <- prepare_dyad_data(
     example_dyadic_crosssectional_mixed,
     group = coupleID,
     member = personID,
@@ -258,18 +258,18 @@ test_that("mixed APIM diagrams extract every composition block", {
   )
   mixed_fit <- glmmTMB::glmmTMB(
     satisfaction ~ 0 +
-      .i_is_female_x_male_female +
-      .i_is_female_x_male_male +
-      .i_is_female_x_female +
-      .i_is_male_x_male +
+      .dy_is_female_x_male_female +
+      .dy_is_female_x_male_male +
+      .dy_is_female_x_female +
+      .dy_is_male_x_male +
       us(
-        0 + .i_is_female_x_male_female + .i_is_female_x_male_male |
+        0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |
           coupleID
       ) +
-      us(0 + .i_is_female_x_female | coupleID) +
-      us(0 + .i_diff_female_x_female_arbitrary | coupleID) +
-      us(0 + .i_is_male_x_male | coupleID) +
-      us(0 + .i_diff_male_x_male_arbitrary | coupleID),
+      us(0 + .dy_is_female_x_female | coupleID) +
+      us(0 + .dy_diff_female_x_female_arbitrary | coupleID) +
+      us(0 + .dy_is_male_x_male | coupleID) +
+      us(0 + .dy_diff_male_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = mixed_data
@@ -366,7 +366,7 @@ test_that("CFM diagrams extract fitted lavaan objects", {
 test_that("fitted glmmTMB diagrams reject incomplete residual structures", {
   skip_if_not_installed("glmmTMB")
 
-  data <- prepare_interdep_data(
+  data <- prepare_dyad_data(
     example_dyadic_crosssectional,
     group = coupleID,
     member = personID,
@@ -376,10 +376,10 @@ test_that("fitted glmmTMB diagrams reject incomplete residual structures", {
   )
   fit <- glmmTMB::glmmTMB(
     satisfaction ~
-      .i_communication_dyad_mean_gmc +
-      .i_communication_within_dyad_dev +
+      .dy_communication_dyad_mean_gmc +
+      .dy_communication_within_dyad_dev +
       us(1 | coupleID) +
-      us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID),
+      us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
     family = gaussian(),
     data = data
   )

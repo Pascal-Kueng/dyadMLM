@@ -7,14 +7,14 @@
 center_predictors(data)
 }
 \arguments{
-\item{data}{An \code{interdep_data} object returned by \code{\link[=prepare_interdep_data]{prepare_interdep_data()}}.}
+\item{data}{A \code{dyadMLM_data} object returned by \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 }
 \value{
-An \code{interdep_data} object with centered predictor columns added and
+A \code{dyadMLM_data} object with centered predictor columns added and
 updated predictor metadata.
 }
 \description{
-Adds centered predictor columns to an \code{interdep_data} object. It currently
+Adds centered predictor columns to a \code{dyadMLM_data} object. It currently
 supports two-level temporal centering for intensive longitudinal predictors:
 a within-person component and a between-person component. The original
 predictor remains available as a raw component for model-specific column
@@ -26,6 +26,6 @@ observed measurement occasions.
 }
 \details{
 The function uses the structural metadata stored by
-\code{\link[=prepare_interdep_data]{prepare_interdep_data()}}.
+\code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.
 }
 \keyword{internal}

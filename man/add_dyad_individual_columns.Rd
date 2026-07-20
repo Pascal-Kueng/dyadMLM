@@ -7,16 +7,16 @@
 add_dyad_individual_columns(data)
 }
 \arguments{
-\item{data}{An \code{interdep_data} object returned by \code{\link[=prepare_interdep_data]{prepare_interdep_data()}}.}
+\item{data}{A \code{dyadMLM_data} object returned by \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 }
 \value{
-An \code{interdep_data} object with dyad-mean and within-dyad
+A \code{dyadMLM_data} object with dyad-mean and within-dyad
 member-deviation predictor columns added and DIM predictor metadata
 recorded.
 }
 \description{
 Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad
-member-deviation columns for the predictors recorded in an \code{interdep_data}
+member-deviation columns for the predictors recorded in a \code{dyadMLM_data}
 object. For
 currently supported DIMs, the data must
 contain one exchangeable dyad composition. This means distinguishable dyads
@@ -35,8 +35,8 @@ Selected lag predictors additionally create lag-1 raw and within-person
 dyad-mean and within-dyad member-deviation columns.
 }
 \details{
-The function reads \code{attr(data, "interdep")$temporal_predictor_decompositions} and
+The function reads \code{attr(data, "dyadMLM")$temporal_predictor_decompositions} and
 stores the constructed DIM columns in
-\code{attr(data, "interdep")$dim_predictors}.
+\code{attr(data, "dyadMLM")$dim_predictors}.
 }
 \keyword{internal}

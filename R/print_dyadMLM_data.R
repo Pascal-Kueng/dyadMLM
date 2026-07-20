@@ -1,8 +1,8 @@
 #' @export
-print.interdep_data <- function(x, ...) {
-  meta <- attr(x, "interdep")
+print.dyadMLM_data <- function(x, ...) {
+  meta <- attr(x, "dyadMLM")
 
-  cat(pillar::style_subtle("# interdep data\n"))
+  cat(pillar::style_subtle("# dyadMLM data\n"))
   print_wrapped_comment_fields(
     fields = c(
       paste0("Rows: ", nrow(x)),
@@ -68,7 +68,7 @@ print.interdep_data <- function(x, ...) {
   cat("#\n")
 
   modified <- x
-  class(modified) <- class(modified)[class(modified) != "interdep_data"]
+  class(modified) <- class(modified)[class(modified) != "dyadMLM_data"]
   print(modified, ...)
 
   # return original unchanged tibble
@@ -128,22 +128,22 @@ print_dyad_compositions <- function(dyad_compositions) {
 added_columns_for_print <- function(x, meta) {
   fixed_added_columns <- tibble::tribble(
     ~column_pattern,        ~description,
-    ".i_composition",       "inferred dyad composition",
-    ".i_composition_role",  "composition-specific member role",
-    ".i_is_{comp-role}",    "composition-role indicator columns",
-    ".i_diff_{comp}",       "composition-specific sum-diff contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
+    ".dy_composition",       "inferred dyad composition",
+    ".dy_composition_role",  "composition-specific member role",
+    ".dy_is_{comp-role}",    "composition-role indicator columns",
+    ".dy_diff_{comp}",       "composition-specific sum-diff contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
   )
   show_fixed_added_columns <- c(
-    interdep_composition_col %in% names(x),
-    interdep_composition_role_col %in% names(x),
-    any(startsWith(names(x), paste0(interdep_reserved_prefix, "is_"))),
-    any(startsWith(names(x), paste0(interdep_reserved_prefix, "diff_")))
+    dyad_composition_col %in% names(x),
+    dyad_composition_role_col %in% names(x),
+    any(startsWith(names(x), paste0(dyad_reserved_prefix, "is_"))),
+    any(startsWith(names(x), paste0(dyad_reserved_prefix, "diff_")))
   )
   added_columns <- fixed_added_columns[show_fixed_added_columns, ]
 
-  # Users may remove generated columns while keeping the interdep metadata.
+  # Users may remove generated columns while keeping the dyadMLM metadata.
   # Only advertise generated model columns that are still present in the data.
-  generated_column_specs <- interdep_generated_columns(meta) |>
+  generated_column_specs <- dyad_generated_columns(meta) |>
     dplyr::filter(.data$column %in% names(x)) |>
     # Avoid repeated descriptions when several generated columns share a family.
     dplyr::distinct(

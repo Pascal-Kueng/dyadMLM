@@ -94,7 +94,7 @@ By the end, the distinction should be clear:
   changing residual scale.
 
 Everything used to fit the extension below lives inside this development
-vignette. It is a mathematical prototype, not an exported `interdep` function.
+vignette. It is a mathematical prototype, not an exported `dyadMLM` function.
 
 ## Elevator and seesaw coordinates
 

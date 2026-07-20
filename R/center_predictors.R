@@ -1,6 +1,6 @@
 #' Center predictor variables for dyadic models
 #'
-#' Adds centered predictor columns to an `interdep_data` object. It currently
+#' Adds centered predictor columns to a `dyadMLM_data` object. It currently
 #' supports two-level temporal centering for intensive longitudinal predictors:
 #' a within-person component and a between-person component. The original
 #' predictor remains available as a raw component for model-specific column
@@ -11,23 +11,23 @@
 #' observed measurement occasions.
 #'
 #' The function uses the structural metadata stored by
-#' [prepare_interdep_data()].
+#' [prepare_dyad_data()].
 #'
-#' @param data An `interdep_data` object returned by [prepare_interdep_data()].
+#' @param data A `dyadMLM_data` object returned by [prepare_dyad_data()].
 #'
-#' @return An `interdep_data` object with centered predictor columns added and
+#' @return A `dyadMLM_data` object with centered predictor columns added and
 #'   updated predictor metadata.
 #'
 #' @keywords internal
 center_predictors <- function(data) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   out <- data
 
   group <- meta_data$group
@@ -46,7 +46,7 @@ center_predictors <- function(data) {
   )
 
   if (length(predictors) == 0) {
-    attr(out, "interdep")$temporal_predictor_decompositions <- temporal_predictor_decompositions
+    attr(out, "dyadMLM")$temporal_predictor_decompositions <- temporal_predictor_decompositions
 
     return(out)
   }
@@ -60,19 +60,19 @@ center_predictors <- function(data) {
   )
 
   if (temporal_predictor_decomposition == "none") {
-    attr(out, "interdep")$temporal_predictor_decompositions <- temporal_predictor_decompositions
+    attr(out, "dyadMLM")$temporal_predictor_decompositions <- temporal_predictor_decompositions
 
     return(out)
   }
 
   if (temporal_predictor_decomposition == "time_2l") {
-    predictor_suffixes <- make_interdep_suffixes(predictors)
+    predictor_suffixes <- make_dyad_suffixes(predictors)
 
     for (predictor in predictors) {
       predictor_suffix <- predictor_suffixes[[predictor]]
-      person_mean_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_person_mean")
-      cwp_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_cwp")
-      cbp_col <- paste0(interdep_reserved_prefix, predictor_suffix, "_cbp")
+      person_mean_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_person_mean")
+      cwp_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_cwp")
+      cbp_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_cbp")
 
       person_means <- out |>
         dplyr::group_by(.data[[group]], .data[[member]]) |>
@@ -102,16 +102,16 @@ center_predictors <- function(data) {
       )
     }
 
-    attr(out, "interdep")$temporal_predictor_decompositions <- temporal_predictor_decompositions
+    attr(out, "dyadMLM")$temporal_predictor_decompositions <- temporal_predictor_decompositions
 
     return(out)
   }
 
   stop(
-    "Internal error: unsupported `attr(data, \"interdep\")$temporal_predictor_decomposition` value `",
+    "Internal error: unsupported `attr(data, \"dyadMLM\")$temporal_predictor_decomposition` value `",
     temporal_predictor_decomposition,
     "`. Expected one of `none` or `time_2l` after validation. ",
-    "Please report this as an interdep bug with a reproducible example and your package version.",
+    "Please report this as a dyadMLM bug with a reproducible example and your package version.",
     call. = FALSE
   )
 }

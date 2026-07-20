@@ -1,31 +1,31 @@
-test_that("validate_interdep_data has no outcome-selection argument", {
-  expect_false("outcomes" %in% names(formals(validate_interdep_data)))
+test_that("validate_dyad_data has no outcome-selection argument", {
+  expect_false("outcomes" %in% names(formals(validate_dyad_data)))
 })
 
-test_that("validate_interdep_data returns an interdep tibble", {
+test_that("validate_dyad_data returns a dyadMLM tibble", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c(1, 2, 3, 4),
     x = 1:4
   )
 
-  result <- validate_interdep_data(data, group = dyad_id, member = person_id)
+  result <- validate_dyad_data(data, group = dyad_id, member = person_id)
 
-  expect_s3_class(result, "interdep_data")
+  expect_s3_class(result, "dyadMLM_data")
   expect_s3_class(result, "tbl_df")
   expect_equal(result$dyad_id, c(1, 1, 2, 2))
   expect_equal(result$person_id, c(1, 2, 3, 4))
   expect_equal(result$x, 1:4)
 })
 
-test_that("validate_interdep_data stores input metadata", {
+test_that("validate_dyad_data stores input metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D")
   )
 
-  result <- validate_interdep_data(data, group = dyad_id, member = person_id)
-  meta <- attr(result, "interdep")
+  result <- validate_dyad_data(data, group = dyad_id, member = person_id)
+  meta <- attr(result, "dyadMLM")
 
   expect_equal(meta$group, "dyad_id")
   expect_equal(meta$member, "person_id")
@@ -41,7 +41,7 @@ test_that("validate_interdep_data stores input metadata", {
   expect_equal(meta$dropped_missing_role_dyads, numeric(0))
 })
 
-test_that("validate_interdep_data stores predictor metadata", {
+test_that("validate_dyad_data stores predictor metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -49,24 +49,24 @@ test_that("validate_interdep_data stores predictor metadata", {
     z = 5:8
   )
 
-  single <- validate_interdep_data(
+  single <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
     predictors = x
   )
-  expect_equal(attr(single, "interdep")$predictors, "x")
+  expect_equal(attr(single, "dyadMLM")$predictors, "x")
 
-  multiple <- validate_interdep_data(
+  multiple <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
     predictors = c(x, z)
   )
-  expect_equal(attr(multiple, "interdep")$predictors, c("x", "z"))
+  expect_equal(attr(multiple, "dyadMLM")$predictors, c("x", "z"))
 })
 
-test_that("validate_interdep_data resolves lag predictor metadata", {
+test_that("validate_dyad_data resolves lag predictor metadata", {
   data <- data.frame(
     dyad_id = rep(1:2, each = 4),
     person_id = rep(c("A", "B"), 4),
@@ -75,7 +75,7 @@ test_that("validate_interdep_data resolves lag predictor metadata", {
     z = 11:18
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -84,10 +84,10 @@ test_that("validate_interdep_data resolves lag predictor metadata", {
     lag_predictors = dplyr::starts_with("x")
   )
 
-  expect_equal(attr(result, "interdep")$lag_predictors, "x")
+  expect_equal(attr(result, "dyadMLM")$lag_predictors, "x")
 })
 
-test_that("validate_interdep_data checks lag predictor arguments", {
+test_that("validate_dyad_data checks lag predictor arguments", {
   longitudinal <- data.frame(
     dyad_id = rep(1:2, each = 4),
     person_id = rep(c("A", "B"), 4),
@@ -97,7 +97,7 @@ test_that("validate_interdep_data checks lag predictor arguments", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       longitudinal,
       group = dyad_id,
       member = person_id,
@@ -110,7 +110,7 @@ test_that("validate_interdep_data checks lag predictor arguments", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       longitudinal,
       group = dyad_id,
       member = person_id,
@@ -123,7 +123,7 @@ test_that("validate_interdep_data checks lag predictor arguments", {
 
   non_integer_time <- dplyr::mutate(longitudinal, time = .data$time / 2)
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       non_integer_time,
       group = dyad_id,
       member = person_id,
@@ -137,7 +137,7 @@ test_that("validate_interdep_data checks lag predictor arguments", {
 
   character_time <- dplyr::mutate(longitudinal, time = as.character(.data$time))
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       character_time,
       group = dyad_id,
       member = person_id,
@@ -150,7 +150,7 @@ test_that("validate_interdep_data checks lag predictor arguments", {
   )
 })
 
-test_that("validate_interdep_data rejects predictor suffix collisions", {
+test_that("validate_dyad_data rejects predictor suffix collisions", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -160,7 +160,7 @@ test_that("validate_interdep_data rejects predictor suffix collisions", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -171,7 +171,7 @@ test_that("validate_interdep_data rejects predictor suffix collisions", {
   )
 })
 
-test_that("validate_interdep_data resolves model helper metadata", {
+test_that("validate_dyad_data resolves model helper metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -179,7 +179,7 @@ test_that("validate_interdep_data resolves model helper metadata", {
     x = 1:8
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -188,20 +188,20 @@ test_that("validate_interdep_data resolves model helper metadata", {
     model_type = "dim"
   )
 
-  meta <- attr(result, "interdep")
+  meta <- attr(result, "dyadMLM")
 
   expect_equal(meta$model_type, "dim")
   expect_equal(meta$temporal_predictor_decomposition, "time_2l")
 })
 
-test_that("validate_interdep_data accepts multiple model types", {
+test_that("validate_dyad_data accepts multiple model types", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     x = 1:4
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -209,10 +209,10 @@ test_that("validate_interdep_data accepts multiple model types", {
     model_type = c("apim", "dim")
   )
 
-  expect_equal(attr(result, "interdep")$model_type, c("apim", "dim"))
+  expect_equal(attr(result, "dyadMLM")$model_type, c("apim", "dim"))
 })
 
-test_that("validate_interdep_data validates incompatible model type requests", {
+test_that("validate_dyad_data validates incompatible model type requests", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -221,7 +221,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -232,7 +232,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -243,7 +243,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -254,7 +254,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -265,7 +265,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -276,7 +276,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -287,7 +287,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -299,7 +299,7 @@ test_that("validate_interdep_data validates incompatible model type requests", {
 
 })
 
-test_that("validate_interdep_data validates explicit time_2l temporal predictor decomposition", {
+test_that("validate_dyad_data validates explicit time_2l temporal predictor decomposition", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -307,7 +307,7 @@ test_that("validate_interdep_data validates explicit time_2l temporal predictor 
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -319,7 +319,7 @@ test_that("validate_interdep_data validates explicit time_2l temporal predictor 
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -331,7 +331,7 @@ test_that("validate_interdep_data validates explicit time_2l temporal predictor 
   )
 })
 
-test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
+test_that("validate_dyad_data rejects non-numeric time_2l predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -340,7 +340,7 @@ test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -352,7 +352,7 @@ test_that("validate_interdep_data rejects non-numeric time_2l predictors", {
   )
 })
 
-test_that("validate_interdep_data rejects non-numeric DIM and DSM predictors", {
+test_that("validate_dyad_data rejects non-numeric DIM and DSM predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -361,7 +361,7 @@ test_that("validate_interdep_data rejects non-numeric DIM and DSM predictors", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -374,7 +374,7 @@ test_that("validate_interdep_data rejects non-numeric DIM and DSM predictors", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -389,14 +389,14 @@ test_that("validate_interdep_data rejects non-numeric DIM and DSM predictors", {
   )
 })
 
-test_that("validate_interdep_data allows non-numeric uncentered predictors", {
+test_that("validate_dyad_data allows non-numeric uncentered predictors", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     x = factor(c("low", "high", "low", "high"))
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -404,98 +404,98 @@ test_that("validate_interdep_data allows non-numeric uncentered predictors", {
     temporal_predictor_decomposition = "none"
   )
 
-  expect_equal(attr(result, "interdep")$predictors, "x")
-  expect_equal(attr(result, "interdep")$temporal_predictor_decomposition, "none")
+  expect_equal(attr(result, "dyadMLM")$predictors, "x")
+  expect_equal(attr(result, "dyadMLM")$temporal_predictor_decomposition, "none")
 })
 
-test_that("validate_interdep_data rejects non-data-frame input", {
+test_that("validate_dyad_data rejects non-data-frame input", {
   expect_error(
-    validate_interdep_data(1:3, group = dyad_id, member = person_id),
+    validate_dyad_data(1:3, group = dyad_id, member = person_id),
     "`data` must be a data frame or tibble.",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data rejects already validated input", {
+test_that("validate_dyad_data rejects already validated input", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D")
   )
 
-  validated <- validate_interdep_data(data, group = dyad_id, member = person_id)
+  validated <- validate_dyad_data(data, group = dyad_id, member = person_id)
 
   expect_error(
-    validate_interdep_data(validated, group = dyad_id, member = person_id),
-    "`data` has already been prepared by interdep.",
+    validate_dyad_data(validated, group = dyad_id, member = person_id),
+    "`data` has already been prepared by dyadMLM.",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data rejects reserved interdep columns", {
+test_that("validate_dyad_data rejects reserved dyadMLM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
-    .i_composition = c("x", "x", "y", "y")
+    .dy_composition = c("x", "x", "y", "y")
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id),
-    "columns starting with `.i_`",
+    validate_dyad_data(data, group = dyad_id, member = person_id),
+    "columns starting with `.dy_`",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data requires group and member arguments", {
+test_that("validate_dyad_data requires group and member arguments", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D")
   )
 
   expect_error(
-    validate_interdep_data(data, member = person_id),
+    validate_dyad_data(data, member = person_id),
     "`group` must be supplied.",
     fixed = TRUE
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id),
+    validate_dyad_data(data, group = dyad_id),
     "`member` must be supplied.",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data rejects missing columns", {
+test_that("validate_dyad_data rejects missing columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D")
   )
 
   expect_error(
-    validate_interdep_data(data, group = missing_group, member = person_id),
+    validate_dyad_data(data, group = missing_group, member = person_id),
     "`group` must refer to an existing column in `data`.",
     fixed = TRUE
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = missing_member),
+    validate_dyad_data(data, group = dyad_id, member = missing_member),
     "`member` must refer to an existing column in `data`.",
     fixed = TRUE
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, role = missing_role),
+    validate_dyad_data(data, group = dyad_id, member = person_id, role = missing_role),
     "`role` must refer to an existing column in `data`.",
     fixed = TRUE
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, time = missing_time),
+    validate_dyad_data(data, group = dyad_id, member = person_id, time = missing_time),
     "`time` must refer to an existing column in `data`.",
     fixed = TRUE
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -506,9 +506,9 @@ test_that("validate_interdep_data rejects missing columns", {
   )
 })
 
-test_that("validate_interdep_data rejects missing grouping values", {
+test_that("validate_dyad_data rejects missing grouping values", {
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data.frame(dyad_id = c(1, NA, 2, 2), person_id = c("A", "B", "C", "D")),
       group = dyad_id,
       member = person_id
@@ -518,7 +518,7 @@ test_that("validate_interdep_data rejects missing grouping values", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data.frame(dyad_id = c(1, 1, 2, 2), person_id = c("A", NA, "C", "D")),
       group = dyad_id,
       member = person_id
@@ -528,7 +528,7 @@ test_that("validate_interdep_data rejects missing grouping values", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data.frame(
         dyad_id = c(1, 1, 2, 2),
         person_id = c("A", "B", "C", "D"),
@@ -543,7 +543,7 @@ test_that("validate_interdep_data rejects missing grouping values", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       data.frame(
         dyad_id = c(1, 1, 2, 2),
         person_id = c("A", "B", "C", "D"),
@@ -558,7 +558,7 @@ test_that("validate_interdep_data rejects missing grouping values", {
   )
 })
 
-test_that("validate_interdep_data rejects duplicate members within group-time", {
+test_that("validate_dyad_data rejects duplicate members within group-time", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2),
     person_id = c("A", "B", "A", "A", "C", "D"),
@@ -566,7 +566,7 @@ test_that("validate_interdep_data rejects duplicate members within group-time", 
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, time = time),
+    validate_dyad_data(data, group = dyad_id, member = person_id, time = time),
     "`dyad_id` = 1, `time` = 2, `person_id` = A",
     fixed = TRUE
   )
@@ -574,7 +574,7 @@ test_that("validate_interdep_data rejects duplicate members within group-time", 
   date_data <- data
   date_data$time <- as.Date("2026-01-01") + date_data$time
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       date_data,
       group = dyad_id,
       member = person_id,
@@ -585,34 +585,34 @@ test_that("validate_interdep_data rejects duplicate members within group-time", 
   )
 })
 
-test_that("validate_interdep_data accepts absent longitudinal occasions", {
+test_that("validate_dyad_data accepts absent longitudinal occasions", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "B", "C", "D", "C", "D"),
     time = c(1, 1, 2, 1, 1, 2, 2)
   )
 
-  result <- validate_interdep_data(data, group = dyad_id, member = person_id, time = time)
+  result <- validate_dyad_data(data, group = dyad_id, member = person_id, time = time)
 
   expect_equal(nrow(result), 7L)
-  expect_true(attr(result, "interdep")$longitudinal)
-  expect_equal(attr(result, "interdep")$n_dyads, 2L)
+  expect_true(attr(result, "dyadMLM")$longitudinal)
+  expect_equal(attr(result, "dyadMLM")$n_dyads, 2L)
 })
 
-test_that("validate_interdep_data rejects groups without two unique members", {
+test_that("validate_dyad_data rejects groups without two unique members", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "A", "C", "D")
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id),
+    validate_dyad_data(data, group = dyad_id, member = person_id),
     "Each `group` must contain exactly two unique members.",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data handles incomplete dyads by policy", {
+test_that("validate_dyad_data handles incomplete dyads by policy", {
   data <- data.frame(
     dyad_id = c(1, 2, 2, 3, 3),
     person_id = c("A", "C", "D", "E", "F"),
@@ -620,7 +620,7 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
+    validate_dyad_data(data, group = dyad_id, member = person_id, role = role),
     paste0(
       "Found 1 incomplete dyad, with ID: 1. Add the missing member rows or ",
       "use `incomplete_dyads = \"drop\"` to drop these dyads."
@@ -629,7 +629,7 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
   )
 
   expect_message(
-    dropped <- validate_interdep_data(
+    dropped <- validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -640,37 +640,37 @@ test_that("validate_interdep_data handles incomplete dyads by policy", {
     fixed = TRUE
   )
   expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
-  expect_equal(attr(dropped, "interdep")$n_dyads, 2L)
-  expect_equal(attr(dropped, "interdep")$dropped_incomplete_dyads, 1)
-  expect_equal(attr(dropped, "interdep")$dropped_missing_role_dyads, numeric(0))
+  expect_equal(attr(dropped, "dyadMLM")$n_dyads, 2L)
+  expect_equal(attr(dropped, "dyadMLM")$dropped_incomplete_dyads, 1)
+  expect_equal(attr(dropped, "dyadMLM")$dropped_missing_role_dyads, numeric(0))
 })
 
-test_that("validate_interdep_data rejects groups with more than two members", {
+test_that("validate_dyad_data rejects groups with more than two members", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2),
     person_id = c("A", "B", "C", "D", "E")
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, incomplete_dyads = "drop"),
+    validate_dyad_data(data, group = dyad_id, member = person_id, incomplete_dyads = "drop"),
     "Found 1 group with more than two members, with ID: 1.",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data stores role metadata", {
+test_that("validate_dyad_data stores role metadata", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
     role = c("female", "male", "female", "male")
   )
 
-  result <- validate_interdep_data(data, group = dyad_id, member = person_id, role = role)
+  result <- validate_dyad_data(data, group = dyad_id, member = person_id, role = role)
 
-  expect_equal(attr(result, "interdep")$role, "role")
+  expect_equal(attr(result, "dyadMLM")$role, "role")
 })
 
-test_that("validate_interdep_data rejects role labels with reserved separator", {
+test_that("validate_dyad_data rejects role labels with reserved separator", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -678,13 +678,13 @@ test_that("validate_interdep_data rejects role labels with reserved separator", 
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
+    validate_dyad_data(data, group = dyad_id, member = person_id, role = role),
     "`role` values must not contain `_x_`",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data accepts stable longitudinal roles", {
+test_that("validate_dyad_data accepts stable longitudinal roles", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2, 2),
     person_id = c("A", "B", "A", "C", "D", "C"),
@@ -692,7 +692,7 @@ test_that("validate_interdep_data accepts stable longitudinal roles", {
     time = c(1, 1, 2, 1, 1, 2)
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -700,10 +700,10 @@ test_that("validate_interdep_data accepts stable longitudinal roles", {
     time = time
   )
 
-  expect_equal(attr(result, "interdep")$role, "role")
+  expect_equal(attr(result, "dyadMLM")$role, "role")
 })
 
-test_that("validate_interdep_data resolves sparse longitudinal roles", {
+test_that("validate_dyad_data resolves sparse longitudinal roles", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -711,7 +711,7 @@ test_that("validate_interdep_data resolves sparse longitudinal roles", {
     time = c(1, 1, 2, 2, 1, 1, 2, 2)
   )
 
-  result <- validate_interdep_data(
+  result <- validate_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -725,7 +725,7 @@ test_that("validate_interdep_data resolves sparse longitudinal roles", {
   )
 })
 
-test_that("validate_interdep_data preserves the role column type", {
+test_that("validate_dyad_data preserves the role column type", {
   factor_data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -736,7 +736,7 @@ test_that("validate_interdep_data preserves the role column type", {
     time = c(1, 1, 2, 2, 1, 1, 2, 2)
   )
 
-  factor_result <- validate_interdep_data(
+  factor_result <- validate_dyad_data(
     factor_data,
     group = dyad_id,
     member = person_id,
@@ -757,7 +757,7 @@ test_that("validate_interdep_data preserves the role column type", {
     role = as.Date(c("2026-01-01", "2026-01-02", "2026-01-01", "2026-01-02"))
   )
 
-  date_result <- validate_interdep_data(
+  date_result <- validate_dyad_data(
     date_data,
     group = dyad_id,
     member = person_id,
@@ -767,7 +767,7 @@ test_that("validate_interdep_data preserves the role column type", {
   expect_identical(date_result$role, date_data$role)
 })
 
-test_that("validate_interdep_data rejects inconsistent roles within member", {
+test_that("validate_dyad_data rejects inconsistent roles within member", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2, 2),
     person_id = c("A", "B", "A", "C", "D", "C"),
@@ -776,13 +776,13 @@ test_that("validate_interdep_data rejects inconsistent roles within member", {
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, role = role, time = time),
+    validate_dyad_data(data, group = dyad_id, member = person_id, role = role, time = time),
     "`dyad_id` = 1, `person_id` = A",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data handles missing roles by policy", {
+test_that("validate_dyad_data handles missing roles by policy", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),
@@ -790,13 +790,13 @@ test_that("validate_interdep_data handles missing roles by policy", {
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id, role = role),
+    validate_dyad_data(data, group = dyad_id, member = person_id, role = role),
     "Fill in `role` values or use `missing_role = \"drop\"` to drop these dyads.",
     fixed = TRUE
   )
 
   expect_message(
-    dropped <- validate_interdep_data(
+    dropped <- validate_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -808,48 +808,48 @@ test_that("validate_interdep_data handles missing roles by policy", {
   )
 
   expect_equal(dropped$dyad_id, c(2, 2, 3, 3))
-  expect_equal(attr(dropped, "interdep")$n_dyads, 2L)
-  expect_equal(attr(dropped, "interdep")$dropped_missing_role_dyads, 1)
-  expect_equal(attr(dropped, "interdep")$dropped_incomplete_dyads, numeric(0))
+  expect_equal(attr(dropped, "dyadMLM")$n_dyads, 2L)
+  expect_equal(attr(dropped, "dyadMLM")$dropped_missing_role_dyads, 1)
+  expect_equal(attr(dropped, "dyadMLM")$dropped_incomplete_dyads, numeric(0))
 })
 
-test_that("validate_interdep_data rejects fewer than two groups", {
+test_that("validate_dyad_data rejects fewer than two groups", {
   data <- data.frame(
     dyad_id = c(1, 1),
     person_id = c("A", "B")
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id),
+    validate_dyad_data(data, group = dyad_id, member = person_id),
     "At least 2 complete dyads are required after validation and any requested dropping.",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data rejects duplicate cross-sectional member rows", {
+test_that("validate_dyad_data rejects duplicate cross-sectional member rows", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2),
     person_id = c("A", "B", "A", "C", "D")
   )
 
   expect_error(
-    validate_interdep_data(data, group = dyad_id, member = person_id),
+    validate_dyad_data(data, group = dyad_id, member = person_id),
     "`dyad_id` = 1, `person_id` = A",
     fixed = TRUE
   )
 })
 
-test_that("validate_interdep_data allows one missing member within group-time", {
+test_that("validate_dyad_data allows one missing member within group-time", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 2, 2, 2),
     person_id = c("A", "B", "A", "C", "D", "C"),
     time = c(1, 1, 2, 1, 1, 2)
   )
 
-  result <- validate_interdep_data(data, group = dyad_id, member = person_id, time = time)
-  meta <- attr(result, "interdep")
+  result <- validate_dyad_data(data, group = dyad_id, member = person_id, time = time)
+  meta <- attr(result, "dyadMLM")
 
-  expect_s3_class(result, "interdep_data")
+  expect_s3_class(result, "dyadMLM_data")
   expect_equal(nrow(result), 6)
   expect_equal(meta$group, "dyad_id")
   expect_equal(meta$member, "person_id")

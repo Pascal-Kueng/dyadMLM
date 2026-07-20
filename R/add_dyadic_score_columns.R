@@ -1,9 +1,9 @@
 #' Add dyadic-score model predictor columns and contrast
 #'
 #' Adds Dyadic Score Model (DSM) dyad-mean and signed dyad-difference columns
-#' for the predictors recorded in an `interdep_data` object, together with a
+#' for the predictors recorded in a `dyadMLM_data` object, together with a
 #' DSM role contrast coded `+0.5` and `-0.5`. DSM differences follow the role
-#' order recorded in `attr(data, "interdep")$dsm_role_order`. The supported DSM
+#' order recorded in `attr(data, "dyadMLM")$dsm_role_order`. The supported DSM
 #' structure contains one distinguishable dyad composition; exchangeable dyads
 #' and multiple compositions are not supported.
 #'
@@ -15,30 +15,30 @@
 #' dyad-mean and signed-difference columns.
 #'
 #' Constructed predictor columns are recorded in
-#' `attr(data, "interdep")$dsm_predictors`, and the contrast column name is
-#' recorded in `attr(data, "interdep")$dsm_role_contrast_column`.
+#' `attr(data, "dyadMLM")$dsm_predictors`, and the contrast column name is
+#' recorded in `attr(data, "dyadMLM")$dsm_role_contrast_column`.
 #'
-#' @param data An `interdep_data` object returned by [prepare_interdep_data()].
+#' @param data A `dyadMLM_data` object returned by [prepare_dyad_data()].
 #'
-#' @return An `interdep_data` object with dyad-mean and signed dyad-difference
+#' @return A `dyadMLM_data` object with dyad-mean and signed dyad-difference
 #'   predictor columns and a DSM role contrast added.
 #'
 #' @keywords internal
 add_dyadic_score_columns <- function(data) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
 
   validate_dsm_compatibility(data)
 
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   dsm_role_order <- meta_data$dsm_role_order
   role <- meta_data$role
 
-  data[[interdep_dsm_role_contrast_col]] <- ifelse(
+  data[[dyad_dsm_role_contrast_col]] <- ifelse(
     as.character(data[[role]]) == dsm_role_order[[1]],
     0.5,
     -0.5
@@ -74,7 +74,7 @@ add_dyadic_score_columns <- function(data) {
     # Deviation = role contrast * full directional difference, so division
     # recovers the same role-1-minus-role-2 score on both member rows.
     out[[difference_col]] <-
-      out[[deviation_col]] / out[[interdep_dsm_role_contrast_col]]
+      out[[deviation_col]] / out[[dyad_dsm_role_contrast_col]]
   }
 
   # Replace intermediate deviation metadata with DSM difference metadata.
@@ -91,8 +91,8 @@ add_dyadic_score_columns <- function(data) {
     out[deviation_cols] <- NULL
   }
 
-  attr(out, "interdep")$dsm_predictors <- dsm_predictors
-  attr(out, "interdep")$dsm_role_contrast_column <- interdep_dsm_role_contrast_col
+  attr(out, "dyadMLM")$dsm_predictors <- dsm_predictors
+  attr(out, "dyadMLM")$dsm_role_contrast_column <- dyad_dsm_role_contrast_col
 
   out
 }

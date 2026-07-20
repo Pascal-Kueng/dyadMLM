@@ -44,16 +44,16 @@ members. The result is on the fitted random effects' linear-predictor scale.
 In non-Gaussian models, it therefore describes a Gaussian latent covariance,
 not response-scale residual covariance. For the model specification,
 derivation, and interpretation, see the
-\href{https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}.
+\href{https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}.
 }
 \details{
-Automatic matching recognizes exact \verb{.i_diff_*_arbitrary} coefficient names
-and first looks for the corresponding \verb{.i_is_*} shared block. It requires
+Automatic matching recognizes exact \verb{.dy_diff_*_arbitrary} coefficient names
+and first looks for the corresponding \verb{.dy_is_*} shared block. It requires
 the two blocks to use the same grouping factor and the same underlying
-terms. Most models fitted with \code{interdep}-generated columns therefore need
+terms. Most models fitted with \code{dyadMLM}-generated columns therefore need
 only:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(model)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- dyadMLM::exchangeable_rescov(model)
 print(result)
 }\if{html}{\out{</div>}}
 
@@ -61,7 +61,7 @@ Supply \code{pairs} when automatic matching is ambiguous or when a model uses
 custom indicators, multiple covariance levels, or deliberately omitted
 blocks or terms. To specify one pair with a custom difference indicator:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- dyadMLM::exchangeable_rescov(
   model,
   pairs = list(
     shared = "(1 + time | coupleID)",
@@ -76,20 +76,20 @@ in a Gaussian \code{glmmTMB} model fitted with \code{dispformula = ~ 0}, this ca
 recovers both a stable dyad-level covariance with an omitted difference
 time slope and the same-occasion partner residual covariance:
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- dyadMLM::exchangeable_rescov(
   model,
   pairs = list(
     dyad = list(
       shared = "(1 + diaryday | coupleID)",
-      difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
+      difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)",
       difference_indicator =
-        ".i_diff_assumed_exchangeable_arbitrary"
+        ".dy_diff_assumed_exchangeable_arbitrary"
     ),
     same_occasion = list(
       shared = "(1 | coupleID:diaryday)",
-      difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+      difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
       difference_indicator =
-        ".i_diff_assumed_exchangeable_arbitrary"
+        ".dy_diff_assumed_exchangeable_arbitrary"
     )
   )
 )
@@ -137,7 +137,7 @@ absent from the fitted model. Do not use \code{NULL} merely to ignore an existin
 block; the resulting back-transformation would be incorrect.
 
 See the constrained-block example in the
-\href{https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks}{exchangeable APIM vignette}.
+\href{https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitted-constraints-and-omitted-blocks}{exchangeable APIM vignette}.
 }
 
 \section{Backend note}{
@@ -162,8 +162,8 @@ in non-Gaussian models.
 
 \seealso{
 The
-\href{https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}
+\href{https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}
 for the model specification, covariance derivation, and constrained-block
-example. Run \code{vignette("apim", package = "interdep")} to open the installed
+example. Run \code{vignette("apim", package = "dyadMLM")} to open the installed
 version.
 }

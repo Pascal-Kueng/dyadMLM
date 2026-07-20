@@ -3,7 +3,7 @@
 ## Status
 
 This is the implementation specification for the first public covariance
-back-transformation helper in `interdep`. It records the decisions made for
+back-transformation helper in `dyadMLM`. It records the decisions made for
 v0.0.1 and the intended path to later model engines and more complex covariance
 structures.
 
@@ -24,7 +24,7 @@ Exchangeable DIMs and APIMs represent the two members' residuals through two
 independent random-effect blocks:
 
 - a **shared residual block**, which moves both members in the same direction;
-- a **difference residual block**, identified by an `interdep` `.i_diff_*`
+- a **difference residual block**, identified by a `dyadMLM` `.dy_diff_*`
   column, which moves them in opposite directions.
 
 The fitted variances of these blocks are useful computationally but are not the
@@ -158,7 +158,7 @@ The first version does not support:
   `unstr(time = member, gr = pair_id)` residual structures that are already on
   the member scale.
 
-Automatic matching requires untouched `interdep` `.i_diff_*` names and complete,
+Automatic matching requires untouched `dyadMLM` `.dy_diff_*` names and complete,
 unambiguous pairs. Exact supplied pairs support custom indicator names and
 constrained structures.
 
@@ -171,7 +171,7 @@ Do not require the original named data object to remain in the calling
 environment. Saved and reloaded models should continue to work. In particular:
 
 - neither backend retains unused original data columns in its model frame;
-- `glmmTMB` does not retain `attr(data, "interdep")` on `model$frame`;
+- `glmmTMB` does not retain `attr(data, "dyadMLM")` on `model$frame`;
 - package metadata therefore cannot be the primary discovery mechanism;
 - recovering the original data would make the helper fragile across sessions.
 
@@ -217,7 +217,7 @@ rather than guessing.
 Automatic matching starts from a canonical column matching
 
 ```text
-.i_diff_{composition}_arbitrary
+.dy_diff_{composition}_arbitrary
 ```
 
 The `{composition}` substring becomes the composition key. Every coefficient in
@@ -230,7 +230,7 @@ For a composition-specific or mixed-composition model, the corresponding shared
 block contains exactly
 
 ```text
-.i_is_{composition}
+.dy_is_{composition}
 ```
 
 For a single exchangeable composition, a generic intercept-and-slope block may
@@ -263,16 +263,16 @@ hold:
 Grouping expressions are part of the pair key. Thus the same composition may
 produce separate results for `coupleID` and `coupleID:diaryday`.
 
-Every discovered `.i_diff_*` block must match exactly one shared block. Stop on
+Every discovered `.dy_diff_*` block must match exactly one shared block. Stop on
 zero or multiple candidates; never silently drop or guess an ambiguous block.
-If the model contains no supported `.i_diff_*` block, explain that no
+If the model contains no supported `.dy_diff_*` block, explain that no
 exchangeable shared/difference residual structure was found.
 
 ### Renaming policy
 
 Users may freely name their original variables, grouping variables, outcomes,
-and predictors. Automatic discovery requires the `interdep`-generated
-`.i_is_*` and `.i_diff_*` columns to retain their generated names. Explicit
+and predictors. Automatic discovery requires the `dyadMLM`-generated
+`.dy_is_*` and `.dy_diff_*` columns to retain their generated names. Explicit
 matching also supports user-created indicator names because the user declares
 their meaning:
 
@@ -402,14 +402,14 @@ result.
 - A larger difference variance produces negative member correlation.
 - Zero shared or difference variance is handled as a valid boundary case.
 - The matrix is symmetric and positive semidefinite.
-- Reversing the arbitrary sign of `.i_diff_*` leaves the covariance result
+- Reversing the arbitrary sign of `.dy_diff_*` leaves the covariance result
   unchanged.
 - Forward and inverse transformations round-trip within numerical tolerance.
 
 ### Discovery and extraction tests
 
 - Single-composition model with an intercept shared block.
-- Single-composition model with a `.i_is_*` shared block.
+- Single-composition model with a `.dy_is_*` shared block.
 - Mixed model with two exchangeable compositions.
 - Mixed model containing both distinguishable and exchangeable blocks.
 - Pooled composition with a generated pool name.
@@ -423,8 +423,8 @@ result.
 
 ### Failure tests
 
-- No `.i_diff_*` block.
-- Unmatched `.i_diff_*` block.
+- No `.dy_diff_*` block.
+- Unmatched `.dy_diff_*` block.
 - Multiple possible shared matches.
 - Shared and difference columns with inconsistent row support.
 - Renamed generated columns.

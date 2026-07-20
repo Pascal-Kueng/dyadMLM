@@ -8,7 +8,7 @@
 #' In non-Gaussian models, it therefore describes a Gaussian latent covariance,
 #' not response-scale residual covariance. For the model specification,
 #' derivation, and interpretation, see the
-#' [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure).
+#' [exchangeable APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure).
 #'
 #' @param model A fitted `glmmTMB` or single-response `brmsfit` model.
 #' @param pairs `NULL` (default) for automatic block matching. Otherwise, supply
@@ -30,14 +30,14 @@
 #'     an ordinary intercept is the shared intercept coordinate.
 #'
 #' @details
-#' Automatic matching recognizes exact `.i_diff_*_arbitrary` coefficient names
-#' and first looks for the corresponding `.i_is_*` shared block. It requires
+#' Automatic matching recognizes exact `.dy_diff_*_arbitrary` coefficient names
+#' and first looks for the corresponding `.dy_is_*` shared block. It requires
 #' the two blocks to use the same grouping factor and the same underlying
-#' terms. Most models fitted with `interdep`-generated columns therefore need
+#' terms. Most models fitted with `dyadMLM`-generated columns therefore need
 #' only:
 #'
 #' ```r
-#' result <- interdep::exchangeable_rescov(model)
+#' result <- dyadMLM::exchangeable_rescov(model)
 #' print(result)
 #' ```
 #'
@@ -46,7 +46,7 @@
 #' blocks or terms. To specify one pair with a custom difference indicator:
 #'
 #' ```r
-#' result <- interdep::exchangeable_rescov(
+#' result <- dyadMLM::exchangeable_rescov(
 #'   model,
 #'   pairs = list(
 #'     shared = "(1 + time | coupleID)",
@@ -62,20 +62,20 @@
 #' time slope and the same-occasion partner residual covariance:
 #'
 #' ```r
-#' result <- interdep::exchangeable_rescov(
+#' result <- dyadMLM::exchangeable_rescov(
 #'   model,
 #'   pairs = list(
 #'     dyad = list(
 #'       shared = "(1 + diaryday | coupleID)",
-#'       difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
+#'       difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)",
 #'       difference_indicator =
-#'         ".i_diff_assumed_exchangeable_arbitrary"
+#'         ".dy_diff_assumed_exchangeable_arbitrary"
 #'     ),
 #'     same_occasion = list(
 #'       shared = "(1 | coupleID:diaryday)",
-#'       difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+#'       difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
 #'       difference_indicator =
-#'         ".i_diff_assumed_exchangeable_arbitrary"
+#'         ".dy_diff_assumed_exchangeable_arbitrary"
 #'     )
 #'   )
 #' )
@@ -121,7 +121,7 @@
 #' block; the resulting back-transformation would be incorrect.
 #'
 #' See the constrained-block example in the
-#' [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks).
+#' [exchangeable APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitted-constraints-and-omitted-blocks).
 #'
 #' @section Backend note:
 #' In `brms`, cross-sectional and same-occasion partner dependence can be
@@ -150,9 +150,9 @@
 #'   are posterior-draw by coefficient by coefficient arrays.
 #'
 #' @seealso The
-#'   [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
+#'   [exchangeable APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure)
 #'   for the model specification, covariance derivation, and constrained-block
-#'   example. Run `vignette("apim", package = "interdep")` to open the installed
+#'   example. Run `vignette("apim", package = "dyadMLM")` to open the installed
 #'   version.
 #'
 #' @export
@@ -549,7 +549,7 @@ find_exchangeable_difference_indicator <- function(coefficients) {
     )
   }
   generated_indicators <- unique(grep(
-    "^\\.i_diff_.+_arbitrary$",
+    "^\\.dy_diff_.+_arbitrary$",
     variables,
     value = TRUE
   ))
@@ -962,7 +962,7 @@ match_exchangeable_residual_blocks <- function(
   )
   if (length(difference_indicators) == 0L) {
     stop(
-      "No supported `.i_diff_*_arbitrary` difference block was found.",
+      "No supported `.dy_diff_*_arbitrary` difference block was found.",
       " Supply `pairs` explicitly if the model uses custom ",
       "difference-indicator names or unequal shared and difference term sets.",
       format_exchangeable_block_inventory(blocks),
@@ -974,11 +974,11 @@ match_exchangeable_residual_blocks <- function(
   # intercept is a safe fallback only when there is one exchangeable type.
   matched_pairs <- list()
   for (idiff in difference_indicators) {
-    composition <- sub("^\\.i_diff_(.+)_arbitrary$", "\\1", idiff)
+    composition <- sub("^\\.dy_diff_(.+)_arbitrary$", "\\1", idiff)
     indicator_pairs <- match_blocks_for_exchangeable_indicator(
       blocks,
       idiff,
-      shared_indicator = paste0(".i_is_", composition),
+      shared_indicator = paste0(".dy_is_", composition),
       fallback_indicator = if (length(difference_indicators) == 1L) "1" else NULL,
       model_frame = model_frame
     )
@@ -2001,7 +2001,7 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
       "Internal error: stored `glmmTMB` random-effect blocks could not be ",
       "aligned. This is unexpected for a supported model; please report an ",
       "issue with a reproducible model and the installed versions of ",
-      "`interdep` and `glmmTMB`.",
+      "`dyadMLM` and `glmmTMB`.",
       call. = FALSE
     )
   }
@@ -2024,7 +2024,7 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
         "Internal error: a `glmmTMB` covariance block could not be aligned ",
         "with its coefficients. This is unexpected for a supported model; ",
         "please report an issue with a reproducible model and the installed ",
-        "versions of `interdep` and `glmmTMB`.",
+        "versions of `dyadMLM` and `glmmTMB`.",
         call. = FALSE
       )
     }
@@ -2177,7 +2177,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
         "Internal error: `brms` covariance draws were not found for a ",
         "random-effect block. This is unexpected for a supported model; please ",
         "report an issue with a reproducible model and the installed versions ",
-        "of `interdep` and `brms`.",
+        "of `dyadMLM` and `brms`.",
         call. = FALSE
       )
     }
@@ -2189,7 +2189,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
         "Internal error: duplicated `brms` covariance names cannot be aligned ",
         "to separate blocks. This is unexpected for a supported model; please ",
         "report an issue with a reproducible model and the installed versions ",
-        "of `interdep` and `brms`.",
+        "of `dyadMLM` and `brms`.",
         call. = FALSE
       )
     }
@@ -2199,7 +2199,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
         "Internal error: `brms` covariance draws could not be aligned with ",
         "their coefficients. This is unexpected for a supported model; please ",
         "report an issue with a reproducible model and the installed versions ",
-        "of `interdep` and `brms`.",
+        "of `dyadMLM` and `brms`.",
         call. = FALSE
       )
     }

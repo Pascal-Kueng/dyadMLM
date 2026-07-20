@@ -27,7 +27,7 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 ```
 
 ```{r setup}
-library(interdep)
+library(dyadMLM)
 ```
 
 
@@ -98,7 +98,7 @@ $$
 
 
 This structure is estimated with an unstructured random-effects block such as
-`us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)`
+`us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID)`
 and `dispformula = ~ 0`. 
 
 <!-- TODO: what is the best order? This shows the RE before we prepped the data.
@@ -112,10 +112,10 @@ if the model does not converge etc.?
 
 ### Fitting the distinguishable APIM with glmmTMB
 
-We first prepare the example data with `interdep::prepare_interdep_data()`:
+We first prepare the example data with `dyadMLM::prepare_dyad_data()`:
 
 ```{r prepare-cross-distinguishable-apim}
-apim_distinguishable_data <- interdep::prepare_interdep_data(
+apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -128,7 +128,7 @@ print(apim_distinguishable_data, n=4)
 
 ```
 
-The generated `.i_*` columns can be used directly in the model formula. Here is
+The generated `.dy_*` columns can be used directly in the model formula. Here is
 a simple example:
 
 ```{r fit-cross-distinguishable-gaussian}
@@ -137,23 +137,23 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 
     # Gender-specific intercepts
     0 +
-    .i_is_female_x_male_female +
-    .i_is_female_x_male_male +
+    .dy_is_female_x_male_female +
+    .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_is_female_x_male_female:.i_communication_actor +
-    .i_is_female_x_male_male:.i_communication_actor +
+    .dy_is_female_x_male_female:.dy_communication_actor +
+    .dy_is_female_x_male_male:.dy_communication_actor +
 
     # Gender-specific partner effects
-    .i_is_female_x_male_female:.i_communication_partner +
-    .i_is_female_x_male_male:.i_communication_partner +
+    .dy_is_female_x_male_female:.dy_communication_partner +
+    .dy_is_female_x_male_male:.dy_communication_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
     # This is glmmTMB-specific syntax! `brms` uses different syntax.
     us(0 +
-         .i_is_female_x_male_female +
-         .i_is_female_x_male_male
+         .dy_is_female_x_male_female +
+         .dy_is_female_x_male_male
        | coupleID)
 
   , dispformula = ~ 0
@@ -250,8 +250,8 @@ correlation between slopes and intercepts anymore.
 
 Therefore, we introduce a solution that works for residuals and other random
 effect terms regardless of slopes. Following
-@delrosarioPracticalGuideSpecifying2025, `interdep::prepare_interdep_data()`
-generates an arbitrary member-difference column, named `.i_diff_*`, that is
+@delrosarioPracticalGuideSpecifying2025, `dyadMLM::prepare_dyad_data()`
+generates an arbitrary member-difference column, named `.dy_diff_*`, that is
 `+1` for one member and `-1` for the other. The exchangeable residual structure
 is represented by two separate random-effects terms: a shared dyad random
 intercept and a random coefficient for this difference column.
@@ -259,7 +259,7 @@ intercept and a random coefficient for this difference column.
 <!-- TODO: do we need a brief explanation of why this is possible? maybe
 not in the applied part to not confuse users that just want to get started? -->
 
-We will now fit the model and then use the `interdep::exchangeable_rescov()`
+We will now fit the model and then use the `dyadMLM::exchangeable_rescov()`
 function that back-transforms the structure to the often more interpretable
 actor-partner residual-covariance matrix we are used to.
 
@@ -274,7 +274,7 @@ so we can test distinguishability later. Another option here would be to omit
 roles, especially if there is no clear role in the data.
 
 ```{r prepare-cross-distinguishability}
-apim_exchangeable_data <- interdep::prepare_interdep_data(
+apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -296,13 +296,13 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     1 +
     
     # Pooled single actor and partner effects
-    .i_communication_actor +
-    .i_communication_partner +
+    .dy_communication_actor +
+    .dy_communication_partner +
     
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
     us(1 | coupleID) +
-    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -311,11 +311,11 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model)
 ```
 
-We use the `interdep::exchangeable_rescov()` to recover the interpretable
+We use the `dyadMLM::exchangeable_rescov()` to recover the interpretable
 variance-covariance matrix:
 
 ```{r}
-backtransformed <- interdep::exchangeable_rescov(apim_exchangeable_model)
+backtransformed <- dyadMLM::exchangeable_rescov(apim_exchangeable_model)
 
 # residual variance-covariance and SD-correlation representations
 print(backtransformed)
@@ -367,12 +367,12 @@ were imposed when fitting the model. For example, we can omit the entire shared 
 ```{r fit-exchangeable-no-shared}
 apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
   satisfaction ~  1 +
-    .i_communication_actor +
-    .i_communication_partner +
+    .dy_communication_actor +
+    .dy_communication_partner +
     
     # Residual variance covariance matrix
     # omitting the us(1 | coupleID) block
-    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -388,12 +388,12 @@ function where both blocks are. Since we completely omitted one block, we tell t
 function:
 
 ```{r}
-backtransformed <- interdep::exchangeable_rescov(
+backtransformed <- dyadMLM::exchangeable_rescov(
   apim_exchangeable_model_no_shared, 
   pairs = list(
     shared = NULL,
-    difference = "us(0 + .i_diff_female_x_male_arbitrary | coupleID)",
-    difference_indicator =".i_diff_female_x_male_arbitrary"
+    difference = "us(0 + .dy_diff_female_x_male_arbitrary | coupleID)",
+    difference_indicator =".dy_diff_female_x_male_arbitrary"
   )
 )
 
@@ -424,12 +424,12 @@ distinguishable model was fitted above, so we now prepare the same original
 observations as exchangeable:
 
 
-[`interdep::compare_interdep_models()`](../reference/compare_interdep_models.html)
+[`dyadMLM::compare_dyad_models()`](../reference/compare_dyad_models.html)
 verifies that both models use equivalent original
 observations before performing the likelihood-ratio test:
 
 ```{r compare-cross-distinguishability}
-interdep::compare_interdep_models(
+dyadMLM::compare_dyad_models(
   apim_exchangeable_model,
   apim_distinguishable_model
 )
@@ -457,39 +457,39 @@ Example model specification:
 ild_distinguishable_model <- glmmTMB(
   closeness ~ 0 + 
     
-    .i_is_female_x_male_female + 
-    .i_is_female_x_male_male + 
+    .dy_is_female_x_male_female +
+    .dy_is_female_x_male_male +
     
     # Gender specific time trends
-    .i_is_female_x_male_female:diaryday + 
-    .i_is_female_x_male_male:diaryday +
+    .dy_is_female_x_male_female:diaryday +
+    .dy_is_female_x_male_male:diaryday +
     
     # Gender-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
+    .dy_is_female_x_male_female:.dy_provided_support_cwp_actor +
+    .dy_is_female_x_male_male:.dy_provided_support_cwp_actor +
 
     # Gender-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
+    .dy_is_female_x_male_female:.dy_provided_support_cwp_partner +
+    .dy_is_female_x_male_male:.dy_provided_support_cwp_partner +
     
     # Gender-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
+    .dy_is_female_x_male_female:.dy_provided_support_cbp_actor +
+    .dy_is_female_x_male_male:.dy_provided_support_cbp_actor +
 
     # Gender-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
+    .dy_is_female_x_male_female:.dy_provided_support_cbp_partner +
+    .dy_is_female_x_male_male:.dy_provided_support_cbp_partner +
     
     # random effects for stable non-independence (means)
     us(0 + 
-         .i_is_female_x_male_female + 
-         .i_is_female_x_male_male 
+         .dy_is_female_x_male_female +
+         .dy_is_female_x_male_male
        | coupleID)  +
 
     # Same-day residual covariance
     us(0 + 
-         .i_is_female_x_male_female + 
-         .i_is_female_x_male_male 
+         .dy_is_female_x_male_female +
+         .dy_is_female_x_male_male
        | coupleID:diaryday) 
 
   , dispformula = ~ 0  
@@ -515,7 +515,7 @@ level to represent same-occasion residual dependence.
 The same shared/difference back-transformation applies to random slopes
 [@delrosarioPracticalGuideSpecifying2025]. For example, let
 $u_{\mathrm{actor},j}$ denote the shared actor random slope for dyad $j$ and
-$\widetilde{u}_{\mathrm{actor},j}$ the corresponding `.i_diff_*` random slope.
+$\widetilde{u}_{\mathrm{actor},j}$ the corresponding `.dy_diff_*` random slope.
 The tilde marks random coefficients from the member-difference block. The actor
 slopes for the members assigned `+1` and `-1` are
 
@@ -527,7 +527,7 @@ u_{\mathrm{actor},2j}
 = u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
 $$
 
-Because the shared and `.i_diff_*` blocks are fitted as separate random-effects
+Because the shared and `.dy_diff_*` blocks are fitted as separate random-effects
 terms, they are independent. Therefore,
 
 $$
@@ -577,7 +577,7 @@ interpretation changes. All APIM predictor effects then describe associations
 conditional on the members' prior outcomes.
 
 By adding the outcome to `predictors` and selecting it with `lag_predictors`,
-`interdep::prepare_interdep_data()` returns lag-1 raw and within-person scores alongside
+`dyadMLM::prepare_dyad_data()` returns lag-1 raw and within-person scores alongside
 the contemporaneous scores. Between-person scores are not lagged because they
 describe stable differences between members.
 
@@ -585,7 +585,7 @@ For this example, we obtain the lagged actor and partner outcome columns through
 the `lag_predictors` argument:
 
 ```{r prepare-ild-apim-dynamic-model}
-ild_apim_data_dynamic <- interdep::prepare_interdep_data(
+ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -609,21 +609,21 @@ stability_influence <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
     # Stability (actor effect across time)
-    .i_closeness_actor_lag1 +
+    .dy_closeness_actor_lag1 +
 
     # Influence (partner effect across time)
-    .i_closeness_partner_lag1 +
+    .dy_closeness_partner_lag1 +
 
     # Linear time trend
     diaryday +
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -640,8 +640,8 @@ contemporaneous coefficients are then conditional on both partners' prior
 outcomes.
 
 The model above uses raw lagged outcomes. The corresponding
-within-person-centered lagged terms are `.i_closeness_cwp_actor_lag1` and
-`.i_closeness_cwp_partner_lag1`.
+within-person-centered lagged terms are `.dy_closeness_cwp_actor_lag1` and
+`.dy_closeness_cwp_partner_lag1`.
 
 Whether to use a raw or within-person-centered lagged outcome depends on the
 research question and the data. Person-mean centering the outcome lag can bias

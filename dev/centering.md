@@ -16,7 +16,7 @@ Implemented scope:
 - DIM currently requires one exchangeable dyad composition
 - `model_type = "dsm"` for directional dyadic-score model data preparation
 - DSM currently requires one distinguishable dyad composition
-- central generated-column metadata via `interdep_generated_columns()`, with
+- central generated-column metadata via `dyad_generated_columns()`, with
   one row per generated temporal, APIM, DIM, or DSM column
 
 Reserved for later:
@@ -33,10 +33,10 @@ random-effects structure of the fitted model.
 
 ## Pipeline
 
-`prepare_interdep_data()` currently runs the predictor workflow internally:
+`prepare_dyad_data()` currently runs the predictor workflow internally:
 
 ```r
-validate_interdep_data()
+validate_dyad_data()
 infer_dyad_compositions()
 center_predictors()
 add_temporal_lag_columns()     # lag_predictors, when requested
@@ -46,7 +46,7 @@ add_dyadic_score_columns()       # "dsm" in model_type
 ```
 
 The resolved temporal predictor decomposition choice is stored in
-`attr(data, "interdep")$temporal_predictor_decomposition`.
+`attr(data, "dyadMLM")$temporal_predictor_decomposition`.
 `temporal_predictor_decomposition = "auto"` resolves to `time_2l` when both `time` and
 `predictors` are supplied, and to `none` otherwise.
 
@@ -63,8 +63,8 @@ dyad-occasion means.
 For each time-varying predictor `x`, `center_predictors()` creates:
 
 ```r
-.i_x_cwp = x - person_mean(x)
-.i_x_cbp = person_mean(x) - grand_mean(person_mean(x))
+.dy_x_cwp = x - person_mean(x)
+.dy_x_cbp = person_mean(x) - grand_mean(person_mean(x))
 ```
 
 The grand mean is computed over person means, not over all observed rows. This
@@ -73,7 +73,7 @@ observed measurement occasions.
 
 Missing values:
 
-- missing raw values remain missing in `.i_x_cwp`
+- missing raw values remain missing in `.dy_x_cwp`
 - person means ignore missing raw values
 - if a person has no observed predictor values, both components are missing for
   that person
@@ -81,15 +81,15 @@ Missing values:
 The metadata table is:
 
 ```r
-attr(data, "interdep")$temporal_predictor_decompositions
+attr(data, "dyadMLM")$temporal_predictor_decompositions
 ```
 
 with one row for the raw predictor and one row per constructed temporal
 component. When `lag_predictors` is supplied, lag-1 raw and CWP records are
 added with `lag = 1`; unlagged records use `lag = 0`.
 
-Generated `.i_*_cwp` and `.i_*_cbp` columns also appear in the normalized
-generated-column table returned by `interdep_generated_columns()`. Raw source
+Generated `.dy_*_cwp` and `.dy_*_cbp` columns also appear in the normalized
+generated-column table returned by `dyad_generated_columns()`. Raw source
 records are excluded from the temporal part of that table because they are not
 package-generated columns. Their model-specific APIM, DIM, or DSM columns are
 included.
@@ -102,17 +102,17 @@ columns.
 For raw predictors:
 
 ```r
-.i_x_actor
-.i_x_partner
+.dy_x_actor
+.dy_x_partner
 ```
 
 For `time_2l` predictors, the raw columns above are retained alongside:
 
 ```r
-.i_x_cwp_actor
-.i_x_cwp_partner
-.i_x_cbp_actor
-.i_x_cbp_partner
+.dy_x_cwp_actor
+.dy_x_cwp_partner
+.dy_x_cbp_actor
+.dy_x_cbp_partner
 ```
 
 Partner values are matched within dyad for cross-sectional data and within
@@ -122,7 +122,7 @@ is missing, the partner column is missing for that row.
 The metadata table is:
 
 ```r
-attr(data, "interdep")$apim_predictors
+attr(data, "dyadMLM")$apim_predictors
 ```
 
 ## DIM Columns
@@ -134,8 +134,8 @@ from grouped dyad means.
 For within-person components, the decomposition level is dyad-time:
 
 ```r
-.i_x_cwp_dyad_mean
-.i_x_cwp_within_dyad_dev
+.dy_x_cwp_dyad_mean
+.dy_x_cwp_within_dyad_dev
 ```
 
 For between-person components, the decomposition level is dyad. The
@@ -143,15 +143,15 @@ implementation first reduces to one row per dyad-member so members are not
 weighted by the number of observed days:
 
 ```r
-.i_x_cbp_dyad_mean
-.i_x_cbp_within_dyad_dev
+.dy_x_cbp_dyad_mean
+.dy_x_cbp_within_dyad_dev
 ```
 
 For raw predictors:
 
 ```r
-.i_x_dyad_mean_gmc
-.i_x_within_dyad_dev
+.dy_x_dyad_mean_gmc
+.dy_x_within_dyad_dev
 ```
 
 Raw longitudinal predictors are decomposed within dyad-time. Raw
@@ -170,7 +170,7 @@ until role-contrast, composition-specific, or pooling support is explicit.
 The metadata table is:
 
 ```r
-attr(data, "interdep")$dim_predictors
+attr(data, "dyadMLM")$dim_predictors
 ```
 
 with `dyad_decomposition_level` recording whether the component was decomposed
@@ -187,25 +187,25 @@ dsm_role_order = c("female", "male")
 
 DSM requires exactly one distinguishable composition. The declared role order
 defines every difference as the first role minus the second and creates
-`.i_dsm_role_contrast` with `+0.5/-0.5` coding.
+`.dy_dsm_role_contrast` with `+0.5/-0.5` coding.
 
 DIM and DSM share internal dyad-mean and member-deviation calculations. Their
 public columns then diverge:
 
 ```r
 # Shared mean
-.i_x_dyad_mean_gmc
+.dy_x_dyad_mean_gmc
 
 # DIM
-.i_x_within_dyad_dev
+.dy_x_within_dyad_dev
 
 # DSM
-.i_x_within_dyad_diff
-.i_dsm_role_contrast
+.dy_x_within_dyad_diff
+.dy_dsm_role_contrast
 ```
 
 For ILD data, DSM creates dyad means and full directional differences for the
-raw predictor and separately for `.i_*_cwp` and `.i_*_cbp`. Raw and CWP scores
+raw predictor and separately for `.dy_*_cwp` and `.dy_*_cbp`. Raw and CWP scores
 are constructed within dyad-time, while CBP scores are constructed within dyad.
 
 Outcome scores are not materialized for the MLM-focused API. Outcomes remain
@@ -222,7 +222,7 @@ member-level variables selected in the fitted-model formula.
   `temporal_predictor_decomposition = "none"` only for model types that do not
   compute dyad means or within-dyad deviations, such as raw APIM.
 - DIM and DSM predictor construction require numeric predictors.
-- user data may not contain package-owned `.i_` columns.
+- user data may not contain package-owned `.dy_` columns.
 - longitudinal raw DIM and DSM predictor construction is available with
   `temporal_predictor_decomposition = "none"`; `time_2l` returns raw scores
   alongside CWP and CBP scores.
@@ -238,8 +238,8 @@ member-level variables selected in the fitted-model formula.
   compact.
 - Treat `dim_predictors` and `dsm_predictors` metadata as stable for v0.1 unless
   review finds a concrete problem.
-- Keep `interdep_generated_columns()` internal for v0.1. It is the normalized
-  table used by `print.interdep_data()` and documentation-facing summaries, not
+- Keep `dyad_generated_columns()` internal for v0.1. It is the normalized
+  table used by `print.dyadMLM_data()` and documentation-facing summaries, not
   a public inspection API.
 - Keep normalized generated-column interpretation focused on
   `temporal_decomposition`, `dyadic_decomposition`, and `column_centering`.

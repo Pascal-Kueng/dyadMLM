@@ -448,7 +448,7 @@ rm(
       .diagram_resolve_term(
         fixed_names, terms[[parameter]],
         function(term) {
-          role_match <- grepl(paste0("\\.i_is_.*_", role, "($|:)"), term)
+          role_match <- grepl(paste0("\\.dy_is_.*_", role, "($|:)"), term)
           if (is.null(field)) {
             return(role_match && !grepl(":", term))
           }
@@ -469,12 +469,12 @@ rm(
     )
     random_female <- .diagram_resolve_term(
       components$random_terms, terms$random_female,
-      function(term) grepl("\\.i_is_.*_female$", term),
+      function(term) grepl("\\.dy_is_.*_female$", term),
       "random_female", "random-effect"
     )
     random_male <- .diagram_resolve_term(
       components$random_terms, terms$random_male,
-      function(term) grepl("\\.i_is_.*_male$", term),
+      function(term) grepl("\\.dy_is_.*_male$", term),
       "random_male", "random-effect"
     )
 
@@ -512,7 +512,7 @@ rm(
   intercept <- resolve_fixed(
     "intercept",
     function(term) term == "(Intercept)" ||
-      (grepl("^\\.i_is_", term) && !grepl(":", term))
+      (grepl("^\\.dy_is_", term) && !grepl(":", term))
   )
   actor <- resolve_fixed(
     "actor", function(term) grepl("_actor$", term) && !grepl(":", term)
@@ -522,12 +522,12 @@ rm(
   )
   random_mean <- .diagram_resolve_term(
     components$random_terms, terms$random_mean,
-    function(term) term == "(Intercept)" || grepl("^\\.i_is_", term),
+    function(term) term == "(Intercept)" || grepl("^\\.dy_is_", term),
     "random_mean", "random-effect"
   )
   random_difference <- .diagram_resolve_term(
     components$random_terms, terms$random_difference,
-    function(term) grepl("^\\.i_diff_", term),
+    function(term) grepl("^\\.dy_diff_", term),
     "random_difference", "random-effect"
   )
   mean_sd <- .extract_diagram_random_sd(components$random, random_mean)
@@ -566,7 +566,7 @@ rm(
   }
   b0 <- resolve_fixed(
     "b0", function(term) term == "(Intercept)" ||
-      (grepl("^\\.i_is_", term) && !grepl(":", term))
+      (grepl("^\\.dy_is_", term) && !grepl(":", term))
   )
   b_mean <- resolve_fixed(
     "b_mean", function(term) grepl("_dyad_mean_gmc$", term)
@@ -576,12 +576,12 @@ rm(
   )
   random_mean <- .diagram_resolve_term(
     components$random_terms, terms$random_mean,
-    function(term) term == "(Intercept)" || grepl("^\\.i_is_", term),
+    function(term) term == "(Intercept)" || grepl("^\\.dy_is_", term),
     "random_mean", "random-effect"
   )
   random_difference <- .diagram_resolve_term(
     components$random_terms, terms$random_difference,
-    function(term) grepl("^\\.i_diff_", term),
+    function(term) grepl("^\\.dy_diff_", term),
     "random_difference", "random-effect"
   )
 
@@ -630,15 +630,15 @@ rm(
     "a12", function(term) grepl("_within_dyad_diff$", term) && !grepl(":", term)
   )
   a20 <- resolve_fixed(
-    "a20", function(term) term == ".i_dsm_role_contrast"
+    "a20", function(term) term == ".dy_dsm_role_contrast"
   )
   a21 <- resolve_fixed(
     "a21", function(term) grepl("_dyad_mean_gmc", term) &&
-      grepl("\\.i_dsm_role_contrast", term) && grepl(":", term)
+      grepl("\\.dy_dsm_role_contrast", term) && grepl(":", term)
   )
   a22 <- resolve_fixed(
     "a22", function(term) grepl("_within_dyad_diff", term) &&
-      grepl("\\.i_dsm_role_contrast", term) && grepl(":", term)
+      grepl("\\.dy_dsm_role_contrast", term) && grepl(":", term)
   )
   random_mean <- .diagram_resolve_term(
     components$random_terms, terms$random_mean,
@@ -647,7 +647,7 @@ rm(
   )
   random_difference <- .diagram_resolve_term(
     components$random_terms, terms$random_difference,
-    function(term) term == ".i_dsm_role_contrast",
+    function(term) term == ".dy_dsm_role_contrast",
     "random_difference", "random-effect"
   )
 
@@ -2381,42 +2381,42 @@ draw_dim_member_diagram <- function() {
 
   fixed_terms <- c(
     intercept_fm_female = resolve_exact(
-      fixed_names, "intercept_fm_female", ".i_is_female_x_male_female"
+      fixed_names, "intercept_fm_female", ".dy_is_female_x_male_female"
     ),
     intercept_fm_male = resolve_exact(
-      fixed_names, "intercept_fm_male", ".i_is_female_x_male_male"
+      fixed_names, "intercept_fm_male", ".dy_is_female_x_male_male"
     ),
     intercept_ff = resolve_exact(
-      fixed_names, "intercept_ff", ".i_is_female_x_female"
+      fixed_names, "intercept_ff", ".dy_is_female_x_female"
     ),
     intercept_mm = resolve_exact(
-      fixed_names, "intercept_mm", ".i_is_male_x_male"
+      fixed_names, "intercept_mm", ".dy_is_male_x_male"
     )
   )
   random_terms <- c(
     random_fm_female = resolve_exact(
       components$random_terms, "random_fm_female",
-      ".i_is_female_x_male_female", "random-effect"
+      ".dy_is_female_x_male_female", "random-effect"
     ),
     random_fm_male = resolve_exact(
       components$random_terms, "random_fm_male",
-      ".i_is_female_x_male_male", "random-effect"
+      ".dy_is_female_x_male_male", "random-effect"
     ),
     random_ff_mean = resolve_exact(
       components$random_terms, "random_ff_mean",
-      ".i_is_female_x_female", "random-effect"
+      ".dy_is_female_x_female", "random-effect"
     ),
     random_ff_difference = resolve_exact(
       components$random_terms, "random_ff_difference",
-      ".i_diff_female_x_female_arbitrary", "random-effect"
+      ".dy_diff_female_x_female_arbitrary", "random-effect"
     ),
     random_mm_mean = resolve_exact(
       components$random_terms, "random_mm_mean",
-      ".i_is_male_x_male", "random-effect"
+      ".dy_is_male_x_male", "random-effect"
     ),
     random_mm_difference = resolve_exact(
       components$random_terms, "random_mm_difference",
-      ".i_diff_male_x_male_arbitrary", "random-effect"
+      ".dy_diff_male_x_male_arbitrary", "random-effect"
     )
   )
 

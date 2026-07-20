@@ -1,7 +1,7 @@
 #' Add dyad-individual predictor columns
 #'
 #' Adds Dyad-Individual Model (DIM) style dyad-mean and within-dyad
-#' member-deviation columns for the predictors recorded in an `interdep_data`
+#' member-deviation columns for the predictors recorded in a `dyadMLM_data`
 #' object. For
 #' currently supported DIMs, the data must
 #' contain one exchangeable dyad composition. This means distinguishable dyads
@@ -19,21 +19,21 @@
 #' Selected lag predictors additionally create lag-1 raw and within-person
 #' dyad-mean and within-dyad member-deviation columns.
 #'
-#' The function reads `attr(data, "interdep")$temporal_predictor_decompositions` and
+#' The function reads `attr(data, "dyadMLM")$temporal_predictor_decompositions` and
 #' stores the constructed DIM columns in
-#' `attr(data, "interdep")$dim_predictors`.
+#' `attr(data, "dyadMLM")$dim_predictors`.
 #'
-#' @param data An `interdep_data` object returned by [prepare_interdep_data()].
+#' @param data A `dyadMLM_data` object returned by [prepare_dyad_data()].
 #'
-#' @return An `interdep_data` object with dyad-mean and within-dyad
+#' @return A `dyadMLM_data` object with dyad-mean and within-dyad
 #'   member-deviation predictor columns added and DIM predictor metadata
 #'   recorded.
 #'
 #' @keywords internal
 add_dyad_individual_columns <- function(data) {
-  if (!inherits(data, "interdep_data")) {
+  if (!inherits(data, "dyadMLM_data")) {
     stop(
-      "`data` must be an `interdep_data` object returned by `prepare_interdep_data()`.",
+      "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
       call. = FALSE
     )
   }
@@ -42,13 +42,13 @@ add_dyad_individual_columns <- function(data) {
 
   decomposition <- construct_dyad_predictor_decompositions(data)
   out <- decomposition$data
-  attr(out, "interdep")$dim_predictors <- decomposition$predictors
+  attr(out, "dyadMLM")$dim_predictors <- decomposition$predictors
 
   out
 }
 
 construct_dyad_predictor_decompositions <- function(data) {
-  meta_data <- attr(data, "interdep")
+  meta_data <- attr(data, "dyadMLM")
   group <- meta_data$group
   member <- meta_data$member
   has_time <- meta_data$longitudinal
@@ -144,8 +144,8 @@ make_dyad_predictor_column_stem <- function(predictor, component, source_col,
     return(source_col)
   }
 
-  predictor_suffix <- make_interdep_suffixes(predictor)[[predictor]]
-  paste0(interdep_reserved_prefix, predictor_suffix)
+  predictor_suffix <- make_dyad_suffixes(predictor)[[predictor]]
+  paste0(dyad_reserved_prefix, predictor_suffix)
 }
 
 add_dyad_time_decomposition <- function(out, group, member, time, source_col,
@@ -158,14 +158,14 @@ add_dyad_time_decomposition <- function(out, group, member, time, source_col,
     dplyr::group_by(.data[[group]], .data[[time]]) |>
     dplyr::mutate(
       # Both member values are required for dyad-level predictor scores.
-      .i_dyad_n_observed = sum(!is.na(.data[[source_col]])),
-      .i_dyad_mean = dplyr::if_else(
-        .data$.i_dyad_n_observed == 2L,
+      .dy_dyad_n_observed = sum(!is.na(.data[[source_col]])),
+      .dy_dyad_mean = dplyr::if_else(
+        .data$.dy_dyad_n_observed == 2L,
         no_NaN_mean(.data[[source_col]]),
         NA_real_
       ),
-      "{mean_col}" := .data$.i_dyad_mean,
-      "{deviation_col}" := .data[[source_col]] - .data$.i_dyad_mean
+      "{mean_col}" := .data$.dy_dyad_mean,
+      "{deviation_col}" := .data[[source_col]] - .data$.dy_dyad_mean
     ) |>
     dplyr::ungroup()
 
@@ -199,29 +199,29 @@ add_dyad_level_decomposition <- function(out, group, member, source_col, mean_co
   dyad_values <- person_values |>
     dplyr::group_by(.data[[group]]) |>
     dplyr::mutate(
-      .i_dyad_n_observed = sum(!is.na(.data[[source_col]])),
-      .i_dyad_mean = dplyr::if_else(
-        .data$.i_dyad_n_observed == 2L,
+      .dy_dyad_n_observed = sum(!is.na(.data[[source_col]])),
+      .dy_dyad_mean = dplyr::if_else(
+        .data$.dy_dyad_n_observed == 2L,
         no_NaN_mean(.data[[source_col]]),
         NA_real_
       ),
-      "{deviation_col}" := .data[[source_col]] - .data$.i_dyad_mean
+      "{deviation_col}" := .data[[source_col]] - .data$.dy_dyad_mean
     ) |>
     dplyr::ungroup()
 
   # Raw cross-sectional dyad means are grand-mean centered by convention.
   if (center_mean) {
     dyad_mean_values <- dyad_values |>
-      dplyr::distinct(.data[[group]], .data$.i_dyad_mean)
+      dplyr::distinct(.data[[group]], .data$.dy_dyad_mean)
 
-    grand_mean <- no_NaN_mean(dyad_mean_values$.i_dyad_mean)
+    grand_mean <- no_NaN_mean(dyad_mean_values$.dy_dyad_mean)
 
     dyad_values <- dyad_values |>
-      dplyr::mutate("{mean_col}" := .data$.i_dyad_mean - grand_mean)
+      dplyr::mutate("{mean_col}" := .data$.dy_dyad_mean - grand_mean)
   } else {
     # Other components already have the intended scale, for example cbp.
     dyad_values <- dyad_values |>
-      dplyr::mutate("{mean_col}" := .data$.i_dyad_mean)
+      dplyr::mutate("{mean_col}" := .data$.dy_dyad_mean)
   }
 
   dyad_values <- dyad_values |>

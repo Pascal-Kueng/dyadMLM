@@ -7,7 +7,7 @@ ILD material remains open.
 
 **Scope:** Gaussian and generalized intensive longitudinal dyadic data, with
 particular attention to APIM, DIM, and DSM examples fitted outside
-`interdep`
+`dyadMLM`
 
 This note records how the package documentation should discuss four distinct
 sources of non-independence:
@@ -224,7 +224,7 @@ For ordinary time-varying predictors, the authors state (p. 437):
 > "we strongly recommend splitting up the effect of time-varying predictors"
 
 into time-averaged and time-specific components. This directly supports
-`interdep`'s `time_2l` decomposition for substantive predictors. In their
+`dyadMLM`'s `time_2l` decomposition for substantive predictors. In their
 discussion, however, they acknowledge that manifest person means introduce
 measurement error into time-averaged effects and identify latent centering as a
 possible remedy (pp. 449-450).

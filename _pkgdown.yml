@@ -1,4 +1,4 @@
-url: https://pascal-kueng.github.io/interdep/
+url: https://pascal-kueng.github.io/dyadMLM/
 
 template:
   bootstrap: 5
@@ -26,7 +26,7 @@ navbar:
       href: workshop/
     github:
       icon: fa-github
-      href: https://github.com/Pascal-Kueng/interdep
+      href: https://github.com/Pascal-Kueng/dyadMLM
       aria-label: GitHub
 
 articles:
@@ -45,8 +45,8 @@ articles:
 reference:
 - title: Main functions
   contents:
-  - prepare_interdep_data
-  - compare_interdep_models
+  - prepare_dyad_data
+  - compare_dyad_models
   - exchangeable_rescov
 
 - title: Example data

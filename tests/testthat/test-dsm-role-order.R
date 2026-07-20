@@ -6,7 +6,7 @@ test_that("DSM role order is required exactly with DSM preparation", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       distinguishable_data,
       group = dyad_id,
       member = person_id,
@@ -21,7 +21,7 @@ test_that("DSM role order is required exactly with DSM preparation", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       distinguishable_data,
       group = dyad_id,
       member = person_id,
@@ -34,7 +34,7 @@ test_that("DSM role order is required exactly with DSM preparation", {
 
   no_role_data <- distinguishable_data[c("dyad_id", "person_id")]
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       no_role_data,
       group = dyad_id,
       member = person_id,
@@ -45,7 +45,7 @@ test_that("DSM role order is required exactly with DSM preparation", {
   )
 
   expect_error(
-    validate_interdep_data(
+    validate_dyad_data(
       no_role_data,
       group = dyad_id,
       member = person_id,
@@ -65,7 +65,7 @@ test_that("DIM and DSM cannot be requested together", {
   )
 
   expect_error(
-    prepare_interdep_data(
+    prepare_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -101,7 +101,7 @@ test_that("DSM role order contains two distinct role values", {
 
   for (role_order in invalid_orders) {
     error <- tryCatch(
-      validate_interdep_data(
+      validate_dyad_data(
         data,
         group = dyad_id,
         member = person_id,
@@ -122,7 +122,7 @@ test_that("DSM role order is stored and matched to the final composition", {
     role = c("female", "male", "female", "male")
   )
 
-  result <- prepare_interdep_data(
+  result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -131,10 +131,10 @@ test_that("DSM role order is stored and matched to the final composition", {
     dsm_role_order = c("male", "female")
   )
 
-  expect_equal(attr(result, "interdep")$dsm_role_order, c("male", "female"))
-  expect_equal(attr(result, "interdep")$dyad_compositions$dyad_type, "distinguishable")
+  expect_equal(attr(result, "dyadMLM")$dsm_role_order, c("male", "female"))
+  expect_equal(attr(result, "dyadMLM")$dyad_compositions$dyad_type, "distinguishable")
 
-  trimmed_result <- prepare_interdep_data(
+  trimmed_result <- prepare_dyad_data(
     data,
     group = dyad_id,
     member = person_id,
@@ -143,12 +143,12 @@ test_that("DSM role order is stored and matched to the final composition", {
     dsm_role_order = c(" male ", " female ")
   )
   expect_equal(
-    attr(trimmed_result, "interdep")$dsm_role_order,
+    attr(trimmed_result, "dyadMLM")$dsm_role_order,
     c("male", "female")
   )
 
   expect_error(
-    prepare_interdep_data(
+    prepare_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -169,7 +169,7 @@ test_that("DSM requires one distinguishable final composition", {
   )
 
   expect_error(
-    prepare_interdep_data(
+    prepare_dyad_data(
       data,
       group = dyad_id,
       member = person_id,
@@ -189,7 +189,7 @@ test_that("DSM requires one distinguishable final composition", {
   )
 
   expect_error(
-    prepare_interdep_data(
+    prepare_dyad_data(
       exchangeable_data,
       group = dyad_id,
       member = person_id,
@@ -215,7 +215,7 @@ test_that("DSM rejects multiple distinguishable compositions actionably", {
   )
 
   expect_error(
-    prepare_interdep_data(
+    prepare_dyad_data(
       data,
       group = dyad_id,
       member = person_id,

@@ -11,7 +11,7 @@
 #'   `NULL`, the current R session's RNG state is used.
 #'
 #' @return A data frame with `group_name`, `member_name`, and
-#'   `.i_arbitrary_role`.
+#'   `.dy_arbitrary_role`.
 #' @keywords internal
 assign_arbitrary_member_roles <- function(data, group_name, member_name, seed = NULL) {
   if (!is.null(seed)) {
@@ -42,7 +42,7 @@ assign_arbitrary_member_roles <- function(data, group_name, member_name, seed = 
     ) |>
     dplyr::group_by(.data[[group_name]]) |>
     dplyr::mutate(
-      "{interdep_arbitrary_role_col}" := sample(
+      "{dyad_arbitrary_role_col}" := sample(
         c("arbitrary_1", "arbitrary_2"),
         size = dplyr::n()
       )
