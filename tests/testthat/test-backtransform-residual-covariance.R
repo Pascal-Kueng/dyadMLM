@@ -1388,24 +1388,41 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
 
   expect_match(
     warning_text,
-    "pair `same_occasion` (`coupleID`) has at most two fitted observations",
+    "Review possible residual-level structure:",
     fixed = TRUE
   )
-  expect_match(warning_text, "may therefore represent", fixed = TRUE)
-  expect_match(warning_text, "The two member positions were not checked", fixed = TRUE)
-  expect_match(warning_text, "For a Gaussian `brms` model", fixed = TRUE)
+  expect_match(
+    warning_text,
+    "Pair `same_occasion` for `IDIFF` (group `coupleID`)",
+    fixed = TRUE
+  )
+  expect_match(warning_text, "may represent residual-level", fixed = TRUE)
+  expect_match(warning_text, "uses row counts only", fixed = TRUE)
+  expect_match(warning_text, "For Gaussian `brms`", fixed = TRUE)
   expect_match(warning_text, "sigma ~ 1", fixed = TRUE)
   expect_match(warning_text, "unstr(time = member_position", fixed = TRUE)
   expect_match(
     warning_text,
-    "omit components: difference = `time`",
+    "Terms absent from the difference block: `time`",
     fixed = TRUE
   )
+  expect_match(warning_text, "fitted model fixes", fixed = TRUE)
   expect_match(warning_text, "correlation +1", fixed = TRUE)
-  expect_match(warning_text, "undefined at zero", fixed = TRUE)
+  expect_match(warning_text, "undefined otherwise", fixed = TRUE)
   expect_match(
     warning_text,
-    "contain non-intercept terms: `time`",
+    "Non-intercept terms at this level: `time`",
+    fixed = TRUE
+  )
+
+  mixed_pair <- pair
+  mixed_pair$shared_indicator <- ".i_is_same_sex"
+  expect_warning(
+    warn_about_exchangeable_residual_level(
+      extracted,
+      list(mixed_pair)
+    ),
+    "exact composition-specific residual covariance structures",
     fixed = TRUE
   )
 
@@ -1433,8 +1450,38 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
       extracted,
       list(shared_only = shared_only)
     ),
-    "difference = `(Intercept)`, `time`",
+    "Terms absent from the difference block: `(Intercept)`, `time`",
     fixed = TRUE
+  )
+
+  # Omissions from the shared block receive the corresponding -1 implication.
+  difference_only_blocks <- list(
+    rescov_test_block(
+      "coupleID",
+      "(Intercept)",
+      "(1 | coupleID)"
+    ),
+    rescov_test_block(
+      "coupleID",
+      c("IDIFF", "IDIFF:time"),
+      "(0 + IDIFF + IDIFF:time | coupleID)"
+    )
+  )
+  missing_shared_slope <- build_exchangeable_pair(
+    difference_only_blocks,
+    1L,
+    2L,
+    "IDIFF",
+    "1"
+  )
+  extracted$blocks <- difference_only_blocks
+  expect_warning(
+    warn_about_exchangeable_residual_level(
+      extracted,
+      list(missing_shared_slope)
+    ),
+    "Terms absent from the shared block: `time`.*correlation -1",
+    fixed = FALSE
   )
 })
 

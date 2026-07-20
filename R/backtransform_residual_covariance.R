@@ -127,8 +127,12 @@
 #' `unstr(time = member_position, gr = residual_group)`. Here,
 #' `member_position` identifies the same two arbitrary positions within every
 #' group, and `residual_group` identifies dyads in cross-sectional data or
-#' dyad-occasions in longitudinal data. The blocks handled here remain relevant
-#' only for higher-level shared and difference random effects.
+#' dyad-occasions in longitudinal data. This direct specification applies when
+#' one residual covariance structure is sufficient. Exact composition-specific
+#' residual covariance structures for mixed dyad types are not currently
+#' supported in a standard single-response `brms` model; use `glmmTMB` for that
+#' model. The blocks handled here remain relevant for higher-level shared and
+#' difference random effects in either backend.
 #'
 #' @return An `exchangeable_rescov` object: a named list with one element per
 #'   matched block pair. Each element contains the member-level
@@ -1642,6 +1646,23 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     paste0("`", terms, "`", collapse = ", ")
   }
 
+  describe_omission <- function(
+    component,
+    terms,
+    member_effects,
+    correlation
+  ) {
+    paste0(
+      "Terms absent from the ", component, " block: ",
+      format_terms(terms), ". The fitted model fixes their ", component,
+      " components to zero. This implies ", member_effects, " (correlation ",
+      correlation, " when the corresponding variance is non-zero; undefined ",
+      "otherwise) and singular member-level covariance for those terms. If ",
+      "this constraint was not intended, revise the ", component,
+      " block and refit."
+    )
+  }
+
   for (i in seq_along(pairs)) {
     pair <- pairs[[i]]
     if (!may_be_exchangeable_residual_level(extracted, pair)) {
@@ -1655,24 +1676,40 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     block_index <- block_indices[!is.na(block_indices)][[1L]]
     group <- extracted$blocks[[block_index]]$group
     pair_name <- names(pairs)[[i]]
-    pair_id <- if (!is.null(pair_name) && nzchar(pair_name)) {
-      paste0("pair `", pair_name, "`")
+    pair_id <- if (!is.null(pair$difference_indicator)) {
+      if (!is.null(pair_name) && nzchar(pair_name)) {
+        paste0("Pair `", pair_name, "` for `", pair$difference_indicator, "`")
+      } else {
+        paste0("Pair for `", pair$difference_indicator, "`")
+      }
+    } else if (!is.null(pair_name) && nzchar(pair_name)) {
+      paste0("Pair `", pair_name, "`")
     } else {
-      paste0("pair ", i)
+      paste0("Pair ", i)
     }
-    pair_label <- paste0(pair_id, " (`", group, "`)")
+    pair_label <- paste0(pair_id, " (group `", group, "`)")
     details <- character()
 
     if (identical(extracted$backend, "brms")) {
-      details <- c(details, paste0(
-        "For a Gaussian `brms` model, if these effects represent partner ",
-        "residual dependence, model it directly with ",
-        "`bf(y ~ ... + unstr(time = member_position, gr = residual_group), ",
-        "sigma ~ 1)`, where `member_position` labels the two arbitrary ",
-        "positions and `residual_group` labels dyads or dyad-occasions. ",
-        "Shared/difference blocks remain appropriate for higher-level random ",
-        "effects."
-      ))
+      if (identical(pair$shared_indicator, "1")) {
+        details <- c(details, paste0(
+          "For Gaussian `brms`, if this pair is intended to model residual ",
+          "dependence, the model should usually be refitted with a common ",
+          "residual scale (`sigma ~ 1`) and direct ",
+          "`unstr(time = member_position, gr = residual_group)` dependence. ",
+          "Here, `member_position` labels the two arbitrary positions and ",
+          "`residual_group` labels dyads or dyad-occasions. See the Backend ",
+          "note in `?exchangeable_rescov`. Shared/difference blocks remain ",
+          "appropriate for higher-level random effects."
+        ))
+      } else {
+        details <- c(details, paste0(
+          "For Gaussian `brms`, exact composition-specific residual ",
+          "covariance structures for mixed dyad types are not currently ",
+          "supported in a standard single-response model. Use `glmmTMB` for ",
+          "this residual-level model; see `?exchangeable_rescov`."
+        ))
+      }
     }
 
     omitted_shared <- pair$underlying_terms[
@@ -1681,65 +1718,57 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     omitted_difference <- pair$underlying_terms[
       is.na(pair$difference_term_indices)
     ]
-    if (length(omitted_shared) > 0L || length(omitted_difference) > 0L) {
-      omitted_components <- c(
-        if (length(omitted_shared) > 0L) {
-          paste0("shared = ", format_terms(omitted_shared))
-        },
-        if (length(omitted_difference) > 0L) {
-          paste0("difference = ", format_terms(omitted_difference))
-        }
+    if (length(omitted_difference) > 0L) {
+      details <- c(
+        details,
+        describe_omission(
+          "difference",
+          omitted_difference,
+          "identical member effects",
+          "+1"
+        )
       )
-      implications <- c(
-        if (length(omitted_shared) > 0L) {
-          paste0(
-            "omitted shared components make the corresponding member effects ",
-            "equal and opposite (correlation -1)"
-          )
-        },
-        if (length(omitted_difference) > 0L) {
-          paste0(
-            "omitted difference components make the corresponding member ",
-            "effects identical (correlation +1)"
-          )
-        }
+    }
+    if (length(omitted_shared) > 0L) {
+      details <- c(
+        details,
+        describe_omission(
+          "shared",
+          omitted_shared,
+          "equal and opposite member effects",
+          "-1"
+        )
       )
-      details <- c(details, paste0(
-        "The fitted blocks omit components: ",
-        paste(omitted_components, collapse = "; "), ". The fitted model, not ",
-        "`exchangeable_rescov()`, imposed these structural zeros: ",
-        paste(implications, collapse = "; "), ". These correlations apply ",
-        "when the corresponding variance is non-zero and are undefined at ",
-        "zero. The corresponding recovered covariance is singular by ",
-        "construction. Confirm that these constraints were intended."
-      ))
     }
 
     slope_terms <- setdiff(pair$underlying_terms, "(Intercept)")
     if (length(slope_terms) > 0L) {
       details <- c(details, paste0(
-        "The fitted blocks contain non-intercept terms: ",
-        format_terms(slope_terms), ". If this is the residual level, these ",
-        "terms model covariate-dependent residual covariance, not higher-level ",
-        "random slopes. This can be intentional; if stable random slopes were ",
-        "intended, group them at a level that repeats across occasions, such ",
-        "as the dyad identifier."
+        "Non-intercept terms at this level: ", format_terms(slope_terms), ". ",
+        "If this pair is residual-level, they define covariate-dependent ",
+        "residual covariance. For constant residual covariance, consider ",
+        "removing them from these blocks. If stable random slopes were ",
+        "intended, specify them at a grouping level observed repeatedly ",
+        "across occasions."
       ))
     }
 
     if (length(details) > 0L) {
       messages <- c(messages, paste0(
-        pair_label, " has at most two fitted observations per grouping unit ",
-        "and may therefore represent residual-level dependence.",
-        paste(details, collapse = " ")
+        pair_label, " may represent residual-level dependence: each group ",
+        "has at most two fitted rows. This check uses row counts only; it ",
+        "does not verify that the rows are the two partner observations.",
+        "\n\n- ", paste(details, collapse = "\n- ")
       ))
     }
   }
 
   if (length(messages) > 0L) {
     warning(
-      "Potential residual-level specification issues:\n- ",
-      paste(messages, collapse = "\n- "),
+      "Review possible residual-level structure",
+      if (length(messages) == 1L) "" else "s",
+      ":\n\n",
+      paste(messages, collapse = "\n\n"),
       call. = FALSE
     )
   }

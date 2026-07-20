@@ -145,8 +145,12 @@ residual scale (\code{sigma ~ 1}) and
 \code{unstr(time = member_position, gr = residual_group)}. Here,
 \code{member_position} identifies the same two arbitrary positions within every
 group, and \code{residual_group} identifies dyads in cross-sectional data or
-dyad-occasions in longitudinal data. The blocks handled here remain relevant
-only for higher-level shared and difference random effects.
+dyad-occasions in longitudinal data. This direct specification applies when
+one residual covariance structure is sufficient. Exact composition-specific
+residual covariance structures for mixed dyad types are not currently
+supported in a standard single-response \code{brms} model; use \code{glmmTMB} for that
+model. The blocks handled here remain relevant for higher-level shared and
+difference random effects in either backend.
 }
 
 \seealso{
