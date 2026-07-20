@@ -10,6 +10,12 @@ dyad compositions in one analysis. The unified SEM presentation by
 Bolger et al. (2025) is the basis and inspiration for this vignette.
 Here, we implement a similar general idea in one multilevel model.
 
+> **Model-engine support.** The joint mixed-composition models in this
+> vignette use `glmmTMB`. An exact composition-specific Gaussian
+> residual covariance structure is not currently supported for a
+> standard single-response `brms` model. Use `glmmTMB` for the
+> specifications shown here.
+
 This vignette builds on the regular [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.md). For
 the broader package workflow and an overview of the other model-specific
@@ -497,9 +503,10 @@ available data or some components are close to zero (del Rosario and
 West 2025). When near-zero covariance components make a frequentist fit
 unstable, regularizing priors in a Bayesian model can sometimes help,
 but they do not replace careful model checks (del Rosario and West
-2025). A Bayesian implementation of this mixed-composition model is
-beyond the scope of this vignette. For these example data, we use the
-BFGS optimizer with a higher iteration limit.
+2025). The exact composition-specific Gaussian residual covariance
+structure is not currently supported for a standard single-response
+`brms` model, so the model below uses `glmmTMB`. For these example data,
+we use the BFGS optimizer with a higher iteration limit.
 
 ``` r
 

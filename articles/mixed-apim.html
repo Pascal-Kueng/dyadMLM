@@ -78,6 +78,13 @@ exchangeable dyad compositions in one analysis. The unified SEM
 presentation by <span class="citation">Bolger et al. (2025)</span> is
 the basis and inspiration for this vignette. Here, we implement a
 similar general idea in one multilevel model.</p>
+<blockquote>
+<p><strong>Model-engine support.</strong> The joint mixed-composition
+models in this vignette use <code>glmmTMB</code>. An exact
+composition-specific Gaussian residual covariance structure is not
+currently supported for a standard single-response <code>brms</code>
+model. Use <code>glmmTMB</code> for the specifications shown here.</p>
+</blockquote>
 <p>This vignette builds on the regular <a href="apim.html">Actor-Partner
 Interdependence Model vignette</a>. For the broader package workflow and
 an overview of the other model-specific vignettes, including the <a href="dim.html">Dyad-Individual Model</a> and <a href="dsm.html">Dyadic
@@ -562,9 +569,11 @@ available data or some components are close to zero <span class="citation">(del 
 covariance components make a frequentist fit unstable, regularizing
 priors in a Bayesian model can sometimes help, but they do not replace
 careful model checks <span class="citation">(del Rosario and West
-2025)</span>. A Bayesian implementation of this mixed-composition model
-is beyond the scope of this vignette. For these example data, we use the
-BFGS optimizer with a higher iteration limit.</p>
+2025)</span>. The exact composition-specific Gaussian residual
+covariance structure is not currently supported for a standard
+single-response <code>brms</code> model, so the model below uses
+<code>glmmTMB</code>. For these example data, we use the BFGS optimizer
+with a higher iteration limit.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">mixed_ild_gaussian_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>

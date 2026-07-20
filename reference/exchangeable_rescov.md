@@ -2,8 +2,11 @@
 
 Back-transforms covariance matrices from paired shared and
 member-difference random-effect blocks to the covariance structure of
-two exchangeable members. For the model specification, derivation, and
-interpretation, see the [exchangeable APIM
+two exchangeable members. The result is on the fitted random effects'
+linear-predictor scale. In non-Gaussian models, it therefore describes a
+Gaussian latent covariance, not response-scale residual covariance. For
+the model specification, derivation, and interpretation, see the
+[exchangeable APIM
 vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure).
 
 ## Usage
@@ -79,14 +82,14 @@ blocks or terms. To specify one pair with a custom difference indicator:
 
 For multiple covariance levels, wrap the pairs in an outer list. For
 example, in a Gaussian `glmmTMB` model fitted with `dispformula = ~ 0`,
-this call recovers both the stable dyad-level random-intercept
-covariance and the same-occasion partner residual covariance:
+this call recovers both a stable dyad-level covariance with an omitted
+difference time slope and the same-occasion partner residual covariance:
 
     result <- interdep::exchangeable_rescov(
       model,
       pairs = list(
         dyad = list(
-          shared = "(1 | coupleID)",
+          shared = "(1 + diaryday | coupleID)",
           difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
           difference_indicator =
             ".i_diff_assumed_exchangeable_arbitrary"
@@ -99,6 +102,13 @@ covariance and the same-occasion partner residual covariance:
         )
       )
     )
+
+At the dyad level, the fitted model includes a shared time slope but no
+difference time slope. Thus, the two members' time random effects are
+identical at this level, with correlation `+1` whenever the shared slope
+variance is non-zero; at zero variance, the correlation is undefined.
+Covariances involving the diary-day slope are therefore supplied
+entirely by the shared block.
 
 The random-effect terms may be copied exactly from the model formula.
 Equivalent backend syntax is also recognized, such as
@@ -141,10 +151,21 @@ vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-cons
 
 ## Backend note
 
-In Gaussian `brms` models, cross-sectional and same-occasion partner
-residual dependence should usually be represented directly with
-`unstr(time = member, gr = pair_id)`. The blocks handled here remain
-relevant only for higher-level shared and difference random effects.
+In `brms`, cross-sectional and same-occasion partner dependence can be
+represented directly with
+`unstr(time = member_position, gr = residual_group)`. With Gaussian
+outcomes, `sigma ~ 1` supplies the common residual scale. Non-Gaussian
+families have no `sigma` parameter here; `unstr()` instead estimates a
+common latent residual scale and correlation on the linear-predictor
+scale. Here, `member_position` identifies the same two arbitrary
+positions within every group, and `residual_group` identifies dyads in
+cross-sectional data or dyad-occasions in longitudinal data. This direct
+specification applies when one covariance structure is sufficient.
+Separate composition-specific `unstr()` structures for mixed dyad types
+are not currently supported in a standard single-response `brms` model.
+For Gaussian mixed-dyad residual covariance, use `glmmTMB`.
+Shared/difference blocks remain relevant for higher-level random effects
+and can represent latent link-scale covariance in non-Gaussian models.
 
 ## See also
 

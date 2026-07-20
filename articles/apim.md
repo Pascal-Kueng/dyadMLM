@@ -499,6 +499,11 @@ backtransformed <- interdep::exchangeable_rescov(
     difference_indicator =".i_diff_female_x_male_arbitrary"
   )
 )
+#> Warning: Review possible residual-level structure:
+#> 
+#> Pair for `.i_diff_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.
+#> 
+#> - Terms absent from the shared block: `(Intercept)`. The fitted model fixes their shared components at zero, implying equal and opposite member effects (correlation -1 when variance > 0; undefined at zero) and singular member covariance. If unintended, revise this block and refit.
 
 # residual variance-covariance and SD-correlation representations
 backtransformed

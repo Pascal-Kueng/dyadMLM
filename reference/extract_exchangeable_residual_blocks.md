@@ -19,7 +19,7 @@ extract_exchangeable_residual_blocks(model)
 
 ## Value
 
-A list containing the model `backend` and one normalized record per
-random-effect block. Every record contains `group`, `coefficients`,
-`correlated`, `term`, and an estimate/draw-by-coefficients covariance
-array.
+A list containing the model `backend`, one normalized record per
+random-effect block, and one grouping-factor ID per fitted row. Every
+block record contains `group`, `coefficients`, `correlated`, `term`, and
+an estimate/draw-by-coefficients covariance array.

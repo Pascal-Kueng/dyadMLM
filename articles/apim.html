@@ -536,6 +536,11 @@ block, we tell the function:</p>
 <span>    difference_indicator <span class="op">=</span><span class="st">".i_diff_female_x_male_arbitrary"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Review possible residual-level structure:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Pair for `.i_diff_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; - Terms absent from the shared block: `(Intercept)`. The fitted model fixes their shared components at zero, implying equal and opposite member effects (correlation -1 when variance &gt; 0; undefined at zero) and singular member covariance. If unintended, revise this block and refit.</span></span>
 <span></span>
 <span><span class="co"># residual variance-covariance and SD-correlation representations</span></span>
 <span><span class="va">backtransformed</span></span>
