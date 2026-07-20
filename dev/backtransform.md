@@ -148,8 +148,8 @@ The first version does not support:
 
 - a shared and difference coordinate placed in the same correlated block;
 - multivariate `brms` models;
-- composition-specific residual covariance structures for mixed dyad types in
-  a standard single-response `brms` model;
+- separate composition-specific `unstr()` structures for mixed dyad types in a
+  standard single-response `brms` model;
 - linked multi-term `brms` blocks, `gr(..., by = ...)` blocks, or random
   effects for distributional/nonlinear parameters;
 - DSM `+0.5/-0.5` score transformations;

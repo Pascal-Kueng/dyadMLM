@@ -1396,11 +1396,11 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
     "Pair `same_occasion` for `IDIFF` (group `coupleID`)",
     fixed = TRUE
   )
-  expect_match(warning_text, "may represent residual-level", fixed = TRUE)
-  expect_match(warning_text, "uses row counts only", fixed = TRUE)
-  expect_match(warning_text, "For Gaussian `brms`", fixed = TRUE)
-  expect_match(warning_text, "sigma ~ 1", fixed = TRUE)
+  expect_match(warning_text, "may be residual-level", fixed = TRUE)
+  expect_match(warning_text, "Row-count check only", fixed = TRUE)
+  expect_match(warning_text, "For `brms`", fixed = TRUE)
   expect_match(warning_text, "unstr(time = member_position", fixed = TRUE)
+  expect_match(warning_text, "See `?exchangeable_rescov`", fixed = TRUE)
   expect_match(
     warning_text,
     "Terms absent from the difference block: `time`",
@@ -1408,10 +1408,10 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
   )
   expect_match(warning_text, "fitted model fixes", fixed = TRUE)
   expect_match(warning_text, "correlation +1", fixed = TRUE)
-  expect_match(warning_text, "undefined otherwise", fixed = TRUE)
+  expect_match(warning_text, "undefined at zero", fixed = TRUE)
   expect_match(
     warning_text,
-    "Non-intercept terms at this level: `time`",
+    "Non-intercept terms: `time`",
     fixed = TRUE
   )
 
@@ -1422,7 +1422,7 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
       extracted,
       list(mixed_pair)
     ),
-    "exact composition-specific residual covariance structures",
+    "separate composition-specific `unstr()` structures",
     fixed = TRUE
   )
 

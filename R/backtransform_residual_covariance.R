@@ -4,7 +4,10 @@
 #'
 #' Back-transforms covariance matrices from paired shared and member-difference
 #' random-effect blocks to the covariance structure of two exchangeable
-#' members. For the model specification, derivation, and interpretation, see the
+#' members. The result is on the fitted random effects' linear-predictor scale.
+#' In non-Gaussian models, it therefore describes a Gaussian latent covariance,
+#' not response-scale residual covariance. For the model specification,
+#' derivation, and interpretation, see the
 #' [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure).
 #'
 #' @param model A fitted `glmmTMB` or single-response `brmsfit` model.
@@ -121,18 +124,22 @@
 #' [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks).
 #'
 #' @section Backend note:
-#' In Gaussian `brms` models, cross-sectional and same-occasion partner
-#' residual dependence should usually be represented directly with a common
-#' residual scale (`sigma ~ 1`) and
-#' `unstr(time = member_position, gr = residual_group)`. Here,
+#' In `brms`, cross-sectional and same-occasion partner dependence can be
+#' represented directly with
+#' `unstr(time = member_position, gr = residual_group)`. With Gaussian
+#' outcomes, `sigma ~ 1` supplies the common residual scale. Non-Gaussian
+#' families have no `sigma` parameter here; `unstr()` instead estimates a
+#' common latent residual scale and correlation on the linear-predictor scale.
+#' Here,
 #' `member_position` identifies the same two arbitrary positions within every
 #' group, and `residual_group` identifies dyads in cross-sectional data or
 #' dyad-occasions in longitudinal data. This direct specification applies when
-#' one residual covariance structure is sufficient. Exact composition-specific
-#' residual covariance structures for mixed dyad types are not currently
-#' supported in a standard single-response `brms` model; use `glmmTMB` for that
-#' model. The blocks handled here remain relevant for higher-level shared and
-#' difference random effects in either backend.
+#' one covariance structure is sufficient. Separate composition-specific
+#' `unstr()` structures for mixed dyad types are not currently supported in a
+#' standard single-response `brms` model. For Gaussian mixed-dyad residual
+#' covariance, use `glmmTMB`. Shared/difference blocks remain relevant for
+#' higher-level random effects and can represent latent link-scale covariance
+#' in non-Gaussian models.
 #'
 #' @return An `exchangeable_rescov` object: a named list with one element per
 #'   matched block pair. Each element contains the member-level
@@ -1655,11 +1662,9 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     paste0(
       "Terms absent from the ", component, " block: ",
       format_terms(terms), ". The fitted model fixes their ", component,
-      " components to zero. This implies ", member_effects, " (correlation ",
-      correlation, " when the corresponding variance is non-zero; undefined ",
-      "otherwise) and singular member-level covariance for those terms. If ",
-      "this constraint was not intended, revise the ", component,
-      " block and refit."
+      " components at zero, implying ", member_effects, " (correlation ",
+      correlation, " when variance > 0; undefined at zero) and singular ",
+      "member covariance. If unintended, revise this block and refit."
     )
   }
 
@@ -1693,21 +1698,18 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     if (identical(extracted$backend, "brms")) {
       if (identical(pair$shared_indicator, "1")) {
         details <- c(details, paste0(
-          "For Gaussian `brms`, if this pair is intended to model residual ",
-          "dependence, the model should usually be refitted with a common ",
-          "residual scale (`sigma ~ 1`) and direct ",
-          "`unstr(time = member_position, gr = residual_group)` dependence. ",
-          "Here, `member_position` labels the two arbitrary positions and ",
-          "`residual_group` labels dyads or dyad-occasions. See the Backend ",
-          "note in `?exchangeable_rescov`. Shared/difference blocks remain ",
-          "appropriate for higher-level random effects."
+          "For `brms`, if this pair is intended to model residual dependence, ",
+          "the model should usually be refitted with a direct ",
+          "`unstr(time = member_position, gr = residual_group)` ",
+          "structure. See `?exchangeable_rescov`."
         ))
       } else {
         details <- c(details, paste0(
-          "For Gaussian `brms`, exact composition-specific residual ",
-          "covariance structures for mixed dyad types are not currently ",
-          "supported in a standard single-response model. Use `glmmTMB` for ",
-          "this residual-level model; see `?exchangeable_rescov`."
+          "For `brms`, one response cannot contain separate composition-specific ",
+          "`unstr()` structures. Use `glmmTMB` for Gaussian mixed-dyad ",
+          "residual covariance. For non-Gaussian outcomes, these blocks ",
+          "instead describe latent link-scale covariance. ",
+          "See `?exchangeable_rescov`."
         ))
       }
     }
@@ -1744,20 +1746,17 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     slope_terms <- setdiff(pair$underlying_terms, "(Intercept)")
     if (length(slope_terms) > 0L) {
       details <- c(details, paste0(
-        "Non-intercept terms at this level: ", format_terms(slope_terms), ". ",
-        "If this pair is residual-level, they define covariate-dependent ",
-        "residual covariance. For constant residual covariance, consider ",
-        "removing them from these blocks. If stable random slopes were ",
-        "intended, specify them at a grouping level observed repeatedly ",
-        "across occasions."
+        "Non-intercept terms: ", format_terms(slope_terms), ". At residual ",
+        "level these make covariance covariate-dependent. For constant ",
+        "covariance, consider removing them. For stable random slopes, use a ",
+        "grouping level repeated across occasions."
       ))
     }
 
     if (length(details) > 0L) {
       messages <- c(messages, paste0(
-        pair_label, " may represent residual-level dependence: each group ",
-        "has at most two fitted rows. This check uses row counts only; it ",
-        "does not verify that the rows are the two partner observations.",
+        pair_label, " may be residual-level: at most two fitted rows per ",
+        "group. Row-count check only; partner positions were not verified.",
         "\n\n- ", paste(details, collapse = "\n- ")
       ))
     }

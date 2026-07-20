@@ -40,7 +40,10 @@ are posterior-draw by coefficient by coefficient arrays.
 \description{
 Back-transforms covariance matrices from paired shared and member-difference
 random-effect blocks to the covariance structure of two exchangeable
-members. For the model specification, derivation, and interpretation, see the
+members. The result is on the fitted random effects' linear-predictor scale.
+In non-Gaussian models, it therefore describes a Gaussian latent covariance,
+not response-scale residual covariance. For the model specification,
+derivation, and interpretation, see the
 \href{https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}.
 }
 \details{
@@ -139,18 +142,22 @@ See the constrained-block example in the
 
 \section{Backend note}{
 
-In Gaussian \code{brms} models, cross-sectional and same-occasion partner
-residual dependence should usually be represented directly with a common
-residual scale (\code{sigma ~ 1}) and
-\code{unstr(time = member_position, gr = residual_group)}. Here,
+In \code{brms}, cross-sectional and same-occasion partner dependence can be
+represented directly with
+\code{unstr(time = member_position, gr = residual_group)}. With Gaussian
+outcomes, \code{sigma ~ 1} supplies the common residual scale. Non-Gaussian
+families have no \code{sigma} parameter here; \code{unstr()} instead estimates a
+common latent residual scale and correlation on the linear-predictor scale.
+Here,
 \code{member_position} identifies the same two arbitrary positions within every
 group, and \code{residual_group} identifies dyads in cross-sectional data or
 dyad-occasions in longitudinal data. This direct specification applies when
-one residual covariance structure is sufficient. Exact composition-specific
-residual covariance structures for mixed dyad types are not currently
-supported in a standard single-response \code{brms} model; use \code{glmmTMB} for that
-model. The blocks handled here remain relevant for higher-level shared and
-difference random effects in either backend.
+one covariance structure is sufficient. Separate composition-specific
+\code{unstr()} structures for mixed dyad types are not currently supported in a
+standard single-response \code{brms} model. For Gaussian mixed-dyad residual
+covariance, use \code{glmmTMB}. Shared/difference blocks remain relevant for
+higher-level random effects and can represent latent link-scale covariance
+in non-Gaussian models.
 }
 
 \seealso{

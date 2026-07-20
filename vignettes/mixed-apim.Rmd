@@ -36,9 +36,9 @@ is the basis and inspiration for this vignette. Here, we implement a similar
 general idea in one multilevel model.
 
 > **Model-engine support.** The joint mixed-composition models in this vignette
-> use `glmmTMB`. An exact composition-specific residual covariance structure is
-> not currently supported for a standard single-response `brms` model. Use
-> `glmmTMB` for the specifications shown here.
+> use `glmmTMB`. An exact composition-specific Gaussian residual covariance
+> structure is not currently supported for a standard single-response `brms`
+> model. Use `glmmTMB` for the specifications shown here.
 
 This vignette builds on the regular
 [Actor-Partner Interdependence Model vignette](apim.html). For the broader
@@ -416,9 +416,9 @@ complex for the available data or some components are close to zero
 make a frequentist fit unstable, regularizing priors in a Bayesian model can
 sometimes help, but they do not replace careful model checks
 [@delrosarioPracticalGuideSpecifying2025]. The exact composition-specific
-residual covariance structure is not currently supported for a standard
-single-response `brms` model, so the model below uses `glmmTMB`. For these
-example data, we use the BFGS optimizer with a higher iteration limit.
+Gaussian residual covariance structure is not currently supported for a
+standard single-response `brms` model, so the model below uses `glmmTMB`. For
+these example data, we use the BFGS optimizer with a higher iteration limit.
 
 ```{r fit-mixed-ild-gaussian, eval = FALSE}
 
