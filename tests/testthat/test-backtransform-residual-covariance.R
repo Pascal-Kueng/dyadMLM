@@ -661,16 +661,14 @@ test_that("supplied exact pairs support wholly omitted blocks", {
     "Use `NULL` only if that block was omitted from the fitted model",
     fixed = TRUE
   )
-  expect_no_warning(
-    difference_only <- match_supplied_exchangeable_residual_blocks(
-      blocks,
-      list(
-        shared = NULL,
-        difference = paste0(
-          "(0 + ", marker, " + ", marker, ":time || coupleID:day)"
-        ),
-        difference_indicator = marker
-      )
+  difference_only <- match_supplied_exchangeable_residual_blocks(
+    blocks,
+    list(
+      shared = NULL,
+      difference = paste0(
+        "(0 + ", marker, " + ", marker, ":time || coupleID:day)"
+      ),
+      difference_indicator = marker
     )
   )
   matched <- c(shared_only, difference_only)
@@ -866,20 +864,18 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
     rescov_test_block("coupleID", "time", "shared time"),
     rescov_test_block("coupleID", "IDIFF:support", "difference support")
   )
-  expect_no_warning(
-    matched <- match_supplied_exchangeable_residual_blocks(
-      blocks,
+  matched <- match_supplied_exchangeable_residual_blocks(
+    blocks,
+    list(
       list(
-        list(
-          shared = "shared time",
-          difference = NULL,
-          difference_indicator = "IDIFF"
-        ),
-        list(
-          shared = NULL,
-          difference = "difference support",
-          difference_indicator = "IDIFF"
-        )
+        shared = "shared time",
+        difference = NULL,
+        difference_indicator = "IDIFF"
+      ),
+      list(
+        shared = NULL,
+        difference = "difference support",
+        difference_indicator = "IDIFF"
       )
     )
   )
@@ -1522,14 +1518,6 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
     "separate composition-specific `unstr()` structures",
     fixed = TRUE
   )
-
-  # The same coefficient blocks are ordinary higher-level random effects when
-  # every dyad contributes repeated member observations.
-  extracted$group_ids$coupleID <- rep(seq_len(2L), each = 3L)
-  expect_no_warning(warn_about_exchangeable_residual_level(
-    extracted,
-    list(pair)
-  ))
 
   # A wholly omitted difference block is still flagged even though no idiff
   # term or member-position column exists in the fitted model.

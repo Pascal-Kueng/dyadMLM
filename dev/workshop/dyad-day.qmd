@@ -1117,12 +1117,29 @@ fit_and_draw_dim(
 
 <!-- ca. 3 Minutes -->
 
+:::{.notes}
+
+-> let students interpret
+
+-> Why no intercept? for the deviation? 
+
+No intercept for the MVPA deviation, because that would break exchangeability. 
+if support deviation is zero, then MVPA deviation is also supposed to be zero. 
+
+-> We conceptually DO have an intercept, it is just constrained to be ZERO!
+
+-> just like the correlation between the residuals, they are not estimated, which 
+effectively constrains them to be zero. 
+
+:::
 
 ## DIM to APIM coefficients
 
-Once we fit an APIM, we have already fitted a DIM—and vice versa.
+- Once we fit an APIM, we have already fitted a DIM—and vice versa.
 
-We can transform values from a fitted APIM into DIM values.
+- We can transform values from a fitted APIM into DIM values.
+
+## DIM to APIM coefficients
 
 Suppose $X_i=1$ and $X_j=1$,
 
