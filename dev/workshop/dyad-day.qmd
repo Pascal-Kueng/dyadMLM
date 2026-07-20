@@ -1139,26 +1139,24 @@ effectively constrains them to be zero.
 
 - We can transform values from a fitted APIM into DIM values.
 
-## DIM to APIM coefficients
+## DIM to APIM coefficients {.compact-derivation}
 
-Suppose $X_i=1$ and $X_j=1$,
+If our APIM predictor values for a focal person are:
+$X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=1$,
 
-then our DIM coordinates are:
-
-$$
-X_{\mathrm{mean}}=1,\qquad X_{\mathrm{dev},i}=0.
-$$
+the same predictor profile in DIM coordinates is:
+$X_{\mathrm{mean}}=1,\quad X_{\mathrm{dev,self}}=0.$
 
 So,
 
 $$
-\hat Y_i=1\times a+1\times p
+\hat Y_{\mathrm{self}}=1\times a+1\times p
 $$
 
 implies
 
 $$
-\hat Y_i=1\times b_{\mathrm{mean}}+0\times b_{\mathrm{dev}}
+\hat Y_{\mathrm{self}}=1\times b_{\mathrm{mean}}+0\times b_{\mathrm{dev}}
 =b_{\mathrm{mean}}.
 $$
 
@@ -1168,29 +1166,25 @@ $$
 b_{\mathrm{mean}}=a+p.
 $$
 
+## DIM to APIM coefficients {.compact-derivation}
 
-## DIM to APIM coefficients
+If our APIM predictor values for a focal person are:
+$X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=-1$,
 
-Now suppose $X_i=1$ and $X_j=-1$ (imagine centered values),
-
-then the DIM coordinates are:
-
-$$
-X_{\mathrm{mean}}=0,\qquad X_{\mathrm{dev},i}=1
-$$
-
-($i$ is 1 higher than the mean and 2 higher than partner $j$).
+the same predictor profile in DIM coordinates is:
+$X_{\mathrm{mean}}=0,\quad X_{\mathrm{dev,self}}=1$.
 
 So,
 
 $$
-\hat Y_i=1\times a+(-1)\times p
+\hat Y_{\mathrm{self}}=1\times a+(-1)\times p
 $$
 
-implies for the higher partner:
+implies for the focal person, whose $X_{\mathrm{self}}$ is 1 unit above the
+couple mean:
 
 $$
-\hat Y_i=0\times b_{\mathrm{mean}}+1\times b_{\mathrm{dev}}
+\hat Y_{\mathrm{self}}=0\times b_{\mathrm{mean}}+1\times b_{\mathrm{dev}}
 =b_{\mathrm{dev}}.
 $$
 
@@ -1199,9 +1193,6 @@ Therefore,
 $$
 b_{\mathrm{dev}}=a-p.
 $$
-
-<!-- TODO @codex how to bring all this info onto one or two slides without 
-overloading them and not loosing valuable clarity? -->
 
 
 ## DIM to APIM coefficients

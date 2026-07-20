@@ -611,26 +611,10 @@ is equivalent to the comparison shown in [Testing distinguishability in the APIM
 
 ## Intensive longitudinal DSM
 
-> The following sections are under construction and are coming soon! This extension
-is equivalent to the extension from the cross-sectional DIM to the ILD DIM. Please
-refer to that section.
-
-### Interpretation of concurrent ILD DSM coefficients
-
-### Equivalence of APIM and DSM in ILD
-
-### Including Random Slopes
-
-#### Transforming DSM random slopes to APIM slopes
-
-### Dynamic ILD DSM example
-
-The ILD models above do not model residual serial dependence. One way to model
-dynamics or to account for temporal dependency is to include lagged outcomes as predictors.
-
-**Note:** Dynamic models, especially with small time series, are subject to bias.
-This, and the choice between raw and within-person-centered outcome lags, are
-addressed in the [APIM vignette's discussion of dynamic models](apim.html#dynamic-models).
+The intensive longitudinal DSM extends the cross-sectional DSM using the same
+temporal decomposition and multilevel workflow shown for the
+[intensive longitudinal DIM](dim.html#intensive-longitudinal-dim). The DSM
+retains the directional mean-and-difference parameterization described above.
 
 ---
 

@@ -123,6 +123,18 @@
   margin-top: 0.1em;
 }
 
+/* Preserve the step-by-step coefficient derivations while fitting each one
+   on a single slide. Only vertical whitespace is tightened. */
+.reveal .slides section.compact-derivation > p {
+  font-size: 0.88em;
+  line-height: 1.18;
+  margin-block: 0.12em;
+}
+
+.reveal .slides section.compact-derivation .math.display {
+  margin-block: 0.14em;
+}
+
 /* Compact side-by-side covariance mappings in the appendix. */
 .reveal .covariance-backtransform {
   margin-top: -1.05em;
