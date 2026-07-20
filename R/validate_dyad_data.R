@@ -528,9 +528,18 @@ resolve_incomplete_dyads <- function(out, group_name, member_name, incomplete_dy
 
 resolve_dyad_roles <- function(out, group_name, member_name, role_name, missing_role) {
   known_roles <- out[[role_name]][!is.na(out[[role_name]])]
+  role_labels <- as.character(known_roles)
+
+  if (any(!nzchar(trimws(role_labels)))) {
+    stop(
+      "`role` values must not be empty or whitespace-only. Use `NA` for ",
+      "unknown roles so `missing_role` can handle them.",
+      call. = FALSE
+    )
+  }
 
   # Reject role labels that contain the reserved composition separator.
-  if (any(grepl(dyad_composition_sep, as.character(known_roles), fixed = TRUE))) {
+  if (any(grepl(dyad_composition_sep, role_labels, fixed = TRUE))) {
     offending_roles <- unique(known_roles[
       grepl(dyad_composition_sep, as.character(known_roles), fixed = TRUE)
     ])

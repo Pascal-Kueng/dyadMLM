@@ -571,6 +571,26 @@ test_that("prepare_dyad_data rejects role labels containing the internal separat
   )
 })
 
+test_that("prepare_dyad_data rejects empty role labels", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  for (roles in list(
+    c("", "male", "female", "male"),
+    c("female", "male", " \t", "male"),
+    factor(c("", "male", "female", "male"))
+  )) {
+    data$role <- roles
+    expect_error(
+      prepare_dyad_data(data, group = dyad_id, member = person_id, role = role),
+      "`role` values must not be empty or whitespace-only",
+      fixed = TRUE
+    )
+  }
+})
+
 test_that("prepare_dyad_data infers compositions from sparse longitudinal roles", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),

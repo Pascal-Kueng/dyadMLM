@@ -1,6 +1,6 @@
 Package: dyadMLM
 Title: Tools for Dyadic Multilevel Models
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: 
     person("Pascal", "Küng", , "kueng.pascal@gmail.com", role = c("aut", "cre"))
 Description: Provides tools for dyadic multilevel modeling with linear and
@@ -28,7 +28,7 @@ Suggests:
     marginaleffects,
     MASS,
     rmarkdown,
-    testthat (>= 3.0.0),
+    testthat (>= 3.1.7),
     usethis
 Config/testthat/edition: 3
 Imports: 
@@ -41,4 +41,6 @@ VignetteBuilder: knitr
 Depends: 
     R (>= 4.1)
 LazyData: true
-URL: https://pascal-kueng.github.io/dyadMLM/
+URL: https://pascal-kueng.github.io/dyadMLM/,
+    https://github.com/Pascal-Kueng/dyadMLM
+BugReports: https://github.com/Pascal-Kueng/dyadMLM/issues

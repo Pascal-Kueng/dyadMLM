@@ -7,7 +7,8 @@
 exchangeable_rescov(model, pairs = NULL)
 }
 \arguments{
-\item{model}{A fitted \code{glmmTMB} or single-response \code{brmsfit} model.}
+\item{model}{A fitted \code{glmmTMB} or single-response \code{brmsfit} model. For
+\code{glmmTMB}, only conditional-model random effects are processed.}
 
 \item{pairs}{\code{NULL} (default) for automatic block matching. Otherwise, supply
 one block-pair specification or a list of block-pair specifications. Each
@@ -114,6 +115,13 @@ indicator columns, \code{difference_indicator} must assign \code{-1} and \code{+
 two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where \code{shared_indicator} is
 zero.
+
+For custom difference indicators supplied through \code{pairs}, the function
+checks whether both positions occur within each supported fitted grouping
+unit. It rejects coding when no group contains both positions, and warns when
+only some groups are one-sided, which can result from fitted-row filtering.
+It also warns when stable member assignments cannot be verified across
+repeated rows without a member identifier.
 }
 \section{What omitted blocks and terms mean}{
 
@@ -142,6 +150,11 @@ See the constrained-block example in the
 
 \section{Backend note}{
 
+For \code{glmmTMB}, random effects in non-conditional components are ignored with
+a warning. See the vignette's
+\href{https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation}{extension to exchangeable random slopes}
+section for the manual calculation.
+
 In \code{brms}, cross-sectional and same-occasion partner dependence can be
 represented directly with
 \code{unstr(time = member_position, gr = residual_group)}. With Gaussian
@@ -160,6 +173,28 @@ higher-level random effects and can represent latent link-scale covariance
 in non-Gaussian models.
 }
 
+\examples{
+if (requireNamespace("glmmTMB", quietly = TRUE)) {
+  example_data <- prepare_dyad_data(
+    example_dyadic_crosssectional,
+    group = coupleID,
+    member = personID,
+    model_type = "none",
+    seed = 123
+  )
+
+  model <- glmmTMB::glmmTMB(
+    satisfaction ~ 1 +
+      us(1 | coupleID) +
+      us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
+    dispformula = ~ 0,
+    data = example_data
+  )
+
+  exchangeable_rescov(model)
+}
+
+}
 \seealso{
 The
 \href{https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure}{exchangeable APIM vignette}

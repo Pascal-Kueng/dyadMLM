@@ -10,7 +10,8 @@
 #' derivation, and interpretation, see the
 #' [exchangeable APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure).
 #'
-#' @param model A fitted `glmmTMB` or single-response `brmsfit` model.
+#' @param model A fitted `glmmTMB` or single-response `brmsfit` model. For
+#'   `glmmTMB`, only conditional-model random effects are processed.
 #' @param pairs `NULL` (default) for automatic block matching. Otherwise, supply
 #'   one block-pair specification or a list of block-pair specifications. Each
 #'   pair contains:
@@ -101,6 +102,13 @@
 #' composition-specific blocks, it must be zero where `shared_indicator` is
 #' zero.
 #'
+#' For custom difference indicators supplied through `pairs`, the function
+#' checks whether both positions occur within each supported fitted grouping
+#' unit. It rejects coding when no group contains both positions, and warns when
+#' only some groups are one-sided, which can result from fitted-row filtering.
+#' It also warns when stable member assignments cannot be verified across
+#' repeated rows without a member identifier.
+#'
 #' @section What omitted blocks and terms mean:
 #' `exchangeable_rescov()` only describes constraints that were already imposed
 #' when the model was fitted. It does not remove a block, set a variance to zero,
@@ -124,6 +132,11 @@
 #' [exchangeable APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitted-constraints-and-omitted-blocks).
 #'
 #' @section Backend note:
+#' For `glmmTMB`, random effects in non-conditional components are ignored with
+#' a warning. See the vignette's
+#' [extension to exchangeable random slopes](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation)
+#' section for the manual calculation.
+#'
 #' In `brms`, cross-sectional and same-occasion partner dependence can be
 #' represented directly with
 #' `unstr(time = member_position, gr = residual_group)`. With Gaussian
@@ -155,6 +168,27 @@
 #'   example. Run `vignette("apim", package = "dyadMLM")` to open the installed
 #'   version.
 #'
+#' @examples
+#' if (requireNamespace("glmmTMB", quietly = TRUE)) {
+#'   example_data <- prepare_dyad_data(
+#'     example_dyadic_crosssectional,
+#'     group = coupleID,
+#'     member = personID,
+#'     model_type = "none",
+#'     seed = 123
+#'   )
+#'
+#'   model <- glmmTMB::glmmTMB(
+#'     satisfaction ~ 1 +
+#'       us(1 | coupleID) +
+#'       us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
+#'     dispformula = ~ 0,
+#'     data = example_data
+#'   )
+#'
+#'   exchangeable_rescov(model)
+#' }
+#'
 #' @export
 exchangeable_rescov <- function(model, pairs = NULL) {
   # 1. Normalize backend-specific random-effect blocks and covariance estimates.
@@ -185,7 +219,8 @@ exchangeable_rescov <- function(model, pairs = NULL) {
     matched_pairs <- match_supplied_exchangeable_residual_blocks(
       extracted$blocks,
       pairs,
-      model_frame
+      model_frame,
+      group_ids = extracted$group_ids
     )
   }
 
@@ -574,7 +609,9 @@ validate_exchangeable_coding <- function(
   model_frame,
   idiff,
   shared_indicator,
-  pair_label = NULL
+  pair_label = NULL,
+  group_ids = NULL,
+  group_name = NULL
 ) {
   pair_context <- if (is.null(pair_label)) "" else paste0(pair_label, ": ")
 
@@ -691,6 +728,67 @@ validate_exchangeable_coding <- function(
       "` must contain both -1 and +1 on its supported fitted ",
       "rows. Check the coding and whether fitted-row filtering removed one ",
       "member position, then refit the model.",
+      call. = FALSE
+    )
+  }
+
+  # 6. Generated indicators are stable by construction. For a custom
+  # indicator supplied through `pairs`, also check its selected grouping level.
+  if (grepl("^\\.dy_diff_.+_arbitrary$", idiff) || is.null(group_name)) {
+    return(invisible(NULL))
+  }
+  if (is.null(group_ids) ||
+      length(group_ids) != nrow(model_frame) ||
+      anyNA(group_ids)) {
+    warning(
+      pair_context, "Grouping IDs for `", group_name,
+      "` were unavailable, so `", idiff,
+      "` could not be checked within fitted groups. Verify that both -1 and ",
+      "+1 occur in every supported group and that each member keeps the same ",
+      "position across repeated rows.",
+      call. = FALSE
+    )
+    return(invisible(NULL))
+  }
+
+  signs_by_group <- split(
+    difference_values[supported_rows],
+    group_ids[supported_rows],
+    drop = TRUE
+  )
+  has_both_positions <- vapply(
+    signs_by_group,
+    function(values) all(c(-1, 1) %in% values),
+    logical(1L)
+  )
+  if (!any(has_both_positions)) {
+    stop(
+      pair_context, "No supported fitted `", group_name,
+      "` group contains both -1 and +1 for `", idiff,
+      "`. Check the coding and ",
+      "whether fitted-row filtering removed one member position, then refit ",
+      "the model.",
+      call. = FALSE
+    )
+  }
+  if (any(!has_both_positions)) {
+    warning(
+      pair_context, sum(!has_both_positions), " of ",
+      length(has_both_positions), " supported fitted `", group_name,
+      "` groups do not contain both -1 and +1 for `", idiff,
+      "`. This can result from fitted-row filtering; verify the coding before ",
+      "interpreting the result.",
+      call. = FALSE
+    )
+  }
+
+  if (any(lengths(signs_by_group)[has_both_positions] > 2L)) {
+    warning(
+      pair_context, "At least one supported fitted `", group_name,
+      "` group contains repeated rows with both positions, but stable ",
+      "member-position coding for custom `", idiff,
+      "` could not be verified. Verify that each member keeps the same -1/+1 ",
+      "assignment across occasions.",
       call. = FALSE
     )
   }
@@ -1400,7 +1498,8 @@ match_one_supplied_exchangeable_pair <- function(
   pair,
   pair_label,
   block_lookup,
-  model_frame = NULL
+  model_frame = NULL,
+  group_ids = NULL
 ) {
   pair_reference <- substr(pair_label, 1L, nchar(pair_label) - 1L)
   shared_field_label <- paste0(pair_reference, "$shared`")
@@ -1503,11 +1602,18 @@ match_one_supplied_exchangeable_pair <- function(
 
   # 4. Check the difference coding whenever that block was actually fitted.
   if (!is.na(difference_block_index)) {
+    selected_group_ids <- if (is.null(group_ids)) {
+      NULL
+    } else {
+      group_ids[[pair_group]]
+    }
     validate_exchangeable_coding(
       model_frame,
       pair$difference_indicator,
       pair$shared_indicator,
-      pair_label
+      pair_label,
+      group_ids = selected_group_ids,
+      group_name = if (is.null(group_ids)) NULL else pair_group
     )
   }
   return(matched_pair)
@@ -1516,7 +1622,8 @@ match_one_supplied_exchangeable_pair <- function(
 match_supplied_exchangeable_residual_blocks <- function(
   blocks,
   pairs,
-  model_frame = NULL
+  model_frame = NULL,
+  group_ids = NULL
 ) {
   # 1. Normalize pair specifications and prepare exact and canonical block
   # labels for selector lookup.
@@ -1542,7 +1649,8 @@ match_supplied_exchangeable_residual_blocks <- function(
       pair_specs[[i]],
       pair_labels[[i]],
       block_lookup,
-      model_frame
+      model_frame,
+      group_ids
     )
   }
 
@@ -1596,31 +1704,22 @@ match_supplied_exchangeable_residual_blocks <- function(
 
   # 4. Warn when an omitted difference component cannot be checked against the
   # fitted blocks because no indicator name was supplied.
-  unverifiable_difference_warnings <- character()
   for (i in seq_along(pair_specs)) {
     if (
       is.null(pair_specs[[i]]$difference) &&
         is.null(pair_specs[[i]]$difference_indicator)
     ) {
-      unverifiable_difference_warnings <- c(
-        unverifiable_difference_warnings,
-        paste0(
-          paste0(substr(pair_labels[[i]], 1L, nchar(pair_labels[[i]]) - 1L),
-            "$difference`"),
-          " is `NULL`, and no `difference_indicator` was supplied, so the ",
-          "fitted model could not be checked for a corresponding difference ",
-          "block. The block will be treated as omitted. Use `NULL` only if ",
-          "that block was omitted from the fitted model; otherwise, the ",
-          "back-transformed result is incorrect."
-        )
+      warning(
+        paste0(substr(pair_labels[[i]], 1L, nchar(pair_labels[[i]]) - 1L),
+          "$difference`"),
+        " is `NULL`, and no `difference_indicator` was supplied, so the ",
+        "fitted model could not be checked for a corresponding difference ",
+        "block. The block will be treated as omitted. Use `NULL` only if ",
+        "that block was omitted from the fitted model; otherwise, the ",
+        "back-transformed result is incorrect.",
+        call. = FALSE
       )
     }
-  }
-  if (length(unverifiable_difference_warnings) > 0L) {
-    warning(
-      paste(unverifiable_difference_warnings, collapse = "\n"),
-      call. = FALSE
-    )
   }
   return(matched_pairs)
 }
@@ -1645,10 +1744,8 @@ may_be_exchangeable_residual_level <- function(extracted, pair) {
 }
 
 # Warn cautiously when a grouping level could represent residual dependence.
-# All applicable issues for one pair are combined into one message.
+# All applicable issues for one pair are combined into one warning.
 warn_about_exchangeable_residual_level <- function(extracted, pairs) {
-  messages <- character()
-
   format_terms <- function(terms) {
     paste0("`", terms, "`", collapse = ", ")
   }
@@ -1754,22 +1851,14 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     }
 
     if (length(details) > 0L) {
-      messages <- c(messages, paste0(
+      warning(
+        "Review possible residual-level structure:\n\n",
         pair_label, " may be residual-level: at most two fitted rows per ",
         "group. Row-count check only; partner positions were not verified.",
-        "\n\n- ", paste(details, collapse = "\n- ")
-      ))
+        "\n\n- ", paste(details, collapse = "\n- "),
+        call. = FALSE
+      )
     }
-  }
-
-  if (length(messages) > 0L) {
-    warning(
-      "Review possible residual-level structure",
-      if (length(messages) == 1L) "" else "s",
-      ":\n\n",
-      paste(messages, collapse = "\n\n"),
-      call. = FALSE
-    )
   }
   return(invisible(NULL))
 }
@@ -1970,6 +2059,24 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
     stop(
       "Package `glmmTMB` must be installed to extract covariance ",
       "parameters from a `glmmTMB` model.",
+      call. = FALSE
+    )
+  }
+
+  ignored_components <- character()
+  if (length(model$modelInfo$reStruc$ziReStruc) > 0L) {
+    ignored_components <- c(ignored_components, "zero-inflation")
+  }
+  if (length(model$modelInfo$reStruc$dispReStruc) > 0L) {
+    ignored_components <- c(ignored_components, "dispersion")
+  }
+  if (length(ignored_components) > 0L) {
+    warning(
+      "Random effects in non-conditional `glmmTMB` components were ignored (",
+      paste(ignored_components, collapse = ", "),
+      "); `exchangeable_rescov()` only processes conditional-model random ",
+      "effects. See 'Extension to exchangeable random slopes' in ",
+      "`vignette(\"apim\", package = \"dyadMLM\")` for the manual calculation.",
       call. = FALSE
     )
   }

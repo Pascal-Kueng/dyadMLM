@@ -173,6 +173,25 @@ test_that("backend adapters return aligned common block records", {
   }
 })
 
+test_that("glmmTMB extractor warns about non-conditional random effects", {
+  skip_if_not_installed("glmmTMB")
+
+  model <- suppressWarnings(glmmTMB::glmmTMB(
+    count ~ 1 + (1 | site),
+    ziformula = ~1 + (1 | site),
+    family = poisson(),
+    data = glmmTMB::Salamanders
+  ))
+
+  expect_warning(
+    extracted <- glmmTMB_extract_exchangeable_residual_blocks(model),
+    "non-conditional `glmmTMB` components were ignored (zero-inflation)",
+    fixed = TRUE
+  )
+  expect_length(extracted$blocks, 1L)
+  expect_equal(extracted$blocks[[1L]]$group, "site")
+})
+
 test_that("literal idiff products match in glmmTMB and brms", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("brms")
@@ -688,6 +707,29 @@ test_that("supplied exact pairs support wholly omitted blocks", {
     unname(aligned_difference_only$difference),
     unname(difference_covariance)
   )
+})
+
+test_that("omitted difference warnings are emitted separately", {
+  blocks <- list(
+    rescov_test_block("coupleID", "(Intercept)", "first shared"),
+    rescov_test_block("familyID", "(Intercept)", "second shared")
+  )
+
+  warnings <- testthat::capture_warnings(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(
+        first = list(shared = "first shared", difference = NULL),
+        second = list(shared = "second shared", difference = NULL)
+      )
+    )
+  )
+
+  expect_length(warnings, 2L)
+  expect_match(warnings[[1L]], "`pairs[[\"first\"]]$difference`", fixed = TRUE)
+  expect_false(grepl("second", warnings[[1L]], fixed = TRUE))
+  expect_match(warnings[[2L]], "`pairs[[\"second\"]]$difference`", fixed = TRUE)
+  expect_false(grepl("first", warnings[[2L]], fixed = TRUE))
 })
 
 test_that("aligned covariance arrays back-transform to member coordinates", {
@@ -1214,6 +1256,16 @@ test_that("named supplied pairs retain their labels in downstream diagnostics", 
     "`pairs[[\"stable\"]]`: `IDIFF` must contain both -1 and +1",
     fixed = TRUE
   )
+  expect_error(
+    match_supplied_exchangeable_residual_blocks(
+      blocks,
+      list(stable = stable_pair),
+      model_frame = data.frame(IDIFF = c(-1, -1, 1, 1)),
+      group_ids = list(coupleID = rep(1:2, each = 2L))
+    ),
+    "No supported fitted `coupleID` group contains both -1 and +1",
+    fixed = TRUE
+  )
 
   expect_error(
     match_supplied_exchangeable_residual_blocks(
@@ -1299,6 +1351,39 @@ test_that("fitted-row validation protects the exchangeable coding", {
   expect_error(
     validate_exchangeable_coding(one_sign, "IDIFF", "SAMESEX"),
     "whether fitted-row filtering removed one member position",
+    fixed = TRUE
+  )
+
+  expect_warning(
+    validate_exchangeable_coding(
+      data.frame(IDIFF = rep(c(-1, 1), 4L)),
+      "IDIFF",
+      "1",
+      group_ids = rep(1:2, each = 4L),
+      group_name = "coupleID"
+    ),
+    "stable member-position coding for custom `IDIFF` could not be verified",
+    fixed = TRUE
+  )
+  expect_warning(
+    validate_exchangeable_coding(
+      data.frame(IDIFF = c(-1, 1, -1, -1)),
+      "IDIFF",
+      "1",
+      group_ids = rep(1:2, each = 2L),
+      group_name = "coupleID"
+    ),
+    "1 of 2 supported fitted `coupleID` groups do not contain both -1 and +1",
+    fixed = TRUE
+  )
+  expect_warning(
+    validate_exchangeable_coding(
+      data.frame(IDIFF = c(-1, 1)),
+      "IDIFF",
+      "1",
+      group_name = "coupleID"
+    ),
+    "Grouping IDs for `coupleID` were unavailable",
     fixed = TRUE
   )
 
@@ -1414,6 +1499,18 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
     "Non-intercept terms: `time`",
     fixed = TRUE
   )
+
+  warnings <- testthat::capture_warnings(
+    warn_about_exchangeable_residual_level(
+      extracted,
+      list(first = pair, second = pair)
+    )
+  )
+  expect_length(warnings, 2L)
+  expect_match(warnings[[1L]], "Pair `first`", fixed = TRUE)
+  expect_false(grepl("Pair `second`", warnings[[1L]], fixed = TRUE))
+  expect_match(warnings[[2L]], "Pair `second`", fixed = TRUE)
+  expect_false(grepl("Pair `first`", warnings[[2L]], fixed = TRUE))
 
   mixed_pair <- pair
   mixed_pair$shared_indicator <- ".dy_is_same_sex"
