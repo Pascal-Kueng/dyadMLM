@@ -20,3 +20,4 @@ or \code{"sdcor"}.}
 \description{
 Print recovered exchangeable residual covariance
 }
+\keyword{internal}

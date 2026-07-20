@@ -35,9 +35,7 @@
 #'
 #' ```r
 #' result <- interdep::exchangeable_rescov(model)
-#' result[[1L]]$varcov
-#' result[[1L]]$sdcor
-#' print(result, what = "sdcor")
+#' print(result)
 #' ```
 #'
 #' Supply `pairs` when automatic matching is ambiguous or when a model uses
@@ -234,6 +232,8 @@ exchangeable_rescov <- function(model, pairs = NULL) {
 #' @param ... Additional arguments passed to [print()] when printing matrices.
 #'
 #' @return `x`, invisibly.
+#'
+#' @keywords internal
 #'
 #' @export
 print.exchangeable_rescov <- function(

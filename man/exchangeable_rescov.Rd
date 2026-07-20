@@ -51,9 +51,7 @@ terms. Most models fitted with \code{interdep}-generated columns therefore need
 only:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(model)
-result[[1L]]$varcov
-result[[1L]]$sdcor
-print(result, what = "sdcor")
+print(result)
 }\if{html}{\out{</div>}}
 
 Supply \code{pairs} when automatic matching is ambiguous or when a model uses
