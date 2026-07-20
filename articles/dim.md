@@ -789,7 +789,7 @@ b_{\mathrm{cwp,mean}}
 ```
 
 ``` math
-b_{\mathrm{cwp,diff}}
+b_{\mathrm{cwp,dev}}
 = b_{\mathrm{cwp,actor}} - b_{\mathrm{cwp,partner}}
 ```
 
@@ -801,7 +801,7 @@ b_{\mathrm{cbp,mean}}
 ```
 
 ``` math
-b_{\mathrm{cbp,diff}}
+b_{\mathrm{cbp,dev}}
 = b_{\mathrm{cbp,actor}} - b_{\mathrm{cbp,partner}}
 ```
 

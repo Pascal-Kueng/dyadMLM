@@ -629,29 +629,219 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-dist
 
 ## Intensive longitudinal DSM
 
-> The following sections are under construction and are coming soon!
-> This extension is equivalent to the extension from the cross-sectional
-> DIM to the ILD DIM. Please refer to that section.
+The intensive longitudinal DSM extends the cross-sectional DSM using the
+same temporal decomposition and multilevel workflow shown for the
+[intensive longitudinal
+DIM](https://pascal-kueng.github.io/dyadMLM/articles/dim.html#intensive-longitudinal-dim).
+The DSM retains the directional mean-and-difference parameterization
+described above. For more detail on centering decisions, interpretation,
+and dynamic models, refer to the DIM vignette.
 
-### Interpretation of concurrent ILD DSM coefficients
+Brief example of ILD DSM:
 
-### Equivalence of APIM and DSM in ILD
+``` r
 
-### Including Random Slopes
+ild_dsm_data <- dyadMLM::prepare_dyad_data(
+  example_dyadic_ILD,
+  group = coupleID,
+  member = personID,
+  role = gender,
+  time = diaryday,
+  predictors = provided_support,
+  model_type = "dsm",
+  dsm_role_order = c("female", "male")
+)
 
-#### Transforming DSM random slopes to APIM slopes
+print(ild_dsm_data, n = 4)
+#> # dyadMLM data
+#> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
+#> # Structure: group = coupleID, member = personID, role = gender, time =
+#> # diaryday
+#> # DSM direction: female - male
+#> #
+#> # Dyad compositions:
+#> # female_x_male distinguishable 40 dyads
+#> #
+#> # Added columns:
+#> #   .dy_composition                  inferred dyad composition
+#> #   .dy_composition_role             composition-specific member role
+#> #   .dy_is_{comp-role}               composition-role indicator columns
+#> #   .dy_{pred}_cwp                   within-person predictor: momentary
+#> #                                    deviations from each person's usual level
+#> #   .dy_{pred}_cbp                   between-person predictor: stable
+#> #                                    differences from the average person's
+#> #                                    usual level
+#> #   .dy_dsm_role_contrast            DSM role contrast: +0.5 for the first
+#> #                                    declared role and -0.5 for the second
+#> #                                    declared role
+#> #   .dy_{pred}_dyad_mean_gmc         dyad-mean predictor: dyad's average
+#> #                                    predictor level, grand-mean centered
+#> #   .dy_{pred}_within_dyad_diff      DSM signed predictor difference: first
+#> #                                    declared role minus second declared role
+#> #   .dy_{pred}_cwp_dyad_mean         within-person dyad-mean predictor: shared
+#> #                                    momentary deviations in the dyad
+#> #   .dy_{pred}_cwp_within_dyad_diff  DSM within-person signed predictor
+#> #                                    difference: first declared role minus
+#> #                                    second declared role
+#> #   .dy_{pred}_cbp_dyad_mean         between-person dyad-mean predictor: dyad's
+#> #                                    stable usual level, grand-mean centered
+#> #   .dy_{pred}_cbp_within_dyad_diff  DSM between-person signed predictor
+#> #                                    difference: first declared role minus
+#> #                                    second declared role
+#> #
+#> # A tibble: 1,120 × 19
+#>   personID coupleID diaryday gender closeness provided_support .dy_composition
+#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          
+#> 1        1        1        0 female      5.03             4.30 female_x_male  
+#> 2        1        1        1 female      5.64             4.24 female_x_male  
+#> 3        1        1        2 female      5.49             3.54 female_x_male  
+#> 4        1        1        3 female      6.71             5.04 female_x_male  
+#> # ℹ 1,116 more rows
+#> # ℹ 12 more variables: .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
+#> #   .dy_provided_support_cwp <dbl>, .dy_provided_support_cbp <dbl>,
+#> #   .dy_dsm_role_contrast <dbl>, .dy_provided_support_dyad_mean_gmc <dbl>,
+#> #   .dy_provided_support_cwp_dyad_mean <dbl>,
+#> #   .dy_provided_support_cbp_dyad_mean <dbl>, …
+```
 
-### Dynamic ILD DSM example
+The example below estimates same-day associations between support and
+closeness and includes `diaryday` to allow separate linear trends for
+the outcome level and the female-minus-male outcome difference.
 
-The ILD models above do not model residual serial dependence. One way to
-model dynamics or to account for temporal dependency is to include
-lagged outcomes as predictors.
+``` r
 
-**Note:** Dynamic models, especially with small time series, are subject
-to bias. This, and the choice between raw and within-person-centered
-outcome lags, are addressed in the [APIM vignette’s discussion of
-dynamic
-models](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#dynamic-models).
+
+dsm_ILD <- glmmTMB::glmmTMB(
+  closeness ~
+
+    # Outcome-level intercept and linear time trend
+    1 +
+    diaryday +
+
+    # Within-person predictor level -> outcome level
+    .dy_provided_support_cwp_dyad_mean +
+
+    # Within-person predictor difference -> outcome level
+    .dy_provided_support_cwp_within_dyad_diff +
+
+    # Between-person predictor level -> outcome level
+    .dy_provided_support_cbp_dyad_mean +
+
+    # Between-person predictor difference -> outcome level
+    .dy_provided_support_cbp_within_dyad_diff +
+
+    # Outcome-difference intercept and linear time trend
+    .dy_dsm_role_contrast +
+    diaryday:.dy_dsm_role_contrast +
+
+    # Within-person predictor level and difference -> outcome difference
+    .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast +
+    .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast +
+
+    # Between-person predictor level and difference -> outcome difference
+    .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast +
+    .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast +
+
+    # Stable outcome-level and outcome-difference covariance
+    us(1 + .dy_dsm_role_contrast | coupleID) +
+
+    # Same-day outcome-level and outcome-difference covariance
+    us(1 + .dy_dsm_role_contrast | coupleID:diaryday),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_dsm_data
+)
+
+summary(dsm_ILD)
+#>  Family: gaussian  ( identity )
+#> Formula:          
+#> closeness ~ 1 + diaryday + .dy_provided_support_cwp_dyad_mean +  
+#>     .dy_provided_support_cwp_within_dyad_diff + .dy_provided_support_cbp_dyad_mean +  
+#>     .dy_provided_support_cbp_within_dyad_diff + .dy_dsm_role_contrast +  
+#>     diaryday:.dy_dsm_role_contrast + .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast +  
+#>     .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast +  
+#>     .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast +  
+#>     .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast +  
+#>     us(1 + .dy_dsm_role_contrast | coupleID) + us(1 + .dy_dsm_role_contrast |  
+#>     coupleID:diaryday)
+#> Dispersion:                 ~0
+#> Data: ild_dsm_data
+#> 
+#>       AIC       BIC    logLik -2*log(L)  df.resid 
+#>    2846.0    2934.9   -1405.0    2810.0      1016 
+#> 
+#> Random effects:
+#> 
+#> Conditional model:
+#>  Groups            Name                  Variance Std.Dev. Corr  
+#>  coupleID          (Intercept)           0.5256   0.7250         
+#>                    .dy_dsm_role_contrast 1.2758   1.1295   0.11  
+#>  coupleID:diaryday (Intercept)           0.3178   0.5637         
+#>                    .dy_dsm_role_contrast 1.9909   1.4110   -0.44 
+#> Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517
+#> 
+#> Conditional model:
+#>                                                                  Estimate
+#> (Intercept)                                                      5.078429
+#> diaryday                                                        -0.007721
+#> .dy_provided_support_cwp_dyad_mean                               0.483069
+#> .dy_provided_support_cwp_within_dyad_diff                        0.029229
+#> .dy_provided_support_cbp_dyad_mean                               1.510727
+#> .dy_provided_support_cbp_within_dyad_diff                       -0.012998
+#> .dy_dsm_role_contrast                                            0.817020
+#> diaryday:.dy_dsm_role_contrast                                   0.039246
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.372333
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.042724
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.619378
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.721074
+#>                                                                 Std. Error
+#> (Intercept)                                                       0.124392
+#> diaryday                                                          0.006233
+#> .dy_provided_support_cwp_dyad_mean                                0.041844
+#> .dy_provided_support_cwp_within_dyad_diff                         0.028390
+#> .dy_provided_support_cbp_dyad_mean                                0.193978
+#> .dy_provided_support_cbp_within_dyad_diff                         0.136247
+#> .dy_dsm_role_contrast                                             0.215305
+#> diaryday:.dy_dsm_role_contrast                                    0.015597
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast          0.104735
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.071057
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast          0.312866
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast   0.219655
+#>                                                                 z value
+#> (Intercept)                                                       40.83
+#> diaryday                                                          -1.24
+#> .dy_provided_support_cwp_dyad_mean                                11.54
+#> .dy_provided_support_cwp_within_dyad_diff                          1.03
+#> .dy_provided_support_cbp_dyad_mean                                 7.79
+#> .dy_provided_support_cbp_within_dyad_diff                         -0.10
+#> .dy_dsm_role_contrast                                              3.79
+#> diaryday:.dy_dsm_role_contrast                                     2.52
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast           3.55
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast    0.60
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast           1.98
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast    3.28
+#>                                                                 Pr(>|z|)    
+#> (Intercept)                                                      < 2e-16 ***
+#> diaryday                                                        0.215413    
+#> .dy_provided_support_cwp_dyad_mean                               < 2e-16 ***
+#> .dy_provided_support_cwp_within_dyad_diff                       0.303231    
+#> .dy_provided_support_cbp_dyad_mean                               6.8e-15 ***
+#> .dy_provided_support_cbp_within_dyad_diff                       0.923996    
+#> .dy_dsm_role_contrast                                           0.000148 ***
+#> diaryday:.dy_dsm_role_contrast                                  0.011862 *  
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast        0.000378 ***
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast 0.547660    
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast        0.047738 *  
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast 0.001028 ** 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+The cross-sectional path interpretation therefore applies separately at
+the within-person and between-person levels. At each level, the
+predictor dyad mean and directional difference predict both the outcome
+level and the directional outcome difference.
 
 ------------------------------------------------------------------------
 
