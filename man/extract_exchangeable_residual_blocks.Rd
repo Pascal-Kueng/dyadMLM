@@ -10,10 +10,10 @@ extract_exchangeable_residual_blocks(model)
 \item{model}{A fitted model. Supported classes are \code{glmmTMB} and \code{brmsfit}.}
 }
 \value{
-A list containing the model \code{backend} and one normalized record per
-random-effect block. Every record contains \code{group}, \code{coefficients},
-\code{correlated}, \code{term}, and an estimate/draw-by-coefficients covariance
-array.
+A list containing the model \code{backend}, one normalized record per
+random-effect block, and one grouping-factor ID per fitted row.
+Every block record contains \code{group}, \code{coefficients}, \code{correlated}, \code{term},
+and an estimate/draw-by-coefficients covariance array.
 }
 \description{
 Normalizes the random-effect coefficients and fitted covariance parameters

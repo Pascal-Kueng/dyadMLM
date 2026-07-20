@@ -98,10 +98,19 @@ test_that("backend adapters return aligned common block records", {
   )
   glmm_blocks <- glmmTMB_extract_exchangeable_residual_blocks(glmm_model)
 
-  expect_named(glmm_blocks, c("backend", "blocks"))
-  expect_named(brms_blocks, c("backend", "blocks"))
+  expect_named(glmm_blocks, c("backend", "blocks", "group_ids"))
+  expect_named(brms_blocks, c("backend", "blocks", "group_ids"))
   expect_length(glmm_blocks$blocks, 4)
   expect_length(brms_blocks$blocks, 4)
+  expect_equal(glmm_blocks$group_ids, brms_blocks$group_ids)
+  expect_equal(
+    unname(lengths(glmm_blocks$group_ids)),
+    rep(nrow(data), 2L)
+  )
+  expect_equal(
+    as.vector(table(glmm_blocks$group_ids$coupleID)),
+    rep(6L, 20L)
+  )
 
   descriptor <- function(block) {
     block[c("group", "coefficients", "correlated")]
@@ -1303,6 +1312,128 @@ test_that("fitted-row validation protects the exchangeable coding", {
   expect_error(
     match_exchangeable_residual_blocks(generic_blocks, model_frame),
     "must use -1/+1 coding",
+    fixed = TRUE
+  )
+})
+
+test_that("levels with at most two fitted observations are flagged", {
+  blocks <- list(
+    rescov_test_block("coupleID", "(Intercept)", "(1 | coupleID)"),
+    rescov_test_block("coupleID", "IDIFF", "(0 + IDIFF | coupleID)")
+  )
+  pair <- build_exchangeable_pair(blocks, 1L, 2L, "IDIFF", "1")
+  extracted <- list(
+    backend = "glmmTMB",
+    blocks = blocks,
+    group_ids = list(coupleID = rep(seq_len(3L), each = 2L))
+  )
+
+  expect_true(may_be_exchangeable_residual_level(extracted, pair))
+
+  extracted$group_ids$coupleID <- c(1, 1, 1, 1, 2, 2)
+  expect_false(may_be_exchangeable_residual_level(extracted, pair))
+
+  # The detector deliberately uses only row counts. It therefore remains
+  # cautious even when all fitted grouping units are singletons.
+  extracted$group_ids$coupleID <- seq_len(6L)
+  expect_true(may_be_exchangeable_residual_level(extracted, pair))
+
+  extracted$group_ids <- list()
+  expect_false(may_be_exchangeable_residual_level(extracted, pair))
+})
+
+test_that("residual-level warnings explain brms, omissions, and slopes", {
+  shared_covariance <- array(
+    diag(c(1, 0.25)),
+    dim = c(1L, 2L, 2L),
+    dimnames = list(NULL, c("(Intercept)", "time"), c("(Intercept)", "time"))
+  )
+  difference_covariance <- array(
+    0.5,
+    dim = c(1L, 1L, 1L),
+    dimnames = list(NULL, "IDIFF", "IDIFF")
+  )
+  blocks <- list(
+    rescov_test_block(
+      "coupleID",
+      c("(Intercept)", "time"),
+      "(1 + time | coupleID)",
+      shared_covariance
+    ),
+    rescov_test_block(
+      "coupleID",
+      "IDIFF",
+      "(0 + IDIFF | coupleID)",
+      difference_covariance
+    )
+  )
+  pair <- build_exchangeable_pair(blocks, 1L, 2L, "IDIFF", "1")
+  extracted <- list(
+    backend = "brms",
+    blocks = blocks,
+    group_ids = list(coupleID = rep(seq_len(3L), each = 2L))
+  )
+
+  warning_text <- NULL
+  withCallingHandlers(
+    warn_about_exchangeable_residual_level(
+      extracted,
+      list(same_occasion = pair)
+    ),
+    warning = function(warning) {
+      warning_text <<- conditionMessage(warning)
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_match(
+    warning_text,
+    "pair `same_occasion` (`coupleID`) has at most two fitted observations",
+    fixed = TRUE
+  )
+  expect_match(warning_text, "may therefore represent", fixed = TRUE)
+  expect_match(warning_text, "The two member positions were not checked", fixed = TRUE)
+  expect_match(warning_text, "For a Gaussian `brms` model", fixed = TRUE)
+  expect_match(warning_text, "sigma ~ 1", fixed = TRUE)
+  expect_match(warning_text, "unstr(time = member_position", fixed = TRUE)
+  expect_match(
+    warning_text,
+    "omit components: difference = `time`",
+    fixed = TRUE
+  )
+  expect_match(warning_text, "correlation +1", fixed = TRUE)
+  expect_match(warning_text, "undefined at zero", fixed = TRUE)
+  expect_match(
+    warning_text,
+    "contain non-intercept terms: `time`",
+    fixed = TRUE
+  )
+
+  # The same coefficient blocks are ordinary higher-level random effects when
+  # every dyad contributes repeated member observations.
+  extracted$group_ids$coupleID <- rep(seq_len(2L), each = 3L)
+  expect_no_warning(warn_about_exchangeable_residual_level(
+    extracted,
+    list(pair)
+  ))
+
+  # A wholly omitted difference block is still flagged even though no idiff
+  # term or member-position column exists in the fitted model.
+  shared_only <- build_exchangeable_pair(
+    blocks,
+    1L,
+    NA_integer_,
+    NULL,
+    "1"
+  )
+  extracted$backend <- "glmmTMB"
+  extracted$group_ids$coupleID <- rep(seq_len(3L), each = 2L)
+  expect_warning(
+    warn_about_exchangeable_residual_level(
+      extracted,
+      list(shared_only = shared_only)
+    ),
+    "difference = `(Intercept)`, `time`",
     fixed = TRUE
   )
 })

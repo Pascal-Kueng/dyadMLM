@@ -455,6 +455,13 @@ not be sent through the shared/difference back-transformation. Supporting them
 means recognizing and returning or explaining the direct parameterization, not
 transforming it again.
 
+Both adapters now retain one grouping-level ID per fitted row. When every
+grouping unit has at most two fitted observations, the public function warns
+that the structure may represent residual-level dependence. This deliberately
+uses only row counts—not `idiff` or member-position checks—so the warning stays
+cautious. It highlights `brms` shared/difference effects, omitted components,
+and non-intercept terms.
+
 Distributional and nonlinear random effects are ignored with a warning.
 Multivariate models, linked multi-term blocks, and `gr(..., by = ...)` remain
 explicitly unsupported.

@@ -70,14 +70,14 @@ blocks or terms. To specify one pair with a custom difference indicator:
 
 For multiple covariance levels, wrap the pairs in an outer list. For example,
 in a Gaussian \code{glmmTMB} model fitted with \code{dispformula = ~ 0}, this call
-recovers both the stable dyad-level random-intercept covariance and the
-same-occasion partner residual covariance:
+recovers both a stable dyad-level covariance with an omitted difference
+time slope and the same-occasion partner residual covariance:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(
   model,
   pairs = list(
     dyad = list(
-      shared = "(1 | coupleID)",
+      shared = "(1 + diaryday | coupleID)",
       difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
       difference_indicator =
         ".i_diff_assumed_exchangeable_arbitrary"
@@ -91,6 +91,13 @@ same-occasion partner residual covariance:
   )
 )
 }\if{html}{\out{</div>}}
+
+At the dyad level, the fitted model includes a shared time slope but no
+difference time slope. Thus, the two members' time random effects are
+identical at this level, with correlation \code{+1} whenever the shared slope
+variance is non-zero; at zero variance, the correlation is undefined.
+Covariances involving the diary-day slope are therefore supplied entirely by
+the shared block.
 
 The random-effect terms may be copied exactly from the model formula.
 Equivalent backend syntax is also recognized, such as
@@ -133,8 +140,12 @@ See the constrained-block example in the
 \section{Backend note}{
 
 In Gaussian \code{brms} models, cross-sectional and same-occasion partner
-residual dependence should usually be represented directly with
-\code{unstr(time = member, gr = pair_id)}. The blocks handled here remain relevant
+residual dependence should usually be represented directly with a common
+residual scale (\code{sigma ~ 1}) and
+\code{unstr(time = member_position, gr = residual_group)}. Here,
+\code{member_position} identifies the same two arbitrary positions within every
+group, and \code{residual_group} identifies dyads in cross-sectional data or
+dyad-occasions in longitudinal data. The blocks handled here remain relevant
 only for higher-level shared and difference random effects.
 }
 

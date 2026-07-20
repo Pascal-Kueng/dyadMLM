@@ -484,11 +484,13 @@ Complete these before calling the feature set CRAN-ready:
       constructs member-level `varcov` and `sdcor` results for every estimate or
       posterior draw. `glmmTMB` returns matrices; `brms` retains draw arrays. A
       compact print method can show both representations or either one alone.
+    - A simple fitted-row detector flags grouping levels whose units always
+      contain at most two observations. Its cautious warning does not inspect
+      `idiff` or claim that the rows are verified member pairs; it highlights
+      `brms` residual structures, omitted components, and non-intercept terms.
   - Remaining release polish:
     - decide later whether a posterior summary is useful beside the retained
-      draw-wise `brms` results;
-    - warn clearly if a `brms` residual-level random-effect construction is
-      supplied where direct `unstr()` residual modeling is appropriate.
+      draw-wise `brms` results.
   - Keep model discovery, matching, matrix algebra, and output formatting
     separate. Do not introduce `reformulas`: both fitted backends already store
     the normalized structures used by the adapters.

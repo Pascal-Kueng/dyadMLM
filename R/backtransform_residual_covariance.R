@@ -55,15 +55,15 @@
 #'
 #' For multiple covariance levels, wrap the pairs in an outer list. For example,
 #' in a Gaussian `glmmTMB` model fitted with `dispformula = ~ 0`, this call
-#' recovers both the stable dyad-level random-intercept covariance and the
-#' same-occasion partner residual covariance:
+#' recovers both a stable dyad-level covariance with an omitted difference
+#' time slope and the same-occasion partner residual covariance:
 #'
 #' ```r
 #' result <- interdep::exchangeable_rescov(
 #'   model,
 #'   pairs = list(
 #'     dyad = list(
-#'       shared = "(1 | coupleID)",
+#'       shared = "(1 + diaryday | coupleID)",
 #'       difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
 #'       difference_indicator =
 #'         ".i_diff_assumed_exchangeable_arbitrary"
@@ -77,6 +77,13 @@
 #'   )
 #' )
 #' ```
+#'
+#' At the dyad level, the fitted model includes a shared time slope but no
+#' difference time slope. Thus, the two members' time random effects are
+#' identical at this level, with correlation `+1` whenever the shared slope
+#' variance is non-zero; at zero variance, the correlation is undefined.
+#' Covariances involving the diary-day slope are therefore supplied entirely by
+#' the shared block.
 #'
 #' The random-effect terms may be copied exactly from the model formula.
 #' Equivalent backend syntax is also recognized, such as
@@ -115,8 +122,12 @@
 #'
 #' @section Backend note:
 #' In Gaussian `brms` models, cross-sectional and same-occasion partner
-#' residual dependence should usually be represented directly with
-#' `unstr(time = member, gr = pair_id)`. The blocks handled here remain relevant
+#' residual dependence should usually be represented directly with a common
+#' residual scale (`sigma ~ 1`) and
+#' `unstr(time = member_position, gr = residual_group)`. Here,
+#' `member_position` identifies the same two arbitrary positions within every
+#' group, and `residual_group` identifies dyads in cross-sectional data or
+#' dyad-occasions in longitudinal data. The blocks handled here remain relevant
 #' only for higher-level shared and difference random effects.
 #'
 #' @return An `exchangeable_rescov` object: a named list with one element per
@@ -167,7 +178,14 @@ exchangeable_rescov <- function(model, pairs = NULL) {
     )
   }
 
-  # 4. Back-transform every matched block pair independently. Internally,
+  # 4. Flag structures that may act as residual covariance because their
+  # grouping units contain no more than two fitted observations.
+  warn_about_exchangeable_residual_level(
+    extracted,
+    matched_pairs
+  )
+
+  # 5. Back-transform every matched block pair independently. Internally,
   # both backends use estimate/draw x coefficient x coefficient arrays.
   results <- vector("list", length(matched_pairs))
   result_names <- character(length(matched_pairs))
@@ -312,10 +330,10 @@ print.exchangeable_rescov <- function(
 #'
 #' @param model A fitted model. Supported classes are `glmmTMB` and `brmsfit`.
 #'
-#' @return A list containing the model `backend` and one normalized record per
-#'   random-effect block. Every record contains `group`, `coefficients`,
-#'   `correlated`, `term`, and an estimate/draw-by-coefficients covariance
-#'   array.
+#' @return A list containing the model `backend`, one normalized record per
+#'   random-effect block, and one grouping-factor ID per fitted row.
+#'   Every block record contains `group`, `coefficients`, `correlated`, `term`,
+#'   and an estimate/draw-by-coefficients covariance array.
 #'
 #' @keywords internal
 extract_exchangeable_residual_blocks <- function(model) {
@@ -1596,6 +1614,138 @@ match_supplied_exchangeable_residual_blocks <- function(
   return(matched_pairs)
 }
 
+# Residual-level diagnostics --------------------------------------------------
+
+# A grouping level may represent residual dependence when every fitted group
+# contains at most two observations. This deliberately makes no claim that the
+# two observations are different members; the warning language stays cautious.
+may_be_exchangeable_residual_level <- function(extracted, pair) {
+  block_indices <- c(
+    pair$shared_block_index,
+    pair$difference_block_index
+  )
+  block_index <- block_indices[!is.na(block_indices)][[1L]]
+  group <- extracted$blocks[[block_index]]$group
+  group_ids <- extracted$group_ids[[group]]
+  if (is.null(group_ids) || length(group_ids) == 0L || anyNA(group_ids)) {
+    return(FALSE)
+  }
+  return(all(table(group_ids) <= 2L))
+}
+
+# Warn cautiously when a grouping level could represent residual dependence.
+# All applicable issues for one pair are combined into one message.
+warn_about_exchangeable_residual_level <- function(extracted, pairs) {
+  messages <- character()
+
+  format_terms <- function(terms) {
+    paste0("`", terms, "`", collapse = ", ")
+  }
+
+  for (i in seq_along(pairs)) {
+    pair <- pairs[[i]]
+    if (!may_be_exchangeable_residual_level(extracted, pair)) {
+      next
+    }
+
+    block_indices <- c(
+      pair$shared_block_index,
+      pair$difference_block_index
+    )
+    block_index <- block_indices[!is.na(block_indices)][[1L]]
+    group <- extracted$blocks[[block_index]]$group
+    pair_name <- names(pairs)[[i]]
+    pair_id <- if (!is.null(pair_name) && nzchar(pair_name)) {
+      paste0("pair `", pair_name, "`")
+    } else {
+      paste0("pair ", i)
+    }
+    pair_label <- paste0(pair_id, " (`", group, "`)")
+    details <- character()
+
+    if (identical(extracted$backend, "brms")) {
+      details <- c(details, paste0(
+        "For a Gaussian `brms` model, if these effects represent partner ",
+        "residual dependence, model it directly with ",
+        "`bf(y ~ ... + unstr(time = member_position, gr = residual_group), ",
+        "sigma ~ 1)`, where `member_position` labels the two arbitrary ",
+        "positions and `residual_group` labels dyads or dyad-occasions. ",
+        "Shared/difference blocks remain appropriate for higher-level random ",
+        "effects."
+      ))
+    }
+
+    omitted_shared <- pair$underlying_terms[
+      is.na(pair$shared_term_indices)
+    ]
+    omitted_difference <- pair$underlying_terms[
+      is.na(pair$difference_term_indices)
+    ]
+    if (length(omitted_shared) > 0L || length(omitted_difference) > 0L) {
+      omitted_components <- c(
+        if (length(omitted_shared) > 0L) {
+          paste0("shared = ", format_terms(omitted_shared))
+        },
+        if (length(omitted_difference) > 0L) {
+          paste0("difference = ", format_terms(omitted_difference))
+        }
+      )
+      implications <- c(
+        if (length(omitted_shared) > 0L) {
+          paste0(
+            "omitted shared components make the corresponding member effects ",
+            "equal and opposite (correlation -1)"
+          )
+        },
+        if (length(omitted_difference) > 0L) {
+          paste0(
+            "omitted difference components make the corresponding member ",
+            "effects identical (correlation +1)"
+          )
+        }
+      )
+      details <- c(details, paste0(
+        "The fitted blocks omit components: ",
+        paste(omitted_components, collapse = "; "), ". The fitted model, not ",
+        "`exchangeable_rescov()`, imposed these structural zeros: ",
+        paste(implications, collapse = "; "), ". These correlations apply ",
+        "when the corresponding variance is non-zero and are undefined at ",
+        "zero. The corresponding recovered covariance is singular by ",
+        "construction. Confirm that these constraints were intended."
+      ))
+    }
+
+    slope_terms <- setdiff(pair$underlying_terms, "(Intercept)")
+    if (length(slope_terms) > 0L) {
+      details <- c(details, paste0(
+        "The fitted blocks contain non-intercept terms: ",
+        format_terms(slope_terms), ". If this is the residual level, these ",
+        "terms model covariate-dependent residual covariance, not higher-level ",
+        "random slopes. This can be intentional; if stable random slopes were ",
+        "intended, group them at a level that repeats across occasions, such ",
+        "as the dyad identifier."
+      ))
+    }
+
+    if (length(details) > 0L) {
+      messages <- c(messages, paste0(
+        pair_label, " has at most two fitted observations per grouping unit ",
+        "and may therefore represent residual-level dependence.",
+        paste(details, collapse = " ")
+      ))
+    }
+  }
+
+  if (length(messages) > 0L) {
+    warning(
+      "Potential residual-level specification issues:\n- ",
+      paste(messages, collapse = "\n- "),
+      call. = FALSE
+    )
+  }
+  return(invisible(NULL))
+}
+
 # Covariance alignment --------------------------------------------------------
 
 # Align the shared and difference covariance arrays to one common term order.
@@ -1800,6 +1950,14 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
   re_structure <- model$modelInfo$reStruc$condReStruc
   fitted_covariances <- glmmTMB::VarCorr(model)$cond
 
+  # `flist` stores one grouping-level ID per fitted row, including
+  # interaction groups such as `coupleID:diaryday` that are not retained as a
+  # column in the ordinary glmmTMB model frame.
+  group_ids <- lapply(
+    re_terms$flist,
+    function(values) match(values, unique(values))
+  )
+
   # These stored objects use corresponding backend block order.
   groups <- names(re_terms$cnms)
   term_labels <- names(re_structure)
@@ -1862,7 +2020,11 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
       covariance = covariance_array
     )
   }
-  return(list(backend = "glmmTMB", blocks = blocks))
+  return(list(
+    backend = "glmmTMB",
+    blocks = blocks,
+    group_ids = group_ids
+  ))
 }
 
 # Recover readable coefficient names while preserving brms' stored covariance
@@ -1916,8 +2078,9 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
   }
   re_terms <- re_terms[!unsupported_parameter_rows, , drop = FALSE]
   if (nrow(re_terms) == 0L) {
-    return(list(backend = "brms", blocks = list()))
+    return(list(backend = "brms", blocks = list(), group_ids = list()))
   }
+  model_frame <- stats::model.frame(model)
   if (
     "by" %in% names(re_terms) &&
       any(!is.na(re_terms$by) & nzchar(re_terms$by))
@@ -1946,8 +2109,25 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
   }
 
   fitted_covariances <- brms::VarCorr(model, summary = FALSE)
-  model_frame <- stats::model.frame(model)
   blocks <- vector("list", length(re_blocks))
+
+  # brms retains generated interaction groups in its fitted model frame. Store
+  # one grouping-level ID per fitted row for each unique grouping factor.
+  group_names <- unique(vapply(
+    re_blocks,
+    function(block) block$group[[1L]],
+    character(1L)
+  ))
+  group_ids <- stats::setNames(
+    vector("list", length(group_names)),
+    group_names
+  )
+  for (group in group_names) {
+    values <- model_frame[[group]]
+    if (!is.null(values) && !anyNA(values)) {
+      group_ids[[group]] <- match(values, unique(values))
+    }
+  }
 
   for (i in seq_along(re_blocks)) {
     block <- re_blocks[[i]]
@@ -2025,5 +2205,9 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
       covariance = covariance_array
     )
   }
-  return(list(backend = "brms", blocks = blocks))
+  return(list(
+    backend = "brms",
+    blocks = blocks,
+    group_ids = group_ids
+  ))
 }
