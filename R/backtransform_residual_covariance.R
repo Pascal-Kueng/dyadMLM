@@ -35,6 +35,9 @@
 #'
 #' ```r
 #' result <- interdep::exchangeable_rescov(model)
+#' result[[1L]]$varcov
+#' result[[1L]]$sdcor
+#' print(result, what = "sdcor")
 #' ```
 #'
 #' Supply `pairs` when automatic matching is ambiguous or when a model uses
@@ -118,10 +121,13 @@
 #' `unstr(time = member, gr = pair_id)`. The blocks handled here remain relevant
 #' only for higher-level shared and difference random effects.
 #'
-#' @return A named list with one element per matched block pair. Each element
-#'   contains the member-level variance-covariance matrix in `varcov` and its
-#'   standard-deviation/correlation representation in `sdcor`. Names reproduce
-#'   the matched random-effect terms.
+#' @return An `exchangeable_rescov` object: a named list with one element per
+#'   matched block pair. Each element contains the member-level
+#'   variance-covariance matrix in `varcov` and its standard-deviation/correlation
+#'   representation in `sdcor`, with standard deviations on the diagonal and
+#'   correlations off the diagonal. Names reproduce the matched random-effect
+#'   terms. For `glmmTMB`, `varcov` and `sdcor` are matrices. For `brms`, they
+#'   are posterior-draw by coefficient by coefficient arrays.
 #'
 #' @seealso The
 #'   [exchangeable APIM vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
@@ -143,8 +149,8 @@ exchangeable_rescov <- function(model, pairs = NULL) {
     stop(
       "The fitted model frame could not be recovered from `model`, so the ",
       "exchangeable coding cannot be validated. This is unexpected for a ",
-      "supported model; please report an issue with a reproducible model and ",
-      "your installed package versions.",
+      "supported model. Please report an issue on GitHub with a reproducible ",
+      "model and your installed package versions.",
       call. = FALSE
     )
   }
@@ -163,8 +169,137 @@ exchangeable_rescov <- function(model, pairs = NULL) {
     )
   }
 
-  extracted$pairs <- matched_pairs
-  return(extracted)
+  # 4. Back-transform every matched block pair independently. Internally,
+  # both backends use estimate/draw x coefficient x coefficient arrays.
+  results <- vector("list", length(matched_pairs))
+  result_names <- character(length(matched_pairs))
+  has_undefined_correlations <- FALSE # needed for warning
+
+  for (i in seq_along(matched_pairs)) {
+    pair <- matched_pairs[[i]]
+    aligned <- align_exchangeable_pair_covariances(
+      extracted$blocks,
+      pair
+    )
+    varcov <- backtransform_exchangeable_covariances(
+      aligned,
+      pair$underlying_terms
+    )
+    sdcor <- covariance_array_to_sdcor(varcov)
+
+    # if ANY loop finds one, this turns TRUE and stays TRUE
+    has_undefined_correlations <- has_undefined_correlations || anyNA(sdcor)
+
+    # glmmTMB contributes one point estimate. brms keeps the leading posterior-
+    # draw dimension so its uncertainty is not discarded.
+    if (identical(extracted$backend, "glmmTMB")) {
+      varcov <- varcov[1L, , , drop = TRUE]
+      sdcor <- sdcor[1L, , , drop = TRUE]
+    }
+    results[[i]] <- list(varcov = varcov, sdcor = sdcor)
+
+    shared_term <- if (is.na(pair$shared_block_index)) {
+      "<omitted>"
+    } else {
+      extracted$blocks[[pair$shared_block_index]]$term
+    }
+    difference_term <- if (is.na(pair$difference_block_index)) {
+      "<omitted>"
+    } else {
+      extracted$blocks[[pair$difference_block_index]]$term
+    }
+    result_names[[i]] <- paste0(
+      "shared: ", shared_term,
+      "; difference: ", difference_term
+    )
+  }
+
+  names(results) <- result_names
+  if (has_undefined_correlations) {
+    warning(
+      "Some correlations in `sdcor` are `NA` because the corresponding ",
+      "random-effect standard deviation is zero.",
+      call. = FALSE
+    )
+  }
+  class(results) <- c("exchangeable_rescov", "list")
+  return(results)
+}
+
+#' Print recovered exchangeable residual covariance
+#'
+#' @param x An object returned by [exchangeable_rescov()].
+#' @param what Which representation to print: `"both"` (default), `"varcov"`,
+#'   or `"sdcor"`.
+#' @param ... Additional arguments passed to [print()] when printing matrices.
+#'
+#' @return `x`, invisibly.
+#'
+#' @export
+print.exchangeable_rescov <- function(
+  x,
+  what = c("both", "varcov", "sdcor"),
+  ...
+) {
+  what <- match.arg(what)
+  components <- if (identical(what, "both")) {
+    c("varcov", "sdcor")
+  } else {
+    what
+  }
+
+  title <- if (length(x) == 1L) {
+    "Exchangeable residual covariance"
+  } else {
+    paste0("Exchangeable residual covariances (", length(x), " block pairs)")
+  }
+  cat(title, "\n", sep = "")
+
+  for (i in seq_along(x)) {
+    if (length(x) > 1L) {
+      cat("\nPair ", i, "\n", sep = "")
+    } else {
+      cat("\n")
+    }
+
+    # Result names store both fitted terms on one line. Split only for display;
+    # the underlying list name and access paths remain unchanged.
+    pair_label <- sub("^shared: ", "Shared:     ", names(x)[[i]])
+    pair_label <- sub(
+      "; difference: ",
+      "\nDifference: ",
+      pair_label,
+      fixed = TRUE
+    )
+    cat(pair_label, "\n", sep = "")
+
+    for (component in components) {
+      heading <- if (identical(component, "varcov")) {
+        "Variance-covariance:"
+      } else {
+        "Standard deviations and correlations:"
+      }
+      cat("\n", heading, "\n", sep = "")
+
+      value <- x[[i]][[component]]
+      if (is.matrix(value)) {
+        print(value, ...)
+      } else {
+        # brms results retain every posterior draw. Avoid printing thousands of
+        # matrices; users can extract this array or summarize it explicitly.
+        dimensions <- dim(value)
+        cat(
+          "<", dimensions[[1L]], " posterior draws x ",
+          dimensions[[2L]], " coefficients x ", dimensions[[3L]],
+          " coefficients>\n",
+          "Extract with `x[[", i, "]]$", component,
+          "` to inspect the draw array.\n",
+          sep = ""
+        )
+      }
+    }
+  }
+  invisible(x)
 }
 
 # Backend dispatch ------------------------------------------------------------
@@ -1518,6 +1653,134 @@ align_exchangeable_pair_covariances <- function(blocks, pair) {
       covariance[, source_positions, source_positions, drop = FALSE]
   }
   return(aligned)
+}
+
+# Convert aligned shared/difference covariance arrays to member-level arrays.
+# For K terms, the input is estimate/draw x K x K and the output is
+# estimate/draw x 2K x 2K: all member-1 terms, then all member-2 terms.
+backtransform_exchangeable_covariances <- function(aligned, terms) {
+  shared <- aligned$shared
+  difference <- aligned$difference
+  dimensions <- dim(shared)
+
+  # The aligner should always supply two finite, equally sized square arrays.
+  valid_dimensions <-
+    length(dimensions) == 3L &&
+      dimensions[[1L]] > 0L &&
+      dimensions[[2L]] > 0L &&
+      dimensions[[2L]] == dimensions[[3L]] &&
+      identical(dimensions, dim(difference))
+  if (
+    !is.numeric(shared) ||
+      !is.numeric(difference) ||
+      !valid_dimensions ||
+      any(!is.finite(shared)) ||
+      any(!is.finite(difference)) ||
+      length(terms) != dimensions[[2L]]
+  ) {
+    stop(
+      "Internal error: aligned shared and difference covariances must be ",
+      "finite arrays with identical draw and square term dimensions.",
+      call. = FALSE
+    )
+  }
+
+  # Validate symmetry before using the same between-member block in both
+  # off-diagonal positions of the final covariance matrix.
+  for (component in c("shared", "difference")) {
+    covariance <- aligned[[component]]
+    if (!identical(
+      unname(covariance),
+      unname(aperm(covariance, c(1L, 3L, 2L)))
+    )) {
+      stop(
+        "Internal error: the aligned ", component,
+        " covariance array must be symmetric in every estimate or draw.",
+        call. = FALSE
+      )
+    }
+  }
+
+  # If u1 = shared + difference and u2 = shared - difference, then:
+  #   Var(u1) = Var(u2)    = shared + difference
+  #   Cov(u1, u2)          = shared - difference
+  within_member <- shared + difference
+  between_members <- shared - difference
+
+  n_estimates <- dimensions[[1L]]
+  n_terms <- dimensions[[2L]]
+  member_1_indices <- seq_len(n_terms)
+  member_2_indices <- n_terms + member_1_indices
+  member_terms <- c(
+    paste0("member_1: ", terms),
+    paste0("member_2: ", terms)
+  )
+
+  varcov <- array(
+    0,
+    dim = c(n_estimates, 2L * n_terms, 2L * n_terms),
+    dimnames = list(dimnames(shared)[[1L]], member_terms, member_terms)
+  )
+  varcov[, member_1_indices, member_1_indices] <- within_member
+  varcov[, member_2_indices, member_2_indices] <- within_member
+  varcov[, member_1_indices, member_2_indices] <- between_members
+  varcov[, member_2_indices, member_1_indices] <- between_members
+  return(varcov)
+}
+
+# Replace the diagonal of each covariance matrix with standard deviations and
+# standardize all off-diagonal covariances to correlations.
+covariance_array_to_sdcor <- function(varcov) {
+  dimensions <- dim(varcov)
+  if (
+    !is.numeric(varcov) ||
+      length(dimensions) != 3L ||
+      dimensions[[2L]] != dimensions[[3L]] ||
+      any(!is.finite(varcov))
+  ) {
+    stop(
+      "Internal error: `varcov` must be a finite draw by coefficient by ",
+      "coefficient array.",
+      call. = FALSE
+    )
+  }
+
+  # Start with NA because correlations involving an exactly zero standard
+  # deviation are undefined. The diagonal is always replaced by the SD itself.
+  sdcor <- array(NA_real_, dim = dimensions, dimnames = dimnames(varcov))
+
+  for (estimate in seq_len(dimensions[[1L]])) {
+    covariance <- varcov[estimate, , , drop = TRUE]
+    variances <- diag(covariance)
+
+    # These diagonals are sums of fitted component variances, so cancellation
+    # cannot create a legitimate negative value, even at a model boundary.
+    if (any(variances < 0)) {
+      stop(
+        "Internal error: the back-transformed covariance matrix contains a ",
+        "negative variance.",
+        call. = FALSE
+      )
+    }
+    standard_deviations <- sqrt(variances)
+    nonzero_sd_indices <- which(standard_deviations > 0)
+
+    # Correlations are defined only where both standard deviations are non-zero.
+    if (length(nonzero_sd_indices) > 0L) {
+      denominators <- outer(
+        standard_deviations[nonzero_sd_indices],
+        standard_deviations[nonzero_sd_indices]
+      )
+      sdcor[estimate, nonzero_sd_indices, nonzero_sd_indices] <-
+        covariance[
+          nonzero_sd_indices,
+          nonzero_sd_indices,
+          drop = FALSE
+        ] / denominators
+    }
+    diag(sdcor[estimate, , ]) <- standard_deviations
+  }
+  return(sdcor)
 }
 
 # Backend adapters ------------------------------------------------------------

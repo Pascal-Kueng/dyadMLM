@@ -29,10 +29,13 @@ an ordinary intercept is the shared intercept coordinate.
 }}
 }
 \value{
-A named list with one element per matched block pair. Each element
-contains the member-level variance-covariance matrix in \code{varcov} and its
-standard-deviation/correlation representation in \code{sdcor}. Names reproduce
-the matched random-effect terms.
+An \code{exchangeable_rescov} object: a named list with one element per
+matched block pair. Each element contains the member-level
+variance-covariance matrix in \code{varcov} and its standard-deviation/correlation
+representation in \code{sdcor}, with standard deviations on the diagonal and
+correlations off the diagonal. Names reproduce the matched random-effect
+terms. For \code{glmmTMB}, \code{varcov} and \code{sdcor} are matrices. For \code{brms}, they
+are posterior-draw by coefficient by coefficient arrays.
 }
 \description{
 Back-transforms covariance matrices from paired shared and member-difference
@@ -48,6 +51,9 @@ terms. Most models fitted with \code{interdep}-generated columns therefore need
 only:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{result <- interdep::exchangeable_rescov(model)
+result[[1L]]$varcov
+result[[1L]]$sdcor
+print(result, what = "sdcor")
 }\if{html}{\out{</div>}}
 
 Supply \code{pairs} when automatic matching is ambiguous or when a model uses

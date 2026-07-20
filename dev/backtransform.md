@@ -13,11 +13,10 @@ Public function name:
 exchangeable_rescov(model)
 ```
 
-The extraction and matching layer is implemented for `glmmTMB` and
-single-response `brmsfit` models. `exchangeable_rescov()` currently returns its
-normalized blocks and matched-pair records while the numerical
-back-transformation is developed. Its documented final contract is a named
-list of member-level covariance structures.
+Extraction, matching, structural-zero alignment, and the numerical
+back-transformation are implemented for `glmmTMB` and single-response
+`brmsfit` models. `exchangeable_rescov()` returns one named member-level
+covariance result per matched shared/difference block pair.
 
 ## Purpose
 
@@ -318,10 +317,12 @@ The implemented extraction and matching layer validates:
 - unnormalised `-1/+1` contrast coding and composition support whenever those
   columns remain in the fitted model frame.
 
-The numerical layer must additionally validate that fitted and transformed
-covariance arrays are finite, symmetric, and positive semidefinite within
-numerical tolerance. It should also surface optimizer or Hessian problems when
-the backend exposes them reliably.
+The numerical layer validates matching dimensions, finite values, symmetric
+component covariance arrays, and nonnegative transformed variances. Positive
+semidefiniteness follows from transforming the two positive-semidefinite fitted
+component matrices and is protected by mathematical tests rather than an
+eigendecomposition of every `brms` draw. Optimizer and Hessian diagnostics
+remain part of the separate diagnostics workflow.
 
 Boundary variance estimates are valid mathematical inputs and should not be
 rejected solely for being zero. If needed, warn that interpretation may be
@@ -340,11 +341,15 @@ Each element contains:
 - `sdcor`: the same result represented by standard deviations and
   correlations.
 
-For `glmmTMB` these are based on one fitted covariance estimate. For `brms` the
-transformation is applied to every posterior draw before any summaries or
-intervals are computed. The exact final draw-summary shape remains the next
-formatter decision; raw draw-wise transformations must not be replaced by
-transforming posterior means.
+For `glmmTMB`, both fields are point-estimate matrices. For `brms`, both are
+posterior-draw by coefficient by coefficient arrays. The transformation is
+applied to every posterior draw; raw draw-wise transformations must not be
+replaced by transforming posterior means.
+
+The print method shows both representations by default. Users can request one
+with `print(x, what = "varcov")` or `print(x, what = "sdcor")`. For `brms`, it
+reports the retained draw-array dimensions rather than dumping every posterior
+matrix; posterior summaries remain a separate future concern.
 
 Use arbitrary `member_1`/`member_2` labels, never female/male labels. With
 random slopes, names must also retain the underlying coefficient term.
@@ -376,17 +381,13 @@ and output while replacing only formula access and covariance extraction.
 
 ## Implementation sequence
 
-Extraction, normalized block records, automatic matching, exact supplied pairs,
-mixed compositions, repeated grouping levels, partial terms, omitted blocks,
-and both backend tests are implemented. Remaining sequence:
-
-1. Embed each component covariance array in the common term order, filling
-   missing positions with zeros.
-2. Apply the shared/difference-to-member transformation draw by draw.
-3. Construct `varcov` and `sdcor` outputs and deterministic names.
-4. Add numerical boundary/validity tests.
-5. Replace the public function's temporary normalized return with the final
-   result and then polish examples.
+The v0.0.1 numerical path is implemented: normalized extraction, automatic and
+supplied matching, mixed compositions and grouping levels, partial and omitted
+components, structural-zero alignment, draw-wise back-transformation,
+`varcov`/`sdcor` construction, deterministic names, and boundary tests. The
+remaining work is release-facing example and vignette polish; posterior summary
+and print methods can be considered later without changing the draw-wise
+result.
 
 ## Test specification
 

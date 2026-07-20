@@ -74,17 +74,15 @@ Recently completed cleanup:
 
 Immediate sequence:
 
-1. implement and test the engine-independent covariance-array
-   back-transformation, including structural-zero padding for partial and
-   wholly omitted components
-2. make `exchangeable_rescov()` return final named variance-covariance and
-   SD-correlation results for `glmmTMB` estimates and draw-wise `brms`
-   transformations
-3. document the bounded diagnostics workflow, without adding a general
+1. document the bounded diagnostics workflow, without adding a general
    diagnostics API
-4. finish release-facing APIM, mixed-APIM, and DSM vignette polish, including
+2. finish release-facing APIM, mixed-APIM, and DSM vignette polish, including
    the planned DSM ILD section
-5. rerun checks and prepare the first release
+3. rerun checks and prepare the first release
+
+The engine-independent covariance-array back-transformation and final named
+`varcov`/`sdcor` results are implemented for `glmmTMB` point estimates and
+draw-wise `brms` results, including partial and wholly omitted components.
 
 The getting-started and DIM vignettes have completed detailed review.
 
@@ -149,11 +147,11 @@ The first release milestone is complete when all of the following are true:
 - [x] Cross-sectional and ILD temporal predictor decomposition, composition
   filtering, exchangeability overrides, pooling, metadata, and printing are
   implemented and tested for the documented scope.
-- [ ] `exchangeable_rescov()` converts fitted shared/`.i_diff_*` random-effect
+- [x] `exchangeable_rescov()` converts fitted shared/`.i_diff_*` random-effect
   structures to interpretable member-level covariance matrices. Backend
   extraction and matching are implemented for `glmmTMB` and single-response
-  `brms`; the engine-independent transformation, final return value, and
-  numerical end-to-end tests remain.
+  `brms`, including draw-wise transformation, constrained components, final
+  named output, and numerical end-to-end tests.
 - [ ] Documentation shows a correct `glmmTMB`/DHARMa workflow for
   `dispformula = ~ 0`, role-specific checks, and clear limitations concerning
   autocorrelation and multicollinearity.
@@ -479,18 +477,16 @@ Complete these before calling the feature set CRAN-ready:
     - Tests cover both backend adapters, correlated and uncorrelated blocks,
       multiple blocks, order changes, automatic ambiguity/failure cases,
       exact custom pairs, partial and omitted structures, fitted-row contrast
-      coding, literal products in both backends, and one public end-to-end
-      `glmmTMB` call.
-  - Remaining implementation:
-    - reorder each pair's covariance arrays from the stored order mappings;
-    - apply the same engine-independent matrix transformation to every
-      `glmmTMB` estimate or `brms` posterior draw;
-    - create clear named `varcov` and `sdcor` output for every selected pair and
-      replace the public function's temporary extraction-object return;
-    - decide the minimal posterior summary stored alongside draw-wise `brms`
-      results, while keeping `glmmTMB` point-estimate-only for v0.0.1;
-    - validate numerical dimensions, finiteness, symmetry, and
-      positive-semidefiniteness and add mathematical plus end-to-end tests;
+      coding, literal products in both backends, mathematical matrix identities,
+      zero-variance boundaries, public `glmmTMB` output, and draw-wise `brms`
+      output.
+    - The common aligner inserts structural zeros, and the numerical helper
+      constructs member-level `varcov` and `sdcor` results for every estimate or
+      posterior draw. `glmmTMB` returns matrices; `brms` retains draw arrays. A
+      compact print method can show both representations or either one alone.
+  - Remaining release polish:
+    - decide later whether a posterior summary is useful beside the retained
+      draw-wise `brms` results;
     - warn clearly if a `brms` residual-level random-effect construction is
       supplied where direct `unstr()` residual modeling is appropriate.
   - Keep model discovery, matching, matrix algebra, and output formatting

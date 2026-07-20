@@ -547,6 +547,25 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
     list(pair$underlying_terms, pair$underlying_terms)
   )
 
+  # The final transformation uses the aligned order, including every padded
+  # zero, rather than either block's original coefficient order.
+  transformed <- backtransform_exchangeable_covariances(
+    aligned,
+    pair$underlying_terms
+  )
+  member_1_indices <- seq_along(pair$underlying_terms)
+  member_2_indices <- length(member_1_indices) + member_1_indices
+  expect_equal(
+    transformed[, member_1_indices, member_1_indices],
+    aligned$shared + aligned$difference,
+    ignore_attr = TRUE
+  )
+  expect_equal(
+    transformed[, member_1_indices, member_2_indices],
+    aligned$shared - aligned$difference,
+    ignore_attr = TRUE
+  )
+
   blocks[[2L]]$covariance <- array(0, dim = c(3, 3, 3))
   expect_error(
     align_exchangeable_pair_covariances(blocks, pair),
@@ -659,6 +678,135 @@ test_that("supplied exact pairs support wholly omitted blocks", {
   expect_equal(
     unname(aligned_difference_only$difference),
     unname(difference_covariance)
+  )
+})
+
+test_that("aligned covariance arrays back-transform to member coordinates", {
+  terms <- c("(Intercept)", "time")
+  shared <- array(0, dim = c(2, 2, 2))
+  difference <- array(0, dim = c(2, 2, 2))
+
+  shared[1, , ] <- matrix(c(1.2, 0.2, 0.2, 0.8), 2)
+  difference[1, , ] <- matrix(c(0.3, 0.1, 0.1, 0.4), 2)
+  shared[2, , ] <- matrix(c(2.0, -0.1, -0.1, 1.0), 2)
+  difference[2, , ] <- matrix(c(0.5, 0.2, 0.2, 0.6), 2)
+
+  varcov <- backtransform_exchangeable_covariances(
+    list(shared = shared, difference = difference),
+    terms
+  )
+  expect_equal(dim(varcov), c(2L, 4L, 4L))
+  expect_equal(
+    dimnames(varcov)[2:3],
+    rep(list(c(
+      "member_1: (Intercept)", "member_1: time",
+      "member_2: (Intercept)", "member_2: time"
+    )), 2L)
+  )
+
+  # Compare both draws with the equivalent matrix expression
+  # T %*% diag(shared, difference) %*% t(T).
+  identity <- diag(2)
+  transformation <- rbind(
+    cbind(identity, identity),
+    cbind(identity, -identity)
+  )
+  for (draw in 1:2) {
+    component_covariance <- matrix(0, 4, 4)
+    component_covariance[1:2, 1:2] <- shared[draw, , ]
+    component_covariance[3:4, 3:4] <- difference[draw, , ]
+    expected <- transformation %*%
+      component_covariance %*%
+      t(transformation)
+    transformed <- unname(varcov[draw, , ])
+    expect_equal(transformed, expected)
+    expect_true(isSymmetric(transformed))
+    expect_true(all(
+      eigen(transformed, symmetric = TRUE, only.values = TRUE)$values >=
+        -sqrt(.Machine$double.eps)
+    ))
+  }
+})
+
+test_that("the SD-correlation representation handles boundaries explicitly", {
+  shared <- array(1.2, dim = c(1, 1, 1))
+  difference <- array(0.3, dim = c(1, 1, 1))
+  varcov <- backtransform_exchangeable_covariances(
+    list(shared = shared, difference = difference),
+    "(Intercept)"
+  )
+  sdcor <- covariance_array_to_sdcor(varcov)
+
+  expect_equal(
+    unname(varcov[1, , ]),
+    matrix(c(1.5, 0.9, 0.9, 1.5), 2)
+  )
+  expect_equal(unname(diag(sdcor[1, , ])), rep(sqrt(1.5), 2))
+  expect_equal(sdcor[1, 1, 2], 0.6)
+  expect_equal(sdcor[1, 2, 1], 0.6)
+
+  equal_components <- backtransform_exchangeable_covariances(
+    list(
+      shared = array(1, dim = c(1, 1, 1)),
+      difference = array(1, dim = c(1, 1, 1))
+    ),
+    "(Intercept)"
+  )
+  expect_equal(covariance_array_to_sdcor(equal_components)[1, 1, 2], 0)
+
+  difference_only <- backtransform_exchangeable_covariances(
+    list(
+      shared = array(0, dim = c(1, 1, 1)),
+      difference = array(1, dim = c(1, 1, 1))
+    ),
+    "(Intercept)"
+  )
+  expect_equal(covariance_array_to_sdcor(difference_only)[1, 1, 2], -1)
+
+  zero_variance <- array(
+    matrix(c(0, 0, 0, 1), 2),
+    dim = c(1, 2, 2)
+  )
+  zero_sdcor <- covariance_array_to_sdcor(zero_variance)
+  expect_equal(diag(zero_sdcor[1, , ]), c(0, 1))
+  expect_true(is.na(zero_sdcor[1, 1, 2]))
+  expect_true(is.na(zero_sdcor[1, 2, 1]))
+
+  negative_variance <- zero_variance
+  negative_variance[1, 1, 1] <- -0.1
+  expect_error(
+    covariance_array_to_sdcor(negative_variance),
+    "contains a negative variance",
+    fixed = TRUE
+  )
+})
+
+test_that("back-transformation validates aligned covariance arrays", {
+  symmetric <- array(
+    matrix(c(1, 0.2, 0.2, 1), 2),
+    dim = c(1, 2, 2)
+  )
+  asymmetric <- symmetric
+  asymmetric[1, 1, 2] <- 0.4
+
+  expect_error(
+    backtransform_exchangeable_covariances(
+      list(shared = asymmetric, difference = symmetric),
+      c("(Intercept)", "time")
+    ),
+    "shared covariance array must be symmetric",
+    fixed = TRUE
+  )
+
+  nonfinite <- symmetric
+  nonfinite[1, 1, 1] <- NA_real_
+  expect_error(
+    backtransform_exchangeable_covariances(
+      list(shared = nonfinite, difference = symmetric),
+      c("(Intercept)", "time")
+    ),
+    "must be finite arrays with identical draw and square term dimensions",
+    fixed = TRUE
   )
 })
 
@@ -1159,7 +1307,7 @@ test_that("fitted-row validation protects the exchangeable coding", {
   )
 })
 
-test_that("the public function extracts, matches, and validates a glmmTMB model", {
+test_that("the public function returns member-level glmmTMB matrices", {
   skip_if_not_installed("glmmTMB")
 
   marker <- ".i_diff_assumed_exchangeable_arbitrary"
@@ -1176,11 +1324,216 @@ test_that("the public function extracts, matches, and validates a glmmTMB model"
     data = data
   ))
   result <- exchangeable_rescov(model)
+  extracted <- glmmTMB_extract_exchangeable_residual_blocks(model)
+  shared_variance <- extracted$blocks[[1L]]$covariance[1L, 1L, 1L]
+  difference_variance <- extracted$blocks[[2L]]$covariance[1L, 1L, 1L]
+  member_variance <- shared_variance + difference_variance
+  member_covariance <- shared_variance - difference_variance
 
-  expect_equal(result$backend, "glmmTMB")
-  expect_length(result$blocks, 2L)
-  expect_length(result$pairs, 1L)
-  expect_equal(result$pairs[[1L]]$shared_block_index, 1L)
-  expect_equal(result$pairs[[1L]]$difference_block_index, 2L)
-  expect_equal(result$pairs[[1L]]$underlying_terms, "(Intercept)")
+  expect_s3_class(result, "exchangeable_rescov")
+  expect_length(result, 1L)
+  expect_named(result[[1L]], c("varcov", "sdcor"))
+  expect_true(is.matrix(result[[1L]]$varcov))
+  expect_true(is.matrix(result[[1L]]$sdcor))
+  expect_equal(
+    unname(result[[1L]]$varcov),
+    matrix(
+      c(
+        member_variance, member_covariance,
+        member_covariance, member_variance
+      ),
+      2L
+    )
+  )
+  expect_equal(
+    unname(diag(result[[1L]]$sdcor)),
+    rep(sqrt(member_variance), 2L)
+  )
+  expect_equal(
+    result[[1L]]$sdcor[1L, 2L],
+    member_covariance / member_variance
+  )
+  expect_true(grepl(
+    extracted$blocks[[1L]]$term,
+    names(result),
+    fixed = TRUE
+  ))
+  expect_true(grepl(
+    extracted$blocks[[2L]]$term,
+    names(result),
+    fixed = TRUE
+  ))
+})
+
+test_that("the public function retains brms draws and labels omitted blocks", {
+  data <- data.frame(outcome = 1:4, IDIFF = rep(c(-1, 1), 2L))
+  model <- stats::lm(outcome ~ IDIFF, data = data)
+  shared_draws <- array(c(1.2, 0), dim = c(2, 1, 1))
+  difference_draws <- array(c(0.4, 0.8), dim = c(2, 1, 1))
+  extracted <- list(
+    backend = "brms",
+    blocks = list(
+      rescov_test_block(
+        "coupleID",
+        "(Intercept)",
+        "(1 | coupleID)",
+        shared_draws
+      ),
+      rescov_test_block(
+        "familyID",
+        "IDIFF",
+        "(0 + IDIFF | familyID)",
+        difference_draws
+      )
+    )
+  )
+
+  expect_warning(
+    result <- testthat::with_mocked_bindings(
+      exchangeable_rescov(
+        model,
+        pairs = list(
+          shared_only = list(
+            shared = "(1 | coupleID)",
+            difference = NULL,
+            difference_indicator = "IDIFF"
+          ),
+          difference_only = list(
+            shared = NULL,
+            difference = "(0 + IDIFF | familyID)",
+            difference_indicator = "IDIFF"
+          )
+        )
+      ),
+      extract_exchangeable_residual_blocks = function(model) extracted,
+      .package = "interdep"
+    ),
+    "standard deviation is zero",
+    fixed = TRUE
+  )
+
+  expect_s3_class(result, "exchangeable_rescov")
+  expect_length(result, 2L)
+  expect_equal(dim(result[[1L]]$varcov), c(2L, 2L, 2L))
+  expect_equal(dim(result[[1L]]$sdcor), c(2L, 2L, 2L))
+  expect_equal(
+    unname(result[[1L]]$varcov[1L, , ]),
+    matrix(1.2, 2L, 2L)
+  )
+  expect_equal(result[[1L]]$sdcor[1L, 1L, 2L], 1)
+  expect_true(is.na(result[[1L]]$sdcor[2L, 1L, 2L]))
+  expect_equal(
+    unname(result[[2L]]$varcov[1L, , ]),
+    matrix(c(0.4, -0.4, -0.4, 0.4), 2L)
+  )
+  expect_equal(result[[2L]]$sdcor[1L, 1L, 2L], -1)
+  expect_true(grepl(
+    "difference: <omitted>",
+    names(result)[[1L]],
+    fixed = TRUE
+  ))
+  expect_true(grepl(
+    "shared: <omitted>",
+    names(result)[[2L]],
+    fixed = TRUE
+  ))
+})
+
+test_that("exchangeable covariance results print without repeated list paths", {
+  pair_name <- paste0(
+    "shared: us(1 | coupleID); difference: ",
+    "us(0 + IDIFF | coupleID)"
+  )
+  varcov <- matrix(
+    c(1.5, 0.9, 0.9, 1.5),
+    2L,
+    dimnames = rep(list(c("member_1", "member_2")), 2L)
+  )
+  sdcor <- matrix(
+    c(sqrt(1.5), 0.6, 0.6, sqrt(1.5)),
+    2L,
+    dimnames = dimnames(varcov)
+  )
+  result <- structure(
+    setNames(list(list(varcov = varcov, sdcor = sdcor)), pair_name),
+    class = c("exchangeable_rescov", "list")
+  )
+
+  printed <- capture.output(returned <- print(result))
+  expect_identical(returned, result)
+  expect_true(any(grepl("Shared:     us(1 | coupleID)", printed, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Difference: us(0 + IDIFF | coupleID)",
+    printed,
+    fixed = TRUE
+  )))
+  expect_equal(sum(grepl("us(1 | coupleID)", printed, fixed = TRUE)), 1L)
+  expect_true(any(grepl("Variance-covariance:", printed, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Standard deviations and correlations:",
+    printed,
+    fixed = TRUE
+  )))
+
+  varcov_only <- capture.output(print(result, "varcov"))
+  expect_true(any(grepl("Variance-covariance:", varcov_only, fixed = TRUE)))
+  expect_false(any(grepl(
+    "Standard deviations and correlations:",
+    varcov_only,
+    fixed = TRUE
+  )))
+
+  sdcor_only <- capture.output(print(result, what = "sdcor"))
+  expect_false(any(grepl("Variance-covariance:", sdcor_only, fixed = TRUE)))
+  expect_true(any(grepl(
+    "Standard deviations and correlations:",
+    sdcor_only,
+    fixed = TRUE
+  )))
+
+  multiple <- structure(
+    c(unclass(result), unclass(result)),
+    class = c("exchangeable_rescov", "list")
+  )
+  names(multiple) <- c(
+    pair_name,
+    "shared: us(1 | familyID); difference: us(0 + IDIFF | familyID)"
+  )
+  multiple_printed <- capture.output(print(multiple, what = "varcov"))
+  expect_true(any(grepl(
+    "Exchangeable residual covariances (2 block pairs)",
+    multiple_printed,
+    fixed = TRUE
+  )))
+  expect_equal(sum(multiple_printed == "Pair 1"), 1L)
+  expect_equal(sum(multiple_printed == "Pair 2"), 1L)
+})
+
+test_that("printing brms results does not dump posterior draw arrays", {
+  draws <- array(
+    1,
+    dim = c(5, 2, 2),
+    dimnames = list(NULL, c("member_1", "member_2"), c("member_1", "member_2"))
+  )
+  result <- structure(
+    list(
+      "shared: (1 | coupleID); difference: <omitted>" = list(
+        varcov = draws,
+        sdcor = draws
+      )
+    ),
+    class = c("exchangeable_rescov", "list")
+  )
+
+  printed <- capture.output(print(result, what = "sdcor"))
+  expect_true(any(grepl(
+    "5 posterior draws x 2 coefficients x 2 coefficients",
+    printed,
+    fixed = TRUE
+  )))
+  expect_true(any(grepl(
+    "Extract with `x[[1]]$sdcor`",
+    printed,
+    fixed = TRUE
+  )))
 })
