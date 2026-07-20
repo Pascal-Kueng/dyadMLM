@@ -135,6 +135,11 @@
   margin-block: 0.14em;
 }
 
+.reveal .slides section.compact-derivation .derivation-context {
+  display: block;
+  margin-bottom: 0.8em;
+}
+
 /* Compact side-by-side covariance mappings in the appendix. */
 .reveal .covariance-backtransform {
   margin-top: -1.05em;

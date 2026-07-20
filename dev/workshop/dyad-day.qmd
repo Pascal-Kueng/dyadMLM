@@ -921,12 +921,11 @@ compare_dyad_models(
 
 ## The DIM
 
-- A re-parametrization of the APIM!
+- A re-parametrization of the **exchangeable** APIM!
 - We decompose predictors into two variables:
   - Dyad mean (GM-centered): $\bar{X} - \mu_{X}$
   - Within-dyad member deviation: $X_i - \bar{X}$
   
-<!-- TODO: insert a data frame?  --> 
 In other words, these predictors express: 
 
 - A couple's average level compared with the average of all couples
@@ -980,8 +979,8 @@ draw_dim_diagram(show_residuals = FALSE)
 
 - Is a couple that is higher on X than others also higher on Y than others?
 
-- is a person within a couple that is higher than their partner on X, also higher
-than their partner on Y?
+- is a person within a couple that is higher than their partner on X 
+(or higher than the dyad-mean), also higher than their partner on Y?
 <!-- TODO @codex fact check these interpretations -->
 
 :::
@@ -1119,12 +1118,16 @@ fit_and_draw_dim(
 
 :::{.notes}
 
+Keep in mind that previously with the same data we have seen that 
+the exchangeability constraints are not really supported by the data. Nonetheless
+we fit the DIM here with the same data and variables to demonstrate. 
+
 -> let students interpret
 
 -> Why no intercept? for the deviation? 
 
 No intercept for the MVPA deviation, because that would break exchangeability. 
-if support deviation is zero, then MVPA deviation is also supposed to be zero. 
+if support deviation is zero, then the expected MVPA deviation is also zero. 
 
 -> We conceptually DO have an intercept, it is just constrained to be ZERO!
 
@@ -1139,7 +1142,10 @@ effectively constrains them to be zero.
 
 - We can transform values from a fitted APIM into DIM values.
 
+
 ## DIM to APIM coefficients {.compact-derivation}
+
+[For this example, the intercept is omitted.]{.derivation-context}
 
 If our APIM predictor values for a focal person are:
 $X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=1$,
@@ -1167,6 +1173,8 @@ b_{\mathrm{mean}}=a+p.
 $$
 
 ## DIM to APIM coefficients {.compact-derivation}
+
+[For this example, the intercept is omitted.]{.derivation-context}
 
 If our APIM predictor values for a focal person are:
 $X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=-1$,
