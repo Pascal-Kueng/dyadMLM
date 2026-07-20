@@ -234,31 +234,34 @@ draw_apim_member_diagram("exchangeable")
 
 ### Modeling the residual random-effects structure {#exchangeable-residual-structure}
 
-Currently, glmmTMB and brms allow us to specify the relevant residual correlation structure, 
-but any additional random effects structure that includes more than just a random intercept presents a problem:
+Currently, glmmTMB and brms allow us to specify the relevant residual correlation
+structure, but any additional random effects structure that includes more than
+just a random intercept presents a problem:
 
-For instance, in glmmTMB the expression `homcs(0 + arbitrary_member_1 + arbitrary_member_2 | coupleID)` 
-would achieve in setting both residual variances equal while still estimating a correlation between
-the residuals. However, if we want to model intensive longitudinal data, like we do below, 
-using `homcs(0 + arbitrary_member_1 + arbitrary_member_2 + time:arbitrary_member1 + arbitrary_member_2 | coupleID)` 
-would impose a single variance shared by both intercepts *and* both time slopes. 
-`homcs(0 + arbitrary_member_1 + arbitrary_member_2)  + homcs(time:arbitrary_member1 + arbitrary_member_2 | coupleID)` 
-would produce the correct variance restrictions, but does then not model a correlation between slopes and intercepts
-anymore. 
+For instance, in glmmTMB the expression
+`homcs(0 + arbitrary_member_1 + arbitrary_member_2 | coupleID)` would achieve
+in setting both residual variances equal while still estimating a correlation
+between the residuals. However, if we want to model intensive longitudinal data,
+like we do below, using `homcs(0 + arbitrary_member_1 + arbitrary_member_2 + time:arbitrary_member1 + arbitrary_member_2 | coupleID)` would impose a single
+variance shared by both intercepts *and* both time slopes.
+`homcs(0 + arbitrary_member_1 + arbitrary_member_2)  + homcs(time:arbitrary_member1 + arbitrary_member_2 | coupleID)`
+would produce the correct variance restrictions, but does then not model a
+correlation between slopes and intercepts anymore.
 
-Therefore, we introduce a solution that works for residuals and other random effect terms regardless of slopes. 
-Following @delrosarioPracticalGuideSpecifying2025, `interdep::prepare_interdep_data()` generates an 
-arbitrary member-difference column, named `.i_diff_*`, that is `+1` for one member and `-1` for the other.
-The exchangeable residual structure is represented by two separate
-random-effects terms: a shared dyad random intercept and a random coefficient
-for this difference column. 
+Therefore, we introduce a solution that works for residuals and other random
+effect terms regardless of slopes. Following
+@delrosarioPracticalGuideSpecifying2025, `interdep::prepare_interdep_data()`
+generates an arbitrary member-difference column, named `.i_diff_*`, that is
+`+1` for one member and `-1` for the other. The exchangeable residual structure
+is represented by two separate random-effects terms: a shared dyad random
+intercept and a random coefficient for this difference column.
 
-<!-- TODO: do we need a brief explanation of why this is possible? -->
+<!-- TODO: do we need a brief explanation of why this is possible? maybe
+not in the applied part to not confuse users that just want to get started? -->
 
-We will now fit the model and then use the `interdep::exchangeable_rescov()` 
-function that "rotates" the structure back to the often more interpretable 
-actor-partner residual-covariance matrix we are used to. 
-
+We will now fit the model and then use the `interdep::exchangeable_rescov()`
+function that back-transforms the structure to the often more interpretable
+actor-partner residual-covariance matrix we are used to.
 
 
 ### Fitting the exchangeable APIM with glmmTMB
@@ -308,6 +311,16 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model)
 ```
 
+We use the `interdep::exchangeable_rescov()` to recover the interpretable
+variance-covariance matrix:
+
+```{r}
+backtransformed <- interdep::exchangeable_rescov(apim_exchangeable_model)
+
+# residual variance-covariance and SD-correlation representations
+print(backtransformed)
+```
+
 
 ```{r prepare-fitted-exchangeable-apim-diagram, include=FALSE}
 apim_exchangeable_diagram_values <- .extract_apim_diagram_values(
@@ -332,18 +345,6 @@ apim_exchangeable_fitted_alt <- sprintf(
 )
 ```
 
-We use the `interdep::exchangeable_rescov()` to recover the interpretable 
-variance-covariance matrix: 
-
-```{r}
-backtransformed <- interdep::exchangeable_rescov(apim_exchangeable_model)
-
-# residual variance-covariance matrix
-backtransformed$varcov
-
-# residual standard deviation and correlation matrix
-backtransformed$sdcor
-```
 
 
 The output can now be mapped as follows:
@@ -377,7 +378,7 @@ apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
   data = apim_exchangeable_data
 )
 
-summary(apim_exchangeable_model)
+summary(apim_exchangeable_model_no_shared)
 ```
 
 <!-- TODO: what does this constraint imply exactly? -->
@@ -396,11 +397,8 @@ backtransformed <- interdep::exchangeable_rescov(
   )
 )
 
-# residual variance-covariance matrix
-backtransformed$varcov
-
-# residual standard deviation and correlation matrix
-backtransformed$sdcor
+# residual variance-covariance and SD-correlation representations
+backtransformed
 ```
 
 If we fit a model that allows us to also specify higher-level random effect terms,
