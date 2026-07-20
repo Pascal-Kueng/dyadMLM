@@ -2,7 +2,7 @@
 
 ``` r
 
-library(interdep)
+library(dyadMLM)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 dsm_fitted_alt <- "Fitted DSM diagram unavailable."
 ```
@@ -15,12 +15,12 @@ difference between partners (Iida et al. 2018).
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the [Actor-Partner Interdependence
-Model](https://pascal-kueng.github.io/interdep/articles/apim.md),
+Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.md),
 [Mixed-Composition
-APIM](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
 and [Dyad-Individual
-Model](https://pascal-kueng.github.io/interdep/articles/dim.md), see the
-[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), see the
+[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
 
 ## Preparing DSM Data
 
@@ -31,7 +31,7 @@ female minus male.
 
 ``` r
 
-cross_dsm_data <- interdep::prepare_interdep_data(
+cross_dsm_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -42,7 +42,7 @@ cross_dsm_data <- interdep::prepare_interdep_data(
 )
 
 print(cross_dsm_data, n = 4)
-#> # interdep data
+#> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
 #> # Structure: group = coupleID, member = personID, role = gender
 #> # DSM direction: female - male
@@ -51,42 +51,42 @@ print(cross_dsm_data, n = 4)
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition              inferred dyad composition
-#> #   .i_composition_role         composition-specific member role
-#> #   .i_is_{comp-role}           composition-role indicator columns
-#> #   .i_dsm_role_contrast        DSM role contrast: +0.5 for the first declared
-#> #                               role and -0.5 for the second declared role
-#> #   .i_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
-#> #                               level, grand-mean centered
-#> #   .i_{pred}_within_dyad_diff  DSM signed predictor difference: first declared
-#> #                               role minus second declared role
+#> #   .dy_composition              inferred dyad composition
+#> #   .dy_composition_role         composition-specific member role
+#> #   .dy_is_{comp-role}           composition-role indicator columns
+#> #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared
+#> #                                role and -0.5 for the second declared role
+#> #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
+#> #                                level, grand-mean centered
+#> #   .dy_{pred}_within_dyad_diff  DSM signed predictor difference: first
+#> #                                declared role minus second declared role
 #> #
 #> # A tibble: 190 × 12
-#>   personID coupleID gender communication satisfaction .i_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
-#> 1        1        1 female          4.79         4.37 female_x_male 
-#> 2        2        1 male            3.80         2.34 female_x_male 
-#> 3        3        2 female          2.91         2.44 female_x_male 
-#> 4        4        2 male            6.51         6.08 female_x_male 
+#>   personID coupleID gender communication satisfaction .dy_composition
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
+#> 1        1        1 female          4.79         4.37 female_x_male  
+#> 2        2        1 male            3.80         2.34 female_x_male  
+#> 3        3        2 female          2.91         2.44 female_x_male  
+#> 4        4        2 male            6.51         6.08 female_x_male  
 #> # ℹ 186 more rows
-#> # ℹ 6 more variables: .i_composition_role <fct>,
-#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_dsm_role_contrast <dbl>, .i_communication_dyad_mean_gmc <dbl>,
-#> #   .i_communication_within_dyad_diff <dbl>
+#> # ℹ 6 more variables: .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
+#> #   .dy_dsm_role_contrast <dbl>, .dy_communication_dyad_mean_gmc <dbl>,
+#> #   .dy_communication_within_dyad_diff <dbl>
 ```
 
 For predictor values $`X_{\mathrm{female}}`$ and $`X_{\mathrm{male}}`$,
-`interdep` then creates:
+`dyadMLM` then creates:
 
-- `.i_communication_dyad_mean_gmc` $`=
+- `.dy_communication_dyad_mean_gmc` $`=
   \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X`$ (with
   $`\mu_X`$ representing the sample grand mean of the dyad-level
   predictor means)
 
-- `.i_communication_within_dyad_diff`
+- `.dy_communication_within_dyad_diff`
   $`= X_{\mathrm{female}} - X_{\mathrm{male}}`$
 
-- `.i_dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
+- `.dy_dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
 
 The dyad mean and signed difference are repeated on both member rows.
 The outcome remains unchanged and no transformation is needed.
@@ -137,22 +137,22 @@ dsm_model <- glmmTMB::glmmTMB(
     1 +
 
     # Predictor level -> outcome level (a11)
-    .i_communication_dyad_mean_gmc +
+    .dy_communication_dyad_mean_gmc +
 
     # Predictor difference -> outcome level (a12)
-    .i_communication_within_dyad_diff +
+    .dy_communication_within_dyad_diff +
 
     # Outcome-difference intercept (a20)
-    .i_dsm_role_contrast +
+    .dy_dsm_role_contrast +
 
     # Predictor level -> outcome difference (a21)
-    .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
+    .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +
 
     # Predictor difference -> outcome difference (a22)
-    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
+    .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
-    us(1 + .i_dsm_role_contrast | coupleID),
+    us(1 + .dy_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data
@@ -161,10 +161,10 @@ dsm_model <- glmmTMB::glmmTMB(
 summary(dsm_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ 1 + .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  
-#>     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  
-#>     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  
-#>     us(1 + .i_dsm_role_contrast | coupleID)
+#> satisfaction ~ 1 + .dy_communication_dyad_mean_gmc + .dy_communication_within_dyad_diff +  
+#>     .dy_dsm_role_contrast + .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +  
+#>     .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +  
+#>     us(1 + .dy_dsm_role_contrast | coupleID)
 #> Dispersion:                    ~0
 #> Data: cross_dsm_data
 #> 
@@ -174,26 +174,26 @@ summary(dsm_model)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups   Name                 Variance Std.Dev. Corr  
-#>  coupleID (Intercept)          0.632    0.795          
-#>           .i_dsm_role_contrast 3.678    1.918    -0.16 
+#>  Groups   Name                  Variance Std.Dev. Corr  
+#>  coupleID (Intercept)           0.632    0.795          
+#>           .dy_dsm_role_contrast 3.678    1.918    -0.16 
 #> Number of obs: 176, groups:  coupleID, 88
 #> 
 #> Conditional model:
-#>                                                        Estimate Std. Error
-#> (Intercept)                                             5.04256    0.08481
-#> .i_communication_dyad_mean_gmc                          1.99024    0.07834
-#> .i_communication_within_dyad_diff                      -0.03201    0.05372
-#> .i_dsm_role_contrast                                    0.95644    0.20459
-#> .i_communication_dyad_mean_gmc:.i_dsm_role_contrast    -0.13847    0.18899
-#> .i_communication_within_dyad_diff:.i_dsm_role_contrast  1.48641    0.12959
-#>                                                        z value Pr(>|z|)    
-#> (Intercept)                                              59.46  < 2e-16 ***
-#> .i_communication_dyad_mean_gmc                           25.41  < 2e-16 ***
-#> .i_communication_within_dyad_diff                        -0.60    0.551    
-#> .i_dsm_role_contrast                                      4.67 2.94e-06 ***
-#> .i_communication_dyad_mean_gmc:.i_dsm_role_contrast      -0.73    0.464    
-#> .i_communication_within_dyad_diff:.i_dsm_role_contrast   11.47  < 2e-16 ***
+#>                                                          Estimate Std. Error
+#> (Intercept)                                               5.04256    0.08481
+#> .dy_communication_dyad_mean_gmc                           1.99024    0.07834
+#> .dy_communication_within_dyad_diff                       -0.03201    0.05372
+#> .dy_dsm_role_contrast                                     0.95644    0.20459
+#> .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast    -0.13847    0.18899
+#> .dy_communication_within_dyad_diff:.dy_dsm_role_contrast  1.48641    0.12959
+#>                                                          z value Pr(>|z|)    
+#> (Intercept)                                                59.46  < 2e-16 ***
+#> .dy_communication_dyad_mean_gmc                            25.41  < 2e-16 ***
+#> .dy_communication_within_dyad_diff                         -0.60    0.551    
+#> .dy_dsm_role_contrast                                       4.67 2.94e-06 ***
+#> .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast      -0.73    0.464    
+#> .dy_communication_within_dyad_diff:.dy_dsm_role_contrast   11.47  < 2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -319,7 +319,7 @@ of the differences, but not the substantive model.
 
 ``` r
 
-cross_dsm_data_inverted <- interdep::prepare_interdep_data(
+cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -335,12 +335,12 @@ cross_dsm_data_inverted <- interdep::prepare_interdep_data(
 
 dsm_model_inverted <- glmmTMB::glmmTMB(
   satisfaction ~
-    .i_communication_dyad_mean_gmc +
-    .i_communication_within_dyad_diff +
-    .i_dsm_role_contrast +
-    .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +
-    .i_communication_within_dyad_diff:.i_dsm_role_contrast +
-    us(1 + .i_dsm_role_contrast | coupleID),
+    .dy_communication_dyad_mean_gmc +
+    .dy_communication_within_dyad_diff +
+    .dy_dsm_role_contrast +
+    .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +
+    .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +
+    us(1 + .dy_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data_inverted
@@ -364,29 +364,29 @@ knitr::kable(
 | model term | female - male | male - female |
 |:---|---:|---:|
 | (Intercept) | 5.043 | 5.043 |
-| .i_communication_dyad_mean_gmc | 1.990 | 1.990 |
-| .i_communication_within_dyad_diff | -0.032 | 0.032 |
-| .i_dsm_role_contrast | 0.956 | -0.956 |
-| .i_communication_dyad_mean_gmc:.i_dsm_role_contrast | -0.138 | 0.138 |
-| .i_communication_within_dyad_diff:.i_dsm_role_contrast | 1.486 | 1.486 |
+| .dy_communication_dyad_mean_gmc | 1.990 | 1.990 |
+| .dy_communication_within_dyad_diff | -0.032 | 0.032 |
+| .dy_dsm_role_contrast | 0.956 | -0.956 |
+| .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast | -0.138 | 0.138 |
+| .dy_communication_within_dyad_diff:.dy_dsm_role_contrast | 1.486 | 1.486 |
 
 The two models have identical fitted values and model fit:
 
-- `.i_communication_within_dyad_diff` reverses because the predictor
+- `.dy_communication_within_dyad_diff` reverses because the predictor
   difference reverses.
 
-- `.i_dsm_role_contrast` reverses because the represented outcome
+- `.dy_dsm_role_contrast` reverses because the represented outcome
   difference reverses.
 
-- `.i_communication_dyad_mean_gmc:.i_dsm_role_contrast` reverses because
-  only the outcome difference reverses.
+- `.dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast` reverses
+  because only the outcome difference reverses.
 
-- `.i_communication_within_dyad_diff:.i_dsm_role_contrast` remains
+- `.dy_communication_within_dyad_diff:.dy_dsm_role_contrast` remains
   unchanged because both differences reverse.
 
-The intercept and `.i_communication_dyad_mean_gmc` also remain
+The intercept and `.dy_communication_dyad_mean_gmc` also remain
 unchanged. For the random effects, the variances of `(Intercept)` and
-`.i_dsm_role_contrast` remain unchanged, whereas their covariance
+`.dy_dsm_role_contrast` remain unchanged, whereas their covariance
 reverses sign.
 
 ## Relationship to the APIM and DIM
@@ -403,21 +403,21 @@ apim_model <- glmmTMB::glmmTMB(
   satisfaction ~
     # Role-specific intercepts
     0 +
-    .i_is_female_x_male_female +
-    .i_is_female_x_male_male +
+    .dy_is_female_x_male_female +
+    .dy_is_female_x_male_male +
 
     # Role-specific actor effects
-    .i_is_female_x_male_female:.i_communication_actor +
-    .i_is_female_x_male_male:.i_communication_actor +
+    .dy_is_female_x_male_female:.dy_communication_actor +
+    .dy_is_female_x_male_male:.dy_communication_actor +
 
     # Role-specific partner effects
-    .i_is_female_x_male_female:.i_communication_partner +
-    .i_is_female_x_male_male:.i_communication_partner +
+    .dy_is_female_x_male_female:.dy_communication_partner +
+    .dy_is_female_x_male_male:.dy_communication_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
-         .i_is_female_x_male_female +
-         .i_is_female_x_male_male
+         .dy_is_female_x_male_female +
+         .dy_is_female_x_male_male
        | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -617,7 +617,7 @@ For exchangeable dyads, the direction of a member difference is
 arbitrary. The directional intercept, both cross-paths, and the
 covariance between outcome level and outcome difference must then be
 zero. The remaining reduced, label-invariant DSM is algebraically the
-Gaussian Dyad-Individual Model (DIM). In `interdep`, use
+Gaussian Dyad-Individual Model (DIM). In `dyadMLM`, use
 `model_type = "dim"` for this exchangeable model and reserve
 `model_type = "dsm"` for distinguishable dyads.
 
@@ -625,7 +625,7 @@ Because the Gaussian DIM is the exchangeability-constrained version of
 the full DSM, exchangeability can also be tested by comparing these
 nested models. This is equivalent to the comparison shown in [Testing
 distinguishability in the APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#testing-distinguishability).
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-distinguishability).
 
 ## Intensive longitudinal DSM
 
@@ -651,18 +651,18 @@ lagged outcomes as predictors.
 to bias. This, and the choice between raw and within-person-centered
 outcome lags, are addressed in the [APIM vignette’s discussion of
 dynamic
-models](https://pascal-kueng.github.io/interdep/articles/apim.html#dynamic-models).
+models](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#dynamic-models).
 
 ------------------------------------------------------------------------
 
 Return to the [Actor-Partner Interdependence Model
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.md), see
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.md), see
 the [Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md)
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md)
 or the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) for
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) for
 related model specifications, or return to the
-[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
 
 ## References
 

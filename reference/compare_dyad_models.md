@@ -2,7 +2,7 @@
 
 Performs a likelihood-ratio test for two nested `glmmTMB` models. The
 models may use ordinary data frames or
-[interdep_data](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+[dyadMLM_data](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
 objects, and their calls do not need to refer to the same R object.
 Models may be supplied in either order. The model with fewer estimated
 parameters is shown first in the result.
@@ -10,7 +10,7 @@ parameters is shown first in the result.
 ## Usage
 
 ``` r
-compare_interdep_models(model1, model2)
+compare_dyad_models(model1, model2)
 ```
 
 ## Arguments
@@ -31,10 +31,10 @@ the test at the 5% significance level.
 Both model calls must use named data-frame objects that remain available
 when the models are compared. The checks assume these objects have not
 been modified since fitting. All ordinary data columns must be
-identical, including their types and attributes. For `interdep_data`,
-generated `.i_` columns may differ, but the original columns must be
+identical, including their types and attributes. For `dyadMLM_data`,
+generated `.dy_` columns may differ, but the original columns must be
 identical. Ordinary and prepared data may be compared with each other.
-Dyad metadata are checked when both models use `interdep_data`. The
+Dyad metadata are checked when both models use `dyadMLM_data`. The
 function also checks fitted rows, outcomes, weights and offsets, model
 family and link, maximum-likelihood estimation, and model convergence.
 Each model must use the same untransformed response column.
@@ -49,7 +49,7 @@ inappropriate when tested variance parameters are on the boundary.
 
 ``` r
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
-  restricted_data <- prepare_interdep_data(
+  restricted_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
     group = coupleID,
     member = personID,
@@ -66,7 +66,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     data = full_data
   )
 
-  compare_interdep_models(restricted_model, full_model)
+  compare_dyad_models(restricted_model, full_model)
 }
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.

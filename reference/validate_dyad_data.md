@@ -1,7 +1,7 @@
 # Validate dyadic input data
 
 Checks whether `data` has a valid long-format dyadic structure and
-returns it as a tibble with an additional `interdep_data` class.
+returns it as a tibble with an additional `dyadMLM_data` class.
 Cross-sectional data may contain at most one row per member within each
 dyad. Intensive longitudinal data may contain at most one row per member
 and measurement occasion within each dyad.
@@ -9,7 +9,7 @@ and measurement occasion within each dyad.
 ## Usage
 
 ``` r
-validate_interdep_data(
+validate_dyad_data(
   data,
   group,
   member,
@@ -98,5 +98,5 @@ validate_interdep_data(
 
 ## Value
 
-A tibble with class `interdep_data` and metadata about the dyad, member,
+A tibble with class `dyadMLM_data` and metadata about the dyad, member,
 optional role, and optional time columns.

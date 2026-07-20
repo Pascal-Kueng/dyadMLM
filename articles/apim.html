@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Actor-Partner Interdependence Model (APIM) • interdep</title>
+<title>Actor-Partner Interdependence Model (APIM) • dyadMLM</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">interdep</a>
+    <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
 
@@ -46,7 +46,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Pascal-Kueng/interdep" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Pascal-Kueng/dyadMLM" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -72,7 +72,7 @@ Küng</h4>
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span></code></pre></div>
 <blockquote>
 <p>This vignette is under construction and preliminary. Please check
 back soon!</p>
@@ -151,7 +151,7 @@ shown) is then block-diagonal:</p>
 </annotation></semantics></math></p>
 <p>This structure is estimated with an unstructured random-effects block
 such as
-<code>us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)</code>
+<code>us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID)</code>
 and <code>dispformula = ~ 0</code>.</p>
 <!-- TODO: what is the best order? This shows the RE before we prepped the data.
 But if we move this whole stuff after data-prep, it interrupts before interpretation. 
@@ -166,9 +166,9 @@ if the model does not converge etc.?
 <h4 id="fitting-the-distinguishable-apim-with-glmmtmb">Fitting the distinguishable APIM with glmmTMB<a class="anchor" aria-label="anchor" href="#fitting-the-distinguishable-apim-with-glmmtmb"></a>
 </h4>
 <p>We first prepare the example data with
-<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code>:</p>
+<code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">apim_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">apim_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -178,7 +178,7 @@ if the model does not converge etc.?
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">apim_distinguishable_data</span>, n<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 190 | Dyads: 95 | Intensive longitudinal: no</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
@@ -186,26 +186,26 @@ if the model does not converge etc.?
 <span><span class="co">#&gt; # female_x_male distinguishable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
-<span><span class="co">#&gt; #                        values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .dy_composition       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .dy_composition_role  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .dy_is_{comp-role}    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                         values</span></span>
+<span><span class="co">#&gt; #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                         values</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 11</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male </span></span>
+<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .dy_composition</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_actor &lt;dbl&gt;, .i_communication_partner &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>The generated <code>.i_*</code> columns can be used directly in the
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .dy_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_communication_actor &lt;dbl&gt;, .dy_communication_partner &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The generated <code>.dy_*</code> columns can be used directly in the
 model formula. Here is a simple example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apim_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -213,23 +213,23 @@ model formula. Here is a simple example:</p>
 <span></span>
 <span>    <span class="co"># Gender-specific intercepts</span></span>
 <span>    <span class="fl">0</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific actor effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_communication_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific partner effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_communication_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Dyad-level unstructured random effects represent the two partner</span></span>
 <span>    <span class="co"># residual variances and their covariance when dispformula = ~ 0.</span></span>
 <span>    <span class="co"># This is glmmTMB-specific syntax! `brms` uses different syntax.</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
-<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>         <span class="va">.i_is_female_x_male_male</span></span>
+<span>         <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.dy_is_female_x_male_male</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
@@ -240,10 +240,10 @@ model formula. Here is a simple example:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_distinguishable_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  </span></span>
-<span><span class="co">#&gt;     .i_is_female_x_male_female:.i_communication_actor + .i_is_female_x_male_male:.i_communication_actor +  </span></span>
-<span><span class="co">#&gt;     .i_is_female_x_male_female:.i_communication_partner + .i_is_female_x_male_male:.i_communication_partner +  </span></span>
-<span><span class="co">#&gt;     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  </span></span>
+<span><span class="co">#&gt; satisfaction ~ 0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +  </span></span>
+<span><span class="co">#&gt;     .dy_is_female_x_male_female:.dy_communication_actor + .dy_is_female_x_male_male:.dy_communication_actor +  </span></span>
+<span><span class="co">#&gt;     .dy_is_female_x_male_female:.dy_communication_partner + .dy_is_female_x_male_male:.dy_communication_partner +  </span></span>
+<span><span class="co">#&gt;     us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |  </span></span>
 <span><span class="co">#&gt;         coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: apim_distinguishable_data</span></span>
@@ -254,26 +254,26 @@ model formula. Here is a simple example:</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups   Name                       Variance Std.Dev. Corr  </span></span>
-<span><span class="co">#&gt;  coupleID .i_is_female_x_male_female 1.311    1.145          </span></span>
-<span><span class="co">#&gt;           .i_is_female_x_male_male   1.792    1.339    -0.19 </span></span>
+<span><span class="co">#&gt;  Groups   Name                        Variance Std.Dev. Corr  </span></span>
+<span><span class="co">#&gt;  coupleID .dy_is_female_x_male_female 1.311    1.145          </span></span>
+<span><span class="co">#&gt;           .dy_is_female_x_male_male   1.792    1.339    -0.19 </span></span>
 <span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                                     Estimate Std. Error z value</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female                          -4.36874    0.59416  -7.353</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male                            -6.03808    0.69452  -8.694</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_communication_actor    1.67170    0.10089  16.570</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_communication_actor      1.80495    0.10562  17.090</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_communication_partner  0.24930    0.09035   2.759</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_communication_partner    0.25453    0.11793   2.158</span></span>
-<span><span class="co">#&gt;                                                     Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female                          1.94e-13 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male                             &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_communication_actor    &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_communication_actor      &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_female:.i_communication_partner  0.00579 ** </span></span>
-<span><span class="co">#&gt; .i_is_female_x_male_male:.i_communication_partner    0.03090 *  </span></span>
+<span><span class="co">#&gt;                                                       Estimate Std. Error</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female                           -4.36874    0.59416</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male                             -6.03808    0.69452</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_communication_actor    1.67170    0.10089</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_communication_actor      1.80495    0.10562</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_communication_partner  0.24930    0.09035</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_communication_partner    0.25453    0.11793</span></span>
+<span><span class="co">#&gt;                                                       z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female                            -7.353 1.94e-13 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male                              -8.694  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_communication_actor    16.570  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_communication_actor      17.090  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_communication_partner   2.759  0.00579 ** </span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_communication_partner     2.158  0.03090 *  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>The estimated coefficients map as follows:</p>
@@ -338,8 +338,8 @@ would produce the correct variance restrictions, but does then not model
 a correlation between slopes and intercepts anymore.</p>
 <p>Therefore, we introduce a solution that works for residuals and other
 random effect terms regardless of slopes. Following <span class="citation">del Rosario and West (2025)</span>,
-<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code> generates an arbitrary
-member-difference column, named <code>.i_diff_*</code>, that is
+<code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code> generates an arbitrary
+member-difference column, named <code>.dy_diff_*</code>, that is
 <code>+1</code> for one member and <code>-1</code> for the other. The
 exchangeable residual structure is represented by two separate
 random-effects terms: a shared dyad random intercept and a random
@@ -347,7 +347,7 @@ coefficient for this difference column.</p>
 <!-- TODO: do we need a brief explanation of why this is possible? maybe
 not in the applied part to not confuse users that just want to get started? -->
 <p>We will now fit the model and then use the
-<code><a href="../reference/exchangeable_rescov.html">interdep::exchangeable_rescov()</a></code> function that
+<code><a href="../reference/exchangeable_rescov.html">dyadMLM::exchangeable_rescov()</a></code> function that
 back-transforms the structure to the often more interpretable
 actor-partner residual-covariance matrix we are used to.</p>
 </div>
@@ -361,7 +361,7 @@ females, so we can test distinguishability later. Another option here
 would be to omit roles, especially if there is no clear role in the
 data.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">apim_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">apim_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -371,7 +371,7 @@ data.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">apim_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 190 | Dyads: 95 | Intensive longitudinal: no</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
@@ -379,28 +379,28 @@ data.</p>
 <span><span class="co">#&gt; # female_x_male exchangeable (set by user) 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary</span></span>
-<span><span class="co">#&gt; #                        direction; 0 for distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                        exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
-<span><span class="co">#&gt; #                        values</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .dy_composition       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .dy_composition_role  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .dy_is_{comp-role}    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .dy_diff_{comp}       composition-specific sum-diff contrasts with</span></span>
+<span><span class="co">#&gt; #                         arbitrary direction; 0 for distinguishable dyads or</span></span>
+<span><span class="co">#&gt; #                         other exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                         values</span></span>
+<span><span class="co">#&gt; #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                         values</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 11</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male </span></span>
+<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .dy_composition</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .i_composition_role &lt;fct&gt;, .i_is_female_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_diff_female_x_male_arbitrary &lt;dbl&gt;, .i_communication_actor &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_partner &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .dy_composition_role &lt;fct&gt;, .dy_is_female_x_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_diff_female_x_male_arbitrary &lt;dbl&gt;, .dy_communication_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_communication_partner &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>We then use the columns to fit the model as follows:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apim_exchangeable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
@@ -410,13 +410,13 @@ data.</p>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># Pooled single actor and partner effects</span></span>
-<span>    <span class="va">.i_communication_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_partner</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># Residual variance covariance matrix via the shared/difference</span></span>
 <span>    <span class="co"># specification in two uncorrelated blocks</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_diff_female_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">apim_exchangeable_data</span></span>
@@ -425,8 +425,8 @@ data.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_exchangeable_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  </span></span>
-<span><span class="co">#&gt;     us(1 | coupleID) + us(0 + .i_diff_female_x_male_arbitrary |      coupleID)</span></span>
+<span><span class="co">#&gt; satisfaction ~ 1 + .dy_communication_actor + .dy_communication_partner +  </span></span>
+<span><span class="co">#&gt;     us(1 | coupleID) + us(0 + .dy_diff_female_x_male_arbitrary |      coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: apim_exchangeable_data</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -436,29 +436,29 @@ data.</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups     Name                            Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID   (Intercept)                     0.6346   0.7966  </span></span>
-<span><span class="co">#&gt;  coupleID.1 .i_diff_female_x_male_arbitrary 1.1532   1.0739  </span></span>
+<span><span class="co">#&gt;  Groups     Name                             Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID   (Intercept)                      0.6346   0.7966  </span></span>
+<span><span class="co">#&gt;  coupleID.1 .dy_diff_female_x_male_arbitrary 1.1532   1.0739  </span></span>
 <span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                          Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)               -5.2330     0.4103 -12.754  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_actor     1.7578     0.0819  21.461  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_partner   0.2379     0.0819   2.904  0.00368 ** </span></span>
+<span><span class="co">#&gt;                           Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                -5.2330     0.4103 -12.754  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_communication_actor     1.7578     0.0819  21.461  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_communication_partner   0.2379     0.0819   2.904  0.00368 ** </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
-<p>We use the <code><a href="../reference/exchangeable_rescov.html">interdep::exchangeable_rescov()</a></code> to recover
-the interpretable variance-covariance matrix:</p>
+<p>We use the <code><a href="../reference/exchangeable_rescov.html">dyadMLM::exchangeable_rescov()</a></code> to recover the
+interpretable variance-covariance matrix:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">backtransformed</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/exchangeable_rescov.html">exchangeable_rescov</a></span><span class="op">(</span><span class="va">apim_exchangeable_model</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">backtransformed</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/exchangeable_rescov.html">exchangeable_rescov</a></span><span class="op">(</span><span class="va">apim_exchangeable_model</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># residual variance-covariance and SD-correlation representations</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">backtransformed</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Exchangeable residual covariance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Shared:     us(1 | coupleID)</span></span>
-<span><span class="co">#&gt; Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)</span></span>
+<span><span class="co">#&gt; Difference: us(0 + .dy_diff_female_x_male_arbitrary | coupleID)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance-covariance:</span></span>
 <span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
@@ -487,12 +487,12 @@ can omit the entire shared block:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apim_exchangeable_model_no_shared</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span>  <span class="fl">1</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_partner</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># Residual variance covariance matrix</span></span>
 <span>    <span class="co"># omitting the us(1 | coupleID) block</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_female_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_diff_female_x_male_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">apim_exchangeable_data</span></span>
@@ -501,8 +501,8 @@ can omit the entire shared block:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_exchangeable_model_no_shared</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  </span></span>
-<span><span class="co">#&gt;     us(0 + .i_diff_female_x_male_arbitrary | coupleID)</span></span>
+<span><span class="co">#&gt; satisfaction ~ 1 + .dy_communication_actor + .dy_communication_partner +  </span></span>
+<span><span class="co">#&gt;     us(0 + .dy_diff_female_x_male_arbitrary | coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: apim_exchangeable_data</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -512,15 +512,15 @@ can omit the entire shared block:</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups   Name                            Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID .i_diff_female_x_male_arbitrary 1.159    1.076   </span></span>
+<span><span class="co">#&gt;  Groups   Name                             Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID .dy_diff_female_x_male_arbitrary 1.159    1.076   </span></span>
 <span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)              -5.233e+00  4.446e-05 -117705  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_actor    1.764e+00  7.221e-02      24  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_partner  2.317e-01  7.221e-02       3  0.00133 ** </span></span>
+<span><span class="co">#&gt;                             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)               -5.233e+00  4.446e-05 -117705  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_communication_actor    1.764e+00  7.221e-02      24  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_communication_partner  2.317e-01  7.221e-02       3  0.00133 ** </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <!-- TODO: what does this constraint imply exactly? -->
@@ -528,17 +528,17 @@ can omit the entire shared block:</p>
 tell the function where both blocks are. Since we completely omitted one
 block, we tell the function:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">backtransformed</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/exchangeable_rescov.html">exchangeable_rescov</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">backtransformed</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/exchangeable_rescov.html">exchangeable_rescov</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_exchangeable_model_no_shared</span>, </span>
 <span>  pairs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    shared <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>    difference <span class="op">=</span> <span class="st">"us(0 + .i_diff_female_x_male_arbitrary | coupleID)"</span>,</span>
-<span>    difference_indicator <span class="op">=</span><span class="st">".i_diff_female_x_male_arbitrary"</span></span>
+<span>    difference <span class="op">=</span> <span class="st">"us(0 + .dy_diff_female_x_male_arbitrary | coupleID)"</span>,</span>
+<span>    difference_indicator <span class="op">=</span><span class="st">".dy_diff_female_x_male_arbitrary"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Review possible residual-level structure:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Pair for `.i_diff_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.</span></span>
+<span><span class="co">#&gt; Pair for `.dy_diff_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; - Terms absent from the shared block: `(Intercept)`. The fitted model fixes their shared components at zero, implying equal and opposite member effects (correlation -1 when variance &gt; 0; undefined at zero) and singular member covariance. If unintended, revise this block and refit.</span></span>
 <span></span>
@@ -547,7 +547,7 @@ block, we tell the function:</p>
 <span><span class="co">#&gt; Exchangeable residual covariance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Shared:     &lt;omitted&gt;</span></span>
-<span><span class="co">#&gt; Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)</span></span>
+<span><span class="co">#&gt; Difference: us(0 + .dy_diff_female_x_male_arbitrary | coupleID)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance-covariance:</span></span>
 <span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
@@ -585,11 +585,11 @@ residual variances.</p>
 <p>The two parameterizations require different generated columns. The
 full distinguishable model was fitted above, so we now prepare the same
 original observations as exchangeable:</p>
-<p><a href="../reference/compare_interdep_models.html"><code>interdep::compare_interdep_models()</code></a>
+<p><a href="../reference/compare_dyad_models.html"><code>dyadMLM::compare_dyad_models()</code></a>
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_interdep_models.html">compare_interdep_models</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_dyad_models.html">compare_dyad_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_exchangeable_model</span>,</span>
 <span>  <span class="va">apim_distinguishable_model</span></span>
 <span><span class="op">)</span></span>
@@ -627,39 +627,39 @@ contributes few occasions, which can bias between-person estimates <span class="
 <span><span class="va">ild_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> </span>
 <span>    </span>
-<span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> </span>
-<span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span> </span>
+<span>    <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># Gender specific time trends</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">diaryday</span> <span class="op">+</span> </span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">diaryday</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">diaryday</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">diaryday</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># Gender-specific within-person actor effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cwp_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cwp_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_provided_support_cwp_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_provided_support_cwp_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific within-person partner effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cwp_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cwp_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_provided_support_cwp_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_provided_support_cwp_partner</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># Gender-specific between-person actor effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cbp_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cbp_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_provided_support_cbp_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_provided_support_cbp_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Gender-specific between-person partner effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_provided_support_cbp_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_provided_support_cbp_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_provided_support_cbp_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_provided_support_cbp_partner</span> <span class="op">+</span></span>
 <span>    </span>
 <span>    <span class="co"># random effects for stable non-independence (means)</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> </span>
-<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> </span>
-<span>         <span class="va">.i_is_female_x_male_male</span> </span>
+<span>         <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.dy_is_female_x_male_male</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Same-day residual covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> </span>
-<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span> </span>
-<span>         <span class="va">.i_is_female_x_male_male</span> </span>
+<span>         <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.dy_is_female_x_male_male</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> </span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>  </span>
@@ -688,7 +688,7 @@ denote the shared actor random slope for dyad
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">\widetilde{u}_{\mathrm{actor},j}</annotation></semantics></math>
-the corresponding <code>.i_diff_*</code> random slope. The tilde marks
+the corresponding <code>.dy_diff_*</code> random slope. The tilde marks
 random coefficients from the member-difference block. The actor slopes
 for the members assigned <code>+1</code> and <code>-1</code> are</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mn>1</mn><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mn>2</mn><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
@@ -698,7 +698,7 @@ u_{\mathrm{actor},1j}
 u_{\mathrm{actor},2j}
 = u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
 </annotation></semantics></math></p>
-<p>Because the shared and <code>.i_diff_*</code> blocks are fitted as
+<p>Because the shared and <code>.dy_diff_*</code> blocks are fitted as
 separate random-effects terms, they are independent. Therefore,</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mn>1</mn><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mn>2</mn><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>u</mi><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>u</mi><mo accent="true">̃</mo></mover><mrow><mrow><mi mathvariant="normal">a</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo>,</mo><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
 \operatorname{Var}(u_{\mathrm{actor},1j})
@@ -744,14 +744,14 @@ predictor effects then describe associations conditional on the members’
 prior outcomes.</p>
 <p>By adding the outcome to <code>predictors</code> and selecting it
 with <code>lag_predictors</code>,
-<code><a href="../reference/prepare_interdep_data.html">interdep::prepare_interdep_data()</a></code> returns lag-1 raw and
+<code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code> returns lag-1 raw and
 within-person scores alongside the contemporaneous scores.
 Between-person scores are not lagged because they describe stable
 differences between members.</p>
 <p>For this example, we obtain the lagged actor and partner outcome
 columns through the <code>lag_predictors</code> argument:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -771,21 +771,21 @@ bridged.</p>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Stability (actor effect across time)</span></span>
-<span>    <span class="va">.i_closeness_actor_lag1</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_closeness_actor_lag1</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Influence (partner effect across time)</span></span>
-<span>    <span class="va">.i_closeness_partner_lag1</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_closeness_partner_lag1</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Linear time trend</span></span>
 <span>    <span class="va">diaryday</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.i_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
 <span></span>
 <span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -795,9 +795,9 @@ bridged.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">stability_influence</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  </span></span>
-<span><span class="co">#&gt;     diaryday + us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
-<span><span class="co">#&gt;     coupleID) + us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt; closeness ~ 1 + .dy_closeness_actor_lag1 + .dy_closeness_partner_lag1 +  </span></span>
+<span><span class="co">#&gt;     diaryday + us(1 | coupleID) + us(0 + .dy_diff_assumed_exchangeable_arbitrary |  </span></span>
+<span><span class="co">#&gt;     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_diff_assumed_exchangeable_arbitrary |  </span></span>
 <span><span class="co">#&gt;     coupleID:diaryday)</span></span>
 <span><span class="co">#&gt; Dispersion:                 ~0</span></span>
 <span><span class="co">#&gt; Data: ild_apim_data_dynamic</span></span>
@@ -808,19 +808,19 @@ bridged.</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups              Name                                   Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID            (Intercept)                            0.9161   0.9571  </span></span>
-<span><span class="co">#&gt;  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                            0.3925   0.6265  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  </span></span>
+<span><span class="co">#&gt;  Groups              Name                                    Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID            (Intercept)                             0.9161   0.9571  </span></span>
+<span><span class="co">#&gt;  coupleID.1          .dy_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                             0.3925   0.6265  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .dy_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  </span></span>
 <span><span class="co">#&gt; Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
-<span><span class="co">#&gt; .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
-<span><span class="co">#&gt; diaryday                  -0.005281   0.007643  -0.691    0.490    </span></span>
+<span><span class="co">#&gt;                             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                 4.213120   0.300184  14.035  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***</span></span>
+<span><span class="co">#&gt; .dy_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    </span></span>
+<span><span class="co">#&gt; diaryday                   -0.005281   0.007643  -0.691    0.490    </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This model can be extended with contemporaneous actor and partner
@@ -830,8 +830,8 @@ between-person components. Their contemporaneous coefficients are then
 conditional on both partners’ prior outcomes.</p>
 <p>The model above uses raw lagged outcomes. The corresponding
 within-person-centered lagged terms are
-<code>.i_closeness_cwp_actor_lag1</code> and
-<code>.i_closeness_cwp_partner_lag1</code>.</p>
+<code>.dy_closeness_cwp_actor_lag1</code> and
+<code>.dy_closeness_cwp_partner_lag1</code>.</p>
 <p>Whether to use a raw or within-person-centered lagged outcome depends
 on the research question and the data. Person-mean centering the outcome
 lag can bias the average carryover estimate downward <span class="citation">(Hamaker and Grasman 2015)</span>. This downward bias

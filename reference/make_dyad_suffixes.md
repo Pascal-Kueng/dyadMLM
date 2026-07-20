@@ -1,11 +1,11 @@
-# Create safe suffixes for generated interdep columns
+# Create safe suffixes for generated dyadMLM columns
 
-Create safe suffixes for generated interdep columns
+Create safe suffixes for generated dyadMLM columns
 
 ## Usage
 
 ``` r
-make_interdep_suffixes(
+make_dyad_suffixes(
   labels,
   label_type = "labels",
   rename_hint = "role or composition labels"

@@ -1,8 +1,10 @@
 # Changelog
 
-## interdep 0.0.1
+## dyadMLM 0.0.1
 
 - Initial release.
+- Renamed the package from `interdep` to `dyadMLM`; package-generated
+  columns now use the `.dy_` prefix instead of `.i_`.
 - Added validation and preparation of cross-sectional and intensive
   longitudinal dyadic data with distinguishable, exchangeable, and mixed
   dyad compositions.

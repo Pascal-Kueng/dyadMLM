@@ -2,7 +2,7 @@
 
 ``` r
 
-library(interdep)
+library(dyadMLM)
 ```
 
 > This vignette is under construction and preliminary. Please check back
@@ -14,12 +14,12 @@ exchangeable dyads.
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the [Mixed-Composition
-APIM](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md),
+APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
 [Dyad-Individual
-Model](https://pascal-kueng.github.io/interdep/articles/dim.md), and
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), and
 [Dyadic Score
-Model](https://pascal-kueng.github.io/interdep/articles/dsm.md), see the
-[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
+[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
 
 A vignette for non-Gaussian generalized models is planned.
 
@@ -96,17 +96,17 @@ shown) is then block-diagonal:
 
 This structure is estimated with an unstructured random-effects block
 such as
-`us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID)`
+`us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID)`
 and `dispformula = ~ 0`.
 
 #### Fitting the distinguishable APIM with glmmTMB
 
 We first prepare the example data with
-[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md):
+[`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md):
 
 ``` r
 
-apim_distinguishable_data <- interdep::prepare_interdep_data(
+apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -116,7 +116,7 @@ apim_distinguishable_data <- interdep::prepare_interdep_data(
 )
 
 print(apim_distinguishable_data, n=4)
-#> # interdep data
+#> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
@@ -124,28 +124,28 @@ print(apim_distinguishable_data, n=4)
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_{comp-role}    composition-role indicator columns
-#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
-#> #                        values
-#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                        values
+#> #   .dy_composition       inferred dyad composition
+#> #   .dy_composition_role  composition-specific member role
+#> #   .dy_is_{comp-role}    composition-role indicator columns
+#> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                         values
+#> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                         values
 #> #
 #> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .i_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
-#> 1        1        1 female          4.79         4.37 female_x_male 
-#> 2        2        1 male            3.80         2.34 female_x_male 
-#> 3        3        2 female          2.91         2.44 female_x_male 
-#> 4        4        2 male            6.51         6.08 female_x_male 
+#>   personID coupleID gender communication satisfaction .dy_composition
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
+#> 1        1        1 female          4.79         4.37 female_x_male  
+#> 2        2        1 male            3.80         2.34 female_x_male  
+#> 3        3        2 female          2.91         2.44 female_x_male  
+#> 4        4        2 male            6.51         6.08 female_x_male  
 #> # ℹ 186 more rows
-#> # ℹ 5 more variables: .i_composition_role <fct>,
-#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_communication_actor <dbl>, .i_communication_partner <dbl>
+#> # ℹ 5 more variables: .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
+#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>
 ```
 
-The generated `.i_*` columns can be used directly in the model formula.
+The generated `.dy_*` columns can be used directly in the model formula.
 Here is a simple example:
 
 ``` r
@@ -155,23 +155,23 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 
     # Gender-specific intercepts
     0 +
-    .i_is_female_x_male_female +
-    .i_is_female_x_male_male +
+    .dy_is_female_x_male_female +
+    .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_is_female_x_male_female:.i_communication_actor +
-    .i_is_female_x_male_male:.i_communication_actor +
+    .dy_is_female_x_male_female:.dy_communication_actor +
+    .dy_is_female_x_male_male:.dy_communication_actor +
 
     # Gender-specific partner effects
-    .i_is_female_x_male_female:.i_communication_partner +
-    .i_is_female_x_male_male:.i_communication_partner +
+    .dy_is_female_x_male_female:.dy_communication_partner +
+    .dy_is_female_x_male_male:.dy_communication_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
     # This is glmmTMB-specific syntax! `brms` uses different syntax.
     us(0 +
-         .i_is_female_x_male_female +
-         .i_is_female_x_male_male
+         .dy_is_female_x_male_female +
+         .dy_is_female_x_male_male
        | coupleID)
 
   , dispformula = ~ 0
@@ -182,10 +182,10 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 summary(apim_distinguishable_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ 0 + .i_is_female_x_male_female + .i_is_female_x_male_male +  
-#>     .i_is_female_x_male_female:.i_communication_actor + .i_is_female_x_male_male:.i_communication_actor +  
-#>     .i_is_female_x_male_female:.i_communication_partner + .i_is_female_x_male_male:.i_communication_partner +  
-#>     us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male |  
+#> satisfaction ~ 0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +  
+#>     .dy_is_female_x_male_female:.dy_communication_actor + .dy_is_female_x_male_male:.dy_communication_actor +  
+#>     .dy_is_female_x_male_female:.dy_communication_partner + .dy_is_female_x_male_male:.dy_communication_partner +  
+#>     us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |  
 #>         coupleID)
 #> Dispersion:                    ~0
 #> Data: apim_distinguishable_data
@@ -196,26 +196,26 @@ summary(apim_distinguishable_model)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups   Name                       Variance Std.Dev. Corr  
-#>  coupleID .i_is_female_x_male_female 1.311    1.145          
-#>           .i_is_female_x_male_male   1.792    1.339    -0.19 
+#>  Groups   Name                        Variance Std.Dev. Corr  
+#>  coupleID .dy_is_female_x_male_female 1.311    1.145          
+#>           .dy_is_female_x_male_male   1.792    1.339    -0.19 
 #> Number of obs: 176, groups:  coupleID, 88
 #> 
 #> Conditional model:
-#>                                                     Estimate Std. Error z value
-#> .i_is_female_x_male_female                          -4.36874    0.59416  -7.353
-#> .i_is_female_x_male_male                            -6.03808    0.69452  -8.694
-#> .i_is_female_x_male_female:.i_communication_actor    1.67170    0.10089  16.570
-#> .i_is_female_x_male_male:.i_communication_actor      1.80495    0.10562  17.090
-#> .i_is_female_x_male_female:.i_communication_partner  0.24930    0.09035   2.759
-#> .i_is_female_x_male_male:.i_communication_partner    0.25453    0.11793   2.158
-#>                                                     Pr(>|z|)    
-#> .i_is_female_x_male_female                          1.94e-13 ***
-#> .i_is_female_x_male_male                             < 2e-16 ***
-#> .i_is_female_x_male_female:.i_communication_actor    < 2e-16 ***
-#> .i_is_female_x_male_male:.i_communication_actor      < 2e-16 ***
-#> .i_is_female_x_male_female:.i_communication_partner  0.00579 ** 
-#> .i_is_female_x_male_male:.i_communication_partner    0.03090 *  
+#>                                                       Estimate Std. Error
+#> .dy_is_female_x_male_female                           -4.36874    0.59416
+#> .dy_is_female_x_male_male                             -6.03808    0.69452
+#> .dy_is_female_x_male_female:.dy_communication_actor    1.67170    0.10089
+#> .dy_is_female_x_male_male:.dy_communication_actor      1.80495    0.10562
+#> .dy_is_female_x_male_female:.dy_communication_partner  0.24930    0.09035
+#> .dy_is_female_x_male_male:.dy_communication_partner    0.25453    0.11793
+#>                                                       z value Pr(>|z|)    
+#> .dy_is_female_x_male_female                            -7.353 1.94e-13 ***
+#> .dy_is_female_x_male_male                              -8.694  < 2e-16 ***
+#> .dy_is_female_x_male_female:.dy_communication_actor    16.570  < 2e-16 ***
+#> .dy_is_female_x_male_male:.dy_communication_actor      17.090  < 2e-16 ***
+#> .dy_is_female_x_male_female:.dy_communication_partner   2.759  0.00579 ** 
+#> .dy_is_female_x_male_male:.dy_communication_partner     2.158  0.03090 *  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -287,15 +287,15 @@ a correlation between slopes and intercepts anymore.
 Therefore, we introduce a solution that works for residuals and other
 random effect terms regardless of slopes. Following del Rosario and West
 (2025),
-[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
-generates an arbitrary member-difference column, named `.i_diff_*`, that
-is `+1` for one member and `-1` for the other. The exchangeable residual
-structure is represented by two separate random-effects terms: a shared
-dyad random intercept and a random coefficient for this difference
-column.
+[`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+generates an arbitrary member-difference column, named `.dy_diff_*`,
+that is `+1` for one member and `-1` for the other. The exchangeable
+residual structure is represented by two separate random-effects terms:
+a shared dyad random intercept and a random coefficient for this
+difference column.
 
 We will now fit the model and then use the
-[`interdep::exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md)
+[`dyadMLM::exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md)
 function that back-transforms the structure to the often more
 interpretable actor-partner residual-covariance matrix we are used to.
 
@@ -308,7 +308,7 @@ data.
 
 ``` r
 
-apim_exchangeable_data <- interdep::prepare_interdep_data(
+apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -318,7 +318,7 @@ apim_exchangeable_data <- interdep::prepare_interdep_data(
 )
 
 print(apim_exchangeable_data, n = 4)
-#> # interdep data
+#> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
@@ -326,28 +326,28 @@ print(apim_exchangeable_data, n = 4)
 #> # female_x_male exchangeable (set by user) 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_{comp-role}    composition-role indicator columns
-#> #   .i_diff_{comp}       composition-specific sum-diff contrasts with arbitrary
-#> #                        direction; 0 for distinguishable dyads or other
-#> #                        exchangeable compositions
-#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
-#> #                        values
-#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                        values
+#> #   .dy_composition       inferred dyad composition
+#> #   .dy_composition_role  composition-specific member role
+#> #   .dy_is_{comp-role}    composition-role indicator columns
+#> #   .dy_diff_{comp}       composition-specific sum-diff contrasts with
+#> #                         arbitrary direction; 0 for distinguishable dyads or
+#> #                         other exchangeable compositions
+#> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                         values
+#> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                         values
 #> #
 #> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .i_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
-#> 1        1        1 female          4.79         4.37 female_x_male 
-#> 2        2        1 male            3.80         2.34 female_x_male 
-#> 3        3        2 female          2.91         2.44 female_x_male 
-#> 4        4        2 male            6.51         6.08 female_x_male 
+#>   personID coupleID gender communication satisfaction .dy_composition
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
+#> 1        1        1 female          4.79         4.37 female_x_male  
+#> 2        2        1 male            3.80         2.34 female_x_male  
+#> 3        3        2 female          2.91         2.44 female_x_male  
+#> 4        4        2 male            6.51         6.08 female_x_male  
 #> # ℹ 186 more rows
-#> # ℹ 5 more variables: .i_composition_role <fct>, .i_is_female_x_male <dbl>,
-#> #   .i_diff_female_x_male_arbitrary <dbl>, .i_communication_actor <dbl>,
-#> #   .i_communication_partner <dbl>
+#> # ℹ 5 more variables: .dy_composition_role <fct>, .dy_is_female_x_male <dbl>,
+#> #   .dy_diff_female_x_male_arbitrary <dbl>, .dy_communication_actor <dbl>,
+#> #   .dy_communication_partner <dbl>
 ```
 
 We then use the columns to fit the model as follows:
@@ -361,13 +361,13 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     1 +
     
     # Pooled single actor and partner effects
-    .i_communication_actor +
-    .i_communication_partner +
+    .dy_communication_actor +
+    .dy_communication_partner +
     
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
     us(1 | coupleID) +
-    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -376,8 +376,8 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  
-#>     us(1 | coupleID) + us(0 + .i_diff_female_x_male_arbitrary |      coupleID)
+#> satisfaction ~ 1 + .dy_communication_actor + .dy_communication_partner +  
+#>     us(1 | coupleID) + us(0 + .dy_diff_female_x_male_arbitrary |      coupleID)
 #> Dispersion:                    ~0
 #> Data: apim_exchangeable_data
 #> 
@@ -387,34 +387,34 @@ summary(apim_exchangeable_model)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups     Name                            Variance Std.Dev.
-#>  coupleID   (Intercept)                     0.6346   0.7966  
-#>  coupleID.1 .i_diff_female_x_male_arbitrary 1.1532   1.0739  
+#>  Groups     Name                             Variance Std.Dev.
+#>  coupleID   (Intercept)                      0.6346   0.7966  
+#>  coupleID.1 .dy_diff_female_x_male_arbitrary 1.1532   1.0739  
 #> Number of obs: 176, groups:  coupleID, 88
 #> 
 #> Conditional model:
-#>                          Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)               -5.2330     0.4103 -12.754  < 2e-16 ***
-#> .i_communication_actor     1.7578     0.0819  21.461  < 2e-16 ***
-#> .i_communication_partner   0.2379     0.0819   2.904  0.00368 ** 
+#>                           Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                -5.2330     0.4103 -12.754  < 2e-16 ***
+#> .dy_communication_actor     1.7578     0.0819  21.461  < 2e-16 ***
+#> .dy_communication_partner   0.2379     0.0819   2.904  0.00368 ** 
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 We use the
-[`interdep::exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md)
+[`dyadMLM::exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md)
 to recover the interpretable variance-covariance matrix:
 
 ``` r
 
-backtransformed <- interdep::exchangeable_rescov(apim_exchangeable_model)
+backtransformed <- dyadMLM::exchangeable_rescov(apim_exchangeable_model)
 
 # residual variance-covariance and SD-correlation representations
 print(backtransformed)
 #> Exchangeable residual covariance
 #> 
 #> Shared:     us(1 | coupleID)
-#> Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)
+#> Difference: us(0 + .dy_diff_female_x_male_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
 #>                       member_1: (Intercept) member_2: (Intercept)
@@ -447,12 +447,12 @@ can omit the entire shared block:
 
 apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
   satisfaction ~  1 +
-    .i_communication_actor +
-    .i_communication_partner +
+    .dy_communication_actor +
+    .dy_communication_partner +
     
     # Residual variance covariance matrix
     # omitting the us(1 | coupleID) block
-    us(0 + .i_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -461,8 +461,8 @@ apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model_no_shared)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  
-#>     us(0 + .i_diff_female_x_male_arbitrary | coupleID)
+#> satisfaction ~ 1 + .dy_communication_actor + .dy_communication_partner +  
+#>     us(0 + .dy_diff_female_x_male_arbitrary | coupleID)
 #> Dispersion:                    ~0
 #> Data: apim_exchangeable_data
 #> 
@@ -472,15 +472,15 @@ summary(apim_exchangeable_model_no_shared)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups   Name                            Variance Std.Dev.
-#>  coupleID .i_diff_female_x_male_arbitrary 1.159    1.076   
+#>  Groups   Name                             Variance Std.Dev.
+#>  coupleID .dy_diff_female_x_male_arbitrary 1.159    1.076   
 #> Number of obs: 176, groups:  coupleID, 88
 #> 
 #> Conditional model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)              -5.233e+00  4.446e-05 -117705  < 2e-16 ***
-#> .i_communication_actor    1.764e+00  7.221e-02      24  < 2e-16 ***
-#> .i_communication_partner  2.317e-01  7.221e-02       3  0.00133 ** 
+#>                             Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)               -5.233e+00  4.446e-05 -117705  < 2e-16 ***
+#> .dy_communication_actor    1.764e+00  7.221e-02      24  < 2e-16 ***
+#> .dy_communication_partner  2.317e-01  7.221e-02       3  0.00133 ** 
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -491,17 +491,17 @@ block, we tell the function:
 
 ``` r
 
-backtransformed <- interdep::exchangeable_rescov(
+backtransformed <- dyadMLM::exchangeable_rescov(
   apim_exchangeable_model_no_shared, 
   pairs = list(
     shared = NULL,
-    difference = "us(0 + .i_diff_female_x_male_arbitrary | coupleID)",
-    difference_indicator =".i_diff_female_x_male_arbitrary"
+    difference = "us(0 + .dy_diff_female_x_male_arbitrary | coupleID)",
+    difference_indicator =".dy_diff_female_x_male_arbitrary"
   )
 )
 #> Warning: Review possible residual-level structure:
 #> 
-#> Pair for `.i_diff_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.
+#> Pair for `.dy_diff_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.
 #> 
 #> - Terms absent from the shared block: `(Intercept)`. The fitted model fixes their shared components at zero, implying equal and opposite member effects (correlation -1 when variance > 0; undefined at zero) and singular member covariance. If unintended, revise this block and refit.
 
@@ -510,7 +510,7 @@ backtransformed
 #> Exchangeable residual covariance
 #> 
 #> Shared:     <omitted>
-#> Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)
+#> Difference: us(0 + .dy_diff_female_x_male_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
 #>                       member_1: (Intercept) member_2: (Intercept)
@@ -547,13 +547,13 @@ The two parameterizations require different generated columns. The full
 distinguishable model was fitted above, so we now prepare the same
 original observations as exchangeable:
 
-[`interdep::compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.md)
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:
 
 ``` r
 
-interdep::compare_interdep_models(
+dyadMLM::compare_dyad_models(
   apim_exchangeable_model,
   apim_distinguishable_model
 )
@@ -594,39 +594,39 @@ Example model specification:
 ild_distinguishable_model <- glmmTMB(
   closeness ~ 0 + 
     
-    .i_is_female_x_male_female + 
-    .i_is_female_x_male_male + 
+    .dy_is_female_x_male_female +
+    .dy_is_female_x_male_male +
     
     # Gender specific time trends
-    .i_is_female_x_male_female:diaryday + 
-    .i_is_female_x_male_male:diaryday +
+    .dy_is_female_x_male_female:diaryday +
+    .dy_is_female_x_male_male:diaryday +
     
     # Gender-specific within-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cwp_actor +
+    .dy_is_female_x_male_female:.dy_provided_support_cwp_actor +
+    .dy_is_female_x_male_male:.dy_provided_support_cwp_actor +
 
     # Gender-specific within-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cwp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cwp_partner +
+    .dy_is_female_x_male_female:.dy_provided_support_cwp_partner +
+    .dy_is_female_x_male_male:.dy_provided_support_cwp_partner +
     
     # Gender-specific between-person actor effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_actor +
-    .i_is_female_x_male_male:.i_provided_support_cbp_actor +
+    .dy_is_female_x_male_female:.dy_provided_support_cbp_actor +
+    .dy_is_female_x_male_male:.dy_provided_support_cbp_actor +
 
     # Gender-specific between-person partner effects
-    .i_is_female_x_male_female:.i_provided_support_cbp_partner +
-    .i_is_female_x_male_male:.i_provided_support_cbp_partner +
+    .dy_is_female_x_male_female:.dy_provided_support_cbp_partner +
+    .dy_is_female_x_male_male:.dy_provided_support_cbp_partner +
     
     # random effects for stable non-independence (means)
     us(0 + 
-         .i_is_female_x_male_female + 
-         .i_is_female_x_male_male 
+         .dy_is_female_x_male_female +
+         .dy_is_female_x_male_male
        | coupleID)  +
 
     # Same-day residual covariance
     us(0 + 
-         .i_is_female_x_male_female + 
-         .i_is_female_x_male_male 
+         .dy_is_female_x_male_female +
+         .dy_is_female_x_male_male
        | coupleID:diaryday) 
 
   , dispformula = ~ 0  
@@ -650,7 +650,7 @@ represent same-occasion residual dependence.
 The same shared/difference back-transformation applies to random slopes
 (del Rosario and West 2025). For example, let $`u_{\mathrm{actor},j}`$
 denote the shared actor random slope for dyad $`j`$ and
-$`\widetilde{u}_{\mathrm{actor},j}`$ the corresponding `.i_diff_*`
+$`\widetilde{u}_{\mathrm{actor},j}`$ the corresponding `.dy_diff_*`
 random slope. The tilde marks random coefficients from the
 member-difference block. The actor slopes for the members assigned `+1`
 and `-1` are
@@ -663,7 +663,7 @@ u_{\mathrm{actor},2j}
 = u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
 ```
 
-Because the shared and `.i_diff_*` blocks are fitted as separate
+Because the shared and `.dy_diff_*` blocks are fitted as separate
 random-effects terms, they are independent. Therefore,
 
 ``` math
@@ -713,7 +713,7 @@ conditional on the members’ prior outcomes.
 
 By adding the outcome to `predictors` and selecting it with
 `lag_predictors`,
-[`interdep::prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+[`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
 returns lag-1 raw and within-person scores alongside the contemporaneous
 scores. Between-person scores are not lagged because they describe
 stable differences between members.
@@ -723,7 +723,7 @@ through the `lag_predictors` argument:
 
 ``` r
 
-ild_apim_data_dynamic <- interdep::prepare_interdep_data(
+ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
   group = coupleID,
   member = personID,
@@ -748,21 +748,21 @@ stability_influence <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
     # Stability (actor effect across time)
-    .i_closeness_actor_lag1 +
+    .dy_closeness_actor_lag1 +
 
     # Influence (partner effect across time)
-    .i_closeness_partner_lag1 +
+    .dy_closeness_partner_lag1 +
 
     # Linear time trend
     diaryday +
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -772,9 +772,9 @@ stability_influence <- glmmTMB::glmmTMB(
 summary(stability_influence)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> closeness ~ 1 + .i_closeness_actor_lag1 + .i_closeness_partner_lag1 +  
-#>     diaryday + us(1 | coupleID) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  
-#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .i_diff_assumed_exchangeable_arbitrary |  
+#> closeness ~ 1 + .dy_closeness_actor_lag1 + .dy_closeness_partner_lag1 +  
+#>     diaryday + us(1 | coupleID) + us(0 + .dy_diff_assumed_exchangeable_arbitrary |  
+#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_diff_assumed_exchangeable_arbitrary |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_apim_data_dynamic
@@ -785,19 +785,19 @@ summary(stability_influence)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups              Name                                   Variance Std.Dev.
-#>  coupleID            (Intercept)                            0.9161   0.9571  
-#>  coupleID.1          .i_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  
-#>  coupleID.diaryday   (Intercept)                            0.3925   0.6265  
-#>  coupleID.diaryday.1 .i_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  
+#>  Groups              Name                                    Variance Std.Dev.
+#>  coupleID            (Intercept)                             0.9161   0.9571  
+#>  coupleID.1          .dy_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  
+#>  coupleID.diaryday   (Intercept)                             0.3925   0.6265  
+#>  coupleID.diaryday.1 .dy_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  
 #> Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497
 #> 
 #> Conditional model:
-#>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                4.213120   0.300184  14.035  < 2e-16 ***
-#> .i_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
-#> .i_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
-#> diaryday                  -0.005281   0.007643  -0.691    0.490    
+#>                             Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                 4.213120   0.300184  14.035  < 2e-16 ***
+#> .dy_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
+#> .dy_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
+#> diaryday                   -0.005281   0.007643  -0.691    0.490    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -809,8 +809,8 @@ between-person components. Their contemporaneous coefficients are then
 conditional on both partners’ prior outcomes.
 
 The model above uses raw lagged outcomes. The corresponding
-within-person-centered lagged terms are `.i_closeness_cwp_actor_lag1`
-and `.i_closeness_cwp_partner_lag1`.
+within-person-centered lagged terms are `.dy_closeness_cwp_actor_lag1`
+and `.dy_closeness_cwp_partner_lag1`.
 
 Whether to use a raw or within-person-centered lagged outcome depends on
 the research question and the data. Person-mean centering the outcome
@@ -843,18 +843,18 @@ From here, choose the model-specific vignette that matches the research
 question:
 
 - [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md)
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md)
   for analyses combining distinguishable and exchangeable dyad
   compositions;
 - [Dyad-Individual Model
-  vignette](https://pascal-kueng.github.io/interdep/articles/dim.md) for
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) for
   the exchangeable DIM parameterization; or
 - [Dyadic Score Model
-  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.md) for
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md) for
   the distinguishable DSM parameterization.
 
 Or return to the
-[Overview](https://pascal-kueng.github.io/interdep/articles/index.md).
+[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
 
 A vignette with non-Gaussian generalized APIM examples is planned.
 

@@ -7,7 +7,7 @@ linear-predictor scale. In non-Gaussian models, it therefore describes a
 Gaussian latent covariance, not response-scale residual covariance. For
 the model specification, derivation, and interpretation, see the
 [exchangeable APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure).
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure).
 
 ## Usage
 
@@ -58,20 +58,20 @@ by coefficient arrays.
 
 ## Details
 
-Automatic matching recognizes exact `.i_diff_*_arbitrary` coefficient
-names and first looks for the corresponding `.i_is_*` shared block. It
+Automatic matching recognizes exact `.dy_diff_*_arbitrary` coefficient
+names and first looks for the corresponding `.dy_is_*` shared block. It
 requires the two blocks to use the same grouping factor and the same
-underlying terms. Most models fitted with `interdep`-generated columns
+underlying terms. Most models fitted with `dyadMLM`-generated columns
 therefore need only:
 
-    result <- interdep::exchangeable_rescov(model)
+    result <- dyadMLM::exchangeable_rescov(model)
     print(result)
 
 Supply `pairs` when automatic matching is ambiguous or when a model uses
 custom indicators, multiple covariance levels, or deliberately omitted
 blocks or terms. To specify one pair with a custom difference indicator:
 
-    result <- interdep::exchangeable_rescov(
+    result <- dyadMLM::exchangeable_rescov(
       model,
       pairs = list(
         shared = "(1 + time | coupleID)",
@@ -85,20 +85,20 @@ example, in a Gaussian `glmmTMB` model fitted with `dispformula = ~ 0`,
 this call recovers both a stable dyad-level covariance with an omitted
 difference time slope and the same-occasion partner residual covariance:
 
-    result <- interdep::exchangeable_rescov(
+    result <- dyadMLM::exchangeable_rescov(
       model,
       pairs = list(
         dyad = list(
           shared = "(1 + diaryday | coupleID)",
-          difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID)",
+          difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)",
           difference_indicator =
-            ".i_diff_assumed_exchangeable_arbitrary"
+            ".dy_diff_assumed_exchangeable_arbitrary"
         ),
         same_occasion = list(
           shared = "(1 | coupleID:diaryday)",
-          difference = "(0 + .i_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+          difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
           difference_indicator =
-            ".i_diff_assumed_exchangeable_arbitrary"
+            ".dy_diff_assumed_exchangeable_arbitrary"
         )
       )
     )
@@ -147,7 +147,7 @@ truly absent from the fitted model. Do not use `NULL` merely to ignore
 an existing block; the resulting back-transformation would be incorrect.
 
 See the constrained-block example in the [exchangeable APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#fitted-constraints-and-omitted-blocks).
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitted-constraints-and-omitted-blocks).
 
 ## Backend note
 
@@ -170,8 +170,8 @@ and can represent latent link-scale covariance in non-Gaussian models.
 ## See also
 
 The [exchangeable APIM
-vignette](https://pascal-kueng.github.io/interdep/articles/apim.html#exchangeable-residual-structure)
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure)
 for the model specification, covariance derivation, and
 constrained-block example. Run
-[`vignette("apim", package = "interdep")`](https://pascal-kueng.github.io/interdep/articles/apim.md)
+[`vignette("apim", package = "dyadMLM")`](https://pascal-kueng.github.io/dyadMLM/articles/apim.md)
 to open the installed version.

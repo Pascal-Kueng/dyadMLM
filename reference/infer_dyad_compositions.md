@@ -1,7 +1,7 @@
 # Infer dyad compositions
 
 Builds a dyad-level summary of role compositions from a validated
-`interdep_data` object.
+`dyadMLM_data` object.
 
 ## Usage
 
@@ -19,12 +19,12 @@ infer_dyad_compositions(
 
 - data:
 
-  An `interdep_data` object returned by
-  [`validate_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/validate_interdep_data.md).
+  A `dyadMLM_data` object returned by
+  [`validate_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/validate_dyad_data.md).
 
 - seed:
 
-  Optional seed for random `.i_diff_*` sign assignment in exchangeable
+  Optional seed for random `.dy_diff_*` sign assignment in exchangeable
   dyads. If `NULL`, the current R session's RNG state is used.
 
 - include_compositions:
@@ -44,8 +44,8 @@ infer_dyad_compositions(
 
 ## Value
 
-An `interdep_data` object with added `.i_composition` and
-`.i_composition_role` factor columns, `.i_is_*` numeric indicator
-columns, composition-specific numeric `.i_diff_*` contrast columns coded
-`-1` and `1` for the two members of matching exchangeable dyads and `0`
-otherwise, and dyad composition metadata.
+A `dyadMLM_data` object with added `.dy_composition` and
+`.dy_composition_role` factor columns, `.dy_is_*` numeric indicator
+columns, composition-specific numeric `.dy_diff_*` contrast columns
+coded `-1` and `1` for the two members of matching exchangeable dyads
+and `0` otherwise, and dyad composition metadata.

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Dyadic Score Model (DSM) • interdep</title>
+<title>Dyadic Score Model (DSM) • dyadMLM</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">interdep</a>
+    <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
 
@@ -46,7 +46,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Pascal-Kueng/interdep" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Pascal-Kueng/dyadMLM" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -72,7 +72,7 @@ Küng</h4>
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/interdep/">interdep</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
 <span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">dsm_fitted_alt</span> <span class="op">&lt;-</span> <span class="st">"Fitted DSM diagram unavailable."</span></span></code></pre></div>
 <p>This vignette focuses on the Dyadic Score Model (DSM) for
@@ -91,7 +91,7 @@ should be substantively meaningful when the directional coefficients are
 interpreted. Here, <code>c("female", "male")</code> defines every
 difference as female minus male.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -102,7 +102,7 @@ difference as female minus male.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_dsm_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># interdep data</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 190 | Dyads: 95 | Intensive longitudinal: no</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # DSM direction: female - male</span></span></span>
@@ -111,44 +111,44 @@ difference as female minus male.</p>
 <span><span class="co">#&gt; # female_x_male distinguishable 95 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .i_composition              inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .i_composition_role         composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .i_is_{comp-role}           composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .i_dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
-<span><span class="co">#&gt; #                               role and -0.5 for the second declared role</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
-<span><span class="co">#&gt; #                               level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .i_{pred}_within_dyad_diff  DSM signed predictor difference: first declared</span></span>
-<span><span class="co">#&gt; #                               role minus second declared role</span></span>
+<span><span class="co">#&gt; #   .dy_composition              inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .dy_composition_role         composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .dy_is_{comp-role}           composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
+<span><span class="co">#&gt; #                                role and -0.5 for the second declared role</span></span>
+<span><span class="co">#&gt; #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                                level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .dy_{pred}_within_dyad_diff  DSM signed predictor difference: first</span></span>
+<span><span class="co">#&gt; #                                declared role minus second declared role</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 190 × 12</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .i_composition</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 female_x_male </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male </span></span>
+<span><span class="co">#&gt;   personID coupleID gender communication satisfaction .dy_composition</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female          4.79         4.37 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male            3.80         2.34 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female          2.91         2.44 female_x_male  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male            6.51         6.08 female_x_male  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 186 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .i_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_is_female_x_male_female &lt;dbl&gt;, .i_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_dsm_role_contrast &lt;dbl&gt;, .i_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .i_communication_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_dsm_role_contrast &lt;dbl&gt;, .dy_communication_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_communication_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For predictor values
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{female}}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{male}}</annotation></semantics></math>,
-<code>interdep</code> then creates:</p>
+<code>dyadMLM</code> then creates:</p>
 <ul>
-<li><p><code>.i_communication_dyad_mean_gmc</code>
+<li><p><code>.dy_communication_dyad_mean_gmc</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub></mrow><annotation encoding="application/x-tex">=
 \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X</annotation></semantics></math>
 (with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
 representing the sample grand mean of the dyad-level predictor
 means)</p></li>
-<li><p><code>.i_communication_within_dyad_diff</code>
+<li><p><code>.dy_communication_within_dyad_diff</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">= X_{\mathrm{female}} - X_{\mathrm{male}}</annotation></semantics></math></p></li>
-<li><p><code>.i_dsm_role_contrast</code>
+<li><p><code>.dy_dsm_role_contrast</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mi>+</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">= +0.5</annotation></semantics></math>
 for female and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">-0.5</annotation></semantics></math>
@@ -192,22 +192,22 @@ below:</p>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor level -&gt; outcome level (a11)</span></span>
-<span>    <span class="va">.i_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor difference -&gt; outcome level (a12)</span></span>
-<span>    <span class="va">.i_communication_within_dyad_diff</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_within_dyad_diff</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Outcome-difference intercept (a20)</span></span>
-<span>    <span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor level -&gt; outcome difference (a21)</span></span>
-<span>    <span class="va">.i_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor difference -&gt; outcome difference (a22)</span></span>
-<span>    <span class="va">.i_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Outcome-level and outcome-difference residual variances and their covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dy_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data</span></span>
@@ -216,10 +216,10 @@ below:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_dyad_mean_gmc + .i_communication_within_dyad_diff +  </span></span>
-<span><span class="co">#&gt;     .i_dsm_role_contrast + .i_communication_dyad_mean_gmc:.i_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     .i_communication_within_dyad_diff:.i_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     us(1 + .i_dsm_role_contrast | coupleID)</span></span>
+<span><span class="co">#&gt; satisfaction ~ 1 + .dy_communication_dyad_mean_gmc + .dy_communication_within_dyad_diff +  </span></span>
+<span><span class="co">#&gt;     .dy_dsm_role_contrast + .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     us(1 + .dy_dsm_role_contrast | coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: cross_dsm_data</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -229,26 +229,26 @@ below:</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups   Name                 Variance Std.Dev. Corr  </span></span>
-<span><span class="co">#&gt;  coupleID (Intercept)          0.632    0.795          </span></span>
-<span><span class="co">#&gt;           .i_dsm_role_contrast 3.678    1.918    -0.16 </span></span>
+<span><span class="co">#&gt;  Groups   Name                  Variance Std.Dev. Corr  </span></span>
+<span><span class="co">#&gt;  coupleID (Intercept)           0.632    0.795          </span></span>
+<span><span class="co">#&gt;           .dy_dsm_role_contrast 3.678    1.918    -0.16 </span></span>
 <span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                                        Estimate Std. Error</span></span>
-<span><span class="co">#&gt; (Intercept)                                             5.04256    0.08481</span></span>
-<span><span class="co">#&gt; .i_communication_dyad_mean_gmc                          1.99024    0.07834</span></span>
-<span><span class="co">#&gt; .i_communication_within_dyad_diff                      -0.03201    0.05372</span></span>
-<span><span class="co">#&gt; .i_dsm_role_contrast                                    0.95644    0.20459</span></span>
-<span><span class="co">#&gt; .i_communication_dyad_mean_gmc:.i_dsm_role_contrast    -0.13847    0.18899</span></span>
-<span><span class="co">#&gt; .i_communication_within_dyad_diff:.i_dsm_role_contrast  1.48641    0.12959</span></span>
-<span><span class="co">#&gt;                                                        z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                                              59.46  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_dyad_mean_gmc                           25.41  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_within_dyad_diff                        -0.60    0.551    </span></span>
-<span><span class="co">#&gt; .i_dsm_role_contrast                                      4.67 2.94e-06 ***</span></span>
-<span><span class="co">#&gt; .i_communication_dyad_mean_gmc:.i_dsm_role_contrast      -0.73    0.464    </span></span>
-<span><span class="co">#&gt; .i_communication_within_dyad_diff:.i_dsm_role_contrast   11.47  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt;                                                          Estimate Std. Error</span></span>
+<span><span class="co">#&gt; (Intercept)                                               5.04256    0.08481</span></span>
+<span><span class="co">#&gt; .dy_communication_dyad_mean_gmc                           1.99024    0.07834</span></span>
+<span><span class="co">#&gt; .dy_communication_within_dyad_diff                       -0.03201    0.05372</span></span>
+<span><span class="co">#&gt; .dy_dsm_role_contrast                                     0.95644    0.20459</span></span>
+<span><span class="co">#&gt; .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast    -0.13847    0.18899</span></span>
+<span><span class="co">#&gt; .dy_communication_within_dyad_diff:.dy_dsm_role_contrast  1.48641    0.12959</span></span>
+<span><span class="co">#&gt;                                                          z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                                                59.46  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_communication_dyad_mean_gmc                            25.41  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_communication_within_dyad_diff                         -0.60    0.551    </span></span>
+<span><span class="co">#&gt; .dy_dsm_role_contrast                                       4.67 2.94e-06 ***</span></span>
+<span><span class="co">#&gt; .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast      -0.73    0.464    </span></span>
+<span><span class="co">#&gt; .dy_communication_within_dyad_diff:.dy_dsm_role_contrast   11.47  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <div class="section level3">
@@ -420,7 +420,7 @@ we can reverse the direction and compute
 This changes the direction of the differences, but not the substantive
 model.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cross_dsm_data_inverted</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_interdep_data.html">prepare_interdep_data</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">cross_dsm_data_inverted</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
@@ -433,12 +433,12 @@ model.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsm_model_inverted</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
-<span>    <span class="va">.i_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_within_dyad_diff</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.i_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.i_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="va">.dy_communication_dyad_mean_gmc</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_within_dyad_diff</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_dyad_mean_gmc</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_communication_within_dyad_diff</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dy_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data_inverted</span></span>
@@ -457,9 +457,9 @@ model.</p>
 <span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="66%">
+<col width="67%">
 <col width="16%">
 <col width="16%">
 </colgroup>
@@ -475,27 +475,27 @@ model.</p>
 <td align="right">5.043</td>
 </tr>
 <tr class="even">
-<td align="left">.i_communication_dyad_mean_gmc</td>
+<td align="left">.dy_communication_dyad_mean_gmc</td>
 <td align="right">1.990</td>
 <td align="right">1.990</td>
 </tr>
 <tr class="odd">
-<td align="left">.i_communication_within_dyad_diff</td>
+<td align="left">.dy_communication_within_dyad_diff</td>
 <td align="right">-0.032</td>
 <td align="right">0.032</td>
 </tr>
 <tr class="even">
-<td align="left">.i_dsm_role_contrast</td>
+<td align="left">.dy_dsm_role_contrast</td>
 <td align="right">0.956</td>
 <td align="right">-0.956</td>
 </tr>
 <tr class="odd">
-<td align="left">.i_communication_dyad_mean_gmc:.i_dsm_role_contrast</td>
+<td align="left">.dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast</td>
 <td align="right">-0.138</td>
 <td align="right">0.138</td>
 </tr>
 <tr class="even">
-<td align="left">.i_communication_within_dyad_diff:.i_dsm_role_contrast</td>
+<td align="left">.dy_communication_within_dyad_diff:.dy_dsm_role_contrast</td>
 <td align="right">1.486</td>
 <td align="right">1.486</td>
 </tr>
@@ -503,18 +503,18 @@ model.</p>
 </table>
 <p>The two models have identical fitted values and model fit:</p>
 <ul>
-<li><p><code>.i_communication_within_dyad_diff</code> reverses because
+<li><p><code>.dy_communication_within_dyad_diff</code> reverses because
 the predictor difference reverses.</p></li>
-<li><p><code>.i_dsm_role_contrast</code> reverses because the
+<li><p><code>.dy_dsm_role_contrast</code> reverses because the
 represented outcome difference reverses.</p></li>
-<li><p><code>.i_communication_dyad_mean_gmc:.i_dsm_role_contrast</code>
+<li><p><code>.dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast</code>
 reverses because only the outcome difference reverses.</p></li>
-<li><p><code>.i_communication_within_dyad_diff:.i_dsm_role_contrast</code>
+<li><p><code>.dy_communication_within_dyad_diff:.dy_dsm_role_contrast</code>
 remains unchanged because both differences reverse.</p></li>
 </ul>
-<p>The intercept and <code>.i_communication_dyad_mean_gmc</code> also
+<p>The intercept and <code>.dy_communication_dyad_mean_gmc</code> also
 remain unchanged. For the random effects, the variances of
-<code>(Intercept)</code> and <code>.i_dsm_role_contrast</code> remain
+<code>(Intercept)</code> and <code>.dy_dsm_role_contrast</code> remain
 unchanged, whereas their covariance reverses sign.</p>
 </div>
 </div>
@@ -530,21 +530,21 @@ associations <span class="citation">(Iida et al. 2018)</span>.</p>
 <span>  <span class="va">satisfaction</span> <span class="op">~</span></span>
 <span>    <span class="co"># Role-specific intercepts</span></span>
 <span>    <span class="fl">0</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific actor effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_communication_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_communication_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific partner effects</span></span>
-<span>    <span class="va">.i_is_female_x_male_female</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.i_is_female_x_male_male</span><span class="op">:</span><span class="va">.i_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_communication_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_communication_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific Gaussian residual covariance structure</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
-<span>         <span class="va">.i_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>         <span class="va">.i_is_female_x_male_male</span></span>
+<span>         <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.dy_is_female_x_male_male</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -767,7 +767,7 @@ role-slope variance:</p>
 arbitrary. The directional intercept, both cross-paths, and the
 covariance between outcome level and outcome difference must then be
 zero. The remaining reduced, label-invariant DSM is algebraically the
-Gaussian Dyad-Individual Model (DIM). In <code>interdep</code>, use
+Gaussian Dyad-Individual Model (DIM). In <code>dyadMLM</code>, use
 <code>model_type = "dim"</code> for this exchangeable model and reserve
 <code>model_type = "dsm"</code> for distinguishable dyads.</p>
 <p>Because the Gaussian DIM is the exchangeability-constrained version

@@ -14,7 +14,7 @@ print(x, what = c("both", "varcov", "sdcor"), ...)
 - x:
 
   An object returned by
-  [`exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md).
+  [`exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md).
 
 - what:
 

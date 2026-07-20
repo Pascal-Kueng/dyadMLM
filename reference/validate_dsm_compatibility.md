@@ -14,7 +14,7 @@ validate_dsm_compatibility(data)
 
 - data:
 
-  An `interdep_data` object after composition inference.
+  A `dyadMLM_data` object after composition inference.
 
 ## Value
 

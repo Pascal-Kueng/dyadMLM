@@ -31,4 +31,4 @@ assign_arbitrary_member_roles(data, group_name, member_name, seed = NULL)
 
 ## Value
 
-A data frame with `group_name`, `member_name`, and `.i_arbitrary_role`.
+A data frame with `group_name`, `member_name`, and `.dy_arbitrary_role`.

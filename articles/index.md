@@ -5,7 +5,7 @@
 Core data requirements and the main preparation workflow.
 
 - [Getting
-  Started](https://pascal-kueng.github.io/interdep/articles/getting-started.md):
+  Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.md):
 
   Core workflow for validating dyadic data, identifying dyad
   compositions, and preparing model-ready columns for dyadic multilevel
@@ -16,17 +16,17 @@ Core data requirements and the main preparation workflow.
 Details for specific dyadic model parameterizations.
 
 - [Actor-Partner Interdependence Model
-  (APIM)](https://pascal-kueng.github.io/interdep/articles/apim.md):
+  (APIM)](https://pascal-kueng.github.io/dyadMLM/articles/apim.md):
 
 - [APIMs with Mixed Dyad
-  Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md):
+  Compositions](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md):
 
 - [Dyad-Individual
-  Model](https://pascal-kueng.github.io/interdep/articles/dim.md):
+  Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md):
 
   Construction and interpretation of DIM predictors, including their
   relationship to APIM effects in dyadic multilevel models for
   exchangeable dyads.
 
 - [Dyadic Score Model
-  (DSM)](https://pascal-kueng.github.io/interdep/articles/dsm.md):
+  (DSM)](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md):

@@ -15,10 +15,10 @@ add_temporal_lag_columns(data)
 
 - data:
 
-  An `interdep_data` object returned by
-  [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md).
+  A `dyadMLM_data` object returned by
+  [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
 
 ## Value
 
-An `interdep_data` object with lagged temporal predictor columns and
+A `dyadMLM_data` object with lagged temporal predictor columns and
 updated predictor metadata.

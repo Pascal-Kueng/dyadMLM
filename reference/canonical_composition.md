@@ -6,9 +6,9 @@ depend on row order.
 ## Usage
 
 ``` r
-canonical_composition(roles, sep = interdep_composition_sep)
+canonical_composition(roles, sep = dyad_composition_sep)
 
-composition_role_label(composition, role, sep = interdep_composition_role_sep)
+composition_role_label(composition, role, sep = dyad_composition_role_sep)
 ```
 
 ## Arguments

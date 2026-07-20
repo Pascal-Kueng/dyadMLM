@@ -1,8 +1,8 @@
-# interdep
+# dyadMLM
 
-`interdep` helps researchers prepare cross-sectional and intensive
-longitudinal dyadic data for multilevel models, including generalized
-multilevel models.
+`dyadMLM` provides tools for dyadic multilevel modeling with linear and
+generalized linear mixed-effects models. It validates and prepares
+cross-sectional and intensive longitudinal dyadic data.
 
 It supports dyadic datasets with distinguishable dyads, exchangeable
 dyads, or mixed dyad types in the same data, such as female-male,
@@ -11,33 +11,37 @@ model-ready columns for dyadic multilevel model parameterizations such
 as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model
 (DIM), and Dyadic Score Model (DSM).
 
+Selected post-estimation tools compare compatible fitted models and
+back-transform exchangeable random-effect covariance structures into
+member-level quantities.
+
 Start with the vignettes, or scroll down for a quick-start.
 
 | Vignette | Focus |
 |----|----|
-| [Getting Started](https://pascal-kueng.github.io/interdep/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/interdep/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
-| [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/interdep/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
-| [Dyadic Score Model](https://pascal-kueng.github.io/interdep/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
+| [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
+| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
+| [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
+| [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
 
 For an in-depth tutorial covering data preparation, model fitting,
 diagnostics, and assumption checks, see [Distinguishable and
 Exchangeable Dyads: Bayesian Multilevel
 Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
-uses `interdep` for cross-sectional and intensive longitudinal APIM and
+uses `dyadMLM` for cross-sectional and intensive longitudinal APIM and
 DIM workflows, with models fitted primarily using `brms`
 ([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
 [DOI](https://doi.org/10.5281/zenodo.17400655)).
 
 ## Installation
 
-You can install the development version of `interdep` from GitHub with:
+You can install the development version of `dyadMLM` from GitHub with:
 
 ``` r
 
 # install.packages("pak")
-pak::pak("Pascal-Kueng/interdep")
+pak::pak("Pascal-Kueng/dyadMLM")
 ```
 
 ## Simple Cross-Sectional Example
@@ -46,9 +50,9 @@ Prepare distinguishable dyads for a cross-sectional APIM:
 
 ``` r
 
-library(interdep)
+library(dyadMLM)
 
-prepared_data <- prepare_interdep_data(
+prepared_data <- prepare_dyad_data(
   example_dyadic_crosssectional,
   group = coupleID,
   member = personID,
@@ -58,7 +62,7 @@ prepared_data <- prepare_interdep_data(
 )
 
 print(prepared_data, n = 4)
-#> # interdep data
+#> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
 #> # Structure: group = coupleID, member = personID, role = gender
 #> #
@@ -66,25 +70,25 @@ print(prepared_data, n = 4)
 #> # female_x_male distinguishable 95 dyads
 #> #
 #> # Added columns:
-#> #   .i_composition       inferred dyad composition
-#> #   .i_composition_role  composition-specific member role
-#> #   .i_is_{comp-role}    composition-role indicator columns
-#> #   .i_{pred}_actor      APIM actor predictor: actor's original predictor
-#> #                        values
-#> #   .i_{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                        values
+#> #   .dy_composition       inferred dyad composition
+#> #   .dy_composition_role  composition-specific member role
+#> #   .dy_is_{comp-role}    composition-role indicator columns
+#> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                         values
+#> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                         values
 #> #
 #> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .i_composition
+#>   personID coupleID gender communication satisfaction .dy_composition
 #>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
 #> 1        1        1 female          4.79         4.37 female_x_male 
 #> 2        2        1 male            3.80         2.34 female_x_male 
 #> 3        3        2 female          2.91         2.44 female_x_male 
 #> 4        4        2 male            6.51         6.08 female_x_male 
 #> # ℹ 186 more rows
-#> # ℹ 5 more variables: .i_composition_role <fct>,
-#> #   .i_is_female_x_male_female <dbl>, .i_is_female_x_male_male <dbl>,
-#> #   .i_communication_actor <dbl>, .i_communication_partner <dbl>
+#> # ℹ 5 more variables: .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
+#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>
 ```
 
 The prepared data contains the composition indicators and APIM
@@ -98,19 +102,19 @@ simple_apim <- glmmTMB::glmmTMB(
   satisfaction ~ 
 
     # Gender-specific intercepts
-    0 + .i_is_female_x_male_female + .i_is_female_x_male_male +
+    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .i_communication_actor:.i_is_female_x_male_female +
-    .i_communication_actor:.i_is_female_x_male_male +
+    .dy_communication_actor:.dy_is_female_x_male_female +
+    .dy_communication_actor:.dy_is_female_x_male_male +
 
     # Gender-specific partner effects
-    .i_communication_partner:.i_is_female_x_male_female +
-    .i_communication_partner:.i_is_female_x_male_male +
+    .dy_communication_partner:.dy_is_female_x_male_female +
+    .dy_communication_partner:.dy_is_female_x_male_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure
-    us(0 + .i_is_female_x_male_female + .i_is_female_x_male_male | coupleID),
+    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID),
 
   # With the residual covariance represented by the dyad-level
   # random effects above, the Gaussian residual dispersion is fixed near zero.
@@ -122,15 +126,15 @@ simple_apim <- glmmTMB::glmmTMB(
 
 ## Citation
 
-If you use `interdep`, please cite the package directly:
+If you use `dyadMLM`, please cite the package directly:
 
 ``` bibtex
-@Manual{interdep,
-  title = {interdep: Prepare Dyadic Data for Multilevel Models},
+@Manual{dyadMLM,
+  title = {dyadMLM: Tools for Dyadic Multilevel Models},
   author = {Pascal Küng},
   year = {2026},
   note = {R package version 0.0.0.9000},
-  url = {https://github.com/Pascal-Kueng/interdep},
+  url = {https://github.com/Pascal-Kueng/dyadMLM},
 }
 ```
 
@@ -140,48 +144,48 @@ archive.
 ------------------------------------------------------------------------
 
 **Continue** with the [Getting Started
-Vignette](https://pascal-kueng.github.io/interdep/articles/getting-started.html).
+Vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html).
 
 Or go directly to a model-specific vignette:
 
 - [Actor-Partner Interdependence Model (APIM)
-  vignette](https://pascal-kueng.github.io/interdep/articles/apim.html),
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html),
 - [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/interdep/articles/mixed-apim.html),
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html),
 - [Dyad-Individual Model
-  vignette](https://pascal-kueng.github.io/interdep/articles/dim.html),
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html),
   or
 - [Dyadic Score Model
-  vignette](https://pascal-kueng.github.io/interdep/articles/dsm.html).
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html).
 
 # Package index
 
 ## Main functions
 
-- [`prepare_interdep_data()`](https://pascal-kueng.github.io/interdep/reference/prepare_interdep_data.md)
+- [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   : Prepare dyadic data for multilevel models
-- [`compare_interdep_models()`](https://pascal-kueng.github.io/interdep/reference/compare_interdep_models.md)
+- [`compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.md)
   : Compare nested glmmTMB models fitted to equivalent data
-- [`exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md)
+- [`exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md)
   : Recover member-level residual covariance from exchangeable
   random-effect blocks
 
 ## Example data
 
-- [`example_dyadic_ILD`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_ILD.md)
+- [`example_dyadic_ILD`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD.md)
   : Example intensive longitudinal dyadic data
-- [`example_dyadic_ILD_mixed`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_ILD_mixed.md)
+- [`example_dyadic_ILD_mixed`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed.md)
   : Example intensive longitudinal dyadic data with mixed dyad types
-- [`example_dyadic_ILD_mixed_tweedie`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_ILD_mixed_tweedie.md)
+- [`example_dyadic_ILD_mixed_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed_tweedie.md)
   : Example intensive longitudinal dyadic data with mixed dyad types and
   a Tweedie outcome
-- [`example_dyadic_ILD_tweedie`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_ILD_tweedie.md)
+- [`example_dyadic_ILD_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_tweedie.md)
   : Example intensive longitudinal dyadic data with a Tweedie outcome
-- [`example_dyadic_crosssectional`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_crosssectional.md)
+- [`example_dyadic_crosssectional`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional.md)
   : Example cross-sectional dyadic data
-- [`example_dyadic_crosssectional_mixed`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_crosssectional_mixed.md)
+- [`example_dyadic_crosssectional_mixed`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_mixed.md)
   : Example cross-sectional dyadic data with mixed dyad types
-- [`example_dyadic_crosssectional_tweedie`](https://pascal-kueng.github.io/interdep/reference/example_dyadic_crosssectional_tweedie.md)
+- [`example_dyadic_crosssectional_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_tweedie.md)
   : Example cross-sectional dyadic data with a Tweedie outcome
 
 # Articles
@@ -191,7 +195,7 @@ Or go directly to a model-specific vignette:
 Core data requirements and the main preparation workflow.
 
 - [Getting
-  Started](https://pascal-kueng.github.io/interdep/articles/getting-started.md):
+  Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.md):
 
   Core workflow for validating dyadic data, identifying dyad
   compositions, and preparing model-ready columns for dyadic multilevel
@@ -202,17 +206,17 @@ Core data requirements and the main preparation workflow.
 Details for specific dyadic model parameterizations.
 
 - [Actor-Partner Interdependence Model
-  (APIM)](https://pascal-kueng.github.io/interdep/articles/apim.md):
+  (APIM)](https://pascal-kueng.github.io/dyadMLM/articles/apim.md):
 
 - [APIMs with Mixed Dyad
-  Compositions](https://pascal-kueng.github.io/interdep/articles/mixed-apim.md):
+  Compositions](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md):
 
 - [Dyad-Individual
-  Model](https://pascal-kueng.github.io/interdep/articles/dim.md):
+  Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md):
 
   Construction and interpretation of DIM predictors, including their
   relationship to APIM effects in dyadic multilevel models for
   exchangeable dyads.
 
 - [Dyadic Score Model
-  (DSM)](https://pascal-kueng.github.io/interdep/articles/dsm.md):
+  (DSM)](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md):

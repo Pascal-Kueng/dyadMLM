@@ -1,6 +1,6 @@
 # Validate DIM compatibility
 
-Checks whether an `interdep_data` object can be used for the currently
+Checks whether a `dyadMLM_data` object can be used for the currently
 supported undirected DIM construction. These models currently support
 only data with exactly one exchangeable dyad composition.
 Distinguishable or multiple exchangeable compositions are rejected until
@@ -17,7 +17,7 @@ validate_dim_compatibility(data)
 
 - data:
 
-  An `interdep_data` object after composition inference.
+  A `dyadMLM_data` object after composition inference.
 
 ## Value
 
