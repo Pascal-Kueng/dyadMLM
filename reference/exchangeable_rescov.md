@@ -19,7 +19,8 @@ exchangeable_rescov(model, pairs = NULL)
 
 - model:
 
-  A fitted `glmmTMB` or single-response `brmsfit` model.
+  A fitted `glmmTMB` or single-response `brmsfit` model. For `glmmTMB`,
+  only conditional-model random effects are processed.
 
 - pairs:
 
@@ -124,6 +125,13 @@ to the two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where `shared_indicator` is
 zero.
 
+For custom difference indicators supplied through `pairs`, the function
+checks whether both positions occur within each supported fitted
+grouping unit. It rejects coding when no group contains both positions,
+and warns when only some groups are one-sided, which can result from
+fitted-row filtering. It also warns when stable member assignments
+cannot be verified across repeated rows without a member identifier.
+
 ## What omitted blocks and terms mean
 
 `exchangeable_rescov()` only describes constraints that were already
@@ -151,6 +159,11 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitted-const
 
 ## Backend note
 
+For `glmmTMB`, random effects in non-conditional components are ignored
+with a warning. See the vignette's [extension to exchangeable random
+slopes](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation)
+section for the manual calculation.
+
 In `brms`, cross-sectional and same-occasion partner dependence can be
 represented directly with
 `unstr(time = member_position, gr = residual_group)`. With Gaussian
@@ -175,3 +188,41 @@ for the model specification, covariance derivation, and
 constrained-block example. Run
 [`vignette("apim", package = "dyadMLM")`](https://pascal-kueng.github.io/dyadMLM/articles/apim.md)
 to open the installed version.
+
+## Examples
+
+``` r
+if (requireNamespace("glmmTMB", quietly = TRUE)) {
+  example_data <- prepare_dyad_data(
+    example_dyadic_crosssectional,
+    group = coupleID,
+    member = personID,
+    model_type = "none",
+    seed = 123
+  )
+
+  model <- glmmTMB::glmmTMB(
+    satisfaction ~ 1 +
+      us(1 | coupleID) +
+      us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
+    dispformula = ~ 0,
+    data = example_data
+  )
+
+  exchangeable_rescov(model)
+}
+#> Exchangeable residual covariance
+#> 
+#> Shared:     us(1 | coupleID)
+#> Difference: us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)
+#> 
+#> Variance-covariance:
+#>                       member_1: (Intercept) member_2: (Intercept)
+#> member_1: (Intercept)              8.038911              2.474583
+#> member_2: (Intercept)              2.474583              8.038911
+#> 
+#> Standard deviations and correlations:
+#>                       member_1: (Intercept) member_2: (Intercept)
+#> member_1: (Intercept)             2.8352974             0.3078257
+#> member_2: (Intercept)             0.3078257             2.8352974
+```

@@ -19,7 +19,7 @@ exchangeable APIM vignette."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,7 @@ exchangeable APIM vignette."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Recover member-level residual covariance from exchangeable random-effect blocks</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/R/backtransform_residual_covariance.R" class="external-link"><code>R/backtransform_residual_covariance.R</code></a></small>
       <div class="d-none name"><code>exchangeable_rescov.Rd</code></div>
     </div>
 
@@ -73,7 +73,8 @@ derivation, and interpretation, see the
 
 
 <dl><dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
-<dd><p>A fitted <code>glmmTMB</code> or single-response <code>brmsfit</code> model.</p></dd>
+<dd><p>A fitted <code>glmmTMB</code> or single-response <code>brmsfit</code> model. For
+<code>glmmTMB</code>, only conditional-model random effects are processed.</p></dd>
 
 
 <dt id="arg-pairs">pairs<a class="anchor" aria-label="anchor" href="#arg-pairs"></a></dt>
@@ -163,6 +164,12 @@ indicator columns, <code>difference_indicator</code> must assign <code>-1</code>
 two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where <code>shared_indicator</code> is
 zero.</p>
+<p>For custom difference indicators supplied through <code>pairs</code>, the function
+checks whether both positions occur within each supported fitted grouping
+unit. It rejects coding when no group contains both positions, and warns when
+only some groups are one-sided, which can result from fitted-row filtering.
+It also warns when stable member assignments cannot be verified across
+repeated rows without a member identifier.</p>
     </div>
     <div class="section level2">
     <h2 id="what-omitted-blocks-and-terms-mean">What omitted blocks and terms mean<a class="anchor" aria-label="anchor" href="#what-omitted-blocks-and-terms-mean"></a></h2>
@@ -188,6 +195,10 @@ block; the resulting back-transformation would be incorrect.</p>
     <h2 id="backend-note">Backend note<a class="anchor" aria-label="anchor" href="#backend-note"></a></h2>
 
 
+<p>For <code>glmmTMB</code>, random effects in non-conditional components are ignored with
+a warning. See the vignette's
+<a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation">extension to exchangeable random slopes</a>
+section for the manual calculation.</p>
 <p>In <code>brms</code>, cross-sectional and same-occasion partner dependence can be
 represented directly with
 <code>unstr(time = member_position, gr = residual_group)</code>. With Gaussian
@@ -214,6 +225,44 @@ example. Run <code><a href="../articles/apim.html">vignette("apim", package = "d
 version.</p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">example_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">example_dyadic_crosssectional</span>,</span></span>
+<span class="r-in"><span>    group <span class="op">=</span> <span class="va">coupleID</span>,</span></span>
+<span class="r-in"><span>    member <span class="op">=</span> <span class="va">personID</span>,</span></span>
+<span class="r-in"><span>    model_type <span class="op">=</span> <span class="st">"none"</span>,</span></span>
+<span class="r-in"><span>    seed <span class="op">=</span> <span class="fl">123</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">satisfaction</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_diff_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    data <span class="op">=</span> <span class="va">example_data</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu">exchangeable_rescov</span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Exchangeable residual covariance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Shared:     us(1 | coupleID)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Difference: us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Variance-covariance:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       member_1: (Intercept) member_2: (Intercept)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> member_1: (Intercept)              8.038911              2.474583</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> member_2: (Intercept)              2.474583              8.038911</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Standard deviations and correlations:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       member_1: (Intercept) member_2: (Intercept)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> member_1: (Intercept)             2.8352974             0.3078257</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> member_2: (Intercept)             0.3078257             2.8352974</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
