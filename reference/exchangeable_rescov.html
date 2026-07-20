@@ -88,10 +88,13 @@ an ordinary intercept is the shared intercept coordinate.</p></li>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A named list with one element per matched block pair. Each element
-contains the member-level variance-covariance matrix in <code>varcov</code> and its
-standard-deviation/correlation representation in <code>sdcor</code>. Names reproduce
-the matched random-effect terms.</p>
+    <p>An <code>exchangeable_rescov</code> object: a named list with one element per
+matched block pair. Each element contains the member-level
+variance-covariance matrix in <code>varcov</code> and its standard-deviation/correlation
+representation in <code>sdcor</code>, with standard deviations on the diagonal and
+correlations off the diagonal. Names reproduce the matched random-effect
+terms. For <code>glmmTMB</code>, <code>varcov</code> and <code>sdcor</code> are matrices. For <code>brms</code>, they
+are posterior-draw by coefficient by coefficient arrays.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -100,7 +103,8 @@ and first looks for the corresponding <code>.i_is_*</code> shared block. It requ
 the two blocks to use the same grouping factor and the same underlying
 terms. Most models fitted with <code>interdep</code>-generated columns therefore need
 only:</p>
-<p></p><div class="sourceCode r"><pre><code><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/exchangeable_rescov.html">exchangeable_rescov</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre><p></p></div>
+<p></p><div class="sourceCode r"><pre><code><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/exchangeable_rescov.html">exchangeable_rescov</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></code></pre><p></p></div>
 <p>Supply <code>pairs</code> when automatic matching is ambiguous or when a model uses
 custom indicators, multiple covariance levels, or deliberately omitted
 blocks or terms. To specify one pair with a custom difference indicator:</p>

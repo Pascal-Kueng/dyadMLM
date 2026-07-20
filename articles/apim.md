@@ -296,7 +296,7 @@ column.
 
 We will now fit the model and then use the
 [`interdep::exchangeable_rescov()`](https://pascal-kueng.github.io/interdep/reference/exchangeable_rescov.md)
-function that “rotates” the structure back to the often more
+function that back-transforms the structure to the often more
 interpretable actor-partner residual-covariance matrix we are used to.
 
 #### Fitting the exchangeable APIM with glmmTMB
@@ -409,13 +409,22 @@ to recover the interpretable variance-covariance matrix:
 
 backtransformed <- interdep::exchangeable_rescov(apim_exchangeable_model)
 
-# residual variance-covariance matrix
-backtransformed$varcov
-#> NULL
-
-# residual standard deviation and correlation matrix
-backtransformed$sdcor
-#> NULL
+# residual variance-covariance and SD-correlation representations
+print(backtransformed)
+#> Exchangeable residual covariance
+#> 
+#> Shared:     us(1 | coupleID)
+#> Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)
+#> 
+#> Variance-covariance:
+#>                       member_1: (Intercept) member_2: (Intercept)
+#> member_1: (Intercept)             1.7877999            -0.5186522
+#> member_2: (Intercept)            -0.5186522             1.7877999
+#> 
+#> Standard deviations and correlations:
+#>                       member_1: (Intercept) member_2: (Intercept)
+#> member_1: (Intercept)             1.3370864            -0.2901064
+#> member_2: (Intercept)            -0.2901064             1.3370864
 ```
 
 The output can now be mapped as follows:
@@ -449,30 +458,29 @@ apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
   data = apim_exchangeable_data
 )
 
-summary(apim_exchangeable_model)
+summary(apim_exchangeable_model_no_shared)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  
-#>     us(1 | coupleID) + us(0 + .i_diff_female_x_male_arbitrary |      coupleID)
+#>     us(0 + .i_diff_female_x_male_arbitrary | coupleID)
 #> Dispersion:                    ~0
 #> Data: apim_exchangeable_data
 #> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     604.0     619.8    -297.0     594.0       171 
+#>         AIC         BIC      logLik   -2*log(L)    df.resid 
+#>  7495052519  7495052532 -3747526256  7495052511         172 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups     Name                            Variance Std.Dev.
-#>  coupleID   (Intercept)                     0.6346   0.7966  
-#>  coupleID.1 .i_diff_female_x_male_arbitrary 1.1532   1.0739  
+#>  Groups   Name                            Variance Std.Dev.
+#>  coupleID .i_diff_female_x_male_arbitrary 1.159    1.076   
 #> Number of obs: 176, groups:  coupleID, 88
 #> 
 #> Conditional model:
-#>                          Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)               -5.2330     0.4103 -12.754  < 2e-16 ***
-#> .i_communication_actor     1.7578     0.0819  21.461  < 2e-16 ***
-#> .i_communication_partner   0.2379     0.0819   2.904  0.00368 ** 
+#>                            Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)              -5.233e+00  4.446e-05 -117705  < 2e-16 ***
+#> .i_communication_actor    1.764e+00  7.221e-02      24  < 2e-16 ***
+#> .i_communication_partner  2.317e-01  7.221e-02       3  0.00133 ** 
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -492,13 +500,22 @@ backtransformed <- interdep::exchangeable_rescov(
   )
 )
 
-# residual variance-covariance matrix
-backtransformed$varcov
-#> NULL
-
-# residual standard deviation and correlation matrix
-backtransformed$sdcor
-#> NULL
+# residual variance-covariance and SD-correlation representations
+backtransformed
+#> Exchangeable residual covariance
+#> 
+#> Shared:     <omitted>
+#> Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)
+#> 
+#> Variance-covariance:
+#>                       member_1: (Intercept) member_2: (Intercept)
+#> member_1: (Intercept)              1.158727             -1.158727
+#> member_2: (Intercept)             -1.158727              1.158727
+#> 
+#> Standard deviations and correlations:
+#>                       member_1: (Intercept) member_2: (Intercept)
+#> member_1: (Intercept)              1.076442             -1.000000
+#> member_2: (Intercept)             -1.000000              1.076442
 ```
 
 If we fit a model that allows us to also specify higher-level random

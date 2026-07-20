@@ -44,10 +44,14 @@ exchangeable_rescov(model, pairs = NULL)
 
 ## Value
 
-A named list with one element per matched block pair. Each element
-contains the member-level variance-covariance matrix in `varcov` and its
-standard-deviation/correlation representation in `sdcor`. Names
-reproduce the matched random-effect terms.
+An `exchangeable_rescov` object: a named list with one element per
+matched block pair. Each element contains the member-level
+variance-covariance matrix in `varcov` and its
+standard-deviation/correlation representation in `sdcor`, with standard
+deviations on the diagonal and correlations off the diagonal. Names
+reproduce the matched random-effect terms. For `glmmTMB`, `varcov` and
+`sdcor` are matrices. For `brms`, they are posterior-draw by coefficient
+by coefficient arrays.
 
 ## Details
 
@@ -58,6 +62,7 @@ underlying terms. Most models fitted with `interdep`-generated columns
 therefore need only:
 
     result <- interdep::exchangeable_rescov(model)
+    print(result)
 
 Supply `pairs` when automatic matching is ambiguous or when a model uses
 custom indicators, multiple covariance levels, or deliberately omitted

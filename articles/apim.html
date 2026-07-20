@@ -344,11 +344,12 @@ member-difference column, named <code>.i_diff_*</code>, that is
 exchangeable residual structure is represented by two separate
 random-effects terms: a shared dyad random intercept and a random
 coefficient for this difference column.</p>
-<!-- TODO: do we need a brief explanation of why this is possible? -->
+<!-- TODO: do we need a brief explanation of why this is possible? maybe
+not in the applied part to not confuse users that just want to get started? -->
 <p>We will now fit the model and then use the
-<code><a href="../reference/exchangeable_rescov.html">interdep::exchangeable_rescov()</a></code> function that “rotates” the
-structure back to the often more interpretable actor-partner
-residual-covariance matrix we are used to.</p>
+<code><a href="../reference/exchangeable_rescov.html">interdep::exchangeable_rescov()</a></code> function that
+back-transforms the structure to the often more interpretable
+actor-partner residual-covariance matrix we are used to.</p>
 </div>
 <div class="section level4">
 <h4 id="fitting-the-exchangeable-apim-with-glmmtmb">Fitting the exchangeable APIM with glmmTMB<a class="anchor" aria-label="anchor" href="#fitting-the-exchangeable-apim-with-glmmtmb"></a>
@@ -452,13 +453,22 @@ the interpretable variance-covariance matrix:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">backtransformed</span> <span class="op">&lt;-</span> <span class="fu">interdep</span><span class="fu">::</span><span class="fu"><a href="../reference/exchangeable_rescov.html">exchangeable_rescov</a></span><span class="op">(</span><span class="va">apim_exchangeable_model</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># residual variance-covariance matrix</span></span>
-<span><span class="va">backtransformed</span><span class="op">$</span><span class="va">varcov</span></span>
-<span><span class="co">#&gt; NULL</span></span>
-<span></span>
-<span><span class="co"># residual standard deviation and correlation matrix</span></span>
-<span><span class="va">backtransformed</span><span class="op">$</span><span class="va">sdcor</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<span><span class="co"># residual variance-covariance and SD-correlation representations</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">backtransformed</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Exchangeable residual covariance</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Shared:     us(1 | coupleID)</span></span>
+<span><span class="co">#&gt; Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Variance-covariance:</span></span>
+<span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
+<span><span class="co">#&gt; member_1: (Intercept)             1.7877999            -0.5186522</span></span>
+<span><span class="co">#&gt; member_2: (Intercept)            -0.5186522             1.7877999</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Standard deviations and correlations:</span></span>
+<span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
+<span><span class="co">#&gt; member_1: (Intercept)             1.3370864            -0.2901064</span></span>
+<span><span class="co">#&gt; member_2: (Intercept)            -0.2901064             1.3370864</span></span></code></pre></div>
 <p>The output can now be mapped as follows:</p>
 <div class="figure">
 <img src="apim_files/figure-html/fitted-exchangeable-apim-diagram-1.svg" class="r-plt" alt="Fitted exchangeable APIM. Intercept -5.23, actor effect 1.76, partner effect 0.24, common residual SD 1.34, and residual correlation -0.29." width="100%"><p class="caption">
@@ -488,30 +498,29 @@ can omit the entire shared block:</p>
 <span>  data <span class="op">=</span> <span class="va">apim_exchangeable_data</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_exchangeable_model</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_exchangeable_model_no_shared</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
 <span><span class="co">#&gt; satisfaction ~ 1 + .i_communication_actor + .i_communication_partner +  </span></span>
-<span><span class="co">#&gt;     us(1 | coupleID) + us(0 + .i_diff_female_x_male_arbitrary |      coupleID)</span></span>
+<span><span class="co">#&gt;     us(0 + .i_diff_female_x_male_arbitrary | coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                    ~0</span></span>
 <span><span class="co">#&gt; Data: apim_exchangeable_data</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;     604.0     619.8    -297.0     594.0       171 </span></span>
+<span><span class="co">#&gt;         AIC         BIC      logLik   -2*log(L)    df.resid </span></span>
+<span><span class="co">#&gt;  7495052519  7495052532 -3747526256  7495052511         172 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups     Name                            Variance Std.Dev.</span></span>
-<span><span class="co">#&gt;  coupleID   (Intercept)                     0.6346   0.7966  </span></span>
-<span><span class="co">#&gt;  coupleID.1 .i_diff_female_x_male_arbitrary 1.1532   1.0739  </span></span>
+<span><span class="co">#&gt;  Groups   Name                            Variance Std.Dev.</span></span>
+<span><span class="co">#&gt;  coupleID .i_diff_female_x_male_arbitrary 1.159    1.076   </span></span>
 <span><span class="co">#&gt; Number of obs: 176, groups:  coupleID, 88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                          Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)               -5.2330     0.4103 -12.754  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_actor     1.7578     0.0819  21.461  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .i_communication_partner   0.2379     0.0819   2.904  0.00368 ** </span></span>
+<span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)              -5.233e+00  4.446e-05 -117705  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_actor    1.764e+00  7.221e-02      24  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .i_communication_partner  2.317e-01  7.221e-02       3  0.00133 ** </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <!-- TODO: what does this constraint imply exactly? -->
@@ -528,13 +537,22 @@ block, we tell the function:</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># residual variance-covariance matrix</span></span>
-<span><span class="va">backtransformed</span><span class="op">$</span><span class="va">varcov</span></span>
-<span><span class="co">#&gt; NULL</span></span>
-<span></span>
-<span><span class="co"># residual standard deviation and correlation matrix</span></span>
-<span><span class="va">backtransformed</span><span class="op">$</span><span class="va">sdcor</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<span><span class="co"># residual variance-covariance and SD-correlation representations</span></span>
+<span><span class="va">backtransformed</span></span>
+<span><span class="co">#&gt; Exchangeable residual covariance</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Shared:     &lt;omitted&gt;</span></span>
+<span><span class="co">#&gt; Difference: us(0 + .i_diff_female_x_male_arbitrary | coupleID)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Variance-covariance:</span></span>
+<span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
+<span><span class="co">#&gt; member_1: (Intercept)              1.158727             -1.158727</span></span>
+<span><span class="co">#&gt; member_2: (Intercept)             -1.158727              1.158727</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Standard deviations and correlations:</span></span>
+<span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
+<span><span class="co">#&gt; member_1: (Intercept)              1.076442             -1.000000</span></span>
+<span><span class="co">#&gt; member_2: (Intercept)             -1.000000              1.076442</span></span></code></pre></div>
 <p>If we fit a model that allows us to also specify higher-level random
 effect terms, such as an intensive longitudinal model, we can also omit
 individual terms from any of the two blocks to allow for several
