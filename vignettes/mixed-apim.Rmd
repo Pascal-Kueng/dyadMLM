@@ -306,7 +306,7 @@ different versions of pooling can be compared. For example, it can be tested
 whether pooling male-male and female-female couples as same-sex substantially
 worsens model fit, considering both the fixed effects and random-effects
 structure. Such model comparisons, performed with
-[`dyadMLM::compare_dyad_models()`](../reference/compare_dyad_models.html) as
+[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html) as
 demonstrated in [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability),
 require the restricted and unrestricted models to use the same observations and
 require the restricted model to be nested within the unrestricted model.
@@ -318,7 +318,7 @@ plus composition deviations.
 ### Model comparison with a restricted model
 
 The [regular APIM vignette](apim.html#testing-distinguishability) introduces
-[`dyadMLM::compare_dyad_models()`](../reference/compare_dyad_models.html) by
+[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html) by
 comparing a distinguishable APIM with its
 exchangeable restriction. Here, we use the same approach for a
 mixed-composition constraint. We treat female-male dyads as exchangeable and

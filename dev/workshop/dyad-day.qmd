@@ -759,7 +759,7 @@ These are associations in the aggregated observational data, not causal effects.
 
 ## The exchangeable APIM
 
-Sometimes: 
+**Sometimes:** 
 
 - partners may not be theoretically meaningfully distinguishable
 - no evidence of difference in effects $\rightarrow$ pool effects for greater power
@@ -842,6 +842,9 @@ draw_apim_exchangeability_comparison()
 
 :::{.notes}
 
+In this example, imagine we have a few couples with an exactly $X_F = 1$ and $X_M = 1$. 
+For these couples, the following would be true... 
+
 On the left: 
 
 - intercepts, actor effects, partner effects, and residual standard
@@ -894,6 +897,14 @@ exchangeable_apim <- fit_and_draw_exchangeable_apim(
 ```
 
 <!-- ca. 3 Minutes -->
+
+:::{.notes}
+
+-> Let students interpret
+
+-> Ask if they think this model fits the data well, considering the distinguishable estimates. 
+
+:::
 
 ## Testing exchangeability
 

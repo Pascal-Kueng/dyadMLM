@@ -5,6 +5,7 @@ title: "dyadMLM: Tools for Dyadic Multilevel Models"
 authors:
   - family-names: "Küng"
     given-names: "Pascal"
+    orcid: "https://orcid.org/0000-0001-7346-9414"
 repository-code: "https://github.com/Pascal-Kueng/dyadMLM"
 url: "https://github.com/Pascal-Kueng/dyadMLM"
 abstract: >-
