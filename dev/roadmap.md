@@ -24,8 +24,8 @@ helpers, and eventually model syntax explicit and reproducible.
     the current-state section below and the code as authoritative
 - ILD non-independence evidence and tutorial policy:
   [`ild-nonindependence.md`](ild-nonindependence.md)
-- Composition-inference debugging scratch code:
-  [`debug-infer-compositions.R`](debug-infer-compositions.R)
+- Data-preparation debugging scratch helpers:
+  [`debug-data-preparation.R`](debug-data-preparation.R)
 
 ## Current State
 

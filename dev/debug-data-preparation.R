@@ -1,18 +1,18 @@
-# Scratch helpers for developing dyadMLM internals.
+# Scratch helpers for debugging prepare_dyad_data() internals.
 #
 # Source this file, then call one of:
-#   setup_validate_debug()
-#   setup_infer_debug()
-#   setup_infer_debug(
+#   setup_validate_dyad_data_debug()
+#   setup_infer_dyad_compositions_debug()
+#   setup_infer_dyad_compositions_debug(
 #     set_exchangeable_compositions = "female-male",
 #     pool_compositions = list(
 #       romantic_couples = c("female-female", "male-male", "female-male")
 #     )
 #   )
-#   setup_center_debug()
-#   setup_add_actor_partner_debug()
-#   setup_add_dyad_individual_debug()
-#   setup_add_dyadic_score_debug()
+#   setup_center_predictors_debug()
+#   setup_add_actor_partner_columns_debug()
+#   setup_add_dyad_individual_columns_debug()
+#   setup_add_dyadic_score_columns_debug()
 #   debugonce(add_dyadic_score_columns)
 #   add_dyadic_score_columns(data)
 #
@@ -21,7 +21,7 @@
 # to copy lines from the function body into the console and run them manually.
 
 
-load_dyad_debug_internals <- function() {
+source_data_preparation_internals <- function() {
   source("R/utils-args.R")
   source("R/utils-compositions.R")
   source("R/assign_arbitrary_member_roles.R")
@@ -61,7 +61,7 @@ assign_debug_vars <- function(..., envir = .GlobalEnv) {
 }
 
 
-setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
+setup_validate_dyad_data_debug <- function(dataset = c("gaussian", "tweedie")) {
   data <- load_debug_ild_data(dataset)
   out <- tibble::as_tibble(data)
 
@@ -98,10 +98,10 @@ setup_validate_debug <- function(dataset = c("gaussian", "tweedie")) {
 }
 
 
-setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                              set_exchangeable_compositions = NULL,
-                              pool_compositions = NULL) {
-  load_dyad_debug_internals()
+setup_infer_dyad_compositions_debug <- function(
+    dataset = c("gaussian", "tweedie"), seed = 123,
+    set_exchangeable_compositions = NULL, pool_compositions = NULL) {
+  source_data_preparation_internals()
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
@@ -209,10 +209,10 @@ setup_infer_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 }
 
 
-setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                               set_exchangeable_compositions = NULL,
-                               pool_compositions = NULL) {
-  load_dyad_debug_internals()
+setup_center_predictors_debug <- function(
+    dataset = c("gaussian", "tweedie"), seed = 123,
+    set_exchangeable_compositions = NULL, pool_compositions = NULL) {
+  source_data_preparation_internals()
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
@@ -252,10 +252,10 @@ setup_center_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
 }
 
 
-setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                          set_exchangeable_compositions = NULL,
-                                          pool_compositions = NULL) {
-  load_dyad_debug_internals()
+setup_add_actor_partner_columns_debug <- function(
+    dataset = c("gaussian", "tweedie"), seed = 123,
+    set_exchangeable_compositions = NULL, pool_compositions = NULL) {
+  source_data_preparation_internals()
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
@@ -300,10 +300,10 @@ setup_add_actor_partner_debug <- function(dataset = c("gaussian", "tweedie"), se
 }
 
 
-setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                            set_exchangeable_compositions = NULL,
-                                            pool_compositions = NULL) {
-  load_dyad_debug_internals()
+setup_add_dyad_individual_columns_debug <- function(
+    dataset = c("gaussian", "tweedie"), seed = 123,
+    set_exchangeable_compositions = NULL, pool_compositions = NULL) {
+  source_data_preparation_internals()
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
@@ -391,9 +391,10 @@ setup_add_dyad_individual_debug <- function(dataset = c("gaussian", "tweedie"), 
 }
 
 
-setup_add_dyadic_score_debug <- function(dataset = c("gaussian", "tweedie"), seed = 123,
-                                         dsm_role_order = c("female", "male")) {
-  load_dyad_debug_internals()
+setup_add_dyadic_score_columns_debug <- function(
+    dataset = c("gaussian", "tweedie"), seed = 123,
+    dsm_role_order = c("female", "male")) {
+  source_data_preparation_internals()
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
