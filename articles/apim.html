@@ -367,7 +367,8 @@ data.</p>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
-<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"female-male"</span></span>
+<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">apim_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
@@ -551,8 +552,8 @@ block, we tell the function:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance-covariance:</span></span>
 <span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
-<span><span class="co">#&gt; member_1: (Intercept)              1.158727             -1.158727</span></span>
-<span><span class="co">#&gt; member_2: (Intercept)             -1.158727              1.158727</span></span>
+<span><span class="co">#&gt; member_1: (Intercept)              1.158728             -1.158728</span></span>
+<span><span class="co">#&gt; member_2: (Intercept)             -1.158728              1.158728</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Standard deviations and correlations:</span></span>
 <span><span class="co">#&gt;                       member_1: (Intercept) member_2: (Intercept)</span></span>
@@ -585,7 +586,7 @@ residual variances.</p>
 <p>The two parameterizations require different generated columns. The
 full distinguishable model was fitted above, so we now prepare the same
 original observations as exchangeable:</p>
-<p><a href="../reference/compare_dyad_models.html"><code>dyadMLM::compare_dyad_models()</code></a>
+<p><a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html"><code>dyadMLM::compare_dyad_models()</code></a>
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">

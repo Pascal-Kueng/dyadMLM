@@ -314,7 +314,8 @@ apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
   member = personID,
   role = gender,
   predictors = communication,
-  set_exchangeable_compositions = "female-male"
+  set_exchangeable_compositions = "female-male",
+  seed = 123
 )
 
 print(apim_exchangeable_data, n = 4)
@@ -514,8 +515,8 @@ backtransformed
 #> 
 #> Variance-covariance:
 #>                       member_1: (Intercept) member_2: (Intercept)
-#> member_1: (Intercept)              1.158727             -1.158727
-#> member_2: (Intercept)             -1.158727              1.158727
+#> member_1: (Intercept)              1.158728             -1.158728
+#> member_2: (Intercept)             -1.158728              1.158728
 #> 
 #> Standard deviations and correlations:
 #>                       member_1: (Intercept) member_2: (Intercept)
@@ -547,7 +548,7 @@ The two parameterizations require different generated columns. The full
 distinguishable model was fitted above, so we now prepare the same
 original observations as exchangeable:
 
-[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.md)
+[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html)
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:
 

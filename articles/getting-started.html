@@ -361,10 +361,10 @@ contrast assigns <code>-1</code> and <code>1</code> to the two members
 of each exchangeable dyad <span class="citation">(del Rosario and West
 2025)</span>. Its direction is arbitrary, and <code>seed</code> makes
 the assignment reproducible.</p>
-<p>Refer to the <a href="apim.html#the-cross-sectional-gaussian-exchangeable-apim">exchangeable
-APIM section</a> for how to use these columns to specify an exchangeable
+<p>Refer to the <a href="apim.html#exchangeable-residual-structure">exchangeable APIM
+section</a> for how to use these columns to specify an exchangeable
 dyadic APIM and recover the constrained actor-partner
-variance-covariance structure with <a href="../reference/exchangeable_rescov.html"><code>dyadMLM::exchangeable_rescov()</code></a>.</p>
+variance-covariance structure with <a href="https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.html"><code>dyadMLM::exchangeable_rescov()</code></a>.</p>
 <p>Alternatively, we can explicitly set a dyad composition to
 exchangeable:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -841,7 +841,7 @@ all dyad compositions into one exchangeable composition.</p>
 selected exchangeable dyad compositions and analyze them as if they were
 one. Pooling can impose equality constraints among compositions. After
 fitting nested pooled and unpooled models to the same observations,
-these constraints can be tested with <a href="../reference/compare_dyad_models.html"><code>dyadMLM::compare_dyad_models()</code></a>;
+these constraints can be tested with <a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html"><code>dyadMLM::compare_dyad_models()</code></a>;
 see <a href="apim.html#testing-distinguishability">Testing
 distinguishability in the APIM vignette</a> for the model-comparison
 workflow.</p>

@@ -212,10 +212,10 @@ and West 2025). Its direction is arbitrary, and `seed` makes the
 assignment reproducible.
 
 Refer to the [exchangeable APIM
-section](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#the-cross-sectional-gaussian-exchangeable-apim)
+section](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure)
 for how to use these columns to specify an exchangeable dyadic APIM and
 recover the constrained actor-partner variance-covariance structure with
-[`dyadMLM::exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md).
+[`dyadMLM::exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.html).
 
 Alternatively, we can explicitly set a dyad composition to exchangeable:
 
@@ -715,7 +715,7 @@ selected exchangeable dyad compositions and analyze them as if they were
 one. Pooling can impose equality constraints among compositions. After
 fitting nested pooled and unpooled models to the same observations,
 these constraints can be tested with
-[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.md);
+[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html);
 see [Testing distinguishability in the APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-distinguishability)
 for the model-comparison workflow.
