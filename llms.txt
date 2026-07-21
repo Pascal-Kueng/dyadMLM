@@ -4,12 +4,11 @@
 generalized linear mixed-effects models. It validates and prepares
 cross-sectional and intensive longitudinal dyadic data.
 
-It supports dyadic datasets with distinguishable dyads, exchangeable
-dyads, or mixed dyad types in the same data, such as female-male,
-female-female, and male-male couples. It creates composition-aware,
-model-ready columns for dyadic multilevel model parameterizations such
-as the Actor-Partner Interdependence Model (APIM), Dyad-Individual Model
-(DIM), and Dyadic Score Model (DSM).
+It supports distinguishable and exchangeable dyads and can also prepare
+datasets containing multiple dyad compositions. It creates
+composition-aware, model-ready columns for dyadic multilevel model
+parameterizations such as the Actor-Partner Interdependence Model
+(APIM), Dyad-Individual Model (DIM), and Dyadic Score Model (DSM).
 
 Selected post-estimation tools compare compatible fitted models and
 back-transform exchangeable random-effect covariance structures into
@@ -172,16 +171,17 @@ Or go directly to a model-specific vignette:
 - [`example_dyadic_ILD`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD.md)
   : Example intensive longitudinal dyadic data
 - [`example_dyadic_ILD_mixed`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed.md)
-  : Example intensive longitudinal dyadic data with mixed dyad types
+  : Example intensive longitudinal dyadic data with multiple dyad
+  compositions
 - [`example_dyadic_ILD_mixed_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed_tweedie.md)
-  : Example intensive longitudinal dyadic data with mixed dyad types and
-  a Tweedie outcome
+  : Example intensive longitudinal dyadic data with multiple dyad
+  compositions and a Tweedie outcome
 - [`example_dyadic_ILD_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_tweedie.md)
   : Example intensive longitudinal dyadic data with a Tweedie outcome
 - [`example_dyadic_crosssectional`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional.md)
   : Example cross-sectional dyadic data
 - [`example_dyadic_crosssectional_mixed`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_mixed.md)
-  : Example cross-sectional dyadic data with mixed dyad types
+  : Example cross-sectional dyadic data with multiple dyad compositions
 - [`example_dyadic_crosssectional_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_tweedie.md)
   : Example cross-sectional dyadic data with a Tweedie outcome
 

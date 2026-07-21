@@ -557,7 +557,7 @@ et al. 2021). See the [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.md) for a
 more detailed discussion and guidance.
 
-## Data with multiple and mixed-composition dyads
+## Working with multiple dyad compositions
 
 `example_dyadic_crosssectional_mixed` contains three dyad compositions
 in the same data object: distinguishable female-male dyads and

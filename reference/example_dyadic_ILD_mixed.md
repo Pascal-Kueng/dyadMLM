@@ -1,4 +1,4 @@
-# Example intensive longitudinal dyadic data with mixed dyad types
+# Example intensive longitudinal dyadic data with multiple dyad compositions
 
 A simulated intensive longitudinal long-format dataset containing
 distinguishable female-male dyads and exchangeable female-female and

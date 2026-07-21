@@ -1,4 +1,4 @@
-# Example intensive longitudinal dyadic data with mixed dyad types and a Tweedie outcome
+# Example intensive longitudinal dyadic data with multiple dyad compositions and a Tweedie outcome
 
 A simulated intensive longitudinal long-format dataset containing
 distinguishable female-male dyads and exchangeable female-female and
