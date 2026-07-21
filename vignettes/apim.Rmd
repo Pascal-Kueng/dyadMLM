@@ -544,8 +544,6 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
-  # Profile the fixed effects for more stable optimization across platforms.
-  , control = glmmTMB::glmmTMBControl(profile = TRUE)
 )
 
 summary(ild_apim_model)
@@ -580,9 +578,11 @@ random intercept, actor slope, and partner slope.
 The full model above estimates both a shared and a member-contrast actor random
 slope. We can first test a smaller model that omits only the actor random slope
 from the member-contrast block. The member-contrast random intercept and both
-same-occasion blocks remain in the model:
+same-occasion blocks remain in the model. These boundary-constraint examples
+are shown but not run because their convergence can depend on the optimizer and
+platform; confirm convergence before interpreting either test.
 
-```{r fit-ild-no-contrast-slope, eval = has_glmmTMB}
+```{r fit-ild-no-contrast-slope, eval = FALSE}
 ild_apim_no_contrast_slope <- update(
   ild_apim_model,
   formula = . ~ . -
@@ -608,7 +608,7 @@ Since we omitted terms, automatic matching is no longer possible and we
 need to tell `dyadMLM::recover_exchangeable_covariance()` what blocks
 belong together.
 
-```{r backtransform-ild-no-contrast-slope, eval = has_glmmTMB}
+```{r backtransform-ild-no-contrast-slope, eval = FALSE}
 no_contrast_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
   ild_apim_no_contrast_slope,
   block_pairings = list(
@@ -630,7 +630,7 @@ We can impose the stronger constraint by omitting the full member-contrast
 block at the stable dyad level. The same-occasion member-contrast block again
 remains in the model:
 
-```{r fit-ild-no-contrast-block, eval = has_glmmTMB}
+```{r fit-ild-no-contrast-block, eval = FALSE}
 ild_apim_no_contrast_block <- update(
   ild_apim_model,
   formula = . ~ . -
@@ -651,7 +651,7 @@ Here, both members have identical random intercepts and actor random slopes at
 the stable dyad level. Because the full member-contrast block is absent, we
 specify it as `NULL`:
 
-```{r backtransform-ild-no-contrast-block, eval = has_glmmTMB}
+```{r backtransform-ild-no-contrast-block, eval = FALSE}
 no_contrast_block_covariance <- dyadMLM::recover_exchangeable_covariance(
   ild_apim_no_contrast_block,
   block_pairings = list(
