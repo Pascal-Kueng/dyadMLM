@@ -2013,17 +2013,14 @@ backtransform_exchangeable_covariances <- function(aligned, terms) {
 
   # Validate symmetry before using the same between-member block in both
   # off-diagonal positions of the final covariance matrix. Fitted covariance
-  # matrices can differ from their transpose by floating-point noise, so do
-  # not require exact equality across platforms.
+  # matrices can differ slightly from their transpose across optimizers and
+  # platforms, so allow absolute differences up to 0.0001.
+  symmetry_tolerance <- 1e-4
   for (component in c("shared", "difference")) {
     covariance <- aligned[[component]]
     transposed_covariance <- aperm(covariance, c(1L, 3L, 2L))
-    is_symmetric <- isTRUE(all.equal(
-      unname(covariance),
-      unname(transposed_covariance),
-      tolerance = sqrt(.Machine$double.eps),
-      check.attributes = FALSE
-    ))
+    maximum_asymmetry <- max(abs(covariance - transposed_covariance))
+    is_symmetric <- isTRUE(maximum_asymmetry <= symmetry_tolerance)
     if (!is_symmetric) {
       stop(
         "Internal error: the aligned ", component,

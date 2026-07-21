@@ -544,6 +544,8 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
+  # Profile the fixed effects for more stable optimization across platforms.
+  , control = glmmTMB::glmmTMBControl(profile = TRUE)
 )
 
 summary(ild_apim_model)
