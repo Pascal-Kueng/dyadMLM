@@ -25,112 +25,107 @@ library(dyadMLM)
 
 ## Categorical outcomes
 
-## Poisson and Negative Binomial Outcomes
+## Poisson and negative-binomial outcomes
 
-##
+`dyads_nbinom_cross` has the same dyadic structure as `dyads_cross`, but its
+`conflict_count` outcome is a non-negative count with greater variance than a
+Poisson model allows. The data were generated from a negative-binomial model
+with a log link. Dyad compositions are selected below through
+`keep_compositions`, so that `prepare_dyad_data()` performs the filtering at
+the dyad level.
 
-## Example and excursion: semi-continuous cross-sectional data
-
-! TODO: the text and formulas below is old:
-
-`example_dyadic_crosssectional_tweedie` has the same dyadic structure as before, but the
-outcome has exact zeros and positive skewed values, as in
-some physical activity outcomes, in contrast to the Gaussian distribution from the 
-previous example. 
-
-```{r tweedie-raw}
-print(head(example_dyadic_crosssectional_tweedie))
-hist(example_dyadic_crosssectional_tweedie$physical_activity, breaks = 20)
+```{r nbinom-raw}
+print(head(dyads_nbinom_cross))
+hist(dyads_nbinom_cross$conflict_count, breaks = 20)
 ```
 
-Validation and modeling work the same way because the dyadic structure is the same.
-The random-effect interpretation is different from the Gaussian case: Tweedie
-random effects are latent effects on the log-mean scale, while the
-observation-level Tweedie variance remains part of the model.
+Validation and preparation work in the same way as for a Gaussian outcome
+because the dyadic structure is unchanged. The interpretation of the fitted
+model differs: fixed and random effects act on the log-mean scale, while the
+observation-level negative-binomial variance remains part of the model.
 
-### Distinguishable Tweedie APIM
+### Distinguishable negative-binomial APIM
 
-```{r prepare-tweedie-distinguishable}
-tweedie_distinguishable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_tweedie,
-  group = coupleID,
+```{r prepare-nbinom-distinguishable}
+nbinom_distinguishable_data <- dyadMLM::prepare_dyad_data(
+  dyads_nbinom_cross,
+  dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = motivation,
-  # when no model_type is specified, apim is the default.
+  predictors = stress,
+  # dyads_nbinom_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male",
   seed = 123
 )
 
-print(tweedie_distinguishable_data)
-summary(tweedie_distinguishable_data)
+print(nbinom_distinguishable_data)
+summary(nbinom_distinguishable_data)
 ```
 
 
-```{r fit-tweedie-distinguishable, eval = FALSE}
+```{r fit-nbinom-distinguishable, eval = FALSE}
+nbinom_distinguishable_model <- glmmTMB::glmmTMB(
+  conflict_count ~ 0 +
+    # Role-specific intercepts
+    .dy_is_female_x_male_female +
+    .dy_is_female_x_male_male +
 
-tweedie_distinguishable_model <- glmmTMB(
-  physical_activity ~ 
-    # remove standard intercept and model separate intercepts for male and female
-    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
-    
-    # gender-specific slopes for motivation actor effect
-    .dy_is_female_x_male_female:.dy_motivation_actor + .dy_is_female_x_male_male:.dy_motivation_actor +
-    
-    # gender-specific slopes for motivation partner effect
-    .dy_is_female_x_male_female:.dy_motivation_partner + .dy_is_female_x_male_male:.dy_motivation_partner +
-    
-    # keep a simple couple-level latent effect for stable non-independence
-    # important limitation: this can only induce positive partner dependence
-    (1 | coupleID) 
-  
-  # allow role-specific Tweedie dispersion
-  , dispformula = ~ 0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male
-  , family = tweedie()
-  , data = tweedie_distinguishable_data
+    # Role-specific actor effects of stress
+    .dy_is_female_x_male_female:.dy_stress_actor +
+    .dy_is_female_x_male_male:.dy_stress_actor +
+
+    # Role-specific partner effects of stress
+    .dy_is_female_x_male_female:.dy_stress_partner +
+    .dy_is_female_x_male_male:.dy_stress_partner +
+
+    # Shared latent dyad effect for stable non-independence
+    (1 | coupleID),
+  family = glmmTMB::nbinom2(link = "log"),
+  data = nbinom_distinguishable_data
 )
 
-summary(tweedie_distinguishable_model)
-
+summary(nbinom_distinguishable_model)
 ```
 
-### Exchangeable Tweedie APIM
+This shared random intercept is deliberately simple. It can induce only
+positive partner dependence on the latent log-mean scale; more flexible
+role-specific covariance structures require enough repeated information to
+support their additional parameters.
 
-```{r prepare-tweedie-exchangeable}
-tweedie_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_tweedie,
-  group = coupleID,
+### Exchangeable negative-binomial APIM
+
+Here we retain male-male dyads, which are exchangeable based on their
+observed roles.
+
+```{r prepare-nbinom-exchangeable}
+nbinom_exchangeable_data <- dyadMLM::prepare_dyad_data(
+  dyads_nbinom_cross,
+  dyad = coupleID,
   member = personID,
-  # role = gender,
-  predictors = motivation,
+  role = gender,
+  predictors = stress,
+  keep_compositions = "male-male",
   seed = 123
 )
 
-print(tweedie_exchangeable_data)
-summary(tweedie_exchangeable_data)
+print(nbinom_exchangeable_data)
+summary(nbinom_exchangeable_data)
 ```
 
-```{r fit-tweedie-exchangeable, eval = FALSE}
+```{r fit-nbinom-exchangeable, eval = FALSE}
+nbinom_exchangeable_model <- glmmTMB::glmmTMB(
+  conflict_count ~
+    # Pooled intercept and actor and partner effects
+    1 +
+    .dy_stress_actor +
+    .dy_stress_partner +
 
-tweedie_exchangeable_model <- glmmTMB(
-  physical_activity ~ 
-    # pooled intercept 
-    1 + 
-    
-    # pooled actor slope for motivation
-    .dy_motivation_actor +
-    
-    # pooled partner slope for motivation
-    .dy_motivation_partner +
-    
-    # exchangeable latent dyad block on the log-mean scale
-    (1 | coupleID) + (0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)
-    
-  # estimate a single pooled Tweedie dispersion parameter
-  , dispformula = ~ 1
-  , family = tweedie()
-  , data = tweedie_exchangeable_data
+    # Exchangeable latent dyad covariance on the log-mean scale
+    (1 | coupleID) +
+    (0 + .dy_member_contrast_male_x_male_arbitrary | coupleID),
+  family = glmmTMB::nbinom2(link = "log"),
+  data = nbinom_exchangeable_data
 )
 
-summary(tweedie_exchangeable_model)
-
+summary(nbinom_exchangeable_model)
 ```

@@ -106,15 +106,28 @@ of freedom.
 
 ## Data
 
-To compare the CFM directly with the other vignettes, we use the same
-`example_dyadic_crosssectional` data, with `communication` as the predictor and
-`satisfaction` as the outcome. `lavaan` represents the two members as separate
+To compare the CFM directly with the other vignettes, we use `dyads_cross`,
+with `provided_support` as the predictor and `closeness` as the outcome. We
+retain the female-male dyads. `lavaan` represents the two members as separate
 observed variables, so the long-format data first need one row per dyad.
 
 ```{r prepare-cfm-data}
+cfm_long_data <- dyadMLM::prepare_dyad_data(
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  # dyads_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male"
+)
+
+# `reshape()` expects an ordinary data frame rather than the prepared-data
+# subclass and its metadata.
+cfm_long_data <- as.data.frame(cfm_long_data)
+
 cfm_data <- reshape(
-  example_dyadic_crosssectional[
-    c("coupleID", "gender", "communication", "satisfaction")
+  cfm_long_data[
+    c("coupleID", "gender", "provided_support", "closeness")
   ],
   idvar = "coupleID",
   timevar = "gender",
@@ -125,8 +138,8 @@ names(cfm_data) <- gsub(".", "_", names(cfm_data), fixed = TRUE)
 cfm_data <- cfm_data[
   c(
     "coupleID",
-    "communication_female", "communication_male",
-    "satisfaction_female", "satisfaction_male"
+    "provided_support_female", "provided_support_male",
+    "closeness_female", "closeness_male"
   )
 ]
 row.names(cfm_data) <- NULL
@@ -140,22 +153,22 @@ using the variables from the package example:
 ```{r cfm-model-syntax}
 cfm_model <- '
   # Shared dyad levels: fix all four loadings to 1
-  communication_level =~
-    1 * communication_female + 1 * communication_male
-  satisfaction_level =~
-    1 * satisfaction_female + 1 * satisfaction_male
+  provided_support_level =~
+    1 * provided_support_female + 1 * provided_support_male
+  closeness_level =~
+    1 * closeness_female + 1 * closeness_male
 
   # Dyad-level association
-  satisfaction_level ~ b_level * communication_level
+  closeness_level ~ b_level * provided_support_level
 
   # Same-member residual covariances
-  communication_female ~~ c_female * satisfaction_female
-  communication_male ~~ c_male * satisfaction_male
+  provided_support_female ~~ c_female * closeness_female
+  provided_support_male ~~ c_male * closeness_male
 '
 ```
 
-Observed residual variances, the latent communication variance, and the latent
-satisfaction disturbance variance are free by default. The four observed
+Observed residual variances, the latent provided-support variance, and the latent
+closeness disturbance variance are free by default. The four observed
 intercepts are also freely estimated. Full-information maximum likelihood uses
 all dyads, including those with a partially missing member report.
 
@@ -207,12 +220,12 @@ variance_rows <- with(
 cfm_variances <- cfm_all_estimates[variance_rows, ]
 
 outcome_variance <- cfm_variances[
-  cfm_variances$lhs == "satisfaction_level",
+  cfm_variances$lhs == "closeness_level",
 ]
 outcome_variance_negative <- is.finite(outcome_variance$est) &&
   outcome_variance$est < 0
 cfm_r_squared <- if (cfm_admissible) {
-  lavInspect(cfm_fit, "r2")[["satisfaction_level"]]
+  lavInspect(cfm_fit, "r2")[["closeness_level"]]
 } else {
   NA_real_
 }
@@ -286,7 +299,7 @@ if (cfm_admissible) {
     sprintf(
       paste0(
         "> **Model diagnostic:** The model converged, but the latent ",
-        "satisfaction disturbance variance is %.2f. This negative variance ",
+        "closeness disturbance variance is %.2f. This negative variance ",
         "makes the solution inadmissible, so its paths and fit indices should ",
         "not be interpreted substantively.\n\n"
       ),
@@ -323,8 +336,8 @@ draw_cfm_diagram(
   ),
   member_ids = c("F", "M"),
   member_names = c("Female", "Male"),
-  predictor_name = "communication",
-  outcome_name = "satisfaction"
+  predictor_name = "provided support",
+  outcome_name = "closeness"
 )
 ```
 
@@ -333,8 +346,8 @@ if (cfm_admissible) {
   cat(
     sprintf(
       paste0(
-        "A one-unit higher latent shared communication level is associated ",
-        "with a %.2f-unit higher latent shared satisfaction level. The ",
+        "A one-unit higher latent shared provided-support level is associated ",
+        "with a %.2f-unit higher latent shared closeness level. The ",
         "standardized association is %.2f.\n\n"
       ),
       cfm_b$est, cfm_b$std.all
@@ -346,10 +359,10 @@ if (cfm_admissible) {
       paste0(
         "The model estimates a shared dyad-level coefficient of ",
         "$b_{\\mathrm{level}} = %.2f$. If the CFM solution were admissible, ",
-        "this would mean that a one-unit higher latent shared communication ",
+        "this would mean that a one-unit higher latent shared provided-support ",
         "level is associated with a %.2f-unit higher latent shared ",
-        "satisfaction level. However, the model estimates a negative latent ",
-        "satisfaction disturbance variance. The solution is therefore ",
+        "closeness level. However, the model estimates a negative latent ",
+        "closeness disturbance variance. The solution is therefore ",
         "inadmissible, and this coefficient should not be interpreted as a ",
         "reliable substantive estimate.\n\n"
       ),
@@ -409,20 +422,20 @@ knitr::kable(
 
 ```{r cfm-variance-table, echo=FALSE}
 residual_names <- c(
-  "communication_female", "communication_male",
-  "satisfaction_female", "satisfaction_male",
-  "satisfaction_level"
+  "provided_support_female", "provided_support_male",
+  "closeness_female", "closeness_male",
+  "closeness_level"
 )
 residual_variances <- cfm_variances[
   match(residual_names, cfm_variances$lhs),
 ]
 
 residual_labels <- c(
-  "Female communication residual",
-  "Male communication residual",
-  "Female satisfaction residual",
-  "Male satisfaction residual",
-  "Latent satisfaction disturbance"
+  "Female provided-support residual",
+  "Male provided-support residual",
+  "Female closeness residual",
+  "Male closeness residual",
+  "Latent closeness disturbance"
 )
 
 knitr::kable(

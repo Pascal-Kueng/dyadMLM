@@ -65,21 +65,23 @@ Prepare distinguishable dyads for a cross-sectional APIM:
 library(dyadMLM)
 
 prepared_data <- prepare_dyad_data(
-  example_dyadic_crosssectional,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
-  model_types = "apim"
+  predictors = provided_support,
+  model_types = "apim",
+  # dyads_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male"
 )
 
 print(prepared_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_male distinguishable 95 dyads
+#> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition       inferred dyad composition
@@ -90,17 +92,17 @@ print(prepared_data, n = 4)
 #> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
 #> #                         values
 #> #
-#> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
-#> 1        1        1 female          4.79         4.37 female_x_male  
-#> 2        2        1 male            3.80         2.34 female_x_male  
-#> 3        3        2 female          2.91         2.44 female_x_male  
-#> 4        4        2 male            6.51         6.08 female_x_male  
-#> # ℹ 186 more rows
-#> # ℹ 5 more variables: .dy_composition_role <fct>,
+#> # A tibble: 240 × 12
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 236 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>
+#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
 ```
 
 The prepared data contains the composition indicators and APIM
@@ -110,18 +112,18 @@ One simple distinguishable APIM formula is:
 
 ``` r
 simple_apim <- glmmTMB::glmmTMB(
-  satisfaction ~ 
+  closeness ~
 
     # Gender-specific intercepts
     0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .dy_communication_actor:.dy_is_female_x_male_female +
-    .dy_communication_actor:.dy_is_female_x_male_male +
+    .dy_provided_support_actor:.dy_is_female_x_male_female +
+    .dy_provided_support_actor:.dy_is_female_x_male_male +
 
     # Gender-specific partner effects
-    .dy_communication_partner:.dy_is_female_x_male_female +
-    .dy_communication_partner:.dy_is_female_x_male_male +
+    .dy_provided_support_partner:.dy_is_female_x_male_female +
+    .dy_provided_support_partner:.dy_is_female_x_male_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure

@@ -76,7 +76,8 @@
 #'   To set multiple compositions, use a character vector of such strings.
 #' @param keep_compositions Optional observed dyad compositions to keep
 #'   before exchangeability overrides and pooling. Requires `role`. Composition
-#'   references use the same format as `set_exchangeable_compositions`.
+#'   references use the same format as `set_exchangeable_compositions`. `NULL`
+#'   keeps all observed compositions.
 #' @param pool_compositions Optionally pool exchangeable dyad compositions
 #'   into a shared final composition label. Must be a named list where each name
 #'   is the final composition label and each value is a character vector of

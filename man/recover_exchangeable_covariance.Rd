@@ -182,17 +182,20 @@ in non-Gaussian models.
 \examples{
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
   example_data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    dyads_cross,
     dyad = coupleID,
     member = personID,
+    role = gender,
     model_types = "none",
+    # dyads_cross contains three compositions; retain `female-female` here.
+    keep_compositions = "female-female",
     seed = 123
   )
 
   model <- glmmTMB::glmmTMB(
-    satisfaction ~ 1 +
+    closeness ~ 1 +
       us(1 | coupleID) +
-      us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID),
     dispformula = ~ 0,
     data = example_data
   )

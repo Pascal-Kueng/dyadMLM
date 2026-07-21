@@ -75,12 +75,14 @@ Prepare distinguishable dyads for a cross-sectional APIM:
 library(dyadMLM)
 
 prepared_data <- prepare_dyad_data(
-  example_dyadic_crosssectional,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
-  model_types = "apim"
+  predictors = provided_support,
+  model_types = "apim",
+  # dyads_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male"
 )
 
 print(prepared_data, n = 4)
@@ -93,18 +95,18 @@ One simple distinguishable APIM formula is:
 
 ```{r cross-sectional-apim, eval = FALSE}
 simple_apim <- glmmTMB::glmmTMB(
-  satisfaction ~ 
+  closeness ~
 
     # Gender-specific intercepts
     0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .dy_communication_actor:.dy_is_female_x_male_female +
-    .dy_communication_actor:.dy_is_female_x_male_male +
+    .dy_provided_support_actor:.dy_is_female_x_male_female +
+    .dy_provided_support_actor:.dy_is_female_x_male_male +
 
     # Gender-specific partner effects
-    .dy_communication_partner:.dy_is_female_x_male_female +
-    .dy_communication_partner:.dy_is_female_x_male_male +
+    .dy_provided_support_partner:.dy_is_female_x_male_female +
+    .dy_provided_support_partner:.dy_is_female_x_male_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure

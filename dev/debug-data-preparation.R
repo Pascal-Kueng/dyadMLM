@@ -26,6 +26,7 @@ source_data_preparation_internals <- function() {
   source("R/utils-compositions.R")
   source("R/assign_arbitrary_member_roles.R")
   source("R/validate_dyad_data.R")
+  source("R/dyad-generated-columns.R")
   source("R/infer_dyad_compositions.R")
   source("R/center_predictors.R")
   source("R/add_temporal_lag_columns.R")
@@ -36,17 +37,28 @@ source_data_preparation_internals <- function() {
 
   invisible(TRUE)
 }
-load_debug_ild_data <- function(dataset = c("gaussian", "tweedie")) {
+load_debug_ild_data <- function(dataset = c("gaussian", "nbinom")) {
   dataset <- rlang::arg_match(dataset)
   data_env <- new.env(parent = emptyenv())
 
   if (dataset == "gaussian") {
-    load("data/example_dyadic_ILD_mixed.rda", envir = data_env)
-    return(data_env$example_dyadic_ILD_mixed)
+    load("data/dyads_ild.rda", envir = data_env)
+    return(data_env$dyads_ild)
   }
 
-  load("data/example_dyadic_ILD_mixed_tweedie.rda", envir = data_env)
-  data_env$example_dyadic_ILD_mixed_tweedie
+  load("data/dyads_nbinom_ild.rda", envir = data_env)
+  data_env$dyads_nbinom_ild
+}
+
+
+debug_predictor_name <- function(dataset = c("gaussian", "nbinom")) {
+  dataset <- rlang::arg_match(dataset)
+
+  if (dataset == "gaussian") {
+    return("provided_support")
+  }
+
+  "stress"
 }
 
 
@@ -61,35 +73,35 @@ assign_debug_vars <- function(..., envir = .GlobalEnv) {
 }
 
 
-setup_validate_dyad_data_debug <- function(dataset = c("gaussian", "tweedie")) {
+setup_validate_dyad_data_debug <- function(dataset = c("gaussian", "nbinom")) {
   data <- load_debug_ild_data(dataset)
   out <- tibble::as_tibble(data)
 
-  group_name <- "coupleID"
+  dyad_name <- "coupleID"
   member_name <- "personID"
   role_name <- "gender"
   time_name <- "diaryday"
-  predictor_names <- "provided_support"
+  predictor_names <- debug_predictor_name(dataset)
 
   has_role <- TRUE
   has_time <- TRUE
-  model_type <- "apim"
-  temporal_predictor_decomposition <- "auto"
+  model_types <- "apim"
+  temporal_decomposition <- "auto"
   incomplete_dyads <- "error"
   missing_role <- "error"
 
   assign_debug_vars(
     data = data,
     out = out,
-    group_name = group_name,
+    dyad_name = dyad_name,
     member_name = member_name,
     role_name = role_name,
     time_name = time_name,
     predictor_names = predictor_names,
     has_role = has_role,
     has_time = has_time,
-    model_type = model_type,
-    temporal_predictor_decomposition = temporal_predictor_decomposition,
+    model_types = model_types,
+    temporal_decomposition = temporal_decomposition,
     incomplete_dyads = incomplete_dyads,
     missing_role = missing_role
   )
@@ -99,32 +111,33 @@ setup_validate_dyad_data_debug <- function(dataset = c("gaussian", "tweedie")) {
 
 
 setup_infer_dyad_compositions_debug <- function(
-    dataset = c("gaussian", "tweedie"), seed = 123,
+    dataset = c("gaussian", "nbinom"), seed = 123,
     set_exchangeable_compositions = NULL, pool_compositions = NULL) {
   source_data_preparation_internals()
+  predictor_name <- debug_predictor_name(dataset)
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     time = diaryday,
-    predictors = provided_support
+    predictors = dplyr::all_of(predictor_name)
   )
 
   meta_data <- attr(data, "dyadMLM")
-  group_name <- meta_data$group
+  dyad_name <- meta_data$dyad
   member_name <- meta_data$member
   role_name <- meta_data$role
   has_role <- !is.null(role_name)
 
   dyad_roles <- data |>
     dplyr::distinct(
-      .data[[group_name]],
+      .data[[dyad_name]],
       .data[[member_name]],
       .data[[role_name]]
     ) |>
-    dplyr::group_by(.data[[group_name]]) |>
+    dplyr::group_by(.data[[dyad_name]]) |>
     dplyr::summarise(
       .dy_raw_composition = {
         canonical_composition(.data[[role_name]])
@@ -195,7 +208,7 @@ setup_infer_dyad_compositions_debug <- function(
     pool_compositions = pool_compositions,
     resolved_set_exchangeable_compositions = resolved_set_exchangeable_compositions,
     meta_data = meta_data,
-    group_name = group_name,
+    dyad_name = dyad_name,
     member_name = member_name,
     role_name = role_name,
     has_role = has_role,
@@ -210,17 +223,18 @@ setup_infer_dyad_compositions_debug <- function(
 
 
 setup_center_predictors_debug <- function(
-    dataset = c("gaussian", "tweedie"), seed = 123,
+    dataset = c("gaussian", "nbinom"), seed = 123,
     set_exchangeable_compositions = NULL, pool_compositions = NULL) {
   source_data_preparation_internals()
+  predictor_name <- debug_predictor_name(dataset)
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     time = diaryday,
-    predictors = provided_support
+    predictors = dplyr::all_of(predictor_name)
   )
   data <- infer_dyad_compositions(
     data,
@@ -231,10 +245,10 @@ setup_center_predictors_debug <- function(
 
   meta_data <- attr(data, "dyadMLM")
   out <- data
-  group <- meta_data$group
+  dyad <- meta_data$dyad
   member <- meta_data$member
   predictors <- meta_data$predictors
-  temporal_predictor_decomposition <- meta_data$temporal_predictor_decomposition
+  temporal_decomposition <- meta_data$temporal_decomposition
 
   assign_debug_vars(
     data = data,
@@ -242,10 +256,10 @@ setup_center_predictors_debug <- function(
     pool_compositions = pool_compositions,
     meta_data = meta_data,
     out = out,
-    group = group,
+    dyad = dyad,
     member = member,
     predictors = predictors,
-    temporal_predictor_decomposition = temporal_predictor_decomposition
+    temporal_decomposition = temporal_decomposition
   )
 
   invisible(data)
@@ -253,17 +267,18 @@ setup_center_predictors_debug <- function(
 
 
 setup_add_actor_partner_columns_debug <- function(
-    dataset = c("gaussian", "tweedie"), seed = 123,
+    dataset = c("gaussian", "nbinom"), seed = 123,
     set_exchangeable_compositions = NULL, pool_compositions = NULL) {
   source_data_preparation_internals()
+  predictor_name <- debug_predictor_name(dataset)
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     time = diaryday,
-    predictors = provided_support
+    predictors = dplyr::all_of(predictor_name)
   )
   data <- infer_dyad_compositions(
     data,
@@ -275,12 +290,12 @@ setup_add_actor_partner_columns_debug <- function(
 
   meta_data <- attr(data, "dyadMLM")
   out <- data
-  group <- meta_data$group
+  dyad <- meta_data$dyad
   member <- meta_data$member
   has_time <- meta_data$longitudinal
   time <- meta_data$time
   predictors <- meta_data$predictors
-  temporal_predictor_decompositions <- meta_data$temporal_predictor_decompositions
+  temporal_decompositions <- meta_data$temporal_decompositions
 
   assign_debug_vars(
     data = data,
@@ -288,12 +303,12 @@ setup_add_actor_partner_columns_debug <- function(
     pool_compositions = pool_compositions,
     meta_data = meta_data,
     out = out,
-    group = group,
+    dyad = dyad,
     member = member,
     has_time = has_time,
     time = time,
     predictors = predictors,
-    temporal_predictor_decompositions = temporal_predictor_decompositions
+    temporal_decompositions = temporal_decompositions
   )
 
   invisible(data)
@@ -301,18 +316,19 @@ setup_add_actor_partner_columns_debug <- function(
 
 
 setup_add_dyad_individual_columns_debug <- function(
-    dataset = c("gaussian", "tweedie"), seed = 123,
+    dataset = c("gaussian", "nbinom"), seed = 123,
     set_exchangeable_compositions = NULL, pool_compositions = NULL) {
   source_data_preparation_internals()
+  predictor_name <- debug_predictor_name(dataset)
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     time = diaryday,
-    predictors = provided_support,
-    model_type = "dim"
+    predictors = dplyr::all_of(predictor_name),
+    model_types = "dim"
   )
   data <- infer_dyad_compositions(
     data,
@@ -324,11 +340,11 @@ setup_add_dyad_individual_columns_debug <- function(
 
   meta_data <- attr(data, "dyadMLM")
   out <- data
-  group <- meta_data$group
+  dyad <- meta_data$dyad
   member <- meta_data$member
   has_time <- meta_data$longitudinal
   time <- meta_data$time
-  temporal_predictor_decompositions <- meta_data$temporal_predictor_decompositions
+  temporal_decompositions <- meta_data$temporal_decompositions
 
   dim_predictors <- tibble::tibble(
     predictor = character(),
@@ -341,10 +357,10 @@ setup_add_dyad_individual_columns_debug <- function(
   )
 
   i <- 1L
-  predictor <- temporal_predictor_decompositions$predictor[[i]]
-  component <- temporal_predictor_decompositions$component[[i]]
-  lag <- temporal_predictor_decompositions$lag[[i]]
-  source_col <- temporal_predictor_decompositions$column[[i]]
+  predictor <- temporal_decompositions$predictor[[i]]
+  component <- temporal_decompositions$component[[i]]
+  lag <- temporal_decompositions$lag[[i]]
+  source_col <- temporal_decompositions$column[[i]]
 
   column_stem <- make_dyad_predictor_column_stem(
     predictor = predictor,
@@ -369,11 +385,11 @@ setup_add_dyad_individual_columns_debug <- function(
     pool_compositions = pool_compositions,
     meta_data = meta_data,
     out = out,
-    group = group,
+    dyad = dyad,
     member = member,
     has_time = has_time,
     time = time,
-    temporal_predictor_decompositions = temporal_predictor_decompositions,
+    temporal_decompositions = temporal_decompositions,
     dim_predictors = dim_predictors,
     i = i,
     predictor = predictor,
@@ -392,24 +408,25 @@ setup_add_dyad_individual_columns_debug <- function(
 
 
 setup_add_dyadic_score_columns_debug <- function(
-    dataset = c("gaussian", "tweedie"), seed = 123,
+    dataset = c("gaussian", "nbinom"), seed = 123,
     dsm_role_order = c("female", "male")) {
   source_data_preparation_internals()
+  predictor_name <- debug_predictor_name(dataset)
 
   data <- validate_dyad_data(
     load_debug_ild_data(dataset),
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     time = diaryday,
-    predictors = provided_support,
-    model_type = "dsm",
+    predictors = dplyr::all_of(predictor_name),
+    model_types = "dsm",
     dsm_role_order = dsm_role_order
   )
   data <- infer_dyad_compositions(
     data,
     seed = seed,
-    include_compositions = "female-male"
+    keep_compositions = "female-male"
   )
   validate_dsm_compatibility(data)
   data <- center_predictors(data)

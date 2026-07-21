@@ -115,33 +115,40 @@ placeholder row for the missing occasion.
 
 ## Data preparation for distinguishable dyads
 
-`example_dyadic_crosssectional` is a simulated cross-sectional dataset for
-distinguishable dyads. Each dyad has two rows: one for each member.
+`dyads_cross` contains three dyad compositions. Each dyad has two rows: one for
+each member. The closeness and provided-support scores are member-level averages
+across the 14 days in `dyads_ild`.
+
+Because these example data contain multiple compositions, `keep_compositions`
+selects the composition modeled below. It can be omitted when the supplied data
+already contain only the intended composition.
 
 ```{r cross-sectional-raw, echo = FALSE}
-head(example_dyadic_crosssectional)
+head(dyads_cross)
 ```
 
 We validate and prepare the data with the function `dyadMLM::prepare_dyad_data()`.
 
 ```{r prepare-cross-distinguishable}
 cross_distinguishable_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
 
   # In this example, we optionally specify a predictor variable
   # and a model type to generate the columns needed for that model type.
-  predictors = communication,
-  model_types = "apim"
+  predictors = provided_support,
+  model_types = "apim",
+  # dyads_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male"
 )
 
 print(cross_distinguishable_data, n = 4)
 
 ```
 
-The function automatically recognized that in this dataset there are 95
+The function retained and recognized 120
 female-male dyads and created APIM-relevant variables
 [@kennyPartnerEffectsRelationship1999]. These generated `.dy_*` columns can be
 used directly in model formulas.
@@ -151,14 +158,16 @@ For fitted APIM examples using these columns, see the
 
 ## Data preparation for exchangeable dyads
 
-For a dataset with only one type of dyad that should be treated as exchangeable,
-omit the `role` argument:
+To work with one exchangeable dyad composition, use `keep_compositions` to
+retain it during preparation:
 
 ```{r prepare-cross-exchangeable-basic}
 cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
+  role = gender,
+  keep_compositions = "female-female",
   seed = 123
 )
 
@@ -166,7 +175,7 @@ print(cross_exchangeable_data, n = 4)
 
 ```
 
-The generated `.dy_member_contrast_assumed_exchangeable_arbitrary` contrast assigns `-1`
+The generated `.dy_member_contrast_female_x_female_arbitrary` contrast assigns `-1`
 and `1` to the two members of each exchangeable dyad
 [@delrosarioPracticalGuideSpecifying2025]. Its direction is arbitrary, and
 `seed` makes the assignment reproducible.
@@ -180,10 +189,11 @@ Alternatively, we can explicitly set a dyad composition to exchangeable:
 
 ```{r prepare-cross-set-exchangeable}
 cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
+  keep_compositions = "female-male",
   set_exchangeable_compositions = "male-female",
   seed = 123
 )
@@ -198,16 +208,19 @@ like `male_female`, `male_x_female`, or `male female`.
 
 ## Generating DIM and DSM columns
 
-For exchangeable dyads, we can request DIM predictor columns. This works here
-because omitting `role` treats all dyads as a single exchangeable composition.
+For exchangeable dyads, we can request DIM predictor columns. DIM preparation
+requires exactly one exchangeable composition, which we retain here with
+`keep_compositions`.
 
 ```{r prepare-cross-dim}
 cross_dim_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
-  predictors = communication,
+  role = gender,
+  predictors = provided_support,
   model_types = "dim",
+  keep_compositions = "female-female",
   seed = 123
 )
 
@@ -221,13 +234,14 @@ differences and the DSM role contrast
 
 ```{r prepare-cross-dsm}
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
+  predictors = provided_support,
   model_types = "dsm",
-  dsm_role_order = c("female", "male")
+  dsm_role_order = c("female", "male"),
+  keep_compositions = "female-male"
 )
 
 print(cross_dsm_data, n = 4)
@@ -236,14 +250,11 @@ print(cross_dsm_data, n = 4)
 
 ## Intensive longitudinal dyadic data
 
-`example_dyadic_ILD` is a simulated intensive longitudinal dyadic dataset. Each
-dyad has repeated observations over `diaryday`, with one row per person-day.
+`dyads_ild` is an intensive longitudinal dyadic dataset. Each dyad
+has repeated observations over `diaryday`, with one row per person-day.
 
 ```{r ild-raw, echo=FALSE}
-example_dyadic_ILD <- example_dyadic_ILD |>
-  dplyr::arrange(
-    coupleID, diaryday
-  )
+head(dyads_ild)
 ```
 
 To prepare intensive longitudinal data, pass the `time` variable to
@@ -251,13 +262,14 @@ To prepare intensive longitudinal data, pass the `time` variable to
 
 ```{r prepare-ild-apim}
 ild_apim_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
   role = gender,
   time = diaryday,
   predictors = provided_support,
   model_types = "apim",
+  keep_compositions = "female-male",
   seed = 123
 )
 
@@ -285,18 +297,20 @@ and partner columns alongside their contemporaneous versions. Lagging respects
 the dyad and member structure, matches observations at exactly `time - 1`, and
 does not bridge missing occasions.
 
-For a simpler dynamic model, this example omits `role` and therefore treats all
-couples as exchangeable:
+For a simpler dynamic model, this example retains the exchangeable
+female-female composition:
 
 ```{r prepare-ild-apim-dynamic}
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = closeness,
   lag1_predictors = closeness,
   model_types = "apim",
+  keep_compositions = "female-female",
   seed = 123
 )
 
@@ -314,15 +328,15 @@ discussion and guidance.
 
 ## Working with multiple dyad compositions
 
-`example_dyadic_crosssectional_mixed` contains three dyad compositions in the
-same data object: distinguishable female-male dyads and exchangeable
-female-female and male-male dyads [@Bolger2025Unified].
+`dyads_cross` contains three dyad compositions:
+distinguishable female-male dyads and exchangeable female-female and male-male
+dyads [@Bolger2025Unified].
 
 Let's have `dyadMLM` infer the compositions automatically:
 
 ```{r prepare-mixed-cross-sectional}
 mixed_cross_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -349,7 +363,7 @@ and `pool_compositions` can only refer to retained dyad compositions.
 
 ```{r prepare-mixed-cross-sectional-included}
 mixed_cross_data_included <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -371,7 +385,7 @@ role, which would pool all dyad compositions into one exchangeable composition.
 
 ```{r prepare-mixed-cross-sectional-exchangeable}
 mixed_cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -399,7 +413,7 @@ and name them `same-sex` dyads:
 
 ```{r prepare-mixed-cross-sectional_pooled}
 mixed_cross_data_pooled <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -418,7 +432,7 @@ Note that you cannot pool distinguishable dyads. If we wanted to pool `female-ma
 
 ```{r prepare-mixed-cross-sectional_pooled_constrained}
 mixed_cross_data_pooled_constrained <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,

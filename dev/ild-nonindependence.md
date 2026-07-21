@@ -31,7 +31,7 @@ of observed person means are additional issues that must be handled separately.
 | Estimate average own-outcome carryover | Use a raw-lag parameterization rather than manifest person-mean centering; retain stable and same-occasion dyadic covariance | When $T$ is small, use a model that explicitly handles initial conditions and random-effect endogeneity; a conventional raw-lag MLM does not |
 | Estimate partner-to-partner temporal carryover | Use a full dyadic VAR with both own- and partner-outcome lags | This extends the Gistelinck-Loeys LD-APIM, which includes only own-outcome lags |
 | Estimate dynamics with very small $T$ | Use a model that explicitly handles the first outcome and its dependence on stable person effects, such as NC-ENDO or a suitable latent-centering SEM | There is no universal safe minimum $T$; ordinary convergence diagnostics do not diagnose this bias |
-| Fit generalized outcomes such as Tweedie responses | Keep the main tutorial concurrent unless a correctly specified generalized or latent dynamic model is available | Lagging the observed response is not generally equivalent to modeling dynamics on the latent or link scale |
+| Fit generalized outcomes such as negative-binomial counts | Keep the main tutorial concurrent unless a correctly specified generalized or latent dynamic model is available | Lagging the observed response is not generally equivalent to modeling dynamics on the latent or link scale |
 
 The choice between a structural lagged-outcome model and a residual dynamic
 model must be driven by the estimand. Adding a lagged outcome changes all other
@@ -371,13 +371,12 @@ A full dyadic VAR adds the remaining directional transition freedom.
 
 Do not assume that lagging an observed non-Gaussian response models the same
 dynamic process as a Gaussian outcome lag or a latent residual AR process. For
-example, the current Tweedie simulations place temporal dependence in a latent
-log-mean deviation. A lagged observed Tweedie response does not recover that
-latent process.
+example, a lagged observed count is not interchangeable with a dynamic process
+on its latent log-mean scale.
 
 Until a validated generalized dynamic model is available, the tutorial should:
 
-- retain concurrent Tweedie actor/partner examples;
+- retain concurrent negative-binomial actor/partner examples;
 - model stable and same-occasion dependence on the link scale carefully;
 - avoid calling a lagged-response GLMM a VAR; and
 - state that serial dependence is not fully modeled when that is true.
@@ -507,25 +506,22 @@ so a formula containing `y_t-1` and only the current mean predictors omits the
 corresponding lagged mean term. It is not the exact model that generated the
 data.
 
-Consequently, there are three defensible tutorial choices:
-
-1. retain the current Gaussian data but label the concurrent fits as working
-   models that do not fully represent the simulated serial dependence;
-2. regenerate concurrent tutorial data with serially independent residuals; or
-3. regenerate data from the structural LD-APIM or dyadic VAR that the tutorial
-   fits, or wait for the residual-VAR implementation. Dynamic examples should
-   have enough occasions for their intended complexity, assessed through
-   model-specific simulation.
+The Gaussian `dyads_ild` example uses serially independent occasion effects,
+so its concurrent fits align with the simulated residual structure. A future
+dynamic recovery example should instead be generated from the structural
+LD-APIM or dyadic VAR that it fits, or wait for the residual-VAR implementation.
+Such an example should have enough occasions for its intended complexity,
+assessed through model-specific simulation.
 
 Simply adding raw outcome lags to every existing Gaussian example is not a clean
 correction of the current data-generating process.
 
-### 6.2 Tweedie example data
+### 6.2 Negative-binomial example data
 
-The current Tweedie generators use a latent AR process on the log-mean scale.
-An observed-response lag specifies a different generalized dynamic model. The
-Tweedie tutorials should remain concurrent unless the simulation and fitted
-model are redesigned together.
+`dyads_nbinom_ild` does not simulate an explicit temporal process. Its tutorial
+should remain concurrent unless a generalized dynamic simulation and its
+fitted model are designed together. An observed-response lag would specify a
+different model from a dynamic process on the latent log-mean scale.
 
 ### 6.3 APIM, DIM, and DSM equivalence
 
@@ -596,12 +592,12 @@ vignette and should guide the remaining APIM and DSM review:
 - retain `time_2l` for ordinary predictors;
 - include appropriate time trends;
 - represent stable and same-occasion dyadic covariance;
-- state that the current Gaussian concurrent examples do not fully model the
-  serial dependence generated in the data;
+- state that concurrent models do not add residual serial dependence and that
+  this assumption must be assessed in users' data;
 - do not add manifest-centered outcome lags;
 - if raw lags are shown, present the model as a practical lag-adjusted MLM and
   include the small-$T$ limitation; and
-- do not add observed-response lags to the Tweedie examples.
+- do not add observed-response lags to the negative-binomial examples.
 
 For the longer-term modeling API:
 

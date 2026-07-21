@@ -14,6 +14,9 @@ if (is.na(diagram_helper)) {
 }
 sys.source(diagram_helper, envir = environment())
 
+diagram_female_male_cross_dyads <- dyads_cross |>
+  dplyr::filter(dyad_composition == "female_x_male")
+
 test_that("diagram effect colors retain their semantic meanings", {
   expected <- c(
     actor = "#1769AA",
@@ -78,20 +81,20 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
   skip_if_not_installed("glmmTMB")
 
   distinguishable_data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    diagram_female_male_cross_dyads,
     dyad = coupleID,
     member = personID,
     role = gender,
-    predictors = communication
+    predictors = provided_support
   )
   distinguishable_fit <- glmmTMB::glmmTMB(
-    satisfaction ~ 0 +
+    closeness ~ 0 +
       .dy_is_female_x_male_female +
       .dy_is_female_x_male_male +
-      .dy_is_female_x_male_female:.dy_communication_actor +
-      .dy_is_female_x_male_male:.dy_communication_actor +
-      .dy_is_female_x_male_female:.dy_communication_partner +
-      .dy_is_female_x_male_male:.dy_communication_partner +
+      .dy_is_female_x_male_female:.dy_provided_support_actor +
+      .dy_is_female_x_male_male:.dy_provided_support_actor +
+      .dy_is_female_x_male_female:.dy_provided_support_partner +
+      .dy_is_female_x_male_male:.dy_provided_support_partner +
       us(
         0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |
           coupleID
@@ -127,22 +130,22 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
   expect_no_error(draw_to_temporary_pdf(draw_apim_diagram(
     "distinguishable",
     model = distinguishable_fit,
-    labels = c(predictor = "Provided\nsupport", outcome = "Satisfaction")
+    labels = c(predictor = "Provided\nsupport", outcome = "Closeness")
   )))
 
   exchangeable_data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    diagram_female_male_cross_dyads,
     dyad = coupleID,
     member = personID,
     role = gender,
-    predictors = communication,
+    predictors = provided_support,
     set_exchangeable_compositions = "female-male"
   )
   exchangeable_fit <- glmmTMB::glmmTMB(
-    satisfaction ~ 0 +
+    closeness ~ 0 +
       .dy_is_female_x_male +
-      .dy_communication_actor +
-      .dy_communication_partner +
+      .dy_provided_support_actor +
+      .dy_provided_support_partner +
       us(0 + .dy_is_female_x_male | coupleID) +
       us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
     dispformula = ~0,
@@ -178,17 +181,17 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
   skip_if_not_installed("glmmTMB")
 
   dim_data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    diagram_female_male_cross_dyads,
     dyad = coupleID,
     member = personID,
-    predictors = communication,
+    predictors = provided_support,
     model_types = "dim",
     seed = 123
   )
   dim_fit <- glmmTMB::glmmTMB(
-    satisfaction ~
-      .dy_communication_dyad_mean_gmc +
-      .dy_communication_within_dyad_dev +
+    closeness ~
+      .dy_provided_support_dyad_mean_gmc +
+      .dy_provided_support_within_dyad_dev +
       us(1 | coupleID) +
       us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
     dispformula = ~0,
@@ -202,25 +205,25 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
   expect_named(dim_values$residuals, c("sd_mean", "sd_difference"))
   expect_no_error(draw_to_temporary_pdf(draw_dim_diagram(
     model = dim_fit,
-    labels = c(predictor = "Communication", outcome = "Satisfaction")
+    labels = c(predictor = "Provided support", outcome = "Closeness")
   )))
 
   dsm_data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    diagram_female_male_cross_dyads,
     dyad = coupleID,
     member = personID,
     role = gender,
-    predictors = communication,
+    predictors = provided_support,
     model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
   dsm_fit <- glmmTMB::glmmTMB(
-    satisfaction ~
-      .dy_communication_dyad_mean_gmc +
-      .dy_communication_within_dyad_diff +
+    closeness ~
+      .dy_provided_support_dyad_mean_gmc +
+      .dy_provided_support_within_dyad_diff +
       .dy_dsm_role_contrast +
-      .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +
-      .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +
+      .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
+      .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
       us(1 + .dy_dsm_role_contrast | coupleID),
     dispformula = ~0,
     family = gaussian(),
@@ -242,7 +245,7 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
   )
   expect_no_error(draw_to_temporary_pdf(draw_dsm_diagram(
     model = dsm_fit,
-    labels = c(predictor = "Communication", outcome = "Satisfaction")
+    labels = c(predictor = "Provided support", outcome = "Closeness")
   )))
 })
 
@@ -250,14 +253,14 @@ test_that("mixed APIM diagrams extract every composition block", {
   skip_if_not_installed("glmmTMB")
 
   mixed_data <- prepare_dyad_data(
-    example_dyadic_crosssectional_mixed,
+    dyads_cross,
     dyad = coupleID,
     member = personID,
     role = gender,
     seed = 123
   )
   mixed_fit <- glmmTMB::glmmTMB(
-    satisfaction ~ 0 +
+    closeness ~ 0 +
       .dy_is_female_x_male_female +
       .dy_is_female_x_male_male +
       .dy_is_female_x_female +
@@ -292,11 +295,11 @@ test_that("mixed APIM diagrams extract every composition block", {
 test_that("CFM diagrams extract fitted lavaan objects", {
   skip_if_not_installed("lavaan")
 
-  cfm_source <- as.data.frame(example_dyadic_crosssectional)
+  cfm_source <- as.data.frame(diagram_female_male_cross_dyads)
   cfm_source$gender <- as.character(cfm_source$gender)
   cfm_data <- stats::reshape(
     cfm_source[
-      c("coupleID", "gender", "communication", "satisfaction")
+      c("coupleID", "gender", "provided_support", "closeness")
     ],
     idvar = "coupleID",
     timevar = "gender",
@@ -306,18 +309,18 @@ test_that("CFM diagrams extract fitted lavaan objects", {
   cfm_data <- cfm_data[
     c(
       "coupleID",
-      "communication_female", "communication_male",
-      "satisfaction_female", "satisfaction_male"
+      "provided_support_female", "provided_support_male",
+      "closeness_female", "closeness_male"
     )
   ]
   cfm_model <- '
-    communication_level =~
-      1 * communication_female + 1 * communication_male
-    satisfaction_level =~
-      1 * satisfaction_female + 1 * satisfaction_male
-    satisfaction_level ~ b_level * communication_level
-    communication_female ~~ c_female * satisfaction_female
-    communication_male ~~ c_male * satisfaction_male
+    provided_support_level =~
+      1 * provided_support_female + 1 * provided_support_male
+    closeness_level =~
+      1 * closeness_female + 1 * closeness_male
+    closeness_level ~ b_level * provided_support_level
+    provided_support_female ~~ c_female * closeness_female
+    provided_support_male ~~ c_male * closeness_male
   '
   cfm_fit <- suppressWarnings(lavaan::sem(
     cfm_model,
@@ -367,22 +370,24 @@ test_that("fitted glmmTMB diagrams reject incomplete residual structures", {
   skip_if_not_installed("glmmTMB")
 
   data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    diagram_female_male_cross_dyads,
     dyad = coupleID,
     member = personID,
-    predictors = communication,
+    predictors = provided_support,
     model_types = "dim",
     seed = 123
   )
-  fit <- glmmTMB::glmmTMB(
-    satisfaction ~
-      .dy_communication_dyad_mean_gmc +
-      .dy_communication_within_dyad_dev +
+  # The deliberately incomplete residual structure can itself produce a
+  # convergence warning. This test concerns the diagram's targeted error.
+  fit <- suppressWarnings(glmmTMB::glmmTMB(
+    closeness ~
+      .dy_provided_support_dyad_mean_gmc +
+      .dy_provided_support_within_dyad_dev +
       us(1 | coupleID) +
       us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
     family = gaussian(),
     data = data
-  )
+  ))
 
   expect_error(
     draw_dim_diagram(model = fit),
@@ -414,7 +419,7 @@ test_that("conceptual diagrams can omit residual components", {
     fixed = TRUE
   )
   expect_error(
-    draw_apim_diagram(labels = c(predictor = "Communication")),
+    draw_apim_diagram(labels = c(predictor = "Provided support")),
     "`labels` must contain non-empty character values named `predictor` and `outcome`.",
     fixed = TRUE
   )

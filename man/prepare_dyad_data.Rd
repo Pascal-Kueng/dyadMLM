@@ -96,7 +96,8 @@ To set multiple compositions, use a character vector of such strings.}
 
 \item{keep_compositions}{Optional observed dyad compositions to keep
 before exchangeability overrides and pooling. Requires \code{role}. Composition
-references use the same format as \code{set_exchangeable_compositions}.}
+references use the same format as \code{set_exchangeable_compositions}. \code{NULL}
+keeps all observed compositions.}
 
 \item{pool_compositions}{Optionally pool exchangeable dyad compositions
 into a shared final composition label. Must be a named list where each name

@@ -54,6 +54,7 @@
     dsm_role_order = if (identical(model_types, "dsm")) {
       c("female", "male")
     },
+    # If other compositions are supplied, retain only `female-male` here.
     keep_compositions = "female-male",
     set_exchangeable_compositions = if (exchangeable) "female-male",
     seed = if (exchangeable) 123

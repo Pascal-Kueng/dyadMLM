@@ -34,6 +34,7 @@ Suggests:
     lavaan,
     marginaleffects,
     rmarkdown,
+    spelling,
     testthat (>= 3.1.7)
 Config/testthat/edition: 3
 Imports: 
@@ -49,3 +50,4 @@ LazyData: true
 URL: https://pascal-kueng.github.io/dyadMLM/,
     https://github.com/Pascal-Kueng/dyadMLM
 BugReports: https://github.com/Pascal-Kueng/dyadMLM/issues
+Language: en-US

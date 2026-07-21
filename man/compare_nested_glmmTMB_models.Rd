@@ -43,19 +43,21 @@ tested variance parameters are on the boundary.
 \examples{
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
   restricted_data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    dyads_cross,
     dyad = coupleID,
     member = personID,
-    role = gender
+    role = gender,
+    # dyads_cross contains three compositions; retain `female-male` here.
+    keep_compositions = "female-male"
   )
   full_data <- restricted_data
 
   restricted_model <- glmmTMB::glmmTMB(
-    satisfaction ~ 1 + us(1 | coupleID),
+    closeness ~ 1 + us(1 | coupleID),
     data = restricted_data
   )
   full_model <- glmmTMB::glmmTMB(
-    satisfaction ~ gender + us(1 | coupleID),
+    closeness ~ gender + us(1 | coupleID),
     data = full_data
   )
 

@@ -57,56 +57,16 @@ including the [Dyad-Individual Model](dim.html) and
 
 ## Cross-sectional mixed-composition APIM
 
-The data were simulated with the following fixed effects and covariance
-parameters. For exchangeable dyads, `sum_variance` and `diff_variance` imply the
-within-dyad correlation.
-
-```{r mixed-cross-sectional-targets, echo=FALSE}
-mixed_cross_targets <- data.frame(
-  block = c(
-    "female_x_male",
-    "female_x_male",
-    "female_x_male",
-    "female_x_female",
-    "female_x_female",
-    "female_x_female",
-    "male_x_male",
-    "male_x_male",
-    "male_x_male"
-  ),
-  parameter = c(
-    "female_mean",
-    "male_mean",
-    "correlation",
-    "mean",
-    "sum_variance",
-    "diff_variance",
-    "mean",
-    "sum_variance",
-    "diff_variance"
-  ),
-  value = c(
-    5.50,
-    4.50,
-    -0.30,
-    5.80,
-    0.675,
-    0.325,
-    4.20,
-    0.63375,
-    1.05625
-  )
-)
-
-mixed_cross_targets
-```
+The cross-sectional example uses `dyads_cross`. The data also contain actor and
+partner effects, but the intercept-only model below keeps the focus on the
+composition-specific covariance structures.
 
 We first prepare the data with `dyadMLM::prepare_dyad_data()`, which identifies all
 observed dyad compositions.
 
 ```{r prepare-mixed-cross-sectional}
 mixed_cross_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -141,7 +101,7 @@ The model can then be specified as follows (example for an intercept-only model)
 ```{r fit-mixed-cross-sectional-gaussian, eval = has_glmmTMB}
 
 mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
-  satisfaction ~ 0 +
+  closeness ~ 0 +
 
     ##### INTERCEPTS ######
     # fixed intercepts for individuals from distinguishable female-male couples
@@ -337,7 +297,7 @@ justification.
 
 ```{r prepare-mixed-cross-sectional-constrained, eval = has_glmmTMB}
 mixed_cross_data_constrained <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -349,7 +309,7 @@ mixed_cross_data_constrained <- dyadMLM::prepare_dyad_data(
 )
 
 mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
-  satisfaction ~ 0 +
+  closeness ~ 0 +
     .dy_is_female_x_female +
     .dy_is_non_female_x_female +
 
@@ -379,9 +339,8 @@ It does not show which restriction accounts for the difference.
 
 ## Mixed-composition intensive longitudinal (ILD) Gaussian model
 
-`example_dyadic_ILD_mixed` contains the same three dyad compositions as the
-mixed-composition cross-sectional example, but each dyad contributes repeated
-paired observations over `diaryday`.
+`dyads_ild` contains the same three dyad compositions used in the
+cross-sectional example, with repeated paired observations over `diaryday`.
 
 To keep the example lighter, we pool female-female and male-male dyads into one
 same-sex composition. This is a simplifying modeling assumption and does not
@@ -394,7 +353,7 @@ and a predictor:
 
 ```{r prepare-mixed-ild}
 mixed_ild_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD_mixed,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
   role = gender,

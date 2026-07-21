@@ -52,12 +52,14 @@ Here, `c("female", "male")` defines every difference as female minus male.
 
 ```{r prepare-cross-dsm}
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
+  predictors = provided_support,
   model_types = "dsm",
+  # dyads_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male",
   dsm_role_order = c("female", "male")
 )
 
@@ -67,11 +69,11 @@ print(cross_dsm_data, n = 4)
 For predictor values $X_{\mathrm{female}}$ and $X_{\mathrm{male}}$, `dyadMLM`
 then creates:
 
-- `.dy_communication_dyad_mean_gmc` $=
+- `.dy_provided_support_dyad_mean_gmc` $=
   \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X$ (with $\mu_X$ representing the sample grand
   mean of the dyad-level predictor means)
   
-- `.dy_communication_within_dyad_diff` $= X_{\mathrm{female}} - X_{\mathrm{male}}$
+- `.dy_provided_support_within_dyad_diff` $= X_{\mathrm{female}} - X_{\mathrm{male}}$
 
 - `.dy_dsm_role_contrast` $= +0.5$ for female and $-0.5$ for male.
 
@@ -99,25 +101,25 @@ The path labels correspond directly to the terms in the model below:
 
 ```{r fit-cross-dsm, eval=has_glmmTMB}
 dsm_model <- glmmTMB::glmmTMB(
-  satisfaction ~
+  closeness ~
 
     # Outcome-level intercept
     1 +
 
     # Predictor level -> outcome level (a11)
-    .dy_communication_dyad_mean_gmc +
+    .dy_provided_support_dyad_mean_gmc +
 
     # Predictor difference -> outcome level (a12)
-    .dy_communication_within_dyad_diff +
+    .dy_provided_support_within_dyad_diff +
 
     # Outcome-difference intercept (a20)
     .dy_dsm_role_contrast +
 
     # Predictor level -> outcome difference (a21)
-    .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +
+    .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
 
     # Predictor difference -> outcome difference (a22)
-    .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +
+    .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
     us(1 + .dy_dsm_role_contrast | coupleID),
@@ -199,7 +201,7 @@ dsm_fitted_alt <- sprintf(
 ```{r fitted-dsm-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional DSM for the example data. The nodes identify the mean and difference scores; edge and intercept labels show the estimated DSM coefficients, and the residual labels show the estimated score-component standard deviations and correlation.", fig.alt=dsm_fitted_alt}
 draw_dsm_diagram(
   model = dsm_model,
-  labels = c(predictor = "communication", outcome = "satisfaction")
+  labels = c(predictor = "provided support", outcome = "closeness")
 )
 ```
 
@@ -207,18 +209,18 @@ The fixed effects from our MLM model map directly to these paths as such:
 
 | Long-format fixed effect | DSM SEM path and interpretation |
 |---|---|
-| Intercept | $a_{10}$: expected dyad-average satisfaction at the sample-average communication level and no female-male communication difference |
-| Communication dyad mean | $a_{11}$: predictor level $\rightarrow$ outcome level |
-| Communication difference | $a_{12}$: predictor difference $\rightarrow$ outcome level |
+| Intercept | $a_{10}$: expected dyad-average closeness at the sample-average provided-support level and no female-male support difference |
+| Provided-support dyad mean | $a_{11}$: predictor level $\rightarrow$ outcome level |
+| Provided-support difference | $a_{12}$: predictor difference $\rightarrow$ outcome level |
 | DSM role contrast | $a_{20}$: expected female-minus-male outcome difference at the predictor reference values |
 | Dyad mean $\times$ role contrast | $a_{21}$: predictor level $\rightarrow$ outcome difference |
-| Communication difference $\times$ role contrast | $a_{22}$: predictor difference $\rightarrow$ outcome difference |
+| Provided-support difference $\times$ role contrast | $a_{22}$: predictor difference $\rightarrow$ outcome difference |
 
-Thus, for example, $a_{12}$ is the change in dyad-average satisfaction
-associated with a one-unit larger female-minus-male communication difference,
-holding communication level constant. In contrast, $a_{22}$ is the change in
-the female-minus-male satisfaction difference associated with that same
-one-unit larger communication difference, holding communication level
+Thus, for example, $a_{12}$ is the change in dyad-average closeness
+associated with a one-unit larger female-minus-male provided-support difference,
+holding support level constant. In contrast, $a_{22}$ is the change in
+the female-minus-male closeness difference associated with that same
+one-unit larger support difference, holding support level
 constant. The $a_{12}$ and $a_{21}$ coefficients are the DSM cross-paths. They
 are omitted from the reduced DSM but are needed for the full model.
 
@@ -264,25 +266,26 @@ changes the direction of the differences, but not the substantive model.
 
 ```{r prepare-cross-dsm-inverted}
 cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
+  predictors = provided_support,
   # Request APIM columns too for comparison below.
   model_types = c("dsm", "apim"),
+  keep_compositions = "female-male",
   dsm_role_order = c("male", "female")
 )
 ```
 
 ```{r fit-cross-dsm-inverted, eval=has_glmmTMB}
 dsm_model_inverted <- glmmTMB::glmmTMB(
-  satisfaction ~
-    .dy_communication_dyad_mean_gmc +
-    .dy_communication_within_dyad_diff +
+  closeness ~
+    .dy_provided_support_dyad_mean_gmc +
+    .dy_provided_support_within_dyad_diff +
     .dy_dsm_role_contrast +
-    .dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast +
-    .dy_communication_within_dyad_diff:.dy_dsm_role_contrast +
+    .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
+    .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
     us(1 + .dy_dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -306,19 +309,19 @@ knitr::kable(
 
 The two models have identical fitted values and model fit: 
 
-- `.dy_communication_within_dyad_diff` reverses because the predictor difference
+- `.dy_provided_support_within_dyad_diff` reverses because the predictor difference
   reverses.
 
 - `.dy_dsm_role_contrast` reverses because the represented outcome difference
   reverses.
 
-- `.dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast` reverses because only
+- `.dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast` reverses because only
   the outcome difference reverses.
 
-- `.dy_communication_within_dyad_diff:.dy_dsm_role_contrast` remains unchanged
+- `.dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast` remains unchanged
   because both differences reverse.
 
-The intercept and `.dy_communication_dyad_mean_gmc` also remain unchanged. For
+The intercept and `.dy_provided_support_dyad_mean_gmc` also remain unchanged. For
 the random effects, the variances of `(Intercept)` and
 `.dy_dsm_role_contrast` remain unchanged, whereas their covariance reverses
 sign.
@@ -333,19 +336,19 @@ Let's fit the equivalent distinguishable APIM:
 
 ```{r fit-cross-apim, eval=has_glmmTMB}
 apim_model <- glmmTMB::glmmTMB(
-  satisfaction ~
+  closeness ~
     # Role-specific intercepts
     0 +
     .dy_is_female_x_male_female +
     .dy_is_female_x_male_male +
 
     # Role-specific actor effects
-    .dy_is_female_x_male_female:.dy_communication_actor +
-    .dy_is_female_x_male_male:.dy_communication_actor +
+    .dy_is_female_x_male_female:.dy_provided_support_actor +
+    .dy_is_female_x_male_male:.dy_provided_support_actor +
 
     # Role-specific partner effects
-    .dy_is_female_x_male_female:.dy_communication_partner +
-    .dy_is_female_x_male_male:.dy_communication_partner +
+    .dy_is_female_x_male_female:.dy_provided_support_partner +
+    .dy_is_female_x_male_male:.dy_provided_support_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
@@ -481,22 +484,22 @@ dsm_coef <- glmmTMB::fixef(dsm_model)$cond
 b0_female <- apim_coef[[".dy_is_female_x_male_female"]]
 b0_male <- apim_coef[[".dy_is_female_x_male_male"]]
 b_actor_female <- apim_coef[[
-  ".dy_is_female_x_male_female:.dy_communication_actor"
+  ".dy_is_female_x_male_female:.dy_provided_support_actor"
 ]]
 b_actor_male <- apim_coef[[
-  ".dy_is_female_x_male_male:.dy_communication_actor"
+  ".dy_is_female_x_male_male:.dy_provided_support_actor"
 ]]
 b_partner_female <- apim_coef[[
-  ".dy_is_female_x_male_female:.dy_communication_partner"
+  ".dy_is_female_x_male_female:.dy_provided_support_partner"
 ]]
 b_partner_male <- apim_coef[[
-  ".dy_is_female_x_male_male:.dy_communication_partner"
+  ".dy_is_female_x_male_male:.dy_provided_support_partner"
 ]]
 
 mu_X <- mean(
-  (cross_dsm_data_inverted$.dy_communication_actor +
-     cross_dsm_data_inverted$.dy_communication_partner) / 2 -
-    cross_dsm_data_inverted$.dy_communication_dyad_mean_gmc,
+  (cross_dsm_data_inverted$.dy_provided_support_actor +
+     cross_dsm_data_inverted$.dy_provided_support_partner) / 2 -
+    cross_dsm_data_inverted$.dy_provided_support_dyad_mean_gmc,
   na.rm = TRUE
 )
 
@@ -520,14 +523,14 @@ apim_to_dsm <- c(
 )
 
 a10_dsm <- dsm_coef[["(Intercept)"]]
-a11_dsm <- dsm_coef[[".dy_communication_dyad_mean_gmc"]]
-a12_dsm <- dsm_coef[[".dy_communication_within_dyad_diff"]]
+a11_dsm <- dsm_coef[[".dy_provided_support_dyad_mean_gmc"]]
+a12_dsm <- dsm_coef[[".dy_provided_support_within_dyad_diff"]]
 a20_dsm <- dsm_coef[[".dy_dsm_role_contrast"]]
 a21_dsm <- dsm_coef[[
-  ".dy_communication_dyad_mean_gmc:.dy_dsm_role_contrast"
+  ".dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast"
 ]]
 a22_dsm <- dsm_coef[[
-  ".dy_communication_within_dyad_diff:.dy_dsm_role_contrast"
+  ".dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast"
 ]]
 
 knitr::kable(
@@ -624,13 +627,14 @@ Brief example of ILD DSM:
 
 ```{r prepare-ild-dsm}
 ild_dsm_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
   role = gender,
   time = diaryday,
   predictors = provided_support,
   model_types = "dsm",
+  keep_compositions = "female-male",
   dsm_role_order = c("female", "male")
 )
 

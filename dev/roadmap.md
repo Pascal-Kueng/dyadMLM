@@ -38,10 +38,8 @@ Recently completed cleanup:
 
 - replaced the old combined-model wording with "mixed dyad types" or
   "mixed-composition" wording
-- renamed the mixed example datasets to:
-  - `example_dyadic_crosssectional_mixed`
-  - `example_dyadic_ILD_mixed`
-  - `example_dyadic_ILD_mixed_tweedie`
+- consolidated the examples into the structurally parallel `dyads_cross`,
+  `dyads_ild`, `dyads_nbinom_cross`, and `dyads_nbinom_ild` datasets
 - kept `LICENSE` for R/CRAN's `MIT + file LICENSE` convention and
   `LICENSE.md` as the full human-readable MIT license
 - added GitHub Pages/pkgdown infrastructure and linked available vignettes from
@@ -54,7 +52,7 @@ Recently completed cleanup:
 - added `pool_compositions`, so exchangeable analysis compositions can be
   pooled under a user-provided final composition label without external
   preprocessing
-- added `include_compositions`, so analyses can keep selected observed dyad
+- added `keep_compositions`, so analyses can keep selected observed dyad
   compositions before exchangeability overrides, pooling, and DIM/DSM
   compatibility checks
 - implemented and reviewed separate DIM and directional DSM preparation paths
@@ -100,7 +98,7 @@ Target vignette structure:
   - `group`, `member`, `role`, and `time`
   - distinguishable, exchangeable, and mixed dyad types
   - missing structural data rules
-  - compact examples of `predictors`, `model_type`, `temporal_predictor_decomposition`,
+  - compact examples of `predictors`, `model_types`, `temporal_decomposition`,
     print output, and metadata
   - links to available model-specific vignettes
   - minimal or no fitted models
@@ -108,8 +106,8 @@ Target vignette structure:
   - cross-sectional and ILD APIM model construction
   - distinguishable and exchangeable APIMs
   - within-person and between-person actor/partner effects
-  - generalized outcomes, including Tweedie examples
-  - `.dy_is_*`, `.dy_diff_*`, and raw actor/partner predictor columns
+  - generalized outcomes, including negative-binomial examples
+  - `.dy_is_*`, `.dy_member_contrast_*`, and raw actor/partner predictor columns
   - a brief comparison of manifest raw outcome lags and separately estimated
     within-/between-person outcome-lag components, with their different
     interpretations and small-T cautions
@@ -147,7 +145,8 @@ The first release milestone is complete when all of the following are true:
 - [x] Cross-sectional and ILD temporal predictor decomposition, composition
   filtering, exchangeability overrides, pooling, metadata, and printing are
   implemented and tested for the documented scope.
-- [x] `exchangeable_rescov()` converts fitted shared/`.dy_diff_*` random-effect
+- [x] `recover_exchangeable_covariance()` converts fitted
+  shared/`.dy_member_contrast_*` random-effect
   structures to interpretable member-level covariance matrices. Backend
   extraction and matching are implemented for `glmmTMB` and single-response
   `brms`, including draw-wise transformation, constrained components, final
@@ -176,7 +175,7 @@ Detailed implemented scope and final checks follow.
 - Auto-detect roles, dyad compositions, and distinguishability where possible
 - Add explicit analysis-composition controls so common mixed dyad-type analyses
   do not require external preprocessing
-  - `include_compositions = NULL` is implemented as an observed-composition
+  - `keep_compositions = NULL` is implemented as an observed-composition
     pre-filter before exchangeability overrides and pooling. It is a narrow
     dyad-level filter, not a general row filter:
     - require `role`; without observed roles, there are no observed
@@ -186,7 +185,7 @@ Detailed implemented scope and final checks follow.
       `"female female"`, or `"female_female"`
     - reject `character(0)`, non-character values, unknown references, and
       filters that leave fewer than two complete dyads
-    - infer canonical raw compositions first, resolve `include_compositions`
+    - infer canonical raw compositions first, resolve `keep_compositions`
       against those raw observed compositions, then keep all rows for retained
       dyads and drop all rows for excluded dyads
     - update `attr(data, "dyadMLM")$n_dyads` and all downstream
@@ -208,15 +207,17 @@ Detailed implemented scope and final checks follow.
     reference
   - Apply the steps in this order:
     1. infer canonical raw compositions and create aliases
-    2. apply `include_compositions`, if supplied, as a whole-dyad raw
+    2. apply `keep_compositions`, if supplied, as a whole-dyad raw
        composition filter
     3. apply `set_exchangeable_compositions`
     4. apply `pool_compositions` only to compositions that are exchangeable
        after step 3
-    5. build `.dy_composition`, `.dy_composition_role`, `.dy_is_*`, `.dy_diff_*`,
+    5. build `.dy_composition`, `.dy_composition_role`, `.dy_is_*`,
+       `.dy_member_contrast_*`,
        print summaries, and metadata from the final analysis compositions
-  - Keep raw observed compositions out of the returned data columns, but
-    preserve pooling provenance in `attr(data, "dyadMLM")$dyad_compositions`
+  - Do not generate an additional raw-composition column. Preserve any
+    user-supplied columns, and record pooling provenance in
+    `attr(data, "dyadMLM")$dyad_compositions`
   - Error clearly for unknown aliases, ambiguous aliases, overlapping pooling
     definitions, or pooling requests that include non-exchangeable compositions
 - Handle incomplete dyads and missing roles with explicit `error` and `drop`
@@ -224,18 +225,19 @@ Detailed implemented scope and final checks follow.
 - Return factor columns for `.dy_composition` and
   `.dy_composition_role`
 - Add temporal predictor decomposition and predictor-shape helpers for ILD data
-  - Keep the implemented `time_2l` workflow described in [`centering.md`](centering.md)
+  - Keep the implemented `"2l"` workflow described in [`centering.md`](centering.md)
   - Keep APIM, DIM, and DSM on the same temporal predictor decomposition
     foundation
-  - Use `temporal_predictor_decomposition = "auto"` by default: resolve to
-    `time_2l` when both `time` and predictors are supplied, and to `none`
+  - Use `temporal_decomposition = "auto"` by default: resolve to
+    `"2l"` when both `time` and predictors are supplied, and to `"none"`
     otherwise
-  - Allow explicit `temporal_predictor_decomposition = "none"` for
+  - Allow explicit `temporal_decomposition = "none"` for
     undecomposed or externally centered cases
   - Support raw and within-/between-person model-ready columns for APIM, DIM,
     and DSM, including DIM within-dyad deviations using the
     `_within_dyad_dev` suffix
-  - For ILD models using `time_2l`, retain each selected raw predictor alongside
+  - For ILD models using `temporal_decomposition = "2l"`, retain each selected
+    raw predictor alongside
     its CWP and CBP components in the shared predictor metadata
     - construct raw APIM actor/partner columns and raw DIM/DSM dyadic scores
       from the shared metadata
@@ -255,7 +257,7 @@ Detailed implemented scope and final checks follow.
   - Keep `predictors` as the only transformed-variable API; select outcomes in
     fitted-model formulas
 - Add directional dyadic-score model (DSM) data preparation
-  - Use `model_type = "dsm"` with an explicit `dsm_role_order`
+  - Use `model_types = "dsm"` with an explicit `dsm_role_order`
   - Require one distinguishable dyad composition
   - Reuse neutral dyad-mean/member-deviation calculations internally
   - Create full signed predictor differences and a `+0.5/-0.5` role contrast
@@ -265,33 +267,36 @@ Detailed implemented scope and final checks follow.
     the data output
   - Show number of dyads, whether data are longitudinal, and inferred
     composition counts
-  - Show structural columns: group, member, optional role, optional time
+  - Show structural columns: dyad, member, optional role, optional time
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
-    `.dy_composition`, `.dy_composition_role`, `.dy_is_*`, `.dy_diff_*`,
+    `.dy_composition`, `.dy_composition_role`, `.dy_is_*`,
+    `.dy_member_contrast_*`,
     temporal predictor components, APIM predictor columns, DIM deviations, and
     DSM directional predictor columns
   - Drive generated-column printing from `dyad_generated_columns()`, which
     normalizes temporal predictor, APIM, DIM, and DSM metadata into
     one row per concrete generated column
   - Make dropped incomplete dyads and missing roles visible
-  - Target display:
+  - Target display for `dyads_ild`:
     ```r
     # dyadMLM data
-    # Rows: 5,600 | Dyads: 200 | Intensive longitudinal: yes
-    # Structure: group = coupleID, member = personID, role = gender, time = diaryday
+    # Rows: 10,080 | Dyads: 360 | Intensive longitudinal: yes
+    # Structure: dyad = coupleID, member = personID, role = gender, time = diaryday
     #
     # Dyad compositions:
-    # female_x_male   distinguishable 80 dyads
-    # female_x_female exchangeable    60 dyads
-    # male_x_male     exchangeable    60 dyads
+    # female_x_female exchangeable    120 dyads
+    # female_x_male   distinguishable 120 dyads
+    # male_x_male     exchangeable    120 dyads
     #
     # Added columns:
     #   .dy_composition                  inferred dyad composition
     #   .dy_composition_role             composition-specific member role
     #   .dy_is_{comp-role}               composition-role indicator columns
-    #   .dy_diff_{comp}                  composition-specific sum-diff contrasts; 0
-    #                                   for distinguishable dyads or other
+    #   .dy_member_contrast_{comp}_arbitrary
+    #                                   composition-specific member contrasts
+    #                                   with arbitrary direction; 0 for
+    #                                   distinguishable dyads or other
     #                                   exchangeable compositions
     #   .dy_{pred}_cwp                   within-person predictor: momentary
     #                                   deviations from each person's usual level
@@ -331,14 +336,13 @@ Detailed implemented scope and final checks follow.
     #   .dy_{pred}_cwp_within_dyad_diff   DSM within-person signed predictor difference
     #   .dy_{pred}_cbp_within_dyad_diff   DSM between-person signed predictor difference
     #
-    # Dropped incomplete dyads: 14 dyads, with IDs: 12, 18, 44, 51, 60, 72, 80, 91, 104, 110, ... and 4 more
-    # A tibble: 5,600 x 17
-       personID coupleID diaryday gender closeness provided_support .dy_composition ...
-          <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          ...
-     1        1        1        0 female      5.91             4.72 female_x_male  ...
-     2        1        1        1 female      6.10             5.01 female_x_male  ...
-     3        1        1        2 female      5.44             4.63 female_x_male  ...
-    # i 5,597 more rows
+    # A tibble: 10,080 x 23
+       personID coupleID diaryday gender dyad_composition closeness provided_support ...
+          <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl> ...
+     1        1        1        0 female female_x_male         4.40             4.93 ...
+     2        2        1        0 male   female_x_male         5.14             5.59 ...
+     3        1        1        1 female female_x_male         5.16             4.89 ...
+    # i 10,077 more rows
     ```
   - Do not add sparse-composition warnings to `print()` yet; thresholds are too
     arbitrary for a compact display
@@ -377,9 +381,9 @@ Complete these before calling the feature set CRAN-ready:
   - DSM remains restricted to one final distinguishable composition matching
     `dsm_role_order`
 - Analysis-composition controls: done for v0.0.1
-  - `include_compositions` is implemented as a raw observed-composition dyad
+  - `keep_compositions` is implemented as a raw observed-composition dyad
     filter before `set_exchangeable_compositions` and `pool_compositions`
-  - `include_compositions` updates retained dyads and downstream metadata; a
+  - `keep_compositions` updates retained dyads and downstream metadata; a
     separate excluded-composition metadata table or print summary is deferred
     unless users need it
   - `set_exchangeable_compositions` runs before `pool_compositions`
@@ -388,10 +392,10 @@ Complete these before calling the feature set CRAN-ready:
   - `pool_compositions` is a named list where names are final analysis
     composition labels and values are observed or analysis composition labels
     to pool
-  - `include_compositions`, `set_exchangeable_compositions`, and
+  - `keep_compositions`, `set_exchangeable_compositions`, and
     `pool_compositions` use the same composition-reference resolver
-  - returned data are limited to final analysis columns, not extra raw
-    composition columns
+  - no extra raw-composition column is generated; user-supplied columns remain
+    unchanged
   - pooling provenance is recorded in `dyad_compositions$pooled_from`
 - DIM metadata: done for v0.0.1
   - the current `dim_predictors` table columns are stable for v0.0.1:
@@ -435,7 +439,7 @@ Complete these before calling the feature set CRAN-ready:
     and mark advanced examples `eval = FALSE` where needed
 - Keep the completed DIM vignette stable
   - retain cross-sectional and ILD APIM-DIM equivalence
-  - retain raw and `time_2l` ILD construction and the current concise
+  - retain raw and `"2l"` ILD construction and the current concise
     methodological limitations
   - retain selective `lag_predictors` construction for lag-1 raw and CWP
     model-ready columns without bridging missing time indexes
@@ -622,10 +626,10 @@ Complete these before calling the feature set CRAN-ready:
 ## Version 0.3.0
 
 - Advanced ILD/EMA data infrastructure
-  - Add `time_3l` temporal predictor decomposition only after the `time_2l`
+  - Add `"3l"` temporal predictor decomposition only after the `"2l"`
     workflow is stable
-  - Require an explicit day, burst, or period variable for `time_3l`
-  - Do not infer `time_3l` automatically from EMA nesting or three-level random
+  - Require an explicit day, burst, or period variable for `"3l"`
+  - Do not infer `"3l"` automatically from EMA nesting or three-level random
     effects; users should request it when the substantive predictor
     decomposition requires it
   - Keep `time_4l` out of scope unless a concrete applied use case justifies the
@@ -671,12 +675,12 @@ Minimum expected state:
 - stable generated-column families for compositions, temporal predictor
   components, APIM predictors, and DIM/DSM predictors
 - stable analysis-composition controls:
-  `include_compositions`, `set_exchangeable_compositions`, and
+  `keep_compositions`, `set_exchangeable_compositions`, and
   `pool_compositions`
 - clear metadata for raw observed compositions versus final analysis
   compositions
 - complete getting-started, APIM, mixed-APIM, DIM, and DSM documentation paths
-- interpretation helpers for `.dy_diff_*` structures
+- interpretation helpers for `.dy_member_contrast_*` structures
 - syntax generation for at least one primary model engine, preferably
   `glmmTMB`, with tests that protect intended estimands
 - CRAN release history and pkgdown documentation that match the current API
@@ -696,7 +700,7 @@ Target state before JOSS submission:
   package
 - Robust temporal predictor decomposition for ILD data
 - Composition filtering, exchangeability, and pooling helpers
-- `.dy_diff_*` / Idiff interpretation helpers
+- `.dy_member_contrast_*` interpretation helpers
 - Formula or syntax generation for at least `glmmTMB`; a second modeling
   backend is optional and is not a JOSS submission gate
 - Reproducible vignettes showing composition-aware dyadic MLM workflows
