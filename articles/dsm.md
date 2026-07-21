@@ -66,8 +66,8 @@ print(cross_dsm_data, n = 4)
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1        1        1 female female_x_male         4.77             4.49
 #> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.42             4.09
-#> 4        4        2 male   female_x_male         6.01             6.20
+#> 3        3        2 female female_x_male         6.44             4.09
+#> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
 #> # ℹ 7 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
@@ -169,14 +169,14 @@ summary(dsm_model)
 #> Data: cross_dsm_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     614.7     646.1    -298.4     596.7       231 
+#>     615.1     646.5    -298.6     597.1       231 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups   Name                  Variance Std.Dev. Corr 
 #>  coupleID (Intercept)           0.5085   0.7131        
-#>           .dy_dsm_role_contrast 0.9741   0.9870   0.02 
+#>           .dy_dsm_role_contrast 0.9773   0.9886   0.02 
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
@@ -184,16 +184,16 @@ summary(dsm_model)
 #> (Intercept)                                                  5.07753    0.06691
 #> .dy_provided_support_dyad_mean_gmc                           1.46596    0.09224
 #> .dy_provided_support_within_dyad_diff                        0.10107    0.07577
-#> .dy_dsm_role_contrast                                        1.02380    0.09261
-#> .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast     0.70614    0.12766
-#> .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast  0.91989    0.10487
+#> .dy_dsm_role_contrast                                        1.01425    0.09277
+#> .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast     0.71929    0.12788
+#> .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast  0.92366    0.10505
 #>                                                             z value Pr(>|z|)
 #> (Intercept)                                                   75.88  < 2e-16
 #> .dy_provided_support_dyad_mean_gmc                            15.89  < 2e-16
 #> .dy_provided_support_within_dyad_diff                          1.33    0.182
-#> .dy_dsm_role_contrast                                         11.05  < 2e-16
-#> .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast       5.53 3.18e-08
-#> .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast    8.77  < 2e-16
+#> .dy_dsm_role_contrast                                         10.93  < 2e-16
+#> .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast       5.62 1.86e-08
+#> .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast    8.79  < 2e-16
 #>                                                                
 #> (Intercept)                                                 ***
 #> .dy_provided_support_dyad_mean_gmc                          ***
@@ -250,8 +250,8 @@ Consider the conceptual SEM formulas:
 
 The fitted paths for this example are:
 
-![Fitted DSM. Intercepts a10 5.08 and a20 1.02; paths a11 1.47, a12
-0.10, a21 0.71, and a22 0.92; residual SDs 0.71 and 0.99, with
+![Fitted DSM. Intercepts a10 5.08 and a20 1.01; paths a11 1.47, a12
+0.10, a21 0.72, and a22 0.92; residual SDs 0.71 and 0.99, with
 correlation 0.02.](dsm_files/figure-html/fitted-dsm-diagram-1.svg)
 
 Fitted cross-sectional DSM for the example data. The nodes identify the
@@ -374,9 +374,9 @@ knitr::kable(
 | (Intercept) | 5.078 | 5.078 |
 | .dy_provided_support_dyad_mean_gmc | 1.466 | 1.466 |
 | .dy_provided_support_within_dyad_diff | 0.101 | -0.101 |
-| .dy_dsm_role_contrast | 1.024 | -1.024 |
-| .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast | 0.706 | -0.706 |
-| .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast | 0.920 | 0.920 |
+| .dy_dsm_role_contrast | 1.014 | -1.014 |
+| .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast | 0.719 | -0.719 |
+| .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast | 0.924 | 0.924 |
 
 The two models have identical fitted values and model fit:
 
@@ -447,10 +447,10 @@ data.frame(
     as.numeric(logLik(apim_model))
   ), 3)
 )
-#>                model     AIC     BIC   logLik
-#> 1 DSM: female - male 614.748 646.074 -298.374
-#> 2 DSM: male - female 614.748 646.074 -298.374
-#> 3               APIM 614.748 646.074 -298.374
+#>                model     AIC    BIC   logLik
+#> 1 DSM: female - male 615.134 646.46 -298.567
+#> 2 DSM: male - female 615.134 646.46 -298.567
+#> 3               APIM 615.134 646.46 -298.567
 ```
 
 ### Fixed-effect transformation
@@ -562,9 +562,9 @@ six fixed effects:
 | a10      |                    5.078 |          5.078 |
 | a11      |                    1.466 |          1.466 |
 | a12      |                    0.101 |          0.101 |
-| a20      |                    1.024 |          1.024 |
-| a21      |                    0.706 |          0.706 |
-| a22      |                    0.920 |          0.920 |
+| a20      |                    1.014 |          1.014 |
+| a21      |                    0.719 |          0.719 |
+| a22      |                    0.924 |          0.924 |
 
 APIM-to-DSM fixed-effect transformation (centering constant = 4.909).
 {.table}
@@ -617,8 +617,8 @@ data.frame(
 )
 #>                         parameter from_DSM from_APIM_transformation
 #> 1               Var(outcome mean)    0.508                    0.508
-#> 2 Cov(outcome mean, outcome diff)    0.011                    0.011
-#> 3               Var(outcome diff)    0.974                    0.974
+#> 2 Cov(outcome mean, outcome diff)    0.013                    0.013
+#> 3               Var(outcome diff)    0.977                    0.977
 ```
 
 For exchangeable dyads, the direction of a member difference is
@@ -763,9 +763,6 @@ dsm_ILD <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_dsm_data
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; false convergence (8). See vignette('troubleshooting'),
-#> help('diagnose')
 
 summary(dsm_ILD)
 #>  Family: gaussian  ( identity )
@@ -783,70 +780,70 @@ summary(dsm_ILD)
 #> Data: ild_dsm_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    8243.9    8354.1   -4104.0    8207.9      3342 
+#>    8375.0    8485.1   -4169.5    8339.0      3342 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups            Name                  Variance Std.Dev. Corr 
-#>  coupleID          (Intercept)           0.4817   0.6941        
-#>                    .dy_dsm_role_contrast 0.9168   0.9575   0.02 
-#>  coupleID:diaryday (Intercept)           0.3742   0.6117        
-#>                    .dy_dsm_role_contrast 0.8026   0.8959   0.01 
+#>  coupleID          (Intercept)           0.4812   0.6937        
+#>                    .dy_dsm_role_contrast 0.9162   0.9572   0.02 
+#>  coupleID:diaryday (Intercept)           0.3819   0.6180        
+#>                    .dy_dsm_role_contrast 0.8551   0.9247   0.01 
 #> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
 #> 
 #> Conditional model:
 #>                                                                  Estimate
-#> (Intercept)                                                      5.109462
-#> diaryday                                                        -0.004915
-#> .dy_provided_support_cwp_dyad_mean                               0.474652
-#> .dy_provided_support_cwp_within_dyad_diff                        0.018536
-#> .dy_provided_support_cbp_dyad_mean                               1.465972
-#> .dy_provided_support_cbp_within_dyad_diff                        0.101095
-#> .dy_dsm_role_contrast                                            0.875953
-#> diaryday:.dy_dsm_role_contrast                                   0.022748
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.241942
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.200587
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.706138
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.919841
+#> (Intercept)                                                      5.111583
+#> diaryday                                                        -0.005238
+#> .dy_provided_support_cwp_dyad_mean                               0.472112
+#> .dy_provided_support_cwp_within_dyad_diff                        0.011992
+#> .dy_provided_support_cbp_dyad_mean                               1.465964
+#> .dy_provided_support_cbp_within_dyad_diff                        0.101067
+#> .dy_dsm_role_contrast                                            0.864415
+#> diaryday:.dy_dsm_role_contrast                                   0.023050
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.212178
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.196322
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.719301
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.923664
 #>                                                                 Std. Error
-#> (Intercept)                                                       0.071117
-#> diaryday                                                          0.003707
-#> .dy_provided_support_cwp_dyad_mean                                0.027582
-#> .dy_provided_support_cwp_within_dyad_diff                         0.017505
-#> .dy_provided_support_cbp_dyad_mean                                0.092234
-#> .dy_provided_support_cbp_within_dyad_diff                         0.075769
-#> .dy_dsm_role_contrast                                             0.099109
-#> diaryday:.dy_dsm_role_contrast                                    0.005429
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast          0.040395
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.025637
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast          0.127665
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast   0.104874
+#> (Intercept)                                                       0.071202
+#> diaryday                                                          0.003745
+#> .dy_provided_support_cwp_dyad_mean                                0.027865
+#> .dy_provided_support_cwp_within_dyad_diff                         0.017685
+#> .dy_provided_support_cbp_dyad_mean                                0.092236
+#> .dy_provided_support_cbp_within_dyad_diff                         0.075770
+#> .dy_dsm_role_contrast                                             0.099661
+#> diaryday:.dy_dsm_role_contrast                                    0.005604
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast          0.041695
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.026461
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast          0.127875
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast   0.105047
 #>                                                                 z value
-#> (Intercept)                                                       71.85
-#> diaryday                                                          -1.33
-#> .dy_provided_support_cwp_dyad_mean                                17.21
-#> .dy_provided_support_cwp_within_dyad_diff                          1.06
+#> (Intercept)                                                       71.79
+#> diaryday                                                          -1.40
+#> .dy_provided_support_cwp_dyad_mean                                16.94
+#> .dy_provided_support_cwp_within_dyad_diff                          0.68
 #> .dy_provided_support_cbp_dyad_mean                                15.89
 #> .dy_provided_support_cbp_within_dyad_diff                          1.33
-#> .dy_dsm_role_contrast                                              8.84
-#> diaryday:.dy_dsm_role_contrast                                     4.19
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast           5.99
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast    7.82
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast           5.53
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast    8.77
+#> .dy_dsm_role_contrast                                              8.67
+#> diaryday:.dy_dsm_role_contrast                                     4.11
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast           5.09
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast    7.42
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast           5.63
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast    8.79
 #>                                                                 Pr(>|z|)    
 #> (Intercept)                                                      < 2e-16 ***
-#> diaryday                                                           0.185    
+#> diaryday                                                           0.162    
 #> .dy_provided_support_cwp_dyad_mean                               < 2e-16 ***
-#> .dy_provided_support_cwp_within_dyad_diff                          0.290    
+#> .dy_provided_support_cwp_within_dyad_diff                          0.498    
 #> .dy_provided_support_cbp_dyad_mean                               < 2e-16 ***
 #> .dy_provided_support_cbp_within_dyad_diff                          0.182    
 #> .dy_dsm_role_contrast                                            < 2e-16 ***
-#> diaryday:.dy_dsm_role_contrast                                  2.79e-05 ***
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast        2.11e-09 ***
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast 5.11e-15 ***
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast        3.18e-08 ***
+#> diaryday:.dy_dsm_role_contrast                                  3.90e-05 ***
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast        3.60e-07 ***
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast 1.18e-13 ***
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast        1.85e-08 ***
 #> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  < 2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1

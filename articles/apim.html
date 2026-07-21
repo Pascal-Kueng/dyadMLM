@@ -196,8 +196,8 @@ and <code>dispformula = ~ 0</code>.</p>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
@@ -247,36 +247,36 @@ model formula. Here is a simple example:</p>
 <span><span class="co">#&gt; Data: apim_distinguishable_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;     614.7     646.1    -298.4     596.7       231 </span></span>
+<span><span class="co">#&gt;     615.1     646.5    -298.6     597.1       231 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;  Groups   Name                        Variance Std.Dev. Corr </span></span>
-<span><span class="co">#&gt;  coupleID .dy_is_female_x_male_female 0.7631   0.8736        </span></span>
-<span><span class="co">#&gt;           .dy_is_female_x_male_male   0.7409   0.8607   0.35 </span></span>
+<span><span class="co">#&gt;  coupleID .dy_is_female_x_male_female 0.7655   0.8749        </span></span>
+<span><span class="co">#&gt;           .dy_is_female_x_male_male   0.7401   0.8603   0.35 </span></span>
 <span><span class="co">#&gt; Number of obs: 240, groups:  coupleID, 120</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                                          Estimate Std. Error</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_female                               -3.3410     0.5629</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_male                                 -0.8981     0.5546</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_actor     1.4705     0.1140</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_actor       0.9153     0.1016</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_partner   0.3485     0.1031</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_partner     0.1976     0.1123</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female                               -3.3781     0.5638</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male                                 -0.8610     0.5543</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_actor     1.4757     0.1142</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_actor       0.9139     0.1015</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_partner   0.3499     0.1032</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_partner     0.1924     0.1123</span></span>
 <span><span class="co">#&gt;                                                          z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_female                               -5.936 2.93e-09 ***</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_male                                 -1.619 0.105394    </span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_actor    12.901  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_actor       9.013  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_partner   3.381 0.000722 ***</span></span>
-<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_partner     1.759 0.078553 .  </span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female                               -5.992 2.07e-09 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male                                 -1.553   0.1204    </span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_actor    12.927  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_actor       9.003  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_female:.dy_provided_support_partner   3.389   0.0007 ***</span></span>
+<span><span class="co">#&gt; .dy_is_female_x_male_male:.dy_provided_support_partner     1.714   0.0865 .  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>The estimated coefficients map as follows:</p>
 <div class="figure">
-<img src="apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg" class="r-plt" alt="Fitted distinguishable APIM. Female and male intercepts -3.34 and -0.90; actor effects 1.47 and 0.92; partner effects 0.35 and 0.20; residual SDs 0.87 and 0.86, with correlation 0.35." width="100%"><p class="caption">
+<img src="apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg" class="r-plt" alt="Fitted distinguishable APIM. Female and male intercepts -3.38 and -0.86; actor effects 1.48 and 0.91; partner effects 0.35 and 0.19; residual SDs 0.87 and 0.86, with correlation 0.35." width="100%"><p class="caption">
 Fitted cross-sectional distinguishable APIM for the example data. Fixed
 effects, residual standard deviations, and the residual correlation are
 extracted from the fitted model.
@@ -378,8 +378,8 @@ exchangeability constraints. Another option would be to omit roles.</p>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male &lt;dbl&gt;,</span></span></span>
@@ -416,21 +416,21 @@ exchangeability constraints. Another option would be to omit roles.</p>
 <span><span class="co">#&gt; Data: apim_exchangeable_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;     708.5     725.9    -349.3     698.5       235 </span></span>
+<span><span class="co">#&gt;     708.2     725.6    -349.1     698.2       235 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;  Groups     Name                                        Variance Std.Dev.</span></span>
 <span><span class="co">#&gt;  coupleID   (Intercept)                                 0.5160   0.7183  </span></span>
-<span><span class="co">#&gt;  coupleID.1 .dy_member_contrast_female_x_male_arbitrary 0.5603   0.7485  </span></span>
+<span><span class="co">#&gt;  coupleID.1 .dy_member_contrast_female_x_male_arbitrary 0.5589   0.7476  </span></span>
 <span><span class="co">#&gt; Number of obs: 240, groups:  coupleID, 120</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                              Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                   -2.0307     0.4580  -4.434 9.25e-06 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_actor     1.2876     0.0897  14.354  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_partner   0.1645     0.0897   1.834   0.0666 .  </span></span>
+<span><span class="co">#&gt; (Intercept)                  -2.03068    0.45797  -4.434 9.25e-06 ***</span></span>
+<span><span class="co">#&gt; .dy_provided_support_actor    1.28763    0.08962  14.368  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_provided_support_partner  0.16444    0.08962   1.835   0.0665 .  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>We use the <code><a href="../reference/recover_exchangeable_covariance.html">dyadMLM::recover_exchangeable_covariance()</a></code> to
@@ -448,13 +448,13 @@ recover the interpretable variance-covariance matrix:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance-covariance:</span></span>
 <span><span class="co">#&gt;                        1      2     </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept) 1.076  -0.044</span></span>
-<span><span class="co">#&gt; 2 member2: (Intercept) -0.044 1.076 </span></span>
+<span><span class="co">#&gt; 1 member1: (Intercept) 1.075  -0.043</span></span>
+<span><span class="co">#&gt; 2 member2: (Intercept) -0.043 1.075 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Standard deviations and correlations:</span></span>
 <span><span class="co">#&gt;                        1      2     </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept) 1.037  -0.041</span></span>
-<span><span class="co">#&gt; 2 member2: (Intercept) -0.041 1.037</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 member1: (Intercept) 1.037  -0.040</span></span>
+<span><span class="co">#&gt; 2 member2: (Intercept) -0.040 1.037</span></span></code></pre></div>
 <p>The back-transformation follows directly from the shared and
 member-difference random effects. If
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>j</mi></msub><annotation encoding="application/x-tex">u_j</annotation></semantics></math>
@@ -507,9 +507,9 @@ performing the likelihood-ratio test:</p>
 <span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent data</span></span>
 <span><span class="co">#&gt; Assumes mathematical nesting and an appropriate chi-squared reference distribution.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
-<span><span class="co">#&gt; apim_exchangeable_model     5 708.54 725.94 -349.27   698.54              </span></span>
-<span><span class="co">#&gt; apim_distinguishable_model  9 614.75 646.07 -298.37   596.75 101.79      4</span></span>
+<span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance Chisq Chi Df</span></span>
+<span><span class="co">#&gt; apim_exchangeable_model     5 708.23 725.64 -349.12   698.23             </span></span>
+<span><span class="co">#&gt; apim_distinguishable_model  9 615.13 646.46 -298.57   597.13 101.1      4</span></span>
 <span><span class="co">#&gt;                            Pr(&gt;Chisq)    </span></span>
 <span><span class="co">#&gt; apim_exchangeable_model                  </span></span>
 <span><span class="co">#&gt; apim_distinguishable_model  &lt; 2.2e-16 ***</span></span>
@@ -604,7 +604,10 @@ role-specific intercepts refer to the average study day:</p>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_distinguishable_data</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
+<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
+<span><span class="co">#&gt; help('diagnose')</span></span></code></pre></div>
 <div class="section level5">
 <h5 id="random-slopes">Random slopes<a class="anchor" aria-label="anchor" href="#random-slopes"></a>
 </h5>
@@ -689,10 +692,10 @@ female-female dyads as one substantively exchangeable composition:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,360 × 19</span></span></span>
 <span><span class="co">#&gt;   personID coupleID diaryday gender dyad_composition closeness provided_support</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121        0 female female_x_female       6.68             6.18</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121        0 female female_x_female       5.67             5.70</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      241      121        1 female female_x_female       8.63             4.57</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      242      121        1 female female_x_female       5.58             5.30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121        0 female female_x_female       6.59             6.18</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121        0 female female_x_female       5.73             5.70</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      241      121        1 female female_x_female       8.70             4.57</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      242      121        1 female female_x_female       5.61             5.30</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,356 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;,</span></span></span>
@@ -749,7 +752,7 @@ below.</p>
 <span><span class="co">#&gt; Data: ild_apim_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;    8237.5    8323.2   -4104.8    8209.5      3346 </span></span>
+<span><span class="co">#&gt;    8303.5    8389.2   -4137.7    8275.5      3346 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -769,22 +772,22 @@ below.</p>
 <span><span class="co">#&gt;  (Intercept)                                                                 </span></span>
 <span><span class="co">#&gt;  .dy_member_contrast_female_x_female_arbitrary                               </span></span>
 <span><span class="co">#&gt;  Variance Std.Dev. Corr  </span></span>
-<span><span class="co">#&gt;  0.53935  0.7344         </span></span>
-<span><span class="co">#&gt;  0.08253  0.2873   0.31  </span></span>
-<span><span class="co">#&gt;  0.25725  0.5072         </span></span>
-<span><span class="co">#&gt;  0.03036  0.1742   -0.20 </span></span>
-<span><span class="co">#&gt;  0.36268  0.6022         </span></span>
-<span><span class="co">#&gt;  0.18018  0.4245         </span></span>
+<span><span class="co">#&gt;  0.53933  0.7344         </span></span>
+<span><span class="co">#&gt;  0.08265  0.2875   0.31  </span></span>
+<span><span class="co">#&gt;  0.25635  0.5063         </span></span>
+<span><span class="co">#&gt;  0.08180  0.2860   -0.19 </span></span>
+<span><span class="co">#&gt;  0.36229  0.6019         </span></span>
+<span><span class="co">#&gt;  0.18043  0.4248         </span></span>
 <span><span class="co">#&gt; Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                  Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                      5.894379   0.072740   81.03  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; diaryday                         0.007803   0.003707    2.10   0.0353 *  </span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_actor   0.246995   0.032559    7.59 3.30e-14 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_partner 0.247376   0.018964   13.04  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_actor   1.209439   0.070885   17.06  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_partner 0.313467   0.070901    4.42 9.82e-06 ***</span></span>
+<span><span class="co">#&gt; (Intercept)                      5.894110   0.072751   81.02  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; diaryday                         0.007846   0.003713    2.11   0.0346 *  </span></span>
+<span><span class="co">#&gt; .dy_provided_support_cwp_actor   0.245909   0.032679    7.53 5.27e-14 ***</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cwp_partner 0.247470   0.018980   13.04  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cbp_actor   1.215919   0.070693   17.20  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cbp_partner 0.308590   0.070711    4.36 1.28e-05 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>We can now recover the member-level covariance matrices for both the
@@ -803,17 +806,17 @@ matched block pairs are returned separately:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance-covariance:</span></span>
 <span><span class="co">#&gt;                                           1     2     3     4    </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept)                    0.797 0.047 0.282 0.083</span></span>
-<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.047 0.113 0.083 0.052</span></span>
-<span><span class="co">#&gt; 3 member2: (Intercept)                    0.282 0.083 0.797 0.047</span></span>
-<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.083 0.052 0.047 0.113</span></span>
+<span><span class="co">#&gt; 1 member1: (Intercept)                    0.796 0.038 0.283 0.093</span></span>
+<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.038 0.164 0.093 0.001</span></span>
+<span><span class="co">#&gt; 3 member2: (Intercept)                    0.283 0.093 0.796 0.038</span></span>
+<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.093 0.001 0.038 0.164</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Standard deviations and correlations:</span></span>
 <span><span class="co">#&gt;                                           1     2     3     4    </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept)                    0.893 0.157 0.354 0.276</span></span>
-<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.157 0.336 0.276 0.462</span></span>
-<span><span class="co">#&gt; 3 member2: (Intercept)                    0.354 0.276 0.893 0.157</span></span>
-<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.276 0.462 0.157 0.336</span></span>
+<span><span class="co">#&gt; 1 member1: (Intercept)                    0.892 0.104 0.356 0.257</span></span>
+<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.104 0.406 0.257 0.005</span></span>
+<span><span class="co">#&gt; 3 member2: (Intercept)                    0.356 0.257 0.892 0.104</span></span>
+<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.257 0.005 0.104 0.406</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Pair `pair_2`</span></span>
 <span><span class="co">#&gt; Shared:     us(1 | coupleID:diaryday)</span></span>
@@ -821,13 +824,13 @@ matched block pairs are returned separately:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance-covariance:</span></span>
 <span><span class="co">#&gt;                        1     2    </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept) 0.543 0.183</span></span>
-<span><span class="co">#&gt; 2 member2: (Intercept) 0.183 0.543</span></span>
+<span><span class="co">#&gt; 1 member1: (Intercept) 0.543 0.182</span></span>
+<span><span class="co">#&gt; 2 member2: (Intercept) 0.182 0.543</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Standard deviations and correlations:</span></span>
 <span><span class="co">#&gt;                        1     2    </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept) 0.737 0.336</span></span>
-<span><span class="co">#&gt; 2 member2: (Intercept) 0.336 0.737</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 member1: (Intercept) 0.737 0.335</span></span>
+<span><span class="co">#&gt; 2 member2: (Intercept) 0.335 0.737</span></span></code></pre></div>
 <p>The <code>cwp</code> terms estimate actor and partner associations
 for occasion-specific deviations from each member’s usual support. The
 <code>cbp</code> terms estimate actor and partner associations involving
@@ -868,11 +871,11 @@ the model:</p>
 <span><span class="co">#&gt; Assumes mathematical nesting and an appropriate chi-squared reference distribution.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
-<span><span class="co">#&gt; ild_apim_no_contrast_slope 12 8262.4 8335.9 -4119.2   8238.4              </span></span>
-<span><span class="co">#&gt; ild_apim_model             14 8237.5 8323.2 -4104.8   8209.5 28.926      2</span></span>
+<span><span class="co">#&gt; ild_apim_no_contrast_slope 12 8419.8 8493.2 -4197.9   8395.8              </span></span>
+<span><span class="co">#&gt; ild_apim_model             14 8303.5 8389.2 -4137.7   8275.5 120.33      2</span></span>
 <span><span class="co">#&gt;                            Pr(&gt;Chisq)    </span></span>
 <span><span class="co">#&gt; ild_apim_no_contrast_slope               </span></span>
-<span><span class="co">#&gt; ild_apim_model              5.234e-07 ***</span></span>
+<span><span class="co">#&gt; ild_apim_model              &lt; 2.2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -907,10 +910,10 @@ what blocks belong together.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Standard deviations and correlations:</span></span>
 <span><span class="co">#&gt;                                           1     2     3     4    </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept)                    0.892 0.254 0.355 0.254</span></span>
-<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.254 0.287 0.254 1.000</span></span>
-<span><span class="co">#&gt; 3 member2: (Intercept)                    0.355 0.254 0.892 0.254</span></span>
-<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.254 1.000 0.254 0.287</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 member1: (Intercept)                    0.890 0.259 0.357 0.259</span></span>
+<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.259 0.291 0.259 1.000</span></span>
+<span><span class="co">#&gt; 3 member2: (Intercept)                    0.357 0.259 0.890 0.259</span></span>
+<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.259 1.000 0.259 0.291</span></span></code></pre></div>
 <p>We can impose the stronger constraint by omitting the full
 member-contrast block at the stable dyad level. The same-occasion
 member-contrast block again remains in the model:</p>
@@ -932,9 +935,9 @@ member-contrast block again remains in the model:</p>
 <span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent data</span></span>
 <span><span class="co">#&gt; Assumes mathematical nesting and an appropriate chi-squared reference distribution.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance Chisq Chi Df</span></span>
-<span><span class="co">#&gt; ild_apim_no_contrast_block 11 9331.5 9398.8 -4654.7   9309.5             </span></span>
-<span><span class="co">#&gt; ild_apim_model             14 8237.5 8323.2 -4104.8   8209.5  1100      3</span></span>
+<span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
+<span><span class="co">#&gt; ild_apim_no_contrast_block 11 9421.3 9488.6 -4699.6   9399.3              </span></span>
+<span><span class="co">#&gt; ild_apim_model             14 8303.5 8389.2 -4137.7   8275.5 1123.8      3</span></span>
 <span><span class="co">#&gt;                            Pr(&gt;Chisq)    </span></span>
 <span><span class="co">#&gt; ild_apim_no_contrast_block               </span></span>
 <span><span class="co">#&gt; ild_apim_model              &lt; 2.2e-16 ***</span></span>
@@ -968,10 +971,10 @@ is absent, we specify it as <code>NULL</code>:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Standard deviations and correlations:</span></span>
 <span><span class="co">#&gt;                                           1     2     3     4    </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept)                    0.734 0.339 1.000 0.339</span></span>
-<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.339 0.269 0.339 1.000</span></span>
-<span><span class="co">#&gt; 3 member2: (Intercept)                    1.000 0.339 0.734 0.339</span></span>
-<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.339 1.000 0.339 0.269</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 member1: (Intercept)                    0.733 0.344 1.000 0.344</span></span>
+<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.344 0.272 0.344 1.000</span></span>
+<span><span class="co">#&gt; 3 member2: (Intercept)                    1.000 0.344 0.733 0.344</span></span>
+<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.344 1.000 0.344 0.272</span></span></code></pre></div>
 <p>These are constraints on the stable dyad-level random effects, not on
 the same-occasion residual structure. Because variance constraints lie
 on the boundary of the parameter space, the usual chi-squared reference
@@ -1057,9 +1060,6 @@ bridged.</p>
 <span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  , data <span class="op">=</span> <span class="va">ild_apim_data_dynamic</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
-<span><span class="co">#&gt; help('diagnose')</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">stability_influence</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
@@ -1072,29 +1072,29 @@ bridged.</p>
 <span><span class="co">#&gt; Data: ild_apim_data_dynamic</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
-<span><span class="co">#&gt;    8206.2    8254.6   -4095.1    8190.2      3112 </span></span>
+<span><span class="co">#&gt;    8341.7    8390.1   -4162.9    8325.7      3112 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;  Groups              Name                                          Variance</span></span>
-<span><span class="co">#&gt;  coupleID            (Intercept)                                   1.7286  </span></span>
-<span><span class="co">#&gt;  coupleID.1          .dy_member_contrast_female_x_female_arbitrary 0.4121  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                                   0.4654  </span></span>
-<span><span class="co">#&gt;  coupleID.diaryday.1 .dy_member_contrast_female_x_female_arbitrary 0.2015  </span></span>
+<span><span class="co">#&gt;  coupleID            (Intercept)                                   1.7348  </span></span>
+<span><span class="co">#&gt;  coupleID.1          .dy_member_contrast_female_x_female_arbitrary 0.4077  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday   (Intercept)                                   0.4769  </span></span>
+<span><span class="co">#&gt;  coupleID.diaryday.1 .dy_member_contrast_female_x_female_arbitrary 0.2161  </span></span>
 <span><span class="co">#&gt;  Std.Dev.</span></span>
-<span><span class="co">#&gt;  1.3148  </span></span>
-<span><span class="co">#&gt;  0.6419  </span></span>
-<span><span class="co">#&gt;  0.6822  </span></span>
-<span><span class="co">#&gt;  0.4489  </span></span>
+<span><span class="co">#&gt;  1.3171  </span></span>
+<span><span class="co">#&gt;  0.6385  </span></span>
+<span><span class="co">#&gt;  0.6906  </span></span>
+<span><span class="co">#&gt;  0.4649  </span></span>
 <span><span class="co">#&gt; Number of obs: 3120, groups:  coupleID, 120; coupleID:diaryday, 1560</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                5.821704   0.206073  28.251   &lt;2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_closeness_actor_lag1   0.004035   0.019499   0.207   0.8361    </span></span>
-<span><span class="co">#&gt; .dy_closeness_partner_lag1 0.006138   0.019499   0.315   0.7529    </span></span>
-<span><span class="co">#&gt; diaryday                   0.009085   0.004620   1.967   0.0492 *  </span></span>
+<span><span class="co">#&gt; (Intercept)                5.834951   0.206339  28.278   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_closeness_actor_lag1   0.005985   0.019493   0.307   0.7588    </span></span>
+<span><span class="co">#&gt; .dy_closeness_partner_lag1 0.002167   0.019493   0.111   0.9115    </span></span>
+<span><span class="co">#&gt; diaryday                   0.008910   0.004676   1.905   0.0567 .  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>This model can be extended with contemporaneous actor and partner

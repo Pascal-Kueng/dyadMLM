@@ -141,8 +141,8 @@ print(apim_distinguishable_data, n=4)
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1        1        1 female female_x_male         4.77             4.49
 #> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.42             4.09
-#> 4        4        2 male   female_x_male         6.01             6.20
+#> 3        3        2 female female_x_male         6.44             4.09
+#> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
 #> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
@@ -196,39 +196,39 @@ summary(apim_distinguishable_model)
 #> Data: apim_distinguishable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     614.7     646.1    -298.4     596.7       231 
+#>     615.1     646.5    -298.6     597.1       231 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups   Name                        Variance Std.Dev. Corr 
-#>  coupleID .dy_is_female_x_male_female 0.7631   0.8736        
-#>           .dy_is_female_x_male_male   0.7409   0.8607   0.35 
+#>  coupleID .dy_is_female_x_male_female 0.7655   0.8749        
+#>           .dy_is_female_x_male_male   0.7401   0.8603   0.35 
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
 #>                                                          Estimate Std. Error
-#> .dy_is_female_x_male_female                               -3.3410     0.5629
-#> .dy_is_female_x_male_male                                 -0.8981     0.5546
-#> .dy_is_female_x_male_female:.dy_provided_support_actor     1.4705     0.1140
-#> .dy_is_female_x_male_male:.dy_provided_support_actor       0.9153     0.1016
-#> .dy_is_female_x_male_female:.dy_provided_support_partner   0.3485     0.1031
-#> .dy_is_female_x_male_male:.dy_provided_support_partner     0.1976     0.1123
+#> .dy_is_female_x_male_female                               -3.3781     0.5638
+#> .dy_is_female_x_male_male                                 -0.8610     0.5543
+#> .dy_is_female_x_male_female:.dy_provided_support_actor     1.4757     0.1142
+#> .dy_is_female_x_male_male:.dy_provided_support_actor       0.9139     0.1015
+#> .dy_is_female_x_male_female:.dy_provided_support_partner   0.3499     0.1032
+#> .dy_is_female_x_male_male:.dy_provided_support_partner     0.1924     0.1123
 #>                                                          z value Pr(>|z|)    
-#> .dy_is_female_x_male_female                               -5.936 2.93e-09 ***
-#> .dy_is_female_x_male_male                                 -1.619 0.105394    
-#> .dy_is_female_x_male_female:.dy_provided_support_actor    12.901  < 2e-16 ***
-#> .dy_is_female_x_male_male:.dy_provided_support_actor       9.013  < 2e-16 ***
-#> .dy_is_female_x_male_female:.dy_provided_support_partner   3.381 0.000722 ***
-#> .dy_is_female_x_male_male:.dy_provided_support_partner     1.759 0.078553 .  
+#> .dy_is_female_x_male_female                               -5.992 2.07e-09 ***
+#> .dy_is_female_x_male_male                                 -1.553   0.1204    
+#> .dy_is_female_x_male_female:.dy_provided_support_actor    12.927  < 2e-16 ***
+#> .dy_is_female_x_male_male:.dy_provided_support_actor       9.003  < 2e-16 ***
+#> .dy_is_female_x_male_female:.dy_provided_support_partner   3.389   0.0007 ***
+#> .dy_is_female_x_male_male:.dy_provided_support_partner     1.714   0.0865 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 The estimated coefficients map as follows:
 
-![Fitted distinguishable APIM. Female and male intercepts -3.34 and
--0.90; actor effects 1.47 and 0.92; partner effects 0.35 and 0.20;
+![Fitted distinguishable APIM. Female and male intercepts -3.38 and
+-0.86; actor effects 1.48 and 0.91; partner effects 0.35 and 0.19;
 residual SDs 0.87 and 0.86, with correlation
 0.35.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg)
 
@@ -344,8 +344,8 @@ print(apim_exchangeable_data, n = 4)
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1        1        1 female female_x_male         4.77             4.49
 #> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.42             4.09
-#> 4        4        2 male   female_x_male         6.01             6.20
+#> 3        3        2 female female_x_male         6.44             4.09
+#> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
 #> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male <dbl>,
@@ -386,21 +386,21 @@ summary(apim_exchangeable_model)
 #> Data: apim_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     708.5     725.9    -349.3     698.5       235 
+#>     708.2     725.6    -349.1     698.2       235 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups     Name                                        Variance Std.Dev.
 #>  coupleID   (Intercept)                                 0.5160   0.7183  
-#>  coupleID.1 .dy_member_contrast_female_x_male_arbitrary 0.5603   0.7485  
+#>  coupleID.1 .dy_member_contrast_female_x_male_arbitrary 0.5589   0.7476  
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
 #>                              Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                   -2.0307     0.4580  -4.434 9.25e-06 ***
-#> .dy_provided_support_actor     1.2876     0.0897  14.354  < 2e-16 ***
-#> .dy_provided_support_partner   0.1645     0.0897   1.834   0.0666 .  
+#> (Intercept)                  -2.03068    0.45797  -4.434 9.25e-06 ***
+#> .dy_provided_support_actor    1.28763    0.08962  14.368  < 2e-16 ***
+#> .dy_provided_support_partner  0.16444    0.08962   1.835   0.0665 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -423,13 +423,13 @@ print(backtransformed)
 #> 
 #> Variance-covariance:
 #>                        1      2     
-#> 1 member1: (Intercept) 1.076  -0.044
-#> 2 member2: (Intercept) -0.044 1.076 
+#> 1 member1: (Intercept) 1.075  -0.043
+#> 2 member2: (Intercept) -0.043 1.075 
 #> 
 #> Standard deviations and correlations:
 #>                        1      2     
-#> 1 member1: (Intercept) 1.037  -0.041
-#> 2 member2: (Intercept) -0.041 1.037
+#> 1 member1: (Intercept) 1.037  -0.040
+#> 2 member2: (Intercept) -0.040 1.037
 ```
 
 The back-transformation follows directly from the shared and
@@ -487,9 +487,9 @@ dyadMLM::compare_nested_glmmTMB_models(
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
-#>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
-#> apim_exchangeable_model     5 708.54 725.94 -349.27   698.54              
-#> apim_distinguishable_model  9 614.75 646.07 -298.37   596.75 101.79      4
+#>                            Df    AIC    BIC  logLik deviance Chisq Chi Df
+#> apim_exchangeable_model     5 708.23 725.64 -349.12   698.23             
+#> apim_distinguishable_model  9 615.13 646.46 -298.57   597.13 101.1      4
 #>                            Pr(>Chisq)    
 #> apim_exchangeable_model                  
 #> apim_distinguishable_model  < 2.2e-16 ***
@@ -589,6 +589,9 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_distinguishable_data
 )
+#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
+#> problem; false convergence (8). See vignette('troubleshooting'),
+#> help('diagnose')
 ```
 
 ##### Random slopes
@@ -678,10 +681,10 @@ print(ild_apim_data, n = 4)
 #> # A tibble: 3,360 × 19
 #>   personID coupleID diaryday gender dyad_composition closeness provided_support
 #>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121        0 female female_x_female       6.68             6.18
-#> 2      242      121        0 female female_x_female       5.67             5.70
-#> 3      241      121        1 female female_x_female       8.63             4.57
-#> 4      242      121        1 female female_x_female       5.58             5.30
+#> 1      241      121        0 female female_x_female       6.59             6.18
+#> 2      242      121        0 female female_x_female       5.73             5.70
+#> 3      241      121        1 female female_x_female       8.70             4.57
+#> 4      242      121        1 female female_x_female       5.61             5.30
 #> # ℹ 3,356 more rows
 #> # ℹ 12 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_female <dbl>,
@@ -741,7 +744,7 @@ summary(ild_apim_model)
 #> Data: ild_apim_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    8237.5    8323.2   -4104.8    8209.5      3346 
+#>    8303.5    8389.2   -4137.7    8275.5      3346 
 #> 
 #> Random effects:
 #> 
@@ -761,22 +764,22 @@ summary(ild_apim_model)
 #>  (Intercept)                                                                 
 #>  .dy_member_contrast_female_x_female_arbitrary                               
 #>  Variance Std.Dev. Corr  
-#>  0.53935  0.7344         
-#>  0.08253  0.2873   0.31  
-#>  0.25725  0.5072         
-#>  0.03036  0.1742   -0.20 
-#>  0.36268  0.6022         
-#>  0.18018  0.4245         
+#>  0.53933  0.7344         
+#>  0.08265  0.2875   0.31  
+#>  0.25635  0.5063         
+#>  0.08180  0.2860   -0.19 
+#>  0.36229  0.6019         
+#>  0.18043  0.4248         
 #> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
 #> 
 #> Conditional model:
 #>                                  Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                      5.894379   0.072740   81.03  < 2e-16 ***
-#> diaryday                         0.007803   0.003707    2.10   0.0353 *  
-#> .dy_provided_support_cwp_actor   0.246995   0.032559    7.59 3.30e-14 ***
-#> .dy_provided_support_cwp_partner 0.247376   0.018964   13.04  < 2e-16 ***
-#> .dy_provided_support_cbp_actor   1.209439   0.070885   17.06  < 2e-16 ***
-#> .dy_provided_support_cbp_partner 0.313467   0.070901    4.42 9.82e-06 ***
+#> (Intercept)                      5.894110   0.072751   81.02  < 2e-16 ***
+#> diaryday                         0.007846   0.003713    2.11   0.0346 *  
+#> .dy_provided_support_cwp_actor   0.245909   0.032679    7.53 5.27e-14 ***
+#> .dy_provided_support_cwp_partner 0.247470   0.018980   13.04  < 2e-16 ***
+#> .dy_provided_support_cbp_actor   1.215919   0.070693   17.20  < 2e-16 ***
+#> .dy_provided_support_cbp_partner 0.308590   0.070711    4.36 1.28e-05 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -799,17 +802,17 @@ print(recovered_covariance)
 #> 
 #> Variance-covariance:
 #>                                           1     2     3     4    
-#> 1 member1: (Intercept)                    0.797 0.047 0.282 0.083
-#> 2 member1: .dy_provided_support_cwp_actor 0.047 0.113 0.083 0.052
-#> 3 member2: (Intercept)                    0.282 0.083 0.797 0.047
-#> 4 member2: .dy_provided_support_cwp_actor 0.083 0.052 0.047 0.113
+#> 1 member1: (Intercept)                    0.796 0.038 0.283 0.093
+#> 2 member1: .dy_provided_support_cwp_actor 0.038 0.164 0.093 0.001
+#> 3 member2: (Intercept)                    0.283 0.093 0.796 0.038
+#> 4 member2: .dy_provided_support_cwp_actor 0.093 0.001 0.038 0.164
 #> 
 #> Standard deviations and correlations:
 #>                                           1     2     3     4    
-#> 1 member1: (Intercept)                    0.893 0.157 0.354 0.276
-#> 2 member1: .dy_provided_support_cwp_actor 0.157 0.336 0.276 0.462
-#> 3 member2: (Intercept)                    0.354 0.276 0.893 0.157
-#> 4 member2: .dy_provided_support_cwp_actor 0.276 0.462 0.157 0.336
+#> 1 member1: (Intercept)                    0.892 0.104 0.356 0.257
+#> 2 member1: .dy_provided_support_cwp_actor 0.104 0.406 0.257 0.005
+#> 3 member2: (Intercept)                    0.356 0.257 0.892 0.104
+#> 4 member2: .dy_provided_support_cwp_actor 0.257 0.005 0.104 0.406
 #> 
 #> Pair `pair_2`
 #> Shared:     us(1 | coupleID:diaryday)
@@ -817,13 +820,13 @@ print(recovered_covariance)
 #> 
 #> Variance-covariance:
 #>                        1     2    
-#> 1 member1: (Intercept) 0.543 0.183
-#> 2 member2: (Intercept) 0.183 0.543
+#> 1 member1: (Intercept) 0.543 0.182
+#> 2 member2: (Intercept) 0.182 0.543
 #> 
 #> Standard deviations and correlations:
 #>                        1     2    
-#> 1 member1: (Intercept) 0.737 0.336
-#> 2 member2: (Intercept) 0.336 0.737
+#> 1 member1: (Intercept) 0.737 0.335
+#> 2 member2: (Intercept) 0.335 0.737
 ```
 
 The `cwp` terms estimate actor and partner associations for
@@ -866,11 +869,11 @@ dyadMLM::compare_nested_glmmTMB_models(
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
-#> ild_apim_no_contrast_slope 12 8262.4 8335.9 -4119.2   8238.4              
-#> ild_apim_model             14 8237.5 8323.2 -4104.8   8209.5 28.926      2
+#> ild_apim_no_contrast_slope 12 8419.8 8493.2 -4197.9   8395.8              
+#> ild_apim_model             14 8303.5 8389.2 -4137.7   8275.5 120.33      2
 #>                            Pr(>Chisq)    
 #> ild_apim_no_contrast_slope               
-#> ild_apim_model              5.234e-07 ***
+#> ild_apim_model              < 2.2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -911,10 +914,10 @@ print(no_contrast_slope_covariance, representation = "sdcor")
 #> 
 #> Standard deviations and correlations:
 #>                                           1     2     3     4    
-#> 1 member1: (Intercept)                    0.892 0.254 0.355 0.254
-#> 2 member1: .dy_provided_support_cwp_actor 0.254 0.287 0.254 1.000
-#> 3 member2: (Intercept)                    0.355 0.254 0.892 0.254
-#> 4 member2: .dy_provided_support_cwp_actor 0.254 1.000 0.254 0.287
+#> 1 member1: (Intercept)                    0.890 0.259 0.357 0.259
+#> 2 member1: .dy_provided_support_cwp_actor 0.259 0.291 0.259 1.000
+#> 3 member2: (Intercept)                    0.357 0.259 0.890 0.259
+#> 4 member2: .dy_provided_support_cwp_actor 0.259 1.000 0.259 0.291
 ```
 
 We can impose the stronger constraint by omitting the full
@@ -940,9 +943,9 @@ dyadMLM::compare_nested_glmmTMB_models(
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
-#>                            Df    AIC    BIC  logLik deviance Chisq Chi Df
-#> ild_apim_no_contrast_block 11 9331.5 9398.8 -4654.7   9309.5             
-#> ild_apim_model             14 8237.5 8323.2 -4104.8   8209.5  1100      3
+#>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
+#> ild_apim_no_contrast_block 11 9421.3 9488.6 -4699.6   9399.3              
+#> ild_apim_model             14 8303.5 8389.2 -4137.7   8275.5 1123.8      3
 #>                            Pr(>Chisq)    
 #> ild_apim_no_contrast_block               
 #> ild_apim_model              < 2.2e-16 ***
@@ -980,10 +983,10 @@ print(no_contrast_block_covariance, representation = "sdcor")
 #> 
 #> Standard deviations and correlations:
 #>                                           1     2     3     4    
-#> 1 member1: (Intercept)                    0.734 0.339 1.000 0.339
-#> 2 member1: .dy_provided_support_cwp_actor 0.339 0.269 0.339 1.000
-#> 3 member2: (Intercept)                    1.000 0.339 0.734 0.339
-#> 4 member2: .dy_provided_support_cwp_actor 0.339 1.000 0.339 0.269
+#> 1 member1: (Intercept)                    0.733 0.344 1.000 0.344
+#> 2 member1: .dy_provided_support_cwp_actor 0.344 0.272 0.344 1.000
+#> 3 member2: (Intercept)                    1.000 0.344 0.733 0.344
+#> 4 member2: .dy_provided_support_cwp_actor 0.344 1.000 0.344 0.272
 ```
 
 These are constraints on the stable dyad-level random effects, not on
@@ -1078,9 +1081,6 @@ stability_influence <- glmmTMB::glmmTMB(
   , family = gaussian()
   , data = ild_apim_data_dynamic
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; false convergence (8). See vignette('troubleshooting'),
-#> help('diagnose')
 
 summary(stability_influence)
 #>  Family: gaussian  ( identity )
@@ -1093,29 +1093,29 @@ summary(stability_influence)
 #> Data: ild_apim_data_dynamic
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    8206.2    8254.6   -4095.1    8190.2      3112 
+#>    8341.7    8390.1   -4162.9    8325.7      3112 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups              Name                                          Variance
-#>  coupleID            (Intercept)                                   1.7286  
-#>  coupleID.1          .dy_member_contrast_female_x_female_arbitrary 0.4121  
-#>  coupleID.diaryday   (Intercept)                                   0.4654  
-#>  coupleID.diaryday.1 .dy_member_contrast_female_x_female_arbitrary 0.2015  
+#>  coupleID            (Intercept)                                   1.7348  
+#>  coupleID.1          .dy_member_contrast_female_x_female_arbitrary 0.4077  
+#>  coupleID.diaryday   (Intercept)                                   0.4769  
+#>  coupleID.diaryday.1 .dy_member_contrast_female_x_female_arbitrary 0.2161  
 #>  Std.Dev.
-#>  1.3148  
-#>  0.6419  
-#>  0.6822  
-#>  0.4489  
+#>  1.3171  
+#>  0.6385  
+#>  0.6906  
+#>  0.4649  
 #> Number of obs: 3120, groups:  coupleID, 120; coupleID:diaryday, 1560
 #> 
 #> Conditional model:
 #>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                5.821704   0.206073  28.251   <2e-16 ***
-#> .dy_closeness_actor_lag1   0.004035   0.019499   0.207   0.8361    
-#> .dy_closeness_partner_lag1 0.006138   0.019499   0.315   0.7529    
-#> diaryday                   0.009085   0.004620   1.967   0.0492 *  
+#> (Intercept)                5.834951   0.206339  28.278   <2e-16 ***
+#> .dy_closeness_actor_lag1   0.005985   0.019493   0.307   0.7588    
+#> .dy_closeness_partner_lag1 0.002167   0.019493   0.111   0.9115    
+#> diaryday                   0.008910   0.004676   1.905   0.0567 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

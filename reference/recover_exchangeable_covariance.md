@@ -230,11 +230,11 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #> 
 #> Variance-covariance:
 #>                        1     2    
-#> 1 member1: (Intercept) 2.215 1.368
-#> 2 member2: (Intercept) 1.368 2.215
+#> 1 member1: (Intercept) 2.217 1.366
+#> 2 member2: (Intercept) 1.366 2.217
 #> 
 #> Standard deviations and correlations:
 #>                        1     2    
-#> 1 member1: (Intercept) 1.488 0.617
-#> 2 member2: (Intercept) 0.617 1.488
+#> 1 member1: (Intercept) 1.489 0.616
+#> 2 member2: (Intercept) 0.616 1.489
 ```

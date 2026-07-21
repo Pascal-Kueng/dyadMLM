@@ -74,8 +74,8 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                  Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)    
-#> restricted_model  3 882.91 893.35 -438.46   876.91                             
-#> full_model        4 812.35 826.28 -402.18   804.35 72.558      1  < 2.2e-16 ***
+#> restricted_model  3 882.71 893.15 -438.36   876.71                             
+#> full_model        4 813.42 827.35 -402.71   805.42 71.289      1  < 2.2e-16 ***
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 #> 

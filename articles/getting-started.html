@@ -271,12 +271,12 @@ scores are member-level averages across the 14 days in
 can be omitted when the supplied data already contain only the intended
 composition.</p>
 <pre><code><span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt; 1        1        1 female    female_x_male  4.768293         4.494570</span></span>
-<span><span class="co">#&gt; 2        2        1   male    female_x_male  4.462613         4.757241</span></span>
-<span><span class="co">#&gt; 3        3        2 female    female_x_male  6.420218         4.092390</span></span>
-<span><span class="co">#&gt; 4        4        2   male    female_x_male  6.011005         6.199226</span></span>
-<span><span class="co">#&gt; 5        5        3 female    female_x_male  4.703145         4.223651</span></span>
-<span><span class="co">#&gt; 6        6        3   male    female_x_male  4.536900         5.029079</span></span></code></pre>
+<span><span class="co">#&gt; 1        1        1 female    female_x_male  4.767889         4.494570</span></span>
+<span><span class="co">#&gt; 2        2        1   male    female_x_male  4.463017         4.757241</span></span>
+<span><span class="co">#&gt; 3        3        2 female    female_x_male  6.437603         4.092390</span></span>
+<span><span class="co">#&gt; 4        4        2   male    female_x_male  5.993620         6.199226</span></span>
+<span><span class="co">#&gt; 5        5        3 female    female_x_male  4.756118         4.223651</span></span>
+<span><span class="co">#&gt; 6        6        3   male    female_x_male  4.483926         5.029079</span></span></code></pre>
 <p>We validate and prepare the data with the function
 <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -316,8 +316,8 @@ composition.</p>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
@@ -363,10 +363,10 @@ directly in model formulas.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 10</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.59             5.41</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.14             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.27             5.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.02             5.57</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.58             5.41</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.15             5.19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.28             5.89</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.00             5.57</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;,</span></span></span>
@@ -416,8 +416,8 @@ exchangeable:</p>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male &lt;dbl&gt;,</span></span></span>
@@ -471,10 +471,10 @@ retain here with <code>keep_compositions</code>.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.59             5.41</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.14             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.27             5.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.02             5.57</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.58             5.41</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.15             5.19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.28             5.89</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.00             5.57</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;,</span></span></span>
@@ -521,8 +521,8 @@ all DSM predictor differences and the DSM role contrast <span class="citation">(
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
@@ -698,12 +698,12 @@ female-female composition:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,360 × 25</span></span></span>
 <span><span class="co">#&gt;   personID coupleID diaryday gender dyad_composition closeness provided_support</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121        0 female female_x_female       6.68             6.18</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121        0 female female_x_female       5.67             5.70</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      241      121        1 female female_x_female       8.63             4.57</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      242      121        1 female female_x_female       5.58             5.30</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      241      121        2 female female_x_female       7.05             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>      242      121        2 female female_x_female       6.83             3.89</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121        0 female female_x_female       6.59             6.18</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121        0 female female_x_female       5.73             5.70</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      241      121        1 female female_x_female       8.70             4.57</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      242      121        1 female female_x_female       5.61             5.30</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      241      121        2 female female_x_female       7.06             5.19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>      242      121        2 female female_x_female       6.72             3.89</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,354 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 18 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;,</span></span></span>
@@ -760,8 +760,8 @@ automatically:</p>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 716 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
@@ -816,10 +816,10 @@ compositions.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 480 × 12</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.59             5.41</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.14             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.27             5.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.02             5.57</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.58             5.41</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.15             5.19</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.28             5.89</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.00             5.57</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 476 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_male_x_male &lt;dbl&gt;,</span></span></span>
@@ -869,8 +869,8 @@ all dyad compositions into one exchangeable composition.</p>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 716 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_female_x_male &lt;dbl&gt;,</span></span></span>
@@ -930,14 +930,14 @@ dyads:</p>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female female_x_male         4.70             4.22</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male   female_x_male         4.54             5.03</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female female_x_male         7.81             5.36</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male   female_x_male         5.55             5.25</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female female_x_male         7.27             5.78</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male   female_x_male         5.43             4.98</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female female_x_male         4.76             4.22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male   female_x_male         4.48             5.03</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female female_x_male         7.76             5.36</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male   female_x_male         5.59             5.25</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female female_x_male         7.28             5.78</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male   female_x_male         5.42             4.98</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 710 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
@@ -983,14 +983,14 @@ have to treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female female_x_male         4.77             4.49</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female female_x_male         6.42             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male   female_x_male         6.01             6.20</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female female_x_male         4.70             4.22</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male   female_x_male         4.54             5.03</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female female_x_male         7.81             5.36</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male   female_x_male         5.55             5.25</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female female_x_male         7.27             5.78</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male   female_x_male         5.43             4.98</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female female_x_male         6.44             4.09</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female female_x_male         4.76             4.22</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male   female_x_male         4.48             5.03</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female female_x_male         7.76             5.36</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male   female_x_male         5.59             5.25</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female female_x_male         7.28             5.78</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male   female_x_male         5.42             4.98</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 710 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_pooled_exchangeable &lt;dbl&gt;,</span></span></span>

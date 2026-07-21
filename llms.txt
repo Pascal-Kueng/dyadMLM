@@ -90,8 +90,8 @@ print(prepared_data, n = 4)
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1        1        1 female female_x_male         4.77             4.49
 #> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.42             4.09
-#> 4        4        2 male   female_x_male         6.01             6.20
+#> 3        3        2 female female_x_male         6.44             4.09
+#> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
 #> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
