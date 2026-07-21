@@ -713,84 +713,20 @@ back-transformed into the complete and more readily interpretable member-specifi
 actor-partner covariance matrix. This is described in the
 [exchangeable random-slope back-transformation in the APIM vignette](apim.html#exchangeable-random-slope-back-transformation).
 
-### Dynamic ILD DIM example
+### Dynamic ILD models
 
-The ILD models above do not model residual serial dependence. One way to model
-dynamics or to account for temporal dependency is to include lagged outcomes as predictors.
+Dynamic dyadic models are most directly expressed in APIM terms: a member's own
+lagged outcome represents stability, whereas the partner's lagged outcome
+represents influence. See the
+[dynamic ILD APIM example](apim.html#dynamic-models) for data preparation, a
+fitted model, and important cautions about outcome lags in short time series.
 
-**Note:** Dynamic models, especially with small time series, are subject to bias.
-This, and the choice between raw and within-person-centered outcome lags, are
-addressed in the [APIM vignette's discussion of dynamic models](apim.html#dynamic-models).
-
-Brief example to obtain lagged raw and within-person centered versions of the outcome:
-
-```{r prepare-ild-dim-dynamic}
-ild_exchangeable_data_dynamic <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
-  dyad = coupleID,
-  member = personID,
-  time = diaryday,
-  predictors = c(provided_support, closeness),
-  lag1_predictors = closeness,
-  model_types = "dim",
-  seed = 123
-)
-
-print(ild_exchangeable_data_dynamic)
-```
-
-Lags are matched at exactly `diaryday - 1`, so omitted diary days are not
-bridged.
-
-The raw lagged outcome scores can be included in the model as follows:
-
-```{r fit-ild-dim-dynamic, eval = has_glmmTMB}
-dim_ILD_lag_raw <- glmmTMB::glmmTMB(
-  closeness ~
-    1 +
-
-    # Raw lagged outcomes
-    .dy_closeness_dyad_mean_gmc_lag1 + .dy_closeness_within_dyad_dev_lag1 +
-
-    diaryday +
-
-    # Within-person DIM
-    .dy_provided_support_cwp_dyad_mean +
-    .dy_provided_support_cwp_within_dyad_dev +
-
-    # Between-person DIM
-    .dy_provided_support_cbp_dyad_mean +
-    .dy_provided_support_cbp_within_dyad_dev +
-
-    # Stable exchangeable dyad-level covariance
-    us(1 | coupleID)  +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID) +
-
-    # Same-day exchangeable dyad-level covariance
-    us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_exchangeable_data_dynamic
-
-  # The model did not converge with the default optimizer
-  , control = glmmTMB::glmmTMBControl(
-      optimizer = stats::optim,
-      optArgs = list(method = "BFGS")
-    )
-)
-
-summary(dim_ILD_lag_raw)
-```
-
-The lagged dyad-mean coefficient describes how a one-point higher shared prior
-outcome level relates to both members' current outcomes. The lagged
-within-dyad member-deviation coefficient describes how a one-point prior difference
-between partners relates to their current expected difference.
-
-All predictor effects in this model are conditional on both members' prior
-outcomes.
+Under exchangeability, the same fixed effects can be reparameterized as lagged
+DIM effects. The lagged dyad mean describes how the members' shared prior
+outcome level relates to their current outcomes, while the lagged within-dyad
+member deviation describes how their prior difference relates to their current
+difference. This changes the coefficient parameterization, not the fitted
+values.
 
 ---
 
