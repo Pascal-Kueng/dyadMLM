@@ -77,20 +77,18 @@ Küng</h4>
 <span>  <span class="st">"Fitted distinguishable APIM diagram unavailable."</span></span>
 <span><span class="va">apim_exchangeable_fitted_alt</span> <span class="op">&lt;-</span></span>
 <span>  <span class="st">"Fitted exchangeable APIM diagram unavailable."</span></span></code></pre></div>
-<blockquote>
-<p>This vignette is under construction and preliminary. Please check
-back soon!</p>
-</blockquote>
-<p>This vignette focuses on the Gaussian cross-sectional and intensive
-longitudinal Actor-Partner Interdependence model for distinguishable and
-exchangeable dyads.</p>
+<p>This vignette focuses on Gaussian cross-sectional and intensive
+longitudinal Actor-Partner Interdependence models for distinguishable
+and exchangeable dyads. The intensive longitudinal examples cover
+concurrent associations and a simple dynamic model of stability and
+partner influence.</p>
 <p>For the broader package workflow and an overview of the available
 model-specific vignettes, including the <a href="dim.html">Dyad-Individual Model</a> and <a href="dsm.html">Dyadic
 Score Model</a>, see the <a href="https://pascal-kueng.github.io/dyadMLM/">online package
 overview</a>.</p>
 <p>A vignette for non-Gaussian generalized models is planned.</p>
 <div class="section level2">
-<h2 id="cross-sectional-apims">Cross sectional APIMs<a class="anchor" aria-label="anchor" href="#cross-sectional-apims"></a>
+<h2 id="cross-sectional-apims">Cross-sectional APIMs<a class="anchor" aria-label="anchor" href="#cross-sectional-apims"></a>
 </h2>
 <div class="section level3">
 <h3 id="the-distinguishable-apim">The distinguishable APIM<a class="anchor" aria-label="anchor" href="#the-distinguishable-apim"></a>
@@ -745,15 +743,17 @@ concurrent regression separate from a VAR model for its residuals <span class="c
 through the <code>glmmTMB</code> interface used here, and open-source
 support for dyadic dynamic models remains very limited <span class="citation">(del Rosario and West 2025)</span>. Within open-source
 R, such a model generally requires custom TMB or Stan code.</p>
-<div class="section level5">
-<h5 id="dynamic-models">Dynamic models<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
-</h5>
+</div>
+<div class="section level4">
+<h4 id="dynamic-models">Dynamic ILD APIM example<a class="anchor" aria-label="anchor" href="#dynamic-models"></a>
+</h4>
 <p>A <strong>practical alternative</strong> is a model with lagged
 outcomes, especially when carryover or temporal dynamics are part of the
 research question <span class="citation">(Gistelinck and Loeys
-2020)</span>. In such a model, the interpretation changes. All APIM
-predictor effects then describe associations conditional on the members’
-prior outcomes.</p>
+2020)</span>. In such a model, the member’s own lagged outcome
+represents stability and the partner’s lagged outcome represents
+influence. All other APIM predictor effects then describe associations
+conditional on the members’ prior outcomes.</p>
 <p>By adding the outcome to <code>predictors</code> and selecting it
 with <code>lag1_predictors</code>,
 <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code> returns lag-1 raw and
@@ -886,7 +886,6 @@ distinguishable DSM parameterization.</li>
 overview</a>.</p>
 <p>A vignette with non-Gaussian generalized APIM examples is
 planned.</p>
-</div>
 </div>
 </div>
 <div class="section level3">

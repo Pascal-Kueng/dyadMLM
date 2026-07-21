@@ -10,12 +10,11 @@ apim_exchangeable_fitted_alt <-
   "Fitted exchangeable APIM diagram unavailable."
 ```
 
-> This vignette is under construction and preliminary. Please check back
-> soon!
-
-This vignette focuses on the Gaussian cross-sectional and intensive
-longitudinal Actor-Partner Interdependence model for distinguishable and
-exchangeable dyads.
+This vignette focuses on Gaussian cross-sectional and intensive
+longitudinal Actor-Partner Interdependence models for distinguishable
+and exchangeable dyads. The intensive longitudinal examples cover
+concurrent associations and a simple dynamic model of stability and
+partner influence.
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the [Dyad-Individual
@@ -26,7 +25,7 @@ Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
 
 A vignette for non-Gaussian generalized models is planned.
 
-## Cross sectional APIMs
+## Cross-sectional APIMs
 
 ### The distinguishable APIM
 
@@ -711,12 +710,13 @@ interface used here, and open-source support for dyadic dynamic models
 remains very limited (del Rosario and West 2025). Within open-source R,
 such a model generally requires custom TMB or Stan code.
 
-##### Dynamic models
+#### Dynamic ILD APIM example
 
 A **practical alternative** is a model with lagged outcomes, especially
 when carryover or temporal dynamics are part of the research question
-(Gistelinck and Loeys 2020). In such a model, the interpretation
-changes. All APIM predictor effects then describe associations
+(Gistelinck and Loeys 2020). In such a model, the member’s own lagged
+outcome represents stability and the partner’s lagged outcome represents
+influence. All other APIM predictor effects then describe associations
 conditional on the members’ prior outcomes.
 
 By adding the outcome to `predictors` and selecting it with
