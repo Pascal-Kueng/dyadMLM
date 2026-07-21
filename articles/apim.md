@@ -701,6 +701,13 @@ that we can demonstrate the random-slope back-transformation below.
 
 ``` r
 
+# Profile the fixed effects and use BFGS for stable cross-platform optimization.
+ild_apim_control <- glmmTMB::glmmTMBControl(
+  profile = TRUE,
+  optimizer = stats::optim,
+  optArgs = list(method = "BFGS")
+)
+
 ild_apim_model <- glmmTMB::glmmTMB(
   closeness ~
     1 +
@@ -729,6 +736,7 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
+  , control = ild_apim_control
 )
 
 summary(ild_apim_model)
@@ -776,9 +784,9 @@ summary(ild_apim_model)
 #>                                  Estimate Std. Error z value Pr(>|z|)    
 #> (Intercept)                      5.894110   0.072751   81.02  < 2e-16 ***
 #> diaryday                         0.007846   0.003713    2.11   0.0346 *  
-#> .dy_provided_support_cwp_actor   0.245909   0.032679    7.53 5.27e-14 ***
+#> .dy_provided_support_cwp_actor   0.245909   0.032678    7.53 5.26e-14 ***
 #> .dy_provided_support_cwp_partner 0.247470   0.018980   13.04  < 2e-16 ***
-#> .dy_provided_support_cbp_actor   1.215919   0.070693   17.20  < 2e-16 ***
+#> .dy_provided_support_cbp_actor   1.215919   0.070694   17.20  < 2e-16 ***
 #> .dy_provided_support_cbp_partner 0.308590   0.070711    4.36 1.28e-05 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
