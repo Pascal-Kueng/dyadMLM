@@ -749,52 +749,11 @@ difference.
 
 ### Equivalence of APIM and DIM in ILD
 
-The equivalent APIM uses actor and partner effects on both levels:
-
-``` r
-
-
-apim_ILD <- glmmTMB::glmmTMB(
-  closeness ~
-    1 +
-
-    diaryday +
-
-    # Within-person APIM
-    .dy_provided_support_cwp_actor +
-    .dy_provided_support_cwp_partner +
-
-    # Between-person APIM
-    .dy_provided_support_cbp_actor +
-    .dy_provided_support_cbp_partner +
-
-    # Stable exchangeable dyad-level covariance
-    us(1 | coupleID)  + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID) +
-
-    # Residual (same-day) exchangeable dyad-level covariance
-    us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_exchangeable_data
-)
-```
-
-The two ILD models again have identical fit statistics:
-
-``` r
-
-data.frame(
-  model = c("DIM", "APIM"),
-  AIC = c(AIC(dim_ILD), AIC(apim_ILD)),
-  BIC = c(BIC(dim_ILD), BIC(apim_ILD)),
-  logLik = c(as.numeric(logLik(dim_ILD)), as.numeric(logLik(apim_ILD)))
-)
-#>   model      AIC      BIC    logLik
-#> 1   DIM 2977.225 3026.637 -1478.613
-#> 2  APIM 2977.225 3026.637 -1478.613
-```
+The equivalent APIM uses actor and partner effects on both levels, as
+shown in the [concurrent ILD APIM
+example](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#concurrent-ild-gaussian-apim-for-exchangeable-dyads).
+The APIM and DIM again estimate the same model with different
+coefficients.
 
 The equivalence holds separately for the within-person (`cwp`) and
 between-person (`cbp`) predictor components. For the within-person
@@ -822,112 +781,19 @@ b_{\mathrm{cbp,dev}}
 = b_{\mathrm{cbp,actor}} - b_{\mathrm{cbp,partner}}
 ```
 
-This also means that an APIM parameterization can be used on one level
-and a DIM parameterization on the other. For example:
-
-``` r
-
-
-apim_dim_ILD <- glmmTMB::glmmTMB(
-  closeness ~
-    1 +
-
-    diaryday +
-
-    # Within-person APIM
-    .dy_provided_support_cwp_actor +
-    .dy_provided_support_cwp_partner +
-
-    # Between-person DIM
-    .dy_provided_support_cbp_dyad_mean +
-    .dy_provided_support_cbp_within_dyad_dev +
-
-    # Stable exchangeable dyad-level covariance
-    us(1 | coupleID)  + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID) +
-
-    # Same-day exchangeable dyad-level covariance
-    us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_exchangeable_data
-)
-```
-
-This mixed parameterization still estimates the same model:
-
-``` r
-
-data.frame(
-  model = c("DIM within / DIM between", "APIM within / APIM between", "APIM within / DIM between"),
-  AIC = c(AIC(dim_ILD), AIC(apim_ILD), AIC(apim_dim_ILD)),
-  BIC = c(BIC(dim_ILD), BIC(apim_ILD), BIC(apim_dim_ILD)),
-  logLik = c(
-    as.numeric(logLik(dim_ILD)),
-    as.numeric(logLik(apim_ILD)),
-    as.numeric(logLik(apim_dim_ILD))
-  )
-)
-#>                        model      AIC      BIC    logLik
-#> 1   DIM within / DIM between 2977.225 3026.637 -1478.613
-#> 2 APIM within / APIM between 2977.225 3026.637 -1478.613
-#> 3  APIM within / DIM between 2977.225 3026.637 -1478.613
-```
+An APIM parameterization can therefore be used on one level and a DIM
+parameterization on the other. This mixed parameterization changes the
+coefficients, but still estimates the same model.
 
 ### Including Random Slopes
 
 Random slopes can be included in the DIM by adding the corresponding
-within-person effects to the stable dyad-level random-effect blocks:
-
-The following syntax illustrates the full random-slope specification. It
-is not fitted here because the example data do not support this complex
-random-effects structure.
-
-``` r
-
-
-dim_ILD_random <- glmmTMB::glmmTMB(
-  closeness ~
-    1 +
-
-    diaryday +
-
-    # Within-person DIM
-    .dy_provided_support_cwp_dyad_mean +
-    .dy_provided_support_cwp_within_dyad_dev +
-
-    # Between-person DIM
-    .dy_provided_support_cbp_dyad_mean +
-    .dy_provided_support_cbp_within_dyad_dev +
-
-    # Stable dyad-level covariance with within-person random slopes
-    us(1 +
-       .dy_provided_support_cwp_dyad_mean +
-       .dy_provided_support_cwp_within_dyad_dev
-     | coupleID)  +
-    us(0 +
-       .dy_member_contrast_assumed_exchangeable_arbitrary +
-       .dy_member_contrast_assumed_exchangeable_arbitrary:.dy_provided_support_cwp_dyad_mean +
-       .dy_member_contrast_assumed_exchangeable_arbitrary:.dy_provided_support_cwp_within_dyad_dev
-     | coupleID) +
-
-    # Same-day exchangeable dyad-level covariance
-    us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
-
-  , dispformula = ~ 0
-  , family = gaussian()
-  , data = ild_exchangeable_data
-)
-```
-
-The first stable dyad-level random effects block contains the shared DIM
-intercept, dyad-mean slope, and within-dyad member-deviation slope. The
-second block contains their member-difference counterparts, included
-through the `.dy_member_contrast_*` interactions. These uncorrelated
-blocks allow the two members to have different random slopes while
-preserving exchangeability.
+within-person effects to the stable dyad-level random-effect blocks. The
+shared block contains the DIM intercept, dyad-mean slope, and
+within-dyad member-deviation slope. The `.dy_member_contrast_*` block
+contains their member-difference counterparts. Together, these blocks
+allow the two members to have different random slopes while preserving
+exchangeability.
 
 #### Transforming DIM random slopes to APIM slopes
 
@@ -964,6 +830,8 @@ readily interpretable member-specific actor-partner covariance matrix.
 This is described in the [exchangeable random-slope back-transformation
 in the APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-random-slope-back-transformation).
+The APIM vignette also shows how to [test constraints on these random
+effects](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitted-constraints-and-omitted-blocks).
 
 ### Dynamic ILD models
 

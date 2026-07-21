@@ -7,7 +7,14 @@ library(dyadMLM)
 
 ## Installation
 
-You can install the development version of `dyadMLM` from GitHub with:
+You can install the released version of `dyadMLM` from CRAN with:
+
+``` r
+
+install.packages("dyadMLM")
+```
+
+You can install the development version from GitHub with:
 
 ``` r
 
@@ -553,9 +560,9 @@ print(ild_apim_data_dynamic, n = 6)
 outcome depends on the research question and the data. Including a
 lagged **outcome** in dynamic models can introduce bias, especially in
 shorter time series (Hamaker and Grasman 2015; Nickell 1981; Gistelinck
-et al. 2021). See the [APIM
-vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.md) for a
-more detailed discussion and guidance.
+et al. 2021). See the [dynamic ILD APIM
+example](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#dynamic-models)
+for a more detailed discussion and guidance.
 
 ## Working with multiple dyad compositions
 

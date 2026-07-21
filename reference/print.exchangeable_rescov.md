@@ -6,7 +6,7 @@ Print recovered exchangeable residual covariance
 
 ``` r
 # S3 method for class 'exchangeable_rescov'
-print(x, representation = c("both", "varcov", "sdcor"), ...)
+print(x, representation = c("both", "varcov", "sdcor"), digits = 3L, ...)
 ```
 
 ## Arguments
@@ -20,6 +20,10 @@ print(x, representation = c("both", "varcov", "sdcor"), ...)
 
   Which representation to print: `"both"` (default), `"varcov"`, or
   `"sdcor"`.
+
+- digits:
+
+  Number of decimal places to print.
 
 - ...:
 

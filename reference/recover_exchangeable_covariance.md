@@ -226,12 +226,12 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #> Difference: us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
-#>                       member_1: (Intercept) member_2: (Intercept)
-#> member_1: (Intercept)              8.038911              2.474583
-#> member_2: (Intercept)              2.474583              8.038911
+#>                        1     2    
+#> 1 member1: (Intercept) 8.039 2.475
+#> 2 member2: (Intercept) 2.475 8.039
 #> 
 #> Standard deviations and correlations:
-#>                       member_1: (Intercept) member_2: (Intercept)
-#> member_1: (Intercept)             2.8352974             0.3078257
-#> member_2: (Intercept)             0.3078257             2.8352974
+#>                        1     2    
+#> 1 member1: (Intercept) 2.835 0.308
+#> 2 member2: (Intercept) 0.308 2.835
 ```

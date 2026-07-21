@@ -79,9 +79,12 @@ Küng</h4>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <code>dyadMLM</code> from
-GitHub with:</p>
+<p>You can install the released version of <code>dyadMLM</code> from
+CRAN with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
+<p>You can install the development version from GitHub with:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"Pascal-Kueng/dyadMLM"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -271,7 +274,7 @@ rows: one for each member.</p>
 <span><span class="co">#&gt; 6        6        3   male      8.215332     9.661295</span></span></code></pre>
 <p>We validate and prepare the data with the function
 <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -322,7 +325,7 @@ rows: one for each member.</p>
 </h2>
 <p>For a dataset with only one type of dyad that should be treated as
 exchangeable, omit the <code>role</code> argument:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -370,7 +373,7 @@ dyadic APIM and recover the constrained actor-partner
 variance-covariance structure with <a href="https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html"><code>dyadMLM::recover_exchangeable_covariance()</code></a>.</p>
 <p>Alternatively, we can explicitly set a dyad composition to
 exchangeable:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -419,7 +422,7 @@ separators like <code>male_female</code>, <code>male_x_female</code>, or
 <p>For exchangeable dyads, we can request DIM predictor columns. This
 works here because omitting <code>role</code> treats all dyads as a
 single exchangeable composition.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dim_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -467,7 +470,7 @@ single exchangeable composition.</p>
 <p>Generating DSM columns for distinguishable dyads additionally
 requires an explicit role order. The role order defines the direction of
 all DSM predictor differences and the DSM role contrast <span class="citation">(Iida et al. 2018)</span>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">example_dyadic_crosssectional</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -519,7 +522,7 @@ dyadic dataset. Each dyad has repeated observations over
 <code>diaryday</code>, with one row per person-day.</p>
 <p>To prepare intensive longitudinal data, pass the <code>time</code>
 variable to <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -599,7 +602,7 @@ structure, matches observations at exactly <code>time - 1</code>, and
 does not bridge missing occasions.</p>
 <p>For a simpler dynamic model, this example omits <code>role</code> and
 therefore treats all couples as exchangeable:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -685,8 +688,8 @@ therefore treats all couples as exchangeable:</p>
 within-person-centered lagged outcome depends on the research question
 and the data. Including a lagged <strong>outcome</strong> in dynamic
 models can introduce bias, especially in shorter time series <span class="citation">(Hamaker and Grasman 2015; Nickell 1981; Gistelinck et
-al. 2021)</span>. See the <a href="apim.html">APIM vignette</a> for a
-more detailed discussion and guidance.</p>
+al. 2021)</span>. See the <a href="apim.html#dynamic-models">dynamic ILD
+APIM example</a> for a more detailed discussion and guidance.</p>
 </div>
 </div>
 <div class="section level2">
@@ -697,7 +700,7 @@ compositions in the same data object: distinguishable female-male dyads
 and exchangeable female-female and male-male dyads <span class="citation">(Bolger et al. 2025)</span>.</p>
 <p>Let’s have <code>dyadMLM</code> infer the compositions
 automatically:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -755,7 +758,7 @@ labels. The filtering happens before exchangeability constraints and
 pooling, so <code>set_exchangeable_compositions</code> and
 <code>pool_compositions</code> can only refer to retained dyad
 compositions.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_included</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -804,7 +807,7 @@ specification keeps the differentiation between the kinds of dyads
 (e.g., <code>male-male</code>, <code>female-female</code>, and
 <code>male-female</code>), as opposed to omitting role, which would pool
 all dyad compositions into one exchangeable composition.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -861,7 +864,7 @@ workflow.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
 dyads:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -913,7 +916,7 @@ dyads:</p>
 <p>Note that you cannot pool distinguishable dyads. If we wanted to pool
 <code>female-male</code> with <code>male-male</code>, we would first
 have to treat <code>female-male</code> as exchangeable:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional_mixed</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>

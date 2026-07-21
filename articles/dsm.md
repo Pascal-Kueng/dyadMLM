@@ -632,8 +632,11 @@ same temporal decomposition and multilevel workflow shown for the
 [intensive longitudinal
 DIM](https://pascal-kueng.github.io/dyadMLM/articles/dim.html#intensive-longitudinal-dim).
 The DSM retains the directional mean-and-difference parameterization
-described above. For more detail on centering decisions, interpretation,
-and dynamic models, refer to the DIM vignette.
+described above. For more detail on centering decisions and
+mean-and-deviation interpretation, refer to the [DIM
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html#intensive-longitudinal-dim).
+For dynamic models and their cautions, see the [dynamic ILD APIM
+example](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#dynamic-models).
 
 Brief example of ILD DSM:
 

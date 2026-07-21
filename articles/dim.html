@@ -798,46 +798,10 @@ respectively.</p></li>
 <div class="section level3">
 <h3 id="equivalence-of-apim-and-dim-in-ild">Equivalence of APIM and DIM in ILD<a class="anchor" aria-label="anchor" href="#equivalence-of-apim-and-dim-in-ild"></a>
 </h3>
-<p>The equivalent APIM uses actor and partner effects on both
-levels:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">apim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
-<span>  <span class="va">closeness</span> <span class="op">~</span></span>
-<span>    <span class="fl">1</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="va">diaryday</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Within-person APIM</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_partner</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Between-person APIM</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_partner</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span> <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Residual (same-day) exchangeable dyad-level covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
-<span></span>
-<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
-<span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>The two ILD models again have identical fit statistics:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM"</span>, <span class="st">"APIM"</span><span class="op">)</span>,</span>
-<span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  logLik <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt;   model      AIC      BIC    logLik</span></span>
-<span><span class="co">#&gt; 1   DIM 2977.225 3026.637 -1478.613</span></span>
-<span><span class="co">#&gt; 2  APIM 2977.225 3026.637 -1478.613</span></span></code></pre></div>
+<p>The equivalent APIM uses actor and partner effects on both levels, as
+shown in the <a href="apim.html#concurrent-ild-gaussian-apim-for-exchangeable-dyads">concurrent
+ILD APIM example</a>. The APIM and DIM again estimate the same model
+with different coefficients.</p>
 <p>The equivalence holds separately for the within-person
 (<code>cwp</code>) and between-person (<code>cbp</code>) predictor
 components. For the within-person component:</p>
@@ -858,101 +822,21 @@ b_{\mathrm{cbp,mean}}
 b_{\mathrm{cbp,dev}}
 = b_{\mathrm{cbp,actor}} - b_{\mathrm{cbp,partner}}
 </annotation></semantics></math></p>
-<p>This also means that an APIM parameterization can be used on one
-level and a DIM parameterization on the other. For example:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">apim_dim_ILD</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
-<span>  <span class="va">closeness</span> <span class="op">~</span></span>
-<span>    <span class="fl">1</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="va">diaryday</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Within-person APIM</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_partner</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Between-person DIM</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_dyad_mean</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_within_dyad_dev</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Stable exchangeable dyad-level covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span> <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
-<span></span>
-<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
-<span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>This mixed parameterization still estimates the same model:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DIM within / DIM between"</span>, <span class="st">"APIM within / APIM between"</span>, <span class="st">"APIM within / DIM between"</span><span class="op">)</span>,</span>
-<span>  AIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  BIC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  logLik <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">dim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">apim_ILD</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">apim_dim_ILD</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt;                        model      AIC      BIC    logLik</span></span>
-<span><span class="co">#&gt; 1   DIM within / DIM between 2977.225 3026.637 -1478.613</span></span>
-<span><span class="co">#&gt; 2 APIM within / APIM between 2977.225 3026.637 -1478.613</span></span>
-<span><span class="co">#&gt; 3  APIM within / DIM between 2977.225 3026.637 -1478.613</span></span></code></pre></div>
+<p>An APIM parameterization can therefore be used on one level and a DIM
+parameterization on the other. This mixed parameterization changes the
+coefficients, but still estimates the same model.</p>
 </div>
 <div class="section level3">
 <h3 id="including-random-slopes">Including Random Slopes<a class="anchor" aria-label="anchor" href="#including-random-slopes"></a>
 </h3>
 <p>Random slopes can be included in the DIM by adding the corresponding
-within-person effects to the stable dyad-level random-effect blocks:</p>
-<p>The following syntax illustrates the full random-slope specification.
-It is not fitted here because the example data do not support this
-complex random-effects structure.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">dim_ILD_random</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
-<span>  <span class="va">closeness</span> <span class="op">~</span></span>
-<span>    <span class="fl">1</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="va">diaryday</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Within-person DIM</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_dyad_mean</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_within_dyad_dev</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Between-person DIM</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_dyad_mean</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_within_dyad_dev</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Stable dyad-level covariance with within-person random slopes</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span></span>
-<span>       <span class="va">.dy_provided_support_cwp_dyad_mean</span> <span class="op">+</span></span>
-<span>       <span class="va">.dy_provided_support_cwp_within_dyad_dev</span></span>
-<span>     <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>  <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
-<span>       <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span> <span class="op">+</span></span>
-<span>       <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span><span class="op">:</span><span class="va">.dy_provided_support_cwp_dyad_mean</span> <span class="op">+</span></span>
-<span>       <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span><span class="op">:</span><span class="va">.dy_provided_support_cwp_within_dyad_dev</span></span>
-<span>     <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Same-day exchangeable dyad-level covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_member_contrast_assumed_exchangeable_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span></span>
-<span></span>
-<span>  , dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span></span>
-<span>  , family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  , data <span class="op">=</span> <span class="va">ild_exchangeable_data</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>The first stable dyad-level random effects block contains the shared
-DIM intercept, dyad-mean slope, and within-dyad member-deviation slope.
-The second block contains their member-difference counterparts, included
-through the <code>.dy_member_contrast_*</code> interactions. These
-uncorrelated blocks allow the two members to have different random
-slopes while preserving exchangeability.</p>
+within-person effects to the stable dyad-level random-effect blocks. The
+shared block contains the DIM intercept, dyad-mean slope, and
+within-dyad member-deviation slope. The
+<code>.dy_member_contrast_*</code> block contains their
+member-difference counterparts. Together, these blocks allow the two
+members to have different random slopes while preserving
+exchangeability.</p>
 <div class="section level4">
 <h4 id="transforming-dim-random-slopes-to-apim-slopes">Transforming DIM random slopes to APIM slopes<a class="anchor" aria-label="anchor" href="#transforming-dim-random-slopes-to-apim-slopes"></a>
 </h4>
@@ -985,7 +869,9 @@ remain unchanged.</p>
 and partner effects which are then back-transformed into the complete
 and more readily interpretable member-specific actor-partner covariance
 matrix. This is described in the <a href="apim.html#exchangeable-random-slope-back-transformation">exchangeable
-random-slope back-transformation in the APIM vignette</a>.</p>
+random-slope back-transformation in the APIM vignette</a>. The APIM
+vignette also shows how to <a href="apim.html#fitted-constraints-and-omitted-blocks">test constraints
+on these random effects</a>.</p>
 </div>
 </div>
 <div class="section level3">
