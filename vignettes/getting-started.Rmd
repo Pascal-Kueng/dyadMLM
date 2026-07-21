@@ -308,8 +308,9 @@ print(ild_apim_data_dynamic, n = 6)
 on the research question and the data. Including a lagged **outcome** in dynamic
 models can introduce bias, especially in shorter time series
 [@hamakerCenterNotCenter2015; @nickellBiasesDynamicModels1981;
-@gistelinckMultilevelAutoregressiveSmall2021]. See the [APIM vignette](apim.html)
-for a more detailed discussion and guidance.
+@gistelinckMultilevelAutoregressiveSmall2021]. See the
+[dynamic ILD APIM example](apim.html#dynamic-models) for a more detailed
+discussion and guidance.
 
 ## Working with multiple dyad compositions
 

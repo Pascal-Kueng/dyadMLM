@@ -413,12 +413,18 @@ ild_distinguishable_data <- dyadMLM::prepare_dyad_data(
   time = diaryday,
   predictors = provided_support,
   model_types = "apim"
-)
+) |>
+  dplyr::mutate(
+    # we grand-mean center in this example to help convergence and 
+    # interpretation
+    diaryday_gmc = diaryday - mean(diaryday)
+  )
 ```
 
 The following model allows the intercepts, time trends, and within- and
 between-person actor and partner effects to differ between female and male
-members:
+members. Centering `diaryday` makes the role-specific intercepts refer to the
+average study day:
 
 ```{r fit-ild-distinguishable-apim, eval = has_glmmTMB}
 ild_distinguishable_model <- glmmTMB::glmmTMB(
@@ -430,8 +436,8 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
     .dy_is_female_x_male_male +
 
     # Role-specific time trends
-    .dy_is_female_x_male_female:diaryday +
-    .dy_is_female_x_male_male:diaryday +
+    .dy_is_female_x_male_female:diaryday_gmc +
+    .dy_is_female_x_male_male:diaryday_gmc +
 
     # Role-specific within-person actor effects
     .dy_is_female_x_male_female:.dy_provided_support_cwp_actor +
