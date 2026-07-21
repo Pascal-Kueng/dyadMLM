@@ -17,7 +17,7 @@ and an estimate/draw-by-coefficients covariance array.
 }
 \description{
 Normalizes the random-effect coefficients and fitted covariance parameters
-needed by \code{\link[=exchangeable_rescov]{exchangeable_rescov()}} while keeping backend-specific work in two
+needed by \code{\link[=recover_exchangeable_covariance]{recover_exchangeable_covariance()}} while keeping backend-specific work in two
 small adapters.
 }
 \keyword{internal}

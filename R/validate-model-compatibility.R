@@ -40,7 +40,7 @@ validate_dim_compatibility <- function(data) {
       dyad_composition_text,
       ". ",
       "Use this model type only when partners are exchangeable for your analysis, for example by omitting `role`; ",
-      "otherwise use `model_type = \"apim\"`, `model_type = \"dsm\"`, `model_type = \"none\"`, or use `include_compositions`, ",
+      "otherwise use `model_types = \"apim\"`, `model_types = \"dsm\"`, `model_types = \"none\"`, or use `keep_compositions`, ",
       "`set_exchangeable_compositions`, or `pool_compositions` to prepare exactly one exchangeable composition.",
       call. = FALSE
     )
@@ -89,8 +89,8 @@ validate_dsm_compatibility <- function(data) {
       "DSM currently supports only data with exactly one distinguishable dyad composition. ",
       "The prepared data contains unsupported dyad composition metadata: ",
       dyad_composition_text,
-      ". Use `include_compositions` to retain one distinguishable composition, or prepare compositions in separate calls. ",
-      "If the intended dyads are exchangeable, use `model_type = \"dim\"` instead. ",
+      ". Use `keep_compositions` to retain one distinguishable composition, or prepare compositions in separate calls. ",
+      "If the intended dyads are exchangeable, use `model_types = \"dim\"` instead. ",
       "If a distinguishable composition was overridden, remove it from `set_exchangeable_compositions`.",
       call. = FALSE
     )

@@ -6,17 +6,17 @@
 \usage{
 prepare_dyad_data(
   data,
-  group,
+  dyad,
   member,
   role = NULL,
   time = NULL,
   predictors = NULL,
-  lag_predictors = NULL,
-  model_type = "apim",
+  lag1_predictors = NULL,
+  model_types = "apim",
   dsm_role_order = NULL,
-  temporal_predictor_decomposition = c("auto", "time_2l", "none"),
+  temporal_decomposition = c("auto", "2l", "none"),
   set_exchangeable_compositions = NULL,
-  include_compositions = NULL,
+  keep_compositions = NULL,
   pool_compositions = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
@@ -29,14 +29,17 @@ cross-sectional dyadic data, each observed member of each dyad has one row.
 For intensive longitudinal dyadic data, each observed member of each dyad has
 one row per observed time point.}
 
-\item{group}{Column identifying the dyad.}
+\item{dyad}{Column identifying the dyad.}
 
 \item{member}{Column identifying a person or the member within dyad.}
 
 \item{role}{Optional column identifying a stable member role, such as gender.
-Values must be stable within each \code{group} x \code{member} and must not contain
-\verb{_x_}. Missing role information is controlled by \code{missing_role}. If no role
-is supplied, all dyads are treated as the same type of exchangeable dyads.}
+Non-missing values must be consistent within each \code{dyad} x \code{member} and
+must not contain \verb{_x_}. In repeated-measures data, an observed role is
+propagated to missing rows for the same member within a dyad.
+\code{missing_role} controls dyads in which a member has no non-missing role on
+any row. If no role is supplied, all dyads are treated as the same type of
+exchangeable dyads.}
 
 \item{time}{Optional column identifying time or measurement order of repeated
 measures.}
@@ -44,14 +47,14 @@ measures.}
 \item{predictors}{Optional variables to use for temporal predictor
 decomposition and model-ready predictor construction.}
 
-\item{lag_predictors}{Optional subset of \code{predictors} for which lag-1
+\item{lag1_predictors}{Optional subset of \code{predictors} for which lag-1
 model-ready columns should be created. Requires \code{time} to be a finite,
 integer-valued numeric measurement index. Lagging respects the dyad and
 member structure, matches observations at exactly \code{time - 1}, and does not
 bridge missing occasions. Only raw and within-person predictors are
 lagged. Stable between-person versions are not.}
 
-\item{model_type}{Model-ready column families to construct. Can contain one
+\item{model_types}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
 actor and partner predictors. \code{"dim"} creates dyad-mean and
 within-dyad member-deviation predictors. \code{"dsm"} creates dyadic-score model
@@ -60,20 +63,20 @@ construction after validation, composition inference, and optional
 temporal predictor decomposition, and must be used alone. \code{"dim"} and
 \code{"dsm"} must be requested in separate calls.}
 
-\item{dsm_role_order}{For \code{model_type = "dsm"}, a character vector giving
+\item{dsm_role_order}{For \code{model_types = "dsm"}, a character vector giving
 the two distinguishable roles in the order used for directional
 differences. For example, \code{c("female", "male")} defines predictor
 differences as female minus male and assigns the DSM role contrast \code{+0.5}
 to female partners and \code{-0.5} to male partners. Required when DSM columns
 are requested and must be \code{NULL} otherwise.}
 
-\item{temporal_predictor_decomposition}{Temporal decomposition strategy for
+\item{temporal_decomposition}{Temporal decomposition strategy for
 \code{predictors}.
 \code{"none"} leaves predictors undecomposed before model-specific columns are
-constructed. \code{"time_2l"} indicates a two-level temporal predictor
+constructed. \code{"2l"} indicates a two-level temporal predictor
 decomposition into within-person and between-person components. \code{"auto"}
-resolves to \code{"time_2l"} when both \code{time} and \code{predictors} are supplied, and
-to \code{"none"} otherwise. \code{"time_2l"} retains raw model-ready predictors in
+resolves to \code{"2l"} when both \code{time} and \code{predictors} are supplied, and
+to \code{"none"} otherwise. \code{"2l"} retains raw model-ready predictors in
 addition to their within-person and between-person components. For
 longitudinal DIM and DSM construction, raw and within-person dyadic scores
 are computed within each dyad occasion, while between-person scores are
@@ -91,7 +94,7 @@ for example \code{"female_x_male"}, \code{"female-male"}, \code{"female_male"}, 
 \code{"female male"}, in arbitrary order.
 To set multiple compositions, use a character vector of such strings.}
 
-\item{include_compositions}{Optional observed dyad compositions to keep
+\item{keep_compositions}{Optional observed dyad compositions to keep
 before exchangeability overrides and pooling. Requires \code{role}. Composition
 references use the same format as \code{set_exchangeable_compositions}.}
 
@@ -104,28 +107,31 @@ exchangeable compositions can be pooled. Each pool must contain at least
 two distinct observed compositions after composition references are
 resolved.}
 
-\item{incomplete_dyads}{How to handle dyads that do not contain exactly two
-unique members anywhere in the data. \code{"error"} stops with an error and
-\code{"drop"} removes the entire dyad.}
+\item{incomplete_dyads}{How to handle dyads with fewer than two unique
+members across all rows in \code{data}. \code{"error"} stops with an error and
+\code{"drop"} removes the entire dyad. A dyad with more than two unique members
+is invalid and always causes an error, regardless of this setting.}
 
-\item{missing_role}{How to handle missing values in the \code{role} column.
-\code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
-information. Ignored when no \code{role} column is supplied.}
+\item{missing_role}{How to handle dyads in which at least one member has no
+non-missing \code{role} value on any row. A consistent non-missing role observed
+for a member is propagated to that member's other rows before this policy
+is applied. \code{"error"} stops with an error and \code{"drop"} removes the entire
+dyad. Conflicting non-missing roles always cause an error. Ignored when no
+\code{role} column is supplied.}
 
-\item{seed}{Optional seed for random \verb{.dy_diff_*} sign assignment in
-exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
+\item{seed}{Optional seed for random \verb{.dy_member_contrast_*} sign assignment
+in exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 }
 \value{
 The original data as a tibble with class \code{dyadMLM_data},
 \code{.dy_composition} and \code{.dy_composition_role} factor columns,
 \verb{.dy_is_*} numeric indicator columns, composition-specific
-numeric \verb{.dy_diff_*} contrast columns coded \code{-1} and \code{1} for the two members
-of matching exchangeable dyads and \code{0} otherwise, and a \code{dyadMLM} attribute
-containing structural metadata, \code{dyad_compositions}, and predictor metadata
-such as \code{temporal_predictor_decompositions}, \code{lag_predictors},
-\code{apim_predictors}, and
-\code{dim_predictors}, as well as \code{dsm_predictors} and \code{dsm_role_order} when
-applicable.
+numeric \verb{.dy_member_contrast_*} columns coded \code{-1} and \code{1} for the two
+members of matching exchangeable dyads and \code{0} otherwise, and a \code{dyadMLM}
+attribute containing structural metadata, \code{dyad_compositions}, and
+predictor metadata such as \code{temporal_decompositions}, \code{lag1_predictors},
+\code{apim_predictors}, and \code{dim_predictors}, as well as \code{dsm_predictors} and
+\code{dsm_role_order} when applicable.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata
@@ -135,9 +141,11 @@ and model-ready columns for dyadic multilevel model parameterizations.
 Data must be in long format. Cross-sectional dyadic data may contain at most
 one row per member within dyad. Intensive longitudinal dyadic data may
 contain at most one row per member and observed measurement occasion within
-dyad. Measured variables may contain missing values. Missing or incomplete
-structural information is controlled by \code{incomplete_dyads} and
-\code{missing_role}.
+dyad. Measured variables may contain missing values. Structural completeness
+is assessed across all rows. \code{incomplete_dyads} controls dyads with fewer
+than two members; dyads with more than two members always cause an error.
+When \code{role} is supplied, stable member roles are resolved across repeated
+rows before \code{missing_role} is applied.
 
 Dyad composition labels are canonical: role labels are sorted alphabetically
 before being combined, so labels do not depend on row or member order.
@@ -152,22 +160,22 @@ data <- data.frame(
 
 prepared <- prepare_dyad_data(
   data,
-  group = dyad_id,
+  dyad = dyad_id,
   member = person_id,
   role = role,
   predictors = x,
-  model_type = "apim"
+  model_types = "apim"
 )
 
 print(prepared)
 
 pooled <- prepare_dyad_data(
   data,
-  group = dyad_id,
+  dyad = dyad_id,
   member = person_id,
   role = role,
   predictors = x,
-  model_type = "apim",
+  model_types = "apim",
   set_exchangeable_compositions = "female-male",
   pool_compositions = list(
     romantic_couples = c("female-female", "male-male", "female-male")
@@ -185,12 +193,12 @@ ild_data <- data.frame(
 
 ild_prepared <- prepare_dyad_data(
   ild_data,
-  group = dyad_id,
+  dyad = dyad_id,
   member = person_id,
   time = time,
   predictors = x,
-  lag_predictors = x,
-  model_type = "apim",
+  lag1_predictors = x,
+  model_types = "apim",
   seed = 123
 )
 

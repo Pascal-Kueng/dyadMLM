@@ -4,12 +4,12 @@
 \alias{resolve_dsm_role_order}
 \title{Resolve the DSM role order}
 \usage{
-resolve_dsm_role_order(dsm_role_order, model_type, has_role)
+resolve_dsm_role_order(dsm_role_order, model_types, has_role)
 }
 \arguments{
 \item{dsm_role_order}{The requested DSM role order.}
 
-\item{model_type}{The normalized model types.}
+\item{model_types}{The normalized model types.}
 
 \item{has_role}{Whether a role column was supplied.}
 }
@@ -17,7 +17,7 @@ resolve_dsm_role_order(dsm_role_order, model_type, has_role)
 The validated, unnamed role order, or \code{NULL}.
 }
 \description{
-Checks the relationship between \code{model_type}, \code{role}, and \code{dsm_role_order},
+Checks the relationship between \code{model_types}, \code{role}, and \code{dsm_role_order},
 validates the requested role order, and returns its stored representation.
 }
 \keyword{internal}

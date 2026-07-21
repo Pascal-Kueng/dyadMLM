@@ -8,7 +8,7 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x
@@ -52,7 +52,7 @@ test_that("add_dyad_individual_columns requires complete dyad values for each co
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x
@@ -79,10 +79,10 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -143,12 +143,12 @@ test_that("DIM construction allows one role-supplied exchangeable composition", 
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
+    model_types = "dim",
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -167,11 +167,11 @@ test_that("raw cross-sectional DIM requires complete dyad values", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
+    model_types = "dim",
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -190,11 +190,11 @@ test_that("prepare_dyad_data creates DIM columns without APIM columns", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
+    model_types = "dim",
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -214,12 +214,12 @@ test_that("DIM construction errors for distinguishable dyads", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
       predictors = x,
-      model_type = "dim",
-      temporal_predictor_decomposition = "none",
+      model_types = "dim",
+      temporal_decomposition = "none",
       seed = 123
     ),
     "female_x_male \\(distinguishable, n_dyads = 2\\)"
@@ -237,12 +237,12 @@ test_that("DIM construction errors for mixed distinguishable and exchangeable dy
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
       predictors = x,
-      model_type = c("apim", "dim"),
-      temporal_predictor_decomposition = "none",
+      model_types = c("apim", "dim"),
+      temporal_decomposition = "none",
       seed = 123
     ),
     "female_x_female \\(exchangeable, n_dyads = 1\\).*female_x_male \\(distinguishable, n_dyads = 1\\).*male_x_male \\(exchangeable, n_dyads = 1\\)"
@@ -260,12 +260,12 @@ test_that("DIM construction errors for multiple exchangeable dyad compositions",
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
       predictors = x,
-      model_type = "dim",
-      temporal_predictor_decomposition = "none",
+      model_types = "dim",
+      temporal_decomposition = "none",
       seed = 123
     ),
     "female_x_female \\(exchangeable, n_dyads = 1\\).*male_x_male \\(exchangeable, n_dyads = 1\\)"
@@ -282,12 +282,12 @@ test_that("longitudinal DIM constructs undecomposed raw predictor scores", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
+    model_types = "dim",
+    temporal_decomposition = "none",
     seed = 123
   )
 

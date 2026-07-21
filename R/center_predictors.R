@@ -30,43 +30,61 @@ center_predictors <- function(data) {
   meta_data <- attr(data, "dyadMLM")
   out <- data
 
-  group <- meta_data$group
+  dyad <- meta_data$dyad
   member <- meta_data$member
   predictors <- meta_data$predictors
-  temporal_predictor_decomposition <- meta_data$temporal_predictor_decomposition
+  temporal_decomposition <- meta_data$temporal_decomposition
 
   # Downstream predictor-construction helpers read this table instead of
   # inferring generated column names from string patterns.
-  temporal_predictor_decompositions <- tibble::tibble(
+  temporal_decompositions <- tibble::tibble(
     predictor = character(),
     component = character(),
     column = character(),
-    temporal_predictor_decomposition = character(),
+    temporal_decomposition = character(),
     lag = integer()
   )
 
   if (length(predictors) == 0) {
-    attr(out, "dyadMLM")$temporal_predictor_decompositions <- temporal_predictor_decompositions
+    attr(out, "dyadMLM")$temporal_decompositions <- temporal_decompositions
 
     return(out)
   }
 
-  temporal_predictor_decompositions <- tibble::tibble(
+  temporal_decompositions <- tibble::tibble(
     predictor = predictors,
     component = "raw",
     column = predictors,
-    temporal_predictor_decomposition = "none",
+    temporal_decomposition = "none",
     lag = 0L
   )
 
-  if (temporal_predictor_decomposition == "none") {
-    attr(out, "dyadMLM")$temporal_predictor_decompositions <- temporal_predictor_decompositions
+  if (temporal_decomposition == "none") {
+    attr(out, "dyadMLM")$temporal_decompositions <- temporal_decompositions
 
     return(out)
   }
 
-  if (temporal_predictor_decomposition == "time_2l") {
+  if (temporal_decomposition == "2l") {
     predictor_suffixes <- make_dyad_suffixes(predictors)
+
+    # One row per proposed target makes collisions independent of predictor
+    # order and guarantees that this stage fails before writing any columns.
+    plan <- tibble::tibble(
+      target = c(
+        paste0(dyad_reserved_prefix, unname(predictor_suffixes), "_cwp"),
+        paste0(dyad_reserved_prefix, unname(predictor_suffixes), "_cbp")
+      ),
+      predictor = rep(predictors, 2L),
+      temporal_component = c(
+        rep("cwp", length(predictors)),
+        rep("cbp", length(predictors))
+      ),
+      lag = 0L,
+      model_family = "temporal",
+      column_role = "temporal_component"
+    )
+    validate_generated_column_plan(out, plan)
 
     for (predictor in predictors) {
       predictor_suffix <- predictor_suffixes[[predictor]]
@@ -75,7 +93,7 @@ center_predictors <- function(data) {
       cbp_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_cbp")
 
       person_means <- out |>
-        dplyr::group_by(.data[[group]], .data[[member]]) |>
+        dplyr::group_by(.data[[dyad]], .data[[member]]) |>
         dplyr::summarise(
           "{person_mean_col}" := no_NaN_mean(.data[[predictor]]),
           .groups = "drop"
@@ -84,7 +102,7 @@ center_predictors <- function(data) {
       grand_mean <- no_NaN_mean(person_means[[person_mean_col]])
 
       out <- out |>
-        dplyr::left_join(person_means, by = c(group, member)) |>
+        dplyr::left_join(person_means, by = c(dyad, member)) |>
         dplyr::mutate(
           "{cwp_col}" := .data[[predictor]] - .data[[person_mean_col]],
           "{cbp_col}" := .data[[person_mean_col]] - grand_mean
@@ -92,25 +110,25 @@ center_predictors <- function(data) {
 
       out[[person_mean_col]] <- NULL
 
-      temporal_predictor_decompositions <- tibble::add_row(
-        temporal_predictor_decompositions,
+      temporal_decompositions <- tibble::add_row(
+        temporal_decompositions,
         predictor = c(predictor, predictor),
         component = c("cwp", "cbp"),
         column = c(cwp_col, cbp_col),
-        temporal_predictor_decomposition = temporal_predictor_decomposition,
+        temporal_decomposition = temporal_decomposition,
         lag = 0L
       )
     }
 
-    attr(out, "dyadMLM")$temporal_predictor_decompositions <- temporal_predictor_decompositions
+    attr(out, "dyadMLM")$temporal_decompositions <- temporal_decompositions
 
     return(out)
   }
 
   stop(
-    "Internal error: unsupported `attr(data, \"dyadMLM\")$temporal_predictor_decomposition` value `",
-    temporal_predictor_decomposition,
-    "`. Expected one of `none` or `time_2l` after validation. ",
+    "Internal error: unsupported `attr(data, \"dyadMLM\")$temporal_decomposition` value `",
+    temporal_decomposition,
+    "`. Expected one of `none` or `2l` after validation. ",
     "Please report this as a dyadMLM bug with a reproducible example and your package version.",
     call. = FALSE
   )

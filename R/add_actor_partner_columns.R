@@ -10,7 +10,7 @@
 #' actor and partner columns.
 #'
 #' The function will use the predictor decomposition metadata stored in
-#' `attr(data, "dyadMLM")$temporal_predictor_decompositions`, so downstream code does
+#' `attr(data, "dyadMLM")$temporal_decompositions`, so downstream code does
 #' not need to infer generated predictor columns from their names. It stores the
 #' constructed APIM columns in `attr(data, "dyadMLM")$apim_predictors`.
 #'
@@ -31,12 +31,12 @@ add_actor_partner_columns <- function(data) {
   # Extracting all needed metadata
   meta_data <- attr(data, "dyadMLM")
 
-  group <- meta_data$group
+  dyad <- meta_data$dyad
   member <- meta_data$member
   has_time <- meta_data$longitudinal
   time <- meta_data$time
 
-  temporal_predictor_decompositions <- meta_data$temporal_predictor_decompositions
+  temporal_decompositions <- meta_data$temporal_decompositions
 
   apim_predictors <- tibble::tibble(
     predictor = character(),
@@ -48,18 +48,20 @@ add_actor_partner_columns <- function(data) {
   )
 
   # if no predictor was provided
-  if (nrow(temporal_predictor_decompositions) == 0) {
+  if (nrow(temporal_decompositions) == 0) {
     attr(data, "dyadMLM")$apim_predictors <- apim_predictors
     return(data)
   }
 
   out <- data
 
-  for (i in seq_len(nrow(temporal_predictor_decompositions))) {
-    predictor <- temporal_predictor_decompositions$predictor[[i]]
-    component <- temporal_predictor_decompositions$component[[i]]
-    lag <- temporal_predictor_decompositions$lag[[i]]
-    source_col <- temporal_predictor_decompositions$column[[i]]
+  # Resolve the entire stage before writing so two semantic origins cannot
+  # silently converge on the same compact actor/partner name.
+  for (i in seq_len(nrow(temporal_decompositions))) {
+    predictor <- temporal_decompositions$predictor[[i]]
+    component <- temporal_decompositions$component[[i]]
+    lag <- temporal_decompositions$lag[[i]]
+    source_col <- temporal_decompositions$column[[i]]
 
     column_stem <- source_col
     if (lag > 0L) {
@@ -83,15 +85,41 @@ add_actor_partner_columns <- function(data) {
       actor_column = actor_col,
       partner_column = partner_col
     )
+  }
+
+  apim_plan <- dplyr::bind_rows(
+    tibble::tibble(
+      target = apim_predictors$actor_column,
+      predictor = apim_predictors$predictor,
+      temporal_component = apim_predictors$component,
+      lag = apim_predictors$lag,
+      model_family = "apim",
+      column_role = "actor"
+    ),
+    tibble::tibble(
+      target = apim_predictors$partner_column,
+      predictor = apim_predictors$predictor,
+      temporal_component = apim_predictors$component,
+      lag = apim_predictors$lag,
+      model_family = "apim",
+      column_role = "partner"
+    )
+  )
+  validate_generated_column_plan(out, apim_plan)
+
+  for (i in seq_len(nrow(apim_predictors))) {
+    source_col <- apim_predictors$source_column[[i]]
+    actor_col <- apim_predictors$actor_column[[i]]
+    partner_col <- apim_predictors$partner_column[[i]]
 
     # Storing the actor column
     out[[actor_col]] <- out[[source_col]]
 
     # Computing and storing the partner column
-    join_keys <- group
+    join_keys <- dyad
 
     if (has_time) {
-      join_keys <- c(group, time)
+      join_keys <- c(dyad, time)
     }
 
     partner_lookup <- out |>

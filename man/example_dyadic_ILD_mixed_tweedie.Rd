@@ -31,7 +31,7 @@ male-male dyads with a semi-continuous physical activity outcome. Each dyad
 contributes one row per member and measurement occasion.
 }
 \details{
-Prepare with \code{group = coupleID}, \code{member = personID}, \code{role = gender}, and
+Prepare with \code{dyad = coupleID}, \code{member = personID}, \code{role = gender}, and
 \code{time = diaryday}.
 }
 \keyword{datasets}

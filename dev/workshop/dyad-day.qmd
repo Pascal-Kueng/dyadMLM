@@ -911,7 +911,7 @@ exchangeable_apim <- fit_and_draw_exchangeable_apim(
 ```{r}
 library(dyadMLM)
 
-compare_dyad_models(
+compare_nested_glmmTMB_models(
   exchangeable_apim,
   distinguishable_apim
 )
@@ -1225,6 +1225,8 @@ dim_reparameterization_grid(
 
 ## The DSM
 
+But what if we want DIM-style interpretation but have distinguishable dyads?
+
 ### The dyadic score model (DSM) is: 
 
 :::{.incremental}
@@ -1305,8 +1307,7 @@ on average also tend to have a larger female–male difference than predicted.
 
 
 ::: {.seesaw-footnote}
-The correlation describes a pattern across couples—not two residuals varying
-within one couple.
+The correlation describes a pattern across couples—not two residuals varying within one couple.
 :::
 
 :::{.notes}

@@ -153,8 +153,8 @@ test_that("backend adapters return aligned common block records", {
     pair <- match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
-        shared = "(1 + day | coupleID)",
-        difference = "(0 + idiff + idiff:day || coupleID)",
+        shared_block = "(1 + day | coupleID)",
+        difference_block = "(0 + idiff + idiff:day || coupleID)",
         difference_indicator = "idiff"
       )
     )[[1L]]
@@ -163,8 +163,8 @@ test_that("backend adapters return aligned common block records", {
     family_pair <- match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
-        shared = blocks[[3L]]$term,
-        difference = blocks[[4L]]$term,
+        shared_block = blocks[[3L]]$term,
+        difference_block = blocks[[4L]]$term,
         difference_indicator = "diff2",
         shared_indicator = "shared2"
       )
@@ -266,8 +266,8 @@ test_that("literal idiff products match in glmmTMB and brms", {
     supplied <- match_supplied_exchangeable_residual_blocks(
       model_blocks$blocks,
       list(
-        shared = "(1 + day | coupleID)",
-        difference = "(0 + idiff + I(idiff * day) || coupleID)",
+        shared_block = "(1 + day | coupleID)",
+        difference_block = "(0 + idiff + I(idiff * day) || coupleID)",
         difference_indicator = "idiff"
       )
     )[[1L]]
@@ -368,7 +368,7 @@ test_that("brms ignores non-mean random effects", {
 })
 
 test_that("automatic matching aligns groups and coefficient order", {
-  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
   blocks <- list(
     rescov_test_block("coupleID", c("time", "(Intercept)"), "shared"),
     rescov_test_block(
@@ -414,8 +414,8 @@ test_that("automatic matching aligns groups and coefficient order", {
 })
 
 test_that("automatic matching handles compositions and grouping levels", {
-  same_idiff <- ".dy_diff_same_sex_arbitrary"
-  friend_idiff <- ".dy_diff_friends_arbitrary"
+  same_idiff <- ".dy_member_contrast_same_sex_arbitrary"
+  friend_idiff <- ".dy_member_contrast_friends_arbitrary"
   blocks <- list(
     rescov_test_block("coupleID", "(Intercept)", "generic"),
     rescov_test_block("coupleID", ".dy_is_same_sex", "same shared"),
@@ -458,13 +458,13 @@ test_that("automatic matching handles compositions and grouping levels", {
 })
 
 test_that("automatic matching is conservative about missing and ambiguous blocks", {
-  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
 
   expect_error(
     match_exchangeable_residual_blocks(list(
       rescov_test_block("coupleID", "(Intercept)", "shared")
     )),
-    "Supply `pairs` explicitly",
+    "Supply `block_pairings` explicitly",
     fixed = TRUE
   )
 
@@ -482,7 +482,7 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
   )
   expect_error(
     match_exchangeable_residual_blocks(incomplete),
-    "Supply `pairs` explicitly to select the intended blocks",
+    "Supply `block_pairings` explicitly to select the intended blocks",
     fixed = TRUE
   )
 
@@ -493,7 +493,7 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
   )
   expect_error(
     match_exchangeable_residual_blocks(ambiguous),
-    "Supply `pairs` explicitly to select the intended blocks",
+    "Supply `block_pairings` explicitly to select the intended blocks",
     fixed = TRUE
   )
 
@@ -539,8 +539,8 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
   pair <- match_supplied_exchangeable_residual_blocks(
     blocks,
     list(
-      shared = "(1 + support + time | coupleID)",
-      difference =
+      shared_block = "(1 + support + time | coupleID)",
+      difference_block =
         "(0 + IDIFF + I(support * IDIFF) + IDIFF:stress || coupleID)",
       difference_indicator = "IDIFF"
     )
@@ -616,8 +616,8 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
   composition_pair <- match_supplied_exchangeable_residual_blocks(
     composition_blocks,
     list(
-      shared = "shared",
-      difference = "difference",
+      shared_block = "shared",
+      difference_block = "difference",
       difference_indicator = "IDIFF_SAMESEX",
       shared_indicator = "SAMESEX"
     )
@@ -630,7 +630,7 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
 })
 
 test_that("supplied exact pairs support wholly omitted blocks", {
-  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
   shared_covariance <- rescov_test_covariance(1:2)
   difference_covariance <- rescov_test_covariance(3:4)
   blocks <- list(
@@ -653,8 +653,8 @@ test_that("supplied exact pairs support wholly omitted blocks", {
     shared_only <- match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
-        shared = "(1 + time | coupleID)",
-        difference = NULL
+        shared_block = "(1 + time | coupleID)",
+        difference_block = NULL
       ),
       model_frame = data.frame(other = 1:2)
     ),
@@ -664,8 +664,8 @@ test_that("supplied exact pairs support wholly omitted blocks", {
   difference_only <- match_supplied_exchangeable_residual_blocks(
     blocks,
     list(
-      shared = NULL,
-      difference = paste0(
+      shared_block = NULL,
+      difference_block = paste0(
         "(0 + ", marker, " + ", marker, ":time || coupleID:day)"
       ),
       difference_indicator = marker
@@ -717,16 +717,16 @@ test_that("omitted difference warnings are emitted separately", {
     match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
-        first = list(shared = "first shared", difference = NULL),
-        second = list(shared = "second shared", difference = NULL)
+        first = list(shared_block = "first shared", difference_block = NULL),
+        second = list(shared_block = "second shared", difference_block = NULL)
       )
     )
   )
 
   expect_length(warnings, 2L)
-  expect_match(warnings[[1L]], "`pairs[[\"first\"]]$difference`", fixed = TRUE)
+  expect_match(warnings[[1L]], "`block_pairings[[\"first\"]]$difference_block`", fixed = TRUE)
   expect_false(grepl("second", warnings[[1L]], fixed = TRUE))
-  expect_match(warnings[[2L]], "`pairs[[\"second\"]]$difference`", fixed = TRUE)
+  expect_match(warnings[[2L]], "`block_pairings[[\"second\"]]$difference_block`", fixed = TRUE)
   expect_false(grepl("first", warnings[[2L]], fixed = TRUE))
 })
 
@@ -868,13 +868,13 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
     blocks,
     list(
       list(
-        shared = "shared time",
-        difference = NULL,
+        shared_block = "shared time",
+        difference_block = NULL,
         difference_indicator = "IDIFF"
       ),
       list(
-        shared = NULL,
-        difference = "difference support",
+        shared_block = NULL,
+        difference_block = "difference support",
         difference_indicator = "IDIFF"
       )
     )
@@ -892,9 +892,9 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       malformed_difference,
-      list(shared = "shared", difference = NULL, difference_indicator = "IDIFF")
+      list(shared_block = "shared", difference_block = NULL, difference_indicator = "IDIFF")
     ),
-    "`pairs$difference` is `NULL`, but a compatible fitted block exists",
+    "`block_pairings$difference_block` is `NULL`, but a compatible fitted block exists",
     fixed = TRUE
   )
 
@@ -909,9 +909,9 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       unsupported_product,
-      list(shared = "shared", difference = NULL, difference_indicator = "IDIFF")
+      list(shared_block = "shared", difference_block = NULL, difference_indicator = "IDIFF")
     ),
-    "`pairs$difference` is `NULL`, but a compatible fitted block exists",
+    "`block_pairings$difference_block` is `NULL`, but a compatible fitted block exists",
     fixed = TRUE
   )
 
@@ -927,19 +927,19 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
     match_supplied_exchangeable_residual_blocks(
       malformed_shared,
       list(
-        shared = NULL,
-        difference = "difference",
+        shared_block = NULL,
+        difference_block = "difference",
         difference_indicator = "IDIFF",
         shared_indicator = "SAMESEX"
       )
     ),
-    "`pairs$shared` is `NULL`, but a compatible fitted block exists",
+    "`block_pairings$shared_block` is `NULL`, but a compatible fitted block exists",
     fixed = TRUE
   )
 })
 
 test_that("model-style selectors preserve covariance structures", {
-  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
   blocks <- list(
     rescov_test_block(
       "coupleID",
@@ -956,8 +956,8 @@ test_that("model-style selectors preserve covariance structures", {
   pair <- match_supplied_exchangeable_residual_blocks(
     blocks,
     list(
-      shared = "(1 + time | coupleID)",
-      difference = paste0(
+      shared_block = "(1 + time | coupleID)",
+      difference_block = paste0(
         "(0 + ", marker, " + time:", marker, " || coupleID)"
       ),
       difference_indicator = marker
@@ -993,8 +993,8 @@ test_that("model-style selectors preserve covariance structures", {
     match_supplied_exchangeable_residual_blocks(
       ambiguous,
       list(
-        shared = "(1+time | coupleID)",
-        difference = "difference",
+        shared_block = "(1+time | coupleID)",
+        difference_block = "difference",
         difference_indicator = marker
       )
     ),
@@ -1005,15 +1005,15 @@ test_that("model-style selectors preserve covariance structures", {
 
 test_that("supplied pairs accept arbitrary difference-indicator names", {
   pair <- list(
-    shared = "(1 | coupleID)",
-    difference = "(0 + hallelujah | coupleID)",
+    shared_block = "(1 | coupleID)",
+    difference_block = "(0 + hallelujah | coupleID)",
     difference_indicator = "hallelujah"
   )
 
   single <- normalize_supplied_exchangeable_pairs(pair)
   expect_equal(single[[1L]]$difference_indicator, "hallelujah")
   expect_equal(single[[1L]]$shared_indicator, "1")
-  expect_equal(attr(single, "pair_labels"), "`pairs`")
+  expect_equal(attr(single, "pair_labels"), "`block_pairings`")
 
   multiple <- normalize_supplied_exchangeable_pairs(list(
     stable = pair,
@@ -1022,8 +1022,65 @@ test_that("supplied pairs accept arbitrary difference-indicator names", {
   expect_equal(names(multiple), c("stable", "shared"))
   expect_equal(
     attr(multiple, "pair_labels"),
-    c("`pairs[[\"stable\"]]`", "`pairs[[\"shared\"]]`")
+    c("`block_pairings[[\"stable\"]]`", "`block_pairings[[\"shared\"]]`")
   )
+})
+
+test_that("block pairing names are stable, partial, and unique", {
+  pair <- list(
+    shared_block = "(1 | coupleID)",
+    difference_block = "(0 + IDIFF | coupleID)",
+    difference_indicator = "IDIFF"
+  )
+
+  expect_named(normalize_supplied_exchangeable_pairs(pair), "pair_1")
+  expect_named(
+    normalize_supplied_exchangeable_pairs(list(pair, pair)),
+    c("pair_1", "pair_2")
+  )
+  partially_named <- stats::setNames(list(pair, pair), c("dyad", ""))
+  expect_named(
+    normalize_supplied_exchangeable_pairs(partially_named),
+    c("dyad", "pair_2")
+  )
+  missing_name <- stats::setNames(list(pair, pair), c(NA_character_, "dyad"))
+  expect_named(
+    normalize_supplied_exchangeable_pairs(missing_name),
+    c("pair_1", "dyad")
+  )
+  duplicate_final <- stats::setNames(list(pair, pair), c("pair_2", ""))
+  expect_error(
+    normalize_supplied_exchangeable_pairs(duplicate_final),
+    "Duplicated name(s): pair_2",
+    fixed = TRUE
+  )
+})
+
+test_that("automatic matching recognizes new and legacy member contrasts", {
+  new_indicator <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
+  legacy_indicator <- ".dy_diff_assumed_exchangeable_arbitrary"
+  expect_identical(
+    find_exchangeable_difference_indicator(new_indicator),
+    new_indicator
+  )
+  expect_identical(
+    find_exchangeable_difference_indicator(legacy_indicator),
+    legacy_indicator
+  )
+
+  for (indicator in c(new_indicator, legacy_indicator)) {
+    blocks <- list(
+      rescov_test_block("coupleID", "(Intercept)", "(1 | coupleID)"),
+      rescov_test_block(
+        "coupleID",
+        indicator,
+        paste0("(0 + ", indicator, " | coupleID)")
+      )
+    )
+    matched <- match_exchangeable_residual_blocks(blocks)
+    expect_length(matched, 1L)
+    expect_identical(matched[[1L]]$difference_indicator, indicator)
+  }
 })
 
 test_that("supplied pair specifications fail clearly", {
@@ -1034,12 +1091,21 @@ test_that("supplied pair specifications fail clearly", {
   )
 
   expect_error(
+    normalize_supplied_exchangeable_pairs(list(
+      shared = "shared",
+      difference = "difference"
+    )),
+    "unknown fields `shared`, `difference`",
+    fixed = TRUE
+  )
+
+  expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      list(shared = "shared", difference = "difference")
+      list(shared_block = "shared", difference_block = "difference")
     ),
     paste0(
-      "`pairs` is missing required field `difference_indicator`. Set it to ",
+      "`block_pairings` is missing required field `difference_indicator`. Set it to ",
       "the exact name of the -1/+1 difference-indicator column used in the ",
       "selected difference block, for example ",
       "`difference_indicator = \"hallelujah\"`."
@@ -1049,36 +1115,36 @@ test_that("supplied pair specifications fail clearly", {
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      list(list(shared = "shared", difference = "difference"))
+      list(list(shared_block = "shared", difference_block = "difference"))
     ),
-    "`pairs[[1]]` is missing required field `difference_indicator`",
+    "`block_pairings[[1]]` is missing required field `difference_indicator`",
     fixed = TRUE
   )
   expect_error(
     normalize_supplied_exchangeable_pairs(list(
-      shared = "shared",
-      difference = "difference",
+      shared_block = "shared",
+      difference_block = "difference",
       difference_indicator = NULL
     )),
-    "`pairs` is missing required field `difference_indicator`",
+    "`block_pairings` is missing required field `difference_indicator`",
     fixed = TRUE
   )
   omitted_difference <- normalize_supplied_exchangeable_pairs(
-    list(shared = "shared", difference = NULL)
+    list(shared_block = "shared", difference_block = NULL)
   )
   expect_null(omitted_difference[[1L]]$difference_indicator)
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
-        shared = "shared",
-        difference = "difference",
+        shared_block = "shared",
+        difference_block = "difference",
         idif = "IDIFF"
       )
     ),
     paste0(
-      "`pairs` contains unknown field `idif`. Allowed fields are `shared`, ",
-      "`difference`, `difference_indicator`, `shared_indicator`."
+      "`block_pairings` contains unknown field `idif`. Allowed fields are `shared_block`, ",
+      "`difference_block`, `difference_indicator`, `shared_indicator`."
     ),
     fixed = TRUE
   )
@@ -1087,15 +1153,15 @@ test_that("supplied pair specifications fail clearly", {
       blocks,
       list(shared_indicator = "1")
     ),
-    "`pairs` is missing required fields `shared`, `difference`.",
+    "`block_pairings` is missing required fields `shared_block`, `difference_block`.",
     fixed = TRUE
   )
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
-        shared = "unknown",
-        difference = "difference",
+        shared_block = "unknown",
+        difference_block = "difference",
         difference_indicator = "IDIFF"
       )
     ),
@@ -1106,8 +1172,8 @@ test_that("supplied pair specifications fail clearly", {
     match_supplied_exchangeable_residual_blocks(
       blocks,
       list(
-        shared = "study",
-        difference = "difference",
+        shared_block = "study",
+        difference_block = "difference",
         difference_indicator = "IDIFF"
       )
     ),
@@ -1127,8 +1193,8 @@ test_that("supplied pair specifications fail clearly", {
     match_supplied_exchangeable_residual_blocks(
       transformed,
       list(
-        shared = "shared",
-        difference = "difference",
+        shared_block = "shared",
+        difference_block = "difference",
         difference_indicator = "IDIFF"
       )
     ),
@@ -1139,40 +1205,40 @@ test_that("supplied pair specifications fail clearly", {
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      list(shared = NULL, difference = NULL, difference_indicator = "IDIFF")
+      list(shared_block = NULL, difference_block = NULL, difference_indicator = "IDIFF")
     ),
-    "cannot set both `shared` and `difference` to `NULL`",
+    "cannot set both `shared_block` and `difference_block` to `NULL`",
     fixed = TRUE
   )
 
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      list(shared = "shared", difference = NULL, difference_indicator = "IDIFF")
+      list(shared_block = "shared", difference_block = NULL, difference_indicator = "IDIFF")
     ),
-    "`pairs$difference` is `NULL`, but a compatible fitted block exists",
+    "`block_pairings$difference_block` is `NULL`, but a compatible fitted block exists",
     fixed = TRUE
   )
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      list(shared = NULL, difference = "difference", difference_indicator = "IDIFF")
+      list(shared_block = NULL, difference_block = "difference", difference_indicator = "IDIFF")
     ),
-    "`pairs$shared` is `NULL`, but a compatible fitted block exists",
+    "`block_pairings$shared_block` is `NULL`, but a compatible fitted block exists",
     fixed = TRUE
   )
   expect_error(
     match_supplied_exchangeable_residual_blocks(
       blocks,
-      list(shared = "difference", difference = NULL, difference_indicator = "IDIFF")
+      list(shared_block = "difference", difference_block = NULL, difference_indicator = "IDIFF")
     ),
     "selected shared block contains the difference indicator `IDIFF`",
     fixed = TRUE
   )
 
   repeated_pair <- list(
-    shared = "shared",
-    difference = "difference",
+    shared_block = "shared",
+    difference_block = "difference",
     difference_indicator = "IDIFF"
   )
   expect_error(
@@ -1196,13 +1262,13 @@ test_that("named supplied pairs retain their labels in downstream diagnostics", 
     match_supplied_exchangeable_residual_blocks(
       blocks,
       list(stable = list(
-        shared = "study",
-        difference = "difference",
+        shared_block = "study",
+        difference_block = "difference",
         difference_indicator = "IDIFF"
       ))
     ),
     paste0(
-      "`pairs[[\"stable\"]]`: The selected shared block groups by `study`, ",
+      "`block_pairings[[\"stable\"]]`: The selected shared block groups by `study`, ",
       "but the selected difference block groups by `coupleID`"
     ),
     fixed = TRUE
@@ -1220,18 +1286,18 @@ test_that("named supplied pairs retain their labels in downstream diagnostics", 
     match_supplied_exchangeable_residual_blocks(
       malformed_coefficients,
       list(stable = list(
-        shared = "shared",
-        difference = "difference",
+        shared_block = "shared",
+        difference_block = "difference",
         difference_indicator = "IDIFF"
       ))
     ),
-    "`pairs[[\"stable\"]]`: Difference indicator `IDIFF` must identify every coefficient",
+    "`block_pairings[[\"stable\"]]`: Difference indicator `IDIFF` must identify every coefficient",
     fixed = TRUE
   )
 
   stable_pair <- list(
-    shared = "shared",
-    difference = "difference",
+    shared_block = "shared",
+    difference_block = "difference",
     difference_indicator = "IDIFF"
   )
   expect_warning(
@@ -1240,7 +1306,7 @@ test_that("named supplied pairs retain their labels in downstream diagnostics", 
       list(stable = stable_pair),
       model_frame = data.frame(other = 1:2)
     ),
-    "`pairs[[\"stable\"]]`: `IDIFF` was not retained",
+    "`block_pairings[[\"stable\"]]`: `IDIFF` was not retained",
     fixed = TRUE
   )
   expect_error(
@@ -1249,7 +1315,7 @@ test_that("named supplied pairs retain their labels in downstream diagnostics", 
       list(stable = stable_pair),
       model_frame = data.frame(IDIFF = c(1, 1))
     ),
-    "`pairs[[\"stable\"]]`: `IDIFF` must contain both -1 and +1",
+    "`block_pairings[[\"stable\"]]`: `IDIFF` must contain both -1 and +1",
     fixed = TRUE
   )
   expect_error(
@@ -1269,8 +1335,8 @@ test_that("named supplied pairs retain their labels in downstream diagnostics", 
       list(stable = stable_pair, follow_up = stable_pair)
     ),
     paste0(
-      "Pair assignments: `shared` in `pairs[[\"stable\"]]`, ",
-      "`pairs[[\"follow_up\"]]`"
+      "Pair assignments: `shared` in `block_pairings[[\"stable\"]]`, ",
+      "`block_pairings[[\"follow_up\"]]`"
     ),
     fixed = TRUE
   )
@@ -1383,7 +1449,7 @@ test_that("fitted-row validation protects the exchangeable coding", {
     fixed = TRUE
   )
 
-  marker <- ".dy_diff_same_sex_arbitrary"
+  marker <- ".dy_member_contrast_same_sex_arbitrary"
   generic_blocks <- list(
     rescov_test_block("coupleID", "(Intercept)", "generic shared"),
     rescov_test_block("coupleID", marker, "difference")
@@ -1481,7 +1547,11 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
   expect_match(warning_text, "Row-count check only", fixed = TRUE)
   expect_match(warning_text, "For `brms`", fixed = TRUE)
   expect_match(warning_text, "unstr(time = member_position", fixed = TRUE)
-  expect_match(warning_text, "See `?exchangeable_rescov`", fixed = TRUE)
+  expect_match(
+    warning_text,
+    "See `?recover_exchangeable_covariance`",
+    fixed = TRUE
+  )
   expect_match(
     warning_text,
     "Terms absent from the difference block: `time`",
@@ -1573,7 +1643,7 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
 test_that("the public function returns member-level glmmTMB matrices", {
   skip_if_not_installed("glmmTMB")
 
-  marker <- ".dy_diff_assumed_exchangeable_arbitrary"
+  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
   data <- expand.grid(member = c(-1, 1), coupleID = seq_len(30))
   data$coupleID <- factor(data$coupleID)
   data[[marker]] <- data$member
@@ -1582,11 +1652,11 @@ test_that("the public function returns member-level glmmTMB matrices", {
 
   model <- suppressWarnings(glmmTMB::glmmTMB(
     outcome ~ 1 + (1 | coupleID) +
-      (0 + .dy_diff_assumed_exchangeable_arbitrary || coupleID),
+      (0 + .dy_member_contrast_assumed_exchangeable_arbitrary || coupleID),
     dispformula = ~0,
     data = data
   ))
-  result <- exchangeable_rescov(model)
+  result <- recover_exchangeable_covariance(model)
   extracted <- glmmTMB_extract_exchangeable_residual_blocks(model)
   shared_variance <- extracted$blocks[[1L]]$covariance[1L, 1L, 1L]
   difference_variance <- extracted$blocks[[2L]]$covariance[1L, 1L, 1L]
@@ -1595,7 +1665,10 @@ test_that("the public function returns member-level glmmTMB matrices", {
 
   expect_s3_class(result, "exchangeable_rescov")
   expect_length(result, 1L)
-  expect_named(result[[1L]], c("varcov", "sdcor"))
+  expect_named(
+    result[[1L]],
+    c("shared_term", "difference_term", "varcov", "sdcor")
+  )
   expect_true(is.matrix(result[[1L]]$varcov))
   expect_true(is.matrix(result[[1L]]$sdcor))
   expect_equal(
@@ -1616,16 +1689,9 @@ test_that("the public function returns member-level glmmTMB matrices", {
     result[[1L]]$sdcor[1L, 2L],
     member_covariance / member_variance
   )
-  expect_true(grepl(
-    extracted$blocks[[1L]]$term,
-    names(result),
-    fixed = TRUE
-  ))
-  expect_true(grepl(
-    extracted$blocks[[2L]]$term,
-    names(result),
-    fixed = TRUE
-  ))
+  expect_named(result, "pair_1")
+  expect_identical(result[[1L]]$shared_term, extracted$blocks[[1L]]$term)
+  expect_identical(result[[1L]]$difference_term, extracted$blocks[[2L]]$term)
 })
 
 test_that("the public function retains brms draws and labels omitted blocks", {
@@ -1653,17 +1719,17 @@ test_that("the public function retains brms draws and labels omitted blocks", {
 
   expect_warning(
     result <- testthat::with_mocked_bindings(
-      exchangeable_rescov(
+      recover_exchangeable_covariance(
         model,
-        pairs = list(
+        block_pairings = list(
           shared_only = list(
-            shared = "(1 | coupleID)",
-            difference = NULL,
+            shared_block = "(1 | coupleID)",
+            difference_block = NULL,
             difference_indicator = "IDIFF"
           ),
           difference_only = list(
-            shared = NULL,
-            difference = "(0 + IDIFF | familyID)",
+            shared_block = NULL,
+            difference_block = "(0 + IDIFF | familyID)",
             difference_indicator = "IDIFF"
           )
         )
@@ -1690,23 +1756,12 @@ test_that("the public function retains brms draws and labels omitted blocks", {
     matrix(c(0.4, -0.4, -0.4, 0.4), 2L)
   )
   expect_equal(result[[2L]]$sdcor[1L, 1L, 2L], -1)
-  expect_true(grepl(
-    "difference: <omitted>",
-    names(result)[[1L]],
-    fixed = TRUE
-  ))
-  expect_true(grepl(
-    "shared: <omitted>",
-    names(result)[[2L]],
-    fixed = TRUE
-  ))
+  expect_named(result, c("shared_only", "difference_only"))
+  expect_null(result[[1L]]$difference_term)
+  expect_null(result[[2L]]$shared_term)
 })
 
-test_that("exchangeable covariance results print without repeated list paths", {
-  pair_name <- paste0(
-    "shared: us(1 | coupleID); difference: ",
-    "us(0 + IDIFF | coupleID)"
-  )
+test_that("exchangeable covariance results print structured pairings", {
   varcov <- matrix(
     c(1.5, 0.9, 0.9, 1.5),
     2L,
@@ -1718,7 +1773,12 @@ test_that("exchangeable covariance results print without repeated list paths", {
     dimnames = dimnames(varcov)
   )
   result <- structure(
-    setNames(list(list(varcov = varcov, sdcor = sdcor)), pair_name),
+    list(dyad = list(
+      shared_term = "us(1 | coupleID)",
+      difference_term = "us(0 + IDIFF | coupleID)",
+      varcov = varcov,
+      sdcor = sdcor
+    )),
     class = c("exchangeable_rescov", "list")
   )
 
@@ -1746,7 +1806,7 @@ test_that("exchangeable covariance results print without repeated list paths", {
     fixed = TRUE
   )))
 
-  sdcor_only <- capture.output(print(result, what = "sdcor"))
+  sdcor_only <- capture.output(print(result, representation = "sdcor"))
   expect_false(any(grepl("Variance-covariance:", sdcor_only, fixed = TRUE)))
   expect_true(any(grepl(
     "Standard deviations and correlations:",
@@ -1754,22 +1814,30 @@ test_that("exchangeable covariance results print without repeated list paths", {
     fixed = TRUE
   )))
 
+  expect_error(
+    print(result, what = "varcov"),
+    "`what` has been renamed to `representation`",
+    fixed = TRUE
+  )
+
   multiple <- structure(
     c(unclass(result), unclass(result)),
     class = c("exchangeable_rescov", "list")
   )
   names(multiple) <- c(
-    pair_name,
-    "shared: us(1 | familyID); difference: us(0 + IDIFF | familyID)"
+    "dyad",
+    "family"
   )
-  multiple_printed <- capture.output(print(multiple, what = "varcov"))
+  multiple[[2L]]$shared_term <- "us(1 | familyID)"
+  multiple[[2L]]$difference_term <- "us(0 + IDIFF | familyID)"
+  multiple_printed <- capture.output(print(multiple, representation = "varcov"))
   expect_true(any(grepl(
     "Exchangeable residual covariances (2 block pairs)",
     multiple_printed,
     fixed = TRUE
   )))
-  expect_equal(sum(multiple_printed == "Pair 1"), 1L)
-  expect_equal(sum(multiple_printed == "Pair 2"), 1L)
+  expect_equal(sum(multiple_printed == "Pair `dyad`"), 1L)
+  expect_equal(sum(multiple_printed == "Pair `family`"), 1L)
 })
 
 test_that("printing brms results does not dump posterior draw arrays", {
@@ -1780,7 +1848,9 @@ test_that("printing brms results does not dump posterior draw arrays", {
   )
   result <- structure(
     list(
-      "shared: (1 | coupleID); difference: <omitted>" = list(
+      pair_1 = list(
+        shared_term = "(1 | coupleID)",
+        difference_term = NULL,
         varcov = draws,
         sdcor = draws
       )
@@ -1788,7 +1858,7 @@ test_that("printing brms results does not dump posterior draw arrays", {
     class = c("exchangeable_rescov", "list")
   )
 
-  printed <- capture.output(print(result, what = "sdcor"))
+  printed <- capture.output(print(result, representation = "sdcor"))
   expect_true(any(grepl(
     "5 posterior draws x 2 coefficients x 2 coefficients",
     printed,
@@ -1799,4 +1869,5 @@ test_that("printing brms results does not dump posterior draw arrays", {
     printed,
     fixed = TRUE
   )))
+  expect_true(any(grepl("Difference: <omitted>", printed, fixed = TRUE)))
 })

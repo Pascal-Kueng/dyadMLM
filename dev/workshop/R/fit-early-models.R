@@ -43,18 +43,18 @@
 }
 
 .prepare_early_model_data <- function(
-    data, predictor, model_type, exchangeable = FALSE) {
+    data, predictor, model_types, exchangeable = FALSE) {
   dyadMLM::prepare_dyad_data(
     data,
-    group = couple_id,
+    dyad = couple_id,
     member = person_id,
     role = role,
     predictors = !!rlang::sym(predictor),
-    model_type = model_type,
-    dsm_role_order = if (identical(model_type, "dsm")) {
+    model_types = model_types,
+    dsm_role_order = if (identical(model_types, "dsm")) {
       c("female", "male")
     },
-    include_compositions = "female-male",
+    keep_compositions = "female-male",
     set_exchangeable_compositions = if (exchangeable) "female-male",
     seed = if (exchangeable) 123
   )
@@ -68,7 +68,7 @@ fit_and_draw_distinguishable_apim <- function(
     data, rlang::ensym(predictor), rlang::ensym(outcome)
   )
   prepared <- .prepare_early_model_data(
-    data, variables$predictor, model_type = "apim"
+    data, variables$predictor, model_types = "apim"
   )
 
   actor <- paste0(".dy_", variables$predictor, "_actor")
@@ -97,13 +97,13 @@ fit_and_draw_exchangeable_apim <- function(
     data, rlang::ensym(predictor), rlang::ensym(outcome)
   )
   prepared <- .prepare_early_model_data(
-    data, variables$predictor, model_type = "apim", exchangeable = TRUE
+    data, variables$predictor, model_types = "apim", exchangeable = TRUE
   )
 
   actor <- paste0(".dy_", variables$predictor, "_actor")
   partner <- paste0(".dy_", variables$predictor, "_partner")
   intercept <- ".dy_is_female_x_male"
-  difference <- ".dy_diff_female_x_male_arbitrary"
+  difference <- ".dy_member_contrast_female_x_male_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -124,12 +124,12 @@ fit_and_draw_dim <- function(data, predictor, outcome, labels = NULL) {
     data, rlang::ensym(predictor), rlang::ensym(outcome)
   )
   prepared <- .prepare_early_model_data(
-    data, variables$predictor, model_type = "dim", exchangeable = TRUE
+    data, variables$predictor, model_types = "dim", exchangeable = TRUE
   )
 
   mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")
   deviation <- paste0(".dy_", variables$predictor, "_within_dyad_dev")
-  difference <- ".dy_diff_female_x_male_arbitrary"
+  difference <- ".dy_member_contrast_female_x_male_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -149,7 +149,7 @@ fit_and_draw_dsm <- function(data, predictor, outcome, labels = NULL) {
     data, rlang::ensym(predictor), rlang::ensym(outcome)
   )
   prepared <- .prepare_early_model_data(
-    data, variables$predictor, model_type = "dsm"
+    data, variables$predictor, model_types = "dsm"
   )
 
   mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")

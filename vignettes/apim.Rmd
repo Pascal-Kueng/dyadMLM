@@ -123,11 +123,11 @@ We first prepare the example data with `dyadMLM::prepare_dyad_data()`:
 ```{r prepare-cross-distinguishable-apim}
 apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "apim"
+  model_types = "apim"
 )
 
 print(apim_distinguishable_data, n=4)
@@ -257,7 +257,7 @@ correlation between slopes and intercepts anymore.
 Therefore, we introduce a solution that works for residuals and other random
 effect terms regardless of slopes. Following
 @delrosarioPracticalGuideSpecifying2025, `dyadMLM::prepare_dyad_data()`
-generates an arbitrary member-difference column, named `.dy_diff_*`, that is
+generates an arbitrary member-difference column, named `.dy_member_contrast_*`, that is
 `+1` for one member and `-1` for the other. The exchangeable residual structure
 is represented by two separate random-effects terms: a shared dyad random
 intercept and a random coefficient for this difference column.
@@ -265,7 +265,7 @@ intercept and a random coefficient for this difference column.
 <!-- TODO: do we need a brief explanation of why this is possible? maybe
 not in the applied part to not confuse users that just want to get started? -->
 
-We will now fit the model and then use the `dyadMLM::exchangeable_rescov()`
+We will now fit the model and then use the `dyadMLM::recover_exchangeable_covariance()`
 function that back-transforms the structure to the often more interpretable
 actor-partner residual-covariance matrix we are used to.
 
@@ -282,7 +282,7 @@ roles, especially if there is no clear role in the data.
 ```{r prepare-cross-distinguishability}
 apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
@@ -309,7 +309,7 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
     us(1 | coupleID) +
-    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -318,11 +318,11 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model)
 ```
 
-We use the `dyadMLM::exchangeable_rescov()` to recover the interpretable
+We use the `dyadMLM::recover_exchangeable_covariance()` to recover the interpretable
 variance-covariance matrix:
 
 ```{r backtransform-cross-exchangeable, eval = has_glmmTMB}
-backtransformed <- dyadMLM::exchangeable_rescov(apim_exchangeable_model)
+backtransformed <- dyadMLM::recover_exchangeable_covariance(apim_exchangeable_model)
 
 # residual variance-covariance and SD-correlation representations
 print(backtransformed)
@@ -379,7 +379,7 @@ apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
     
     # Residual variance covariance matrix
     # omitting the us(1 | coupleID) block
-    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -395,12 +395,12 @@ function where both blocks are. Since we completely omitted one block, we tell t
 function:
 
 ```{r backtransform-cross-exchangeable-no-shared, eval = has_glmmTMB}
-backtransformed <- dyadMLM::exchangeable_rescov(
+backtransformed <- dyadMLM::recover_exchangeable_covariance(
   apim_exchangeable_model_no_shared, 
-  pairs = list(
-    shared = NULL,
-    difference = "us(0 + .dy_diff_female_x_male_arbitrary | coupleID)",
-    difference_indicator =".dy_diff_female_x_male_arbitrary"
+  block_pairings = list(
+    shared_block = NULL,
+    difference_block = "us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID)",
+    difference_indicator =".dy_member_contrast_female_x_male_arbitrary"
   )
 )
 
@@ -431,12 +431,12 @@ distinguishable model was fitted above, so we now prepare the same original
 observations as exchangeable:
 
 
-[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html)
+[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html)
 verifies that both models use equivalent original
 observations before performing the likelihood-ratio test:
 
 ```{r compare-cross-distinguishability, eval = has_glmmTMB}
-dyadMLM::compare_dyad_models(
+dyadMLM::compare_nested_glmmTMB_models(
   apim_exchangeable_model,
   apim_distinguishable_model
 )
@@ -522,7 +522,7 @@ level to represent same-occasion residual dependence.
 The same shared/difference back-transformation applies to random slopes
 [@delrosarioPracticalGuideSpecifying2025]. For example, let
 $u_{\mathrm{actor},j}$ denote the shared actor random slope for dyad $j$ and
-$\widetilde{u}_{\mathrm{actor},j}$ the corresponding `.dy_diff_*` random slope.
+$\widetilde{u}_{\mathrm{actor},j}$ the corresponding `.dy_member_contrast_*` random slope.
 The tilde marks random coefficients from the member-difference block. The actor
 slopes for the members assigned `+1` and `-1` are
 
@@ -534,7 +534,7 @@ u_{\mathrm{actor},2j}
 = u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
 $$
 
-Because the shared and `.dy_diff_*` blocks are fitted as separate random-effects
+Because the shared and `.dy_member_contrast_*` blocks are fitted as separate random-effects
 terms, they are independent. Therefore,
 
 $$
@@ -583,23 +583,23 @@ carryover or temporal dynamics are part of the research question
 interpretation changes. All APIM predictor effects then describe associations
 conditional on the members' prior outcomes.
 
-By adding the outcome to `predictors` and selecting it with `lag_predictors`,
+By adding the outcome to `predictors` and selecting it with `lag1_predictors`,
 `dyadMLM::prepare_dyad_data()` returns lag-1 raw and within-person scores alongside
 the contemporaneous scores. Between-person scores are not lagged because they
 describe stable differences between members.
 
 For this example, we obtain the lagged actor and partner outcome columns through
-the `lag_predictors` argument:
+the `lag1_predictors` argument:
 
 ```{r prepare-ild-apim-dynamic-model}
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   time = diaryday,
   predictors = closeness,
-  lag_predictors = closeness,
-  model_type = "apim",
+  lag1_predictors = closeness,
+  model_types = "apim",
   seed = 123
 )
 ```
@@ -626,11 +626,11 @@ stability_influence <- glmmTMB::glmmTMB(
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()

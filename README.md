@@ -60,17 +60,17 @@ library(dyadMLM)
 
 prepared_data <- prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "apim"
+  model_types = "apim"
 )
 
 print(prepared_data, n = 4)
 #> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
 #> # female_x_male distinguishable 95 dyads
@@ -86,11 +86,11 @@ print(prepared_data, n = 4)
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
-#> 1        1        1 female          4.79         4.37 female_x_male 
-#> 2        2        1 male            3.80         2.34 female_x_male 
-#> 3        3        2 female          2.91         2.44 female_x_male 
-#> 4        4        2 male            6.51         6.08 female_x_male 
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
+#> 1        1        1 female          4.79         4.37 female_x_male  
+#> 2        2        1 male            3.80         2.34 female_x_male  
+#> 3        3        2 female          2.91         2.44 female_x_male  
+#> 4        4        2 male            6.51         6.08 female_x_male  
 #> # ℹ 186 more rows
 #> # ℹ 5 more variables: .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,

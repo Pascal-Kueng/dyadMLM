@@ -15,7 +15,7 @@ print.dyadMLM_data <- function(x, ...) {
   )
 
   structure_fields <- c(
-    paste0("group = ", meta$group),
+    paste0("dyad = ", meta$dyad),
     paste0("member = ", meta$member)
   )
   if (!is.null(meta$role)) {
@@ -131,13 +131,16 @@ added_columns_for_print <- function(x, meta) {
     ".dy_composition",       "inferred dyad composition",
     ".dy_composition_role",  "composition-specific member role",
     ".dy_is_{comp-role}",    "composition-role indicator columns",
-    ".dy_diff_{comp}",       "composition-specific sum-diff contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
+    ".dy_member_contrast_{comp}_arbitrary", "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
   )
   show_fixed_added_columns <- c(
     dyad_composition_col %in% names(x),
     dyad_composition_role_col %in% names(x),
     any(startsWith(names(x), paste0(dyad_reserved_prefix, "is_"))),
-    any(startsWith(names(x), paste0(dyad_reserved_prefix, "diff_")))
+    any(startsWith(
+      names(x),
+      paste0(dyad_reserved_prefix, "member_contrast_")
+    ))
   )
   added_columns <- fixed_added_columns[show_fixed_added_columns, ]
 

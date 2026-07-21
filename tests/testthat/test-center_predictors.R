@@ -1,4 +1,4 @@
-test_that("center_predictors creates time_2l centered predictor columns", {
+test_that("center_predictors creates 2l centered predictor columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
     person_id = c("A", "B", "A", "B", "C", "D", "C", "D"),
@@ -8,7 +8,7 @@ test_that("center_predictors creates time_2l centered predictor columns", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x
@@ -39,12 +39,12 @@ test_that("center_predictors creates time_2l centered predictor columns", {
   )
 
   expect_equal(
-    attr(result, "dyadMLM")$temporal_predictor_decompositions,
+    attr(result, "dyadMLM")$temporal_decompositions,
     tibble::tibble(
       predictor = c("x", "x", "x"),
       component = c("raw", "cwp", "cbp"),
       column = c("x", ".dy_x_cwp", ".dy_x_cbp"),
-      temporal_predictor_decomposition = c("none", "time_2l", "time_2l"),
+      temporal_decomposition = c("none", "2l", "2l"),
       lag = c(0L, 0L, 0L)
     )
   )
@@ -60,7 +60,7 @@ test_that("center_predictors weights people equally for between-person centering
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x
@@ -81,7 +81,7 @@ test_that("center_predictors handles missing predictor values", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x
@@ -104,7 +104,7 @@ test_that("center_predictors does not remove user-owned person mean columns", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x
@@ -125,21 +125,21 @@ test_that("center_predictors leaves uncentered data unchanged", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   ) |>
     center_predictors()
 
   expect_equal(names(result), c("dyad_id", "person_id", "x"))
   expect_equal(
-    attr(result, "dyadMLM")$temporal_predictor_decompositions,
+    attr(result, "dyadMLM")$temporal_decompositions,
     tibble::tibble(
       predictor = "x",
       component = "raw",
       column = "x",
-      temporal_predictor_decomposition = "none",
+      temporal_decomposition = "none",
       lag = 0L
     )
   )

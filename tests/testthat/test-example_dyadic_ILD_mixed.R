@@ -18,7 +18,7 @@ check_mixed_dyad_type_ild_dataset <- function(data, outcome) {
 
   prepared <- prepare_dyad_data(
     data,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     time = diaryday,
@@ -38,15 +38,15 @@ check_mixed_dyad_type_ild_dataset <- function(data, outcome) {
   )
   expect_equal(dyad_compositions$n_dyads, c(60L, 80L, 60L))
   expect_false(dyad_diff_col %in% names(prepared))
-  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(prepared))
-  expect_true(".dy_diff_male_x_male_arbitrary" %in% names(prepared))
+  expect_true(".dy_member_contrast_female_x_female_arbitrary" %in% names(prepared))
+  expect_true(".dy_member_contrast_male_x_male_arbitrary" %in% names(prepared))
 
   female_female <- prepared$.dy_composition == "female_x_female"
   male_male <- prepared$.dy_composition == "male_x_male"
-  expect_true(all(abs(prepared$.dy_diff_female_x_female_arbitrary[female_female]) == 1))
-  expect_true(all(prepared$.dy_diff_female_x_female_arbitrary[!female_female] == 0))
-  expect_true(all(abs(prepared$.dy_diff_male_x_male_arbitrary[male_male]) == 1))
-  expect_true(all(prepared$.dy_diff_male_x_male_arbitrary[!male_male] == 0))
+  expect_true(all(abs(prepared$.dy_member_contrast_female_x_female_arbitrary[female_female]) == 1))
+  expect_true(all(prepared$.dy_member_contrast_female_x_female_arbitrary[!female_female] == 0))
+  expect_true(all(abs(prepared$.dy_member_contrast_male_x_male_arbitrary[male_male]) == 1))
+  expect_true(all(prepared$.dy_member_contrast_male_x_male_arbitrary[!male_male] == 0))
 }
 
 test_that("ILD Gaussian example data with mixed dyad types has expected structure", {

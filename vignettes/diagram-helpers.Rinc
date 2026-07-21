@@ -527,7 +527,7 @@ rm(
   )
   random_difference <- .diagram_resolve_term(
     components$random_terms, terms$random_difference,
-    function(term) grepl("^\\.dy_diff_", term),
+    function(term) grepl("^\\.dy_member_contrast_", term),
     "random_difference", "random-effect"
   )
   mean_sd <- .extract_diagram_random_sd(components$random, random_mean)
@@ -581,7 +581,7 @@ rm(
   )
   random_difference <- .diagram_resolve_term(
     components$random_terms, terms$random_difference,
-    function(term) grepl("^\\.dy_diff_", term),
+    function(term) grepl("^\\.dy_member_contrast_", term),
     "random_difference", "random-effect"
   )
 
@@ -2408,7 +2408,7 @@ draw_dim_member_diagram <- function() {
     ),
     random_ff_difference = resolve_exact(
       components$random_terms, "random_ff_difference",
-      ".dy_diff_female_x_female_arbitrary", "random-effect"
+      ".dy_member_contrast_female_x_female_arbitrary", "random-effect"
     ),
     random_mm_mean = resolve_exact(
       components$random_terms, "random_mm_mean",
@@ -2416,7 +2416,7 @@ draw_dim_member_diagram <- function() {
     ),
     random_mm_difference = resolve_exact(
       components$random_terms, "random_mm_difference",
-      ".dy_diff_male_x_male_arbitrary", "random-effect"
+      ".dy_member_contrast_male_x_male_arbitrary", "random-effect"
     )
   )
 

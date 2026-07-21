@@ -8,14 +8,14 @@ test_that("DSM role order is required exactly with DSM preparation", {
   expect_error(
     validate_dyad_data(
       distinguishable_data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      model_type = "dsm"
+      model_types = "dsm"
     ),
     paste0(
-      '`model_type = "dsm"` requires `dsm_role_order` to be supplied. ',
-      'For exchangeable dyads, use `model_type = "dim"` instead.'
+      '`model_types = "dsm"` requires `dsm_role_order` to be supplied. ',
+      'For exchangeable dyads, use `model_types = "dim"` instead.'
     ),
     fixed = TRUE
   )
@@ -23,12 +23,12 @@ test_that("DSM role order is required exactly with DSM preparation", {
   expect_error(
     validate_dyad_data(
       distinguishable_data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
       dsm_role_order = c("female", "male")
     ),
-    '`dsm_role_order` can only be supplied when `model_type` includes "dsm".',
+    '`dsm_role_order` can only be supplied when `model_types` includes "dsm".',
     fixed = TRUE
   )
 
@@ -36,23 +36,23 @@ test_that("DSM role order is required exactly with DSM preparation", {
   expect_error(
     validate_dyad_data(
       no_role_data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
-      model_type = "dsm"
+      model_types = "dsm"
     ),
-    '`model_type = "dsm"` requires `role` to be supplied.',
+    '`model_types = "dsm"` requires `role` to be supplied.',
     fixed = TRUE
   )
 
   expect_error(
     validate_dyad_data(
       no_role_data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
-      model_type = "dsm",
+      model_types = "dsm",
       dsm_role_order = c("female", "male")
     ),
-    '`model_type = "dsm"` requires `role` to be supplied.',
+    '`model_types = "dsm"` requires `role` to be supplied.',
     fixed = TRUE
   )
 })
@@ -67,13 +67,13 @@ test_that("DIM and DSM cannot be requested together", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      model_type = c("dim", "dsm"),
+      model_types = c("dim", "dsm"),
       dsm_role_order = c("female", "male")
     ),
-    '`model_type = "dim"` and `model_type = "dsm"` cannot be combined.',
+    '`model_types = "dim"` and `model_types = "dsm"` cannot be combined.',
     fixed = TRUE
   )
 })
@@ -103,10 +103,10 @@ test_that("DSM role order contains two distinct role values", {
     error <- tryCatch(
       validate_dyad_data(
         data,
-        group = dyad_id,
+        dyad = dyad_id,
         member = person_id,
         role = role,
-        model_type = "dsm",
+        model_types = "dsm",
         dsm_role_order = role_order
       ),
       error = identity
@@ -124,10 +124,10 @@ test_that("DSM role order is stored and matched to the final composition", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("male", "female")
   )
 
@@ -136,10 +136,10 @@ test_that("DSM role order is stored and matched to the final composition", {
 
   trimmed_result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c(" male ", " female ")
   )
   expect_equal(
@@ -150,10 +150,10 @@ test_that("DSM role order is stored and matched to the final composition", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      model_type = "dsm",
+      model_types = "dsm",
       dsm_role_order = c("female", "other")
     ),
     "`dsm_role_order` must contain exactly the two role values in the prepared DSM data.",
@@ -171,10 +171,10 @@ test_that("DSM requires one distinguishable final composition", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      model_type = "dsm",
+      model_types = "dsm",
       dsm_role_order = c("female", "male"),
       set_exchangeable_compositions = "female-male"
     ),
@@ -191,13 +191,13 @@ test_that("DSM requires one distinguishable final composition", {
   expect_error(
     prepare_dyad_data(
       exchangeable_data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      model_type = "dsm",
+      model_types = "dsm",
       dsm_role_order = c("female", "male")
     ),
-    "If the intended dyads are exchangeable, use `model_type = \"dim\"` instead.",
+    "If the intended dyads are exchangeable, use `model_types = \"dim\"` instead.",
     fixed = TRUE
   )
 })
@@ -217,13 +217,13 @@ test_that("DSM rejects multiple distinguishable compositions actionably", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      model_type = "dsm",
+      model_types = "dsm",
       dsm_role_order = c("female", "male")
     ),
-    "Use `include_compositions` to retain one distinguishable composition, or prepare compositions in separate calls.",
+    "Use `keep_compositions` to retain one distinguishable composition, or prepare compositions in separate calls.",
     fixed = TRUE
   )
 })

@@ -87,7 +87,7 @@ Roughly, the expected structure for `dyadMLM` is:
 | 1 | 2 | 2 | 5.3 | 6.6 |
 
 
-Measured variables may contain missing values. The structural `group`,
+Measured variables may contain missing values. The structural `dyad`,
 `member`, and optional `time` variables must not contain missing values.
 
 In intensive longitudinal data, missing measurement occasions can be represented
@@ -122,14 +122,14 @@ We validate and prepare the data with the function `dyadMLM::prepare_dyad_data()
 ```{r prepare-cross-distinguishable}
 cross_distinguishable_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
 
   # In this example, we optionally specify a predictor variable
   # and a model type to generate the columns needed for that model type.
   predictors = communication,
-  model_type = "apim"
+  model_types = "apim"
 )
 
 print(cross_distinguishable_data, n = 4)
@@ -152,7 +152,7 @@ omit the `role` argument:
 ```{r prepare-cross-exchangeable-basic}
 cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   seed = 123
 )
@@ -161,7 +161,7 @@ print(cross_exchangeable_data, n = 4)
 
 ```
 
-The generated `.dy_diff_assumed_exchangeable_arbitrary` contrast assigns `-1`
+The generated `.dy_member_contrast_assumed_exchangeable_arbitrary` contrast assigns `-1`
 and `1` to the two members of each exchangeable dyad
 [@delrosarioPracticalGuideSpecifying2025]. Its direction is arbitrary, and
 `seed` makes the assignment reproducible.
@@ -169,14 +169,14 @@ and `1` to the two members of each exchangeable dyad
 Refer to the [exchangeable APIM section](apim.html#exchangeable-residual-structure)
 for how to use these columns to specify an exchangeable dyadic APIM and recover
 the constrained actor-partner variance-covariance structure with
-[`dyadMLM::exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.html).
+[`dyadMLM::recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html).
 
 Alternatively, we can explicitly set a dyad composition to exchangeable:
 
 ```{r prepare-cross-set-exchangeable}
 cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   set_exchangeable_compositions = "male-female",
@@ -199,10 +199,10 @@ because omitting `role` treats all dyads as a single exchangeable composition.
 ```{r prepare-cross-dim}
 cross_dim_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   predictors = communication,
-  model_type = "dim",
+  model_types = "dim",
   seed = 123
 )
 
@@ -217,11 +217,11 @@ differences and the DSM role contrast
 ```{r prepare-cross-dsm}
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "dsm",
+  model_types = "dsm",
   dsm_role_order = c("female", "male")
 )
 
@@ -247,12 +247,12 @@ To prepare intensive longitudinal data, pass the `time` variable to
 ```{r prepare-ild-apim}
 ild_apim_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   time = diaryday,
   predictors = provided_support,
-  model_type = "apim",
+  model_types = "apim",
   seed = 123
 )
 
@@ -263,8 +263,8 @@ print(ild_apim_data, n = 6)
 By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components
 [@bolgerIntensiveLongitudinalMethods2013]. This temporal predictor decomposition
-is controlled by `temporal_predictor_decomposition`. The default `"auto"`
-setting selects `"time_2l"` for this longitudinal setup and retains raw actor
+is controlled by `temporal_decomposition`. The default `"auto"`
+setting selects `"2l"` for this longitudinal setup and retains raw actor
 and partner columns alongside both components.
 
 Note that observed person means used to construct the between-person (`cbp`) predictors
@@ -274,7 +274,7 @@ between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
 ### Preparing lagged predictors
 
 Lagged versions of variables, including an outcome that is also passed to
-`predictors`, can be obtained through the `lag_predictors` argument.
+`predictors`, can be obtained through the `lag1_predictors` argument.
 `dyadMLM::prepare_dyad_data()` then returns lag-1 raw and within-person-centered actor
 and partner columns alongside their contemporaneous versions. Lagging respects
 the dyad and member structure, matches observations at exactly `time - 1`, and
@@ -286,12 +286,12 @@ couples as exchangeable:
 ```{r prepare-ild-apim-dynamic}
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   time = diaryday,
   predictors = closeness,
-  lag_predictors = closeness,
-  model_type = "apim",
+  lag1_predictors = closeness,
+  model_types = "apim",
   seed = 123
 )
 
@@ -317,7 +317,7 @@ Let's have `dyadMLM` infer the compositions automatically:
 ```{r prepare-mixed-cross-sectional}
 mixed_cross_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   seed = 123
@@ -328,7 +328,7 @@ print(mixed_cross_data, n = 4)
 
 Note that when role compositions are available, each exchangeable composition
 receives its own difference contrast, such as
-`.dy_diff_female_x_female_arbitrary`, which is `0` for all other compositions
+`.dy_member_contrast_female_x_female_arbitrary`, which is `0` for all other compositions
 [@delrosarioPracticalGuideSpecifying2025].
 
 We can use this data to model these dyad types as separate or in the same model.
@@ -338,7 +338,7 @@ mixed-composition formulas and practical convergence notes.
 ### Keeping only selected dyad compositions (filtering)
 
 Sometimes a mixed dataset contains dyad compositions that should not be part of
-a given analysis. Use `include_compositions` to keep only dyads whose *observed*
+a given analysis. Use `keep_compositions` to keep only dyads whose *observed*
 composition matches the requested labels. The filtering happens before
 exchangeability constraints and pooling, so `set_exchangeable_compositions`
 and `pool_compositions` can only refer to retained dyad compositions.
@@ -346,10 +346,10 @@ and `pool_compositions` can only refer to retained dyad compositions.
 ```{r prepare-mixed-cross-sectional-included}
 mixed_cross_data_included <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
-  include_compositions = c("female-female", "male-male"),
+  keep_compositions = c("female-female", "male-male"),
   seed = 123
 )
 
@@ -368,7 +368,7 @@ role, which would pool all dyad compositions into one exchangeable composition.
 ```{r prepare-mixed-cross-sectional-exchangeable}
 mixed_cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   set_exchangeable_compositions = c("male-female"),
@@ -386,7 +386,7 @@ pool selected exchangeable dyad compositions and analyze them as if they were on
 Pooling can impose equality constraints among compositions. After fitting
 nested pooled and unpooled models to the same observations, these constraints
 can be tested with
-[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html); see
+[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html); see
 [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability)
 for the model-comparison workflow.
 
@@ -396,7 +396,7 @@ and name them `same-sex` dyads:
 ```{r prepare-mixed-cross-sectional_pooled}
 mixed_cross_data_pooled <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   pool_compositions = list(
@@ -415,7 +415,7 @@ Note that you cannot pool distinguishable dyads. If we wanted to pool `female-ma
 ```{r prepare-mixed-cross-sectional_pooled_constrained}
 mixed_cross_data_pooled_constrained <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   set_exchangeable_compositions = "male female",

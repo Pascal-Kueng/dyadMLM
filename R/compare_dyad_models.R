@@ -35,7 +35,7 @@
 #' if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #'   restricted_data <- prepare_dyad_data(
 #'     example_dyadic_crosssectional,
-#'     group = coupleID,
+#'     dyad = coupleID,
 #'     member = personID,
 #'     role = gender
 #'   )
@@ -50,11 +50,11 @@
 #'     data = full_data
 #'   )
 #'
-#'   compare_dyad_models(restricted_model, full_model)
+#'   compare_nested_glmmTMB_models(restricted_model, full_model)
 #' }
 #'
 #' @export
-compare_dyad_models <- function(model1, model2) {
+compare_nested_glmmTMB_models <- function(model1, model2) {
   validate_comparison_model(model1, "model1")
   validate_comparison_model(model2, "model2")
 
@@ -138,7 +138,7 @@ comparison_model_data <- function(model, caller_env, argument) {
   model_formula <- stats::formula(model, component = "cond")
 
   # A model fitted inside a helper may keep its data with its formula.
-  # Search there first, then where compare_dyad_models() was called.
+  # Search there first, then where compare_nested_glmmTMB_models() was called.
   environments <- list(environment(model_formula), caller_env)
 
   for (search_env in environments) {
@@ -183,7 +183,7 @@ validate_comparison_data <- function(model1, model2,
     # Both preparations must agree on the columns that define the dyadic data.
     model1_meta <- attr(model1_data, "dyadMLM")
     model2_meta <- attr(model2_data, "dyadMLM")
-    for (field in c("group", "member", "role", "time")) {
+    for (field in c("dyad", "member", "role", "time")) {
       if (!identical(model1_meta[[field]], model2_meta[[field]])) {
         stop(
           sprintf(

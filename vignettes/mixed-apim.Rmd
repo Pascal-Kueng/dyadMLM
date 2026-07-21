@@ -102,7 +102,7 @@ observed dyad compositions.
 ```{r prepare-mixed-cross-sectional}
 mixed_cross_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   seed = 123
@@ -117,7 +117,7 @@ parameterization. This gives the two members equal variances while allowing
 their within-dyad covariance to be estimated
 [@delrosarioPracticalGuideSpecifying2025].
 
-The returned `.dy_diff_*` variables contain `-1` and `1` for the corresponding
+The returned `.dy_member_contrast_*` variables contain `-1` and `1` for the corresponding
 exchangeable composition and `0` for all other compositions.
 `dyadMLM::prepare_dyad_data()` creates this structure automatically.
 The [APIM vignette](apim.html#exchangeable-residual-structure) derives
@@ -154,11 +154,11 @@ mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
 
     # exchangeable female-female residual covariance via sum-diff
     us(0 + .dy_is_female_x_female | coupleID) +
-    us(0 + .dy_diff_female_x_female_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
 
     # exchangeable male-male residual covariance via sum-diff
     us(0 + .dy_is_male_x_male | coupleID) +
-    us(0 + .dy_diff_male_x_male_arbitrary | coupleID)
+    us(0 + .dy_member_contrast_male_x_male_arbitrary | coupleID)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -310,7 +310,7 @@ different versions of pooling can be compared. For example, it can be tested
 whether pooling male-male and female-female couples as same-sex substantially
 worsens model fit, considering both the fixed effects and random-effects
 structure. Such model comparisons, performed with
-[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html) as
+[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html) as
 demonstrated in [Testing distinguishability in the APIM vignette](apim.html#testing-distinguishability),
 require the restricted and unrestricted models to use the same observations and
 require the restricted model to be nested within the unrestricted model.
@@ -322,7 +322,7 @@ plus composition deviations.
 ### Model comparison with a restricted model
 
 The [regular APIM vignette](apim.html#testing-distinguishability) introduces
-[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html) by
+[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html) by
 comparing a distinguishable APIM with its
 exchangeable restriction. Here, we use the same approach for a
 mixed-composition constraint. We treat female-male dyads as exchangeable and
@@ -333,7 +333,7 @@ justification.
 ```{r prepare-mixed-cross-sectional-constrained, eval = has_glmmTMB}
 mixed_cross_data_constrained <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   set_exchangeable_compositions = "male-female",
@@ -350,18 +350,18 @@ mixed_cross_gaussian_model_constrained <- glmmTMB::glmmTMB(
 
     # exchangeable female-female residual covariance via sum-diff
     us(0 + .dy_is_female_x_female | coupleID) +
-    us(0 + .dy_diff_female_x_female_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
 
     # pooled female-male and male-male residual covariance via sum-diff
     us(0 + .dy_is_non_female_x_female | coupleID) +
-    us(0 + .dy_diff_non_female_x_female_arbitrary | coupleID)
+    us(0 + .dy_member_contrast_non_female_x_female_arbitrary | coupleID)
 
   , dispformula = ~ 0
   , family = gaussian()
   , data = mixed_cross_data_constrained
 )
 
-dyadMLM::compare_dyad_models(
+dyadMLM::compare_nested_glmmTMB_models(
   mixed_cross_gaussian_model_constrained,
   mixed_cross_gaussian_model
 )
@@ -390,7 +390,7 @@ and a predictor:
 ```{r prepare-mixed-ild}
 mixed_ild_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD_mixed,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   pool_compositions = list(
@@ -468,13 +468,13 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
     us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID) +
 
     us(0 + .dy_is_same_sex | coupleID) +
-    us(0 + .dy_diff_same_sex_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_same_sex_arbitrary | coupleID) +
 
     # same-day covariance
     us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID:diaryday) +
 
     us(0 + .dy_is_same_sex | coupleID:diaryday) +
-    us(0 + .dy_diff_same_sex_arbitrary | coupleID:diaryday)
+    us(0 + .dy_member_contrast_same_sex_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -519,9 +519,9 @@ us(
 # exchangeable same-sex difference block
 us(
   0 +
-    .dy_diff_same_sex_arbitrary +
-    .dy_diff_same_sex_arbitrary:.dy_provided_support_cwp_actor +
-    .dy_diff_same_sex_arbitrary:.dy_provided_support_cwp_partner |
+    .dy_member_contrast_same_sex_arbitrary +
+    .dy_member_contrast_same_sex_arbitrary:.dy_provided_support_cwp_actor +
+    .dy_member_contrast_same_sex_arbitrary:.dy_provided_support_cwp_partner |
     coupleID
 )
 ```

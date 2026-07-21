@@ -79,7 +79,7 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
 
   distinguishable_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     predictors = communication
@@ -132,7 +132,7 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
 
   exchangeable_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     predictors = communication,
@@ -144,7 +144,7 @@ test_that("APIM diagrams extract distinguishable and exchangeable fits", {
       .dy_communication_actor +
       .dy_communication_partner +
       us(0 + .dy_is_female_x_male | coupleID) +
-      us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = exchangeable_data
@@ -179,10 +179,10 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
 
   dim_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     predictors = communication,
-    model_type = "dim",
+    model_types = "dim",
     seed = 123
   )
   dim_fit <- glmmTMB::glmmTMB(
@@ -190,7 +190,7 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
       .dy_communication_dyad_mean_gmc +
       .dy_communication_within_dyad_dev +
       us(1 | coupleID) +
-      us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = dim_data
@@ -207,11 +207,11 @@ test_that("DIM and DSM diagrams extract fitted glmmTMB objects", {
 
   dsm_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     predictors = communication,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
   dsm_fit <- glmmTMB::glmmTMB(
@@ -251,7 +251,7 @@ test_that("mixed APIM diagrams extract every composition block", {
 
   mixed_data <- prepare_dyad_data(
     example_dyadic_crosssectional_mixed,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     seed = 123
@@ -267,9 +267,9 @@ test_that("mixed APIM diagrams extract every composition block", {
           coupleID
       ) +
       us(0 + .dy_is_female_x_female | coupleID) +
-      us(0 + .dy_diff_female_x_female_arbitrary | coupleID) +
+      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
       us(0 + .dy_is_male_x_male | coupleID) +
-      us(0 + .dy_diff_male_x_male_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_male_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = mixed_data
@@ -368,10 +368,10 @@ test_that("fitted glmmTMB diagrams reject incomplete residual structures", {
 
   data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     predictors = communication,
-    model_type = "dim",
+    model_types = "dim",
     seed = 123
   )
   fit <- glmmTMB::glmmTMB(
@@ -379,7 +379,7 @@ test_that("fitted glmmTMB diagrams reject incomplete residual structures", {
       .dy_communication_dyad_mean_gmc +
       .dy_communication_within_dyad_dev +
       us(1 | coupleID) +
-      us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
     family = gaussian(),
     data = data
   )

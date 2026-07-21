@@ -1,16 +1,16 @@
-test_that("compare_dyad_models compares reparameterized nested models", {
+test_that("compare_nested_glmmTMB_models compares reparameterized nested models", {
   skip_if_not_installed("glmmTMB")
 
   full_data <- prepare_dyad_data(
     example_dyadic_crosssectional_mixed,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     seed = 123
   )
   restricted_data <- prepare_dyad_data(
     example_dyadic_crosssectional_mixed,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     set_exchangeable_compositions = "male-female",
@@ -31,9 +31,9 @@ test_that("compare_dyad_models compares reparameterized nested models", {
           coupleID
       ) +
       us(0 + .dy_is_female_x_female | coupleID) +
-      us(0 + .dy_diff_female_x_female_arbitrary | coupleID) +
+      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
       us(0 + .dy_is_male_x_male | coupleID) +
-      us(0 + .dy_diff_male_x_male_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_male_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = full_data
@@ -43,15 +43,15 @@ test_that("compare_dyad_models compares reparameterized nested models", {
       .dy_is_female_x_female +
       .dy_is_non_female_x_female +
       us(0 + .dy_is_female_x_female | coupleID) +
-      us(0 + .dy_diff_female_x_female_arbitrary | coupleID) +
+      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
       us(0 + .dy_is_non_female_x_female | coupleID) +
-      us(0 + .dy_diff_non_female_x_female_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_non_female_x_female_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = restricted_data
   )
 
-  comparison <- compare_dyad_models(restricted_model, full_model)
+  comparison <- compare_nested_glmmTMB_models(restricted_model, full_model)
 
   expect_s3_class(comparison, "anova")
   expect_equal(comparison$`Chi Df`[2], 5)
@@ -62,12 +62,12 @@ test_that("compare_dyad_models compares reparameterized nested models", {
   expect_lt(comparison$`Pr(>Chisq)`[2], 0.001)
 })
 
-test_that("compare_dyad_models requires exact original data", {
+test_that("compare_nested_glmmTMB_models requires exact original data", {
   skip_if_not_installed("glmmTMB")
 
   data_one <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -75,7 +75,7 @@ test_that("compare_dyad_models requires exact original data", {
   changed$satisfaction[1] <- changed$satisfaction[1] + 1e-10
   data_two <- prepare_dyad_data(
     changed,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -90,17 +90,17 @@ test_that("compare_dyad_models requires exact original data", {
   )
 
   expect_error(
-    compare_dyad_models(model_one, model_two),
+    compare_nested_glmmTMB_models(model_one, model_two),
     "Column `satisfaction` differs"
   )
 })
 
-test_that("compare_dyad_models checks source and fitted rows", {
+test_that("compare_nested_glmmTMB_models checks source and fitted rows", {
   skip_if_not_installed("glmmTMB")
 
   complete_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -109,7 +109,7 @@ test_that("compare_dyad_models checks source and fitted rows", {
   ]
   shorter_data <- prepare_dyad_data(
     fewer_rows,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -118,7 +118,7 @@ test_that("compare_dyad_models checks source and fitted rows", {
   predictor_missing$extra_predictor[1] <- NA_real_
   row_data <- prepare_dyad_data(
     predictor_missing,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -141,16 +141,16 @@ test_that("compare_dyad_models checks source and fitted rows", {
   )
 
   expect_error(
-    compare_dyad_models(complete_restricted, shorter_full),
+    compare_nested_glmmTMB_models(complete_restricted, shorter_full),
     "different numbers of rows"
   )
   expect_error(
-    compare_dyad_models(row_restricted, row_full),
+    compare_nested_glmmTMB_models(row_restricted, row_full),
     "different observation rows"
   )
 })
 
-test_that("compare_dyad_models supports and checks model families", {
+test_that("compare_nested_glmmTMB_models supports and checks model families", {
   skip_if_not_installed("glmmTMB")
 
   data <- example_dyadic_crosssectional
@@ -159,13 +159,13 @@ test_that("compare_dyad_models supports and checks model families", {
   )
   restricted_data <- prepare_dyad_data(
     data,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
   full_data <- prepare_dyad_data(
     data,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -186,7 +186,7 @@ test_that("compare_dyad_models supports and checks model families", {
     data = full_data
   )
 
-  comparison <- compare_dyad_models(restricted_model, full_model)
+  comparison <- compare_nested_glmmTMB_models(restricted_model, full_model)
 
   expect_s3_class(comparison, "anova")
   expect_equal(comparison$`Chi Df`[2], 1)
@@ -195,30 +195,30 @@ test_that("compare_dyad_models supports and checks model families", {
     2 * as.numeric(logLik(full_model) - logLik(restricted_model))
   )
   expect_error(
-    compare_dyad_models(restricted_model, gaussian_model),
+    compare_nested_glmmTMB_models(restricted_model, gaussian_model),
     "same family and link"
   )
 })
 
-test_that("compare_dyad_models compares APIM, DIM, and DSM models", {
+test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
   skip_if_not_installed("glmmTMB")
 
   distinguishable_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     predictors = communication,
-    model_type = c("apim", "dsm"),
+    model_types = c("apim", "dsm"),
     dsm_role_order = c("female", "male")
   )
   exchangeable_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender,
     predictors = communication,
-    model_type = c("apim", "dim"),
+    model_types = c("apim", "dim"),
     set_exchangeable_compositions = "female-male",
     seed = 123
   )
@@ -240,7 +240,7 @@ test_that("compare_dyad_models compares APIM, DIM, and DSM models", {
       .dy_communication_actor +
       .dy_communication_partner +
       us(0 + .dy_is_female_x_male | coupleID) +
-      us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = exchangeable_data
@@ -266,17 +266,17 @@ test_that("compare_dyad_models compares APIM, DIM, and DSM models", {
       .dy_communication_dyad_mean_gmc +
       .dy_communication_within_dyad_dev +
       us(1 | coupleID) +
-      us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = exchangeable_data
   )
 
-  dsm_comparison <- compare_dyad_models(
+  dsm_comparison <- compare_nested_glmmTMB_models(
     distinguishable_dsm,
     exchangeable_apim
   )
-  apim_dim_comparison <- compare_dyad_models(
+  apim_dim_comparison <- compare_nested_glmmTMB_models(
     distinguishable_apim,
     exchangeable_dim
   )
@@ -286,14 +286,14 @@ test_that("compare_dyad_models compares APIM, DIM, and DSM models", {
   expect_equal(dsm_comparison$Chisq[2], apim_dim_comparison$Chisq[2])
 })
 
-test_that("compare_dyad_models supports ordinary and mixed named data", {
+test_that("compare_nested_glmmTMB_models supports ordinary and mixed named data", {
   skip_if_not_installed("glmmTMB")
 
   plain_data_one <- example_dyadic_crosssectional
   plain_data_two <- plain_data_one
   prepared_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -321,8 +321,8 @@ test_that("compare_dyad_models supports ordinary and mixed named data", {
     data = as.data.frame(plain_data_one)
   )
 
-  plain_comparison <- compare_dyad_models(plain_smaller, plain_larger)
-  mixed_comparison <- compare_dyad_models(plain_smaller, prepared_larger)
+  plain_comparison <- compare_nested_glmmTMB_models(plain_smaller, plain_larger)
+  mixed_comparison <- compare_nested_glmmTMB_models(plain_smaller, prepared_larger)
 
   expect_equal(plain_comparison$`Chi Df`[2], 1)
   expect_equal(
@@ -334,21 +334,21 @@ test_that("compare_dyad_models supports ordinary and mixed named data", {
     plain_comparison$Chisq[2]
   )
   expect_error(
-    compare_dyad_models(plain_smaller, changed_model),
+    compare_nested_glmmTMB_models(plain_smaller, changed_model),
     "Column `communication` differs"
   )
   expect_error(
-    compare_dyad_models(inline_model, plain_larger),
+    compare_nested_glmmTMB_models(inline_model, plain_larger),
     "must have been fitted with a named data frame"
   )
 })
 
-test_that("compare_dyad_models sorts models and agrees with anova.glmmTMB", {
+test_that("compare_nested_glmmTMB_models sorts models and agrees with anova.glmmTMB", {
   skip_if_not_installed("glmmTMB")
 
   model_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -362,8 +362,8 @@ test_that("compare_dyad_models sorts models and agrees with anova.glmmTMB", {
   )
 
   reference <- stats::anova(restricted_model, full_model)
-  comparison <- compare_dyad_models(restricted_model, full_model)
-  reversed <- compare_dyad_models(full_model, restricted_model)
+  comparison <- compare_nested_glmmTMB_models(restricted_model, full_model)
+  reversed <- compare_nested_glmmTMB_models(full_model, restricted_model)
 
   expect_equal(comparison$Chisq[2], reference$Chisq[2])
   expect_equal(comparison$`Chi Df`[2], reference$`Chi Df`[2])
@@ -375,7 +375,7 @@ test_that("compare_dyad_models sorts models and agrees with anova.glmmTMB", {
     reference$`Pr(>Chisq)`[2] < 0.05
   )
   expect_error(
-    compare_dyad_models(restricted_model, restricted_model),
+    compare_nested_glmmTMB_models(restricted_model, restricted_model),
     "different numbers of estimated parameters"
   )
 
@@ -403,7 +403,7 @@ test_that("compare_dyad_models sorts models and agrees with anova.glmmTMB", {
   model_data$noise <- stats::rnorm(nrow(model_data))
   smaller_model <- glmmTMB::glmmTMB(satisfaction ~ 1, data = model_data)
   larger_model <- glmmTMB::glmmTMB(satisfaction ~ noise, data = model_data)
-  no_clear_improvement <- compare_dyad_models(smaller_model, larger_model)
+  no_clear_improvement <- compare_nested_glmmTMB_models(smaller_model, larger_model)
   printed <- capture.output(print(no_clear_improvement))
 
   expect_gt(no_clear_improvement$`Pr(>Chisq)`[2], 0.05)
@@ -433,12 +433,12 @@ test_that("compare_dyad_models sorts models and agrees with anova.glmmTMB", {
   )
 })
 
-test_that("compare_dyad_models rejects transformed and changed outcomes", {
+test_that("compare_nested_glmmTMB_models rejects transformed and changed outcomes", {
   skip_if_not_installed("glmmTMB")
 
   model_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -452,7 +452,7 @@ test_that("compare_dyad_models rejects transformed and changed outcomes", {
   )
 
   expect_error(
-    compare_dyad_models(restricted_model, transformed_model),
+    compare_nested_glmmTMB_models(restricted_model, transformed_model),
     "Only an untransformed outcome"
   )
 
@@ -462,18 +462,18 @@ test_that("compare_dyad_models rejects transformed and changed outcomes", {
     data = model_data
   )
   expect_error(
-    compare_dyad_models(restricted_model, changed_model),
+    compare_nested_glmmTMB_models(restricted_model, changed_model),
     "fitted outcome values differ"
   )
 })
 
-test_that("compare_dyad_models recovers local model data", {
+test_that("compare_nested_glmmTMB_models recovers local model data", {
   skip_if_not_installed("glmmTMB")
 
   fit_models <- function() {
     local_data <- prepare_dyad_data(
       example_dyadic_crosssectional,
-      group = coupleID,
+      dyad = coupleID,
       member = personID,
       role = gender
     )
@@ -484,12 +484,12 @@ test_that("compare_dyad_models recovers local model data", {
   }
 
   models <- fit_models()
-  comparison <- compare_dyad_models(models$restricted, models$full)
+  comparison <- compare_nested_glmmTMB_models(models$restricted, models$full)
 
   expect_s3_class(comparison, "anova")
 })
 
-test_that("compare_dyad_models checks weights and offsets", {
+test_that("compare_nested_glmmTMB_models checks weights and offsets", {
   skip_if_not_installed("glmmTMB")
 
   data <- example_dyadic_crosssectional
@@ -497,7 +497,7 @@ test_that("compare_dyad_models checks weights and offsets", {
   data$observation_offset <- 0.25
   model_data <- prepare_dyad_data(
     data,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -523,15 +523,15 @@ test_that("compare_dyad_models checks weights and offsets", {
   )
 
   expect_error(
-    compare_dyad_models(full_model, weighted_model),
+    compare_nested_glmmTMB_models(full_model, weighted_model),
     "different observation weights"
   )
   expect_error(
-    compare_dyad_models(full_model, offset_model),
+    compare_nested_glmmTMB_models(full_model, offset_model),
     "different offsets"
   )
   expect_error(
-    compare_dyad_models(offset_model, zero_inflation_offset_model),
+    compare_nested_glmmTMB_models(offset_model, zero_inflation_offset_model),
     "different offsets"
   )
 })

@@ -44,7 +44,7 @@ add_dyadic_score_columns <- function(data) {
     -0.5
   )
 
-  decomposition <- construct_dyad_predictor_decompositions(data)
+  decomposition <- construct_dyad_predictor_decompositions(data, "dsm")
 
   out <- decomposition$data
   n_predictors <- nrow(decomposition$predictors)
@@ -70,6 +70,21 @@ add_dyadic_score_columns <- function(data) {
     )
 
     difference_cols[[i]] <- difference_col
+  }
+
+  difference_plan <- tibble::tibble(
+    target = difference_cols,
+    predictor = decomposition$predictors$predictor,
+    temporal_component = decomposition$predictors$component,
+    lag = decomposition$predictors$lag,
+    model_family = rep("dsm", n_predictors),
+    column_role = rep("dyad_difference", n_predictors)
+  )
+  validate_generated_column_plan(out, difference_plan)
+
+  for (i in seq_len(n_predictors)) {
+    deviation_col <- decomposition$predictors$deviation_column[[i]]
+    difference_col <- difference_cols[[i]]
 
     # Deviation = role contrast * full directional difference, so division
     # recovers the same role-1-minus-role-2 score on both member rows.

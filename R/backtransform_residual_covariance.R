@@ -12,71 +12,72 @@
 #'
 #' @param model A fitted `glmmTMB` or single-response `brmsfit` model. For
 #'   `glmmTMB`, only conditional-model random effects are processed.
-#' @param pairs `NULL` (default) for automatic block matching. Otherwise, supply
+#' @param block_pairings `NULL` (default) for automatic block matching. Otherwise, supply
 #'   one block-pair specification or a list of block-pair specifications. Each
 #'   pair contains:
 #'
-#'   - `shared`: a single string naming the shared random-effect term
+#'   - `shared_block`: a single string naming the shared random-effect term
 #'     copied from the fitted model formula or an equivalent selector (see
 #'     Details), or `NULL` if the entire shared block was omitted when fitting;
-#'   - `difference`: a single string naming the member-difference random-effect
+#'   - `difference_block`: a single string naming the member-difference random-effect
 #'     term or an equivalent selector, or `NULL` if the entire difference block
 #'     was omitted;
 #'   - `difference_indicator`: the exact name of the difference-indicator
-#'     column used in `difference`. It is required when `difference` selects a
-#'     block and optional when `difference = NULL`;
+#'     column used in `difference_block`. It is required when `difference_block`
+#'     selects a block and optional when `difference_block = NULL`;
 #'   - `shared_indicator`: the exact shared composition-indicator column,
 #'     needed only for composition-specific blocks in mixed-dyad models. It
 #'     defaults to `"1"`, meaning that every fitted row belongs to the pair and
 #'     an ordinary intercept is the shared intercept coordinate.
 #'
 #' @details
-#' Automatic matching recognizes exact `.dy_diff_*_arbitrary` coefficient names
+#' Automatic matching recognizes exact `.dy_member_contrast_*_arbitrary` and
+#' legacy `.dy_diff_*_arbitrary` coefficient names
 #' and first looks for the corresponding `.dy_is_*` shared block. It requires
 #' the two blocks to use the same grouping factor and the same underlying
 #' terms. Most models fitted with `dyadMLM`-generated columns therefore need
 #' only:
 #'
 #' ```r
-#' result <- dyadMLM::exchangeable_rescov(model)
+#' result <- dyadMLM::recover_exchangeable_covariance(model)
 #' print(result)
 #' ```
 #'
-#' Supply `pairs` when automatic matching is ambiguous or when a model uses
+#' Supply `block_pairings` when automatic matching is ambiguous or when a model uses
 #' custom indicators, multiple covariance levels, or deliberately omitted
 #' blocks or terms. To specify one pair with a custom difference indicator:
 #'
 #' ```r
-#' result <- dyadMLM::exchangeable_rescov(
+#' result <- dyadMLM::recover_exchangeable_covariance(
 #'   model,
-#'   pairs = list(
-#'     shared = "(1 + time | coupleID)",
-#'     difference = "(0 + my_diff + I(my_diff * time) | coupleID)",
+#'   block_pairings = list(
+#'     shared_block = "(1 + time | coupleID)",
+#'     difference_block = "(0 + my_diff + I(my_diff * time) | coupleID)",
 #'     difference_indicator = "my_diff"
 #'   )
 #' )
 #' ```
 #'
-#' For multiple covariance levels, wrap the pairs in an outer list. For example,
+#' For multiple covariance levels, wrap the pairings in an outer list. For example,
 #' in a Gaussian `glmmTMB` model fitted with `dispformula = ~ 0`, this call
 #' recovers both a stable dyad-level covariance with an omitted difference
 #' time slope and the same-occasion partner residual covariance:
 #'
 #' ```r
-#' result <- dyadMLM::exchangeable_rescov(
+#' result <- dyadMLM::recover_exchangeable_covariance(
 #'   model,
-#'   pairs = list(
+#'   block_pairings = list(
 #'     dyad = list(
-#'       shared = "(1 + diaryday | coupleID)",
-#'       difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)",
+#'       shared_block = "(1 + diaryday | coupleID)",
+#'       difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)",
 #'       difference_indicator =
-#'         ".dy_diff_assumed_exchangeable_arbitrary"
+#'         ".dy_member_contrast_assumed_exchangeable_arbitrary"
 #'     ),
 #'     same_occasion = list(
-#'       shared = "(1 | coupleID:diaryday)",
-#'       difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+#'       shared_block = "(1 | coupleID:diaryday)",
+#'       difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)",
 #'       difference_indicator =
-#'         ".dy_diff_assumed_exchangeable_arbitrary"
+#'         ".dy_member_contrast_assumed_exchangeable_arbitrary"
 #'     )
 #'   )
 #' )
@@ -102,7 +103,7 @@
 #' composition-specific blocks, it must be zero where `shared_indicator` is
 #' zero.
 #'
-#' For custom difference indicators supplied through `pairs`, the function
+#' For custom difference indicators supplied through `block_pairings`, the function
 #' checks whether both positions occur within each supported fitted grouping
 #' unit. It rejects coding when no group contains both positions, and warns when
 #' only some groups are one-sided, which can result from fitted-row filtering.
@@ -110,7 +111,7 @@
 #' repeated rows without a member identifier.
 #'
 #' @section What omitted blocks and terms mean:
-#' `exchangeable_rescov()` only describes constraints that were already imposed
+#' `recover_exchangeable_covariance()` only describes constraints that were already imposed
 #' when the model was fitted. It does not remove a block, set a variance to zero,
 #' or otherwise constrain the supplied model. Describe only the structure that
 #' was actually fitted.
@@ -118,12 +119,13 @@
 #' If a term occurs in only one selected block, the function represents the
 #' missing coordinate as a structural zero:
 #'
-#' - A term present only in `shared` has no difference component, so the two
-#'   members have identical random effects for that term.
-#' - A term present only in `difference` has no shared component, so the two
-#'   members have equal-magnitude, opposite-sign random effects for that term.
+#' - A term present only in the shared block has no difference component, so
+#'   the two members have identical random effects for that term.
+#' - A term present only in the difference block has no shared component, so
+#'   the two members have equal-magnitude, opposite-sign random effects for
+#'   that term.
 #'
-#' Setting `difference = NULL` or `shared = NULL` applies the corresponding rule
+#' Setting `difference_block = NULL` or `shared_block = NULL` applies the corresponding rule
 #' to the entire omitted block. This is valid only when that block is truly
 #' absent from the fitted model. Do not use `NULL` merely to ignore an existing
 #' block; the resulting back-transformation would be incorrect.
@@ -155,11 +157,15 @@
 #' in non-Gaussian models.
 #'
 #' @return An `exchangeable_rescov` object: a named list with one element per
-#'   matched block pair. Each element contains the member-level
+#'   matched block pairing. Each element contains `shared_term` and
+#'   `difference_term` (each a fitted term string or `NULL`), plus the member-level
 #'   variance-covariance matrix in `varcov` and its standard-deviation/correlation
 #'   representation in `sdcor`, with standard deviations on the diagonal and
-#'   correlations off the diagonal. Names reproduce the matched random-effect
-#'   terms. For `glmmTMB`, `varcov` and `sdcor` are matrices. For `brms`, they
+#'   correlations off the diagonal. Covariance dimension labels `member_1` and
+#'   `member_2` denote arbitrary exchangeable positions, not substantive roles
+#'   or encodings. Caller-supplied outer names are preserved; unnamed pairings
+#'   receive stable names `pair_1`, `pair_2`, and so on in resolved order.
+#'   For `glmmTMB`, `varcov` and `sdcor` are matrices. For `brms`, they
 #'   are posterior-draw by coefficient by coefficient arrays.
 #'
 #' @seealso The
@@ -172,25 +178,25 @@
 #' if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #'   example_data <- prepare_dyad_data(
 #'     example_dyadic_crosssectional,
-#'     group = coupleID,
+#'     dyad = coupleID,
 #'     member = personID,
-#'     model_type = "none",
+#'     model_types = "none",
 #'     seed = 123
 #'   )
 #'
 #'   model <- glmmTMB::glmmTMB(
 #'     satisfaction ~ 1 +
 #'       us(1 | coupleID) +
-#'       us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
+#'       us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
 #'     dispformula = ~ 0,
 #'     data = example_data
 #'   )
 #'
-#'   exchangeable_rescov(model)
+#'   recover_exchangeable_covariance(model)
 #' }
 #'
 #' @export
-exchangeable_rescov <- function(model, pairs = NULL) {
+recover_exchangeable_covariance <- function(model, block_pairings = NULL) {
   # 1. Normalize backend-specific random-effect blocks and covariance estimates.
   extracted <- extract_exchangeable_residual_blocks(model)
 
@@ -210,7 +216,7 @@ exchangeable_rescov <- function(model, pairs = NULL) {
   }
 
   # 3. Match each shared block to its member-difference block.
-  if (is.null(pairs)) {
+  if (is.null(block_pairings)) {
     matched_pairs <- match_exchangeable_residual_blocks(
       extracted$blocks,
       model_frame
@@ -218,7 +224,7 @@ exchangeable_rescov <- function(model, pairs = NULL) {
   } else {
     matched_pairs <- match_supplied_exchangeable_residual_blocks(
       extracted$blocks,
-      pairs,
+      block_pairings,
       model_frame,
       group_ids = extracted$group_ids
     )
@@ -234,7 +240,6 @@ exchangeable_rescov <- function(model, pairs = NULL) {
   # 5. Back-transform every matched block pair independently. Internally,
   # both backends use estimate/draw x coefficient x coefficient arrays.
   results <- vector("list", length(matched_pairs))
-  result_names <- character(length(matched_pairs))
   has_undefined_correlations <- FALSE # needed for warning
 
   for (i in seq_along(matched_pairs)) {
@@ -258,24 +263,38 @@ exchangeable_rescov <- function(model, pairs = NULL) {
       varcov <- varcov[1L, , , drop = TRUE]
       sdcor <- sdcor[1L, , , drop = TRUE]
     }
-    results[[i]] <- list(varcov = varcov, sdcor = sdcor)
-
     shared_term <- if (is.na(pair$shared_block_index)) {
-      "<omitted>"
+      NULL
     } else {
       extracted$blocks[[pair$shared_block_index]]$term
     }
     difference_term <- if (is.na(pair$difference_block_index)) {
-      "<omitted>"
+      NULL
     } else {
       extracted$blocks[[pair$difference_block_index]]$term
     }
-    result_names[[i]] <- paste0(
-      "shared: ", shared_term,
-      "; difference: ", difference_term
+    results[[i]] <- list(
+      shared_term = shared_term,
+      difference_term = difference_term,
+      varcov = varcov,
+      sdcor = sdcor
     )
   }
 
+  result_names <- names(matched_pairs)
+  if (is.null(result_names)) {
+    result_names <- rep("", length(matched_pairs))
+  }
+  unnamed <- is.na(result_names) | !nzchar(result_names)
+  result_names[unnamed] <- paste0("pair_", which(unnamed))
+  if (anyDuplicated(result_names)) {
+    duplicated_names <- unique(result_names[duplicated(result_names)])
+    stop(
+      "`block_pairings` must have unique final names. Duplicated name(s): ",
+      paste(duplicated_names, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
   names(results) <- result_names
   if (has_undefined_correlations) {
     warning(
@@ -290,8 +309,8 @@ exchangeable_rescov <- function(model, pairs = NULL) {
 
 #' Print recovered exchangeable residual covariance
 #'
-#' @param x An object returned by [exchangeable_rescov()].
-#' @param what Which representation to print: `"both"` (default), `"varcov"`,
+#' @param x An object returned by [recover_exchangeable_covariance()].
+#' @param representation Which representation to print: `"both"` (default), `"varcov"`,
 #'   or `"sdcor"`.
 #' @param ... Additional arguments passed to [print()] when printing matrices.
 #'
@@ -302,14 +321,23 @@ exchangeable_rescov <- function(model, pairs = NULL) {
 #' @export
 print.exchangeable_rescov <- function(
   x,
-  what = c("both", "varcov", "sdcor"),
+  representation = c("both", "varcov", "sdcor"),
   ...
 ) {
-  what <- match.arg(what)
-  components <- if (identical(what, "both")) {
+  dots <- match.call(expand.dots = FALSE)$...
+  if ("what" %in% names(dots)) {
+    stop(
+      "`what` has been renamed to `representation`; use ",
+      "`representation = \"varcov\"`, `\"sdcor\"`, or `\"both\"`.",
+      call. = FALSE
+    )
+  }
+
+  representation <- match.arg(representation)
+  components <- if (identical(representation, "both")) {
     c("varcov", "sdcor")
   } else {
-    what
+    representation
   }
 
   title <- if (length(x) == 1L) {
@@ -320,22 +348,12 @@ print.exchangeable_rescov <- function(
   cat(title, "\n", sep = "")
 
   for (i in seq_along(x)) {
-    if (length(x) > 1L) {
-      cat("\nPair ", i, "\n", sep = "")
-    } else {
-      cat("\n")
-    }
+    cat("\nPair `", names(x)[[i]], "`\n", sep = "")
 
-    # Result names store both fitted terms on one line. Split only for display;
-    # the underlying list name and access paths remain unchanged.
-    pair_label <- sub("^shared: ", "Shared:     ", names(x)[[i]])
-    pair_label <- sub(
-      "; difference: ",
-      "\nDifference: ",
-      pair_label,
-      fixed = TRUE
-    )
-    cat(pair_label, "\n", sep = "")
+    shared_term <- x[[i]]$shared_term
+    difference_term <- x[[i]]$difference_term
+    cat("Shared:     ", if (is.null(shared_term)) "<omitted>" else shared_term, "\n", sep = "")
+    cat("Difference: ", if (is.null(difference_term)) "<omitted>" else difference_term, "\n", sep = "")
 
     for (component in components) {
       heading <- if (identical(component, "varcov")) {
@@ -371,7 +389,7 @@ print.exchangeable_rescov <- function(
 #' Extract exchangeable random-effect blocks from a fitted model
 #'
 #' Normalizes the random-effect coefficients and fitted covariance parameters
-#' needed by [exchangeable_rescov()] while keeping backend-specific work in two
+#' needed by [recover_exchangeable_covariance()] while keeping backend-specific work in two
 #' small adapters.
 #'
 #' @param model A fitted model. Supported classes are `glmmTMB` and `brmsfit`.
@@ -584,7 +602,7 @@ find_exchangeable_difference_indicator <- function(coefficients) {
     )
   }
   generated_indicators <- unique(grep(
-    "^\\.dy_diff_.+_arbitrary$",
+    "^\\.dy_(member_contrast|diff)_.+_arbitrary$",
     variables,
     value = TRUE
   ))
@@ -733,8 +751,8 @@ validate_exchangeable_coding <- function(
   }
 
   # 6. Generated indicators are stable by construction. For a custom
-  # indicator supplied through `pairs`, also check its selected grouping level.
-  if (grepl("^\\.dy_diff_.+_arbitrary$", idiff) || is.null(group_name)) {
+  # indicator supplied through `block_pairings`, also check its selected grouping level.
+  if (grepl("^\\.dy_(member_contrast|diff)_.+_arbitrary$", idiff) || is.null(group_name)) {
     return(invisible(NULL))
   }
   if (is.null(group_ids) ||
@@ -973,7 +991,7 @@ match_blocks_for_exchangeable_indicator <- function(
   if (length(difference_block_indices) == 0L) {
     stop(
       "No difference block contains `", idiff, "`.",
-      " Check the indicator name, or supply `pairs` explicitly if the model ",
+      " Check the indicator name, or supply `block_pairings` explicitly if the model ",
       "uses custom block definitions.",
       inventory,
       call. = FALSE
@@ -1009,7 +1027,7 @@ match_blocks_for_exchangeable_indicator <- function(
     }
 
     # 3. Automatic matching is deliberately strict: exactly one shared block
-    # must fit. Partial or ambiguous structures require explicit `pairs`.
+    # must fit. Partial or ambiguous structures require explicit `block_pairings`.
     if (length(shared_candidate_indices) != 1L) {
       problem <- if (length(shared_candidate_indices) == 0L) {
         "No"
@@ -1020,7 +1038,7 @@ match_blocks_for_exchangeable_indicator <- function(
         problem, " shared block matched difference block `",
         blocks[[difference_block_index]]$term,
         "`. Matching requires the same group and underlying terms.",
-        " Supply `pairs` explicitly to select the intended blocks or to match ",
+        " Supply `block_pairings` explicitly to select the intended blocks or to match ",
         "partial term sets.",
         inventory,
         call. = FALSE
@@ -1060,8 +1078,8 @@ match_exchangeable_residual_blocks <- function(
   )
   if (length(difference_indicators) == 0L) {
     stop(
-      "No supported `.dy_diff_*_arbitrary` difference block was found.",
-      " Supply `pairs` explicitly if the model uses custom ",
+      "No supported `.dy_member_contrast_*_arbitrary` or legacy `.dy_diff_*_arbitrary` difference block was found.",
+      " Supply `block_pairings` explicitly if the model uses custom ",
       "difference-indicator names or unequal shared and difference term sets.",
       format_exchangeable_block_inventory(blocks),
       call. = FALSE
@@ -1072,7 +1090,9 @@ match_exchangeable_residual_blocks <- function(
   # intercept is a safe fallback only when there is one exchangeable type.
   matched_pairs <- list()
   for (idiff in difference_indicators) {
-    composition <- sub("^\\.dy_diff_(.+)_arbitrary$", "\\1", idiff)
+    composition <- sub("^\\.dy_member_contrast_", "", idiff)
+    composition <- sub("^\\.dy_diff_", "", composition)
+    composition <- sub("_arbitrary$", "", composition)
     indicator_pairs <- match_blocks_for_exchangeable_indicator(
       blocks,
       idiff,
@@ -1099,7 +1119,7 @@ match_exchangeable_residual_blocks <- function(
   }
   if (anyDuplicated(shared_block_indices)) {
     stop(
-      "A shared block matched more than one difference block. Supply `pairs` ",
+      "A shared block matched more than one difference block. Supply `block_pairings` ",
       "explicitly so that each shared block is assigned only once.",
       call. = FALSE
     )
@@ -1216,8 +1236,8 @@ canonicalize_exchangeable_block_term <- function(term) {
 
 # Normalize the convenient single-pair form and the general list-of-pairs form
 # to one validated internal representation.
-normalize_supplied_exchangeable_pairs <- function(pairs) {
-  required_names <- c("shared", "difference")
+normalize_supplied_exchangeable_pairs <- function(block_pairings) {
+  required_names <- c("shared_block", "difference_block")
   allowed_names <- c(
     required_names,
     "difference_indicator",
@@ -1233,30 +1253,30 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
     paste0("`", fields, "`", collapse = ", ")
   }
 
-  if (!is.list(pairs) || length(pairs) == 0L) {
+  if (!is.list(block_pairings) || length(block_pairings) == 0L) {
     stop(
-      "`pairs` must be one named block pair or a list of named block pairs.",
+      "`block_pairings` must be one named block pairing or a list of named block pairings.",
       call. = FALSE
     )
   }
 
   # 1. A top-level list of fields describes one pair; otherwise each top-level
   # element must itself describe one pair.
-  pair_names <- names(pairs)
+  pair_names <- names(block_pairings)
   has_top_level_names <- !is.null(pair_names) && any(nzchar(pair_names))
-  all_values_are_lists <- all(vapply(pairs, is.list, logical(1L)))
+  all_values_are_lists <- all(vapply(block_pairings, is.list, logical(1L)))
   looks_like_single_pair <- has_top_level_names && !all_values_are_lists
 
   if (looks_like_single_pair) {
-    pair_specs <- list(pairs)
-    pair_labels <- "`pairs`"
+    pair_specs <- list(block_pairings)
+    pair_labels <- "`block_pairings`"
   } else {
-    pair_specs <- pairs
-    pair_labels <- paste0("`pairs[[", seq_along(pair_specs), "]]`")
+    pair_specs <- block_pairings
+    pair_labels <- paste0("`block_pairings[[", seq_along(pair_specs), "]]`")
     if (!is.null(names(pair_specs))) {
-      named <- nzchar(names(pair_specs))
+      named <- !is.na(names(pair_specs)) & nzchar(names(pair_specs))
       pair_labels[named] <- paste0(
-        "`pairs[[\"", names(pair_specs)[named], "\"]]`"
+        "`block_pairings[[\"", names(pair_specs)[named], "\"]]`"
       )
     }
   }
@@ -1274,8 +1294,8 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
     }
     if (is.null(names(pair)) || any(!nzchar(names(pair)))) {
       stop(
-        pair_label, " must be a named list with fields `shared` ",
-        "and `difference`, plus `difference_indicator` when a difference ",
+        pair_label, " must be a named list with fields `shared_block` ",
+        "and `difference_block`, plus `difference_indicator` when a difference ",
         "block is supplied. `shared_indicator` is optional.",
         call. = FALSE
       )
@@ -1314,7 +1334,7 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
     # 3. Fill and validate indicator names. The ordinary shared intercept uses
     # the special default `shared_indicator = "1"`.
     if (
-      !is.null(pair$difference) &&
+      !is.null(pair$difference_block) &&
         (
           !"difference_indicator" %in% names(pair) ||
             is.null(pair$difference_indicator)
@@ -1371,7 +1391,7 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
     }
 
     # 4. Validate the two block selectors and forbid an entirely empty pair.
-    for (field in c("shared", "difference")) {
+    for (field in c("shared_block", "difference_block")) {
       selector <- pair[[field]]
       if (!is.null(selector) && !is_nonempty_string(selector)) {
         stop(
@@ -1382,15 +1402,33 @@ normalize_supplied_exchangeable_pairs <- function(pairs) {
         )
       }
     }
-    if (is.null(pair$shared) && is.null(pair$difference)) {
+    if (is.null(pair$shared_block) && is.null(pair$difference_block)) {
       stop(pair_label,
-        " cannot set both `shared` and `difference` to `NULL`; supply at ",
+        " cannot set both `shared_block` and `difference_block` to `NULL`; supply at ",
         "least one fitted random-effect block.",
         call. = FALSE
       )
     }
     pair_specs[[i]] <- pair
   }
+
+  # Preserve supplied outer names and fill only unnamed positions with stable
+  # positional labels. Validate the final access paths before model matching.
+  final_names <- names(pair_specs)
+  if (is.null(final_names)) {
+    final_names <- rep("", length(pair_specs))
+  }
+  unnamed <- is.na(final_names) | !nzchar(final_names)
+  final_names[unnamed] <- paste0("pair_", which(unnamed))
+  if (anyDuplicated(final_names)) {
+    duplicated_names <- unique(final_names[duplicated(final_names)])
+    stop(
+      "`block_pairings` must have unique final names. Duplicated name(s): ",
+      paste(duplicated_names, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  names(pair_specs) <- final_names
   attr(pair_specs, "pair_labels") <- pair_labels
   return(pair_specs)
 }
@@ -1502,18 +1540,18 @@ match_one_supplied_exchangeable_pair <- function(
   group_ids = NULL
 ) {
   pair_reference <- substr(pair_label, 1L, nchar(pair_label) - 1L)
-  shared_field_label <- paste0(pair_reference, "$shared`")
-  difference_field_label <- paste0(pair_reference, "$difference`")
+  shared_field_label <- paste0(pair_reference, "$shared_block`")
+  difference_field_label <- paste0(pair_reference, "$difference_block`")
 
   # 1. Resolve the two user selectors to extracted block positions. `NULL`
   # becomes `NA`, so one fitted component is enough to define a pair.
   shared_block_index <- resolve_exchangeable_block_selector(
-    pair$shared,
+    pair$shared_block,
     shared_field_label,
     block_lookup
   )
   difference_block_index <- resolve_exchangeable_block_selector(
-    pair$difference,
+    pair$difference_block,
     difference_field_label,
     block_lookup
   )
@@ -1534,7 +1572,6 @@ match_one_supplied_exchangeable_pair <- function(
     ),
     pair_label
   )
-
   reference_block_index <- fitted_block_indices[[1L]]
   pair_group <- blocks[[reference_block_index]]$group
 
@@ -1621,13 +1658,13 @@ match_one_supplied_exchangeable_pair <- function(
 
 match_supplied_exchangeable_residual_blocks <- function(
   blocks,
-  pairs,
+  block_pairings,
   model_frame = NULL,
   group_ids = NULL
 ) {
   # 1. Normalize pair specifications and prepare exact and canonical block
   # labels for selector lookup.
-  pair_specs <- normalize_supplied_exchangeable_pairs(pairs)
+  pair_specs <- normalize_supplied_exchangeable_pairs(block_pairings)
   pair_labels <- attr(pair_specs, "pair_labels")
   term_labels <- vapply(blocks, `[[`, character(1L), "term")
   block_lookup <- list(
@@ -1706,12 +1743,12 @@ match_supplied_exchangeable_residual_blocks <- function(
   # fitted blocks because no indicator name was supplied.
   for (i in seq_along(pair_specs)) {
     if (
-      is.null(pair_specs[[i]]$difference) &&
+      is.null(pair_specs[[i]]$difference_block) &&
         is.null(pair_specs[[i]]$difference_indicator)
     ) {
       warning(
         paste0(substr(pair_labels[[i]], 1L, nchar(pair_labels[[i]]) - 1L),
-          "$difference`"),
+          "$difference_block`"),
         " is `NULL`, and no `difference_indicator` was supplied, so the ",
         "fitted model could not be checked for a corresponding difference ",
         "block. The block will be treated as omitted. Use `NULL` only if ",
@@ -1798,7 +1835,7 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
           "For `brms`, if this pair is intended to model residual dependence, ",
           "the model should usually be refitted with a direct ",
           "`unstr(time = member_position, gr = residual_group)` ",
-          "structure. See `?exchangeable_rescov`."
+          "structure. See `?recover_exchangeable_covariance`."
         ))
       } else {
         details <- c(details, paste0(
@@ -1806,7 +1843,7 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
           "`unstr()` structures. Use `glmmTMB` for Gaussian mixed-dyad ",
           "residual covariance. For non-Gaussian outcomes, these blocks ",
           "instead describe latent link-scale covariance. ",
-          "See `?exchangeable_rescov`."
+          "See `?recover_exchangeable_covariance`."
         ))
       }
     }
@@ -2074,7 +2111,7 @@ glmmTMB_extract_exchangeable_residual_blocks <- function(model) {
     warning(
       "Random effects in non-conditional `glmmTMB` components were ignored (",
       paste(ignored_components, collapse = ", "),
-      "); `exchangeable_rescov()` only processes conditional-model random ",
+      "); `recover_exchangeable_covariance()` only processes conditional-model random ",
       "effects. See 'Extension to exchangeable random slopes' in ",
       "`vignette(\"apim\", package = \"dyadMLM\")` for the manual calculation.",
       call. = FALSE
@@ -2206,7 +2243,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
   if (any(unsupported_parameter_rows)) {
     warning(
       "Random effects for distributional or nonlinear parameters were ",
-      "ignored; `exchangeable_rescov()` only processes ordinary response-mean ",
+      "ignored; `recover_exchangeable_covariance()` only processes ordinary response-mean ",
       "random effects.",
       call. = FALSE
     )
@@ -2223,7 +2260,7 @@ brms_extract_exchangeable_residual_blocks <- function(model) {
     stop(
       "Random-effect terms using `gr(..., by = ...)` are not supported. Refit ",
       "the exchangeable blocks without `by` before using ",
-      "`exchangeable_rescov()`.",
+      "`recover_exchangeable_covariance()`.",
       call. = FALSE
     )
   }

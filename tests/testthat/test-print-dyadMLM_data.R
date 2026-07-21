@@ -30,7 +30,7 @@ test_that("dyadMLM data prints a header before the tibble", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -54,7 +54,7 @@ test_that("dyadMLM data header and structure wrap to console width", {
 
   result <- prepare_dyad_data(
     data,
-    group = very_long_dyad_identifier,
+    dyad = very_long_dyad_identifier,
     member = very_long_member_identifier,
     role = very_long_role_identifier,
     seed = 123
@@ -65,7 +65,7 @@ test_that("dyadMLM data header and structure wrap to console width", {
   expect_true(any(grepl("# Rows: 4 | Dyads: 2", printed, fixed = TRUE)))
   expect_true(any(grepl("#       Intensive longitudinal: no", printed, fixed = TRUE)))
   expect_true(any(grepl("# Structure:", printed, fixed = TRUE)))
-  expect_true(any(grepl("#   group = very_long_dyad_identifier", printed, fixed = TRUE)))
+  expect_true(any(grepl("#   dyad = very_long_dyad_identifier", printed, fixed = TRUE)))
   expect_true(any(grepl("#   member = very_long_member_identifier", printed, fixed = TRUE)))
   expect_true(any(grepl("#   role = very_long_role_identifier", printed, fixed = TRUE)))
 })
@@ -79,7 +79,7 @@ test_that("dyadMLM data prints dropped incomplete dyads", {
   expect_message(
     result <- prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       incomplete_dyads = "drop",
       seed = 123
@@ -125,7 +125,7 @@ test_that("dyadMLM data print describes generated predictor columns", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
     seed = 123
@@ -134,11 +134,11 @@ test_that("dyadMLM data print describes generated predictor columns", {
   printed <- capture_wide_print(result)
 
   expect_false(any(grepl("sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_diff_{comp}", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_member_contrast_{comp}", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_diff_{comp}",
-    "composition-specific sum-diff contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
+    ".dy_member_contrast_{comp}_arbitrary",
+    "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
   )
   expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
   expect_added_column_description(
@@ -183,7 +183,7 @@ test_that("dyadMLM data print does not describe removed generated model column f
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
     seed = 123
@@ -195,7 +195,7 @@ test_that("dyadMLM data print does not describe removed generated model column f
 
   expect_false(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
   expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_diff_{comp}", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dy_member_contrast_{comp}", printed, fixed = TRUE)))
 })
 
 test_that("dyadMLM data print describes longitudinal APIM columns", {
@@ -208,7 +208,7 @@ test_that("dyadMLM data print describes longitudinal APIM columns", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
@@ -249,12 +249,12 @@ test_that("dyadMLM data print orders generated column descriptions", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time,
     predictors = x,
-    model_type = c("apim", "dsm"),
+    model_types = c("apim", "dsm"),
     dsm_role_order = c("female", "male"),
     seed = 123
   )
@@ -277,7 +277,7 @@ test_that("dyadMLM data print collapses repeated generated column types", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = c(x, z),
@@ -306,7 +306,7 @@ test_that("dyadMLM data print does not describe removed temporal source columns"
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
@@ -331,10 +331,10 @@ test_that("dyadMLM data print describes cross-sectional DIM columns", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = "dim",
+    model_types = "dim",
     seed = 123
   )
 
@@ -364,11 +364,11 @@ test_that("dyadMLM data print describes longitudinal DIM columns", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    model_type = "dim",
+    model_types = "dim",
     seed = 123
   )
 
@@ -414,12 +414,12 @@ test_that("dyadMLM data print describes longitudinal DSM predictors", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male"),
     seed = 123
   )
@@ -448,10 +448,10 @@ test_that("dyadMLM data print combines APIM and DIM column descriptions", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = c("apim", "dim"),
+    model_types = c("apim", "dim"),
     seed = 123
   )
 
@@ -474,11 +474,11 @@ test_that("dyadMLM data print combines APIM and DSM predictors", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = c("apim", "dsm"),
+    model_types = c("apim", "dsm"),
     dsm_role_order = c("female", "male"),
     seed = 123
   )
@@ -505,7 +505,7 @@ test_that("dyadMLM data print describes dropped dyads with missing role informat
   expect_message(
     result <- prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
       missing_role = "drop",
@@ -534,7 +534,7 @@ test_that("dyadMLM data print truncates many dropped incomplete dyad IDs", {
   suppressMessages(
     result <- prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       incomplete_dyads = "drop",
       seed = 123
@@ -557,7 +557,7 @@ test_that("dyadMLM data print includes role and time in structure line", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = day,
@@ -567,7 +567,7 @@ test_that("dyadMLM data print includes role and time in structure line", {
   printed <- capture_wide_print(result)
 
   expect_true(any(grepl(
-    "# Structure: group = dyad_id, member = person_id, role = role, time = day",
+    "# Structure: dyad = dyad_id, member = person_id, role = role, time = day",
     printed,
     fixed = TRUE
   )))
@@ -582,7 +582,7 @@ test_that("dyadMLM data print describes mixed dyad types", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     seed = 123
@@ -605,7 +605,7 @@ test_that("dyadMLM data print marks dyad types set by user", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     set_exchangeable_compositions = "female-male",
@@ -629,7 +629,7 @@ test_that("dyadMLM data print describes pooled compositions", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     set_exchangeable_compositions = "female-male",

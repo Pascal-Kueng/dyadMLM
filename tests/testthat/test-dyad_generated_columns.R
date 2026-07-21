@@ -31,10 +31,10 @@ test_that("dyad_generated_columns collects APIM columns", {
 
   prepared <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    temporal_predictor_decomposition = "none",
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -73,11 +73,11 @@ test_that("dyad_generated_columns excludes raw temporal predictor records", {
 
   prepared <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = "none",
-    temporal_predictor_decomposition = "none",
+    model_types = "none",
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -96,7 +96,7 @@ test_that("dyad_generated_columns records temporal decomposition for APIM column
 
   prepared <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
@@ -180,11 +180,11 @@ test_that("dyad_generated_columns collects DIM columns", {
 
   prepared <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
+    model_types = "dim",
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -224,11 +224,11 @@ test_that("dyad_generated_columns records temporal and dyadic decomposition for 
 
   prepared <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    model_type = "dim",
+    model_types = "dim",
     seed = 123
   )
 
@@ -283,11 +283,11 @@ test_that("dyad_generated_columns combines requested model families", {
 
   prepared <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = c("apim", "dim"),
-    temporal_predictor_decomposition = "none",
+    model_types = c("apim", "dim"),
+    temporal_decomposition = "none",
     seed = 123
   )
 
@@ -313,13 +313,13 @@ test_that("dyad_generated_columns collects DSM columns", {
 
   prepared <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male"),
-    temporal_predictor_decomposition = "none",
+    temporal_decomposition = "none",
     seed = 123
   )
 

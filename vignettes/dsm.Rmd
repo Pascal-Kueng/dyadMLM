@@ -54,11 +54,11 @@ Here, `c("female", "male")` defines every difference as female minus male.
 ```{r prepare-cross-dsm}
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "dsm",
+  model_types = "dsm",
   dsm_role_order = c("female", "male")
 )
 
@@ -266,12 +266,12 @@ changes the direction of the differences, but not the substantive model.
 ```{r prepare-cross-dsm-inverted}
 cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
   # Request APIM columns too for comparison below.
-  model_type = c("dsm", "apim"),
+  model_types = c("dsm", "apim"),
   dsm_role_order = c("male", "female")
 )
 ```
@@ -603,8 +603,8 @@ For exchangeable dyads, the direction of a member difference is arbitrary.
 The directional intercept, both cross-paths, and the covariance between outcome
 level and outcome difference must then be zero. The remaining reduced,
 label-invariant DSM is algebraically the Gaussian Dyad-Individual Model (DIM).
-In `dyadMLM`, use `model_type = "dim"` for this exchangeable model and reserve
-`model_type = "dsm"` for distinguishable dyads.
+In `dyadMLM`, use `model_types = "dim"` for this exchangeable model and reserve
+`model_types = "dsm"` for distinguishable dyads.
 
 Because the Gaussian DIM is the exchangeability-constrained version of the full
 DSM, exchangeability can also be tested by comparing these nested models. This
@@ -624,12 +624,12 @@ Brief example of ILD DSM:
 ```{r prepare-ild-dsm}
 ild_dsm_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   time = diaryday,
   predictors = provided_support,
-  model_type = "dsm",
+  model_types = "dsm",
   dsm_role_order = c("female", "male")
 )
 

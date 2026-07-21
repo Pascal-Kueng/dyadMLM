@@ -15,7 +15,7 @@ updated predictor metadata.
 }
 \description{
 Adds lag-1 raw and within-person columns for predictors selected through
-\code{lag_predictors}. Values are matched at exactly \code{time - 1}, so construction
+\code{lag1_predictors}. Values are matched at exactly \code{time - 1}, so construction
 does not depend on row order and does not bridge gaps in the measurement
 index. Stable between-person components are not lagged.
 }

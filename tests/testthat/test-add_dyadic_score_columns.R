@@ -9,13 +9,13 @@ test_that("DSM constructs directional cross-sectional predictor scores", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male"),
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   )
 
   expect_equal(result$.dy_dsm_role_contrast, c(-0.5, 0.5, 0.5, -0.5))
@@ -51,20 +51,20 @@ test_that("reversing DSM role order reverses directional columns only", {
 
   female_minus_male <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
   male_minus_female <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("male", "female")
   )
 
@@ -92,11 +92,11 @@ test_that("DSM columns reproduce APIM fixed and random effects", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = c("apim", "dsm"),
+    model_types = c("apim", "dsm"),
     dsm_role_order = c("female", "male")
   )
 
@@ -174,11 +174,11 @@ test_that("DSM requires both predictor values for dyadic scores", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
 
@@ -196,10 +196,10 @@ test_that("DSM creates a role contrast without predictors", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
 
@@ -237,11 +237,11 @@ test_that("DSM keeps multiple predictors and metadata aligned", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = c(x, `stress level`),
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
 
@@ -271,12 +271,12 @@ test_that("DSM constructs longitudinal raw, CWP, and CBP scores", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
 
@@ -305,12 +305,12 @@ test_that("DSM returns missing CWP scores for an incomplete predictor pair", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male")
   )
 
@@ -339,11 +339,11 @@ test_that("DSM and APIM predictor columns can coexist", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = c("apim", "dsm"),
+    model_types = c("apim", "dsm"),
     dsm_role_order = c("female", "male")
   )
 
@@ -367,14 +367,14 @@ test_that("DSM constructs raw longitudinal predictor scores", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time,
     predictors = x,
-    model_type = "dsm",
+    model_types = "dsm",
     dsm_role_order = c("female", "male"),
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   )
 
   expect_equal(result$.dy_x_dyad_mean_gmc, rep(c(-4, -1, 1, 4), each = 2))

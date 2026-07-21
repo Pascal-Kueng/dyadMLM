@@ -6,15 +6,15 @@
 \usage{
 validate_dyad_data(
   data,
-  group,
+  dyad,
   member,
   role = NULL,
   time = NULL,
   predictors = NULL,
-  lag_predictors = NULL,
-  model_type = "apim",
+  lag1_predictors = NULL,
+  model_types = "apim",
   dsm_role_order = NULL,
-  temporal_predictor_decomposition = c("auto", "time_2l", "none"),
+  temporal_decomposition = c("auto", "2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
 )
@@ -22,49 +22,55 @@ validate_dyad_data(
 \arguments{
 \item{data}{A long-format data frame or tibble.}
 
-\item{group}{Column identifying the dyad.}
+\item{dyad}{Column identifying the dyad.}
 
 \item{member}{Column identifying the two people or members within each dyad,
 such as a person ID.}
 
-\item{role}{Optional column identifying role that can be used to distinguish
-partners within a dyad, such as gender. If no role is supplied, all dyads
-in the data are treated as exchangeable.}
+\item{role}{Optional column identifying a stable member role, such as gender.
+Non-missing values must be consistent within each \code{dyad} x \code{member}. In
+repeated-measures data, an observed role is propagated to missing rows for
+the same member within a dyad. If no role is supplied, all dyads are
+treated as exchangeable.}
 
 \item{time}{Optional column identifying time or measurement order.}
 
 \item{predictors}{Optional variables to select and store as metadata for
 temporal predictor decomposition and model-helper functions.}
 
-\item{lag_predictors}{Optional subset of \code{predictors} for which lag-1
+\item{lag1_predictors}{Optional subset of \code{predictors} for which lag-1
 model-ready columns should be created. Requires a finite, integer-valued
 numeric \code{time} variable.}
 
-\item{model_type}{Requested model-ready column families. Can contain one or
+\item{model_types}{Requested model-ready column families. Can contain one or
 more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"none"} indicates no
 model-specific predictor construction and must be used alone.}
 
-\item{dsm_role_order}{For \code{model_type = "dsm"}, a character vector giving
+\item{dsm_role_order}{For \code{model_types = "dsm"}, a character vector giving
 the two distinguishable roles in the order used for directional
 differences. Required when DSM columns are requested and must be \code{NULL}
 otherwise.}
 
-\item{temporal_predictor_decomposition}{Requested temporal predictor decomposition
+\item{temporal_decomposition}{Requested temporal predictor decomposition
 strategy for predictors. \code{"none"} leaves predictors undecomposed before
-model-specific columns are constructed. \code{"time_2l"} indicates a two-level
+model-specific columns are constructed. \code{"2l"} indicates a two-level
 temporal predictor decomposition into within-person and between-person
-components. \code{"auto"} resolves to \code{"time_2l"} when both \code{time} and
+components. \code{"auto"} resolves to \code{"2l"} when both \code{time} and
 \code{predictors} are supplied, and to \code{"none"} otherwise.
 Model-specific helpers may apply additional conventions, such as grand-mean
 centering raw DIM and DSM dyad means.}
 
-\item{incomplete_dyads}{How to handle dyads that do not contain exactly two
-unique members anywhere in the data. \code{"error"} stops with an error and
-\code{"drop"} removes the entire dyad.}
+\item{incomplete_dyads}{How to handle dyads with fewer than two unique
+members across all rows in \code{data}. \code{"error"} stops with an error and
+\code{"drop"} removes the entire dyad. A dyad with more than two unique members
+is invalid and always causes an error, regardless of this setting.}
 
-\item{missing_role}{How to handle missing values in the \code{role} column.
-\code{"error"} stops with an error, \code{"drop"} removes dyads with incomplete role
-information. Ignored when no \code{role} column is supplied.}
+\item{missing_role}{How to handle dyads in which at least one member has no
+non-missing \code{role} value on any row. A consistent non-missing role observed
+for a member is propagated to that member's other rows before this policy
+is applied. \code{"error"} stops with an error and \code{"drop"} removes the entire
+dyad. Conflicting non-missing roles always cause an error. Ignored when no
+\code{role} column is supplied.}
 }
 \value{
 A tibble with class \code{dyadMLM_data} and metadata about the dyad,

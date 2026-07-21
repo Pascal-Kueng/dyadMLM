@@ -11,7 +11,7 @@ test_that("prepare_dyad_data returns validated data with dyad composition metada
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     seed = 123
@@ -21,7 +21,7 @@ test_that("prepare_dyad_data returns validated data with dyad composition metada
   expect_s3_class(result, "tbl_df")
 
   meta <- attr(result, "dyadMLM")
-  expect_equal(meta$group, "dyad_id")
+  expect_equal(meta$dyad, "dyad_id")
   expect_equal(meta$member, "person_id")
   expect_equal(meta$role, "role")
   expect_equal(meta$n_dyads, 3L)
@@ -62,10 +62,10 @@ test_that("prepare_dyad_data returns validated data with dyad composition metada
       "female_x_female", "female_x_female",
       "male_x_male", "male_x_male")
   )
-  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(result))
-  expect_true(".dy_diff_male_x_male_arbitrary" %in% names(result))
-  expect_false(".dy_diff_female_x_female" %in% names(result))
-  expect_false(".dy_diff_male_x_male" %in% names(result))
+  expect_true(".dy_member_contrast_female_x_female_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_male_x_male_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_female_x_female" %in% names(result))
+  expect_false(".dy_member_contrast_male_x_male" %in% names(result))
 })
 
 test_that("prepare_dyad_data stores predictor metadata", {
@@ -79,7 +79,7 @@ test_that("prepare_dyad_data stores predictor metadata", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = c(x, z),
@@ -99,7 +99,7 @@ test_that("prepare_dyad_data centers longitudinal predictors", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
@@ -110,12 +110,12 @@ test_that("prepare_dyad_data centers longitudinal predictors", {
   expect_true(".dy_x_cbp" %in% names(result))
   expect_equal(result$.dy_x_cwp, c(-1, -1, 1, 1, -1, -1, 1, 1))
   expect_equal(
-    attr(result, "dyadMLM")$temporal_predictor_decompositions,
+    attr(result, "dyadMLM")$temporal_decompositions,
     tibble::tibble(
       predictor = c("x", "x", "x"),
       component = c("raw", "cwp", "cbp"),
       column = c("x", ".dy_x_cwp", ".dy_x_cbp"),
-      temporal_predictor_decomposition = c("none", "time_2l", "time_2l"),
+      temporal_decomposition = c("none", "2l", "2l"),
       lag = c(0L, 0L, 0L)
     )
   )
@@ -130,15 +130,15 @@ test_that("prepare_dyad_data constructs multiple requested model column families
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    model_type = c("apim", "dim"),
-    temporal_predictor_decomposition = "none",
+    model_types = c("apim", "dim"),
+    temporal_decomposition = "none",
     seed = 123
   )
 
-  expect_equal(attr(result, "dyadMLM")$model_type, c("apim", "dim"))
+  expect_equal(attr(result, "dyadMLM")$model_types, c("apim", "dim"))
   expect_true(".dy_x_actor" %in% names(result))
   expect_true(".dy_x_partner" %in% names(result))
   expect_true(".dy_x_dyad_mean_gmc" %in% names(result))
@@ -156,9 +156,9 @@ test_that("prepare_dyad_data rejects unsupported model types", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
-      model_type = "asdkfjakdfj"
+      model_types = "asdkfjakdfj"
     ),
     'Invalid value(s): "asdkfjakdfj".',
     fixed = TRUE
@@ -175,19 +175,19 @@ test_that("prepare_dyad_data can set a distinguishable composition exchangeable 
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
+    model_types = "dim",
+    temporal_decomposition = "none",
     set_exchangeable_compositions = "male-female",
     seed = 123
   )
 
   expect_equal(attr(result, "dyadMLM")$dyad_compositions$dyad_type, "exchangeable")
-  expect_true(".dy_diff_female_x_male_arbitrary" %in% names(result))
-  expect_false(".dy_diff_female_x_male" %in% names(result))
+  expect_true(".dy_member_contrast_female_x_male_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_female_x_male" %in% names(result))
   expect_true(".dy_x_dyad_mean_gmc" %in% names(result))
   expect_true(".dy_x_within_dyad_dev" %in% names(result))
 })
@@ -202,12 +202,12 @@ test_that("prepare_dyad_data can pool exchangeable compositions for DIM", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
+    model_types = "dim",
+    temporal_decomposition = "none",
     set_exchangeable_compositions = "female-male",
     pool_compositions = list(romantic_couples = c("female-female", "male-male", "female-male")),
     seed = 123
@@ -223,8 +223,8 @@ test_that("prepare_dyad_data can pool exchangeable compositions for DIM", {
     dyad_compositions$pooled_from,
     "female_x_female, female_x_male, male_x_male"
   )
-  expect_true(".dy_diff_romantic_couples_arbitrary" %in% names(result))
-  expect_false(".dy_diff_romantic_couples" %in% names(result))
+  expect_true(".dy_member_contrast_romantic_couples_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_romantic_couples" %in% names(result))
   expect_true(".dy_x_dyad_mean_gmc" %in% names(result))
   expect_true(".dy_x_within_dyad_dev" %in% names(result))
 })
@@ -235,16 +235,16 @@ test_that("prepare_dyad_data treats data without role as assumed exchangeable dy
     person_id = c("A", "B", "C", "D")
   )
 
-  result <- prepare_dyad_data(data, group = dyad_id, member = person_id, seed = 123)
+  result <- prepare_dyad_data(data, dyad = dyad_id, member = person_id, seed = 123)
 
   expect_false(".dy_raw_composition" %in% names(result))
   expect_true(is.factor(result$.dy_composition))
   expect_true(is.factor(result$.dy_composition_role))
   expect_true(".dy_is_assumed_exchangeable" %in% names(result))
   expect_false(".dy_diff" %in% names(result))
-  expect_true(".dy_diff_assumed_exchangeable_arbitrary" %in% names(result))
-  expect_false(".dy_diff_arbitrary" %in% names(result))
-  expect_false(".dy_diff_assumed_exchangeable" %in% names(result))
+  expect_true(".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_assumed_exchangeable" %in% names(result))
   expect_equal(as.character(result$.dy_composition), rep("assumed_exchangeable", 4))
   expect_equal(
     as.character(result$.dy_composition_role),
@@ -271,19 +271,19 @@ test_that("prepare_dyad_data errors when setting compositions exchangeable witho
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
-      include_compositions = "female-male",
+      keep_compositions = "female-male",
       seed = 123
     ),
-    "`include_compositions` requires `role` to be supplied.",
+    "`keep_compositions` requires `role` to be supplied.",
     fixed = TRUE
   )
 
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       set_exchangeable_compositions = "female-male",
       seed = 123
@@ -302,7 +302,7 @@ test_that("prepare_dyad_data errors when pooling compositions without role", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       pool_compositions = list(couples = "female-male"),
       seed = 123
@@ -312,7 +312,7 @@ test_that("prepare_dyad_data errors when pooling compositions without role", {
   )
 })
 
-test_that("prepare_dyad_data validates include_compositions", {
+test_that("prepare_dyad_data validates keep_compositions", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -322,36 +322,36 @@ test_that("prepare_dyad_data validates include_compositions", {
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      include_compositions = character()
+      keep_compositions = character()
     ),
-    "`include_compositions` must contain at least one dyad composition.",
+    "`keep_compositions` must contain at least one dyad composition.",
     fixed = TRUE
   )
 
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      include_compositions = list("female-male")
+      keep_compositions = list("female-male")
     ),
-    "`include_compositions` must be a character vector",
+    "`keep_compositions` must be a character vector",
     fixed = TRUE
   )
 
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      include_compositions = "female-female"
+      keep_compositions = "female-female"
     ),
-    "`include_compositions` contains unknown dyad composition",
+    "`keep_compositions` contains unknown dyad composition",
     fixed = TRUE
   )
 })
@@ -370,11 +370,11 @@ test_that("prepare_dyad_data filters included compositions before finalizing met
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time,
-    include_compositions = c("female-female", "male-male"),
+    keep_compositions = c("female-female", "male-male"),
     seed = 123
   )
 
@@ -394,20 +394,20 @@ test_that("prepare_dyad_data filters included compositions before finalizing met
   expect_equal(levels(result$.dy_composition_role), c("female_x_female", "male_x_male"))
   expect_true(".dy_is_female_x_female" %in% names(result))
   expect_true(".dy_is_male_x_male" %in% names(result))
-  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(result))
-  expect_true(".dy_diff_male_x_male_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_female_x_female_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_male_x_male_arbitrary" %in% names(result))
   expect_false(any(grepl("female_x_male", names(result), fixed = TRUE)))
 
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
       time = time,
-      include_compositions = "female-female"
+      keep_compositions = "female-female"
     ),
-    "`include_compositions` must leave at least two complete dyads after filtering.",
+    "`keep_compositions` must leave at least two complete dyads after filtering.",
     fixed = TRUE
   )
 })
@@ -423,13 +423,13 @@ test_that("prepare_dyad_data filters before DIM compatibility checks", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
-    include_compositions = "female-female",
+    model_types = "dim",
+    temporal_decomposition = "none",
+    keep_compositions = "female-female",
     seed = 123
   )
 
@@ -459,13 +459,13 @@ test_that("prepare_dyad_data can filter, constrain, and pool in one call", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     predictors = x,
-    model_type = "dim",
-    temporal_predictor_decomposition = "none",
-    include_compositions = c("female-female", "male-male", "female-male"),
+    model_types = "dim",
+    temporal_decomposition = "none",
+    keep_compositions = c("female-female", "male-male", "female-male"),
     set_exchangeable_compositions = "female-male",
     pool_compositions = list(
       romantic_couples = c("female-female", "male-male", "female-male")
@@ -486,13 +486,13 @@ test_that("prepare_dyad_data can filter, constrain, and pool in one call", {
   expect_equal(dyad_compositions$n_dyads, 3L)
   expect_equal(levels(result$.dy_composition), "romantic_couples")
   expect_false(any(grepl("nonbinary", names(result), fixed = TRUE)))
-  expect_true(".dy_diff_romantic_couples_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_romantic_couples_arbitrary" %in% names(result))
   expect_true(".dy_x_dyad_mean_gmc" %in% names(result))
   expect_true(".dy_x_within_dyad_dev" %in% names(result))
   expect_equal(attr(result, "dyadMLM")$dim_predictors$predictor, "x")
 })
 
-test_that("prepare_dyad_data applies include_compositions before constraining and pooling", {
+test_that("prepare_dyad_data applies keep_compositions before constraining and pooling", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2, 3, 3),
     person_id = c("A", "B", "C", "D", "E", "F"),
@@ -502,28 +502,28 @@ test_that("prepare_dyad_data applies include_compositions before constraining an
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      include_compositions = c("female-female", "male-male"),
+      keep_compositions = c("female-female", "male-male"),
       set_exchangeable_compositions = "female-male",
       seed = 123
     ),
-    "`include_compositions` filters out composition(s) that are later referenced by `set_exchangeable_compositions` or `pool_compositions`: female_x_male. Add them to `include_compositions` or remove them from the later argument.",
+    "`keep_compositions` filters out composition(s) that are later referenced by `set_exchangeable_compositions` or `pool_compositions`: female_x_male. Add them to `keep_compositions` or remove them from the later argument.",
     fixed = TRUE
   )
 
   expect_error(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
-      include_compositions = c("female-female", "male-male"),
+      keep_compositions = c("female-female", "male-male"),
       pool_compositions = list(couples = c("female-female", "female-male")),
       seed = 123
     ),
-    "`include_compositions` filters out composition(s) that are later referenced by `set_exchangeable_compositions` or `pool_compositions`: female_x_male. Add them to `include_compositions` or remove them from the later argument.",
+    "`keep_compositions` filters out composition(s) that are later referenced by `set_exchangeable_compositions` or `pool_compositions`: female_x_male. Add them to `keep_compositions` or remove them from the later argument.",
     fixed = TRUE
   )
 })
@@ -536,7 +536,7 @@ test_that("prepare_dyad_data rejects reserved dyadMLM columns", {
   )
 
   expect_error(
-    prepare_dyad_data(data, group = dyad_id, member = person_id),
+    prepare_dyad_data(data, dyad = dyad_id, member = person_id),
     "columns starting with `.dy_`",
     fixed = TRUE
   )
@@ -548,10 +548,10 @@ test_that("prepare_dyad_data rejects data that is already prepared", {
     person_id = c("A", "B", "C", "D")
   )
 
-  prepared <- prepare_dyad_data(data, group = dyad_id, member = person_id, seed = 123)
+  prepared <- prepare_dyad_data(data, dyad = dyad_id, member = person_id, seed = 123)
 
   expect_error(
-    prepare_dyad_data(prepared, group = dyad_id, member = person_id, seed = 123),
+    prepare_dyad_data(prepared, dyad = dyad_id, member = person_id, seed = 123),
     "`data` has already been prepared by dyadMLM.",
     fixed = TRUE
   )
@@ -565,7 +565,7 @@ test_that("prepare_dyad_data rejects role labels containing the internal separat
   )
 
   expect_error(
-    prepare_dyad_data(data, group = dyad_id, member = person_id, role = role),
+    prepare_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
     "`role` values must not contain `_x_`",
     fixed = TRUE
   )
@@ -584,7 +584,7 @@ test_that("prepare_dyad_data rejects empty role labels", {
   )) {
     data$role <- roles
     expect_error(
-      prepare_dyad_data(data, group = dyad_id, member = person_id, role = role),
+      prepare_dyad_data(data, dyad = dyad_id, member = person_id, role = role),
       "`role` values must not be empty or whitespace-only",
       fixed = TRUE
     )
@@ -601,7 +601,7 @@ test_that("prepare_dyad_data infers compositions from sparse longitudinal roles"
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time

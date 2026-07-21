@@ -28,6 +28,6 @@ A simulated cross-sectional long-format dataset for distinguishable dyads.
 Each dyad contributes one row per member.
 }
 \details{
-Prepare with \code{group = coupleID}, \code{member = personID}, and \code{role = gender}.
+Prepare with \code{dyad = coupleID}, \code{member = personID}, and \code{role = gender}.
 }
 \keyword{datasets}

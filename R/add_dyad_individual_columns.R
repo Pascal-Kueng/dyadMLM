@@ -19,7 +19,7 @@
 #' Selected lag predictors additionally create lag-1 raw and within-person
 #' dyad-mean and within-dyad member-deviation columns.
 #'
-#' The function reads `attr(data, "dyadMLM")$temporal_predictor_decompositions` and
+#' The function reads `attr(data, "dyadMLM")$temporal_decompositions` and
 #' stores the constructed DIM columns in
 #' `attr(data, "dyadMLM")$dim_predictors`.
 #'
@@ -40,20 +40,20 @@ add_dyad_individual_columns <- function(data) {
 
   validate_dim_compatibility(data)
 
-  decomposition <- construct_dyad_predictor_decompositions(data)
+  decomposition <- construct_dyad_predictor_decompositions(data, "dim")
   out <- decomposition$data
   attr(out, "dyadMLM")$dim_predictors <- decomposition$predictors
 
   out
 }
 
-construct_dyad_predictor_decompositions <- function(data) {
+construct_dyad_predictor_decompositions <- function(data, model_family = "dim") {
   meta_data <- attr(data, "dyadMLM")
-  group <- meta_data$group
+  group <- meta_data$dyad
   member <- meta_data$member
   has_time <- meta_data$longitudinal
   time <- meta_data$time
-  temporal_decompositions <- meta_data$temporal_predictor_decompositions
+  temporal_decompositions <- meta_data$temporal_decompositions
 
   predictors <- tibble::tibble(
     predictor = character(),
@@ -71,6 +71,8 @@ construct_dyad_predictor_decompositions <- function(data) {
 
   out <- data
 
+  # First resolve one complete manifest and metadata table. The second loop
+  # performs the writes only after the shared collision validator succeeds.
   for (i in seq_len(nrow(temporal_decompositions))) {
     predictor <- temporal_decompositions$predictor[[i]]
     component <- temporal_decompositions$component[[i]]
@@ -106,6 +108,33 @@ construct_dyad_predictor_decompositions <- function(data) {
       deviation_column = deviation_col,
       dyad_decomposition_level = dyad_decomposition_level
     )
+  }
+
+  decomposition_plan <- dplyr::bind_rows(
+    tibble::tibble(
+      target = predictors$mean_column,
+      predictor = predictors$predictor,
+      temporal_component = predictors$component,
+      lag = predictors$lag,
+      model_family = model_family,
+      column_role = "dyad_mean"
+    ),
+    tibble::tibble(
+      target = predictors$deviation_column,
+      predictor = predictors$predictor,
+      temporal_component = predictors$component,
+      lag = predictors$lag,
+      model_family = model_family,
+      column_role = "within_dyad_deviation"
+    )
+  )
+  validate_generated_column_plan(out, decomposition_plan)
+
+  for (i in seq_len(nrow(predictors))) {
+    component <- predictors$component[[i]]
+    source_col <- predictors$source_column[[i]]
+    mean_col <- predictors$mean_column[[i]]
+    deviation_col <- predictors$deviation_column[[i]]
 
     if (has_time && component %in% c("raw", "cwp")) {
       out <- add_dyad_time_decomposition(

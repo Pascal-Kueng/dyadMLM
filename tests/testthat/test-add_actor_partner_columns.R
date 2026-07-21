@@ -8,7 +8,7 @@ test_that("add_actor_partner_columns creates actor and partner columns", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x
@@ -35,7 +35,7 @@ test_that("add_actor_partner_columns creates actor and partner columns", {
     )
   )
   expect_equal(
-    attr(result, "dyadMLM")$temporal_predictor_decompositions$component,
+    attr(result, "dyadMLM")$temporal_decompositions$component,
     c("raw", "cwp", "cbp")
   )
 })
@@ -50,11 +50,11 @@ test_that("longitudinal APIM and DIM predictor columns can coexist", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    model_type = c("apim", "dim"),
+    model_types = c("apim", "dim"),
     seed = 123
   )
 
@@ -88,11 +88,11 @@ test_that("add_actor_partner_columns preserves rows with missing partner occasio
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -125,10 +125,10 @@ test_that("add_actor_partner_columns matches cross-sectional partners", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -148,10 +148,10 @@ test_that("add_actor_partner_columns uses generated names for raw predictors", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = `stress level`,
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -178,7 +178,7 @@ test_that("add_actor_partner_columns stores empty metadata without predictors", 
     person_id = c("A", "B", "C", "D")
   )
 
-  result <- validate_dyad_data(data, group = dyad_id, member = person_id) |>
+  result <- validate_dyad_data(data, dyad = dyad_id, member = person_id) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
     add_actor_partner_columns()
@@ -205,10 +205,10 @@ test_that("add_actor_partner_columns preserves measured missingness", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     predictors = x,
-    temporal_predictor_decomposition = "none"
+    temporal_decomposition = "none"
   ) |>
     infer_dyad_compositions(seed = 123) |>
     center_predictors() |>
@@ -229,11 +229,11 @@ test_that("prepare_dyad_data creates actor and partner columns after dropping in
   result <- suppressMessages(
     prepare_dyad_data(
       data,
-      group = dyad_id,
+      dyad = dyad_id,
       member = person_id,
       role = role,
       predictors = x,
-      temporal_predictor_decomposition = "none",
+      temporal_decomposition = "none",
       missing_role = "drop",
       incomplete_dyads = "drop",
       seed = 123

@@ -7,7 +7,7 @@
 infer_dyad_compositions(
   data,
   seed = NULL,
-  include_compositions = NULL,
+  keep_compositions = NULL,
   set_exchangeable_compositions = NULL,
   pool_compositions = NULL
 )
@@ -15,10 +15,10 @@ infer_dyad_compositions(
 \arguments{
 \item{data}{A \code{dyadMLM_data} object returned by \code{\link[=validate_dyad_data]{validate_dyad_data()}}.}
 
-\item{seed}{Optional seed for random \verb{.dy_diff_*} sign assignment in
+\item{seed}{Optional seed for random \verb{.dy_member_contrast_*} sign assignment in
 exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 
-\item{include_compositions}{Optional observed dyad compositions to keep
+\item{keep_compositions}{Optional observed dyad compositions to keep
 before exchangeability overrides and pooling.}
 
 \item{set_exchangeable_compositions}{Optional dyad compositions to treat as
@@ -31,7 +31,7 @@ resolve to at least two distinct observed compositions.}
 \value{
 A \code{dyadMLM_data} object with added \code{.dy_composition} and
 \code{.dy_composition_role} factor columns, \verb{.dy_is_*} numeric indicator columns,
-composition-specific numeric \verb{.dy_diff_*} contrast columns coded \code{-1} and
+composition-specific numeric \verb{.dy_member_contrast_*} columns coded \code{-1} and
 \code{1} for the two members of matching exchangeable dyads and \code{0} otherwise,
 and dyad composition metadata.
 }

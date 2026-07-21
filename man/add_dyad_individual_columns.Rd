@@ -35,7 +35,7 @@ Selected lag predictors additionally create lag-1 raw and within-person
 dyad-mean and within-dyad member-deviation columns.
 }
 \details{
-The function reads \code{attr(data, "dyadMLM")$temporal_predictor_decompositions} and
+The function reads \code{attr(data, "dyadMLM")$temporal_decompositions} and
 stores the constructed DIM columns in
 \code{attr(data, "dyadMLM")$dim_predictors}.
 }

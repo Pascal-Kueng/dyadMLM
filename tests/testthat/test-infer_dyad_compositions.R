@@ -7,7 +7,7 @@ test_that("infer_dyad_compositions counts role compositions", {
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -30,10 +30,10 @@ test_that("infer_dyad_compositions counts role compositions", {
       ".dy_is_male_x_male"
     )
   )
-  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(result))
-  expect_true(".dy_diff_male_x_male_arbitrary" %in% names(result))
-  expect_false(".dy_diff_female_x_female" %in% names(result))
-  expect_false(".dy_diff_male_x_male" %in% names(result))
+  expect_true(".dy_member_contrast_female_x_female_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_male_x_male_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_female_x_female" %in% names(result))
+  expect_false(".dy_member_contrast_male_x_male" %in% names(result))
   expect_true(all(sapply(result[indicator_names], is.numeric)))
   expect_equal(rowSums(result[indicator_names]), rep(1, nrow(result)))
 
@@ -70,10 +70,10 @@ test_that("infer_dyad_compositions counts role compositions", {
       "male_x_male", "male_x_male")
   )
   expect_false(dyad_diff_col %in% names(result))
-  expect_equal(abs(result$.dy_diff_female_x_female_arbitrary[result$dyad_id == 3]), rep(1, 2))
-  expect_equal(abs(result$.dy_diff_male_x_male_arbitrary[result$dyad_id == 4]), rep(1, 2))
-  expect_equal(result$.dy_diff_female_x_female_arbitrary[result$dyad_id != 3], rep(0, 6))
-  expect_equal(result$.dy_diff_male_x_male_arbitrary[result$dyad_id != 4], rep(0, 6))
+  expect_equal(abs(result$.dy_member_contrast_female_x_female_arbitrary[result$dyad_id == 3]), rep(1, 2))
+  expect_equal(abs(result$.dy_member_contrast_male_x_male_arbitrary[result$dyad_id == 4]), rep(1, 2))
+  expect_equal(result$.dy_member_contrast_female_x_female_arbitrary[result$dyad_id != 3], rep(0, 6))
+  expect_equal(result$.dy_member_contrast_male_x_male_arbitrary[result$dyad_id != 4], rep(0, 6))
 })
 
 test_that("composition-specific diff signs do not depend on distinguishable dyads", {
@@ -93,7 +93,7 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
 
   exchangeable_result <- validate_dyad_data(
     exchangeable_only,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   ) |>
@@ -101,19 +101,19 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
 
   mixed_result <- validate_dyad_data(
     mixed,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   ) |>
     infer_dyad_compositions(seed = 123)
 
   expect_equal(
-    mixed_result$.dy_diff_female_x_female_arbitrary[mixed_result$dyad_id == 2],
-    exchangeable_result$.dy_diff_female_x_female_arbitrary[exchangeable_result$dyad_id == 2]
+    mixed_result$.dy_member_contrast_female_x_female_arbitrary[mixed_result$dyad_id == 2],
+    exchangeable_result$.dy_member_contrast_female_x_female_arbitrary[exchangeable_result$dyad_id == 2]
   )
   expect_equal(
-    mixed_result$.dy_diff_male_x_male_arbitrary[mixed_result$dyad_id == 3],
-    exchangeable_result$.dy_diff_male_x_male_arbitrary[exchangeable_result$dyad_id == 3]
+    mixed_result$.dy_member_contrast_male_x_male_arbitrary[mixed_result$dyad_id == 3],
+    exchangeable_result$.dy_member_contrast_male_x_male_arbitrary[exchangeable_result$dyad_id == 3]
   )
 })
 
@@ -126,7 +126,7 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -140,9 +140,9 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
   expect_true(".dy_is_female_x_male" %in% names(result))
   expect_false(".dy_is_female_x_male_female" %in% names(result))
   expect_false(".dy_is_female_x_male_male" %in% names(result))
-  expect_true(".dy_diff_female_x_male_arbitrary" %in% names(result))
-  expect_false(".dy_diff_female_x_male" %in% names(result))
-  expect_equal(abs(result$.dy_diff_female_x_male_arbitrary), rep(1, 4))
+  expect_true(".dy_member_contrast_female_x_male_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_female_x_male" %in% names(result))
+  expect_equal(abs(result$.dy_member_contrast_female_x_male_arbitrary), rep(1, 4))
   expect_equal(as.character(result$.dy_composition), rep("female_x_male", 4))
   expect_equal(as.character(result$.dy_composition_role), rep("female_x_male", 4))
   expect_equal(
@@ -170,7 +170,7 @@ test_that("infer_dyad_compositions accepts separated composition references", {
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -211,7 +211,7 @@ test_that("infer_dyad_compositions accepts a vector of separated composition ref
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   ) |>
@@ -237,7 +237,7 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   ) |>
@@ -247,10 +247,10 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
     )
 
   expect_true(".dy_is_same_sex" %in% names(result))
-  expect_true(".dy_diff_same_sex_arbitrary" %in% names(result))
-  expect_false(".dy_diff_same_sex" %in% names(result))
-  expect_false(".dy_diff_female_x_female_arbitrary" %in% names(result))
-  expect_false(".dy_diff_male_x_male_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_same_sex_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_same_sex" %in% names(result))
+  expect_false(".dy_member_contrast_female_x_female_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_male_x_male_arbitrary" %in% names(result))
   expect_equal(as.character(result$.dy_composition), rep("same_sex", 4))
   expect_equal(as.character(result$.dy_composition_role), rep("same_sex", 4))
 
@@ -275,7 +275,7 @@ test_that("role-aware pools named assumed_exchangeable retain composition-specif
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   ) |>
@@ -286,10 +286,10 @@ test_that("role-aware pools named assumed_exchangeable retain composition-specif
       )
     )
 
-  expect_true(".dy_diff_assumed_exchangeable_arbitrary" %in% names(result))
-  expect_false(".dy_diff_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_arbitrary" %in% names(result))
   expect_equal(
-    abs(result$.dy_diff_assumed_exchangeable_arbitrary),
+    abs(result$.dy_member_contrast_assumed_exchangeable_arbitrary),
     rep(1, 4)
   )
 })
@@ -303,7 +303,7 @@ test_that("infer_dyad_compositions preserves unpooled exchangeable compositions"
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   ) |>
@@ -329,10 +329,10 @@ test_that("infer_dyad_compositions preserves unpooled exchangeable compositions"
     as.character(result$.dy_composition_role),
     c(rep("same_sex", 4), rep("friend_x_friend", 2))
   )
-  expect_true(".dy_diff_friend_x_friend_arbitrary" %in% names(result))
-  expect_false(".dy_diff_friend_x_friend" %in% names(result))
-  expect_false(".dy_diff_female_x_female_arbitrary" %in% names(result))
-  expect_false(".dy_diff_male_x_male_arbitrary" %in% names(result))
+  expect_true(".dy_member_contrast_friend_x_friend_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_friend_x_friend" %in% names(result))
+  expect_false(".dy_member_contrast_female_x_female_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_male_x_male_arbitrary" %in% names(result))
 })
 
 test_that("infer_dyad_compositions pools after setting compositions exchangeable", {
@@ -344,7 +344,7 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   ) |>
@@ -365,8 +365,8 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
   )
   expect_equal(dyad_compositions$n_dyads, 3L)
   expect_true(".dy_is_romantic_couples" %in% names(result))
-  expect_true(".dy_diff_romantic_couples_arbitrary" %in% names(result))
-  expect_false(".dy_diff_romantic_couples" %in% names(result))
+  expect_true(".dy_member_contrast_romantic_couples_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_romantic_couples" %in% names(result))
 })
 
 test_that("infer_dyad_compositions rejects pooling distinguishable compositions", {
@@ -378,7 +378,7 @@ test_that("infer_dyad_compositions rejects pooling distinguishable compositions"
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -403,7 +403,7 @@ test_that("infer_dyad_compositions validates composition pooling input", {
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -469,7 +469,7 @@ test_that("infer_dyad_compositions does not treat role vectors as one compositio
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -494,7 +494,7 @@ test_that("infer_dyad_compositions errors for unknown composition references", {
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -519,7 +519,7 @@ test_that("infer_dyad_compositions errors when setting already exchangeable comp
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -543,7 +543,7 @@ test_that("infer_dyad_compositions treats unsplittable aliases as unknown compos
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -569,7 +569,7 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time
@@ -598,9 +598,9 @@ test_that("infer_dyad_compositions is not inflated by longitudinal rows", {
       "female_x_female", "female_x_female",
       "female_x_female", "female_x_female")
   )
-  expect_true(".dy_diff_female_x_female_arbitrary" %in% names(result))
-  expect_equal(result$.dy_diff_female_x_female_arbitrary[result$dyad_id == 1], rep(0, 4))
-  expect_equal(abs(result$.dy_diff_female_x_female_arbitrary[result$dyad_id == 2]), rep(1, 4))
+  expect_true(".dy_member_contrast_female_x_female_arbitrary" %in% names(result))
+  expect_equal(result$.dy_member_contrast_female_x_female_arbitrary[result$dyad_id == 1], rep(0, 4))
+  expect_equal(abs(result$.dy_member_contrast_female_x_female_arbitrary[result$dyad_id == 2]), rep(1, 4))
 })
 
 test_that("infer_dyad_compositions handles ragged longitudinal rows", {
@@ -613,7 +613,7 @@ test_that("infer_dyad_compositions handles ragged longitudinal rows", {
 
   result <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time
@@ -638,7 +638,7 @@ test_that("infer_dyad_compositions creates formula-friendly indicator names", {
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -658,7 +658,7 @@ test_that("infer_dyad_compositions rejects generated indicator name collisions",
 
   validated <- validate_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role
   )
@@ -676,7 +676,7 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
     person_id = c("A", "B", "C", "D")
   )
 
-  validated <- validate_dyad_data(data, group = dyad_id, member = person_id)
+  validated <- validate_dyad_data(data, dyad = dyad_id, member = person_id)
   result <- infer_dyad_compositions(validated, seed = 123)
 
   expect_false(".dy_raw_composition" %in% names(result))
@@ -684,11 +684,11 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_true(is.factor(result$.dy_composition))
   expect_true(is.factor(result$.dy_composition_role))
   expect_true(".dy_is_assumed_exchangeable" %in% names(result))
-  expect_true(".dy_diff_assumed_exchangeable_arbitrary" %in% names(result))
-  expect_false(".dy_diff_arbitrary" %in% names(result))
-  expect_false(".dy_diff_assumed_exchangeable" %in% names(result))
+  expect_true(".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_arbitrary" %in% names(result))
+  expect_false(".dy_member_contrast_assumed_exchangeable" %in% names(result))
   expect_false(dyad_diff_col %in% names(result))
-  expect_equal(abs(result$.dy_diff_assumed_exchangeable_arbitrary), rep(1, 4))
+  expect_equal(abs(result$.dy_member_contrast_assumed_exchangeable_arbitrary), rep(1, 4))
   expect_equal(
     as.character(result$.dy_composition),
     rep("assumed_exchangeable", 4)
@@ -715,7 +715,7 @@ test_that("infer_dyad_compositions treats empty exchangeability overrides as no 
     person_id = c("A", "B", "C", "D")
   )
 
-  validated <- validate_dyad_data(data, group = dyad_id, member = person_id)
+  validated <- validate_dyad_data(data, dyad = dyad_id, member = person_id)
 
   expect_no_error(
     infer_dyad_compositions(

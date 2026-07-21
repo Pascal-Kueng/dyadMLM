@@ -46,8 +46,8 @@ reference:
 - title: Main functions
   contents:
   - prepare_dyad_data
-  - compare_dyad_models
-  - exchangeable_rescov
+  - compare_nested_glmmTMB_models
+  - recover_exchangeable_covariance
 
 - title: Example data
   contents:

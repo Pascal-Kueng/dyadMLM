@@ -10,12 +10,12 @@ test_that("lag predictors are matched at exactly time minus one", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = c(x, z),
-    lag_predictors = x,
-    model_type = "apim",
+    lag1_predictors = x,
+    model_types = "apim",
     seed = 123
   )
 
@@ -38,9 +38,9 @@ test_that("lag predictors are matched at exactly time minus one", {
 
   expect_false(any(grepl(".dy_z.*lag1", names(result))))
   expect_false(any(grepl("cbp.*lag1", names(result))))
-  expect_equal(attr(result, "dyadMLM")$lag_predictors, "x")
+  expect_equal(attr(result, "dyadMLM")$lag1_predictors, "x")
   expect_equal(
-    attr(result, "dyadMLM")$temporal_predictor_decompositions$lag,
+    attr(result, "dyadMLM")$temporal_decompositions$lag,
     c(rep(0L, 6), 1L, 1L)
   )
 
@@ -73,12 +73,12 @@ test_that("lag predictors handle a missing row for one member", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    lag_predictors = x,
-    model_type = "apim",
+    lag1_predictors = x,
+    model_types = "apim",
     seed = 123
   )
 
@@ -100,12 +100,12 @@ test_that("lag predictors create DIM and DSM model-ready columns", {
 
   dim_result <- prepare_dyad_data(
     exchangeable,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    lag_predictors = x,
-    model_type = "dim",
+    lag1_predictors = x,
+    model_types = "dim",
     seed = 123
   )
 
@@ -127,13 +127,13 @@ test_that("lag predictors create DIM and DSM model-ready columns", {
   )
   dsm_result <- prepare_dyad_data(
     distinguishable,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     role = role,
     time = time,
     predictors = x,
-    lag_predictors = x,
-    model_type = "dsm",
+    lag1_predictors = x,
+    model_types = "dsm",
     dsm_role_order = c("first", "second"),
     seed = 123
   )
@@ -160,13 +160,13 @@ test_that("lag predictors work without temporal centering", {
 
   result <- prepare_dyad_data(
     data,
-    group = dyad_id,
+    dyad = dyad_id,
     member = person_id,
     time = time,
     predictors = x,
-    lag_predictors = x,
-    temporal_predictor_decomposition = "none",
-    model_type = "apim",
+    lag1_predictors = x,
+    temporal_decomposition = "none",
+    model_types = "apim",
     seed = 123
   )
 
