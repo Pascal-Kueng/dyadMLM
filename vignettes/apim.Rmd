@@ -28,6 +28,11 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 
 ```{r setup}
 library(dyadMLM)
+has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+apim_distinguishable_fitted_alt <-
+  "Fitted distinguishable APIM diagram unavailable."
+apim_exchangeable_fitted_alt <-
+  "Fitted exchangeable APIM diagram unavailable."
 ```
 
 
@@ -41,7 +46,8 @@ For the broader package workflow and an overview of the available
 model-specific vignettes, including the
 [Mixed-Composition APIM](mixed-apim.html),
 [Dyad-Individual Model](dim.html), and
-[Dyadic Score Model](dsm.html), see the [Overview](index.html).
+[Dyadic Score Model](dsm.html), see the
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 A vignette for non-Gaussian generalized models is planned.
 
@@ -131,7 +137,7 @@ print(apim_distinguishable_data, n=4)
 The generated `.dy_*` columns can be used directly in the model formula. Here is
 a simple example:
 
-```{r fit-cross-distinguishable-gaussian}
+```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
 apim_distinguishable_model <- glmmTMB::glmmTMB(
   satisfaction ~
 
@@ -166,7 +172,7 @@ summary(apim_distinguishable_model)
 
 
 
-```{r prepare-fitted-distinguishable-apim-diagram, include=FALSE}
+```{r prepare-fitted-distinguishable-apim-diagram, include=FALSE, eval=has_glmmTMB}
 apim_distinguishable_diagram_values <- .extract_apim_diagram_values(
   apim_distinguishable_model,
   type = "distinguishable"
@@ -196,7 +202,7 @@ apim_distinguishable_fitted_alt <- sprintf(
 
 The estimated coefficients map as follows: 
 
-```{r fitted-distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional distinguishable APIM for the example data. Fixed effects, residual standard deviations, and the residual correlation are extracted from the fitted model.", fig.alt=apim_distinguishable_fitted_alt}
+```{r fitted-distinguishable-apim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional distinguishable APIM for the example data. Fixed effects, residual standard deviations, and the residual correlation are extracted from the fitted model.", fig.alt=apim_distinguishable_fitted_alt}
 draw_apim_diagram(
   "distinguishable",
   model = apim_distinguishable_model,
@@ -289,7 +295,7 @@ print(apim_exchangeable_data, n = 4)
 
 We then use the columns to fit the model as follows: 
 
-```{r fit-cross-distinguishability}
+```{r fit-cross-distinguishability, eval = has_glmmTMB}
 apim_exchangeable_model <- glmmTMB::glmmTMB(
   satisfaction ~ 
     
@@ -315,7 +321,7 @@ summary(apim_exchangeable_model)
 We use the `dyadMLM::exchangeable_rescov()` to recover the interpretable
 variance-covariance matrix:
 
-```{r}
+```{r backtransform-cross-exchangeable, eval = has_glmmTMB}
 backtransformed <- dyadMLM::exchangeable_rescov(apim_exchangeable_model)
 
 # residual variance-covariance and SD-correlation representations
@@ -323,7 +329,7 @@ print(backtransformed)
 ```
 
 
-```{r prepare-fitted-exchangeable-apim-diagram, include=FALSE}
+```{r prepare-fitted-exchangeable-apim-diagram, include=FALSE, eval=has_glmmTMB}
 apim_exchangeable_diagram_values <- .extract_apim_diagram_values(
   apim_exchangeable_model,
   type = "exchangeable"
@@ -350,7 +356,7 @@ apim_exchangeable_fitted_alt <- sprintf(
 
 The output can now be mapped as follows:
 
-```{r fitted-exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
+```{r fitted-exchangeable-apim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
 draw_apim_diagram(
   "exchangeable",
   model = apim_exchangeable_model,
@@ -365,7 +371,7 @@ draw_apim_diagram(
 The function can also recover the member-level implication of constraints that
 were imposed when fitting the model. For example, we can omit the entire shared block:
 
-```{r fit-exchangeable-no-shared}
+```{r fit-exchangeable-no-shared, eval = has_glmmTMB}
 apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
   satisfaction ~  1 +
     .dy_communication_actor +
@@ -388,7 +394,7 @@ Since matching is now not automatically possible anymore, we need to tell the
 function where both blocks are. Since we completely omitted one block, we tell the 
 function:
 
-```{r}
+```{r backtransform-cross-exchangeable-no-shared, eval = has_glmmTMB}
 backtransformed <- dyadMLM::exchangeable_rescov(
   apim_exchangeable_model_no_shared, 
   pairs = list(
@@ -429,7 +435,7 @@ observations as exchangeable:
 verifies that both models use equivalent original
 observations before performing the likelihood-ratio test:
 
-```{r compare-cross-distinguishability}
+```{r compare-cross-distinguishability, eval = has_glmmTMB}
 dyadMLM::compare_dyad_models(
   apim_exchangeable_model,
   apim_distinguishable_model
@@ -455,7 +461,7 @@ Example model specification:
 
 ```{r fit-ild-distinguishable, eval = FALSE}
 
-ild_distinguishable_model <- glmmTMB(
+ild_distinguishable_model <- glmmTMB::glmmTMB(
   closeness ~ 0 + 
     
     .dy_is_female_x_male_female +
@@ -605,7 +611,7 @@ and within-person closeness scores. Lags are matched at exactly
 A simple fixed-slope dyadic stability and influence model
 [@delrosarioPracticalGuideSpecifying2025]:
 
-```{r fit-ild-stability-influence}
+```{r fit-ild-stability-influence, eval = has_glmmTMB}
 stability_influence <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
@@ -681,7 +687,8 @@ question:
 - [Dyadic Score Model vignette](dsm.html) for the distinguishable DSM
   parameterization.
 
-Or return to the [Overview](index.html).
+Or return to the
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 A vignette with non-Gaussian generalized APIM examples is planned. 
 

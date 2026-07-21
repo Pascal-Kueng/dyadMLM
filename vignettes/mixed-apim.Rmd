@@ -28,6 +28,9 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 
 ```{r setup}
 library(dyadMLM)
+has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+mixed_apim_fitted_alt <-
+  "Fitted mixed-composition APIM diagram unavailable."
 ```
 
 This vignette covers APIMs that combine distinguishable and exchangeable dyad
@@ -44,7 +47,8 @@ This vignette builds on the regular
 [Actor-Partner Interdependence Model vignette](apim.html). For the broader
 package workflow and an overview of the other model-specific vignettes,
 including the [Dyad-Individual Model](dim.html) and
-[Dyadic Score Model](dsm.html), see the [Overview](index.html).
+[Dyadic Score Model](dsm.html), see the
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## Cross-sectional mixed-composition APIM
 
@@ -129,7 +133,7 @@ draw_mixed_apim_diagram()
 
 The model can then be specified as follows (example for an intercept-only model):
 
-```{r fit-mixed-cross-sectional-gaussian}
+```{r fit-mixed-cross-sectional-gaussian, eval = has_glmmTMB}
 
 mixed_cross_gaussian_model <- glmmTMB::glmmTMB(
   satisfaction ~ 0 +
@@ -170,7 +174,7 @@ model. For the exchangeable blocks, the common member residual standard
 deviation and correlation are back-transformed from their fitted sum-and-
 difference components.
 
-```{r prepare-fitted-mixed-apim-diagram, include=FALSE}
+```{r prepare-fitted-mixed-apim-diagram, include=FALSE, eval=has_glmmTMB}
 mixed_apim_diagram_values <- .extract_mixed_apim_diagram_values(
   mixed_cross_gaussian_model
 )
@@ -198,7 +202,7 @@ mixed_apim_fitted_alt <- sprintf(
 )
 ```
 
-```{r fitted-mixed-apim-diagram, echo=FALSE, fig.width=10, fig.height=5.5, out.width="100%", fig.cap="Fitted intercept-only mixed-composition APIM. Intercepts and composition-specific residual parameters are extracted from the fitted joint model; the two exchangeable blocks are shown on the member scale.", fig.alt=mixed_apim_fitted_alt}
+```{r fitted-mixed-apim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=10, fig.height=5.5, out.width="100%", fig.cap="Fitted intercept-only mixed-composition APIM. Intercepts and composition-specific residual parameters are extracted from the fitted joint model; the two exchangeable blocks are shown on the member scale.", fig.alt=mixed_apim_fitted_alt}
 draw_mixed_apim_diagram(model = mixed_cross_gaussian_model)
 ```
 
@@ -326,7 +330,7 @@ pool them with male-male dyads, while modeling female-female dyads separately.
 In an applied analysis, these constraints would require a theoretical or empirical
 justification.
 
-```{r prepare-mixed-cross-sectional-constrained}
+```{r prepare-mixed-cross-sectional-constrained, eval = has_glmmTMB}
 mixed_cross_data_constrained <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional_mixed,
   group = coupleID,
@@ -544,7 +548,8 @@ complexity.
 Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
 the [Dyad-Individual Model vignette](dim.html) or the
 [Dyadic Score Model vignette](dsm.html) for alternative parameterizations, or
-return to the [Overview](index.html).
+return to the
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References
 

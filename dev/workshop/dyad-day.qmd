@@ -1227,15 +1227,17 @@ dim_reparameterization_grid(
 
 ### The dyadic score model (DSM) is: 
 
-- the unconstrained distinguishable version of the DIM
+:::{.incremental}
 - a re-parametrization of the distinguishable APIM
+- the unconstrained distinguishable version of the DIM
 
-- Just like the DIM, it estimates how predictor dyad mean and differences
 - While the DIM uses deviation from the couple mean which is opposite for each
 partners $X_i - \bar{X}$, the DSM uses meaningful directed differences, e.g.,
-$X_\mathrm{female} - X_\mathrm{male}$. 
+$X_\mathrm{female} - X_\mathrm{male}$, which is repeated for both partners. 
   - This allows the estimation of cross-paths, since both partners' values do not
   cancel out like in the DIM$ 
+  
+:::
   
 <!-- TODO @coded verify the correctness and clarity of this slide, and how
 layout could be improved-->

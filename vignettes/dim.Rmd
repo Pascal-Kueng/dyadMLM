@@ -40,6 +40,7 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 ```{r setup}
 library(dyadMLM)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+has_htmltools <- requireNamespace("htmltools", quietly = TRUE)
 dim_fitted_alt <- "Fitted DIM diagram unavailable."
 ```
 
@@ -55,7 +56,8 @@ equivalent to the DIM, as discussed below. For the broader package workflow and
 an overview of the available model-specific vignettes, including the
 [Actor-Partner Interdependence Model](apim.html),
 [Mixed-Composition APIM](mixed-apim.html), and
-[Dyadic Score Model](dsm.html), see the [Overview](index.html).
+[Dyadic Score Model](dsm.html), see the
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## Cross-Sectional Gaussian DIM
 
@@ -377,7 +379,7 @@ DIM estimates above confirm the equivalence. Both forms therefore make the same
 change in the linear predictor relative to the grand-mean reference. The
 intercept is omitted from both displayed equations.
 
-```{r interactive-dim-grid, echo=FALSE}
+```{r interactive-dim-grid, echo=FALSE, eval=has_htmltools}
 dim_reparameterization_grid(
   if (has_glmmTMB && exists("apim_1")) apim_1 else NULL,
   predictor_label = "Communication",
@@ -796,7 +798,8 @@ outcomes.
 Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
 the [Mixed-Composition APIM vignette](mixed-apim.html) or the
 [Dyadic Score Model vignette](dsm.html) for related model specifications, or
-return to the [Overview](index.html).
+return to the
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References
 

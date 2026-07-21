@@ -45,12 +45,15 @@ composition, whereas DSM supports one distinguishable dyad composition.
 (MLMs).** For a comparison of MLM and structural equation modeling (SEM)
 approaches to dyadic data, see @ledermannAnalyzingDyadicData2017.
 
-For the broader package workflow and an overview of the available
-model-specific vignettes, including the
+The available model-specific vignettes include the
 [Actor-Partner Interdependence Model](apim.html),
 [Mixed-Composition APIM](mixed-apim.html),
 [Dyad-Individual Model](dim.html), and
-[Dyadic Score Model](dsm.html), see the [Overview](index.html).
+[Dyadic Score Model](dsm.html).
+
+The [online package overview](https://pascal-kueng.github.io/dyadMLM/)
+provides the current online versions of these vignettes and the complete
+function reference.
 
 ## Prerequisites
 
@@ -436,7 +439,7 @@ Related model-specific vignettes:
 - [Dyad-Individual Model vignette](dim.html),
 - [Dyadic Score Model vignette](dsm.html),
 
-or return to the [Overview](index.html).
+or return to [About this vignette](#about-this-vignette).
 
 ## References
 
