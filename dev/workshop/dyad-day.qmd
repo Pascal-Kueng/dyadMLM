@@ -1262,20 +1262,18 @@ draw_dsm_diagram(show_residuals = FALSE)
 
 :::{.notes}
 
-- a11 is interpreted the same way as b_mean in the DIM. 
+- a11 is interpreted the same way as b_mean in the DIM (and a10 too).
 
-- a22: The DIM said: "if any of the partners is higher on X, is that partner also higher on Y."
-  - The DSM says: "if the female is higher than the male on X, is the female also higher than the male on Y". 
+- a22: The DIM said: "if any of the partners is higher on X, is that same partner also higher on Y."
+  - The DSM says: "if the female is higher (or lower) than the male on X, is the female also higher (or lower) than the male on Y". 
 
 a21/a12:
 Because we now have a stable direction that we defined, and members do not cancel each 
 other out anymore, we can have an intercept different than zero, and cross-paths
 different than zero! So we estimate them. 
 
-
 <!-- TODO @codex verify the correctness and clarity of this slide. 
 Should we somehow fit the notes sentence on the slide? if it is correct.
-
 -->
 
 :::
@@ -1299,11 +1297,21 @@ draw_dsm_diagram()
 
 :::{.notes}
 
+Residuals are the remaining variability in the outcome mean and outcome difference
+not explained by the model, very similar to the DIM. But because partners
+do not have to cancel each other out anymore, they can now be correlated. 
 
+Again, interdependent residuals of the partners are encoded in both r_m and r_d separately.
+But now, a dyad with a higher mean can also have a larger difference in the female-male difference. 
 
-<!-- TODO @codex check if this is accurate and clear -->
+Before, a larger arbitrary1-arbitary2 difference in a couple was always fully compensated by
+their partners exact opposite arbitrary2-arbitary1 difference.  <!-- TODO @codex is this correct?
+I am not sure. And is it a good way of putting it? check also under dev/references iidas' paper --> 
 
 :::
+
+<!-- ca. 3 minutes --> 
+
 ## Why may the DSM residuals correlate?
 
 ```{r}
@@ -1352,13 +1360,15 @@ difference than predicted.
 - The mean and difference residuals may consequently be correlated.
 - A positive correlation means that, across couples, couples whose outcomes are
   higher than predicted on average also tend to have a larger female–male
-  difference than predicted.
+  difference than predicted. <!-- TODO @codex this is the confusing point for me. 
+  I don't quite get, why in the DIM it can't also be: cuoples whose outcomes are higher on the preds, 
+  also have a larger difference between them in any direction -->
 - This correlation describes a pattern across couples. It is not a correlation
   calculated from two changing residuals inside a single couple.
 
 :::
 
-<!-- ca. 2 Minutes -->
+<!-- ca. 3 Minutes -->
 
 ## Fitting the DSM
 
@@ -1380,6 +1390,13 @@ fit_and_draw_dsm(
 )
 ```
 
+
+:::{.notes}
+
+-> students interpret results, including correlation. 
+
+Muster solution:
+<!-- TODO @codex please insert the correct interpretation in simple language --> 
 
 ## Research Question 2 {.rq-slide}
 

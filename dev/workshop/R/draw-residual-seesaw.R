@@ -5,7 +5,8 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
   muted <- "#64748B"
   border <- "#CBD5E1"
   grid_colour <- "#E2E8F0"
-  surface <- "#F8FAFC"
+  surface <- "#FFFFFF"
+  elevator_fill <- "#EAF2FB"
   female <- "#004D40"
   male <- "#00A6B2"
   male_text <- "#007486"
@@ -29,11 +30,29 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
 
   draw_panel <- function(x, y, width, height) {
     grid::grid.roundrect(
+      x = native(x + 0.006), y = native(y - 0.008),
+      width = native(width), height = native(height),
+      r = grid::unit(0.025, "snpc"),
+      gp = grid::gpar(
+        fill = grDevices::adjustcolor(ink, alpha.f = 0.08), col = NA
+      )
+    )
+    grid::grid.roundrect(
       x = native(x), y = native(y),
       width = native(width), height = native(height),
       r = grid::unit(0.025, "snpc"),
-      gp = grid::gpar(fill = surface, col = border, lwd = 1.4)
+      gp = grid::gpar(fill = surface, col = border, lwd = 1.2)
     )
+  }
+
+  draw_subtitle <- function(label, x, y, width, fill) {
+    grid::grid.roundrect(
+      x = native(x), y = native(y),
+      width = native(width), height = native(0.060),
+      r = grid::unit(0.022, "snpc"),
+      gp = grid::gpar(fill = fill, col = NA)
+    )
+    draw_text(label, x, y, fontsize = 12.8, colour = muted, fontface = "bold")
   }
 
   draw_person <- function(x, y, colour, label = NULL, label_colour = colour) {
@@ -59,9 +78,8 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
   draw_elevator <- function() {
     draw_panel(0.255, 0.715, 0.46, 0.49)
     draw_text("Elevator", 0.255, 0.905, fontsize = 19, fontface = "bold")
-    draw_text(
-      "Dyad mean residual", 0.255, 0.855,
-      fontsize = 14.5, colour = muted
+    draw_subtitle(
+      "Dyad mean residual", 0.255, 0.850, 0.205, elevator_fill
     )
 
     grid::grid.segments(
@@ -73,7 +91,12 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
       x = native(0.225), y = native(0.645),
       width = native(0.205), height = native(0.105),
       r = grid::unit(0.012, "snpc"),
-      gp = grid::gpar(fill = "white", col = muted, lwd = 1.8)
+      gp = grid::gpar(fill = elevator_fill, col = muted, lwd = 1.6)
+    )
+    grid::grid.segments(
+      x0 = native(0.126), x1 = native(0.324),
+      y0 = native(0.601), y1 = native(0.601),
+      gp = grid::gpar(col = grid_colour, lwd = 1.3)
     )
     draw_person(0.185, 0.665, female)
     draw_person(0.265, 0.665, male)
@@ -104,10 +127,10 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
 
     draw_panel(panel_x, 0.715, panel_width, 0.49)
     draw_text("Seesaw", panel_x, 0.905, fontsize = 19, fontface = "bold")
-    draw_text(
+    draw_subtitle(
       if (labelled) "Directed difference residual" else
         "Within-dyad residual",
-      panel_x, 0.855, fontsize = 14.5, colour = muted
+      panel_x, 0.850, if (labelled) 0.265 else 0.205, accent_fill
     )
 
     grid::grid.polygon(
@@ -117,18 +140,26 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
         mean(c(y_left, y_right)) - 0.09,
         mean(c(y_left, y_right))
       )),
-      gp = grid::gpar(fill = border, col = muted, lwd = 1.3)
+      gp = grid::gpar(fill = accent_fill, col = muted, lwd = 1.3)
+    )
+    grid::grid.segments(
+      x0 = native(left), y0 = native(y_left - 0.006),
+      x1 = native(right), y1 = native(y_right - 0.006),
+      gp = grid::gpar(
+        col = grDevices::adjustcolor(ink, alpha.f = 0.12),
+        lwd = 7, lineend = "round"
+      )
     )
     grid::grid.segments(
       x0 = native(left), y0 = native(y_left),
       x1 = native(right), y1 = native(y_right),
-      gp = grid::gpar(col = muted, lwd = 5, lineend = "round")
+      gp = grid::gpar(col = muted, lwd = 4.5, lineend = "round")
     )
     grid::grid.segments(
       x0 = native(c(left, right)), x1 = native(c(left, right)),
       y0 = native(c(y_left - 0.02, y_right - 0.02)),
       y1 = native(c(y_left + 0.03, y_right + 0.03)),
-      gp = grid::gpar(col = muted, lwd = 2.2)
+      gp = grid::gpar(col = c(female, male_text), lwd = 2.2)
     )
 
     draw_person(
