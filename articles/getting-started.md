@@ -104,16 +104,22 @@ without requiring a placeholder row for the missing occasion.
 
 ## Data preparation for distinguishable dyads
 
-`example_dyadic_crosssectional` is a simulated cross-sectional dataset
-for distinguishable dyads. Each dyad has two rows: one for each member.
+`dyads_cross` contains three dyad compositions. Each dyad has two rows:
+one for each member. The closeness and provided-support scores are
+member-level averages across the 14 days in `dyads_ild`.
 
-    #>   personID coupleID gender communication satisfaction
-    #> 1        1        1 female      4.789772     4.367824
-    #> 2        2        1   male      3.803445     2.342890
-    #> 3        3        2 female      2.914052     2.442250
-    #> 4        4        2   male      6.508207     6.080428
-    #> 5        5        3 female      5.696995     5.865494
-    #> 6        6        3   male      8.215332     9.661295
+Because these example data contain multiple compositions,
+`keep_compositions` selects the composition modeled below. It can be
+omitted when the supplied data already contain only the intended
+composition.
+
+    #>   personID coupleID gender dyad_composition closeness provided_support
+    #> 1        1        1 female    female_x_male  4.768293         4.494570
+    #> 2        2        1   male    female_x_male  4.462613         4.757241
+    #> 3        3        2 female    female_x_male  6.420218         4.092390
+    #> 4        4        2   male    female_x_male  6.011005         6.199226
+    #> 5        5        3 female    female_x_male  4.703145         4.223651
+    #> 6        6        3   male    female_x_male  4.536900         5.029079
 
 We validate and prepare the data with the function
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
@@ -121,24 +127,26 @@ We validate and prepare the data with the function
 ``` r
 
 cross_distinguishable_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
 
   # In this example, we optionally specify a predictor variable
   # and a model type to generate the columns needed for that model type.
-  predictors = communication,
-  model_types = "apim"
+  predictors = provided_support,
+  model_types = "apim",
+  # dyads_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male"
 )
 
 print(cross_distinguishable_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_male distinguishable 95 dyads
+#> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition       inferred dyad composition
@@ -149,23 +157,22 @@ print(cross_distinguishable_data, n = 4)
 #> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
 #> #                         values
 #> #
-#> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
-#> 1        1        1 female          4.79         4.37 female_x_male  
-#> 2        2        1 male            3.80         2.34 female_x_male  
-#> 3        3        2 female          2.91         2.44 female_x_male  
-#> 4        4        2 male            6.51         6.08 female_x_male  
-#> # ℹ 186 more rows
-#> # ℹ 5 more variables: .dy_composition_role <fct>,
+#> # A tibble: 240 × 12
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 236 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>
+#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
 ```
 
-The function automatically recognized that in this dataset there are 95
-female-male dyads and created APIM-relevant variables (Kenny and Cook
-1999). These generated `.dy_*` columns can be used directly in model
-formulas.
+The function retained and recognized 120 female-male dyads and created
+APIM-relevant variables (Kenny and Cook 1999). These generated `.dy_*`
+columns can be used directly in model formulas.
 
 For fitted APIM examples using these columns, see the [Actor-Partner
 Interdependence Model
@@ -173,25 +180,27 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.md).
 
 ## Data preparation for exchangeable dyads
 
-For a dataset with only one type of dyad that should be treated as
-exchangeable, omit the `role` argument:
+To work with one exchangeable dyad composition, use `keep_compositions`
+to retain it during preparation:
 
 ``` r
 
 cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
+  role = gender,
+  keep_compositions = "female-female",
   seed = 123
 )
 
 print(cross_exchangeable_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: dyad = coupleID, member = personID
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # assumed_exchangeable exchangeable 95 dyads
+#> # female_x_female exchangeable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -202,23 +211,23 @@ print(cross_exchangeable_data, n = 4)
 #> #                                         distinguishable dyads or other
 #> #                                         exchangeable compositions
 #> #
-#> # A tibble: 190 × 9
-#>   personID coupleID gender communication satisfaction .dy_composition     
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>               
-#> 1        1        1 female          4.79         4.37 assumed_exchangeable
-#> 2        2        1 male            3.80         2.34 assumed_exchangeable
-#> 3        3        2 female          2.91         2.44 assumed_exchangeable
-#> 4        4        2 male            6.51         6.08 assumed_exchangeable
-#> # ℹ 186 more rows
-#> # ℹ 3 more variables: .dy_composition_role <fct>,
-#> #   .dy_is_assumed_exchangeable <dbl>,
-#> #   .dy_member_contrast_assumed_exchangeable_arbitrary <dbl>
+#> # A tibble: 240 × 10
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1      241      121 female female_x_female       7.59             5.41
+#> 2      242      121 female female_x_female       6.14             5.19
+#> 3      243      122 female female_x_female       8.27             5.89
+#> 4      244      122 female female_x_female       8.02             5.57
+#> # ℹ 236 more rows
+#> # ℹ 4 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>,
+#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>
 ```
 
-The generated `.dy_member_contrast_assumed_exchangeable_arbitrary`
-contrast assigns `-1` and `1` to the two members of each exchangeable
-dyad (del Rosario and West 2025). Its direction is arbitrary, and `seed`
-makes the assignment reproducible.
+The generated `.dy_member_contrast_female_x_female_arbitrary` contrast
+assigns `-1` and `1` to the two members of each exchangeable dyad (del
+Rosario and West 2025). Its direction is arbitrary, and `seed` makes the
+assignment reproducible.
 
 Refer to the [exchangeable APIM
 section](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure)
@@ -231,21 +240,22 @@ Alternatively, we can explicitly set a dyad composition to exchangeable:
 ``` r
 
 cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
+  keep_compositions = "female-male",
   set_exchangeable_compositions = "male-female",
   seed = 123
 )
 
 print(cross_exchangeable_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_male exchangeable (set by user) 95 dyads
+#> # female_x_male exchangeable (set by user) 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -256,15 +266,16 @@ print(cross_exchangeable_data, n = 4)
 #> #                                         distinguishable dyads or other
 #> #                                         exchangeable compositions
 #> #
-#> # A tibble: 190 × 9
-#>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
-#> 1        1        1 female          4.79         4.37 female_x_male  
-#> 2        2        1 male            3.80         2.34 female_x_male  
-#> 3        3        2 female          2.91         2.44 female_x_male  
-#> 4        4        2 male            6.51         6.08 female_x_male  
-#> # ℹ 186 more rows
-#> # ℹ 3 more variables: .dy_composition_role <fct>, .dy_is_female_x_male <dbl>,
+#> # A tibble: 240 × 10
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 236 more rows
+#> # ℹ 4 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male <dbl>,
 #> #   .dy_member_contrast_female_x_male_arbitrary <dbl>
 ```
 
@@ -275,28 +286,30 @@ work), and you can use different separators like `male_female`,
 
 ## Generating DIM and DSM columns
 
-For exchangeable dyads, we can request DIM predictor columns. This works
-here because omitting `role` treats all dyads as a single exchangeable
-composition.
+For exchangeable dyads, we can request DIM predictor columns. DIM
+preparation requires exactly one exchangeable composition, which we
+retain here with `keep_compositions`.
 
 ``` r
 
 cross_dim_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
-  predictors = communication,
+  role = gender,
+  predictors = provided_support,
   model_types = "dim",
+  keep_compositions = "female-female",
   seed = 123
 )
 
 print(cross_dim_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: dyad = coupleID, member = personID
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # assumed_exchangeable exchangeable 95 dyads
+#> # female_x_female exchangeable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -312,19 +325,19 @@ print(cross_dim_data, n = 4)
 #> #                                         predictor: member's difference from
 #> #                                         the dyad mean
 #> #
-#> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .dy_composition     
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>               
-#> 1        1        1 female          4.79         4.37 assumed_exchangeable
-#> 2        2        1 male            3.80         2.34 assumed_exchangeable
-#> 3        3        2 female          2.91         2.44 assumed_exchangeable
-#> 4        4        2 male            6.51         6.08 assumed_exchangeable
-#> # ℹ 186 more rows
-#> # ℹ 5 more variables: .dy_composition_role <fct>,
-#> #   .dy_is_assumed_exchangeable <dbl>,
-#> #   .dy_member_contrast_assumed_exchangeable_arbitrary <dbl>,
-#> #   .dy_communication_dyad_mean_gmc <dbl>,
-#> #   .dy_communication_within_dyad_dev <dbl>
+#> # A tibble: 240 × 12
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1      241      121 female female_x_female       7.59             5.41
+#> 2      242      121 female female_x_female       6.14             5.19
+#> 3      243      122 female female_x_female       8.27             5.89
+#> 4      244      122 female female_x_female       8.02             5.57
+#> # ℹ 236 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>,
+#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
+#> #   .dy_provided_support_dyad_mean_gmc <dbl>,
+#> #   .dy_provided_support_within_dyad_dev <dbl>
 ```
 
 Generating DSM columns for distinguishable dyads additionally requires
@@ -334,23 +347,24 @@ predictor differences and the DSM role contrast (Iida et al. 2018).
 ``` r
 
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
+  predictors = provided_support,
   model_types = "dsm",
-  dsm_role_order = c("female", "male")
+  dsm_role_order = c("female", "male"),
+  keep_compositions = "female-male"
 )
 
 print(cross_dsm_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> # DSM direction: female - male
 #> #
 #> # Dyad compositions:
-#> # female_x_male distinguishable 95 dyads
+#> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition              inferred dyad composition
@@ -363,25 +377,34 @@ print(cross_dsm_data, n = 4)
 #> #   .dy_{pred}_within_dyad_diff  DSM signed predictor difference: first
 #> #                                declared role minus second declared role
 #> #
-#> # A tibble: 190 × 12
-#>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
-#> 1        1        1 female          4.79         4.37 female_x_male  
-#> 2        2        1 male            3.80         2.34 female_x_male  
-#> 3        3        2 female          2.91         2.44 female_x_male  
-#> 4        4        2 male            6.51         6.08 female_x_male  
-#> # ℹ 186 more rows
-#> # ℹ 6 more variables: .dy_composition_role <fct>,
+#> # A tibble: 240 × 13
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 236 more rows
+#> # ℹ 7 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_dsm_role_contrast <dbl>, .dy_communication_dyad_mean_gmc <dbl>,
-#> #   .dy_communication_within_dyad_diff <dbl>
+#> #   .dy_dsm_role_contrast <dbl>, .dy_provided_support_dyad_mean_gmc <dbl>,
+#> #   .dy_provided_support_within_dyad_diff <dbl>
 ```
 
 ## Intensive longitudinal dyadic data
 
-`example_dyadic_ILD` is a simulated intensive longitudinal dyadic
-dataset. Each dyad has repeated observations over `diaryday`, with one
-row per person-day.
+`dyads_ild` is an intensive longitudinal dyadic dataset. Each dyad has
+repeated observations over `diaryday`, with one row per person-day.
+
+    #> # A tibble: 6 × 7
+    #>   personID coupleID diaryday gender dyad_composition closeness provided_support
+    #>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+    #> 1        1        1        0 female female_x_male         4.40             4.93
+    #> 2        2        1        0 male   female_x_male         5.14             5.59
+    #> 3        1        1        1 female female_x_male         5.16             4.89
+    #> 4        2        1        1 male   female_x_male         5.70             5.18
+    #> 5        1        1        2 female female_x_male         3.28             4.38
+    #> 6        2        1        2 male   female_x_male         2.82             4.99
 
 To prepare intensive longitudinal data, pass the `time` variable to
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
@@ -389,23 +412,24 @@ To prepare intensive longitudinal data, pass the `time` variable to
 ``` r
 
 ild_apim_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
   role = gender,
   time = diaryday,
   predictors = provided_support,
   model_types = "apim",
+  keep_compositions = "female-male",
   seed = 123
 )
 
 print(ild_apim_data, n = 6)
 #> # dyadMLM data
-#> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
+#> # Rows: 3360 | Dyads: 120 | Intensive longitudinal: yes
 #> # Structure: dyad = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # female_x_male distinguishable 40 dyads
+#> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition         inferred dyad composition
@@ -429,17 +453,17 @@ print(ild_apim_data, n = 6)
 #> #                           stable difference from the average person's usual
 #> #                           level
 #> #
-#> # A tibble: 1,120 × 18
-#>   personID coupleID diaryday gender closeness provided_support .dy_composition
-#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          
-#> 1        1        1        0 female      5.03             4.30 female_x_male  
-#> 2        2        1        0 male        4.68             4.45 female_x_male  
-#> 3        1        1        1 female      5.64             4.24 female_x_male  
-#> 4        2        1        1 male        4.52             5.84 female_x_male  
-#> 5        1        1        2 female      5.49             3.54 female_x_male  
-#> 6        2        1        2 male       NA               NA    female_x_male  
-#> # ℹ 1,114 more rows
-#> # ℹ 11 more variables: .dy_composition_role <fct>,
+#> # A tibble: 3,360 × 19
+#>   personID coupleID diaryday gender dyad_composition closeness provided_support
+#>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1        0 female female_x_male         4.40             4.93
+#> 2        2        1        0 male   female_x_male         5.14             5.59
+#> 3        1        1        1 female female_x_male         5.16             4.89
+#> 4        2        1        1 male   female_x_male         5.70             5.18
+#> 5        1        1        2 female female_x_male         3.28             4.38
+#> 6        2        1        2 male   female_x_male         2.82             4.99
+#> # ℹ 3,354 more rows
+#> # ℹ 12 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
 #> #   .dy_provided_support_cwp <dbl>, .dy_provided_support_cbp <dbl>,
 #> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>,
@@ -468,29 +492,31 @@ columns alongside their contemporaneous versions. Lagging respects the
 dyad and member structure, matches observations at exactly `time - 1`,
 and does not bridge missing occasions.
 
-For a simpler dynamic model, this example omits `role` and therefore
-treats all couples as exchangeable:
+For a simpler dynamic model, this example retains the exchangeable
+female-female composition:
 
 ``` r
 
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = closeness,
   lag1_predictors = closeness,
   model_types = "apim",
+  keep_compositions = "female-female",
   seed = 123
 )
 
 print(ild_apim_data_dynamic, n = 6)
 #> # dyadMLM data
-#> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
-#> # Structure: dyad = coupleID, member = personID, time = diaryday
+#> # Rows: 3360 | Dyads: 120 | Intensive longitudinal: yes
+#> # Structure: dyad = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # assumed_exchangeable exchangeable 40 dyads
+#> # female_x_female exchangeable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -538,19 +564,19 @@ print(ild_apim_data_dynamic, n = 6)
 #> #                                         difference from the average person's
 #> #                                         usual level
 #> #
-#> # A tibble: 1,120 × 24
-#>   personID coupleID diaryday gender closeness provided_support .dy_composition  
-#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>            
-#> 1        1        1        0 female      5.03             4.30 assumed_exchange…
-#> 2        2        1        0 male        4.68             4.45 assumed_exchange…
-#> 3        1        1        1 female      5.64             4.24 assumed_exchange…
-#> 4        2        1        1 male        4.52             5.84 assumed_exchange…
-#> 5        1        1        2 female      5.49             3.54 assumed_exchange…
-#> 6        2        1        2 male       NA               NA    assumed_exchange…
-#> # ℹ 1,114 more rows
-#> # ℹ 17 more variables: .dy_composition_role <fct>,
-#> #   .dy_is_assumed_exchangeable <dbl>,
-#> #   .dy_member_contrast_assumed_exchangeable_arbitrary <dbl>,
+#> # A tibble: 3,360 × 25
+#>   personID coupleID diaryday gender dyad_composition closeness provided_support
+#>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1      241      121        0 female female_x_female       6.68             6.18
+#> 2      242      121        0 female female_x_female       5.67             5.70
+#> 3      241      121        1 female female_x_female       8.63             4.57
+#> 4      242      121        1 female female_x_female       5.58             5.30
+#> 5      241      121        2 female female_x_female       7.05             5.19
+#> 6      242      121        2 female female_x_female       6.83             3.89
+#> # ℹ 3,354 more rows
+#> # ℹ 18 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>,
+#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
 #> #   .dy_closeness_cwp <dbl>, .dy_closeness_cbp <dbl>, .dy_closeness_lag1 <dbl>,
 #> #   .dy_closeness_cwp_lag1 <dbl>, .dy_closeness_actor <dbl>,
 #> #   .dy_closeness_partner <dbl>, .dy_closeness_cwp_actor <dbl>, …
@@ -566,16 +592,16 @@ for a more detailed discussion and guidance.
 
 ## Working with multiple dyad compositions
 
-`example_dyadic_crosssectional_mixed` contains three dyad compositions
-in the same data object: distinguishable female-male dyads and
-exchangeable female-female and male-male dyads (Bolger et al. 2025).
+`dyads_cross` contains three dyad compositions: distinguishable
+female-male dyads and exchangeable female-female and male-male dyads
+(Bolger et al. 2025).
 
 Let’s have `dyadMLM` infer the compositions automatically:
 
 ``` r
 
 mixed_cross_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -584,13 +610,13 @@ mixed_cross_data <- dyadMLM::prepare_dyad_data(
 
 print(mixed_cross_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 640 | Dyads: 320 | Intensive longitudinal: no
+#> # Rows: 720 | Dyads: 360 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable    100 dyads
+#> # female_x_female exchangeable    120 dyads
 #> # female_x_male   distinguishable 120 dyads
-#> # male_x_male     exchangeable    100 dyads
+#> # male_x_male     exchangeable    120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -601,17 +627,17 @@ print(mixed_cross_data, n = 4)
 #> #                                         distinguishable dyads or other
 #> #                                         exchangeable compositions
 #> #
-#> # A tibble: 640 × 12
-#>   personID coupleID gender satisfaction .dy_composition .dy_composition_role
-#>      <int>    <int> <fct>         <dbl> <fct>           <fct>               
-#> 1        1        1 female         4.95 female_x_male   female_x_male_female
-#> 2        2        1 male           5.26 female_x_male   female_x_male_male  
-#> 3        3        2 female         5.14 female_x_male   female_x_male_female
-#> 4        4        2 male           3.11 female_x_male   female_x_male_male  
-#> # ℹ 636 more rows
-#> # ℹ 6 more variables: .dy_is_female_x_female <dbl>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_is_male_x_male <dbl>,
+#> # A tibble: 720 × 14
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 716 more rows
+#> # ℹ 8 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>, .dy_is_female_x_male_female <dbl>,
+#> #   .dy_is_female_x_male_male <dbl>, .dy_is_male_x_male <dbl>,
 #> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
 #> #   .dy_member_contrast_male_x_male_arbitrary <dbl>
 ```
@@ -636,7 +662,7 @@ to retained dyad compositions.
 ``` r
 
 mixed_cross_data_included <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -646,12 +672,12 @@ mixed_cross_data_included <- dyadMLM::prepare_dyad_data(
 
 print(mixed_cross_data_included, n = 4)
 #> # dyadMLM data
-#> # Rows: 400 | Dyads: 200 | Intensive longitudinal: no
+#> # Rows: 480 | Dyads: 240 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable 100 dyads
-#> # male_x_male     exchangeable 100 dyads
+#> # female_x_female exchangeable 120 dyads
+#> # male_x_male     exchangeable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -662,15 +688,16 @@ print(mixed_cross_data_included, n = 4)
 #> #                                         distinguishable dyads or other
 #> #                                         exchangeable compositions
 #> #
-#> # A tibble: 400 × 10
-#>   personID coupleID gender satisfaction .dy_composition .dy_composition_role
-#>      <int>    <int> <fct>         <dbl> <fct>           <fct>               
-#> 1      241      121 female         5.32 female_x_female female_x_female     
-#> 2      242      121 female         5.37 female_x_female female_x_female     
-#> 3      243      122 female         5.99 female_x_female female_x_female     
-#> 4      244      122 female         6.93 female_x_female female_x_female     
-#> # ℹ 396 more rows
-#> # ℹ 4 more variables: .dy_is_female_x_female <dbl>, .dy_is_male_x_male <dbl>,
+#> # A tibble: 480 × 12
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1      241      121 female female_x_female       7.59             5.41
+#> 2      242      121 female female_x_female       6.14             5.19
+#> 3      243      122 female female_x_female       8.27             5.89
+#> 4      244      122 female female_x_female       8.02             5.57
+#> # ℹ 476 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>, .dy_is_male_x_male <dbl>,
 #> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
 #> #   .dy_member_contrast_male_x_male_arbitrary <dbl>
 ```
@@ -686,7 +713,7 @@ would pool all dyad compositions into one exchangeable composition.
 ``` r
 
 mixed_cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -696,13 +723,13 @@ mixed_cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
 
 print(mixed_cross_exchangeable_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 640 | Dyads: 320 | Intensive longitudinal: no
+#> # Rows: 720 | Dyads: 360 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable               100 dyads
+#> # female_x_female exchangeable               120 dyads
 #> # female_x_male   exchangeable (set by user) 120 dyads
-#> # male_x_male     exchangeable               100 dyads
+#> # male_x_male     exchangeable               120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -713,15 +740,16 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> #                                         distinguishable dyads or other
 #> #                                         exchangeable compositions
 #> #
-#> # A tibble: 640 × 12
-#>   personID coupleID gender satisfaction .dy_composition .dy_composition_role
-#>      <int>    <int> <fct>         <dbl> <fct>           <fct>               
-#> 1        1        1 female         4.95 female_x_male   female_x_male       
-#> 2        2        1 male           5.26 female_x_male   female_x_male       
-#> 3        3        2 female         5.14 female_x_male   female_x_male       
-#> 4        4        2 male           3.11 female_x_male   female_x_male       
-#> # ℹ 636 more rows
-#> # ℹ 6 more variables: .dy_is_female_x_female <dbl>, .dy_is_female_x_male <dbl>,
+#> # A tibble: 720 × 14
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 716 more rows
+#> # ℹ 8 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>, .dy_is_female_x_male <dbl>,
 #> #   .dy_is_male_x_male <dbl>,
 #> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
 #> #   .dy_member_contrast_female_x_male_arbitrary <dbl>,
@@ -746,7 +774,7 @@ them `same-sex` dyads:
 ``` r
 
 mixed_cross_data_pooled <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -758,12 +786,12 @@ mixed_cross_data_pooled <- dyadMLM::prepare_dyad_data(
 
 print(mixed_cross_data_pooled)
 #> # dyadMLM data
-#> # Rows: 640 | Dyads: 320 | Intensive longitudinal: no
+#> # Rows: 720 | Dyads: 360 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
 #> # female_x_male          distinguishable 120 dyads
-#> # same-sex (pooled)      exchangeable    200 dyads
+#> # same-sex (pooled)      exchangeable    240 dyads
 #> #   female_x_female
 #> #   male_x_male
 #> #
@@ -776,23 +804,23 @@ print(mixed_cross_data_pooled)
 #> #                                         distinguishable dyads or other
 #> #                                         exchangeable compositions
 #> #
-#> # A tibble: 640 × 10
-#>    personID coupleID gender satisfaction .dy_composition .dy_composition_role
-#>       <int>    <int> <fct>         <dbl> <fct>           <fct>               
-#>  1        1        1 female         4.95 female_x_male   female_x_male_female
-#>  2        2        1 male           5.26 female_x_male   female_x_male_male  
-#>  3        3        2 female         5.14 female_x_male   female_x_male_female
-#>  4        4        2 male           3.11 female_x_male   female_x_male_male  
-#>  5        5        3 female         6.40 female_x_male   female_x_male_female
-#>  6        6        3 male           3.45 female_x_male   female_x_male_male  
-#>  7        7        4 female         4.16 female_x_male   female_x_male_female
-#>  8        8        4 male           6.47 female_x_male   female_x_male_male  
-#>  9        9        5 female         5.97 female_x_male   female_x_male_female
-#> 10       10        5 male           5.44 female_x_male   female_x_male_male  
-#> # ℹ 630 more rows
-#> # ℹ 4 more variables: .dy_is_female_x_male_female <dbl>,
-#> #   .dy_is_female_x_male_male <dbl>, .dy_is_same_sex <dbl>,
-#> #   .dy_member_contrast_same_sex_arbitrary <dbl>
+#> # A tibble: 720 × 12
+#>    personID coupleID gender dyad_composition closeness provided_support
+#>       <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#>  1        1        1 female female_x_male         4.77             4.49
+#>  2        2        1 male   female_x_male         4.46             4.76
+#>  3        3        2 female female_x_male         6.42             4.09
+#>  4        4        2 male   female_x_male         6.01             6.20
+#>  5        5        3 female female_x_male         4.70             4.22
+#>  6        6        3 male   female_x_male         4.54             5.03
+#>  7        7        4 female female_x_male         7.81             5.36
+#>  8        8        4 male   female_x_male         5.55             5.25
+#>  9        9        5 female female_x_male         7.27             5.78
+#> 10       10        5 male   female_x_male         5.43             4.98
+#> # ℹ 710 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
+#> #   .dy_is_same_sex <dbl>, .dy_member_contrast_same_sex_arbitrary <dbl>
 ```
 
 Note that you cannot pool distinguishable dyads. If we wanted to pool
@@ -802,7 +830,7 @@ Note that you cannot pool distinguishable dyads. If we wanted to pool
 ``` r
 
 mixed_cross_data_pooled_constrained <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional_mixed,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
@@ -815,12 +843,12 @@ mixed_cross_data_pooled_constrained <- dyadMLM::prepare_dyad_data(
 
 print(mixed_cross_data_pooled_constrained)
 #> # dyadMLM data
-#> # Rows: 640 | Dyads: 320 | Intensive longitudinal: no
+#> # Rows: 720 | Dyads: 360 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_female              exchangeable 100 dyads
-#> # pooled_exchangeable (pooled) exchangeable 220 dyads
+#> # female_x_female              exchangeable 120 dyads
+#> # pooled_exchangeable (pooled) exchangeable 240 dyads
 #> #   female_x_male
 #> #   male_x_male
 #> #
@@ -833,22 +861,22 @@ print(mixed_cross_data_pooled_constrained)
 #> #                                         distinguishable dyads or other
 #> #                                         exchangeable compositions
 #> #
-#> # A tibble: 640 × 10
-#>    personID coupleID gender satisfaction .dy_composition    .dy_composition_role
-#>       <int>    <int> <fct>         <dbl> <fct>              <fct>               
-#>  1        1        1 female         4.95 pooled_exchangeab… pooled_exchangeable 
-#>  2        2        1 male           5.26 pooled_exchangeab… pooled_exchangeable 
-#>  3        3        2 female         5.14 pooled_exchangeab… pooled_exchangeable 
-#>  4        4        2 male           3.11 pooled_exchangeab… pooled_exchangeable 
-#>  5        5        3 female         6.40 pooled_exchangeab… pooled_exchangeable 
-#>  6        6        3 male           3.45 pooled_exchangeab… pooled_exchangeable 
-#>  7        7        4 female         4.16 pooled_exchangeab… pooled_exchangeable 
-#>  8        8        4 male           6.47 pooled_exchangeab… pooled_exchangeable 
-#>  9        9        5 female         5.97 pooled_exchangeab… pooled_exchangeable 
-#> 10       10        5 male           5.44 pooled_exchangeab… pooled_exchangeable 
-#> # ℹ 630 more rows
-#> # ℹ 4 more variables: .dy_is_female_x_female <dbl>,
-#> #   .dy_is_pooled_exchangeable <dbl>,
+#> # A tibble: 720 × 12
+#>    personID coupleID gender dyad_composition closeness provided_support
+#>       <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#>  1        1        1 female female_x_male         4.77             4.49
+#>  2        2        1 male   female_x_male         4.46             4.76
+#>  3        3        2 female female_x_male         6.42             4.09
+#>  4        4        2 male   female_x_male         6.01             6.20
+#>  5        5        3 female female_x_male         4.70             4.22
+#>  6        6        3 male   female_x_male         4.54             5.03
+#>  7        7        4 female female_x_male         7.81             5.36
+#>  8        8        4 male   female_x_male         5.55             5.25
+#>  9        9        5 female female_x_male         7.27             5.78
+#> 10       10        5 male   female_x_male         5.43             4.98
+#> # ℹ 710 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>, .dy_is_pooled_exchangeable <dbl>,
 #> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
 #> #   .dy_member_contrast_pooled_exchangeable_arbitrary <dbl>
 ```

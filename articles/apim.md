@@ -109,21 +109,23 @@ We first prepare the example data with
 ``` r
 
 apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
-  data = example_dyadic_crosssectional,
+  data = dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
-  model_types = "apim"
+  predictors = provided_support,
+  model_types = "apim",
+  # dyads_cross contains three compositions; retain `female-male` here.
+  keep_compositions = "female-male"
 )
 
 print(apim_distinguishable_data, n=4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_male distinguishable 95 dyads
+#> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition       inferred dyad composition
@@ -134,17 +136,17 @@ print(apim_distinguishable_data, n=4)
 #> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
 #> #                         values
 #> #
-#> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
-#> 1        1        1 female          4.79         4.37 female_x_male  
-#> 2        2        1 male            3.80         2.34 female_x_male  
-#> 3        3        2 female          2.91         2.44 female_x_male  
-#> 4        4        2 male            6.51         6.08 female_x_male  
-#> # ℹ 186 more rows
-#> # ℹ 5 more variables: .dy_composition_role <fct>,
+#> # A tibble: 240 × 12
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 236 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>
+#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
 ```
 
 The generated `.dy_*` columns can be used directly in the model formula.
@@ -153,7 +155,7 @@ Here is a simple example:
 ``` r
 
 apim_distinguishable_model <- glmmTMB::glmmTMB(
-  satisfaction ~
+  closeness ~
 
     # Gender-specific intercepts
     0 +
@@ -161,12 +163,12 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
     .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .dy_is_female_x_male_female:.dy_communication_actor +
-    .dy_is_female_x_male_male:.dy_communication_actor +
+    .dy_is_female_x_male_female:.dy_provided_support_actor +
+    .dy_is_female_x_male_male:.dy_provided_support_actor +
 
     # Gender-specific partner effects
-    .dy_is_female_x_male_female:.dy_communication_partner +
-    .dy_is_female_x_male_male:.dy_communication_partner +
+    .dy_is_female_x_male_female:.dy_provided_support_partner +
+    .dy_is_female_x_male_male:.dy_provided_support_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
@@ -184,50 +186,51 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 summary(apim_distinguishable_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ 0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +  
-#>     .dy_is_female_x_male_female:.dy_communication_actor + .dy_is_female_x_male_male:.dy_communication_actor +  
-#>     .dy_is_female_x_male_female:.dy_communication_partner + .dy_is_female_x_male_male:.dy_communication_partner +  
+#> closeness ~ 0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +  
+#>     .dy_is_female_x_male_female:.dy_provided_support_actor +  
+#>     .dy_is_female_x_male_male:.dy_provided_support_actor + .dy_is_female_x_male_female:.dy_provided_support_partner +  
+#>     .dy_is_female_x_male_male:.dy_provided_support_partner +  
 #>     us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |  
 #>         coupleID)
-#> Dispersion:                    ~0
+#> Dispersion:                 ~0
 #> Data: apim_distinguishable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     589.5     618.0    -285.7     571.5       167 
+#>     614.7     646.1    -298.4     596.7       231 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups   Name                        Variance Std.Dev. Corr  
-#>  coupleID .dy_is_female_x_male_female 1.311    1.145          
-#>           .dy_is_female_x_male_male   1.792    1.339    -0.19 
-#> Number of obs: 176, groups:  coupleID, 88
+#>  Groups   Name                        Variance Std.Dev. Corr 
+#>  coupleID .dy_is_female_x_male_female 0.7631   0.8736        
+#>           .dy_is_female_x_male_male   0.7409   0.8607   0.35 
+#> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
-#>                                                       Estimate Std. Error
-#> .dy_is_female_x_male_female                           -4.36874    0.59416
-#> .dy_is_female_x_male_male                             -6.03808    0.69452
-#> .dy_is_female_x_male_female:.dy_communication_actor    1.67170    0.10089
-#> .dy_is_female_x_male_male:.dy_communication_actor      1.80495    0.10562
-#> .dy_is_female_x_male_female:.dy_communication_partner  0.24930    0.09035
-#> .dy_is_female_x_male_male:.dy_communication_partner    0.25453    0.11793
-#>                                                       z value Pr(>|z|)    
-#> .dy_is_female_x_male_female                            -7.353 1.94e-13 ***
-#> .dy_is_female_x_male_male                              -8.694  < 2e-16 ***
-#> .dy_is_female_x_male_female:.dy_communication_actor    16.570  < 2e-16 ***
-#> .dy_is_female_x_male_male:.dy_communication_actor      17.090  < 2e-16 ***
-#> .dy_is_female_x_male_female:.dy_communication_partner   2.759  0.00579 ** 
-#> .dy_is_female_x_male_male:.dy_communication_partner     2.158  0.03090 *  
+#>                                                          Estimate Std. Error
+#> .dy_is_female_x_male_female                               -3.3410     0.5629
+#> .dy_is_female_x_male_male                                 -0.8981     0.5546
+#> .dy_is_female_x_male_female:.dy_provided_support_actor     1.4705     0.1140
+#> .dy_is_female_x_male_male:.dy_provided_support_actor       0.9153     0.1016
+#> .dy_is_female_x_male_female:.dy_provided_support_partner   0.3485     0.1031
+#> .dy_is_female_x_male_male:.dy_provided_support_partner     0.1976     0.1123
+#>                                                          z value Pr(>|z|)    
+#> .dy_is_female_x_male_female                               -5.936 2.93e-09 ***
+#> .dy_is_female_x_male_male                                 -1.619 0.105394    
+#> .dy_is_female_x_male_female:.dy_provided_support_actor    12.901  < 2e-16 ***
+#> .dy_is_female_x_male_male:.dy_provided_support_actor       9.013  < 2e-16 ***
+#> .dy_is_female_x_male_female:.dy_provided_support_partner   3.381 0.000722 ***
+#> .dy_is_female_x_male_male:.dy_provided_support_partner     1.759 0.078553 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 The estimated coefficients map as follows:
 
-![Fitted distinguishable APIM. Female and male intercepts -4.37 and
--6.04; actor effects 1.67 and 1.80; partner effects 0.25 and 0.25;
-residual SDs 1.15 and 1.34, with correlation
--0.19.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg)
+![Fitted distinguishable APIM. Female and male intercepts -3.34 and
+-0.90; actor effects 1.47 and 0.92; partner effects 0.35 and 0.20;
+residual SDs 0.87 and 0.86, with correlation
+0.35.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg)
 
 Fitted cross-sectional distinguishable APIM for the example data. Fixed
 effects, residual standard deviations, and the residual correlation are
@@ -305,22 +308,23 @@ constraints. Another option would be to omit roles.
 ``` r
 
 apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = communication,
+  predictors = provided_support,
+  keep_compositions = "female-male",
   set_exchangeable_compositions = "female-male",
   seed = 123
 )
 
 print(apim_exchangeable_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # female_x_male exchangeable (set by user) 95 dyads
+#> # female_x_male exchangeable (set by user) 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -335,17 +339,18 @@ print(apim_exchangeable_data, n = 4)
 #> #   .dy_{pred}_partner                    APIM partner predictor: partner's
 #> #                                         original predictor values
 #> #
-#> # A tibble: 190 × 11
-#>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
-#> 1        1        1 female          4.79         4.37 female_x_male  
-#> 2        2        1 male            3.80         2.34 female_x_male  
-#> 3        3        2 female          2.91         2.44 female_x_male  
-#> 4        4        2 male            6.51         6.08 female_x_male  
-#> # ℹ 186 more rows
-#> # ℹ 5 more variables: .dy_composition_role <fct>, .dy_is_female_x_male <dbl>,
+#> # A tibble: 240 × 12
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1        1        1 female female_x_male         4.77             4.49
+#> 2        2        1 male   female_x_male         4.46             4.76
+#> 3        3        2 female female_x_male         6.42             4.09
+#> 4        4        2 male   female_x_male         6.01             6.20
+#> # ℹ 236 more rows
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male <dbl>,
 #> #   .dy_member_contrast_female_x_male_arbitrary <dbl>,
-#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>
+#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
 ```
 
 We then use the columns to fit the model as follows:
@@ -353,14 +358,14 @@ We then use the columns to fit the model as follows:
 ``` r
 
 apim_exchangeable_model <- glmmTMB::glmmTMB(
-  satisfaction ~ 
+  closeness ~
     
     # Pooled single intercept
     1 +
     
     # Pooled single actor and partner effects
-    .dy_communication_actor +
-    .dy_communication_partner +
+    .dy_provided_support_actor +
+    .dy_provided_support_partner +
     
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
@@ -374,28 +379,28 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ 1 + .dy_communication_actor + .dy_communication_partner +  
+#> closeness ~ 1 + .dy_provided_support_actor + .dy_provided_support_partner +  
 #>     us(1 | coupleID) + us(0 + .dy_member_contrast_female_x_male_arbitrary |  
 #>     coupleID)
-#> Dispersion:                    ~0
+#> Dispersion:                 ~0
 #> Data: apim_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     604.0     619.8    -297.0     594.0       171 
+#>     708.5     725.9    -349.3     698.5       235 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups     Name                                        Variance Std.Dev.
-#>  coupleID   (Intercept)                                 0.6346   0.7966  
-#>  coupleID.1 .dy_member_contrast_female_x_male_arbitrary 1.1532   1.0739  
-#> Number of obs: 176, groups:  coupleID, 88
+#>  coupleID   (Intercept)                                 0.5160   0.7183  
+#>  coupleID.1 .dy_member_contrast_female_x_male_arbitrary 0.5603   0.7485  
+#> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
-#>                           Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                -5.2330     0.4103 -12.754  < 2e-16 ***
-#> .dy_communication_actor     1.7578     0.0819  21.461  < 2e-16 ***
-#> .dy_communication_partner   0.2379     0.0819   2.904  0.00368 ** 
+#>                              Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                   -2.0307     0.4580  -4.434 9.25e-06 ***
+#> .dy_provided_support_actor     1.2876     0.0897  14.354  < 2e-16 ***
+#> .dy_provided_support_partner   0.1645     0.0897   1.834   0.0666 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -418,13 +423,13 @@ print(backtransformed)
 #> 
 #> Variance-covariance:
 #>                        1      2     
-#> 1 member1: (Intercept) 1.788  -0.519
-#> 2 member2: (Intercept) -0.519 1.788 
+#> 1 member1: (Intercept) 1.076  -0.044
+#> 2 member2: (Intercept) -0.044 1.076 
 #> 
 #> Standard deviations and correlations:
 #>                        1      2     
-#> 1 member1: (Intercept) 1.337  -0.290
-#> 2 member2: (Intercept) -0.290 1.337
+#> 1 member1: (Intercept) 1.037  -0.041
+#> 2 member2: (Intercept) -0.041 1.037
 ```
 
 The back-transformation follows directly from the shared and
@@ -450,9 +455,9 @@ Because the two fitted blocks are independent,
 
 The output can now be mapped as follows:
 
-![Fitted exchangeable APIM. Intercept -5.23, actor effect 1.76, partner
-effect 0.24, common residual SD 1.34, and residual correlation
--0.29.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.svg)
+![Fitted exchangeable APIM. Intercept -2.03, actor effect 1.29, partner
+effect 0.16, common residual SD 1.04, and residual correlation
+-0.04.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.svg)
 
 Fitted cross-sectional exchangeable APIM for the example data. The
 common member residual standard deviation and residual correlation are
@@ -483,11 +488,11 @@ dyadMLM::compare_nested_glmmTMB_models(
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
-#> apim_exchangeable_model     5 603.98 619.84 -296.99   593.98              
-#> apim_distinguishable_model  9 589.49 618.03 -285.75   571.49 22.492      4
+#> apim_exchangeable_model     5 708.54 725.94 -349.27   698.54              
+#> apim_distinguishable_model  9 614.75 646.07 -298.37   596.75 101.79      4
 #>                            Pr(>Chisq)    
 #> apim_exchangeable_model                  
-#> apim_distinguishable_model  0.0001599 ***
+#> apim_distinguishable_model  < 2.2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -523,13 +528,14 @@ first retain the female-male distinction when preparing the data:
 ``` r
 
 ild_distinguishable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
   role = gender,
   time = diaryday,
   predictors = provided_support,
-  model_types = "apim"
+  model_types = "apim",
+  keep_compositions = "female-male"
 ) |>
   dplyr::mutate(
     # we grand-mean center in this example to help convergence and
@@ -612,27 +618,30 @@ parametrization from del Rosario and West (2025) can be extended to the
 dyad-occasion level to represent same-occasion residual dependence.
 
 We first prepare within-person (`cwp`) and between-person (`cbp`) actor
-and partner predictors:
+and partner predictors. We retain the female-female dyads as one
+substantively exchangeable composition:
 
 ``` r
 
 ild_apim_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = provided_support,
   model_types = "apim",
+  keep_compositions = "female-female",
   seed = 123
 )
 
 print(ild_apim_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
-#> # Structure: dyad = coupleID, member = personID, time = diaryday
+#> # Rows: 3360 | Dyads: 120 | Intensive longitudinal: yes
+#> # Structure: dyad = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # assumed_exchangeable exchangeable 40 dyads
+#> # female_x_female exchangeable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -666,17 +675,17 @@ print(ild_apim_data, n = 4)
 #> #                                         difference from the average person's
 #> #                                         usual level
 #> #
-#> # A tibble: 1,120 × 18
-#>   personID coupleID diaryday gender closeness provided_support .dy_composition  
-#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>            
-#> 1        1        1        0 female      5.03             4.30 assumed_exchange…
-#> 2        1        1        1 female      5.64             4.24 assumed_exchange…
-#> 3        1        1        2 female      5.49             3.54 assumed_exchange…
-#> 4        1        1        3 female      6.71             5.04 assumed_exchange…
-#> # ℹ 1,116 more rows
-#> # ℹ 11 more variables: .dy_composition_role <fct>,
-#> #   .dy_is_assumed_exchangeable <dbl>,
-#> #   .dy_member_contrast_assumed_exchangeable_arbitrary <dbl>,
+#> # A tibble: 3,360 × 19
+#>   personID coupleID diaryday gender dyad_composition closeness provided_support
+#>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1      241      121        0 female female_x_female       6.68             6.18
+#> 2      242      121        0 female female_x_female       5.67             5.70
+#> 3      241      121        1 female female_x_female       8.63             4.57
+#> 4      242      121        1 female female_x_female       5.58             5.30
+#> # ℹ 3,356 more rows
+#> # ℹ 12 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>,
+#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
 #> #   .dy_provided_support_cwp <dbl>, .dy_provided_support_cbp <dbl>,
 #> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>,
 #> #   .dy_provided_support_cwp_actor <dbl>, …
@@ -705,14 +714,14 @@ ild_apim_model <- glmmTMB::glmmTMB(
 
     # Stable exchangeable dyad-level covariance with actor random slopes
     us(1 + .dy_provided_support_cwp_actor | coupleID) + # shared intercept and slope
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary + # difference intercept
-         .dy_member_contrast_assumed_exchangeable_arbitrary:
+    us(0 + .dy_member_contrast_female_x_female_arbitrary + # difference intercept
+         .dy_member_contrast_female_x_female_arbitrary:
            .dy_provided_support_cwp_actor                       # difference slope
        | coupleID) +
 
     # Same-occasion exchangeable covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -725,14 +734,14 @@ summary(ild_apim_model)
 #> closeness ~ 1 + diaryday + .dy_provided_support_cwp_actor + .dy_provided_support_cwp_partner +  
 #>     .dy_provided_support_cbp_actor + .dy_provided_support_cbp_partner +  
 #>     us(1 + .dy_provided_support_cwp_actor | coupleID) + us(0 +  
-#>     .dy_member_contrast_assumed_exchangeable_arbitrary + .dy_member_contrast_assumed_exchangeable_arbitrary:.dy_provided_support_cwp_actor |  
-#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
+#>     .dy_member_contrast_female_x_female_arbitrary + .dy_member_contrast_female_x_female_arbitrary:.dy_provided_support_cwp_actor |  
+#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_member_contrast_female_x_female_arbitrary |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_apim_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2979.3    3048.5   -1475.6    2951.3      1020 
+#>    8237.5    8323.2   -4104.8    8209.5      3346 
 #> 
 #> Random effects:
 #> 
@@ -744,30 +753,30 @@ summary(ild_apim_model)
 #>                     
 #>  coupleID.diaryday  
 #>  coupleID.diaryday.1
-#>  Name                                                                             
-#>  (Intercept)                                                                      
-#>  .dy_provided_support_cwp_actor                                                   
-#>  .dy_member_contrast_assumed_exchangeable_arbitrary                               
-#>  .dy_member_contrast_assumed_exchangeable_arbitrary:.dy_provided_support_cwp_actor
-#>  (Intercept)                                                                      
-#>  .dy_member_contrast_assumed_exchangeable_arbitrary                               
-#>  Variance Std.Dev. Corr 
-#>  0.526359 0.72551       
-#>  0.002924 0.05407  0.12 
-#>  0.644253 0.80265       
-#>  0.017122 0.13085  0.74 
-#>  0.313261 0.55970       
-#>  0.512316 0.71576       
-#> Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517
+#>  Name                                                                        
+#>  (Intercept)                                                                 
+#>  .dy_provided_support_cwp_actor                                              
+#>  .dy_member_contrast_female_x_female_arbitrary                               
+#>  .dy_member_contrast_female_x_female_arbitrary:.dy_provided_support_cwp_actor
+#>  (Intercept)                                                                 
+#>  .dy_member_contrast_female_x_female_arbitrary                               
+#>  Variance Std.Dev. Corr  
+#>  0.53935  0.7344         
+#>  0.08253  0.2873   0.31  
+#>  0.25725  0.5072         
+#>  0.03036  0.1742   -0.20 
+#>  0.36268  0.6022         
+#>  0.18018  0.4245         
+#> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
 #> 
 #> Conditional model:
-#>                                   Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                       5.082021   0.124371   40.86  < 2e-16 ***
-#> diaryday                         -0.008314   0.006275   -1.32   0.1852    
-#> .dy_provided_support_cwp_actor    0.261446   0.042969    6.08 1.17e-09 ***
-#> .dy_provided_support_cwp_partner  0.218131   0.041584    5.25 1.56e-07 ***
-#> .dy_provided_support_cbp_actor    1.213440   0.175931    6.90 5.30e-12 ***
-#> .dy_provided_support_cbp_partner  0.298883   0.175859    1.70   0.0892 .  
+#>                                  Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                      5.894379   0.072740   81.03  < 2e-16 ***
+#> diaryday                         0.007803   0.003707    2.10   0.0353 *  
+#> .dy_provided_support_cwp_actor   0.246995   0.032559    7.59 3.30e-14 ***
+#> .dy_provided_support_cwp_partner 0.247376   0.018964   13.04  < 2e-16 ***
+#> .dy_provided_support_cbp_actor   1.209439   0.070885   17.06  < 2e-16 ***
+#> .dy_provided_support_cbp_partner 0.313467   0.070901    4.42 9.82e-06 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -786,35 +795,35 @@ print(recovered_covariance)
 #> 
 #> Pair `pair_1`
 #> Shared:     us(1 + .dy_provided_support_cwp_actor | coupleID)
-#> Difference: us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary + .dy_member_contrast_assumed_exchangeable_arbitrary:.dy_provided_support_cwp_actor | coupleID)
+#> Difference: us(0 + .dy_member_contrast_female_x_female_arbitrary + .dy_member_contrast_female_x_female_arbitrary:.dy_provided_support_cwp_actor | coupleID)
 #> 
 #> Variance-covariance:
-#>                                           1      2      3      4     
-#> 1 member1: (Intercept)                    1.171  0.082  -0.118 -0.073
-#> 2 member1: .dy_provided_support_cwp_actor 0.082  0.020  -0.073 -0.014
-#> 3 member2: (Intercept)                    -0.118 -0.073 1.171  0.082 
-#> 4 member2: .dy_provided_support_cwp_actor -0.073 -0.014 0.082  0.020 
+#>                                           1     2     3     4    
+#> 1 member1: (Intercept)                    0.797 0.047 0.282 0.083
+#> 2 member1: .dy_provided_support_cwp_actor 0.047 0.113 0.083 0.052
+#> 3 member2: (Intercept)                    0.282 0.083 0.797 0.047
+#> 4 member2: .dy_provided_support_cwp_actor 0.083 0.052 0.047 0.113
 #> 
 #> Standard deviations and correlations:
-#>                                           1      2      3      4     
-#> 1 member1: (Intercept)                    1.082  0.535  -0.101 -0.475
-#> 2 member1: .dy_provided_support_cwp_actor 0.535  0.142  -0.475 -0.708
-#> 3 member2: (Intercept)                    -0.101 -0.475 1.082  0.535 
-#> 4 member2: .dy_provided_support_cwp_actor -0.475 -0.708 0.535  0.142 
+#>                                           1     2     3     4    
+#> 1 member1: (Intercept)                    0.893 0.157 0.354 0.276
+#> 2 member1: .dy_provided_support_cwp_actor 0.157 0.336 0.276 0.462
+#> 3 member2: (Intercept)                    0.354 0.276 0.893 0.157
+#> 4 member2: .dy_provided_support_cwp_actor 0.276 0.462 0.157 0.336
 #> 
 #> Pair `pair_2`
 #> Shared:     us(1 | coupleID:diaryday)
-#> Difference: us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
+#> Difference: us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID:diaryday)
 #> 
 #> Variance-covariance:
-#>                        1      2     
-#> 1 member1: (Intercept) 0.826  -0.199
-#> 2 member2: (Intercept) -0.199 0.826 
+#>                        1     2    
+#> 1 member1: (Intercept) 0.543 0.183
+#> 2 member2: (Intercept) 0.183 0.543
 #> 
 #> Standard deviations and correlations:
-#>                        1      2     
-#> 1 member1: (Intercept) 0.909  -0.241
-#> 2 member2: (Intercept) -0.241 0.909
+#>                        1     2    
+#> 1 member1: (Intercept) 0.737 0.336
+#> 2 member2: (Intercept) 0.336 0.737
 ```
 
 The `cwp` terms estimate actor and partner associations for
@@ -834,10 +843,7 @@ the random intercept, actor slope, and partner slope.
 The full model above estimates both a shared and a member-contrast actor
 random slope. We can first test a smaller model that omits only the
 actor random slope from the member-contrast block. The member-contrast
-random intercept and both same-occasion blocks remain in the model.
-These boundary-constraint examples are shown but not run because their
-convergence can depend on the optimizer and platform; confirm
-convergence before interpreting either test.
+random intercept and both same-occasion blocks remain in the model:
 
 ``` r
 
@@ -845,17 +851,30 @@ ild_apim_no_contrast_slope <- update(
   ild_apim_model,
   formula = . ~ . -
     us(0 +
-         .dy_member_contrast_assumed_exchangeable_arbitrary +
-         .dy_member_contrast_assumed_exchangeable_arbitrary:
+         .dy_member_contrast_female_x_female_arbitrary +
+         .dy_member_contrast_female_x_female_arbitrary:
            .dy_provided_support_cwp_actor
        | coupleID) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
 )
 
 dyadMLM::compare_nested_glmmTMB_models(
   ild_apim_no_contrast_slope,
   ild_apim_model
 )
+#> Likelihood-ratio test for nested models fitted to equivalent data
+#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
+#> 
+#>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
+#> ild_apim_no_contrast_slope 12 8262.4 8335.9 -4119.2   8238.4              
+#> ild_apim_model             14 8237.5 8323.2 -4104.8   8209.5 28.926      2
+#>                            Pr(>Chisq)    
+#> ild_apim_no_contrast_slope               
+#> ild_apim_model              5.234e-07 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Conclusion (5% level): The likelihood-ratio test provides evidence that `ild_apim_model` fits better than `ild_apim_no_contrast_slope` (p < 0.001).
 ```
 
 Without the member-contrast slope, the two members have identical actor
@@ -876,14 +895,26 @@ no_contrast_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
       shared_block =
         "us(1 + .dy_provided_support_cwp_actor | coupleID)",
       difference_block =
-        "us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)",
+        "us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)",
       difference_indicator =
-        ".dy_member_contrast_assumed_exchangeable_arbitrary"
+        ".dy_member_contrast_female_x_female_arbitrary"
     )
   )
 )
 
 print(no_contrast_slope_covariance, representation = "sdcor")
+#> Exchangeable residual covariance
+#> 
+#> Pair `dyad`
+#> Shared:     us(1 + .dy_provided_support_cwp_actor | coupleID)
+#> Difference: us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
+#> 
+#> Standard deviations and correlations:
+#>                                           1     2     3     4    
+#> 1 member1: (Intercept)                    0.892 0.254 0.355 0.254
+#> 2 member1: .dy_provided_support_cwp_actor 0.254 0.287 0.254 1.000
+#> 3 member2: (Intercept)                    0.355 0.254 0.892 0.254
+#> 4 member2: .dy_provided_support_cwp_actor 0.254 1.000 0.254 0.287
 ```
 
 We can impose the stronger constraint by omitting the full
@@ -896,8 +927,8 @@ ild_apim_no_contrast_block <- update(
   ild_apim_model,
   formula = . ~ . -
     us(0 +
-         .dy_member_contrast_assumed_exchangeable_arbitrary +
-         .dy_member_contrast_assumed_exchangeable_arbitrary:
+         .dy_member_contrast_female_x_female_arbitrary +
+         .dy_member_contrast_female_x_female_arbitrary:
            .dy_provided_support_cwp_actor
        | coupleID)
 )
@@ -906,6 +937,19 @@ dyadMLM::compare_nested_glmmTMB_models(
   ild_apim_no_contrast_block,
   ild_apim_model
 )
+#> Likelihood-ratio test for nested models fitted to equivalent data
+#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
+#> 
+#>                            Df    AIC    BIC  logLik deviance Chisq Chi Df
+#> ild_apim_no_contrast_block 11 9331.5 9398.8 -4654.7   9309.5             
+#> ild_apim_model             14 8237.5 8323.2 -4104.8   8209.5  1100      3
+#>                            Pr(>Chisq)    
+#> ild_apim_no_contrast_block               
+#> ild_apim_model              < 2.2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Conclusion (5% level): The likelihood-ratio test provides evidence that `ild_apim_model` fits better than `ild_apim_no_contrast_block` (p < 0.001).
 ```
 
 Here, both members have identical random intercepts and actor random
@@ -922,12 +966,24 @@ no_contrast_block_covariance <- dyadMLM::recover_exchangeable_covariance(
         "us(1 + .dy_provided_support_cwp_actor | coupleID)",
       difference_block = NULL,
       difference_indicator =
-        ".dy_member_contrast_assumed_exchangeable_arbitrary"
+        ".dy_member_contrast_female_x_female_arbitrary"
     )
   )
 )
 
 print(no_contrast_block_covariance, representation = "sdcor")
+#> Exchangeable residual covariance
+#> 
+#> Pair `dyad`
+#> Shared:     us(1 + .dy_provided_support_cwp_actor | coupleID)
+#> Difference: <omitted>
+#> 
+#> Standard deviations and correlations:
+#>                                           1     2     3     4    
+#> 1 member1: (Intercept)                    0.734 0.339 1.000 0.339
+#> 2 member1: .dy_provided_support_cwp_actor 0.339 0.269 0.339 1.000
+#> 3 member2: (Intercept)                    1.000 0.339 0.734 0.339
+#> 4 member2: .dy_provided_support_cwp_actor 0.339 1.000 0.339 0.269
 ```
 
 These are constraints on the stable dyad-level random effects, not on
@@ -976,13 +1032,15 @@ through the `lag1_predictors` argument:
 ``` r
 
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = closeness,
   lag1_predictors = closeness,
   model_types = "apim",
+  keep_compositions = "female-female",
   seed = 123
 )
 ```
@@ -1010,51 +1068,54 @@ stability_influence <- glmmTMB::glmmTMB(
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data_dynamic
 )
+#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
+#> problem; false convergence (8). See vignette('troubleshooting'),
+#> help('diagnose')
 
 summary(stability_influence)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> closeness ~ 1 + .dy_closeness_actor_lag1 + .dy_closeness_partner_lag1 +  
-#>     diaryday + us(1 | coupleID) + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
-#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
+#>     diaryday + us(1 | coupleID) + us(0 + .dy_member_contrast_female_x_female_arbitrary |  
+#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_member_contrast_female_x_female_arbitrary |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_apim_data_dynamic
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2929.0    2968.0   -1456.5    2913.0       967 
+#>    8206.2    8254.6   -4095.1    8190.2      3112 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups              Name                                              
-#>  coupleID            (Intercept)                                       
-#>  coupleID.1          .dy_member_contrast_assumed_exchangeable_arbitrary
-#>  coupleID.diaryday   (Intercept)                                       
-#>  coupleID.diaryday.1 .dy_member_contrast_assumed_exchangeable_arbitrary
-#>  Variance Std.Dev.
-#>  0.9161   0.9571  
-#>  0.5742   0.7578  
-#>  0.3925   0.6265  
-#>  0.5234   0.7235  
-#> Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497
+#>  Groups              Name                                          Variance
+#>  coupleID            (Intercept)                                   1.7286  
+#>  coupleID.1          .dy_member_contrast_female_x_female_arbitrary 0.4121  
+#>  coupleID.diaryday   (Intercept)                                   0.4654  
+#>  coupleID.diaryday.1 .dy_member_contrast_female_x_female_arbitrary 0.2015  
+#>  Std.Dev.
+#>  1.3148  
+#>  0.6419  
+#>  0.6822  
+#>  0.4489  
+#> Number of obs: 3120, groups:  coupleID, 120; coupleID:diaryday, 1560
 #> 
 #> Conditional model:
-#>                             Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                 4.213120   0.300184  14.035  < 2e-16 ***
-#> .dy_closeness_actor_lag1    0.143973   0.035326   4.076 4.59e-05 ***
-#> .dy_closeness_partner_lag1  0.028758   0.035386   0.813    0.416    
-#> diaryday                   -0.005281   0.007643  -0.691    0.490    
+#>                            Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                5.821704   0.206073  28.251   <2e-16 ***
+#> .dy_closeness_actor_lag1   0.004035   0.019499   0.207   0.8361    
+#> .dy_closeness_partner_lag1 0.006138   0.019499   0.315   0.7529    
+#> diaryday                   0.009085   0.004620   1.967   0.0492 *  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

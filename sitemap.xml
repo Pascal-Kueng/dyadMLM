@@ -19,13 +19,10 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/center_predictors.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyad_generated_columns.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed_tweedie.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_tweedie.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_mixed.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_tweedie.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyads_cross.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyads_ild.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyads_nbinom_cross.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyads_nbinom_ild.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/extract_exchangeable_residual_blocks.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/format_group_count.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/format_group_list.html</loc></url>

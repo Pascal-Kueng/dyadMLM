@@ -202,17 +202,20 @@ to open the installed version.
 ``` r
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
   example_data <- prepare_dyad_data(
-    example_dyadic_crosssectional,
+    dyads_cross,
     dyad = coupleID,
     member = personID,
+    role = gender,
     model_types = "none",
+    # dyads_cross contains three compositions; retain `female-female` here.
+    keep_compositions = "female-female",
     seed = 123
   )
 
   model <- glmmTMB::glmmTMB(
-    satisfaction ~ 1 +
+    closeness ~ 1 +
       us(1 | coupleID) +
-      us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID),
     dispformula = ~ 0,
     data = example_data
   )
@@ -223,15 +226,15 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
-#> Difference: us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
+#> Difference: us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
 #>                        1     2    
-#> 1 member1: (Intercept) 8.039 2.475
-#> 2 member2: (Intercept) 2.475 8.039
+#> 1 member1: (Intercept) 2.215 1.368
+#> 2 member2: (Intercept) 1.368 2.215
 #> 
 #> Standard deviations and correlations:
 #>                        1     2    
-#> 1 member1: (Intercept) 2.835 0.308
-#> 2 member2: (Intercept) 0.308 2.835
+#> 1 member1: (Intercept) 1.488 0.617
+#> 2 member2: (Intercept) 0.617 1.488
 ```

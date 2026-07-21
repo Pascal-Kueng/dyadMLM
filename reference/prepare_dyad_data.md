@@ -124,7 +124,8 @@ prepare_dyad_data(
 
   Optional observed dyad compositions to keep before exchangeability
   overrides and pooling. Requires `role`. Composition references use the
-  same format as `set_exchangeable_compositions`.
+  same format as `set_exchangeable_compositions`. `NULL` keeps all
+  observed compositions.
 
 - pool_compositions:
 

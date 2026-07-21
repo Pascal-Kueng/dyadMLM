@@ -34,37 +34,37 @@ treated as exchangeable is a substantive assumption (see [Testing
 distinguishability in the APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-distinguishability)).
 
-One way to make this assumption in `dyadMLM` at the data-preparation
-step is to omit `role` from
-[`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
-This treats all dyads as the same exchangeable composition. Passing a
-`role` is also possible when it leads to exactly one exchangeable
-composition (e.g., only female-female dyads). Otherwise, refer to the
-[Getting Started
+Here, we retain the female-female dyads with `keep_compositions`.
+Because both members have the same role, this gives us one genuinely
+exchangeable dyad composition. Omitting `role` is another option when
+all dyads should be treated as one exchangeable composition. Refer to
+the [Getting Started
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.md)
-for how to filter, pool, and constrain dyad compositions to obtain a
-single exchangeable dyad composition.
+for how to retain, pool, and constrain dyad compositions.
 
 ``` r
 
 cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_crosssectional,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
-  predictors = communication,
+  role = gender,
+  predictors = provided_support,
   # Create both APIM and DIM columns for comparison.
   model_types = c("apim", "dim"),
+  # dyads_cross contains three compositions; retain `female-female` here.
+  keep_compositions = "female-female",
   seed = 123
 )
 
 # Print the first two dyads.
 print(cross_exchangeable_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: dyad = coupleID, member = personID
+#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
-#> # assumed_exchangeable exchangeable 95 dyads
+#> # female_x_female exchangeable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -84,20 +84,20 @@ print(cross_exchangeable_data, n = 4)
 #> #                                         predictor: member's difference from
 #> #                                         the dyad mean
 #> #
-#> # A tibble: 190 × 13
-#>   personID coupleID gender communication satisfaction .dy_composition     
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>               
-#> 1        1        1 female          4.79         4.37 assumed_exchangeable
-#> 2        2        1 male            3.80         2.34 assumed_exchangeable
-#> 3        3        2 female          2.91         2.44 assumed_exchangeable
-#> 4        4        2 male            6.51         6.08 assumed_exchangeable
-#> # ℹ 186 more rows
-#> # ℹ 7 more variables: .dy_composition_role <fct>,
-#> #   .dy_is_assumed_exchangeable <dbl>,
-#> #   .dy_member_contrast_assumed_exchangeable_arbitrary <dbl>,
-#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>,
-#> #   .dy_communication_dyad_mean_gmc <dbl>,
-#> #   .dy_communication_within_dyad_dev <dbl>
+#> # A tibble: 240 × 14
+#>   personID coupleID gender dyad_composition closeness provided_support
+#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#> 1      241      121 female female_x_female       7.59             5.41
+#> 2      242      121 female female_x_female       6.14             5.19
+#> 3      243      122 female female_x_female       8.27             5.89
+#> 4      244      122 female female_x_female       8.02             5.57
+#> # ℹ 236 more rows
+#> # ℹ 8 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>,
+#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
+#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>,
+#> #   .dy_provided_support_dyad_mean_gmc <dbl>,
+#> #   .dy_provided_support_within_dyad_dev <dbl>
 ```
 
 For the exchangeable random-effects specification,
@@ -178,7 +178,7 @@ The resulting estimated fixed effects are a reparameterization of the
 APIM actor and partner effects (Bolger et al. 2025). And just like the
 exchangeable APIM, the random-effects structure comprises a dyad-level
 intercept and a dyad-level difference contrast indexed by
-`.dy_member_contrast_assumed_exchangeable_arbitrary`. In `glmmTMB`, with
+`.dy_member_contrast_female_x_female_arbitrary`. In `glmmTMB`, with
 `dispformula = ~ 0`, these random effects represent the two members’
 Gaussian residual variance and covariance.
 
@@ -194,20 +194,20 @@ The full model can be estimated as:
 
 
 dim_1 <- glmmTMB::glmmTMB(
-  satisfaction ~
+  closeness ~
 
     # Pooled fixed intercept
     1 +
 
     # Between-dyad effect
-    .dy_communication_dyad_mean_gmc +
+    .dy_provided_support_dyad_mean_gmc +
 
     # Within-dyad effect
-    .dy_communication_within_dyad_dev +
+    .dy_provided_support_within_dyad_dev +
 
     # Residual Gaussian covariance structure
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -216,31 +216,28 @@ dim_1 <- glmmTMB::glmmTMB(
 summary(dim_1)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> satisfaction ~ 1 + .dy_communication_dyad_mean_gmc + .dy_communication_within_dyad_dev +  
-#>     us(1 | coupleID) + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
+#> closeness ~ 1 + .dy_provided_support_dyad_mean_gmc + .dy_provided_support_within_dyad_dev +  
+#>     us(1 | coupleID) + us(0 + .dy_member_contrast_female_x_female_arbitrary |  
 #>     coupleID)
-#> Dispersion:                    ~0
+#> Dispersion:                 ~0
 #> Data: cross_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     604.0     619.8    -297.0     594.0       171 
+#>     631.9     649.3    -310.9     621.9       235 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups     Name                                               Variance
-#>  coupleID   (Intercept)                                        0.6346  
-#>  coupleID.1 .dy_member_contrast_assumed_exchangeable_arbitrary 1.1532  
-#>  Std.Dev.
-#>  0.7966  
-#>  1.0739  
-#> Number of obs: 176, groups:  coupleID, 88
+#>  Groups     Name                                          Variance Std.Dev.
+#>  coupleID   (Intercept)                                   0.5650   0.7516  
+#>  coupleID.1 .dy_member_contrast_female_x_female_arbitrary 0.2701   0.5197  
+#> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
-#>                                   Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                        5.04066    0.08492   59.36   <2e-16 ***
-#> .dy_communication_dyad_mean_gmc    1.99563    0.07797   25.59   <2e-16 ***
-#> .dy_communication_within_dyad_dev  1.51989    0.14406   10.55   <2e-16 ***
+#>                                      Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                           5.94511    0.06861   86.65   <2e-16 ***
+#> .dy_provided_support_dyad_mean_gmc    1.54653    0.09582   16.14   <2e-16 ***
+#> .dy_provided_support_within_dyad_dev  0.88745    0.10744    8.26   <2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -248,8 +245,8 @@ summary(dim_1)
 The same mean-and-deviation diagram can now be labelled with the
 estimated fixed effects and residual-component standard deviations:
 
-![Fitted DIM. Intercept 5.04, between-dyad effect 2.00, within-dyad
-effect 1.52, and mean/deviation residual SDs 0.80 and 1.07; their
+![Fitted DIM. Intercept 5.95, between-dyad effect 1.55, within-dyad
+effect 0.89, and mean/deviation residual SDs 0.75 and 0.52; their
 correlation is fixed at
 zero.](dim_files/figure-html/fitted-dim-diagram-1.svg)
 
@@ -272,27 +269,26 @@ Therefore, each coefficient has both an individual-member interpretation
 and an equivalent dyad mean/difference interpretation.
 
 In this Gaussian model, fixed coefficients are interpreted in units of
-the outcome, e.g., “satisfaction”:
+the outcome, here closeness:
 
-- The intercept (about 5.04) is the expected satisfaction of either
-  member, and therefore the expected couple-average satisfaction, when
-  both members’ communication equals the sample grand mean.
+- The intercept (about 5.94) is the expected closeness of either member,
+  and therefore the expected couple-average closeness, when both
+  members’ provided support equals the sample grand mean.
 
-- The between-dyad effect estimate (about 2.00) means that, comparing
-  couples with the same communication difference between partners, a
-  one-point higher couple-average communication level is associated with
-  a 2.00-point higher expected couple-average satisfaction.
-  Equivalently, each member’s expected satisfaction is 2.00 points
-  higher.
+- The between-dyad effect estimate (about 1.55) means that, comparing
+  couples with the same support difference between partners, a one-point
+  higher couple-average provided-support level is associated with a
+  1.55-point higher expected couple-average closeness. Equivalently,
+  each member’s expected closeness is 1.55 points higher.
 
-- The within-dyad effect estimate (about 1.52) means that a one-point
-  difference in communication between partners is associated with a
-  1.52-point difference in their expected satisfaction, holding their
-  average communication constant. In member terms, suppose one member is
-  0.5 points above the dyad mean and the other is 0.5 points below it.
-  Their expected satisfaction is then 0.76 points above and below the
+- The within-dyad effect estimate (about 0.89) means that a one-point
+  difference in provided support between partners is associated with a
+  0.89-point difference in their expected closeness, holding their
+  average support constant. In member terms, suppose one member is 0.5
+  points above the dyad mean and the other is 0.5 points below it. Their
+  expected closeness is then about 0.44 points above and below the
   couple’s predicted mean, respectively, so they are expected to differ
-  by 1.52 points in satisfaction.
+  by 0.89 points in closeness.
 
 Because the Gaussian DIM is the exchangeability-constrained version of
 the full DSM, exchangeability can also be tested by comparing these
@@ -313,16 +309,16 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.md).
 
 
 apim_1 <- glmmTMB::glmmTMB(
-  satisfaction ~ 1 +
+  closeness ~ 1 +
 
     # Fixed effects APIM
-    .dy_communication_actor + .dy_communication_partner +
+    .dy_provided_support_actor + .dy_provided_support_partner +
 
     # Since both models are equivalent, the same random-effects structure
     # can be used. See the APIM vignette to learn how to back-transform
     # these blocks to a full actor-partner covariance matrix.
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -340,8 +336,8 @@ data.frame(
   logLik = c(as.numeric(logLik(dim_1)), as.numeric(logLik(apim_1)))
 )
 #>   model      AIC      BIC    logLik
-#> 1   DIM 603.9834 619.8358 -296.9917
-#> 2  APIM 603.9834 619.8358 -296.9917
+#> 1   DIM 631.8553 649.2585 -310.9276
+#> 2  APIM 631.8553 649.2585 -310.9276
 ```
 
 This demonstrates that the same statistical model is being estimated
@@ -384,11 +380,11 @@ In this example we can see that the transformations work:
 apim_coef <- glmmTMB::fixef(apim_1)$cond
 dim_coef <- glmmTMB::fixef(dim_1)$cond
 
-b_actor <- apim_coef[[".dy_communication_actor"]]
-b_partner <- apim_coef[[".dy_communication_partner"]]
+b_actor <- apim_coef[[".dy_provided_support_actor"]]
+b_partner <- apim_coef[[".dy_provided_support_partner"]]
 
-b_mean <- dim_coef[[".dy_communication_dyad_mean_gmc"]]
-b_dev <- dim_coef[[".dy_communication_within_dyad_dev"]]
+b_mean <- dim_coef[[".dy_provided_support_dyad_mean_gmc"]]
+b_dev <- dim_coef[[".dy_provided_support_within_dyad_dev"]]
 
 
 cat("From APIM model:\n",
@@ -404,16 +400,16 @@ cat("From APIM model:\n",
      "  within-dyad effect:            ", round(b_dev, 3), "\n"
 )
 #> From APIM model:
-#>    actor effect:                   1.758 
-#>    partner effect:                 0.238 
+#>    actor effect:                   1.217 
+#>    partner effect:                 0.33 
 #> 
 #>  DIM transformation:
-#>    b_mean = b_actor + b_partner:   1.996 
-#>    b_dev = b_actor - b_partner:    1.52 
+#>    b_mean = b_actor + b_partner:   1.547 
+#>    b_dev = b_actor - b_partner:    0.887 
 #> 
 #>  From DIM model:
-#>    between-dyad effect:            1.996 
-#>    within-dyad effect:             1.52
+#>    between-dyad effect:            1.547 
+#>    within-dyad effect:             0.887
 ```
 
 The DIM and APIM intercepts are not expected to be equal because the DIM
@@ -447,7 +443,7 @@ therefore make the same change in the linear predictor relative to the
 grand-mean reference. The intercept is omitted from both displayed
 equations.
 
-**Communication coordinates**
+**Provided support coordinates**
 
 Reset
 
@@ -534,22 +530,24 @@ dyad-occasion mean and within-dyad member deviation.
 ``` r
 
 ild_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  example_dyadic_ILD,
+  dyads_ild,
   dyad = coupleID,
   member = personID,
+  role = gender,
   time = diaryday,
   predictors = provided_support,
   model_types = c("apim", "dim"),
+  keep_compositions = "female-female",
   seed = 123
 )
 
 print(ild_exchangeable_data)
 #> # dyadMLM data
-#> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
-#> # Structure: dyad = coupleID, member = personID, time = diaryday
+#> # Rows: 3360 | Dyads: 120 | Intensive longitudinal: yes
+#> # Structure: dyad = coupleID, member = personID, role = gender, time = diaryday
 #> #
 #> # Dyad compositions:
-#> # assumed_exchangeable exchangeable 40 dyads
+#> # female_x_female exchangeable 120 dyads
 #> #
 #> # Added columns:
 #> #   .dy_composition                       inferred dyad composition
@@ -602,23 +600,23 @@ print(ild_exchangeable_data)
 #> #                                         stable difference from the dyad's
 #> #                                         usual level
 #> #
-#> # A tibble: 1,120 × 24
-#>    personID coupleID diaryday gender closeness provided_support .dy_composition 
-#>       <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>           
-#>  1        1        1        0 female      5.03             4.30 assumed_exchang…
-#>  2        1        1        1 female      5.64             4.24 assumed_exchang…
-#>  3        1        1        2 female      5.49             3.54 assumed_exchang…
-#>  4        1        1        3 female      6.71             5.04 assumed_exchang…
-#>  5        1        1        4 female      5.61             4.74 assumed_exchang…
-#>  6        1        1        5 female      6.11             4.72 assumed_exchang…
-#>  7        1        1        6 female      6.96             5.12 assumed_exchang…
-#>  8        1        1        7 female      7.03             5.21 assumed_exchang…
-#>  9        1        1        8 female      8.07             5.20 assumed_exchang…
-#> 10        1        1        9 female      4.87             4.69 assumed_exchang…
-#> # ℹ 1,110 more rows
-#> # ℹ 17 more variables: .dy_composition_role <fct>,
-#> #   .dy_is_assumed_exchangeable <dbl>,
-#> #   .dy_member_contrast_assumed_exchangeable_arbitrary <dbl>,
+#> # A tibble: 3,360 × 25
+#>    personID coupleID diaryday gender dyad_composition closeness provided_support
+#>       <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
+#>  1      241      121        0 female female_x_female       6.68             6.18
+#>  2      242      121        0 female female_x_female       5.67             5.70
+#>  3      241      121        1 female female_x_female       8.63             4.57
+#>  4      242      121        1 female female_x_female       5.58             5.30
+#>  5      241      121        2 female female_x_female       7.05             5.19
+#>  6      242      121        2 female female_x_female       6.83             3.89
+#>  7      241      121        3 female female_x_female       6.46             6.28
+#>  8      242      121        3 female female_x_female       6.65             5.26
+#>  9      241      121        4 female female_x_female       8.08             6.94
+#> 10      242      121        4 female female_x_female       7.29             5.59
+#> # ℹ 3,350 more rows
+#> # ℹ 18 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_female <dbl>,
+#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
 #> #   .dy_provided_support_cwp <dbl>, .dy_provided_support_cbp <dbl>,
 #> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>,
 #> #   .dy_provided_support_cwp_actor <dbl>, …
@@ -647,11 +645,11 @@ dim_ILD <- glmmTMB::glmmTMB(
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
 
     # Residual (same-day) exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -664,45 +662,45 @@ summary(dim_ILD)
 #> closeness ~ 1 + diaryday + .dy_provided_support_cwp_dyad_mean +  
 #>     .dy_provided_support_cwp_within_dyad_dev + .dy_provided_support_cbp_dyad_mean +  
 #>     .dy_provided_support_cbp_within_dyad_dev + us(1 | coupleID) +  
-#>     us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
-#>         coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
+#>     us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +  
+#>     us(1 | coupleID:diaryday) + us(0 + .dy_member_contrast_female_x_female_arbitrary |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    2977.2    3026.6   -1478.6    2957.2      1024 
+#>    8362.0    8423.2   -4171.0    8342.0      3350 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups              Name                                              
-#>  coupleID            (Intercept)                                       
-#>  coupleID.1          .dy_member_contrast_assumed_exchangeable_arbitrary
-#>  coupleID.diaryday   (Intercept)                                       
-#>  coupleID.diaryday.1 .dy_member_contrast_assumed_exchangeable_arbitrary
-#>  Variance Std.Dev.
-#>  0.5254   0.7248  
-#>  0.6416   0.8010  
-#>  0.3185   0.5643  
-#>  0.5184   0.7200  
-#> Number of obs: 1034, groups:  coupleID, 40; coupleID:diaryday, 517
+#>  Groups              Name                                          Variance
+#>  coupleID            (Intercept)                                   0.5367  
+#>  coupleID.1          .dy_member_contrast_female_x_female_arbitrary 0.2556  
+#>  coupleID.diaryday   (Intercept)                                   0.3961  
+#>  coupleID.diaryday.1 .dy_member_contrast_female_x_female_arbitrary 0.2033  
+#>  Std.Dev.
+#>  0.7326  
+#>  0.5056  
+#>  0.6294  
+#>  0.4509  
+#> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
 #> 
 #> Conditional model:
 #>                                           Estimate Std. Error z value Pr(>|z|)
-#> (Intercept)                               5.079988   0.124223   40.89  < 2e-16
-#> diaryday                                 -0.008077   0.006234   -1.30   0.1951
-#> .dy_provided_support_cwp_dyad_mean        0.487152   0.041725   11.68  < 2e-16
-#> .dy_provided_support_cwp_within_dyad_dev  0.055002   0.072173    0.76   0.4460
-#> .dy_provided_support_cbp_dyad_mean        1.510701   0.193894    7.79 6.63e-15
-#> .dy_provided_support_cbp_within_dyad_dev  0.776673   0.302810    2.56   0.0103
+#> (Intercept)                               5.897760   0.072946   80.85   <2e-16
+#> diaryday                                  0.007287   0.003809    1.91   0.0558
+#> .dy_provided_support_cwp_dyad_mean        0.492385   0.028933   17.02   <2e-16
+#> .dy_provided_support_cwp_within_dyad_dev -0.007011   0.026008   -0.27   0.7875
+#> .dy_provided_support_cbp_dyad_mean        1.546531   0.095817   16.14   <2e-16
+#> .dy_provided_support_cbp_within_dyad_dev  0.887504   0.107440    8.26   <2e-16
 #>                                             
 #> (Intercept)                              ***
-#> diaryday                                    
+#> diaryday                                 .  
 #> .dy_provided_support_cwp_dyad_mean       ***
 #> .dy_provided_support_cwp_within_dyad_dev    
 #> .dy_provided_support_cbp_dyad_mean       ***
-#> .dy_provided_support_cbp_within_dyad_dev *  
+#> .dy_provided_support_cbp_within_dyad_dev ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -715,11 +713,11 @@ and expected couple-average outcomes. Coefficients of within-dyad member
 deviations describe both members’ deviations and their expected
 difference.
 
-- The `cbp` dyad-mean estimate (about 1.51) means that, comparing
+- The `cbp` dyad-mean estimate (about 1.55) means that, comparing
   couples whose average usual support differs by one point while holding
   the stable difference between partners constant, expected
-  couple-average closeness is 1.51 points higher for the higher-support
-  couple. Equivalently, each member is expected to report 1.51 points
+  couple-average closeness is 1.55 points higher for the higher-support
+  couple. Equivalently, each member is expected to report 1.55 points
   higher closeness.
 
 - The `cwp` dyad-mean estimate (about 0.49) means that when both members
@@ -729,23 +727,21 @@ difference.
   deviations constant. Equivalently, expected couple-average closeness
   is 0.49 points higher on that occasion.
 
-- The `cbp` within-dyad member-deviation estimate (about 0.78) means
+- The `cbp` within-dyad member-deviation estimate (about 0.89) means
   that if partners differ by one point in their usual support levels,
-  they are expected to differ by 0.78 points in closeness, holding the
+  they are expected to differ by 0.89 points in closeness, holding the
   couple’s average usual support and the other predictors constant. In
   member terms, suppose one member is 0.5 points above the couple’s
   average usual support and the other is 0.5 points below it. Their
-  expected closeness is then 0.39 points above and below the couple’s
-  predicted mean, respectively.
+  expected closeness is then about 0.44 points above and below the
+  couple’s predicted mean, respectively.
 
-- The `cwp` within-dyad member-deviation estimate (about 0.06) means
-  that if one partner’s momentary deviation from usual support is one
-  point higher than the other partner’s deviation, they are expected to
-  differ by 0.06 points in closeness, holding the occasion-specific dyad
-  mean and the other predictors constant. In member terms, suppose their
-  momentary deviations are 0.5 points above and below the
-  occasion-specific dyad mean. Their expected closeness is then 0.03
-  points above and below the couple’s predicted mean, respectively.
+- The `cwp` within-dyad member-deviation estimate (about -0.01) is close
+  to zero. If one partner’s momentary deviation from usual support is
+  one point higher than the other partner’s deviation, there is
+  essentially no expected closeness difference between them from this
+  term, holding the occasion-specific dyad mean and the other predictors
+  constant.
 
 ### Equivalence of APIM and DIM in ILD
 

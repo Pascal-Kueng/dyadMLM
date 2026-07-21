@@ -12,19 +12,11 @@
 
 ## Example data
 
-- [`example_dyadic_ILD`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD.md)
-  : Example intensive longitudinal dyadic data
-- [`example_dyadic_ILD_mixed`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed.md)
-  : Example intensive longitudinal dyadic data with multiple dyad
-  compositions
-- [`example_dyadic_ILD_mixed_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed_tweedie.md)
-  : Example intensive longitudinal dyadic data with multiple dyad
-  compositions and a Tweedie outcome
-- [`example_dyadic_ILD_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_tweedie.md)
-  : Example intensive longitudinal dyadic data with a Tweedie outcome
-- [`example_dyadic_crosssectional`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional.md)
-  : Example cross-sectional dyadic data
-- [`example_dyadic_crosssectional_mixed`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_mixed.md)
-  : Example cross-sectional dyadic data with multiple dyad compositions
-- [`example_dyadic_crosssectional_tweedie`](https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_tweedie.md)
-  : Example cross-sectional dyadic data with a Tweedie outcome
+- [`dyads_cross`](https://pascal-kueng.github.io/dyadMLM/reference/dyads_cross.md)
+  : Example Gaussian cross-sectional dyadic data
+- [`dyads_ild`](https://pascal-kueng.github.io/dyadMLM/reference/dyads_ild.md)
+  : Example Gaussian intensive longitudinal dyadic data
+- [`dyads_nbinom_cross`](https://pascal-kueng.github.io/dyadMLM/reference/dyads_nbinom_cross.md)
+  : Example negative-binomial cross-sectional dyadic data
+- [`dyads_nbinom_ild`](https://pascal-kueng.github.io/dyadMLM/reference/dyads_nbinom_ild.md)
+  : Example negative-binomial intensive longitudinal dyadic data
