@@ -96,6 +96,18 @@ test_that("compare_nested_glmmTMB_models requires exact original data", {
     compare_nested_glmmTMB_models(model_one, model_two),
     "Column `closeness` differs"
   )
+
+  changed_metadata <- data_one
+  attr(changed_metadata, "dyadMLM")$role <- "changed_role"
+  expect_error(
+    validate_comparison_data(
+      model_one,
+      model_one,
+      data_one,
+      changed_metadata
+    ),
+    "prepared datasets use different `role` variables"
+  )
 })
 
 test_that("compare_nested_glmmTMB_models checks source and fitted rows", {
@@ -345,6 +357,18 @@ test_that("compare_nested_glmmTMB_models supports ordinary and mixed named data"
     compare_nested_glmmTMB_models(inline_model, plain_larger),
     "must have been fitted with a named data frame"
   )
+
+  extra_column_data <- plain_data_two
+  extra_column_data$unused_column <- 1
+  expect_error(
+    validate_comparison_data(
+      plain_smaller,
+      plain_larger,
+      plain_data_one,
+      extra_column_data
+    ),
+    "do not contain the same original columns"
+  )
 })
 
 test_that("compare_nested_glmmTMB_models sorts models and agrees with anova.glmmTMB", {
@@ -465,9 +489,19 @@ test_that("compare_nested_glmmTMB_models rejects transformed and changed outcome
     data = model_data
   )
 
+  model_data$alternate_outcome <- model_data$closeness
+  alternate_outcome_model <- glmmTMB::glmmTMB(
+    alternate_outcome ~ gender,
+    data = model_data
+  )
+
   expect_error(
     compare_nested_glmmTMB_models(restricted_model, transformed_model),
     "Only an untransformed outcome"
+  )
+  expect_error(
+    compare_nested_glmmTMB_models(restricted_model, alternate_outcome_model),
+    "use different outcome variables"
   )
 
   model_data$closeness <- model_data$closeness + 1
@@ -501,6 +535,50 @@ test_that("compare_nested_glmmTMB_models recovers local model data", {
   comparison <- compare_nested_glmmTMB_models(models$restricted, models$full)
 
   expect_s3_class(comparison, "anova")
+})
+
+test_that("compare_nested_glmmTMB_models rejects unsuitable fitted models", {
+  skip_if_not_installed("glmmTMB")
+
+  model_data <- comparison_female_male_cross_dyads
+  valid_model <- glmmTMB::glmmTMB(closeness ~ 1, data = model_data)
+
+  expect_error(
+    compare_nested_glmmTMB_models(stats::lm(closeness ~ 1, data = model_data), valid_model),
+    "`model1` must be a fitted `glmmTMB` model"
+  )
+
+  reml_model <- valid_model
+  reml_model$modelInfo$REML <- TRUE
+  expect_error(
+    compare_nested_glmmTMB_models(valid_model, reml_model),
+    "`model2` model was fitted with REML"
+  )
+
+  unconverged_model <- valid_model
+  unconverged_model$fit$convergence <- 1L
+  expect_error(
+    compare_nested_glmmTMB_models(valid_model, unconverged_model),
+    "`model2` model did not converge"
+  )
+
+  indefinite_hessian_model <- valid_model
+  indefinite_hessian_model$sdr$pdHess <- FALSE
+  expect_error(
+    compare_nested_glmmTMB_models(valid_model, indefinite_hessian_model),
+    "`model2` model has a non-positive-definite Hessian matrix"
+  )
+
+  unavailable_data_model <- valid_model
+  unavailable_data_model$call$data <- as.name("unavailable_model_data")
+  expect_error(
+    comparison_model_data(
+      unavailable_data_model,
+      parent.frame(),
+      "model1"
+    ),
+    "Could not recover the named data frame used by `model1`"
+  )
 })
 
 test_that("compare_nested_glmmTMB_models checks weights and offsets", {

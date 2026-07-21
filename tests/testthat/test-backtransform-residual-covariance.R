@@ -461,6 +461,15 @@ test_that("automatic matching is conservative about missing and ambiguous blocks
   marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
 
   expect_error(
+    find_exchangeable_difference_indicator(c(
+      ".dy_member_contrast_friends_arbitrary",
+      ".dy_member_contrast_coworkers_arbitrary"
+    )),
+    "more than one generated difference indicator",
+    fixed = TRUE
+  )
+
+  expect_error(
     match_exchangeable_residual_blocks(list(
       rescov_test_block("coupleID", "(Intercept)", "shared")
     )),
@@ -1104,6 +1113,51 @@ test_that("supplied pair specifications fail clearly", {
   )
 
   expect_error(
+    normalize_supplied_exchangeable_pairs(NULL),
+    "must be one named block pairing or a list of named block pairings",
+    fixed = TRUE
+  )
+  expect_error(
+    normalize_supplied_exchangeable_pairs(list(list("shared", "difference"))),
+    "must be a named list with fields",
+    fixed = TRUE
+  )
+  expect_error(
+    normalize_supplied_exchangeable_pairs(list(
+      shared_block = "shared",
+      difference_block = "difference",
+      difference_indicator = character()
+    )),
+    "difference_indicator` must be one non-empty string",
+    fixed = TRUE
+  )
+  expect_error(
+    normalize_supplied_exchangeable_pairs(list(
+      shared_block = "shared",
+      difference_block = "difference",
+      difference_indicator = "IDIFF",
+      shared_indicator = "IDIFF"
+    )),
+    "must name different columns",
+    fixed = TRUE
+  )
+  expect_error(
+    normalize_supplied_exchangeable_pairs(list(
+      shared_block = 1L,
+      difference_block = "difference",
+      difference_indicator = "IDIFF"
+    )),
+    "shared_block` must be one random-effect term selector",
+    fixed = TRUE
+  )
+
+  expect_error(
+    recover_exchangeable_covariance(stats::lm(mpg ~ wt, data = mtcars)),
+    "must be a fitted `glmmTMB` or `brmsfit` model",
+    fixed = TRUE
+  )
+
+  expect_error(
     normalize_supplied_exchangeable_pairs(list(
       shared = "shared",
       difference = "difference"
@@ -1361,6 +1415,11 @@ test_that("fitted-row validation protects the exchangeable coding", {
     SAMESEX = c(1, 1, 0, 0)
   )
   expect_no_error(validate_exchangeable_coding(valid, "IDIFF", "SAMESEX"))
+  logical_support <- valid
+  logical_support$SAMESEX <- as.logical(logical_support$SAMESEX)
+  expect_no_error(
+    validate_exchangeable_coding(logical_support, "IDIFF", "SAMESEX")
+  )
   expect_no_error(validate_exchangeable_coding(
     data.frame(IDIFF = c(-1, 1)),
     "IDIFF",

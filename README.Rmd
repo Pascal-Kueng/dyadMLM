@@ -67,7 +67,7 @@ You can install the development version from GitHub with:
 pak::pak("Pascal-Kueng/dyadMLM")
 ```
 
-## Simple Cross-Sectional Example
+## Simple Cross-Sectional Examplee
 
 Prepare distinguishable dyads for a cross-sectional APIM:
 

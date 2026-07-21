@@ -86,7 +86,7 @@ shared_stable_covariance <- matrix(
   nrow = 2L
 )
 
-difference_stable_sds <- c(intercept = 0.50, actor_slope = 0.20)
+difference_stable_sds <- c(intercept = 0.50, actor_slope = 0.30)
 difference_stable_correlation <- -0.15
 difference_stable_covariance <- matrix(
   c(
