@@ -835,6 +835,19 @@ test_that("back-transformation validates aligned covariance arrays", {
     matrix(c(1, 0.2, 0.2, 1), 2),
     dim = c(1, 2, 2)
   )
+
+  nearly_symmetric <- symmetric
+  nearly_symmetric[1, 1, 2] <-
+    nearly_symmetric[1, 1, 2] + .Machine$double.eps
+  transformed <- backtransform_exchangeable_covariances(
+    list(shared = nearly_symmetric, difference = symmetric),
+    c("(Intercept)", "time")
+  )
+  expect_identical(
+    unname(transformed),
+    unname(aperm(transformed, c(1L, 3L, 2L)))
+  )
+
   asymmetric <- symmetric
   asymmetric[1, 1, 2] <- 0.4
 

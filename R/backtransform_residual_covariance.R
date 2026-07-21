@@ -2012,20 +2012,33 @@ backtransform_exchangeable_covariances <- function(aligned, terms) {
   }
 
   # Validate symmetry before using the same between-member block in both
-  # off-diagonal positions of the final covariance matrix.
+  # off-diagonal positions of the final covariance matrix. Fitted covariance
+  # matrices can differ from their transpose by floating-point noise, so do
+  # not require exact equality across platforms.
   for (component in c("shared", "difference")) {
     covariance <- aligned[[component]]
-    if (!identical(
+    transposed_covariance <- aperm(covariance, c(1L, 3L, 2L))
+    is_symmetric <- isTRUE(all.equal(
       unname(covariance),
-      unname(aperm(covariance, c(1L, 3L, 2L)))
-    )) {
+      unname(transposed_covariance),
+      tolerance = sqrt(.Machine$double.eps),
+      check.attributes = FALSE
+    ))
+    if (!is_symmetric) {
       stop(
         "Internal error: the aligned ", component,
         " covariance array must be symmetric in every estimate or draw.",
         call. = FALSE
       )
     }
+
+    # Remove the accepted numerical noise so all subsequent covariance
+    # matrices are exactly symmetric.
+    aligned[[component]] <- (covariance + transposed_covariance) / 2
   }
+
+  shared <- aligned$shared
+  difference <- aligned$difference
 
   # If u1 = shared + difference and u2 = shared - difference, then:
   #   Var(u1) = Var(u2)    = shared + difference

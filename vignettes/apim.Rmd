@@ -415,7 +415,7 @@ ild_distinguishable_data <- dyadMLM::prepare_dyad_data(
   model_types = "apim"
 ) |>
   dplyr::mutate(
-    # we grand-mean center in this example to help convergence and 
+    # we grand-mean center in this example to help convergence and
     # interpretation
     diaryday_gmc = diaryday - mean(diaryday)
   )
