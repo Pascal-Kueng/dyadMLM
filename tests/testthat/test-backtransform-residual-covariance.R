@@ -1769,7 +1769,10 @@ test_that("exchangeable covariance results print structured pairings", {
   varcov <- matrix(
     c(1.5, 0.9, 0.9, 1.5),
     2L,
-    dimnames = rep(list(c("member_1", "member_2")), 2L)
+    dimnames = rep(
+      list(c("member_1: (Intercept)", "member_2: (Intercept)")),
+      2L
+    )
   )
   sdcor <- matrix(
     c(sqrt(1.5), 0.6, 0.6, sqrt(1.5)),
@@ -1801,6 +1804,10 @@ test_that("exchangeable covariance results print structured pairings", {
     printed,
     fixed = TRUE
   )))
+  expect_false(any(grepl("Coefficient key", printed, fixed = TRUE)))
+  expect_true(any(grepl("1 member1: (Intercept)", printed, fixed = TRUE)))
+  expect_true(any(grepl("2 member2: (Intercept)", printed, fixed = TRUE)))
+  expect_true(any(grepl("1.225", printed, fixed = TRUE)))
 
   varcov_only <- capture.output(print(result, "varcov"))
   expect_true(any(grepl("Variance-covariance:", varcov_only, fixed = TRUE)))

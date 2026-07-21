@@ -4,13 +4,15 @@
 \alias{print.exchangeable_rescov}
 \title{Print recovered exchangeable residual covariance}
 \usage{
-\method{print}{exchangeable_rescov}(x, representation = c("both", "varcov", "sdcor"), ...)
+\method{print}{exchangeable_rescov}(x, representation = c("both", "varcov", "sdcor"), digits = 3L, ...)
 }
 \arguments{
 \item{x}{An object returned by \code{\link[=recover_exchangeable_covariance]{recover_exchangeable_covariance()}}.}
 
 \item{representation}{Which representation to print: \code{"both"} (default), \code{"varcov"},
 or \code{"sdcor"}.}
+
+\item{digits}{Number of decimal places to print.}
 
 \item{...}{Additional arguments passed to \code{\link[=print]{print()}} when printing matrices.}
 }

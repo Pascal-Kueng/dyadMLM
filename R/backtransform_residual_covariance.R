@@ -312,6 +312,7 @@ recover_exchangeable_covariance <- function(model, block_pairings = NULL) {
 #' @param x An object returned by [recover_exchangeable_covariance()].
 #' @param representation Which representation to print: `"both"` (default), `"varcov"`,
 #'   or `"sdcor"`.
+#' @param digits Number of decimal places to print.
 #' @param ... Additional arguments passed to [print()] when printing matrices.
 #'
 #' @return `x`, invisibly.
@@ -322,6 +323,7 @@ recover_exchangeable_covariance <- function(model, block_pairings = NULL) {
 print.exchangeable_rescov <- function(
   x,
   representation = c("both", "varcov", "sdcor"),
+  digits = 3L,
   ...
 ) {
   dots <- match.call(expand.dots = FALSE)$...
@@ -355,6 +357,24 @@ print.exchangeable_rescov <- function(
     cat("Shared:     ", if (is.null(shared_term)) "<omitted>" else shared_term, "\n", sep = "")
     cat("Difference: ", if (is.null(difference_term)) "<omitted>" else difference_term, "\n", sep = "")
 
+    # Print each complete coefficient name once, on the left. Numbering the
+    # rows and using the same numbers as column labels keeps wide symmetric
+    # matrices readable. The stored matrix and its dimension names are unchanged.
+    first_component <- x[[i]][[components[[1L]]]]
+    numbered_row_labels <- NULL
+    column_numbers <- NULL
+    if (is.matrix(first_component)) {
+      coefficient_numbers <- seq_len(nrow(first_component))
+      coefficient_names <- sub(
+        "^member_1: ", "member1: ", rownames(first_component)
+      )
+      coefficient_names <- sub(
+        "^member_2: ", "member2: ", coefficient_names
+      )
+      numbered_row_labels <- paste(coefficient_numbers, coefficient_names)
+      column_numbers <- as.character(coefficient_numbers)
+    }
+
     for (component in components) {
       heading <- if (identical(component, "varcov")) {
         "Variance-covariance:"
@@ -365,7 +385,9 @@ print.exchangeable_rescov <- function(
 
       value <- x[[i]][[component]]
       if (is.matrix(value)) {
-        print(value, ...)
+        dimnames(value) <- list(numbered_row_labels, column_numbers)
+        formatted_value <- formatC(value, format = "f", digits = digits)
+        print(noquote(formatted_value), ...)
       } else {
         # brms results retain every posterior draw. Avoid printing thousands of
         # matrices; users can extract this array or summarize it explicitly.
