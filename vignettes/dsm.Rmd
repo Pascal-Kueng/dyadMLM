@@ -615,8 +615,10 @@ The intensive longitudinal DSM extends the cross-sectional DSM using the same
 temporal decomposition and multilevel workflow shown for the
 [intensive longitudinal DIM](dim.html#intensive-longitudinal-dim). The DSM
 retains the directional mean-and-difference parameterization described above.
-For more detail on centering decisions, interpretation, and dynamic models,
-refer to the DIM vignette.
+For more detail on centering decisions and mean-and-deviation interpretation,
+refer to the [DIM vignette](dim.html#intensive-longitudinal-dim). For dynamic
+models and their cautions, see the
+[dynamic ILD APIM example](apim.html#dynamic-models).
 
 Brief example of ILD DSM:
 
