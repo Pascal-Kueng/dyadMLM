@@ -4,6 +4,7 @@
 
 library(dyadMLM)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+has_htmltools <- requireNamespace("htmltools", quietly = TRUE)
 dim_fitted_alt <- "Fitted DIM diagram unavailable."
 ```
 
@@ -24,7 +25,7 @@ Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.md),
 APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
 and [Dyadic Score
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## Cross-Sectional Gaussian DIM
 
@@ -1162,8 +1163,8 @@ the [Mixed-Composition APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md)
 or the [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md) for
-related model specifications, or return to the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+related model specifications, or return to the [online package
+overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References
 

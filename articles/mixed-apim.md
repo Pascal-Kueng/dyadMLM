@@ -3,6 +3,9 @@
 ``` r
 
 library(dyadMLM)
+has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+mixed_apim_fitted_alt <-
+  "Fitted mixed-composition APIM diagram unavailable."
 ```
 
 This vignette covers APIMs that combine distinguishable and exchangeable
@@ -23,7 +26,7 @@ vignettes, including the [Dyad-Individual
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) and
 [Dyadic Score
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## Cross-sectional mixed-composition APIM
 
@@ -636,8 +639,8 @@ the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) or the
 [Dyadic Score Model
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md) for
-alternative parameterizations, or return to the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+alternative parameterizations, or return to the [online package
+overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References
 

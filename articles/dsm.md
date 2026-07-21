@@ -20,7 +20,7 @@ Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.md),
 APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
 and [Dyad-Individual
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), see the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## Preparing DSM Data
 
@@ -851,8 +851,8 @@ the [Mixed-Composition APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md)
 or the [Dyad-Individual Model
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) for
-related model specifications, or return to the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+related model specifications, or return to the [online package
+overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References
 

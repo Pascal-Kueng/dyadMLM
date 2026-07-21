@@ -3,6 +3,11 @@
 ``` r
 
 library(dyadMLM)
+has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+apim_distinguishable_fitted_alt <-
+  "Fitted distinguishable APIM diagram unavailable."
+apim_exchangeable_fitted_alt <-
+  "Fitted exchangeable APIM diagram unavailable."
 ```
 
 > This vignette is under construction and preliminary. Please check back
@@ -19,7 +24,7 @@ APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), and
 [Dyadic Score
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 A vignette for non-Gaussian generalized models is planned.
 
@@ -592,7 +597,7 @@ Example model specification:
 ``` r
 
 
-ild_distinguishable_model <- glmmTMB(
+ild_distinguishable_model <- glmmTMB::glmmTMB(
   closeness ~ 0 + 
     
     .dy_is_female_x_male_female +
@@ -854,8 +859,8 @@ question:
   vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md) for
   the distinguishable DSM parameterization.
 
-Or return to the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+Or return to the [online package
+overview](https://pascal-kueng.github.io/dyadMLM/).
 
 A vignette with non-Gaussian generalized APIM examples is planned.
 

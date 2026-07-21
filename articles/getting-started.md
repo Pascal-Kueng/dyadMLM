@@ -30,16 +30,19 @@ models (MLMs).** For a comparison of MLM and structural equation
 modeling (SEM) approaches to dyadic data, see Ledermann and Kenny
 (2017).
 
-For the broader package workflow and an overview of the available
-model-specific vignettes, including the [Actor-Partner Interdependence
+The available model-specific vignettes include the [Actor-Partner
+Interdependence
 Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.md),
 [Mixed-Composition
 APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
 [Dyad-Individual
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), and
 [Dyadic Score
-Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md).
+
+The [online package overview](https://pascal-kueng.github.io/dyadMLM/)
+provides the current online versions of these vignettes and the complete
+function reference.
 
 ## Prerequisites
 
@@ -844,8 +847,7 @@ Related model-specific vignettes:
 - [Dyadic Score Model
   vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md),
 
-or return to the
-[Overview](https://pascal-kueng.github.io/dyadMLM/articles/index.md).
+or return to [About this vignette](#about-this-vignette).
 
 ## References
 

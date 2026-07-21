@@ -72,7 +72,12 @@ Küng</h4>
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
+<span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">apim_distinguishable_fitted_alt</span> <span class="op">&lt;-</span></span>
+<span>  <span class="st">"Fitted distinguishable APIM diagram unavailable."</span></span>
+<span><span class="va">apim_exchangeable_fitted_alt</span> <span class="op">&lt;-</span></span>
+<span>  <span class="st">"Fitted exchangeable APIM diagram unavailable."</span></span></code></pre></div>
 <blockquote>
 <p>This vignette is under construction and preliminary. Please check
 back soon!</p>
@@ -82,7 +87,8 @@ longitudinal Actor-Partner Interdependence model for distinguishable and
 exchangeable dyads.</p>
 <p>For the broader package workflow and an overview of the available
 model-specific vignettes, including the <a href="mixed-apim.html">Mixed-Composition APIM</a>, <a href="dim.html">Dyad-Individual Model</a>, and <a href="dsm.html">Dyadic
-Score Model</a>, see the <a href="index.html">Overview</a>.</p>
+Score Model</a>, see the <a href="https://pascal-kueng.github.io/dyadMLM/">online package
+overview</a>.</p>
 <p>A vignette for non-Gaussian generalized models is planned.</p>
 <div class="section level2">
 <h2 id="cross-sectional-apims">Cross sectional APIMs<a class="anchor" aria-label="anchor" href="#cross-sectional-apims"></a>
@@ -625,7 +631,7 @@ contributes few occasions, which can bias between-person estimates <span class="
 <p>Example model specification:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">ild_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="op">(</span></span>
+<span><span class="va">ild_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> </span>
 <span>    </span>
 <span>    <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
@@ -870,7 +876,8 @@ exchangeable DIM parameterization; or</li>
 <a href="dsm.html">Dyadic Score Model vignette</a> for the
 distinguishable DSM parameterization.</li>
 </ul>
-<p>Or return to the <a href="index.html">Overview</a>.</p>
+<p>Or return to the <a href="https://pascal-kueng.github.io/dyadMLM/">online package
+overview</a>.</p>
 <p>A vignette with non-Gaussian generalized APIM examples is
 planned.</p>
 </div>
