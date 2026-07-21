@@ -3,7 +3,7 @@ Title: Tools for Dyadic Multilevel Models
 Version: 0.0.1
 Authors@R: 
     person("Pascal", "Küng", , "kueng.pascal@gmail.com",
-           role = c("aut", "cre"),
+           role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-7346-9414"))
 Description: Provides tools for dyadic multilevel modeling with linear and
     generalized linear mixed-effects models. It validates and prepares

@@ -523,6 +523,13 @@ actor random slope in both stable dyad-level blocks so that we can demonstrate
 the random-slope back-transformation below.
 
 ```{r fit-ild-exchangeable-apim, eval = has_glmmTMB}
+# Profile the fixed effects and use BFGS for stable cross-platform optimization.
+ild_apim_control <- glmmTMB::glmmTMBControl(
+  profile = TRUE,
+  optimizer = stats::optim,
+  optArgs = list(method = "BFGS")
+)
+
 ild_apim_model <- glmmTMB::glmmTMB(
   closeness ~
     1 +
@@ -551,6 +558,7 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
+  , control = ild_apim_control
 )
 
 summary(ild_apim_model)
