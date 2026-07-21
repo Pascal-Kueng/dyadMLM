@@ -1023,7 +1023,7 @@ $$
 <!-- ca. 2 Minutes -->
 
 
-## Why are the DIM residuals uncorrelated?
+## Why are the mean and deviation residuals uncorrelated?
 
 ```{r}
 #| label: dim-residual-seesaw
@@ -1082,7 +1082,10 @@ the seesaw coordinate.
 
 You might wonder, why the elevator and seasaw residuals are not correlated.
 
-- A positive correlation for example would imply that - ON THE POPULATION LEVEL - higher Y1 + Y2 is linked to, Y1 being higher than Y2. But because partners are exchangeable, we can reverse the partners and the sign just reverses. Thus, they should be constrained to be zero/cancel out. <!-- @codex, his this correct and understandable? --> 
+A positive mean–deviation residual correlation would mean:
+  - couples above their prediction on average also tend to tilt toward the arbitrarily named Member 1. 
+  - But Member 1 and Member 2 are assigned arbitrarily. Across couples, reversing these arbitrary assignments produces equally valid positive and negative signed deviations, which cancel in expectation. 
+  - Therefore, the exchangeable DIM therefore constrains the population correlation to zero.
 
 But again, this does not make the partners independent, and this model
 IS exactly equivalent to the APIM
@@ -1265,13 +1268,9 @@ draw_dsm_diagram(show_residuals = FALSE)
   - The DSM says: "if the female is higher (or lower) than the male on X, is the female also higher (or lower) than the male on Y". 
 
 a21/a12:
-Because we now have a stable direction that we defined, and members do not cancel each 
-other out anymore, we can have an intercept for the difference that is different than zero, 
-and cross-paths different than zero! So we estimate them. 
-
-<!-- @codex accurate? is the reason we do not estimate an intercept in the dim for the diff, that it should be zero, 
-since partners vary around the couple mean here, which is zero? or is it because the couples could be swapped, 
-and then some magic happens? --> 
+Because we now have a stable direction that we defined with Female minus Male 
+having the same meaning in every couple. These directional terms therefore no 
+longer cancel (to zero) and may be estimated.
 
 :::
 
@@ -1294,22 +1293,19 @@ draw_dsm_diagram()
 
 :::{.notes}
 
-Residuals are the remaining variability in the outcome mean and outcome difference
-not explained by the model, very similar to the DIM. But because partners
-do not have to cancel each other out anymore, they can now be correlated. 
+Like the DIM, the DSM decomposes the two partner residuals into a residual mean 
+and a residual difference. 
 
-Again, interdependent residuals of the partners are encoded in both r_m and r_d separately.
-But now, a dyad with a higher mean can also have a larger difference in the female-male difference. 
+In the DIM, the positive direction of the residual difference is arbitrarily assigned. 
+Positive and negative directional associations therefore cancel across arbitrary assignments.
 
-Before, a larger arbitrary1-arbitary2 difference in a couple was always fully compensated by
-their partners exact opposite arbitrary2-arbitary1 difference.  <!-- TODO @codex is this correct?
-I am not sure. And is it a good way of putting it? check also under dev/references iidas' paper --> 
+In the DSM, the direction is fixed as Female minus Male. Positive has the same substantive meaning in every couple, so the residual mean and residual difference may correlate.
 
 :::
 
 <!-- ca. 3 minutes --> 
 
-## Why may the DSM residuals correlate?
+## Why may the DSM mean and difference residuals correlate?
 
 ```{r}
 #| label: dsm-residual-seesaw
@@ -1351,17 +1347,13 @@ difference than predicted.
   substantively meaningful labels.
 
 - Swapping Female and Male changes the meaning and sign of the directed
-  difference. Unlike in the DIM, this relabelling is not a symmetry of the
-  model because the labels are substantive rather than arbitrary.
+  difference. 
 
 - The mean and difference residuals may consequently be correlated.
+
 - A positive correlation means that, across couples, couples whose outcomes are
-  higher than predicted on average also tend to have a larger female–male
-  difference than predicted. <!-- TODO @codex this is the confusing point for me. 
-  I don't quite get, why in the DIM it can't also be: cuoples whose outcomes are higher on the preds, 
-  also have a larger difference between them in any direction -->
-- This correlation describes a pattern across couples. It is not a correlation
-  calculated from two changing residuals inside a single couple.
+  higher than predicted on average also tend to have a more positive female minus male
+  difference than predicted. 
 
 :::
 
@@ -1392,8 +1384,24 @@ fit_and_draw_dsm(
 
 -> students interpret results, including correlation. 
 
-Muster solution:
-<!-- TODO @codex please insert the correct interpretation in simple language --> 
+**Intercepts**: A couple with *average mean level* and *zero male-female difference* is expected to be:
+
+- a10: 33.26 min more active on average,
+- a20: have a female that is 4.04 min more active than the male.
+
+A couple providing 1 unit more average support is expected to be:
+
+- a11: 9.25 minutes more active on average,
+- a21: have a female that is 2.4 minutes + 4.04 minutes more active than the male
+
+A couple with a female providing 1 unit more support than the male is expected to:
+
+- a12: have a couple-mean MVPA 11.86 minutes lower. 
+- a22: have a female that is 4.06 minutes + 4.04 minutes more active than the male
+
+<!-- @codex, check if correctly interpreted -->
+
+:::
 
 ## Research Question 2 {.rq-slide}
 
