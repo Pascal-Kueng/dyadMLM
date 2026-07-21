@@ -981,7 +981,6 @@ draw_dim_diagram(show_residuals = FALSE)
 
 - is a person within a couple that is higher than their partner on X 
 (or higher than the dyad-mean), also higher than their partner on Y?
-<!-- TODO @codex fact check these interpretations -->
 
 :::
 
@@ -1072,10 +1071,10 @@ POTENTIALLY SKIP FOR TIME
 Elevator: once the couples' mean value X has accounted for some variance in the
 couples' outcome Y, there might still be some movement up or down that is unaccounted. $\rightarrow$ residual
 
-Seasaw: once a persons' difference from the couple mean has accounted for some variance
+Seesaw: once a persons' difference from the couple mean has accounted for some variance
 in the persons' difference from the couple mean in Y, there might still be some additional deviation $\rightarrow$ residual
 
-In the DIM, the DIM, the member positions on the seasaw are arbitrary.
+In the DIM, the member positions on the seasaw are arbitrary.
 Swapping them leaves the elevator coordinate unchanged but reverses the sign of
 the seesaw coordinate.
 
@@ -1083,9 +1082,7 @@ the seesaw coordinate.
 
 You might wonder, why the elevator and seasaw residuals are not correlated.
 
-- A positive correlation for example would imply that higher Y1 + Y2 is linked to, Y1 being higher than Y2.
-- If partners are exchangeable, across all partners, the differences in the seasaw cancel out to
-zero. ! TODO @codex fact check this interpretation for correctness.
+- A positive correlation for example would imply that - ON THE POPULATION LEVEL - higher Y1 + Y2 is linked to, Y1 being higher than Y2. But because partners are exchangeable, we can reverse the partners and the sign just reverses. Thus, they should be constrained to be zero/cancel out. <!-- @codex, his this correct and understandable? --> 
 
 But again, this does not make the partners independent, and this model
 IS exactly equivalent to the APIM
@@ -1269,12 +1266,12 @@ draw_dsm_diagram(show_residuals = FALSE)
 
 a21/a12:
 Because we now have a stable direction that we defined, and members do not cancel each 
-other out anymore, we can have an intercept different than zero, and cross-paths
-different than zero! So we estimate them. 
+other out anymore, we can have an intercept for the difference that is different than zero, 
+and cross-paths different than zero! So we estimate them. 
 
-<!-- TODO @codex verify the correctness and clarity of this slide. 
-Should we somehow fit the notes sentence on the slide? if it is correct.
--->
+<!-- @codex accurate? is the reason we do not estimate an intercept in the dim for the diff, that it should be zero, 
+since partners vary around the couple mean here, which is zero? or is it because the couples could be swapped, 
+and then some magic happens? --> 
 
 :::
 
