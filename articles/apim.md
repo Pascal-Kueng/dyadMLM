@@ -834,7 +834,10 @@ the random intercept, actor slope, and partner slope.
 The full model above estimates both a shared and a member-contrast actor
 random slope. We can first test a smaller model that omits only the
 actor random slope from the member-contrast block. The member-contrast
-random intercept and both same-occasion blocks remain in the model:
+random intercept and both same-occasion blocks remain in the model.
+These boundary-constraint examples are shown but not run because their
+convergence can depend on the optimizer and platform; confirm
+convergence before interpreting either test.
 
 ``` r
 
@@ -853,19 +856,6 @@ dyadMLM::compare_nested_glmmTMB_models(
   ild_apim_no_contrast_slope,
   ild_apim_model
 )
-#> Likelihood-ratio test for nested models fitted to equivalent data
-#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
-#> 
-#>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
-#> ild_apim_no_contrast_slope 12 2981.2 3040.5 -1478.6   2957.2              
-#> ild_apim_model             14 2979.3 3048.5 -1475.7   2951.3 5.9039      2
-#>                            Pr(>Chisq)  
-#> ild_apim_no_contrast_slope             
-#> ild_apim_model                0.05224 .
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Conclusion (5% level): The likelihood-ratio test finds no clear improvement from `ild_apim_no_contrast_slope` to `ild_apim_model` (p = 0.0522). Based on this test, prefer `ild_apim_no_contrast_slope` for parsimony. This does not establish equal fit.
 ```
 
 Without the member-contrast slope, the two members have identical actor
@@ -894,18 +884,6 @@ no_contrast_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
 )
 
 print(no_contrast_slope_covariance, representation = "sdcor")
-#> Exchangeable residual covariance
-#> 
-#> Pair `dyad`
-#> Shared:     us(1 + .dy_provided_support_cwp_actor | coupleID)
-#> Difference: us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
-#> 
-#> Standard deviations and correlations:
-#>                                           1      2     3      4    
-#> 1 member1: (Intercept)                    1.080  0.001 -0.100 0.001
-#> 2 member1: .dy_provided_support_cwp_actor 0.001  0.041 0.001  1.000
-#> 3 member2: (Intercept)                    -0.100 0.001 1.080  0.001
-#> 4 member2: .dy_provided_support_cwp_actor 0.001  1.000 0.001  0.041
 ```
 
 We can impose the stronger constraint by omitting the full
@@ -928,19 +906,6 @@ dyadMLM::compare_nested_glmmTMB_models(
   ild_apim_no_contrast_block,
   ild_apim_model
 )
-#> Likelihood-ratio test for nested models fitted to equivalent data
-#> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
-#> 
-#>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
-#> ild_apim_no_contrast_block 11 3284.7 3339.1 -1631.4   3262.7              
-#> ild_apim_model             14 2979.3 3048.5 -1475.7   2951.3 311.44      3
-#>                            Pr(>Chisq)    
-#> ild_apim_no_contrast_block               
-#> ild_apim_model              < 2.2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Conclusion (5% level): The likelihood-ratio test provides evidence that `ild_apim_model` fits better than `ild_apim_no_contrast_block` (p < 0.001).
 ```
 
 Here, both members have identical random intercepts and actor random
@@ -963,18 +928,6 @@ no_contrast_block_covariance <- dyadMLM::recover_exchangeable_covariance(
 )
 
 print(no_contrast_block_covariance, representation = "sdcor")
-#> Exchangeable residual covariance
-#> 
-#> Pair `dyad`
-#> Shared:     us(1 + .dy_provided_support_cwp_actor | coupleID)
-#> Difference: <omitted>
-#> 
-#> Standard deviations and correlations:
-#>                                           1      2      3      4     
-#> 1 member1: (Intercept)                    0.725  -0.014 1.000  -0.014
-#> 2 member1: .dy_provided_support_cwp_actor -0.014 0.068  -0.014 1.000 
-#> 3 member2: (Intercept)                    1.000  -0.014 0.725  -0.014
-#> 4 member2: .dy_provided_support_cwp_actor -0.014 1.000  -0.014 0.068
 ```
 
 These are constraints on the stable dyad-level random effects, not on

@@ -838,7 +838,9 @@ among the random intercept, actor slope, and partner slope.</p>
 actor random slope. We can first test a smaller model that omits only
 the actor random slope from the member-contrast block. The
 member-contrast random intercept and both same-occasion blocks remain in
-the model:</p>
+the model. These boundary-constraint examples are shown but not run
+because their convergence can depend on the optimizer and platform;
+confirm convergence before interpreting either test.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_no_contrast_slope</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_model</span>,</span>
@@ -854,20 +856,7 @@ the model:</p>
 <span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_no_contrast_slope</span>,</span>
 <span>  <span class="va">ild_apim_model</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent data</span></span>
-<span><span class="co">#&gt; Assumes mathematical nesting and an appropriate chi-squared reference distribution.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
-<span><span class="co">#&gt; ild_apim_no_contrast_slope 12 2981.2 3040.5 -1478.6   2957.2              </span></span>
-<span><span class="co">#&gt; ild_apim_model             14 2979.3 3048.5 -1475.7   2951.3 5.9039      2</span></span>
-<span><span class="co">#&gt;                            Pr(&gt;Chisq)  </span></span>
-<span><span class="co">#&gt; ild_apim_no_contrast_slope             </span></span>
-<span><span class="co">#&gt; ild_apim_model                0.05224 .</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conclusion (5% level): The likelihood-ratio test finds no clear improvement from `ild_apim_no_contrast_slope` to `ild_apim_model` (p = 0.0522). Based on this test, prefer `ild_apim_no_contrast_slope` for parsimony. This does not establish equal fit.</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Without the member-contrast slope, the two members have identical
 actor random slopes at the stable dyad level. We tell the
 back-transformation which fitted blocks represent this constraint.</p>
@@ -889,19 +878,7 @@ what blocks belong together.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">no_contrast_slope_covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exchangeable residual covariance</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Pair `dyad`</span></span>
-<span><span class="co">#&gt; Shared:     us(1 + .dy_provided_support_cwp_actor | coupleID)</span></span>
-<span><span class="co">#&gt; Difference: us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Standard deviations and correlations:</span></span>
-<span><span class="co">#&gt;                                           1      2     3      4    </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept)                    1.080  0.001 -0.100 0.001</span></span>
-<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor 0.001  0.041 0.001  1.000</span></span>
-<span><span class="co">#&gt; 3 member2: (Intercept)                    -0.100 0.001 1.080  0.001</span></span>
-<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor 0.001  1.000 0.001  0.041</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">no_contrast_slope_covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span></code></pre></div>
 <p>We can impose the stronger constraint by omitting the full
 member-contrast block at the stable dyad level. The same-occasion
 member-contrast block again remains in the model:</p>
@@ -919,20 +896,7 @@ member-contrast block again remains in the model:</p>
 <span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_no_contrast_block</span>,</span>
 <span>  <span class="va">ild_apim_model</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Likelihood-ratio test for nested models fitted to equivalent data</span></span>
-<span><span class="co">#&gt; Assumes mathematical nesting and an appropriate chi-squared reference distribution.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                            Df    AIC    BIC  logLik deviance  Chisq Chi Df</span></span>
-<span><span class="co">#&gt; ild_apim_no_contrast_block 11 3284.7 3339.1 -1631.4   3262.7              </span></span>
-<span><span class="co">#&gt; ild_apim_model             14 2979.3 3048.5 -1475.7   2951.3 311.44      3</span></span>
-<span><span class="co">#&gt;                            Pr(&gt;Chisq)    </span></span>
-<span><span class="co">#&gt; ild_apim_no_contrast_block               </span></span>
-<span><span class="co">#&gt; ild_apim_model              &lt; 2.2e-16 ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Conclusion (5% level): The likelihood-ratio test provides evidence that `ild_apim_model` fits better than `ild_apim_no_contrast_block` (p &lt; 0.001).</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Here, both members have identical random intercepts and actor random
 slopes at the stable dyad level. Because the full member-contrast block
 is absent, we specify it as <code>NULL</code>:</p>
@@ -950,19 +914,7 @@ is absent, we specify it as <code>NULL</code>:</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">no_contrast_block_covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exchangeable residual covariance</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Pair `dyad`</span></span>
-<span><span class="co">#&gt; Shared:     us(1 + .dy_provided_support_cwp_actor | coupleID)</span></span>
-<span><span class="co">#&gt; Difference: &lt;omitted&gt;</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Standard deviations and correlations:</span></span>
-<span><span class="co">#&gt;                                           1      2      3      4     </span></span>
-<span><span class="co">#&gt; 1 member1: (Intercept)                    0.725  -0.014 1.000  -0.014</span></span>
-<span><span class="co">#&gt; 2 member1: .dy_provided_support_cwp_actor -0.014 0.068  -0.014 1.000 </span></span>
-<span><span class="co">#&gt; 3 member2: (Intercept)                    1.000  -0.014 0.725  -0.014</span></span>
-<span><span class="co">#&gt; 4 member2: .dy_provided_support_cwp_actor -0.014 1.000  -0.014 0.068</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">no_contrast_block_covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span></code></pre></div>
 <p>These are constraints on the stable dyad-level random effects, not on
 the same-occasion residual structure. Because variance constraints lie
 on the boundary of the parameter space, the usual chi-squared reference
