@@ -1890,8 +1890,8 @@ warn_about_exchangeable_residual_level <- function(extracted, pairs) {
     if (length(details) > 0L) {
       warning(
         "Review possible residual-level structure:\n\n",
-        pair_label, " may be residual-level: at most two fitted rows per ",
-        "group. Row-count check only; partner positions were not verified.",
+        pair_label, " may be residual-level (reason: at most two fitted rows per ",
+        "group).",
         "\n\n- ", paste(details, collapse = "\n- "),
         call. = FALSE
       )

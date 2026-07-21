@@ -1544,7 +1544,11 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
     fixed = TRUE
   )
   expect_match(warning_text, "may be residual-level", fixed = TRUE)
-  expect_match(warning_text, "Row-count check only", fixed = TRUE)
+  expect_match(
+    warning_text,
+    "reason: at most two fitted rows per group",
+    fixed = TRUE
+  )
   expect_match(warning_text, "For `brms`", fixed = TRUE)
   expect_match(warning_text, "unstr(time = member_position", fixed = TRUE)
   expect_match(
