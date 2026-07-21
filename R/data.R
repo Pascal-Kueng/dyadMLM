@@ -19,7 +19,7 @@
 #'   \doi{10.5281/zenodo.20720321}.
 "example_dyadic_crosssectional"
 
-#' Example cross-sectional dyadic data with mixed dyad types
+#' Example cross-sectional dyadic data with multiple dyad compositions
 #'
 #' A simulated cross-sectional long-format dataset containing distinguishable
 #' female-male dyads and exchangeable female-female and male-male dyads. Each
@@ -85,7 +85,7 @@
 #'   \doi{10.5281/zenodo.20720321}.
 "example_dyadic_ILD"
 
-#' Example intensive longitudinal dyadic data with mixed dyad types
+#' Example intensive longitudinal dyadic data with multiple dyad compositions
 #'
 #' A simulated intensive longitudinal long-format dataset containing
 #' distinguishable female-male dyads and exchangeable female-female and
@@ -134,7 +134,7 @@
 #'   \doi{10.5281/zenodo.20720321}.
 "example_dyadic_ILD_tweedie"
 
-#' Example intensive longitudinal dyadic data with mixed dyad types and a Tweedie outcome
+#' Example intensive longitudinal dyadic data with multiple dyad compositions and a Tweedie outcome
 #'
 #' A simulated intensive longitudinal long-format dataset containing
 #' distinguishable female-male dyads and exchangeable female-female and

@@ -3,7 +3,7 @@
 \docType{data}
 \name{example_dyadic_ILD_mixed}
 \alias{example_dyadic_ILD_mixed}
-\title{Example intensive longitudinal dyadic data with mixed dyad types}
+\title{Example intensive longitudinal dyadic data with multiple dyad compositions}
 \format{
 A data frame with 5,600 rows and 6 variables:
 \describe{

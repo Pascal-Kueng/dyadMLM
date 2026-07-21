@@ -3,7 +3,7 @@
 \docType{data}
 \name{example_dyadic_crosssectional_mixed}
 \alias{example_dyadic_crosssectional_mixed}
-\title{Example cross-sectional dyadic data with mixed dyad types}
+\title{Example cross-sectional dyadic data with multiple dyad compositions}
 \format{
 A data frame with 640 rows and 4 variables:
 \describe{

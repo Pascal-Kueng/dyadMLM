@@ -1230,19 +1230,21 @@ But what if we want DIM-style interpretation but have distinguishable dyads?
 ### The dyadic score model (DSM) is: 
 
 :::{.incremental}
-
 - the unconstrained distinguishable version of the DIM
 - a re-parametrization of the distinguishable APIM
+::: 
 
-- While the DIM uses deviation from the couple mean which is opposite for each
-partners $X_i - \bar{X}$, the DSM uses meaningful directed differences, e.g.,
-$X_\mathrm{female} - X_\mathrm{male}$, which is repeated for both partners. 
-  - This allows the estimation of cross-paths, since both partners' values do not
-  cancel out like in the DIM$ 
-  
+:::{.fragment}
+- **DIM**: deviation from the couple mean $X_i - \bar{X}$
+  - opposite for each partner 
+- **DSM**: meaningful directed differences $X_\mathrm{female} - X_\mathrm{male}$
+  - repeated for both partners.
 :::
+
+[This allows the estimation of cross-paths, since both partners' values do not
+cancel out like in the DIM.]{.fragment}
   
-<!-- TODO @coded verify the correctness and clarity of this slide, and how
+<!-- TODO @codex verify the correctness and clarity of this slide, and how
 layout could be improved-->
 
 <!-- ca. 3 Minutes -->

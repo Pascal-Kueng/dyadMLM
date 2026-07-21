@@ -23,12 +23,11 @@ knitr::opts_chunk$set(
 generalized linear mixed-effects models. It validates and prepares
 cross-sectional and intensive longitudinal dyadic data.
 
-It supports dyadic datasets with distinguishable dyads, exchangeable dyads, or
-mixed dyad types in the same data, such as female-male, female-female,
-and male-male couples. It creates composition-aware, model-ready columns for
-dyadic multilevel model parameterizations such as the Actor-Partner
-Interdependence Model (APIM), Dyad-Individual Model (DIM), and Dyadic Score
-Model (DSM).
+It supports distinguishable and exchangeable dyads and can also prepare
+datasets containing multiple dyad compositions. It creates composition-aware,
+model-ready columns for dyadic multilevel model parameterizations such as the
+Actor-Partner Interdependence Model (APIM), Dyad-Individual Model (DIM), and
+Dyadic Score Model (DSM).
 
 Selected post-estimation tools compare compatible fitted models and
 back-transform exchangeable random-effect covariance structures into
