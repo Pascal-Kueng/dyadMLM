@@ -94,28 +94,18 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
   }
 
   draw_seesaw <- function(labelled = FALSE) {
-    if (labelled) {
-      panel_x <- 0.30
-      panel_width <- 0.56
-      left <- 0.11
-      right <- 0.49
-      centre <- 0.30
-      y_left <- 0.56
-      y_right <- 0.72
-    } else {
-      panel_x <- 0.745
-      panel_width <- 0.46
-      left <- 0.575
-      right <- 0.915
-      centre <- 0.745
-      y_left <- 0.61
-      y_right <- 0.73
-    }
+    panel_x <- 0.745
+    panel_width <- 0.46
+    left <- 0.575
+    right <- 0.915
+    centre <- 0.745
+    y_left <- 0.61
+    y_right <- 0.73
 
     draw_panel(panel_x, 0.715, panel_width, 0.49)
     draw_text("Seesaw", panel_x, 0.905, fontsize = 19, fontface = "bold")
     draw_text(
-      if (labelled) "Outcome difference residual" else
+      if (labelled) "Directed difference residual" else
         "Within-dyad residual",
       panel_x, 0.855, fontsize = 14.5, colour = muted
     )
@@ -166,29 +156,8 @@ draw_residual_seesaw <- function(model = c("dim", "dsm")) {
     draw_elevator()
     draw_seesaw(labelled = FALSE)
   } else {
+    draw_elevator()
     draw_seesaw(labelled = TRUE)
-
-    draw_panel(0.78, 0.715, 0.38, 0.49)
-    draw_text(
-      "The direction is meaningful", 0.78, 0.895,
-      fontsize = 18, fontface = "bold"
-    )
-    draw_text(
-      "Female and male are", 0.78, 0.800,
-      fontsize = 15, colour = ink, fontface = "bold"
-    )
-    draw_text(
-      "substantive labels.", 0.78, 0.752,
-      fontsize = 15, colour = ink, fontface = "bold"
-    )
-    draw_text(
-      "Relabelling is no longer an", 0.78, 0.655,
-      fontsize = 14, colour = muted
-    )
-    draw_text(
-      "allowed symmetry of the model.", 0.78, 0.610,
-      fontsize = 14, colour = muted
-    )
   }
 
   grid::popViewport()

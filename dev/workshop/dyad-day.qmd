@@ -1225,27 +1225,22 @@ dim_reparameterization_grid(
 
 ## The DSM
 
-But what if we want DIM-style interpretation but have distinguishable dyads?
+What if we want DIM-style interpretation but have distinguishable dyads?
 
+:::{.fragment}
 ### The dyadic score model (DSM) is: 
 
-:::{.incremental}
 - the unconstrained distinguishable version of the DIM
 - a re-parametrization of the distinguishable APIM
-::: 
+:::
 
 :::{.fragment}
 - **DIM**: deviation from the couple mean $X_i - \bar{X}$
   - opposite for each partner 
 - **DSM**: meaningful directed differences $X_\mathrm{female} - X_\mathrm{male}$
-  - repeated for both partners.
+  - repeated for both partners. 
 :::
 
-[This allows the estimation of cross-paths, since both partners' values do not
-cancel out like in the DIM.]{.fragment}
-  
-<!-- TODO @codex verify the correctness and clarity of this slide, and how
-layout could be improved-->
 
 <!-- ca. 3 Minutes -->
 
@@ -1264,6 +1259,29 @@ layout could be improved-->
 draw_dsm_diagram(show_residuals = FALSE)
 ```
 
+
+:::{.notes}
+
+- a11 is interpreted the same way as b_mean in the DIM. 
+
+- a22: The DIM said: "if any of the partners is higher on X, is that partner also higher on Y."
+  - The DSM says: "if the female is higher than the male on X, is the female also higher than the male on Y". 
+
+a21/a12:
+Because we now have a stable direction that we defined, and members do not cancel each 
+other out anymore, we can have an intercept different than zero, and cross-paths
+different than zero! So we estimate them. 
+
+
+<!-- TODO @codex verify the correctness and clarity of this slide. 
+Should we somehow fit the notes sentence on the slide? if it is correct.
+
+-->
+
+:::
+
+<!-- ca. 3 Minutes -->
+
 ## The DSM
 
 ```{r}
@@ -1279,7 +1297,14 @@ draw_dsm_diagram(show_residuals = FALSE)
 draw_dsm_diagram()
 ```
 
-## In the DSM, the seats are labelled
+:::{.notes}
+
+
+
+<!-- TODO @codex check if this is accurate and clear -->
+
+:::
+## Why may the DSM residuals correlate?
 
 ```{r}
 #| label: dsm-residual-seesaw
@@ -1289,28 +1314,30 @@ draw_dsm_diagram()
 #| fig-height: 3.15
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "A seesaw with female and male seats illustrates that the DSM outcome difference has a meaningful direction. Because the labels cannot be swapped arbitrarily, the outcome mean and difference residuals may correlate."
+#| fig-alt: "An elevator represents the dyad mean residual, which moves both partners together; a seesaw with female and male seats represents the directed outcome-difference residual. Because these substantive labels cannot be swapped arbitrarily, the two residual components may correlate."
 
 draw_residual_seesaw("dsm")
 ```
 
+::: {.seesaw-swap}
+**Substantive labels:**
+$D_Y=Y_{\mathrm{F}}-Y_{\mathrm{M}}$
+
+Swapping Female and Male changes the meaning and sign of the difference, so
+label-swapping is not a symmetry of the DSM.
+:::
+
 ::: {.seesaw-equation .seesaw-equation-dsm}
 $$
-D_Y=Y_{\mathrm{F}}-Y_{\mathrm{M}}
-\qquad\text{and}\qquad
-\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})\ \text{may be non-zero.}
+\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})
+\quad\text{is not constrained to zero.}
 $$
 :::
 
-
 ::: {.seesaw-takeaway}
-**A positive $\rho_{r_m r_d}$ means:** couples whose outcomes are higher than predicted
-on average also tend to have a larger female–male difference than predicted.
-:::
-
-
-::: {.seesaw-footnote}
-The correlation describes a pattern across couples—not two residuals varying within one couple.
+**A positive $\rho_{r_\mathrm{M}r_\mathrm{D}}$ means:** couples whose outcomes are
+higher than predicted on average also tend to have a larger female–male
+difference than predicted.
 :::
 
 :::{.notes}
@@ -1318,8 +1345,9 @@ The correlation describes a pattern across couples—not two residuals varying w
 - The DSM uses the same elevator and seesaw idea, but the two seats now have
   substantively meaningful labels.
 
-- If the outcome difference is defined as female minus male, reversing its sign
-  changes the meaning of the variable. (different than before, where swapping seats did not change the model)
+- Swapping Female and Male changes the meaning and sign of the directed
+  difference. Unlike in the DIM, this relabelling is not a symmetry of the
+  model because the labels are substantive rather than arbitrary.
 
 - The mean and difference residuals may consequently be correlated.
 - A positive correlation means that, across couples, couples whose outcomes are
