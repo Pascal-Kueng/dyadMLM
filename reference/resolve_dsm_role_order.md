@@ -1,13 +1,13 @@
 # Resolve the DSM role order
 
-Checks the relationship between `model_type`, `role`, and
+Checks the relationship between `model_types`, `role`, and
 `dsm_role_order`, validates the requested role order, and returns its
 stored representation.
 
 ## Usage
 
 ``` r
-resolve_dsm_role_order(dsm_role_order, model_type, has_role)
+resolve_dsm_role_order(dsm_role_order, model_types, has_role)
 ```
 
 ## Arguments
@@ -16,7 +16,7 @@ resolve_dsm_role_order(dsm_role_order, model_type, has_role)
 
   The requested DSM role order.
 
-- model_type:
+- model_types:
 
   The normalized model types.
 

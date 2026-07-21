@@ -31,7 +31,7 @@ and APIM predictor metadata recorded.
 ## Details
 
 The function will use the predictor decomposition metadata stored in
-`attr(data, "dyadMLM")$temporal_predictor_decompositions`, so downstream
-code does not need to infer generated predictor columns from their
-names. It stores the constructed APIM columns in
+`attr(data, "dyadMLM")$temporal_decompositions`, so downstream code does
+not need to infer generated predictor columns from their names. It
+stores the constructed APIM columns in
 `attr(data, "dyadMLM")$apim_predictors`.

@@ -48,5 +48,5 @@ Multilevel Modelling* (v2.0.9). Zenodo.
 
 ## Details
 
-Prepare with `group = coupleID`, `member = personID`, `role = gender`,
+Prepare with `dyad = coupleID`, `member = personID`, `role = gender`,
 and `time = diaryday`.

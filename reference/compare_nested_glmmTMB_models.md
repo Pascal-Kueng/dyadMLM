@@ -10,7 +10,7 @@ parameters is shown first in the result.
 ## Usage
 
 ``` r
-compare_dyad_models(model1, model2)
+compare_nested_glmmTMB_models(model1, model2)
 ```
 
 ## Arguments
@@ -51,7 +51,7 @@ inappropriate when tested variance parameters are on the boundary.
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
   restricted_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
     role = gender
   )
@@ -66,7 +66,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     data = full_data
   )
 
-  compare_dyad_models(restricted_model, full_model)
+  compare_nested_glmmTMB_models(restricted_model, full_model)
 }
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.

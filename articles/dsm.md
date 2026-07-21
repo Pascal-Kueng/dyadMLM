@@ -15,10 +15,8 @@ difference between partners (Iida et al. 2018).
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the [Actor-Partner Interdependence
-Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.md),
-[Mixed-Composition
-APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
-and [Dyad-Individual
+Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.md) and
+[Dyad-Individual
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), see the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
@@ -33,18 +31,18 @@ female minus male.
 
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "dsm",
+  model_types = "dsm",
   dsm_role_order = c("female", "male")
 )
 
 print(cross_dsm_data, n = 4)
 #> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> # DSM direction: female - male
 #> #
 #> # Dyad compositions:
@@ -321,12 +319,12 @@ of the differences, but not the substantive model.
 
 cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
   # Request APIM columns too for comparison below.
-  model_type = c("dsm", "apim"),
+  model_types = c("dsm", "apim"),
   dsm_role_order = c("male", "female")
 )
 ```
@@ -618,8 +616,8 @@ arbitrary. The directional intercept, both cross-paths, and the
 covariance between outcome level and outcome difference must then be
 zero. The remaining reduced, label-invariant DSM is algebraically the
 Gaussian Dyad-Individual Model (DIM). In `dyadMLM`, use
-`model_type = "dim"` for this exchangeable model and reserve
-`model_type = "dsm"` for distinguishable dyads.
+`model_types = "dim"` for this exchangeable model and reserve
+`model_types = "dsm"` for distinguishable dyads.
 
 Because the Gaussian DIM is the exchangeability-constrained version of
 the full DSM, exchangeability can also be tested by comparing these
@@ -643,20 +641,19 @@ Brief example of ILD DSM:
 
 ild_dsm_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   time = diaryday,
   predictors = provided_support,
-  model_type = "dsm",
+  model_types = "dsm",
   dsm_role_order = c("female", "male")
 )
 
 print(ild_dsm_data, n = 4)
 #> # dyadMLM data
 #> # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes
-#> # Structure: group = coupleID, member = personID, role = gender, time =
-#> # diaryday
+#> # Structure: dyad = coupleID, member = personID, role = gender, time = diaryday
 #> # DSM direction: female - male
 #> #
 #> # Dyad compositions:
@@ -847,11 +844,9 @@ level and the directional outcome difference.
 
 Return to the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.md), see
-the [Mixed-Composition APIM
-vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md)
-or the [Dyad-Individual Model
-vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) for
-related model specifications, or return to the [online package
+the [Dyad-Individual Model
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) for a
+related model specification, or return to the [online package
 overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References

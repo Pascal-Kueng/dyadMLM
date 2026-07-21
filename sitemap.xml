@@ -7,7 +7,6 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/dsm.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/articles/index.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/authors.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/index.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/news/index.html</loc></url>
@@ -18,7 +17,7 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/assign_arbitrary_member_roles.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/canonical_composition.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/center_predictors.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyad_generated_columns.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_ILD_mixed.html</loc></url>
@@ -27,7 +26,6 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_mixed.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/example_dyadic_crosssectional_tweedie.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/extract_exchangeable_residual_blocks.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/format_group_count.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/format_group_list.html</loc></url>
@@ -36,6 +34,7 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/make_dyad_suffixes.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/print.exchangeable_rescov.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/resolve_composition_references.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/resolve_dsm_role_order.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/validate_dim_compatibility.html</loc></url>

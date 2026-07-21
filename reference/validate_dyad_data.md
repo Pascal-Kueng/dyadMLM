@@ -11,15 +11,15 @@ and measurement occasion within each dyad.
 ``` r
 validate_dyad_data(
   data,
-  group,
+  dyad,
   member,
   role = NULL,
   time = NULL,
   predictors = NULL,
-  lag_predictors = NULL,
-  model_type = "apim",
+  lag1_predictors = NULL,
+  model_types = "apim",
   dsm_role_order = NULL,
-  temporal_predictor_decomposition = c("auto", "time_2l", "none"),
+  temporal_decomposition = c("auto", "2l", "none"),
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop")
 )
@@ -31,7 +31,7 @@ validate_dyad_data(
 
   A long-format data frame or tibble.
 
-- group:
+- dyad:
 
   Column identifying the dyad.
 
@@ -42,9 +42,11 @@ validate_dyad_data(
 
 - role:
 
-  Optional column identifying role that can be used to distinguish
-  partners within a dyad, such as gender. If no role is supplied, all
-  dyads in the data are treated as exchangeable.
+  Optional column identifying a stable member role, such as gender.
+  Non-missing values must be consistent within each `dyad` x `member`.
+  In repeated-measures data, an observed role is propagated to missing
+  rows for the same member within a dyad. If no role is supplied, all
+  dyads are treated as exchangeable.
 
 - time:
 
@@ -55,13 +57,13 @@ validate_dyad_data(
   Optional variables to select and store as metadata for temporal
   predictor decomposition and model-helper functions.
 
-- lag_predictors:
+- lag1_predictors:
 
   Optional subset of `predictors` for which lag-1 model-ready columns
   should be created. Requires a finite, integer-valued numeric `time`
   variable.
 
-- model_type:
+- model_types:
 
   Requested model-ready column families. Can contain one or more of
   `"apim"`, `"dim"`, and `"dsm"`. `"none"` indicates no model-specific
@@ -69,32 +71,36 @@ validate_dyad_data(
 
 - dsm_role_order:
 
-  For `model_type = "dsm"`, a character vector giving the two
+  For `model_types = "dsm"`, a character vector giving the two
   distinguishable roles in the order used for directional differences.
   Required when DSM columns are requested and must be `NULL` otherwise.
 
-- temporal_predictor_decomposition:
+- temporal_decomposition:
 
   Requested temporal predictor decomposition strategy for predictors.
   `"none"` leaves predictors undecomposed before model-specific columns
-  are constructed. `"time_2l"` indicates a two-level temporal predictor
+  are constructed. `"2l"` indicates a two-level temporal predictor
   decomposition into within-person and between-person components.
-  `"auto"` resolves to `"time_2l"` when both `time` and `predictors` are
+  `"auto"` resolves to `"2l"` when both `time` and `predictors` are
   supplied, and to `"none"` otherwise. Model-specific helpers may apply
   additional conventions, such as grand-mean centering raw DIM and DSM
   dyad means.
 
 - incomplete_dyads:
 
-  How to handle dyads that do not contain exactly two unique members
-  anywhere in the data. `"error"` stops with an error and `"drop"`
-  removes the entire dyad.
+  How to handle dyads with fewer than two unique members across all rows
+  in `data`. `"error"` stops with an error and `"drop"` removes the
+  entire dyad. A dyad with more than two unique members is invalid and
+  always causes an error, regardless of this setting.
 
 - missing_role:
 
-  How to handle missing values in the `role` column. `"error"` stops
-  with an error, `"drop"` removes dyads with incomplete role
-  information. Ignored when no `role` column is supplied.
+  How to handle dyads in which at least one member has no non-missing
+  `role` value on any row. A consistent non-missing role observed for a
+  member is propagated to that member's other rows before this policy is
+  applied. `"error"` stops with an error and `"drop"` removes the entire
+  dyad. Conflicting non-missing roles always cause an error. Ignored
+  when no `role` column is supplied.
 
 ## Value
 

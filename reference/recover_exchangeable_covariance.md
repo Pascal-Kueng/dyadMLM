@@ -12,7 +12,7 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable
 ## Usage
 
 ``` r
-exchangeable_rescov(model, pairs = NULL)
+recover_exchangeable_covariance(model, block_pairings = NULL)
 ```
 
 ## Arguments
@@ -22,24 +22,25 @@ exchangeable_rescov(model, pairs = NULL)
   A fitted `glmmTMB` or single-response `brmsfit` model. For `glmmTMB`,
   only conditional-model random effects are processed.
 
-- pairs:
+- block_pairings:
 
   `NULL` (default) for automatic block matching. Otherwise, supply one
   block-pair specification or a list of block-pair specifications. Each
   pair contains:
 
-  - `shared`: a single string naming the shared random-effect term
+  - `shared_block`: a single string naming the shared random-effect term
     copied from the fitted model formula or an equivalent selector (see
     Details), or `NULL` if the entire shared block was omitted when
     fitting;
 
-  - `difference`: a single string naming the member-difference
+  - `difference_block`: a single string naming the member-difference
     random-effect term or an equivalent selector, or `NULL` if the
     entire difference block was omitted;
 
   - `difference_indicator`: the exact name of the difference-indicator
-    column used in `difference`. It is required when `difference`
-    selects a block and optional when `difference = NULL`;
+    column used in `difference_block`. It is required when
+    `difference_block` selects a block and optional when
+    `difference_block = NULL`;
 
   - `shared_indicator`: the exact shared composition-indicator column,
     needed only for composition-specific blocks in mixed-dyad models. It
@@ -49,57 +50,62 @@ exchangeable_rescov(model, pairs = NULL)
 ## Value
 
 An `exchangeable_rescov` object: a named list with one element per
-matched block pair. Each element contains the member-level
-variance-covariance matrix in `varcov` and its
+matched block pairing. Each element contains `shared_term` and
+`difference_term` (each a fitted term string or `NULL`), plus the
+member-level variance-covariance matrix in `varcov` and its
 standard-deviation/correlation representation in `sdcor`, with standard
-deviations on the diagonal and correlations off the diagonal. Names
-reproduce the matched random-effect terms. For `glmmTMB`, `varcov` and
+deviations on the diagonal and correlations off the diagonal. Covariance
+dimension labels `member_1` and `member_2` denote arbitrary exchangeable
+positions, not substantive roles or encodings. Caller-supplied outer
+names are preserved; unnamed pairings receive stable names `pair_1`,
+`pair_2`, and so on in resolved order. For `glmmTMB`, `varcov` and
 `sdcor` are matrices. For `brms`, they are posterior-draw by coefficient
 by coefficient arrays.
 
 ## Details
 
-Automatic matching recognizes exact `.dy_diff_*_arbitrary` coefficient
-names and first looks for the corresponding `.dy_is_*` shared block. It
-requires the two blocks to use the same grouping factor and the same
-underlying terms. Most models fitted with `dyadMLM`-generated columns
-therefore need only:
+Automatic matching recognizes exact `.dy_member_contrast_*_arbitrary`
+and legacy `.dy_diff_*_arbitrary` coefficient names and first looks for
+the corresponding `.dy_is_*` shared block. It requires the two blocks to
+use the same grouping factor and the same underlying terms. Most models
+fitted with `dyadMLM`-generated columns therefore need only:
 
-    result <- dyadMLM::exchangeable_rescov(model)
+    result <- dyadMLM::recover_exchangeable_covariance(model)
     print(result)
 
-Supply `pairs` when automatic matching is ambiguous or when a model uses
-custom indicators, multiple covariance levels, or deliberately omitted
-blocks or terms. To specify one pair with a custom difference indicator:
+Supply `block_pairings` when automatic matching is ambiguous or when a
+model uses custom indicators, multiple covariance levels, or
+deliberately omitted blocks or terms. To specify one pair with a custom
+difference indicator:
 
-    result <- dyadMLM::exchangeable_rescov(
+    result <- dyadMLM::recover_exchangeable_covariance(
       model,
-      pairs = list(
-        shared = "(1 + time | coupleID)",
-        difference = "(0 + my_diff + I(my_diff * time) | coupleID)",
+      block_pairings = list(
+        shared_block = "(1 + time | coupleID)",
+        difference_block = "(0 + my_diff + I(my_diff * time) | coupleID)",
         difference_indicator = "my_diff"
       )
     )
 
-For multiple covariance levels, wrap the pairs in an outer list. For
+For multiple covariance levels, wrap the pairings in an outer list. For
 example, in a Gaussian `glmmTMB` model fitted with `dispformula = ~ 0`,
 this call recovers both a stable dyad-level covariance with an omitted
 difference time slope and the same-occasion partner residual covariance:
 
-    result <- dyadMLM::exchangeable_rescov(
+    result <- dyadMLM::recover_exchangeable_covariance(
       model,
-      pairs = list(
+      block_pairings = list(
         dyad = list(
-          shared = "(1 + diaryday | coupleID)",
-          difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)",
+          shared_block = "(1 + diaryday | coupleID)",
+          difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)",
           difference_indicator =
-            ".dy_diff_assumed_exchangeable_arbitrary"
+            ".dy_member_contrast_assumed_exchangeable_arbitrary"
         ),
         same_occasion = list(
-          shared = "(1 | coupleID:diaryday)",
-          difference = "(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+          shared_block = "(1 | coupleID:diaryday)",
+          difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)",
           difference_indicator =
-            ".dy_diff_assumed_exchangeable_arbitrary"
+            ".dy_member_contrast_assumed_exchangeable_arbitrary"
         )
       )
     )
@@ -125,34 +131,36 @@ to the two arbitrary member positions consistently within each dyad. For
 composition-specific blocks, it must be zero where `shared_indicator` is
 zero.
 
-For custom difference indicators supplied through `pairs`, the function
-checks whether both positions occur within each supported fitted
-grouping unit. It rejects coding when no group contains both positions,
-and warns when only some groups are one-sided, which can result from
-fitted-row filtering. It also warns when stable member assignments
-cannot be verified across repeated rows without a member identifier.
+For custom difference indicators supplied through `block_pairings`, the
+function checks whether both positions occur within each supported
+fitted grouping unit. It rejects coding when no group contains both
+positions, and warns when only some groups are one-sided, which can
+result from fitted-row filtering. It also warns when stable member
+assignments cannot be verified across repeated rows without a member
+identifier.
 
 ## What omitted blocks and terms mean
 
-`exchangeable_rescov()` only describes constraints that were already
-imposed when the model was fitted. It does not remove a block, set a
-variance to zero, or otherwise constrain the supplied model. Describe
-only the structure that was actually fitted.
+`recover_exchangeable_covariance()` only describes constraints that were
+already imposed when the model was fitted. It does not remove a block,
+set a variance to zero, or otherwise constrain the supplied model.
+Describe only the structure that was actually fitted.
 
 If a term occurs in only one selected block, the function represents the
 missing coordinate as a structural zero:
 
-- A term present only in `shared` has no difference component, so the
-  two members have identical random effects for that term.
+- A term present only in the shared block has no difference component,
+  so the two members have identical random effects for that term.
 
-- A term present only in `difference` has no shared component, so the
-  two members have equal-magnitude, opposite-sign random effects for
-  that term.
+- A term present only in the difference block has no shared component,
+  so the two members have equal-magnitude, opposite-sign random effects
+  for that term.
 
-Setting `difference = NULL` or `shared = NULL` applies the corresponding
-rule to the entire omitted block. This is valid only when that block is
-truly absent from the fitted model. Do not use `NULL` merely to ignore
-an existing block; the resulting back-transformation would be incorrect.
+Setting `difference_block = NULL` or `shared_block = NULL` applies the
+corresponding rule to the entire omitted block. This is valid only when
+that block is truly absent from the fitted model. Do not use `NULL`
+merely to ignore an existing block; the resulting back-transformation
+would be incorrect.
 
 See the constrained-block example in the [exchangeable APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#fitted-constraints-and-omitted-blocks).
@@ -195,26 +203,27 @@ to open the installed version.
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
   example_data <- prepare_dyad_data(
     example_dyadic_crosssectional,
-    group = coupleID,
+    dyad = coupleID,
     member = personID,
-    model_type = "none",
+    model_types = "none",
     seed = 123
   )
 
   model <- glmmTMB::glmmTMB(
     satisfaction ~ 1 +
       us(1 | coupleID) +
-      us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID),
     dispformula = ~ 0,
     data = example_data
   )
 
-  exchangeable_rescov(model)
+  recover_exchangeable_covariance(model)
 }
 #> Exchangeable residual covariance
 #> 
+#> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
-#> Difference: us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID)
+#> Difference: us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
 #>                       member_1: (Intercept) member_2: (Intercept)

@@ -22,7 +22,6 @@ dyadMLM_data object."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
-    <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
     <li><a class="dropdown-item" href="../articles/dsm.html">Dyadic Score Model</a></li>
   </ul></li>
@@ -53,7 +52,7 @@ dyadMLM_data object."></head><body>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">infer_dyad_compositions</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  include_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pool_compositions <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -68,11 +67,11 @@ dyadMLM_data object."></head><body>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Optional seed for random <code>.dy_diff_*</code> sign assignment in
+<dd><p>Optional seed for random <code>.dy_member_contrast_*</code> sign assignment in
 exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
 
 
-<dt id="arg-include-compositions">include_compositions<a class="anchor" aria-label="anchor" href="#arg-include-compositions"></a></dt>
+<dt id="arg-keep-compositions">keep_compositions<a class="anchor" aria-label="anchor" href="#arg-keep-compositions"></a></dt>
 <dd><p>Optional observed dyad compositions to keep
 before exchangeability overrides and pooling.</p></dd>
 
@@ -92,7 +91,7 @@ resolve to at least two distinct observed compositions.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>dyadMLM_data</code> object with added <code>.dy_composition</code> and
 <code>.dy_composition_role</code> factor columns, <code>.dy_is_*</code> numeric indicator columns,
-composition-specific numeric <code>.dy_diff_*</code> contrast columns coded <code>-1</code> and
+composition-specific numeric <code>.dy_member_contrast_*</code> columns coded <code>-1</code> and
 <code>1</code> for the two members of matching exchangeable dyads and <code>0</code> otherwise,
 and dyad composition metadata.</p>
     </div>

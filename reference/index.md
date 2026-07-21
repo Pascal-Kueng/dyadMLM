@@ -4,9 +4,9 @@
 
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   : Prepare dyadic data for multilevel models
-- [`compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.md)
+- [`compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.md)
   : Compare nested glmmTMB models fitted to equivalent data
-- [`exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md)
+- [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
   : Recover member-level residual covariance from exchangeable
   random-effect blocks
 

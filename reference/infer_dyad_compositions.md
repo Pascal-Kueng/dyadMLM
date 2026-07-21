@@ -9,7 +9,7 @@ Builds a dyad-level summary of role compositions from a validated
 infer_dyad_compositions(
   data,
   seed = NULL,
-  include_compositions = NULL,
+  keep_compositions = NULL,
   set_exchangeable_compositions = NULL,
   pool_compositions = NULL
 )
@@ -24,10 +24,11 @@ infer_dyad_compositions(
 
 - seed:
 
-  Optional seed for random `.dy_diff_*` sign assignment in exchangeable
-  dyads. If `NULL`, the current R session's RNG state is used.
+  Optional seed for random `.dy_member_contrast_*` sign assignment in
+  exchangeable dyads. If `NULL`, the current R session's RNG state is
+  used.
 
-- include_compositions:
+- keep_compositions:
 
   Optional observed dyad compositions to keep before exchangeability
   overrides and pooling.
@@ -46,6 +47,6 @@ infer_dyad_compositions(
 
 A `dyadMLM_data` object with added `.dy_composition` and
 `.dy_composition_role` factor columns, `.dy_is_*` numeric indicator
-columns, composition-specific numeric `.dy_diff_*` contrast columns
+columns, composition-specific numeric `.dy_member_contrast_*` columns
 coded `-1` and `1` for the two members of matching exchangeable dyads
 and `0` otherwise, and dyad composition metadata.

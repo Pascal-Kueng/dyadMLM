@@ -37,6 +37,6 @@ predictor columns added and DIM predictor metadata recorded.
 
 ## Details
 
-The function reads
-`attr(data, "dyadMLM")$temporal_predictor_decompositions` and stores the
-constructed DIM columns in `attr(data, "dyadMLM")$dim_predictors`.
+The function reads `attr(data, "dyadMLM")$temporal_decompositions` and
+stores the constructed DIM columns in
+`attr(data, "dyadMLM")$dim_predictors`.

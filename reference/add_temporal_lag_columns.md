@@ -1,7 +1,7 @@
 # Add lagged temporal predictor columns
 
 Adds lag-1 raw and within-person columns for predictors selected through
-`lag_predictors`. Values are matched at exactly `time - 1`, so
+`lag1_predictors`. Values are matched at exactly `time - 1`, so
 construction does not depend on row order and does not bridge gaps in
 the measurement index. Stable between-person components are not lagged.
 

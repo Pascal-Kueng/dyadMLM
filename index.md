@@ -21,7 +21,6 @@ Start with the vignettes, or scroll down for a quick-start.
 |----|----|
 | [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
 | [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
-| [APIMs with Mixed Dyad Compositions](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html) | APIMs that combine distinguishable and exchangeable dyad compositions in one analysis |
 | [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
 | [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
 
@@ -54,17 +53,17 @@ library(dyadMLM)
 
 prepared_data <- prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "apim"
+  model_types = "apim"
 )
 
 print(prepared_data, n = 4)
 #> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
 #> # female_x_male distinguishable 95 dyads
@@ -80,11 +79,11 @@ print(prepared_data, n = 4)
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .dy_composition
-#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>         
-#> 1        1        1 female          4.79         4.37 female_x_male 
-#> 2        2        1 male            3.80         2.34 female_x_male 
-#> 3        3        2 female          2.91         2.44 female_x_male 
-#> 4        4        2 male            6.51         6.08 female_x_male 
+#>      <int>    <int> <fct>          <dbl>        <dbl> <fct>          
+#> 1        1        1 female          4.79         4.37 female_x_male  
+#> 2        2        1 male            3.80         2.34 female_x_male  
+#> 3        3        2 female          2.91         2.44 female_x_male  
+#> 4        4        2 male            6.51         6.08 female_x_male  
 #> # ℹ 186 more rows
 #> # ℹ 5 more variables: .dy_composition_role <fct>,
 #> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
@@ -150,8 +149,6 @@ Or go directly to a model-specific vignette:
 
 - [Actor-Partner Interdependence Model (APIM)
   vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html),
-- [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.html),
 - [Dyad-Individual Model
   vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html),
   or

@@ -2,7 +2,7 @@
 
 Normalizes the random-effect coefficients and fitted covariance
 parameters needed by
-[`exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md)
+[`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
 while keeping backend-specific work in two small adapters.
 
 ## Usage

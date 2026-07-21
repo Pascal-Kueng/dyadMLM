@@ -6,7 +6,7 @@ Print recovered exchangeable residual covariance
 
 ``` r
 # S3 method for class 'exchangeable_rescov'
-print(x, what = c("both", "varcov", "sdcor"), ...)
+print(x, representation = c("both", "varcov", "sdcor"), ...)
 ```
 
 ## Arguments
@@ -14,9 +14,9 @@ print(x, what = c("both", "varcov", "sdcor"), ...)
 - x:
 
   An object returned by
-  [`exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md).
+  [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md).
 
-- what:
+- representation:
 
   Which representation to print: `"both"` (default), `"varcov"`, or
   `"sdcor"`.

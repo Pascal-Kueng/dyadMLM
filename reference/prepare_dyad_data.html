@@ -22,7 +22,6 @@ and model-ready columns for dyadic multilevel model parameterizations."></head><
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
-    <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
     <li><a class="dropdown-item" href="../articles/dsm.html">Dyadic Score Model</a></li>
   </ul></li>
@@ -52,17 +51,17 @@ and model-ready columns for dyadic multilevel model parameterizations.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prepare_dyad_data</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">group</span>,</span>
+<span>  <span class="va">dyad</span>,</span>
 <span>  <span class="va">member</span>,</span>
 <span>  role <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  lag_predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  lag1_predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  temporal_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  include_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pool_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  incomplete_dyads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  missing_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
@@ -81,7 +80,7 @@ For intensive longitudinal dyadic data, each observed member of each dyad has
 one row per observed time point.</p></dd>
 
 
-<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
+<dt id="arg-dyad">dyad<a class="anchor" aria-label="anchor" href="#arg-dyad"></a></dt>
 <dd><p>Column identifying the dyad.</p></dd>
 
 
@@ -91,9 +90,12 @@ one row per observed time point.</p></dd>
 
 <dt id="arg-role">role<a class="anchor" aria-label="anchor" href="#arg-role"></a></dt>
 <dd><p>Optional column identifying a stable member role, such as gender.
-Values must be stable within each <code>group</code> x <code>member</code> and must not contain
-<code>_x_</code>. Missing role information is controlled by <code>missing_role</code>. If no role
-is supplied, all dyads are treated as the same type of exchangeable dyads.</p></dd>
+Non-missing values must be consistent within each <code>dyad</code> x <code>member</code> and
+must not contain <code>_x_</code>. In repeated-measures data, an observed role is
+propagated to missing rows for the same member within a dyad.
+<code>missing_role</code> controls dyads in which a member has no non-missing role on
+any row. If no role is supplied, all dyads are treated as the same type of
+exchangeable dyads.</p></dd>
 
 
 <dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
@@ -106,7 +108,7 @@ measures.</p></dd>
 decomposition and model-ready predictor construction.</p></dd>
 
 
-<dt id="arg-lag-predictors">lag_predictors<a class="anchor" aria-label="anchor" href="#arg-lag-predictors"></a></dt>
+<dt id="arg-lag-predictors">lag1_predictors<a class="anchor" aria-label="anchor" href="#arg-lag-predictors"></a></dt>
 <dd><p>Optional subset of <code>predictors</code> for which lag-1
 model-ready columns should be created. Requires <code>time</code> to be a finite,
 integer-valued numeric measurement index. Lagging respects the dyad and
@@ -115,7 +117,7 @@ bridge missing occasions. Only raw and within-person predictors are
 lagged. Stable between-person versions are not.</p></dd>
 
 
-<dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
+<dt id="arg-model-types">model_types<a class="anchor" aria-label="anchor" href="#arg-model-types"></a></dt>
 <dd><p>Model-ready column families to construct. Can contain one
 or more of <code>"apim"</code>, <code>"dim"</code>, and <code>"dsm"</code>. <code>"apim"</code> creates
 actor and partner predictors. <code>"dim"</code> creates dyad-mean and
@@ -127,7 +129,7 @@ temporal predictor decomposition, and must be used alone. <code>"dim"</code> and
 
 
 <dt id="arg-dsm-role-order">dsm_role_order<a class="anchor" aria-label="anchor" href="#arg-dsm-role-order"></a></dt>
-<dd><p>For <code>model_type = "dsm"</code>, a character vector giving
+<dd><p>For <code>model_types = "dsm"</code>, a character vector giving
 the two distinguishable roles in the order used for directional
 differences. For example, <code>c("female", "male")</code> defines predictor
 differences as female minus male and assigns the DSM role contrast <code>+0.5</code>
@@ -135,14 +137,14 @@ to female partners and <code>-0.5</code> to male partners. Required when DSM col
 are requested and must be <code>NULL</code> otherwise.</p></dd>
 
 
-<dt id="arg-temporal-predictor-decomposition">temporal_predictor_decomposition<a class="anchor" aria-label="anchor" href="#arg-temporal-predictor-decomposition"></a></dt>
+<dt id="arg-temporal-decomposition">temporal_decomposition<a class="anchor" aria-label="anchor" href="#arg-temporal-decomposition"></a></dt>
 <dd><p>Temporal decomposition strategy for
 <code>predictors</code>.
 <code>"none"</code> leaves predictors undecomposed before model-specific columns are
-constructed. <code>"time_2l"</code> indicates a two-level temporal predictor
+constructed. <code>"2l"</code> indicates a two-level temporal predictor
 decomposition into within-person and between-person components. <code>"auto"</code>
-resolves to <code>"time_2l"</code> when both <code>time</code> and <code>predictors</code> are supplied, and
-to <code>"none"</code> otherwise. <code>"time_2l"</code> retains raw model-ready predictors in
+resolves to <code>"2l"</code> when both <code>time</code> and <code>predictors</code> are supplied, and
+to <code>"none"</code> otherwise. <code>"2l"</code> retains raw model-ready predictors in
 addition to their within-person and between-person components. For
 longitudinal DIM and DSM construction, raw and within-person dyadic scores
 are computed within each dyad occasion, while between-person scores are
@@ -163,7 +165,7 @@ for example <code>"female_x_male"</code>, <code>"female-male"</code>, <code>"fem
 To set multiple compositions, use a character vector of such strings.</p></dd>
 
 
-<dt id="arg-include-compositions">include_compositions<a class="anchor" aria-label="anchor" href="#arg-include-compositions"></a></dt>
+<dt id="arg-keep-compositions">keep_compositions<a class="anchor" aria-label="anchor" href="#arg-keep-compositions"></a></dt>
 <dd><p>Optional observed dyad compositions to keep
 before exchangeability overrides and pooling. Requires <code>role</code>. Composition
 references use the same format as <code>set_exchangeable_compositions</code>.</p></dd>
@@ -181,20 +183,24 @@ resolved.</p></dd>
 
 
 <dt id="arg-incomplete-dyads">incomplete_dyads<a class="anchor" aria-label="anchor" href="#arg-incomplete-dyads"></a></dt>
-<dd><p>How to handle dyads that do not contain exactly two
-unique members anywhere in the data. <code>"error"</code> stops with an error and
-<code>"drop"</code> removes the entire dyad.</p></dd>
+<dd><p>How to handle dyads with fewer than two unique
+members across all rows in <code>data</code>. <code>"error"</code> stops with an error and
+<code>"drop"</code> removes the entire dyad. A dyad with more than two unique members
+is invalid and always causes an error, regardless of this setting.</p></dd>
 
 
 <dt id="arg-missing-role">missing_role<a class="anchor" aria-label="anchor" href="#arg-missing-role"></a></dt>
-<dd><p>How to handle missing values in the <code>role</code> column.
-<code>"error"</code> stops with an error, <code>"drop"</code> removes dyads with incomplete role
-information. Ignored when no <code>role</code> column is supplied.</p></dd>
+<dd><p>How to handle dyads in which at least one member has no
+non-missing <code>role</code> value on any row. A consistent non-missing role observed
+for a member is propagated to that member's other rows before this policy
+is applied. <code>"error"</code> stops with an error and <code>"drop"</code> removes the entire
+dyad. Conflicting non-missing roles always cause an error. Ignored when no
+<code>role</code> column is supplied.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Optional seed for random <code>.dy_diff_*</code> sign assignment in
-exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
+<dd><p>Optional seed for random <code>.dy_member_contrast_*</code> sign assignment
+in exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -202,22 +208,23 @@ exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is u
     <p>The original data as a tibble with class <code>dyadMLM_data</code>,
 <code>.dy_composition</code> and <code>.dy_composition_role</code> factor columns,
 <code>.dy_is_*</code> numeric indicator columns, composition-specific
-numeric <code>.dy_diff_*</code> contrast columns coded <code>-1</code> and <code>1</code> for the two members
-of matching exchangeable dyads and <code>0</code> otherwise, and a <code>dyadMLM</code> attribute
-containing structural metadata, <code>dyad_compositions</code>, and predictor metadata
-such as <code>temporal_predictor_decompositions</code>, <code>lag_predictors</code>,
-<code>apim_predictors</code>, and
-<code>dim_predictors</code>, as well as <code>dsm_predictors</code> and <code>dsm_role_order</code> when
-applicable.</p>
+numeric <code>.dy_member_contrast_*</code> columns coded <code>-1</code> and <code>1</code> for the two
+members of matching exchangeable dyads and <code>0</code> otherwise, and a <code>dyadMLM</code>
+attribute containing structural metadata, <code>dyad_compositions</code>, and
+predictor metadata such as <code>temporal_decompositions</code>, <code>lag1_predictors</code>,
+<code>apim_predictors</code>, and <code>dim_predictors</code>, as well as <code>dsm_predictors</code> and
+<code>dsm_role_order</code> when applicable.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Data must be in long format. Cross-sectional dyadic data may contain at most
 one row per member within dyad. Intensive longitudinal dyadic data may
 contain at most one row per member and observed measurement occasion within
-dyad. Measured variables may contain missing values. Missing or incomplete
-structural information is controlled by <code>incomplete_dyads</code> and
-<code>missing_role</code>.</p>
+dyad. Measured variables may contain missing values. Structural completeness
+is assessed across all rows. <code>incomplete_dyads</code> controls dyads with fewer
+than two members; dyads with more than two members always cause an error.
+When <code>role</code> is supplied, stable member roles are resolved across repeated
+rows before <code>missing_role</code> is applied.</p>
 <p>Dyad composition labels are canonical: role labels are sorted alphabetically
 before being combined, so labels do not depend on row or member order.</p>
     </div>
@@ -233,17 +240,17 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">prepared</span> <span class="op">&lt;-</span> <span class="fu">prepare_dyad_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span>,</span></span>
-<span class="r-in"><span>  group <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
+<span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
 <span class="r-in"><span>  member <span class="op">=</span> <span class="va">person_id</span>,</span></span>
 <span class="r-in"><span>  role <span class="op">=</span> <span class="va">role</span>,</span></span>
 <span class="r-in"><span>  predictors <span class="op">=</span> <span class="va">x</span>,</span></span>
-<span class="r-in"><span>  model_type <span class="op">=</span> <span class="st">"apim"</span></span></span>
+<span class="r-in"><span>  model_types <span class="op">=</span> <span class="st">"apim"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prepared</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># dyadMLM data</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Rows: 6 | Dyads: 3 | Intensive longitudinal: no</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Structure: group = dyad_id, member = person_id, role = role</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Structure: dyad = dyad_id, member = person_id, role = role</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dyad compositions:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # female_x_female exchangeable    1 dyad</span>
@@ -251,16 +258,17 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # male_x_male     exchangeable    1 dyad</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition       inferred dyad composition</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition_role  composition-specific member role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_is_{comp-role}    composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_diff_{comp}       composition-specific sum-diff contrasts with</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         arbitrary direction; 0 for distinguishable dyads or</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         other exchangeable compositions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition                       inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition_role                  composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_is_{comp-role}                    composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         with arbitrary direction; 0 for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         distinguishable dyads or other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor                      APIM actor predictor: actor's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         original predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner                    APIM partner predictor: partner's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         original predictor values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 14</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id role       x .dy_composition .dy_composition_role</span>
@@ -273,17 +281,18 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       3         6 male       8 male_x_male     male_x_male         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: .dy_is_female_x_female &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_is_male_x_male &lt;dbl&gt;, .dy_diff_female_x_female_arbitrary &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_diff_male_x_male_arbitrary &lt;dbl&gt;, .dy_x_actor &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_is_male_x_male &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_member_contrast_male_x_male_arbitrary &lt;dbl&gt;, .dy_x_actor &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_x_partner &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">pooled</span> <span class="op">&lt;-</span> <span class="fu">prepare_dyad_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">data</span>,</span></span>
-<span class="r-in"><span>  group <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
+<span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
 <span class="r-in"><span>  member <span class="op">=</span> <span class="va">person_id</span>,</span></span>
 <span class="r-in"><span>  role <span class="op">=</span> <span class="va">role</span>,</span></span>
 <span class="r-in"><span>  predictors <span class="op">=</span> <span class="va">x</span>,</span></span>
-<span class="r-in"><span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span></span>
+<span class="r-in"><span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span></span>
 <span class="r-in"><span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span></span>
 <span class="r-in"><span>  pool_compositions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    romantic_couples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female-female"</span>, <span class="st">"male-male"</span>, <span class="st">"female-male"</span><span class="op">)</span></span></span>
@@ -293,7 +302,7 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pooled</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># dyadMLM data</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Rows: 6 | Dyads: 3 | Intensive longitudinal: no</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Structure: group = dyad_id, member = person_id, role = role</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Structure: dyad = dyad_id, member = person_id, role = role</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dyad compositions:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # romantic_couples (pooled) exchangeable 3 dyads</span>
@@ -302,16 +311,17 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   male_x_male</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition       inferred dyad composition</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition_role  composition-specific member role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_is_{comp-role}    composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_diff_{comp}       composition-specific sum-diff contrasts with</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         arbitrary direction; 0 for distinguishable dyads or</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         other exchangeable compositions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                         values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition                       inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition_role                  composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_is_{comp-role}                    composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         with arbitrary direction; 0 for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         distinguishable dyads or other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor                      APIM actor predictor: actor's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         original predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner                    APIM partner predictor: partner's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         original predictor values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 10</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id role       x .dy_composition  .dy_composition_role</span>
@@ -323,7 +333,7 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>       3         5 male       3 romantic_couples romantic_couples    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>       3         6 male       8 romantic_couples romantic_couples    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 4 more variables: .dy_is_romantic_couples &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_diff_romantic_couples_arbitrary &lt;dbl&gt;, .dy_x_actor &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_member_contrast_romantic_couples_arbitrary &lt;dbl&gt;, .dy_x_actor &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_x_partner &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ild_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
@@ -335,62 +345,68 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ild_prepared</span> <span class="op">&lt;-</span> <span class="fu">prepare_dyad_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">ild_data</span>,</span></span>
-<span class="r-in"><span>  group <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
+<span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">dyad_id</span>,</span></span>
 <span class="r-in"><span>  member <span class="op">=</span> <span class="va">person_id</span>,</span></span>
 <span class="r-in"><span>  time <span class="op">=</span> <span class="va">time</span>,</span></span>
 <span class="r-in"><span>  predictors <span class="op">=</span> <span class="va">x</span>,</span></span>
-<span class="r-in"><span>  lag_predictors <span class="op">=</span> <span class="va">x</span>,</span></span>
-<span class="r-in"><span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span></span>
+<span class="r-in"><span>  lag1_predictors <span class="op">=</span> <span class="va">x</span>,</span></span>
+<span class="r-in"><span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span></span>
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">123</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ild_prepared</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># dyadMLM data</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Rows: 8 | Dyads: 2 | Intensive longitudinal: yes</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Structure: group = dyad_id, member = person_id, time = time</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Structure: dyad = dyad_id, member = person_id, time = time</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Dyad compositions:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # assumed_exchangeable exchangeable 2 dyads</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Added columns:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition              inferred dyad composition</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition_role         composition-specific member role</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_is_{comp-role}           composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_diff_{comp}              composition-specific sum-diff contrasts with</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                arbitrary direction; 0 for distinguishable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                dyads or other exchangeable compositions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_lag1              lag-1 raw predictor values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp               within-person predictor: momentary deviations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                from each person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_lag1          lag-1 within-person predictor: momentary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                deviations from each person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cbp               between-person predictor: stable differences</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                from the average person's usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor             APIM actor predictor: actor's original</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                predictor values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor_lag1        lag-1 APIM actor predictor: actor's original</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                predictor values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner           APIM partner predictor: partner's original</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                predictor values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner_lag1      lag-1 APIM partner predictor: partner's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                original predictor values</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_actor         APIM within-person actor predictor: actor's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                momentary deviations from their usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_actor_lag1    lag-1 APIM within-person actor predictor:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                actor's momentary deviations from their usual</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_partner       APIM within-person partner predictor:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                partner's momentary deviations from their</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_partner_lag1  lag-1 APIM within-person partner predictor:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                partner's momentary deviations from their</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cbp_actor         APIM between-person actor predictor: actor's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                stable difference from the average person's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                usual level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cbp_partner       APIM between-person partner predictor:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                partner's stable difference from the average</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition                       inferred dyad composition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_composition_role                  composition-specific member role</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_is_{comp-role}                    composition-role indicator columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         with arbitrary direction; 0 for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         distinguishable dyads or other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_lag1                       lag-1 raw predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp                        within-person predictor: momentary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         deviations from each person's usual</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_lag1                   lag-1 within-person predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         momentary deviations from each</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cbp                        between-person predictor: stable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         differences from the average person's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor                      APIM actor predictor: actor's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         original predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_actor_lag1                 lag-1 APIM actor predictor: actor's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         original predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner                    APIM partner predictor: partner's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         original predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_partner_lag1               lag-1 APIM partner predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         partner's original predictor values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_actor                  APIM within-person actor predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         actor's momentary deviations from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_actor_lag1             lag-1 APIM within-person actor</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         predictor: actor's momentary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         deviations from their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_partner                APIM within-person partner predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         partner's momentary deviations from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cwp_partner_lag1           lag-1 APIM within-person partner</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         predictor: partner's momentary</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         deviations from their usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cbp_actor                  APIM between-person actor predictor:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         actor's stable difference from the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         average person's usual level</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .dy_{pred}_cbp_partner                APIM between-person partner</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         predictor: partner's stable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         difference from the average person's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                         usual level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 22</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   dyad_id person_id  time     x .dy_composition      .dy_composition_role</span>
@@ -404,7 +420,7 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span>       2         1     2     4 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span>       2         2     2     7 assumed_exchangeable assumed_exchangeable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 16 more variables: .dy_is_assumed_exchangeable &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_diff_assumed_exchangeable_arbitrary &lt;dbl&gt;, .dy_x_cwp &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_member_contrast_assumed_exchangeable_arbitrary &lt;dbl&gt;, .dy_x_cwp &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_x_cbp &lt;dbl&gt;, .dy_x_lag1 &lt;dbl&gt;, .dy_x_cwp_lag1 &lt;dbl&gt;, .dy_x_actor &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_x_partner &lt;dbl&gt;, .dy_x_cwp_actor &lt;dbl&gt;, .dy_x_cwp_partner &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .dy_x_cbp_actor &lt;dbl&gt;, .dy_x_cbp_partner &lt;dbl&gt;, .dy_x_actor_lag1 &lt;dbl&gt;,</span></span>

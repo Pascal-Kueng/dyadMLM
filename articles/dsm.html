@@ -35,7 +35,6 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
-    <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
     <li><a class="dropdown-item" href="../articles/dsm.html">Dyadic Score Model</a></li>
   </ul>
@@ -82,7 +81,7 @@ associations in terms of the dyad’s shared level and the directional
 difference between partners <span class="citation">(Iida et al.
 2018)</span>.</p>
 <p>For the broader package workflow and an overview of the available
-model-specific vignettes, including the <a href="apim.html">Actor-Partner Interdependence Model</a>, <a href="mixed-apim.html">Mixed-Composition APIM</a>, and <a href="dim.html">Dyad-Individual Model</a>, see the <a href="https://pascal-kueng.github.io/dyadMLM/">online package
+model-specific vignettes, including the <a href="apim.html">Actor-Partner Interdependence Model</a> and <a href="dim.html">Dyad-Individual Model</a>, see the <a href="https://pascal-kueng.github.io/dyadMLM/">online package
 overview</a>.</p>
 <div class="section level2">
 <h2 id="preparing-dsm-data">Preparing DSM Data<a class="anchor" aria-label="anchor" href="#preparing-dsm-data"></a>
@@ -94,18 +93,18 @@ difference as female minus male.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
-<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
-<span>  model_type <span class="op">=</span> <span class="st">"dsm"</span>,</span>
+<span>  model_types <span class="op">=</span> <span class="st">"dsm"</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_dsm_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 190 | Dyads: 95 | Intensive longitudinal: no</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # DSM direction: female - male</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
@@ -423,12 +422,12 @@ model.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data_inverted</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_crosssectional</span>,</span>
-<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">communication</span>,</span>
 <span>  <span class="co"># Request APIM columns too for comparison below.</span></span>
-<span>  model_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dsm"</span>, <span class="st">"apim"</span><span class="op">)</span>,</span>
+<span>  model_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dsm"</span>, <span class="st">"apim"</span><span class="op">)</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male"</span>, <span class="st">"female"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -769,8 +768,8 @@ arbitrary. The directional intercept, both cross-paths, and the
 covariance between outcome level and outcome difference must then be
 zero. The remaining reduced, label-invariant DSM is algebraically the
 Gaussian Dyad-Individual Model (DIM). In <code>dyadMLM</code>, use
-<code>model_type = "dim"</code> for this exchangeable model and reserve
-<code>model_type = "dsm"</code> for distinguishable dyads.</p>
+<code>model_types = "dim"</code> for this exchangeable model and reserve
+<code>model_types = "dsm"</code> for distinguishable dyads.</p>
 <p>Because the Gaussian DIM is the exchangeability-constrained version
 of the full DSM, exchangeability can also be tested by comparing these
 nested models. This is equivalent to the comparison shown in <a href="apim.html#testing-distinguishability">Testing distinguishability
@@ -790,20 +789,19 @@ vignette.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">example_dyadic_ILD</span>,</span>
-<span>  group <span class="op">=</span> <span class="va">coupleID</span>,</span>
+<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  time <span class="op">=</span> <span class="va">diaryday</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
-<span>  model_type <span class="op">=</span> <span class="st">"dsm"</span>,</span>
+<span>  model_types <span class="op">=</span> <span class="st">"dsm"</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ild_dsm_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 1120 | Dyads: 40 | Intensive longitudinal: yes</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: group = coupleID, member = personID, role = gender, time =</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # diaryday</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID, role = gender, time = diaryday</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # DSM direction: female - male</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
@@ -986,9 +984,8 @@ predictor dyad mean and directional difference predict both the outcome
 level and the directional outcome difference.</p>
 <hr>
 <p>Return to the <a href="apim.html">Actor-Partner Interdependence Model
-vignette</a>, see the <a href="mixed-apim.html">Mixed-Composition APIM
-vignette</a> or the <a href="dim.html">Dyad-Individual Model
-vignette</a> for related model specifications, or return to the <a href="https://pascal-kueng.github.io/dyadMLM/">online package
+vignette</a>, see the <a href="dim.html">Dyad-Individual Model
+vignette</a> for a related model specification, or return to the <a href="https://pascal-kueng.github.io/dyadMLM/">online package
 overview</a>.</p>
 </div>
 <div class="section level2">

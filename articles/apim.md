@@ -18,10 +18,8 @@ longitudinal Actor-Partner Interdependence model for distinguishable and
 exchangeable dyads.
 
 For the broader package workflow and an overview of the available
-model-specific vignettes, including the [Mixed-Composition
-APIM](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md),
-[Dyad-Individual
-Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), and
+model-specific vignettes, including the [Dyad-Individual
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) and
 [Dyadic Score
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
@@ -113,17 +111,17 @@ We first prepare the example data with
 
 apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   data = example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
-  model_type = "apim"
+  model_types = "apim"
 )
 
 print(apim_distinguishable_data, n=4)
 #> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
 #> # female_x_male distinguishable 95 dyads
@@ -293,14 +291,14 @@ Therefore, we introduce a solution that works for residuals and other
 random effect terms regardless of slopes. Following del Rosario and West
 (2025),
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
-generates an arbitrary member-difference column, named `.dy_diff_*`,
-that is `+1` for one member and `-1` for the other. The exchangeable
-residual structure is represented by two separate random-effects terms:
-a shared dyad random intercept and a random coefficient for this
-difference column.
+generates an arbitrary member-difference column, named
+`.dy_member_contrast_*`, that is `+1` for one member and `-1` for the
+other. The exchangeable residual structure is represented by two
+separate random-effects terms: a shared dyad random intercept and a
+random coefficient for this difference column.
 
 We will now fit the model and then use the
-[`dyadMLM::exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md)
+[`dyadMLM::recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
 function that back-transforms the structure to the often more
 interpretable actor-partner residual-covariance matrix we are used to.
 
@@ -315,7 +313,7 @@ data.
 
 apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
   example_dyadic_crosssectional,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   role = gender,
   predictors = communication,
@@ -326,22 +324,23 @@ apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
 print(apim_exchangeable_data, n = 4)
 #> # dyadMLM data
 #> # Rows: 190 | Dyads: 95 | Intensive longitudinal: no
-#> # Structure: group = coupleID, member = personID, role = gender
+#> # Structure: dyad = coupleID, member = personID, role = gender
 #> #
 #> # Dyad compositions:
 #> # female_x_male exchangeable (set by user) 95 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition       inferred dyad composition
-#> #   .dy_composition_role  composition-specific member role
-#> #   .dy_is_{comp-role}    composition-role indicator columns
-#> #   .dy_diff_{comp}       composition-specific sum-diff contrasts with
-#> #                         arbitrary direction; 0 for distinguishable dyads or
-#> #                         other exchangeable compositions
-#> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
-#> #                         values
-#> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                         values
+#> #   .dy_composition                       inferred dyad composition
+#> #   .dy_composition_role                  composition-specific member role
+#> #   .dy_is_{comp-role}                    composition-role indicator columns
+#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
+#> #                                         with arbitrary direction; 0 for
+#> #                                         distinguishable dyads or other
+#> #                                         exchangeable compositions
+#> #   .dy_{pred}_actor                      APIM actor predictor: actor's
+#> #                                         original predictor values
+#> #   .dy_{pred}_partner                    APIM partner predictor: partner's
+#> #                                         original predictor values
 #> #
 #> # A tibble: 190 × 11
 #>   personID coupleID gender communication satisfaction .dy_composition
@@ -352,8 +351,8 @@ print(apim_exchangeable_data, n = 4)
 #> 4        4        2 male            6.51         6.08 female_x_male  
 #> # ℹ 186 more rows
 #> # ℹ 5 more variables: .dy_composition_role <fct>, .dy_is_female_x_male <dbl>,
-#> #   .dy_diff_female_x_male_arbitrary <dbl>, .dy_communication_actor <dbl>,
-#> #   .dy_communication_partner <dbl>
+#> #   .dy_member_contrast_female_x_male_arbitrary <dbl>,
+#> #   .dy_communication_actor <dbl>, .dy_communication_partner <dbl>
 ```
 
 We then use the columns to fit the model as follows:
@@ -373,7 +372,7 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
     us(1 | coupleID) +
-    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -383,7 +382,8 @@ summary(apim_exchangeable_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> satisfaction ~ 1 + .dy_communication_actor + .dy_communication_partner +  
-#>     us(1 | coupleID) + us(0 + .dy_diff_female_x_male_arbitrary |      coupleID)
+#>     us(1 | coupleID) + us(0 + .dy_member_contrast_female_x_male_arbitrary |  
+#>     coupleID)
 #> Dispersion:                    ~0
 #> Data: apim_exchangeable_data
 #> 
@@ -393,9 +393,9 @@ summary(apim_exchangeable_model)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups     Name                             Variance Std.Dev.
-#>  coupleID   (Intercept)                      0.6346   0.7966  
-#>  coupleID.1 .dy_diff_female_x_male_arbitrary 1.1532   1.0739  
+#>  Groups     Name                                        Variance Std.Dev.
+#>  coupleID   (Intercept)                                 0.6346   0.7966  
+#>  coupleID.1 .dy_member_contrast_female_x_male_arbitrary 1.1532   1.0739  
 #> Number of obs: 176, groups:  coupleID, 88
 #> 
 #> Conditional model:
@@ -408,19 +408,20 @@ summary(apim_exchangeable_model)
 ```
 
 We use the
-[`dyadMLM::exchangeable_rescov()`](https://pascal-kueng.github.io/dyadMLM/reference/exchangeable_rescov.md)
+[`dyadMLM::recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
 to recover the interpretable variance-covariance matrix:
 
 ``` r
 
-backtransformed <- dyadMLM::exchangeable_rescov(apim_exchangeable_model)
+backtransformed <- dyadMLM::recover_exchangeable_covariance(apim_exchangeable_model)
 
 # residual variance-covariance and SD-correlation representations
 print(backtransformed)
 #> Exchangeable residual covariance
 #> 
+#> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
-#> Difference: us(0 + .dy_diff_female_x_male_arbitrary | coupleID)
+#> Difference: us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
 #>                       member_1: (Intercept) member_2: (Intercept)
@@ -458,7 +459,7 @@ apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
     
     # Residual variance covariance matrix
     # omitting the us(1 | coupleID) block
-    us(0 + .dy_diff_female_x_male_arbitrary | coupleID),
+    us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -468,7 +469,7 @@ summary(apim_exchangeable_model_no_shared)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> satisfaction ~ 1 + .dy_communication_actor + .dy_communication_partner +  
-#>     us(0 + .dy_diff_female_x_male_arbitrary | coupleID)
+#>     us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID)
 #> Dispersion:                    ~0
 #> Data: apim_exchangeable_data
 #> 
@@ -478,8 +479,8 @@ summary(apim_exchangeable_model_no_shared)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups   Name                             Variance Std.Dev.
-#>  coupleID .dy_diff_female_x_male_arbitrary 1.159    1.076   
+#>  Groups   Name                                        Variance Std.Dev.
+#>  coupleID .dy_member_contrast_female_x_male_arbitrary 1.159    1.076   
 #> Number of obs: 176, groups:  coupleID, 88
 #> 
 #> Conditional model:
@@ -497,17 +498,17 @@ block, we tell the function:
 
 ``` r
 
-backtransformed <- dyadMLM::exchangeable_rescov(
+backtransformed <- dyadMLM::recover_exchangeable_covariance(
   apim_exchangeable_model_no_shared, 
-  pairs = list(
-    shared = NULL,
-    difference = "us(0 + .dy_diff_female_x_male_arbitrary | coupleID)",
-    difference_indicator =".dy_diff_female_x_male_arbitrary"
+  block_pairings = list(
+    shared_block = NULL,
+    difference_block = "us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID)",
+    difference_indicator =".dy_member_contrast_female_x_male_arbitrary"
   )
 )
 #> Warning: Review possible residual-level structure:
 #> 
-#> Pair for `.dy_diff_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.
+#> Pair `pair_1` for `.dy_member_contrast_female_x_male_arbitrary` (group `coupleID`) may be residual-level: at most two fitted rows per group. Row-count check only; partner positions were not verified.
 #> 
 #> - Terms absent from the shared block: `(Intercept)`. The fitted model fixes their shared components at zero, implying equal and opposite member effects (correlation -1 when variance > 0; undefined at zero) and singular member covariance. If unintended, revise this block and refit.
 
@@ -515,8 +516,9 @@ backtransformed <- dyadMLM::exchangeable_rescov(
 backtransformed
 #> Exchangeable residual covariance
 #> 
+#> Pair `pair_1`
 #> Shared:     <omitted>
-#> Difference: us(0 + .dy_diff_female_x_male_arbitrary | coupleID)
+#> Difference: us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
 #>                       member_1: (Intercept) member_2: (Intercept)
@@ -553,13 +555,13 @@ The two parameterizations require different generated columns. The full
 distinguishable model was fitted above, so we now prepare the same
 original observations as exchangeable:
 
-[`dyadMLM::compare_dyad_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_dyad_models.html)
+[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html)
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:
 
 ``` r
 
-dyadMLM::compare_dyad_models(
+dyadMLM::compare_nested_glmmTMB_models(
   apim_exchangeable_model,
   apim_distinguishable_model
 )
@@ -656,10 +658,10 @@ represent same-occasion residual dependence.
 The same shared/difference back-transformation applies to random slopes
 (del Rosario and West 2025). For example, let $`u_{\mathrm{actor},j}`$
 denote the shared actor random slope for dyad $`j`$ and
-$`\widetilde{u}_{\mathrm{actor},j}`$ the corresponding `.dy_diff_*`
-random slope. The tilde marks random coefficients from the
-member-difference block. The actor slopes for the members assigned `+1`
-and `-1` are
+$`\widetilde{u}_{\mathrm{actor},j}`$ the corresponding
+`.dy_member_contrast_*` random slope. The tilde marks random
+coefficients from the member-difference block. The actor slopes for the
+members assigned `+1` and `-1` are
 
 ``` math
 u_{\mathrm{actor},1j}
@@ -669,8 +671,8 @@ u_{\mathrm{actor},2j}
 = u_{\mathrm{actor},j} - \widetilde{u}_{\mathrm{actor},j}.
 ```
 
-Because the shared and `.dy_diff_*` blocks are fitted as separate
-random-effects terms, they are independent. Therefore,
+Because the shared and `.dy_member_contrast_*` blocks are fitted as
+separate random-effects terms, they are independent. Therefore,
 
 ``` math
 \operatorname{Var}(u_{\mathrm{actor},1j})
@@ -718,25 +720,25 @@ changes. All APIM predictor effects then describe associations
 conditional on the members’ prior outcomes.
 
 By adding the outcome to `predictors` and selecting it with
-`lag_predictors`,
+`lag1_predictors`,
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
 returns lag-1 raw and within-person scores alongside the contemporaneous
 scores. Between-person scores are not lagged because they describe
 stable differences between members.
 
 For this example, we obtain the lagged actor and partner outcome columns
-through the `lag_predictors` argument:
+through the `lag1_predictors` argument:
 
 ``` r
 
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
   example_dyadic_ILD,
-  group = coupleID,
+  dyad = coupleID,
   member = personID,
   time = diaryday,
   predictors = closeness,
-  lag_predictors = closeness,
-  model_type = "apim",
+  lag1_predictors = closeness,
+  model_types = "apim",
   seed = 123
 )
 ```
@@ -764,11 +766,11 @@ stability_influence <- glmmTMB::glmmTMB(
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_diff_assumed_exchangeable_arbitrary | coupleID:diaryday)
+    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -779,8 +781,8 @@ summary(stability_influence)
 #>  Family: gaussian  ( identity )
 #> Formula:          
 #> closeness ~ 1 + .dy_closeness_actor_lag1 + .dy_closeness_partner_lag1 +  
-#>     diaryday + us(1 | coupleID) + us(0 + .dy_diff_assumed_exchangeable_arbitrary |  
-#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_diff_assumed_exchangeable_arbitrary |  
+#>     diaryday + us(1 | coupleID) + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
+#>     coupleID) + us(1 | coupleID:diaryday) + us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary |  
 #>     coupleID:diaryday)
 #> Dispersion:                 ~0
 #> Data: ild_apim_data_dynamic
@@ -791,11 +793,16 @@ summary(stability_influence)
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups              Name                                    Variance Std.Dev.
-#>  coupleID            (Intercept)                             0.9161   0.9571  
-#>  coupleID.1          .dy_diff_assumed_exchangeable_arbitrary 0.5742   0.7578  
-#>  coupleID.diaryday   (Intercept)                             0.3925   0.6265  
-#>  coupleID.diaryday.1 .dy_diff_assumed_exchangeable_arbitrary 0.5234   0.7235  
+#>  Groups              Name                                              
+#>  coupleID            (Intercept)                                       
+#>  coupleID.1          .dy_member_contrast_assumed_exchangeable_arbitrary
+#>  coupleID.diaryday   (Intercept)                                       
+#>  coupleID.diaryday.1 .dy_member_contrast_assumed_exchangeable_arbitrary
+#>  Variance Std.Dev.
+#>  0.9161   0.9571  
+#>  0.5742   0.7578  
+#>  0.3925   0.6265  
+#>  0.5234   0.7235  
 #> Number of obs: 975, groups:  coupleID, 40; coupleID:diaryday, 497
 #> 
 #> Conditional model:
@@ -848,10 +855,6 @@ occasions.
 From here, choose the model-specific vignette that matches the research
 question:
 
-- [Mixed-Composition APIM
-  vignette](https://pascal-kueng.github.io/dyadMLM/articles/mixed-apim.md)
-  for analyses combining distinguishable and exchangeable dyad
-  compositions;
 - [Dyad-Individual Model
   vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) for
   the exchangeable DIM parameterization; or

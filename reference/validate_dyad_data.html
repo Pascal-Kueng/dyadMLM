@@ -28,7 +28,6 @@ occasion within each dyad."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/apim.html">Actor-Partner Interdependence Model</a></li>
-    <li><a class="dropdown-item" href="../articles/mixed-apim.html">APIMs with Mixed Dyad Compositions</a></li>
     <li><a class="dropdown-item" href="../articles/dim.html">Dyad-Individual Model</a></li>
     <li><a class="dropdown-item" href="../articles/dsm.html">Dyadic Score Model</a></li>
   </ul></li>
@@ -61,15 +60,15 @@ occasion within each dyad.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">validate_dyad_data</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">group</span>,</span>
+<span>  <span class="va">dyad</span>,</span>
 <span>  <span class="va">member</span>,</span>
 <span>  role <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  lag_predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  model_type <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  lag1_predictors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  temporal_predictor_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"time_2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  temporal_decomposition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"2l"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  incomplete_dyads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  missing_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -83,7 +82,7 @@ occasion within each dyad.</p>
 <dd><p>A long-format data frame or tibble.</p></dd>
 
 
-<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
+<dt id="arg-dyad">dyad<a class="anchor" aria-label="anchor" href="#arg-dyad"></a></dt>
 <dd><p>Column identifying the dyad.</p></dd>
 
 
@@ -93,9 +92,11 @@ such as a person ID.</p></dd>
 
 
 <dt id="arg-role">role<a class="anchor" aria-label="anchor" href="#arg-role"></a></dt>
-<dd><p>Optional column identifying role that can be used to distinguish
-partners within a dyad, such as gender. If no role is supplied, all dyads
-in the data are treated as exchangeable.</p></dd>
+<dd><p>Optional column identifying a stable member role, such as gender.
+Non-missing values must be consistent within each <code>dyad</code> x <code>member</code>. In
+repeated-measures data, an observed role is propagated to missing rows for
+the same member within a dyad. If no role is supplied, all dyads are
+treated as exchangeable.</p></dd>
 
 
 <dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
@@ -107,46 +108,50 @@ in the data are treated as exchangeable.</p></dd>
 temporal predictor decomposition and model-helper functions.</p></dd>
 
 
-<dt id="arg-lag-predictors">lag_predictors<a class="anchor" aria-label="anchor" href="#arg-lag-predictors"></a></dt>
+<dt id="arg-lag-predictors">lag1_predictors<a class="anchor" aria-label="anchor" href="#arg-lag-predictors"></a></dt>
 <dd><p>Optional subset of <code>predictors</code> for which lag-1
 model-ready columns should be created. Requires a finite, integer-valued
 numeric <code>time</code> variable.</p></dd>
 
 
-<dt id="arg-model-type">model_type<a class="anchor" aria-label="anchor" href="#arg-model-type"></a></dt>
+<dt id="arg-model-types">model_types<a class="anchor" aria-label="anchor" href="#arg-model-types"></a></dt>
 <dd><p>Requested model-ready column families. Can contain one or
 more of <code>"apim"</code>, <code>"dim"</code>, and <code>"dsm"</code>. <code>"none"</code> indicates no
 model-specific predictor construction and must be used alone.</p></dd>
 
 
 <dt id="arg-dsm-role-order">dsm_role_order<a class="anchor" aria-label="anchor" href="#arg-dsm-role-order"></a></dt>
-<dd><p>For <code>model_type = "dsm"</code>, a character vector giving
+<dd><p>For <code>model_types = "dsm"</code>, a character vector giving
 the two distinguishable roles in the order used for directional
 differences. Required when DSM columns are requested and must be <code>NULL</code>
 otherwise.</p></dd>
 
 
-<dt id="arg-temporal-predictor-decomposition">temporal_predictor_decomposition<a class="anchor" aria-label="anchor" href="#arg-temporal-predictor-decomposition"></a></dt>
+<dt id="arg-temporal-decomposition">temporal_decomposition<a class="anchor" aria-label="anchor" href="#arg-temporal-decomposition"></a></dt>
 <dd><p>Requested temporal predictor decomposition
 strategy for predictors. <code>"none"</code> leaves predictors undecomposed before
-model-specific columns are constructed. <code>"time_2l"</code> indicates a two-level
+model-specific columns are constructed. <code>"2l"</code> indicates a two-level
 temporal predictor decomposition into within-person and between-person
-components. <code>"auto"</code> resolves to <code>"time_2l"</code> when both <code>time</code> and
+components. <code>"auto"</code> resolves to <code>"2l"</code> when both <code>time</code> and
 <code>predictors</code> are supplied, and to <code>"none"</code> otherwise.
 Model-specific helpers may apply additional conventions, such as grand-mean
 centering raw DIM and DSM dyad means.</p></dd>
 
 
 <dt id="arg-incomplete-dyads">incomplete_dyads<a class="anchor" aria-label="anchor" href="#arg-incomplete-dyads"></a></dt>
-<dd><p>How to handle dyads that do not contain exactly two
-unique members anywhere in the data. <code>"error"</code> stops with an error and
-<code>"drop"</code> removes the entire dyad.</p></dd>
+<dd><p>How to handle dyads with fewer than two unique
+members across all rows in <code>data</code>. <code>"error"</code> stops with an error and
+<code>"drop"</code> removes the entire dyad. A dyad with more than two unique members
+is invalid and always causes an error, regardless of this setting.</p></dd>
 
 
 <dt id="arg-missing-role">missing_role<a class="anchor" aria-label="anchor" href="#arg-missing-role"></a></dt>
-<dd><p>How to handle missing values in the <code>role</code> column.
-<code>"error"</code> stops with an error, <code>"drop"</code> removes dyads with incomplete role
-information. Ignored when no <code>role</code> column is supplied.</p></dd>
+<dd><p>How to handle dyads in which at least one member has no
+non-missing <code>role</code> value on any row. A consistent non-missing role observed
+for a member is propagated to that member's other rows before this policy
+is applied. <code>"error"</code> stops with an error and <code>"drop"</code> removes the entire
+dyad. Conflicting non-missing roles always cause an error. Ignored when no
+<code>role</code> column is supplied.</p></dd>
 
 </dl></div>
     <div class="section level2">
