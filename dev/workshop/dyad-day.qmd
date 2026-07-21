@@ -1230,8 +1230,9 @@ But what if we want DIM-style interpretation but have distinguishable dyads?
 ### The dyadic score model (DSM) is: 
 
 :::{.incremental}
-- a re-parametrization of the distinguishable APIM
+
 - the unconstrained distinguishable version of the DIM
+- a re-parametrization of the distinguishable APIM
 
 - While the DIM uses deviation from the couple mean which is opposite for each
 partners $X_i - \bar{X}$, the DSM uses meaningful directed differences, e.g.,

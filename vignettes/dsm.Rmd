@@ -40,8 +40,7 @@ dyad's shared level and the directional difference between partners
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the
-[Actor-Partner Interdependence Model](apim.html),
-[Mixed-Composition APIM](mixed-apim.html), and
+[Actor-Partner Interdependence Model](apim.html) and
 [Dyad-Individual Model](dim.html), see the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
@@ -695,9 +694,8 @@ outcome difference.
 ---
 
 Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
-the [Mixed-Composition APIM vignette](mixed-apim.html) or the
-[Dyad-Individual Model vignette](dim.html) for related model specifications,
-or return to the
+the [Dyad-Individual Model vignette](dim.html) for a related model
+specification, or return to the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References

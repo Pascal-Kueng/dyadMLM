@@ -15,8 +15,6 @@ navbar:
         href: articles/getting-started.html
       - text: Actor-Partner Interdependence Model
         href: articles/apim.html
-      - text: APIMs with Mixed Dyad Compositions
-        href: articles/mixed-apim.html
       - text: Dyad-Individual Model
         href: articles/dim.html
       - text: Dyadic Score Model
@@ -38,7 +36,6 @@ articles:
   desc: Details for specific dyadic model parameterizations.
   contents:
   - apim
-  - mixed-apim
   - dim
   - dsm
 

@@ -54,8 +54,7 @@ dyad's shared level and the contrast between partners.
 Under exchangeability constraints, the reduced, label-invariant DSM is also
 equivalent to the DIM, as discussed below. For the broader package workflow and
 an overview of the available model-specific vignettes, including the
-[Actor-Partner Interdependence Model](apim.html),
-[Mixed-Composition APIM](mixed-apim.html), and
+[Actor-Partner Interdependence Model](apim.html) and
 [Dyadic Score Model](dsm.html), see the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
@@ -796,9 +795,8 @@ outcomes.
 ---
 
 Return to the [Actor-Partner Interdependence Model vignette](apim.html), see
-the [Mixed-Composition APIM vignette](mixed-apim.html) or the
-[Dyadic Score Model vignette](dsm.html) for related model specifications, or
-return to the
+the [Dyadic Score Model vignette](dsm.html) for a related model specification,
+or return to the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
 ## References

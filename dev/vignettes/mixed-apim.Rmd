@@ -1,7 +1,7 @@
 ---
 title: "APIMs with Mixed Dyad Compositions"
 author: "Pascal Küng"
-bibliography: references.bib
+bibliography: ../../vignettes/references.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{APIMs with Mixed Dyad Compositions}
@@ -15,10 +15,15 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-diagram_helper <- if (file.exists("diagram-helpers.Rinc")) {
-  "diagram-helpers.Rinc"
-} else {
-  file.path("vignettes", "diagram-helpers.Rinc")
+diagram_candidates <- c(
+  "diagram-helpers.Rinc",
+  "../../vignettes/diagram-helpers.Rinc",
+  "vignettes/diagram-helpers.Rinc"
+)
+diagram_helper <- diagram_candidates[file.exists(diagram_candidates)][1]
+
+if (is.na(diagram_helper)) {
+  stop("Could not find vignettes/diagram-helpers.Rinc.", call. = FALSE)
 }
 sys.source(diagram_helper, envir = knitr::knit_global())
 

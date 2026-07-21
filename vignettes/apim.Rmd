@@ -44,8 +44,7 @@ Actor-Partner Interdependence model for distinguishable and exchangeable dyads.
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the
-[Mixed-Composition APIM](mixed-apim.html),
-[Dyad-Individual Model](dim.html), and
+[Dyad-Individual Model](dim.html) and
 [Dyadic Score Model](dsm.html), see the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
@@ -680,8 +679,6 @@ unreliable person means used to construct `cbp` predictors with few occasions.
 From here, choose the model-specific vignette that matches the research
 question:
 
-- [Mixed-Composition APIM vignette](mixed-apim.html) for analyses combining
-  distinguishable and exchangeable dyad compositions;
 - [Dyad-Individual Model vignette](dim.html) for the exchangeable DIM
   parameterization; or
 - [Dyadic Score Model vignette](dsm.html) for the distinguishable DSM
