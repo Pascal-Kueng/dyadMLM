@@ -104,15 +104,6 @@ This structure is estimated with an unstructured random-effects block such as
 `us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID)`
 and `dispformula = ~ 0`. 
 
-<!-- TODO: what is the best order? This shows the RE before we prepped the data.
-But if we move this whole stuff after data-prep, it interrupts before interpretation. 
-
-
-TODO: should we discuss constraints briefly too, since we do it for exchnageable dyads? 
-Like removeing the correlation, or enforcing equal variances as well (homcs()), 
-if the model does not converge etc.?
--->
-
 ### Fitting the distinguishable APIM with glmmTMB
 
 We first prepare the example data with `dyadMLM::prepare_dyad_data()`:
@@ -207,15 +198,6 @@ draw_apim_diagram(
 )
 ```
 
-<!-- TODO: add a brief interpretation section? 
-
-### Interpretation
-
-Maybe like on:
-https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
-
--->
-
 ## The exchangeable APIM
 
 Conceptually, the exchangeable APIM constrains several of the effects to be equal: 
@@ -237,30 +219,20 @@ draw_apim_member_diagram("exchangeable")
 
 ### Modeling the residual random-effects structure {#exchangeable-residual-structure}
 
-Currently, glmmTMB and brms allow us to specify the relevant residual correlation
-structure, but any additional random effects structure that includes more than
-just a random intercept presents a problem:
+For a simple random-intercept structure, equal member variances and their
+covariance can be specified directly. The specification becomes more difficult
+when the same exchangeability constraints must cover several random slopes. A
+single homogeneous structure would impose one variance across intercepts and
+slopes, whereas separate structures would omit their correlations.
 
-For instance, in glmmTMB the expression
-`homcs(0 + arbitrary_member_1 + arbitrary_member_2 | coupleID)` would achieve
-in setting both residual variances equal while still estimating a correlation
-between the residuals. However, if we want to model intensive longitudinal data,
-like we do below, using `homcs(0 + arbitrary_member_1 + arbitrary_member_2 + time:arbitrary_member1 + arbitrary_member_2 | coupleID)` would impose a single
-variance shared by both intercepts *and* both time slopes.
-`homcs(0 + arbitrary_member_1 + arbitrary_member_2)  + homcs(time:arbitrary_member1 + arbitrary_member_2 | coupleID)`
-would produce the correct variance restrictions, but does then not model a
-correlation between slopes and intercepts anymore.
-
-Therefore, we introduce a solution that works for residuals and other random
-effect terms regardless of slopes. Following
+The shared/difference representation works for residuals and other random-effect
+terms, including random slopes. Following
 @delrosarioPracticalGuideSpecifying2025, `dyadMLM::prepare_dyad_data()`
 generates an arbitrary member-difference column, named `.dy_member_contrast_*`, that is
 `+1` for one member and `-1` for the other. The exchangeable residual structure
 is represented by two separate random-effects terms: a shared dyad random
-intercept and a random coefficient for this difference column.
-
-<!-- TODO: do we need a brief explanation of why this is possible? maybe
-not in the applied part to not confuse users that just want to get started? -->
+intercept and a random coefficient for this difference column. Additional
+random slopes can be included in both blocks without changing this logic.
 
 We will now fit the model and then use the `dyadMLM::recover_exchangeable_covariance()`
 function that back-transforms the structure to the often more interpretable
@@ -268,9 +240,6 @@ actor-partner residual-covariance matrix we are used to.
 
 
 ### Fitting the exchangeable APIM with glmmTMB
-
-<!-- TODO: insert the model fitting here, and then the applied back-transform, and only then explain
-all the back-transform math? maybe here just say that this is discussed below, alongside constraints? -->
 
 We use the same dataset as before, but do not distinguish males and females, 
 so we can test distinguishability later. Another option here would be to omit
@@ -361,61 +330,6 @@ draw_apim_diagram(
 )
 ```
 
-<!-- TODO: do we need a brief interpretation section? -->
-
-#### Fitted constraints and omitted blocks {#fitted-constraints-and-omitted-blocks}
-
-The function can also recover the member-level implication of constraints that
-were imposed when fitting the model. For example, we can omit the entire shared block:
-
-```{r fit-exchangeable-no-shared, eval = has_glmmTMB}
-apim_exchangeable_model_no_shared <- glmmTMB::glmmTMB(
-  satisfaction ~  1 +
-    .dy_communication_actor +
-    .dy_communication_partner +
-    
-    # Residual variance covariance matrix
-    # omitting the us(1 | coupleID) block
-    us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
-  dispformula = ~ 0,
-  family = gaussian(),
-  data = apim_exchangeable_data
-)
-
-summary(apim_exchangeable_model_no_shared)
-```
-
-<!-- TODO: what does this constraint imply exactly? -->
-
-Since matching is now not automatically possible anymore, we need to tell the
-function where both blocks are. Since we completely omitted one block, we tell the 
-function:
-
-```{r backtransform-cross-exchangeable-no-shared, eval = has_glmmTMB}
-backtransformed <- dyadMLM::recover_exchangeable_covariance(
-  apim_exchangeable_model_no_shared, 
-  block_pairings = list(
-    shared_block = NULL,
-    difference_block = "us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID)",
-    difference_indicator =".dy_member_contrast_female_x_male_arbitrary"
-  )
-)
-
-# residual variance-covariance and SD-correlation representations
-backtransformed
-```
-
-If we fit a model that allows us to also specify higher-level random effect terms,
-such as an intensive longitudinal model, we can also omit individual terms from 
-any of the two blocks to allow for several restraints. Speficications such 
-as `diag(1 + x1 + x2 + x3 | coupleID) + homcs(0 + idiff + x3:idiff | coupleID)` 
-are possible, for instance. <!-- TODO: test if it really is -->
-
-Or something like like: 
-`(1 + x1 || coupleID) + (0 + x3:idiff | coupleID)` <!-- TODO: should we describe implications, or no? -->
-
-### Interpretation
-
 ## Testing distinguishability {#testing-distinguishability}
 
 Distinguishability can be evaluated by comparing a full model in which the two
@@ -423,10 +337,8 @@ roles may differ with a restricted exchangeable model. This comparison tests
 the imposed equality constraints jointly. Here, they concern the fixed
 intercepts, actor effects, partner effects, and residual variances.
 
-The two parameterizations require different generated columns. The full
-distinguishable model was fitted above, so we now prepare the same original
-observations as exchangeable:
-
+The two parameterizations require different generated columns, but both models
+above use the same original observations.
 
 [`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html)
 verifies that both models use equivalent original
@@ -448,71 +360,126 @@ variance parameter lies on its boundary.
 
 ## Intensive longitudinal APIMs
 
-### Concurrent ILD Gaussian APIM for distinguishable dyads
+### Concurrent ILD Gaussian APIM for exchangeable dyads
+
+For longitudinal APIMs, time-varying predictors are decomposed into
+within-person and between-person components before actor and partner variables
+are constructed [@bolgerIntensiveLongitudinalMethods2013;
+@gistelinckMultilevelAutoregressiveDyadic2020]. The default `"auto"` selects
+`"2l"` when both `time` and `predictors` are supplied. The within-person (`cwp`)
+component captures occasion-specific deviations from each member's observed
+mean, whereas the between-person (`cbp`) component captures each member's
+observed mean relative to the sample grand mean.
 
 Observed person means used to construct the between-person (`cbp`) predictors
 can be unreliable when each member contributes few occasions, which can bias
 between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
-
-Example model specification: 
-
-```{r fit-ild-distinguishable, eval = FALSE}
-
-ild_distinguishable_model <- glmmTMB::glmmTMB(
-  closeness ~ 0 + 
-    
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
-    
-    # Gender specific time trends
-    .dy_is_female_x_male_female:diaryday +
-    .dy_is_female_x_male_male:diaryday +
-    
-    # Gender-specific within-person actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_cwp_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_cwp_actor +
-
-    # Gender-specific within-person partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_cwp_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_cwp_partner +
-    
-    # Gender-specific between-person actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_cbp_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_cbp_actor +
-
-    # Gender-specific between-person partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_cbp_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_cbp_partner +
-    
-    # random effects for stable non-independence (means)
-    us(0 + 
-         .dy_is_female_x_male_female +
-         .dy_is_female_x_male_male
-       | coupleID)  +
-
-    # Same-day residual covariance
-    us(0 + 
-         .dy_is_female_x_male_female +
-         .dy_is_female_x_male_male
-       | coupleID:diaryday) 
-
-  , dispformula = ~ 0  
-  , family = gaussian()
-  , data = ild_distinguishable_data
-)
-
-summary(ild_distinguishable_model)
-
-```
-
-
-### Concurrent ILD Gaussian APIM for exchangeable dyads
 
 Following del Rosario and West, the stable dyad covariance can be represented
 using sum-and-difference random effects
 [@delrosarioPracticalGuideSpecifying2025]. In longitudinal Gaussian APIMs fitted
 with `glmmTMB`, the same parameterization can be extended to the dyad-occasion
 level to represent same-occasion residual dependence.
+
+We first prepare within-person (`cwp`) and between-person (`cbp`) actor and
+partner predictors:
+
+```{r prepare-ild-exchangeable-apim}
+ild_apim_data <- dyadMLM::prepare_dyad_data(
+  example_dyadic_ILD,
+  dyad = coupleID,
+  member = personID,
+  time = diaryday,
+  predictors = provided_support,
+  model_types = "apim",
+  seed = 123
+)
+
+print(ild_apim_data, n = 4)
+```
+
+The example below estimates same-day associations between support and closeness
+and includes `diaryday` to adjust for a linear time trend. We also include an
+actor random slope in both stable dyad-level blocks so that we can demonstrate
+the random-slope back-transformation below.
+
+```{r fit-ild-exchangeable-apim, eval = has_glmmTMB}
+ild_apim_model <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+
+    diaryday +
+
+    # Within-person actor and partner effects
+    .dy_provided_support_cwp_actor +
+    .dy_provided_support_cwp_partner +
+
+    # Between-person actor and partner effects
+    .dy_provided_support_cbp_actor +
+    .dy_provided_support_cbp_partner +
+
+    # Stable exchangeable dyad-level covariance with actor random slopes
+    us(1 + .dy_provided_support_cwp_actor | coupleID) +
+    us(0 +
+         .dy_member_contrast_assumed_exchangeable_arbitrary +
+         .dy_member_contrast_assumed_exchangeable_arbitrary:
+           .dy_provided_support_cwp_actor
+       | coupleID) +
+
+    # Same-occasion exchangeable covariance
+    us(1 | coupleID:diaryday) +
+    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)
+
+  , dispformula = ~ 0
+  , family = gaussian()
+  , data = ild_apim_data
+)
+
+summary(ild_apim_model)
+```
+
+We can now recover the member-level covariance matrices for both the stable
+dyad effects and the same-occasion residual dependence. Supplying names for the
+two block pairings keeps these two levels explicit in the result:
+
+```{r backtransform-ild-exchangeable-apim, eval = has_glmmTMB}
+member_contrast_column <-
+  ".dy_member_contrast_assumed_exchangeable_arbitrary"
+
+same_occasion_pairing <- list(
+  shared_block = "us(1 | coupleID:diaryday)",
+  difference_block = paste0(
+    "us(0 + ", member_contrast_column, " ",
+    "| coupleID:diaryday)"
+  ),
+  difference_indicator = member_contrast_column
+)
+
+ild_apim_covariance <- dyadMLM::recover_exchangeable_covariance(
+  ild_apim_model,
+  block_pairings = list(
+    dyad = list(
+      shared_block =
+        "us(1 + .dy_provided_support_cwp_actor | coupleID)",
+      difference_block = paste0(
+        "us(0 + ", member_contrast_column, " + ",
+        member_contrast_column, ":",
+        ".dy_provided_support_cwp_actor | coupleID)"
+      ),
+      difference_indicator = member_contrast_column
+    ),
+    same_occasion = same_occasion_pairing
+  )
+)
+
+print(ild_apim_covariance, representation = "sdcor", digits = 3)
+```
+
+The `cwp` terms estimate actor and partner associations for occasion-specific
+deviations from each member's usual support. The `cbp` terms estimate actor and
+partner associations involving members' usual support levels. These are
+concurrent associations; they do not by themselves represent temporal
+carryover.
 
 #### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
 
@@ -552,6 +519,126 @@ $$
 The same calculation applies to the partner slopes and random intercepts. Any
 covariances among the random intercept, actor slope, and partner slope can be
 back-transformed in the same way.
+
+#### Testing random-effect constraints {#fitted-constraints-and-omitted-blocks}
+
+The full model above estimates both a shared and a member-contrast actor random
+slope. We can first test a smaller model that omits only the actor random slope
+from the member-contrast block. The member-contrast random intercept and both
+same-occasion blocks remain in the model:
+
+```{r fit-ild-no-contrast-slope, eval = has_glmmTMB}
+ild_apim_no_contrast_slope <- update(
+  ild_apim_model,
+  formula = . ~ . -
+    us(0 +
+         .dy_member_contrast_assumed_exchangeable_arbitrary +
+         .dy_member_contrast_assumed_exchangeable_arbitrary:
+           .dy_provided_support_cwp_actor
+       | coupleID) +
+    us(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)
+)
+
+dyadMLM::compare_nested_glmmTMB_models(
+  ild_apim_no_contrast_slope,
+  ild_apim_model
+)
+```
+
+Without the member-contrast slope, the two members have identical actor random
+slopes at the stable dyad level. We tell the back-transformation which fitted
+blocks represent this constraint:
+
+```{r backtransform-ild-no-contrast-slope, eval = has_glmmTMB}
+no_contrast_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
+  ild_apim_no_contrast_slope,
+  block_pairings = list(
+    dyad = list(
+      shared_block =
+        "us(1 + .dy_provided_support_cwp_actor | coupleID)",
+      difference_block = paste0(
+        "us(0 + ", member_contrast_column, " ",
+        "| coupleID)"
+      ),
+      difference_indicator = member_contrast_column
+    ),
+    same_occasion = same_occasion_pairing
+  )
+)
+
+no_contrast_slope_sdcor <- no_contrast_slope_covariance$dyad$sdcor
+tibble::tibble(
+  random_effect = c("intercept", "actor slope"),
+  member_correlation = c(
+    no_contrast_slope_sdcor[
+      "member_1: (Intercept)", "member_2: (Intercept)"
+    ],
+    no_contrast_slope_sdcor[
+      "member_1: .dy_provided_support_cwp_actor",
+      "member_2: .dy_provided_support_cwp_actor"
+    ]
+  )
+)
+```
+
+We can impose the stronger constraint by omitting the full member-contrast
+block at the stable dyad level. The same-occasion member-contrast block again
+remains in the model:
+
+```{r fit-ild-no-contrast-block, eval = has_glmmTMB}
+ild_apim_no_contrast_block <- update(
+  ild_apim_model,
+  formula = . ~ . -
+    us(0 +
+         .dy_member_contrast_assumed_exchangeable_arbitrary +
+         .dy_member_contrast_assumed_exchangeable_arbitrary:
+           .dy_provided_support_cwp_actor
+       | coupleID)
+)
+
+dyadMLM::compare_nested_glmmTMB_models(
+  ild_apim_no_contrast_block,
+  ild_apim_model
+)
+```
+
+Here, both members have identical random intercepts and actor random slopes at
+the stable dyad level. Because the full member-contrast block is absent, we
+specify it as `NULL`:
+
+```{r backtransform-ild-no-contrast-block, eval = has_glmmTMB}
+no_contrast_block_covariance <- dyadMLM::recover_exchangeable_covariance(
+  ild_apim_no_contrast_block,
+  block_pairings = list(
+    dyad = list(
+      shared_block =
+        "us(1 + .dy_provided_support_cwp_actor | coupleID)",
+      difference_block = NULL,
+      difference_indicator = member_contrast_column
+    ),
+    same_occasion = same_occasion_pairing
+  )
+)
+
+no_contrast_block_sdcor <- no_contrast_block_covariance$dyad$sdcor
+tibble::tibble(
+  random_effect = c("intercept", "actor slope"),
+  member_correlation = c(
+    no_contrast_block_sdcor[
+      "member_1: (Intercept)", "member_2: (Intercept)"
+    ],
+    no_contrast_block_sdcor[
+      "member_1: .dy_provided_support_cwp_actor",
+      "member_2: .dy_provided_support_cwp_actor"
+    ]
+  )
+)
+```
+
+These are constraints on the stable dyad-level random effects, not on the
+same-occasion residual structure. Because variance constraints lie on the
+boundary of the parameter space, the usual chi-squared reference distribution
+for the likelihood-ratio tests should be interpreted cautiously.
 
 
 ### Current limitations of dyadic ILD designs in R

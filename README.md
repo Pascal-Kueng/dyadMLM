@@ -42,7 +42,13 @@ DIM workflows, with models fitted primarily using `brms`
 
 ## Installation
 
-You can install the development version of `dyadMLM` from GitHub with:
+You can install the released version of `dyadMLM` from CRAN with:
+
+``` r
+install.packages("dyadMLM")
+```
+
+You can install the development version from GitHub with:
 
 ``` r
 # install.packages("pak")
