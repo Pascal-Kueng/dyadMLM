@@ -140,13 +140,14 @@ If you use `dyadMLM`, please cite the package directly:
   title = {dyadMLM: Tools for Dyadic Multilevel Models},
   author = {Pascal Küng},
   year = {2026},
-  note = {R package version 0.0.1},
+  note = {R package version 0.1.0},
+  doi = {10.5281/zenodo.21481720},
   url = {https://github.com/Pascal-Kueng/dyadMLM},
 }
 ```
 
-An archival DOI will be added once the package has a public release
-archive.
+The package uses the concept DOI `10.5281/zenodo.21481720` across
+releases.
 
 ------------------------------------------------------------------------
 

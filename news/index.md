@@ -1,6 +1,6 @@
 # Changelog
 
-## dyadMLM 0.0.1
+## dyadMLM 0.1.0
 
 - Initial release.
 - Cleaned up the pre-release public API with these direct migration

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.1" id="dyadmlm-001">dyadMLM 0.0.1<a class="anchor" aria-label="anchor" href="#dyadmlm-001"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="dyadmlm-010">dyadMLM 0.1.0<a class="anchor" aria-label="anchor" href="#dyadmlm-010"></a></h2>
 <ul><li>Initial release.</li>
 <li>Cleaned up the pre-release public API with these direct migration mappings: <code>group</code> to <code>dyad</code>, <code>lag_predictors</code> to <code>lag1_predictors</code>, <code>model_type</code> to <code>model_types</code>, <code>temporal_predictor_decomposition</code> to <code>temporal_decomposition</code>, <code>"time_2l"</code> to <code>"2l"</code>, <code>include_compositions</code> to <code>keep_compositions</code>, <code>compare_dyad_models()</code> to <code><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models()</a></code>, <code>exchangeable_rescov()</code> to <code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code>, <code>pairs</code> to <code>block_pairings</code>, pairing fields <code>shared</code> and <code>difference</code> to <code>shared_block</code> and <code>difference_block</code>, and print argument <code>what</code> to <code>representation</code>.</li>
 <li>Renamed generated exchangeable-member contrasts from <code>.dy_diff_{composition}_arbitrary</code> to <code>.dy_member_contrast_{composition}_arbitrary</code>. Covariance recovery continues to recognize legacy contrast names in previously fitted models.</li>
