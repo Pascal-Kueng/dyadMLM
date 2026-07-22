@@ -391,6 +391,10 @@
   color: var(--uzh-blue-dark);
 }
 
+.reveal .text-smaller {
+  font-size: 0.82em;
+}
+
 .reveal .subtle {
   font-size: 0.76em;
   color: var(--uzh-muted);

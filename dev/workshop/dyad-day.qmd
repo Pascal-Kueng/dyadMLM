@@ -255,7 +255,7 @@ Basically answering differt sub-RQs each time that I will introduce.
 
 ## Measurement - Predictor
 
-### Emotional support provided
+### Provided emotional support
 
 > **Rough English translation of the original German item**<br>
 > “How much did you emotionally support your partner today so that they would
@@ -434,12 +434,12 @@ $n = 998$ eligible articles)
 **Various dyadic models** can be used, each answering different questions!
 
 ::: {.incremental}
-- **Actor-partner interdependence model (APIM)**: interdependent individuals
-- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
-- **Common fate model (CFM)**: latent dyadic process
+- **Actor-partner interdependence model (APIM)**: actor and partner associations between interdependent individuals
+- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: associations involving dyad levels and within-dyad differences
+- **Common fate model (CFM)**: latent dyad-level constructs reflected in both partners' reports
 :::
 
-::: {.fragment}
+::: {.fragment .text-smaller}
 Other approaches include the **mutual-influence model**, for reciprocal influence
 between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
 **Truth and Bias model**, for separating mean-level bias from correlational
@@ -453,15 +453,17 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 
 **Various dyadic models** can be used, each answering different questions!
 
-- [**Actor-partner interdependence model (APIM)**: interdependent individuals]{.text-highlight}
-- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
-- **Common fate model (CFM)**: latent dyadic process
+- [**Actor-partner interdependence model (APIM)**: actor and partner associations between interdependent individuals]{.text-highlight}
+- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: associations involving dyad levels and within-dyad differences
+- **Common fate model (CFM)**: latent dyad-level constructs reflected in both partners' reports
 
+:::{.text-smaller}
 Other approaches include the **mutual-influence model**, for reciprocal influence
 between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
 **Truth and Bias model**, for separating mean-level bias from correlational
 accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 @westTruthBiasModel2011].
+:::
 
 ::: {.notes}
 "For broad RQ 1 we first use Actor-Partner interdependence model"
@@ -469,6 +471,16 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 
 
 <!-- ca. 1 Minute -->
+
+## Research Question 1a {.rq-slide}
+
+::: {.rq-center}
+::: {.rq-card}
+[RQ1a:]{.rq-label} [Is a person's provided emotional support associated with (a) their own MVPA and (b) their partner's MVPA?]{.rq-text}
+:::
+:::
+
+<!-- ca. 0.5 Minutes -->
 
 
 ## The distinguishable APIM
@@ -933,6 +945,16 @@ compare_nested_glmmTMB_models(
   distinguishable_apim
 )
 ```
+
+## Research Question 1b {.rq-slide}
+
+::: {.rq-center}
+::: {.rq-card}
+[RQ1b:]{.rq-label} [How are couples' average levels and partner differences in provided emotional support associated with their average MVPA and partner differences in MVPA?]{.rq-text}
+:::
+:::
+
+<!-- ca. 0.5 Minutes -->
 
 
 ## The DIM
@@ -1460,12 +1482,11 @@ Here, $b_1$ is the actor effect and $b_2$ is the partner effect. The APIM
 predictors and DSM couple mean now use the same pooled grand-mean reference, so
 no additional centering adjustment is needed for the intercepts.
 
-## Research Question 2 {.rq-slide}
+## Research Question 3 {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ2:]{.rq-label} [In romantic couples, how is collaborative planning linked to physical 
-activity?]{.rq-text}
+[RQ3:]{.rq-label} [How is collaborative planning associated with joint physical activity in romantic couples?]{.rq-text}
 :::
 :::
 
