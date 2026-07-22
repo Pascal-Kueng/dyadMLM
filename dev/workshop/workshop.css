@@ -404,6 +404,19 @@
   color: inherit;
 }
 
+.reveal h2 .heading-reference {
+  margin-left: 0.45em;
+  color: var(--uzh-muted);
+  font-size: 0.42em;
+  font-weight: 400;
+  white-space: nowrap;
+  vertical-align: 0.12em;
+}
+
+.reveal h2 .heading-reference a {
+  color: inherit;
+}
+
 /* Keep source citations stable while preceding fragments are revealed. */
 .reveal .bottom-reference {
   position: absolute;

@@ -105,6 +105,18 @@ sys.source(
   envir = knitr::knit_global()
 )
 
+truth_bias_file <- if (
+    file.exists(file.path("R", "draw-truth-bias.R"))) {
+  file.path("R", "draw-truth-bias.R")
+} else {
+  file.path("dev", "workshop", "R", "draw-truth-bias.R")
+}
+
+sys.source(
+  normalizePath(truth_bias_file),
+  envir = knitr::knit_global()
+)
+
 data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds"
 
 pilot <- readRDS(data_file) |>
@@ -1761,8 +1773,9 @@ draw_cfm_diagram(
 
 <!-- ca. 2 Minutes -->
 
-## Can a CFM be exchangeable?
+## When should we model a CFM as exchangeable?
 
+:::{.incremental}
 - Partner positions are arbitrary, or theory and the data support treating the
   measurement process as invariant across roles.
 - Swapping the partner labels should then leave the model unchanged.
@@ -1771,8 +1784,8 @@ draw_cfm_diagram(
   - **residual variances:** the same amount of indicator-specific variation
   - **same-member residual associations:** the same residual predictor–outcome
     association for both partners
-- The loadings remain fixed to 1, so both reports measure the dyadic level on
-  their original scale.
+  
+:::
 
 [@ledermannMediationDyadicData2009; @peughAnalyzingMixedDyadic2013]{.subtle}
 
@@ -1900,12 +1913,188 @@ of fit.
 
 :::
 
-<!-- ca. 0.5 Minutes -->
 
+:::{.notes}
 
-## Honorable mention: The truth and bias model 
+- Here, $R^2 = `r sprintf("%.2f", cfm_level_r2)`$ means that collaborative
+  planning, the model's only predictor, accounts for
+  `r sprintf("%.0f", 100 * cfm_level_r2)`% of the total model-implied variance
+  across couples in the **latent joint-MVPA level**. It does not refer to the
+  total variance in the two observed partner reports.
+- This is an outcome-specific, model-based descriptive summary—not an overall
+  fit measure or evidence of a causal effect.
 
-<!-- add ref, basic idea, example graphic and basic interpretation of paths -->
+:::
+<!-- ca. 1 Minute -->
+
+# Other interesting dyadic models to consider
+
+## Other dyadic models and designs {.smaller}
+
+- **Truth and Bias model:** Separates accuracy in judging a partner from
+  directional bias and assumed similarity [@westTruthBiasModel2011].
+
+- **Mutual-influence model:** Tests whether partners' outcomes directly and
+  reciprocally influence one another [@kennyModelsNonIndependenceDyadic1996].
+
+- **APIM mediation model:** Traces whether actor and partner associations operate
+  through either partner's mediator [@ledermannAssessingMediationDyadic2011].
+
+- **Dyadic response surface analysis:** Tests whether partner similarity,
+  discrepancy, or particular combinations of scores relate to an outcome
+  [@schonbrodtTestingSimilarityEffects2018].
+
+- **One-with-many and Social Relations models:** Extend dyadic analysis to
+  repeated relationships with several partners or round-robin groups, separating
+  person and relationship components
+  [@kenny2006dyadic; @kennySocialRelationsModel1984].
+
+- **Network models:** Explain the formation and evolution of ties within an
+  interconnected group, including reciprocity, clustering, and actor-driven
+  network change [@hollandExponentialFamilyDirected1981;
+  @snijdersStatisticalEvaluationNetwork2001].
+
+<!-- ca. 1 minute -->
+
+## The Truth and Bias model [[@kennyAccuracyBiasPerception2001; @westTruthBiasModel2011]]{.heading-reference} {#the-truth-and-bias-model}
+
+```{r}
+#| label: conceptual-truth-bias
+#| echo: false
+#| dev: svg
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 80%
+#| fig-align: center
+#| fig-alt: "Dyadic Truth and Bias model in which female and male self-reports predict both partner judgments. Same-perceiver paths represent assumed-similarity bias, cross-partner paths represent direct accuracy, intercepts represent directional bias, self-report covariance represents actual similarity, and judgment residuals covary."
+
+draw_truth_bias_diagram()
+```
+
+::: {.text-smaller}
+
+- **Direct accuracy** tracks the target's report; **assumed similarity** tracks
+  the perceiver's own report.
+- The target's report is the operational “truth,” not necessarily objective
+  truth; after centering, $b_0$ is **directional bias**.
+
+:::
+
+:::{.notes}
+
+- Has the structure of a distinguishable APIM.
+- The subscript on each path coefficient identifies the perceiver.
+- The blue actor paths are assumed-similarity bias: each person's own report
+  predicts their judgment of their partner.
+- The purple partner paths are direct accuracy: the target's report predicts
+  the perceiver's judgment of that target, controlling for assumed similarity.
+- The correlation between self-reports is actual similarity. Together with
+  assumed similarity, it can produce indirect accuracy even if direct accuracy
+  is zero.
+- Bias is systematic information other than the truth criterion, not random
+  error and not necessarily inaccuracy.
+- Self-reports and judgments must use the same scale and be centered on the
+  relevant truth-criterion mean for the intercept to represent adjusted
+  directional bias.
+- In the basic observed-variable model, the target's self-report is treated as
+  an error-free criterion for estimation. This defines accuracy relative to the
+  target's report; it does not establish objective truth or perfect
+  self-knowledge.
+- The paths are predictive associations, not necessarily causal effects.
+- Direct accuracy is the truth association remaining after the measured bias
+  variable has been controlled.
+- Separate standardization by partner would make the role-specific coefficients
+  difficult to compare; the model is interpreted using unstandardized paths on
+  a common metric.
+
+:::
+
+<!-- ca. 2 minutes -->
+
+## Dyadic response surface analysis [[@schonbrodtTestingSimilarityEffects2018]]{.heading-reference}
+
+```{r}
+#| label: conceptual-dyadic-response-surface
+#| echo: false
+#| dev: svg
+#| fig-width: 5.2
+#| fig-height: 3.6
+#| layout-ncol: 2
+#| fig-align: center
+#| fig-alt: "Two hypothetical response surfaces from one dyadic model. The first shows Partner A's predicted satisfaction and the second Partner B's predicted satisfaction, each as a function of both partners' support scores."
+
+RSA::plotRSA(
+  x = 0.45,
+  y = 0.45,
+  x2 = -0.18,
+  y2 = -0.18,
+  xy = 0.36,
+  b0 = 3,
+  xlim = c(-2, 2),
+  ylim = c(-2, 2),
+  zlim = c(0, 5),
+  xlab = "Partner A support",
+  ylab = "Partner B support",
+  zlab = "Partner A satisfaction",
+  main = "Partner A outcome",
+  legend = FALSE,
+  param = FALSE,
+  axes = c("LOC", "LOIC"),
+  project = c("contour", "LOC", "LOIC"),
+  border = FALSE,
+  cex.tickLabel = 0.8,
+  cex.axesLabel = 0.9
+)
+
+RSA::plotRSA(
+  x = 0.20,
+  y = 0.65,
+  x2 = -0.10,
+  y2 = -0.16,
+  xy = 0.20,
+  b0 = 3,
+  xlim = c(-2, 2),
+  ylim = c(-2, 2),
+  zlim = c(0, 5),
+  xlab = "Partner A support",
+  ylab = "Partner B support",
+  zlab = "Partner B satisfaction",
+  main = "Partner B outcome",
+  legend = FALSE,
+  param = FALSE,
+  axes = c("LOC", "LOIC"),
+  project = c("contour", "LOC", "LOIC"),
+  border = FALSE,
+  cex.tickLabel = 0.8,
+  cex.axesLabel = 0.9
+)
+```
+
+::: {.text-smaller}
+
+- **One joint model:** Both partner outcomes are estimated with correlated residuals.
+- **Two surfaces:** Each visualizes one partner-specific coefficient set.
+
+:::
+
+:::{.notes}
+
+- These are deliberately hypothetical surfaces, not results from today's data.
+- Both surfaces come from the same conceptual joint model: the two polynomial
+  outcome equations are estimated simultaneously and their residuals correlate.
+- The horizontal axes stay in the same orientation in both plots. Only the
+  outcome on the vertical axis and its regression coefficients change.
+- Dyadic response surface analysis can test equality constraints across the two
+  partners' surface parameters.
+- Along the line of congruence, both partners have the same predictor score; the
+  first surface illustrates a rising high-high congruence pattern.
+- The second surface deliberately differs to illustrate that the same predictor
+  combination may relate differently to the two partners' outcomes.
+- A response surface is more informative than a difference score because the
+  same difference can arise from substantively different combinations of the
+  two partners' levels.
+
+:::
 
 <!-- ca. 2 minutes -->
 
