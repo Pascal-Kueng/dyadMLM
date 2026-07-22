@@ -946,18 +946,42 @@ compare_nested_glmmTMB_models(
 )
 ```
 
+## Shifting the analytical lens
+
+Sometimes, actor and partner associations are not the primary interest.
+
+Instead, we may want to understand:
+
+- how couples compare with other couples
+- how partners stand relative to one another within a couple
+
+::: {.fragment}
+
+This shifts the focus to **dyadic levels and within-dyad differences**.
+
+:::
+
+::: {.fragment}
+
+  - for exchangeable dyads, use the **dyad-individual model (DIM)**
+  - for distinguishable dyads, use the **dyadic score model (DSM)**
+  
+:::
+
+<!-- ca. 2 Minutes -->
+
 ## Research Question 1b {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ1b:]{.rq-label} [How are couples' average levels and partner differences in provided emotional support associated with their average MVPA and partner differences in MVPA?]{.rq-text}
+[RQ1b:]{.rq-label} [How are couples' average levels and partner differences in provided emotional support associated with the couple-average MVPA and partner differences in MVPA?]{.rq-text}
 :::
 :::
 
 <!-- ca. 0.5 Minutes -->
 
 
-## The DIM
+## The dyad-individual model (DIM)
 
 - A re-parametrization of the **exchangeable** APIM!
 - We decompose predictors into two variables:
@@ -1260,12 +1284,12 @@ dim_reparameterization_grid(
 
 <!-- ca. 5 Minutes -->
 
-## The DSM
+## The dyadic score model (DSM)
 
 What if we want DIM-style interpretation but have distinguishable dyads?
 
 :::{.fragment}
-### The dyadic score model (DSM) is: 
+**The DSM is: **
 
 - the unconstrained distinguishable version of the DIM
 - a re-parametrization of the distinguishable APIM
@@ -1481,6 +1505,17 @@ $$
 Here, $b_1$ is the actor effect and $b_2$ is the partner effect. The APIM
 predictors and DSM couple mean now use the same pooled grand-mean reference, so
 no additional centering adjustment is needed for the intercepts.
+
+## When the construct is inherently dyadic
+
+Sometimes, a construct describes the **couple as a unit**, rather than either
+partner individually.
+
+- Both partners report on the same dyadic phenomenon.
+- Differences between their reports are not the substantive focus.
+- Interest lies in the couple's underlying dyadic level.
+
+<!-- ca. 1 Minute -->
 
 ## Research Question 3 {.rq-slide}
 
