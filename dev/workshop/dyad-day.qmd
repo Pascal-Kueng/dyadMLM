@@ -473,6 +473,7 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 <!-- ca. 1 Minute -->
 
 # Actor-partner interdependence models
+Distinguishable & Exchangeable APIM
 
 ## Research Question 1a {.rq-slide}
 
@@ -792,7 +793,9 @@ These are associations in the aggregated observational data, not causal effects.
 - no evidence of difference in effects $\rightarrow$ pool effects for greater power
 - we want to formally test distinguishability
 
+:::{.fragment}
 $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
+:::
 
 <!-- ca. 2 Minutes -->
 
@@ -949,6 +952,7 @@ compare_nested_glmmTMB_models(
 ```
 
 # Level-and-difference models
+Dyad-Individual Model & Dyadic Score Model
 
 ## Shifting the analytical lens
 
@@ -987,15 +991,21 @@ This shifts the focus to **dyadic levels and within-dyad differences**.
 
 ## The dyad-individual model (DIM)
 
+### The DIM is: 
+
 - A re-parametrization of the **exchangeable** APIM!
 - We decompose predictors into two variables:
   - Dyad mean (GM-centered): $\bar{X} - \mu_{X}$
   - Within-dyad member deviation: $X_i - \bar{X}$
-  
+
+:::{.fragment}
+
 In other words, these predictors express: 
 
 - A couple's average level compared with the average of all couples
 - A partner's level compared with the average of their couple
+
+:::
 
 :::{.notes}
 
@@ -1293,7 +1303,7 @@ dim_reparameterization_grid(
 What if we want DIM-style interpretation but have distinguishable dyads?
 
 :::{.fragment}
-**The DSM is: **
+### The DSM is:
 
 - the unconstrained distinguishable version of the DIM
 - a re-parametrization of the distinguishable APIM
@@ -1510,9 +1520,10 @@ Here, $b_1$ is the actor effect and $b_2$ is the partner effect. The APIM
 predictors and DSM couple mean now use the same pooled grand-mean reference, so
 no additional centering adjustment is needed for the intercepts.
 
-# Common fate models
+# Common Fate Model
+Modeling Dyadic Constructs
 
-## When the construct is inherently dyadic
+## When the construct is dyadic
 
 Sometimes, a construct describes the **couple as a unit**, rather than either
 partner individually.
@@ -1521,7 +1532,22 @@ partner individually.
 - Differences between their reports are not the substantive focus.
 - Interest lies in the couple's underlying dyadic level.
 
+:::{.fragment}
+
+### For our data-example: 
+
+- Collaborative planning as a dyadic predictor
+- Joint physical activity as a dyadic outcome
+
+:::
+
 <!-- ca. 1 Minute -->
+
+:::{.notes}
+
+-> Ask students if they had ideas on a dyadic construct
+
+:::
 
 ## Research Question 3 {.rq-slide}
 
