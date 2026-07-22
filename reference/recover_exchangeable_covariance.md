@@ -207,7 +207,9 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     member = personID,
     role = gender,
     model_types = "none",
-    # dyads_cross contains three compositions; retain `female-female` here.
+    # All three observed compositions in `dyads_cross` are detected and retained
+    # by default. This example focuses on `female-female` dyads, so we restrict
+    # the analysis here.
     keep_compositions = "female-female",
     seed = 123
   )

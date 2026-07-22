@@ -54,7 +54,9 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     dyad = coupleID,
     member = personID,
     role = gender,
-    # dyads_cross contains three compositions; retain `female-male` here.
+    # All three observed compositions in `dyads_cross` are detected and retained
+    # by default. This example focuses on `female-male` dyads, so we restrict the
+    # analysis here.
     keep_compositions = "female-male"
   )
   full_data <- restricted_data

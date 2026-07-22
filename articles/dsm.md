@@ -36,7 +36,9 @@ cross_dsm_data <- dyadMLM::prepare_dyad_data(
   role = gender,
   predictors = provided_support,
   model_types = "dsm",
-  # dyads_cross contains three compositions; retain `female-male` here.
+  # All three observed compositions in `dyads_cross` are detected and retained by
+  # default. This example focuses on `female-male` dyads, so we restrict the
+  # analysis here.
   keep_compositions = "female-male",
   dsm_role_order = c("female", "male")
 )

@@ -52,7 +52,9 @@ cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   predictors = provided_support,
   # Create both APIM and DIM columns for comparison.
   model_types = c("apim", "dim"),
-  # dyads_cross contains three compositions; retain `female-female` here.
+  # All three observed compositions in `dyads_cross` are detected and retained by
+  # default. This example focuses on `female-female` dyads, so we restrict the
+  # analysis here.
   keep_compositions = "female-female",
   seed = 123
 )
