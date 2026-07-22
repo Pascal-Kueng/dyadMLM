@@ -991,7 +991,7 @@ This shifts the focus to **dyadic levels and within-dyad differences**.
 
 ## The dyad-individual model (DIM)
 
-### The DIM is: 
+**The DIM is:**
 
 - A re-parametrization of the **exchangeable** APIM!
 - We decompose predictors into two variables:
@@ -1303,7 +1303,7 @@ dim_reparameterization_grid(
 What if we want DIM-style interpretation but have distinguishable dyads?
 
 :::{.fragment}
-### The DSM is:
+**The DSM is:**
 
 - the unconstrained distinguishable version of the DIM
 - a re-parametrization of the distinguishable APIM
@@ -1534,7 +1534,7 @@ partner individually.
 
 :::{.fragment}
 
-### For our data-example: 
+**For our data-example:**
 
 - Collaborative planning as a dyadic predictor
 - Joint physical activity as a dyadic outcome
