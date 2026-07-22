@@ -257,11 +257,11 @@ may predict outcomes beyond either individual score.
 
 <!-- ca. 1.5 Minutes -->
 
-## Research Question 1 {.rq-slide}
+## Guiding question {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ1:]{.rq-label} [In romantic couples, how is provided health-related social support linked to physical activity?]{.rq-text}
+[Guiding question:]{.rq-label} [In romantic couples, how is provided health-related social support linked to physical activity?]{.rq-text}
 :::
 :::
 
@@ -488,7 +488,7 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 :::
 
 ::: {.notes}
-"For broad RQ 1 we first use Actor-Partner interdependence model"
+"For the guiding question, we first use the Actor-Partner Interdependence Model."
 :::
 
 
@@ -497,11 +497,11 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 # Actor-partner interdependence models
 Distinguishable & Exchangeable APIM
 
-## Research Question 1a {.rq-slide}
+## RQ1 · Actor and partner associations {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ1a:]{.rq-label} [Is a person's provided emotional support associated with (a) their own MVPA and (b) their partner's MVPA?]{.rq-text}
+[RQ1:]{.rq-label} [Is a person's provided emotional support associated with (a) their own MVPA and (b) their partner's MVPA?]{.rq-text}
 :::
 :::
 
@@ -1000,11 +1000,11 @@ This shifts the focus to **dyadic levels and within-dyad differences**.
 
 <!-- ca. 2 Minutes -->
 
-## Research Question 1b {.rq-slide}
+## RQ2 · Dyad levels and differences {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ1b:]{.rq-label} [How are couples' average levels and partner differences in provided emotional support associated with the couple-average MVPA and partner differences in MVPA?]{.rq-text}
+[RQ2:]{.rq-label} [How are couples' average levels and partner differences in provided emotional support associated with the couple-average MVPA and partner differences in MVPA?]{.rq-text}
 :::
 :::
 
@@ -1571,7 +1571,7 @@ partner individually.
 
 :::
 
-## Research Question 3 {.rq-slide}
+## RQ3 · Shared dyadic constructs {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
@@ -1912,7 +1912,7 @@ of fit.
 
 <!-- ca. 3 Minutes -->
 
-## Conclusion {.rq-slide}
+## RQ3 result {.rq-slide}
 
 ::: {.rq-center}
 
