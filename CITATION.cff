@@ -8,6 +8,7 @@ authors:
     orcid: "https://orcid.org/0000-0001-7346-9414"
 repository-code: "https://github.com/Pascal-Kueng/dyadMLM"
 url: "https://github.com/Pascal-Kueng/dyadMLM"
+doi: "10.5281/zenodo.21481720"
 abstract: >-
   dyadMLM provides tools for dyadic multilevel modeling with linear and
   generalized linear mixed-effects models. It prepares cross-sectional and
@@ -21,4 +22,4 @@ keywords:
   - exchangeable dyads
   - mixed-composition dyads
 license: MIT
-version: 0.0.1
+version: 0.1.0

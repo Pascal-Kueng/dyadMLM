@@ -29,10 +29,10 @@ helpers, and eventually model syntax explicit and reproducible.
 
 ## Current State
 
-The package is currently in a public development state, not a CRAN-ready release
-state. The core data-preparation API is implemented and covered by tests, the
-README links to the pkgdown site, and GitHub Actions are configured for
-R CMD check and pkgdown publishing.
+The package is currently in final preparation for its first CRAN release. The
+core data-preparation API is implemented and covered by tests, the README links
+to the pkgdown site, and GitHub Actions are configured for R CMD check and
+pkgdown publishing.
 
 Recently completed cleanup:
 
@@ -56,8 +56,8 @@ Recently completed cleanup:
   compositions before exchangeability overrides, pooling, and DIM/DSM
   compatibility checks
 - implemented and reviewed separate DIM and directional DSM preparation paths
-  for the current v0.0.1 scope
-- accepted the current composition metadata shape for v0.0.1: returned data use
+  for the current v0.1.0 scope
+- accepted the current composition metadata shape for v0.1.0: returned data use
   final analysis compositions, while pooling metadata records the pooled source
   compositions in a compact `pooled_from` summary
 - implemented common extraction of `glmmTMB` and `brms` random-effect blocks,
@@ -72,11 +72,9 @@ Recently completed cleanup:
 
 Immediate sequence:
 
-1. document the bounded diagnostics workflow, without adding a general
-   diagnostics API
-2. finish release-facing APIM, mixed-APIM, and DSM vignette polish, including
-   the planned DSM ILD section
-3. rerun checks and prepare the first release
+1. synchronize the 0.1.0 release metadata and reserved Zenodo concept DOI
+2. rerun the complete source-package, vignette, and pkgdown checks
+3. submit to CRAN after final review and explicit approval
 
 The engine-independent covariance-array back-transformation and final named
 `varcov`/`sdcor` results are implemented for `glmmTMB` point estimates and
@@ -111,7 +109,8 @@ Target vignette structure:
   - a brief comparison of manifest raw outcome lags and separately estimated
     within-/between-person outcome-lag components, with their different
     interpretations and small-T cautions
-- `mixed-apim.Rmd`
+- `dev/vignettes/mixed-apim.Rmd`
+  - development-only workflow, omitted from the public vignette index
   - cross-sectional and ILD APIMs with mixed dyad compositions
   - optimizer and convergence notes
   - heavier mixed-composition ILD models shown carefully, with `eval = FALSE`
@@ -127,16 +126,16 @@ Target vignette structure:
   - dyad-level and signed-difference predictor columns
   - exact long-format interaction model and coefficient interpretations
   - role-order reversal and APIM-DSM transformations
-  - a brief ILD extension, still to be added
+  - a brief ILD extension
   - outcomes remain unchanged in the MLM-focused preparation API
 
-## Version 0.0.1 - First CRAN Release Candidate
+## Version 0.1.0 - First CRAN Release Candidate
 
 Goal: ship a small, reliable data-preparation and interpretation workflow with
 enough ILD support to be useful for composition-aware dyadic MLMs before adding
 larger model-building features.
 
-### v0.0.1 Release Gate
+### v0.1.0 Release Gate
 
 The first release milestone is complete when all of the following are true:
 
@@ -160,9 +159,9 @@ The first release milestone is complete when all of the following are true:
   example data or explicitly presented as advanced/diagnostic specifications.
 - [ ] Documentation, README, citation metadata, pkgdown, tests, and multi-platform
   R CMD checks are clean.
-- [ ] Version `0.0.1` is released, tagged, and archived.
+- [ ] Version `0.1.0` is released, tagged, and archived.
 
-Not required for v0.0.1: model fitting or syntax-generation wrappers, public
+Not required for v0.1.0: model fitting or syntax-generation wrappers, public
 fitted-diagram functions, automated AR(1)/VAR diagnostics, a universal
 multicollinearity rule, generalized-family diagnostic automation, or a full
 diagnostics plotting interface.
@@ -347,7 +346,7 @@ Detailed implemented scope and final checks follow.
   - Do not add sparse-composition warnings to `print()` yet; thresholds are too
     arbitrary for a compact display
 - Add composition role indicator columns for cross-sectional model workflows
-- Keep generated-column inspection internal for v0.0.1
+- Keep generated-column inspection internal for v0.1.0
   - `dyad_generated_columns()` remains the internal normalized table used by
     printing
   - generated-column meanings are exposed through `print.dyadMLM_data()`
@@ -366,7 +365,7 @@ Detailed implemented scope and final checks follow.
   - `inst/CITATION` for R users
   - `CITATION.cff` for GitHub and future Zenodo metadata
 
-### Pre-CRAN v0.0.1 Checklist
+### Pre-CRAN v0.1.0 Checklist
 
 Complete these before calling the feature set CRAN-ready:
 
@@ -374,13 +373,13 @@ Complete these before calling the feature set CRAN-ready:
   - run `devtools::document()`
   - render `README.Rmd`
   - build pkgdown locally when changing vignette structure or `_pkgdown.yml`
-- DIM and directional DSM preparation review: done for the current v0.0.1 scope
+- DIM and directional DSM preparation review: done for the current v0.1.0 scope
   - direct grouped DIM construction is accepted
   - raw cross-sectional and longitudinal DIM names are accepted
   - DIM remains restricted to one final exchangeable composition
   - DSM remains restricted to one final distinguishable composition matching
     `dsm_role_order`
-- Analysis-composition controls: done for v0.0.1
+- Analysis-composition controls: done for v0.1.0
   - `keep_compositions` is implemented as a raw observed-composition dyad
     filter before `set_exchangeable_compositions` and `pool_compositions`
   - `keep_compositions` updates retained dyads and downstream metadata; a
@@ -397,18 +396,18 @@ Complete these before calling the feature set CRAN-ready:
   - no extra raw-composition column is generated; user-supplied columns remain
     unchanged
   - pooling provenance is recorded in `dyad_compositions$pooled_from`
-- DIM metadata: done for v0.0.1
-  - the current `dim_predictors` table columns are stable for v0.0.1:
+- DIM metadata: done for v0.1.0
+  - the current `dim_predictors` table columns are stable for v0.1.0:
     `predictor`, `component`, `source_column`, `mean_column`,
     `deviation_column`, `dyad_decomposition_level`
   - keep downstream print/vignette code reading metadata rather than guessing
     column names where possible
-- Generated-column metadata: done for v0.0.1
+- Generated-column metadata: done for v0.1.0
   - `dyad_generated_columns()` stays internal as the single normalized table
     used by printing and documentation-facing summaries of generated temporal
     predictor, APIM, DIM, and DSM columns
   - expose generated-column meanings through `print.dyadMLM_data()` for
-    v0.0.1;
+    v0.1.0;
     consider a public wrapper later only if users need programmatic inspection
   - preserve explicit fields for `temporal_decomposition`,
     `dyadic_decomposition`, and `column_centering`
@@ -416,15 +415,15 @@ Complete these before calling the feature set CRAN-ready:
     out of the normalized generated-column interpretation table unless they
     answer a user-facing interpretation question
 - `print.dyadMLM_data()` descriptions for DIM column families: done for
-  v0.0.1
+  v0.1.0
   - describe raw, cwp, and cbp DIM columns separately when present
   - avoid listing every generated predictor individually
-- Directional DSM preparation: done for the current v0.0.1 scope
+- Directional DSM preparation: done for the current v0.1.0 scope
   - outcomes remain unchanged and are selected in model formulas
   - DSM reuses neutral dyad-mean/member-deviation calculations internally
   - full signed differences and the role contrast are recorded in DSM metadata
   - the DSM vignette documents the exact long-format interaction model
-- Finalize vignette polish for v0.0.1
+- Finalize vignette polish for v0.1.0
   - `getting-started.Rmd` is finalized as an orientation and data-prep vignette,
     not the main modeling manual
   - `dim.Rmd` is finalized for the current scope, including cross-sectional and
@@ -452,7 +451,7 @@ Complete these before calling the feature set CRAN-ready:
   - either simplify the vignette model deliberately or explain that the maximal
     model is aspirational/diagnostic and may require more data or Bayesian
     regularization
-- Add public covariance back-transformation helpers for v0.0.1
+- Add public covariance back-transformation helpers for v0.1.0
   - Current implementation status:
     - `extract_exchangeable_residual_blocks()` dispatches to thin `glmmTMB` and
       `brms` adapters and returns one common block representation.
@@ -502,7 +501,7 @@ Complete these before calling the feature set CRAN-ready:
     transformed covariance of exchangeable dyads.
   - `dev/backtransform.md` records the matching contract, mathematical
     transformation, backend boundaries, and remaining implementation sequence.
-- Add a bounded `glmmTMB` diagnostics workflow for v0.0.1
+- Add a bounded `glmmTMB` diagnostics workflow for v0.1.0
   - Keep this documentation-first: one focused section that other model
     vignettes can link to, with no exported diagnostics or plotting API.
   - Start with optimizer convergence, positive-definite Hessian, finite standard
@@ -546,29 +545,31 @@ Complete these before calling the feature set CRAN-ready:
     for CRAN-facing clarity
 
 - Release to CRAN once checks, tests, docs, README, and vignette are clean
+  - Keep Zenodo draft `21481721` for 0.1.0 unpublished during CRAN review;
+    its reserved version DOI is `10.5281/zenodo.21481721`
   - Submit source package to CRAN without requiring a Git tag first
-  - After CRAN acceptance, tag the accepted commit as `v0.0.1`
+  - After CRAN acceptance, tag the accepted commit as `v0.1.0`
   - Create a GitHub release from that tag
-  - Archive the GitHub release on Zenodo
-  - Add the Zenodo concept DOI to README and citation metadata on `main`
-  - Include the DOI in the next CRAN release
+  - Upload the exact accepted source archive to the prepared Zenodo draft
+  - Verify the draft metadata and checksum, then publish it
+  - Continue to use the concept DOI in package-level citation metadata
 
-## Version 0.0.2
+## Near-term maintenance after 0.1.0
 
 - Extend `compare_dyad_models()` to support fitted `brms` models, using a
   Bayesian-appropriate comparison method and similarly clear output.
 
-## Version 0.1.0
+## Post-0.1.0 method development
 
-- Extend the v0.0.1 covariance back-transformation only where applied use
+- Extend the v0.1.0 covariance back-transformation only where applied use
   justifies it:
   - add the distinct DSM `+0.5/-0.5` transformation
   - consider bootstrap or delta-method uncertainty for `glmmTMB`
   - consider explicitly mapped custom member contrasts only if their coding and
     scale can be validated safely
-  - extend posterior summaries for `brms` only where the v0.0.1 return proves
+  - extend posterior summaries for `brms` only where the v0.1.0 return proves
     insufficient in applied use
-- Develop advanced diagnostics only after validating the v0.0.1 guidance:
+- Develop advanced diagnostics only after validating the v0.1.0 guidance:
   - evaluate a within-member lag-1 statistic against unconditional full-model
     simulations, respecting gaps and repeated series
   - validate joint DHARMa covariance rotation and mixed/ILD diagnostic behavior
@@ -578,7 +579,7 @@ Complete these before calling the feature set CRAN-ready:
     are understood for the supported structures
 
 - Add a dedicated, validated simulation of lagged-outcome bias if this remains
-  useful after the v0.0.1 tutorial review
+  useful after the v0.1.0 tutorial review
   - generate data from a structural lagged-outcome model rather than reuse the
     current examples, whose serial dependence is generated at the residual
     level
@@ -587,11 +588,11 @@ Complete these before calling the feature set CRAN-ready:
     if the results are presented as a methodological comparison
   - keep computationally expensive Monte Carlo work out of normal vignette
     rendering; use a development script or validated precomputed summary
-- Extend dyadic-score model support beyond the v0.0.1 data-prep API
+- Extend dyadic-score model support beyond the v0.1.0 data-prep API
   - consider multiple distinguishable compositions with explicit directions
   - Keep multivariate DSM modeling and formula/syntax generation for a later
     modeling layer
-- Extend composition controls only after the v0.0.1 API has real examples
+- Extend composition controls only after the v0.1.0 API has real examples
   - consider richer pooling diagnostics and warnings for sparse pooled groups
   - consider helpers for inspecting raw-to-analysis composition mappings
   - avoid adding partial-pooling semantics here; `pool_compositions` is a
@@ -611,7 +612,8 @@ Complete these before calling the feature set CRAN-ready:
     new estimator rather than preparation/syntax infrastructure
 - Model summaries focused on dyadic interpretation
 - Exported or advanced diagnostic helpers and sparse-composition guidance,
-  building on the documentation-first v0.0.1 workflow and v0.1 validation
+  building on the documentation-first v0.1.0 workflow and subsequent
+  validation
 - Optional wide-to-long preprocessing helper
   - Keep `prepare_dyad_data()` strict: it should continue to validate one
     canonical long-format dyadic structure

@@ -1,6 +1,6 @@
 Package: dyadMLM
 Title: Tools for Dyadic Multilevel Models
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: 
     person("Pascal", "Küng", , "kueng.pascal@gmail.com",
            role = c("aut", "cre", "cph"),

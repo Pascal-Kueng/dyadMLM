@@ -7,3 +7,5 @@ inst/doc
 /Meta/
 HANDOFF.md
 docs
+/dyadMLM_*.tar.gz
+/*.Rcheck/
