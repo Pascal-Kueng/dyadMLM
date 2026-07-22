@@ -1135,14 +1135,14 @@ we fit the DIM here with the same data and variables to demonstrate.
   
 :::
 
-## DIM to APIM coefficients
+## DIM to exchangeable APIM coefficients
 
 - Once we fit an APIM, we have already fitted a DIM—and vice versa.
 
 - We can transform values from a fitted APIM into DIM values.
 
 
-## DIM to APIM coefficients {.compact-derivation}
+## DIM to exchangeable APIM coefficients {.compact-derivation}
 
 [For this example, the intercept is omitted.]{.derivation-context}
 
@@ -1171,7 +1171,7 @@ $$
 b_{\mathrm{mean}}=a+p.
 $$
 
-## DIM to APIM coefficients {.compact-derivation}
+## DIM to exchangeable APIM coefficients {.compact-derivation}
 
 [For this example, the intercept is omitted.]{.derivation-context}
 
@@ -1202,7 +1202,7 @@ b_{\mathrm{dev}}=a-p.
 $$
 
 
-## DIM to APIM coefficients
+## DIM to exchangeable APIM coefficients
 
 ```{r}
 #| label: interactive-apim-dim-grid-coefficients
@@ -1414,6 +1414,11 @@ interpretations on a separate slide for each model -->
 :::
 
 
+## DSM to distinguishable APIM coefficients
+
+- Once we fit a distinguishable APIM, we have already fitted a DIM—and vice versa.
+
+- We can transform values from a fitted APIM into DIM values.
 
 
 
@@ -1857,6 +1862,56 @@ Thank you for your attention!
 
 
 # Appendix
+
+## Interpreting the distinguishable APIM [← Results](#fitting-the-distinguishable-apim){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+APIM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+**Intercepts:** When both partners' support scores are zero:
+
+- $b_{0,\mathrm{F}}$: Predicted female MVPA is 25.68 minutes.
+- $b_{0,\mathrm{M}}$: Predicted male MVPA is 23.85 minutes.
+
+**Female MVPA**, holding the male partner's support constant:
+
+- [$a_{\mathrm{F}}$: One-unit higher female support is associated with 4.61 fewer minutes of her own MVPA.]{.not-significant}
+- $p_{\mathrm{F}}$: One-unit higher male support is associated with 15.06 additional minutes of female MVPA.
+
+**Male MVPA**, holding the female partner's support constant:
+
+- $a_{\mathrm{M}}$: One-unit higher male support is associated with 17.92 additional minutes of his own MVPA.
+- [$p_{\mathrm{M}}$: One-unit higher female support is associated with 9.87 fewer minutes of male MVPA.]{.not-significant}
+
+**Residual correlation ($\rho = .78$):** When the female's MVPA is higher than predicted, the male's MVPA also tends to be higher than predicted, and likewise for being lower. This is the remaining within-couple interdependence after accounting for both support scores.
+
+## Interpreting the exchangeable APIM [← Results](#fitting-the-exchangeable-apim){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+APIM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+The intercept, actor effect, partner effect, and residual SD are **pooled across members**.
+
+**Pooled intercept:** When both support scores are zero:
+
+- $b_0$: Predicted MVPA is 22.28 minutes for either member position.
+
+**Pooled effects:** For either member, holding the other support score constant:
+
+- $a$: One-unit higher own support is associated with 7.75 additional minutes of own MVPA.
+- [$p$: One-unit higher partner support is associated with 1.97 additional minutes of own MVPA.]{.not-significant}
+
+Pooling means that the same coefficients are used for both member positions. It does not require the two members to have identical predictions because their own and partner support scores may differ.
+
+**Residual correlation ($\rho = .77$):** When one member's MVPA is higher than predicted, the partner's MVPA also tends to be higher than predicted, and likewise for being lower. The residual correlation remains freely estimated even though the other parameters are pooled.
 
 ## Interpreting the fitted DIM [← Results](#fitting-the-dim){.appendix-back-link} {.smaller .interpretation-slide}
 
