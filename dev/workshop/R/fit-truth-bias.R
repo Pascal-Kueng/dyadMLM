@@ -1,7 +1,7 @@
 fit_truth_bias <- function(data) {
   required_columns <- c(
     "couple_id", "person_id", "role",
-    "provided_emotional_support", "received_emotional_support"
+    "provided_support", "received_support"
   )
   missing_columns <- setdiff(required_columns, names(data))
 
@@ -14,11 +14,11 @@ fit_truth_bias <- function(data) {
   }
 
   if (
-    !is.numeric(data$provided_emotional_support) ||
-    !is.numeric(data$received_emotional_support)
+    !is.numeric(data$provided_support) ||
+    !is.numeric(data$received_support)
   ) {
     stop(
-      "`provided_emotional_support` and `received_emotional_support` ",
+      "`provided_support` and `received_support` ",
       "must be numeric.",
       call. = FALSE
     )
@@ -32,7 +32,7 @@ fit_truth_bias <- function(data) {
     dyad = couple_id,
     member = person_id,
     role = role,
-    predictors = provided_emotional_support,
+    predictors = provided_support,
     model_types = "apim",
     keep_compositions = "female-male"
   )
@@ -40,12 +40,12 @@ fit_truth_bias <- function(data) {
   model_data <- prepared |>
     tibble::as_tibble() |>
     dplyr::rename(
-      own_provided_support = .dy_provided_emotional_support_actor,
-      partner_provided_support = .dy_provided_emotional_support_partner
+      own_provided_support = .dy_provided_support_actor,
+      partner_provided_support = .dy_provided_support_partner
     )
 
   analysis_columns <- c(
-    "provided_emotional_support", "received_emotional_support",
+    "provided_support", "received_support",
     "own_provided_support", "partner_provided_support"
   )
   columns_are_complete <- vapply(
@@ -72,11 +72,11 @@ fit_truth_bias <- function(data) {
   # West and Kenny's centering is essential for the intercept interpretation:
   # subtract the same pooled truth mean from the judgment (J), truth predictor
   # (T), and bias predictor (B). Do not center received support on its own mean.
-  truth_mean <- mean(model_data$provided_emotional_support)
+  truth_mean <- mean(model_data$provided_support)
 
   model_data <- model_data |>
     dplyr::mutate(
-      received_support_c = received_emotional_support - truth_mean,
+      received_support_c = received_support - truth_mean,
       own_provided_support_c = own_provided_support - truth_mean,
       partner_provided_support_c = partner_provided_support - truth_mean
     )
@@ -141,10 +141,10 @@ fit_truth_bias <- function(data) {
   # glmmTMB conditions on the predictors, so actual similarity is calculated
   # once per couple as the raw correlation between partners' provided support.
   provided_support_by_role <- model_data |>
-    dplyr::select(couple_id, role, provided_emotional_support) |>
+    dplyr::select(couple_id, role, provided_support) |>
     tidyr::pivot_wider(
       names_from = role,
-      values_from = provided_emotional_support
+      values_from = provided_support
     )
   actual_similarity_test <- stats::cor.test(
     provided_support_by_role$female,

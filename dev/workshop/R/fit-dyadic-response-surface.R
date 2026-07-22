@@ -1,7 +1,7 @@
 fit_dyadic_response_surface <- function(data) {
   required_columns <- c(
     "couple_id", "person_id", "role",
-    "provided_emotional_support", "mvpa_total"
+    "provided_support", "total_mvpa"
   )
   missing_columns <- setdiff(required_columns, names(data))
 
@@ -14,11 +14,11 @@ fit_dyadic_response_surface <- function(data) {
   }
 
   if (
-    !is.numeric(data$provided_emotional_support) ||
-    !is.numeric(data$mvpa_total)
+    !is.numeric(data$provided_support) ||
+    !is.numeric(data$total_mvpa)
   ) {
     stop(
-      "`provided_emotional_support` and `mvpa_total` must be numeric.",
+      "`provided_support` and `total_mvpa` must be numeric.",
       call. = FALSE
     )
   }
@@ -30,14 +30,14 @@ fit_dyadic_response_surface <- function(data) {
     dyad = couple_id,
     member = person_id,
     role = role,
-    predictors = provided_emotional_support,
+    predictors = provided_support,
     model_types = "apim",
     keep_compositions = "female-male"
   )
 
   if (
-    any(!is.finite(prepared$provided_emotional_support)) ||
-    any(!is.finite(prepared$mvpa_total))
+    any(!is.finite(prepared$provided_support)) ||
+    any(!is.finite(prepared$total_mvpa))
   ) {
     stop(
       "This workshop example requires complete support and MVPA observations.",
@@ -55,8 +55,8 @@ fit_dyadic_response_surface <- function(data) {
   model_data <- prepared |>
     tibble::as_tibble() |>
     dplyr::rename(
-      actor_support = .dy_provided_emotional_support_actor,
-      partner_support = .dy_provided_emotional_support_partner
+      actor_support = .dy_provided_support_actor,
+      partner_support = .dy_provided_support_partner
     ) |>
     dplyr::mutate(
       female_support = dplyr::if_else(
@@ -92,7 +92,7 @@ fit_dyadic_response_surface <- function(data) {
   # and male MVPA and their residual covariance. This is the multilevel
   # equivalent of the joint Gaussian SEM used by Schönbrodt et al. (2018).
   fit <- glmmTMB::glmmTMB(
-    mvpa_total ~ 0 + role +
+    total_mvpa ~ 0 + role +
       role:(
         female_support_c +
         male_support_c +
@@ -203,11 +203,11 @@ fit_dyadic_response_surface <- function(data) {
   }
   r2 <- c(
     female_mvpa = variance_explained(
-      model_data$mvpa_total[model_data$role == "female"],
+      model_data$total_mvpa[model_data$role == "female"],
       fixed_surface_prediction[model_data$role == "female"]
     ),
     male_mvpa = variance_explained(
-      model_data$mvpa_total[model_data$role == "male"],
+      model_data$total_mvpa[model_data$role == "male"],
       fixed_surface_prediction[model_data$role == "male"]
     )
   )

@@ -7,13 +7,13 @@ draw_dyadic_response_surface <- function(result) {
   # one row per couple while retaining the fixed female and male support axes.
   plot_data <- result$data |>
     dplyr::select(
-      couple_id, role, mvpa_total,
+      couple_id, role, total_mvpa,
       female_support_c, male_support_c
     ) |>
     tidyr::pivot_wider(
       id_cols = c(couple_id, female_support_c, male_support_c),
       names_from = role,
-      values_from = mvpa_total,
+      values_from = total_mvpa,
       names_glue = "{role}_mvpa"
     )
 

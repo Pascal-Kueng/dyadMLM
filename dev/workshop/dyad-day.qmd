@@ -117,33 +117,40 @@ sys.source(
   envir = knitr::knit_global()
 )
 
-data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds"
+data_file_candidates <- c(
+  "dyadic-data.rds",
+  file.path("dev", "workshop", "dyadic-data.rds")
+)
+data_file <- data_file_candidates[file.exists(data_file_candidates)][1]
+
+if (is.na(data_file)) {
+  stop("Could not find dev/workshop/dyadic-data.rds.")
+}
 
 pilot <- readRDS(data_file) |>
-  select(
-    coupleID, userID, gender, ss_pa, ss_pa_min_solo, ss_pa_min_collab,
-    ss_emo_pleasure, sp_emo_pleasure, sc_actionplan
-  ) |>
   transmute(
     couple_id = coupleID,
-    person_id = userID,
+    person_id = personID,
     role = factor(gender, levels = c(1, 2), labels = c("female", "male")),
-    provided_emotional_support = ss_emo_pleasure,
-    received_emotional_support = sp_emo_pleasure,
-    collaborative_planning = sc_actionplan,
-    mvpa_solo = if_else(ss_pa == 0, 0, ss_pa_min_solo),
-    mvpa_joint = if_else(ss_pa == 0, 0, ss_pa_min_collab),
-    mvpa_total = mvpa_solo + mvpa_joint
+    provided_support,
+    received_support,
+    collaborative_planning,
+    exerted_persuasion,
+    experienced_persuasion,
+    self_efficacy,
+    solo_mvpa,
+    joint_mvpa,
+    total_mvpa
   )
 
 distribution_plot <- function(data, variables, bin_widths) {
   labels <- c(
-    provided_emotional_support = "Provided emotional support",
-    received_emotional_support = "Received emotional support",
+    provided_support = "Provided emotional support",
+    received_support = "Received emotional support",
     collaborative_planning = "Collaborative planning (daily mean)",
-    mvpa_solo = "Mean solo MVPA (minutes/day)",
-    mvpa_joint = "Mean joint MVPA (minutes/day)",
-    mvpa_total = "Mean MVPA (minutes/day)"
+    solo_mvpa = "Mean solo MVPA (minutes/day)",
+    joint_mvpa = "Mean joint MVPA (minutes/day)",
+    total_mvpa = "Mean MVPA (minutes/day)"
   )
 
   missing_widths <- setdiff(variables, names(bin_widths))
@@ -317,9 +324,9 @@ pilot_aggregated <- pilot |>
 ::: {.fragment}
 The variables now represent person-level daily averages across the study:
 
-- `provided_emotional_support`: average daily support provided
-- `received_emotional_support`: average daily support received
-- `mvpa_total`: average daily total MVPA (minutes)
+- `provided_support`: average daily support provided
+- `received_support`: average daily support received
+- `total_mvpa`: average daily total MVPA (minutes)
 :::
 
 <!-- ca. 1 Minute -->
@@ -333,7 +340,7 @@ The variables now represent person-level daily averages across the study:
 
 support_distribution_plot <- ggplot(
   pilot_aggregated,
-  aes(provided_emotional_support, y = after_stat(density))
+  aes(provided_support, y = after_stat(density))
 ) +
   geom_histogram(
     bins = 15, boundary = 0,
@@ -379,7 +386,7 @@ support_distribution_plot
 #| fig-alt: "Histograms and boundary-corrected density curves of average daily MVPA, shown separately for female and male partners."
 
 ggplot(pilot_aggregated,
-       aes(mvpa_total, y = after_stat(density))) +
+       aes(total_mvpa, y = after_stat(density))) +
   geom_histogram(
     bins = 15, boundary = 0,
     fill = "steelblue", color = "white", alpha = 0.75
@@ -749,8 +756,8 @@ On the right:
 
 distinguishable_apim <- fit_and_draw_distinguishable_apim(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "Provided\nsupport", outcome = "MVPA")
 )
 ```
@@ -939,8 +946,8 @@ On the right:
 
 exchangeable_apim <- fit_and_draw_exchangeable_apim(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "Provided\nsupport", outcome = "MVPA")
 )
 ```
@@ -1199,8 +1206,8 @@ IS exactly equivalent to the APIM
 
 fit_and_draw_dim(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "support", outcome = "MVPA")
 )
 ```
@@ -1463,8 +1470,8 @@ difference than predicted.
 
 fit_and_draw_dsm(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "support", outcome = "MVPA")
 )
 ```
@@ -1603,10 +1610,10 @@ cfm_data <- pilot_aggregated |>
   group_by(couple_id) |>
   filter(n_distinct(role) == 2) |>
   ungroup() |>
-  select(couple_id, role, collaborative_planning, mvpa_joint) |>
+  select(couple_id, role, collaborative_planning, joint_mvpa) |>
   tidyr::pivot_wider(
     names_from = role,
-    values_from = c(collaborative_planning, mvpa_joint),
+    values_from = c(collaborative_planning, joint_mvpa),
     names_sep = "_"
   )
 
@@ -1626,7 +1633,7 @@ planning_agreement_plot <- ggplot(
 
 mvpa_agreement_plot <- ggplot(
   cfm_data,
-  aes(mvpa_joint_female, mvpa_joint_male)
+  aes(joint_mvpa_female, joint_mvpa_male)
 ) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey55") +
   geom_point(color = "steelblue", size = 2.4, alpha = 0.8) +
@@ -1729,19 +1736,19 @@ distinguishable_cfm_model <- '
     1 * collaborative_planning_female +
     1 * collaborative_planning_male
   joint_mvpa_level =~
-    1 * mvpa_joint_female +
-    1 * mvpa_joint_male
+    1 * joint_mvpa_female +
+    1 * joint_mvpa_male
 
   # Association between the two shared levels.
   joint_mvpa_level ~ b_level * planning_level
 
   # Same-member residual covariances.
-  collaborative_planning_female ~~ c_female * mvpa_joint_female
-  collaborative_planning_male ~~ c_male * mvpa_joint_male
+  collaborative_planning_female ~~ c_female * joint_mvpa_female
+  collaborative_planning_male ~~ c_male * joint_mvpa_male
 
   # Both partners report the same jointly performed activity.
-  mvpa_joint_female ~~ e_mvpa * mvpa_joint_female
-  mvpa_joint_male ~~ e_mvpa * mvpa_joint_male
+  joint_mvpa_female ~~ e_mvpa * joint_mvpa_female
+  joint_mvpa_male ~~ e_mvpa * joint_mvpa_male
 '
 
 workshop_distinguishable_cfm <- lavaan::sem(
@@ -1820,8 +1827,8 @@ exchangeable_cfm_model <- '
     1 * collaborative_planning_female +
     1 * collaborative_planning_male
   joint_mvpa_level =~
-    1 * mvpa_joint_female +
-    1 * mvpa_joint_male
+    1 * joint_mvpa_female +
+    1 * joint_mvpa_male
 
   # Association between the two shared levels.
   joint_mvpa_level ~ b_level * planning_level
@@ -1829,18 +1836,18 @@ exchangeable_cfm_model <- '
   # Equal indicator intercepts across positions.
   collaborative_planning_female ~ i_planning * 1
   collaborative_planning_male ~ i_planning * 1
-  mvpa_joint_female ~ i_mvpa * 1
-  mvpa_joint_male ~ i_mvpa * 1
+  joint_mvpa_female ~ i_mvpa * 1
+  joint_mvpa_male ~ i_mvpa * 1
 
   # Equal residual variances across positions.
   collaborative_planning_female ~~ e_planning * collaborative_planning_female
   collaborative_planning_male ~~ e_planning * collaborative_planning_male
-  mvpa_joint_female ~~ e_mvpa * mvpa_joint_female
-  mvpa_joint_male ~~ e_mvpa * mvpa_joint_male
+  joint_mvpa_female ~~ e_mvpa * joint_mvpa_female
+  joint_mvpa_male ~~ e_mvpa * joint_mvpa_male
 
   # Equal same-member residual covariances across positions.
-  collaborative_planning_female ~~ c_female * mvpa_joint_female
-  collaborative_planning_male ~~ c_male * mvpa_joint_male
+  collaborative_planning_female ~~ c_female * joint_mvpa_female
+  collaborative_planning_male ~~ c_male * joint_mvpa_male
   c_female == c_male
 '
 

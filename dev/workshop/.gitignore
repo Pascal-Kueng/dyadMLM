@@ -11,4 +11,4 @@
 *.rda
 *.RData
 .~lock.*#
-*.rds
+!/dyadic-data.rds
