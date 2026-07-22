@@ -48,7 +48,8 @@
   margin-bottom: 0.1em;
 }
 
-.reveal .appendix-back-link {
+.reveal .appendix-back-link,
+.reveal .results-forward-link {
   float: right;
   font-size: 0.36em;
   font-weight: 500;

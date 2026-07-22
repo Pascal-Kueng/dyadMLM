@@ -693,7 +693,7 @@ On the right:
 <!-- ca. 4 Minutes -->
 
 
-## Fitting the distinguishable APIM
+## Fitting the distinguishable APIM [Interpretation →](#interpreting-the-distinguishable-apim-results){.results-forward-link} {#fitting-the-distinguishable-apim}
 
 ```{r}
 #| label: fitted-distinguishable-apim
@@ -876,7 +876,7 @@ On the right:
 
 <!-- ca. 4 Minutes -->
 
-## Fitting the exchangeable APIM
+## Fitting the exchangeable APIM [Interpretation →](#interpreting-the-exchangeable-apim-results){.results-forward-link} {#fitting-the-exchangeable-apim}
 
 ```{r}
 #| label: fitted-exchangeable-apim
@@ -1093,7 +1093,7 @@ IS exactly equivalent to the APIM
 
 <!-- ca. 4 Minutes -->
 
-## Fitting the DIM
+## Fitting the DIM [Interpretation →](#interpreting-the-fitted-dim-results){.results-forward-link} {#fitting-the-dim}
 
 ```{r}
 #| label: fitted-dim
@@ -1358,7 +1358,7 @@ difference than predicted.
 
 <!-- ca. 3 Minutes -->
 
-## Fitting the DSM {#fitted-dsm-results}
+## Fitting the DSM [Interpretation →](#interpreting-the-fitted-dsm-results){.results-forward-link} {#fitted-dsm-results}
 
 ```{r}
 #| label: fitted-dsm
