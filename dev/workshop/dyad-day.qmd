@@ -2011,89 +2011,304 @@ draw_truth_bias_diagram()
 
 <!-- ca. 2 minutes -->
 
-## Dyadic response surface analysis [[@schonbrodtTestingSimilarityEffects2018]]{.heading-reference}
-
-::: {style="transform: scale(1.22); transform-origin: center center;"}
-
 ```{r}
-#| label: conceptual-dyadic-response-surface
-#| echo: false
-#| dev: svg
-#| fig-width: 5.2
-#| fig-height: 3.6
-#| layout-ncol: 2
-#| fig-align: center
-#| fig-alt: "Two hypothetical response surfaces from one dyadic model. The first shows Partner A's predicted satisfaction and the second Partner B's predicted satisfaction, each as a function of both partners' support scores."
+#| label: fit-dyadic-response-surface
+#| include: false
 
-RSA::plotRSA(
-  x = 0.45,
-  y = 0.45,
-  x2 = -0.18,
-  y2 = -0.18,
-  xy = 0.36,
-  b0 = 3,
-  xlim = c(-2, 2),
-  ylim = c(-2, 2),
-  zlim = c(0, 5),
-  xlab = "Partner A support",
-  ylab = "Partner B support",
-  zlab = "Partner A satisfaction",
-  main = "Partner A outcome",
-  legend = FALSE,
-  param = FALSE,
-  axes = c("LOC", "LOIC"),
-  project = c("contour", "LOC", "LOIC"),
-  border = FALSE,
-  cex.tickLabel = 0.8,
-  cex.axesLabel = 0.9
+# Fit the full distinguishable DRSA described by Schönbrodt et al. (2018):
+# two partner-specific polynomial regressions in one SEM, with correlated
+# outcome residuals. Both support scores use the same centering constant.
+drsa_data <- pilot_aggregated |>
+  group_by(couple_id) |>
+  filter(n() == 2, n_distinct(role) == 2) |>
+  ungroup() |>
+  select(
+    couple_id, role, provided_emotional_support, mvpa_total
+  ) |>
+  tidyr::pivot_wider(
+    names_from = role,
+    values_from = c(provided_emotional_support, mvpa_total),
+    names_sep = "_"
+  ) |>
+  rename(
+    female_support = provided_emotional_support_female,
+    male_support = provided_emotional_support_male,
+    female_mvpa = mvpa_total_female,
+    male_mvpa = mvpa_total_male
+  )
+
+drsa_support_center <- mean(
+  c(drsa_data$female_support, drsa_data$male_support),
+  na.rm = TRUE
 )
 
-RSA::plotRSA(
-  x = 0.20,
-  y = 0.65,
-  x2 = -0.10,
-  y2 = -0.16,
-  xy = 0.20,
-  b0 = 3,
-  xlim = c(-2, 2),
-  ylim = c(-2, 2),
-  zlim = c(0, 5),
-  xlab = "Partner A support",
-  ylab = "Partner B support",
-  zlab = "Partner B satisfaction",
-  main = "Partner B outcome",
-  legend = FALSE,
-  param = FALSE,
-  axes = c("LOC", "LOIC"),
-  project = c("contour", "LOC", "LOIC"),
-  border = FALSE,
-  cex.tickLabel = 0.8,
-  cex.axesLabel = 0.9
+drsa_data <- drsa_data |>
+  mutate(
+    female_support_c = female_support - drsa_support_center,
+    male_support_c = male_support - drsa_support_center,
+    female_support_sq = female_support_c^2,
+    support_product = female_support_c * male_support_c,
+    male_support_sq = male_support_c^2
+  )
+
+drsa_model <- '
+  female_mvpa ~ b1f * female_support_c + b2f * male_support_c +
+                b3f * female_support_sq + b4f * support_product +
+                b5f * male_support_sq
+  male_mvpa   ~ b1m * female_support_c + b2m * male_support_c +
+                b3m * female_support_sq + b4m * support_product +
+                b5m * male_support_sq
+
+  female_mvpa ~~ male_mvpa
+
+  a1f := b1f + b2f
+  a2f := b3f + b4f + b5f
+  a3f := b1f - b2f
+  a4f := b3f - b4f + b5f
+  a5f := b3f - b5f
+
+  a1m := b1m + b2m
+  a2m := b3m + b4m + b5m
+  a3m := b1m - b2m
+  a4m := b3m - b4m + b5m
+  a5m := b3m - b5m
+'
+
+drsa_fit <- lavaan::sem(
+  drsa_model,
+  data = drsa_data,
+  meanstructure = TRUE,
+  estimator = "MLR",
+  se = "robust",
+  missing = "fiml"
+)
+
+if (!lavaan::lavInspect(drsa_fit, "converged")) {
+  stop("The joint dyadic response surface model did not converge.")
+}
+
+drsa_parameters <- lavaan::parameterEstimates(drsa_fit)
+
+drsa_labeled_estimate <- function(label) {
+  estimate <- drsa_parameters$est[drsa_parameters$label == label]
+  if (length(estimate) != 1) {
+    stop("Could not uniquely recover DRSA parameter `", label, "`.")
+  }
+  estimate
+}
+
+drsa_intercept <- function(outcome) {
+  estimate <- drsa_parameters$est[
+    drsa_parameters$lhs == outcome & drsa_parameters$op == "~1"
+  ]
+  if (length(estimate) != 1) {
+    stop("Could not uniquely recover the intercept for `", outcome, "`.")
+  }
+  estimate
+}
+
+drsa_surface_coefficients <- list(
+  female = c(
+    b0 = drsa_intercept("female_mvpa"),
+    x = drsa_labeled_estimate("b1f"),
+    y = drsa_labeled_estimate("b2f"),
+    x2 = drsa_labeled_estimate("b3f"),
+    xy = drsa_labeled_estimate("b4f"),
+    y2 = drsa_labeled_estimate("b5f")
+  ),
+  male = c(
+    b0 = drsa_intercept("male_mvpa"),
+    x = drsa_labeled_estimate("b1m"),
+    y = drsa_labeled_estimate("b2m"),
+    x2 = drsa_labeled_estimate("b3m"),
+    xy = drsa_labeled_estimate("b4m"),
+    y2 = drsa_labeled_estimate("b5m")
+  )
+)
+
+drsa_residual_parameter <- function(lhs, rhs) {
+  estimate <- drsa_parameters$est[
+    drsa_parameters$lhs == lhs &
+      drsa_parameters$op == "~~" &
+      drsa_parameters$rhs == rhs
+  ]
+  if (length(estimate) != 1) {
+    stop("Could not uniquely recover a DRSA residual (co)variance.")
+  }
+  estimate
+}
+
+drsa_residual_correlation <-
+  drsa_residual_parameter("female_mvpa", "male_mvpa") /
+  sqrt(
+    drsa_residual_parameter("female_mvpa", "female_mvpa") *
+      drsa_residual_parameter("male_mvpa", "male_mvpa")
+  )
+
+drsa_r2 <- lavaan::lavInspect(drsa_fit, "rsquare")
+
+# Use common plot limits so the two surfaces are directly comparable. A small
+# pad keeps the observed-data bagplot inside the plotting cube.
+drsa_xy_range <- range(
+  c(drsa_data$female_support_c, drsa_data$male_support_c),
+  finite = TRUE
+)
+drsa_xy_pad <- 0.015 * diff(drsa_xy_range)
+drsa_xy_limit <- drsa_xy_range + c(-drsa_xy_pad, drsa_xy_pad)
+
+drsa_surface_value <- function(coefficients, x, y) {
+  coefficients[["b0"]] +
+    coefficients[["x"]] * x +
+    coefficients[["y"]] * y +
+    coefficients[["x2"]] * x^2 +
+    coefficients[["xy"]] * x * y +
+    coefficients[["y2"]] * y^2
+}
+
+drsa_plot_grid <- expand.grid(
+  x = seq(drsa_xy_limit[1], drsa_xy_limit[2], length.out = 101),
+  y = seq(drsa_xy_limit[1], drsa_xy_limit[2], length.out = 101)
+)
+drsa_grid_predictions <- unlist(lapply(
+  drsa_surface_coefficients,
+  \(coefficients) drsa_surface_value(
+    coefficients, drsa_plot_grid$x, drsa_plot_grid$y
+  )
+))
+drsa_z_limit <- c(
+  floor(min(0, drsa_grid_predictions) / 50) * 50,
+  ceiling(max(drsa_grid_predictions) / 50) * 50
 )
 ```
 
-:::
+## Dyadic response surface analysis [[@schonbrodtTestingSimilarityEffects2018]]{.heading-reference}
+
+```{r}
+#| label: fitted-dyadic-response-surface
+#| echo: false
+#| dev: svglite
+#| fig-width: 12
+#| fig-height: 4.25
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Two fitted response surfaces from one joint dyadic polynomial model. Each shows predicted female or male average daily total MVPA as a function of female-provided and male-provided emotional support centered at the pooled mean. Points and loops mark the observed couples and predictor region; the solid blue line is the line of congruence and the dashed purple line is the line of incongruence."
+
+drsa_palette <- grDevices::colorRampPalette(
+  c("#F8FAFC", "#BFE4EA", "#00A6B2", "#0028A5")
+)(24)
+
+drsa_axes_styles <- list(
+  LOC = list(lty = "solid", lwd = 2, col = "#1769AA"),
+  LOIC = list(lty = "dashed", lwd = 2, col = "#7B3FA1")
+)
+
+drsa_plot <- function(role) {
+  coefficients <- drsa_surface_coefficients[[role]]
+  outcome <- paste0(role, "_mvpa")
+
+  RSA::plotRSA(
+    x = coefficients[["x"]],
+    y = coefficients[["y"]],
+    x2 = coefficients[["x2"]],
+    y2 = coefficients[["y2"]],
+    xy = coefficients[["xy"]],
+    b0 = coefficients[["b0"]],
+    xlim = drsa_xy_limit,
+    ylim = drsa_xy_limit,
+    zlim = drsa_z_limit,
+    xlab = "Female-provided emotional\nsupport (centered)",
+    ylab = "Male-provided emotional\nsupport (centered)",
+    zlab = "Predicted value",
+    main = paste0(tools::toTitleCase(role), " total MVPA (min/day)"),
+    legend = FALSE,
+    param = FALSE,
+    axes = c("LOC", "LOIC"),
+    axesStyles = drsa_axes_styles,
+    project = c("contour", "LOC", "LOIC", "points"),
+    points = list(
+      data = data.frame(
+        drsa_data$female_support_c,
+        drsa_data$male_support_c,
+        drsa_data[[outcome]]
+      ),
+      show = TRUE,
+      value = "predicted",
+      jitter = 0,
+      color = "#20252B",
+      cex = 0.38
+    ),
+    hull = TRUE,
+    border = FALSE,
+    gridsize = 23,
+    pal = drsa_palette,
+    pal.range = "box",
+    distance = c(1.05, 1.05, 1.1),
+    cex.tickLabel = 0.66,
+    cex.axesLabel = 0.74,
+    cex.main = 0.90,
+    pad = 0.35
+  )
+}
+
+female_drsa_plot <- drsa_plot("female")
+male_drsa_plot <- drsa_plot("male")
+
+gridExtra::grid.arrange(
+  female_drsa_plot,
+  male_drsa_plot,
+  ncol = 2,
+  padding = grid::unit(0.15, "line")
+)
+```
 
 ::: {.text-smaller}
 
-- **One joint model:** Both partner outcomes are estimated with correlated residuals.
-- **Two surfaces:** Each visualizes one partner-specific coefficient set.
+- **Joint fit:** Both MVPA outcomes were modeled together (residual
+  $\hat\rho_e = `r sub("^0", "", sprintf("%.2f", drsa_residual_correlation))`$).
+- **Pattern:** Both surfaces curve upward along the line of incongruence
+  ($a_{4,\mathrm F} = `r sprintf("%.2f", drsa_labeled_estimate("a4f"))`$;
+  $a_{4,\mathrm M} = `r sprintf("%.2f", drsa_labeled_estimate("a4m"))`$)—not the
+  pattern expected for a similarity benefit.
 
 :::
 
 :::{.notes}
 
-- These are deliberately hypothetical surfaces, not results from today's data.
-- Both surfaces come from the same conceptual joint model: the two polynomial
-  outcome equations are estimated simultaneously and their residuals correlate.
-- The horizontal axes stay in the same orientation in both plots. Only the
-  outcome on the vertical axis and its regression coefficients change.
-- Dyadic response surface analysis can test equality constraints across the two
-  partners' surface parameters.
-- Along the line of congruence, both partners have the same predictor score; the
-  first surface illustrates a rising high-high congruence pattern.
-- The second surface deliberately differs to illustrate that the same predictor
-  combination may relate differently to the two partners' outcomes.
+- These are fitted results from the same 36 female–male couples used for the
+  distinguishable APIM. Female and male total MVPA are the two outcomes.
+- Following Schönbrodt et al., the two full second-order polynomial equations
+  were estimated simultaneously in `lavaan` with MLR, FIML, and a correlated
+  residual. The unconstrained outcome model is saturated, so global fit is not
+  informative.
+- Both support scores were centered at their pooled mean
+  (`r sprintf("%.2f", drsa_support_center)`), preserving numerical congruence
+  between the partners' measures. The axes retain the same female/male
+  orientation in both panels.
+- The solid blue line is the line of congruence ($X=Y$). The dashed purple line
+  is the line of incongruence ($Y=-X$ after centering). The points are fitted
+  values for observed couples; the loops mark the inner bag and outer fence of
+  their predictor combinations.
+- Surface parameters for female MVPA are
+  $a_1=`r sprintf("%.2f", drsa_labeled_estimate("a1f"))`$,
+  $a_2=`r sprintf("%.2f", drsa_labeled_estimate("a2f"))`$,
+  $a_3=`r sprintf("%.2f", drsa_labeled_estimate("a3f"))`$,
+  $a_4=`r sprintf("%.2f", drsa_labeled_estimate("a4f"))`$, and
+  $a_5=`r sprintf("%.2f", drsa_labeled_estimate("a5f"))`$.
+- Surface parameters for male MVPA are
+  $a_1=`r sprintf("%.2f", drsa_labeled_estimate("a1m"))`$,
+  $a_2=`r sprintf("%.2f", drsa_labeled_estimate("a2m"))`$,
+  $a_3=`r sprintf("%.2f", drsa_labeled_estimate("a3m"))`$,
+  $a_4=`r sprintf("%.2f", drsa_labeled_estimate("a4m"))`$, and
+  $a_5=`r sprintf("%.2f", drsa_labeled_estimate("a5m"))`$.
+- The polynomial predictors account for
+  `r sprintf("%.0f", 100 * drsa_r2[["female_mvpa"]])`% of female-MVPA variance
+  and `r sprintf("%.0f", 100 * drsa_r2[["male_mvpa"]])`% of male-MVPA variance
+  in this sample.
+- Positive $a_4$ values describe U-shaped curvature along the line of
+  incongruence, not the inverted-U pattern required for a similarity benefit.
+  With only 36 couples and sparse discrepant high-support combinations, this is
+  a descriptive illustration; do not interpret the empty surface corners or
+  the fitted pattern as robust evidence.
 - A response surface is more informative than a difference score because the
   same difference can arise from substantively different combinations of the
   two partners' levels.
