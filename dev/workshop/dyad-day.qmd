@@ -918,7 +918,6 @@ compare_nested_glmmTMB_models(
 ```
 
 
-
 ## The DIM
 
 - A re-parametrization of the **exchangeable** APIM!
@@ -1126,14 +1125,14 @@ we fit the DIM here with the same data and variables to demonstrate.
 
 -> Why no intercept? for the deviation? 
 
-No intercept for the MVPA deviation, because that would break exchangeability. 
-if support deviation is zero, then the expected MVPA deviation is also zero. 
-
--> We conceptually DO have an intercept, it is just constrained to be ZERO!
-
--> just like the correlation between the residuals, they are not estimated, which 
-effectively constrains them to be zero. 
-
+  No intercept for the MVPA deviation, because that would break exchangeability. 
+  if support deviation is zero, then the expected MVPA deviation is also zero. 
+  
+  -> We conceptually DO have an intercept, it is just constrained to be ZERO!
+  
+  -> just like the correlation between the residuals, they are not estimated, which 
+  effectively constrains them to be zero. 
+  
 :::
 
 ## DIM to APIM coefficients
@@ -1359,7 +1358,7 @@ difference than predicted.
 
 <!-- ca. 3 Minutes -->
 
-## Fitting the DSM
+## Fitting the DSM {#fitted-dsm-results}
 
 ```{r}
 #| label: fitted-dsm
@@ -1384,24 +1383,39 @@ fit_and_draw_dsm(
 
 -> students interpret results, including correlation. 
 
-**Intercepts**: A couple with *average mean level* and *zero male-female difference* is expected to be:
+**Intercepts**: For a couple with an average support mean and no female–male support difference:
 
-- a10: 33.26 min more active on average,
-- a20: have a female that is 4.04 min more active than the male.
+- a10: predicted couple-mean MVPA is 33.26 minutes,
+- a20: the female is predicted to be 4.04 min more active than the male.
 
-A couple providing 1 unit more average support is expected to be:
+Holding the couple-difference score at zero, 
+**a 1 unit higher couple-mean support score** is associated with:
 
-- a11: 9.25 minutes more active on average,
-- a21: have a female that is 2.4 minutes + 4.04 minutes more active than the male
+- a11: 9.25 additional minutes of couple-mean MVPA,
+- a21: a 2.4-minute larger female-male MVPA difference (The female is 2.4 minutes + 4.04 minutes more active than the male). 
 
-A couple with a female providing 1 unit more support than the male is expected to:
+Holding the couple-mean score at the *sample-average*, 
+**a one-unit larger female-male support difference** is associated with:
 
-- a12: have a couple-mean MVPA 11.86 minutes lower. 
-- a22: have a female that is 4.06 minutes + 4.04 minutes more active than the male
+- a12: 11.86 fewer minutes of couple-mean MVPA
+- a22: a 4.06-minute larger female-male MVPA difference (The female is 4.06 minutes + 4.04 minutes more active than the male)
 
-<!-- @codex, check if correctly interpreted -->
+**Residual correlations**
+
+After accounting for the support mean and female–male support difference, 
+couples whose average MVPA is higher than predicted also tend to have a more 
+positive female–male MVPA difference than predicted. 
+
+In other words, their unexplained MVPA tends to tilt toward the female partner.
+
+<!-- TODO: after the workshop perhaps create a slide-deck that has the 
+interpretations on a separate slide for each model -->
 
 :::
+
+
+
+
 
 ## Research Question 2 {.rq-slide}
 
@@ -1843,6 +1857,56 @@ Thank you for your attention!
 
 
 # Appendix
+
+## Interpreting the fitted DIM [← Results](#fitting-the-dim){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+DIM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+**Intercepts:** For a couple with an average support mean:
+
+- $b_0$: Predicted couple-mean MVPA is 31.21 minutes.
+- The member-deviation intercept is constrained to zero: a member with no support deviation has no predicted MVPA deviation from the couple mean.
+
+Holding the **members' support deviations fixed**, a one-unit higher couple-mean support score is associated with:
+
+- $b_{\mathrm{mean}}$: 9.72 additional minutes of couple-mean MVPA.
+
+Holding couple-mean support at the **sample average**, a one-unit larger member support deviation from the couple mean is associated with:
+
+- [$b_{\mathrm{dev}}$: A 5.78-minute larger member MVPA deviation from the couple mean. Thus, a member whose support is one unit above the couple mean is predicted to have MVPA 5.78 minutes above the couple mean.]{.not-significant}
+
+**Residual correlation:** Exchangeability constrains the correlation between the residual couple mean and residual member deviation to zero. Thus, couples whose MVPA is higher than predicted on average are not expected to tilt systematically toward either arbitrarily labeled member in residual MVPA. This is a model constraint, not an empirical finding, and it does not imply that the two partners' residuals are independent.
+
+## Interpreting the fitted DSM [← Results](#fitted-dsm-results){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+DSM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+**Intercepts:** For a couple with an average support mean and no female–male support difference:
+
+- $a_{10}$: Predicted couple-mean MVPA is 33.26 minutes.
+- [$a_{20}$: The female is predicted to be 4.04 minutes more active than the male.]{.not-significant}
+
+Holding the **female–male support difference at zero**, a one-unit higher couple-mean support score is associated with:
+
+- $a_{11}$: 9.25 additional minutes of couple-mean MVPA.
+- [$a_{21}$: A 2.40-minute larger female–male MVPA difference. Thus, when couple-mean support is one unit above the sample average, the predicted difference is $4.04 + 2.40 = 6.44$ minutes.]{.not-significant}
+
+Holding couple-mean support at the **sample average**, a one-unit larger female–male support difference is associated with:
+
+- $a_{12}$: 11.86 fewer minutes of couple-mean MVPA.
+- [$a_{22}$: A 4.06-minute larger female–male MVPA difference. Thus, when the female–male support difference is one unit, the predicted difference is $4.04 + 4.06 = 8.10$ minutes.]{.not-significant}
+
+**Residual correlation ($\rho = .37$):** Couples with higher-than-predicted mean MVPA also tend to show a more positive-than-predicted female–male MVPA difference; residual MVPA therefore tilts toward the female.
 
 ## Distinguishable APIM: residual covariance
 

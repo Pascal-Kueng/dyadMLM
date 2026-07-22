@@ -18,6 +18,43 @@
   --interdep-residual-correlation: #546e7a;
 }
 
+/* Interpretation cautions ----------------------------------------------- */
+.reveal .not-significant,
+.reveal .interpretation-footnote {
+  color: #b42318;
+}
+
+.reveal .interpretation-footnote {
+  font-size: 0.66em;
+  line-height: 1.2;
+  margin-top: 0.45em;
+}
+
+.reveal .interpretation-footnote p {
+  margin: 0;
+}
+
+.reveal .slides section.interpretation-slide p {
+  margin: 0.38em 0;
+}
+
+.reveal .slides section.interpretation-slide ul {
+  margin-top: 0.18em;
+  margin-bottom: 0.42em;
+}
+
+.reveal .slides section.interpretation-slide li {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+.reveal .appendix-back-link {
+  float: right;
+  font-size: 0.36em;
+  font-weight: 500;
+  margin-top: 0.85em;
+}
+
 /* Transition between the two workshop decks ------------------------------ */
 .reveal .workshop-next {
   display: grid;
