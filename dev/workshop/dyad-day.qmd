@@ -1414,13 +1414,37 @@ interpretations on a separate slide for each model -->
 :::
 
 
-## DSM to distinguishable APIM coefficients
+## DSM to distinguishable APIM coefficients {.smaller}
 
-- Once we fit a distinguishable APIM, we have already fitted a DIM—and vice versa.
+- Once we fit a DSM, we have already fitted a distinguishable APIM—and vice versa.
 
-- We can transform values from a fitted APIM into DIM values.
+- We can back-transform the DSM fixed effects into APIM coefficients:
 
+$$
+\begin{aligned}
+b_{0,\mathrm F}
+  &=a_{10}+\tfrac12a_{20}
+    -\bar X\left(a_{11}+\tfrac12a_{21}\right),
+&
+b_{0,\mathrm M}
+  &=a_{10}-\tfrac12a_{20}
+    -\bar X\left(a_{11}-\tfrac12a_{21}\right),\\[0.4em]
+b_{1,\mathrm F}
+  &=\tfrac12a_{11}+a_{12}+\tfrac14a_{21}+\tfrac12a_{22},
+&
+b_{1,\mathrm M}
+  &=\tfrac12a_{11}-a_{12}-\tfrac14a_{21}+\tfrac12a_{22},\\[0.4em]
+b_{2,\mathrm F}
+  &=\tfrac12a_{11}-a_{12}+\tfrac14a_{21}-\tfrac12a_{22},
+&
+b_{2,\mathrm M}
+  &=\tfrac12a_{11}+a_{12}-\tfrac14a_{21}-\tfrac12a_{22}.
+\end{aligned}
+$$
 
+Here, $b_1$ is the actor effect, $b_2$ is the partner effect, and $\bar X$ is
+the sample-average couple-mean predictor score. The $\bar X$ terms are needed
+because the DSM couple mean is centered, whereas the APIM predictors are not.
 
 ## Research Question 2 {.rq-slide}
 
