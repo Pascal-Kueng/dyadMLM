@@ -9,6 +9,7 @@ on:
       - fix/workshop-model-comparison
     paths:
       - dev/workshop/dyad-day.html
+      - dev/workshop/applied-tutorial.html
       - .github/workflows/workshop-draft.yaml
 
 permissions:
@@ -25,17 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Stage the self-contained slide deck
+      - name: Stage the self-contained slide decks
         run: |
-          mkdir -p _workshop-draft
-          cp dev/workshop/dyad-day.html _workshop-draft/index.html
+          mkdir -p _workshop-draft/conceptual _workshop-draft/applied
+          cp dev/workshop/dyad-day.html _workshop-draft/conceptual/index.html
+          cp dev/workshop/applied-tutorial.html _workshop-draft/applied/index.html
 
-      - name: Publish the workshop draft
+      - name: Publish the workshop drafts
         uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           branch: gh-pages
           folder: _workshop-draft
-          target-folder: workshop/conceptual
+          target-folder: workshop
           clean: false
           force: false
           attempt-limit: 5
