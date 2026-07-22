@@ -1,0 +1,42 @@
+# Temporary publisher for fix/workshop-model-comparison.
+# Delete this file on that branch immediately before merging into main so the
+# workflow has no net effect on main's tree.
+name: Workshop draft (temporary)
+
+on:
+  push:
+    branches:
+      - fix/workshop-model-comparison
+    paths:
+      - dev/workshop/dyad-day.html
+      - .github/workflows/workshop-draft.yaml
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-workshop:
+    runs-on: ubuntu-latest
+    # Match the non-PR deployment group in pkgdown.yaml so two jobs cannot
+    # update gh-pages concurrently.
+    concurrency:
+      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Stage the self-contained slide deck
+        run: |
+          mkdir -p _workshop-draft
+          cp dev/workshop/dyad-day.html _workshop-draft/index.html
+
+      - name: Publish the workshop draft
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
+        with:
+          branch: gh-pages
+          folder: _workshop-draft
+          target-folder: workshop/conceptual
+          clean: false
+          force: false
+          attempt-limit: 5
+          commit-message: "Deploy workshop draft from ${{ github.sha }}"
