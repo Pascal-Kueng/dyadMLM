@@ -61,6 +61,28 @@
   )
 }
 
+.grand_mean_center_apim_predictors <- function(data, predictor) {
+  actor <- paste0(".dy_", predictor, "_actor")
+  partner <- paste0(".dy_", predictor, "_partner")
+  complete_pair <- is.finite(data[[actor]]) & is.finite(data[[partner]])
+
+  if (!any(complete_pair)) {
+    stop(
+      "No complete actor-partner predictor pairs are available for centering.",
+      call. = FALSE
+    )
+  }
+
+  # One common centering constant preserves female-male differences and matches
+  # the grand mean used for the DIM/DSM dyad-mean predictor.
+  grand_mean <- mean(
+    (data[[actor]][complete_pair] + data[[partner]][complete_pair]) / 2
+  )
+  data[[actor]] <- data[[actor]] - grand_mean
+  data[[partner]] <- data[[partner]] - grand_mean
+  data
+}
+
 # Each public helper draws the fitted diagram and invisibly returns its model.
 
 fit_and_draw_distinguishable_apim <- function(
@@ -70,6 +92,9 @@ fit_and_draw_distinguishable_apim <- function(
   )
   prepared <- .prepare_early_model_data(
     data, variables$predictor, model_types = "apim"
+  )
+  prepared <- .grand_mean_center_apim_predictors(
+    prepared, variables$predictor
   )
 
   actor <- paste0(".dy_", variables$predictor, "_actor")
@@ -88,7 +113,10 @@ fit_and_draw_distinguishable_apim <- function(
   )
   model <- .fit_early_gaussian_model(model_formula, prepared)
 
-  draw_apim_diagram("distinguishable", model = model, labels = labels)
+  draw_apim_diagram(
+    "distinguishable", model = model, labels = labels,
+    predictors_centered = TRUE
+  )
   invisible(model)
 }
 
@@ -99,6 +127,9 @@ fit_and_draw_exchangeable_apim <- function(
   )
   prepared <- .prepare_early_model_data(
     data, variables$predictor, model_types = "apim", exchangeable = TRUE
+  )
+  prepared <- .grand_mean_center_apim_predictors(
+    prepared, variables$predictor
   )
 
   actor <- paste0(".dy_", variables$predictor, "_actor")
@@ -116,7 +147,10 @@ fit_and_draw_exchangeable_apim <- function(
   )
   model <- .fit_early_gaussian_model(model_formula, prepared)
 
-  draw_apim_diagram("exchangeable", model = model, labels = labels)
+  draw_apim_diagram(
+    "exchangeable", model = model, labels = labels,
+    predictors_centered = TRUE
+  )
   invisible(model)
 }
 

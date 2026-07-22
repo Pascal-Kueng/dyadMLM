@@ -684,12 +684,17 @@ draw_apim_diagram <- function(
     terms = NULL,
     show_residuals = TRUE,
     labels = NULL,
-    p_values = NULL) {
+    p_values = NULL,
+    predictors_centered = FALSE) {
   type <- match.arg(type)
   labels <- .diagram_variable_labels(labels)
   if (!is.logical(show_residuals) || length(show_residuals) != 1L ||
       is.na(show_residuals)) {
     stop("`show_residuals` must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.logical(predictors_centered) || length(predictors_centered) != 1L ||
+      is.na(predictors_centered)) {
+    stop("`predictors_centered` must be TRUE or FALSE.", call. = FALSE)
   }
 
   if (!is.null(model)) {
@@ -716,8 +721,12 @@ draw_apim_diagram <- function(
 
   if (type == "distinguishable") {
     node_labels <- list(
-      x_top = expression(X[plain(F)]),
-      x_bottom = expression(X[plain(M)]),
+      x_top = if (predictors_centered) {
+        expression(X[plain(F)] - mu[X])
+      } else expression(X[plain(F)]),
+      x_bottom = if (predictors_centered) {
+        expression(X[plain(M)] - mu[X])
+      } else expression(X[plain(M)]),
       y_top = expression(Y[plain(F)]),
       y_bottom = expression(Y[plain(M)]),
       e_top = expression(epsilon[plain(F)]),
@@ -741,8 +750,12 @@ draw_apim_diagram <- function(
     required_residuals <- c("sd_female", "sd_male", "correlation")
   } else {
     node_labels <- list(
-      x_top = expression(X[1]),
-      x_bottom = expression(X[2]),
+      x_top = if (predictors_centered) {
+        expression(X[1] - mu[X])
+      } else expression(X[1]),
+      x_bottom = if (predictors_centered) {
+        expression(X[2] - mu[X])
+      } else expression(X[2]),
       y_top = expression(Y[1]),
       y_bottom = expression(Y[2]),
       e_top = expression(epsilon[1]),
@@ -888,7 +901,7 @@ draw_apim_diagram <- function(
     type = "closed"
   )
 
-  draw_node <- function(x, y, label) {
+  draw_node <- function(x, y, label, subtitle = NULL) {
     node_fontsize <- if (is.null(labels)) 20 else 18
     if (is.list(label) && !is.expression(label)) {
       line_labels <- lapply(label, .diagram_math_label)
@@ -912,21 +925,37 @@ draw_apim_diagram <- function(
       grid::grid.text(
         label,
         x = native(x),
-        y = native(y),
+        y = native(y + if (is.null(subtitle)) 0 else 0.025),
         gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
       )
     } else {
+      line_offset <- if (is.null(subtitle)) 0.035 else 0.050
+      line_gap <- if (is.null(subtitle)) 0.070 else 0.045
       grid::grid.text(
         line_labels[[1]],
         x = native(x),
-        y = native(y + 0.035),
-        gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
+        y = native(y + line_offset),
+        gp = grid::gpar(
+          col = ink_colour,
+          fontsize = node_fontsize - if (is.null(subtitle)) 0 else 1
+        )
       )
       grid::grid.text(
         line_labels[[2]],
         x = native(x),
-        y = native(y - 0.035),
-        gp = grid::gpar(col = ink_colour, fontsize = node_fontsize)
+        y = native(y + line_offset - line_gap),
+        gp = grid::gpar(
+          col = ink_colour,
+          fontsize = node_fontsize - if (is.null(subtitle)) 0 else 1
+        )
+      )
+    }
+    if (!is.null(subtitle)) {
+      grid::grid.text(
+        subtitle,
+        x = native(x),
+        y = native(y - 0.060),
+        gp = grid::gpar(col = muted_colour, fontsize = 10)
       )
     }
   }
@@ -999,8 +1028,9 @@ draw_apim_diagram <- function(
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
   grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
-  draw_node(0.17, 0.72, node_labels$x_top)
-  draw_node(0.17, 0.28, node_labels$x_bottom)
+  predictor_subtitle <- if (predictors_centered) "GM-centered" else NULL
+  draw_node(0.17, 0.72, node_labels$x_top, predictor_subtitle)
+  draw_node(0.17, 0.28, node_labels$x_bottom, predictor_subtitle)
   draw_node(0.64, 0.72, node_labels$y_top)
   draw_node(0.64, 0.28, node_labels$y_bottom)
   draw_intercept(0.64, 0.86, intercept_labels$top)

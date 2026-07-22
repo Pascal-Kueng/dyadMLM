@@ -483,7 +483,10 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 #| fig-align: center
 #| fig-alt: "Conceptual distinguishable APIM with actor and partner paths."
 
-draw_apim_diagram("distinguishable", show_residuals = FALSE)
+draw_apim_diagram(
+  "distinguishable", show_residuals = FALSE,
+  predictors_centered = TRUE
+)
 ```
 
 ::: {.fragment}
@@ -512,7 +515,7 @@ outcomes.
 #| fig-align: center
 #| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
 
-draw_apim_diagram("distinguishable")
+draw_apim_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 Actor and partner effects together explain some of the covariance between partners' 
@@ -520,6 +523,9 @@ outcomes.  $\rightarrow$ But some covariance may remain!
 
 :::{.notes}
 But more on the residuals later!!!
+
+-> Ask students what grand-mean centering is. 
+
 :::
 
 <!-- ca. 0.5 Minutes -->
@@ -541,9 +547,12 @@ $$
   \end{gathered}
 $$
 <br>
+
 [Could we just use two separate models?]{.fragment}
 
-<!-- ca. 1 Minutes -->
+
+
+<!-- ca. 2 Minutes -->
 
 ## Could we just use two separate models?
 
@@ -612,10 +621,13 @@ within-dyad covariance is accounted for by the predictors.
 #| fig-align: center
 #| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
 
-draw_apim_diagram("distinguishable")
+draw_apim_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 :::{.notes}
+
+"This represents the two model formulas before, but in a single model with correlated
+residuals." 
 
 Map the preceding visual onto the APIM notation:
 
@@ -624,7 +636,7 @@ Map the preceding visual onto the APIM notation:
   partners. Their squares are the residual variances from the previous slide.
 - The curved double-headed arrow is the residual correlation,
   $\rho_{\epsilon_F\epsilon_M}$.
-
+  
 :::
 
 <!-- ca. 2 Minutes -->
@@ -721,8 +733,9 @@ distinguishable_apim <- fit_and_draw_distinguishable_apim(
 
 - All associations are conditional on both partners' provided support.
 
-- The intercepts, 25.68 for female partners and 23.85 for male partners, are the
-  predicted daily MVPA when both partners' average provided support is zero.
+- The intercepts, 35.28 for female partners and 31.24 for male partners, are the
+  predicted daily MVPA when both partners' average provided support equals the
+  pooled sample mean (0.92 on the original scale).
   
 - Female actor effect, -4.61: for each one-unit higher support provided by a
   female partner, her own predicted daily MVPA is 4.61 minutes lower, holding
@@ -781,7 +794,10 @@ $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
 #| fig-align: center
 #| fig-alt: "Conceptual exchangeable APIM with pooled actor and partner paths."
 
-draw_apim_diagram("exchangeable", show_residuals = FALSE)
+draw_apim_diagram(
+  "exchangeable", show_residuals = FALSE,
+  predictors_centered = TRUE
+)
 ```
 
 :::{.notes}
@@ -809,7 +825,7 @@ pooled intercepts pooling
 #| fig-align: center
 #| fig-alt: "Conceptual exchangeable APIM with pooled actor and partner paths."
 
-draw_apim_diagram("exchangeable")
+draw_apim_diagram("exchangeable", predictors_centered = TRUE)
 ```
 
 :::{.notes}
@@ -842,7 +858,8 @@ draw_apim_exchangeability_comparison()
 
 :::{.notes}
 
-In this example, imagine we have a few couples with an exactly $X_F = 1$ and $X_M = 1$. 
+In this example, imagine we have a few couples with exactly $X_F = 1$ and $X_M = 1$
+on the GM-centered scale.
 For these couples, the following would be true... 
 
 On the left: 
@@ -1144,12 +1161,12 @@ we fit the DIM here with the same data and variables to demonstrate.
 
 ## DIM to exchangeable APIM coefficients {.compact-derivation}
 
-[For this example, the intercept is omitted.]{.derivation-context}
+[The intercept is omitted; APIM predictors are grand-mean centered.]{.derivation-context}
 
-If our APIM predictor values for a focal person are:
+For a focal person, let
 $X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=1$,
 
-the same predictor profile in DIM coordinates is:
+so that in DIM coordinates:
 $X_{\mathrm{mean}}=1,\quad X_{\mathrm{dev,self}}=0.$
 
 So,
@@ -1173,12 +1190,12 @@ $$
 
 ## DIM to exchangeable APIM coefficients {.compact-derivation}
 
-[For this example, the intercept is omitted.]{.derivation-context}
+[The intercept is omitted; APIM predictors are grand-mean centered.]{.derivation-context}
 
-If our APIM predictor values for a focal person are:
+For a focal person, let
 $X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=-1$,
 
-the same predictor profile in DIM coordinates is:
+so that in DIM coordinates:
 $X_{\mathrm{mean}}=0,\quad X_{\mathrm{dev,self}}=1$.
 
 So,
@@ -1187,8 +1204,7 @@ $$
 \hat Y_{\mathrm{self}}=1\times a+(-1)\times p
 $$
 
-implies for the focal person, whose $X_{\mathrm{self}}$ is 1 unit above the
-couple mean:
+implies:
 
 $$
 \hat Y_{\mathrm{self}}=0\times b_{\mathrm{mean}}+1\times b_{\mathrm{dev}}
@@ -1423,12 +1439,10 @@ interpretations on a separate slide for each model -->
 $$
 \begin{aligned}
 b_{0,\mathrm F}
-  &=a_{10}+\tfrac12a_{20}
-    -\bar X\left(a_{11}+\tfrac12a_{21}\right),
+  &=a_{10}+\tfrac12a_{20},
 &
 b_{0,\mathrm M}
-  &=a_{10}-\tfrac12a_{20}
-    -\bar X\left(a_{11}-\tfrac12a_{21}\right),\\[0.4em]
+  &=a_{10}-\tfrac12a_{20},\\[0.4em]
 b_{1,\mathrm F}
   &=\tfrac12a_{11}+a_{12}+\tfrac14a_{21}+\tfrac12a_{22},
 &
@@ -1442,9 +1456,9 @@ b_{2,\mathrm M}
 \end{aligned}
 $$
 
-Here, $b_1$ is the actor effect, $b_2$ is the partner effect, and $\bar X$ is
-the sample-average couple-mean predictor score. The $\bar X$ terms are needed
-because the DSM couple mean is centered, whereas the APIM predictors are not.
+Here, $b_1$ is the actor effect and $b_2$ is the partner effect. The APIM
+predictors and DSM couple mean now use the same pooled grand-mean reference, so
+no additional centering adjustment is needed for the intercepts.
 
 ## Research Question 2 {.rq-slide}
 
@@ -1896,10 +1910,10 @@ APIM coefficients are interpreted; they should not be treated as evidence of a
 nonzero effect.
 :::
 
-**Intercepts:** When both partners' support scores are zero:
+**Intercepts:** When both partners' support scores equal the pooled sample mean:
 
-- $b_{0,\mathrm{F}}$: Predicted female MVPA is 25.68 minutes.
-- $b_{0,\mathrm{M}}$: Predicted male MVPA is 23.85 minutes.
+- $b_{0,\mathrm{F}}$: Predicted female MVPA is 35.28 minutes.
+- $b_{0,\mathrm{M}}$: Predicted male MVPA is 31.24 minutes.
 
 **Female MVPA**, holding the male partner's support constant:
 
@@ -1924,9 +1938,9 @@ nonzero effect.
 
 The intercept, actor effect, partner effect, and residual SD are **pooled across members**.
 
-**Pooled intercept:** When both support scores are zero:
+**Pooled intercept:** When both partners' support scores equal the pooled sample mean:
 
-- $b_0$: Predicted MVPA is 22.28 minutes for either member position.
+- $b_0$: Predicted MVPA is 31.21 minutes for either member position.
 
 **Pooled effects:** For either member, holding the other support score constant:
 

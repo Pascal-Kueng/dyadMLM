@@ -382,7 +382,7 @@ draw_apim_exchangeability_comparison <- function() {
 
   draw_coloured_equation(
     list(
-      "Illustrative example:",
+      "GM-centered example:",
       expression(X[plain(F)] == +1 * "," ~~ X[plain(M)] == +1)
     ),
     rep(muted_colour, 2), 0.255, 0.716, fontsize = 12.0,
@@ -390,7 +390,7 @@ draw_apim_exchangeability_comparison <- function() {
   )
   draw_coloured_equation(
     list(
-      "Illustrative example:",
+      "GM-centered example:",
       expression(X[1] == +1 * "," ~~ X[2] == +1)
     ),
     rep(muted_colour, 2), 0.745, 0.716, fontsize = 12.0,
