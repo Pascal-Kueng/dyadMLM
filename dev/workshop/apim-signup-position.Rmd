@@ -1,0 +1,1157 @@
+---
+title: "Exploratory APIM by signup position"
+subtitle: "Lower-userID initiator versus higher-userID partner"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+
+library(dplyr)
+library(ggplot2)
+library(glmmTMB)
+library(tidyr)
+```
+
+# Purpose
+
+The workshop's distinguishable APIM uses gender to distinguish partners. This
+exploratory analysis instead distinguishes partners by signup position:
+
+- **Person 1 / initiator:** the member with the lower `userID`;
+- **Person 2 / invited partner:** the member with the higher `userID`.
+
+In these study data, the lower ID is also labelled `_A` and the higher ID `_B`.
+The interpretation of `_A` as the signup initiator comes from knowledge of the
+study's signup process; it is not a measured motivation variable. Consequently,
+the analysis can test whether APIM parameters vary by signup position, but it
+cannot establish that any difference is caused by motivation.
+
+# Data and role construction
+
+```{r read-data}
+data_candidates <- c(
+  "long.rds",
+  file.path("dev", "workshop", "long.rds")
+)
+data_file <- data_candidates[file.exists(data_candidates)][1]
+
+if (is.na(data_file)) {
+  stop("Could not find dev/workshop/long.rds.", call. = FALSE)
+}
+
+workshop_raw <- readRDS(data_file)
+
+members <- workshop_raw |>
+  distinct(coupleID, userID, gender, which_partner) |>
+  group_by(coupleID) |>
+  arrange(userID, .by_group = TRUE) |>
+  mutate(
+    member_count = n(),
+    signup_position = row_number(),
+    signup_role = factor(
+      if_else(signup_position == 1L, "initiator", "partner"),
+      levels = c("initiator", "partner")
+    )
+  ) |>
+  ungroup()
+
+if (anyNA(members$userID) || any(members$member_count != 2L)) {
+  stop("Each dyad must contain exactly two non-missing userIDs.", call. = FALSE)
+}
+
+role_matches_system_label <-
+  (members$signup_role == "initiator" & members$which_partner == "_A") |
+  (members$signup_role == "partner" & members$which_partner == "_B")
+
+if (!all(role_matches_system_label)) {
+  stop("Lower/higher userID does not consistently match _A/_B.", call. = FALSE)
+}
+
+role_validation <- members |>
+  count(signup_role, which_partner, name = "members")
+
+knitr::kable(
+  role_validation,
+  caption = "Validation of userID order against the study-system role label."
+)
+```
+
+All `r n_distinct(members$coupleID)` dyads have one lower-ID `_A` member and one
+higher-ID `_B` member. The role distinction therefore retains all dyads,
+including one female--female and one male--male couple. By contrast, the
+workshop's gender-distinguishable example retains only the 36 female--male
+couples.
+
+We construct daily MVPA exactly as in the conceptual workshop deck and then
+aggregate the diary observations to person-level means.
+
+```{r aggregate-data}
+mean_or_na <- function(x) {
+  if (all(is.na(x))) NA_real_ else mean(x, na.rm = TRUE)
+}
+
+pilot_aggregated <- workshop_raw |>
+  select(
+    coupleID, userID, ss_pa, ss_pa_min_solo, ss_pa_min_collab,
+    ss_emo_pleasure
+  ) |>
+  inner_join(
+    members |>
+      select(coupleID, userID, signup_role, gender),
+    by = c("coupleID", "userID")
+  ) |>
+  transmute(
+    couple_id = coupleID,
+    person_id = userID,
+    signup_role,
+    gender = factor(gender, levels = c(1, 2), labels = c("female", "male")),
+    provided_emotional_support = ss_emo_pleasure,
+    mvpa_solo = if_else(ss_pa == 0, 0, ss_pa_min_solo),
+    mvpa_joint = if_else(ss_pa == 0, 0, ss_pa_min_collab),
+    mvpa_total = mvpa_solo + mvpa_joint
+  ) |>
+  group_by(couple_id, person_id, signup_role, gender) |>
+  summarise(
+    across(
+      c(provided_emotional_support, mvpa_total),
+      mean_or_na
+    ),
+    .groups = "drop"
+  )
+
+if (any(!is.finite(pilot_aggregated$provided_emotional_support)) ||
+    any(!is.finite(pilot_aggregated$mvpa_total))) {
+  stop("The aggregated APIM variables must be finite.", call. = FALSE)
+}
+```
+
+## Descriptives and an important overlap
+
+```{r descriptives}
+role_descriptives <- pilot_aggregated |>
+  group_by(signup_role) |>
+  summarise(
+    people = n(),
+    support_mean = mean(provided_emotional_support),
+    support_sd = sd(provided_emotional_support),
+    mvpa_mean = mean(mvpa_total),
+    mvpa_sd = sd(mvpa_total),
+    .groups = "drop"
+  )
+
+role_by_gender <- pilot_aggregated |>
+  count(signup_role, gender) |>
+  pivot_wider(names_from = gender, values_from = n, values_fill = 0)
+
+support_wide <- pilot_aggregated |>
+  select(couple_id, signup_role, provided_emotional_support) |>
+  pivot_wider(
+    names_from = signup_role,
+    values_from = provided_emotional_support
+  )
+
+partner_support_correlation <- with(
+  support_wide,
+  cor(initiator, partner, use = "complete.obs")
+)
+
+signup_gender_correlation <- with(
+  pilot_aggregated,
+  cor(as.integer(gender), as.integer(signup_role))
+)
+
+knitr::kable(
+  role_descriptives,
+  digits = 2,
+  caption = "Person-level descriptives by signup position."
+)
+
+knitr::kable(
+  role_by_gender,
+  caption = "Signup position by gender."
+)
+```
+
+Signup position is associated with gender in this small sample: Person 1 is
+male in 24 of 38 dyads, whereas Person 2 is female in 24 of 38 dyads. The two
+partners' average support scores are also correlated
+($r = `r sprintf("%.2f", partner_support_correlation)`$). Role-specific APIM
+coefficients should therefore be treated as exploratory conditional
+associations, not as clean effects of signup position or motivation.
+
+# Prepare the role-distinguishable APIM
+
+`prepare_dyad_data()` now receives `signup_role` rather than gender. Both actor
+and partner support scores are then centered using one pooled grand mean, just
+as in the workshop's gender-distinguishable APIM.
+
+```{r prepare-distinguishable-apim}
+signup_apim_data <- dyadMLM::prepare_dyad_data(
+  pilot_aggregated,
+  dyad = couple_id,
+  member = person_id,
+  role = signup_role,
+  predictors = provided_emotional_support,
+  model_types = "apim",
+  keep_compositions = "initiator-partner"
+)
+
+actor_term <- ".dy_provided_emotional_support_actor"
+partner_term <- ".dy_provided_emotional_support_partner"
+complete_predictor_pair <-
+  is.finite(signup_apim_data[[actor_term]]) &
+  is.finite(signup_apim_data[[partner_term]])
+
+support_grand_mean <- mean(
+  (
+    signup_apim_data[[actor_term]][complete_predictor_pair] +
+      signup_apim_data[[partner_term]][complete_predictor_pair]
+  ) / 2
+)
+
+signup_apim_data[[actor_term]] <-
+  signup_apim_data[[actor_term]] - support_grand_mean
+signup_apim_data[[partner_term]] <-
+  signup_apim_data[[partner_term]] - support_grand_mean
+
+support_grand_mean
+```
+
+The common centering value is
+`r sprintf("%.2f", support_grand_mean)` on the original support scale. Thus,
+each role-specific intercept is predicted MVPA when both partners' support is
+at this pooled sample mean.
+
+# Fit the distinguishable APIM
+
+The fixed effects and the complete two-person residual covariance structure
+are allowed to differ by signup position.
+
+```{r fit-distinguishable-apim}
+person1_indicator <- ".dy_is_initiator_x_partner_initiator"
+person2_indicator <- ".dy_is_initiator_x_partner_partner"
+
+signup_distinguishable_apim <- glmmTMB(
+  mvpa_total ~ 0 +
+    .dy_is_initiator_x_partner_initiator +
+    .dy_is_initiator_x_partner_partner +
+    .dy_is_initiator_x_partner_initiator:
+      .dy_provided_emotional_support_actor +
+    .dy_is_initiator_x_partner_partner:
+      .dy_provided_emotional_support_actor +
+    .dy_is_initiator_x_partner_initiator:
+      .dy_provided_emotional_support_partner +
+    .dy_is_initiator_x_partner_partner:
+      .dy_provided_emotional_support_partner +
+    us(
+      0 + .dy_is_initiator_x_partner_initiator +
+        .dy_is_initiator_x_partner_partner | couple_id
+    ),
+  dispformula = ~0,
+  family = gaussian(),
+  data = signup_apim_data
+)
+
+summary(signup_distinguishable_apim)
+```
+
+# Extract results for the diagram
+
+The workshop's shared distinguishable-APIM diagram extractor deliberately uses
+female/male labels. To avoid changing that helper or mislabelling this model,
+the extraction and signup-position diagram are defined locally in this file.
+
+```{r extract-diagram-results}
+signup_apim_terms <- c(
+  intercept_person1 =
+    ".dy_is_initiator_x_partner_initiator",
+  intercept_person2 =
+    ".dy_is_initiator_x_partner_partner",
+  actor_person1 = paste0(person1_indicator, ":", actor_term),
+  actor_person2 = paste0(person2_indicator, ":", actor_term),
+  partner_effect_on_person1 =
+    paste0(person1_indicator, ":", partner_term),
+  partner_effect_on_person2 =
+    paste0(person2_indicator, ":", partner_term)
+)
+
+extract_signup_apim_diagram_values <- function(
+    model, terms, dyad_group, person1_random, person2_random) {
+  coefficient_table <- summary(model)$coefficients$cond
+  missing_terms <- setdiff(unname(terms), rownames(coefficient_table))
+
+  if (length(missing_terms)) {
+    stop(
+      "Could not find model term(s): ", paste(missing_terms, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  random_covariance <- glmmTMB::VarCorr(model)$cond[[dyad_group]]
+  random_sds <- attr(random_covariance, "stddev")
+  random_correlations <- attr(random_covariance, "correlation")
+
+  random_terms <- c(person1_random, person2_random)
+  if (!all(random_terms %in% names(random_sds))) {
+    stop("Could not find both role-specific residual terms.", call. = FALSE)
+  }
+
+  list(
+    estimates = setNames(
+      coefficient_table[unname(terms), "Estimate"],
+      names(terms)
+    ),
+    standard_errors = setNames(
+      coefficient_table[unname(terms), "Std. Error"],
+      names(terms)
+    ),
+    p_values = setNames(
+      coefficient_table[unname(terms), "Pr(>|z|)"],
+      names(terms)
+    ),
+    residuals = c(
+      sd_person1 = unname(random_sds[[person1_random]]),
+      sd_person2 = unname(random_sds[[person2_random]]),
+      correlation = unname(
+        random_correlations[person1_random, person2_random]
+      )
+    ),
+    terms = terms
+  )
+}
+
+signup_diagram_values <- extract_signup_apim_diagram_values(
+  signup_distinguishable_apim,
+  terms = signup_apim_terms,
+  dyad_group = "couple_id",
+  person1_random = person1_indicator,
+  person2_random = person2_indicator
+)
+
+format_p_value <- function(p_value) {
+  format.pval(p_value, digits = 3, eps = .001)
+}
+
+fixed_effect_table <- tibble(
+  parameter = c(
+    "Intercept: Person 1",
+    "Intercept: Person 2",
+    "Actor effect: Person 1",
+    "Actor effect: Person 2",
+    "Partner effect on Person 1 outcome",
+    "Partner effect on Person 2 outcome"
+  ),
+  estimate = unname(signup_diagram_values$estimates),
+  standard_error = unname(signup_diagram_values$standard_errors),
+  p_value = format_p_value(unname(signup_diagram_values$p_values))
+)
+
+residual_table <- tibble(
+  parameter = c(
+    "Residual SD: Person 1",
+    "Residual SD: Person 2",
+    "Residual correlation"
+  ),
+  estimate = unname(signup_diagram_values$residuals)
+)
+
+knitr::kable(
+  fixed_effect_table,
+  digits = 3,
+  caption = "Fixed effects extracted for the signup-position APIM diagram."
+)
+
+knitr::kable(
+  residual_table,
+  digits = 3,
+  caption = "Residual quantities extracted for the diagram."
+)
+```
+
+## Fitted signup-position diagram
+
+```{r fitted-signup-position-diagram, echo=FALSE, fig.width=11, fig.height=6}
+significance_stars <- function(p_value) {
+  if (!is.finite(p_value)) return("")
+  if (p_value < .001) return("***")
+  if (p_value < .01) return("**")
+  if (p_value < .05) return("*")
+  ""
+}
+
+draw_signup_apim_diagram <- function(values) {
+  estimates <- values$estimates
+  p_values <- values$p_values
+  residuals <- values$residuals
+
+  actor_colour <- "#1769AA"
+  partner_colour <- "#7B3FA1"
+  residual_colour <- "#64748B"
+  ink_colour <- "#263238"
+
+  old_parameters <- par(no.readonly = TRUE)
+  on.exit(par(old_parameters), add = TRUE)
+  par(mar = c(0.3, 0.3, 2.1, 0.3), xpd = NA)
+
+  plot.new()
+  plot.window(xlim = c(0, 10.7), ylim = c(0, 10))
+
+  node <- function(x, y, label, width = 2.3, height = 1.15) {
+    rect(
+      x - width / 2, y - height / 2,
+      x + width / 2, y + height / 2,
+      col = "#F8FAFC", border = ink_colour, lwd = 1.5
+    )
+    text(x, y, label, col = ink_colour, cex = 0.9)
+  }
+
+  edge_label <- function(x, y, label, colour) {
+    label_width <- strwidth(label, cex = 0.82, font = 2)
+    label_height <- strheight(label, cex = 0.82, font = 2)
+    rect(
+      x - label_width / 2 - 0.06, y - label_height / 2 - 0.07,
+      x + label_width / 2 + 0.06, y + label_height / 2 + 0.07,
+      col = "white", border = NA
+    )
+    text(x, y, label, col = colour, cex = 0.82, font = 2)
+  }
+
+  formatted_effect <- function(label, parameter) {
+    paste0(
+      label, " = ", sprintf("%.2f", estimates[[parameter]]),
+      significance_stars(p_values[[parameter]])
+    )
+  }
+
+  x_predictor <- 1.55
+  x_outcome <- 6.45
+  x_residual <- 9.05
+  y_person1 <- 7.45
+  y_person2 <- 2.55
+
+  node(
+    x_predictor, y_person1,
+    "Provided support\nPerson 1 (GM-centered)", width = 2.8
+  )
+  node(
+    x_predictor, y_person2,
+    "Provided support\nPerson 2 (GM-centered)", width = 2.8
+  )
+  node(x_outcome, y_person1, "MVPA\nPerson 1")
+  node(x_outcome, y_person2, "MVPA\nPerson 2")
+  node(
+    x_residual, y_person1,
+    paste0("Residual 1\nSD = ", sprintf("%.2f", residuals[["sd_person1"]])),
+    width = 1.75
+  )
+  node(
+    x_residual, y_person2,
+    paste0("Residual 2\nSD = ", sprintf("%.2f", residuals[["sd_person2"]])),
+    width = 1.75
+  )
+
+  arrows(
+    2.98, y_person1, 5.24, y_person1,
+    length = 0.10, lwd = 2.2, col = actor_colour
+  )
+  arrows(
+    2.98, y_person2, 5.24, y_person2,
+    length = 0.10, lwd = 2.2, col = actor_colour
+  )
+  arrows(
+    2.88, y_person2 + 0.35, 5.30, y_person1 - 0.35,
+    length = 0.10, lwd = 2.2, col = partner_colour
+  )
+  arrows(
+    2.88, y_person1 - 0.35, 5.30, y_person2 + 0.35,
+    length = 0.10, lwd = 2.2, col = partner_colour
+  )
+
+  arrows(
+    8.15, y_person1, 7.65, y_person1,
+    length = 0.09, lwd = 1.7, col = residual_colour
+  )
+  arrows(
+    8.15, y_person2, 7.65, y_person2,
+    length = 0.09, lwd = 1.7, col = residual_colour
+  )
+  arrows(
+    x_residual, y_person2 + 0.62,
+    x_residual, y_person1 - 0.62,
+    code = 3, length = 0.09, lwd = 1.7, col = residual_colour
+  )
+
+  edge_label(
+    4.10, 7.88,
+    formatted_effect("Actor P1", "actor_person1"), actor_colour
+  )
+  edge_label(
+    4.10, 2.12,
+    formatted_effect("Actor P2", "actor_person2"), actor_colour
+  )
+  edge_label(
+    4.12, 6.15,
+    formatted_effect("Partner effect on P1", "partner_effect_on_person1"),
+    partner_colour
+  )
+  edge_label(
+    4.12, 3.85,
+    formatted_effect("Partner effect on P2", "partner_effect_on_person2"),
+    partner_colour
+  )
+
+  text(
+    x_outcome, 8.30,
+    paste0("Intercept P1 = ", sprintf("%.2f", estimates[["intercept_person1"]])),
+    col = ink_colour, cex = 0.85
+  )
+  text(
+    x_outcome, 1.70,
+    paste0("Intercept P2 = ", sprintf("%.2f", estimates[["intercept_person2"]])),
+    col = ink_colour, cex = 0.85
+  )
+  text(
+    9.85, 5,
+    paste0("Residual r = ", sprintf("%.2f", residuals[["correlation"]])),
+    col = residual_colour, cex = 0.85, srt = 90
+  )
+
+  title(
+    "Distinguishable APIM by signup position",
+    col.main = ink_colour, font.main = 2
+  )
+}
+
+draw_signup_apim_diagram(signup_diagram_values)
+```
+
+Person 1 and Person 2 refer to lower and higher `userID`, respectively. Actor
+effects link each member's support to their own MVPA. Each partner effect is
+named by the **outcome member**: for example, "partner effect on P1" links
+Person 2's support to Person 1's MVPA. Stars use the model's asymptotic Wald
+tests.
+
+# Which role-specific coefficients differ?
+
+The following Wald contrasts isolate the three fixed-effect equality
+restrictions. They are more informative than inspecting whether one
+role-specific coefficient is significant and the other is not.
+
+```{r role-contrasts}
+fixed_estimates <- glmmTMB::fixef(signup_distinguishable_apim)$cond
+fixed_covariance <- vcov(signup_distinguishable_apim)$cond
+
+contrast_matrix <- rbind(
+  "Intercept: Person 1 - Person 2" = c(1, -1, 0, 0, 0, 0),
+  "Actor effect: Person 1 - Person 2" = c(0, 0, 1, -1, 0, 0),
+  "Partner effect: on Person 1 - on Person 2" = c(0, 0, 0, 0, 1, -1)
+)
+colnames(contrast_matrix) <- unname(signup_apim_terms)
+
+ordered_estimates <- fixed_estimates[unname(signup_apim_terms)]
+ordered_covariance <- fixed_covariance[
+  unname(signup_apim_terms), unname(signup_apim_terms), drop = FALSE
+]
+
+contrast_estimates <- drop(contrast_matrix %*% ordered_estimates)
+contrast_ses <- sqrt(diag(
+  contrast_matrix %*% ordered_covariance %*% t(contrast_matrix)
+))
+contrast_z <- contrast_estimates / contrast_ses
+
+role_contrast_table <- tibble(
+  contrast = rownames(contrast_matrix),
+  estimate = contrast_estimates,
+  standard_error = contrast_ses,
+  z = contrast_z,
+  p_value = format_p_value(
+    2 * pnorm(abs(contrast_z), lower.tail = FALSE)
+  )
+)
+
+knitr::kable(
+  role_contrast_table,
+  digits = 3,
+  caption = "Wald contrasts between signup-position-specific fixed effects."
+)
+```
+
+# Compare with an exchangeable APIM
+
+To ask whether signup position is jointly informative, we compare the model
+above with an exchangeable APIM fitted to the **same 38 dyads**. The reduced
+model constrains the intercept, actor effect, partner effect, and residual
+variance to equality across positions while retaining within-couple residual
+correlation.
+
+```{r fit-exchangeable-apim}
+signup_exchangeable_data <- dyadMLM::prepare_dyad_data(
+  pilot_aggregated,
+  dyad = couple_id,
+  member = person_id,
+  role = signup_role,
+  predictors = provided_emotional_support,
+  model_types = "apim",
+  keep_compositions = "initiator-partner",
+  set_exchangeable_compositions = "initiator-partner",
+  seed = 123
+)
+
+signup_exchangeable_data[[actor_term]] <-
+  signup_exchangeable_data[[actor_term]] - support_grand_mean
+signup_exchangeable_data[[partner_term]] <-
+  signup_exchangeable_data[[partner_term]] - support_grand_mean
+
+signup_exchangeable_apim <- glmmTMB(
+  mvpa_total ~ 0 +
+    .dy_is_initiator_x_partner +
+    .dy_provided_emotional_support_actor +
+    .dy_provided_emotional_support_partner +
+    us(0 + .dy_is_initiator_x_partner | couple_id) +
+    us(
+      0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+    ),
+  dispformula = ~0,
+  family = gaussian(),
+  data = signup_exchangeable_data
+)
+
+model_comparison <- dyadMLM::compare_nested_glmmTMB_models(
+  signup_exchangeable_apim,
+  signup_distinguishable_apim
+)
+
+model_comparison
+```
+
+```{r information-criteria}
+fit_table <- tibble(
+  model = c("Exchangeable", "Distinguishable by signup position"),
+  parameters = c(
+    attr(logLik(signup_exchangeable_apim), "df"),
+    attr(logLik(signup_distinguishable_apim), "df")
+  ),
+  log_likelihood = c(
+    as.numeric(logLik(signup_exchangeable_apim)),
+    as.numeric(logLik(signup_distinguishable_apim))
+  ),
+  AIC = c(AIC(signup_exchangeable_apim), AIC(signup_distinguishable_apim)),
+  BIC = c(BIC(signup_exchangeable_apim), BIC(signup_distinguishable_apim))
+)
+
+knitr::kable(fit_table, digits = 2, caption = "Model-fit comparison.")
+```
+
+```{r comparison-values, include=FALSE}
+comparison_loglik <- c(
+  exchangeable = as.numeric(logLik(signup_exchangeable_apim)),
+  distinguishable = as.numeric(logLik(signup_distinguishable_apim))
+)
+comparison_df <- c(
+  exchangeable = attr(logLik(signup_exchangeable_apim), "df"),
+  distinguishable = attr(logLik(signup_distinguishable_apim), "df")
+)
+lrt_chisq <- 2 * diff(comparison_loglik)
+lrt_df <- diff(comparison_df)
+lrt_p <- pchisq(lrt_chisq, df = lrt_df, lower.tail = FALSE)
+delta_aic <- AIC(signup_exchangeable_apim) - AIC(signup_distinguishable_apim)
+delta_bic <- BIC(signup_distinguishable_apim) - BIC(signup_exchangeable_apim)
+```
+
+# Separate gender from signup-position moderation
+
+The position-distinguishable model alone cannot show whether its slope
+differences merely reflect the association between signup position and gender.
+We can address this more directly by including both moderators in one model:
+
+```{r combined-model-formula, eval=FALSE}
+mvpa_total ~
+  actor * (gender + signup_role) +
+  partner * (gender + signup_role) +
+  residual_covariance
+```
+
+This expands to the actor and partner main effects, the gender and signup-role
+main effects, and four two-way interactions. Thus, each gender interaction is
+adjusted for signup-position moderation and each signup-position interaction
+is adjusted for gender moderation. Here gender is the **outcome member's**
+gender, matching the convention in the workshop's distinguishable APIM.
+
+We use the same exchangeable residual covariance in every model below. This
+avoids privileging either gender or signup position in the residual structure,
+and ensures that the comparisons isolate fixed-effect slope moderation.
+
+```{r fit-combined-moderation-apims}
+combined_full_formula <-
+  mvpa_total ~
+  .dy_provided_emotional_support_actor * (gender + signup_role) +
+  .dy_provided_emotional_support_partner * (gender + signup_role) +
+  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(
+    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+  )
+
+# Retain the gender main effect but omit both gender slope interactions.
+combined_signup_only_formula <-
+  mvpa_total ~
+  .dy_provided_emotional_support_actor * signup_role +
+  .dy_provided_emotional_support_partner * signup_role +
+  gender +
+  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(
+    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+  )
+
+# Retain the signup-position main effect but omit both position interactions.
+combined_gender_only_formula <-
+  mvpa_total ~
+  .dy_provided_emotional_support_actor * gender +
+  .dy_provided_emotional_support_partner * gender +
+  signup_role +
+  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(
+    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+  )
+
+# Retain both main effects but omit all four slope interactions.
+combined_no_moderation_formula <-
+  mvpa_total ~
+  .dy_provided_emotional_support_actor +
+  .dy_provided_emotional_support_partner +
+  gender + signup_role +
+  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(
+    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+  )
+
+fit_combined_apim <- function(formula, data) {
+  glmmTMB(
+    formula,
+    dispformula = ~0,
+    family = gaussian(),
+    data = data
+  )
+}
+
+combined_full_apim <- fit_combined_apim(
+  combined_full_formula, signup_exchangeable_data
+)
+combined_signup_only_apim <- fit_combined_apim(
+  combined_signup_only_formula, signup_exchangeable_data
+)
+combined_gender_only_apim <- fit_combined_apim(
+  combined_gender_only_formula, signup_exchangeable_data
+)
+combined_no_moderation_apim <- fit_combined_apim(
+  combined_no_moderation_formula, signup_exchangeable_data
+)
+
+combined_models <- list(
+  combined_full_apim,
+  combined_signup_only_apim,
+  combined_gender_only_apim,
+  combined_no_moderation_apim
+)
+combined_models_converged <- vapply(
+  combined_models,
+  function(model) model$fit$convergence == 0L && isTRUE(model$sdr$pdHess),
+  logical(1)
+)
+
+if (!all(combined_models_converged)) {
+  warning("At least one combined APIM has a convergence or Hessian problem.")
+}
+```
+
+## Unique interaction coefficients
+
+Female Person 1 members are the reference group under R's default treatment
+coding. The main effects are included to respect model hierarchy. The four
+interaction coefficients are the unique slope-moderation estimates of primary
+interest.
+
+```{r combined-fixed-effects}
+combined_coefficients <- summary(combined_full_apim)$coefficients$cond
+
+combined_fixed_table <- tibble(
+  term = rownames(combined_coefficients),
+  estimate = combined_coefficients[, "Estimate"],
+  standard_error = combined_coefficients[, "Std. Error"],
+  p_value = format_p_value(combined_coefficients[, "Pr(>|z|)"])
+) |>
+  mutate(
+    parameter = case_when(
+      term == "(Intercept)" ~ "Intercept: female Person 1",
+      term == actor_term ~ "Actor effect: female Person 1",
+      term == partner_term ~ "Partner effect: female Person 1 outcome",
+      term == "gendermale" ~ "Main effect: male versus female",
+      term == "signup_rolepartner" ~ "Main effect: Person 2 versus Person 1",
+      grepl(actor_term, term, fixed = TRUE) &
+        grepl("gendermale", term, fixed = TRUE) ~
+          "Actor x gender (male - female)",
+      grepl(actor_term, term, fixed = TRUE) &
+        grepl("signup_rolepartner", term, fixed = TRUE) ~
+          "Actor x signup position (Person 2 - Person 1)",
+      grepl(partner_term, term, fixed = TRUE) &
+        grepl("gendermale", term, fixed = TRUE) ~
+          "Partner x gender (male - female outcome)",
+      grepl(partner_term, term, fixed = TRUE) &
+        grepl("signup_rolepartner", term, fixed = TRUE) ~
+          "Partner x signup position (Person 2 - Person 1 outcome)",
+      TRUE ~ term
+    )
+  ) |>
+  select(parameter, estimate, standard_error, p_value)
+
+knitr::kable(
+  combined_fixed_table,
+  digits = 3,
+  caption = paste(
+    "Combined gender and signup-position APIM.",
+    "Female Person 1 members are the reference group."
+  )
+)
+```
+
+Because this model assumes additive moderation, the gender difference in each
+slope is held constant across signup positions, and the signup-position
+difference is held constant across genders. A three-way interaction would relax
+that assumption, but would be ambitious with only 38 dyads.
+
+The fitted slopes for the four observed gender-by-position combinations are:
+
+```{r combined-simple-slopes}
+combined_estimates <- glmmTMB::fixef(combined_full_apim)$cond
+combined_names <- names(combined_estimates)
+
+find_interaction_term <- function(first, second, available_terms) {
+  candidates <- c(
+    paste(first, second, sep = ":"),
+    paste(second, first, sep = ":")
+  )
+  match <- intersect(candidates, available_terms)
+  if (length(match) != 1L) {
+    stop(
+      "Could not uniquely resolve interaction between ", first,
+      " and ", second, ".",
+      call. = FALSE
+    )
+  }
+  match
+}
+
+actor_gender_term <- find_interaction_term(
+  actor_term, "gendermale", combined_names
+)
+actor_position_term <- find_interaction_term(
+  actor_term, "signup_rolepartner", combined_names
+)
+partner_gender_term <- find_interaction_term(
+  partner_term, "gendermale", combined_names
+)
+partner_position_term <- find_interaction_term(
+  partner_term, "signup_rolepartner", combined_names
+)
+
+combined_simple_slopes <- tidyr::expand_grid(
+  gender = c("female", "male"),
+  signup_position = c("Person 1", "Person 2")
+) |>
+  mutate(
+    predicted_mvpa_at_mean_support =
+      unname(combined_estimates[["(Intercept)"]]) +
+      (gender == "male") * unname(combined_estimates[["gendermale"]]) +
+      (signup_position == "Person 2") *
+        unname(combined_estimates[["signup_rolepartner"]]),
+    actor_effect =
+      unname(combined_estimates[[actor_term]]) +
+      (gender == "male") * unname(combined_estimates[[actor_gender_term]]) +
+      (signup_position == "Person 2") *
+        unname(combined_estimates[[actor_position_term]]),
+    partner_effect_on_outcome =
+      unname(combined_estimates[[partner_term]]) +
+      (gender == "male") * unname(combined_estimates[[partner_gender_term]]) +
+      (signup_position == "Person 2") *
+        unname(combined_estimates[[partner_position_term]])
+  )
+
+knitr::kable(
+  combined_simple_slopes,
+  digits = 2,
+  caption = "Point estimates implied by the additive combined model."
+)
+```
+
+## Joint tests: gender or signup position?
+
+Seeing one interaction reach significance and another not does not itself test
+whether the moderators differ. Each moderator also contributes two interaction
+terms--one for the actor slope and one for the partner slope. We therefore
+remove both terms for one moderator at a time and compare that reduced model
+with the full model. Both main effects remain in every comparison.
+
+```{r conditional-moderation-tests}
+likelihood_ratio_row <- function(reduced, full, test, sample) {
+  reduced_loglik <- logLik(reduced)
+  full_loglik <- logLik(full)
+  chi_square <- 2 * (
+    as.numeric(full_loglik) - as.numeric(reduced_loglik)
+  )
+  degrees_freedom <-
+    attr(full_loglik, "df") - attr(reduced_loglik, "df")
+
+  tibble(
+    sample,
+    test,
+    chi_square,
+    df = degrees_freedom,
+    p_value = pchisq(
+      chi_square, df = degrees_freedom, lower.tail = FALSE
+    )
+  )
+}
+
+all_dyad_moderation_tests <- bind_rows(
+  likelihood_ratio_row(
+    combined_signup_only_apim,
+    combined_full_apim,
+    "Gender interactions beyond signup position",
+    "All 38 dyads"
+  ),
+  likelihood_ratio_row(
+    combined_gender_only_apim,
+    combined_full_apim,
+    "Signup-position interactions beyond gender",
+    "All 38 dyads"
+  ),
+  likelihood_ratio_row(
+    combined_no_moderation_apim,
+    combined_full_apim,
+    "All four slope interactions jointly",
+    "All 38 dyads"
+  )
+)
+
+combined_fit_table <- tibble(
+  model = c(
+    "No slope moderation",
+    "Signup-position moderation only",
+    "Gender moderation only",
+    "Both moderators"
+  ),
+  fitted_model = list(
+    combined_no_moderation_apim,
+    combined_signup_only_apim,
+    combined_gender_only_apim,
+    combined_full_apim
+  )
+) |>
+  mutate(
+    parameters = vapply(
+      fitted_model, function(model) attr(logLik(model), "df"), numeric(1)
+    ),
+    log_likelihood = vapply(
+      fitted_model, function(model) as.numeric(logLik(model)), numeric(1)
+    ),
+    AIC = vapply(fitted_model, AIC, numeric(1)),
+    BIC = vapply(fitted_model, BIC, numeric(1))
+  ) |>
+  select(-fitted_model)
+
+knitr::kable(
+  all_dyad_moderation_tests |>
+    mutate(p_value = format_p_value(p_value)),
+  digits = 3,
+  caption = "Conditional likelihood-ratio tests of slope moderation."
+)
+
+knitr::kable(
+  combined_fit_table,
+  digits = 2,
+  caption = "Fit of the combined moderation models for all 38 dyads."
+)
+```
+
+The full model converged with a positive-definite Hessian. Conditional on the
+signup-position interactions, the two gender interactions do not jointly
+improve fit. Conditional on the gender interactions, the two signup-position
+interactions do improve fit.
+
+## Sensitivity using the workshop's 36 female--male dyads
+
+The combined analysis above can validly include the two same-gender couples
+because gender is a person-level moderator. Nevertheless, the original
+gender-distinguishable workshop APIM uses only female--male dyads. We therefore
+repeat the two conditional tests on those same 36 dyads.
+
+```{r mixed-gender-sensitivity}
+mixed_gender_couples <- pilot_aggregated |>
+  group_by(couple_id) |>
+  summarise(genders = n_distinct(gender), .groups = "drop") |>
+  filter(genders == 2L) |>
+  pull(couple_id)
+
+combined_mixed_data <- signup_exchangeable_data |>
+  filter(couple_id %in% mixed_gender_couples)
+
+# Recenter both APIM predictors on the pooled mean of this sensitivity sample.
+mixed_centering_offset <- mean(
+  (
+    combined_mixed_data[[actor_term]] +
+      combined_mixed_data[[partner_term]]
+  ) / 2
+)
+combined_mixed_data[[actor_term]] <-
+  combined_mixed_data[[actor_term]] - mixed_centering_offset
+combined_mixed_data[[partner_term]] <-
+  combined_mixed_data[[partner_term]] - mixed_centering_offset
+
+combined_mixed_full_apim <- fit_combined_apim(
+  combined_full_formula, combined_mixed_data
+)
+combined_mixed_signup_only_apim <- fit_combined_apim(
+  combined_signup_only_formula, combined_mixed_data
+)
+combined_mixed_gender_only_apim <- fit_combined_apim(
+  combined_gender_only_formula, combined_mixed_data
+)
+
+mixed_gender_moderation_tests <- bind_rows(
+  likelihood_ratio_row(
+    combined_mixed_signup_only_apim,
+    combined_mixed_full_apim,
+    "Gender interactions beyond signup position",
+    "36 female-male dyads"
+  ),
+  likelihood_ratio_row(
+    combined_mixed_gender_only_apim,
+    combined_mixed_full_apim,
+    "Signup-position interactions beyond gender",
+    "36 female-male dyads"
+  )
+)
+
+all_moderation_tests <- bind_rows(
+  all_dyad_moderation_tests,
+  mixed_gender_moderation_tests
+)
+
+knitr::kable(
+  mixed_gender_moderation_tests |>
+    mutate(p_value = format_p_value(p_value)),
+  digits = 3,
+  caption = "Sensitivity analysis using the 36 female--male dyads."
+)
+```
+
+The sensitivity analysis gives the same qualitative answer, so the result is
+not driven by the two same-gender couples.
+
+```{r combined-inline-values, include=FALSE}
+all_gender_test <- all_moderation_tests |>
+  filter(
+    sample == "All 38 dyads",
+    test == "Gender interactions beyond signup position"
+  )
+all_signup_test <- all_moderation_tests |>
+  filter(
+    sample == "All 38 dyads",
+    test == "Signup-position interactions beyond gender"
+  )
+mixed_gender_test <- all_moderation_tests |>
+  filter(
+    sample == "36 female-male dyads",
+    test == "Gender interactions beyond signup position"
+  )
+mixed_signup_test <- all_moderation_tests |>
+  filter(
+    sample == "36 female-male dyads",
+    test == "Signup-position interactions beyond gender"
+  )
+
+combined_actor_gender_estimate <-
+  unname(combined_estimates[[actor_gender_term]])
+combined_actor_gender_p <-
+  combined_coefficients[actor_gender_term, "Pr(>|z|)"]
+combined_partner_gender_estimate <-
+  unname(combined_estimates[[partner_gender_term]])
+combined_partner_gender_p <-
+  combined_coefficients[partner_gender_term, "Pr(>|z|)"]
+combined_actor_position_estimate <-
+  unname(combined_estimates[[actor_position_term]])
+combined_actor_position_p <-
+  combined_coefficients[actor_position_term, "Pr(>|z|)"]
+combined_partner_position_estimate <-
+  unname(combined_estimates[[partner_position_term]])
+combined_partner_position_p <-
+  combined_coefficients[partner_position_term, "Pr(>|z|)"]
+```
+
+# Exploratory conclusion
+
+The joint comparison favours allowing parameters to vary by signup position,
+$\chi^2(`r lrt_df`) = `r sprintf("%.2f", lrt_chisq)`$,
+$p = `r sprintf("%.3f", lrt_p)`$. AIC also favours the role-distinguishable
+model by `r sprintf("%.2f", delta_aic)` points, whereas BIC favours the simpler
+exchangeable model by `r sprintf("%.2f", delta_bic)` points. Thus the evidence
+is interesting but not unequivocal. The pronounced role differences are in the
+actor and partner slopes rather than in predicted MVPA levels or residual
+standard deviations:
+
+- higher support from Person 1 is positively associated with both Person 1's
+  own MVPA and Person 2's MVPA;
+- higher support from Person 2 is negatively associated with both Person 2's
+  own MVPA and Person 1's MVPA;
+- the two intercepts and residual SDs are very similar.
+
+This is intriguing enough to discuss as an alternative distinguishability
+scheme. It is not, however, evidence that signup motivation produces these
+associations. Signup position has a modest association with gender: Person 1
+includes 14 women and 24 men, whereas Person 2 includes 24 women and 14 men.
+Coding female = 1, male = 2, Person 1 = 1, and Person 2 = 2 gives
+$r = `r sprintf("%.3f", signup_gender_correlation)`$ (equivalently,
+$\phi = V = `r sprintf("%.3f", abs(signup_gender_correlation))`$). This is not
+near-collinearity, so the two moderator sets can be estimated together.
+
+In the full combined model, both signup-position interactions remain clearly
+different from zero after accounting for gender (actor:
+$b = `r sprintf("%.2f", combined_actor_position_estimate)`$,
+$p = `r sprintf("%.3f", combined_actor_position_p)`$; partner:
+$b = `r sprintf("%.2f", combined_partner_position_estimate)`$,
+$p = `r sprintf("%.3f", combined_partner_position_p)`$). Neither gender
+interaction remains clearly different from zero after accounting for signup
+position (actor: $b = `r sprintf("%.2f", combined_actor_gender_estimate)`$,
+$p = `r sprintf("%.3f", combined_actor_gender_p)`$; partner:
+$b = `r sprintf("%.2f", combined_partner_gender_estimate)`$,
+$p = `r sprintf("%.3f", combined_partner_gender_p)`$).
+
+The joint tests give the same answer. Signup-position moderation remains after
+accounting for gender, $\chi^2(`r all_signup_test$df`) =
+`r sprintf("%.2f", all_signup_test$chi_square)`$,
+$p = `r sprintf("%.3f", all_signup_test$p_value)`$, whereas gender moderation
+does not remain after accounting for signup position,
+$\chi^2(`r all_gender_test$df`) =
+`r sprintf("%.2f", all_gender_test$chi_square)`$,
+$p = `r sprintf("%.3f", all_gender_test$p_value)`$. Restricting the analysis to
+the same 36 female--male dyads leads to the same conclusion (signup position:
+$p = `r sprintf("%.3f", mixed_signup_test$p_value)`$; gender:
+$p = `r sprintf("%.3f", mixed_gender_test$p_value)`$). Statistically, the slope
+differences therefore align more clearly with signup position than with gender
+in this sample.
+
+This identifies unique conditional associations, not causal responsibility.
+The sample contains only 38 dyads, the partners' support scores are strongly
+correlated, and signup position is only a proxy for the hypothesized difference
+in motivation. The combined model also assumes additive two-way moderation;
+there is not enough information here for a convincing gender-by-position
+three-way moderation analysis.
