@@ -105,7 +105,7 @@ sys.source(
   envir = knitr::knit_global()
 )
 
-truth_bias_file <- if (
+truth_bias_draw_file <- if (
     file.exists(file.path("R", "draw-truth-bias.R"))) {
   file.path("R", "draw-truth-bias.R")
 } else {
@@ -113,7 +113,7 @@ truth_bias_file <- if (
 }
 
 sys.source(
-  normalizePath(truth_bias_file),
+  normalizePath(truth_bias_draw_file),
   envir = knitr::knit_global()
 )
 
@@ -122,13 +122,14 @@ data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds
 pilot <- readRDS(data_file) |>
   select(
     coupleID, userID, gender, ss_pa, ss_pa_min_solo, ss_pa_min_collab,
-    ss_emo_pleasure, sc_actionplan
+    ss_emo_pleasure, sp_emo_pleasure, sc_actionplan
   ) |>
   transmute(
     couple_id = coupleID,
     person_id = userID,
     role = factor(gender, levels = c(1, 2), labels = c("female", "male")),
     provided_emotional_support = ss_emo_pleasure,
+    received_emotional_support = sp_emo_pleasure,
     collaborative_planning = sc_actionplan,
     mvpa_solo = if_else(ss_pa == 0, 0, ss_pa_min_solo),
     mvpa_joint = if_else(ss_pa == 0, 0, ss_pa_min_collab),
@@ -138,6 +139,7 @@ pilot <- readRDS(data_file) |>
 distribution_plot <- function(data, variables, bin_widths) {
   labels <- c(
     provided_emotional_support = "Provided emotional support",
+    received_emotional_support = "Received emotional support",
     collaborative_planning = "Collaborative planning (daily mean)",
     mvpa_solo = "Mean solo MVPA (minutes/day)",
     mvpa_joint = "Mean joint MVPA (minutes/day)",
@@ -316,6 +318,7 @@ pilot_aggregated <- pilot |>
 The variables now represent person-level daily averages across the study:
 
 - `provided_emotional_support`: average daily support provided
+- `received_emotional_support`: average daily support received
 - `mvpa_total`: average daily total MVPA (minutes)
 :::
 
@@ -1956,56 +1959,84 @@ of fit.
 
 <!-- ca. 1 minute -->
 
+```{r}
+#| label: fit-truth-bias
+#| include: false
+
+truth_bias_fit_file <- if (
+    file.exists(file.path("R", "fit-truth-bias.R"))) {
+  file.path("R", "fit-truth-bias.R")
+} else {
+  file.path("dev", "workshop", "R", "fit-truth-bias.R")
+}
+
+sys.source(
+  normalizePath(truth_bias_fit_file),
+  envir = knitr::knit_global()
+)
+
+truth_bias_result <- fit_truth_bias(pilot_aggregated)
+```
+
 ## The Truth and Bias model [[@kennyAccuracyBiasPerception2001; @westTruthBiasModel2011]]{.heading-reference} {#the-truth-and-bias-model}
 
 ```{r}
-#| label: conceptual-truth-bias
+#| label: fitted-truth-bias
 #| echo: false
 #| dev: svg
 #| fig-width: 9
 #| fig-height: 4.8
-#| out-width: 80%
+#| out-width: 90%
 #| fig-align: center
-#| fig-alt: "Dyadic Truth and Bias model in which female and male self-reports predict both partner judgments. Same-perceiver paths represent assumed-similarity bias, cross-partner paths represent direct accuracy, intercepts represent directional bias, self-report covariance represents actual similarity, and judgment residuals covary."
+#| fig-alt: "Fitted dyadic Truth and Bias model for provided and received emotional support. Estimates and significance stars annotate female- and male-specific assumed-similarity, direct-accuracy, and directional-bias paths. The partners' provided-support correlation represents actual similarity, and received-support judgment residuals covary."
 
-draw_truth_bias_diagram()
+draw_truth_bias_diagram(truth_bias_result)
 ```
 
 ::: {.text-smaller}
 
-- **Direct accuracy** tracks the target's report; **assumed similarity** tracks
-  the perceiver's own report.
-- The target's report is the operational “truth,” not necessarily objective
-  truth; after centering, $b_0$ is **directional bias**.
+- **Direct accuracy** tracks the partner's reported provision; **assumed
+  similarity** tracks the perceiver's own provision—each controlling for the
+  other.
+- The partner's report is the operational “truth”; after truth-mean centering,
+  $b_0$ is **directional bias**.
 
 :::
 
 :::{.notes}
 
-- Has the structure of a distinguishable APIM.
-- The subscript on each path coefficient identifies the perceiver.
-- The blue actor paths are assumed-similarity bias: each person's own report
-  predicts their judgment of their partner.
-- The purple partner paths are direct accuracy: the target's report predicts
-  the perceiver's judgment of that target, controlling for assumed similarity.
-- The correlation between self-reports is actual similarity. Together with
-  assumed similarity, it can produce indirect accuracy even if direct accuracy
-  is zero.
-- Bias is systematic information other than the truth criterion, not random
-  error and not necessarily inaccuracy.
-- Self-reports and judgments must use the same scale and be centered on the
-  relevant truth-criterion mean for the intercept to represent adjusted
+- This is a distinguishable, cross-sectional Truth and Bias model fitted to the
+  person-level daily averages of `r truth_bias_result$n_dyads` couples.
+- All three quantities—provided support by either partner and received support—
+  were centered on the pooled provided-support mean
+  (`r sprintf("%.2f", truth_bias_result$truth_mean)`). This makes $b_0$ adjusted
   directional bias.
-- In the basic observed-variable model, the target's self-report is treated as
-  an error-free criterion for estimation. This defines accuracy relative to the
-  target's report; it does not establish objective truth or perfect
-  self-knowledge.
-- The paths are predictive associations, not necessarily causal effects.
-- Direct accuracy is the truth association remaining after the measured bias
-  variable has been controlled.
-- Separate standardization by partner would make the role-specific coefficients
-  difficult to compare; the model is interpreted using unstandardized paths on
-  a common metric.
+- Both partners showed strong assumed similarity: their own reported provision
+  was closely associated with received support, controlling for their partner's
+  reported provision.
+- Direct accuracy was positive for female perceivers ($t_F =
+  `r sprintf("%.2f", truth_bias_result$estimates[["truth_female"]])`$) but not
+  evident for male perceivers ($t_M =
+  `r sprintf("%.2f", truth_bias_result$estimates[["truth_male"]])`$) in this
+  small sample; these paths control for the perceiver's own provision.
+- Partners' provided-support reports were strongly positively correlated across
+  couples ($r =
+  `r sprintf("%.2f", truth_bias_result$actual_similarity[["estimate"]])`$),
+  termed **actual similarity** in this model. This lets assumed similarity
+  contribute indirectly to accuracy.
+- Assumed similarity was stronger than direct accuracy. Using the
+  partner-to-own provision slopes ($a_F =
+  `r sprintf("%.2f", truth_bias_result$actual_similarity_paths[["female"]])`$;
+  $a_M =
+  `r sprintf("%.2f", truth_bias_result$actual_similarity_paths[["male"]])`$),
+  much of the apparent accuracy was indirect: $ab$ was
+  `r sprintf("%.2f", truth_bias_result$indirect_accuracy[["female"]])` (female)
+  and `r sprintf("%.2f", truth_bias_result$indirect_accuracy[["male"]])` (male);
+  total accuracy, $t + ab$, was
+  `r sprintf("%.2f", truth_bias_result$total_accuracy[["female"]])` and
+  `r sprintf("%.2f", truth_bias_result$total_accuracy[["male"]])`.
+- “Truth” here is the partner's provided-support report, not objective support;
+  the unstandardized paths are predictive associations on the common 0–5 scale.
 
 :::
 
@@ -2015,170 +2046,25 @@ draw_truth_bias_diagram()
 #| label: fit-dyadic-response-surface
 #| include: false
 
-# Fit the full distinguishable DRSA described by Schönbrodt et al. (2018):
-# two partner-specific polynomial regressions in one SEM, with correlated
-# outcome residuals. Both support scores use the same centering constant.
-drsa_data <- pilot_aggregated |>
-  group_by(couple_id) |>
-  filter(n() == 2, n_distinct(role) == 2) |>
-  ungroup() |>
-  select(
-    couple_id, role, provided_emotional_support, mvpa_total
-  ) |>
-  tidyr::pivot_wider(
-    names_from = role,
-    values_from = c(provided_emotional_support, mvpa_total),
-    names_sep = "_"
-  ) |>
-  rename(
-    female_support = provided_emotional_support_female,
-    male_support = provided_emotional_support_male,
-    female_mvpa = mvpa_total_female,
-    male_mvpa = mvpa_total_male
-  )
-
-drsa_support_center <- mean(
-  c(drsa_data$female_support, drsa_data$male_support),
-  na.rm = TRUE
-)
-
-drsa_data <- drsa_data |>
-  mutate(
-    female_support_c = female_support - drsa_support_center,
-    male_support_c = male_support - drsa_support_center,
-    female_support_sq = female_support_c^2,
-    support_product = female_support_c * male_support_c,
-    male_support_sq = male_support_c^2
-  )
-
-drsa_model <- '
-  female_mvpa ~ b1f * female_support_c + b2f * male_support_c +
-                b3f * female_support_sq + b4f * support_product +
-                b5f * male_support_sq
-  male_mvpa   ~ b1m * female_support_c + b2m * male_support_c +
-                b3m * female_support_sq + b4m * support_product +
-                b5m * male_support_sq
-
-  female_mvpa ~~ male_mvpa
-
-  a1f := b1f + b2f
-  a2f := b3f + b4f + b5f
-  a3f := b1f - b2f
-  a4f := b3f - b4f + b5f
-  a5f := b3f - b5f
-
-  a1m := b1m + b2m
-  a2m := b3m + b4m + b5m
-  a3m := b1m - b2m
-  a4m := b3m - b4m + b5m
-  a5m := b3m - b5m
-'
-
-drsa_fit <- lavaan::sem(
-  drsa_model,
-  data = drsa_data,
-  meanstructure = TRUE,
-  estimator = "MLR",
-  se = "robust",
-  missing = "fiml"
-)
-
-if (!lavaan::lavInspect(drsa_fit, "converged")) {
-  stop("The joint dyadic response surface model did not converge.")
+drsa_fit_file <- if (
+    file.exists(file.path("R", "fit-dyadic-response-surface.R"))) {
+  file.path("R", "fit-dyadic-response-surface.R")
+} else {
+  file.path("dev", "workshop", "R", "fit-dyadic-response-surface.R")
 }
 
-drsa_parameters <- lavaan::parameterEstimates(drsa_fit)
-
-drsa_labeled_estimate <- function(label) {
-  estimate <- drsa_parameters$est[drsa_parameters$label == label]
-  if (length(estimate) != 1) {
-    stop("Could not uniquely recover DRSA parameter `", label, "`.")
-  }
-  estimate
+drsa_draw_file <- if (
+    file.exists(file.path("R", "draw-dyadic-response-surface.R"))) {
+  file.path("R", "draw-dyadic-response-surface.R")
+} else {
+  file.path("dev", "workshop", "R", "draw-dyadic-response-surface.R")
 }
 
-drsa_intercept <- function(outcome) {
-  estimate <- drsa_parameters$est[
-    drsa_parameters$lhs == outcome & drsa_parameters$op == "~1"
-  ]
-  if (length(estimate) != 1) {
-    stop("Could not uniquely recover the intercept for `", outcome, "`.")
-  }
-  estimate
-}
+sys.source(normalizePath(drsa_fit_file), envir = knitr::knit_global())
+sys.source(normalizePath(drsa_draw_file), envir = knitr::knit_global())
 
-drsa_surface_coefficients <- list(
-  female = c(
-    b0 = drsa_intercept("female_mvpa"),
-    x = drsa_labeled_estimate("b1f"),
-    y = drsa_labeled_estimate("b2f"),
-    x2 = drsa_labeled_estimate("b3f"),
-    xy = drsa_labeled_estimate("b4f"),
-    y2 = drsa_labeled_estimate("b5f")
-  ),
-  male = c(
-    b0 = drsa_intercept("male_mvpa"),
-    x = drsa_labeled_estimate("b1m"),
-    y = drsa_labeled_estimate("b2m"),
-    x2 = drsa_labeled_estimate("b3m"),
-    xy = drsa_labeled_estimate("b4m"),
-    y2 = drsa_labeled_estimate("b5m")
-  )
-)
+drsa_result <- fit_dyadic_response_surface(pilot_aggregated)
 
-drsa_residual_parameter <- function(lhs, rhs) {
-  estimate <- drsa_parameters$est[
-    drsa_parameters$lhs == lhs &
-      drsa_parameters$op == "~~" &
-      drsa_parameters$rhs == rhs
-  ]
-  if (length(estimate) != 1) {
-    stop("Could not uniquely recover a DRSA residual (co)variance.")
-  }
-  estimate
-}
-
-drsa_residual_correlation <-
-  drsa_residual_parameter("female_mvpa", "male_mvpa") /
-  sqrt(
-    drsa_residual_parameter("female_mvpa", "female_mvpa") *
-      drsa_residual_parameter("male_mvpa", "male_mvpa")
-  )
-
-drsa_r2 <- lavaan::lavInspect(drsa_fit, "rsquare")
-
-# Use common plot limits so the two surfaces are directly comparable. A small
-# pad keeps the observed-data bagplot inside the plotting cube.
-drsa_xy_range <- range(
-  c(drsa_data$female_support_c, drsa_data$male_support_c),
-  finite = TRUE
-)
-drsa_xy_pad <- 0.015 * diff(drsa_xy_range)
-drsa_xy_limit <- drsa_xy_range + c(-drsa_xy_pad, drsa_xy_pad)
-
-drsa_surface_value <- function(coefficients, x, y) {
-  coefficients[["b0"]] +
-    coefficients[["x"]] * x +
-    coefficients[["y"]] * y +
-    coefficients[["x2"]] * x^2 +
-    coefficients[["xy"]] * x * y +
-    coefficients[["y2"]] * y^2
-}
-
-drsa_plot_grid <- expand.grid(
-  x = seq(drsa_xy_limit[1], drsa_xy_limit[2], length.out = 101),
-  y = seq(drsa_xy_limit[1], drsa_xy_limit[2], length.out = 101)
-)
-drsa_grid_predictions <- unlist(lapply(
-  drsa_surface_coefficients,
-  \(coefficients) drsa_surface_value(
-    coefficients, drsa_plot_grid$x, drsa_plot_grid$y
-  )
-))
-drsa_z_limit <- c(
-  floor(min(0, drsa_grid_predictions) / 50) * 50,
-  ceiling(max(drsa_grid_predictions) / 50) * 50
-)
 ```
 
 ## Dyadic response surface analysis [[@schonbrodtTestingSimilarityEffects2018]]{.heading-reference}
@@ -2193,125 +2079,37 @@ drsa_z_limit <- c(
 #| fig-align: center
 #| fig-alt: "Two fitted response surfaces from one joint dyadic polynomial model. Each shows predicted female or male average daily total MVPA as a function of female-provided and male-provided emotional support centered at the pooled mean. Points and loops mark the observed couples and predictor region; the solid blue line is the line of congruence and the dashed purple line is the line of incongruence."
 
-drsa_palette <- grDevices::colorRampPalette(
-  c("#F8FAFC", "#BFE4EA", "#00A6B2", "#0028A5")
-)(24)
-
-drsa_axes_styles <- list(
-  LOC = list(lty = "solid", lwd = 2, col = "#1769AA"),
-  LOIC = list(lty = "dashed", lwd = 2, col = "#7B3FA1")
-)
-
-drsa_plot <- function(role) {
-  coefficients <- drsa_surface_coefficients[[role]]
-  outcome <- paste0(role, "_mvpa")
-
-  RSA::plotRSA(
-    x = coefficients[["x"]],
-    y = coefficients[["y"]],
-    x2 = coefficients[["x2"]],
-    y2 = coefficients[["y2"]],
-    xy = coefficients[["xy"]],
-    b0 = coefficients[["b0"]],
-    xlim = drsa_xy_limit,
-    ylim = drsa_xy_limit,
-    zlim = drsa_z_limit,
-    xlab = "Female-provided emotional\nsupport (centered)",
-    ylab = "Male-provided emotional\nsupport (centered)",
-    zlab = "Predicted value",
-    main = paste0(tools::toTitleCase(role), " total MVPA (min/day)"),
-    legend = FALSE,
-    param = FALSE,
-    axes = c("LOC", "LOIC"),
-    axesStyles = drsa_axes_styles,
-    project = c("contour", "LOC", "LOIC", "points"),
-    points = list(
-      data = data.frame(
-        drsa_data$female_support_c,
-        drsa_data$male_support_c,
-        drsa_data[[outcome]]
-      ),
-      show = TRUE,
-      value = "predicted",
-      jitter = 0,
-      color = "#20252B",
-      cex = 0.38
-    ),
-    hull = TRUE,
-    border = FALSE,
-    gridsize = 23,
-    pal = drsa_palette,
-    pal.range = "box",
-    distance = c(1.05, 1.05, 1.1),
-    cex.tickLabel = 0.66,
-    cex.axesLabel = 0.74,
-    cex.main = 0.90,
-    pad = 0.35
-  )
-}
-
-female_drsa_plot <- drsa_plot("female")
-male_drsa_plot <- drsa_plot("male")
-
-gridExtra::grid.arrange(
-  female_drsa_plot,
-  male_drsa_plot,
-  ncol = 2,
-  padding = grid::unit(0.15, "line")
-)
+draw_dyadic_response_surface(drsa_result)
 ```
 
 ::: {.text-smaller}
 
 - **Joint fit:** Both MVPA outcomes were modeled together (residual
-  $\hat\rho_e = `r sub("^0", "", sprintf("%.2f", drsa_residual_correlation))`$).
+  $\hat\rho_e = `r sub("^0", "", sprintf("%.2f", drsa_result$residual_correlation))`$).
 - **Pattern:** Both surfaces curve upward along the line of incongruence
-  ($a_{4,\mathrm F} = `r sprintf("%.2f", drsa_labeled_estimate("a4f"))`$;
-  $a_{4,\mathrm M} = `r sprintf("%.2f", drsa_labeled_estimate("a4m"))`$)—not the
+  ($a_{4,\mathrm F} = `r sprintf("%.2f", drsa_result$surface_parameters[["a4f"]])`$;
+  $a_{4,\mathrm M} = `r sprintf("%.2f", drsa_result$surface_parameters[["a4m"]])`$)—not the
   pattern expected for a similarity benefit.
 
 :::
 
 :::{.notes}
 
-- These are fitted results from the same 36 female–male couples used for the
-  distinguishable APIM. Female and male total MVPA are the two outcomes.
-- Following Schönbrodt et al., the two full second-order polynomial equations
-  were estimated simultaneously in `lavaan` with MLR, FIML, and a correlated
-  residual. The unconstrained outcome model is saturated, so global fit is not
-  informative.
-- Both support scores were centered at their pooled mean
-  (`r sprintf("%.2f", drsa_support_center)`), preserving numerical congruence
-  between the partners' measures. The axes retain the same female/male
-  orientation in both panels.
-- The solid blue line is the line of congruence ($X=Y$). The dashed purple line
-  is the line of incongruence ($Y=-X$ after centering). The points are fitted
-  values for observed couples; the loops mark the inner bag and outer fence of
-  their predictor combinations.
-- Surface parameters for female MVPA are
-  $a_1=`r sprintf("%.2f", drsa_labeled_estimate("a1f"))`$,
-  $a_2=`r sprintf("%.2f", drsa_labeled_estimate("a2f"))`$,
-  $a_3=`r sprintf("%.2f", drsa_labeled_estimate("a3f"))`$,
-  $a_4=`r sprintf("%.2f", drsa_labeled_estimate("a4f"))`$, and
-  $a_5=`r sprintf("%.2f", drsa_labeled_estimate("a5f"))`$.
-- Surface parameters for male MVPA are
-  $a_1=`r sprintf("%.2f", drsa_labeled_estimate("a1m"))`$,
-  $a_2=`r sprintf("%.2f", drsa_labeled_estimate("a2m"))`$,
-  $a_3=`r sprintf("%.2f", drsa_labeled_estimate("a3m"))`$,
-  $a_4=`r sprintf("%.2f", drsa_labeled_estimate("a4m"))`$, and
-  $a_5=`r sprintf("%.2f", drsa_labeled_estimate("a5m"))`$.
-- The polynomial predictors account for
-  `r sprintf("%.0f", 100 * drsa_r2[["female_mvpa"]])`% of female-MVPA variance
-  and `r sprintf("%.0f", 100 * drsa_r2[["male_mvpa"]])`% of male-MVPA variance
-  in this sample.
-- Positive $a_4$ values describe U-shaped curvature along the line of
-  incongruence, not the inverted-U pattern required for a similarity benefit.
-  With only 36 couples and sparse discrepant high-support combinations, this is
-  a descriptive illustration; do not interpret the empty surface corners or
-  the fitted pattern as robust evidence.
-- A response surface is more informative than a difference score because the
-  same difference can arise from substantively different combinations of the
-  two partners' levels.
+- The two horizontal axes show female- and male-provided support. Zero is the
+  pooled mean; the height of each surface is predicted female or male MVPA.
+
+- On the solid blue congruence line ($X=Y$), partners report equal support,
+  ranging from low-low to high-high. On the dashed purple incongruence line
+  ($Y=-X$), one partner is above and the other equally below the pooled mean.
+
+- The points mark observed couples' support combinations on the fitted surface;
+  the loops show the observed predictor region. Areas far outside are
+  extrapolations.
+
+- In this sample, predicted MVPA tends to rise as partners become discrepant in
+  either direction. That is not a similarity-benefit pattern, but it should be
+  treated descriptively because only 36 couples—and few extreme combinations—
+  inform the surface.
 
 :::
 
