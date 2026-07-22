@@ -2013,6 +2013,8 @@ draw_truth_bias_diagram()
 
 ## Dyadic response surface analysis [[@schonbrodtTestingSimilarityEffects2018]]{.heading-reference}
 
+::: {style="transform: scale(1.22); transform-origin: center center;"}
+
 ```{r}
 #| label: conceptual-dyadic-response-surface
 #| echo: false
@@ -2069,6 +2071,8 @@ RSA::plotRSA(
   cex.axesLabel = 0.9
 )
 ```
+
+:::
 
 ::: {.text-smaller}
 
