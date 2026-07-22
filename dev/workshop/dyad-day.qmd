@@ -1253,7 +1253,7 @@ What if we want DIM-style interpretation but have distinguishable dyads?
 - **DIM**: deviation from the couple mean $X_i - \bar{X}$
   - opposite for each partner 
 - **DSM**: meaningful directed differences $X_\mathrm{female} - X_\mathrm{male}$
-  - repeated for both partners. 
+  - repeated for both partners
 :::
 
 

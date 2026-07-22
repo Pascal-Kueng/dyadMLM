@@ -50,6 +50,12 @@ A DSM requires an explicitly declared direction. This direction should be
 substantively meaningful when the directional coefficients are interpreted.
 Here, `c("female", "male")` defines every difference as female minus male.
 
+Throughout this cross-sectional example, $X_{\mathrm{female}}$ and
+$X_{\mathrm{male}}$ denote provided support after subtracting the same pooled
+grand mean across all members in the analysis sample. Raw scores could instead
+be used if zero is meaningful for that variable in the analysis sample; this
+would change the intercept reference point, but not the slope estimates.
+
 ```{r prepare-cross-dsm}
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
   dyads_cross,
@@ -68,19 +74,19 @@ cross_dsm_data <- dyadMLM::prepare_dyad_data(
 print(cross_dsm_data, n = 4)
 ```
 
-For predictor values $X_{\mathrm{female}}$ and $X_{\mathrm{male}}$, `dyadMLM`
-then creates:
+With this notation, `dyadMLM` creates the equivalent coordinates:
 
 - `.dy_provided_support_dyad_mean_gmc` $=
-  \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X$ (with $\mu_X$ representing the sample grand
-  mean of the dyad-level predictor means)
+  \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2}$
   
 - `.dy_provided_support_within_dyad_diff` $= X_{\mathrm{female}} - X_{\mathrm{male}}$
 
 - `.dy_dsm_role_contrast` $= +0.5$ for female and $-0.5$ for male.
 
-The dyad mean and signed difference are repeated on both member rows. The
-outcome remains unchanged and no transformation is needed.
+The function obtains the first coordinate by grand-mean centering the dyad
+means calculated from the original scores. The common centering shift cancels
+from the signed difference. Both coordinates are repeated on the member rows;
+the outcome remains unchanged and needs no transformation.
 
 ## Cross-Sectional Gaussian DSM
 
@@ -144,12 +150,14 @@ decomposed in the same way:
 
 $$
 X_{\mathrm{mean}}
-= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X,
+= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2},
 \qquad
-X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}},
+X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}}.
 $$
 
-where $\mu_X$ is the sample grand mean of the dyad-level predictor means.
+Here the two member predictors already share the pooled grand-mean reference,
+so $X_{\mathrm{mean}}$ is grand-mean centered and the common shift cancels from
+$X_{\mathrm{diff}}$.
 
 The **outcomes** are also decomposed:
 
@@ -278,6 +286,22 @@ cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   keep_compositions = "female-male",
   dsm_role_order = c("male", "female")
 )
+
+provided_support_grand_mean <- mean(
+  c(
+    cross_dsm_data_inverted$.dy_provided_support_actor,
+    cross_dsm_data_inverted$.dy_provided_support_partner
+  ),
+  na.rm = TRUE
+)
+
+# Use one pooled centering constant for both APIM predictor columns.
+cross_dsm_data_inverted$.dy_provided_support_actor <-
+  cross_dsm_data_inverted$.dy_provided_support_actor -
+  provided_support_grand_mean
+cross_dsm_data_inverted$.dy_provided_support_partner <-
+  cross_dsm_data_inverted$.dy_provided_support_partner -
+  provided_support_grand_mean
 ```
 
 ```{r fit-cross-dsm-inverted, eval=has_glmmTMB}
@@ -423,18 +447,19 @@ a_{22}
 \end{aligned}
 $$
 
-The APIM predictors retain their original scale, whereas the DSM predictor
-level is grand-mean centered. Keeping the raw APIM predictors on their original
-scale preserves their reference values; the centering difference is handled
-explicitly in the intercept transformation. If $\mu_X$ is the grand mean
-subtracted from the DSM predictor level, the intercepts transform as
+Grand-mean centering both APIM predictor columns with the same pooled constant
+aligns their zero point with the DSM predictor mean. The intercepts therefore
+transform as
 
 $$
-a_{10}
-= \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2} + \mu_X a_{11},
+a_{10} = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2},
 \qquad
-a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}} + \mu_X a_{21}.
+a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}}.
 $$
+
+With raw APIM predictors, the slope transformations would be unchanged, but
+the intercept transformation would additionally need to account for the
+different zero point.
 
 For the reverse slope transformation, first recover the role-specific
 actor-plus-partner and actor-minus-partner combinations:
@@ -467,13 +492,11 @@ $$
 The intercepts transform back as
 
 $$
-b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2}
-- \mu_X\left(a_{11} + \frac{a_{21}}{2}\right),
+b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2},
 $$
 
 $$
-b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}
-- \mu_X\left(a_{11} - \frac{a_{21}}{2}\right).
+b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}.
 $$
 
 The following comparison applies the APIM-to-DSM transformation to all six
@@ -498,13 +521,6 @@ b_partner_male <- apim_coef[[
   ".dy_is_female_x_male_male:.dy_provided_support_partner"
 ]]
 
-mu_X <- mean(
-  (cross_dsm_data_inverted$.dy_provided_support_actor +
-     cross_dsm_data_inverted$.dy_provided_support_partner) / 2 -
-    cross_dsm_data_inverted$.dy_provided_support_dyad_mean_gmc,
-  na.rm = TRUE
-)
-
 b_sum_female <- b_actor_female + b_partner_female
 b_sum_male <- b_actor_male + b_partner_male
 b_difference_female <- b_actor_female - b_partner_female
@@ -516,10 +532,10 @@ a12_from_apim <- (b_difference_female - b_difference_male) / 4
 a22_from_apim <- (b_difference_female + b_difference_male) / 2
 
 apim_to_dsm <- c(
-  a10 = (b0_female + b0_male) / 2 + mu_X * a11_from_apim,
+  a10 = (b0_female + b0_male) / 2,
   a11 = a11_from_apim,
   a12 = a12_from_apim,
-  a20 = b0_female - b0_male + mu_X * a21_from_apim,
+  a20 = b0_female - b0_male,
   a21 = a21_from_apim,
   a22 = a22_from_apim
 )
@@ -550,10 +566,9 @@ knitr::kable(
     check.names = FALSE
   ),
   align = c("l", "r", "r"),
-  caption = paste0(
-    "APIM-to-DSM fixed-effect transformation (centering constant = ",
-    round(mu_X, 3),
-    ")."
+  caption = paste(
+    "APIM-to-DSM fixed-effect transformation with pooled",
+    "grand-mean-centered actor and partner predictors."
   )
 )
 ```

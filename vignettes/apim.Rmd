@@ -51,19 +51,25 @@ A vignette for non-Gaussian generalized models is planned.
 
 # Cross-sectional APIMs
 
+Throughout the cross-sectional examples, both partners' $X$ terms are
+grand-mean centered by subtracting the same pooled mean across all members in
+the analysis sample. Raw predictor scores could instead be used if zero is
+meaningful for that variable in the analysis sample; this would change the
+intercept reference point, but not the actor or partner slopes.
+
 ## The distinguishable APIM
 
 A conceptual example for distinguishable female-male dyads:
 
-```{r distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads. Intercepts $b_\\mathrm{0}$, actor effects $a$, and partner effects $p$ can differ by the role of the outcome member (F and M), and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Female and male outcomes have separate intercepts. Female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. The female and male outcome residuals covary."}
-draw_apim_diagram("distinguishable")
+```{r distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads, with both predictors centered using one pooled grand mean. Intercepts $b_\\mathrm{0}$, actor effects $a$, and partner effects $p$ can differ by the role of the outcome member (F and M), and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Grand-mean-centered female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. Female and male outcomes have separate intercepts, and their residuals covary."}
+draw_apim_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 For univariate MLM software like `glmmTMB`, this model is fitted in long format 
 with one outcome row per member, which can be visualized as:
 
-```{r distinguishable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the distinguishable cross-sectional APIM used for the long-format multilevel model. For the female outcome, the female predictor is the actor predictor and the male predictor is the partner predictor. These roles reverse for the male outcome. Intercepts, actor coefficients, and partner coefficients may differ by outcome role, and the two member residuals may have different variances and covary.", fig.alt="Two-panel path diagram for a distinguishable female-male APIM. The female and male outcomes have separate intercepts. In the female outcome panel, female X is the actor predictor and male X is the partner predictor of female Y, with coefficients a F and p F. In the male outcome panel, male X is the actor predictor and female X is the partner predictor of male Y, with coefficients a M and p M. The female and male outcome residuals covary."}
-draw_apim_member_diagram("distinguishable")
+```{r distinguishable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the distinguishable cross-sectional APIM used for the long-format multilevel model. Both predictors use one pooled grand-mean reference. For the female outcome, the female predictor is the actor predictor and the male predictor is the partner predictor. These roles reverse for the male outcome. Intercepts, actor coefficients, and partner coefficients may differ by outcome role, and the two member residuals may have different variances and covary.", fig.alt="Two-panel path diagram for a distinguishable female-male APIM with grand-mean-centered predictors. In the female outcome panel, female X is the actor predictor and male X is the partner predictor of female Y, with coefficients a F and p F. In the male outcome panel, male X is the actor predictor and female X is the partner predictor of male Y, with coefficients a M and p M. The outcomes have separate intercepts and their residuals covary."}
+draw_apim_member_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 
@@ -124,9 +130,27 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
 
 print(apim_distinguishable_data, n=4)
 
+provided_support_grand_mean <- mean(
+  c(
+    apim_distinguishable_data$.dy_provided_support_actor,
+    apim_distinguishable_data$.dy_provided_support_partner
+  ),
+  na.rm = TRUE
+)
+
+# Use one pooled centering constant for both actor and partner predictors.
+apim_distinguishable_data$.dy_provided_support_actor <-
+  apim_distinguishable_data$.dy_provided_support_actor -
+  provided_support_grand_mean
+apim_distinguishable_data$.dy_provided_support_partner <-
+  apim_distinguishable_data$.dy_provided_support_partner -
+  provided_support_grand_mean
+
 ```
 
-The generated `.dy_*` columns can be used directly in the model formula. Here is
+`prepare_dyad_data()` initially generated the actor and partner columns on the
+original predictor scale. The lines above subtract one pooled mean from both
+analysis columns, which can now be used directly in the model formula. Here is
 a simple example:
 
 ```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
@@ -192,13 +216,16 @@ apim_distinguishable_fitted_alt <- sprintf(
 )
 ```
 
-The estimated coefficients map as follows: 
+With the common centering, the two intercepts are the expected female and male
+closeness scores when both partners' provided support equals the pooled sample
+mean. The estimated coefficients map as follows:
 
 ```{r fitted-distinguishable-apim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional distinguishable APIM for the example data. Fixed effects, residual standard deviations, and the residual correlation are extracted from the fitted model.", fig.alt=apim_distinguishable_fitted_alt}
 draw_apim_diagram(
   "distinguishable",
   model = apim_distinguishable_model,
-  labels = c(predictor = "Provided support", outcome = "Closeness")
+  labels = c(predictor = "Provided support", outcome = "Closeness"),
+  predictors_centered = TRUE
 )
 ```
 
@@ -206,8 +233,8 @@ draw_apim_diagram(
 
 Conceptually, the exchangeable APIM constrains several of the effects to be equal: 
 
-```{r exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for exchangeable dyads. The two members share one intercept, one actor effect, and one partner effect. Their outcome residuals have equal variances, yet still covary within dyads.", fig.alt="Path diagram for an exchangeable cross-sectional APIM. Both outcomes have the same intercept. Each member's predictor has the same actor effect on their own outcome and the same partner effect on the other member's outcome. The two outcome residuals have equal variances and covary."}
-draw_apim_diagram("exchangeable")
+```{r exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for exchangeable dyads, with both predictors centered using one pooled grand mean. The two members share one intercept, one actor effect, and one partner effect. Their outcome residuals have equal variances, yet still covary within dyads.", fig.alt="Path diagram for an exchangeable cross-sectional APIM with grand-mean-centered predictors. Both outcomes have the same intercept. Each member's predictor has the same actor effect on their own outcome and the same partner effect on the other member's outcome. The two outcome residuals have equal variances and covary."}
+draw_apim_diagram("exchangeable", predictors_centered = TRUE)
 ```
 
 Because the member labels are arbitrary, swapping members 1 and 2 does **not**
@@ -216,8 +243,8 @@ change the model.
 To estimate this model in a univariate MLM framework, we can draw a conceptual
 diagram as such: 
 
-```{r exchangeable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the exchangeable cross-sectional APIM used for the long-format multilevel model. Both members share the same intercept. Each member's own predictor has the shared actor effect, and the other member's predictor has the shared partner effect. The two residual variances are equal and the residuals may covary.", fig.alt="Two-panel path diagram for an exchangeable APIM. Both outcomes have the same intercept. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary."}
-draw_apim_member_diagram("exchangeable")
+```{r exchangeable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the exchangeable cross-sectional APIM used for the long-format multilevel model. Both predictors use one pooled grand-mean reference. The members share the same intercept; each member's own predictor has the shared actor effect, and the other member's predictor has the shared partner effect. The two residual variances are equal and the residuals may covary.", fig.alt="Two-panel path diagram for an exchangeable APIM with grand-mean-centered predictors. Both outcomes have the same intercept. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary."}
+draw_apim_member_diagram("exchangeable", predictors_centered = TRUE)
 ```
 
 
@@ -266,6 +293,22 @@ apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
 )
 
 print(apim_exchangeable_data, n = 4)
+
+exchangeable_support_grand_mean <- mean(
+  c(
+    apim_exchangeable_data$.dy_provided_support_actor,
+    apim_exchangeable_data$.dy_provided_support_partner
+  ),
+  na.rm = TRUE
+)
+
+# Use one pooled centering constant for both actor and partner predictors.
+apim_exchangeable_data$.dy_provided_support_actor <-
+  apim_exchangeable_data$.dy_provided_support_actor -
+  exchangeable_support_grand_mean
+apim_exchangeable_data$.dy_provided_support_partner <-
+  apim_exchangeable_data$.dy_provided_support_partner -
+  exchangeable_support_grand_mean
 ```
 
 We then use the columns to fit the model as follows: 
@@ -349,13 +392,16 @@ apim_exchangeable_fitted_alt <- sprintf(
 
 
 
-The output can now be mapped as follows:
+With the common centering, the shared intercept is the expected closeness of
+either member when both partners' provided support equals the pooled sample
+mean. The output can now be mapped as follows:
 
 ```{r fitted-exchangeable-apim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
 draw_apim_diagram(
   "exchangeable",
   model = apim_exchangeable_model,
-  labels = c(predictor = "Provided support", outcome = "Closeness")
+  labels = c(predictor = "Provided support", outcome = "Closeness"),
+  predictors_centered = TRUE
 )
 ```
 

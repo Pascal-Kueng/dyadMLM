@@ -1148,8 +1148,13 @@ draw_apim_diagram <- function(
 }
 
 draw_apim_member_diagram <- function(
-    type = c("distinguishable", "exchangeable")) {
+    type = c("distinguishable", "exchangeable"),
+    predictors_centered = FALSE) {
   type <- match.arg(type)
+  if (!is.logical(predictors_centered) || length(predictors_centered) != 1L ||
+      is.na(predictors_centered)) {
+    stop("`predictors_centered` must be TRUE or FALSE.", call. = FALSE)
+  }
 
   actor_colour <- .interdep_diagram_colours$actor
   partner_colour <- .interdep_diagram_colours$partner
@@ -1162,10 +1167,18 @@ draw_apim_member_diagram <- function(
       panel_top = "Female outcome member",
       panel_bottom = "Male outcome member",
       actor_subtitle = "Actor predictor",
-      actor_x_top = expression(X[plain(F)]),
-      partner_x_top = expression(X[plain(M)]),
-      actor_x_bottom = expression(X[plain(M)]),
-      partner_x_bottom = expression(X[plain(F)]),
+      actor_x_top = if (predictors_centered) {
+        expression(X[plain(F)] - mu[X])
+      } else expression(X[plain(F)]),
+      partner_x_top = if (predictors_centered) {
+        expression(X[plain(M)] - mu[X])
+      } else expression(X[plain(M)]),
+      actor_x_bottom = if (predictors_centered) {
+        expression(X[plain(M)] - mu[X])
+      } else expression(X[plain(M)]),
+      partner_x_bottom = if (predictors_centered) {
+        expression(X[plain(F)] - mu[X])
+      } else expression(X[plain(F)]),
       y_top = expression(Y[plain(F)]),
       y_bottom = expression(Y[plain(M)]),
       residual_top = expression(epsilon[plain(F)]),
@@ -1182,10 +1195,18 @@ draw_apim_member_diagram <- function(
       panel_top = "Arbitrary member 1",
       panel_bottom = "Arbitrary member 2",
       actor_subtitle = "Own predictor",
-      actor_x_top = expression(X[1]),
-      partner_x_top = expression(X[2]),
-      actor_x_bottom = expression(X[2]),
-      partner_x_bottom = expression(X[1]),
+      actor_x_top = if (predictors_centered) {
+        expression(X[1] - mu[X])
+      } else expression(X[1]),
+      partner_x_top = if (predictors_centered) {
+        expression(X[2] - mu[X])
+      } else expression(X[2]),
+      actor_x_bottom = if (predictors_centered) {
+        expression(X[2] - mu[X])
+      } else expression(X[2]),
+      partner_x_bottom = if (predictors_centered) {
+        expression(X[1] - mu[X])
+      } else expression(X[1]),
       y_top = expression(Y[1]),
       y_bottom = expression(Y[2]),
       residual_top = expression(epsilon[1]),

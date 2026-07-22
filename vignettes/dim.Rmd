@@ -88,8 +88,24 @@ cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   seed = 123
 )
 
-# Print the first two dyads.
+# Print the first two dyads before changing the generated APIM analysis columns.
 print(cross_exchangeable_data, n = 4)
+
+provided_support_grand_mean <- mean(
+  c(
+    cross_exchangeable_data$.dy_provided_support_actor,
+    cross_exchangeable_data$.dy_provided_support_partner
+  ),
+  na.rm = TRUE
+)
+
+# Use one pooled centering constant for both APIM predictor columns.
+cross_exchangeable_data$.dy_provided_support_actor <-
+  cross_exchangeable_data$.dy_provided_support_actor -
+  provided_support_grand_mean
+cross_exchangeable_data$.dy_provided_support_partner <-
+  cross_exchangeable_data$.dy_provided_support_partner -
+  provided_support_grand_mean
 ```
 
 For the exchangeable random-effects specification,
@@ -99,15 +115,23 @@ are arbitrary, setting `seed` makes their assignment reproducible.
 
 ### Example DIM Model
 
-For member \(i \in \{1, 2\}\) of dyad \(j\), define the dyad mean and
-within-dyad member deviation as:
+In this cross-sectional example, $x_{ij}$ denotes provided support after
+subtracting the same pooled grand mean across all members in the analysis
+sample. Raw scores could instead be used if zero is meaningful for that variable
+in the analysis sample; the slopes would be unchanged, but the intercept would
+have a different reference point.
+
+For member $i \in \{1, 2\}$ of dyad $j$, define the dyad mean and within-dyad
+member deviation as:
 
 $$
 \bar{x}_j = \frac{x_{1j} + x_{2j}}{2}, \qquad
 x_{\mathrm{dev},ij} = x_{ij} - \bar{x}_j.
 $$
 
-The model uses $\bar{x}_j-\mu_x$, the grand-mean-centered dyad mean.
+Because each $x_{ij}$ uses the same grand-mean reference, $\bar{x}_j$ is already
+grand-mean centered. The within-dyad deviation is unchanged by this common
+shift.
 
 The deviations of the two partners have equal magnitude and opposite signs:
 \(x_{\mathrm{dev},1j} = -x_{\mathrm{dev},2j}\). Outcome means and deviations
@@ -297,7 +321,19 @@ Once APIM estimates are present, one can easily obtain DIM estimates, and
 the other way around. Let $b_{\mathrm{actor}}$ and $b_{\mathrm{partner}}$
 denote the APIM actor and partner slopes, and let $b_{\mathrm{mean}}$ and
 $b_{\mathrm{dev}}$ denote the DIM between-dyad and within-dyad slopes.
-They relate as follows:
+Grand-mean centering the APIM actor and partner predictors with the same pooled
+constant gives the APIM and DIM the same zero point. This simplifies the
+fixed-effect transformation to the formulas shown here; with raw APIM
+predictors, the slope formulas would be unchanged but the intercept would need
+to be recentered.
+
+The shared intercept is
+
+$$
+b_{0,\mathrm{DIM}} = b_{0,\mathrm{APIM}}.
+$$
+
+The slopes relate as follows:
 
 $$
 b_{\mathrm{mean}} = b_{\mathrm{actor}} + b_{\mathrm{partner}}
@@ -330,14 +366,17 @@ In this example we can see that the transformations work:
 apim_coef <- glmmTMB::fixef(apim_1)$cond
 dim_coef <- glmmTMB::fixef(dim_1)$cond
 
+b0_apim <- apim_coef[["(Intercept)"]]
 b_actor <- apim_coef[[".dy_provided_support_actor"]]
 b_partner <- apim_coef[[".dy_provided_support_partner"]]
 
+b0_dim <- dim_coef[["(Intercept)"]]
 b_mean <- dim_coef[[".dy_provided_support_dyad_mean_gmc"]]
 b_dev <- dim_coef[[".dy_provided_support_within_dyad_dev"]]
 
 
 cat("From APIM model:\n",
+     "  intercept:                     ", round(b0_apim, 3), "\n",
      "  actor effect:                  ", round(b_actor, 3), "\n",
      "  partner effect:                ", round(b_partner, 3), "\n\n",
 
@@ -346,15 +385,15 @@ cat("From APIM model:\n",
      "  b_dev = b_actor - b_partner:   ", round(b_actor - b_partner, 3), "\n\n",
 
      "From DIM model:\n",
+     "  intercept:                     ", round(b0_dim, 3), "\n",
      "  between-dyad effect:           ", round(b_mean, 3), "\n",
      "  within-dyad effect:            ", round(b_dev, 3), "\n"
 )
 
 ```
 
-The DIM and APIM intercepts are not expected to be equal because the DIM dyad
-mean is grand-mean centered, whereas the APIM predictors retain their original
-scale.
+The DIM and APIM intercepts are equal up to numerical estimation tolerance
+because both parameterizations now use the same grand-mean reference.
 
 
 ### Why Are These Models Equivalent? Exploring the Reparameterization

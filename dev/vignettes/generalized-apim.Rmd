@@ -44,6 +44,12 @@ because the dyadic structure is unchanged. The interpretation of the fitted
 model differs: fixed and random effects act on the log-mean scale, while the
 observation-level negative-binomial variance remains part of the model.
 
+Throughout these cross-sectional examples, both partners' stress terms $X$ are
+grand-mean centered by subtracting the same pooled mean across all members in
+the analysis sample. Raw scores could instead be used if zero is meaningful for
+that variable in the analysis sample; this would change the intercept reference
+point, but not the actor or partner slopes.
+
 ### Distinguishable negative-binomial APIM
 
 ```{r prepare-nbinom-distinguishable}
@@ -62,6 +68,20 @@ nbinom_distinguishable_data <- dyadMLM::prepare_dyad_data(
 
 print(nbinom_distinguishable_data)
 summary(nbinom_distinguishable_data)
+
+stress_grand_mean <- mean(
+  c(
+    nbinom_distinguishable_data$.dy_stress_actor,
+    nbinom_distinguishable_data$.dy_stress_partner
+  ),
+  na.rm = TRUE
+)
+
+# Use one pooled centering constant for both actor and partner predictors.
+nbinom_distinguishable_data$.dy_stress_actor <-
+  nbinom_distinguishable_data$.dy_stress_actor - stress_grand_mean
+nbinom_distinguishable_data$.dy_stress_partner <-
+  nbinom_distinguishable_data$.dy_stress_partner - stress_grand_mean
 ```
 
 
@@ -112,6 +132,22 @@ nbinom_exchangeable_data <- dyadMLM::prepare_dyad_data(
 
 print(nbinom_exchangeable_data)
 summary(nbinom_exchangeable_data)
+
+exchangeable_stress_grand_mean <- mean(
+  c(
+    nbinom_exchangeable_data$.dy_stress_actor,
+    nbinom_exchangeable_data$.dy_stress_partner
+  ),
+  na.rm = TRUE
+)
+
+# Use one pooled centering constant for both actor and partner predictors.
+nbinom_exchangeable_data$.dy_stress_actor <-
+  nbinom_exchangeable_data$.dy_stress_actor -
+  exchangeable_stress_grand_mean
+nbinom_exchangeable_data$.dy_stress_partner <-
+  nbinom_exchangeable_data$.dy_stress_partner -
+  exchangeable_stress_grand_mean
 ```
 
 ```{r fit-nbinom-exchangeable, eval = FALSE}

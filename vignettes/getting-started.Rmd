@@ -152,8 +152,10 @@ print(cross_distinguishable_data, n = 4)
 
 The function retained and recognized 120
 female-male dyads and created APIM-relevant variables
-[@kennyPartnerEffectsRelationship1999]. These generated `.dy_*` columns can be
-used directly in model formulas.
+[@kennyPartnerEffectsRelationship1999]. The generated actor and partner columns
+retain the original predictor scale. They can be used directly when zero is a
+meaningful reference; in the cross-sectional APIM examples, we instead subtract
+the same pooled grand mean from both columns before fitting the model.
 
 For fitted APIM examples using these columns, see the
 [Actor-Partner Interdependence Model vignette](apim.html).
