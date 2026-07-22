@@ -472,6 +472,8 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 
 <!-- ca. 1 Minute -->
 
+# Actor-partner interdependence models
+
 ## Research Question 1a {.rq-slide}
 
 ::: {.rq-center}
@@ -945,6 +947,8 @@ compare_nested_glmmTMB_models(
   distinguishable_apim
 )
 ```
+
+# Level-and-difference models
 
 ## Shifting the analytical lens
 
@@ -1505,6 +1509,8 @@ $$
 Here, $b_1$ is the actor effect and $b_2$ is the partner effect. The APIM
 predictors and DSM couple mean now use the same pooled grand-mean reference, so
 no additional centering adjustment is needed for the intercepts.
+
+# Common fate models
 
 ## When the construct is inherently dyadic
 
