@@ -25,20 +25,20 @@
 }
 
 .fit_early_gaussian_model <- function(formula, data) {
-  model_environment <- new.env(parent = environment(formula))
-  model_environment$.early_model_data <- data
-  environment(formula) <- model_environment
+  # Give the prepared data a stable name in this function environment. glmmTMB
+  # retains that environment with the fitted formula, allowing dyadMLM to
+  # recover the data later when two models are compared.
+  .early_model_data <- data
 
   model <- glmmTMB::glmmTMB(
     formula,
     dispformula = ~0,
     family = stats::gaussian(),
-    data = data
+    data = .early_model_data
   )
   # Keep the evaluated formula in the returned call so formula(model) remains
   # available after this helper's local objects have gone out of scope.
   model$call$formula <- formula
-  model$call$data <- quote(.early_model_data)
   model
 }
 
