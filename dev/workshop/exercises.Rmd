@@ -1,0 +1,17 @@
+---
+title: "Dyadic Data Analysis with R"
+subtitle: "Workshop Exercises"
+author:
+  - "Pascal Küng"
+  - "Turu Stadler"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-title: "Exercises"
+editor: source
+---
+
+# Exercises
+
+The workshop exercises will be added here.

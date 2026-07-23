@@ -7,11 +7,7 @@ on:
   push:
     branches:
       - fix/workshop-model-comparison
-    paths:
-      - dev/workshop/dyad-day.html
-      - dev/workshop/applied-tutorial.qmd
-      - dev/workshop/applied-tutorial.html
-      - .github/workflows/workshop-draft.yaml
+    # Deliberately no paths filter: every branch push rebuilds all materials.
 
 permissions:
   contents: write
@@ -27,18 +23,43 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: r-lib/actions/setup-r@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::ggplot2
+            any::gridExtra
+            any::patchwork
+            any::pkgdown
+            any::RSA
+            any::see
+            any::tidyr
+            local::.
+          needs: website
+
       - uses: quarto-dev/quarto-actions/setup@v2
 
-      - name: Render the applied tutorial
-        run: quarto render dev/workshop/applied-tutorial.qmd
-
-      - name: Stage the self-contained slide decks
+      - name: Render all workshop materials
         run: |
-          mkdir -p _workshop-draft/conceptual _workshop-draft/applied
+          quarto render dev/workshop/dyad-day.qmd
+          quarto render dev/workshop/applied-tutorial.qmd
+          quarto render dev/workshop/exercises.Rmd
+
+      - name: Render the workshop landing page
+        run: |
+          mkdir -p docs/workshop
+          Rscript -e 'pkgdown::render_page(".", "workshop", data = list(pagetitle = "Workshop", description = "Dyadic Data Analysis workshop materials."), path = "workshop/index.html", depth = 1)'
+
+      - name: Stage the workshop materials
+        run: |
+          mkdir -p _workshop-draft/conceptual _workshop-draft/applied _workshop-draft/exercises
+          cp docs/workshop/index.html _workshop-draft/index.html
           cp dev/workshop/dyad-day.html _workshop-draft/conceptual/index.html
           cp dev/workshop/applied-tutorial.html _workshop-draft/applied/index.html
+          cp dev/workshop/exercises.html _workshop-draft/exercises/index.html
 
-      - name: Publish the workshop drafts
+      - name: Publish the workshop materials
         uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           branch: gh-pages
