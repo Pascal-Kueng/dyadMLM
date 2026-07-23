@@ -147,8 +147,8 @@ None of these standard approaches automatically handles MNAR.
 
 ### Why we teach R
 
-- **Freely available:** cross-platform and independent of institutional licenses
-- **Open source:** statistical implementations can be inspected and audited
+- **Free to use:** no license fees or institutional access barriers
+- **Open source:** statistical implementations can be inspected, audited, and adapted
 - **Reproducible:** workflows can be rerun, reviewed, shared, and version-controlled
 - **Extensible:** specialized methods integrate with data, graphics, and reporting
 
@@ -222,9 +222,25 @@ None of these standard approaches automatically handles MNAR.
 
 ## Distinguishable APIM
 
-
+- Row-Level representation
+- residual matrix?
+- Code
+  - Data prep and inspecting and understanding data structure
+  - Visualizing variables and bivariate relationships
+  - Estimating the model
+  - Checking assumptions
+  - Visualizing results
 
 ## Exchangeable APIM
+
+- Row-Level representation
+- residual matrix?
+- Code
+  - Data prep and inspecting and understanding data structure
+  - Visualizing variables and bivariate relationships
+  - Estimating the model
+  - Checking assumptions
+  - Visualizing results
 
 ## Testing distinguishability
 
@@ -234,7 +250,18 @@ None of these standard approaches automatically handles MNAR.
 
 ## DIM
 
+- Row-Level representation
+- residual matrix?
+- Code
+  - Data prep and inspecting and understanding data structure
+  - Visualizing variables and bivariate relationships
+  - Estimating the model
+  - Checking assumptions
+  - Visualizing results
+
 ## Excursion: non-Gaussian generalized models
+
+## Q&A and discussion
 
 # Intensive longitudinal extensions
 
