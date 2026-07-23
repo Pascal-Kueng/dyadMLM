@@ -44,7 +44,6 @@ jobs:
         run: |
           quarto render dev/workshop/dyad-day.qmd
           quarto render dev/workshop/applied-tutorial.qmd
-          quarto render dev/workshop/exercises.Rmd
 
       - name: Render the workshop landing page
         run: |
@@ -53,11 +52,11 @@ jobs:
 
       - name: Stage the workshop materials
         run: |
-          mkdir -p _workshop-draft/conceptual _workshop-draft/applied _workshop-draft/exercises
+          mkdir -p _workshop-draft/conceptual _workshop-draft/applied
           cp docs/workshop/index.html _workshop-draft/index.html
           cp dev/workshop/dyad-day.html _workshop-draft/conceptual/index.html
           cp dev/workshop/applied-tutorial.html _workshop-draft/applied/index.html
-          cp dev/workshop/exercises.html _workshop-draft/exercises/index.html
+          cp dev/workshop/exercises.Rmd _workshop-draft/exercises.Rmd
 
       - name: Publish the workshop materials
         uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0

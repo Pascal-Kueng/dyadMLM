@@ -233,7 +233,214 @@ None of these standard approaches automatically handles MNAR.
   - Visualizing results
   
   
-<!-- INSERT EXAMPLE HERE -->
+```{r}
+#| label: setup-distinguishable-apim-example
+#| include: false
+
+source(
+  "../../vignettes/diagram-helpers.Rinc",
+  local = knitr::knit_global()
+)
+```
+
+## Example: affective attitude and active days {.smaller}
+
+We average the daily observations for each person. `active_days` is therefore
+the proportion of observed days on which the person performed MVPA.
+
+```{r}
+#| label: aggregate-distinguishable-apim-data
+
+library(dplyr)
+library(dyadMLM)
+library(glmmTMB)
+
+daily_data <- readRDS("long.rds")
+
+person_data <- daily_data |>
+  transmute(
+    couple_id = coupleID,
+    person_id = userID,
+    role = factor(
+      gender,
+      levels = c(1, 2),
+      labels = c("female", "male")
+    ),
+    affective_attitude = ss_affect_con,
+    active_days = ss_pa
+  ) |>
+  summarise(
+    affective_attitude = mean(affective_attitude, na.rm = TRUE),
+    active_days = mean(active_days, na.rm = TRUE),
+    .by = c(couple_id, person_id, role)
+  ) |>
+  arrange(couple_id, role)
+```
+
+## Prepare the distinguishable APIM data {.smaller}
+
+```{r}
+#| label: prepare-distinguishable-apim-data
+
+apim_data <- dyadMLM::prepare_dyad_data(
+  person_data,
+  dyad = couple_id,
+  member = person_id,
+  role = role,
+  predictors = affective_attitude,
+  model_types = "apim",
+  keep_compositions = "female-male"
+)
+
+attitude_mean <- mean(apim_data$affective_attitude)
+
+apim_data <- apim_data |>
+  mutate(
+    .dy_affective_attitude_actor =
+      .dy_affective_attitude_actor - attitude_mean,
+    .dy_affective_attitude_partner =
+      .dy_affective_attitude_partner - attitude_mean
+  )
+```
+
+Both actor and partner scores use the same pooled grand mean. The analysis
+contains 36 female--male couples.
+
+## Fit the distinguishable APIM {.smaller}
+
+```{r}
+#| label: fit-distinguishable-apim
+
+distinguishable_apim <- glmmTMB::glmmTMB(
+  active_days ~
+    0 +
+    .dy_is_female_x_male_female +
+    .dy_is_female_x_male_male +
+    .dy_is_female_x_male_female:
+      .dy_affective_attitude_actor +
+    .dy_is_female_x_male_male:
+      .dy_affective_attitude_actor +
+    .dy_is_female_x_male_female:
+      .dy_affective_attitude_partner +
+    .dy_is_female_x_male_male:
+      .dy_affective_attitude_partner +
+    us(
+      0 +
+        .dy_is_female_x_male_female +
+        .dy_is_female_x_male_male |
+        couple_id
+    ),
+  dispformula = ~0,
+  family = gaussian(),
+  data = apim_data
+)
+```
+
+The unstructured dyad random effect estimates the two residual variances and
+their covariance.
+
+## Print the fixed effects {.smaller}
+
+```{r}
+#| label: print-distinguishable-apim
+
+fixed_effects <- summary(distinguishable_apim)$coefficients$cond
+
+rownames(fixed_effects) <- c(
+  "Female intercept", "Male intercept",
+  "Female actor effect", "Male actor effect",
+  "Female partner effect", "Male partner effect"
+)
+
+knitr::kable(fixed_effects, digits = 3)
+```
+
+:::{.notes}
+
+One point higher average affective attitude is associated with about 6.5
+percentage points more active days for the actor and 3--4 percentage points
+more active days for the partner.
+
+:::
+
+## Plot the fitted APIM
+
+```{r}
+#| label: plot-distinguishable-apim
+#| dev: svg
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted distinguishable APIM linking affective attitude to the proportion of active days for female and male partners."
+
+draw_apim_diagram(
+  "distinguishable",
+  model = distinguishable_apim,
+  labels = c(
+    predictor = "Affective\nattitude",
+    outcome = "Proportion of\nactive days"
+  ),
+  predictors_centered = TRUE
+)
+```
+
+## Simulate dyadic residuals with DHARMa {.smaller}
+
+Because `dispformula = ~0`, ordinary conditional DHARMa residuals are
+degenerate. We simulate the dyad random effects unconditionally and inspect
+the two directions of the paired residuals separately.
+
+```{r}
+#| label: simulate-distinguishable-apim-residuals
+
+set.seed(123)
+
+simulated_residuals <- DHARMa::simulateResiduals(
+  distinguishable_apim,
+  n = 2000,
+  simulateREs = "unconditional",
+  plot = FALSE
+)
+
+dyad_id <- distinguishable_apim$frame$couple_id
+
+dyad_mean_residuals <- DHARMa::recalculateResiduals(
+  simulated_residuals,
+  group = dyad_id,
+  aggregateBy = mean
+)
+
+dyad_difference_residuals <- DHARMa::recalculateResiduals(
+  simulated_residuals,
+  group = dyad_id,
+  aggregateBy = diff
+)
+```
+
+## DHARMa: dyad means
+
+```{r}
+#| label: plot-distinguishable-apim-dyad-mean-residuals
+#| fig-width: 10
+#| fig-height: 5.5
+#| out-width: 100%
+#| fig-align: center
+
+plot(dyad_mean_residuals)
+```
+
+## DHARMa: dyad differences
+
+```{r}
+#| label: plot-distinguishable-apim-dyad-difference-residuals
+#| fig-width: 10
+#| fig-height: 5.5
+#| out-width: 100%
+#| fig-align: center
+
+plot(dyad_difference_residuals)
+```
 
 ## Exchangeable APIM
 

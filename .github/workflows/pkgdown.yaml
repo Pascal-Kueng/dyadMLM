@@ -48,7 +48,6 @@ jobs:
         run: |
           quarto render dev/workshop/dyad-day.qmd
           quarto render dev/workshop/applied-tutorial.qmd
-          quarto render dev/workshop/exercises.Rmd
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
@@ -56,11 +55,11 @@ jobs:
 
       - name: Add workshop materials
         run: |
-          mkdir -p docs/workshop/conceptual docs/workshop/applied docs/workshop/exercises
+          mkdir -p docs/workshop/conceptual docs/workshop/applied
           Rscript -e 'pkgdown::render_page(".", "workshop", data = list(pagetitle = "Workshop", description = "Dyadic Data Analysis workshop materials."), path = "workshop/index.html", depth = 1)'
           cp dev/workshop/dyad-day.html docs/workshop/conceptual/index.html
           cp dev/workshop/applied-tutorial.html docs/workshop/applied/index.html
-          cp dev/workshop/exercises.html docs/workshop/exercises/index.html
+          cp dev/workshop/exercises.Rmd docs/workshop/exercises.Rmd
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
