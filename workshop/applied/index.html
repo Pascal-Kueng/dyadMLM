@@ -1911,47 +1911,72 @@ Turu Stadler
 <!-- TODO @codex: please grey out the first two points, intro and lunch break). -->
 <!-- ca. 2 Minutes -->
 </section>
-<section id="choices-of-software-and-framework" class="slide level2">
-<h2>Choices of software and framework</h2>
+<section>
+<section id="software-and-frameworks" class="title-slide slide level1 center">
+<h1>Software and frameworks</h1>
+
 </section>
 <section id="sem-vs.-mlm" class="slide level2 smaller">
 <h2>SEM vs. MLM</h2>
 <ul>
 <li>Many simple dyadic models can be represented in either framework.</li>
-<li>We use MLM in this workshop, but the best framework is the one that represents the complete scientific model most naturally. <span class="citation" data-cites="ledermannAnalyzingDyadicData2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span></li>
+<li>We use MLM in this workshop, but the best framework is the one that represents your conceptual model most naturally <span class="citation" data-cites="ledermannAnalyzingDyadicData2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span>.</li>
 </ul>
 <div class="columns">
 <div class="column" style="width:50%;">
 <h3 id="sem-dsem-is-often-more-natural-for">SEM / DSEM is often more natural for</h3>
 <ul>
-<li>Latent dyad constructs (e.g., CFM)</li>
+<li>Latent dyad constructs (e.g., a CFM)</li>
 <li>Item-level measurement models for reflective measures</li>
 <li>Linked outcomes or equations, including mediation and reciprocal effects</li>
 <li>Short dynamic panels requiring explicit treatment of the first observations</li>
-<li>Intensive lagged/dynamic models via SEM/RDSEM</li>
+<li>Intensive lagged or coupled dynamics via DSEM/RDSEM or continuous-time SEM (<code>ctsem</code>)</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <h3 id="mlm-is-often-more-natural-for">MLM is often more natural for</h3>
 <ul>
 <li>Parsimonious observed-variable models with modest numbers of dyads</li>
 <li>Nested or crossed grouping and flexible random-effect structures</li>
-<li>Growth or concurrent ILD models with many or unequal numbers of occasions</li>
-<li>Interactions, nonlinear terms (such as RSA)</li>
+<li>Observed-outcome growth or concurrent ILD models with flexible time trends</li>
+<li>Complex interactions and nonlinear terms (such as RSA)</li>
 <li>Specialized GLMM families, such as zero-inflated, hurdle, and Tweedie models</li>
 </ul>
 </div></div>
 <div class="subtle">
-<p><span class="citation" data-cites="asparouhovDynamicStructuralEquation2018 asparouhovComparisonModelsAnalysis2020 gistelinckMultilevelAutoregressiveSmall2021 delrosarioPracticalGuideSpecifying2025">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov et al., 2018</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov &amp; Muthén, 2020</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>del Rosario &amp; West, 2025</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Gistelinck et al., 2021</a>)</span></p>
+<p><span class="citation" data-cites="asparouhovDynamicStructuralEquation2018 asparouhovComparisonModelsAnalysis2020 driverContinuousTimeStructural2017 gistelinckMultilevelAutoregressiveSmall2021 delrosarioPracticalGuideSpecifying2025">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov et al., 2018</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov &amp; Muthén, 2020</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>del Rosario &amp; West, 2025</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Driver et al., 2017</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Gistelinck et al., 2021</a>)</span></p>
 </div>
 </section>
-<section id="missing-data-not-simply-fiml-vs.-complete-cases" class="slide level2">
-<h2>Missing data: not simply FIML vs. complete cases</h2>
+<section id="missing-data-fiml-mi-and-complete-cases" class="slide level2">
+<h2>Missing data: FIML, MI, and complete cases</h2>
+<p>All approaches are robust to MAR and MCAR</p>
 <ul>
-<li>SEM commonly offers FIML for partially observed dyads.</li>
-<li>MLM can retain the other observed outcome occasions, but rows with missing predictors are usually dropped.</li>
-<li>Multiple imputation is available in either framework. It can be especially useful for missing predictors, but is not automatically the best solution and must respect persons, dyads, and time. <span class="citation" data-cites="ledermannAnalyzingDyadicData2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span></li>
+<li>MLM default: complete-case analysis = drop rows with missing data.
+<ul>
+<li>Loss in power compared to other approaches, but robust under MAR</li>
+</ul></li>
+<li>SEM offers FIML (joint estimation of missing predictors and outcomes in one likelihood model).
+<ul>
+<li>More power, simple solution, but “invisible” assumpsion (which are?)</li>
+<li>Robust under MAR - so missingness generating variables need to be included</li>
+</ul></li>
+<li>Multiple imputation (in either framework). Can use information from the full dataset, most likely to satisfy MAR. But can be difficult, must respect persons, dyads, and time <span class="citation" data-cites="ledermannAnalyzingDyadicData2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span></li>
 </ul>
 <!-- ca. 2.5 Minutes -->
+<aside class="notes">
+<p>MAR means there are predictors responsible for missingness included in the model. E.g., FIML and complete case are robust only, if missingness process is captured by model variables. MI has the advantage that it can use and identify missingness from across the whole dataset. Nonetheless, if missingness process is known, and the predictor is included in any of the approaches, we are robust.</p>
+<p>MI huge disadvantage that it is error prone and hard to do with nested data that has temporal dependency etc. principle of “nomogenity”? what was it called, where the MI model has to be at least as complex as the analysis model.</p>
+<p>brms mention?</p>
+<style type="text/css">
+span.MJX_Assistive_MathML {
+position:absolute!important;
+clip: rect(1px, 1px, 1px, 1px);
+padding: 1px 0 0 0!important;
+border: 0!important;
+height: 1px!important;
+width: 1px!important;
+overflow: hidden!important;
+display:block!important;
+}</style></aside>
 </section>
 <section id="r-vs.-mplus-spss-sas" class="slide level2">
 <h2>R vs. MPLUS, SPSS, SAS</h2>
@@ -1979,7 +2004,7 @@ Turu Stadler
 </ul></li>
 </ul>
 <!-- ca. 2.5 Minutes -->
-</section>
+</section></section>
 <section>
 <section id="estimating-cross-sectional-dyadic-models-in-r" class="title-slide slide level1 center">
 <h1>Estimating cross-sectional dyadic models in R</h1>
@@ -2049,6 +2074,9 @@ Asparouhov, T., &amp; Muthén, B. (2020). Comparison of models for the analysis 
 </div>
 <div id="ref-delrosarioPracticalGuideSpecifying2025" class="csl-entry" role="listitem">
 del Rosario, K. S., &amp; West, T. V. (2025). A <span>Practical Guide</span> to <span>Specifying Random Effects</span> in <span>Longitudinal Dyadic Multilevel Modeling</span>. <em>Advances in Methods and Practices in Psychological Science</em>, <em>8</em>(3), 25152459251351286. <a href="https://doi.org/10.1177/25152459251351286">https://doi.org/10.1177/25152459251351286</a>
+</div>
+<div id="ref-driverContinuousTimeStructural2017" class="csl-entry" role="listitem">
+Driver, C. C., Oud, J. H. L., &amp; Voelkle, M. C. (2017). Continuous time structural equation modeling with <span>R</span> package <span class="nocase">ctsem</span>. <em>Journal of Statistical Software</em>, <em>77</em>(5), 1–35. <a href="https://doi.org/10.18637/jss.v077.i05">https://doi.org/10.18637/jss.v077.i05</a>
 </div>
 <div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry" role="listitem">
 Gistelinck, F., Loeys, T., &amp; Flamant, N. (2021). Multilevel autoregressive models when the number of time points is small. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, <em>28</em>(1), 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517">https://doi.org/10.1080/10705511.2020.1753517</a>
