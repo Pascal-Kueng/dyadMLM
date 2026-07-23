@@ -259,7 +259,7 @@ as exchangeable APIM?
 
 ### Model comparison
 
-## DIM
+## DIM (potentially omit)
 
 - Row-Level representation
 - Formula
@@ -299,9 +299,20 @@ as exchangeable APIM?
   - Checking assumptions
   - Visualizing results
 
-## DIM
+## DIM (potentially omit)
+
+- Code
+  - Data prep and inspecting and unerstanding data structure
+  - Estimating the model show equivalence on both models
+  - Checking assumptions
+  - Visualizing results
 
 ## AR1, OU, and Dynamic Models
+
+- When to use dynamic models vs. concurrent models
+- Current possibilities in R MLM for AR1 or ou models
+- Current possibilites in R MLM for dynamic models
+- Alternatives (DSEM in MPLUS or lavaan for X)
 
 # Excercises in R
 
