@@ -4,6 +4,8 @@ subtitle: "Part II: Applied Tutorial"
 author:
   - "Pascal Küng"
   - "Turu Stadler"
+bibliography: ../../vignettes/references.bib
+csl: apa.csl
 resources:
   - uzh-logo.svg
   - charite-logo.svg
@@ -41,17 +43,83 @@ editor: source
 
 ## Choices of software and framework
 
-## SEM vs. MLM
+## SEM vs. MLM {.smaller}
+
+- Many simple dyadic models can be represented in either framework.
+- We use MLM in this workshop, but the best framework is the one that represents
+  the complete scientific model most naturally.
+  [@ledermannAnalyzingDyadicData2017]
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+### SEM / DSEM is often more natural for
+
+- Latent dyad constructs (e.g., CFM) 
+- Item-level measurement models for reflective measures
+- Linked outcomes or equations, including mediation and reciprocal effects
+- Short dynamic panels requiring explicit treatment of the first observations
+- Intensive lagged/dynamic models via SEM/RDSEM
+
+:::
+
+::: {.column width="50%"}
+
+### MLM is often more natural for
+
+- Parsimonious observed-variable models with modest numbers of dyads
+- Nested or crossed grouping and flexible random-effect structures
+- Growth or concurrent ILD models with many or unequal numbers of occasions
+- Interactions, nonlinear terms (such as RSA)
+- Specialized GLMM families, such as zero-inflated, hurdle, and Tweedie models
+
+:::
+
+::::
+
+::: {.subtle}
+[@asparouhovDynamicStructuralEquation2018;
+@asparouhovComparisonModelsAnalysis2020;
+@gistelinckMultilevelAutoregressiveSmall2021;
+@delrosarioPracticalGuideSpecifying2025]
+:::
+
+## Missing data: not simply FIML vs. complete cases
+
+- SEM commonly offers FIML for partially observed dyads.
+- MLM can retain the other observed outcome occasions, but rows with missing
+  predictors are usually dropped.
+- Multiple imputation is available in either framework. It can be especially
+  useful for missing predictors, but is not automatically the best solution
+  and must respect persons, dyads, and time.
+  [@ledermannAnalyzingDyadicData2017]
 
 <!-- ca. 2.5 Minutes -->
 
 ## R vs. MPLUS, SPSS, SAS
 
+Why we teach R: 
+
+- It is open source and free
+  - no blackbox, everyone can check the code - and help fix bugs
+  - scriptable and reproducible
+  - wide variety of free and open packages
+  - if something doesn't exist yet, you can create it
+
+Current limitations for dyadic analysis: 
+
+- No SEM package that rivals MPLUS
+  - Lavaan/blavaan can estimate many dyadic models but does not support random slopes
+  - packages that implement DSEM are available but remain limited in different areas
+  
+- glmmTMB and brms are some of the most powerful MLM frameworks available
+  - Yet they currently lack one desirable feature for ILD models (VAR-style residual structures or kronecker products)
+  - SAS and SPSS currently support these and are viable alternatives
+
 <!-- ca. 2.5 Minutes -->
 
 # Estimating cross-sectional dyadic models in R
-
-test
 
 ## Distinguishable APIM
 
@@ -103,5 +171,4 @@ Create exercises with data visalization, etc. Panel plots, histograms
 correlations (wb corr)?
 
 -->
-
 
