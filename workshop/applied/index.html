@@ -509,6 +509,37 @@ margin: 0 0.8em 0.2em -1em;  vertical-align: middle;
 --interdep-residual-correlation: #546e7a;
 }
 
+.reveal .not-significant,
+.reveal .interpretation-footnote {
+color: #b42318;
+}
+.reveal .interpretation-footnote {
+font-size: 0.66em;
+line-height: 1.2;
+margin-top: 0.45em;
+}
+.reveal .interpretation-footnote p {
+margin: 0;
+}
+.reveal .slides section.interpretation-slide p {
+margin: 0.38em 0;
+}
+.reveal .slides section.interpretation-slide ul {
+margin-top: 0.18em;
+margin-bottom: 0.42em;
+}
+.reveal .slides section.interpretation-slide li {
+margin-top: 0.1em;
+margin-bottom: 0.1em;
+}
+.reveal .appendix-back-link,
+.reveal .results-forward-link {
+float: right;
+font-size: 0.36em;
+font-weight: 500;
+margin-top: 0.85em;
+}
+
 .reveal .workshop-next {
 display: grid;
 gap: 1.25rem;
@@ -597,6 +628,37 @@ font-size: 0.82em;
 }
 .reveal .matrix-notation .math.display {
 margin-top: 0.1em;
+}
+
+.reveal .slides section.compact-derivation > p {
+font-size: 0.88em;
+line-height: 1.18;
+margin-block: 0.12em;
+}
+.reveal .slides section.compact-derivation .math.display {
+margin-block: 0.14em;
+}
+.reveal .slides section.compact-derivation .derivation-context {
+display: block;
+margin-bottom: 0.8em;
+}
+
+.reveal .covariance-backtransform {
+margin-top: -1.05em;
+}
+.reveal .covariance-backtransform p {
+margin: 0;
+}
+.reveal .covariance-backtransform .math.display {
+font-size: 0.9em;
+margin-bottom: 0;
+margin-left: -0.8em;
+margin-right: -0.8em;
+margin-top: 0;
+}
+
+.reveal .dim-backtransform {
+transform: translateY(-0.65em);
 }
 .reveal {
 color: var(--uzh-ink);
@@ -759,11 +821,25 @@ color: var(--uzh-ink);
 .reveal code {
 color: var(--uzh-blue-dark);
 }
+.reveal .text-smaller {
+font-size: 0.82em;
+}
 .reveal .subtle {
 font-size: 0.76em;
 color: var(--uzh-muted);
 }
 .reveal .subtle a {
+color: inherit;
+}
+.reveal h2 .heading-reference {
+margin-left: 0.45em;
+color: var(--uzh-muted);
+font-size: 0.42em;
+font-weight: 400;
+white-space: nowrap;
+vertical-align: 0.12em;
+}
+.reveal h2 .heading-reference a {
 color: inherit;
 }
 
@@ -1240,6 +1316,13 @@ margin: -2px 0 0;
 color: var(--uzh-muted);
 font-size: 15px;
 line-height: 1.15;
+text-align: center;
+}
+.reveal .cfm-constraint {
+margin: 0 auto 4px;
+color: var(--uzh-muted);
+font-size: 16px;
+line-height: 1.2;
 text-align: center;
 }
 @media print {
@@ -1765,9 +1848,76 @@ Turu Stadler
 </div>
 
 </section>
-<section id="applied-tutorial" class="slide level2">
-<h2>Applied tutorial</h2>
-<p>Content in development.</p>
+<section id="todays-aims-and-program" class="slide level2">
+<h2>Today’s aims and program</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Time</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>11:00–12:45</td>
+<td>Introduction and types of dyadic models</td>
+</tr>
+<tr class="even">
+<td>12:45–14:00</td>
+<td><em>Lunch break</em></td>
+</tr>
+<tr class="odd">
+<td>14:00–15:30</td>
+<td>Estimating cross-sectional dyadic models in R</td>
+</tr>
+<tr class="even">
+<td>15:30–15:45</td>
+<td><em>Short break</em></td>
+</tr>
+<tr class="odd">
+<td>15:45–16:45</td>
+<td>Intensive longitudinal extensions</td>
+</tr>
+<tr class="even">
+<td>16:45–17:00</td>
+<td><em>Short break</em></td>
+</tr>
+<tr class="odd">
+<td>17:00–18:00</td>
+<td>Exercises in R</td>
+</tr>
+</tbody>
+</table>
+<!-- TODO @codex: please grey out the first two points, intro and lunch break). -->
+<!-- ca. 2 Minutes -->
+</section>
+<section id="estimating-cross-sectional-dyadic-models-in-r" class="title-slide slide level1 center">
+<h1>Estimating cross-sectional dyadic models in R</h1>
+<!--
+
+- DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
+
+- glmmTMB -> as required 
+- dyadMLM -> as required (via pak, see instructions). -> maybe just require pak and we install newest version on workshop-day?
+- dplyr -> required
+- tibble -> required
+- lavaan -> required
+- ggplot2 -> required
+
+-------------->
+<!-- ILD-part: 
+
+- see dev note on ar1 processes careful to consider degrees of freedom! relevant here?
+  - TODO @codex: are degrees of freedom alreaedy important in the cross-sectional case and should we teach anything regarding those?
+- see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
+
+-->
+<!-- Excercises part: separate files! Include on overview page?
+
+Create exercises with data visalization, etc. Panel plots, histograms
+correlations (wb corr)?
+
+-->
 
 </section>
     </div>
