@@ -88,23 +88,21 @@ editor: source
 
 ## Missing data: ML, FIML, and MI {.smaller}
 
-- **MLM:** rows with any missing model variable are omitted.
-  - Missing outcomes: ML uses the remaining occasions and can be valid under MAR.
-  - Missing predictors: omission is safe only if missingness does not depend on
-    the outcome after accounting for the modeled predictors.
-- **SEM with FIML:** uses the observed parts of each case for variables included
-  in the joint model and can be valid under MAR.
-  - Missing predictors can be retained, and observed outcomes can help estimate
-    their joint distribution.
-- **Multiple imputation:** can handle missing outcomes, predictors, and auxiliary
-  information before either an MLM or SEM analysis.
-  - It is valid under MAR if the imputation model matches the analysis and
-    preserves persons, dyads, roles, and time.
+- **MLM — row omission**
+  - **Outcome missing:** ML uses the remaining occasions; can be valid under MAR
+  - **Predictor missing:** safe only if missingness does not depend on the
+    outcome after accounting for modeled predictors
+- **SEM with FIML — joint likelihood**
+  - Uses observed parts of incomplete cases; can be valid under MAR
+  - Retains cases with missing predictors when predictors are modeled jointly
+- **MI — impute, then analyze**
+  - Handles missing outcomes, predictors, and auxiliary information
+  - Must match the analysis and preserve person, dyad, role, and time structure
 
 ::: {.subtle}
-Include important observed predictors of missingness and of missing values.
-FIML and MI cover more MAR situations than row omission, but none automatically
-solves MNAR. [@ledermannAnalyzingDyadicData2017;
+Include important predictors of missingness and missing values. FIML and MI
+cover more MAR situations than row omission; none automatically solves MNAR.
+[@ledermannAnalyzingDyadicData2017;
 @hughesAccountingMissingData2019; @grundMultipleImputationMissing2018]
 :::
 
@@ -149,9 +147,10 @@ None of these standard approaches automatically handles MNAR.
 
 ### Why we teach R
 
-- Free and open source: the source code can be inspected and improved
-- Code-based workflows can be rerun, reviewed, shared, and version-controlled
-- Broad, extensible package ecosystem
+- **Freely available:** cross-platform and independent of institutional licenses
+- **Open source:** statistical implementations can be inspected and audited
+- **Reproducible:** workflows can be rerun, reviewed, shared, and version-controlled
+- **Extensible:** specialized methods integrate with data, graphics, and reporting
 
 :::
 

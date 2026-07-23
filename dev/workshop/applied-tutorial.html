@@ -1949,22 +1949,24 @@ Turu Stadler
 <section id="missing-data-ml-fiml-and-mi" class="slide level2 smaller">
 <h2>Missing data: ML, FIML, and MI</h2>
 <ul>
-<li><strong>MLM:</strong> rows with any missing model variable are omitted.
+<li><strong>MLM — row omission</strong>
 <ul>
-<li>Missing outcomes: ML uses the remaining occasions and can be valid under MAR.</li>
-<li>Missing predictors: omission is safe only if missingness does not depend on the outcome after accounting for the modeled predictors.</li>
+<li><strong>Outcome missing:</strong> ML uses the remaining occasions; can be valid under MAR</li>
+<li><strong>Predictor missing:</strong> safe only if missingness does not depend on the outcome after accounting for modeled predictors</li>
 </ul></li>
-<li><strong>SEM with FIML:</strong> uses the observed parts of each case for variables included in the joint model and can be valid under MAR.
+<li><strong>SEM with FIML — joint likelihood</strong>
 <ul>
-<li>Missing predictors can be retained, and observed outcomes can help estimate their joint distribution.</li>
+<li>Uses observed parts of incomplete cases; can be valid under MAR</li>
+<li>Retains cases with missing predictors when predictors are modeled jointly</li>
 </ul></li>
-<li><strong>Multiple imputation:</strong> can handle missing outcomes, predictors, and auxiliary information before either an MLM or SEM analysis.
+<li><strong>MI — impute, then analyze</strong>
 <ul>
-<li>It is valid under MAR if the imputation model matches the analysis and preserves persons, dyads, roles, and time.</li>
+<li>Handles missing outcomes, predictors, and auxiliary information</li>
+<li>Must match the analysis and preserve person, dyad, role, and time structure</li>
 </ul></li>
 </ul>
 <div class="subtle">
-<p>Include important observed predictors of missingness and of missing values. FIML and MI cover more MAR situations than row omission, but none automatically solves MNAR. <span class="citation" data-cites="ledermannAnalyzingDyadicData2017 hughesAccountingMissingData2019 grundMultipleImputationMissing2018">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Grund et al., 2018</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Hughes et al., 2019</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span></p>
+<p>Include important predictors of missingness and missing values. FIML and MI cover more MAR situations than row omission; none automatically solves MNAR. <span class="citation" data-cites="ledermannAnalyzingDyadicData2017 hughesAccountingMissingData2019 grundMultipleImputationMissing2018">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Grund et al., 2018</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Hughes et al., 2019</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span></p>
 </div>
 <!-- ca. 2.5 Minutes -->
 <aside class="notes">
@@ -1991,9 +1993,10 @@ display:block!important;
 <div class="column" style="width:46%;">
 <h3 id="why-we-teach-r">Why we teach R</h3>
 <ul>
-<li>Free and open source: the source code can be inspected and improved</li>
-<li>Code-based workflows can be rerun, reviewed, shared, and version-controlled</li>
-<li>Broad, extensible package ecosystem</li>
+<li><strong>Freely available:</strong> cross-platform and independent of institutional licenses</li>
+<li><strong>Open source:</strong> statistical implementations can be inspected and audited</li>
+<li><strong>Reproducible:</strong> workflows can be rerun, reviewed, shared, and version-controlled</li>
+<li><strong>Extensible:</strong> specialized methods integrate with data, graphics, and reporting</li>
 </ul>
 </div><div class="column" style="width:54%;">
 <h3 id="current-trade-offs">Current trade-offs</h3>
