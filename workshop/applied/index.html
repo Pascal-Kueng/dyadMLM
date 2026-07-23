@@ -2047,6 +2047,7 @@ display:block!important;
 <h2>Distinguishable APIM</h2>
 <ul>
 <li>Row-Level representation</li>
+<li>Formula</li>
 <li>residual matrix?</li>
 <li>Code
 <ul>
@@ -2062,6 +2063,7 @@ display:block!important;
 <h2>Exchangeable APIM</h2>
 <ul>
 <li>Row-Level representation</li>
+<li>Formula</li>
 <li>residual matrix?</li>
 <li>Code
 <ul>
@@ -2072,6 +2074,14 @@ display:block!important;
 <li>Visualizing results</li>
 </ul></li>
 </ul>
+<!-- TODO: @codex better to have separate data prep and inspecting 
+workflows or is it enough with the distinguishable, then just explain and estimate
+exchangeable, and compare models? Treat it as a single workflow rather than separate
+analyses? Then we could remove data-prep and visualizing variables and bivariate relationships (non-dyadic) 
+
+Same for the DIM, just estimate once, backtransform and show that it is then the same
+as exchangeable APIM?
+-->
 </section>
 <section id="testing-distinguishability" class="slide level2">
 <h2>Testing distinguishability</h2>
@@ -2082,6 +2092,7 @@ display:block!important;
 <h2>DIM</h2>
 <ul>
 <li>Row-Level representation</li>
+<li>Formula</li>
 <li>residual matrix?</li>
 <li>Code
 <ul>
@@ -2099,16 +2110,47 @@ display:block!important;
 <section id="qa-and-discussion" class="slide level2">
 <h2>Q&amp;A and discussion</h2>
 </section></section>
+<section>
 <section id="intensive-longitudinal-extensions" class="title-slide slide level1 center">
 <h1>Intensive longitudinal extensions</h1>
 
 </section>
-
-<section id="section" class="title-slide slide level1 center">
-<h1></h1>
-
+<section id="distinguishable-apim-1" class="slide level2">
+<h2>Distinguishable APIM</h2>
+<ul>
+<li>Formula</li>
+<li>Random effects and residual covariance explained</li>
+<li>Code
+<ul>
+<li>Data prep and inspecting and understanding data structure</li>
+<li>Visualizing variables and bivariate relationships on both levels (wbCorr)</li>
+<li>Estimating the model</li>
+<li>Checking assumptions</li>
+<li>Visualizing results</li>
+</ul></li>
+</ul>
 </section>
-
+<section id="exchangeable-apim-1" class="slide level2">
+<h2>Exchangeable APIM</h2>
+<ul>
+<li>Formula</li>
+<li>Random effects and residual covariance explained</li>
+<li>Code
+<ul>
+<li>Data prep and inspecting and understanding data structure</li>
+<li>Visualizing variables and bivariate relationships on both levels (wbCorr)</li>
+<li>Estimating the model</li>
+<li>Checking assumptions</li>
+<li>Visualizing results</li>
+</ul></li>
+</ul>
+</section>
+<section id="dim-1" class="slide level2">
+<h2>DIM</h2>
+</section>
+<section id="ar1-ou-and-dynamic-models" class="slide level2">
+<h2>AR1, OU, and Dynamic Models</h2>
+</section></section>
 <section id="excercises-in-r" class="title-slide slide level1 smaller scrollable">
 <h1>Excercises in R</h1>
 <!--
