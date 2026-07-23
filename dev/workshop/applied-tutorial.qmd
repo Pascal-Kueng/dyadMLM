@@ -30,7 +30,7 @@ editor: source
 | Time | Focus |
 |---|---|
 | 11:00–12:45 | Introduction and types of dyadic models |
-| 12:45–14:00 | *Lunch break* |
+| 12:45–14:00 | *Lunch break*|
 | 14:00–15:30 | Estimating cross-sectional dyadic models in R |
 | 15:30–15:45 | *Short break* |
 | 15:45–16:45 | Intensive longitudinal extensions |
@@ -41,14 +41,13 @@ editor: source
 
 <!-- ca. 2 Minutes -->
 
-## Choices of software and framework
+# Software and frameworks
 
 ## SEM vs. MLM {.smaller}
 
 - Many simple dyadic models can be represented in either framework.
 - We use MLM in this workshop, but the best framework is the one that represents
-  the complete scientific model most naturally.
-  [@ledermannAnalyzingDyadicData2017]
+  your conceptual model most naturally [@ledermannAnalyzingDyadicData2017].
 
 :::: {.columns}
 
@@ -56,11 +55,12 @@ editor: source
 
 ### SEM / DSEM is often more natural for
 
-- Latent dyad constructs (e.g., CFM) 
+- Latent dyad constructs (e.g., a CFM)
 - Item-level measurement models for reflective measures
 - Linked outcomes or equations, including mediation and reciprocal effects
 - Short dynamic panels requiring explicit treatment of the first observations
-- Intensive lagged/dynamic models via SEM/RDSEM
+- Intensive lagged or coupled dynamics via DSEM/RDSEM or continuous-time
+  SEM (`ctsem`)
 
 :::
 
@@ -70,8 +70,8 @@ editor: source
 
 - Parsimonious observed-variable models with modest numbers of dyads
 - Nested or crossed grouping and flexible random-effect structures
-- Growth or concurrent ILD models with many or unequal numbers of occasions
-- Interactions, nonlinear terms (such as RSA)
+- Observed-outcome growth or concurrent ILD models with flexible time trends
+- Complex interactions and nonlinear terms (such as RSA)
 - Specialized GLMM families, such as zero-inflated, hurdle, and Tweedie models
 
 :::
@@ -81,21 +81,42 @@ editor: source
 ::: {.subtle}
 [@asparouhovDynamicStructuralEquation2018;
 @asparouhovComparisonModelsAnalysis2020;
+@driverContinuousTimeStructural2017;
 @gistelinckMultilevelAutoregressiveSmall2021;
 @delrosarioPracticalGuideSpecifying2025]
 :::
 
-## Missing data: not simply FIML vs. complete cases
+## Missing data: FIML, MI, and complete cases
 
-- SEM commonly offers FIML for partially observed dyads.
-- MLM can retain the other observed outcome occasions, but rows with missing
-  predictors are usually dropped.
-- Multiple imputation is available in either framework. It can be especially
-  useful for missing predictors, but is not automatically the best solution
-  and must respect persons, dyads, and time.
-  [@ledermannAnalyzingDyadicData2017]
+All approaches are robust to MAR and MCAR
+
+- MLM default: complete-case analysis = drop rows with missing data. 
+  - Loss in power compared to other approaches, but robust under MAR
+- SEM offers FIML (joint estimation of missing predictors and outcomes in one likelihood model).
+  - More power, simple solution, but "invisible" assumpsion (which are?)
+  - Robust under MAR - so missingness generating variables need to be included
+- Multiple imputation (in either framework). Can use information from the full 
+dataset, most likely to satisfy MAR. But can be difficult, must respect persons, 
+dyads, and time [@ledermannAnalyzingDyadicData2017]
 
 <!-- ca. 2.5 Minutes -->
+
+:::{.notes}
+
+MAR means there are predictors responsible for missingness included in the model. 
+E.g., FIML and complete case are robust only, if missingness process is captured
+by model variables. 
+MI has the advantage that it can use and identify missingness from across the whole
+dataset. Nonetheless, if missingness process is known, and the predictor is included
+in any of the approaches, we are robust. 
+
+MI huge disadvantage that it is error prone and hard to do with nested data
+that has temporal dependency etc. principle of "nomogenity"? what was it called, 
+where the MI model has to be at least as complex as the analysis model. 
+
+brms mention?
+
+:::
 
 ## R vs. MPLUS, SPSS, SAS
 
@@ -171,4 +192,3 @@ Create exercises with data visalization, etc. Panel plots, histograms
 correlations (wb corr)?
 
 -->
-
