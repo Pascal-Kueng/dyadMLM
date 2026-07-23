@@ -223,6 +223,7 @@ None of these standard approaches automatically handles MNAR.
 ## Distinguishable APIM
 
 - Row-Level representation
+- Formula
 - residual matrix?
 - Code
   - Data prep and inspecting and understanding data structure
@@ -234,6 +235,7 @@ None of these standard approaches automatically handles MNAR.
 ## Exchangeable APIM
 
 - Row-Level representation
+- Formula
 - residual matrix?
 - Code
   - Data prep and inspecting and understanding data structure
@@ -241,6 +243,15 @@ None of these standard approaches automatically handles MNAR.
   - Estimating the model
   - Checking assumptions
   - Visualizing results
+  
+<!-- TODO: @codex better to have separate data prep and inspecting 
+workflows or is it enough with the distinguishable, then just explain and estimate
+exchangeable, and compare models? Treat it as a single workflow rather than separate
+analyses? Then we could remove data-prep and visualizing variables and bivariate relationships (non-dyadic) 
+
+Same for the DIM, just estimate once, backtransform and show that it is then the same
+as exchangeable APIM?
+-->
 
 ## Testing distinguishability
 
@@ -251,6 +262,7 @@ None of these standard approaches automatically handles MNAR.
 ## DIM
 
 - Row-Level representation
+- Formula
 - residual matrix?
 - Code
   - Data prep and inspecting and understanding data structure
@@ -265,7 +277,31 @@ None of these standard approaches automatically handles MNAR.
 
 # Intensive longitudinal extensions
 
-# 
+## Distinguishable APIM
+
+- Formula
+- Random effects and residual covariance explained
+- Code
+  - Data prep and inspecting and understanding data structure
+  - Visualizing variables and bivariate relationships on both levels (wbCorr)
+  - Estimating the model
+  - Checking assumptions
+  - Visualizing results
+  
+## Exchangeable APIM
+
+- Formula
+- Random effects and residual covariance explained
+- Code
+  - Data prep and inspecting and understanding data structure
+  - Visualizing variables and bivariate relationships on both levels (wbCorr)
+  - Estimating the model
+  - Checking assumptions
+  - Visualizing results
+
+## DIM
+
+## AR1, OU, and Dynamic Models
 
 # Excercises in R
 
