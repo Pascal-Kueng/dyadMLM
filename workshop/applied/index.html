@@ -1946,26 +1946,33 @@ Turu Stadler
 <p><span class="citation" data-cites="asparouhovDynamicStructuralEquation2018 asparouhovComparisonModelsAnalysis2020 driverContinuousTimeStructural2017 gistelinckMultilevelAutoregressiveSmall2021 delrosarioPracticalGuideSpecifying2025">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov et al., 2018</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov &amp; Muthén, 2020</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>del Rosario &amp; West, 2025</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Driver et al., 2017</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Gistelinck et al., 2021</a>)</span></p>
 </div>
 </section>
-<section id="missing-data-fiml-mi-and-complete-cases" class="slide level2">
-<h2>Missing data: FIML, MI, and complete cases</h2>
-<p>All approaches are robust to MAR and MCAR</p>
+<section id="missing-data-ml-fiml-and-mi" class="slide level2 smaller">
+<h2>Missing data: ML, FIML, and MI</h2>
 <ul>
-<li>MLM default: complete-case analysis = drop rows with missing data.
+<li><strong>MLM:</strong> rows with any missing model variable are omitted.
 <ul>
-<li>Loss in power compared to other approaches, but robust under MAR</li>
+<li>Missing outcomes: ML uses the remaining occasions and can be valid under MAR.</li>
+<li>Missing predictors: omission is safe only if missingness does not depend on the outcome after accounting for the modeled predictors.</li>
 </ul></li>
-<li>SEM offers FIML (joint estimation of missing predictors and outcomes in one likelihood model).
+<li><strong>SEM with FIML:</strong> uses the observed parts of each case for variables included in the joint model and can be valid under MAR.
 <ul>
-<li>More power, simple solution, but “invisible” assumpsion (which are?)</li>
-<li>Robust under MAR - so missingness generating variables need to be included</li>
+<li>Missing predictors can be retained, and observed outcomes can help estimate their joint distribution.</li>
 </ul></li>
-<li>Multiple imputation (in either framework). Can use information from the full dataset, most likely to satisfy MAR. But can be difficult, must respect persons, dyads, and time <span class="citation" data-cites="ledermannAnalyzingDyadicData2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span></li>
+<li><strong>Multiple imputation:</strong> can handle missing outcomes, predictors, and auxiliary information before either an MLM or SEM analysis.
+<ul>
+<li>It is valid under MAR if the imputation model matches the analysis and preserves persons, dyads, roles, and time.</li>
+</ul></li>
 </ul>
+<div class="subtle">
+<p>Include important observed predictors of missingness and of missing values. FIML and MI cover more MAR situations than row omission, but none automatically solves MNAR. <span class="citation" data-cites="ledermannAnalyzingDyadicData2017 hughesAccountingMissingData2019 grundMultipleImputationMissing2018">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Grund et al., 2018</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Hughes et al., 2019</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Ledermann &amp; Kenny, 2017</a>)</span></p>
+</div>
 <!-- ca. 2.5 Minutes -->
 <aside class="notes">
-<p>MAR means there are predictors responsible for missingness included in the model. E.g., FIML and complete case are robust only, if missingness process is captured by model variables. MI has the advantage that it can use and identify missingness from across the whole dataset. Nonetheless, if missingness process is known, and the predictor is included in any of the approaches, we are robust.</p>
-<p>MI huge disadvantage that it is error prone and hard to do with nested data that has temporal dependency etc. principle of “nomogenity”? what was it called, where the MI model has to be at least as complex as the analysis model.</p>
-<p>brms mention?</p>
+<p><code>glmmTMB</code> omits every incomplete model-frame row, whether the missing value is an outcome or a predictor. With a missing outcome, that occasion contributes no outcome information, but the person’s or dyad’s other occasions remain. This likelihood analysis can be valid under MAR when the outcome and dependence models are correctly specified.</p>
+<p>Missing predictors are different because an ordinary MLM does not model their distribution. Row omission can still be valid, but only when being retained does not depend on the outcome after accounting for the modeled predictors. MAR alone is not sufficient because missingness in a predictor may depend on an observed outcome.</p>
+<p>FIML uses missing predictors only when they are part of the joint likelihood. For example, <code>lavaan</code> must treat them as stochastic rather than fixed exogenous covariates. If MLM row omission is valid, FIML’s main benefit is efficiency. If it is not valid, FIML may also reduce bias by using observed outcomes and other variables to inform the missing predictors.</p>
+<p>Multiple imputation is more flexible, but its imputation model must be congenial, or compatible, with the analysis model. It should include the outcome, all analysis variables, and useful predictors of missingness and missing values. For dyadic ILD it must also preserve the person, dyad, role, and temporal structure, including relevant interactions, nonlinearities, and lags.</p>
+<p>Including these variables makes MAR more plausible; it does not prove MAR. None of these standard approaches automatically handles MNAR.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1978,31 +1985,54 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="r-vs.-mplus-spss-sas" class="slide level2">
-<h2>R vs. MPLUS, SPSS, SAS</h2>
-<p>Why we teach R:</p>
+<section id="why-rand-where-other-software-helps" class="slide level2 smaller">
+<h2>Why R—and where other software helps</h2>
+<div class="columns">
+<div class="column" style="width:46%;">
+<h3 id="why-we-teach-r">Why we teach R</h3>
 <ul>
-<li>It is open source and free
+<li>Free and open source: the source code can be inspected and improved</li>
+<li>Code-based workflows can be rerun, reviewed, shared, and version-controlled</li>
+<li>Broad, extensible package ecosystem</li>
+</ul>
+</div><div class="column" style="width:54%;">
+<h3 id="current-trade-offs">Current trade-offs</h3>
 <ul>
-<li>no blackbox, everyone can check the code - and help fix bugs</li>
-<li>scriptable and reproducible</li>
-<li>wide variety of free and open packages</li>
-<li>if something doesn’t exist yet, you can create it</li>
+<li><strong>SEM/DSEM:</strong> R’s capabilities are spread across specialized packages
+<ul>
+<li><code>lavaan</code> handles explicitly specified, fixed-wave lagged SEMs (e.g., CLPM/RI-CLPM), but has no native DSEM or residual AR(1) structure</li>
+<li>Version 0.7 adds restricted two-level random slopes; <code>mlts</code> implements Bayesian multilevel time-series models, while Mplus integrates DSEM/RDSEM</li>
+</ul></li>
+<li><strong>MLM/ILD:</strong> <code>glmmTMB</code> and <code>brms</code> both model serial dependence
+<ul>
+<li>Neither directly offers a separable partner-by-time residual structure such as <span class="math inline">\(\mathrm{UN}\otimes\mathrm{AR}(1)\)</span>; SAS <code>PROC MIXED</code> and SPSS <code>MIXED</code> do for Gaussian repeated-measures models</li>
 </ul></li>
 </ul>
-<p>Current limitations for dyadic analysis:</p>
+</div></div>
+<div class="subtle">
+<p><span class="citation" data-cites="lavaanMultilevelSEM mulderThreeExtensions2021 blavaanTwoLevelSEM koslowskiMlts2025 asparouhovDynamicStructuralEquation2018 asparouhovComparisonModelsAnalysis2020 kristensenCovarianceStructuresGlmmTMB2023 buerknerAutocorrelationStructuresBrms sasInstituteMixedProcedure ibmCovarianceStructureList">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov et al., 2018</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Asparouhov &amp; Muthén, 2020</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Bürkner, n.d.</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>IBM Corp., n.d.</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Koslowski et al., 2025</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Kristensen &amp; McGillycuddy, 2023</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick><span class="nocase">lavaan project</span>, n.d.-b</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Merkle et al., n.d.</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Mulder &amp; Hamaker, 2021</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>SAS Institute Inc., n.d.</a>)</span></p>
+</div>
+<aside class="notes">
 <ul>
-<li>No SEM package that rivals MPLUS
-<ul>
-<li>Lavaan/blavaan can estimate many dyadic models but does not support random slopes</li>
-<li>packages that implement DSEM are available but remain limited in different areas</li>
-</ul></li>
-<li>glmmTMB and brms are some of the most powerful MLM frameworks available
-<ul>
-<li>Yet they currently lack one desirable feature for ILD models (VAR-style residual structures or kronecker products)</li>
-<li>SAS and SPSS currently support these and are viable alternatives</li>
-</ul></li>
+<li>The vignette’s concurrent Gaussian ILD APIM can be reparameterized in <code>lavaan</code> with one row per dyad-occasion and one outcome per member: dyad-level intercepts and <code>rv()</code> slopes live at level 2, while the members’ same-occasion residuals covary at level 1. This equivalence does not work with the vignette’s stacked member rows because that would require a third level.</li>
+<li>When a time-varying predictor appears at both levels, <code>lavaan</code> can let an <code>rv()</code> slope act on its latent within-cluster component. This avoids treating observed member means as error-free, targeting the problem described by Lüdtke et al. <span class="citation" data-cites="lavaanRandomSlopeSyntax ludtkeMultilevelLatentCovariate2008">(<a href="#/excercises-in-r" role="doc-biblioref" onclick><span class="nocase">lavaan project</span>, n.d.-a</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Lüdtke et al., 2008</a>)</span>.</li>
+<li>This does not provide latent dynamic modeling. In fixed-wave, wide-format data, latent within-state variables can be linked with autoregressive and cross-lagged paths. A precomputed lag in long data does not make <code>lavaan</code> time-aware or automatically solve endogeneity and initial-condition problems <span class="citation" data-cites="gistelinckMultilevelAutoregressiveSmall2021">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Gistelinck et al., 2021</a>)</span>.</li>
+<li>Thus, “AR(1)” is ambiguous: lag-1 structural regressions can be written explicitly, but a native time-indexed AR(1) residual covariance for long-format ILD is not available.</li>
+<li><code>lavaan</code> 0.7 random slopes are currently limited to two-level, single-group, continuous-data models fitted with ML; chi-square-derived fit indices are not available. These generic random slopes do not make <code>lavaan</code> a DSEM engine.</li>
+<li><code>blavaan</code> currently documents two-level random-intercept models for complete, continuous data.</li>
+<li><span class="math inline">\(\mathrm{UN}\otimes\mathrm{AR}(1)\)</span> is a separable residual covariance across partner and time, not a VAR: a VAR models own- and cross-lagged effects in the conditional mean.</li>
 </ul>
+<style type="text/css">
+span.MJX_Assistive_MathML {
+position:absolute!important;
+clip: rect(1px, 1px, 1px, 1px);
+padding: 1px 0 0 0!important;
+border: 0!important;
+height: 1px!important;
+width: 1px!important;
+overflow: hidden!important;
+display:block!important;
+}</style></aside>
 <!-- ca. 2.5 Minutes -->
 </section></section>
 <section>
@@ -2072,6 +2102,9 @@ Asparouhov, T., Hamaker, E. L., &amp; Muthén, B. (2018). Dynamic structural equ
 <div id="ref-asparouhovComparisonModelsAnalysis2020" class="csl-entry" role="listitem">
 Asparouhov, T., &amp; Muthén, B. (2020). Comparison of models for the analysis of intensive longitudinal data. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, <em>27</em>(2), 275–297. <a href="https://doi.org/10.1080/10705511.2019.1626733">https://doi.org/10.1080/10705511.2019.1626733</a>
 </div>
+<div id="ref-buerknerAutocorrelationStructuresBrms" class="csl-entry" role="listitem">
+Bürkner, P.-C. (n.d.). <em>Autocorrelation structures</em>. Retrieved July 23, 2026, from <a href="https://paulbuerkner.com/brms/reference/autocor-terms.html">https://paulbuerkner.com/brms/reference/autocor-terms.html</a>
+</div>
 <div id="ref-delrosarioPracticalGuideSpecifying2025" class="csl-entry" role="listitem">
 del Rosario, K. S., &amp; West, T. V. (2025). A <span>Practical Guide</span> to <span>Specifying Random Effects</span> in <span>Longitudinal Dyadic Multilevel Modeling</span>. <em>Advances in Methods and Practices in Psychological Science</em>, <em>8</em>(3), 25152459251351286. <a href="https://doi.org/10.1177/25152459251351286">https://doi.org/10.1177/25152459251351286</a>
 </div>
@@ -2081,8 +2114,41 @@ Driver, C. C., Oud, J. H. L., &amp; Voelkle, M. C. (2017). Continuous time struc
 <div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry" role="listitem">
 Gistelinck, F., Loeys, T., &amp; Flamant, N. (2021). Multilevel autoregressive models when the number of time points is small. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, <em>28</em>(1), 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517">https://doi.org/10.1080/10705511.2020.1753517</a>
 </div>
+<div id="ref-grundMultipleImputationMissing2018" class="csl-entry" role="listitem">
+Grund, S., Lüdtke, O., &amp; Robitzsch, A. (2018). Multiple imputation of missing data for multilevel models: Simulations and recommendations. <em>Organizational Research Methods</em>, <em>21</em>(1), 111–149. <a href="https://doi.org/10.1177/1094428117703686">https://doi.org/10.1177/1094428117703686</a>
+</div>
+<div id="ref-hughesAccountingMissingData2019" class="csl-entry" role="listitem">
+Hughes, R. A., Heron, J., Sterne, J. A. C., &amp; Tilling, K. (2019). Accounting for missing data in statistical analyses: Multiple imputation is not always the answer. <em>International Journal of Epidemiology</em>, <em>48</em>(4), 1294–1304. <a href="https://doi.org/10.1093/ije/dyz032">https://doi.org/10.1093/ije/dyz032</a>
+</div>
+<div id="ref-ibmCovarianceStructureList" class="csl-entry" role="listitem">
+IBM Corp. (n.d.). <em>Covariance structure list (<span>MIXED</span> command)</em>. Retrieved July 23, 2026, from <a href="https://www.ibm.com/docs/en/spss-statistics/32.0.0?topic=mixed-covariance-structure-list-command">https://www.ibm.com/docs/en/spss-statistics/32.0.0?topic=mixed-covariance-structure-list-command</a>
+</div>
+<div id="ref-koslowskiMlts2025" class="csl-entry" role="listitem">
+Koslowski, K., Münch, F., Koch, T., &amp; Holtmann, J. (2025). <em>Mlts: Multilevel latent time series models with <span>R</span> and <span>Stan</span></em>. <a href="https://CRAN.R-project.org/package=mlts">https://CRAN.R-project.org/package=mlts</a>
+</div>
+<div id="ref-kristensenCovarianceStructuresGlmmTMB2023" class="csl-entry" role="listitem">
+Kristensen, K., &amp; McGillycuddy, M. (2023, October 14). <em>Covariance structures with <span class="nocase">glmmTMB</span></em>. <a href="https://glmmtmb.github.io/glmmTMB/articles/covstruct.html">https://glmmtmb.github.io/glmmTMB/articles/covstruct.html</a>
+</div>
+<div id="ref-lavaanRandomSlopeSyntax" class="csl-entry" role="listitem">
+<span class="nocase">lavaan project</span>. (n.d.-a). <em>Lavaan model syntax: Random slopes (two-level models)</em>. Retrieved July 23, 2026, from <a href="https://stat.ethz.ch/CRAN/web/packages/lavaan/refman/lavaan.html">https://stat.ethz.ch/CRAN/web/packages/lavaan/refman/lavaan.html</a>
+</div>
+<div id="ref-lavaanMultilevelSEM" class="csl-entry" role="listitem">
+<span class="nocase">lavaan project</span>. (n.d.-b). <em>Multilevel <span>SEM</span></em>. Retrieved July 23, 2026, from <a href="https://lavaan.ugent.be/tutorial/multilevel.html">https://lavaan.ugent.be/tutorial/multilevel.html</a>
+</div>
 <div id="ref-ledermannAnalyzingDyadicData2017" class="csl-entry" role="listitem">
 Ledermann, T., &amp; Kenny, D. A. (2017). Analyzing dyadic data with multilevel modeling versus structural equation modeling: <span>A</span> tale of two methods. <em>Journal of Family Psychology</em>, <em>31</em>(4), 442–452. <a href="https://doi.org/10.1037/fam0000290">https://doi.org/10.1037/fam0000290</a>
+</div>
+<div id="ref-ludtkeMultilevelLatentCovariate2008" class="csl-entry" role="listitem">
+Lüdtke, O., Marsh, H. W., Robitzsch, A., Trautwein, U., Asparouhov, T., &amp; Muthén, B. (2008). The multilevel latent covariate model: A new, more reliable approach to group-level effects in contextual studies. <em>Psychological Methods</em>, <em>13</em>(3), 203–229. <a href="https://doi.org/10.1037/a0012869">https://doi.org/10.1037/a0012869</a>
+</div>
+<div id="ref-blavaanTwoLevelSEM" class="csl-entry" role="listitem">
+Merkle, E. C., Rosseel, Y., &amp; Goodrich, B. (n.d.). <em>Two-level <span>SEM</span></em>. Retrieved July 23, 2026, from <a href="https://blavaan.org/articles/multilevel.html">https://blavaan.org/articles/multilevel.html</a>
+</div>
+<div id="ref-mulderThreeExtensions2021" class="csl-entry" role="listitem">
+Mulder, J. D., &amp; Hamaker, E. L. (2021). Three extensions of the random intercept cross-lagged panel model. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, <em>28</em>(4), 638–648. <a href="https://doi.org/10.1080/10705511.2020.1784738">https://doi.org/10.1080/10705511.2020.1784738</a>
+</div>
+<div id="ref-sasInstituteMixedProcedure" class="csl-entry" role="listitem">
+SAS Institute Inc. (n.d.). <em><span>SAS/STAT</span> 15.4 user’s guide: The <span>MIXED</span> procedure</em>. SAS Institute Inc. Retrieved July 23, 2026, from <a href="https://go.documentation.sas.com/api/collections/pgmsascdc/9.4_3.5/docsets/statug/content/mixed.pdf">https://go.documentation.sas.com/api/collections/pgmsascdc/9.4_3.5/docsets/statug/content/mixed.pdf</a>
 </div>
 </div>
 </section>
