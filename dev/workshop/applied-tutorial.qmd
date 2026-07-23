@@ -231,6 +231,9 @@ None of these standard approaches automatically handles MNAR.
   - Estimating the model
   - Checking assumptions
   - Visualizing results
+  
+  
+<!-- INSERT EXAMPLE HERE -->
 
 ## Exchangeable APIM
 
