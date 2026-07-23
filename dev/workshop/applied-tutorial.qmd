@@ -23,6 +23,81 @@ execute:
 editor: source
 ---
 
-## Applied tutorial
+## Today's aims and program
 
-Content in development.
+| Time | Focus |
+|---|---|
+| 11:00–12:45 | Introduction and types of dyadic models |
+| 12:45–14:00 | *Lunch break* |
+| 14:00–15:30 | Estimating cross-sectional dyadic models in R |
+| 15:30–15:45 | *Short break* |
+| 15:45–16:45 | Intensive longitudinal extensions |
+| 16:45–17:00 | *Short break* |
+| 17:00–18:00 | Exercises in R |
+
+<!-- TODO @codex: please grey out the first two points, intro and lunch break). -->
+
+<!-- ca. 2 Minutes -->
+
+## Choices of software and framework
+
+## SEM vs. MLM
+
+<!-- ca. 2.5 Minutes -->
+
+## R vs. MPLUS, SPSS, SAS
+
+<!-- ca. 2.5 Minutes -->
+
+# Estimating cross-sectional dyadic models in R
+
+## Distinguishable APIM
+
+## Exchangeable APIM
+
+## Testing distinguishability
+
+### Wald test for fixed effects equality
+
+### Model comparison
+
+## DIM
+
+## Excursion: non-Gaussian generalized models
+
+# Intensive longitudinal extensions
+
+# 
+
+# Excercises in R
+
+
+<!--
+
+- DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
+
+- glmmTMB -> as required 
+- dyadMLM -> as required (via pak, see instructions). -> maybe just require pak and we install newest version on workshop-day?
+- dplyr -> required
+- tibble -> required
+- lavaan -> required
+- ggplot2 -> required
+
+-------------->
+
+<!-- ILD-part: 
+
+- see dev note on ar1 processes careful to consider degrees of freedom! relevant here?
+  - TODO @codex: are degrees of freedom alreaedy important in the cross-sectional case and should we teach anything regarding those?
+- see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
+
+-->
+
+<!-- Excercises part: separate files! Include on overview page?
+
+Create exercises with data visalization, etc. Panel plots, histograms
+correlations (wb corr)?
+
+-->
+
+
