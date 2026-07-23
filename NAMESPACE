@@ -3,6 +3,7 @@
 S3method(print,dyadMLM_data)
 S3method(print,dyadMLM_model_comparison)
 S3method(print,exchangeable_rescov)
+S3method(summary,dyadMLM_data)
 export(compare_nested_glmmTMB_models)
 export(prepare_dyad_data)
 export(recover_exchangeable_covariance)

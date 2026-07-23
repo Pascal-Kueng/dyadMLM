@@ -1,8 +1,24 @@
 #' @export
 print.dyadMLM_data <- function(x, ...) {
+  print_dyadMLM_header(x)
+
+  meta <- attr(x, "dyadMLM")
+  cat("# Added columns:\n")
+  print_added_columns(added_columns_for_print(x, meta))
+  cat("#\n")
+
+  modified <- x
+  class(modified) <- class(modified)[class(modified) != "dyadMLM_data"]
+  print(modified, ...)
+
+  # return original unchanged tibble
+  invisible(x)
+}
+
+print_dyadMLM_header <- function(x, title = "dyadMLM data") {
   meta <- attr(x, "dyadMLM")
 
-  cat(pillar::style_subtle("# dyadMLM data\n"))
+  cat(pillar::style_subtle(paste0("# ", title, "\n")))
   print_wrapped_comment_fields(
     fields = c(
       paste0("Rows: ", nrow(x)),
@@ -62,17 +78,7 @@ print.dyadMLM_data <- function(x, ...) {
   }
 
   print_dyad_compositions(meta$dyad_compositions)
-
-  cat("# Added columns:\n")
-  print_added_columns(added_columns_for_print(x, meta))
-  cat("#\n")
-
-  modified <- x
-  class(modified) <- class(modified)[class(modified) != "dyadMLM_data"]
-  print(modified, ...)
-
-  # return original unchanged tibble
-  invisible(x)
+  invisible(NULL)
 }
 
 print_dyad_compositions <- function(dyad_compositions) {
