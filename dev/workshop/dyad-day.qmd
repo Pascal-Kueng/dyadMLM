@@ -2002,48 +2002,26 @@ draw_truth_bias_diagram(truth_bias_result)
 
 ::: {.text-smaller}
 
-- **Direct accuracy** tracks the partner's reported provision; **assumed
-  similarity** tracks the perceiver's own provision—each controlling for the
-  other.
-- The partner's report is the operational “truth”; after truth-mean centering,
-  $b_0$ is **directional bias**.
+- The partner's report is the researcher-defined “truth”, not necessarily 
+an objective truth. 
+
+- After truth-mean centering, $b_0$ is **directional bias**.
 
 :::
 
 :::{.notes}
 
-- This is a distinguishable, cross-sectional Truth and Bias model fitted to the
-  person-level daily averages of `r truth_bias_result$n_dyads` couples.
-- All three quantities—provided support by either partner and received support—
-  were centered on the pooled provided-support mean
-  (`r sprintf("%.2f", truth_bias_result$truth_mean)`). This makes $b_0$ adjusted
-  directional bias.
-- Both partners showed strong assumed similarity: their own reported provision
-  was closely associated with received support, controlling for their partner's
-  reported provision.
-- Direct accuracy was positive for female perceivers ($t_F =
-  `r sprintf("%.2f", truth_bias_result$estimates[["truth_female"]])`$) but not
-  evident for male perceivers ($t_M =
-  `r sprintf("%.2f", truth_bias_result$estimates[["truth_male"]])`$) in this
-  small sample; these paths control for the perceiver's own provision.
-- Partners' provided-support reports were strongly positively correlated across
-  couples ($r =
-  `r sprintf("%.2f", truth_bias_result$actual_similarity[["estimate"]])`$),
-  termed **actual similarity** in this model. This lets assumed similarity
-  contribute indirectly to accuracy.
-- Assumed similarity was stronger than direct accuracy. Using the
-  partner-to-own provision slopes ($a_F =
-  `r sprintf("%.2f", truth_bias_result$actual_similarity_paths[["female"]])`$;
-  $a_M =
-  `r sprintf("%.2f", truth_bias_result$actual_similarity_paths[["male"]])`$),
-  much of the apparent accuracy was indirect: $ab$ was
-  `r sprintf("%.2f", truth_bias_result$indirect_accuracy[["female"]])` (female)
-  and `r sprintf("%.2f", truth_bias_result$indirect_accuracy[["male"]])` (male);
-  total accuracy, $t + ab$, was
-  `r sprintf("%.2f", truth_bias_result$total_accuracy[["female"]])` and
-  `r sprintf("%.2f", truth_bias_result$total_accuracy[["male"]])`.
-- “Truth” here is the partner's provided-support report, not objective support;
-  the unstandardized paths are predictive associations on the common 0–5 scale.
+- Received support is the judgment; the partner's provided support is the
+  operational “truth”; one's own provision is the assumed-similarity predictor.
+- **Intercept:** At average provision by both partners, does the perceiver report
+  receiving more or less than the partner reports providing?
+- **Slopes:** Does perceived support track the partner's provision (direct
+  accuracy) or one's own provision (assumed similarity)?
+- The correlation between partners' provision is actual similarity, which lets
+  assumed similarity contribute indirectly to accuracy.
+- Here, assumed similarity was strong; direct accuracy was positive for female
+  perceivers but not evident for male perceivers. Treat this small,
+  cross-sectional example descriptively.
 
 :::
 
@@ -2091,32 +2069,27 @@ draw_dyadic_response_surface(drsa_result)
 
 ::: {.text-smaller}
 
-- **Joint fit:** Both MVPA outcomes were modeled together (residual
-  $\hat\rho_e = `r sub("^0", "", sprintf("%.2f", drsa_result$residual_correlation))`$).
-- **Pattern:** Both surfaces curve upward along the line of incongruence
-  ($a_{4,\mathrm F} = `r sprintf("%.2f", drsa_result$surface_parameters[["a4f"]])`$;
-  $a_{4,\mathrm M} = `r sprintf("%.2f", drsa_result$surface_parameters[["a4m"]])`$)—not the
-  pattern expected for a similarity benefit.
+- **[Line of incongruence]{style="color: #7B3FA1"}** curves upward; no clear slope or curvature along the **[line of congruence]{style="color: #1769AA"}**.
+
+- **Interpretation:** No similarity-benefit pattern; instead, some evidence of a dissimilarity pattern.
+
 
 :::
 
 :::{.notes}
 
-- The two horizontal axes show female- and male-provided support. Zero is the
-  pooled mean; the height of each surface is predicted female or male MVPA.
-
-- On the solid blue congruence line ($X=Y$), partners report equal support,
-  ranging from low-low to high-high. On the dashed purple incongruence line
-  ($Y=-X$), one partner is above and the other equally below the pooled mean.
-
-- The points mark observed couples' support combinations on the fitted surface;
-  the loops show the observed predictor region. Areas far outside are
-  extrapolations.
-
-- In this sample, predicted MVPA tends to rise as partners become discrepant in
-  either direction. That is not a similarity-benefit pattern, but it should be
-  treated descriptively because only 36 couples—and few extreme combinations—
-  inform the surface.
+- Each surface predicts one partner's MVPA. Higher areas mean more MVPA; a
+  slope shows change, and a bend shows that the association itself changes.
+- **Blue line (congruence):** Both partners report the same support. Moving
+  along it compares low-low with high-high couples.
+- **Dashed purple line (incongruence):** One partner reports above-average and
+  the other equally below-average support. Moving away from its centre means
+  greater disagreement.
+- Here, the purple line curves upward for both outcomes: larger discrepancies
+  are associated with more MVPA. This is a dissimilarity pattern, not evidence
+  that dissimilarity causes a benefit.
+- Points and loops show the observed data region. With 36 couples, especially
+  avoid interpreting the surface far outside it.
 
 :::
 
