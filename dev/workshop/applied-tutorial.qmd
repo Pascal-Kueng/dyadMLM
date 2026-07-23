@@ -51,7 +51,11 @@ editor: source
 
 # Estimating cross-sectional dyadic models in R
 
+test
+
 ## Distinguishable APIM
+
+
 
 ## Exchangeable APIM
 
