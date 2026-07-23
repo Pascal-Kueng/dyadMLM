@@ -9,6 +9,7 @@ on:
       - fix/workshop-model-comparison
     paths:
       - dev/workshop/dyad-day.html
+      - dev/workshop/applied-tutorial.qmd
       - dev/workshop/applied-tutorial.html
       - .github/workflows/workshop-draft.yaml
 
@@ -25,6 +26,11 @@ jobs:
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Render the applied tutorial
+        run: quarto render dev/workshop/applied-tutorial.qmd
 
       - name: Stage the self-contained slide decks
         run: |
