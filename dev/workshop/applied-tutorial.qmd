@@ -243,10 +243,10 @@ source(
 )
 ```
 
-## Example: affective attitude and active days {.smaller}
+## Example: self-efficacy and MVPA {.smaller}
 
-We average the daily observations for each person. `active_days` is therefore
-the proportion of observed days on which the person performed MVPA.
+We average the daily observations for each person. `total_mvpa` is therefore
+their mean number of MVPA minutes per day.
 
 ```{r}
 #| label: aggregate-distinguishable-apim-data
@@ -255,23 +255,33 @@ library(dplyr)
 library(dyadMLM)
 library(glmmTMB)
 
-daily_data <- readRDS("long.rds")
+data_file_candidates <- c(
+  "dyadic-data.rds",
+  file.path("dev", "workshop", "dyadic-data.rds")
+)
+data_file <- data_file_candidates[file.exists(data_file_candidates)][1]
+
+if (is.na(data_file)) {
+  stop("Could not find dev/workshop/dyadic-data.rds.", call. = FALSE)
+}
+
+daily_data <- readRDS(data_file)
 
 person_data <- daily_data |>
   transmute(
     couple_id = coupleID,
-    person_id = userID,
+    person_id = personID,
     role = factor(
       gender,
       levels = c(1, 2),
       labels = c("female", "male")
     ),
-    affective_attitude = ss_affect_con,
-    active_days = ss_pa
+    self_efficacy,
+    total_mvpa
   ) |>
   summarise(
-    affective_attitude = mean(affective_attitude, na.rm = TRUE),
-    active_days = mean(active_days, na.rm = TRUE),
+    self_efficacy = mean(self_efficacy, na.rm = TRUE),
+    total_mvpa = mean(total_mvpa, na.rm = TRUE),
     .by = c(couple_id, person_id, role)
   ) |>
   arrange(couple_id, role)
@@ -287,24 +297,24 @@ apim_data <- dyadMLM::prepare_dyad_data(
   dyad = couple_id,
   member = person_id,
   role = role,
-  predictors = affective_attitude,
+  predictors = self_efficacy,
   model_types = "apim",
   keep_compositions = "female-male"
 )
 
-attitude_mean <- mean(apim_data$affective_attitude)
+efficacy_mean <- mean(apim_data$self_efficacy)
 
 apim_data <- apim_data |>
   mutate(
-    .dy_affective_attitude_actor =
-      .dy_affective_attitude_actor - attitude_mean,
-    .dy_affective_attitude_partner =
-      .dy_affective_attitude_partner - attitude_mean
+    .dy_self_efficacy_actor =
+      .dy_self_efficacy_actor - efficacy_mean,
+    .dy_self_efficacy_partner =
+      .dy_self_efficacy_partner - efficacy_mean
   )
 ```
 
 Both actor and partner scores use the same pooled grand mean. The analysis
-contains 36 female--male couples.
+contains 38 female--male couples.
 
 ## Fit the distinguishable APIM {.smaller}
 
@@ -312,18 +322,18 @@ contains 36 female--male couples.
 #| label: fit-distinguishable-apim
 
 distinguishable_apim <- glmmTMB::glmmTMB(
-  active_days ~
+  total_mvpa ~
     0 +
     .dy_is_female_x_male_female +
     .dy_is_female_x_male_male +
     .dy_is_female_x_male_female:
-      .dy_affective_attitude_actor +
+      .dy_self_efficacy_actor +
     .dy_is_female_x_male_male:
-      .dy_affective_attitude_actor +
+      .dy_self_efficacy_actor +
     .dy_is_female_x_male_female:
-      .dy_affective_attitude_partner +
+      .dy_self_efficacy_partner +
     .dy_is_female_x_male_male:
-      .dy_affective_attitude_partner +
+      .dy_self_efficacy_partner +
     us(
       0 +
         .dy_is_female_x_male_female +
@@ -357,9 +367,9 @@ knitr::kable(fixed_effects, digits = 3)
 
 :::{.notes}
 
-One point higher average affective attitude is associated with about 6.5
-percentage points more active days for the actor and 3--4 percentage points
-more active days for the partner.
+One point higher average self-efficacy is associated with about 12 additional
+MVPA minutes per day for female actors and 8 for male actors. The corresponding
+partner estimates are about 3--4 minutes.
 
 :::
 
@@ -372,14 +382,14 @@ more active days for the partner.
 #| fig-height: 4.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Fitted distinguishable APIM linking affective attitude to the proportion of active days for female and male partners."
+#| fig-alt: "Fitted distinguishable APIM linking self-efficacy to mean daily MVPA for female and male partners."
 
 draw_apim_diagram(
   "distinguishable",
   model = distinguishable_apim,
   labels = c(
-    predictor = "Affective\nattitude",
-    outcome = "Proportion of\nactive days"
+    predictor = "Self-\nefficacy",
+    outcome = "Mean daily\nMVPA (minutes)"
   ),
   predictors_centered = TRUE
 )
