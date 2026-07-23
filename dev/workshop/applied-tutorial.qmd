@@ -220,6 +220,36 @@ None of these standard approaches automatically handles MNAR.
 
 # Estimating cross-sectional dyadic models in R
 
+## Cross-sectional APIMs follow six steps {.smaller}
+
+1. **Define dyads, roles, and research questions**
+2. **Check data structure, completeness, and missing-data handling**
+3. **Describe measures and dyadic relationships**
+   - Summary statistics, reliability where applicable, partner correlations,
+     and raw relationship plots
+4. **Specify, document, and estimate the APIM**
+5. **Check assumptions, diagnostics, and potential outliers**
+6. **Interpret, visualize, and report the results**
+
+::: {.subtle}
+Before data collection: preregister the dyadic model and conduct a dyad-specific
+power analysis [@mohammadzadehYazdBeyondIndividual2026].
+
+Workflow synthesized from @kenny2006dyadic and @stasGivingDyadicData2018.
+:::
+
+:::{.notes}
+
+The systematic review examined 73 longitudinal APIM studies with at least 70
+dyads and study periods exceeding 1 year, rather than intensive diary designs.
+Only 17.8% reported a power analysis, 24.7% did not report their missing-data
+strategy, and 35.6% did not document model constraints. We use its
+recommendations as general motivation for preregistration, dyad-specific power
+analysis, and transparent model specification—not as prevalence estimates for
+ILD studies.
+
+:::
+
 ## Distinguishable APIM
 
 - Row-Level representation
@@ -496,6 +526,50 @@ as exchangeable APIM?
 ## Q&A and discussion
 
 # Intensive longitudinal extensions
+
+## ILD extends rather than replaces the workflow {.smaller}
+
+:::: {.columns}
+
+::: {.column width="43%"}
+
+::: {.subtle}
+
+### The same core workflow
+
+1. Define dyads, roles, and research questions
+2. Check data structure, completeness, and missing-data handling
+3. Describe measures and dyadic relationships
+4. Specify, document, and estimate the APIM
+5. Check assumptions, diagnostics, and potential outliers
+6. Interpret, visualize, and report the results
+
+:::
+
+:::
+
+::: {.column width="57%"}
+
+### ILD additionally requires
+
+- Check compliance, matched occasions, and actual time gaps
+- Plot paired trajectories over time
+- Separate within- and between-person variation
+  - ICCs, level-specific correlations, and multilevel reliability where
+    applicable
+- Choose the temporal specification
+  - Trends, concurrent versus lagged effects, and discrete versus continuous
+    time
+- Check residual temporal and cross-partner dependence
+
+:::
+
+::::
+
+::: {.subtle}
+Workflow synthesized from @bolgerIntensiveLongitudinalMethods2013,
+@revolPreprocessingExperienceSampling2024, and @mcneishPrimerTwoLevel2020.
+:::
 
 ## Distinguishable APIM
 
