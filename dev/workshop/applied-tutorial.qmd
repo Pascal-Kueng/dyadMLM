@@ -316,6 +316,19 @@ as exchangeable APIM?
 
 # Excercises in R
 
+Short break - initiate package install before you leave
+
+```{r eval = FALSE}
+
+install.packages(
+  c('dyadMLM', 'wbCorr', 'glmmTMB', 'DHARMa', 'dplyr', 'ggplot2')
+  )
+
+```
+
+
+- Go to https://pascal-kueng.github.io/dyadMLM/workshop/ 
+- or Teams channel
 
 <!--
 
