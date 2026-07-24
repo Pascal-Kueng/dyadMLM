@@ -121,6 +121,31 @@ test_that("lag predictors create DIM and DSM model-ready columns", {
     rep(c(-0.5, 0.5), 4)
   )
 
+  dim_generated_lags <- dyad_generated_columns(attr(dim_result, "dyadMLM")) |>
+    dplyr::filter(.data$model_family == "dim", .data$lag == 1L) |>
+    dplyr::select("component", "column_role", "column", "source_column") |>
+    dplyr::arrange(.data$column)
+  expect_equal(
+    dim_generated_lags,
+    tibble::tibble(
+      component = c("cwp", "cwp", "raw", "raw"),
+      column_role = c(
+        "dyad_mean", "within_dyad_deviation",
+        "dyad_mean", "within_dyad_deviation"
+      ),
+      column = c(
+        ".dy_x_cwp_dyad_mean_lag1",
+        ".dy_x_cwp_within_dyad_dev_lag1",
+        ".dy_x_dyad_mean_gmc_lag1",
+        ".dy_x_within_dyad_dev_lag1"
+      ),
+      source_column = c(
+        ".dy_x_cwp_lag1", ".dy_x_cwp_lag1",
+        ".dy_x_lag1", ".dy_x_lag1"
+      )
+    )
+  )
+
   distinguishable <- dplyr::mutate(
     exchangeable,
     role = ifelse(.data$person_id == "A", "first", "second")
@@ -147,6 +172,31 @@ test_that("lag predictors create DIM and DSM model-ready columns", {
   expect_equal(
     dsm_result$.dy_x_within_dyad_diff_lag1[dsm_result$time > 1],
     rep(-1, 8)
+  )
+
+  dsm_generated_lags <- dyad_generated_columns(attr(dsm_result, "dyadMLM")) |>
+    dplyr::filter(.data$model_family == "dsm", .data$lag == 1L) |>
+    dplyr::select("component", "column_role", "column", "source_column") |>
+    dplyr::arrange(.data$column)
+  expect_equal(
+    dsm_generated_lags,
+    tibble::tibble(
+      component = c("cwp", "cwp", "raw", "raw"),
+      column_role = c(
+        "dyad_mean", "dyad_difference",
+        "dyad_mean", "dyad_difference"
+      ),
+      column = c(
+        ".dy_x_cwp_dyad_mean_lag1",
+        ".dy_x_cwp_within_dyad_diff_lag1",
+        ".dy_x_dyad_mean_gmc_lag1",
+        ".dy_x_within_dyad_diff_lag1"
+      ),
+      source_column = c(
+        ".dy_x_cwp_lag1", ".dy_x_cwp_lag1",
+        ".dy_x_lag1", ".dy_x_lag1"
+      )
+    )
   )
 })
 

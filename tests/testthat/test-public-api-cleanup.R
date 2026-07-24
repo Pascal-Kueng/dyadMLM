@@ -172,6 +172,47 @@ test_that("lag collisions with earlier generated columns are rejected", {
   )
 })
 
+test_that("collision ownership uses the registry, not a name prefix", {
+  data <- tibble::tibble(
+    x = 1,
+    generated_short = 1,
+    original_short = 1
+  )
+
+  generated_plan <- tibble::tibble(
+    target = "generated_short",
+    predictor = "x",
+    temporal_component = "raw",
+    lag = 0L,
+    model_family = "apim",
+    column_role = "actor",
+    variable_role = "predictor",
+    source_column = "x"
+  )
+  data <- record_generated_columns(data, generated_plan)
+
+  proposed_plan <- generated_plan
+  proposed_plan$model_family <- "temporal"
+  proposed_plan$column_role <- "temporal_component"
+
+  expect_error(
+    validate_generated_column_plan(data, proposed_plan),
+    paste0(
+      "`generated_short`.*model family `temporal`.*",
+      "model family `apim`.*column role `actor`"
+    )
+  )
+
+  proposed_plan$target <- "original_short"
+  expect_error(
+    validate_generated_column_plan(data, proposed_plan),
+    paste0(
+      "`original_short`.*model family `temporal`.*",
+      "model family `input`.*column role `original`"
+    )
+  )
+})
+
 test_that("predictor columns cannot overwrite composition columns", {
   data <- data.frame(
     dyad_id = rep(1:2, each = 2),

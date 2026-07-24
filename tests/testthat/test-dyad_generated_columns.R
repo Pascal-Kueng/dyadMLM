@@ -61,6 +61,68 @@ test_that("dyad_generated_columns records every created composition column", {
   expect_false(any(grepl("member_contrast", result$column, fixed = TRUE)))
 })
 
+test_that("dyad_generated_columns records exchangeable member contrasts", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  prepared <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    model_types = "none",
+    seed = 123
+  )
+
+  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+
+  composition_columns <- result |>
+    dplyr::arrange(.data$print_order) |>
+    dplyr::select("column_role", "column", "print_order")
+  expect_equal(
+    composition_columns,
+    tibble::tibble(
+      column_role = c(
+        "composition",
+        "composition_role",
+        "composition_indicator",
+        "member_contrast"
+      ),
+      column = c(
+        ".dy_composition",
+        ".dy_composition_role",
+        ".dy_is_assumed_exchangeable",
+        ".dy_member_contrast_assumed_exchangeable_arbitrary"
+      ),
+      print_order = 1:4
+    )
+  )
+
+  member_contrast <- result |>
+    dplyr::filter(.data$column_role == "member_contrast") |>
+    dplyr::select(
+      "model_family", "variable_role", "component", "lag",
+      "source_column", "temporal_decomposition", "dyadic_decomposition",
+      "column_centering", "print_order", "column_pattern"
+    )
+  expect_equal(
+    member_contrast,
+    tibble::tibble(
+      model_family = "composition",
+      variable_role = "composition",
+      component = "none",
+      lag = 0L,
+      source_column = ".dy_composition",
+      temporal_decomposition = "none",
+      dyadic_decomposition = "none",
+      column_centering = "none",
+      print_order = 4L,
+      column_pattern = ".dy_member_contrast_{comp}_arbitrary"
+    )
+  )
+})
+
 test_that("dyad_generated_columns collects APIM columns", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
