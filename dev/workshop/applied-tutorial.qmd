@@ -259,6 +259,45 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 
 <!-- ca. 1 Minute -->
 
+## Workflow
+
+1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
+2. **Prepare the Data**
+2. **Check data structure**
+3. **Describe measures and simple relationships**
+4. **Estimate the models**
+5. **Verify estimation, check assumptions, identify influential dyads**
+6. **Visualize, interpret, and report results**
+
+:::{.notes}
+
+We have defined a research question, and for this analysis we have
+decided to distinguish by gender... although this is often just a standard
+and should be considered carefully too. 
+
+:::
+
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. [**Prepare the Data**]{.text-highlight}
+2. **Check data structure**
+3. **Describe measures and simple relationships**
+4. **Estimate the models**
+5. **Verify estimation, check assumptions, identify influential dyads**
+6. **Visualize, interpret, and report results**
+
+## Data preparation in R
+
+The dplyr package enables better readable syntax
+
+```{r}
+library(dplyr)
+
+
+
+```
+
 
 ## Distinguishable APIM
 
