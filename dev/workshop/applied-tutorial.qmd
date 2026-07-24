@@ -263,9 +263,8 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 ## Workflow
 
 1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
-2. **Prepare the Data**
-2. **Check data structure**
-3. **Describe and visualize measures and simple relationships**
+2. **Prepare the data and verify the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
 4. **Estimate the models**
 5. **Verify estimation, check assumptions, identify influential dyads**
 6. **Visualize, interpret, and report results**
@@ -291,9 +290,8 @@ Important: Gender is not always the only choice!
 ## Workflow
 
 1. **Define dyads, distinguishability, and research questions**
-2. [**Prepare the Data**]{.text-highlight}
-2. **Check data structure**
-3. **Describe and visualize measures and simple relationships**
+2. [**Prepare the data and verify the dyadic structure**]{.text-highlight}
+3. **Describe and visualize measures and observed relationships**
 4. **Estimate the models**
 5. **Verify estimation, check assumptions, identify influential dyads**
 6. **Visualize, interpret, and report results**
@@ -372,19 +370,20 @@ local({
 ## Workflow
 
 1. **Define dyads, distinguishability, and research questions**
-2. **Prepare the Data**
-2. [**Check data structure**]{.text-highlight}
-3. **Describe and visualize measures and simple relationships**
+2. **Prepare the data and verify the dyadic structure**
+3. [**Describe and visualize measures and observed relationships**]{.text-highlight}
 4. **Estimate the models**
 5. **Verify estimation, check assumptions, identify influential dyads**
 6. **Visualize, interpret, and report results**
 
-## Check data structure
+## Describe and visualize measures and observed relationships
 
 For example: 
 
 - Describe missingness (MAR analyses, decide on imputation, etc.)
 - Check implausible values / outliers 
+
+--- 
 
 ## Distinguishable APIM
 
