@@ -324,17 +324,21 @@ df_apim <- prepare_dyad_data( # exported function from dyadMLM
   model_types = 'apim'
 )
 
-df_apim |>
-  tibble::as_tibble() |>
-  select(
-    couple_id, person_id, total_mvpa,
-    .dy_efficacy_actor, .dy_efficacy_partner,
-    .dy_is_female, .dy_is_male
-  ) |>
-  print(n = 4, width = 100)
+print(df_apim)
 
 ```
 
+## Create the expected format
+
+```{r echo = FALSE}
+df_apim |>
+  select(
+    couple_id, person_id, gender, .dy_is_female, .dy_is_male,
+    efficacy, .dy_efficacy_actor, .dy_efficacy_partner, total_mvpa
+  ) |>
+  tibble() |>
+  print(n = 6)
+```
 
 ## Distinguishable APIM
 
