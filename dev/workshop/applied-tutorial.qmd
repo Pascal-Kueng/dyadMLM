@@ -239,7 +239,8 @@ Before data collection: preregister hypotheses and key model decisions, and
 conduct a dyad-specific power analysis
 [@stasGivingDyadicData2018; @mohammadzadehYazdBeyondIndividual2026].
 
-Workflow synthesized from @kenny2006dyadic and @stasGivingDyadicData2018.
+Workflow synthesized from @kenny2006dyadic,
+@ledermannToolboxProgramsRestructure2015, and @stasGivingDyadicData2018.
 :::
 
 :::{.notes}
@@ -436,8 +437,9 @@ Each couple contributes one female--male residual vector. The model allows the
 partners to correlate through a free 2-by-2 covariance matrix; **different
 couples**, not partners, are assumed independent.
 
-**Before these plots:** verify convergence, the Hessian, and unexplained
-boundary estimates [@delrosarioPracticalGuideSpecifying2025].
+**Before these plots:** verify convergence and investigate Hessian warnings
+or unexplained boundary estimates
+[@glmmTMBTroubleshooting2026; @delrosarioPracticalGuideSpecifying2025].
 
 :::: {.columns}
 
@@ -450,6 +452,7 @@ boundary estimates [@delrosarioPracticalGuideSpecifying2025].
 3. Use one rotated QQ plot as a global distributional screen
 4. Reuse the same simulations for role-specific predictor plots
 5. Delete whole couples to assess influence
+   [@xiangInfluenceDiagnosticsGeneralized2002]
 
 :::
 
@@ -468,7 +471,8 @@ boundary estimates [@delrosarioPracticalGuideSpecifying2025].
 
 ::: {.subtle}
 DHARMa recommends rotation when unconditional simulations retain a modeled
-residual covariance [@hartigDHARMaResidualDiagnostics2026].
+residual covariance; the joint dyadic workflow shown here adapts that principle
+[@hartigDHARMaResidualDiagnostics2026].
 :::
 
 ## One joint simulation gives the global check {.smaller}
@@ -771,14 +775,19 @@ as exchangeable APIM?
 ### ILD additionally requires
 
 - Check compliance, matched occasions, and actual time gaps
+  [@revolPreprocessingExperienceSampling2024]
 - Plot paired trajectories and inspect raw temporal and cross-partner patterns
-  [@perryGraphicMethodsInterpreting2017]
+  [@bolgerIntensiveLongitudinalMethods2013;
+  @revolPreprocessingExperienceSampling2024]
 - Separate within- and between-person variation
   - ICCs, level-specific correlations, and multilevel reliability where
-    applicable
+    applicable [@bolgerIntensiveLongitudinalMethods2013;
+    @hamakerCuriousCaseCrossSectional2024;
+    @geldhofReliabilityEstimationMultilevel2014]
 - Choose the temporal specification
   - Time scale and lag, trends/stationarity, concurrent versus lagged effects,
     and discrete versus continuous time
+    [@driverContinuousTimeStructural2017]
 - Check residual temporal and cross-partner dependence
 
 :::
@@ -789,6 +798,26 @@ as exchangeable APIM?
 Workflow synthesized from @bolgerIntensiveLongitudinalMethods2013,
 @revolPreprocessingExperienceSampling2024, @mcneishPrimerTwoLevel2020, and
 @delrosarioPracticalGuideSpecifying2025.
+:::
+
+:::{.notes}
+
+For ILD-specific power analysis, see @lafitPowerLAPIMApplication2022. Perry et
+al. belongs with interpretation of fitted dynamics: their change-score APIM and
+vector-field diagrams show the joint implications of actor and partner
+coefficients [@perryGraphicMethodsInterpreting2017].
+
+We will use `wbCorr` for pooled within- and between-person correlations
+[@kuengWbCorrBivariateWithin2026]; @hamakerCuriousCaseCrossSectional2024
+provides the methodological rationale.
+
+`omegaSEM()` is provided by `multilevelTools`, not `semTools`. It implements
+level-specific internal-consistency coefficients based on a two-level
+one-factor model [@wileyMultilevelTools2025;
+@geldhofReliabilityEstimationMultilevel2014]. These coefficients are not
+temporal stability or the precision of observed person means; for the latter,
+see @laiCompositeReliabilityMultilevel2021.
+
 :::
 
 ## Distinguishable APIM

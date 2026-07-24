@@ -2124,7 +2124,7 @@ display:block!important;
 </ol>
 <div class="subtle">
 <p>Before data collection: preregister hypotheses and key model decisions, and conduct a dyad-specific power analysis <span class="citation" data-cites="stasGivingDyadicData2018 mohammadzadehYazdBeyondIndividual2026">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Mohammadzadeh Yazd et al., 2026</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Stas et al., 2018</a>)</span>.</p>
-<p>Workflow synthesized from <span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2006</a>)</span> and <span class="citation" data-cites="stasGivingDyadicData2018">Stas et al. (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2018</a>)</span>.</p>
+<p>Workflow synthesized from <span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2006</a>)</span>, <span class="citation" data-cites="ledermannToolboxProgramsRestructure2015">Ledermann &amp; Kenny (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2015</a>)</span>, and <span class="citation" data-cites="stasGivingDyadicData2018">Stas et al. (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2018</a>)</span>.</p>
 </div>
 <aside class="notes">
 <p>The systematic review examined 73 longitudinal APIM studies with at least 70 dyads and study periods exceeding 1 year, rather than intensive diary designs. Only 17.8% reported a power analysis, 24.7% did not report their missing-data strategy, and 35.6% did not document model constraints. We use its recommendations as general motivation for preregistration, dyad-specific power analysis, and transparent model specification—not as prevalence estimates for ILD studies.</p>
@@ -2360,7 +2360,7 @@ display:block!important;
 <section id="residual-diagnostics-must-preserve-the-pair" class="slide level2 smaller">
 <h2>Residual diagnostics must preserve the pair</h2>
 <p>Each couple contributes one female–male residual vector. The model allows the partners to correlate through a free 2-by-2 covariance matrix; <strong>different couples</strong>, not partners, are assumed independent.</p>
-<p><strong>Before these plots:</strong> verify convergence, the Hessian, and unexplained boundary estimates <span class="citation" data-cites="delrosarioPracticalGuideSpecifying2025">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>del Rosario &amp; West, 2025</a>)</span>.</p>
+<p><strong>Before these plots:</strong> verify convergence and investigate Hessian warnings or unexplained boundary estimates <span class="citation" data-cites="glmmTMBTroubleshooting2026 delrosarioPracticalGuideSpecifying2025">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>del Rosario &amp; West, 2025</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick><span class="nocase">glmmTMB Development Team</span>, 2026</a>)</span>.</p>
 <div class="columns">
 <div class="column" style="width:55%;">
 <p><strong>Teach this workflow</strong></p>
@@ -2369,7 +2369,7 @@ display:block!important;
 <li>Whiten the modeled partner covariance</li>
 <li>Use one rotated QQ plot as a global distributional screen</li>
 <li>Reuse the same simulations for role-specific predictor plots</li>
-<li>Delete whole couples to assess influence</li>
+<li>Delete whole couples to assess influence <span class="citation" data-cites="xiangInfluenceDiagnosticsGeneralized2002">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Xiang et al., 2002</a>)</span></li>
 </ol>
 </div><div class="column" style="width:45%;">
 <p><strong>Do not</strong></p>
@@ -2381,7 +2381,7 @@ display:block!important;
 </ul>
 </div></div>
 <div class="subtle">
-<p>DHARMa recommends rotation when unconditional simulations retain a modeled residual covariance <span class="citation" data-cites="hartigDHARMaResidualDiagnostics2026">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Hartig, 2026</a>)</span>.</p>
+<p>DHARMa recommends rotation when unconditional simulations retain a modeled residual covariance; the joint dyadic workflow shown here adapts that principle <span class="citation" data-cites="hartigDHARMaResidualDiagnostics2026">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Hartig, 2026</a>)</span>.</p>
 </div>
 </section>
 <section id="one-joint-simulation-gives-the-global-check" class="slide level2 smaller">
@@ -2558,15 +2558,15 @@ as exchangeable APIM?
 </div><div class="column" style="width:57%;">
 <h3 id="ild-additionally-requires">ILD additionally requires</h3>
 <ul>
-<li>Check compliance, matched occasions, and actual time gaps</li>
-<li>Plot paired trajectories and inspect raw temporal and cross-partner patterns <span class="citation" data-cites="perryGraphicMethodsInterpreting2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Perry et al., 2017</a>)</span></li>
+<li>Check compliance, matched occasions, and actual time gaps <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Revol et al., 2024</a>)</span></li>
+<li>Plot paired trajectories and inspect raw temporal and cross-partner patterns <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013 revolPreprocessingExperienceSampling2024">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Bolger &amp; Laurenceau, 2013</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Revol et al., 2024</a>)</span></li>
 <li>Separate within- and between-person variation
 <ul>
-<li>ICCs, level-specific correlations, and multilevel reliability where applicable</li>
+<li>ICCs, level-specific correlations, and multilevel reliability where applicable <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013 hamakerCuriousCaseCrossSectional2024 geldhofReliabilityEstimationMultilevel2014">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Bolger &amp; Laurenceau, 2013</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Geldhof et al., 2014</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Hamaker, 2024</a>)</span></li>
 </ul></li>
 <li>Choose the temporal specification
 <ul>
-<li>Time scale and lag, trends/stationarity, concurrent versus lagged effects, and discrete versus continuous time</li>
+<li>Time scale and lag, trends/stationarity, concurrent versus lagged effects, and discrete versus continuous time <span class="citation" data-cites="driverContinuousTimeStructural2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Driver et al., 2017</a>)</span></li>
 </ul></li>
 <li>Check residual temporal and cross-partner dependence</li>
 </ul>
@@ -2574,6 +2574,21 @@ as exchangeable APIM?
 <div class="subtle">
 <p>Workflow synthesized from <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013">Bolger &amp; Laurenceau (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2013</a>)</span>, <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">Revol et al. (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2024</a>)</span>, <span class="citation" data-cites="mcneishPrimerTwoLevel2020">McNeish &amp; Hamaker (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2020</a>)</span>, and <span class="citation" data-cites="delrosarioPracticalGuideSpecifying2025">del Rosario &amp; West (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2025</a>)</span>.</p>
 </div>
+<aside class="notes">
+<p>For ILD-specific power analysis, see <span class="citation" data-cites="lafitPowerLAPIMApplication2022">Lafit et al. (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2022</a>)</span>. Perry et al. belongs with interpretation of fitted dynamics: their change-score APIM and vector-field diagrams show the joint implications of actor and partner coefficients <span class="citation" data-cites="perryGraphicMethodsInterpreting2017">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Perry et al., 2017</a>)</span>.</p>
+<p>We will use <code>wbCorr</code> for pooled within- and between-person correlations <span class="citation" data-cites="kuengWbCorrBivariateWithin2026">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Küng, 2026</a>)</span>; <span class="citation" data-cites="hamakerCuriousCaseCrossSectional2024">Hamaker (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2024</a>)</span> provides the methodological rationale.</p>
+<p><code>omegaSEM()</code> is provided by <code>multilevelTools</code>, not <code>semTools</code>. It implements level-specific internal-consistency coefficients based on a two-level one-factor model <span class="citation" data-cites="wileyMultilevelTools2025 geldhofReliabilityEstimationMultilevel2014">(<a href="#/excercises-in-r" role="doc-biblioref" onclick>Geldhof et al., 2014</a>; <a href="#/excercises-in-r" role="doc-biblioref" onclick>Wiley, 2025</a>)</span>. These coefficients are not temporal stability or the precision of observed person means; for the latter, see <span class="citation" data-cites="laiCompositeReliabilityMultilevel2021">Lai (<a href="#/excercises-in-r" role="doc-biblioref" onclick>2021</a>)</span>.</p>
+<style type="text/css">
+span.MJX_Assistive_MathML {
+position:absolute!important;
+clip: rect(1px, 1px, 1px, 1px);
+padding: 1px 0 0 0!important;
+border: 0!important;
+height: 1px!important;
+width: 1px!important;
+overflow: hidden!important;
+display:block!important;
+}</style></aside>
 </section>
 <section id="distinguishable-apim-1" class="slide level2">
 <h2>Distinguishable APIM</h2>
@@ -2686,11 +2701,20 @@ del Rosario, K. S., &amp; West, T. V. (2025). A <span>Practical Guide</span> to 
 <div id="ref-driverContinuousTimeStructural2017" class="csl-entry" role="listitem">
 Driver, C. C., Oud, J. H. L., &amp; Voelkle, M. C. (2017). Continuous time structural equation modeling with <span>R</span> package <span class="nocase">ctsem</span>. <em>Journal of Statistical Software</em>, <em>77</em>(5), 1–35. <a href="https://doi.org/10.18637/jss.v077.i05">https://doi.org/10.18637/jss.v077.i05</a>
 </div>
+<div id="ref-geldhofReliabilityEstimationMultilevel2014" class="csl-entry" role="listitem">
+Geldhof, G. J., Preacher, K. J., &amp; Zyphur, M. J. (2014). Reliability estimation in a multilevel confirmatory factor analysis framework. <em>Psychological Methods</em>, <em>19</em>(1), 72–91. <a href="https://doi.org/10.1037/a0032138">https://doi.org/10.1037/a0032138</a>
+</div>
 <div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry" role="listitem">
 Gistelinck, F., Loeys, T., &amp; Flamant, N. (2021). Multilevel autoregressive models when the number of time points is small. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, <em>28</em>(1), 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517">https://doi.org/10.1080/10705511.2020.1753517</a>
 </div>
+<div id="ref-glmmTMBTroubleshooting2026" class="csl-entry" role="listitem">
+<span class="nocase">glmmTMB Development Team</span>. (2026). <em>Troubleshooting with <span class="nocase">glmmTMB</span></em>. <a href="https://glmmtmb.github.io/glmmTMB/articles/troubleshooting.html">https://glmmtmb.github.io/glmmTMB/articles/troubleshooting.html</a>
+</div>
 <div id="ref-grundMultipleImputationMissing2018" class="csl-entry" role="listitem">
 Grund, S., Lüdtke, O., &amp; Robitzsch, A. (2018). Multiple imputation of missing data for multilevel models: Simulations and recommendations. <em>Organizational Research Methods</em>, <em>21</em>(1), 111–149. <a href="https://doi.org/10.1177/1094428117703686">https://doi.org/10.1177/1094428117703686</a>
+</div>
+<div id="ref-hamakerCuriousCaseCrossSectional2024" class="csl-entry" role="listitem">
+Hamaker, E. L. (2024). The curious case of the cross-sectional correlation. <em>Multivariate Behavioral Research</em>, <em>59</em>(6), 1111–1122. <a href="https://doi.org/10.1080/00273171.2022.2155930">https://doi.org/10.1080/00273171.2022.2155930</a>
 </div>
 <div id="ref-hartigDHARMaResidualDiagnostics2026" class="csl-entry" role="listitem">
 Hartig, F. (2026). <em><span>DHARMa</span>: Residual diagnostics for hierarchical (multi-level / mixed) regression models</em>. <a href="https://doi.org/10.32614/CRAN.package.DHARMa">https://doi.org/10.32614/CRAN.package.DHARMa</a>
@@ -2710,11 +2734,23 @@ Koslowski, K., Münch, F., Koch, T., &amp; Holtmann, J. (2025). <em>Mlts: Multil
 <div id="ref-kristensenCovarianceStructuresGlmmTMB2023" class="csl-entry" role="listitem">
 Kristensen, K., &amp; McGillycuddy, M. (2023, October 14). <em>Covariance structures with <span class="nocase">glmmTMB</span></em>. <a href="https://glmmtmb.github.io/glmmTMB/articles/covstruct.html">https://glmmtmb.github.io/glmmTMB/articles/covstruct.html</a>
 </div>
+<div id="ref-kuengWbCorrBivariateWithin2026" class="csl-entry" role="listitem">
+Küng, P. (2026). <em><span class="nocase">wbCorr</span>: Bivariate within- and between-cluster correlations</em>. University of Zürich. <a href="https://doi.org/10.32614/CRAN.package.wbCorr">https://doi.org/10.32614/CRAN.package.wbCorr</a>
+</div>
+<div id="ref-lafitPowerLAPIMApplication2022" class="csl-entry" role="listitem">
+Lafit, G., Sels, L., Adolf, J. K., Loeys, T., &amp; Ceulemans, E. (2022). <span>PowerLAPIM</span>: An application to conduct power analysis for linear and quadratic longitudinal actor–partner interdependence models in intensive longitudinal dyadic designs. <em>Journal of Social and Personal Relationships</em>, <em>39</em>(10), 3085–3115. <a href="https://doi.org/10.1177/02654075221080128">https://doi.org/10.1177/02654075221080128</a>
+</div>
+<div id="ref-laiCompositeReliabilityMultilevel2021" class="csl-entry" role="listitem">
+Lai, M. H. C. (2021). Composite reliability of multilevel data: It’s about observed scores and construct meanings. <em>Psychological Methods</em>, <em>26</em>(1), 90–102. <a href="https://doi.org/10.1037/met0000287">https://doi.org/10.1037/met0000287</a>
+</div>
 <div id="ref-lavaanRandomSlopeSyntax" class="csl-entry" role="listitem">
 <span class="nocase">lavaan project</span>. (n.d.-a). <em>Lavaan model syntax: Random slopes (two-level models)</em>. Retrieved July 23, 2026, from <a href="https://stat.ethz.ch/CRAN/web/packages/lavaan/refman/lavaan.html">https://stat.ethz.ch/CRAN/web/packages/lavaan/refman/lavaan.html</a>
 </div>
 <div id="ref-lavaanMultilevelSEM" class="csl-entry" role="listitem">
 <span class="nocase">lavaan project</span>. (n.d.-b). <em>Multilevel <span>SEM</span></em>. Retrieved July 23, 2026, from <a href="https://lavaan.ugent.be/tutorial/multilevel.html">https://lavaan.ugent.be/tutorial/multilevel.html</a>
+</div>
+<div id="ref-ledermannToolboxProgramsRestructure2015" class="csl-entry" role="listitem">
+Ledermann, T., &amp; Kenny, D. A. (2015). A toolbox with programs to restructure and describe dyadic data. <em>Journal of Social and Personal Relationships</em>, <em>32</em>(8), 997–1011. <a href="https://doi.org/10.1177/0265407514555273">https://doi.org/10.1177/0265407514555273</a>
 </div>
 <div id="ref-ledermannAnalyzingDyadicData2017" class="csl-entry" role="listitem">
 Ledermann, T., &amp; Kenny, D. A. (2017). Analyzing dyadic data with multilevel modeling versus structural equation modeling: <span>A</span> tale of two methods. <em>Journal of Family Psychology</em>, <em>31</em>(4), 442–452. <a href="https://doi.org/10.1037/fam0000290">https://doi.org/10.1037/fam0000290</a>
@@ -2754,6 +2790,9 @@ Schönbrodt, F. D., Humberg, S., &amp; Nestler, S. (2018). Testing similarity ef
 </div>
 <div id="ref-stasGivingDyadicData2018" class="csl-entry" role="listitem">
 Stas, L., Kenny, D. A., Mayer, A., &amp; Loeys, T. (2018). Giving dyadic data analysis away: <span>A</span> user-friendly app for actor–partner interdependence models. <em>Personal Relationships</em>, <em>25</em>(1), 103–119. <a href="https://doi.org/10.1111/pere.12230">https://doi.org/10.1111/pere.12230</a>
+</div>
+<div id="ref-wileyMultilevelTools2025" class="csl-entry" role="listitem">
+Wiley, J. F. (2025). <em><span class="nocase">multilevelTools</span>: Multilevel and mixed effects model diagnostics and effect sizes</em>. <a href="https://doi.org/10.32614/CRAN.package.multilevelTools">https://doi.org/10.32614/CRAN.package.multilevelTools</a>
 </div>
 <div id="ref-xiangInfluenceDiagnosticsGeneralized2002" class="csl-entry" role="listitem">
 Xiang, L., Tse, S.-K., &amp; Lee, A. H. (2002). Influence diagnostics for generalized linear mixed models: Applications to clustered data. <em>Computational Statistics &amp; Data Analysis</em>, <em>40</em>(4), 759–774. <a href="https://doi.org/10.1016/S0167-9473(02)00075-0">https://doi.org/10.1016/S0167-9473(02)00075-0</a>
