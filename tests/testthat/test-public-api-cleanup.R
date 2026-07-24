@@ -218,8 +218,9 @@ test_that("predictor columns cannot overwrite composition columns", {
     dyad_id = rep(1:2, each = 2),
     member_id = rep(c("a", "b"), 2),
     role = rep(c("actor", "f"), 2),
-    is_actor_x_f = 1:4
+    is = 1:4
   )
+  collision_name <- paste0(dyad_short_prefix, "is_actor")
 
   expect_error(
     prepare_dyad_data(
@@ -227,11 +228,11 @@ test_that("predictor columns cannot overwrite composition columns", {
       dyad = dyad_id,
       member = member_id,
       role = role,
-      predictors = is_actor_x_f,
+      predictors = is,
       model_types = "apim"
     ),
     paste0(
-      "`.dy_is_actor_x_f_actor`.*predictor `is_actor_x_f`.*",
+      "`", collision_name, "`.*predictor `is`.*",
       "model family `apim`.*model family `composition`"
     ),
     fixed = FALSE
@@ -248,8 +249,12 @@ test_that("only the new member contrast is generated", {
     model_types = "none",
     seed = 1
   )
+  short_member_contrast <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
   expect_true(
-    ".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(prepared)
+    short_member_contrast %in% names(prepared)
   )
   expect_false(any(startsWith(names(prepared), ".dy_diff_")))
 })

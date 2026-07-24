@@ -365,21 +365,21 @@ apim_model <- glmmTMB::glmmTMB(
   closeness ~
     # Role-specific intercepts
     0 +
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
+    .dy_is_female +
+    .dy_is_male +
 
     # Role-specific actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_actor +
+    .dy_is_female:.dy_provided_support_actor +
+    .dy_is_male:.dy_provided_support_actor +
 
     # Role-specific partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_partner +
+    .dy_is_female:.dy_provided_support_partner +
+    .dy_is_male:.dy_provided_support_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
-         .dy_is_female_x_male_female +
-         .dy_is_female_x_male_male
+         .dy_is_female +
+         .dy_is_male
        | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -506,19 +506,19 @@ fixed effects:
 apim_coef <- glmmTMB::fixef(apim_model)$cond
 dsm_coef <- glmmTMB::fixef(dsm_model)$cond
 
-b0_female <- apim_coef[[".dy_is_female_x_male_female"]]
-b0_male <- apim_coef[[".dy_is_female_x_male_male"]]
+b0_female <- apim_coef[[".dy_is_female"]]
+b0_male <- apim_coef[[".dy_is_male"]]
 b_actor_female <- apim_coef[[
-  ".dy_is_female_x_male_female:.dy_provided_support_actor"
+  ".dy_is_female:.dy_provided_support_actor"
 ]]
 b_actor_male <- apim_coef[[
-  ".dy_is_female_x_male_male:.dy_provided_support_actor"
+  ".dy_is_male:.dy_provided_support_actor"
 ]]
 b_partner_female <- apim_coef[[
-  ".dy_is_female_x_male_female:.dy_provided_support_partner"
+  ".dy_is_female:.dy_provided_support_partner"
 ]]
 b_partner_male <- apim_coef[[
-  ".dy_is_female_x_male_male:.dy_provided_support_partner"
+  ".dy_is_male:.dy_provided_support_partner"
 ]]
 
 b_sum_female <- b_actor_female + b_partner_female

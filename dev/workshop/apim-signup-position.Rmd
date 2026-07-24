@@ -238,24 +238,24 @@ The fixed effects and the complete two-person residual covariance structure
 are allowed to differ by signup position.
 
 ```{r fit-distinguishable-apim}
-person1_indicator <- ".dy_is_initiator_x_partner_initiator"
-person2_indicator <- ".dy_is_initiator_x_partner_partner"
+person1_indicator <- ".dy_is_initiator"
+person2_indicator <- ".dy_is_partner"
 
 signup_distinguishable_apim <- glmmTMB(
   mvpa_total ~ 0 +
-    .dy_is_initiator_x_partner_initiator +
-    .dy_is_initiator_x_partner_partner +
-    .dy_is_initiator_x_partner_initiator:
+    .dy_is_initiator +
+    .dy_is_partner +
+    .dy_is_initiator:
       .dy_provided_emotional_support_actor +
-    .dy_is_initiator_x_partner_partner:
+    .dy_is_partner:
       .dy_provided_emotional_support_actor +
-    .dy_is_initiator_x_partner_initiator:
+    .dy_is_initiator:
       .dy_provided_emotional_support_partner +
-    .dy_is_initiator_x_partner_partner:
+    .dy_is_partner:
       .dy_provided_emotional_support_partner +
     us(
-      0 + .dy_is_initiator_x_partner_initiator +
-        .dy_is_initiator_x_partner_partner | couple_id
+      0 + .dy_is_initiator +
+        .dy_is_partner | couple_id
     ),
   dispformula = ~0,
   family = gaussian(),
@@ -274,9 +274,9 @@ the extraction and signup-position diagram are defined locally in this file.
 ```{r extract-diagram-results}
 signup_apim_terms <- c(
   intercept_person1 =
-    ".dy_is_initiator_x_partner_initiator",
+    ".dy_is_initiator",
   intercept_person2 =
-    ".dy_is_initiator_x_partner_partner",
+    ".dy_is_partner",
   actor_person1 = paste0(person1_indicator, ":", actor_term),
   actor_person2 = paste0(person2_indicator, ":", actor_term),
   partner_effect_on_person1 =
@@ -614,12 +614,12 @@ signup_exchangeable_data[[partner_term]] <-
 
 signup_exchangeable_apim <- glmmTMB(
   mvpa_total ~ 0 +
-    .dy_is_initiator_x_partner +
+    .dy_is_exchangeable +
     .dy_provided_emotional_support_actor +
     .dy_provided_emotional_support_partner +
-    us(0 + .dy_is_initiator_x_partner | couple_id) +
+    us(0 + .dy_is_exchangeable | couple_id) +
     us(
-      0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+      0 + .dy_member_contrast_arbitrary | couple_id
     ),
   dispformula = ~0,
   family = gaussian(),
@@ -696,9 +696,9 @@ combined_full_formula <-
   mvpa_total ~
   .dy_provided_emotional_support_actor * (gender + signup_role) +
   .dy_provided_emotional_support_partner * (gender + signup_role) +
-  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(0 + .dy_is_exchangeable | couple_id) +
   us(
-    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+    0 + .dy_member_contrast_arbitrary | couple_id
   )
 
 # Retain the gender main effect but omit both gender slope interactions.
@@ -707,9 +707,9 @@ combined_signup_only_formula <-
   .dy_provided_emotional_support_actor * signup_role +
   .dy_provided_emotional_support_partner * signup_role +
   gender +
-  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(0 + .dy_is_exchangeable | couple_id) +
   us(
-    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+    0 + .dy_member_contrast_arbitrary | couple_id
   )
 
 # Retain the signup-position main effect but omit both position interactions.
@@ -718,9 +718,9 @@ combined_gender_only_formula <-
   .dy_provided_emotional_support_actor * gender +
   .dy_provided_emotional_support_partner * gender +
   signup_role +
-  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(0 + .dy_is_exchangeable | couple_id) +
   us(
-    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+    0 + .dy_member_contrast_arbitrary | couple_id
   )
 
 # Retain both main effects but omit all four slope interactions.
@@ -729,9 +729,9 @@ combined_no_moderation_formula <-
   .dy_provided_emotional_support_actor +
   .dy_provided_emotional_support_partner +
   gender + signup_role +
-  us(0 + .dy_is_initiator_x_partner | couple_id) +
+  us(0 + .dy_is_exchangeable | couple_id) +
   us(
-    0 + .dy_member_contrast_initiator_x_partner_arbitrary | couple_id
+    0 + .dy_member_contrast_arbitrary | couple_id
   )
 
 fit_combined_apim <- function(formula, data) {

@@ -276,6 +276,30 @@ source(
   "../../vignettes/diagram-helpers.Rinc",
   local = knitr::knit_global()
 )
+
+dharma_helper_candidates <- c(
+  file.path(
+    "tmp-dharma-validation",
+    "reference-implementation",
+    "dyad_dharma.R"
+  ),
+  file.path(
+    "dev",
+    "workshop",
+    "tmp-dharma-validation",
+    "reference-implementation",
+    "dyad_dharma.R"
+  )
+)
+dharma_helper <- dharma_helper_candidates[
+  file.exists(dharma_helper_candidates)
+][1]
+
+if (is.na(dharma_helper)) {
+  stop("Could not find the temporary dyadic DHARMa helper.", call. = FALSE)
+}
+
+source(dharma_helper, local = knitr::knit_global())
 ```
 
 ## Example: self-efficacy and MVPA {.smaller}
@@ -360,20 +384,20 @@ retains 38 female--male couples; the complete-case model uses 36.
 distinguishable_apim <- glmmTMB::glmmTMB(
   total_mvpa ~
     0 +
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
-    .dy_is_female_x_male_female:
+    .dy_is_female +
+    .dy_is_male +
+    .dy_is_female:
       .dy_self_efficacy_actor +
-    .dy_is_female_x_male_male:
+    .dy_is_male:
       .dy_self_efficacy_actor +
-    .dy_is_female_x_male_female:
+    .dy_is_female:
       .dy_self_efficacy_partner +
-    .dy_is_female_x_male_male:
+    .dy_is_male:
       .dy_self_efficacy_partner +
     us(
       0 +
-        .dy_is_female_x_male_female +
-        .dy_is_female_x_male_male |
+        .dy_is_female +
+        .dy_is_male |
         couple_id
     ),
   dispformula = ~0,
@@ -431,69 +455,47 @@ draw_apim_diagram(
 )
 ```
 
-## Residual diagnostics must preserve the pair {.smaller}
+## Dyadic residual checks answer two questions {.smaller}
 
-Each couple contributes one female--male residual vector. The model allows the
-partners to correlate through a free 2-by-2 covariance matrix; **different
-couples**, not partners, are assumed independent.
-
-**Before these plots:** verify convergence and investigate Hessian warnings
-or unexplained boundary estimates
-[@glmmTMBTroubleshooting2026; @delrosarioPracticalGuideSpecifying2025].
-
-:::: {.columns}
-
-::: {.column width="55%"}
-
-**Teach this workflow**
-
-1. Simulate both partners **jointly and unconditionally**
-2. Whiten the modeled partner covariance
-3. Use one rotated QQ plot as a global distributional screen
-4. Reuse the same simulations for role-specific predictor plots
-5. Delete whole couples to assess influence
-   [@xiangInfluenceDiagnosticsGeneralized2002]
-
-:::
-
-::: {.column width="45%"}
-
-**Do not**
-
-- Condition on the fitted dyad vector: almost no variation remains
-- Simulate female and male outcomes independently
-- Test whether partners are independent
-- Treat a non-significant diagnostic as proof of correct specification
-
-:::
-
-::::
+- **Overall shape:** Does a QQ plot adjusted for partner dependence follow the
+  diagonal?
+- **Patterns by role:** Do residual center and spread stay flat over key
+  predictors?
 
 ::: {.subtle}
-DHARMa recommends rotation when unconditional simulations retain a modeled
-residual covariance; the joint dyadic workflow shown here adapts that principle
-[@hartigDHARMaResidualDiagnostics2026].
+First make sure the model fitted without convergence warnings
+[@glmmTMBTroubleshooting2026].
 :::
 
-## One joint simulation gives the global check {.smaller}
+:::{.notes}
+
+The helper uses unconditional simulations, including new couple effects, and
+then removes the exact fitted Gaussian response covariance within each couple
+by blockwise Cholesky whitening. The global QQ coordinates should therefore not
+be plotted against the original predictors. The role plots instead reuse the
+original, unwhitened simulations. This adapts DHARMa's documented rotation
+principle using a known response-scale covariance
+[@hartigDHARMaResidualDiagnostics2026].
+
+:::
+
+## The overall residual shape looks reasonable {.smaller}
 
 :::: {.columns}
 
-::: {.column width="49%"}
+::: {.column width="40%"}
 
 ```r
-joint_residuals <- DHARMa::simulateResiduals(
+apim_checks <- simulate_dyad_dharma(
   distinguishable_apim,
+  cluster = "couple_id",
   n = 2000,
-  simulateREs = "unconditional",
-  rotation = "estimated",
-  refit = FALSE,
-  seed = 123,
-  plot = FALSE
+  seed = 123
 )
 
 DHARMa::plotQQunif(
-  joint_residuals,
+  apim_checks$joint,
+  testUniformity = FALSE,
   testDispersion = FALSE,
   testOutliers = FALSE
 )
@@ -501,39 +503,31 @@ DHARMa::plotQQunif(
 
 :::
 
-::: {.column width="51%"}
+::: {.column width="60%"}
 
 ```{r}
 #| label: plot-distinguishable-apim-global-dharma
 #| echo: false
-#| fig-width: 5.8
-#| fig-height: 4.6
-#| out-width: 100%
+#| fig-width: 6.5
+#| fig-height: 3.5
+#| out-width: 94%
 #| fig-align: center
-#| fig-alt: "Uniform quantile-quantile plot of rotated DHARMa residuals from the distinguishable APIM."
+#| fig-alt: "Uniform quantile-quantile plot of whitened DHARMa residuals from the distinguishable APIM."
 
-model_frame <- distinguishable_apim$frame
-is_female <- model_frame$.dy_is_female_x_male_female == 1
+model_frame <- stats::model.frame(distinguishable_apim)
+is_female <- model_frame$.dy_is_female == 1
 actor_efficacy <- model_frame$.dy_self_efficacy_actor
-partner_efficacy <- model_frame$.dy_self_efficacy_partner
 
-joint_residuals <- DHARMa::simulateResiduals(
+apim_checks <- simulate_dyad_dharma(
   distinguishable_apim,
+  cluster = "couple_id",
   n = 2000,
-  simulateREs = "unconditional",
-  rotation = "estimated",
-  refit = FALSE,
-  seed = 123,
-  plot = FALSE
-)
-
-joint_uniformity <- DHARMa::testUniformity(
-  joint_residuals, plot = FALSE
+  seed = 123
 )
 
 DHARMa::plotQQunif(
-  joint_residuals,
-  testUniformity = TRUE,
+  apim_checks$joint,
+  testUniformity = FALSE,
   testDispersion = FALSE,
   testOutliers = FALSE
 )
@@ -543,86 +537,54 @@ DHARMa::plotQQunif(
 
 ::::
 
-**Current fit:** no clear global deviation from the fitted joint Gaussian
-distribution (uniformity p = `r sub("^0", "", format.pval(joint_uniformity$p.value, digits = 3))`).
+- **Here:** points mostly follow the diagonal, so there is no obvious problem
+  in the overall residual shape after accounting for partner dependence.
+- **A systematic curve or tail gap:** the model may still miss a pattern; use
+  the next plots to locate it.
 
 ::: {.subtle}
-Supplying the exact fitted covariance is technically preferable; the documented
-`"estimated"` rotation is the simpler workshop default
-[@hartigDHARMaResidualDiagnostics2026].
+This is a broad screen, not proof that every part of the model is correct.
 :::
 
-## Separate roles only to inspect mean patterns {.smaller}
-
-Do not resimulate. Recalculate **unrotated marginal residuals** from the same
-joint simulations. Within each role, there is one observation per couple.
+## Role-specific plots suggest checking sparse extremes {.smaller}
 
 :::: {.columns}
 
-::: {.column width="36%"}
+::: {.column width="34%"}
 
 ```r
-female_residuals <-
-  DHARMa::recalculateResiduals(
-    joint_residuals,
-    sel = is_female,
-    rotation = NULL
-  )
-
-DHARMa::plotResiduals(
-  female_residuals,
-  form = actor_efficacy[is_female],
-  quantreg = FALSE
+plot_dyad_dharma_roles(
+  apim_checks,
+  predictor = actor_efficacy,
+  roles = list(
+    Female = is_female,
+    Male = !is_female
+  ),
+  xlab = "Actor self-efficacy"
 )
 ```
 
 :::
 
-::: {.column width="64%"}
+::: {.column width="66%"}
 
 ```{r}
 #| label: plot-distinguishable-apim-role-patterns
 #| echo: false
 #| fig-width: 8
-#| fig-height: 4.3
+#| fig-height: 4
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Four panels of unrotated role-specific DHARMa residuals over actor and partner self-efficacy."
+#| fig-alt: "Four panels showing marginal DHARMa residual center and spread patterns over actor self-efficacy, separately for female and male partners."
 
-female_residuals <- DHARMa::recalculateResiduals(
-  joint_residuals,
-  sel = is_female,
-  rotation = NULL
-)
-male_residuals <- DHARMa::recalculateResiduals(
-  joint_residuals,
-  sel = !is_female,
-  rotation = NULL
-)
-
-plot_role_pattern <- function(check, x, title) {
-  DHARMa::plotResiduals(
-    check,
-    form = x,
-    quantreg = FALSE,
-    rank = FALSE,
-    main = title
-  )
-  lines(lowess(x, residuals(check)), lwd = 2)
-}
-
-par(mfrow = c(2, 2), mar = c(3, 3, 2, 1))
-plot_role_pattern(
-  female_residuals, actor_efficacy[is_female], "Female: actor"
-)
-plot_role_pattern(
-  female_residuals, partner_efficacy[is_female], "Female: partner"
-)
-plot_role_pattern(
-  male_residuals, actor_efficacy[!is_female], "Male: actor"
-)
-plot_role_pattern(
-  male_residuals, partner_efficacy[!is_female], "Male: partner"
+plot_dyad_dharma_roles(
+  apim_checks,
+  predictor = actor_efficacy,
+  roles = list(
+    Female = is_female,
+    Male = !is_female
+  ),
+  xlab = "Actor self-efficacy"
 )
 ```
 
@@ -630,8 +592,26 @@ plot_role_pattern(
 
 ::::
 
-Use these plots to locate possible nonlinear mean patterns—not as four separate
-tests.
+- **Expected:** black smooths stay roughly horizontal near 0.5.
+- **Meaning:** a center trend suggests a missing mean pattern; a spread trend
+  suggests changing residual variance.
+- **Here:** the strongest bends are at sparse predictor extremes. Inspect those
+  couples before changing the model.
+
+::: {.subtle}
+Repeat for partner and other key predictors; focus on sustained patterns rather
+than p-values.
+:::
+
+:::{.notes}
+
+The spread score is twice the absolute distance of a DHARMa residual from 0.5.
+Under the fitted model it is also uniform, so its smooth should stay near 0.5.
+In this cross-sectional example each role panel has one row per couple. With
+intensive longitudinal data, residuals within a role can remain dependent
+across occasions, so these panels should be treated as descriptive.
+
+:::
 
 ## Influence belongs to the whole couple {.smaller}
 
@@ -659,8 +639,7 @@ beta_change <- sweep(
 max_beta_change <- apply(abs(beta_change), 1, max)
 
 deleted_vcov <- apim_influence[["var.cov.comps[-couple_id]"]]
-deleted_rho <- deleted_vcov[, 3] /
-  sqrt(deleted_vcov[, 2] * deleted_vcov[, 4])
+deleted_rho <- deleted_vcov[, 3] / sqrt(deleted_vcov[, 2] * deleted_vcov[, 4])
 full_vcov <- apim_influence[["var.cov.comps"]]
 full_rho <- full_vcov[3] / sqrt(full_vcov[2] * full_vcov[4])
 deleted_id <- as.numeric(as.character(apim_influence$deleted))

@@ -9,7 +9,8 @@ infer_dyad_compositions(
   seed = NULL,
   keep_compositions = NULL,
   set_exchangeable_compositions = NULL,
-  pool_compositions = NULL
+  pool_compositions = NULL,
+  short_colnames = TRUE
 )
 }
 \arguments{
@@ -27,6 +28,9 @@ exchangeable for analysis.}
 \item{pool_compositions}{Optional named list that pools exchangeable dyad
 compositions into user-named final composition labels. Each pool must
 resolve to at least two distinct observed compositions.}
+
+\item{short_colnames}{Whether to use shorter composition-dependent generated
+column names when the final data contain one composition.}
 }
 \value{
 A \code{dyadMLM_data} object with added \code{.dy_composition} and

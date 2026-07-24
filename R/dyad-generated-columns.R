@@ -16,7 +16,13 @@ dyad_generated_columns <- function(meta) {
     return(empty_generated_columns())
   }
 
-  attach_generated_column_specs(columns)
+  columns <- attach_generated_column_specs(columns)
+  # This metadata field records the naming style actually used after
+  # composition filtering, not merely the value requested by the user.
+  if (isTRUE(meta$short_colnames)) {
+    columns$column_pattern <- columns$short_column_pattern
+  }
+  columns
 }
 
 # Validate a complete stage-level table of proposed generated columns before
@@ -127,6 +133,7 @@ empty_generated_columns <- function() {
     column_centering = character(),
     print_order = integer(),
     column_pattern = character(),
+    short_column_pattern = character(),
     description = character()
   )
 }
@@ -208,6 +215,7 @@ attach_generated_column_specs <- function(columns) {
     "column_centering",
     "print_order",
     "column_pattern",
+    "short_column_pattern",
     "description"
   )
   missing_spec <- !stats::complete.cases(out[spec_cols])
@@ -231,6 +239,11 @@ attach_generated_column_specs <- function(columns) {
     "_lag",
     out$lag[is_lagged]
   )
+  out$short_column_pattern[is_lagged] <- paste0(
+    out$short_column_pattern[is_lagged],
+    "_lag",
+    out$lag[is_lagged]
+  )
   out$description[is_lagged] <- paste0(
     "lag-",
     out$lag[is_lagged],
@@ -242,33 +255,41 @@ attach_generated_column_specs <- function(columns) {
 }
 
 generated_column_spec_lookup <- function() {
-  tibble::tribble(
-    ~model_family,    ~variable_role, ~component, ~column_role,              ~temporal_decomposition,      ~dyadic_decomposition,      ~column_centering, ~print_order, ~column_pattern,                         ~description,
-    "composition",    "composition",  "none",     "composition",             "none",                       "none",                     "none",            1L,           ".dy_composition",                            "inferred dyad composition",
-    "composition",    "composition_role", "none", "composition_role",        "none",                       "none",                     "none",            2L,           ".dy_composition_role",                       "composition-specific member role",
-    "composition",    "composition_role", "none", "composition_indicator",   "none",                       "none",                     "none",            3L,           ".dy_is_{comp-role}",                         "composition-role indicator columns",
-    "composition",    "composition",  "none",     "member_contrast",         "none",                       "none",                     "none",            4L,           ".dy_member_contrast_{comp}_arbitrary",       "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions",
-    "temporal",       "predictor",    "raw",      "temporal_component",      "none",                       "none",                     "none",            7L,           ".dy_{pred}",                                 "raw predictor values",
-    "temporal",       "predictor",    "cwp",      "temporal_component",      "within_person",              "none",                     "none",            8L,           ".dy_{pred}_cwp",                             "within-person predictor: momentary deviations from each person's usual level",
-    "temporal",       "predictor",    "cbp",      "temporal_component",      "between_person_grand_mean",  "none",                     "none",            9L,           ".dy_{pred}_cbp",                             "between-person predictor: stable differences from the average person's usual level",
-    "apim",           "predictor",    "raw",      "actor",                  "none",                       "none",                     "none",            10L,          ".dy_{pred}_actor",                       "APIM actor predictor: actor's original predictor values",
-    "apim",           "predictor",    "raw",      "partner",                "none",                       "none",                     "none",            11L,          ".dy_{pred}_partner",                     "APIM partner predictor: partner's original predictor values",
-    "apim",           "predictor",    "cwp",      "actor",                  "within_person",              "none",                     "none",            12L,          ".dy_{pred}_cwp_actor",                       "APIM within-person actor predictor: actor's momentary deviations from their usual level",
-    "apim",           "predictor",    "cwp",      "partner",                "within_person",              "none",                     "none",            13L,          ".dy_{pred}_cwp_partner",                     "APIM within-person partner predictor: partner's momentary deviations from their usual level",
-    "apim",           "predictor",    "cbp",      "actor",                  "between_person_grand_mean",  "none",                     "none",            14L,          ".dy_{pred}_cbp_actor",                       "APIM between-person actor predictor: actor's stable difference from the average person's usual level",
-    "apim",           "predictor",    "cbp",      "partner",                "between_person_grand_mean",  "none",                     "none",            15L,          ".dy_{pred}_cbp_partner",                     "APIM between-person partner predictor: partner's stable difference from the average person's usual level",
-    "dsm",            "role",         "raw",      "role_contrast",          "none",                       "role_contrast",            "none",            19L,          ".dy_dsm_role_contrast",                   "DSM role contrast: +0.5 for the first declared role and -0.5 for the second declared role",
-    "dim",            "predictor",    "raw",      "dyad_mean",              "none",                       "dyad_mean",                "grand_mean",      20L,          ".dy_{pred}_dyad_mean_gmc",               "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
-    "dim",            "predictor",    "raw",      "within_dyad_deviation",  "none",                       "within_dyad_deviation",    "none",            21L,          ".dy_{pred}_within_dyad_dev",             "DIM within-dyad member-deviation predictor: member's difference from the dyad mean",
-    "dim",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".dy_{pred}_cwp_dyad_mean",                   "within-person dyad-mean predictor: shared momentary deviations in the dyad",
-    "dim",            "predictor",    "cwp",      "within_dyad_deviation",  "within_person",              "within_dyad_deviation",    "none",            23L,          ".dy_{pred}_cwp_within_dyad_dev",         "DIM within-person, within-dyad member-deviation predictor: member's momentary deviation from the dyad mean",
-    "dim",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".dy_{pred}_cbp_dyad_mean",                   "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
-    "dim",            "predictor",    "cbp",      "within_dyad_deviation",  "between_person_grand_mean",  "within_dyad_deviation",    "none",            25L,          ".dy_{pred}_cbp_within_dyad_dev",         "DIM between-person, within-dyad member-deviation predictor: member's stable difference from the dyad's usual level",
-    "dsm",            "predictor",    "raw",      "dyad_mean",              "none",                       "dyad_mean",                "grand_mean",      20L,          ".dy_{pred}_dyad_mean_gmc",                   "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
-    "dsm",            "predictor",    "raw",      "dyad_difference",        "none",                       "dyad_difference",          "none",            21L,          ".dy_{pred}_within_dyad_diff",            "DSM signed predictor difference: first declared role minus second declared role",
-    "dsm",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".dy_{pred}_cwp_dyad_mean",                   "within-person dyad-mean predictor: shared momentary deviations in the dyad",
-    "dsm",            "predictor",    "cwp",      "dyad_difference",        "within_person",              "dyad_difference",          "none",            23L,          ".dy_{pred}_cwp_within_dyad_diff",        "DSM within-person signed predictor difference: first declared role minus second declared role",
-    "dsm",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".dy_{pred}_cbp_dyad_mean",                   "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
-    "dsm",            "predictor",    "cbp",      "dyad_difference",        "between_person_grand_mean",  "dyad_difference",          "none",            25L,          ".dy_{pred}_cbp_within_dyad_diff",        "DSM between-person signed predictor difference: first declared role minus second declared role"
+  column_specs <- tibble::tribble(
+    ~model_family,    ~variable_role, ~component, ~column_role,              ~temporal_decomposition,      ~dyadic_decomposition,      ~column_centering, ~print_order, ~column_pattern,                         ~short_column_pattern,                                      ~description,
+    "composition",    "composition",  "none",     "composition",             "none",                       "none",                     "none",            1L,           ".dy_composition",                            NA_character_,                                               "inferred dyad composition",
+    "composition",    "composition_role", "none", "composition_role",        "none",                       "none",                     "none",            2L,           ".dy_composition_role",                       NA_character_,                                               "composition-specific member role",
+    "composition",    "composition_role", "none", "composition_indicator",   "none",                       "none",                     "none",            3L,           ".dy_is_{comp-role}",                         paste0(dyad_short_prefix, "is_{role}"),                      "composition-role indicator columns",
+    "composition",    "composition",  "none",     "member_contrast",         "none",                       "none",                     "none",            4L,           ".dy_member_contrast_{comp}_arbitrary",       paste0(dyad_short_prefix, "member_contrast_arbitrary"),      "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions",
+    "temporal",       "predictor",    "raw",      "temporal_component",      "none",                       "none",                     "none",            7L,           ".dy_{pred}",                                 NA_character_,                                               "raw predictor values",
+    "temporal",       "predictor",    "cwp",      "temporal_component",      "within_person",              "none",                     "none",            8L,           ".dy_{pred}_cwp",                             NA_character_,                                               "within-person predictor: momentary deviations from each person's usual level",
+    "temporal",       "predictor",    "cbp",      "temporal_component",      "between_person_grand_mean",  "none",                     "none",            9L,           ".dy_{pred}_cbp",                             NA_character_,                                               "between-person predictor: stable differences from the average person's usual level",
+    "apim",           "predictor",    "raw",      "actor",                  "none",                       "none",                     "none",            10L,          ".dy_{pred}_actor",                           NA_character_,                                               "APIM actor predictor: actor's original predictor values",
+    "apim",           "predictor",    "raw",      "partner",                "none",                       "none",                     "none",            11L,          ".dy_{pred}_partner",                         NA_character_,                                               "APIM partner predictor: partner's original predictor values",
+    "apim",           "predictor",    "cwp",      "actor",                  "within_person",              "none",                     "none",            12L,          ".dy_{pred}_cwp_actor",                       NA_character_,                                               "APIM within-person actor predictor: actor's momentary deviations from their usual level",
+    "apim",           "predictor",    "cwp",      "partner",                "within_person",              "none",                     "none",            13L,          ".dy_{pred}_cwp_partner",                     NA_character_,                                               "APIM within-person partner predictor: partner's momentary deviations from their usual level",
+    "apim",           "predictor",    "cbp",      "actor",                  "between_person_grand_mean",  "none",                     "none",            14L,          ".dy_{pred}_cbp_actor",                       NA_character_,                                               "APIM between-person actor predictor: actor's stable difference from the average person's usual level",
+    "apim",           "predictor",    "cbp",      "partner",                "between_person_grand_mean",  "none",                     "none",            15L,          ".dy_{pred}_cbp_partner",                     NA_character_,                                               "APIM between-person partner predictor: partner's stable difference from the average person's usual level",
+    "dsm",            "role",         "raw",      "role_contrast",          "none",                       "role_contrast",            "none",            19L,          ".dy_dsm_role_contrast",                      NA_character_,                                               "DSM role contrast: +0.5 for the first declared role and -0.5 for the second declared role",
+    "dim",            "predictor",    "raw",      "dyad_mean",              "none",                       "dyad_mean",                "grand_mean",      20L,          ".dy_{pred}_dyad_mean_gmc",                   NA_character_,                                               "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
+    "dim",            "predictor",    "raw",      "within_dyad_deviation",  "none",                       "within_dyad_deviation",    "none",            21L,          ".dy_{pred}_within_dyad_dev",                 NA_character_,                                               "DIM within-dyad member-deviation predictor: member's difference from the dyad mean",
+    "dim",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".dy_{pred}_cwp_dyad_mean",                   NA_character_,                                               "within-person dyad-mean predictor: shared momentary deviations in the dyad",
+    "dim",            "predictor",    "cwp",      "within_dyad_deviation",  "within_person",              "within_dyad_deviation",    "none",            23L,          ".dy_{pred}_cwp_within_dyad_dev",             NA_character_,                                               "DIM within-person, within-dyad member-deviation predictor: member's momentary deviation from the dyad mean",
+    "dim",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".dy_{pred}_cbp_dyad_mean",                   NA_character_,                                               "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
+    "dim",            "predictor",    "cbp",      "within_dyad_deviation",  "between_person_grand_mean",  "within_dyad_deviation",    "none",            25L,          ".dy_{pred}_cbp_within_dyad_dev",             NA_character_,                                               "DIM between-person, within-dyad member-deviation predictor: member's stable difference from the dyad's usual level",
+    "dsm",            "predictor",    "raw",      "dyad_mean",              "none",                       "dyad_mean",                "grand_mean",      20L,          ".dy_{pred}_dyad_mean_gmc",                   NA_character_,                                               "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
+    "dsm",            "predictor",    "raw",      "dyad_difference",        "none",                       "dyad_difference",          "none",            21L,          ".dy_{pred}_within_dyad_diff",                NA_character_,                                               "DSM signed predictor difference: first declared role minus second declared role",
+    "dsm",            "predictor",    "cwp",      "dyad_mean",              "within_person",              "dyad_mean",                "none",            22L,          ".dy_{pred}_cwp_dyad_mean",                   NA_character_,                                               "within-person dyad-mean predictor: shared momentary deviations in the dyad",
+    "dsm",            "predictor",    "cwp",      "dyad_difference",        "within_person",              "dyad_difference",          "none",            23L,          ".dy_{pred}_cwp_within_dyad_diff",            NA_character_,                                               "DSM within-person signed predictor difference: first declared role minus second declared role",
+    "dsm",            "predictor",    "cbp",      "dyad_mean",              "between_person_grand_mean",  "dyad_mean",                "none",            24L,          ".dy_{pred}_cbp_dyad_mean",                   NA_character_,                                               "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered",
+    "dsm",            "predictor",    "cbp",      "dyad_difference",        "between_person_grand_mean",  "dyad_difference",          "none",            25L,          ".dy_{pred}_cbp_within_dyad_diff",            NA_character_,                                               "DSM between-person signed predictor difference: first declared role minus second declared role"
   )
+
+  # `NA` marks rows whose short pattern is identical to the regular pattern.
+  column_specs$short_column_pattern <- dplyr::coalesce(
+    column_specs$short_column_pattern,
+    column_specs$column_pattern
+  )
+
+  column_specs
 }

@@ -132,12 +132,18 @@ test_that("dyadMLM data print describes generated predictor columns", {
   )
 
   printed <- capture_wide_print(result)
+  short_indicator_pattern <- paste0(dyad_short_prefix, "is_{role}")
+  short_member_contrast_pattern <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
 
   expect_false(any(grepl("sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_member_contrast_{comp}", printed, fixed = TRUE)))
+  expect_true(any(grepl(short_indicator_pattern, printed, fixed = TRUE)))
+  expect_true(any(grepl(short_member_contrast_pattern, printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_member_contrast_{comp}_arbitrary",
+    short_member_contrast_pattern,
     "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
   )
   expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
@@ -192,10 +198,18 @@ test_that("dyadMLM data print does not describe removed generated model column f
   result$.dy_x_actor <- NULL
 
   printed <- capture_wide_print(result)
+  short_member_contrast_pattern <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
 
   expect_false(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
   expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_member_contrast_{comp}", printed, fixed = TRUE)))
+  expect_true(any(grepl(
+    short_member_contrast_pattern,
+    printed,
+    fixed = TRUE
+  )))
 })
 
 test_that("dyadMLM data print describes longitudinal APIM columns", {

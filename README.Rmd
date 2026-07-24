@@ -100,19 +100,19 @@ simple_apim <- glmmTMB::glmmTMB(
   closeness ~
 
     # Gender-specific intercepts
-    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
+    0 + .dy_is_female + .dy_is_male +
 
     # Gender-specific actor effects
-    .dy_provided_support_actor:.dy_is_female_x_male_female +
-    .dy_provided_support_actor:.dy_is_female_x_male_male +
+    .dy_provided_support_actor:.dy_is_female +
+    .dy_provided_support_actor:.dy_is_male +
 
     # Gender-specific partner effects
-    .dy_provided_support_partner:.dy_is_female_x_male_female +
-    .dy_provided_support_partner:.dy_is_female_x_male_male +
+    .dy_provided_support_partner:.dy_is_female +
+    .dy_provided_support_partner:.dy_is_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure
-    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID),
+    us(0 + .dy_is_female + .dy_is_male | coupleID),
 
   # With the residual covariance represented by the dyad-level
   # random effects above, the Gaussian residual dispersion is fixed near zero.

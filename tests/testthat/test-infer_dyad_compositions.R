@@ -137,12 +137,18 @@ test_that("infer_dyad_compositions can set distinguishable compositions exchange
     set_exchangeable_compositions = "male-female"
   )
 
-  expect_true(".dy_is_female_x_male" %in% names(result))
+  exchangeable_indicator <- paste0(dyad_short_prefix, "is_exchangeable")
+  short_member_contrast <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
+
+  expect_true(exchangeable_indicator %in% names(result))
   expect_false(".dy_is_female_x_male_female" %in% names(result))
   expect_false(".dy_is_female_x_male_male" %in% names(result))
-  expect_true(".dy_member_contrast_female_x_male_arbitrary" %in% names(result))
+  expect_true(short_member_contrast %in% names(result))
   expect_false(".dy_member_contrast_female_x_male" %in% names(result))
-  expect_equal(abs(result$.dy_member_contrast_female_x_male_arbitrary), rep(1, 4))
+  expect_equal(abs(result[[short_member_contrast]]), rep(1, 4))
   expect_equal(as.character(result$.dy_composition), rep("female_x_male", 4))
   expect_equal(as.character(result$.dy_composition_role), rep("female_x_male", 4))
   expect_equal(
@@ -246,8 +252,10 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
       pool_compositions = list(same_sex = c("female-female", "male male"))
     )
 
-  expect_true(".dy_is_same_sex" %in% names(result))
-  expect_true(".dy_member_contrast_same_sex_arbitrary" %in% names(result))
+  expect_true(paste0(dyad_short_prefix, "is_exchangeable") %in% names(result))
+  expect_true(
+    paste0(dyad_short_prefix, "member_contrast_arbitrary") %in% names(result)
+  )
   expect_false(".dy_member_contrast_same_sex" %in% names(result))
   expect_false(".dy_member_contrast_female_x_female_arbitrary" %in% names(result))
   expect_false(".dy_member_contrast_male_x_male_arbitrary" %in% names(result))
@@ -266,7 +274,7 @@ test_that("infer_dyad_compositions pools exchangeable compositions", {
   )
 })
 
-test_that("role-aware pools named assumed_exchangeable retain composition-specific naming", {
+test_that("compact names do not depend on a pooled composition label", {
   data <- data.frame(
     dyad_id = c(1, 1, 2, 2),
     person_id = c("A", "B", "C", "D"),
@@ -286,10 +294,17 @@ test_that("role-aware pools named assumed_exchangeable retain composition-specif
       )
     )
 
-  expect_true(".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(result))
-  expect_false(".dy_member_contrast_arbitrary" %in% names(result))
+  short_member_contrast <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
+
+  expect_true(short_member_contrast %in% names(result))
+  expect_false(
+    ".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(result)
+  )
   expect_equal(
-    abs(result$.dy_member_contrast_assumed_exchangeable_arbitrary),
+    abs(result[[short_member_contrast]]),
     rep(1, 4)
   )
 })
@@ -364,8 +379,10 @@ test_that("infer_dyad_compositions pools after setting compositions exchangeable
     "female_x_female, female_x_male, male_x_male"
   )
   expect_equal(dyad_compositions$n_dyads, 3L)
-  expect_true(".dy_is_romantic_couples" %in% names(result))
-  expect_true(".dy_member_contrast_romantic_couples_arbitrary" %in% names(result))
+  expect_true(paste0(dyad_short_prefix, "is_exchangeable") %in% names(result))
+  expect_true(
+    paste0(dyad_short_prefix, "member_contrast_arbitrary") %in% names(result)
+  )
   expect_false(".dy_member_contrast_romantic_couples" %in% names(result))
 })
 
@@ -645,8 +662,12 @@ test_that("infer_dyad_compositions creates formula-friendly indicator names", {
 
   result <- infer_dyad_compositions(validated, seed = 123)
 
-  expect_true(".dy_is_female_partner_x_male_partner_female_partner" %in% names(result))
-  expect_true(".dy_is_female_partner_x_male_partner_male_partner" %in% names(result))
+  expect_true(
+    paste0(dyad_short_prefix, "is_female_partner") %in% names(result)
+  )
+  expect_true(
+    paste0(dyad_short_prefix, "is_male_partner") %in% names(result)
+  )
 })
 
 test_that("infer_dyad_compositions rejects generated indicator name collisions", {
@@ -683,12 +704,20 @@ test_that("infer_dyad_compositions treats missing role metadata as unclassified"
   expect_false(".dy_arbitrary_role" %in% names(result))
   expect_true(is.factor(result$.dy_composition))
   expect_true(is.factor(result$.dy_composition_role))
-  expect_true(".dy_is_assumed_exchangeable" %in% names(result))
-  expect_true(".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(result))
-  expect_false(".dy_member_contrast_arbitrary" %in% names(result))
+  short_member_contrast <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
+  expect_true(
+    paste0(dyad_short_prefix, "is_exchangeable") %in% names(result)
+  )
+  expect_true(short_member_contrast %in% names(result))
+  expect_false(
+    ".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(result)
+  )
   expect_false(".dy_member_contrast_assumed_exchangeable" %in% names(result))
   expect_false(dyad_diff_col %in% names(result))
-  expect_equal(abs(result$.dy_member_contrast_assumed_exchangeable_arbitrary), rep(1, 4))
+  expect_equal(abs(result[[short_member_contrast]]), rep(1, 4))
   expect_equal(
     as.character(result$.dy_composition),
     rep("assumed_exchangeable", 4)

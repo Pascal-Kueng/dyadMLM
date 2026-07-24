@@ -1,6 +1,7 @@
 non_composition_generated_columns <- function(prepared) {
   dyad_generated_columns(attr(prepared, "dyadMLM")) |>
-    dplyr::filter(.data$model_family != "composition")
+    dplyr::filter(.data$model_family != "composition") |>
+    dplyr::select(-"short_column_pattern")
 }
 
 test_that("dyad_generated_columns returns empty metadata without model columns", {
@@ -76,6 +77,14 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
   )
 
   result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  short_composition_indicator <- paste0(
+    dyad_short_prefix,
+    "is_exchangeable"
+  )
+  short_member_contrast <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
 
   composition_columns <- result |>
     dplyr::arrange(.data$print_order) |>
@@ -92,8 +101,8 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
       column = c(
         ".dy_composition",
         ".dy_composition_role",
-        ".dy_is_assumed_exchangeable",
-        ".dy_member_contrast_assumed_exchangeable_arbitrary"
+        short_composition_indicator,
+        short_member_contrast
       ),
       print_order = 1:4
     )
@@ -104,7 +113,8 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
     dplyr::select(
       "model_family", "variable_role", "component", "lag",
       "source_column", "temporal_decomposition", "dyadic_decomposition",
-      "column_centering", "print_order", "column_pattern"
+      "column_centering", "print_order", "column_pattern",
+      "short_column_pattern"
     )
   expect_equal(
     member_contrast,
@@ -118,8 +128,30 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
       dyadic_decomposition = "none",
       column_centering = "none",
       print_order = 4L,
-      column_pattern = ".dy_member_contrast_{comp}_arbitrary"
+      column_pattern = short_member_contrast,
+      short_column_pattern = short_member_contrast
     )
+  )
+
+  long_prepared <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    model_types = "none",
+    short_colnames = FALSE,
+    seed = 123
+  )
+  long_result <- dyad_generated_columns(attr(long_prepared, "dyadMLM"))
+
+  expect_equal(
+    long_result$column[long_result$column_role == "member_contrast"],
+    ".dy_member_contrast_assumed_exchangeable_arbitrary"
+  )
+  expect_equal(
+    long_result$column_pattern[
+      long_result$column_role == "member_contrast"
+    ],
+    ".dy_member_contrast_{comp}_arbitrary"
   )
 })
 

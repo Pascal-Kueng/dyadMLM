@@ -98,12 +98,18 @@
 #'   `role` column is supplied.
 #' @param seed Optional seed for random `.dy_member_contrast_*` sign assignment
 #'   in exchangeable dyads. If `NULL`, the current R session's RNG state is used.
+#' @param short_colnames Whether to use shorter composition-dependent generated
+#'   column names when the final data contain one composition. The default `TRUE`
+#'   omits the redundant composition label from `.dy_is_*` and
+#'   `.dy_member_contrast_*` names. `FALSE` always retains composition-qualified
+#'   names. Other generated column names are unaffected.
 #'
 #' @return The original data as a tibble with class `dyadMLM_data`,
 #'   `.dy_composition` and `.dy_composition_role` factor columns,
-#'   `.dy_is_*` numeric indicator columns, composition-specific
-#'   numeric `.dy_member_contrast_*` columns coded `-1` and `1` for the two
-#'   members of matching exchangeable dyads and `0` otherwise, and a `dyadMLM`
+#'   `.dy_is_*` numeric indicator columns, and numeric
+#'   `.dy_member_contrast_*` columns coded `-1` and `1` for the two members of
+#'   matching exchangeable dyads and `0` otherwise. With one final composition,
+#'   their default names omit the composition label. The `dyadMLM`
 #'   attribute containing structural metadata, `dyad_compositions`, and
 #'   predictor metadata such as `temporal_decompositions`, `lag1_predictors`,
 #'   `apim_predictors`, and `dim_predictors`, as well as `dsm_predictors` and
@@ -181,7 +187,8 @@ prepare_dyad_data <- function(
     pool_compositions = NULL,
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
-    seed = NULL
+    seed = NULL,
+    short_colnames = TRUE
   ) {
 
   model_types <- normalize_model_types(model_types)
@@ -209,7 +216,8 @@ prepare_dyad_data <- function(
     seed = seed,
     keep_compositions = keep_compositions,
     set_exchangeable_compositions = set_exchangeable_compositions,
-    pool_compositions = pool_compositions
+    pool_compositions = pool_compositions,
+    short_colnames = short_colnames
   )
 
   # Validate model compatibilities

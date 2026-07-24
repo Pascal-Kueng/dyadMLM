@@ -31,9 +31,10 @@
 #'     an ordinary intercept is the shared intercept coordinate.
 #'
 #' @details
-#' Automatic matching recognizes exact `.dy_member_contrast_*_arbitrary` and
-#' legacy `.dy_diff_*_arbitrary` coefficient names
-#' and first looks for the corresponding `.dy_is_*` shared block. It requires
+#' Automatic matching recognizes the compact `.dy_member_contrast_arbitrary`,
+#' composition-qualified `.dy_member_contrast_*_arbitrary`, and legacy
+#' `.dy_diff_*_arbitrary` coefficient names and first looks for the
+#' corresponding `.dy_is_*` shared block. It requires
 #' the two blocks to use the same grouping factor and the same underlying
 #' terms. Most models fitted with `dyadMLM`-generated columns therefore need
 #' only:
@@ -69,15 +70,15 @@
 #'   block_pairings = list(
 #'     dyad = list(
 #'       shared_block = "(1 + diaryday | coupleID)",
-#'       difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)",
+#'       difference_block = "(0 + .dy_member_contrast_arbitrary | coupleID)",
 #'       difference_indicator =
-#'         ".dy_member_contrast_assumed_exchangeable_arbitrary"
+#'         ".dy_member_contrast_arbitrary"
 #'     ),
 #'     same_occasion = list(
 #'       shared_block = "(1 | coupleID:diaryday)",
-#'       difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)",
+#'       difference_block = "(0 + .dy_member_contrast_arbitrary | coupleID:diaryday)",
 #'       difference_indicator =
-#'         ".dy_member_contrast_assumed_exchangeable_arbitrary"
+#'         ".dy_member_contrast_arbitrary"
 #'     )
 #'   )
 #' )
@@ -192,7 +193,7 @@
 #'   model <- glmmTMB::glmmTMB(
 #'     closeness ~ 1 +
 #'       us(1 | coupleID) +
-#'       us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID),
+#'       us(0 + .dy_member_contrast_arbitrary | coupleID),
 #'     dispformula = ~ 0,
 #'     data = example_data
 #'   )
@@ -620,6 +621,19 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
   return(terms)
 }
 
+is_generated_exchangeable_difference_indicator <- function(column_names) {
+  column_specs <- generated_column_spec_lookup()
+  short_member_contrast_pattern <- column_specs$short_column_pattern[
+    column_specs$model_family == "composition" &
+      column_specs$column_role == "member_contrast"
+  ]
+
+  # The compact name is exact; qualified current and legacy names include a
+  # composition suffix.
+  column_names %in% short_member_contrast_pattern |
+    grepl("^\\.dy_(member_contrast|diff)_.+_arbitrary$", column_names)
+}
+
 find_exchangeable_difference_indicator <- function(coefficients) {
   variables <- character()
   for (coefficient in coefficients) {
@@ -628,11 +642,9 @@ find_exchangeable_difference_indicator <- function(coefficients) {
       parse_exchangeable_coefficient(coefficient)$variables
     )
   }
-  generated_indicators <- unique(grep(
-    "^\\.dy_(member_contrast|diff)_.+_arbitrary$",
-    variables,
-    value = TRUE
-  ))
+  generated_indicators <- unique(
+    variables[is_generated_exchangeable_difference_indicator(variables)]
+  )
 
   if (length(generated_indicators) > 1L) {
     stop(
@@ -779,7 +791,8 @@ validate_exchangeable_coding <- function(
 
   # 6. Generated indicators are stable by construction. For a custom
   # indicator supplied through `block_pairings`, also check its selected grouping level.
-  if (grepl("^\\.dy_(member_contrast|diff)_.+_arbitrary$", idiff) || is.null(group_name)) {
+  if (is_generated_exchangeable_difference_indicator(idiff) ||
+      is.null(group_name)) {
     return(invisible(NULL))
   }
   if (is.null(group_ids) ||
@@ -1105,7 +1118,9 @@ match_exchangeable_residual_blocks <- function(
   )
   if (length(difference_indicators) == 0L) {
     stop(
-      "No supported `.dy_member_contrast_*_arbitrary` or legacy `.dy_diff_*_arbitrary` difference block was found.",
+      "No supported `.dy_member_contrast_arbitrary`, ",
+      "`.dy_member_contrast_*_arbitrary`, or legacy `.dy_diff_*_arbitrary` ",
+      "difference block was found.",
       " Supply `block_pairings` explicitly if the model uses custom ",
       "difference-indicator names or unequal shared and difference term sets.",
       format_exchangeable_block_inventory(blocks),
@@ -1113,17 +1128,40 @@ match_exchangeable_residual_blocks <- function(
     )
   }
 
-  # 2. Match every discovered composition independently. An ordinary shared
-  # intercept is a safe fallback only when there is one exchangeable type.
+  # 2. Match each discovered difference indicator independently. An ordinary
+  # shared intercept is a safe fallback only when there is one such indicator.
   matched_pairs <- list()
+  column_specs <- generated_column_spec_lookup()
+  short_member_contrast_pattern <- column_specs$short_column_pattern[
+    column_specs$model_family == "composition" &
+      column_specs$column_role == "member_contrast"
+  ]
+  short_composition_indicator_pattern <- column_specs$short_column_pattern[
+    column_specs$model_family == "composition" &
+      column_specs$column_role == "composition_indicator"
+  ]
+
   for (idiff in difference_indicators) {
-    composition <- sub("^\\.dy_member_contrast_", "", idiff)
-    composition <- sub("^\\.dy_diff_", "", composition)
-    composition <- sub("_arbitrary$", "", composition)
+    if (identical(idiff, short_member_contrast_pattern)) {
+      # A compact member contrast can only represent one exchangeable
+      # composition, whose compact shared indicator uses "exchangeable".
+      shared_indicator <- sub(
+        "{role}",
+        "exchangeable",
+        short_composition_indicator_pattern,
+        fixed = TRUE
+      )
+    } else {
+      composition <- sub("^\\.dy_member_contrast_", "", idiff)
+      composition <- sub("^\\.dy_diff_", "", composition)
+      composition <- sub("_arbitrary$", "", composition)
+      shared_indicator <- paste0(".dy_is_", composition)
+    }
+
     indicator_pairs <- match_blocks_for_exchangeable_indicator(
       blocks,
       idiff,
-      shared_indicator = paste0(".dy_is_", composition),
+      shared_indicator = shared_indicator,
       fallback_indicator = if (length(difference_indicators) == 1L) "1" else NULL,
       model_frame = model_frame
     )

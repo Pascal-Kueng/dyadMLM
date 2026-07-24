@@ -89,16 +89,16 @@ nbinom_distinguishable_data$.dy_stress_partner <-
 nbinom_distinguishable_model <- glmmTMB::glmmTMB(
   conflict_count ~ 0 +
     # Role-specific intercepts
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
+    .dy_is_female +
+    .dy_is_male +
 
     # Role-specific actor effects of stress
-    .dy_is_female_x_male_female:.dy_stress_actor +
-    .dy_is_female_x_male_male:.dy_stress_actor +
+    .dy_is_female:.dy_stress_actor +
+    .dy_is_male:.dy_stress_actor +
 
     # Role-specific partner effects of stress
-    .dy_is_female_x_male_female:.dy_stress_partner +
-    .dy_is_female_x_male_male:.dy_stress_partner +
+    .dy_is_female:.dy_stress_partner +
+    .dy_is_male:.dy_stress_partner +
 
     # Shared latent dyad effect for stable non-independence
     (1 | coupleID),
@@ -160,7 +160,7 @@ nbinom_exchangeable_model <- glmmTMB::glmmTMB(
 
     # Exchangeable latent dyad covariance on the log-mean scale
     (1 | coupleID) +
-    (0 + .dy_member_contrast_male_x_male_arbitrary | coupleID),
+    (0 + .dy_member_contrast_arbitrary | coupleID),
   family = glmmTMB::nbinom2(link = "log"),
   data = nbinom_exchangeable_data
 )

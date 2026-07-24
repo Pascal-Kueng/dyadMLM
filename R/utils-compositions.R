@@ -14,6 +14,10 @@ dyad_assumed_exchangeable_label <- "assumed_exchangeable"
 # Prefix to be used for package-owned / reserved columns.
 dyad_reserved_prefix <- ".dy_"
 
+# Prefix for shortened composition-dependent columns. Keeping this separate
+# makes the compact naming style easy to change without touching construction.
+dyad_short_prefix <- ".dy_"
+
 # Package generated columns will use the following names consistently
 dyad_composition_col <- paste0(dyad_reserved_prefix, "composition")
 dyad_composition_role_col <- paste0(dyad_reserved_prefix, "composition_role")

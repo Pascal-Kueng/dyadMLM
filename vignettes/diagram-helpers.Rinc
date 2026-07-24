@@ -448,7 +448,10 @@ rm(
       .diagram_resolve_term(
         fixed_names, terms[[parameter]],
         function(term) {
-          role_match <- grepl(paste0("\\.dy_is_.*_", role, "($|:)"), term)
+          role_match <- grepl(
+            paste0("\\.dy_is_(.*_)?", role, "($|:)"),
+            term
+          )
           if (is.null(field)) {
             return(role_match && !grepl(":", term))
           }
@@ -469,12 +472,12 @@ rm(
     )
     random_female <- .diagram_resolve_term(
       components$random_terms, terms$random_female,
-      function(term) grepl("\\.dy_is_.*_female$", term),
+      function(term) grepl("\\.dy_is_(.*_)?female$", term),
       "random_female", "random-effect"
     )
     random_male <- .diagram_resolve_term(
       components$random_terms, terms$random_male,
-      function(term) grepl("\\.dy_is_.*_male$", term),
+      function(term) grepl("\\.dy_is_(.*_)?male$", term),
       "random_male", "random-effect"
     )
 

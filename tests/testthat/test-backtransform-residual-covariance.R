@@ -413,6 +413,25 @@ test_that("automatic matching aligns groups and coefficient order", {
   }
 })
 
+test_that("automatic matching recognizes compact exchangeable columns", {
+  shared_indicator <- paste0(dyad_short_prefix, "is_exchangeable")
+  difference_indicator <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
+  blocks <- list(
+    rescov_test_block("coupleID", shared_indicator, "shared"),
+    rescov_test_block("coupleID", difference_indicator, "difference")
+  )
+
+  pair <- match_exchangeable_residual_blocks(blocks)[[1L]]
+
+  expect_equal(pair$shared_block_index, 1L)
+  expect_equal(pair$difference_block_index, 2L)
+  expect_equal(pair$shared_indicator, shared_indicator)
+  expect_equal(pair$difference_indicator, difference_indicator)
+})
+
 test_that("automatic matching handles compositions and grouping levels", {
   same_idiff <- ".dy_member_contrast_same_sex_arbitrary"
   friend_idiff <- ".dy_member_contrast_friends_arbitrary"
@@ -1424,6 +1443,18 @@ test_that("fitted-row validation protects the exchangeable coding", {
     data.frame(IDIFF = c(-1, 1)),
     "IDIFF",
     "1"
+  ))
+  short_member_contrast <- paste0(
+    dyad_short_prefix,
+    "member_contrast_arbitrary"
+  )
+  short_coding_data <- data.frame(value = c(-1, 1))
+  names(short_coding_data) <- short_member_contrast
+  expect_no_warning(validate_exchangeable_coding(
+    short_coding_data,
+    short_member_contrast,
+    "1",
+    group_name = "coupleID"
   ))
   expect_warning(
     validate_exchangeable_coding(

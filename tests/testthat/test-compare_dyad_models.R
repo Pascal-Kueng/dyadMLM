@@ -246,7 +246,8 @@ test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
     role = gender,
     predictors = provided_support,
     model_types = c("apim", "dsm"),
-    dsm_role_order = c("female", "male")
+    dsm_role_order = c("female", "male"),
+    short_colnames = FALSE
   )
   exchangeable_data <- prepare_dyad_data(
     comparison_female_male_cross_dyads,
@@ -256,6 +257,7 @@ test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
     predictors = provided_support,
     model_types = c("apim", "dim"),
     set_exchangeable_compositions = "female-male",
+    short_colnames = FALSE,
     seed = 123
   )
 

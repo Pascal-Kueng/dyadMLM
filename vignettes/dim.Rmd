@@ -171,7 +171,7 @@ draw_dim_member_diagram()
 The resulting estimated fixed effects are a reparameterization of the APIM actor
 and partner effects [@Bolger2025Unified]. And just like the exchangeable APIM,
 the random-effects structure comprises a dyad-level intercept
-and a dyad-level difference contrast indexed by `.dy_member_contrast_female_x_female_arbitrary`.
+and a dyad-level difference contrast indexed by `.dy_member_contrast_arbitrary`.
 In `glmmTMB`, with `dispformula = ~ 0`, these random effects represent the two
 members' Gaussian residual variance and covariance.
 
@@ -199,7 +199,7 @@ dim_1 <- glmmTMB::glmmTMB(
 
     # Residual Gaussian covariance structure
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
+    us(0 + .dy_member_contrast_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -295,7 +295,7 @@ apim_1 <- glmmTMB::glmmTMB(
     # can be used. See the APIM vignette to learn how to back-transform
     # these blocks to a full actor-partner covariance matrix.
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
+    us(0 + .dy_member_contrast_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -503,11 +503,11 @@ dim_ILD <- glmmTMB::glmmTMB(
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
+    us(0 + .dy_member_contrast_arbitrary | coupleID) +
 
     # Residual (same-day) exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID:diaryday)
+    us(0 + .dy_member_contrast_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()

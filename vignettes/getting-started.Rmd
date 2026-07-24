@@ -179,7 +179,7 @@ print(cross_exchangeable_data, n = 4)
 
 ```
 
-The generated `.dy_member_contrast_female_x_female_arbitrary` contrast assigns `-1`
+The generated `.dy_member_contrast_arbitrary` contrast assigns `-1`
 and `1` to the two members of each exchangeable dyad
 [@delrosarioPracticalGuideSpecifying2025]. Its direction is arbitrary, and
 `seed` makes the assignment reproducible.

@@ -99,16 +99,20 @@ fit_and_draw_distinguishable_apim <- function(
 
   actor <- paste0(".dy_", variables$predictor, "_actor")
   partner <- paste0(".dy_", variables$predictor, "_partner")
-  female <- ".dy_is_female_x_male_female"
-  male <- ".dy_is_female_x_male_male"
+  female_indicator <- ".dy_is_female"
+  male_indicator <- ".dy_is_male"
 
   model_formula <- .early_model_formula(
     variables$outcome,
     c(
-      "0", female, male,
-      paste0(female, ":", actor), paste0(male, ":", actor),
-      paste0(female, ":", partner), paste0(male, ":", partner),
-      paste0("us(0 + ", female, " + ", male, " | couple_id)")
+      "0", female_indicator, male_indicator,
+      paste0(female_indicator, ":", actor),
+      paste0(male_indicator, ":", actor),
+      paste0(female_indicator, ":", partner),
+      paste0(male_indicator, ":", partner),
+      paste0(
+        "us(0 + ", female_indicator, " + ", male_indicator, " | couple_id)"
+      )
     )
   )
   model <- .fit_early_gaussian_model(model_formula, prepared)
@@ -134,15 +138,15 @@ fit_and_draw_exchangeable_apim <- function(
 
   actor <- paste0(".dy_", variables$predictor, "_actor")
   partner <- paste0(".dy_", variables$predictor, "_partner")
-  intercept <- ".dy_is_female_x_male"
-  difference <- ".dy_member_contrast_female_x_male_arbitrary"
+  exchangeable_indicator <- ".dy_is_exchangeable"
+  member_contrast <- ".dy_member_contrast_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
     c(
-      "0", intercept, actor, partner,
-      paste0("us(0 + ", intercept, " | couple_id)"),
-      paste0("us(0 + ", difference, " | couple_id)")
+      "0", exchangeable_indicator, actor, partner,
+      paste0("us(0 + ", exchangeable_indicator, " | couple_id)"),
+      paste0("us(0 + ", member_contrast, " | couple_id)")
     )
   )
   model <- .fit_early_gaussian_model(model_formula, prepared)
@@ -162,15 +166,15 @@ fit_and_draw_dim <- function(data, predictor, outcome, labels = NULL) {
     data, variables$predictor, model_types = "dim", exchangeable = TRUE
   )
 
-  mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")
-  deviation <- paste0(".dy_", variables$predictor, "_within_dyad_dev")
-  difference <- ".dy_member_contrast_female_x_male_arbitrary"
+  dyad_mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")
+  member_deviation <- paste0(".dy_", variables$predictor, "_within_dyad_dev")
+  member_contrast <- ".dy_member_contrast_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
     c(
-      "1", mean, deviation, "us(1 | couple_id)",
-      paste0("us(0 + ", difference, " | couple_id)")
+      "1", dyad_mean, member_deviation, "us(1 | couple_id)",
+      paste0("us(0 + ", member_contrast, " | couple_id)")
     )
   )
   model <- .fit_early_gaussian_model(model_formula, prepared)
