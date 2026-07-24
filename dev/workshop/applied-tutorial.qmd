@@ -298,7 +298,7 @@ This dataset is stored as an R object. Other packages provide functions to impor
 
 
 ```{r}
-library(dplyr) # for easier data-wrangling
+library(dplyr) # for easier data-wrangling, exports functions like `select()`
 
 df <- readRDS("dyadic-person-means.rds") |>
   select(
@@ -308,11 +308,31 @@ df <- readRDS("dyadic-person-means.rds") |>
 print(df, n = 4)
 ```
 
-## What one row represents
+## Create the expected format
 
-- One row per person: 76 partners from 38 couples
-- Diary measures are person-level averages across available days
-- `gender` is already labeled as `female` or `male`
+```{r}
+#| output-location: slide
+
+library(dyadMLM) # for easier data-wrangling
+
+df_apim <- prepare_dyad_data( # exported function from dyadMLM
+  data = df, 
+  dyad = couple_id, 
+  member = person_id, 
+  role = gender, 
+  predictors = self_efficacy,
+  model_types = 'apim'
+)
+
+print(
+  df_apim[,c(
+    'couple_id', 'person_id', 'total_mvpa', '.dy_is_female', 
+    '.dy_is_male', '.dy_self_efficacy_actor', '.dy_self_efficacy_partner')], 
+  n = 4
+)
+
+```
+
 
 ## Distinguishable APIM
 

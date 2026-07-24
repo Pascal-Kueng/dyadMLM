@@ -51,6 +51,42 @@ full <- full |>
   ) |>
   relocate(couple_id, person_id, gender)
 
+mixed_gender_couples <- full |>
+  distinct(couple_id, person_id, gender) |>
+  group_by(couple_id) |>
+  summarise(
+    n_people = n(),
+    n_female = sum(gender == "female"),
+    n_male = sum(gender == "male"),
+    .groups = "drop"
+  ) |>
+  filter(n_people == 2, n_female == 1, n_male == 1) |>
+  pull(couple_id)
+
+daily <- daily |>
+  filter(couple_id %in% mixed_gender_couples)
+
+full <- full |>
+  filter(couple_id %in% mixed_gender_couples)
+
+retained_couple_ids <- sort(unique(full$couple_id))
+retained_person_ids <- sort(unique(full$person_id))
+
+daily <- daily |>
+  mutate(
+    couple_id = match(couple_id, retained_couple_ids),
+    person_id = match(person_id, retained_person_ids)
+  )
+
+full <- full |>
+  mutate(
+    couple_id = match(couple_id, retained_couple_ids),
+    person_id = match(person_id, retained_person_ids)
+  )
+
+couple_ids <- sort(unique(full$couple_id))
+person_ids <- sort(unique(full$person_id))
+
 genders_per_person <- daily |>
   distinct(couple_id, person_id, gender) |>
   count(couple_id, person_id, name = "n_genders")
@@ -87,6 +123,7 @@ stopifnot(
   identical(sort(unique(full$person_id)), seq_len(length(person_ids))),
   !anyDuplicated(person_means[c("couple_id", "person_id")]),
   all(table(person_means$couple_id) == 2),
+  all(table(person_means$couple_id, person_means$gender) == 1),
   all(!is.na(person_means$gender)),
   all(!is.na(daily$gender)),
   all(!is.na(full$gender)),
