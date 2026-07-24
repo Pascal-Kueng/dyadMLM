@@ -2221,35 +2221,64 @@ display:block!important;
 <span id="cb3-9"><a href></a>  <span class="at">model_types =</span> <span class="st">&#39;apim&#39;</span></span>
 <span id="cb3-10"><a href></a>)</span>
 <span id="cb3-11"><a href></a></span>
-<span id="cb3-12"><a href></a>df_apim <span class="sc">|&gt;</span></span>
-<span id="cb3-13"><a href></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
-<span id="cb3-14"><a href></a>  <span class="fu">select</span>(</span>
-<span id="cb3-15"><a href></a>    couple_id, person_id, total_mvpa,</span>
-<span id="cb3-16"><a href></a>    .dy_efficacy_actor, .dy_efficacy_partner,</span>
-<span id="cb3-17"><a href></a>    .dy_is_female, .dy_is_male</span>
-<span id="cb3-18"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb3-19"><a href></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">4</span>, <span class="at">width =</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-12"><a href></a><span class="fu">print</span>(df_apim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
 <section id="create-the-expected-format-output" class="slide level2 output-location-slide"><h2>Create the expected format</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 72 × 7
-  couple_id person_id total_mvpa .dy_efficacy_actor .dy_efficacy_partner
-      &lt;int&gt;     &lt;int&gt;      &lt;dbl&gt;              &lt;dbl&gt;                &lt;dbl&gt;
-1         1         1       33.6              3.02                 0.891
-2         1         2       12.7              0.891                3.02 
-3         2         3       42.8              0.132                2.37 
-4         2         4       44.5              2.37                 0.132
-  .dy_is_female .dy_is_male
-          &lt;dbl&gt;       &lt;dbl&gt;
-1             0           1
-2             1           0
-3             0           1
-4             1           0
-# ℹ 68 more rows</code></pre>
+<pre><code># dyadMLM data
+# Rows: 72 | Dyads: 36 | Intensive longitudinal: no
+# Structure: dyad = couple_id, member = person_id, role = gender
+#
+# Dyad compositions:
+# female_x_male distinguishable 36 dyads
+#
+# Added columns:
+#   .dy_composition       inferred dyad composition
+#   .dy_composition_role  composition-specific member role
+#   .dy_is_{role}         composition-role indicator columns
+#   .dy_{pred}_actor      APIM actor predictor: actor&#39;s original predictor
+#                         values
+#   .dy_{pred}_partner    APIM partner predictor: partner&#39;s original predictor
+#                         values
+#
+# A tibble: 72 × 11
+   couple_id person_id gender efficacy total_mvpa .dy_composition
+       &lt;int&gt;     &lt;int&gt; &lt;fct&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;fct&gt;          
+ 1         1         1 male      3.02       33.6  female_x_male  
+ 2         1         2 female    0.891      12.7  female_x_male  
+ 3         2         3 male      0.132      42.8  female_x_male  
+ 4         2         4 female    2.37       44.5  female_x_male  
+ 5         3         5 female    3.33       62.9  female_x_male  
+ 6         3         6 male      1.62       32.3  female_x_male  
+ 7         4         7 male      1.09       21.5  female_x_male  
+ 8         4         8 female    0.755      51.9  female_x_male  
+ 9         5         9 female    1.48        9.79 female_x_male  
+10         5        10 male      1.35       11.4  female_x_male  
+# ℹ 62 more rows
+# ℹ 5 more variables: .dy_composition_role &lt;fct&gt;, .dy_is_female &lt;dbl&gt;,
+#   .dy_is_male &lt;dbl&gt;, .dy_efficacy_actor &lt;dbl&gt;, .dy_efficacy_partner &lt;dbl&gt;</code></pre>
 </div>
-</div></section><section id="distinguishable-apim" class="slide level2">
+</div></section><section id="create-the-expected-format-1" class="slide level2">
+<h2>Create the expected format</h2>
+<p>Looking at the columns immediately relevant to us:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 72 × 8
+  couple_id person_id gender .dy_is_female .dy_is_male efficacy .dy_efficacy_actor .dy_efficacy_partner
+      &lt;int&gt;     &lt;int&gt; &lt;fct&gt;          &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;              &lt;dbl&gt;                &lt;dbl&gt;
+1         1         1 male               0           1    3.02               3.02                 0.891
+2         1         2 female             1           0    0.891              0.891                3.02 
+3         2         3 male               0           1    0.132              0.132                2.37 
+4         2         4 female             1           0    2.37               2.37                 0.132
+5         3         5 female             1           0    3.33               3.33                 1.62 
+6         3         6 male               0           1    1.62               1.62                 3.33 
+# ℹ 66 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="distinguishable-apim" class="slide level2">
 <h2>Distinguishable APIM</h2>
 <ul>
 <li>Row-Level representation</li>
@@ -2456,13 +2485,13 @@ display:block!important;
 <h1>Excercises in R</h1>
 <p>Short break - initiate package install before you leave</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href></a><span class="fu">install.packages</span>(</span>
-<span id="cb5-2"><a href></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
-<span id="cb5-3"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
-<span id="cb5-4"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
-<span id="cb5-5"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
-<span id="cb5-6"><a href></a>  )</span>
-<span id="cb5-7"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href></a><span class="fu">install.packages</span>(</span>
+<span id="cb6-2"><a href></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
+<span id="cb6-3"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
+<span id="cb6-4"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
+<span id="cb6-5"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
+<span id="cb6-6"><a href></a>  )</span>
+<span id="cb6-7"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>
