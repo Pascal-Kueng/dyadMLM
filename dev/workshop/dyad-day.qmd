@@ -186,6 +186,8 @@ distribution_plot <- function(data, variables, bin_widths) {
 
 ## Today's aims and program
 
+::: {.fancy-table}
+
 | Time | Focus |
 |---|---|
 | 11:00–12:45 | Introduction and types of dyadic models |
@@ -195,6 +197,8 @@ distribution_plot <- function(data, variables, bin_widths) {
 | 15:45–16:45 | Intensive longitudinal extensions |
 | 16:45–17:00 | *Short break* |
 | 17:00–18:00 | Exercises in R |
+
+:::
 
 <!-- ca. 2.5 Minutes -->
 

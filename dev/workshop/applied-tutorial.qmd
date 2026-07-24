@@ -32,6 +32,8 @@ editor: source
 library(dplyr)
 library(ggplot2)
 
+options(knitr.kable.NA = "")
+
 diagram_helper_candidates <- c(
   "diagram-helpers.Rinc",
   file.path("vignettes", "diagram-helpers.Rinc"),
@@ -54,6 +56,8 @@ sys.source(
 
 ## Today's aims and program
 
+::: {.fancy-table}
+
 | Time | Focus |
 |---|---|
 | 11:00–12:45 | Introduction and types of dyadic models |
@@ -63,6 +67,8 @@ sys.source(
 | 15:45–16:45 | Intensive longitudinal extensions |
 | 16:45–17:00 | *Short break* |
 | 17:00–18:00 | Exercises in R |
+
+:::
 
 <!-- TODO @codex: please grey out the first two points, intro and lunch break). -->
 
@@ -319,11 +325,11 @@ Important: Gender is not always the only choice!
 library(dplyr) # for easier data-wrangling, exports functions like `select()`
 
 df <- readRDS("dyadic-person-means.rds") |>
-  select(
+  dplyr::select(
     couple_id, person_id, gender, efficacy, total_mvpa
   )
 
-print(df, n = 4)
+knitr::kable(df[1:4,], digits = 2, row.names = FALSE)
 ```
 
 :::{.subtle}
@@ -344,26 +350,36 @@ as a missing value.
 
 :::
 
-## Validate the structure and create the correct format
+## Create the required format and validate the data
 
-Validate: 
+**For the distinguishable APIM we need:**
+
+- `efficacy_actor` and `efficacy_partner` columns
+- Dummy coded variables for the two roles
+
+:::{.fragment}
+**Validate things like: **
 
 - no dyad with more than two members,
-- each dyad-member combination occurs only once (for cross-sectional data),
+- each dyad-member combination occurs only once (per occasion),
 - gender labels are present and consistent
 - you only have the type of dyad you expect
+:::
 
-The `dyadMLM` package helps by validating these aspects and preparing the 
-correct data structure. 
+:::{.fragment}
 
-## Create the required format and validate dyadic structure
+We can use the `dyadMLM` package to help with data preparation and validation.
+
+:::
+
+## Create the required format and validate the data
 
 ```{r}
 #| output-location: slide
 
-library(dyadMLM) # for easier data-wrangling
+library(dyadMLM)
 
-df_apim <- prepare_dyad_data( # exported function from dyadMLM
+df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
   data = df,
   dyad = couple_id,
   member = person_id,
@@ -372,50 +388,31 @@ df_apim <- prepare_dyad_data( # exported function from dyadMLM
   model_types = 'apim'
 )
 
+
 print(df_apim)
 
 ```
 
-## Validated the dyadic structure
 
-Check things like: 
-
-- no dyad with more than two members,
-- each dyad-member combination occurs only once (for cross-sectional data),
-- gender labels are present and consistent
-
-`prepare_dyad_data()` already checked these and would produce a warning 
-or informative error if the structure had issues.
-
-## Create the required format 
-<!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the 
+## Create the required format and validate the data
+<!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the
 is_male, is_female, and _actor and _partner variables. -->
 
 
 Looking at the columns immediately relevant to us:
 
 ```{r}
-#| echo: false
 
-local({
-  old_options <- options(width = 140)
-  on.exit(options(old_options))
+df_apim[1:6,] |>
+  select(
+    couple_id, person_id, gender, .dy_is_female, .dy_is_male, efficacy,
+    .dy_efficacy_actor, .dy_efficacy_partner, total_mvpa
+  ) |>
+  knitr::kable(digits = 2, row.names = FALSE)
 
-  df_apim |>
-    tibble::as_tibble() |>
-    select(
-      couple_id, person_id, gender,
-      .dy_is_female, .dy_is_male,
-      efficacy, .dy_efficacy_actor,
-      .dy_efficacy_partner
-    ) |>
-    print(n = 6)
-})
 ```
-<!-- TODO: color code and prettier printing? -->
 
-- `x_actor` variables are each persons' own value
-- `x_partner` variables are the partners' value
+<!-- TODO: color code partner values? -->
 
 ## Workflow
 
@@ -428,12 +425,27 @@ local({
 
 ## Describe and visualize measures and observed relationships
 
-For example: 
 
-- Describe missingness (MAR analyses, decide on imputation, etc.)
-- Check implausible values / outliers 
+```{r}
+library(report)
 
---- 
+variables <- c('gender', 'efficacy', 'total_mvpa')
+
+df_apim |>
+  dplyr::select(all_of(variables)) |>
+  report::report_table() |>
+  summary() |>
+  knitr::kable(digits = 2, row.names = FALSE)
+```
+
+## slide
+
+Additionally, you may:
+
+- Describe missingness in greater detail, perform MAR analyses, perform imputation, etc.
+- Check implausible values / outliers
+
+---
 
 ## Distinguishable APIM
 

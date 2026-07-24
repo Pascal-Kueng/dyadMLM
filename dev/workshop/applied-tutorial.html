@@ -868,32 +868,68 @@ color: var(--uzh-blue);
 color: var(--uzh-blue-dark);
 }
 .reveal table {
-width: 100%;
-margin-top: 0.35em;
-border-collapse: separate;
+width: auto;
+max-width: 100%;
+margin: 0.35em auto 0;
+border-collapse: collapse;
 border-spacing: 0;
-font-size: 0.78em;
-overflow: hidden;
-border: 1px solid var(--uzh-rule);
-border-radius: 7px;
+border: 0;
+border-top: 1px solid var(--uzh-rule);
+border-bottom: 1px solid var(--uzh-rule);
+background: transparent;
+font-size: 0.58em;
 }
 .reveal table th {
-padding: 0.46em 0.65em;
+padding: 0.3em 0.5em;
 border: 0;
-background: var(--uzh-blue);
-color: white;
+border-bottom: 1.5px solid var(--uzh-muted);
+background: transparent;
+color: var(--uzh-ink);
 font-weight: 600;
 }
 .reveal table td {
-padding: 0.4em 0.65em;
+padding: 0.26em 0.5em;
 border: 0;
 border-bottom: 1px solid var(--uzh-rule);
 }
 .reveal table tr:nth-child(even) td {
-background: var(--uzh-surface);
+background: transparent;
 }
 .reveal table tr:last-child td {
 border-bottom: 0;
+}
+
+.reveal .fancy-table table {
+width: 100%;
+max-width: 100%;
+border-collapse: separate;
+border: 1px solid var(--uzh-rule);
+border-radius: 7px;
+font-size: 0.78em;
+overflow: hidden;
+}
+.reveal .fancy-table table th {
+padding: 0.46em 0.65em;
+border-bottom: 0;
+background: var(--uzh-blue);
+color: white;
+font-weight: 600;
+}
+.reveal .fancy-table table td {
+padding: 0.4em 0.65em;
+border-bottom: 1px solid var(--uzh-rule);
+}
+.reveal .fancy-table table tr:nth-child(even) td {
+background: var(--uzh-surface);
+}
+
+.reveal .cell > .cell-code + .cell-output,
+.reveal .cell > .cell-code + .cell-output-display,
+.reveal .cell > .cell-code + .cell-output-stdout,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output-display,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output-stdout {
+margin-top: 0.25em;
 }
 .reveal blockquote {
 width: auto;
@@ -1936,6 +1972,7 @@ Turu Stadler
 </section>
 <section id="todays-aims-and-program" class="slide level2">
 <h2>Today’s aims and program</h2>
+<div class="fancy-table">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1974,6 +2011,7 @@ Turu Stadler
 </tr>
 </tbody>
 </table>
+</div>
 <!-- TODO @codex: please grey out the first two points, intro and lunch break). -->
 <!-- ca. 2 Minutes -->
 </section>
@@ -2220,20 +2258,53 @@ display:block!important;
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href></a><span class="fu">library</span>(dplyr) <span class="co"># for easier data-wrangling, exports functions like `select()`</span></span>
 <span id="cb1-2"><a href></a></span>
 <span id="cb1-3"><a href></a>df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;dyadic-person-means.rds&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-4"><a href></a>  <span class="fu">select</span>(</span>
+<span id="cb1-4"><a href></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
 <span id="cb1-5"><a href></a>    couple_id, person_id, gender, efficacy, total_mvpa</span>
 <span id="cb1-6"><a href></a>  )</span>
 <span id="cb1-7"><a href></a></span>
-<span id="cb1-8"><a href></a><span class="fu">print</span>(df, <span class="at">n =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 72 × 5
-  couple_id person_id gender efficacy total_mvpa
-      &lt;int&gt;     &lt;int&gt; &lt;fct&gt;     &lt;dbl&gt;      &lt;dbl&gt;
-1         1         1 male      3.02        33.6
-2         1         2 female    0.891       12.7
-3         2         3 male      0.132       42.8
-4         2         4 female    2.37        44.5
-# ℹ 68 more rows</code></pre>
+<span id="cb1-8"><a href></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,], <span class="at">digits =</span> <span class="dv">2</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;">couple_id</th>
+<th style="text-align: right;">person_id</th>
+<th style="text-align: left;">gender</th>
+<th style="text-align: right;">efficacy</th>
+<th style="text-align: right;">total_mvpa</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">3.02</td>
+<td style="text-align: right;">33.61</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">12.71</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">42.83</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">2.37</td>
+<td style="text-align: right;">44.54</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div class="subtle">
@@ -2255,36 +2326,46 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="validate-the-structure-and-create-the-correct-format" class="slide level2">
-<h2>Validate the structure and create the correct format</h2>
-<p>Validate:</p>
+<section id="create-the-required-format-and-validate-the-data" class="slide level2">
+<h2>Create the required format and validate the data</h2>
+<p><strong>For the distinguishable APIM we need:</strong></p>
+<ul>
+<li><code>efficacy_actor</code> and <code>efficacy_partner</code> columns</li>
+<li>Dummy coded variables for the two roles</li>
+</ul>
+<div class="fragment">
+<p><strong>Validate things like: </strong></p>
 <ul>
 <li>no dyad with more than two members,</li>
-<li>each dyad-member combination occurs only once (for cross-sectional data),</li>
+<li>each dyad-member combination occurs only once (per occasion),</li>
 <li>gender labels are present and consistent</li>
 <li>you only have the type of dyad you expect</li>
 </ul>
-<p>The <code>dyadMLM</code> package helps by validating these aspects and preparing the correct data structure.</p>
+</div>
+<div class="fragment">
+<p>We can use the <code>dyadMLM</code> package to help with data preparation and validation.</p>
+</div>
 </section>
-<section id="create-the-required-format-and-validate-dyadic-structure" class="slide level2">
-<h2>Create the required format and validate dyadic structure</h2>
+<section id="create-the-required-format-and-validate-the-data-1" class="slide level2">
+<h2>Create the required format and validate the data</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href></a><span class="fu">library</span>(dyadMLM) <span class="co"># for easier data-wrangling</span></span>
-<span id="cb3-2"><a href></a></span>
-<span id="cb3-3"><a href></a>df_apim <span class="ot">&lt;-</span> <span class="fu">prepare_dyad_data</span>( <span class="co"># exported function from dyadMLM</span></span>
-<span id="cb3-4"><a href></a>  <span class="at">data =</span> df,</span>
-<span id="cb3-5"><a href></a>  <span class="at">dyad =</span> couple_id,</span>
-<span id="cb3-6"><a href></a>  <span class="at">member =</span> person_id,</span>
-<span id="cb3-7"><a href></a>  <span class="at">role =</span> gender,</span>
-<span id="cb3-8"><a href></a>  <span class="at">predictors =</span> efficacy,</span>
-<span id="cb3-9"><a href></a>  <span class="at">model_types =</span> <span class="st">&#39;apim&#39;</span></span>
-<span id="cb3-10"><a href></a>)</span>
-<span id="cb3-11"><a href></a></span>
-<span id="cb3-12"><a href></a><span class="fu">print</span>(df_apim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href></a><span class="fu">library</span>(dyadMLM) </span>
+<span id="cb2-2"><a href></a></span>
+<span id="cb2-3"><a href></a>df_apim <span class="ot">&lt;-</span> dyadMLM<span class="sc">::</span><span class="fu">prepare_dyad_data</span>( <span class="co"># exported function from dyadMLM</span></span>
+<span id="cb2-4"><a href></a>  <span class="at">data =</span> df,</span>
+<span id="cb2-5"><a href></a>  <span class="at">dyad =</span> couple_id,</span>
+<span id="cb2-6"><a href></a>  <span class="at">member =</span> person_id,</span>
+<span id="cb2-7"><a href></a>  <span class="at">role =</span> gender,</span>
+<span id="cb2-8"><a href></a>  <span class="at">predictors =</span> efficacy,</span>
+<span id="cb2-9"><a href></a>  <span class="at">model_types =</span> <span class="st">&#39;apim&#39;</span></span>
+<span id="cb2-10"><a href></a>) </span>
+<span id="cb2-11"><a href></a></span>
+<span id="cb2-12"><a href></a></span>
+<span id="cb2-13"><a href></a><span class="fu">print</span>(df_apim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
-<section id="create-the-required-format-and-validate-dyadic-structure-output" class="slide level2 output-location-slide"><h2>Create the required format and validate dyadic structure</h2><div class="cell output-location-slide">
+<section id="create-the-required-format-and-validate-the-data-1-output" class="slide level2 output-location-slide"><h2>Create the required format and validate the data</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># dyadMLM data
 # Rows: 72 | Dyads: 36 | Intensive longitudinal: no
@@ -2319,40 +2400,116 @@ display:block!important;
 # ℹ 5 more variables: .dy_composition_role &lt;fct&gt;, .dy_is_female &lt;dbl&gt;,
 #   .dy_is_male &lt;dbl&gt;, .dy_efficacy_actor &lt;dbl&gt;, .dy_efficacy_partner &lt;dbl&gt;</code></pre>
 </div>
-</div></section><section id="validated-the-dyadic-structure" class="slide level2">
-<h2>Validated the dyadic structure</h2>
-<p>Check things like:</p>
-<ul>
-<li>no dyad with more than two members,</li>
-<li>each dyad-member combination occurs only once (for cross-sectional data),</li>
-<li>gender labels are present and consistent</li>
-</ul>
-<p><code>prepare_dyad_data()</code> already checked these and would produce a warning or informative error if the structure had issues.</p>
-</section>
-<section id="create-the-required-format" class="slide level2">
-<h2>Create the required format</h2>
+</div></section><section id="create-the-required-format-and-validate-the-data-2" class="slide level2">
+<h2>Create the required format and validate the data</h2>
 <!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the 
 is_male, is_female, and _actor and _partner variables. -->
 <p>Looking at the columns immediately relevant to us:</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 72 × 8
-  couple_id person_id gender .dy_is_female .dy_is_male efficacy .dy_efficacy_actor .dy_efficacy_partner
-      &lt;int&gt;     &lt;int&gt; &lt;fct&gt;          &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;              &lt;dbl&gt;                &lt;dbl&gt;
-1         1         1 male               0           1    3.02               3.02                 0.891
-2         1         2 female             1           0    0.891              0.891                3.02 
-3         2         3 male               0           1    0.132              0.132                2.37 
-4         2         4 female             1           0    2.37               2.37                 0.132
-5         3         5 female             1           0    3.33               3.33                 1.62 
-6         3         6 male               0           1    1.62               1.62                 3.33 
-# ℹ 66 more rows</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href></a>df_apim[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>,] <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href></a>  <span class="fu">select</span>(</span>
+<span id="cb4-3"><a href></a>    couple_id, person_id, gender, .dy_is_female, .dy_is_male, efficacy, </span>
+<span id="cb4-4"><a href></a>    .dy_efficacy_actor, .dy_efficacy_partner, total_mvpa</span>
+<span id="cb4-5"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-6"><a href></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 6%">
+<col style="width: 10%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 15%">
+<col style="width: 17%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">couple_id</th>
+<th style="text-align: right;">person_id</th>
+<th style="text-align: left;">gender</th>
+<th style="text-align: right;">.dy_is_female</th>
+<th style="text-align: right;">.dy_is_male</th>
+<th style="text-align: right;">efficacy</th>
+<th style="text-align: right;">.dy_efficacy_actor</th>
+<th style="text-align: right;">.dy_efficacy_partner</th>
+<th style="text-align: right;">total_mvpa</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.02</td>
+<td style="text-align: right;">3.02</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">33.61</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">3.02</td>
+<td style="text-align: right;">12.71</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">2.37</td>
+<td style="text-align: right;">42.83</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2.37</td>
+<td style="text-align: right;">2.37</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">44.54</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3.33</td>
+<td style="text-align: right;">3.33</td>
+<td style="text-align: right;">1.62</td>
+<td style="text-align: right;">62.86</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.62</td>
+<td style="text-align: right;">1.62</td>
+<td style="text-align: right;">3.33</td>
+<td style="text-align: right;">32.29</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-<!-- TODO: color code and prettier printing? -->
-<ul>
-<li><code>x_actor</code> variables are each persons’ own value</li>
-<li><code>x_partner</code> variables are the partners’ value</li>
-</ul>
+<!-- TODO: color code partner values? -->
 </section>
 <section id="workflow-2" class="slide level2">
 <h2>Workflow</h2>
@@ -2367,9 +2524,81 @@ is_male, is_female, and _actor and _partner variables. -->
 </section>
 <section id="describe-and-visualize-measures-and-observed-relationships" class="slide level2">
 <h2>Describe and visualize measures and observed relationships</h2>
-<p>For example:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href></a><span class="fu">library</span>(report)</span>
+<span id="cb5-2"><a href></a></span>
+<span id="cb5-3"><a href></a>variables <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&#39;gender&#39;</span>, <span class="st">&#39;efficacy&#39;</span>, <span class="st">&#39;total_mvpa&#39;</span>)</span>
+<span id="cb5-4"><a href></a></span>
+<span id="cb5-5"><a href></a>df_apim <span class="sc">|&gt;</span></span>
+<span id="cb5-6"><a href></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="fu">all_of</span>(variables)) <span class="sc">|&gt;</span></span>
+<span id="cb5-7"><a href></a>  report<span class="sc">::</span><span class="fu">report_table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-8"><a href></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-9"><a href></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Level</th>
+<th style="text-align: right;">n_Obs</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">SD</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Max</th>
+<th style="text-align: right;">n_Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">gender</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gender</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">efficacy</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">2.38</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">4.92</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_mvpa</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">31.21</td>
+<td style="text-align: right;">22.40</td>
+<td style="text-align: right;">3.43</td>
+<td style="text-align: right;">126.35</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="slide" class="slide level2">
+<h2>slide</h2>
+<p>Additionally, you may:</p>
 <ul>
-<li>Describe missingness (MAR analyses, decide on imputation, etc.)</li>
+<li>Describe missingness in greater detail, perform MAR analyses, perform imputation, etc.</li>
 <li>Check implausible values / outliers</li>
 </ul>
 </section>

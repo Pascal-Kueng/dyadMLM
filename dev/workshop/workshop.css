@@ -345,36 +345,77 @@
 }
 
 .reveal table {
-  width: 100%;
-  margin-top: 0.35em;
-  border-collapse: separate;
+  width: auto;
+  max-width: 100%;
+  margin: 0.35em auto 0;
+  border-collapse: collapse;
   border-spacing: 0;
-  font-size: 0.78em;
-  overflow: hidden;
-  border: 1px solid var(--uzh-rule);
-  border-radius: 7px;
+  border: 0;
+  border-top: 1px solid var(--uzh-rule);
+  border-bottom: 1px solid var(--uzh-rule);
+  background: transparent;
+  font-size: 0.58em;
 }
 
 .reveal table th {
-  padding: 0.46em 0.65em;
+  padding: 0.3em 0.5em;
   border: 0;
-  background: var(--uzh-blue);
-  color: white;
+  border-bottom: 1.5px solid var(--uzh-muted);
+  background: transparent;
+  color: var(--uzh-ink);
   font-weight: 600;
 }
 
 .reveal table td {
-  padding: 0.4em 0.65em;
+  padding: 0.26em 0.5em;
   border: 0;
   border-bottom: 1px solid var(--uzh-rule);
 }
 
 .reveal table tr:nth-child(even) td {
-  background: var(--uzh-surface);
+  background: transparent;
 }
 
 .reveal table tr:last-child td {
   border-bottom: 0;
+}
+
+/* Reserve the branded treatment for presentation-oriented overview tables. */
+.reveal .fancy-table table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: separate;
+  border: 1px solid var(--uzh-rule);
+  border-radius: 7px;
+  font-size: 0.78em;
+  overflow: hidden;
+}
+
+.reveal .fancy-table table th {
+  padding: 0.46em 0.65em;
+  border-bottom: 0;
+  background: var(--uzh-blue);
+  color: white;
+  font-weight: 600;
+}
+
+.reveal .fancy-table table td {
+  padding: 0.4em 0.65em;
+  border-bottom: 1px solid var(--uzh-rule);
+}
+
+.reveal .fancy-table table tr:nth-child(even) td {
+  background: var(--uzh-surface);
+}
+
+/* Give executed code and its output a little visual separation. */
+.reveal .cell > .cell-code + .cell-output,
+.reveal .cell > .cell-code + .cell-output-display,
+.reveal .cell > .cell-code + .cell-output-stdout,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output-display,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output-stdout {
+  margin-top: 0.25em;
 }
 
 .reveal blockquote {
