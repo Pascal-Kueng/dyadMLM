@@ -293,9 +293,9 @@ and should be considered carefully too.
 
 This dataset is stored as an R object. Other packages provide functions to import various formats, such as: `readxl::read_excel()`, `utils::read.csv()`, `haven::read_sav()`, `haven::read_sas()`
 
+<br>
 :::
 
-<br>
 
 ```{r}
 library(dplyr) # for easier data-wrangling
