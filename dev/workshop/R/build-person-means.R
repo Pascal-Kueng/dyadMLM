@@ -12,6 +12,23 @@ full_file <- file.path(workshop_dir, "long.rds")
 daily <- readRDS(daily_file)
 full <- readRDS(full_file)
 
+standardize_efficacy_name <- function(data, candidates) {
+  if ("efficacy" %in% names(data)) {
+    return(data)
+  }
+
+  source <- candidates[candidates %in% names(data)]
+  if (length(source) != 1) {
+    stop("Could not identify exactly one efficacy variable.")
+  }
+
+  names(data)[names(data) == source] <- "efficacy"
+  data
+}
+
+daily <- standardize_efficacy_name(daily, "self_efficacy")
+full <- standardize_efficacy_name(full, c("self_efficacy", "ss_eff"))
+
 recode_gender <- function(x) {
   x <- as.character(x)
   x[x == "1"] <- "female"
@@ -101,7 +118,7 @@ person_means <- daily |>
     collaborative_planning,
     exerted_persuasion,
     experienced_persuasion,
-    self_efficacy,
+    efficacy,
     solo_mvpa,
     joint_mvpa,
     total_mvpa
@@ -127,6 +144,12 @@ stopifnot(
   all(!is.na(person_means$gender)),
   all(!is.na(daily$gender)),
   all(!is.na(full$gender)),
+  "efficacy" %in% names(daily),
+  "efficacy" %in% names(full),
+  "efficacy" %in% names(person_means),
+  !any(c("self_efficacy", "ss_eff") %in% names(daily)),
+  !any(c("self_efficacy", "ss_eff") %in% names(full)),
+  !any(c("self_efficacy", "ss_eff") %in% names(person_means)),
   all(vapply(numeric_columns, \(x) all(is.finite(x)), logical(1)))
 )
 

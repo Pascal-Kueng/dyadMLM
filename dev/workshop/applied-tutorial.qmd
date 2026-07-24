@@ -302,7 +302,7 @@ library(dplyr) # for easier data-wrangling, exports functions like `select()`
 
 df <- readRDS("dyadic-person-means.rds") |>
   select(
-    couple_id, person_id, gender, self_efficacy, total_mvpa
+    couple_id, person_id, gender, efficacy, total_mvpa
   )
 
 print(df, n = 4)
@@ -316,20 +316,22 @@ print(df, n = 4)
 library(dyadMLM) # for easier data-wrangling
 
 df_apim <- prepare_dyad_data( # exported function from dyadMLM
-  data = df, 
-  dyad = couple_id, 
-  member = person_id, 
-  role = gender, 
-  predictors = self_efficacy,
+  data = df,
+  dyad = couple_id,
+  member = person_id,
+  role = gender,
+  predictors = efficacy,
   model_types = 'apim'
 )
 
-print(
-  df_apim[,c(
-    'couple_id', 'person_id', 'total_mvpa', '.dy_is_female', 
-    '.dy_is_male', '.dy_self_efficacy_actor', '.dy_self_efficacy_partner')], 
-  n = 4
-)
+df_apim |>
+  tibble::as_tibble() |>
+  select(
+    couple_id, person_id, total_mvpa,
+    .dy_efficacy_actor, .dy_efficacy_partner,
+    .dy_is_female, .dy_is_male
+  ) |>
+  print(n = 4, width = 100)
 
 ```
 
@@ -579,7 +581,13 @@ Short break - initiate package install before you leave
 
 ```{r eval = FALSE}
 
-install.packages(c('dyadMLM', 'wbCorr', 'glmmTMB', 'DHARMa', 'dplyr', 'ggplot2', 'tibble'))
+install.packages(
+  c("dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "dplyr", "ggplot2", "tibble"),
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
+  )
+)
 
 ```
 
@@ -592,7 +600,7 @@ install.packages(c('dyadMLM', 'wbCorr', 'glmmTMB', 'DHARMa', 'dplyr', 'ggplot2',
 - DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
 
 - glmmTMB -> as required 
-- dyadMLM -> as required (via pak, see instructions). -> maybe just require pak and we install newest version on workshop-day?
+- dyadMLM -> as required (via R-universe, see instructions).
 - dplyr -> required
 - tibble -> required
 - lavaan -> required
