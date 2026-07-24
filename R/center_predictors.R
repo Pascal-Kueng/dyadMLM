@@ -82,7 +82,9 @@ center_predictors <- function(data) {
       ),
       lag = 0L,
       model_family = "temporal",
-      column_role = "temporal_component"
+      column_role = "temporal_component",
+      variable_role = "predictor",
+      source_column = rep(predictors, 2L)
     )
     validate_generated_column_plan(out, plan)
 
@@ -121,6 +123,7 @@ center_predictors <- function(data) {
     }
 
     attr(out, "dyadMLM")$temporal_decompositions <- temporal_decompositions
+    out <- record_generated_columns(out, plan)
 
     return(out)
   }

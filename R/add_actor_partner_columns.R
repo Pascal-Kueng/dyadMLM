@@ -94,7 +94,9 @@ add_actor_partner_columns <- function(data) {
       temporal_component = apim_predictors$component,
       lag = apim_predictors$lag,
       model_family = "apim",
-      column_role = "actor"
+      column_role = "actor",
+      variable_role = "predictor",
+      source_column = apim_predictors$source_column
     ),
     tibble::tibble(
       target = apim_predictors$partner_column,
@@ -102,7 +104,9 @@ add_actor_partner_columns <- function(data) {
       temporal_component = apim_predictors$component,
       lag = apim_predictors$lag,
       model_family = "apim",
-      column_role = "partner"
+      column_role = "partner",
+      variable_role = "predictor",
+      source_column = apim_predictors$source_column
     )
   )
   validate_generated_column_plan(out, apim_plan)
@@ -172,6 +176,7 @@ add_actor_partner_columns <- function(data) {
   }
 
   attr(out, "dyadMLM")$apim_predictors <- apim_predictors
+  out <- record_generated_columns(out, apim_plan)
 
   return(out)
 }

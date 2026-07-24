@@ -514,12 +514,15 @@ finalize_composition_columns <- function(data) {
   names(composition_indicator_columns) <- composition_role_labels
 
   exchangeable_compositions <- sort(names(exchangeable_composition_suffixes))
-  member_contrast_columns <- paste0(
-    dyad_reserved_prefix,
-    "member_contrast_",
-    unname(exchangeable_composition_suffixes[exchangeable_compositions]),
-    "_arbitrary"
-  )
+  member_contrast_columns <- character(length(exchangeable_compositions))
+  if (length(exchangeable_compositions) > 0L) {
+    member_contrast_columns <- paste0(
+      dyad_reserved_prefix,
+      "member_contrast_",
+      unname(exchangeable_composition_suffixes[exchangeable_compositions]),
+      "_arbitrary"
+    )
+  }
   names(member_contrast_columns) <- exchangeable_compositions
 
   # Shape: one row per column that this function is about to create. The
@@ -536,6 +539,14 @@ finalize_composition_columns <- function(data) {
     column_role = c(
       rep("composition_indicator", length(composition_indicator_columns)),
       rep("member_contrast", length(member_contrast_columns))
+    ),
+    variable_role = c(
+      rep("composition_role", length(composition_indicator_columns)),
+      rep("composition", length(member_contrast_columns))
+    ),
+    source_column = c(
+      rep(dyad_composition_role_col, length(composition_indicator_columns)),
+      rep(dyad_composition_col, length(member_contrast_columns))
     )
   )
   validate_generated_column_plan(data, composition_column_plan)
@@ -565,6 +576,23 @@ finalize_composition_columns <- function(data) {
   }
 
   data[[dyad_diff_col]] <- NULL
+  # These two fixed columns are created before this shared finalizer. Append
+  # their rows to the already validated indicator/contrast plan and record the
+  # complete composition stage only after every column exists.
+  fixed_composition_columns <- tibble::tibble(
+    target = c(dyad_composition_col, dyad_composition_role_col),
+    predictor = NA_character_,
+    temporal_component = "none",
+    lag = 0L,
+    model_family = "composition",
+    column_role = c("composition", "composition_role"),
+    variable_role = c("composition", "composition_role"),
+    source_column = NA_character_
+  )
+  data <- record_generated_columns(
+    data,
+    dplyr::bind_rows(fixed_composition_columns, composition_column_plan)
+  )
 
   data
 }

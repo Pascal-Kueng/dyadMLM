@@ -1,3 +1,8 @@
+non_composition_generated_columns <- function(prepared) {
+  dyad_generated_columns(attr(prepared, "dyadMLM")) |>
+    dplyr::filter(.data$model_family != "composition")
+}
+
 test_that("dyad_generated_columns returns empty metadata without model columns", {
   result <- dyad_generated_columns(list())
 
@@ -6,13 +11,15 @@ test_that("dyad_generated_columns returns empty metadata without model columns",
 
 test_that("dyad_generated_columns errors when generated column specs are missing", {
   meta <- list(
-    apim_predictors = tibble::tibble(
-      predictor = "x",
+    generated_columns = tibble::tibble(
+      model_family = "apim",
+      variable_role = "predictor",
+      variable = "x",
       component = "unsupported",
       lag = 0L,
-      source_column = "x",
-      actor_column = ".dy_x_unsupported_actor",
-      partner_column = ".dy_x_unsupported_partner"
+      column_role = "actor",
+      column = ".dy_x_unsupported_actor",
+      source_column = "x"
     )
   )
 
@@ -20,6 +27,38 @@ test_that("dyad_generated_columns errors when generated column specs are missing
     dyad_generated_columns(meta),
     "no generated-column specification.*apim/predictor/unsupported/actor"
   )
+})
+
+test_that("generated column specification keys are unique", {
+  specifications <- generated_column_spec_lookup()
+  keys <- c("model_family", "variable_role", "component", "column_role")
+
+  expect_equal(anyDuplicated(specifications[keys]), 0L)
+})
+
+test_that("dyad_generated_columns records every created composition column", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male")
+  )
+
+  prepared <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    role = role,
+    model_types = "none"
+  )
+
+  meta <- attr(prepared, "dyadMLM")
+  stored <- meta$generated_columns
+  result <- dyad_generated_columns(meta)
+
+  expect_equal(stored, result[names(stored)])
+  expect_setequal(stored$column, setdiff(names(prepared), names(data)))
+  expect_true(all(result$model_family == "composition"))
+  expect_false(any(grepl("member_contrast", result$column, fixed = TRUE)))
 })
 
 test_that("dyad_generated_columns collects APIM columns", {
@@ -38,7 +77,7 @@ test_that("dyad_generated_columns collects APIM columns", {
     seed = 123
   )
 
-  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  result <- non_composition_generated_columns(prepared)
 
   expect_equal(
     result,
@@ -81,7 +120,7 @@ test_that("dyad_generated_columns excludes raw temporal predictor records", {
     seed = 123
   )
 
-  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  result <- non_composition_generated_columns(prepared)
 
   expect_equal(nrow(result), 0)
 })
@@ -103,7 +142,7 @@ test_that("dyad_generated_columns records temporal decomposition for APIM column
     seed = 123
   )
 
-  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  result <- non_composition_generated_columns(prepared)
 
   expect_equal(
     result,
@@ -188,7 +227,7 @@ test_that("dyad_generated_columns collects DIM columns", {
     seed = 123
   )
 
-  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  result <- non_composition_generated_columns(prepared)
 
   expect_equal(
     result,
@@ -232,7 +271,7 @@ test_that("dyad_generated_columns records temporal and dyadic decomposition for 
     seed = 123
   )
 
-  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  result <- non_composition_generated_columns(prepared)
 
   expect_equal(
     result$temporal_decomposition,
@@ -291,7 +330,7 @@ test_that("dyad_generated_columns combines requested model families", {
     seed = 123
   )
 
-  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  result <- non_composition_generated_columns(prepared)
 
   expect_equal(
     result$model_family,
@@ -323,7 +362,7 @@ test_that("dyad_generated_columns collects DSM columns", {
     seed = 123
   )
 
-  result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
+  result <- non_composition_generated_columns(prepared)
 
   expect_equal(
     result$model_family,

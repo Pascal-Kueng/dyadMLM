@@ -1,6 +1,26 @@
 comparison_female_male_cross_dyads <- dyads_cross |>
   dplyr::filter(dyad_composition == "female_x_male")
 
+test_that("comparison treats unregistered prefixed columns as original data", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+  prepared <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    seed = 123
+  )
+  changed <- prepared
+  changed$.dy_unregistered <- 1
+
+  expect_error(
+    validate_comparison_data(NULL, NULL, prepared, changed),
+    "do not contain the same original columns"
+  )
+})
+
 test_that("compare_nested_glmmTMB_models compares reparameterized nested models", {
   skip_if_not_installed("glmmTMB")
 

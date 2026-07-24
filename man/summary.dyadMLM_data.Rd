@@ -4,19 +4,16 @@
 \alias{summary.dyadMLM_data}
 \title{Summarize prepared dyadic data}
 \usage{
-\method{summary}{dyadMLM_data}(object, ..., include_generated = FALSE)
+\method{summary}{dyadMLM_data}(object, ...)
 }
 \arguments{
 \item{object}{A \code{dyadMLM_data} object returned by \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
 
 \item{...}{Arguments passed to \code{\link[=summary]{summary()}}.}
-
-\item{include_generated}{Whether to include package-generated \code{.dy_} columns
-in the column summaries. The default is \code{FALSE}.}
 }
 \value{
-Invisibly, the standard summary of the selected columns.
+Invisibly, the standard summary of all columns.
 }
 \description{
-Prints the dyadic structure followed by standard column summaries.
+Prints the dyadic structure followed by standard summaries for all columns.
 }

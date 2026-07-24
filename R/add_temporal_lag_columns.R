@@ -55,7 +55,9 @@ add_temporal_lag_columns <- function(data) {
     temporal_component = lag_sources$component,
     lag = 1L,
     model_family = "temporal",
-    column_role = "temporal_component"
+    column_role = "temporal_component",
+    variable_role = "predictor",
+    source_column = lag_sources$column
   )
   validate_generated_column_plan(data, lag_plan)
 
@@ -104,6 +106,7 @@ add_temporal_lag_columns <- function(data) {
   meta_data$temporal_decompositions <- decompositions
   attr(out, "dyadMLM") <- meta_data
   class(out) <- class(data)
+  out <- record_generated_columns(out, lag_plan)
   out
 }
 

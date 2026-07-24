@@ -43,6 +43,7 @@ add_dyad_individual_columns <- function(data) {
   decomposition <- construct_dyad_predictor_decompositions(data, "dim")
   out <- decomposition$data
   attr(out, "dyadMLM")$dim_predictors <- decomposition$predictors
+  out <- record_generated_columns(out, decomposition$column_plan)
 
   out
 }
@@ -64,10 +65,6 @@ construct_dyad_predictor_decompositions <- function(data, model_family = "dim") 
     deviation_column = character(),
     dyad_decomposition_level = character()
   )
-
-  if (nrow(temporal_decompositions) == 0) {
-    return(list(data = data, predictors = predictors))
-  }
 
   out <- data
 
@@ -116,16 +113,20 @@ construct_dyad_predictor_decompositions <- function(data, model_family = "dim") 
       predictor = predictors$predictor,
       temporal_component = predictors$component,
       lag = predictors$lag,
-      model_family = model_family,
-      column_role = "dyad_mean"
+      model_family = rep(model_family, nrow(predictors)),
+      column_role = rep("dyad_mean", nrow(predictors)),
+      variable_role = rep("predictor", nrow(predictors)),
+      source_column = predictors$source_column
     ),
     tibble::tibble(
       target = predictors$deviation_column,
       predictor = predictors$predictor,
       temporal_component = predictors$component,
       lag = predictors$lag,
-      model_family = model_family,
-      column_role = "within_dyad_deviation"
+      model_family = rep(model_family, nrow(predictors)),
+      column_role = rep("within_dyad_deviation", nrow(predictors)),
+      variable_role = rep("predictor", nrow(predictors)),
+      source_column = predictors$source_column
     )
   )
   validate_generated_column_plan(out, decomposition_plan)
@@ -160,7 +161,11 @@ construct_dyad_predictor_decompositions <- function(data, model_family = "dim") 
     }
   }
 
-  list(data = out, predictors = predictors)
+  list(
+    data = out,
+    predictors = predictors,
+    column_plan = decomposition_plan
+  )
 }
 
 make_dyad_predictor_column_stem <- function(predictor, component, source_col,

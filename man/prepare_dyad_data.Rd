@@ -132,7 +132,8 @@ members of matching exchangeable dyads and \code{0} otherwise, and a \code{dyadM
 attribute containing structural metadata, \code{dyad_compositions}, and
 predictor metadata such as \code{temporal_decompositions}, \code{lag1_predictors},
 \code{apim_predictors}, and \code{dim_predictors}, as well as \code{dsm_predictors} and
-\code{dsm_role_order} when applicable.
+\code{dsm_role_order} when applicable. The \code{generated_columns} table records each
+package-generated column retained in the returned data.
 }
 \description{
 Validates dyadic data, records the structural variables, and adds metadata

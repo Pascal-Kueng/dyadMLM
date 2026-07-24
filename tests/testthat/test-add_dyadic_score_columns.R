@@ -217,7 +217,8 @@ test_that("DSM creates a role contrast without predictors", {
     )
   )
 
-  generated <- dyad_generated_columns(attr(result, "dyadMLM"))
+  generated <- dyad_generated_columns(attr(result, "dyadMLM")) |>
+    dplyr::filter(.data$model_family == "dsm")
   expect_equal(generated$column, ".dy_dsm_role_contrast")
 
   printed <- capture.output(print(result, n = 2))

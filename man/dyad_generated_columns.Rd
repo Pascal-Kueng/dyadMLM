@@ -10,14 +10,12 @@ dyad_generated_columns(meta)
 \item{meta}{The \code{dyadMLM} metadata attribute from a \code{dyadMLM_data} object.}
 }
 \value{
-A tibble with one row per generated temporal predictor, APIM, DIM,
-or DSM column. The \code{lag} column is \code{0} for contemporaneous columns and \code{1}
-for lag-1 columns.
+A tibble with one row per generated column. The \code{lag} column is \code{0}
+for contemporaneous columns and \code{1} for lag-1 columns.
 }
 \description{
-Creates a normalized, one-row-per-column view over temporal predictor, APIM,
-DIM, and DSM columns stored in a \code{dyadMLM} attribute. This is a
-derived lookup table; the model-specific metadata tables remain the source
-records.
+Returns a normalized, one-row-per-column view of the generated columns
+recorded in a \code{dyadMLM} attribute. Shared semantics and display text are
+supplied by \code{generated_column_spec_lookup()}.
 }
 \keyword{internal}
