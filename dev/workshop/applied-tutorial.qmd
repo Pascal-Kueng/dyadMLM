@@ -305,7 +305,7 @@ df <- readRDS("dyadic-person-means.rds") |>
     couple_id, person_id, gender, self_efficacy, total_mvpa
   )
 
-print(df, n = 4, width = 110)
+print(df, n = 4)
 ```
 
 ## What one row represents
