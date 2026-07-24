@@ -2081,6 +2081,7 @@ Turu Stadler
 <li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
+<!-- konsistent wie hier -->
 <div class="subtle">
 <p>Synthesized from <span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span>, <span class="citation" data-cites="ledermannToolboxProgramsRestructure2015">Ledermann &amp; Kenny (<a href="#/references" role="doc-biblioref" onclick>2015</a>)</span>, and <span class="citation" data-cites="stasGivingDyadicData2018">Stas et al. (<a href="#/references" role="doc-biblioref" onclick>2018</a>)</span>.</p>
 </div>
@@ -2149,13 +2150,31 @@ display:block!important;
 <li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
 <li><strong>Prepare the Data</strong></li>
 <li><strong>Check data structure</strong></li>
-<li><strong>Describe measures and simple relationships</strong></li>
+<li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
 <li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 <aside class="notes">
 <p>We have defined a research question, and for this analysis we have decided to distinguish by gender… although this is often just a standard and should be considered carefully too.</p>
+<style type="text/css">
+span.MJX_Assistive_MathML {
+position:absolute!important;
+clip: rect(1px, 1px, 1px, 1px);
+padding: 1px 0 0 0!important;
+border: 0!important;
+height: 1px!important;
+width: 1px!important;
+overflow: hidden!important;
+display:block!important;
+}</style></aside>
+</section></section>
+<section>
+<section id="distinguishable-dyads" class="title-slide slide level1 center">
+<h1>Distinguishable dyads</h1>
+<p>Distinguishing by gender</p>
+<aside class="notes">
+<p>Important: Gender is not always the only choice!</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -2174,7 +2193,7 @@ display:block!important;
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
 <li><span class="text-highlight"><strong>Prepare the Data</strong></span></li>
 <li><strong>Check data structure</strong></li>
-<li><strong>Describe measures and simple relationships</strong></li>
+<li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
 <li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
@@ -2182,10 +2201,6 @@ display:block!important;
 </section>
 <section id="data-preparation-in-r" class="slide level2">
 <h2>Data preparation in R</h2>
-<div class="subtle">
-<p>This dataset is stored as an R object. Other packages provide functions to import various formats, such as: <code>readxl::read_excel()</code>, <code>utils::read.csv()</code>, <code>haven::read_sav()</code>, <code>haven::read_sas()</code></p>
-<p><br></p>
-</div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href></a><span class="fu">library</span>(dplyr) <span class="co"># for easier data-wrangling, exports functions like `select()`</span></span>
 <span id="cb1-2"><a href></a></span>
@@ -2205,6 +2220,10 @@ display:block!important;
 4         2         4 female    2.37        44.5
 # ℹ 68 more rows</code></pre>
 </div>
+</div>
+<div class="subtle">
+<p><br></p>
+<p>This dataset is stored as an R object. Other packages provide functions to import various formats, such as: <code>readxl::read_excel()</code>, <code>utils::read.csv()</code>, <code>haven::read_sav()</code>, <code>haven::read_sas()</code></p>
 </div>
 </section>
 <section id="create-the-required-format" class="slide level2">
@@ -2262,6 +2281,8 @@ display:block!important;
 </div>
 </div></section><section id="create-the-required-format-1" class="slide level2">
 <h2>Create the required format</h2>
+<!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the 
+is_male, is_female, and _actor and _partner variables. -->
 <p>Looking at the columns immediately relevant to us:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -2277,11 +2298,23 @@ display:block!important;
 # ℹ 66 more rows</code></pre>
 </div>
 </div>
-<!-- TODO: color code? -->
+<!-- TODO: color code and prettier printing? -->
 <ul>
 <li><code>x_actor</code> variables are each persons’ own value</li>
 <li><code>x_partner</code> variables are the partners’ value</li>
 </ul>
+</section>
+<section id="workflow-2" class="slide level2">
+<h2>Workflow</h2>
+<ol type="1">
+<li><strong>Define dyads, distinguishability, and research questions</strong></li>
+<li>[<strong>Prepare the Data</strong>]</li>
+<li><span class="text-highlight"><strong>Check data structure</strong></span></li>
+<li><strong>Describe and visualize measures and simple relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
+<li><strong>Visualize, interpret, and report results</strong></li>
+</ol>
 </section>
 <section id="distinguishable-apim" class="slide level2">
 <h2>Distinguishable APIM</h2>

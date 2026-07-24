@@ -278,6 +278,16 @@ and should be considered carefully too.
 
 :::
 
+# Distinguishable dyads
+Distinguishing by gender
+
+:::{.notes}
+
+Important: Gender is not always the only choice! 
+
+:::
+
+
 ## Workflow
 
 1. **Define dyads, distinguishability, and research questions**
@@ -290,14 +300,6 @@ and should be considered carefully too.
 
 ## Data preparation in R
 
-:::{.subtle}
-
-This dataset is stored as an R object. Other packages provide functions to import various formats, such as: `readxl::read_excel()`, `utils::read.csv()`, `haven::read_sav()`, `haven::read_sas()`
-
-<br>
-:::
-
-
 ```{r}
 library(dplyr) # for easier data-wrangling, exports functions like `select()`
 
@@ -308,6 +310,14 @@ df <- readRDS("dyadic-person-means.rds") |>
 
 print(df, n = 4)
 ```
+
+:::{.subtle}
+
+<br>
+
+This dataset is stored as an R object. Other packages provide functions to import various formats, such as: `readxl::read_excel()`, `utils::read.csv()`, `haven::read_sav()`, `haven::read_sas()`
+
+:::
 
 ## Create the required format
 
@@ -329,7 +339,10 @@ print(df_apim)
 
 ```
 
-## Create the required format
+## Create the required format 
+<!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the 
+is_male, is_female, and _actor and _partner variables. -->
+
 
 Looking at the columns immediately relevant to us:
 
@@ -351,11 +364,27 @@ local({
     print(n = 6)
 })
 ```
-<!-- TODO: color code? -->
+<!-- TODO: color code and prettier printing? -->
 
 - `x_actor` variables are each persons' own value
 - `x_partner` variables are the partners' value
 
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the Data**
+2. [**Check data structure**]{.text-highlight}
+3. **Describe and visualize measures and simple relationships**
+4. **Estimate the models**
+5. **Verify estimation, check assumptions, identify influential dyads**
+6. **Visualize, interpret, and report results**
+
+## Check data structure
+
+For example: 
+
+- Describe missingness (MAR analyses, decide on imputation, etc.)
+- Check implausible values / outliers 
 
 ## Distinguishable APIM
 
