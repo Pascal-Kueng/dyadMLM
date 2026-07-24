@@ -64,7 +64,7 @@
 Küng</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/vignettes/dsm.Rmd" class="external-link"><code>vignettes/dsm.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/fix/workshop-model-comparison/vignettes/dsm.Rmd" class="external-link"><code>vignettes/dsm.Rmd</code></a></small>
       <div class="d-none name"><code>dsm.Rmd</code></div>
     </div>
 
@@ -73,6 +73,10 @@ Küng</h4>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
 <span><span class="va">has_glmmTMB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"glmmTMB"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: </span></span>
+<span><span class="co">#&gt; glmmTMB was built with TMB package version 1.9.21</span></span>
+<span><span class="co">#&gt; Current TMB package version is 1.9.23</span></span>
+<span><span class="co">#&gt; Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)</span></span>
 <span><span class="va">dsm_fitted_alt</span> <span class="op">&lt;-</span> <span class="st">"Fitted DSM diagram unavailable."</span></span></code></pre></div>
 <p>This vignette focuses on the Dyadic Score Model (DSM) for
 distinguishable dyads and its relationship to the distinguishable
@@ -90,6 +94,15 @@ overview</a>.</p>
 should be substantively meaningful when the directional coefficients are
 interpreted. Here, <code>c("female", "male")</code> defines every
 difference as female minus male.</p>
+<p>Throughout this cross-sectional example,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{female}}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{male}}</annotation></semantics></math>
+denote provided support after subtracting the same pooled grand mean
+across all members in the analysis sample. Raw scores could instead be
+used if zero is meaningful for that variable in the analysis sample;
+this would change the intercept reference point, but not the slope
+estimates.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
@@ -117,7 +130,7 @@ difference as female minus male.</p>
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .dy_composition              inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .dy_composition_role         composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}           composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .dy_is_{role}                composition-role indicator columns</span></span>
 <span><span class="co">#&gt; #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
 <span><span class="co">#&gt; #                                role and -0.5 for the second declared role</span></span>
 <span><span class="co">#&gt; #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
@@ -134,22 +147,15 @@ difference as female minus male.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_dsm_role_contrast &lt;dbl&gt;, .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female &lt;dbl&gt;, .dy_is_male &lt;dbl&gt;, .dy_dsm_role_contrast &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>For predictor values
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{female}}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{male}}</annotation></semantics></math>,
-<code>dyadMLM</code> then creates:</p>
+<p>With this notation, <code>dyadMLM</code> creates the equivalent
+coordinates:</p>
 <ul>
 <li><p><code>.dy_provided_support_dyad_mean_gmc</code>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub></mrow><annotation encoding="application/x-tex">=
-\frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X</annotation></semantics></math>
-(with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
-representing the sample grand mean of the dyad-level predictor
-means)</p></li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">=
+\frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2}</annotation></semantics></math></p></li>
 <li><p><code>.dy_provided_support_within_dyad_diff</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">= X_{\mathrm{female}} - X_{\mathrm{male}}</annotation></semantics></math></p></li>
 <li><p><code>.dy_dsm_role_contrast</code>
@@ -158,8 +164,11 @@ for female and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">-0.5</annotation></semantics></math>
 for male.</p></li>
 </ul>
-<p>The dyad mean and signed difference are repeated on both member rows.
-The outcome remains unchanged and no transformation is needed.</p>
+<p>The function obtains the first coordinate by grand-mean centering the
+dyad means calculated from the original scores. The common centering
+shift cancels from the signed difference. Both coordinates are repeated
+on the member rows; the outcome remains unchanged and needs no
+transformation.</p>
 </div>
 <div class="section level2">
 <h2 id="cross-sectional-gaussian-dsm">Cross-Sectional Gaussian DSM<a class="anchor" aria-label="anchor" href="#cross-sectional-gaussian-dsm"></a>
@@ -269,15 +278,17 @@ below:</p>
 estimates the same paths as the conventional score-based DSM <span class="citation">(Iida et al. 2018)</span>.</p>
 <p>In the conventional score-based representation, the
 <strong>predictors</strong> are decomposed in the same way:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>X</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><mo>=</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>X</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><mo>=</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 X_{\mathrm{mean}}
-= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X,
+= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2},
 \qquad
-X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}},
+X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}}.
 </annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
-is the sample grand mean of the dyad-level predictor means.</p>
+<p>Here the two member predictors already share the pooled grand-mean
+reference, so
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{mean}}</annotation></semantics></math>
+is grand-mean centered and the common shift cancels from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><annotation encoding="application/x-tex">X_{\mathrm{diff}}</annotation></semantics></math>.</p>
 <p>The <strong>outcomes</strong> are also decomposed:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>Y</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>+</mo><msub><mi>Y</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>Y</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi></mrow></msub><mo>=</mo><msub><mi>Y</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>−</mo><msub><mi>Y</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 Y_{\mathrm{mean}} = \frac{Y_{\mathrm{female}} + Y_{\mathrm{male}}}{2},
@@ -441,7 +452,23 @@ model.</p>
 <span>  model_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dsm"</span>, <span class="st">"apim"</span><span class="op">)</span>,</span>
 <span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
 <span>  dsm_role_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"male"</span>, <span class="st">"female"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">provided_support_grand_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_actor</span>,</span>
+<span>    <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_partner</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Use one pooled centering constant for both APIM predictor columns.</span></span>
+<span><span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_actor</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_actor</span> <span class="op">-</span></span>
+<span>  <span class="va">provided_support_grand_mean</span></span>
+<span><span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_partner</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_partner</span> <span class="op">-</span></span>
+<span>  <span class="va">provided_support_grand_mean</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsm_model_inverted</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
@@ -542,21 +569,21 @@ associations <span class="citation">(Iida et al. 2018)</span>.</p>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    <span class="co"># Role-specific intercepts</span></span>
 <span>    <span class="fl">0</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_female_x_male_male</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific actor effects</span></span>
-<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_provided_support_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_provided_support_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female</span><span class="op">:</span><span class="va">.dy_provided_support_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_male</span><span class="op">:</span><span class="va">.dy_provided_support_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific partner effects</span></span>
-<span>    <span class="va">.dy_is_female_x_male_female</span><span class="op">:</span><span class="va">.dy_provided_support_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_female_x_male_male</span><span class="op">:</span><span class="va">.dy_provided_support_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_female</span><span class="op">:</span><span class="va">.dy_provided_support_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.dy_is_male</span><span class="op">:</span><span class="va">.dy_provided_support_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific Gaussian residual covariance structure</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
-<span>         <span class="va">.dy_is_female_x_male_female</span> <span class="op">+</span></span>
-<span>         <span class="va">.dy_is_female_x_male_male</span></span>
+<span>         <span class="va">.dy_is_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.dy_is_male</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -634,19 +661,17 @@ a_{22}
         + b_{\mathrm{difference},\mathrm{male}}}{2}.
 \end{aligned}
 </annotation></semantics></math></p>
-<p>The APIM predictors retain their original scale, whereas the DSM
-predictor level is grand-mean centered. Keeping the raw APIM predictors
-on their original scale preserves their reference values; the centering
-difference is handled explicitly in the intercept transformation. If
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>X</mi></msub><annotation encoding="application/x-tex">\mu_X</annotation></semantics></math>
-is the grand mean subtracted from the DSM predictor level, the
-intercepts transform as</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mn>10</mn></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>2</mn></mfrac><mo>+</mo><msub><mi>μ</mi><mi>X</mi></msub><msub><mi>a</mi><mn>11</mn></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>a</mi><mn>20</mn></msub><mo>=</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>μ</mi><mi>X</mi></msub><msub><mi>a</mi><mn>21</mn></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
-a_{10}
-= \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2} + \mu_X a_{11},
+<p>Grand-mean centering both APIM predictor columns with the same pooled
+constant aligns their zero point with the DSM predictor mean. The
+intercepts therefore transform as</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mn>10</mn></msub><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>+</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>a</mi><mn>20</mn></msub><mo>=</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+a_{10} = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2},
 \qquad
-a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}} + \mu_X a_{21}.
+a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}}.
 </annotation></semantics></math></p>
+<p>With raw APIM predictors, the slope transformations would be
+unchanged, but the intercept transformation would additionally need to
+account for the different zero point.</p>
 <p>For the reverse slope transformation, first recover the role-specific
 actor-plus-partner and actor-minus-partner combinations:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>11</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">m</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>11</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>22</mn></msub><mo>+</mo><mn>2</mn><msub><mi>a</mi><mn>12</mn></msub><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>b</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi></mrow><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>a</mi><mn>22</mn></msub><mo>−</mo><mn>2</mn><msub><mi>a</mi><mn>12</mn></msub><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
@@ -673,19 +698,17 @@ b_{\mathrm{partner},r}
 = \frac{b_{\mathrm{sum},r} - b_{\mathrm{difference},r}}{2}.
 </annotation></semantics></math></p>
 <p>The intercepts transform back as</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>20</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mn>11</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
-b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2}
-- \mu_X\left(a_{11} + \frac{a_{21}}{2}\right),
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>+</mo><mfrac><msub><mi>a</mi><mn>20</mn></msub><mn>2</mn></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
+b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2},
 </annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>20</mn></msub><mn>2</mn></mfrac><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mn>11</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>21</mn></msub><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
-b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}
-- \mu_X\left(a_{11} - \frac{a_{21}}{2}\right).
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>=</mo><msub><mi>a</mi><mn>10</mn></msub><mo>−</mo><mfrac><msub><mi>a</mi><mn>20</mn></msub><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}.
 </annotation></semantics></math></p>
 <p>The following comparison applies the APIM-to-DSM transformation to
 all six fixed effects:</p>
 <table class="table">
-<caption>APIM-to-DSM fixed-effect transformation (centering constant =
-4.909).</caption>
+<caption>APIM-to-DSM fixed-effect transformation with pooled
+grand-mean-centered actor and partner predictors.</caption>
 <thead><tr class="header">
 <th align="left">DSM path</th>
 <th align="right">From APIM transformation</th>
@@ -823,7 +846,7 @@ models and their cautions, see the <a href="apim.html#dynamic-models">dynamic IL
 <span><span class="co">#&gt; # Added columns:</span></span>
 <span><span class="co">#&gt; #   .dy_composition                  inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .dy_composition_role             composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}               composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .dy_is_{role}                    composition-role indicator columns</span></span>
 <span><span class="co">#&gt; #   .dy_{pred}_cwp                   within-person predictor: momentary</span></span>
 <span><span class="co">#&gt; #                                    deviations from each person's usual level</span></span>
 <span><span class="co">#&gt; #   .dy_{pred}_cbp                   between-person predictor: stable</span></span>
@@ -856,9 +879,9 @@ models and their cautions, see the <a href="apim.html#dynamic-models">dynamic IL
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        2        1        1 male   female_x_male         5.70             5.18</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,356 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cwp &lt;dbl&gt;, .dy_provided_support_cbp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_dsm_role_contrast &lt;dbl&gt;, .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female &lt;dbl&gt;, .dy_is_male &lt;dbl&gt;, .dy_provided_support_cwp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cbp &lt;dbl&gt;, .dy_dsm_role_contrast &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cwp_dyad_mean &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cbp_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <p>The example below estimates same-day associations between support and

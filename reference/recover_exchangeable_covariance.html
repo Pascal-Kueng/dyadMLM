@@ -48,7 +48,7 @@ exchangeable APIM vignette."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Recover member-level residual covariance from exchangeable random-effect blocks</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/R/backtransform_residual_covariance.R" class="external-link"><code>R/backtransform_residual_covariance.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/fix/workshop-model-comparison/R/backtransform_residual_covariance.R" class="external-link"><code>R/backtransform_residual_covariance.R</code></a></small>
       <div class="d-none name"><code>recover_exchangeable_covariance.Rd</code></div>
     </div>
 
@@ -111,9 +111,10 @@ are posterior-draw by coefficient by coefficient arrays.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Automatic matching recognizes exact <code>.dy_member_contrast_*_arbitrary</code> and
-legacy <code>.dy_diff_*_arbitrary</code> coefficient names
-and first looks for the corresponding <code>.dy_is_*</code> shared block. It requires
+    <p>Automatic matching recognizes the compact <code>.dy_member_contrast_arbitrary</code>,
+composition-qualified <code>.dy_member_contrast_*_arbitrary</code>, and legacy
+<code>.dy_diff_*_arbitrary</code> coefficient names and first looks for the
+corresponding <code>.dy_is_*</code> shared block. It requires
 the two blocks to use the same grouping factor and the same underlying
 terms. Most models fitted with <code>dyadMLM</code>-generated columns therefore need
 only:</p>
@@ -139,15 +140,15 @@ time slope and the same-occasion partner residual covariance:</p>
 <span>  block_pairings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    dyad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      shared_block <span class="op">=</span> <span class="st">"(1 + diaryday | coupleID)"</span>,</span>
-<span>      difference_block <span class="op">=</span> <span class="st">"(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)"</span>,</span>
+<span>      difference_block <span class="op">=</span> <span class="st">"(0 + .dy_member_contrast_arbitrary | coupleID)"</span>,</span>
 <span>      difference_indicator <span class="op">=</span></span>
-<span>        <span class="st">".dy_member_contrast_assumed_exchangeable_arbitrary"</span></span>
+<span>        <span class="st">".dy_member_contrast_arbitrary"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    same_occasion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      shared_block <span class="op">=</span> <span class="st">"(1 | coupleID:diaryday)"</span>,</span>
-<span>      difference_block <span class="op">=</span> <span class="st">"(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)"</span>,</span>
+<span>      difference_block <span class="op">=</span> <span class="st">"(0 + .dy_member_contrast_arbitrary | coupleID:diaryday)"</span>,</span>
 <span>      difference_indicator <span class="op">=</span></span>
-<span>        <span class="st">".dy_member_contrast_assumed_exchangeable_arbitrary"</span></span>
+<span>        <span class="st">".dy_member_contrast_arbitrary"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre><p></p></div>
@@ -249,7 +250,7 @@ version.</p></div>
 <span class="r-in"><span>  <span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_member_contrast_female_x_female_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.dy_member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>    data <span class="op">=</span> <span class="va">example_data</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
@@ -260,7 +261,7 @@ version.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pair `pair_1`</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Shared:     us(1 | coupleID)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Difference: us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Difference: us(0 + .dy_member_contrast_arbitrary | coupleID)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Variance-covariance:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        1     2    </span>

@@ -11,7 +11,8 @@ infer_dyad_compositions(
   seed = NULL,
   keep_compositions = NULL,
   set_exchangeable_compositions = NULL,
-  pool_compositions = NULL
+  pool_compositions = NULL,
+  short_colnames = TRUE
 )
 ```
 
@@ -42,6 +43,11 @@ infer_dyad_compositions(
   Optional named list that pools exchangeable dyad compositions into
   user-named final composition labels. Each pool must resolve to at
   least two distinct observed compositions.
+
+- short_colnames:
+
+  Whether to use shorter composition-dependent generated column names
+  when the final data contain one composition.
 
 ## Value
 

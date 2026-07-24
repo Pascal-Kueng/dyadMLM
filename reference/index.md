@@ -4,6 +4,8 @@
 
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   : Prepare dyadic data for multilevel models
+- [`summary(`*`<dyadMLM_data>`*`)`](https://pascal-kueng.github.io/dyadMLM/reference/summary.dyadMLM_data.md)
+  : Summarize prepared dyadic data
 - [`compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.md)
   : Compare nested glmmTMB models fitted to equivalent data
 - [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)

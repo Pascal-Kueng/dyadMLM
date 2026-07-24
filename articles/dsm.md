@@ -4,6 +4,10 @@
 
 library(dyadMLM)
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
+#> Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: 
+#> glmmTMB was built with TMB package version 1.9.21
+#> Current TMB package version is 1.9.23
+#> Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
 dsm_fitted_alt <- "Fitted DSM diagram unavailable."
 ```
 
@@ -26,6 +30,13 @@ A DSM requires an explicitly declared direction. This direction should
 be substantively meaningful when the directional coefficients are
 interpreted. Here, `c("female", "male")` defines every difference as
 female minus male.
+
+Throughout this cross-sectional example, $`X_{\mathrm{female}}`$ and
+$`X_{\mathrm{male}}`$ denote provided support after subtracting the same
+pooled grand mean across all members in the analysis sample. Raw scores
+could instead be used if zero is meaningful for that variable in the
+analysis sample; this would change the intercept reference point, but
+not the slope estimates.
 
 ``` r
 
@@ -55,7 +66,7 @@ print(cross_dsm_data, n = 4)
 #> # Added columns:
 #> #   .dy_composition              inferred dyad composition
 #> #   .dy_composition_role         composition-specific member role
-#> #   .dy_is_{comp-role}           composition-role indicator columns
+#> #   .dy_is_{role}                composition-role indicator columns
 #> #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared
 #> #                                role and -0.5 for the second declared role
 #> #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
@@ -72,26 +83,26 @@ print(cross_dsm_data, n = 4)
 #> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
 #> # ℹ 7 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_dsm_role_contrast <dbl>, .dy_provided_support_dyad_mean_gmc <dbl>,
+#> #   .dy_is_female <dbl>, .dy_is_male <dbl>, .dy_dsm_role_contrast <dbl>,
+#> #   .dy_provided_support_dyad_mean_gmc <dbl>,
 #> #   .dy_provided_support_within_dyad_diff <dbl>
 ```
 
-For predictor values $`X_{\mathrm{female}}`$ and $`X_{\mathrm{male}}`$,
-`dyadMLM` then creates:
+With this notation, `dyadMLM` creates the equivalent coordinates:
 
 - `.dy_provided_support_dyad_mean_gmc` $`=
-  \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X`$ (with
-  $`\mu_X`$ representing the sample grand mean of the dyad-level
-  predictor means)
+  \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2}`$
 
 - `.dy_provided_support_within_dyad_diff`
   $`= X_{\mathrm{female}} - X_{\mathrm{male}}`$
 
 - `.dy_dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
 
-The dyad mean and signed difference are repeated on both member rows.
-The outcome remains unchanged and no transformation is needed.
+The function obtains the first coordinate by grand-mean centering the
+dyad means calculated from the original scores. The common centering
+shift cancels from the signed difference. Both coordinates are repeated
+on the member rows; the outcome remains unchanged and needs no
+transformation.
 
 ## Cross-Sectional Gaussian DSM
 
@@ -217,13 +228,14 @@ decomposed in the same way:
 
 ``` math
 X_{\mathrm{mean}}
-= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X,
+= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2},
 \qquad
-X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}},
+X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}}.
 ```
 
-where $`\mu_X`$ is the sample grand mean of the dyad-level predictor
-means.
+Here the two member predictors already share the pooled grand-mean
+reference, so $`X_{\mathrm{mean}}`$ is grand-mean centered and the
+common shift cancels from $`X_{\mathrm{diff}}`$.
 
 The **outcomes** are also decomposed:
 
@@ -339,6 +351,22 @@ cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   keep_compositions = "female-male",
   dsm_role_order = c("male", "female")
 )
+
+provided_support_grand_mean <- mean(
+  c(
+    cross_dsm_data_inverted$.dy_provided_support_actor,
+    cross_dsm_data_inverted$.dy_provided_support_partner
+  ),
+  na.rm = TRUE
+)
+
+# Use one pooled centering constant for both APIM predictor columns.
+cross_dsm_data_inverted$.dy_provided_support_actor <-
+  cross_dsm_data_inverted$.dy_provided_support_actor -
+  provided_support_grand_mean
+cross_dsm_data_inverted$.dy_provided_support_partner <-
+  cross_dsm_data_inverted$.dy_provided_support_partner -
+  provided_support_grand_mean
 ```
 
 ``` r
@@ -413,21 +441,21 @@ apim_model <- glmmTMB::glmmTMB(
   closeness ~
     # Role-specific intercepts
     0 +
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
+    .dy_is_female +
+    .dy_is_male +
 
     # Role-specific actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_actor +
+    .dy_is_female:.dy_provided_support_actor +
+    .dy_is_male:.dy_provided_support_actor +
 
     # Role-specific partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_partner +
+    .dy_is_female:.dy_provided_support_partner +
+    .dy_is_male:.dy_provided_support_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
-         .dy_is_female_x_male_female +
-         .dy_is_female_x_male_male
+         .dy_is_female +
+         .dy_is_male
        | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -502,19 +530,19 @@ a_{22}
 \end{aligned}
 ```
 
-The APIM predictors retain their original scale, whereas the DSM
-predictor level is grand-mean centered. Keeping the raw APIM predictors
-on their original scale preserves their reference values; the centering
-difference is handled explicitly in the intercept transformation. If
-$`\mu_X`$ is the grand mean subtracted from the DSM predictor level, the
-intercepts transform as
+Grand-mean centering both APIM predictor columns with the same pooled
+constant aligns their zero point with the DSM predictor mean. The
+intercepts therefore transform as
 
 ``` math
-a_{10}
-= \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2} + \mu_X a_{11},
+a_{10} = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2},
 \qquad
-a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}} + \mu_X a_{21}.
+a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}}.
 ```
+
+With raw APIM predictors, the slope transformations would be unchanged,
+but the intercept transformation would additionally need to account for
+the different zero point.
 
 For the reverse slope transformation, first recover the role-specific
 actor-plus-partner and actor-minus-partner combinations:
@@ -547,13 +575,11 @@ b_{\mathrm{partner},r}
 The intercepts transform back as
 
 ``` math
-b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2}
-- \mu_X\left(a_{11} + \frac{a_{21}}{2}\right),
+b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2},
 ```
 
 ``` math
-b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}
-- \mu_X\left(a_{11} - \frac{a_{21}}{2}\right).
+b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}.
 ```
 
 The following comparison applies the APIM-to-DSM transformation to all
@@ -568,8 +594,8 @@ six fixed effects:
 | a21      |                    0.719 |          0.719 |
 | a22      |                    0.924 |          0.924 |
 
-APIM-to-DSM fixed-effect transformation (centering constant = 4.909).
-{.table}
+APIM-to-DSM fixed-effect transformation with pooled grand-mean-centered
+actor and partner predictors. {.table}
 
 ### Random-effect transformation
 
@@ -678,7 +704,7 @@ print(ild_dsm_data, n = 4)
 #> # Added columns:
 #> #   .dy_composition                  inferred dyad composition
 #> #   .dy_composition_role             composition-specific member role
-#> #   .dy_is_{comp-role}               composition-role indicator columns
+#> #   .dy_is_{role}                    composition-role indicator columns
 #> #   .dy_{pred}_cwp                   within-person predictor: momentary
 #> #                                    deviations from each person's usual level
 #> #   .dy_{pred}_cbp                   between-person predictor: stable
@@ -711,9 +737,9 @@ print(ild_dsm_data, n = 4)
 #> 4        2        1        1 male   female_x_male         5.70             5.18
 #> # ℹ 3,356 more rows
 #> # ℹ 13 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_provided_support_cwp <dbl>, .dy_provided_support_cbp <dbl>,
-#> #   .dy_dsm_role_contrast <dbl>, .dy_provided_support_dyad_mean_gmc <dbl>,
+#> #   .dy_is_female <dbl>, .dy_is_male <dbl>, .dy_provided_support_cwp <dbl>,
+#> #   .dy_provided_support_cbp <dbl>, .dy_dsm_role_contrast <dbl>,
+#> #   .dy_provided_support_dyad_mean_gmc <dbl>,
 #> #   .dy_provided_support_cwp_dyad_mean <dbl>,
 #> #   .dy_provided_support_cbp_dyad_mean <dbl>, …
 ```

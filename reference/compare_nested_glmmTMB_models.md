@@ -32,7 +32,7 @@ Both model calls must use named data-frame objects that remain available
 when the models are compared. The checks assume these objects have not
 been modified since fitting. All ordinary data columns must be
 identical, including their types and attributes. For `dyadMLM_data`,
-generated `.dy_` columns may differ, but the original columns must be
+package-generated columns may differ, but the original columns must be
 identical. Ordinary and prepared data may be compared with each other.
 Dyad metadata are checked when both models use `dyadMLM_data`. The
 function also checks fitted rows, outcomes, weights and offsets, model

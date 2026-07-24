@@ -44,7 +44,7 @@ shown first in the result."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Compare nested glmmTMB models fitted to equivalent data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/R/compare_dyad_models.R" class="external-link"><code>R/compare_dyad_models.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/fix/workshop-model-comparison/R/compare_dyad_models.R" class="external-link"><code>R/compare_dyad_models.R</code></a></small>
       <div class="d-none name"><code>compare_nested_glmmTMB_models.Rd</code></div>
     </div>
 
@@ -81,7 +81,7 @@ test at the 5% significance level.</p>
     <p>Both model calls must use named data-frame objects that remain available when
 the models are compared. The checks assume these objects have not been
 modified since fitting. All ordinary data columns must be identical,
-including their types and attributes. For <code>dyadMLM_data</code>, generated <code>.dy_</code>
+including their types and attributes. For <code>dyadMLM_data</code>, package-generated
 columns may differ, but the original columns must be identical. Ordinary and
 prepared data may be compared with each other. Dyad metadata are checked when
 both models use <code>dyadMLM_data</code>. The function also checks fitted rows,

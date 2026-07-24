@@ -20,6 +20,10 @@
   `.dy_member_contrast_{composition}_arbitrary`. Covariance recovery
   continues to recognize legacy contrast names in previously fitted
   models.
+- [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+  now uses shorter composition-column names when the final data contain
+  one composition. Set `short_colnames = FALSE` to retain
+  composition-qualified names.
 - Renamed the package from `interdep` to `dyadMLM`; package-generated
   columns now use the `.dy_` prefix instead of `.i_`.
 - Added validation and preparation of cross-sectional and intensive

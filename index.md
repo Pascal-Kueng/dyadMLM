@@ -34,19 +34,15 @@ DIM workflows, with models fitted primarily using `brms`
 
 ## Installation
 
-You can install the released version of `dyadMLM` from CRAN with:
+You can install the development version with:
 
 ``` r
 
-install.packages("dyadMLM")
-```
-
-You can install the development version from GitHub with:
-
-``` r
-
-# install.packages("pak")
-pak::pak("Pascal-Kueng/dyadMLM")
+install.packages("dyadMLM", repos = c(
+  "https://pascal-kueng.r-universe.dev",
+  "https://cloud.r-project.org"
+  )
+)
 ```
 
 ## Simple Cross-Sectional Example
@@ -81,7 +77,7 @@ print(prepared_data, n = 4)
 #> # Added columns:
 #> #   .dy_composition       inferred dyad composition
 #> #   .dy_composition_role  composition-specific member role
-#> #   .dy_is_{comp-role}    composition-role indicator columns
+#> #   .dy_is_{role}         composition-role indicator columns
 #> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
 #> #                         values
 #> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
@@ -96,8 +92,8 @@ print(prepared_data, n = 4)
 #> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
 #> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
+#> #   .dy_is_female <dbl>, .dy_is_male <dbl>, .dy_provided_support_actor <dbl>,
+#> #   .dy_provided_support_partner <dbl>
 ```
 
 The prepared data contains the composition indicators and APIM
@@ -111,19 +107,19 @@ simple_apim <- glmmTMB::glmmTMB(
   closeness ~
 
     # Gender-specific intercepts
-    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
+    0 + .dy_is_female + .dy_is_male +
 
     # Gender-specific actor effects
-    .dy_provided_support_actor:.dy_is_female_x_male_female +
-    .dy_provided_support_actor:.dy_is_female_x_male_male +
+    .dy_provided_support_actor:.dy_is_female +
+    .dy_provided_support_actor:.dy_is_male +
 
     # Gender-specific partner effects
-    .dy_provided_support_partner:.dy_is_female_x_male_female +
-    .dy_provided_support_partner:.dy_is_female_x_male_male +
+    .dy_provided_support_partner:.dy_is_female +
+    .dy_provided_support_partner:.dy_is_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure
-    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID),
+    us(0 + .dy_is_female + .dy_is_male | coupleID),
 
   # With the residual covariance represented by the dyad-level
   # random effects above, the Gaussian residual dispersion is fixed near zero.
