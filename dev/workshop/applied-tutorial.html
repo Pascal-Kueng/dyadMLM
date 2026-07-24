@@ -2078,7 +2078,7 @@ Turu Stadler
 <li><strong>Check data structure</strong></li>
 <li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 <!-- konsistent wie hier -->
@@ -2100,6 +2100,22 @@ width: 1px!important;
 overflow: hidden!important;
 display:block!important;
 }</style></aside>
+</section>
+<section id="one-possible-workflow-1" class="slide level2">
+<h2>One possible workflow</h2>
+<ol type="1">
+<li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
+<li><strong>Prepare the Data</strong></li>
+<li><strong>Check data structure</strong></li>
+<li><strong>Describe and visualize measures and simple relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Visualize, interpret, and report results</strong></li>
+</ol>
+<!-- konsistent wie hier -->
+<div class="subtle">
+<p>Synthesized from <span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span>, <span class="citation" data-cites="ledermannToolboxProgramsRestructure2015">Ledermann &amp; Kenny (<a href="#/references" role="doc-biblioref" onclick>2015</a>)</span>, and <span class="citation" data-cites="stasGivingDyadicData2018">Stas et al. (<a href="#/references" role="doc-biblioref" onclick>2018</a>)</span>.</p>
+</div>
 </section>
 <section id="the-dataset" class="slide level2">
 <h2>The Dataset</h2>
@@ -2148,15 +2164,15 @@ display:block!important;
 <h2>Workflow</h2>
 <ol type="1">
 <li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
-<li><strong>Prepare the Data</strong></li>
-<li><strong>Check data structure</strong></li>
-<li><strong>Describe and visualize measures and simple relationships</strong></li>
+<li><strong>Prepare the data and verify the dyadic structure</strong></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 <aside class="notes">
-<p>We have defined a research question, and for this analysis we have decided to distinguish by gender… although this is often just a standard and should be considered carefully too.</p>
+<p>Almost done with first step, we still have to decide on distinguishability. In our data, probably makes sense to distinguish by gender. Not always!</p>
+<p>-&gt; Gender, but TEST!</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -2191,16 +2207,15 @@ display:block!important;
 <h2>Workflow</h2>
 <ol type="1">
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
-<li><span class="text-highlight"><strong>Prepare the Data</strong></span></li>
-<li><strong>Check data structure</strong></li>
-<li><strong>Describe and visualize measures and simple relationships</strong></li>
+<li><span class="text-highlight"><strong>Prepare the data and verify the dyadic structure</strong></span></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 </section>
-<section id="data-preparation-in-r" class="slide level2">
-<h2>Data preparation in R</h2>
+<section id="load-and-inspect-the-raw-data" class="slide level2">
+<h2>Load and inspect the raw data</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href></a><span class="fu">library</span>(dplyr) <span class="co"># for easier data-wrangling, exports functions like `select()`</span></span>
 <span id="cb1-2"><a href></a></span>
@@ -2225,9 +2240,34 @@ display:block!important;
 <p><br></p>
 <p>This dataset is stored as an R object. Other packages provide functions to import various formats, such as: <code>readxl::read_excel()</code>, <code>utils::read.csv()</code>, <code>haven::read_sav()</code>, <code>haven::read_sas()</code></p>
 </div>
+<aside class="notes">
+<p>Manual inspection at each step is important!</p>
+<p>Example that Lilly told me: weird associations, until discovered that missing values were coded as 99, in a software that didn’t recognize this as a missing value.</p>
+<style type="text/css">
+span.MJX_Assistive_MathML {
+position:absolute!important;
+clip: rect(1px, 1px, 1px, 1px);
+padding: 1px 0 0 0!important;
+border: 0!important;
+height: 1px!important;
+width: 1px!important;
+overflow: hidden!important;
+display:block!important;
+}</style></aside>
 </section>
-<section id="create-the-required-format" class="slide level2">
-<h2>Create the required format</h2>
+<section id="validate-the-structure-and-create-the-correct-format" class="slide level2">
+<h2>Validate the structure and create the correct format</h2>
+<p>Validate:</p>
+<ul>
+<li>no dyad with more than two members,</li>
+<li>each dyad-member combination occurs only once (for cross-sectional data),</li>
+<li>gender labels are present and consistent</li>
+<li>you only have the type of dyad you expect</li>
+</ul>
+<p>The <code>dyadMLM</code> package helps by validating these aspects and preparing the correct data structure.</p>
+</section>
+<section id="create-the-required-format-and-validate-dyadic-structure" class="slide level2">
+<h2>Create the required format and validate dyadic structure</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href></a><span class="fu">library</span>(dyadMLM) <span class="co"># for easier data-wrangling</span></span>
 <span id="cb3-2"><a href></a></span>
@@ -2244,7 +2284,7 @@ display:block!important;
 </div>
 
 </section>
-<section id="create-the-required-format-output" class="slide level2 output-location-slide"><h2>Create the required format</h2><div class="cell output-location-slide">
+<section id="create-the-required-format-and-validate-dyadic-structure-output" class="slide level2 output-location-slide"><h2>Create the required format and validate dyadic structure</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># dyadMLM data
 # Rows: 72 | Dyads: 36 | Intensive longitudinal: no
@@ -2279,7 +2319,17 @@ display:block!important;
 # ℹ 5 more variables: .dy_composition_role &lt;fct&gt;, .dy_is_female &lt;dbl&gt;,
 #   .dy_is_male &lt;dbl&gt;, .dy_efficacy_actor &lt;dbl&gt;, .dy_efficacy_partner &lt;dbl&gt;</code></pre>
 </div>
-</div></section><section id="create-the-required-format-1" class="slide level2">
+</div></section><section id="validated-the-dyadic-structure" class="slide level2">
+<h2>Validated the dyadic structure</h2>
+<p>Check things like:</p>
+<ul>
+<li>no dyad with more than two members,</li>
+<li>each dyad-member combination occurs only once (for cross-sectional data),</li>
+<li>gender labels are present and consistent</li>
+</ul>
+<p><code>prepare_dyad_data()</code> already checked these and would produce a warning or informative error if the structure had issues.</p>
+</section>
+<section id="create-the-required-format" class="slide level2">
 <h2>Create the required format</h2>
 <!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the 
 is_male, is_female, and _actor and _partner variables. -->
@@ -2308,13 +2358,20 @@ is_male, is_female, and _actor and _partner variables. -->
 <h2>Workflow</h2>
 <ol type="1">
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
-<li>[<strong>Prepare the Data</strong>]</li>
-<li><span class="text-highlight"><strong>Check data structure</strong></span></li>
-<li><strong>Describe and visualize measures and simple relationships</strong></li>
+<li><strong>Prepare the data and verify the dyadic structure</strong></li>
+<li><span class="text-highlight"><strong>Describe and visualize measures and observed relationships</strong></span></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
+</section>
+<section id="describe-and-visualize-measures-and-observed-relationships" class="slide level2">
+<h2>Describe and visualize measures and observed relationships</h2>
+<p>For example:</p>
+<ul>
+<li>Describe missingness (MAR analyses, decide on imputation, etc.)</li>
+<li>Check implausible values / outliers</li>
+</ul>
 </section>
 <section id="distinguishable-apim" class="slide level2">
 <h2>Distinguishable APIM</h2>

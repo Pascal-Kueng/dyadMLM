@@ -194,7 +194,7 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 2. **Check data structure**
 3. **Describe and visualize measures and simple relationships**
 4. **Estimate the models**
-5. **Verify estimation, check assumptions, identify influential dyads**
+5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
 <!-- konsistent wie hier -->
@@ -207,6 +207,22 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 - In this example we will use the same dataset that we already used in Part I
 
 :::
+
+## One possible workflow
+
+1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
+2. **Prepare the Data**
+2. **Check data structure**
+3. **Describe and visualize measures and simple relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
+<!-- konsistent wie hier -->
+::: {.subtle}
+Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and @stasGivingDyadicData2018.
+:::
+
 
 ## The Dataset
 
@@ -266,14 +282,15 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 2. **Prepare the data and verify the dyadic structure**
 3. **Describe and visualize measures and observed relationships**
 4. **Estimate the models**
-5. **Verify estimation, check assumptions, identify influential dyads**
-6. **Visualize, interpret, and report results**
+5. **Verify model adequacy, distinguishability, and robustness**
+7. **Visualize, interpret, and report results**
 
 :::{.notes}
 
-We have defined a research question, and for this analysis we have
-decided to distinguish by gender... although this is often just a standard
-and should be considered carefully too. 
+Almost done with first step, we still have to decide on distinguishability. 
+In our data, probably makes sense to distinguish by gender. Not always!
+
+-> Gender, but TEST!
 
 :::
 
@@ -293,10 +310,10 @@ Important: Gender is not always the only choice!
 2. [**Prepare the data and verify the dyadic structure**]{.text-highlight}
 3. **Describe and visualize measures and observed relationships**
 4. **Estimate the models**
-5. **Verify estimation, check assumptions, identify influential dyads**
+5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
-## Data preparation in R
+## Load and inspect the raw data
 
 ```{r}
 library(dplyr) # for easier data-wrangling, exports functions like `select()`
@@ -317,7 +334,29 @@ This dataset is stored as an R object. Other packages provide functions to impor
 
 :::
 
-## Create the required format
+:::{.notes}
+
+Manual inspection at each step is important! 
+
+Example that Lilly told me: weird associations, until discovered that 
+missing values were coded as 99, in a software that didn't recognize this 
+as a missing value.
+
+:::
+
+## Validate the structure and create the correct format
+
+Validate: 
+
+- no dyad with more than two members,
+- each dyad-member combination occurs only once (for cross-sectional data),
+- gender labels are present and consistent
+- you only have the type of dyad you expect
+
+The `dyadMLM` package helps by validating these aspects and preparing the 
+correct data structure. 
+
+## Create the required format and validate dyadic structure
 
 ```{r}
 #| output-location: slide
@@ -336,6 +375,17 @@ df_apim <- prepare_dyad_data( # exported function from dyadMLM
 print(df_apim)
 
 ```
+
+## Validated the dyadic structure
+
+Check things like: 
+
+- no dyad with more than two members,
+- each dyad-member combination occurs only once (for cross-sectional data),
+- gender labels are present and consistent
+
+`prepare_dyad_data()` already checked these and would produce a warning 
+or informative error if the structure had issues.
 
 ## Create the required format 
 <!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the 
@@ -373,7 +423,7 @@ local({
 2. **Prepare the data and verify the dyadic structure**
 3. [**Describe and visualize measures and observed relationships**]{.text-highlight}
 4. **Estimate the models**
-5. **Verify estimation, check assumptions, identify influential dyads**
+5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
 ## Describe and visualize measures and observed relationships
