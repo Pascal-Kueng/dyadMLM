@@ -298,25 +298,14 @@ This dataset is stored as an R object. Other packages provide functions to impor
 <br>
 
 ```{r}
-df <- readRDS("dyadic-data.rds") # absolute or relative path to file
-
-# For cross-sectional analyses we aggregate
-
-print(df, n = 4)
+df <- readRDS("dyadic-person-means.rds")
 ```
 
-## Data preparation in R
+## What one row represents
 
-Gender ist stored as 1/2, so we recode this as a factor for a nicer representation:
-
-```{r}
-library(dplyr)
-
-df <- df |>
-  mutate( # Mutate function provided by dplyr
-    gender = factor(gender, levels = c(1, 2), labels = c("female", "male"))
-  )
-```
+- One row per person: 76 partners from 38 couples
+- Diary measures are person-level averages across available days
+- `role` is already labeled as `female` or `male`
 
 ## Distinguishable APIM
 
@@ -563,9 +552,7 @@ Short break - initiate package install before you leave
 
 ```{r eval = FALSE}
 
-install.packages(
-  c('dyadMLM', 'wbCorr', 'glmmTMB', 'DHARMa', 'dplyr', 'ggplot2')
-  )
+install.packages(c('dyadMLM', 'wbCorr', 'glmmTMB', 'DHARMa', 'dplyr', 'ggplot2'))
 
 ```
 
@@ -600,3 +587,5 @@ Create exercises with data visalization, etc. Panel plots, histograms
 correlations (wb corr)?
 
 -->
+
+## References

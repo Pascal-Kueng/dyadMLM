@@ -12,3 +12,4 @@
 *.RData
 .~lock.*#
 !/dyadic-data.rds
+!/dyadic-person-means.rds

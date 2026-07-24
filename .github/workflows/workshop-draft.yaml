@@ -13,8 +13,10 @@ permissions:
   contents: write
 
 jobs:
-  deploy-workshop:
+  deploy-site:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     # Match the non-PR deployment group in pkgdown.yaml so two jobs cannot
     # update gh-pages concurrently.
     concurrency:
@@ -22,6 +24,8 @@ jobs:
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-r@v2
 
@@ -46,26 +50,25 @@ jobs:
           quarto render dev/workshop/dyad-day.qmd
           quarto render dev/workshop/applied-tutorial.qmd
 
-      - name: Render the workshop landing page
+      - name: Build site
+        shell: Rscript {0}
         run: |
-          mkdir -p docs/workshop
+          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+
+      - name: Add workshop materials
+        run: |
+          mkdir -p docs/workshop/conceptual docs/workshop/applied
           Rscript -e 'pkgdown::init_site(); pkgdown::render_page(".", "workshop", data = list(pagetitle = "Workshop", description = "Dyadic Data Analysis workshop materials."), path = "workshop/index.html", depth = 1)'
+          cp dev/workshop/dyad-day.html docs/workshop/conceptual/index.html
+          cp dev/workshop/applied-tutorial.html docs/workshop/applied/index.html
+          cp dev/workshop/exercises.Rmd docs/workshop/exercises.Rmd
 
-      - name: Stage the workshop materials
-        run: |
-          mkdir -p _workshop-draft/conceptual _workshop-draft/applied
-          cp docs/workshop/index.html _workshop-draft/index.html
-          cp dev/workshop/dyad-day.html _workshop-draft/conceptual/index.html
-          cp dev/workshop/applied-tutorial.html _workshop-draft/applied/index.html
-          cp dev/workshop/exercises.Rmd _workshop-draft/exercises.Rmd
-
-      - name: Publish the workshop materials
+      - name: Deploy the full branch site
         uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           branch: gh-pages
-          folder: _workshop-draft
-          target-folder: workshop
-          clean: false
+          folder: docs
+          clean: true
           force: false
           attempt-limit: 5
-          commit-message: "Deploy workshop draft from ${{ github.sha }}"
+          commit-message: "Deploy full branch site from ${{ github.sha }}"

@@ -117,36 +117,6 @@ sys.source(
   envir = knitr::knit_global()
 )
 
-# Prepare data --------------------------------------------------
-
-data_file_candidates <- c(
-  "dyadic-data.rds",
-  file.path("dev", "workshop", "dyadic-data.rds")
-)
-data_file <- data_file_candidates[file.exists(data_file_candidates)][1]
-
-if (is.na(data_file)) {
-  stop("Could not find dev/workshop/dyadic-data.rds.")
-}
-
-
-pilot <- readRDS(data_file) |>
-  transmute(
-    couple_id = coupleID,
-    person_id = personID,
-    role = factor(gender, levels = c(1, 2), labels = c("female", "male")),
-    provided_support,
-    received_support,
-    collaborative_planning,
-    exerted_persuasion,
-    experienced_persuasion,
-    self_efficacy,
-    solo_mvpa,
-    joint_mvpa,
-    total_mvpa
-  )
-
-
 # Nice distribution plots ----------------------------------------------
 distribution_plot <- function(data, variables, bin_widths) {
   labels <- c(
@@ -311,25 +281,17 @@ be physically active with greater enjoyment?”
 
 <!-- ca. 1 Minute -->
 
-## Aggregating for cross-sectional examples
+## Person-level data for cross-sectional examples
 
-To show simple dyadic models we aggregate the daily diary data to
-obtain a "cross-sectional" dataset.
+For the cross-sectional examples, we use a prepared person-level version of
+the daily diary data.
 
 ```{r}
-library(dplyr)
-
-pilot_aggregated <- pilot |>
-  group_by(couple_id, person_id) |>
-  summarise(
-    role = first(role),
-    across(where(is.numeric), ~ mean(.x, na.rm = TRUE)),
-    .groups = "drop"
-  )
+pilot_aggregated <- readRDS("dyadic-person-means.rds")
 ```
 
 ::: {.fragment}
-The variables now represent person-level daily averages across the study:
+Each row is one partner. Measures are averages across available diary days:
 
 - `provided_support`: average daily support provided
 - `received_support`: average daily support received
