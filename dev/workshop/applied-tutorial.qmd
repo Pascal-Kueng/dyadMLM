@@ -330,14 +330,25 @@ print(df_apim)
 
 ## Create the expected format
 
-```{r echo = FALSE}
-df_apim |>
-  select(
-    couple_id, person_id, gender, .dy_is_female, .dy_is_male,
-    efficacy, .dy_efficacy_actor, .dy_efficacy_partner, total_mvpa
-  ) |>
-  tibble() |>
-  print(n = 6)
+Looking at the columns immediately relevant to us:
+
+```{r}
+#| echo: false
+
+local({
+  old_options <- options(width = 140)
+  on.exit(options(old_options))
+
+  df_apim |>
+    tibble::as_tibble() |>
+    select(
+      couple_id, person_id, gender,
+      .dy_is_female, .dy_is_male,
+      efficacy, .dy_efficacy_actor,
+      .dy_efficacy_partner
+    ) |>
+    print(n = 6)
+})
 ```
 
 ## Distinguishable APIM
