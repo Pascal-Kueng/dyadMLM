@@ -192,11 +192,12 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 1. **Define dyads, distinguishability, and research questions**
 2. **Prepare the Data**
 2. **Check data structure**
-3. **Describe measures and simple relationships**
+3. **Describe and visualize measures and simple relationships**
 4. **Estimate the models**
 5. **Verify estimation, check assumptions, identify influential dyads**
 6. **Visualize, interpret, and report results**
 
+<!-- konsistent wie hier -->
 ::: {.subtle}
 Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and @stasGivingDyadicData2018.
 :::
@@ -264,7 +265,7 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
 2. **Prepare the Data**
 2. **Check data structure**
-3. **Describe measures and simple relationships**
+3. **Describe and visualize measures and simple relationships**
 4. **Estimate the models**
 5. **Verify estimation, check assumptions, identify influential dyads**
 6. **Visualize, interpret, and report results**
@@ -282,7 +283,7 @@ and should be considered carefully too.
 1. **Define dyads, distinguishability, and research questions**
 2. [**Prepare the Data**]{.text-highlight}
 2. **Check data structure**
-3. **Describe measures and simple relationships**
+3. **Describe and visualize measures and simple relationships**
 4. **Estimate the models**
 5. **Verify estimation, check assumptions, identify influential dyads**
 6. **Visualize, interpret, and report results**
@@ -308,7 +309,7 @@ df <- readRDS("dyadic-person-means.rds") |>
 print(df, n = 4)
 ```
 
-## Create the expected format
+## Create the required format
 
 ```{r}
 #| output-location: slide
@@ -328,7 +329,7 @@ print(df_apim)
 
 ```
 
-## Create the expected format
+## Create the required format
 
 Looking at the columns immediately relevant to us:
 
@@ -350,6 +351,11 @@ local({
     print(n = 6)
 })
 ```
+<!-- TODO: color code? -->
+
+- `x_actor` variables are each persons' own value
+- `x_partner` variables are the partners' value
+
 
 ## Distinguishable APIM
 
