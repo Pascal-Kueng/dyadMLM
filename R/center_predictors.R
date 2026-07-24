@@ -72,8 +72,8 @@ center_predictors <- function(data) {
     # order and guarantees that this stage fails before writing any columns.
     plan <- tibble::tibble(
       target = c(
-        paste0(dyad_reserved_prefix, unname(predictor_suffixes), "_cwp"),
-        paste0(dyad_reserved_prefix, unname(predictor_suffixes), "_cbp")
+        paste0(dyad_retained_prefix, unname(predictor_suffixes), "_cwp"),
+        paste0(dyad_retained_prefix, unname(predictor_suffixes), "_cbp")
       ),
       predictor = rep(predictors, 2L),
       temporal_component = c(
@@ -91,8 +91,8 @@ center_predictors <- function(data) {
     for (predictor in predictors) {
       predictor_suffix <- predictor_suffixes[[predictor]]
       person_mean_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_person_mean")
-      cwp_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_cwp")
-      cbp_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_cbp")
+      cwp_col <- paste0(dyad_retained_prefix, predictor_suffix, "_cwp")
+      cbp_col <- paste0(dyad_retained_prefix, predictor_suffix, "_cbp")
 
       person_means <- out |>
         dplyr::group_by(.data[[dyad]], .data[[member]]) |>

@@ -2375,30 +2375,29 @@ display:block!important;
 # female_x_male distinguishable 36 dyads
 #
 # Added columns:
-#   .dy_composition       inferred dyad composition
-#   .dy_composition_role  composition-specific member role
-#   .dy_is_{role}         composition-role indicator columns
-#   .dy_{pred}_actor      APIM actor predictor: actor&#39;s original predictor
-#                         values
-#   .dy_{pred}_partner    APIM partner predictor: partner&#39;s original predictor
-#                         values
+#   .composition       inferred dyad composition
+#   .composition_role  composition-specific member role
+#   .is_{role}         composition-role indicator columns
+#   .{pred}_actor      APIM actor predictor: actor&#39;s original predictor values
+#   .{pred}_partner    APIM partner predictor: partner&#39;s original predictor
+#                      values
 #
 # A tibble: 72 × 11
-   couple_id person_id gender efficacy total_mvpa .dy_composition
-       &lt;int&gt;     &lt;int&gt; &lt;fct&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;fct&gt;          
- 1         1         1 male      3.02       33.6  female_x_male  
- 2         1         2 female    0.891      12.7  female_x_male  
- 3         2         3 male      0.132      42.8  female_x_male  
- 4         2         4 female    2.37       44.5  female_x_male  
- 5         3         5 female    3.33       62.9  female_x_male  
- 6         3         6 male      1.62       32.3  female_x_male  
- 7         4         7 male      1.09       21.5  female_x_male  
- 8         4         8 female    0.755      51.9  female_x_male  
- 9         5         9 female    1.48        9.79 female_x_male  
-10         5        10 male      1.35       11.4  female_x_male  
+   couple_id person_id gender efficacy total_mvpa .composition .composition_role
+       &lt;int&gt;     &lt;int&gt; &lt;fct&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;fct&gt;        &lt;fct&gt;
+ 1         1         1 male      3.02       33.6  female_x_ma… female_x_male_ma…
+ 2         1         2 female    0.891      12.7  female_x_ma… female_x_male_fe…
+ 3         2         3 male      0.132      42.8  female_x_ma… female_x_male_ma…
+ 4         2         4 female    2.37       44.5  female_x_ma… female_x_male_fe…
+ 5         3         5 female    3.33       62.9  female_x_ma… female_x_male_fe…
+ 6         3         6 male      1.62       32.3  female_x_ma… female_x_male_ma…
+ 7         4         7 male      1.09       21.5  female_x_ma… female_x_male_ma…
+ 8         4         8 female    0.755      51.9  female_x_ma… female_x_male_fe…
+ 9         5         9 female    1.48        9.79 female_x_ma… female_x_male_fe…
+10         5        10 male      1.35       11.4  female_x_ma… female_x_male_ma…
 # ℹ 62 more rows
-# ℹ 5 more variables: .dy_composition_role &lt;fct&gt;, .dy_is_female &lt;dbl&gt;,
-#   .dy_is_male &lt;dbl&gt;, .dy_efficacy_actor &lt;dbl&gt;, .dy_efficacy_partner &lt;dbl&gt;</code></pre>
+# ℹ 4 more variables: .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;, .efficacy_actor &lt;dbl&gt;,
+#   .efficacy_partner &lt;dbl&gt;</code></pre>
 </div>
 </div></section><section id="create-the-required-format-and-validate-the-data-2" class="slide level2">
 <h2>Create the required format and validate the data</h2>
@@ -2408,8 +2407,8 @@ is_male, is_female, and _actor and _partner variables. -->
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href></a>df_apim[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>,] <span class="sc">|&gt;</span></span>
 <span id="cb4-2"><a href></a>  <span class="fu">select</span>(</span>
-<span id="cb4-3"><a href></a>    couple_id, person_id, gender, .dy_is_female, .dy_is_male, efficacy, </span>
-<span id="cb4-4"><a href></a>    .dy_efficacy_actor, .dy_efficacy_partner, total_mvpa</span>
+<span id="cb4-3"><a href></a>    couple_id, person_id, gender, .is_female, .is_male, efficacy, </span>
+<span id="cb4-4"><a href></a>    .efficacy_actor, .efficacy_partner, total_mvpa</span>
 <span id="cb4-5"><a href></a>  ) <span class="sc">|&gt;</span></span>
 <span id="cb4-6"><a href></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
@@ -2430,11 +2429,11 @@ is_male, is_female, and _actor and _partner variables. -->
 <th style="text-align: right;">couple_id</th>
 <th style="text-align: right;">person_id</th>
 <th style="text-align: left;">gender</th>
-<th style="text-align: right;">.dy_is_female</th>
-<th style="text-align: right;">.dy_is_male</th>
+<th style="text-align: right;">.is_female</th>
+<th style="text-align: right;">.is_male</th>
 <th style="text-align: right;">efficacy</th>
-<th style="text-align: right;">.dy_efficacy_actor</th>
-<th style="text-align: right;">.dy_efficacy_partner</th>
+<th style="text-align: right;">.efficacy_actor</th>
+<th style="text-align: right;">.efficacy_partner</th>
 <th style="text-align: right;">total_mvpa</th>
 </tr>
 </thead>

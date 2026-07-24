@@ -76,12 +76,12 @@ print(cross_dsm_data, n = 4)
 
 With this notation, `dyadMLM` creates the equivalent coordinates:
 
-- `.dy_provided_support_dyad_mean_gmc` $=
+- `.provided_support_dyad_mean_gmc` $=
   \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2}$
   
-- `.dy_provided_support_within_dyad_diff` $= X_{\mathrm{female}} - X_{\mathrm{male}}$
+- `.provided_support_within_dyad_diff` $= X_{\mathrm{female}} - X_{\mathrm{male}}$
 
-- `.dy_dsm_role_contrast` $= +0.5$ for female and $-0.5$ for male.
+- `.dsm_role_contrast` $= +0.5$ for female and $-0.5$ for male.
 
 The function obtains the first coordinate by grand-mean centering the dyad
 means calculated from the original scores. The common centering shift cancels
@@ -115,22 +115,22 @@ dsm_model <- glmmTMB::glmmTMB(
     1 +
 
     # Predictor level -> outcome level (a11)
-    .dy_provided_support_dyad_mean_gmc +
+    .provided_support_dyad_mean_gmc +
 
     # Predictor difference -> outcome level (a12)
-    .dy_provided_support_within_dyad_diff +
+    .provided_support_within_dyad_diff +
 
     # Outcome-difference intercept (a20)
-    .dy_dsm_role_contrast +
+    .dsm_role_contrast +
 
     # Predictor level -> outcome difference (a21)
-    .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
+    .provided_support_dyad_mean_gmc:.dsm_role_contrast +
 
     # Predictor difference -> outcome difference (a22)
-    .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
+    .provided_support_within_dyad_diff:.dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
-    us(1 + .dy_dsm_role_contrast | coupleID),
+    us(1 + .dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data
@@ -289,30 +289,30 @@ cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
 
 provided_support_grand_mean <- mean(
   c(
-    cross_dsm_data_inverted$.dy_provided_support_actor,
-    cross_dsm_data_inverted$.dy_provided_support_partner
+    cross_dsm_data_inverted$.provided_support_actor,
+    cross_dsm_data_inverted$.provided_support_partner
   ),
   na.rm = TRUE
 )
 
 # Use one pooled centering constant for both APIM predictor columns.
-cross_dsm_data_inverted$.dy_provided_support_actor <-
-  cross_dsm_data_inverted$.dy_provided_support_actor -
+cross_dsm_data_inverted$.provided_support_actor <-
+  cross_dsm_data_inverted$.provided_support_actor -
   provided_support_grand_mean
-cross_dsm_data_inverted$.dy_provided_support_partner <-
-  cross_dsm_data_inverted$.dy_provided_support_partner -
+cross_dsm_data_inverted$.provided_support_partner <-
+  cross_dsm_data_inverted$.provided_support_partner -
   provided_support_grand_mean
 ```
 
 ```{r fit-cross-dsm-inverted, eval=has_glmmTMB}
 dsm_model_inverted <- glmmTMB::glmmTMB(
   closeness ~
-    .dy_provided_support_dyad_mean_gmc +
-    .dy_provided_support_within_dyad_diff +
-    .dy_dsm_role_contrast +
-    .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
-    .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
-    us(1 + .dy_dsm_role_contrast | coupleID),
+    .provided_support_dyad_mean_gmc +
+    .provided_support_within_dyad_diff +
+    .dsm_role_contrast +
+    .provided_support_dyad_mean_gmc:.dsm_role_contrast +
+    .provided_support_within_dyad_diff:.dsm_role_contrast +
+    us(1 + .dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data_inverted
@@ -335,21 +335,21 @@ knitr::kable(
 
 The two models have identical fitted values and model fit: 
 
-- `.dy_provided_support_within_dyad_diff` reverses because the predictor difference
+- `.provided_support_within_dyad_diff` reverses because the predictor difference
   reverses.
 
-- `.dy_dsm_role_contrast` reverses because the represented outcome difference
+- `.dsm_role_contrast` reverses because the represented outcome difference
   reverses.
 
-- `.dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast` reverses because only
+- `.provided_support_dyad_mean_gmc:.dsm_role_contrast` reverses because only
   the outcome difference reverses.
 
-- `.dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast` remains unchanged
+- `.provided_support_within_dyad_diff:.dsm_role_contrast` remains unchanged
   because both differences reverse.
 
-The intercept and `.dy_provided_support_dyad_mean_gmc` also remain unchanged. For
+The intercept and `.provided_support_dyad_mean_gmc` also remain unchanged. For
 the random effects, the variances of `(Intercept)` and
-`.dy_dsm_role_contrast` remain unchanged, whereas their covariance reverses
+`.dsm_role_contrast` remain unchanged, whereas their covariance reverses
 sign.
 
 ## Relationship to the APIM and DIM
@@ -365,21 +365,21 @@ apim_model <- glmmTMB::glmmTMB(
   closeness ~
     # Role-specific intercepts
     0 +
-    .dy_is_female +
-    .dy_is_male +
+    .is_female +
+    .is_male +
 
     # Role-specific actor effects
-    .dy_is_female:.dy_provided_support_actor +
-    .dy_is_male:.dy_provided_support_actor +
+    .is_female:.provided_support_actor +
+    .is_male:.provided_support_actor +
 
     # Role-specific partner effects
-    .dy_is_female:.dy_provided_support_partner +
-    .dy_is_male:.dy_provided_support_partner +
+    .is_female:.provided_support_partner +
+    .is_male:.provided_support_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
-         .dy_is_female +
-         .dy_is_male
+         .is_female +
+         .is_male
        | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -506,19 +506,19 @@ fixed effects:
 apim_coef <- glmmTMB::fixef(apim_model)$cond
 dsm_coef <- glmmTMB::fixef(dsm_model)$cond
 
-b0_female <- apim_coef[[".dy_is_female"]]
-b0_male <- apim_coef[[".dy_is_male"]]
+b0_female <- apim_coef[[".is_female"]]
+b0_male <- apim_coef[[".is_male"]]
 b_actor_female <- apim_coef[[
-  ".dy_is_female:.dy_provided_support_actor"
+  ".is_female:.provided_support_actor"
 ]]
 b_actor_male <- apim_coef[[
-  ".dy_is_male:.dy_provided_support_actor"
+  ".is_male:.provided_support_actor"
 ]]
 b_partner_female <- apim_coef[[
-  ".dy_is_female:.dy_provided_support_partner"
+  ".is_female:.provided_support_partner"
 ]]
 b_partner_male <- apim_coef[[
-  ".dy_is_male:.dy_provided_support_partner"
+  ".is_male:.provided_support_partner"
 ]]
 
 b_sum_female <- b_actor_female + b_partner_female
@@ -541,14 +541,14 @@ apim_to_dsm <- c(
 )
 
 a10_dsm <- dsm_coef[["(Intercept)"]]
-a11_dsm <- dsm_coef[[".dy_provided_support_dyad_mean_gmc"]]
-a12_dsm <- dsm_coef[[".dy_provided_support_within_dyad_diff"]]
-a20_dsm <- dsm_coef[[".dy_dsm_role_contrast"]]
+a11_dsm <- dsm_coef[[".provided_support_dyad_mean_gmc"]]
+a12_dsm <- dsm_coef[[".provided_support_within_dyad_diff"]]
+a20_dsm <- dsm_coef[[".dsm_role_contrast"]]
 a21_dsm <- dsm_coef[[
-  ".dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast"
+  ".provided_support_dyad_mean_gmc:.dsm_role_contrast"
 ]]
 a22_dsm <- dsm_coef[[
-  ".dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast"
+  ".provided_support_within_dyad_diff:.dsm_role_contrast"
 ]]
 
 knitr::kable(
@@ -672,34 +672,34 @@ dsm_ILD <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person predictor level -> outcome level
-    .dy_provided_support_cwp_dyad_mean +
+    .provided_support_cwp_dyad_mean +
 
     # Within-person predictor difference -> outcome level
-    .dy_provided_support_cwp_within_dyad_diff +
+    .provided_support_cwp_within_dyad_diff +
 
     # Between-person predictor level -> outcome level
-    .dy_provided_support_cbp_dyad_mean +
+    .provided_support_cbp_dyad_mean +
 
     # Between-person predictor difference -> outcome level
-    .dy_provided_support_cbp_within_dyad_diff +
+    .provided_support_cbp_within_dyad_diff +
 
     # Outcome-difference intercept and linear time trend
-    .dy_dsm_role_contrast +
-    diaryday:.dy_dsm_role_contrast +
+    .dsm_role_contrast +
+    diaryday:.dsm_role_contrast +
 
     # Within-person predictor level and difference -> outcome difference
-    .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast +
-    .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast +
+    .provided_support_cwp_dyad_mean:.dsm_role_contrast +
+    .provided_support_cwp_within_dyad_diff:.dsm_role_contrast +
 
     # Between-person predictor level and difference -> outcome difference
-    .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast +
-    .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast +
+    .provided_support_cbp_dyad_mean:.dsm_role_contrast +
+    .provided_support_cbp_within_dyad_diff:.dsm_role_contrast +
 
     # Stable outcome-level and outcome-difference covariance
-    us(1 + .dy_dsm_role_contrast | coupleID) +
+    us(1 + .dsm_role_contrast | coupleID) +
 
     # Same-day outcome-level and outcome-difference covariance
-    us(1 + .dy_dsm_role_contrast | coupleID:diaryday),
+    us(1 + .dsm_role_contrast | coupleID:diaryday),
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_dsm_data

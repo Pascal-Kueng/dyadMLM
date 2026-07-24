@@ -155,7 +155,7 @@ setup_infer_dyad_compositions_debug <- function(
       .groups = "drop"
     ) |>
     dplyr::mutate(
-      .dy_composition = .data$.dy_raw_composition,
+      .composition = .data$.dy_raw_composition,
       .dy_pool_member = NA_character_
     )
 

@@ -71,17 +71,17 @@ summary(nbinom_distinguishable_data)
 
 stress_grand_mean <- mean(
   c(
-    nbinom_distinguishable_data$.dy_stress_actor,
-    nbinom_distinguishable_data$.dy_stress_partner
+    nbinom_distinguishable_data$.stress_actor,
+    nbinom_distinguishable_data$.stress_partner
   ),
   na.rm = TRUE
 )
 
 # Use one pooled centering constant for both actor and partner predictors.
-nbinom_distinguishable_data$.dy_stress_actor <-
-  nbinom_distinguishable_data$.dy_stress_actor - stress_grand_mean
-nbinom_distinguishable_data$.dy_stress_partner <-
-  nbinom_distinguishable_data$.dy_stress_partner - stress_grand_mean
+nbinom_distinguishable_data$.stress_actor <-
+  nbinom_distinguishable_data$.stress_actor - stress_grand_mean
+nbinom_distinguishable_data$.stress_partner <-
+  nbinom_distinguishable_data$.stress_partner - stress_grand_mean
 ```
 
 
@@ -89,16 +89,16 @@ nbinom_distinguishable_data$.dy_stress_partner <-
 nbinom_distinguishable_model <- glmmTMB::glmmTMB(
   conflict_count ~ 0 +
     # Role-specific intercepts
-    .dy_is_female +
-    .dy_is_male +
+    .is_female +
+    .is_male +
 
     # Role-specific actor effects of stress
-    .dy_is_female:.dy_stress_actor +
-    .dy_is_male:.dy_stress_actor +
+    .is_female:.stress_actor +
+    .is_male:.stress_actor +
 
     # Role-specific partner effects of stress
-    .dy_is_female:.dy_stress_partner +
-    .dy_is_male:.dy_stress_partner +
+    .is_female:.stress_partner +
+    .is_male:.stress_partner +
 
     # Shared latent dyad effect for stable non-independence
     (1 | coupleID),
@@ -135,18 +135,18 @@ summary(nbinom_exchangeable_data)
 
 exchangeable_stress_grand_mean <- mean(
   c(
-    nbinom_exchangeable_data$.dy_stress_actor,
-    nbinom_exchangeable_data$.dy_stress_partner
+    nbinom_exchangeable_data$.stress_actor,
+    nbinom_exchangeable_data$.stress_partner
   ),
   na.rm = TRUE
 )
 
 # Use one pooled centering constant for both actor and partner predictors.
-nbinom_exchangeable_data$.dy_stress_actor <-
-  nbinom_exchangeable_data$.dy_stress_actor -
+nbinom_exchangeable_data$.stress_actor <-
+  nbinom_exchangeable_data$.stress_actor -
   exchangeable_stress_grand_mean
-nbinom_exchangeable_data$.dy_stress_partner <-
-  nbinom_exchangeable_data$.dy_stress_partner -
+nbinom_exchangeable_data$.stress_partner <-
+  nbinom_exchangeable_data$.stress_partner -
   exchangeable_stress_grand_mean
 ```
 
@@ -155,12 +155,12 @@ nbinom_exchangeable_model <- glmmTMB::glmmTMB(
   conflict_count ~
     # Pooled intercept and actor and partner effects
     1 +
-    .dy_stress_actor +
-    .dy_stress_partner +
+    .stress_actor +
+    .stress_partner +
 
     # Exchangeable latent dyad covariance on the log-mean scale
     (1 | coupleID) +
-    (0 + .dy_member_contrast_arbitrary | coupleID),
+    (0 + .member_contrast_arbitrary | coupleID),
   family = glmmTMB::nbinom2(link = "log"),
   data = nbinom_exchangeable_data
 )

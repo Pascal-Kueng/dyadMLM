@@ -405,8 +405,8 @@ Looking at the columns immediately relevant to us:
 
 df_apim[1:6,] |>
   select(
-    couple_id, person_id, gender, .dy_is_female, .dy_is_male, efficacy,
-    .dy_efficacy_actor, .dy_efficacy_partner, total_mvpa
+    couple_id, person_id, gender, .is_female, .is_male, efficacy,
+    .efficacy_actor, .efficacy_partner, total_mvpa
   ) |>
   knitr::kable(digits = 2, row.names = FALSE)
 

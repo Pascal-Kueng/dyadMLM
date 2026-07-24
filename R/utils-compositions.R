@@ -11,16 +11,15 @@ dyad_composition_role_sep <- "_"
 # Label used when no role column is supplied.
 dyad_assumed_exchangeable_label <- "assumed_exchangeable"
 
-# Prefix to be used for package-owned / reserved columns.
+# Prefix reserved for temporary implementation columns.
 dyad_reserved_prefix <- ".dy_"
 
-# Prefix for shortened composition-dependent columns. Keeping this separate
-# makes the compact naming style easy to change without touching construction.
-dyad_short_prefix <- ".dy_"
+# Retained columns use "." so model formulas remain concise.
+dyad_retained_prefix <- "."
 
-# Package generated columns will use the following names consistently
-dyad_composition_col <- paste0(dyad_reserved_prefix, "composition")
-dyad_composition_role_col <- paste0(dyad_reserved_prefix, "composition_role")
+# Fixed retained and temporary column names used throughout preparation.
+dyad_composition_col <- paste0(dyad_retained_prefix, "composition")
+dyad_composition_role_col <- paste0(dyad_retained_prefix, "composition_role")
 dyad_type_col <- paste0(dyad_reserved_prefix, "dyad_type")
 dyad_type_source_col <- paste0(dyad_reserved_prefix, "dyad_type_source")
 dyad_raw_composition_col <- paste0(dyad_reserved_prefix, "raw_composition")
@@ -28,7 +27,7 @@ dyad_pool_member_col <- paste0(dyad_reserved_prefix, "pool_member")
 dyad_resolved_role_col <- paste0(dyad_reserved_prefix, "resolved_role")
 dyad_diff_col <- paste0(dyad_reserved_prefix, "diff")
 dyad_arbitrary_role_col <- paste0(dyad_reserved_prefix, "arbitrary_role")
-dyad_dsm_role_contrast_col <- paste0(dyad_reserved_prefix, "dsm_role_contrast")
+dyad_dsm_role_contrast_col <- paste0(dyad_retained_prefix, "dsm_role_contrast")
 
 ############################################################################
 # HELPER FUNCTIONS

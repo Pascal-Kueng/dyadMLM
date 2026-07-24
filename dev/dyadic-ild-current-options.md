@@ -92,7 +92,7 @@ restriction shared with the exchangeable model.
 
 Let `diff` be the existing stable arbitrary member sign, coded `-1/+1` within
 each couple (for example,
-`.dy_member_contrast_arbitrary`). Then use the current independent
+`.member_contrast_arbitrary`). Then use the current independent
 mean-and-difference blocks:
 
 ```r

@@ -41,8 +41,8 @@ fit_truth_bias <- function(data) {
     tibble::as_tibble() |>
     dplyr::rename(
       role = gender,
-      own_provided_support = .dy_provided_support_actor,
-      partner_provided_support = .dy_provided_support_partner
+      own_provided_support = .provided_support_actor,
+      partner_provided_support = .provided_support_partner
     )
 
   analysis_columns <- c(

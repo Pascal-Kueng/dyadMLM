@@ -69,7 +69,7 @@ add_actor_partner_columns <- function(data) {
     }
     if (component == "raw") {
       predictor_suffix <- make_dyad_suffixes(predictor)[[predictor]]
-      column_stem <- paste0(dyad_reserved_prefix, predictor_suffix)
+      column_stem <- paste0(dyad_retained_prefix, predictor_suffix)
     }
 
     lag_suffix <- make_predictor_lag_suffix(lag)

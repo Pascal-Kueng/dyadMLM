@@ -176,7 +176,7 @@ print(cross_exchangeable_data, n = 4)
 
 ```
 
-The generated `.dy_member_contrast_arbitrary` contrast assigns `-1`
+The generated `.member_contrast_arbitrary` contrast assigns `-1`
 and `1` to the two members of each exchangeable dyad
 [@delrosarioPracticalGuideSpecifying2025]. Its direction is arbitrary, and
 `seed` makes the assignment reproducible.
@@ -349,7 +349,7 @@ print(mixed_cross_data, n = 4)
 
 Note that when role compositions are available, each exchangeable composition
 receives its own difference contrast, such as
-`.dy_member_contrast_female_x_female_arbitrary`, which is `0` for all other compositions
+`.member_contrast_female_x_female_arbitrary`, which is `0` for all other compositions
 [@delrosarioPracticalGuideSpecifying2025].
 
 We can use this data to model these dyad types as separate or in the same model.

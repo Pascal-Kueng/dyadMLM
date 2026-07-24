@@ -45,7 +45,7 @@ add_temporal_lag_columns <- function(data) {
     lag_col <- paste0(source_col, "_lag1")
     if (component == "raw") {
       predictor_suffix <- make_dyad_suffixes(predictor)[[predictor]]
-      lag_col <- paste0(dyad_reserved_prefix, predictor_suffix, "_lag1")
+      lag_col <- paste0(dyad_retained_prefix, predictor_suffix, "_lag1")
     }
     lag_columns[[i]] <- lag_col
   }

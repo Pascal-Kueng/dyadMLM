@@ -56,8 +56,8 @@ fit_dyadic_response_surface <- function(data) {
     tibble::as_tibble() |>
     dplyr::rename(
       role = gender,
-      actor_support = .dy_provided_support_actor,
-      partner_support = .dy_provided_support_partner
+      actor_support = .provided_support_actor,
+      partner_support = .provided_support_partner
     ) |>
     dplyr::mutate(
       female_support = dplyr::if_else(

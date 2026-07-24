@@ -63,8 +63,8 @@ dyad-occasion means.
 For each time-varying predictor `x`, `center_predictors()` creates:
 
 ```r
-.dy_x_cwp = x - person_mean(x)
-.dy_x_cbp = person_mean(x) - grand_mean(person_mean(x))
+.x_cwp = x - person_mean(x)
+.x_cbp = person_mean(x) - grand_mean(person_mean(x))
 ```
 
 The grand mean is computed over person means, not over all observed rows. This
@@ -73,7 +73,7 @@ observed measurement occasions.
 
 Missing values:
 
-- missing raw values remain missing in `.dy_x_cwp`
+- missing raw values remain missing in `.x_cwp`
 - person means ignore missing raw values
 - if a person has no observed predictor values, both components are missing for
   that person
@@ -88,7 +88,7 @@ with one row for the raw predictor and one row per constructed temporal
 component. When `lag_predictors` is supplied, lag-1 raw and CWP records are
 added with `lag = 1`; unlagged records use `lag = 0`.
 
-Generated `.dy_*_cwp` and `.dy_*_cbp` columns also appear in the normalized
+Generated `.{pred}_cwp` and `.{pred}_cbp` columns also appear in the normalized
 generated-column table returned by `dyad_generated_columns()`. Raw source
 records are excluded from the temporal part of that table because they are not
 package-generated columns. Their model-specific APIM, DIM, or DSM columns are
@@ -102,17 +102,17 @@ columns.
 For raw predictors:
 
 ```r
-.dy_x_actor
-.dy_x_partner
+.x_actor
+.x_partner
 ```
 
 For `time_2l` predictors, the raw columns above are retained alongside:
 
 ```r
-.dy_x_cwp_actor
-.dy_x_cwp_partner
-.dy_x_cbp_actor
-.dy_x_cbp_partner
+.x_cwp_actor
+.x_cwp_partner
+.x_cbp_actor
+.x_cbp_partner
 ```
 
 Partner values are matched within dyad for cross-sectional data and within
@@ -134,8 +134,8 @@ from grouped dyad means.
 For within-person components, the decomposition level is dyad-time:
 
 ```r
-.dy_x_cwp_dyad_mean
-.dy_x_cwp_within_dyad_dev
+.x_cwp_dyad_mean
+.x_cwp_within_dyad_dev
 ```
 
 For between-person components, the decomposition level is dyad. The
@@ -143,15 +143,15 @@ implementation first reduces to one row per dyad-member so members are not
 weighted by the number of observed days:
 
 ```r
-.dy_x_cbp_dyad_mean
-.dy_x_cbp_within_dyad_dev
+.x_cbp_dyad_mean
+.x_cbp_within_dyad_dev
 ```
 
 For raw predictors:
 
 ```r
-.dy_x_dyad_mean_gmc
-.dy_x_within_dyad_dev
+.x_dyad_mean_gmc
+.x_within_dyad_dev
 ```
 
 Raw longitudinal predictors are decomposed within dyad-time. Raw
@@ -187,25 +187,25 @@ dsm_role_order = c("female", "male")
 
 DSM requires exactly one distinguishable composition. The declared role order
 defines every difference as the first role minus the second and creates
-`.dy_dsm_role_contrast` with `+0.5/-0.5` coding.
+`.dsm_role_contrast` with `+0.5/-0.5` coding.
 
 DIM and DSM share internal dyad-mean and member-deviation calculations. Their
 public columns then diverge:
 
 ```r
 # Shared mean
-.dy_x_dyad_mean_gmc
+.x_dyad_mean_gmc
 
 # DIM
-.dy_x_within_dyad_dev
+.x_within_dyad_dev
 
 # DSM
-.dy_x_within_dyad_diff
-.dy_dsm_role_contrast
+.x_within_dyad_diff
+.dsm_role_contrast
 ```
 
 For ILD data, DSM creates dyad means and full directional differences for the
-raw predictor and separately for `.dy_*_cwp` and `.dy_*_cbp`. Raw and CWP scores
+raw predictor and separately for `.{pred}_cwp` and `.{pred}_cbp`. Raw and CWP scores
 are constructed within dyad-time, while CBP scores are constructed within dyad.
 
 Outcome scores are not materialized for the MLM-focused API. Outcomes remain

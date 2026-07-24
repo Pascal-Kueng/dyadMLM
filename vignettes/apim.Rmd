@@ -107,7 +107,7 @@ $$
 
 
 This structure is estimated with an unstructured random-effects block such as
-`us(0 + .dy_is_female + .dy_is_male | coupleID)`
+`us(0 + .is_female + .is_male | coupleID)`
 and `dispformula = ~ 0`. 
 
 ### Fitting the distinguishable APIM with glmmTMB
@@ -132,18 +132,18 @@ print(apim_distinguishable_data, n=4)
 
 provided_support_grand_mean <- mean(
   c(
-    apim_distinguishable_data$.dy_provided_support_actor,
-    apim_distinguishable_data$.dy_provided_support_partner
+    apim_distinguishable_data$.provided_support_actor,
+    apim_distinguishable_data$.provided_support_partner
   ),
   na.rm = TRUE
 )
 
 # Use one pooled centering constant for both actor and partner predictors.
-apim_distinguishable_data$.dy_provided_support_actor <-
-  apim_distinguishable_data$.dy_provided_support_actor -
+apim_distinguishable_data$.provided_support_actor <-
+  apim_distinguishable_data$.provided_support_actor -
   provided_support_grand_mean
-apim_distinguishable_data$.dy_provided_support_partner <-
-  apim_distinguishable_data$.dy_provided_support_partner -
+apim_distinguishable_data$.provided_support_partner <-
+  apim_distinguishable_data$.provided_support_partner -
   provided_support_grand_mean
 
 ```
@@ -159,23 +159,23 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 
     # Gender-specific intercepts
     0 +
-    .dy_is_female +
-    .dy_is_male +
+    .is_female +
+    .is_male +
 
     # Gender-specific actor effects
-    .dy_is_female:.dy_provided_support_actor +
-    .dy_is_male:.dy_provided_support_actor +
+    .is_female:.provided_support_actor +
+    .is_male:.provided_support_actor +
 
     # Gender-specific partner effects
-    .dy_is_female:.dy_provided_support_partner +
-    .dy_is_male:.dy_provided_support_partner +
+    .is_female:.provided_support_partner +
+    .is_male:.provided_support_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
     # This is glmmTMB-specific syntax! `brms` uses different syntax.
     us(0 +
-         .dy_is_female +
-         .dy_is_male
+         .is_female +
+         .is_male
        | coupleID)
 
   , dispformula = ~ 0
@@ -259,7 +259,7 @@ slopes, whereas separate structures would omit their correlations.
 The shared/difference representation works for residuals and other random-effect
 terms, including random slopes. Following
 @delrosarioPracticalGuideSpecifying2025, `dyadMLM::prepare_dyad_data()`
-generates an arbitrary member-difference column, named `.dy_member_contrast_*`.
+generates an arbitrary member-difference column, named `.member_contrast_*`.
 This contrast is `+1` for one member and `-1` for the other. The exchangeable
 residual structure is represented by two separate random-effects terms: a
 shared dyad random intercept and a random coefficient for this difference
@@ -296,18 +296,18 @@ print(apim_exchangeable_data, n = 4)
 
 exchangeable_support_grand_mean <- mean(
   c(
-    apim_exchangeable_data$.dy_provided_support_actor,
-    apim_exchangeable_data$.dy_provided_support_partner
+    apim_exchangeable_data$.provided_support_actor,
+    apim_exchangeable_data$.provided_support_partner
   ),
   na.rm = TRUE
 )
 
 # Use one pooled centering constant for both actor and partner predictors.
-apim_exchangeable_data$.dy_provided_support_actor <-
-  apim_exchangeable_data$.dy_provided_support_actor -
+apim_exchangeable_data$.provided_support_actor <-
+  apim_exchangeable_data$.provided_support_actor -
   exchangeable_support_grand_mean
-apim_exchangeable_data$.dy_provided_support_partner <-
-  apim_exchangeable_data$.dy_provided_support_partner -
+apim_exchangeable_data$.provided_support_partner <-
+  apim_exchangeable_data$.provided_support_partner -
   exchangeable_support_grand_mean
 ```
 
@@ -321,13 +321,13 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     1 +
     
     # Pooled single actor and partner effects
-    .dy_provided_support_actor +
-    .dy_provided_support_partner +
+    .provided_support_actor +
+    .provided_support_partner +
     
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID),
+    us(0 + .member_contrast_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -484,34 +484,34 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
     0 +
 
     # Role-specific intercepts
-    .dy_is_female +
-    .dy_is_male +
+    .is_female +
+    .is_male +
 
     # Role-specific time trends
-    .dy_is_female:diaryday_gmc +
-    .dy_is_male:diaryday_gmc +
+    .is_female:diaryday_gmc +
+    .is_male:diaryday_gmc +
 
     # Role-specific within-person actor effects
-    .dy_is_female:.dy_provided_support_cwp_actor +
-    .dy_is_male:.dy_provided_support_cwp_actor +
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor +
 
     # Role-specific within-person partner effects
-    .dy_is_female:.dy_provided_support_cwp_partner +
-    .dy_is_male:.dy_provided_support_cwp_partner +
+    .is_female:.provided_support_cwp_partner +
+    .is_male:.provided_support_cwp_partner +
 
     # Role-specific between-person actor effects
-    .dy_is_female:.dy_provided_support_cbp_actor +
-    .dy_is_male:.dy_provided_support_cbp_actor +
+    .is_female:.provided_support_cbp_actor +
+    .is_male:.provided_support_cbp_actor +
 
     # Role-specific between-person partner effects
-    .dy_is_female:.dy_provided_support_cbp_partner +
-    .dy_is_male:.dy_provided_support_cbp_partner +
+    .is_female:.provided_support_cbp_partner +
+    .is_male:.provided_support_cbp_partner +
 
     # Stable dyad-level covariance
-    us(0 + .dy_is_female + .dy_is_male | coupleID) +
+    us(0 + .is_female + .is_male | coupleID) +
 
     # Same-occasion covariance
-    us(0 + .dy_is_female + .dy_is_male |
+    us(0 + .is_female + .is_male |
          coupleID:diaryday),
   dispformula = ~ 0,
   family = gaussian(),
@@ -527,10 +527,10 @@ replacing the stable dyad-level block above with:
 ```{r ild-distinguishable-random-slopes, eval = FALSE}
 us(
   0 +
-    .dy_is_female +
-    .dy_is_male +
-    .dy_is_female:.dy_provided_support_cwp_actor +
-    .dy_is_male:.dy_provided_support_cwp_actor
+    .is_female +
+    .is_male +
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor
   | coupleID
 )
 ```
@@ -585,23 +585,23 @@ ild_apim_model <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person actor and partner effects
-    .dy_provided_support_cwp_actor +
-    .dy_provided_support_cwp_partner +
+    .provided_support_cwp_actor +
+    .provided_support_cwp_partner +
 
     # Between-person actor and partner effects
-    .dy_provided_support_cbp_actor +
-    .dy_provided_support_cbp_partner +
+    .provided_support_cbp_actor +
+    .provided_support_cbp_partner +
 
     # Stable exchangeable dyad-level covariance with actor random slopes
-    us(1 + .dy_provided_support_cwp_actor | coupleID) + # shared intercept and slope
-    us(0 + .dy_member_contrast_arbitrary + # difference intercept
-         .dy_member_contrast_arbitrary:
-           .dy_provided_support_cwp_actor                       # difference slope
+    us(1 + .provided_support_cwp_actor | coupleID) + # shared intercept and slope
+    us(0 + .member_contrast_arbitrary + # difference intercept
+         .member_contrast_arbitrary:
+           .provided_support_cwp_actor                       # difference slope
        | coupleID) +
 
     # Same-occasion exchangeable covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID:diaryday)
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -648,11 +648,11 @@ ild_apim_no_contrast_slope <- update(
   ild_apim_model,
   formula = . ~ . -
     us(0 +
-         .dy_member_contrast_arbitrary +
-         .dy_member_contrast_arbitrary:
-           .dy_provided_support_cwp_actor
+         .member_contrast_arbitrary +
+         .member_contrast_arbitrary:
+           .provided_support_cwp_actor
        | coupleID) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID)
+    us(0 + .member_contrast_arbitrary | coupleID)
 )
 
 dyadMLM::compare_nested_glmmTMB_models(
@@ -675,11 +675,11 @@ no_contrast_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
   block_pairings = list(
     dyad = list(
       shared_block =
-        "us(1 + .dy_provided_support_cwp_actor | coupleID)",
+        "us(1 + .provided_support_cwp_actor | coupleID)",
       difference_block =
-        "us(0 + .dy_member_contrast_arbitrary | coupleID)",
+        "us(0 + .member_contrast_arbitrary | coupleID)",
       difference_indicator =
-        ".dy_member_contrast_arbitrary"
+        ".member_contrast_arbitrary"
     )
   )
 )
@@ -696,9 +696,9 @@ ild_apim_no_contrast_block <- update(
   ild_apim_model,
   formula = . ~ . -
     us(0 +
-         .dy_member_contrast_arbitrary +
-         .dy_member_contrast_arbitrary:
-           .dy_provided_support_cwp_actor
+         .member_contrast_arbitrary +
+         .member_contrast_arbitrary:
+           .provided_support_cwp_actor
        | coupleID)
 )
 
@@ -718,10 +718,10 @@ no_contrast_block_covariance <- dyadMLM::recover_exchangeable_covariance(
   block_pairings = list(
     dyad = list(
       shared_block =
-        "us(1 + .dy_provided_support_cwp_actor | coupleID)",
+        "us(1 + .provided_support_cwp_actor | coupleID)",
       difference_block = NULL,
       difference_indicator =
-        ".dy_member_contrast_arbitrary"
+        ".member_contrast_arbitrary"
     )
   )
 )
@@ -798,21 +798,21 @@ stability_influence <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
     # Stability (actor effect across time)
-    .dy_closeness_actor_lag1 +
+    .closeness_actor_lag1 +
 
     # Influence (partner effect across time)
-    .dy_closeness_partner_lag1 +
+    .closeness_partner_lag1 +
 
     # Linear time trend
     diaryday +
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID:diaryday)
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -829,8 +829,8 @@ contemporaneous coefficients are then conditional on both partners' prior
 outcomes.
 
 The model above uses raw lagged outcomes. The corresponding
-within-person-centered lagged terms are `.dy_closeness_cwp_actor_lag1` and
-`.dy_closeness_cwp_partner_lag1`.
+within-person-centered lagged terms are `.closeness_cwp_actor_lag1` and
+`.closeness_cwp_partner_lag1`.
 
 Whether to use a raw or within-person-centered lagged outcome depends on the
 research question and the data. Person-mean centering the outcome lag can bias

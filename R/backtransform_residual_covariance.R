@@ -31,10 +31,9 @@
 #'     an ordinary intercept is the shared intercept coordinate.
 #'
 #' @details
-#' Automatic matching recognizes the compact `.dy_member_contrast_arbitrary`,
-#' composition-qualified `.dy_member_contrast_*_arbitrary`, and legacy
-#' `.dy_diff_*_arbitrary` coefficient names and first looks for the
-#' corresponding `.dy_is_*` shared block. It requires
+#' Automatic matching recognizes the compact `.member_contrast_arbitrary` and
+#' composition-qualified `.member_contrast_*_arbitrary` names. It first looks
+#' for the corresponding `.is_*` shared block. It requires
 #' the two blocks to use the same grouping factor and the same underlying
 #' terms. Most models fitted with `dyadMLM`-generated columns therefore need
 #' only:
@@ -70,15 +69,15 @@
 #'   block_pairings = list(
 #'     dyad = list(
 #'       shared_block = "(1 + diaryday | coupleID)",
-#'       difference_block = "(0 + .dy_member_contrast_arbitrary | coupleID)",
+#'       difference_block = "(0 + .member_contrast_arbitrary | coupleID)",
 #'       difference_indicator =
-#'         ".dy_member_contrast_arbitrary"
+#'         ".member_contrast_arbitrary"
 #'     ),
 #'     same_occasion = list(
 #'       shared_block = "(1 | coupleID:diaryday)",
-#'       difference_block = "(0 + .dy_member_contrast_arbitrary | coupleID:diaryday)",
+#'       difference_block = "(0 + .member_contrast_arbitrary | coupleID:diaryday)",
 #'       difference_indicator =
-#'         ".dy_member_contrast_arbitrary"
+#'         ".member_contrast_arbitrary"
 #'     )
 #'   )
 #' )
@@ -193,7 +192,7 @@
 #'   model <- glmmTMB::glmmTMB(
 #'     closeness ~ 1 +
 #'       us(1 | coupleID) +
-#'       us(0 + .dy_member_contrast_arbitrary | coupleID),
+#'       us(0 + .member_contrast_arbitrary | coupleID),
 #'     dispformula = ~ 0,
 #'     data = example_data
 #'   )
@@ -623,15 +622,31 @@ exchangeable_underlying_terms <- function(coefficients, indicator = "1") {
 
 is_generated_exchangeable_difference_indicator <- function(column_names) {
   column_specs <- generated_column_spec_lookup()
-  short_member_contrast_pattern <- column_specs$short_column_pattern[
+  # Derive both supported forms from the shared specification so automatic
+  # matching stays aligned with generated-column naming.
+  short_member_contrast_name <- column_specs$short_column_pattern[
     column_specs$model_family == "composition" &
       column_specs$column_role == "member_contrast"
   ]
+  qualified_member_contrast_pattern <- column_specs$column_pattern[
+    column_specs$model_family == "composition" &
+      column_specs$column_role == "member_contrast"
+  ]
+  qualified_member_contrast_prefix <- sub(
+    "{comp}_arbitrary",
+    "",
+    qualified_member_contrast_pattern,
+    fixed = TRUE
+  )
 
-  # The compact name is exact; qualified current and legacy names include a
-  # composition suffix.
-  column_names %in% short_member_contrast_pattern |
-    grepl("^\\.dy_(member_contrast|diff)_.+_arbitrary$", column_names)
+  # The compact name is exact; a qualified name must contain a composition.
+  column_names %in% short_member_contrast_name |
+    (
+      startsWith(column_names, qualified_member_contrast_prefix) &
+        endsWith(column_names, "_arbitrary") &
+        nchar(column_names) >
+          nchar(paste0(qualified_member_contrast_prefix, "_arbitrary"))
+    )
 }
 
 find_exchangeable_difference_indicator <- function(coefficients) {
@@ -1118,9 +1133,8 @@ match_exchangeable_residual_blocks <- function(
   )
   if (length(difference_indicators) == 0L) {
     stop(
-      "No supported `.dy_member_contrast_arbitrary`, ",
-      "`.dy_member_contrast_*_arbitrary`, or legacy `.dy_diff_*_arbitrary` ",
-      "difference block was found.",
+      "No supported `.member_contrast_arbitrary` ",
+      "or `.member_contrast_*_arbitrary` difference block was found.",
       " Supply `block_pairings` explicitly if the model uses custom ",
       "difference-indicator names or unequal shared and difference term sets.",
       format_exchangeable_block_inventory(blocks),
@@ -1132,7 +1146,8 @@ match_exchangeable_residual_blocks <- function(
   # shared intercept is a safe fallback only when there is one such indicator.
   matched_pairs <- list()
   column_specs <- generated_column_spec_lookup()
-  short_member_contrast_pattern <- column_specs$short_column_pattern[
+  # Derive both naming forms from the same specifications used for display.
+  short_member_contrast_name <- column_specs$short_column_pattern[
     column_specs$model_family == "composition" &
       column_specs$column_role == "member_contrast"
   ]
@@ -1140,9 +1155,23 @@ match_exchangeable_residual_blocks <- function(
     column_specs$model_family == "composition" &
       column_specs$column_role == "composition_indicator"
   ]
+  qualified_member_contrast_pattern <- column_specs$column_pattern[
+    column_specs$model_family == "composition" &
+      column_specs$column_role == "member_contrast"
+  ]
+  qualified_member_contrast_prefix <- sub(
+    "{comp}_arbitrary",
+    "",
+    qualified_member_contrast_pattern,
+    fixed = TRUE
+  )
+  qualified_composition_indicator_pattern <- column_specs$column_pattern[
+    column_specs$model_family == "composition" &
+      column_specs$column_role == "composition_indicator"
+  ]
 
   for (idiff in difference_indicators) {
-    if (identical(idiff, short_member_contrast_pattern)) {
+    if (identical(idiff, short_member_contrast_name)) {
       # A compact member contrast can only represent one exchangeable
       # composition, whose compact shared indicator uses "exchangeable".
       shared_indicator <- sub(
@@ -1152,10 +1181,19 @@ match_exchangeable_residual_blocks <- function(
         fixed = TRUE
       )
     } else {
-      composition <- sub("^\\.dy_member_contrast_", "", idiff)
-      composition <- sub("^\\.dy_diff_", "", composition)
-      composition <- sub("_arbitrary$", "", composition)
-      shared_indicator <- paste0(".dy_is_", composition)
+      composition_suffix <- sub(
+        qualified_member_contrast_prefix,
+        "",
+        idiff,
+        fixed = TRUE
+      )
+      composition_suffix <- sub("_arbitrary$", "", composition_suffix)
+      shared_indicator <- sub(
+        "{comp-role}",
+        composition_suffix,
+        qualified_composition_indicator_pattern,
+        fixed = TRUE
+      )
     }
 
     indicator_pairs <- match_blocks_for_exchangeable_indicator(

@@ -179,7 +179,7 @@ make_dyad_predictor_column_stem <- function(predictor, component, source_col,
   }
 
   predictor_suffix <- make_dyad_suffixes(predictor)[[predictor]]
-  paste0(dyad_reserved_prefix, predictor_suffix)
+  paste0(dyad_retained_prefix, predictor_suffix)
 }
 
 add_dyad_time_decomposition <- function(out, group, member, time, source_col,

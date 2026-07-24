@@ -121,20 +121,20 @@ is applied. \code{"error"} stops with an error and \code{"drop"} removes the ent
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
 
-\item{seed}{Optional seed for random \verb{.dy_member_contrast_*} sign assignment
+\item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment
 in exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
 
 \item{short_colnames}{Whether to use shorter composition-dependent generated
 column names when the final data contain one composition. The default \code{TRUE}
-omits the redundant composition label from \verb{.dy_is_*} and
-\verb{.dy_member_contrast_*} names. \code{FALSE} always retains composition-qualified
+omits the redundant composition label from \verb{.is_*} and
+\verb{.member_contrast_*} names. \code{FALSE} always retains composition-qualified
 names. Other generated column names are unaffected.}
 }
 \value{
 The original data as a tibble with class \code{dyadMLM_data},
-\code{.dy_composition} and \code{.dy_composition_role} factor columns,
-\verb{.dy_is_*} numeric indicator columns, and numeric
-\verb{.dy_member_contrast_*} columns coded \code{-1} and \code{1} for the two members of
+\code{.composition} and \code{.composition_role} factor columns,
+\verb{.is_*} numeric indicator columns, and numeric
+\verb{.member_contrast_*} columns coded \code{-1} and \code{1} for the two members of
 matching exchangeable dyads and \code{0} otherwise. With one final composition,
 their default names omit the composition label. The \code{dyadMLM}
 attribute containing structural metadata, \code{dyad_compositions}, and

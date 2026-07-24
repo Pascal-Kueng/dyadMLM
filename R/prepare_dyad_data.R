@@ -96,18 +96,18 @@
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
-#' @param seed Optional seed for random `.dy_member_contrast_*` sign assignment
+#' @param seed Optional seed for random `.member_contrast_*` sign assignment
 #'   in exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #' @param short_colnames Whether to use shorter composition-dependent generated
 #'   column names when the final data contain one composition. The default `TRUE`
-#'   omits the redundant composition label from `.dy_is_*` and
-#'   `.dy_member_contrast_*` names. `FALSE` always retains composition-qualified
+#'   omits the redundant composition label from `.is_*` and
+#'   `.member_contrast_*` names. `FALSE` always retains composition-qualified
 #'   names. Other generated column names are unaffected.
 #'
 #' @return The original data as a tibble with class `dyadMLM_data`,
-#'   `.dy_composition` and `.dy_composition_role` factor columns,
-#'   `.dy_is_*` numeric indicator columns, and numeric
-#'   `.dy_member_contrast_*` columns coded `-1` and `1` for the two members of
+#'   `.composition` and `.composition_role` factor columns,
+#'   `.is_*` numeric indicator columns, and numeric
+#'   `.member_contrast_*` columns coded `-1` and `1` for the two members of
 #'   matching exchangeable dyads and `0` otherwise. With one final composition,
 #'   their default names omit the composition label. The `dyadMLM`
 #'   attribute containing structural metadata, `dyad_compositions`, and

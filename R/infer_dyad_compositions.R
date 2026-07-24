@@ -4,7 +4,7 @@
 #' `dyadMLM_data` object.
 #'
 #' @param data A `dyadMLM_data` object returned by [validate_dyad_data()].
-#' @param seed Optional seed for random `.dy_member_contrast_*` sign assignment in
+#' @param seed Optional seed for random `.member_contrast_*` sign assignment in
 #'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
 #' @param keep_compositions Optional observed dyad compositions to keep
 #'   before exchangeability overrides and pooling.
@@ -16,9 +16,9 @@
 #' @param short_colnames Whether to use shorter composition-dependent generated
 #'   column names when the final data contain one composition.
 #'
-#' @return A `dyadMLM_data` object with added `.dy_composition` and
-#'   `.dy_composition_role` factor columns, `.dy_is_*` numeric indicator columns,
-#'   composition-specific numeric `.dy_member_contrast_*` columns coded `-1` and
+#' @return A `dyadMLM_data` object with added `.composition` and
+#'   `.composition_role` factor columns, `.is_*` numeric indicator columns,
+#'   composition-specific numeric `.member_contrast_*` columns coded `-1` and
 #'   `1` for the two members of matching exchangeable dyads and `0` otherwise,
 #'   and dyad composition metadata.
 #'
@@ -42,6 +42,20 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
   meta_data <- attr(data, "dyadMLM")
   group_name <- meta_data$dyad
   member_name <- meta_data$member
+
+  # These retained columns are created before the composition-dependent names
+  # are known, so protect them from input collisions before either is written.
+  fixed_composition_column_plan <- tibble::tibble(
+    target = c(dyad_composition_col, dyad_composition_role_col),
+    predictor = NA_character_,
+    temporal_component = "none",
+    lag = 0L,
+    model_family = "composition",
+    column_role = c("composition", "composition_role"),
+    variable_role = c("composition", "composition_role"),
+    source_column = NA_character_
+  )
+  validate_generated_column_plan(data, fixed_composition_column_plan)
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
@@ -90,7 +104,11 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
     data[[dyad_diff_col]] <- ifelse(data[[dyad_arbitrary_role_col]] == "arbitrary_1", -1, 1)
 
     # Finalize factors and construct the generated composition columns.
-    data <- finalize_composition_columns(data, short_colnames)
+    data <- finalize_composition_columns(
+      data,
+      short_colnames,
+      fixed_composition_column_plan
+    )
 
     return(data)
   }
@@ -124,7 +142,7 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
       .groups = "drop"
     ) |>
     dplyr::mutate(
-      .dy_composition = .data$.dy_raw_composition,
+      "{dyad_composition_col}" := .data[[dyad_raw_composition_col]],
       .dy_pool_member = NA_character_
     )
 
@@ -224,7 +242,11 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
   data[[dyad_pool_member_col]] <- NULL
 
   # Finalize factors and construct the generated composition columns.
-  data <- finalize_composition_columns(data, short_colnames)
+  data <- finalize_composition_columns(
+    data,
+    short_colnames,
+    fixed_composition_column_plan
+  )
 
   data
 }
@@ -478,7 +500,7 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
     ## subsetting all rows **within the current pooling step**.
     is_pooled <- dyad_roles[[dyad_composition_col]] %in% resolved_compositions_to_pool
 
-    # Before overwriting .dy_composition, copy the old composition into .dy_pool_member.
+    # Retain each row's source composition before assigning the pool label.
     dyad_roles[[dyad_pool_member_col]][is_pooled] <- dyad_roles[[dyad_composition_col]][is_pooled]
 
     # Now replace the current composition with the pool name.
@@ -491,16 +513,20 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
 }
 
 
-finalize_composition_columns <- function(data, short_colnames) {
+finalize_composition_columns <- function(
+    data,
+    short_colnames,
+    fixed_composition_column_plan
+  ) {
 
   # Convert to factors before returning.
   data[[dyad_composition_col]] <- factor(data[[dyad_composition_col]])
   data[[dyad_composition_role_col]] <- factor(data[[dyad_composition_role_col]])
 
   meta_data <- attr(data, "dyadMLM")
-  # Short names omit the composition label. After filtering and pooling, they
-  # are unambiguous only when exactly one final composition remains; otherwise
-  # they are not allowed.
+  # Short names omit the composition label. They are unambiguous only when
+  # filtering and pooling leave one final composition; with more than one,
+  # short names would be ambiguous and therefore are not allowed.
   has_single_composition <- nrow(meta_data$dyad_compositions) == 1L
   use_short_composition_colnames <-
     short_colnames && has_single_composition
@@ -520,7 +546,7 @@ finalize_composition_columns <- function(data, short_colnames) {
   if (use_short_composition_colnames &&
       meta_data$dyad_compositions$dyad_type[[1L]] == "exchangeable") {
     composition_indicator_columns <- paste0(
-      dyad_short_prefix,
+      dyad_retained_prefix,
       "is_exchangeable"
     )
   } else if (use_short_composition_colnames) {
@@ -538,7 +564,7 @@ finalize_composition_columns <- function(data, short_colnames) {
       rename_hint = "role labels"
     )
     composition_indicator_columns <- paste0(
-      dyad_short_prefix,
+      dyad_retained_prefix,
       "is_",
       unname(observed_role_suffixes[observed_role_labels])
     )
@@ -547,7 +573,7 @@ finalize_composition_columns <- function(data, short_colnames) {
       composition_role_labels
     )
     composition_indicator_columns <- paste0(
-      dyad_reserved_prefix,
+      dyad_retained_prefix,
       "is_",
       unname(composition_role_suffixes[composition_role_labels])
     )
@@ -563,7 +589,7 @@ finalize_composition_columns <- function(data, short_colnames) {
   if (length(exchangeable_composition_labels) > 0L) {
     if (use_short_composition_colnames) {
       member_contrast_columns <- paste0(
-        dyad_short_prefix,
+        dyad_retained_prefix,
         "member_contrast_arbitrary"
       )
     } else {
@@ -571,7 +597,7 @@ finalize_composition_columns <- function(data, short_colnames) {
         exchangeable_composition_labels
       )
       member_contrast_columns <- paste0(
-        dyad_reserved_prefix,
+        dyad_retained_prefix,
         "member_contrast_",
         unname(
           exchangeable_composition_suffixes[exchangeable_composition_labels]
@@ -582,8 +608,8 @@ finalize_composition_columns <- function(data, short_colnames) {
   }
   names(member_contrast_columns) <- exchangeable_composition_labels
 
-  # Shape: one row per column that this function is about to create. The
-  # descriptive fields are used only to make collision errors informative.
+  # Use one row per column for both pre-write collision validation and the
+  # generated-column metadata recorded after all columns exist.
   composition_column_plan <- tibble::tibble(
     target = c(
       unname(composition_indicator_columns),
@@ -633,22 +659,13 @@ finalize_composition_columns <- function(data, short_colnames) {
   }
 
   data[[dyad_diff_col]] <- NULL
-  # These two fixed columns are created before this shared finalizer. Append
-  # their rows to the already validated indicator/contrast plan and record the
-  # complete composition stage only after every column exists.
-  fixed_composition_columns <- tibble::tibble(
-    target = c(dyad_composition_col, dyad_composition_role_col),
-    predictor = NA_character_,
-    temporal_component = "none",
-    lag = 0L,
-    model_family = "composition",
-    column_role = c("composition", "composition_role"),
-    variable_role = c("composition", "composition_role"),
-    source_column = NA_character_
-  )
+  # Record the complete composition stage only after every column exists.
   data <- record_generated_columns(
     data,
-    dplyr::bind_rows(fixed_composition_columns, composition_column_plan)
+    dplyr::bind_rows(
+      fixed_composition_column_plan,
+      composition_column_plan
+    )
   )
 
   data

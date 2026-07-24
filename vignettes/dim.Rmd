@@ -93,23 +93,23 @@ print(cross_exchangeable_data, n = 4)
 
 provided_support_grand_mean <- mean(
   c(
-    cross_exchangeable_data$.dy_provided_support_actor,
-    cross_exchangeable_data$.dy_provided_support_partner
+    cross_exchangeable_data$.provided_support_actor,
+    cross_exchangeable_data$.provided_support_partner
   ),
   na.rm = TRUE
 )
 
 # Use one pooled centering constant for both APIM predictor columns.
-cross_exchangeable_data$.dy_provided_support_actor <-
-  cross_exchangeable_data$.dy_provided_support_actor -
+cross_exchangeable_data$.provided_support_actor <-
+  cross_exchangeable_data$.provided_support_actor -
   provided_support_grand_mean
-cross_exchangeable_data$.dy_provided_support_partner <-
-  cross_exchangeable_data$.dy_provided_support_partner -
+cross_exchangeable_data$.provided_support_partner <-
+  cross_exchangeable_data$.provided_support_partner -
   provided_support_grand_mean
 ```
 
 For the exchangeable random-effects specification,
-`dyadMLM::prepare_dyad_data()` creates a member-difference contrast `.dy_member_contrast_*`,
+`dyadMLM::prepare_dyad_data()` creates a member-difference contrast `.member_contrast_*`,
 coded as `+1` for one partner and `-1` for the other. Because these member labels
 are arbitrary, setting `seed` makes their assignment reproducible.
 
@@ -171,7 +171,7 @@ draw_dim_member_diagram()
 The resulting estimated fixed effects are a reparameterization of the APIM actor
 and partner effects [@Bolger2025Unified]. And just like the exchangeable APIM,
 the random-effects structure comprises a dyad-level intercept
-and a dyad-level difference contrast indexed by `.dy_member_contrast_arbitrary`.
+and a dyad-level difference contrast indexed by `.member_contrast_arbitrary`.
 In `glmmTMB`, with `dispformula = ~ 0`, these random effects represent the two
 members' Gaussian residual variance and covariance.
 
@@ -192,14 +192,14 @@ dim_1 <- glmmTMB::glmmTMB(
     1 +
 
     # Between-dyad effect
-    .dy_provided_support_dyad_mean_gmc +
+    .provided_support_dyad_mean_gmc +
 
     # Within-dyad effect
-    .dy_provided_support_within_dyad_dev +
+    .provided_support_within_dyad_dev +
 
     # Residual Gaussian covariance structure
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID)
+    us(0 + .member_contrast_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -289,13 +289,13 @@ apim_1 <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
     # Fixed effects APIM
-    .dy_provided_support_actor + .dy_provided_support_partner +
+    .provided_support_actor + .provided_support_partner +
 
     # Since both models are equivalent, the same random-effects structure
     # can be used. See the APIM vignette to learn how to back-transform
     # these blocks to a full actor-partner covariance matrix.
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID)
+    us(0 + .member_contrast_arbitrary | coupleID)
   , dispformula = ~ 0
   , family = gaussian()
   , data = cross_exchangeable_data
@@ -367,12 +367,12 @@ apim_coef <- glmmTMB::fixef(apim_1)$cond
 dim_coef <- glmmTMB::fixef(dim_1)$cond
 
 b0_apim <- apim_coef[["(Intercept)"]]
-b_actor <- apim_coef[[".dy_provided_support_actor"]]
-b_partner <- apim_coef[[".dy_provided_support_partner"]]
+b_actor <- apim_coef[[".provided_support_actor"]]
+b_partner <- apim_coef[[".provided_support_partner"]]
 
 b0_dim <- dim_coef[["(Intercept)"]]
-b_mean <- dim_coef[[".dy_provided_support_dyad_mean_gmc"]]
-b_dev <- dim_coef[[".dy_provided_support_within_dyad_dev"]]
+b_mean <- dim_coef[[".provided_support_dyad_mean_gmc"]]
+b_dev <- dim_coef[[".provided_support_within_dyad_dev"]]
 
 
 cat("From APIM model:\n",
@@ -494,20 +494,20 @@ dim_ILD <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person DIM
-    .dy_provided_support_cwp_dyad_mean +
-    .dy_provided_support_cwp_within_dyad_dev +
+    .provided_support_cwp_dyad_mean +
+    .provided_support_cwp_within_dyad_dev +
 
     # Between-person DIM
-    .dy_provided_support_cbp_dyad_mean +
-    .dy_provided_support_cbp_within_dyad_dev +
+    .provided_support_cbp_dyad_mean +
+    .provided_support_cbp_within_dyad_dev +
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
 
     # Residual (same-day) exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_arbitrary | coupleID:diaryday)
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -592,7 +592,7 @@ coefficients, but still estimates the same model.
 Random slopes can be included in the DIM by adding the corresponding
 within-person effects to the stable dyad-level random-effect blocks. The shared
 block contains the DIM intercept, dyad-mean slope, and within-dyad
-member-deviation slope. The `.dy_member_contrast_*` block contains their
+member-deviation slope. The `.member_contrast_*` block contains their
 member-difference counterparts. Together, these blocks allow the two members
 to have different random slopes while preserving exchangeability.
 
@@ -612,7 +612,7 @@ u_{\mathrm{partner},j}
 = \frac{u_{\mathrm{mean},j} - u_{\mathrm{dev},j}}{2},
 $$
 
-and for the `.dy_member_contrast_*` block, marked by a tilde,
+and for the `.member_contrast_*` block, marked by a tilde,
 
 $$
 \widetilde{u}_{\mathrm{actor},j}
@@ -622,9 +622,9 @@ $$
 = \frac{\widetilde{u}_{\mathrm{mean},j} - \widetilde{u}_{\mathrm{dev},j}}{2}.
 $$
 
-The shared and `.dy_member_contrast_*` random intercepts remain unchanged.
+The shared and `.member_contrast_*` random intercepts remain unchanged.
 
-We now have the shared and `.dy_member_contrast_*` actor and partner effects which are then
+We now have the shared and `.member_contrast_*` actor and partner effects which are then
 back-transformed into the complete and more readily interpretable member-specific
 actor-partner covariance matrix. This is described in the
 [exchangeable random-slope back-transformation in the APIM vignette](apim.html#exchangeable-random-slope-back-transformation).

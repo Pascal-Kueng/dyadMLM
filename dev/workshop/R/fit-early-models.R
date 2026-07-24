@@ -62,8 +62,8 @@
 }
 
 .grand_mean_center_apim_predictors <- function(data, predictor) {
-  actor <- paste0(".dy_", predictor, "_actor")
-  partner <- paste0(".dy_", predictor, "_partner")
+  actor <- paste0(".", predictor, "_actor")
+  partner <- paste0(".", predictor, "_partner")
   complete_pair <- is.finite(data[[actor]]) & is.finite(data[[partner]])
 
   if (!any(complete_pair)) {
@@ -97,10 +97,10 @@ fit_and_draw_distinguishable_apim <- function(
     prepared, variables$predictor
   )
 
-  actor <- paste0(".dy_", variables$predictor, "_actor")
-  partner <- paste0(".dy_", variables$predictor, "_partner")
-  female_indicator <- ".dy_is_female"
-  male_indicator <- ".dy_is_male"
+  actor <- paste0(".", variables$predictor, "_actor")
+  partner <- paste0(".", variables$predictor, "_partner")
+  female_indicator <- ".is_female"
+  male_indicator <- ".is_male"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -136,10 +136,10 @@ fit_and_draw_exchangeable_apim <- function(
     prepared, variables$predictor
   )
 
-  actor <- paste0(".dy_", variables$predictor, "_actor")
-  partner <- paste0(".dy_", variables$predictor, "_partner")
-  exchangeable_indicator <- ".dy_is_exchangeable"
-  member_contrast <- ".dy_member_contrast_arbitrary"
+  actor <- paste0(".", variables$predictor, "_actor")
+  partner <- paste0(".", variables$predictor, "_partner")
+  exchangeable_indicator <- ".is_exchangeable"
+  member_contrast <- ".member_contrast_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -166,9 +166,9 @@ fit_and_draw_dim <- function(data, predictor, outcome, labels = NULL) {
     data, variables$predictor, model_types = "dim", exchangeable = TRUE
   )
 
-  dyad_mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")
-  member_deviation <- paste0(".dy_", variables$predictor, "_within_dyad_dev")
-  member_contrast <- ".dy_member_contrast_arbitrary"
+  dyad_mean <- paste0(".", variables$predictor, "_dyad_mean_gmc")
+  member_deviation <- paste0(".", variables$predictor, "_within_dyad_dev")
+  member_contrast <- ".member_contrast_arbitrary"
 
   model_formula <- .early_model_formula(
     variables$outcome,
@@ -191,9 +191,9 @@ fit_and_draw_dsm <- function(data, predictor, outcome, labels = NULL) {
     data, variables$predictor, model_types = "dsm"
   )
 
-  mean <- paste0(".dy_", variables$predictor, "_dyad_mean_gmc")
-  difference <- paste0(".dy_", variables$predictor, "_within_dyad_diff")
-  role <- ".dy_dsm_role_contrast"
+  mean <- paste0(".", variables$predictor, "_dyad_mean_gmc")
+  difference <- paste0(".", variables$predictor, "_within_dyad_diff")
+  role <- ".dsm_role_contrast"
 
   model_formula <- .early_model_formula(
     variables$outcome,
