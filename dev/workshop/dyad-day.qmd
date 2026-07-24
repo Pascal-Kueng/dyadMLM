@@ -287,8 +287,7 @@ Basically answering different sub-RQs each time that I will introduce.
 > “How much did you emotionally support your partner today so that they would
 be physically active with greater enjoyment?”
 >
-> [Study-developed provided-support item; the corresponding received-support
-> item is reported in @kuengDailyAssociationsSocialControl2026, p. 9]{.subtle}
+> [Adapted from @bolgerInvisibleSupportAdjustment2000]{.subtle}
 
 0 = *not at all today* <br>
 5 = *very much today*<br>
@@ -303,8 +302,7 @@ be physically active with greater enjoyment?”
 > “How many minutes did you spend engaging in moderate-to-vigorous physical
 > activity today?”
 >
-> [Study item reported in @kuengDailyAssociationsSocialControl2026, p. 8;
-> exact two-part wording in @hoehenerEffectivenessSmartphoneDyadic2026, p. 6]{.subtle}
+> [Adapted from @amireaultGodinShephardQuestionnaire2015]{.subtle}
 
 - **Alone:** _____ minutes
 - **Together with your partner:** _____ minutes
@@ -1596,8 +1594,7 @@ partner individually.
 > “We have already planned precisely for tomorrow when, where, and how we will
 > be physically active together.”
 >
-> [Daily dyadic adaptation of the action-planning items in
-> @scholzBeyondBehaviouralIntentions2008, p. 484]{.subtle}
+> [Adapted from @scholzBeyondBehaviouralIntentions2008]{.subtle}
 
 0 = *not at all true today*<br>
 5 = *completely true today*

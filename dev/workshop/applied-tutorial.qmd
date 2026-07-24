@@ -235,7 +235,7 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 > “I am confident that I can be physically active tomorrow, even if it becomes
 > difficult.”
 >
-> [Study item adapted from @sniehottaBridgingIntentionBehaviour2005]{.subtle}
+> [Adapted from @sniehottaBridgingIntentionBehaviour2005]{.subtle}
 
 0 = *not at all true today* <br>
 5 = *completely true today*<br>
@@ -250,8 +250,7 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 > “How many minutes did you spend engaging in moderate-to-vigorous physical
 > activity today?”
 >
-> [Study item reported in @kuengDailyAssociationsSocialControl2026, p. 8;
-> exact two-part wording in @hoehenerEffectivenessSmartphoneDyadic2026, p. 6]{.subtle}
+> [Adapted from @amireaultGodinShephardQuestionnaire2015]{.subtle}
 
 - **Alone:** _____ minutes
 - **Together with your partner:** _____ minutes
