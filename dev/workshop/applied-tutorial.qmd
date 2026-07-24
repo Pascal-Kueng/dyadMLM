@@ -298,7 +298,15 @@ This dataset is stored as an R object. Other packages provide functions to impor
 <br>
 
 ```{r}
-df <- readRDS("dyadic-person-means.rds")
+library(dplyr) # for easier data-wrangling
+
+df <- readRDS("dyadic-person-means.rds") |>
+  select(
+    couple_id, person_id, role, self_efficacy, total_mvpa 
+  )
+  
+
+print(df, n = 4, width = 110)
 ```
 
 ## What one row represents
@@ -552,7 +560,7 @@ Short break - initiate package install before you leave
 
 ```{r eval = FALSE}
 
-install.packages(c('dyadMLM', 'wbCorr', 'glmmTMB', 'DHARMa', 'dplyr', 'ggplot2'))
+install.packages(c('dyadMLM', 'wbCorr', 'glmmTMB', 'DHARMa', 'dplyr', 'ggplot2', 'tibble'))
 
 ```
 
