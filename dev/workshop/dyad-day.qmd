@@ -318,7 +318,7 @@ support_distribution_plot <- ggplot(
   geom_density(
     bounds = c(0, Inf), color = "navy", linewidth = 1.1
   ) +
-  facet_wrap(~role, nrow = 1) +
+  facet_wrap(~gender, nrow = 1) +
   labs(x = "Average provided support", y = "Density") +
   see::theme_modern(base_size = 16)
 ```
@@ -363,7 +363,7 @@ ggplot(pilot_aggregated,
   geom_density(
     bounds = c(0, Inf), color = "navy", linewidth = 1.1
   ) +
-  facet_wrap(~role, nrow = 1) +
+  facet_wrap(~gender, nrow = 1) +
   labs(x = "Average MVPA (minutes/day)", y = "Density") +
   see::theme_modern(base_size = 16)
 ```
@@ -1578,11 +1578,11 @@ planning** across the 55 days.
 
 cfm_data <- pilot_aggregated |>
   group_by(couple_id) |>
-  filter(n_distinct(role) == 2) |>
+  filter(n_distinct(gender) == 2) |>
   ungroup() |>
-  select(couple_id, role, collaborative_planning, joint_mvpa) |>
+  select(couple_id, gender, collaborative_planning, joint_mvpa) |>
   tidyr::pivot_wider(
-    names_from = role,
+    names_from = gender,
     values_from = c(collaborative_planning, joint_mvpa),
     names_sep = "_"
   )

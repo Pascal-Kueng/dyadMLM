@@ -2187,21 +2187,23 @@ display:block!important;
 </div>
 <p><br></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href></a>df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;dyadic-person-means.rds&quot;</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href></a><span class="fu">library</span>(dplyr) <span class="co"># for easier data-wrangling</span></span>
 <span id="cb1-2"><a href></a></span>
-<span id="cb1-3"><a href></a><span class="fu">print</span>(df, <span class="at">n =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href></a>df <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;dyadic-person-means.rds&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-4"><a href></a>  <span class="fu">select</span>(</span>
+<span id="cb1-5"><a href></a>    couple_id, person_id, gender, self_efficacy, total_mvpa</span>
+<span id="cb1-6"><a href></a>  )</span>
+<span id="cb1-7"><a href></a></span>
+<span id="cb1-8"><a href></a><span class="fu">print</span>(df, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">width =</span> <span class="dv">110</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 76 × 12
-  couple_id person_id role   provided_support received_support
-      &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;             &lt;dbl&gt;            &lt;dbl&gt;
-1         4      1007 male              0.130            0    
-2         4      1008 female            0.6              0.527
-3         6      1011 male              1.70             1.72 
-4         6      1012 female            1.19             1.65 
-# ℹ 72 more rows
-# ℹ 7 more variables: collaborative_planning &lt;dbl&gt;, exerted_persuasion &lt;dbl&gt;,
-#   experienced_persuasion &lt;dbl&gt;, self_efficacy &lt;dbl&gt;, solo_mvpa &lt;dbl&gt;,
-#   joint_mvpa &lt;dbl&gt;, total_mvpa &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 76 × 5
+  couple_id person_id gender self_efficacy total_mvpa
+      &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;          &lt;dbl&gt;      &lt;dbl&gt;
+1         4      1007 male           3.02        33.6
+2         4      1008 female         0.891       12.7
+3         6      1011 male           0.132       42.8
+4         6      1012 female         2.37        44.5
+# ℹ 72 more rows</code></pre>
 </div>
 </div>
 </section>
@@ -2210,7 +2212,7 @@ display:block!important;
 <ul>
 <li>One row per person: 76 partners from 38 couples</li>
 <li>Diary measures are person-level averages across available days</li>
-<li><code>role</code> is already labeled as <code>female</code> or <code>male</code></li>
+<li><code>gender</code> is already labeled as <code>female</code> or <code>male</code></li>
 </ul>
 </section>
 <section id="distinguishable-apim" class="slide level2">
@@ -2420,7 +2422,7 @@ display:block!important;
 <h1>Excercises in R</h1>
 <p>Short break - initiate package install before you leave</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">&#39;dyadMLM&#39;</span>, <span class="st">&#39;wbCorr&#39;</span>, <span class="st">&#39;glmmTMB&#39;</span>, <span class="st">&#39;DHARMa&#39;</span>, <span class="st">&#39;dplyr&#39;</span>, <span class="st">&#39;ggplot2&#39;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">&#39;dyadMLM&#39;</span>, <span class="st">&#39;wbCorr&#39;</span>, <span class="st">&#39;glmmTMB&#39;</span>, <span class="st">&#39;DHARMa&#39;</span>, <span class="st">&#39;dplyr&#39;</span>, <span class="st">&#39;ggplot2&#39;</span>, <span class="st">&#39;tibble&#39;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>

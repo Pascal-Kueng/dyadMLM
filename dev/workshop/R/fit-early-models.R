@@ -2,7 +2,7 @@
   predictor <- rlang::as_name(predictor)
   outcome <- rlang::as_name(outcome)
 
-  required <- c("couple_id", "person_id", "role", predictor, outcome)
+  required <- c("couple_id", "person_id", "gender", predictor, outcome)
   missing <- setdiff(required, names(data))
   if (length(missing)) {
     stop(
@@ -48,7 +48,7 @@
     data,
     dyad = couple_id,
     member = person_id,
-    role = role,
+    role = gender,
     predictors = !!rlang::sym(predictor),
     model_types = model_types,
     dsm_role_order = if (identical(model_types, "dsm")) {

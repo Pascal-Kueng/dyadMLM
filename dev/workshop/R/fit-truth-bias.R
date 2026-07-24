@@ -1,6 +1,6 @@
 fit_truth_bias <- function(data) {
   required_columns <- c(
-    "couple_id", "person_id", "role",
+    "couple_id", "person_id", "gender",
     "provided_support", "received_support"
   )
   missing_columns <- setdiff(required_columns, names(data))
@@ -31,7 +31,7 @@ fit_truth_bias <- function(data) {
     data,
     dyad = couple_id,
     member = person_id,
-    role = role,
+    role = gender,
     predictors = provided_support,
     model_types = "apim",
     keep_compositions = "female-male"
@@ -40,6 +40,7 @@ fit_truth_bias <- function(data) {
   model_data <- prepared |>
     tibble::as_tibble() |>
     dplyr::rename(
+      role = gender,
       own_provided_support = .dy_provided_support_actor,
       partner_provided_support = .dy_provided_support_partner
     )

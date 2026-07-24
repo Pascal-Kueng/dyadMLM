@@ -302,9 +302,8 @@ library(dplyr) # for easier data-wrangling
 
 df <- readRDS("dyadic-person-means.rds") |>
   select(
-    couple_id, person_id, role, self_efficacy, total_mvpa 
+    couple_id, person_id, gender, self_efficacy, total_mvpa
   )
-  
 
 print(df, n = 4, width = 110)
 ```
@@ -313,7 +312,7 @@ print(df, n = 4, width = 110)
 
 - One row per person: 76 partners from 38 couples
 - Diary measures are person-level averages across available days
-- `role` is already labeled as `female` or `male`
+- `gender` is already labeled as `female` or `male`
 
 ## Distinguishable APIM
 

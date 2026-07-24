@@ -43,6 +43,7 @@ reference:
 - title: Main functions
   contents:
   - prepare_dyad_data
+  - summary.dyadMLM_data
   - compare_nested_glmmTMB_models
   - recover_exchangeable_covariance
 

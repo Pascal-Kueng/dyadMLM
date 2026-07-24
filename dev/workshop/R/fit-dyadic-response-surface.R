@@ -1,6 +1,6 @@
 fit_dyadic_response_surface <- function(data) {
   required_columns <- c(
-    "couple_id", "person_id", "role",
+    "couple_id", "person_id", "gender",
     "provided_support", "total_mvpa"
   )
   missing_columns <- setdiff(required_columns, names(data))
@@ -29,7 +29,7 @@ fit_dyadic_response_surface <- function(data) {
     data,
     dyad = couple_id,
     member = person_id,
-    role = role,
+    role = gender,
     predictors = provided_support,
     model_types = "apim",
     keep_compositions = "female-male"
@@ -55,6 +55,7 @@ fit_dyadic_response_surface <- function(data) {
   model_data <- prepared |>
     tibble::as_tibble() |>
     dplyr::rename(
+      role = gender,
       actor_support = .dy_provided_support_actor,
       partner_support = .dy_provided_support_partner
     ) |>
