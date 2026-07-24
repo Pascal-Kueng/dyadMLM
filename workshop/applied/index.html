@@ -2076,11 +2076,12 @@ Turu Stadler
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
 <li><strong>Prepare the Data</strong></li>
 <li><strong>Check data structure</strong></li>
-<li><strong>Describe measures and simple relationships</strong></li>
+<li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
 <li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
+<!-- konsistent wie hier -->
 <div class="subtle">
 <p>Synthesized from <span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span>, <span class="citation" data-cites="ledermannToolboxProgramsRestructure2015">Ledermann &amp; Kenny (<a href="#/references" role="doc-biblioref" onclick>2015</a>)</span>, and <span class="citation" data-cites="stasGivingDyadicData2018">Stas et al. (<a href="#/references" role="doc-biblioref" onclick>2018</a>)</span>.</p>
 </div>
@@ -2149,7 +2150,7 @@ display:block!important;
 <li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
 <li><strong>Prepare the Data</strong></li>
 <li><strong>Check data structure</strong></li>
-<li><strong>Describe measures and simple relationships</strong></li>
+<li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
 <li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
@@ -2174,7 +2175,7 @@ display:block!important;
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
 <li><span class="text-highlight"><strong>Prepare the Data</strong></span></li>
 <li><strong>Check data structure</strong></li>
-<li><strong>Describe measures and simple relationships</strong></li>
+<li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
 <li><strong>Verify estimation, check assumptions, identify influential dyads</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
@@ -2207,8 +2208,8 @@ display:block!important;
 </div>
 </div>
 </section>
-<section id="create-the-expected-format" class="slide level2">
-<h2>Create the expected format</h2>
+<section id="create-the-required-format" class="slide level2">
+<h2>Create the required format</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href></a><span class="fu">library</span>(dyadMLM) <span class="co"># for easier data-wrangling</span></span>
 <span id="cb3-2"><a href></a></span>
@@ -2225,7 +2226,7 @@ display:block!important;
 </div>
 
 </section>
-<section id="create-the-expected-format-output" class="slide level2 output-location-slide"><h2>Create the expected format</h2><div class="cell output-location-slide">
+<section id="create-the-required-format-output" class="slide level2 output-location-slide"><h2>Create the required format</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># dyadMLM data
 # Rows: 72 | Dyads: 36 | Intensive longitudinal: no
@@ -2260,8 +2261,8 @@ display:block!important;
 # ℹ 5 more variables: .dy_composition_role &lt;fct&gt;, .dy_is_female &lt;dbl&gt;,
 #   .dy_is_male &lt;dbl&gt;, .dy_efficacy_actor &lt;dbl&gt;, .dy_efficacy_partner &lt;dbl&gt;</code></pre>
 </div>
-</div></section><section id="create-the-expected-format-1" class="slide level2">
-<h2>Create the expected format</h2>
+</div></section><section id="create-the-required-format-1" class="slide level2">
+<h2>Create the required format</h2>
 <p>Looking at the columns immediately relevant to us:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -2277,6 +2278,11 @@ display:block!important;
 # ℹ 66 more rows</code></pre>
 </div>
 </div>
+<!-- TODO: color code? -->
+<ul>
+<li><code>x_actor</code> variables are each persons’ own value</li>
+<li><code>x_partner</code> variables are the partners’ value</li>
+</ul>
 </section>
 <section id="distinguishable-apim" class="slide level2">
 <h2>Distinguishable APIM</h2>
