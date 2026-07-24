@@ -289,15 +289,34 @@ and should be considered carefully too.
 
 ## Data preparation in R
 
-The dplyr package enables better readable syntax
+:::{.subtle}
+
+This dataset is stored as an R object. Other packages provide functions to import various formats, such as: `readxl::read_excel()`, `utils::read.csv()`, `haven::read_sav()`, `haven::read_sas()`
+
+:::
+
+<br>
+
+```{r}
+df <- readRDS("dyadic-data.rds") # absolute or relative path to file
+
+# For cross-sectional analyses we aggregate
+
+print(df, n = 4)
+```
+
+## Data preparation in R
+
+Gender ist stored as 1/2, so we recode this as a factor for a nicer representation:
 
 ```{r}
 library(dplyr)
 
-
-
+df <- df |>
+  mutate( # Mutate function provided by dplyr
+    gender = factor(gender, levels = c(1, 2), labels = c("female", "male"))
+  )
 ```
-
 
 ## Distinguishable APIM
 
@@ -355,9 +374,9 @@ library(dplyr)
 
 ::: {.column width="43%"}
 
-::: {.subtle}
-
 ### The same core workflow
+
+::: {.subtle}
 
 1. Define dyads, roles, distinguishability, and research questions
 2. Check data structure, completeness, and missing-data handling
@@ -456,6 +475,87 @@ see @laiCompositeReliabilityMultilevel2021.
 - Current possibilities in R MLM for AR1 or ou models
 - Current possibilites in R MLM for dynamic models
 - Alternatives (DSEM in MPLUS or lavaan for X)
+
+## Power analysis is the clearest reporting gap
+
+```{r}
+#| label: plot-longitudinal-apim-reporting-gaps
+#| echo: false
+#| fig-width: 10.5
+#| fig-height: 4.5
+#| out-width: 92%
+#| fig-align: center
+#| fig-alt: "Bar chart of reporting practices in 73 longitudinal APIM studies: 17.8 percent reported a power analysis, 64.4 percent documented model constraints, and 75.3 percent reported a missing-data strategy."
+
+reporting_gaps <- tibble(
+  item = factor(
+    c("Power analysis", "Model constraints", "Missing-data strategy"),
+    levels = c("Missing-data strategy", "Model constraints", "Power analysis")
+  ),
+  reported = c(17.8, 64.4, 75.3)
+)
+
+ggplot(reporting_gaps, aes(item, reported, fill = item == "Power analysis")) +
+  geom_col(width = 0.65) +
+  geom_text(
+    aes(label = paste0(reported, "%")),
+    hjust = -0.15, size = 7
+  ) +
+  coord_flip(clip = "off") +
+  scale_fill_manual(values = c("TRUE" = "#0028a5", "FALSE" = "#9aa7bd")) +
+  scale_y_continuous(
+    limits = c(0, 100),
+    breaks = seq(0, 100, 20),
+    labels = paste0(seq(0, 100, 20), "%"),
+    expand = c(0, 0)
+  ) +
+  labs(
+    x = NULL,
+    y = "Studies reporting the item"
+  ) +
+  theme_minimal(base_size = 21) +
+  theme(
+    legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(5.5, 20, 5.5, 5.5)
+  )
+```
+
+Systematic review of 73 longitudinal APIM studies published from 2008–2025
+[@mohammadzadehYazdBeyondIndividual2026].
+
+:::{.notes}
+
+- The chart shows reporting rates because they are easier to read as adherence
+  to good practice. The paper directly reports 17.8% for power analyses; 64.4%
+  and 75.3% are the complements of the reported omission rates.
+- This was a methodological systematic review, not a meta-analysis of effect
+  sizes. Its sample was restricted to longitudinal APIM studies with at least
+  70 dyads and follow-up longer than one year.
+- The review therefore supports “reporting gaps remain common,” not the broader
+  claim that all dyadic analyses are reported inadequately.
+
+[Sources]
+
+- Mohammadzadeh Yazd et al. (2026), abstract:
+  <https://doi.org/10.1177/02654075261443593>
+
+:::
+
+## Make every dyadic analysis decision visible
+
+1. **Preregister** actor and partner hypotheses and key analysis decisions.
+2. **Plan and report power** using dyad-specific tools.
+3. **Explain missing data:** describe missingness and the handling strategy.
+4. **Specify the full model:** roles and distinguishability, actor and partner
+   paths, constraints, and covariance structure.
+
+The review also recommends multi-method measurement and more diverse
+populations
+
+[@mohammadzadehYazdBeyondIndividual2026]{.subtle}
+
 
 # Excercises in R
 

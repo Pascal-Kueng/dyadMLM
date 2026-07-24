@@ -17,3 +17,6 @@
 ^codecov\.yml$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^tmp$
+^Rplots\.pdf$
+^dyadMLM_.*\.tar\.gz$

@@ -84,7 +84,7 @@ $$
 \epsilon_{Fi} \\
 \epsilon_{Mi}
 \end{pmatrix}
-= \boldsymbol{\Sigma}_{\epsilon}
+= \Sigma_{\epsilon}
 = \begin{bmatrix}
 \sigma_{\epsilon_F}^{2}
 & \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M} \\
@@ -96,11 +96,11 @@ $$
 And the full residual covariance matrix for all dyads (first three shown) is then block-diagonal:
 
 $$
-\boldsymbol{\Sigma}_{\mathrm{model}}
+\Sigma_{\mathrm{model}}
 = \begin{bmatrix}
-\boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \boldsymbol{0} & \cdots \\
-\boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \cdots \\
-\boldsymbol{0} & \boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \cdots \\
+\Sigma_{\epsilon} & 0 & 0 & \cdots \\
+0 & \Sigma_{\epsilon} & 0 & \cdots \\
+0 & 0 & \Sigma_{\epsilon} & \cdots \\
 \vdots & \vdots & \vdots & \ddots
 \end{bmatrix}
 $$
