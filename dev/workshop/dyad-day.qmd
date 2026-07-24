@@ -117,6 +117,8 @@ sys.source(
   envir = knitr::knit_global()
 )
 
+# Prepare data --------------------------------------------------
+
 data_file_candidates <- c(
   "dyadic-data.rds",
   file.path("dev", "workshop", "dyadic-data.rds")
@@ -126,6 +128,7 @@ data_file <- data_file_candidates[file.exists(data_file_candidates)][1]
 if (is.na(data_file)) {
   stop("Could not find dev/workshop/dyadic-data.rds.")
 }
+
 
 pilot <- readRDS(data_file) |>
   transmute(
@@ -143,6 +146,8 @@ pilot <- readRDS(data_file) |>
     total_mvpa
   )
 
+
+# Nice distribution plots ----------------------------------------------
 distribution_plot <- function(data, variables, bin_widths) {
   labels <- c(
     provided_support = "Provided emotional support",
@@ -247,7 +252,7 @@ differences, such as complementarity, may predict outcomes beyond either individ
 
 ## Introducing today's dyadic dataset!
 
-- 38 physically inactive romantic couples
+- 36 physically inactive romantic couples
 - Both partners intended to become more physically active
 - Smartphone-based planning interventions and JITAIs
 - Daily diaries over 55 days
@@ -317,8 +322,9 @@ obtain a "cross-sectional" dataset.
 library(dplyr)
 
 pilot_aggregated <- pilot |>
-  group_by(couple_id, person_id, role) |>
+  group_by(couple_id, person_id) |>
   summarise(
+    role = first(role),
     across(where(is.numeric), ~ mean(.x, na.rm = TRUE)),
     .groups = "drop"
   )

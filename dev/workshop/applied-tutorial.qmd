@@ -25,6 +25,33 @@ execute:
 editor: source
 ---
 
+```{r}
+#| label: setup-pilot-data
+#| include: false
+
+library(dplyr)
+library(ggplot2)
+
+diagram_helper_candidates <- c(
+  "diagram-helpers.Rinc",
+  file.path("vignettes", "diagram-helpers.Rinc"),
+  file.path("..", "..", "vignettes", "diagram-helpers.Rinc")
+)
+diagram_helper <- diagram_helper_candidates[
+  file.exists(diagram_helper_candidates)
+][1]
+
+if (is.na(diagram_helper)) {
+  stop("Could not find vignettes/diagram-helpers.Rinc.")
+}
+
+sys.source(
+  normalizePath(diagram_helper),
+  envir = knitr::knit_global()
+)
+
+```
+
 ## Today's aims and program
 
 | Time | Focus |
@@ -178,9 +205,60 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 
 - In this example we will use the same dataset that we already used in Part I
 
-- 
-
 :::
+
+## The Dataset
+
+**Same as before: **
+
+- 36 physically inactive romantic couples
+- Both partners intended to become more physically active
+- Smartphone-based planning interventions and JITAIs
+- Daily diaries over 55 days
+
+**Aggregated for cross-sectional analyses**
+
+
+## Research Question {.rq-slide}
+
+::: {.rq-center}
+::: {.rq-card}
+[RQ:]{.rq-label} [In romantic couples, is a person's **self-efficacy** linked to physical activity in both partners?]{.rq-text}
+:::
+:::
+
+## Measurement - predictor
+
+### Self-efficacy
+
+> **Rough English translation of the original German item**<br>
+> “I am confident that I can be physically active tomorrow, even if it becomes
+> difficult.”
+>
+> [Study item adapted from @sniehottaBridgingIntentionBehaviour2005]{.subtle}
+
+0 = *not at all true today* <br>
+5 = *completely true today*<br>
+
+<!-- ca. 1 Minute -->
+
+## Measurement - outcome
+
+### Moderate to vigorous physical activity (MVPA)
+
+> **Rough English translation of the original German item**<br>
+> “How many minutes did you spend engaging in moderate-to-vigorous physical
+> activity today?”
+>
+> [Study item reported in @kuengDailyAssociationsSocialControl2026, p. 8;
+> exact two-part wording in @hoehenerEffectivenessSmartphoneDyadic2026, p. 6]{.subtle}
+
+- **Alone:** _____ minutes
+- **Together with your partner:** _____ minutes
+
+**Total MVPA = solo MVPA + joint MVPA.**
+
+<!-- ca. 1 Minute -->
 
 
 ## Distinguishable APIM
