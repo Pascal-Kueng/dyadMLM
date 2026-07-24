@@ -368,7 +368,7 @@ test_that("brms ignores non-mean random effects", {
 })
 
 test_that("automatic matching aligns groups and coefficient order", {
-  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
+  marker <- ".member_contrast_assumed_exchangeable_arbitrary"
   blocks <- list(
     rescov_test_block("coupleID", c("time", "(Intercept)"), "shared"),
     rescov_test_block(
@@ -414,9 +414,9 @@ test_that("automatic matching aligns groups and coefficient order", {
 })
 
 test_that("automatic matching recognizes compact exchangeable columns", {
-  shared_indicator <- paste0(dyad_short_prefix, "is_exchangeable")
+  shared_indicator <- paste0(dyad_retained_prefix, "is_exchangeable")
   difference_indicator <- paste0(
-    dyad_short_prefix,
+    dyad_retained_prefix,
     "member_contrast_arbitrary"
   )
   blocks <- list(
@@ -433,13 +433,13 @@ test_that("automatic matching recognizes compact exchangeable columns", {
 })
 
 test_that("automatic matching handles compositions and grouping levels", {
-  same_idiff <- ".dy_member_contrast_same_sex_arbitrary"
-  friend_idiff <- ".dy_member_contrast_friends_arbitrary"
+  same_idiff <- ".member_contrast_same_sex_arbitrary"
+  friend_idiff <- ".member_contrast_friends_arbitrary"
   blocks <- list(
     rescov_test_block("coupleID", "(Intercept)", "generic"),
-    rescov_test_block("coupleID", ".dy_is_same_sex", "same shared"),
+    rescov_test_block("coupleID", ".is_same_sex", "same shared"),
     rescov_test_block("coupleID", same_idiff, "same difference"),
-    rescov_test_block("coupleID", ".dy_is_friends", "friend shared"),
+    rescov_test_block("coupleID", ".is_friends", "friend shared"),
     rescov_test_block("coupleID", friend_idiff, "friend difference")
   )
 
@@ -456,7 +456,7 @@ test_that("automatic matching handles compositions and grouping levels", {
   )
   expect_equal(
     unlist(lapply(pairs, `[[`, "shared_indicator"), use.names = FALSE),
-    c(".dy_is_same_sex", ".dy_is_friends")
+    c(".is_same_sex", ".is_friends")
   )
 
   repeated <- list(
@@ -477,12 +477,18 @@ test_that("automatic matching handles compositions and grouping levels", {
 })
 
 test_that("automatic matching is conservative about missing and ambiguous blocks", {
-  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
+  marker <- ".member_contrast_assumed_exchangeable_arbitrary"
+
+  expect_false(
+    is_generated_exchangeable_difference_indicator(
+      ".member_contrast__arbitrary"
+    )
+  )
 
   expect_error(
     find_exchangeable_difference_indicator(c(
-      ".dy_member_contrast_friends_arbitrary",
-      ".dy_member_contrast_coworkers_arbitrary"
+      ".member_contrast_friends_arbitrary",
+      ".member_contrast_coworkers_arbitrary"
     )),
     "more than one generated difference indicator",
     fixed = TRUE
@@ -658,7 +664,7 @@ test_that("supplied exact pairs align partial and custom-named blocks", {
 })
 
 test_that("supplied exact pairs support wholly omitted blocks", {
-  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
+  marker <- ".member_contrast_assumed_exchangeable_arbitrary"
   shared_covariance <- rescov_test_covariance(1:2)
   difference_covariance <- rescov_test_covariance(3:4)
   blocks <- list(
@@ -980,7 +986,7 @@ test_that("omitted blocks are checked without rejecting disjoint pairs", {
 })
 
 test_that("model-style selectors preserve covariance structures", {
-  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
+  marker <- ".member_contrast_assumed_exchangeable_arbitrary"
   blocks <- list(
     rescov_test_block(
       "coupleID",
@@ -1095,33 +1101,6 @@ test_that("block pairing names are stable, partial, and unique", {
     "Duplicated name(s): pair_2",
     fixed = TRUE
   )
-})
-
-test_that("automatic matching recognizes new and legacy member contrasts", {
-  new_indicator <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
-  legacy_indicator <- ".dy_diff_assumed_exchangeable_arbitrary"
-  expect_identical(
-    find_exchangeable_difference_indicator(new_indicator),
-    new_indicator
-  )
-  expect_identical(
-    find_exchangeable_difference_indicator(legacy_indicator),
-    legacy_indicator
-  )
-
-  for (indicator in c(new_indicator, legacy_indicator)) {
-    blocks <- list(
-      rescov_test_block("coupleID", "(Intercept)", "(1 | coupleID)"),
-      rescov_test_block(
-        "coupleID",
-        indicator,
-        paste0("(0 + ", indicator, " | coupleID)")
-      )
-    )
-    matched <- match_exchangeable_residual_blocks(blocks)
-    expect_length(matched, 1L)
-    expect_identical(matched[[1L]]$difference_indicator, indicator)
-  }
 })
 
 test_that("supplied pair specifications fail clearly", {
@@ -1445,7 +1424,7 @@ test_that("fitted-row validation protects the exchangeable coding", {
     "1"
   ))
   short_member_contrast <- paste0(
-    dyad_short_prefix,
+    dyad_retained_prefix,
     "member_contrast_arbitrary"
   )
   short_coding_data <- data.frame(value = c(-1, 1))
@@ -1552,7 +1531,7 @@ test_that("fitted-row validation protects the exchangeable coding", {
     fixed = TRUE
   )
 
-  marker <- ".dy_member_contrast_same_sex_arbitrary"
+  marker <- ".member_contrast_same_sex_arbitrary"
   generic_blocks <- list(
     rescov_test_block("coupleID", "(Intercept)", "generic shared"),
     rescov_test_block("coupleID", marker, "difference")
@@ -1686,7 +1665,7 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
   expect_false(grepl("Pair `first`", warnings[[2L]], fixed = TRUE))
 
   mixed_pair <- pair
-  mixed_pair$shared_indicator <- ".dy_is_same_sex"
+  mixed_pair$shared_indicator <- ".is_same_sex"
   expect_warning(
     warn_about_exchangeable_residual_level(
       extracted,
@@ -1750,7 +1729,7 @@ test_that("residual-level warnings explain brms, omissions, and slopes", {
 test_that("the public function returns member-level glmmTMB matrices", {
   skip_if_not_installed("glmmTMB")
 
-  marker <- ".dy_member_contrast_assumed_exchangeable_arbitrary"
+  marker <- ".member_contrast_assumed_exchangeable_arbitrary"
   data <- expand.grid(member = c(-1, 1), coupleID = seq_len(30))
   data$coupleID <- factor(data$coupleID)
   data[[marker]] <- data$member
@@ -1759,7 +1738,7 @@ test_that("the public function returns member-level glmmTMB matrices", {
 
   model <- suppressWarnings(glmmTMB::glmmTMB(
     outcome ~ 1 + (1 | coupleID) +
-      (0 + .dy_member_contrast_assumed_exchangeable_arbitrary || coupleID),
+      (0 + .member_contrast_assumed_exchangeable_arbitrary || coupleID),
     dispformula = ~0,
     data = data
   ))

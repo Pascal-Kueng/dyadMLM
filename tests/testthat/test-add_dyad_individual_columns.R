@@ -17,12 +17,12 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
     center_predictors() |>
     add_dyad_individual_columns()
 
-  expect_equal(result$.dy_x_dyad_mean_gmc, c(-11.5, -11.5, -8.5, -8.5, 8, 8, 12, 12))
-  expect_equal(result$.dy_x_within_dyad_dev, c(-4.5, 4.5, -5.5, 5.5, -5, 5, -5, 5))
-  expect_equal(result$.dy_x_cwp_dyad_mean, c(-1.5, -1.5, 1.5, 1.5, -2, -2, 2, 2))
-  expect_equal(result$.dy_x_cwp_within_dyad_dev, c(0.5, -0.5, -0.5, 0.5, 0, 0, 0, 0))
-  expect_equal(result$.dy_x_cbp_dyad_mean, c(-10, -10, -10, -10, 10, 10, 10, 10))
-  expect_equal(result$.dy_x_cbp_within_dyad_dev, c(-5, 5, -5, 5, -5, 5, -5, 5))
+  expect_equal(result$.x_dyad_mean_gmc, c(-11.5, -11.5, -8.5, -8.5, 8, 8, 12, 12))
+  expect_equal(result$.x_within_dyad_dev, c(-4.5, 4.5, -5.5, 5.5, -5, 5, -5, 5))
+  expect_equal(result$.x_cwp_dyad_mean, c(-1.5, -1.5, 1.5, 1.5, -2, -2, 2, 2))
+  expect_equal(result$.x_cwp_within_dyad_dev, c(0.5, -0.5, -0.5, 0.5, 0, 0, 0, 0))
+  expect_equal(result$.x_cbp_dyad_mean, c(-10, -10, -10, -10, 10, 10, 10, 10))
+  expect_equal(result$.x_cbp_within_dyad_dev, c(-5, 5, -5, 5, -5, 5, -5, 5))
 
   expect_equal(
     attr(result, "dyadMLM")$dim_predictors,
@@ -30,12 +30,12 @@ test_that("add_dyad_individual_columns creates longitudinal DIM columns", {
       predictor = c("x", "x", "x"),
       component = c("raw", "cwp", "cbp"),
       lag = c(0L, 0L, 0L),
-      source_column = c("x", ".dy_x_cwp", ".dy_x_cbp"),
-      mean_column = c(".dy_x_dyad_mean_gmc", ".dy_x_cwp_dyad_mean", ".dy_x_cbp_dyad_mean"),
+      source_column = c("x", ".x_cwp", ".x_cbp"),
+      mean_column = c(".x_dyad_mean_gmc", ".x_cwp_dyad_mean", ".x_cbp_dyad_mean"),
       deviation_column = c(
-        ".dy_x_within_dyad_dev",
-        ".dy_x_cwp_within_dyad_dev",
-        ".dy_x_cbp_within_dyad_dev"
+        ".x_within_dyad_dev",
+        ".x_cwp_within_dyad_dev",
+        ".x_cbp_within_dyad_dev"
       ),
       dyad_decomposition_level = c("dyad_time", "dyad_time", "dyad")
     )
@@ -61,13 +61,13 @@ test_that("add_dyad_individual_columns requires complete dyad values for each co
     center_predictors() |>
     add_dyad_individual_columns()
 
-  expect_false(is.na(result$.dy_x_cwp_dyad_mean[1]))
-  expect_true(is.na(result$.dy_x_cwp_dyad_mean[3]))
-  expect_false(is.na(result$.dy_x_dyad_mean_gmc[1]))
-  expect_true(is.na(result$.dy_x_dyad_mean_gmc[3]))
-  expect_true(is.na(result$.dy_x_within_dyad_dev[3]))
-  expect_true(all(is.na(result$.dy_x_cbp_dyad_mean[result$dyad_id == 2])))
-  expect_true(all(is.na(result$.dy_x_cbp_within_dyad_dev[result$dyad_id == 2])))
+  expect_false(is.na(result$.x_cwp_dyad_mean[1]))
+  expect_true(is.na(result$.x_cwp_dyad_mean[3]))
+  expect_false(is.na(result$.x_dyad_mean_gmc[1]))
+  expect_true(is.na(result$.x_dyad_mean_gmc[3]))
+  expect_true(is.na(result$.x_within_dyad_dev[3]))
+  expect_true(all(is.na(result$.x_cbp_dyad_mean[result$dyad_id == 2])))
+  expect_true(all(is.na(result$.x_cbp_within_dyad_dev[result$dyad_id == 2])))
 })
 
 test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns", {
@@ -88,8 +88,8 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
     center_predictors() |>
     add_dyad_individual_columns()
 
-  expect_equal(result$.dy_x_dyad_mean_gmc, c(-9.75, -9.75, 9.75, 9.75))
-  expect_equal(result$.dy_x_within_dyad_dev, c(-4.5, 4.5, -5, 5))
+  expect_equal(result$.x_dyad_mean_gmc, c(-9.75, -9.75, 9.75, 9.75))
+  expect_equal(result$.x_within_dyad_dev, c(-4.5, 4.5, -5, 5))
 
   expect_equal(
     attr(result, "dyadMLM")$dim_predictors,
@@ -98,8 +98,8 @@ test_that("add_dyad_individual_columns creates cross-sectional raw DIM columns",
       component = "raw",
       lag = 0L,
       source_column = "x",
-      mean_column = ".dy_x_dyad_mean_gmc",
-      deviation_column = ".dy_x_within_dyad_dev",
+      mean_column = ".x_dyad_mean_gmc",
+      deviation_column = ".x_within_dyad_dev",
       dyad_decomposition_level = "dyad"
     )
   )
@@ -152,9 +152,9 @@ test_that("DIM construction allows one role-supplied exchangeable composition", 
     seed = 123
   )
 
-  expect_true(".dy_x_dyad_mean_gmc" %in% names(result))
-  expect_true(".dy_x_within_dyad_dev" %in% names(result))
-  expect_equal(unique(as.character(result$.dy_composition)), "female_x_female")
+  expect_true(".x_dyad_mean_gmc" %in% names(result))
+  expect_true(".x_within_dyad_dev" %in% names(result))
+  expect_equal(unique(as.character(result$.composition)), "female_x_female")
   expect_equal(attr(result, "dyadMLM")$dyad_compositions$dyad_type, "exchangeable")
 })
 
@@ -175,10 +175,10 @@ test_that("raw cross-sectional DIM requires complete dyad values", {
     seed = 123
   )
 
-  expect_true(all(is.na(result$.dy_x_dyad_mean_gmc[result$dyad_id == 1])))
-  expect_true(all(is.na(result$.dy_x_within_dyad_dev[result$dyad_id == 1])))
-  expect_equal(result$.dy_x_dyad_mean_gmc[result$dyad_id == 2], c(0, 0))
-  expect_equal(result$.dy_x_within_dyad_dev[result$dyad_id == 2], c(-5, 5))
+  expect_true(all(is.na(result$.x_dyad_mean_gmc[result$dyad_id == 1])))
+  expect_true(all(is.na(result$.x_within_dyad_dev[result$dyad_id == 1])))
+  expect_equal(result$.x_dyad_mean_gmc[result$dyad_id == 2], c(0, 0))
+  expect_equal(result$.x_within_dyad_dev[result$dyad_id == 2], c(-5, 5))
 })
 
 test_that("prepare_dyad_data creates DIM columns without APIM columns", {
@@ -198,7 +198,7 @@ test_that("prepare_dyad_data creates DIM columns without APIM columns", {
     seed = 123
   )
 
-  expect_true(".dy_x_dyad_mean_gmc" %in% names(result))
+  expect_true(".x_dyad_mean_gmc" %in% names(result))
   expect_false("x_actor" %in% names(result))
   expect_false("x_partner" %in% names(result))
 })
@@ -291,8 +291,8 @@ test_that("longitudinal DIM constructs undecomposed raw predictor scores", {
     seed = 123
   )
 
-  expect_equal(result$.dy_x_dyad_mean_gmc, c(-11.5, -11.5, -8.5, -8.5, 8, 8, 12, 12))
-  expect_equal(result$.dy_x_within_dyad_dev, c(-4.5, 4.5, -5.5, 5.5, -5, 5, -5, 5))
+  expect_equal(result$.x_dyad_mean_gmc, c(-11.5, -11.5, -8.5, -8.5, 8, 8, 12, 12))
+  expect_equal(result$.x_within_dyad_dev, c(-4.5, 4.5, -5.5, 5.5, -5, 5, -5, 5))
   expect_equal(attr(result, "dyadMLM")$dim_predictors$component, "raw")
   expect_equal(attr(result, "dyadMLM")$dim_predictors$dyad_decomposition_level, "dyad_time")
 })

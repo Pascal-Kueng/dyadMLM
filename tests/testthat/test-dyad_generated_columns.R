@@ -19,7 +19,7 @@ test_that("dyad_generated_columns errors when generated column specs are missing
       component = "unsupported",
       lag = 0L,
       column_role = "actor",
-      column = ".dy_x_unsupported_actor",
+      column = ".x_unsupported_actor",
       source_column = "x"
     )
   )
@@ -78,11 +78,11 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
 
   result <- dyad_generated_columns(attr(prepared, "dyadMLM"))
   short_composition_indicator <- paste0(
-    dyad_short_prefix,
+    dyad_retained_prefix,
     "is_exchangeable"
   )
   short_member_contrast <- paste0(
-    dyad_short_prefix,
+    dyad_retained_prefix,
     "member_contrast_arbitrary"
   )
 
@@ -99,8 +99,8 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
         "member_contrast"
       ),
       column = c(
-        ".dy_composition",
-        ".dy_composition_role",
+        ".composition",
+        ".composition_role",
         short_composition_indicator,
         short_member_contrast
       ),
@@ -123,7 +123,7 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
       variable_role = "composition",
       component = "none",
       lag = 0L,
-      source_column = ".dy_composition",
+      source_column = ".composition",
       temporal_decomposition = "none",
       dyadic_decomposition = "none",
       column_centering = "none",
@@ -145,13 +145,13 @@ test_that("dyad_generated_columns records exchangeable member contrasts", {
 
   expect_equal(
     long_result$column[long_result$column_role == "member_contrast"],
-    ".dy_member_contrast_assumed_exchangeable_arbitrary"
+    ".member_contrast_assumed_exchangeable_arbitrary"
   )
   expect_equal(
     long_result$column_pattern[
       long_result$column_role == "member_contrast"
     ],
-    ".dy_member_contrast_{comp}_arbitrary"
+    ".member_contrast_{comp}_arbitrary"
   )
 })
 
@@ -182,13 +182,13 @@ test_that("dyad_generated_columns collects APIM columns", {
       component = c("raw", "raw"),
       lag = c(0L, 0L),
       column_role = c("actor", "partner"),
-      column = c(".dy_x_actor", ".dy_x_partner"),
+      column = c(".x_actor", ".x_partner"),
       source_column = c("x", "x"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("none", "none"),
       column_centering = c("none", "none"),
       print_order = c(10L, 11L),
-      column_pattern = c(".dy_{pred}_actor", ".dy_{pred}_partner"),
+      column_pattern = c(".{pred}_actor", ".{pred}_partner"),
       description = c(
         "APIM actor predictor: actor's original predictor values",
         "APIM partner predictor: partner's original predictor values"
@@ -257,16 +257,16 @@ test_that("dyad_generated_columns records temporal decomposition for APIM column
         "partner"
       ),
       column = c(
-        ".dy_x_cwp",
-        ".dy_x_cbp",
-        ".dy_x_actor",
-        ".dy_x_cwp_actor",
-        ".dy_x_cbp_actor",
-        ".dy_x_partner",
-        ".dy_x_cwp_partner",
-        ".dy_x_cbp_partner"
+        ".x_cwp",
+        ".x_cbp",
+        ".x_actor",
+        ".x_cwp_actor",
+        ".x_cbp_actor",
+        ".x_partner",
+        ".x_cwp_partner",
+        ".x_cbp_partner"
       ),
-      source_column = c("x", "x", "x", ".dy_x_cwp", ".dy_x_cbp", "x", ".dy_x_cwp", ".dy_x_cbp"),
+      source_column = c("x", "x", "x", ".x_cwp", ".x_cbp", "x", ".x_cwp", ".x_cbp"),
       temporal_decomposition = c(
         "within_person",
         "between_person_grand_mean",
@@ -281,14 +281,14 @@ test_that("dyad_generated_columns records temporal decomposition for APIM column
       column_centering = rep("none", 8),
       print_order = c(8L, 9L, 10L, 12L, 14L, 11L, 13L, 15L),
       column_pattern = c(
-        ".dy_{pred}_cwp",
-        ".dy_{pred}_cbp",
-        ".dy_{pred}_actor",
-        ".dy_{pred}_cwp_actor",
-        ".dy_{pred}_cbp_actor",
-        ".dy_{pred}_partner",
-        ".dy_{pred}_cwp_partner",
-        ".dy_{pred}_cbp_partner"
+        ".{pred}_cwp",
+        ".{pred}_cbp",
+        ".{pred}_actor",
+        ".{pred}_cwp_actor",
+        ".{pred}_cbp_actor",
+        ".{pred}_partner",
+        ".{pred}_cwp_partner",
+        ".{pred}_cbp_partner"
       ),
       description = c(
         "within-person predictor: momentary deviations from each person's usual level",
@@ -332,13 +332,13 @@ test_that("dyad_generated_columns collects DIM columns", {
       component = c("raw", "raw"),
       lag = c(0L, 0L),
       column_role = c("dyad_mean", "within_dyad_deviation"),
-      column = c(".dy_x_dyad_mean_gmc", ".dy_x_within_dyad_dev"),
+      column = c(".x_dyad_mean_gmc", ".x_within_dyad_dev"),
       source_column = c("x", "x"),
       temporal_decomposition = c("none", "none"),
       dyadic_decomposition = c("dyad_mean", "within_dyad_deviation"),
       column_centering = c("grand_mean", "none"),
       print_order = c(20L, 21L),
-      column_pattern = c(".dy_{pred}_dyad_mean_gmc", ".dy_{pred}_within_dyad_dev"),
+      column_pattern = c(".{pred}_dyad_mean_gmc", ".{pred}_within_dyad_dev"),
       description = c(
         "dyad-mean predictor: dyad's average predictor level, grand-mean centered",
         "DIM within-dyad member-deviation predictor: member's difference from the dyad mean"
@@ -473,9 +473,9 @@ test_that("dyad_generated_columns collects DSM columns", {
   expect_equal(
     result$column,
     c(
-      ".dy_dsm_role_contrast",
-      ".dy_x_dyad_mean_gmc",
-      ".dy_x_within_dyad_diff"
+      ".dsm_role_contrast",
+      ".x_dyad_mean_gmc",
+      ".x_within_dyad_diff"
     )
   )
   expect_equal(result$dyadic_decomposition, c("role_contrast", "dyad_mean", "dyad_difference"))

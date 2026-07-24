@@ -13,7 +13,7 @@ test_that("comparison treats unregistered prefixed columns as original data", {
     seed = 123
   )
   changed <- prepared
-  changed$.dy_unregistered <- 1
+  changed$.unregistered <- 1
 
   expect_error(
     validate_comparison_data(NULL, NULL, prepared, changed),
@@ -45,30 +45,30 @@ test_that("compare_nested_glmmTMB_models compares reparameterized nested models"
 
   full_model <- glmmTMB::glmmTMB(
     closeness ~ 0 +
-      .dy_is_female_x_male_female +
-      .dy_is_female_x_male_male +
-      .dy_is_female_x_female +
-      .dy_is_male_x_male +
+      .is_female_x_male_female +
+      .is_female_x_male_male +
+      .is_female_x_female +
+      .is_male_x_male +
       us(
-        0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |
+        0 + .is_female_x_male_female + .is_female_x_male_male |
           coupleID
       ) +
-      us(0 + .dy_is_female_x_female | coupleID) +
-      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
-      us(0 + .dy_is_male_x_male | coupleID) +
-      us(0 + .dy_member_contrast_male_x_male_arbitrary | coupleID),
+      us(0 + .is_female_x_female | coupleID) +
+      us(0 + .member_contrast_female_x_female_arbitrary | coupleID) +
+      us(0 + .is_male_x_male | coupleID) +
+      us(0 + .member_contrast_male_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = full_data
   )
   restricted_model <- glmmTMB::glmmTMB(
     closeness ~ 0 +
-      .dy_is_female_x_female +
-      .dy_is_non_female_x_female +
-      us(0 + .dy_is_female_x_female | coupleID) +
-      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
-      us(0 + .dy_is_non_female_x_female | coupleID) +
-      us(0 + .dy_member_contrast_non_female_x_female_arbitrary | coupleID),
+      .is_female_x_female +
+      .is_non_female_x_female +
+      us(0 + .is_female_x_female | coupleID) +
+      us(0 + .member_contrast_female_x_female_arbitrary | coupleID) +
+      us(0 + .is_non_female_x_female | coupleID) +
+      us(0 + .member_contrast_non_female_x_female_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = restricted_data
@@ -263,36 +263,36 @@ test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
 
   distinguishable_dsm <- glmmTMB::glmmTMB(
     closeness ~ 1 +
-      .dy_provided_support_dyad_mean_gmc +
-      .dy_provided_support_within_dyad_diff +
-      .dy_dsm_role_contrast +
-      .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
-      .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
-      us(1 + .dy_dsm_role_contrast | coupleID),
+      .provided_support_dyad_mean_gmc +
+      .provided_support_within_dyad_diff +
+      .dsm_role_contrast +
+      .provided_support_dyad_mean_gmc:.dsm_role_contrast +
+      .provided_support_within_dyad_diff:.dsm_role_contrast +
+      us(1 + .dsm_role_contrast | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = distinguishable_data
   )
   exchangeable_apim <- glmmTMB::glmmTMB(
-    closeness ~ 0 + .dy_is_female_x_male +
-      .dy_provided_support_actor +
-      .dy_provided_support_partner +
-      us(0 + .dy_is_female_x_male | coupleID) +
-      us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
+    closeness ~ 0 + .is_female_x_male +
+      .provided_support_actor +
+      .provided_support_partner +
+      us(0 + .is_female_x_male | coupleID) +
+      us(0 + .member_contrast_female_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = exchangeable_data
   )
   distinguishable_apim <- glmmTMB::glmmTMB(
     closeness ~ 0 +
-      .dy_is_female_x_male_female +
-      .dy_is_female_x_male_male +
-      .dy_is_female_x_male_female:.dy_provided_support_actor +
-      .dy_is_female_x_male_male:.dy_provided_support_actor +
-      .dy_is_female_x_male_female:.dy_provided_support_partner +
-      .dy_is_female_x_male_male:.dy_provided_support_partner +
+      .is_female_x_male_female +
+      .is_female_x_male_male +
+      .is_female_x_male_female:.provided_support_actor +
+      .is_female_x_male_male:.provided_support_actor +
+      .is_female_x_male_female:.provided_support_partner +
+      .is_female_x_male_male:.provided_support_partner +
       us(
-        0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |
+        0 + .is_female_x_male_female + .is_female_x_male_male |
           coupleID
       ),
     dispformula = ~0,
@@ -301,10 +301,10 @@ test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
   )
   exchangeable_dim <- glmmTMB::glmmTMB(
     closeness ~ 1 +
-      .dy_provided_support_dyad_mean_gmc +
-      .dy_provided_support_within_dyad_dev +
+      .provided_support_dyad_mean_gmc +
+      .provided_support_within_dyad_dev +
       us(1 | coupleID) +
-      us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
+      us(0 + .member_contrast_female_x_male_arbitrary | coupleID),
     dispformula = ~0,
     family = gaussian(),
     data = exchangeable_data
