@@ -107,6 +107,17 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
   ) |>
     infer_dyad_compositions(seed = 123)
 
+  mixed_result_with_distinguishable_contrast <- validate_dyad_data(
+    mixed,
+    dyad = dyad_id,
+    member = person_id,
+    role = role
+  ) |>
+    infer_dyad_compositions(
+      seed = 123,
+      include_arbitrary_member_contrast = TRUE
+    )
+
   expect_equal(
     mixed_result$.member_contrast_female_x_female_arbitrary[mixed_result$dyad_id == 2],
     exchangeable_result$.member_contrast_female_x_female_arbitrary[exchangeable_result$dyad_id == 2]
@@ -114,6 +125,30 @@ test_that("composition-specific diff signs do not depend on distinguishable dyad
   expect_equal(
     mixed_result$.member_contrast_male_x_male_arbitrary[mixed_result$dyad_id == 3],
     exchangeable_result$.member_contrast_male_x_male_arbitrary[exchangeable_result$dyad_id == 3]
+  )
+  expect_equal(
+    mixed_result_with_distinguishable_contrast$.member_contrast_female_x_female_arbitrary,
+    mixed_result$.member_contrast_female_x_female_arbitrary
+  )
+  expect_equal(
+    mixed_result_with_distinguishable_contrast$.member_contrast_male_x_male_arbitrary,
+    mixed_result$.member_contrast_male_x_male_arbitrary
+  )
+  expect_equal(
+    sort(mixed_result_with_distinguishable_contrast$.member_contrast_female_x_male_arbitrary[
+      mixed_result_with_distinguishable_contrast$dyad_id == 1
+    ]),
+    c(-1, 1)
+  )
+  expect_equal(
+    mixed_result_with_distinguishable_contrast$.member_contrast_female_x_male_arbitrary[
+      mixed_result_with_distinguishable_contrast$dyad_id != 1
+    ],
+    rep(0, 4)
+  )
+  expect_equal(
+    attr(mixed_result_with_distinguishable_contrast, "dyadMLM")$dyad_compositions,
+    attr(mixed_result, "dyadMLM")$dyad_compositions
   )
 })
 
@@ -404,6 +439,7 @@ test_that("infer_dyad_compositions rejects pooling distinguishable compositions"
     infer_dyad_compositions(
       validated,
       seed = 123,
+      include_arbitrary_member_contrast = TRUE,
       pool_compositions = list(couples = c("female-female", "female-male"))
     ),
     "can only pool exchangeable compositions",

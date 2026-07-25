@@ -1,6 +1,10 @@
 test_that("prepare_dyad_data has no outcome-selection argument", {
   expect_false("outcomes" %in% names(formals(prepare_dyad_data)))
   expect_identical(formals(prepare_dyad_data)$short_colnames, TRUE)
+  expect_identical(
+    formals(prepare_dyad_data)$include_arbitrary_member_contrast,
+    FALSE
+  )
 })
 
 test_that("prepare_dyad_data returns validated data with dyad composition metadata", {
@@ -184,6 +188,149 @@ test_that("prepare_dyad_data validates short_colnames", {
       fixed = TRUE
     )
   }
+})
+
+test_that("prepare_dyad_data validates include_arbitrary_member_contrast", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D")
+  )
+
+  for (include_arbitrary_member_contrast in list(NA, c(TRUE, FALSE), "yes")) {
+    expect_error(
+      prepare_dyad_data(
+        data,
+        dyad = dyad_id,
+        member = person_id,
+        include_arbitrary_member_contrast = include_arbitrary_member_contrast
+      ),
+      "`include_arbitrary_member_contrast` must be `TRUE` or `FALSE`.",
+      fixed = TRUE
+    )
+  }
+})
+
+test_that("prepare_dyad_data can contrast members without changing distinguishability", {
+  data <- data.frame(
+    dyad_id = rep(1:2, each = 8),
+    person_id = rep(rep(c("A", "B"), each = 4), 2),
+    role = rep(rep(c("female", "male"), each = 4), 2),
+    time = rep(1:4, 4)
+  )
+
+  default <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    role = role,
+    time = time,
+    model_types = "none",
+    seed = 123
+  )
+  result <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    role = role,
+    time = time,
+    model_types = "none",
+    seed = 123,
+    include_arbitrary_member_contrast = TRUE
+  )
+
+  expect_false(".member_contrast_arbitrary" %in% names(default))
+  expect_true(".member_contrast_arbitrary" %in% names(result))
+  expect_equal(
+    as.character(result$.composition_role),
+    as.character(default$.composition_role)
+  )
+  expect_equal(result$.is_female, default$.is_female)
+  expect_equal(result$.is_male, default$.is_male)
+  expect_false(".is_exchangeable" %in% names(result))
+  expect_equal(
+    attr(result, "dyadMLM")$dyad_compositions,
+    attr(default, "dyadMLM")$dyad_compositions
+  )
+  expect_equal(
+    attr(result, "dyadMLM")$dyad_compositions$dyad_type,
+    "distinguishable"
+  )
+
+  member_contrasts <- result |>
+    dplyr::distinct(
+      .data$dyad_id,
+      .data$person_id,
+      .data$.member_contrast_arbitrary
+    )
+
+  expect_equal(nrow(member_contrasts), 4L)
+  expect_equal(
+    sort(member_contrasts$.member_contrast_arbitrary[
+      member_contrasts$dyad_id == 1
+    ]),
+    c(-1, 1)
+  )
+  expect_equal(
+    sort(member_contrasts$.member_contrast_arbitrary[
+      member_contrasts$dyad_id == 2
+    ]),
+    c(-1, 1)
+  )
+
+  generated <- dyad_generated_columns(attr(result, "dyadMLM"))
+  member_contrast <- generated[
+    generated$column_role == "member_contrast",
+  ]
+  expect_equal(nrow(member_contrast), 1L)
+  expect_equal(member_contrast$column, ".member_contrast_arbitrary")
+
+  qualified <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    role = role,
+    time = time,
+    model_types = "none",
+    short_colnames = FALSE,
+    seed = 123,
+    include_arbitrary_member_contrast = TRUE
+  )
+  expect_true(
+    ".member_contrast_female_x_male_arbitrary" %in% names(qualified)
+  )
+  expect_false(any(grepl("male_x_female", names(qualified), fixed = TRUE)))
+})
+
+test_that("optional member contrasts respect generated-column collisions", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    role = c("female", "male", "female", "male"),
+    .member_contrast_arbitrary = 0,
+    check.names = FALSE
+  )
+
+  expect_no_error(
+    prepare_dyad_data(
+      data,
+      dyad = dyad_id,
+      member = person_id,
+      role = role,
+      model_types = "none"
+    )
+  )
+  expect_error(
+    prepare_dyad_data(
+      data,
+      dyad = dyad_id,
+      member = person_id,
+      role = role,
+      model_types = "none",
+      include_arbitrary_member_contrast = TRUE
+    ),
+    "Generated-column collision for `.member_contrast_arbitrary`",
+    fixed = TRUE
+  )
 })
 
 test_that("prepare_dyad_data can set a distinguishable composition exchangeable for DIM", {

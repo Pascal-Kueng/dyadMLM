@@ -144,7 +144,11 @@ test_that("dyadMLM data print describes generated predictor columns", {
   expect_added_column_description(
     printed,
     short_member_contrast_pattern,
-    "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
+    paste(
+      "composition-specific member contrasts coded -1/+1 in arbitrary",
+      "direction for exchangeability-constrained random effects. Values are",
+      "0 for other compositions"
+    )
   )
   expect_true(any(grepl(".{pred}_actor", printed, fixed = TRUE)))
   expect_added_column_description(

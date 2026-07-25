@@ -26,7 +26,7 @@ test_that("the public API and metadata use only the cleaned names", {
   prepare_arguments <- names(formals(prepare_dyad_data))
   expect_true(all(c(
     "dyad", "lag1_predictors", "model_types", "temporal_decomposition",
-    "keep_compositions"
+    "keep_compositions", "include_arbitrary_member_contrast"
   ) %in% prepare_arguments))
   expect_false(any(c(
     "group", "lag_predictors", "model_type",

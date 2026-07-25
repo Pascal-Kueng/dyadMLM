@@ -21,7 +21,8 @@ prepare_dyad_data(
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL,
-  short_colnames = TRUE
+  short_colnames = TRUE,
+  include_arbitrary_member_contrast = FALSE
 )
 }
 \arguments{
@@ -93,7 +94,11 @@ exchangeable should not be listed. Each composition must be supplied as one
 string, using \verb{_x_}, \code{-}, \verb{_}, or whitespace (\verb{ }) between the two role labels,
 for example \code{"female_x_male"}, \code{"female-male"}, \code{"female_male"}, or
 \code{"female male"}, in arbitrary order.
-To set multiple compositions, use a character vector of such strings.}
+To set multiple compositions, use a character vector of such strings.
+Unlike \code{include_arbitrary_member_contrast}, this reclassifies the selected
+compositions as exchangeable and changes their composition-role coding and
+indicators, which is required for composition pooling and DIM
+compatibility.}
 
 \item{keep_compositions}{Optional observed dyad compositions to keep
 before exchangeability overrides and pooling. Requires \code{role}. Composition
@@ -121,21 +126,30 @@ is applied. \code{"error"} stops with an error and \code{"drop"} removes the ent
 dyad. Conflicting non-missing roles always cause an error. Ignored when no
 \code{role} column is supplied.}
 
-\item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment
-in exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
+\item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment.
+If \code{NULL}, the current R session's RNG state is used.}
 
 \item{short_colnames}{Whether to use shorter composition-dependent generated
 column names when the final data contain one composition. The default \code{TRUE}
 omits the redundant composition label from \verb{.is_*} and
 \verb{.member_contrast_*} names. \code{FALSE} always retains composition-qualified
 names. Other generated column names are unaffected.}
+
+\item{include_arbitrary_member_contrast}{Whether to also generate arbitrary
+\verb{.member_contrast_*} columns for distinguishable compositions. The default
+\code{FALSE} generates these columns only for exchangeable compositions.
+\code{TRUE} retains distinguishable composition metadata, composition roles,
+and role indicators. It only adds the contrast needed to fit an
+exchangeability-constrained random-effects model to the same prepared
+data. Use \code{set_exchangeable_compositions} instead to reclassify
+compositions for pooling or DIM compatibility.}
 }
 \value{
 The original data as a tibble with class \code{dyadMLM_data},
 \code{.composition} and \code{.composition_role} factor columns,
 \verb{.is_*} numeric indicator columns, and numeric
 \verb{.member_contrast_*} columns coded \code{-1} and \code{1} for the two members of
-matching exchangeable dyads and \code{0} otherwise. With one final composition,
+each matching composition and \code{0} otherwise. With one final composition,
 their default names omit the composition label. The \code{dyadMLM}
 attribute containing structural metadata, \code{dyad_compositions}, and
 predictor metadata such as \code{temporal_decompositions}, \code{lag1_predictors},

@@ -85,6 +85,82 @@ test_that("compare_nested_glmmTMB_models compares reparameterized nested models"
   expect_lt(comparison$`Pr(>Chisq)`[2], 0.001)
 })
 
+test_that("one prepared object supports both distinguishability models", {
+  skip_if_not_installed("glmmTMB")
+
+  comparison_data <- prepare_dyad_data(
+    comparison_female_male_cross_dyads,
+    dyad = coupleID,
+    member = personID,
+    role = gender,
+    predictors = provided_support,
+    include_arbitrary_member_contrast = TRUE,
+    seed = 123
+  )
+  exchangeable_data <- prepare_dyad_data(
+    comparison_female_male_cross_dyads,
+    dyad = coupleID,
+    member = personID,
+    role = gender,
+    predictors = provided_support,
+    set_exchangeable_compositions = "female-male",
+    seed = 123
+  )
+
+  full_model <- glmmTMB::glmmTMB(
+    closeness ~ 0 +
+      .is_female +
+      .is_male +
+      .is_female:.provided_support_actor +
+      .is_male:.provided_support_actor +
+      .is_female:.provided_support_partner +
+      .is_male:.provided_support_partner +
+      us(0 + .is_female + .is_male | coupleID),
+    dispformula = ~0,
+    family = gaussian(),
+    data = comparison_data
+  )
+  restricted_model <- glmmTMB::glmmTMB(
+    closeness ~
+      .provided_support_actor +
+      .provided_support_partner +
+      us(1 | coupleID) +
+      us(0 + .member_contrast_arbitrary | coupleID),
+    dispformula = ~0,
+    family = gaussian(),
+    data = comparison_data
+  )
+  re_prepared_model <- update(
+    restricted_model,
+    data = exchangeable_data
+  )
+
+  comparison <- compare_nested_glmmTMB_models(
+    restricted_model,
+    full_model
+  )
+  recovered <- recover_exchangeable_covariance(restricted_model)
+
+  expect_s3_class(comparison, "anova")
+  expect_equal(comparison$`Chi Df`[2], 4)
+  expect_s3_class(recovered, "exchangeable_rescov")
+  expect_equal(
+    as.numeric(stats::logLik(restricted_model)),
+    as.numeric(stats::logLik(re_prepared_model)),
+    tolerance = 1e-8
+  )
+  expect_equal(
+    glmmTMB::fixef(restricted_model),
+    glmmTMB::fixef(re_prepared_model),
+    tolerance = 1e-8
+  )
+  expect_equal(
+    glmmTMB::VarCorr(restricted_model),
+    glmmTMB::VarCorr(re_prepared_model),
+    tolerance = 1e-8
+  )
+})
+
 test_that("compare_nested_glmmTMB_models requires exact original data", {
   skip_if_not_installed("glmmTMB")
 

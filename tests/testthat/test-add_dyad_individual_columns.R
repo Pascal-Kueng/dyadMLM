@@ -220,7 +220,8 @@ test_that("DIM construction errors for distinguishable dyads", {
       predictors = x,
       model_types = "dim",
       temporal_decomposition = "none",
-      seed = 123
+      seed = 123,
+      include_arbitrary_member_contrast = TRUE
     ),
     "female_x_male \\(distinguishable, n_dyads = 2\\)"
   )

@@ -74,6 +74,10 @@
 #'   for example `"female_x_male"`, `"female-male"`, `"female_male"`, or
 #'   `"female male"`, in arbitrary order.
 #'   To set multiple compositions, use a character vector of such strings.
+#'   Unlike `include_arbitrary_member_contrast`, this reclassifies the selected
+#'   compositions as exchangeable and changes their composition-role coding and
+#'   indicators, which is required for composition pooling and DIM
+#'   compatibility.
 #' @param keep_compositions Optional observed dyad compositions to keep
 #'   before exchangeability overrides and pooling. Requires `role`. Composition
 #'   references use the same format as `set_exchangeable_compositions`. `NULL`
@@ -96,19 +100,27 @@
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
-#' @param seed Optional seed for random `.member_contrast_*` sign assignment
-#'   in exchangeable dyads. If `NULL`, the current R session's RNG state is used.
+#' @param seed Optional seed for random `.member_contrast_*` sign assignment.
+#'   If `NULL`, the current R session's RNG state is used.
 #' @param short_colnames Whether to use shorter composition-dependent generated
 #'   column names when the final data contain one composition. The default `TRUE`
 #'   omits the redundant composition label from `.is_*` and
 #'   `.member_contrast_*` names. `FALSE` always retains composition-qualified
 #'   names. Other generated column names are unaffected.
+#' @param include_arbitrary_member_contrast Whether to also generate arbitrary
+#'   `.member_contrast_*` columns for distinguishable compositions. The default
+#'   `FALSE` generates these columns only for exchangeable compositions.
+#'   `TRUE` retains distinguishable composition metadata, composition roles,
+#'   and role indicators. It only adds the contrast needed to fit an
+#'   exchangeability-constrained random-effects model to the same prepared
+#'   data. Use `set_exchangeable_compositions` instead to reclassify
+#'   compositions for pooling or DIM compatibility.
 #'
 #' @return The original data as a tibble with class `dyadMLM_data`,
 #'   `.composition` and `.composition_role` factor columns,
 #'   `.is_*` numeric indicator columns, and numeric
 #'   `.member_contrast_*` columns coded `-1` and `1` for the two members of
-#'   matching exchangeable dyads and `0` otherwise. With one final composition,
+#'   each matching composition and `0` otherwise. With one final composition,
 #'   their default names omit the composition label. The `dyadMLM`
 #'   attribute containing structural metadata, `dyad_compositions`, and
 #'   predictor metadata such as `temporal_decompositions`, `lag1_predictors`,
@@ -188,7 +200,8 @@ prepare_dyad_data <- function(
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
     seed = NULL,
-    short_colnames = TRUE
+    short_colnames = TRUE,
+    include_arbitrary_member_contrast = FALSE
   ) {
 
   model_types <- normalize_model_types(model_types)
@@ -217,7 +230,8 @@ prepare_dyad_data <- function(
     keep_compositions = keep_compositions,
     set_exchangeable_compositions = set_exchangeable_compositions,
     pool_compositions = pool_compositions,
-    short_colnames = short_colnames
+    short_colnames = short_colnames,
+    include_arbitrary_member_contrast = include_arbitrary_member_contrast
   )
 
   # Validate model compatibilities

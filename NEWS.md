@@ -9,6 +9,12 @@
   `.member_contrast_arbitrary`. Set `short_colnames = FALSE` to retain
   composition-qualified names. `recover_exchangeable_covariance()` recognizes
   both forms.
+* `prepare_dyad_data(include_arbitrary_member_contrast = TRUE)` can now add arbitrary
+  member contrasts for distinguishable compositions without changing their
+  metadata or role indicators. This supports full and
+  exchangeability-constrained APIMs from the same prepared data.
+  `set_exchangeable_compositions` still performs reclassification for pooling
+  and DIM preparation.
 * Added a `summary()` method for prepared data that prints the dyadic structure
   followed by standard summaries of all columns.
 * Generated-column tracking now records all retained composition and modeling
