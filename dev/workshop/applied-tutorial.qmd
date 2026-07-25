@@ -659,8 +659,9 @@ $$
   \end{gathered}
 $$
 
-[**Actor effects:** own predictor]{style="color: #1769AA"} ·
-[**Partner effects:** the other member's predictor]{style="color: #7B3FA1"}
+- [**Actor effects:** own predictor]{style="color: #1769AA"}
+
+- [**Partner effects:** the other member's predictor]{style="color: #7B3FA1"}
 
 In long format, each equation applies to one member row of the dyad.
 
@@ -677,34 +678,35 @@ coefficients. They are not built into the model equation.
 
 ## Role indicators combine the equations
 
-Let $D_{\mathrm{M},ji}$ and $D_{\mathrm{F},ji}$ indicate the role of row
-$j$. Let $X^{(\mathrm{A})}_{ji}$ and $X^{(\mathrm{P})}_{ji}$ contain the
-actor's and partner's values:
+With $r \in \{\mathrm{M},\mathrm{F}\}$ denoting role and $i$ dyad,
+$D_{\mathrm{M},ri}$ and $D_{\mathrm{F},ri}$ select the role-specific terms.
+$X^{(\mathrm{A})}_{ri}$ and $X^{(\mathrm{P})}_{ri}$ contain actor and partner
+values:
 
 $$
 \begin{aligned}
-Y_{ji} ={}&
+Y_{ri} ={}&
 \underbrace{
-  b_{0,\mathrm{M}} \times D_{\mathrm{M},ji}
-  + b_{0,\mathrm{F}} \times D_{\mathrm{F},ji}
+  b_{0,\mathrm{M}} \times D_{\mathrm{M},ri}
+  + b_{0,\mathrm{F}} \times D_{\mathrm{F},ri}
 }_{\text{role-specific intercepts}}
 \\[0.35em]
 &+
 \color{#1769AA}{
 \underbrace{
-  a_{\mathrm{M}} \times D_{\mathrm{M},ji} \times X^{(\mathrm{A})}_{ji}
-  + a_{\mathrm{F}} \times D_{\mathrm{F},ji} \times X^{(\mathrm{A})}_{ji}
+  a_{\mathrm{M}} \times D_{\mathrm{M},ri} \times X^{(\mathrm{A})}_{ri}
+  + a_{\mathrm{F}} \times D_{\mathrm{F},ri} \times X^{(\mathrm{A})}_{ri}
 }_{\text{role-specific actor effects}}
 }
 \\[0.35em]
 &+
 \color{#7B3FA1}{
 \underbrace{
-  p_{\mathrm{M}} \times D_{\mathrm{M},ji} \times X^{(\mathrm{P})}_{ji}
-  + p_{\mathrm{F}} \times D_{\mathrm{F},ji} \times X^{(\mathrm{P})}_{ji}
+  p_{\mathrm{M}} \times D_{\mathrm{M},ri} \times X^{(\mathrm{P})}_{ri}
+  + p_{\mathrm{F}} \times D_{\mathrm{F},ri} \times X^{(\mathrm{P})}_{ri}
 }_{\text{role-specific partner effects}}
 }
-+ \epsilon_{ji}.
++ \epsilon_{ri}.
 \end{aligned}
 $$
 
@@ -718,6 +720,8 @@ Male row: $D_\mathrm{M}=1,\ D_\mathrm{F}=0$. Female row: the reverse.
 
 The role indicators correspond to `.is_male` and `.is_female`. The actor and
 partner values correspond to `.efficacy_actor` and `.efficacy_partner`.
+The role index is written first, followed by the dyad index, as in
+$Y_{\mathrm{male},i}$ and $Y_{\mathrm{female},i}$.
 
 [Sources]
 

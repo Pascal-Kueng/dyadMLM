@@ -2865,7 +2865,10 @@ display:block!important;
   + \epsilon_{\mathrm{female},i}
   \end{gathered}
 \]</span></p>
-<p><span style="color: #1769AA"><strong>Actor effects:</strong> own predictor</span> · <span style="color: #7B3FA1"><strong>Partner effects:</strong> the other member’s predictor</span></p>
+<ul>
+<li><p><span style="color: #1769AA"><strong>Actor effects:</strong> own predictor</span></p></li>
+<li><p><span style="color: #7B3FA1"><strong>Partner effects:</strong> the other member’s predictor</span></p></li>
+</ul>
 <p>In long format, each equation applies to one member row of the dyad.</p>
 <aside class="notes">
 <p>The signs of the actor and partner associations come from the estimated coefficients. They are not built into the model equation.</p>
@@ -2887,38 +2890,38 @@ display:block!important;
 </section>
 <section id="role-indicators-combine-the-equations" class="slide level2">
 <h2>Role indicators combine the equations</h2>
-<p>Let <span class="math inline">\(D_{\mathrm{M},ji}\)</span> and <span class="math inline">\(D_{\mathrm{F},ji}\)</span> indicate the role of row <span class="math inline">\(j\)</span>. Let <span class="math inline">\(X^{(\mathrm{A})}_{ji}\)</span> and <span class="math inline">\(X^{(\mathrm{P})}_{ji}\)</span> contain the actor’s and partner’s values:</p>
+<p>With <span class="math inline">\(r \in \{\mathrm{M},\mathrm{F}\}\)</span> denoting role and <span class="math inline">\(i\)</span> dyad, <span class="math inline">\(D_{\mathrm{M},ri}\)</span> and <span class="math inline">\(D_{\mathrm{F},ri}\)</span> select the role-specific terms. <span class="math inline">\(X^{(\mathrm{A})}_{ri}\)</span> and <span class="math inline">\(X^{(\mathrm{P})}_{ri}\)</span> contain actor and partner values:</p>
 <p><span class="math display">\[
 \begin{aligned}
-Y_{ji} ={}&amp;
+Y_{ri} ={}&amp;
 \underbrace{
-  b_{0,\mathrm{M}} \times D_{\mathrm{M},ji}
-  + b_{0,\mathrm{F}} \times D_{\mathrm{F},ji}
+  b_{0,\mathrm{M}} \times D_{\mathrm{M},ri}
+  + b_{0,\mathrm{F}} \times D_{\mathrm{F},ri}
 }_{\text{role-specific intercepts}}
 \\[0.35em]
 &amp;+
 \color{#1769AA}{
 \underbrace{
-  a_{\mathrm{M}} \times D_{\mathrm{M},ji} \times X^{(\mathrm{A})}_{ji}
-  + a_{\mathrm{F}} \times D_{\mathrm{F},ji} \times X^{(\mathrm{A})}_{ji}
+  a_{\mathrm{M}} \times D_{\mathrm{M},ri} \times X^{(\mathrm{A})}_{ri}
+  + a_{\mathrm{F}} \times D_{\mathrm{F},ri} \times X^{(\mathrm{A})}_{ri}
 }_{\text{role-specific actor effects}}
 }
 \\[0.35em]
 &amp;+
 \color{#7B3FA1}{
 \underbrace{
-  p_{\mathrm{M}} \times D_{\mathrm{M},ji} \times X^{(\mathrm{P})}_{ji}
-  + p_{\mathrm{F}} \times D_{\mathrm{F},ji} \times X^{(\mathrm{P})}_{ji}
+  p_{\mathrm{M}} \times D_{\mathrm{M},ri} \times X^{(\mathrm{P})}_{ri}
+  + p_{\mathrm{F}} \times D_{\mathrm{F},ri} \times X^{(\mathrm{P})}_{ri}
 }_{\text{role-specific partner effects}}
 }
-+ \epsilon_{ji}.
++ \epsilon_{ri}.
 \end{aligned}
 \]</span></p>
 <div class="text-smaller">
 <p>Male row: <span class="math inline">\(D_\mathrm{M}=1,\ D_\mathrm{F}=0\)</span>. Female row: the reverse.</p>
 </div>
 <aside class="notes">
-<p>The role indicators correspond to <code>.is_male</code> and <code>.is_female</code>. The actor and partner values correspond to <code>.efficacy_actor</code> and <code>.efficacy_partner</code>.</p>
+<p>The role indicators correspond to <code>.is_male</code> and <code>.is_female</code>. The actor and partner values correspond to <code>.efficacy_actor</code> and <code>.efficacy_partner</code>. The role index is written first, followed by the dyad index, as in <span class="math inline">\(Y_{\mathrm{male},i}\)</span> and <span class="math inline">\(Y_{\mathrm{female},i}\)</span>.</p>
 <p>[Sources]</p>
 <ul>
 <li><span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span></li>
