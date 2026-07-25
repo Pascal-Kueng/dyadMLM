@@ -2823,45 +2823,29 @@ display:block!important;
 </section>
 <section id="the-apim-starts-with-two-member-specific-equations" class="slide level2">
 <h2>The APIM starts with two member-specific equations</h2>
-<p>For each dyad <span class="math inline">\(i\)</span>:</p>
+<p>For each dyad <span class="math inline">\(i\)</span>, both members with roles <span class="math inline">\(r \in \{\mathrm{M, F}\}\)</span> have their own predictor <span class="math inline">\(X^{(\mathrm{A})}_{ri}\)</span> and their partners’ predictor value <span class="math inline">\(X^{(\mathrm{P})}_{ri}\)</span>:</p>
 <p><span class="math display">\[
   \begin{gathered}
-  Y_{\mathrm{male},i}
+  Y_{\mathrm{M},i}
   = b_{0,\mathrm{M}}
-  + \color{#1769AA}{a_{\mathrm{M}} \times X^{(\mathrm{A})}_{\mathrm{male},i}}
-  + \color{#7B3FA1}{p_{\mathrm{M}} \times X^{(\mathrm{P})}_{\mathrm{female},i}}
-  + \epsilon_{\mathrm{male},i}
+  + \color{#1769AA}{a_{\mathrm{M}} \times X^{(\mathrm{A})}_{\mathrm{M},i}}
+  + \color{#7B3FA1}{p_{\mathrm{M}} \times X^{(\mathrm{P})}_{\mathrm{M},i}}
+  + \epsilon_{\mathrm{M},i}
   \\
-  Y_{\mathrm{female},i}
+  Y_{\mathrm{F},i}
   = b_{0,\mathrm{F}}
-  + \color{#1769AA}{a_{\mathrm{F}} \times X^{(\mathrm{A})}_{\mathrm{female},i}}
-  + \color{#7B3FA1}{p_{\mathrm{F}} \times X^{(\mathrm{P})}_{\mathrm{male},i}}
-  + \epsilon_{\mathrm{female},i}
+  + \color{#1769AA}{a_{\mathrm{F}} \times X^{(\mathrm{A})}_{\mathrm{F},i}}
+  + \color{#7B3FA1}{p_{\mathrm{F}} \times X^{(\mathrm{P})}_{\mathrm{F},i}}
+  + \epsilon_{\mathrm{F},i}
   \end{gathered}
 \]</span></p>
 <p><span style="color: #1769AA"><strong>- Actor effects</strong></span> <span style="color: #7B3FA1"><strong>- Partner effects</strong></span></p>
 <p>In long format, each equation applies to one member row of the dyad.</p>
-<aside class="notes">
-<p>The signs of the actor and partner associations come from the estimated coefficients. They are not built into the model equation.</p>
-<p>[Sources]</p>
-<ul>
-<li><span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span></li>
-</ul>
-<style type="text/css">
-span.MJX_Assistive_MathML {
-position:absolute!important;
-clip: rect(1px, 1px, 1px, 1px);
-padding: 1px 0 0 0!important;
-border: 0!important;
-height: 1px!important;
-width: 1px!important;
-overflow: hidden!important;
-display:block!important;
-}</style></aside>
+<p>How do we write this equation into a single formula?</p>
 </section>
 <section id="role-indicators-combine-the-equations" class="slide level2">
 <h2>Role indicators combine the equations</h2>
-<p>With <span class="math inline">\(r \in \{\mathrm{M},\mathrm{F}\}\)</span> denoting role and <span class="math inline">\(i\)</span> dyad, <span class="math inline">\(D_{\mathrm{M},ri}\)</span> and <span class="math inline">\(D_{\mathrm{F},ri}\)</span> select the role-specific terms. <span class="math inline">\(X^{(\mathrm{A})}_{ri}\)</span> and <span class="math inline">\(X^{(\mathrm{P})}_{ri}\)</span> contain actor and partner values:</p>
+<p>The indicators <span class="math inline">\(D_{\mathrm{M},ri}\)</span> and <span class="math inline">\(D_{\mathrm{F},ri}\)</span> identify the male or female row:</p>
 <p><span class="math display">\[
 \begin{aligned}
 Y_{ri} ={}&amp;
@@ -2889,7 +2873,7 @@ Y_{ri} ={}&amp;
 \end{aligned}
 \]</span></p>
 <div class="text-smaller">
-<p>Male row: <span class="math inline">\(D_\mathrm{M}=1,\ D_\mathrm{F}=0\)</span>. Female row: the reverse.</p>
+<p>For a male row: <span class="math inline">\(D_\mathrm{M}=1,\ D_\mathrm{F}=0\)</span>. For a female row: the reverse.</p>
 </div>
 <aside class="notes">
 <p>The role indicators correspond to <code>.is_male</code> and <code>.is_female</code>. The actor and partner values correspond to <code>.efficacy_actor</code> and <code>.efficacy_partner</code>. The role index is written first, followed by the dyad index, as in <span class="math inline">\(Y_{\mathrm{male},i}\)</span> and <span class="math inline">\(Y_{\mathrm{female},i}\)</span>.</p>
@@ -2931,27 +2915,33 @@ display:block!important;
 \sigma_{\epsilon_\mathrm{M}}^{2}
 \end{bmatrix}
 \]</span></p>
-<p>In <code>glmmTMB</code>, this is represented by:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href></a><span class="fu">us</span>(<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id),</span>
-<span id="cb13-2"><a href></a>dispformula <span class="ot">=</span> <span class="er">~</span> <span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<aside class="notes">
-<p>The unstructured block estimates separate female and male residual variances and their covariance. Setting <code>dispformula = ~ 0</code> avoids adding a second observation-level residual variance.</p>
-<p>[Sources]</p>
-<ul>
-<li><span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span></li>
-</ul>
-<style type="text/css">
-span.MJX_Assistive_MathML {
-position:absolute!important;
-clip: rect(1px, 1px, 1px, 1px);
-padding: 1px 0 0 0!important;
-border: 0!important;
-height: 1px!important;
-width: 1px!important;
-overflow: hidden!important;
-display:block!important;
-}</style></aside>
-<!-------------------------    --------------------------------------------->
+</section>
+<section id="fitting-the-distinguishable-apim-in-glmmtmb" class="slide level2">
+<h2>Fitting the distinguishable APIM in glmmTMB</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" data-code-line-numbers="1-21|4|5-6|8-10|12-14|16-18|19-20|1-21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href></a><span class="fu">library</span>(glmmTMB)</span>
+<span id="cb13-2"><a href></a></span>
+<span id="cb13-3"><a href></a>apim_distinguishable_model <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(</span>
+<span id="cb13-4"><a href></a>  total_mvpa <span class="sc">~</span></span>
+<span id="cb13-5"><a href></a>    <span class="co"># Role-specific intercepts</span></span>
+<span id="cb13-6"><a href></a>    <span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">+</span></span>
+<span id="cb13-7"><a href></a></span>
+<span id="cb13-8"><a href></a>    <span class="co"># Role-specific actor effects</span></span>
+<span id="cb13-9"><a href></a>    .is_female<span class="sc">:</span>.efficacy_actor <span class="sc">+</span></span>
+<span id="cb13-10"><a href></a>    .is_male<span class="sc">:</span>.efficacy_actor <span class="sc">+</span></span>
+<span id="cb13-11"><a href></a></span>
+<span id="cb13-12"><a href></a>    <span class="co"># Role-specific partner effects</span></span>
+<span id="cb13-13"><a href></a>    .is_female<span class="sc">:</span>.efficacy_partner <span class="sc">+</span></span>
+<span id="cb13-14"><a href></a>    .is_male<span class="sc">:</span>.efficacy_partner <span class="sc">+</span></span>
+<span id="cb13-15"><a href></a></span>
+<span id="cb13-16"><a href></a>    <span class="co"># Within-dyad residual covariance</span></span>
+<span id="cb13-17"><a href></a>    <span class="fu">us</span>(<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id),</span>
+<span id="cb13-18"><a href></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb13-19"><a href></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb13-20"><a href></a>  <span class="at">data =</span> df_apim</span>
+<span id="cb13-21"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<!-------------------------  Work in progress  --------------------------------------------->
 </section>
 <section id="exchangeable-apim" class="slide level2">
 <h2>Exchangeable APIM</h2>

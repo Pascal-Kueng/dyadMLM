@@ -610,21 +610,22 @@ This is the same conceptual model introduced in Part I.
 
 ## The APIM starts with two member-specific equations
 
-For each dyad $i$:
+For each dyad $i$, both members with roles $r \in \{\mathrm{M, F}\}$ have their own predictor $X^{(\mathrm{A})}_{ri}$ and
+their partners' predictor value $X^{(\mathrm{P})}_{ri}$:
 
 $$
   \begin{gathered}
-  Y_{\mathrm{male},i}
+  Y_{\mathrm{M},i}
   = b_{0,\mathrm{M}}
-  + \color{#1769AA}{a_{\mathrm{M}} \times X^{(\mathrm{A})}_{\mathrm{male},i}}
-  + \color{#7B3FA1}{p_{\mathrm{M}} \times X^{(\mathrm{P})}_{\mathrm{female},i}}
-  + \epsilon_{\mathrm{male},i}
+  + \color{#1769AA}{a_{\mathrm{M}} \times X^{(\mathrm{A})}_{\mathrm{M},i}}
+  + \color{#7B3FA1}{p_{\mathrm{M}} \times X^{(\mathrm{P})}_{\mathrm{M},i}}
+  + \epsilon_{\mathrm{M},i}
   \\
-  Y_{\mathrm{female},i}
+  Y_{\mathrm{F},i}
   = b_{0,\mathrm{F}}
-  + \color{#1769AA}{a_{\mathrm{F}} \times X^{(\mathrm{A})}_{\mathrm{female},i}}
-  + \color{#7B3FA1}{p_{\mathrm{F}} \times X^{(\mathrm{P})}_{\mathrm{male},i}}
-  + \epsilon_{\mathrm{female},i}
+  + \color{#1769AA}{a_{\mathrm{F}} \times X^{(\mathrm{A})}_{\mathrm{F},i}}
+  + \color{#7B3FA1}{p_{\mathrm{F}} \times X^{(\mathrm{P})}_{\mathrm{F},i}}
+  + \epsilon_{\mathrm{F},i}
   \end{gathered}
 $$
 
@@ -637,10 +638,8 @@ How do we write this equation into a single formula?
 
 ## Role indicators combine the equations
 
-With $r \in \{\mathrm{M},\mathrm{F}\}$ denoting role and $i$ dyad,
-$D_{\mathrm{M},ri}$ and $D_{\mathrm{F},ri}$ select the role-specific terms.
-$X^{(\mathrm{A})}_{ri}$ and $X^{(\mathrm{P})}_{ri}$ contain actor and partner
-values:
+The indicators $D_{\mathrm{M},ri}$ and $D_{\mathrm{F},ri}$ identify the male
+or female row:
 
 $$
 \begin{aligned}
@@ -671,7 +670,7 @@ $$
 
 :::{.text-smaller}
 
-Male row: $D_\mathrm{M}=1,\ D_\mathrm{F}=0$. Female row: the reverse.
+For a male row: $D_\mathrm{M}=1,\ D_\mathrm{F}=0$. For a female row: the reverse.
 
 :::
 
@@ -712,27 +711,36 @@ $$
 \end{bmatrix}
 $$
 
-In `glmmTMB`, this is represented by:
 
-```r
-us(0 + .is_female + .is_male | couple_id),
-dispformula = ~ 0
+## Fitting the distinguishable APIM in glmmTMB
+
+```{r}
+#| code-line-numbers: "1-21|4|5-6|8-10|12-14|16-18|19-20|1-21"
+
+library(glmmTMB)
+
+apim_distinguishable_model <- glmmTMB(
+  total_mvpa ~
+    # Role-specific intercepts
+    0 + .is_female + .is_male +
+
+    # Role-specific actor effects
+    .is_female:.efficacy_actor +
+    .is_male:.efficacy_actor +
+
+    # Role-specific partner effects
+    .is_female:.efficacy_partner +
+    .is_male:.efficacy_partner +
+
+    # Within-dyad residual covariance
+    us(0 + .is_female + .is_male | couple_id),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = df_apim
+)
 ```
 
-:::{.notes}
-
-The unstructured block estimates separate female and male residual variances
-and their covariance. Setting `dispformula = ~ 0` avoids adding a second
-observation-level residual variance.
-
-[Sources]
-
-- @kenny2006dyadic
-
-:::
-
-
-<!-------------------------    --------------------------------------------->
+<!-------------------------  Work in progress  --------------------------------------------->
   
 
 ## Exchangeable APIM
