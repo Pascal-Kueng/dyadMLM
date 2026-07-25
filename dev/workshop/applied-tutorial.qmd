@@ -325,25 +325,6 @@ In our data, probably makes sense to distinguish by gender. Not always!
 
 ## Workflow
 
-1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
-2. **Prepare the data and verify the dyadic structure**
-3. **Describe and visualize measures and observed relationships**
-4. **Estimate the models**
-5. **Verify model adequacy, distinguishability, and robustness**
-7. **Visualize, interpret, and report results**
-
-
-
-
-:::{.notes}
-
-Important: Gender is not always the only choice! 
-
-:::
-
-
-## Workflow
-
 1. **Define dyads, distinguishability, and research questions**
 2. [**Prepare the data and verify the dyadic structure**]{.text-highlight}
 3. **Describe and visualize measures and observed relationships**
@@ -385,10 +366,10 @@ as a missing value.
 
 ## Create the required format and validate the data
 
-**For the distinguishable APIM we need:**
+**For the distinguishable APIM we need to add:**
 
 - `efficacy_actor` and `efficacy_partner` columns
-- Dummy coded variables for the two roles
+- Dummy coded numeric variables for the two roles
 
 :::{.fragment}
 **Validate things like: **
@@ -454,9 +435,7 @@ df_apim[1:6,] |>
 
 ## Create a wide view for role-specific exploration
 
-- One row per dyad for straightforward role-specific summaries, plots, and correlations
-- The models will still use the `df_apim` dataset
-- For exchangeable dyads, this step is not necessary 
+The models will **NOT** use this dataset
 
 ```{r}
 df_wide <- df_apim |>
@@ -465,14 +444,14 @@ df_wide <- df_apim |>
     names_from = gender,
     values_from = c(efficacy, total_mvpa)
   )
+
+slide_table(head(df_wide))
 ```
 
 
 ## Describe each partner role
 
 ```{r}
-#| output-location: slide
-
 library(report)
 
 df_wide |>
@@ -482,30 +461,23 @@ df_wide |>
   slide_table()
 ```
 
-## Describe and visualize measures and observed relationships
+## Describe observed relationships
 
 The same wide data let us correlate female and male partners directly.
 
-```{r results='hide'}
+```{r}
 library(correlation)
 
-dyad_corr <- df_wide |>
+df_wide |>
   correlation::correlation(
     select = c("efficacy_female", "total_mvpa_female"),
     select2 = c("efficacy_male", "total_mvpa_male")
-  )
+  ) |> 
+  summary() |>
+  insight::print_md(footer = "") # usually not required after summary()
 ```
 
-
-## Describe and visualize measures and observed relationships
-
-```{r echo = FALSE}
-dyad_corr |>
-  summary() |> 
-  insight::print_md(footer = "")
-```
-
-
+[p-value adjustment method: Holm (1979)]{.subtle}
 
 ## Describe and visualize measures and observed relationships
 
