@@ -66,7 +66,8 @@ and model-ready columns for dyadic multilevel model parameterizations.</p>
 <span>  incomplete_dyads <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  missing_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  short_colnames <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  short_colnames <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_arbitrary_member_contrast <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -163,7 +164,11 @@ exchangeable should not be listed. Each composition must be supplied as one
 string, using <code>_x_</code>, <code>-</code>, <code>_</code>, or whitespace (<code> </code>) between the two role labels,
 for example <code>"female_x_male"</code>, <code>"female-male"</code>, <code>"female_male"</code>, or
 <code>"female male"</code>, in arbitrary order.
-To set multiple compositions, use a character vector of such strings.</p></dd>
+To set multiple compositions, use a character vector of such strings.
+Unlike <code>include_arbitrary_member_contrast</code>, this reclassifies the selected
+compositions as exchangeable and changes their composition-role coding and
+indicators, which is required for composition pooling and DIM
+compatibility.</p></dd>
 
 
 <dt id="arg-keep-compositions">keep_compositions<a class="anchor" aria-label="anchor" href="#arg-keep-compositions"></a></dt>
@@ -201,8 +206,8 @@ dyad. Conflicting non-missing roles always cause an error. Ignored when no
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Optional seed for random <code>.member_contrast_*</code> sign assignment
-in exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
+<dd><p>Optional seed for random <code>.member_contrast_*</code> sign assignment.
+If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
 
 
 <dt id="arg-short-colnames">short_colnames<a class="anchor" aria-label="anchor" href="#arg-short-colnames"></a></dt>
@@ -212,6 +217,17 @@ omits the redundant composition label from <code>.is_*</code> and
 <code>.member_contrast_*</code> names. <code>FALSE</code> always retains composition-qualified
 names. Other generated column names are unaffected.</p></dd>
 
+
+<dt id="arg-include-arbitrary-member-contrast">include_arbitrary_member_contrast<a class="anchor" aria-label="anchor" href="#arg-include-arbitrary-member-contrast"></a></dt>
+<dd><p>Whether to also generate arbitrary
+<code>.member_contrast_*</code> columns for distinguishable compositions. The default
+<code>FALSE</code> generates these columns only for exchangeable compositions.
+<code>TRUE</code> retains distinguishable composition metadata, composition roles,
+and role indicators. It only adds the contrast needed to fit an
+exchangeability-constrained random-effects model to the same prepared
+data. Use <code>set_exchangeable_compositions</code> instead to reclassify
+compositions for pooling or DIM compatibility.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -219,7 +235,7 @@ names. Other generated column names are unaffected.</p></dd>
 <code>.composition</code> and <code>.composition_role</code> factor columns,
 <code>.is_*</code> numeric indicator columns, and numeric
 <code>.member_contrast_*</code> columns coded <code>-1</code> and <code>1</code> for the two members of
-matching exchangeable dyads and <code>0</code> otherwise. With one final composition,
+each matching composition and <code>0</code> otherwise. With one final composition,
 their default names omit the composition label. The <code>dyadMLM</code>
 attribute containing structural metadata, <code>dyad_compositions</code>, and
 predictor metadata such as <code>temporal_decompositions</code>, <code>lag1_predictors</code>,
@@ -274,9 +290,10 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .composition_role                  composition-specific member role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .is_{comp-role}                    composition-role indicator columns</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                      with arbitrary direction; 0 for</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                      distinguishable dyads or other</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                                      exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                      coded -1/+1 in arbitrary direction for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                      exchangeability-constrained random</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                      effects. Values are 0 for other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                                      compositions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .{pred}_actor                      APIM actor predictor: actor's original</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                                      predictor values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .{pred}_partner                    APIM partner predictor: partner's</span>
@@ -325,9 +342,10 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .composition                inferred dyad composition</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .composition_role           composition-specific member role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .is_{role}                  composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .member_contrast_arbitrary  composition-specific member contrasts with</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                               arbitrary direction; 0 for distinguishable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                               dyads or other exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .member_contrast_arbitrary  composition-specific member contrasts coded</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               -1/+1 in arbitrary direction for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               exchangeability-constrained random effects.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               Values are 0 for other compositions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .{pred}_actor               APIM actor predictor: actor's original</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                               predictor values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .{pred}_partner             APIM partner predictor: partner's original</span>
@@ -375,9 +393,10 @@ before being combined, so labels do not depend on row or member order.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .composition                inferred dyad composition</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .composition_role           composition-specific member role</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .is_{role}                  composition-role indicator columns</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #   .member_contrast_arbitrary  composition-specific member contrasts with</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                               arbitrary direction; 0 for distinguishable</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #                               dyads or other exchangeable compositions</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #   .member_contrast_arbitrary  composition-specific member contrasts coded</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               -1/+1 in arbitrary direction for</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               exchangeability-constrained random effects.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #                               Values are 0 for other compositions</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .{pred}_lag1                lag-1 raw predictor values</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #   .{pred}_cwp                 within-person predictor: momentary deviations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #                               from each person's usual level</span>

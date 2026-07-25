@@ -183,7 +183,9 @@ such as <code>us(0 + .is_female + .is_male | coupleID)</code> and
 <span>  <span class="co"># All three observed compositions in `dyads_cross` are detected and retained by</span></span>
 <span>  <span class="co"># default. This example focuses on `female-male` dyads, so we restrict the</span></span>
 <span>  <span class="co"># analysis here.</span></span>
-<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span></span>
+<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
+<span>  include_arbitrary_member_contrast <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">apim_distinguishable_data</span>, n<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span>
@@ -195,14 +197,19 @@ such as <code>us(0 + .is_female + .is_male | coupleID)</code> and
 <span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .composition       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .composition_role  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .is_{role}         composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .{pred}_actor      APIM actor predictor: actor's original predictor values</span></span>
-<span><span class="co">#&gt; #   .{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                      values</span></span>
+<span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{role}                  composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                               -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                               exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                               Values are 0 for other compositions</span></span>
+<span><span class="co">#&gt; #   .{pred}_actor               APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_partner             APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 12</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 13</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
@@ -210,9 +217,9 @@ such as <code>us(0 + .is_female + .is_male | coupleID)</code> and
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .composition &lt;fct&gt;, .composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;, .provided_support_actor &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_partner &lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .composition &lt;fct&gt;, .composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;, .member_contrast_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_actor &lt;dbl&gt;, .provided_support_partner &lt;dbl&gt;</span></span></span>
 <span></span>
 <span><span class="va">provided_support_grand_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -229,6 +236,9 @@ such as <code>us(0 + .is_female + .is_male | coupleID)</code> and
 <span><span class="va">apim_distinguishable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">apim_distinguishable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">-</span></span>
 <span>  <span class="va">provided_support_grand_mean</span></span></code></pre></div>
+<p>The optional member contrast is used later for the restricted model.
+It does not change the composition’s distinguishable metadata or role
+indicators.</p>
 <p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> initially generated the actor and
 partner columns on the original predictor scale. The lines above
 subtract one pooled mean from both analysis columns, which can now be
@@ -357,74 +367,17 @@ back-transforms the structure to the often more interpretable
 member-level residual covariance matrix.</p>
 </div>
 <div class="section level4">
-<h4 id="fitting-the-exchangeable-apim-with-glmmtmb">Fitting the exchangeable APIM with glmmTMB<a class="anchor" aria-label="anchor" href="#fitting-the-exchangeable-apim-with-glmmtmb"></a>
+<h4 id="fitting-the-restricted-exchangeable-apim-with-glmmtmb">Fitting the restricted exchangeable APIM with glmmTMB<a class="anchor" aria-label="anchor" href="#fitting-the-restricted-exchangeable-apim-with-glmmtmb"></a>
 </h4>
-<p>We use the same dataset as before, but do not distinguish males and
-females. We can test distinguishability later by comparing this model
-with the prior model.</p>
-<p>We use <code>set_exchangeable_compositions</code> for the
-exchangeability constraints. Another option would be to omit roles.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">apim_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
-<span>  <span class="va">dyads_cross</span>,</span>
-<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
-<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
-<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">apim_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_male exchangeable (set by user) 120 dyads</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .is_{role}                  composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts with</span></span>
-<span><span class="co">#&gt; #                               arbitrary direction; 0 for distinguishable</span></span>
-<span><span class="co">#&gt; #                               dyads or other exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .{pred}_actor               APIM actor predictor: actor's original</span></span>
-<span><span class="co">#&gt; #                               predictor values</span></span>
-<span><span class="co">#&gt; #   .{pred}_partner             APIM partner predictor: partner's original</span></span>
-<span><span class="co">#&gt; #                               predictor values</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 12</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .composition &lt;fct&gt;, .composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .is_exchangeable &lt;dbl&gt;, .member_contrast_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_actor &lt;dbl&gt;, .provided_support_partner &lt;dbl&gt;</span></span></span>
-<span></span>
-<span><span class="va">exchangeable_support_grand_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="va">apim_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_actor</span>,</span>
-<span>    <span class="va">apim_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Use one pooled centering constant for both actor and partner predictors.</span></span>
-<span><span class="va">apim_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_actor</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">apim_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_actor</span> <span class="op">-</span></span>
-<span>  <span class="va">exchangeable_support_grand_mean</span></span>
-<span><span class="va">apim_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">apim_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">-</span></span>
-<span>  <span class="va">exchangeable_support_grand_mean</span></span></code></pre></div>
+<p>The restricted model omits gender-specific fixed effects and uses the
+shared/difference residual representation. We reuse
+<code>apim_distinguishable_data</code>, so both models use exactly the
+same prepared rows and centering.
+<code>set_exchangeable_compositions</code> would instead reclassify the
+composition when it should be treated as exchangeable throughout an
+analysis.</p>
 <p>We then use the columns to fit the model as follows:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">apim_exchangeable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    </span>
@@ -441,7 +394,7 @@ exchangeability constraints. Another option would be to omit roles.</p>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  data <span class="op">=</span> <span class="va">apim_exchangeable_data</span></span>
+<span>  data <span class="op">=</span> <span class="va">apim_distinguishable_data</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">apim_exchangeable_model</span><span class="op">)</span></span>
@@ -450,7 +403,7 @@ exchangeability constraints. Another option would be to omit roles.</p>
 <span><span class="co">#&gt; closeness ~ 1 + .provided_support_actor + .provided_support_partner +  </span></span>
 <span><span class="co">#&gt;     us(1 | coupleID) + us(0 + .member_contrast_arbitrary | coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                 ~0</span></span>
-<span><span class="co">#&gt; Data: apim_exchangeable_data</span></span>
+<span><span class="co">#&gt; Data: apim_distinguishable_data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       AIC       BIC    logLik -2*log(L)  df.resid </span></span>
 <span><span class="co">#&gt;     708.2     725.6    -349.1     698.2       235 </span></span>
@@ -472,7 +425,7 @@ exchangeability constraints. Another option would be to omit roles.</p>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>We use the <code><a href="../reference/recover_exchangeable_covariance.html">dyadMLM::recover_exchangeable_covariance()</a></code> to
 recover the interpretable variance-covariance matrix:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">backtransformed</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span><span class="va">apim_exchangeable_model</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># residual variance-covariance and SD-correlation representations</span></span>
@@ -533,12 +486,14 @@ which the two roles may differ with a restricted exchangeable model.
 This comparison tests the imposed equality constraints jointly. Here,
 they concern the fixed intercepts, actor effects, partner effects, and
 residual variances.</p>
-<p>The two parameterizations require different generated columns, but
-both models above use the same original observations.</p>
+<p>Both models use the same prepared data object. The full model uses
+its retained role indicators. The restricted model instead uses the
+opt-in arbitrary member contrast for the exchangeability-constrained
+residual structure.</p>
 <p><a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html"><code>dyadMLM::compare_nested_glmmTMB_models()</code></a>
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_exchangeable_model</span>,</span>
 <span>  <span class="va">apim_distinguishable_model</span></span>
@@ -585,7 +540,7 @@ between-person estimates <span class="citation">(Gottfredson
 </h4>
 <p>The decomposition above can be combined with role-specific effects.
 We first retain the female-male distinction when preparing the data:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -605,7 +560,7 @@ We first retain the female-male distinction when preparing the data:</p>
 and between-person actor and partner effects to differ between female
 and male members. Centering <code>diaryday</code> makes the
 role-specific intercepts refer to the average study day:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_distinguishable_model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    <span class="fl">0</span> <span class="op">+</span></span>
@@ -652,7 +607,7 @@ role-specific intercepts refer to the average study day:</p>
 </h5>
 <p>For example, role-specific within-person actor random slopes can be
 added by replacing the stable dyad-level block above with:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">us</span><span class="op">(</span></span>
 <span>  <span class="fl">0</span> <span class="op">+</span></span>
 <span>    <span class="va">.is_female</span> <span class="op">+</span></span>
@@ -675,7 +630,7 @@ same-occasion residual dependence.</p>
 <p>We first prepare within-person (<code>cwp</code>) and between-person
 (<code>cbp</code>) actor and partner predictors. We retain the
 female-female dyads as one substantively exchangeable composition:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -700,9 +655,10 @@ female-female dyads as one substantively exchangeable composition:</p>
 <span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .is_{role}                  composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts with</span></span>
-<span><span class="co">#&gt; #                               arbitrary direction; 0 for distinguishable</span></span>
-<span><span class="co">#&gt; #                               dyads or other exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                               -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                               exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                               Values are 0 for other compositions</span></span>
 <span><span class="co">#&gt; #   .{pred}_cwp                 within-person predictor: momentary deviations</span></span>
 <span><span class="co">#&gt; #                               from each person's usual level</span></span>
 <span><span class="co">#&gt; #   .{pred}_cbp                 between-person predictor: stable differences</span></span>
@@ -741,7 +697,7 @@ closeness and includes <code>diaryday</code> to adjust for a linear time
 trend. We also include an actor random slope in both stable dyad-level
 blocks so that we can demonstrate the random-slope back-transformation
 below.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Profile the fixed effects and use BFGS for stable cross-platform optimization.</span></span>
 <span><span class="va">ild_apim_control</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMBControl.html" class="external-link">glmmTMBControl</a></span><span class="op">(</span></span>
 <span>  profile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -827,7 +783,7 @@ below.</p>
 <p>We can now recover the member-level covariance matrices for both the
 stable dyad effects and the same-occasion residual dependence. The two
 matched block pairs are returned separately:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">recovered_covariance</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span><span class="va">ild_apim_model</span><span class="op">)</span></span>
 <span></span>
@@ -885,7 +841,7 @@ actor random slope. We can first test a smaller model that omits only
 the actor random slope from the member-contrast block. The
 member-contrast random intercept and both same-occasion blocks remain in
 the model:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_no_contrast_slope</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_model</span>,</span>
 <span>  formula <span class="op">=</span> <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span></span>
@@ -920,7 +876,7 @@ back-transformation which fitted blocks represent this constraint.</p>
 <p>Since we omitted terms, automatic matching is no longer possible and
 we need to tell <code><a href="../reference/recover_exchangeable_covariance.html">dyadMLM::recover_exchangeable_covariance()</a></code>
 what blocks belong together.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">no_contrast_slope_covariance</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_no_contrast_slope</span>,</span>
 <span>  block_pairings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -951,7 +907,7 @@ what blocks belong together.</p>
 <p>We can impose the stronger constraint by omitting the full
 member-contrast block at the stable dyad level. The same-occasion
 member-contrast block again remains in the model:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_no_contrast_block</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_model</span>,</span>
 <span>  formula <span class="op">=</span> <span class="va">.</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span></span>
@@ -982,7 +938,7 @@ member-contrast block again remains in the model:</p>
 <p>Here, both members have identical random intercepts and actor random
 slopes at the stable dyad level. Because the full member-contrast block
 is absent, we specify it as <code>NULL</code>:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">no_contrast_block_covariance</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_no_contrast_block</span>,</span>
 <span>  block_pairings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -1051,7 +1007,7 @@ Between-person scores are not lagged because they describe stable
 differences between members.</p>
 <p>For this example, we obtain the lagged actor and partner outcome
 columns through the <code>lag1_predictors</code> argument:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -1069,7 +1025,7 @@ lag-1 raw and within-person closeness scores. Lags are matched at
 exactly <code>diaryday - 1</code>, so omitted diary days are not
 bridged.</p>
 <p>A simple fixed-slope dyadic stability and influence model <span class="citation">(del Rosario and West 2025)</span>:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">stability_influence</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>

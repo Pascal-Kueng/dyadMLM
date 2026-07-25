@@ -206,9 +206,10 @@ print(cross_exchangeable_data, n = 4)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #
 #> # A tibble: 240 × 10
 #>   personID coupleID gender dyad_composition closeness provided_support
@@ -259,9 +260,10 @@ print(cross_exchangeable_data, n = 4)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #
 #> # A tibble: 240 × 10
 #>   personID coupleID gender dyad_composition closeness provided_support
@@ -311,9 +313,10 @@ print(cross_dim_data, n = 4)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #   .{pred}_dyad_mean_gmc       dyad-mean predictor: dyad's average predictor
 #> #                               level, grand-mean centered
 #> #   .{pred}_within_dyad_dev     DIM within-dyad member-deviation predictor:
@@ -515,9 +518,10 @@ print(ild_apim_data_dynamic, n = 6)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #   .{pred}_lag1                lag-1 raw predictor values
 #> #   .{pred}_cwp                 within-person predictor: momentary deviations
 #> #                               from each person's usual level
@@ -609,9 +613,10 @@ print(mixed_cross_data, n = 4)
 #> #   .composition_role                  composition-specific member role
 #> #   .is_{comp-role}                    composition-role indicator columns
 #> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                      with arbitrary direction; 0 for
-#> #                                      distinguishable dyads or other
-#> #                                      exchangeable compositions
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
 #> # A tibble: 720 × 14
 #>   personID coupleID gender dyad_composition closeness provided_support
@@ -670,9 +675,10 @@ print(mixed_cross_data_included, n = 4)
 #> #   .composition_role                  composition-specific member role
 #> #   .is_{comp-role}                    composition-role indicator columns
 #> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                      with arbitrary direction; 0 for
-#> #                                      distinguishable dyads or other
-#> #                                      exchangeable compositions
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
 #> # A tibble: 480 × 12
 #>   personID coupleID gender dyad_composition closeness provided_support
@@ -722,9 +728,10 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> #   .composition_role                  composition-specific member role
 #> #   .is_{comp-role}                    composition-role indicator columns
 #> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                      with arbitrary direction; 0 for
-#> #                                      distinguishable dyads or other
-#> #                                      exchangeable compositions
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
 #> # A tibble: 720 × 14
 #>   personID coupleID gender dyad_composition closeness provided_support
@@ -785,9 +792,10 @@ print(mixed_cross_data_pooled)
 #> #   .composition_role                  composition-specific member role
 #> #   .is_{comp-role}                    composition-role indicator columns
 #> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                      with arbitrary direction; 0 for
-#> #                                      distinguishable dyads or other
-#> #                                      exchangeable compositions
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
 #> # A tibble: 720 × 12
 #>    personID coupleID gender dyad_composition closeness provided_support
@@ -842,9 +850,10 @@ print(mixed_cross_data_pooled_constrained)
 #> #   .composition_role                  composition-specific member role
 #> #   .is_{comp-role}                    composition-role indicator columns
 #> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                      with arbitrary direction; 0 for
-#> #                                      distinguishable dyads or other
-#> #                                      exchangeable compositions
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
 #> # A tibble: 720 × 12
 #>    personID coupleID gender dyad_composition closeness provided_support

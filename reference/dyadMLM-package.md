@@ -17,10 +17,6 @@ post-estimation tools.
   converts exchangeable shared/difference covariance structures to
   member-level quantities.
 
-- [`summary.dyadMLM_data()`](https://pascal-kueng.github.io/dyadMLM/reference/summary.dyadMLM_data.md)
-  summarizes data returned by
-  [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
-
 ## Example data
 
 See

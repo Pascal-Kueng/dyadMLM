@@ -141,9 +141,10 @@ retain, pool, and constrain dyad compositions.</p>
 <span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .is_{role}                  composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts with</span></span>
-<span><span class="co">#&gt; #                               arbitrary direction; 0 for distinguishable</span></span>
-<span><span class="co">#&gt; #                               dyads or other exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                               -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                               exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                               Values are 0 for other compositions</span></span>
 <span><span class="co">#&gt; #   .{pred}_actor               APIM actor predictor: actor's original</span></span>
 <span><span class="co">#&gt; #                               predictor values</span></span>
 <span><span class="co">#&gt; #   .{pred}_partner             APIM partner predictor: partner's original</span></span>
@@ -651,9 +652,10 @@ the raw dyad-occasion mean and within-dyad member deviation.</p>
 <span><span class="co">#&gt; #   .composition                 inferred dyad composition</span></span>
 <span><span class="co">#&gt; #   .composition_role            composition-specific member role</span></span>
 <span><span class="co">#&gt; #   .is_{role}                   composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .member_contrast_arbitrary   composition-specific member contrasts with</span></span>
-<span><span class="co">#&gt; #                                arbitrary direction; 0 for distinguishable</span></span>
-<span><span class="co">#&gt; #                                dyads or other exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary   composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                                -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                                exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                                Values are 0 for other compositions</span></span>
 <span><span class="co">#&gt; #   .{pred}_cwp                  within-person predictor: momentary deviations</span></span>
 <span><span class="co">#&gt; #                                from each person's usual level</span></span>
 <span><span class="co">#&gt; #   .{pred}_cbp                  between-person predictor: stable differences</span></span>

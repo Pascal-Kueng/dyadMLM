@@ -12,7 +12,8 @@ infer_dyad_compositions(
   keep_compositions = NULL,
   set_exchangeable_compositions = NULL,
   pool_compositions = NULL,
-  short_colnames = TRUE
+  short_colnames = TRUE,
+  include_arbitrary_member_contrast = FALSE
 )
 ```
 
@@ -25,9 +26,8 @@ infer_dyad_compositions(
 
 - seed:
 
-  Optional seed for random `.member_contrast_*` sign assignment in
-  exchangeable dyads. If `NULL`, the current R session's RNG state is
-  used.
+  Optional seed for random `.member_contrast_*` sign assignment. If
+  `NULL`, the current R session's RNG state is used.
 
 - keep_compositions:
 
@@ -49,10 +49,16 @@ infer_dyad_compositions(
   Whether to use shorter composition-dependent generated column names
   when the final data contain one composition.
 
+- include_arbitrary_member_contrast:
+
+  Whether to also generate arbitrary `.member_contrast_*` columns for
+  distinguishable compositions without changing their composition
+  metadata, roles, or indicators.
+
 ## Value
 
 A `dyadMLM_data` object with added `.composition` and
 `.composition_role` factor columns, `.is_*` numeric indicator columns,
 composition-specific numeric `.member_contrast_*` columns coded `-1` and
-`1` for the two members of matching exchangeable dyads and `0`
-otherwise, and dyad composition metadata.
+`1` for the two members of each matching composition and `0` otherwise,
+and dyad composition metadata.

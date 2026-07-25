@@ -2134,7 +2134,7 @@ Turu Stadler
 <li><strong>Check data structure</strong></li>
 <li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Verify model adequacy, (distinguishability, if applicable), and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 <!-- konsistent wie hier -->
@@ -2165,7 +2165,7 @@ display:block!important;
 <li><strong>Check data structure</strong></li>
 <li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Verify model adequacy, (distinguishability, if applicable), and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 <!-- konsistent wie hier -->
@@ -2215,17 +2215,11 @@ display:block!important;
 </ul>
 <p><strong>Total MVPA = solo MVPA + joint MVPA.</strong></p>
 <!-- ca. 1 Minute -->
-</section>
-<section id="workflow" class="slide level2">
-<h2>Workflow</h2>
-<ol type="1">
-<li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
-<li><strong>Prepare the data and verify the dyadic structure</strong></li>
-<li><strong>Describe and visualize measures and observed relationships</strong></li>
-<li><strong>Estimate the models</strong></li>
-<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
-<li><strong>Visualize, interpret, and report results</strong></li>
-</ol>
+</section></section>
+<section>
+<section id="distinguishable-dyads" class="title-slide slide level1 center">
+<h1>Distinguishable dyads</h1>
+<p>Distinguishing by gender</p>
 <aside class="notes">
 <p>Almost done with first step, we still have to decide on distinguishability. In our data, probably makes sense to distinguish by gender. Not always!</p>
 <p>-&gt; Gender, but TEST!</p>
@@ -2240,26 +2234,8 @@ width: 1px!important;
 overflow: hidden!important;
 display:block!important;
 }</style></aside>
-</section></section>
-<section>
-<section id="distinguishable-dyads" class="title-slide slide level1 center">
-<h1>Distinguishable dyads</h1>
-<p>Distinguishing by gender</p>
-<aside class="notes">
-<p>Important: Gender is not always the only choice!</p>
-<style type="text/css">
-span.MJX_Assistive_MathML {
-position:absolute!important;
-clip: rect(1px, 1px, 1px, 1px);
-padding: 1px 0 0 0!important;
-border: 0!important;
-height: 1px!important;
-width: 1px!important;
-overflow: hidden!important;
-display:block!important;
-}</style></aside>
 </section>
-<section id="workflow-1" class="slide level2">
+<section id="workflow" class="slide level2">
 <h2>Workflow</h2>
 <ol type="1">
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
@@ -2347,10 +2323,10 @@ display:block!important;
 </section>
 <section id="create-the-required-format-and-validate-the-data" class="slide level2">
 <h2>Create the required format and validate the data</h2>
-<p><strong>For the distinguishable APIM we need:</strong></p>
+<p><strong>For the distinguishable APIM we need to add:</strong></p>
 <ul>
 <li><code>efficacy_actor</code> and <code>efficacy_partner</code> columns</li>
-<li>Dummy coded variables for the two roles</li>
+<li>Dummy coded numeric variables for the two roles</li>
 </ul>
 <div class="fragment">
 <p><strong>Validate things like: </strong></p>
@@ -2516,7 +2492,7 @@ is_male, is_female, and _actor and _partner variables. -->
 </div>
 <!-- TODO: color code partner values? -->
 </section>
-<section id="workflow-2" class="slide level2">
+<section id="workflow-1" class="slide level2">
 <h2>Workflow</h2>
 <ol type="1">
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
@@ -2527,99 +2503,150 @@ is_male, is_female, and _actor and _partner variables. -->
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 </section>
-<section id="describe-and-visualize-measures-and-observed-relationships" class="slide level2">
-<h2>Describe and visualize measures and observed relationships</h2>
+<section id="create-a-wide-view-for-role-specific-exploration" class="slide level2">
+<h2>Create a wide view for role-specific exploration</h2>
+<p>The models will <strong>NOT</strong> use this dataset</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href aria-label="1"></a><span class="fu">library</span>(report, insight)</span>
-<span id="cb5-2"><a href aria-label="2"></a></span>
-<span id="cb5-3"><a href aria-label="3"></a>df_apim <span class="sc">|&gt;</span></span>
-<span id="cb5-4"><a href aria-label="4"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
-<span id="cb5-5"><a href aria-label="5"></a>  report<span class="sc">::</span><span class="fu">report_table</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-6"><a href aria-label="6"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-7"><a href aria-label="7"></a>  insight<span class="sc">::</span><span class="fu">print_md</span>() <span class="co"># make a Markdown table</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href aria-label="1"></a>df_wide <span class="ot">&lt;-</span> df_apim <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href aria-label="2"></a>  <span class="fu">select</span>(couple_id, gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href aria-label="3"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb5-4"><a href aria-label="4"></a>    <span class="at">names_from =</span> gender,</span>
+<span id="cb5-5"><a href aria-label="5"></a>    <span class="at">values_from =</span> <span class="fu">c</span>(efficacy, total_mvpa)</span>
+<span id="cb5-6"><a href aria-label="6"></a>  )</span>
+<span id="cb5-7"><a href aria-label="7"></a></span>
+<span id="cb5-8"><a href aria-label="8"></a><span class="fu">slide_table</span>(<span class="fu">head</span>(df_wide))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th style="text-align: left;">Variable</th>
-<th style="text-align: left;">Level</th>
-<th style="text-align: right;">n_Obs</th>
-<th style="text-align: right;">Mean</th>
-<th style="text-align: right;">SD</th>
-<th style="text-align: right;">Min</th>
-<th style="text-align: right;">Max</th>
-<th style="text-align: right;">n_Missing</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">couple_id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">efficacy_male</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">efficacy_female</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">total_mvpa_male</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">total_mvpa_female</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">gender</td>
-<td style="text-align: left;">female</td>
-<td style="text-align: right;">36</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.02</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">33.61</td>
+<td style="text-align: right;">12.71</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">gender</td>
-<td style="text-align: left;">male</td>
-<td style="text-align: right;">36</td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;"></td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">2.37</td>
+<td style="text-align: right;">42.83</td>
+<td style="text-align: right;">44.54</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">efficacy</td>
-<td style="text-align: left;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;">2.38</td>
-<td style="text-align: right;">0.99</td>
-<td style="text-align: right;">0.13</td>
-<td style="text-align: right;">4.92</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">1.62</td>
+<td style="text-align: right;">3.33</td>
+<td style="text-align: right;">32.29</td>
+<td style="text-align: right;">62.86</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">total_mvpa</td>
-<td style="text-align: left;"></td>
-<td style="text-align: right;"></td>
-<td style="text-align: right;">31.21</td>
-<td style="text-align: right;">22.40</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">1.09</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">21.55</td>
+<td style="text-align: right;">51.89</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">1.35</td>
+<td style="text-align: right;">1.48</td>
+<td style="text-align: right;">11.35</td>
+<td style="text-align: right;">9.79</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6.00</td>
+<td style="text-align: right;">1.18</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">7.55</td>
 <td style="text-align: right;">3.43</td>
-<td style="text-align: right;">126.35</td>
-<td style="text-align: right;">0</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </section>
-<section id="describe-and-visualize-measures-and-observed-relationships-1" class="slide level2">
-<h2>Describe and visualize measures and observed relationships</h2>
-<p>For a dyadic correlation table, we need to pivot the dataset to wide-format so that each dyad has 1 single row.</p>
+<section id="describe-each-partner-role" class="slide level2">
+<h2>Describe each partner role</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href aria-label="1"></a><span class="fu">library</span>(correlation, tidyr)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href aria-label="1"></a><span class="fu">library</span>(report)</span>
 <span id="cb6-2"><a href aria-label="2"></a></span>
-<span id="cb6-3"><a href aria-label="3"></a>df_apim <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href aria-label="4"></a>  <span class="fu">select</span>(couple_id, gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
-<span id="cb6-5"><a href aria-label="5"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb6-6"><a href aria-label="6"></a>    <span class="at">names_from =</span> gender,</span>
-<span id="cb6-7"><a href aria-label="7"></a>    <span class="at">values_from =</span> <span class="fu">c</span>(efficacy, total_mvpa)</span>
-<span id="cb6-8"><a href aria-label="8"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb6-9"><a href aria-label="9"></a>  correlation<span class="sc">::</span><span class="fu">correlation</span>(</span>
-<span id="cb6-10"><a href aria-label="10"></a>    <span class="at">select =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_female&quot;</span>, <span class="st">&quot;total_mvpa_female&quot;</span>),</span>
-<span id="cb6-11"><a href aria-label="11"></a>    <span class="at">select2 =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_male&quot;</span>, <span class="st">&quot;total_mvpa_male&quot;</span>)</span>
-<span id="cb6-12"><a href aria-label="12"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb6-13"><a href aria-label="13"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-14"><a href aria-label="14"></a>  insight<span class="sc">::</span><span class="fu">print_md</span>(<span class="at">footer =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-3"><a href aria-label="3"></a>df_wide <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href aria-label="4"></a>  <span class="fu">select</span>(<span class="sc">-</span>couple_id) <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href aria-label="5"></a>  <span class="fu">report_table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-6"><a href aria-label="6"></a>  <span class="fu">transmute</span>(Variable, <span class="at">n =</span> <span class="fu">as.character</span>(n_Obs), Mean, SD, Min, Max) <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a href aria-label="7"></a>  <span class="fu">slide_table</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Variable</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">n</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mean</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">SD</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Min</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">efficacy_male</td>
+<td style="text-align: left;">36</td>
+<td style="text-align: right;">2.29</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">4.60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">efficacy_female</td>
+<td style="text-align: left;">36</td>
+<td style="text-align: right;">2.46</td>
+<td style="text-align: right;">1.01</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">4.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_mvpa_male</td>
+<td style="text-align: left;">36</td>
+<td style="text-align: right;">28.84</td>
+<td style="text-align: right;">20.28</td>
+<td style="text-align: right;">3.51</td>
+<td style="text-align: right;">111.16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_mvpa_female</td>
+<td style="text-align: left;">36</td>
+<td style="text-align: right;">33.58</td>
+<td style="text-align: right;">24.39</td>
+<td style="text-align: right;">3.43</td>
+<td style="text-align: right;">126.35</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </section>
-<section id="describe-and-visualize-measures-and-observed-relationships-2" class="slide level2">
-<h2>Describe and visualize measures and observed relationships</h2>
+<section id="describe-observed-relationships" class="slide level2">
+<h2>Describe observed relationships</h2>
+<p>The same wide data let us correlate female and male partners directly.</p>
 <div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href aria-label="1"></a><span class="fu">library</span>(correlation)</span>
+<span id="cb7-2"><a href aria-label="2"></a></span>
+<span id="cb7-3"><a href aria-label="3"></a>df_wide <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href aria-label="4"></a>  correlation<span class="sc">::</span><span class="fu">correlation</span>(</span>
+<span id="cb7-5"><a href aria-label="5"></a>    <span class="at">select =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_female&quot;</span>, <span class="st">&quot;total_mvpa_female&quot;</span>),</span>
+<span id="cb7-6"><a href aria-label="6"></a>    <span class="at">select2 =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_male&quot;</span>, <span class="st">&quot;total_mvpa_male&quot;</span>)</span>
+<span id="cb7-7"><a href aria-label="7"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb7-8"><a href aria-label="8"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href aria-label="9"></a>  insight<span class="sc">::</span><span class="fu">print_md</span>(<span class="at">footer =</span> <span class="st">&quot;&quot;</span>) <span class="co"># usually not required after summary()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top">
 <caption>Correlation Matrix (pearson-method)</caption>
@@ -2645,8 +2672,9 @@ is_male, is_female, and _actor and _partner variables. -->
 </table>
 </div>
 </div>
+<p><span class="subtle">p-value adjustment method: Holm (1979)</span></p>
 </section>
-<section id="describe-and-visualize-measures-and-observed-relationships-3" class="slide level2">
+<section id="describe-and-visualize-measures-and-observed-relationships" class="slide level2">
 <h2>Describe and visualize measures and observed relationships</h2>
 <ul>
 <li>visualize raw distributions by role hist()</li>
@@ -2654,13 +2682,13 @@ is_male, is_female, and _actor and _partner variables. -->
 <li>other useful plots to show here?</li>
 </ul>
 </section>
-<section id="slide" class="slide level2">
-<h2>slide</h2>
-<p>Additionally, you may:</p>
+<section id="you-may-also-consider" class="slide level2">
+<h2>You may also consider:</h2>
 <ul>
-<li>Describe missingness in greater detail, perform MAR analyses, perform imputation, etc.</li>
+<li>Describing missingness, performing MAR analyses</li>
 <li>Check implausible values / outliers</li>
 </ul>
+<!-- TODO: what else to add? -->
 </section>
 <section id="distinguishable-apim" class="slide level2">
 <h2>Distinguishable APIM</h2>
@@ -2869,13 +2897,13 @@ display:block!important;
 <h1>Excercises in R</h1>
 <p>Short break - initiate package install before you leave</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href aria-label="1"></a><span class="fu">install.packages</span>(</span>
-<span id="cb7-2"><a href aria-label="2"></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
-<span id="cb7-3"><a href aria-label="3"></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
-<span id="cb7-4"><a href aria-label="4"></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
-<span id="cb7-5"><a href aria-label="5"></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
-<span id="cb7-6"><a href aria-label="6"></a>  )</span>
-<span id="cb7-7"><a href aria-label="7"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href aria-label="1"></a><span class="fu">install.packages</span>(</span>
+<span id="cb8-2"><a href aria-label="2"></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
+<span id="cb8-3"><a href aria-label="3"></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
+<span id="cb8-4"><a href aria-label="4"></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
+<span id="cb8-5"><a href aria-label="5"></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
+<span id="cb8-6"><a href aria-label="6"></a>  )</span>
+<span id="cb8-7"><a href aria-label="7"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>

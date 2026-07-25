@@ -13,6 +13,12 @@
   composition-qualified names.
   [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
   recognizes both forms.
+- `prepare_dyad_data(include_arbitrary_member_contrast = TRUE)` can now
+  add arbitrary member contrasts for distinguishable compositions
+  without changing their metadata or role indicators. This supports full
+  and exchangeability-constrained APIMs from the same prepared data.
+  `set_exchangeable_compositions` still performs reclassification for
+  pooling and DIM preparation.
 - Added a [`summary()`](https://rdrr.io/r/base/summary.html) method for
   prepared data that prints the dyadic structure followed by standard
   summaries of all columns.

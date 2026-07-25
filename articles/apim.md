@@ -129,7 +129,9 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
-  keep_compositions = "female-male"
+  keep_compositions = "female-male",
+  include_arbitrary_member_contrast = TRUE,
+  seed = 123
 )
 
 print(apim_distinguishable_data, n=4)
@@ -141,14 +143,19 @@ print(apim_distinguishable_data, n=4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .composition       inferred dyad composition
-#> #   .composition_role  composition-specific member role
-#> #   .is_{role}         composition-role indicator columns
-#> #   .{pred}_actor      APIM actor predictor: actor's original predictor values
-#> #   .{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                      values
+#> #   .composition                inferred dyad composition
+#> #   .composition_role           composition-specific member role
+#> #   .is_{role}                  composition-role indicator columns
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
+#> #   .{pred}_actor               APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .{pred}_partner             APIM partner predictor: partner's original
+#> #                               predictor values
 #> #
-#> # A tibble: 240 × 12
+#> # A tibble: 240 × 13
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1        1        1 female female_x_male         4.77             4.49
@@ -156,9 +163,9 @@ print(apim_distinguishable_data, n=4)
 #> 3        3        2 female female_x_male         6.44             4.09
 #> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
-#> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
-#> #   .is_female <dbl>, .is_male <dbl>, .provided_support_actor <dbl>,
-#> #   .provided_support_partner <dbl>
+#> # ℹ 7 more variables: .composition <fct>, .composition_role <fct>,
+#> #   .is_female <dbl>, .is_male <dbl>, .member_contrast_arbitrary <dbl>,
+#> #   .provided_support_actor <dbl>, .provided_support_partner <dbl>
 
 provided_support_grand_mean <- mean(
   c(
@@ -176,6 +183,10 @@ apim_distinguishable_data$.provided_support_partner <-
   apim_distinguishable_data$.provided_support_partner -
   provided_support_grand_mean
 ```
+
+The optional member contrast is used later for the restricted model. It
+does not change the composition’s distinguishable metadata or role
+indicators.
 
 [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
 initially generated the actor and partner columns on the original
@@ -324,76 +335,14 @@ We will now fit a simple exchangeable APIM and then use the
 function that back-transforms the structure to the often more
 interpretable member-level residual covariance matrix.
 
-#### Fitting the exchangeable APIM with glmmTMB
+#### Fitting the restricted exchangeable APIM with glmmTMB
 
-We use the same dataset as before, but do not distinguish males and
-females. We can test distinguishability later by comparing this model
-with the prior model.
-
-We use `set_exchangeable_compositions` for the exchangeability
-constraints. Another option would be to omit roles.
-
-``` r
-
-apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  dyads_cross,
-  dyad = coupleID,
-  member = personID,
-  role = gender,
-  predictors = provided_support,
-  keep_compositions = "female-male",
-  set_exchangeable_compositions = "female-male",
-  seed = 123
-)
-
-print(apim_exchangeable_data, n = 4)
-#> # dyadMLM data
-#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
-#> # Structure: dyad = coupleID, member = personID, role = gender
-#> #
-#> # Dyad compositions:
-#> # female_x_male exchangeable (set by user) 120 dyads
-#> #
-#> # Added columns:
-#> #   .composition                inferred dyad composition
-#> #   .composition_role           composition-specific member role
-#> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
-#> #   .{pred}_actor               APIM actor predictor: actor's original
-#> #                               predictor values
-#> #   .{pred}_partner             APIM partner predictor: partner's original
-#> #                               predictor values
-#> #
-#> # A tibble: 240 × 12
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
-#> # ℹ 236 more rows
-#> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
-#> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>,
-#> #   .provided_support_actor <dbl>, .provided_support_partner <dbl>
-
-exchangeable_support_grand_mean <- mean(
-  c(
-    apim_exchangeable_data$.provided_support_actor,
-    apim_exchangeable_data$.provided_support_partner
-  ),
-  na.rm = TRUE
-)
-
-# Use one pooled centering constant for both actor and partner predictors.
-apim_exchangeable_data$.provided_support_actor <-
-  apim_exchangeable_data$.provided_support_actor -
-  exchangeable_support_grand_mean
-apim_exchangeable_data$.provided_support_partner <-
-  apim_exchangeable_data$.provided_support_partner -
-  exchangeable_support_grand_mean
-```
+The restricted model omits gender-specific fixed effects and uses the
+shared/difference residual representation. We reuse
+`apim_distinguishable_data`, so both models use exactly the same
+prepared rows and centering. `set_exchangeable_compositions` would
+instead reclassify the composition when it should be treated as
+exchangeable throughout an analysis.
 
 We then use the columns to fit the model as follows:
 
@@ -415,7 +364,7 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     us(0 + .member_contrast_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
-  data = apim_exchangeable_data
+  data = apim_distinguishable_data
 )
 
 summary(apim_exchangeable_model)
@@ -424,7 +373,7 @@ summary(apim_exchangeable_model)
 #> closeness ~ 1 + .provided_support_actor + .provided_support_partner +  
 #>     us(1 | coupleID) + us(0 + .member_contrast_arbitrary | coupleID)
 #> Dispersion:                 ~0
-#> Data: apim_exchangeable_data
+#> Data: apim_distinguishable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
 #>     708.2     725.6    -349.1     698.2       235 
@@ -514,8 +463,10 @@ comparison tests the imposed equality constraints jointly. Here, they
 concern the fixed intercepts, actor effects, partner effects, and
 residual variances.
 
-The two parameterizations require different generated columns, but both
-models above use the same original observations.
+Both models use the same prepared data object. The full model uses its
+retained role indicators. The restricted model instead uses the opt-in
+arbitrary member contrast for the exchangeability-constrained residual
+structure.
 
 [`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html)
 verifies that both models use equivalent original observations before
@@ -693,9 +644,10 @@ print(ild_apim_data, n = 4)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #   .{pred}_cwp                 within-person predictor: momentary deviations
 #> #                               from each person's usual level
 #> #   .{pred}_cbp                 between-person predictor: stable differences

@@ -76,9 +76,10 @@ print(cross_exchangeable_data, n = 4)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #   .{pred}_actor               APIM actor predictor: actor's original
 #> #                               predictor values
 #> #   .{pred}_partner             APIM partner predictor: partner's original
@@ -597,9 +598,10 @@ print(ild_exchangeable_data)
 #> #   .composition                 inferred dyad composition
 #> #   .composition_role            composition-specific member role
 #> #   .is_{role}                   composition-role indicator columns
-#> #   .member_contrast_arbitrary   composition-specific member contrasts with
-#> #                                arbitrary direction; 0 for distinguishable
-#> #                                dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary   composition-specific member contrasts coded
+#> #                                -1/+1 in arbitrary direction for
+#> #                                exchangeability-constrained random effects.
+#> #                                Values are 0 for other compositions
 #> #   .{pred}_cwp                  within-person predictor: momentary deviations
 #> #                                from each person's usual level
 #> #   .{pred}_cbp                  between-person predictor: stable differences

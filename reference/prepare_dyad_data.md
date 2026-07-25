@@ -24,7 +24,8 @@ prepare_dyad_data(
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
   seed = NULL,
-  short_colnames = TRUE
+  short_colnames = TRUE,
+  include_arbitrary_member_contrast = FALSE
 )
 ```
 
@@ -119,7 +120,11 @@ prepare_dyad_data(
   whitespace (` `) between the two role labels, for example
   `"female_x_male"`, `"female-male"`, `"female_male"`, or
   `"female male"`, in arbitrary order. To set multiple compositions, use
-  a character vector of such strings.
+  a character vector of such strings. Unlike
+  `include_arbitrary_member_contrast`, this reclassifies the selected
+  compositions as exchangeable and changes their composition-role coding
+  and indicators, which is required for composition pooling and DIM
+  compatibility.
 
 - keep_compositions:
 
@@ -157,9 +162,8 @@ prepare_dyad_data(
 
 - seed:
 
-  Optional seed for random `.member_contrast_*` sign assignment in
-  exchangeable dyads. If `NULL`, the current R session's RNG state is
-  used.
+  Optional seed for random `.member_contrast_*` sign assignment. If
+  `NULL`, the current R session's RNG state is used.
 
 - short_colnames:
 
@@ -169,19 +173,30 @@ prepare_dyad_data(
   names. `FALSE` always retains composition-qualified names. Other
   generated column names are unaffected.
 
+- include_arbitrary_member_contrast:
+
+  Whether to also generate arbitrary `.member_contrast_*` columns for
+  distinguishable compositions. The default `FALSE` generates these
+  columns only for exchangeable compositions. `TRUE` retains
+  distinguishable composition metadata, composition roles, and role
+  indicators. It only adds the contrast needed to fit an
+  exchangeability-constrained random-effects model to the same prepared
+  data. Use `set_exchangeable_compositions` instead to reclassify
+  compositions for pooling or DIM compatibility.
+
 ## Value
 
 The original data as a tibble with class `dyadMLM_data`, `.composition`
 and `.composition_role` factor columns, `.is_*` numeric indicator
 columns, and numeric `.member_contrast_*` columns coded `-1` and `1` for
-the two members of matching exchangeable dyads and `0` otherwise. With
-one final composition, their default names omit the composition label.
-The `dyadMLM` attribute containing structural metadata,
-`dyad_compositions`, and predictor metadata such as
-`temporal_decompositions`, `lag1_predictors`, `apim_predictors`, and
-`dim_predictors`, as well as `dsm_predictors` and `dsm_role_order` when
-applicable. The `generated_columns` table records each package-generated
-column retained in the returned data.
+the two members of each matching composition and `0` otherwise. With one
+final composition, their default names omit the composition label. The
+`dyadMLM` attribute containing structural metadata, `dyad_compositions`,
+and predictor metadata such as `temporal_decompositions`,
+`lag1_predictors`, `apim_predictors`, and `dim_predictors`, as well as
+`dsm_predictors` and `dsm_role_order` when applicable. The
+`generated_columns` table records each package-generated column retained
+in the returned data.
 
 ## Details
 
@@ -232,9 +247,10 @@ print(prepared)
 #> #   .composition_role                  composition-specific member role
 #> #   .is_{comp-role}                    composition-role indicator columns
 #> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                      with arbitrary direction; 0 for
-#> #                                      distinguishable dyads or other
-#> #                                      exchangeable compositions
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #   .{pred}_actor                      APIM actor predictor: actor's original
 #> #                                      predictor values
 #> #   .{pred}_partner                    APIM partner predictor: partner's
@@ -283,9 +299,10 @@ print(pooled)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #   .{pred}_actor               APIM actor predictor: actor's original
 #> #                               predictor values
 #> #   .{pred}_partner             APIM partner predictor: partner's original
@@ -333,9 +350,10 @@ print(ild_prepared)
 #> #   .composition                inferred dyad composition
 #> #   .composition_role           composition-specific member role
 #> #   .is_{role}                  composition-role indicator columns
-#> #   .member_contrast_arbitrary  composition-specific member contrasts with
-#> #                               arbitrary direction; 0 for distinguishable
-#> #                               dyads or other exchangeable compositions
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
 #> #   .{pred}_lag1                lag-1 raw predictor values
 #> #   .{pred}_cwp                 within-person predictor: momentary deviations
 #> #                               from each person's usual level
