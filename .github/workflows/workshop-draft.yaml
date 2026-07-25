@@ -37,6 +37,7 @@ jobs:
             any::gridExtra
             any::patchwork
             any::pkgdown
+            any::report
             any::RSA
             any::see
             any::tidyr
