@@ -743,8 +743,6 @@ apim_distinguishable_model <- glmmTMB(
 
 summary(apim_distinguishable_model)
 
-report::report_table(apim_distinguishable_model, include_effectsize = FALSE) |> 
-  summary()
   
 ```
 
@@ -804,6 +802,25 @@ However, non-significant comparisons are not proof that roles are identical
 Report any material changes in the conclusions.
 
 [@xiangInfluenceDiagnosticsGeneralized2002]{.subtle}
+
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and verify the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. [**Visualize, interpret, and report results**]{.text-highlight}
+
+## Visualize, interpret, and report
+
+```{r}
+report::report_table(
+  apim_distinguishable_model, 
+  include_effectsize = FALSE) |> # otherwise report tries to compute standardized effect sizes for our intercepts and warns
+  summary()
+```
+
 
 ## Exchangeable APIM
 
