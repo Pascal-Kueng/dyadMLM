@@ -558,7 +558,7 @@ plot_partner_similarity <- function(data, x, y, id, title, n_mahalanobis = 3) {
 #| fig-width: 12
 #| fig-height: 5.5
 #| out-width: 100%
-#| fig-cap: "Labels: three largest Mahalanobis distances (most unusual joint values)."
+#| fig-cap: "Labels: four largest Mahalanobis distances in each plot."
 
 n_mahalanobis <- 4
 
@@ -639,38 +639,89 @@ draw_apim_member_diagram("distinguishable")
 
 :::
 
-## Two equations become one stacked model
+## The APIM starts with two member-specific equations
 
-The two member-specific equations are:
+For each dyad $i$:
 
 $$
   \begin{gathered}
   Y_{\mathrm{male},i}
-  = b_{0,\mathrm{M}} + a_{1,\mathrm{M}} \times X_{\mathrm{male},i}
-  + p_{2,\mathrm{M}} \times X_{\mathrm{female},i} + \epsilon_{\mathrm{male},i}
+  = b_{0,\mathrm{M}}
+  + \color{#1769AA}{a_{\mathrm{M}} \times X_{\mathrm{male},i}}
+  + \color{#7B3FA1}{p_{\mathrm{M}} \times X_{\mathrm{female},i}}
+  + \epsilon_{\mathrm{male},i}
   \\
   Y_{\mathrm{female},i}
-  = b_{0,\mathrm{F}} + a_{1,\mathrm{F}} \times X_{\mathrm{female},i}
-  + p_{2,\mathrm{F}} \times X_{\mathrm{male},i} + \epsilon_{\mathrm{female},i}
+  = b_{0,\mathrm{F}}
+  + \color{#1769AA}{a_{\mathrm{F}} \times X_{\mathrm{female},i}}
+  + \color{#7B3FA1}{p_{\mathrm{F}} \times X_{\mathrm{male},i}}
+  + \epsilon_{\mathrm{female},i}
   \end{gathered}
 $$
 
-With $X_{0,\mathrm{male}}$ (0 = no male, 1 = is male) and $X_{0,\mathrm{female}}$ (0 = no female, 1 = is female):
+[**Actor effects:** own predictor]{style="color: #1769AA"} ·
+[**Partner effects:** the other member's predictor]{style="color: #7B3FA1"}
 
-$$
-Y_{ji} = X_{0,\mathrm{male}} \times Y_{\mathrm{male},i} + X_{0,\mathrm{female}} \times Y_{\mathrm{female}, i}
-$$
-
-Or written in full: 
-
-$$
-Y_{ji} = 
-$$
+In long format, each equation applies to one member row of the dyad.
 
 :::{.notes}
 
-The response remains univariate at the row level. The role indicators select
-the appropriate intercept, actor effect, and partner effect for each row.
+The signs of the actor and partner associations come from the estimated
+coefficients. They are not built into the model equation.
+
+[Sources]
+
+- @kenny2006dyadic
+
+:::
+
+## Role indicators combine the equations
+
+Let $D_{\mathrm{M},ji}$ and $D_{\mathrm{F},ji}$ indicate the role of row
+$j$. Let $X^{(\mathrm{A})}_{ji}$ and $X^{(\mathrm{P})}_{ji}$ contain the
+actor's and partner's values:
+
+$$
+\begin{aligned}
+Y_{ji} ={}&
+\underbrace{
+  b_{0,\mathrm{M}} \times D_{\mathrm{M},ji}
+  + b_{0,\mathrm{F}} \times D_{\mathrm{F},ji}
+}_{\text{role-specific intercepts}}
+\\[0.35em]
+&+
+\color{#1769AA}{
+\underbrace{
+  a_{\mathrm{M}} \times D_{\mathrm{M},ji} \times X^{(\mathrm{A})}_{ji}
+  + a_{\mathrm{F}} \times D_{\mathrm{F},ji} \times X^{(\mathrm{A})}_{ji}
+}_{\text{role-specific actor effects}}
+}
+\\[0.35em]
+&+
+\color{#7B3FA1}{
+\underbrace{
+  p_{\mathrm{M}} \times D_{\mathrm{M},ji} \times X^{(\mathrm{P})}_{ji}
+  + p_{\mathrm{F}} \times D_{\mathrm{F},ji} \times X^{(\mathrm{P})}_{ji}
+}_{\text{role-specific partner effects}}
+}
++ \epsilon_{ji}.
+\end{aligned}
+$$
+
+:::{.text-smaller}
+
+Male row: $D_\mathrm{M}=1,\ D_\mathrm{F}=0$. Female row: the reverse.
+
+:::
+
+:::{.notes}
+
+The role indicators correspond to `.is_male` and `.is_female`. The actor and
+partner values correspond to `.efficacy_actor` and `.efficacy_partner`.
+
+[Sources]
+
+- @kenny2006dyadic
 
 :::
 
