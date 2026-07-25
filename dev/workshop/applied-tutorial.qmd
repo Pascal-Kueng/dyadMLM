@@ -610,8 +610,10 @@ This is the same conceptual model introduced in Part I.
 
 ## The APIM starts with two member-specific equations
 
-For each dyad $i$, both members with roles $r \in \{\mathrm{M, F}\}$ have their own predictor $X^{(\mathrm{A})}_{ri}$ and
-their partners' predictor value $X^{(\mathrm{P})}_{ri}$:
+For each dyad $i$, each member with role
+$r \in \{\mathrm{M},\mathrm{F}\}$ has their own predictor
+$X^{(\mathrm{A})}_{ri}$ and their partner's predictor
+$X^{(\mathrm{P})}_{ri}$:
 
 $$
   \begin{gathered}
@@ -633,7 +635,7 @@ $$
 
 In long format, each equation applies to one member row of the dyad.
 
-How do we write this equation into a single formula?
+How can we combine these two equations into one model?
 
 
 ## Role indicators combine the equations
@@ -715,7 +717,8 @@ $$
 ## Fitting the distinguishable APIM in glmmTMB
 
 ```{r}
-#| code-line-numbers: "1-21|4|5-6|8-10|12-14|16-18|19-20|1-21"
+#| code-line-numbers: "1-23|4|5-6|8-10|12-14|16-18|19-20|23|1-23"
+#| output-location: slide
 
 library(glmmTMB)
 
@@ -738,6 +741,8 @@ apim_distinguishable_model <- glmmTMB(
   family = gaussian(),
   data = df_apim
 )
+
+summary(apim_distinguishable_model)
 ```
 
 <!-------------------------  Work in progress  --------------------------------------------->

@@ -2823,7 +2823,7 @@ display:block!important;
 </section>
 <section id="the-apim-starts-with-two-member-specific-equations" class="slide level2">
 <h2>The APIM starts with two member-specific equations</h2>
-<p>For each dyad <span class="math inline">\(i\)</span>, both members with roles <span class="math inline">\(r \in \{\mathrm{M, F}\}\)</span> have their own predictor <span class="math inline">\(X^{(\mathrm{A})}_{ri}\)</span> and their partners’ predictor value <span class="math inline">\(X^{(\mathrm{P})}_{ri}\)</span>:</p>
+<p>For each dyad <span class="math inline">\(i\)</span>, each member with role <span class="math inline">\(r \in \{\mathrm{M},\mathrm{F}\}\)</span> has their own predictor <span class="math inline">\(X^{(\mathrm{A})}_{ri}\)</span> and their partner’s predictor <span class="math inline">\(X^{(\mathrm{P})}_{ri}\)</span>:</p>
 <p><span class="math display">\[
   \begin{gathered}
   Y_{\mathrm{M},i}
@@ -2841,7 +2841,7 @@ display:block!important;
 \]</span></p>
 <p><span style="color: #1769AA"><strong>- Actor effects</strong></span> <span style="color: #7B3FA1"><strong>- Partner effects</strong></span></p>
 <p>In long format, each equation applies to one member row of the dyad.</p>
-<p>How do we write this equation into a single formula?</p>
+<p>How can we combine these two equations into one model?</p>
 </section>
 <section id="role-indicators-combine-the-equations" class="slide level2">
 <h2>Role indicators combine the equations</h2>
@@ -2919,7 +2919,7 @@ display:block!important;
 <section id="fitting-the-distinguishable-apim-in-glmmtmb" class="slide level2">
 <h2>Fitting the distinguishable APIM in glmmTMB</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" data-code-line-numbers="1-21|4|5-6|8-10|12-14|16-18|19-20|1-21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href></a><span class="fu">library</span>(glmmTMB)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" data-code-line-numbers="1-23|4|5-6|8-10|12-14|16-18|19-20|23|1-23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href></a><span class="fu">library</span>(glmmTMB)</span>
 <span id="cb13-2"><a href></a></span>
 <span id="cb13-3"><a href></a>apim_distinguishable_model <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(</span>
 <span id="cb13-4"><a href></a>  total_mvpa <span class="sc">~</span></span>
@@ -2939,11 +2939,46 @@ display:block!important;
 <span id="cb13-18"><a href></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
 <span id="cb13-19"><a href></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
 <span id="cb13-20"><a href></a>  <span class="at">data =</span> df_apim</span>
-<span id="cb13-21"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-21"><a href></a>)</span>
+<span id="cb13-22"><a href></a></span>
+<span id="cb13-23"><a href></a><span class="fu">summary</span>(apim_distinguishable_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+
 <!-------------------------  Work in progress  --------------------------------------------->
 </section>
-<section id="exchangeable-apim" class="slide level2">
+<section id="fitting-the-distinguishable-apim-in-glmmtmb-output" class="slide level2 output-location-slide"><h2>Fitting the distinguishable APIM in glmmTMB</h2><div class="cell output-location-slide">
+<div class="cell-output cell-output-stdout">
+<pre><code> Family: gaussian  ( identity )
+Formula:          
+total_mvpa ~ 0 + .is_female + .is_male + .is_female:.efficacy_actor +  
+    .is_male:.efficacy_actor + .is_female:.efficacy_partner +  
+    .is_male:.efficacy_partner + us(0 + .is_female + .is_male |      couple_id)
+Dispersion:                  ~0
+Data: df_apim
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    605.4     625.9    -293.7     587.4        63 
+
+Random effects:
+
+Conditional model:
+ Groups    Name       Variance Std.Dev. Corr 
+ couple_id .is_female 388.3    19.70         
+           .is_male   286.0    16.91    0.79 
+Number of obs: 72, groups:  couple_id, 36
+
+Conditional model:
+                             Estimate Std. Error z value Pr(&gt;|z|)   
+.is_female                    -2.6965     9.4731  -0.285  0.77591   
+.is_male                       0.6008     8.1303   0.074  0.94109   
+.is_female:.efficacy_actor    11.8668     4.1389   2.867  0.00414 **
+.is_male:.efficacy_actor       7.9703     3.6110   2.207  0.02730 * 
+.is_female:.efficacy_partner   3.0896     4.2074   0.734  0.46274   
+.is_male:.efficacy_partner     4.0484     3.5522   1.140  0.25442   
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+</div></section><section id="exchangeable-apim" class="slide level2">
 <h2>Exchangeable APIM</h2>
 <ul>
 <li>Row-Level representation</li>
@@ -3134,13 +3169,13 @@ display:block!important;
 <h1>Excercises in R</h1>
 <p>Short break - initiate package install before you leave</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href></a><span class="fu">install.packages</span>(</span>
-<span id="cb14-2"><a href></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
-<span id="cb14-3"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
-<span id="cb14-4"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
-<span id="cb14-5"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
-<span id="cb14-6"><a href></a>  )</span>
-<span id="cb14-7"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href></a><span class="fu">install.packages</span>(</span>
+<span id="cb15-2"><a href></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
+<span id="cb15-3"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
+<span id="cb15-4"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
+<span id="cb15-5"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
+<span id="cb15-6"><a href></a>  )</span>
+<span id="cb15-7"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>
