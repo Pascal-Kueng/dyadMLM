@@ -394,7 +394,7 @@ df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
   dyad = couple_id,
   member = person_id,
   role = gender,
-  predictors = c(efficacy, total_mvpa), 
+  predictors = efficacy, 
   model_types = 'apim'
 )
 
@@ -414,7 +414,7 @@ Looking at the columns immediately relevant to us:
 ```{r}
 
 df_apim[1:6,] |>
-  select(
+  dplyr::select(
     couple_id, person_id, gender, .is_female, .is_male, efficacy,
     .efficacy_actor, .efficacy_partner, total_mvpa
   ) |>
@@ -439,7 +439,7 @@ The models will **NOT** use this dataset
 
 ```{r}
 df_wide <- df_apim |>
-  select(couple_id, gender, efficacy, total_mvpa) |>
+  dplyr::select(couple_id, gender, efficacy, total_mvpa) |>
   tidyr::pivot_wider(
     names_from = gender,
     values_from = c(efficacy, total_mvpa)
@@ -449,24 +449,69 @@ slide_table(head(df_wide))
 ```
 
 
-## Describe each partner role
+## Describe focal variables per role
 
 ```{r}
 library(report)
 
 df_wide |>
-  select(-couple_id) |>
-  report_table() |>
-  transmute(Variable, n = as.character(n_Obs), Mean, SD, Min, Max) |>
+  dplyr::select(-couple_id) |>
+  report::report_table() |>
   slide_table()
 ```
 
-## Describe observed relationships
+## Visualize focal variable by partner role
 
-The same wide data let us correlate female and male partners directly.
+```{r}
+
+library(ggplot2)
+library(see)
+
+plot_dyadic_histograms <- function(data, group, var) {
+  var_label <- rlang::as_label(rlang::enquo(var))
+
+  ggplot(
+    data,
+    aes(x = {{ var }}, y = after_stat(density))
+  ) +
+    geom_histogram(
+      bins = 15, boundary = 0,
+      fill = "steelblue", color = "white", alpha = 0.75
+    ) +
+    geom_density(
+      bounds = c(0, Inf), color = "navy", linewidth = 1.1
+    ) +
+    facet_wrap(vars({{ group }}), nrow = 1) +
+    labs(x = var_label, y = "Density") +
+    see::theme_modern(base_size = 16)
+}
+
+```
+
+## Visualize focal variable by partner role - Efficacy
+
+```{r}
+#| dev: svglite
+
+plot_dyadic_histograms(df_apim, gender, efficacy)
+```
+
+
+## Visualize focal variable by partner role - MVPA
+
+```{r}
+#| dev: svglite
+
+plot_dyadic_histograms(df_apim, gender, total_mvpa)
+```
+
+## Observed dyadic correlations
+
+The wide data ensure that each couple contributes once.
 
 ```{r}
 library(correlation)
+library(insight)
 
 df_wide |>
   correlation::correlation(
@@ -474,25 +519,58 @@ df_wide |>
     select2 = c("efficacy_male", "total_mvpa_male")
   ) |> 
   summary() |>
-  insight::print_md(footer = "") # usually not required after summary()
+  insight::print_md(footer = "")
 ```
 
-[p-value adjustment method: Holm (1979)]{.subtle}
 
-## Describe and visualize measures and observed relationships
+## Visualize partner similarity
 
-- visualize raw distributions by role hist()
-- plot values together like corelation to see spread
-- other useful plots to show here? 
+```{r}
+#| output-location: slide
+#| dev: svglite
+#| fig-width: 12
+#| fig-height: 5.1
+#| out-width: 100%
+
+p_efficacy <- ggplot(
+  df_wide,
+  aes(efficacy_female, efficacy_male)
+) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "navy") +
+  labs(title = "Efficacy", x = "Female", y = "Male") +
+  see::theme_modern(base_size = 16)
+
+p_mvpa <- ggplot(
+  df_wide,
+  aes(total_mvpa_female, total_mvpa_male)
+) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "navy") +
+  labs(title = "Daily MVPA", x = "Female", y = "Male") +
+  see::theme_modern(base_size = 16)
+
+see::plots(
+  p_efficacy, p_mvpa,
+  caption = "Each point is one couple; positive slopes indicate partner similarity."
+)
+```
+
 
 ## You may also consider:
 
 - Describing missingness, performing MAR analyses
-- Check implausible values / outliers
 
 <!-- TODO: what else to add? -->
 
----
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and verify the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. [**Estimate the models**]{.text-highlight}
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
 
 ## Distinguishable APIM
 
