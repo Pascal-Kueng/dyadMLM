@@ -543,6 +543,7 @@ But more on the residuals later!!!
 ## How to estimate actor and partner effects?
 
 Conceptually, we are estimating these two equations in a single model:
+The member role is written first, and $i$ indexes dyads.
 
 $$
   \begin{gathered}

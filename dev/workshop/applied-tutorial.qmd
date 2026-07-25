@@ -616,21 +616,19 @@ $$
   \begin{gathered}
   Y_{\mathrm{male},i}
   = b_{0,\mathrm{M}}
-  + \color{#1769AA}{a_{\mathrm{M}} \times X_{\mathrm{male},i}}
-  + \color{#7B3FA1}{p_{\mathrm{M}} \times X_{\mathrm{female},i}}
+  + \color{#1769AA}{a_{\mathrm{M}} \times X^{(\mathrm{A})}_{\mathrm{male},i}}
+  + \color{#7B3FA1}{p_{\mathrm{M}} \times X^{(\mathrm{P})}_{\mathrm{female},i}}
   + \epsilon_{\mathrm{male},i}
   \\
   Y_{\mathrm{female},i}
   = b_{0,\mathrm{F}}
-  + \color{#1769AA}{a_{\mathrm{F}} \times X_{\mathrm{female},i}}
-  + \color{#7B3FA1}{p_{\mathrm{F}} \times X_{\mathrm{male},i}}
+  + \color{#1769AA}{a_{\mathrm{F}} \times X^{(\mathrm{A})}_{\mathrm{female},i}}
+  + \color{#7B3FA1}{p_{\mathrm{F}} \times X^{(\mathrm{P})}_{\mathrm{male},i}}
   + \epsilon_{\mathrm{female},i}
   \end{gathered}
 $$
 
-- [**Actor effects:** own predictor]{style="color: #1769AA"}
-
-- [**Partner effects:** the other member's predictor]{style="color: #7B3FA1"}
+[**- Actor effects**]{style="color: #1769AA"} [**- Partner effects**]{style="color: #7B3FA1"}
 
 In long format, each equation applies to one member row of the dyad.
 

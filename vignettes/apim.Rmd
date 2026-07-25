@@ -76,7 +76,9 @@ draw_apim_member_diagram("distinguishable", predictors_centered = TRUE)
 ### Residual random-effects structure {#distinguishable-residual-structure}
 
 For a distinguishable female-male dyad, the two members can have different
-residual variances. The within-dyad residual covariance block (shared across dyads) is:
+residual variances. In the notation below, the member role is written first and
+$i$ indexes dyads. The within-dyad residual covariance block (shared across
+dyads) is:
 
 $$
 \operatorname{Cov}
