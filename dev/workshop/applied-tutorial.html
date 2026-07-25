@@ -931,6 +931,24 @@ background: var(--uzh-surface);
 .reveal .cell > .code-copy-outer-scaffold + .cell-output-stdout {
 margin-top: 0.4em;
 }
+
+.reveal .slides section.output-location-slide.present {
+display: grid !important;
+grid-template-rows: auto minmax(0, 1fr);
+box-sizing: border-box;
+padding-bottom: 1.2em;
+}
+.reveal .slides section.output-location-slide > .cell.output-location-slide,
+.reveal .slides section.output-location-slide .cell-output-stdout,
+.reveal .slides section.output-location-slide .cell-output-stdout > pre {
+min-height: 0;
+height: 100%;
+}
+.reveal .slides section.output-location-slide .cell-output-stdout > pre > code {
+box-sizing: border-box;
+max-height: 100%;
+overflow: auto;
+}
 .reveal blockquote {
 width: auto;
 margin: 0.8em 0;

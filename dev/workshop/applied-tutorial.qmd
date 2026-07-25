@@ -745,8 +745,55 @@ apim_distinguishable_model <- glmmTMB(
 summary(apim_distinguishable_model)
 ```
 
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and verify the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. [**Verify model adequacy, distinguishability, and robustness**]{.text-highlight}
+6. **Visualize, interpret, and report results**
+
 <!-------------------------  Work in progress  --------------------------------------------->
-  
+
+:::{.notes}
+
+BEFORE interpreting and reporting results, we should ...
+
+:::
+
+## Verify model adequacy - Convergence and assumptions
+
+The model converged without warnings... a good first sign!
+
+Other things to look out for: 
+
+- Residual variances close to zero or correlations close to zero or one $\rightarrow$ singular fit
+- Inspect residuals $\rightarrow$ tricky since we have 2 correlated residuals per couple
+
+## Test distinguishability
+
+- Compare fixed effects with wald-test
+- Fit exchangeable model and compare models
+
+If effects are not different, you may pool them. If distinguishability does 
+not make the model better, you may treat the whole dyad as exchangeable. 
+
+However,non-significant comparisons are not proof that roles are identical
+[@gistelinckIndistinguishabilityTests2018].
+
+## Test robustness - sensitivity analyses
+
+- Refit the model leaving out one dyad at a time
+  - Examine changes in the key actor and partner estimates and confidence intervals
+- Refit a small number of prespecified, defensible alternatives where relevant:
+  - coding or centering decisions
+  - missing-data handling
+  - covariates with a substantive confounding or precision rationale
+
+Report any changes
+
+[@xiangInfluenceDiagnosticsGeneralized2002]{.subtle}
 
 ## Exchangeable APIM
 
