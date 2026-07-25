@@ -18,6 +18,8 @@
 * Updated the APIM, DIM, and DSM vignettes to use a common pooled grand mean
   when comparing parameterizations, so their intercepts share the same
   reference point.
+* Added package-level help at `?dyadMLM`, with links to the main functions,
+  example datasets, and getting-started documentation.
 
 # dyadMLM 0.1.0
 
