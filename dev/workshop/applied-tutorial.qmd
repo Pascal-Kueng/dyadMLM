@@ -783,8 +783,43 @@ Other things to look out for:
 
 ## Test distinguishability
 
-- Compare fixed effects with a Wald test
-- Fit exchangeable model and compare models
+Fit exchangeable model and compare models
+
+```{r include=FALSE}
+
+apim_exchangeable_model <- glmmTMB(
+  total_mvpa ~
+    # Pooled intercept
+    1 +
+
+    # Pooled actor effect
+    .efficacy_gmc_actor +
+
+    # Pooled partner effect
+    .efficacy_gmc_partner +
+
+    # Within-dyad residual covariance
+    us(1 | couple_id) +
+    us(0 + .member_contrast_arbitrary | couple_id),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = df_apim
+)
+
+summary(apim_exchangeable_model)
+
+dyadMLM::recover_exchangeable_covariance(apim_exchangeable_model)
+
+```
+
+```{r}
+
+dyadMLM::compare_nested_glmmTMB_models(
+  apim_distinguishable_model, apim_exchangeable_model
+)
+
+```
+
 
 If pooling is substantively defensible and compatible with the data, you may
 pool specific effects or fit an exchangeable model.
@@ -798,7 +833,7 @@ However, non-significant comparisons are not proof that roles are identical
   - Examine changes in the key actor and partner estimates and confidence intervals
 - Refit a small number of prespecified, defensible alternatives where relevant:
   - coding or centering decisions
-  - different plausible outcome families
+  - different plausible outcome families or transformations
   - missing-data handling
   - covariates with a substantive confounding or precision rationale
 
