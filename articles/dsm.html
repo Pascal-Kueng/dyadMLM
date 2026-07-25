@@ -128,15 +128,15 @@ estimates.</p>
 <span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition              inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role         composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{role}                composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
-<span><span class="co">#&gt; #                                role and -0.5 for the second declared role</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
-<span><span class="co">#&gt; #                                level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_within_dyad_diff  DSM signed predictor difference: first</span></span>
-<span><span class="co">#&gt; #                                declared role minus second declared role</span></span>
+<span><span class="co">#&gt; #   .composition              inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role         composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{role}                composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
+<span><span class="co">#&gt; #                             role and -0.5 for the second declared role</span></span>
+<span><span class="co">#&gt; #   .{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                             level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .{pred}_within_dyad_diff  DSM signed predictor difference: first declared</span></span>
+<span><span class="co">#&gt; #                             role minus second declared role</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 13</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
@@ -146,19 +146,19 @@ estimates.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female &lt;dbl&gt;, .dy_is_male &lt;dbl&gt;, .dy_dsm_role_contrast &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .composition &lt;fct&gt;, .composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;, .dsm_role_contrast &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>With this notation, <code>dyadMLM</code> creates the equivalent
 coordinates:</p>
 <ul>
-<li><p><code>.dy_provided_support_dyad_mean_gmc</code>
+<li><p><code>.provided_support_dyad_mean_gmc</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>+</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">=
 \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2}</annotation></semantics></math></p></li>
-<li><p><code>.dy_provided_support_within_dyad_diff</code>
+<li><p><code>.provided_support_within_dyad_diff</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub><mo>−</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></msub></mrow><annotation encoding="application/x-tex">= X_{\mathrm{female}} - X_{\mathrm{male}}</annotation></semantics></math></p></li>
-<li><p><code>.dy_dsm_role_contrast</code>
+<li><p><code>.dsm_role_contrast</code>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mi>+</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">= +0.5</annotation></semantics></math>
 for female and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">-0.5</annotation></semantics></math>
@@ -205,22 +205,22 @@ below:</p>
 <span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor level -&gt; outcome level (a11)</span></span>
-<span>    <span class="va">.dy_provided_support_dyad_mean_gmc</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_dyad_mean_gmc</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor difference -&gt; outcome level (a12)</span></span>
-<span>    <span class="va">.dy_provided_support_within_dyad_diff</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_within_dyad_diff</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Outcome-difference intercept (a20)</span></span>
-<span>    <span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor level -&gt; outcome difference (a21)</span></span>
-<span>    <span class="va">.dy_provided_support_dyad_mean_gmc</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_dyad_mean_gmc</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Predictor difference -&gt; outcome difference (a22)</span></span>
-<span>    <span class="va">.dy_provided_support_within_dyad_diff</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_within_dyad_diff</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Outcome-level and outcome-difference residual variances and their covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dy_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data</span></span>
@@ -229,10 +229,10 @@ below:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_model</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
 <span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; closeness ~ 1 + .dy_provided_support_dyad_mean_gmc + .dy_provided_support_within_dyad_diff +  </span></span>
-<span><span class="co">#&gt;     .dy_dsm_role_contrast + .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     us(1 + .dy_dsm_role_contrast | coupleID)</span></span>
+<span><span class="co">#&gt; closeness ~ 1 + .provided_support_dyad_mean_gmc + .provided_support_within_dyad_diff +  </span></span>
+<span><span class="co">#&gt;     .dsm_role_contrast + .provided_support_dyad_mean_gmc:.dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     .provided_support_within_dyad_diff:.dsm_role_contrast + us(1 +  </span></span>
+<span><span class="co">#&gt;     .dsm_role_contrast | coupleID)</span></span>
 <span><span class="co">#&gt; Dispersion:                 ~0</span></span>
 <span><span class="co">#&gt; Data: cross_dsm_data</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -242,33 +242,26 @@ below:</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups   Name                  Variance Std.Dev. Corr </span></span>
-<span><span class="co">#&gt;  coupleID (Intercept)           0.5085   0.7131        </span></span>
-<span><span class="co">#&gt;           .dy_dsm_role_contrast 0.9773   0.9886   0.02 </span></span>
+<span><span class="co">#&gt;  Groups   Name               Variance Std.Dev. Corr </span></span>
+<span><span class="co">#&gt;  coupleID (Intercept)        0.5085   0.7131        </span></span>
+<span><span class="co">#&gt;           .dsm_role_contrast 0.9773   0.9886   0.02 </span></span>
 <span><span class="co">#&gt; Number of obs: 240, groups:  coupleID, 120</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                                             Estimate Std. Error</span></span>
-<span><span class="co">#&gt; (Intercept)                                                  5.07753    0.06691</span></span>
-<span><span class="co">#&gt; .dy_provided_support_dyad_mean_gmc                           1.46596    0.09224</span></span>
-<span><span class="co">#&gt; .dy_provided_support_within_dyad_diff                        0.10107    0.07577</span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                        1.01425    0.09277</span></span>
-<span><span class="co">#&gt; .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast     0.71929    0.12788</span></span>
-<span><span class="co">#&gt; .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast  0.92366    0.10505</span></span>
-<span><span class="co">#&gt;                                                             z value Pr(&gt;|z|)</span></span>
-<span><span class="co">#&gt; (Intercept)                                                   75.88  &lt; 2e-16</span></span>
-<span><span class="co">#&gt; .dy_provided_support_dyad_mean_gmc                            15.89  &lt; 2e-16</span></span>
-<span><span class="co">#&gt; .dy_provided_support_within_dyad_diff                          1.33    0.182</span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                         10.93  &lt; 2e-16</span></span>
-<span><span class="co">#&gt; .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast       5.62 1.86e-08</span></span>
-<span><span class="co">#&gt; .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast    8.79  &lt; 2e-16</span></span>
-<span><span class="co">#&gt;                                                                </span></span>
-<span><span class="co">#&gt; (Intercept)                                                 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_dyad_mean_gmc                          ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_within_dyad_diff                          </span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                       ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast    ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast ***</span></span>
+<span><span class="co">#&gt;                                                       Estimate Std. Error</span></span>
+<span><span class="co">#&gt; (Intercept)                                            5.07753    0.06691</span></span>
+<span><span class="co">#&gt; .provided_support_dyad_mean_gmc                        1.46596    0.09224</span></span>
+<span><span class="co">#&gt; .provided_support_within_dyad_diff                     0.10107    0.07577</span></span>
+<span><span class="co">#&gt; .dsm_role_contrast                                     1.01425    0.09277</span></span>
+<span><span class="co">#&gt; .provided_support_dyad_mean_gmc:.dsm_role_contrast     0.71929    0.12788</span></span>
+<span><span class="co">#&gt; .provided_support_within_dyad_diff:.dsm_role_contrast  0.92366    0.10505</span></span>
+<span><span class="co">#&gt;                                                       z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                                             75.88  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_dyad_mean_gmc                         15.89  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_within_dyad_diff                       1.33    0.182    </span></span>
+<span><span class="co">#&gt; .dsm_role_contrast                                      10.93  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_dyad_mean_gmc:.dsm_role_contrast       5.62 1.86e-08 ***</span></span>
+<span><span class="co">#&gt; .provided_support_within_dyad_diff:.dsm_role_contrast    8.79  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <div class="section level3">
@@ -456,28 +449,28 @@ model.</p>
 <span></span>
 <span><span class="va">provided_support_grand_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_actor</span>,</span>
-<span>    <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_partner</span></span>
+<span>    <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.provided_support_actor</span>,</span>
+<span>    <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.provided_support_partner</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Use one pooled centering constant for both APIM predictor columns.</span></span>
-<span><span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_actor</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_actor</span> <span class="op">-</span></span>
+<span><span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.provided_support_actor</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.provided_support_actor</span> <span class="op">-</span></span>
 <span>  <span class="va">provided_support_grand_mean</span></span>
-<span><span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_partner</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.dy_provided_support_partner</span> <span class="op">-</span></span>
+<span><span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">cross_dsm_data_inverted</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">-</span></span>
 <span>  <span class="va">provided_support_grand_mean</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dsm_model_inverted</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
-<span>    <span class="va">.dy_provided_support_dyad_mean_gmc</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_within_dyad_diff</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_dyad_mean_gmc</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_within_dyad_diff</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dy_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="va">.provided_support_dyad_mean_gmc</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_within_dyad_diff</span> <span class="op">+</span></span>
+<span>    <span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_dyad_mean_gmc</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_within_dyad_diff</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">cross_dsm_data_inverted</span></span>
@@ -496,11 +489,11 @@ model.</p>
 <span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table style="width:100%;" class="table">
+<table class="table">
 <colgroup>
-<col width="68%">
-<col width="15%">
-<col width="15%">
+<col width="65%">
+<col width="17%">
+<col width="17%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">model term</th>
@@ -514,27 +507,27 @@ model.</p>
 <td align="right">5.078</td>
 </tr>
 <tr class="even">
-<td align="left">.dy_provided_support_dyad_mean_gmc</td>
+<td align="left">.provided_support_dyad_mean_gmc</td>
 <td align="right">1.466</td>
 <td align="right">1.466</td>
 </tr>
 <tr class="odd">
-<td align="left">.dy_provided_support_within_dyad_diff</td>
+<td align="left">.provided_support_within_dyad_diff</td>
 <td align="right">0.101</td>
 <td align="right">-0.101</td>
 </tr>
 <tr class="even">
-<td align="left">.dy_dsm_role_contrast</td>
+<td align="left">.dsm_role_contrast</td>
 <td align="right">1.014</td>
 <td align="right">-1.014</td>
 </tr>
 <tr class="odd">
-<td align="left">.dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast</td>
+<td align="left">.provided_support_dyad_mean_gmc:.dsm_role_contrast</td>
 <td align="right">0.719</td>
 <td align="right">-0.719</td>
 </tr>
 <tr class="even">
-<td align="left">.dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast</td>
+<td align="left">.provided_support_within_dyad_diff:.dsm_role_contrast</td>
 <td align="right">0.924</td>
 <td align="right">0.924</td>
 </tr>
@@ -542,18 +535,18 @@ model.</p>
 </table>
 <p>The two models have identical fitted values and model fit:</p>
 <ul>
-<li><p><code>.dy_provided_support_within_dyad_diff</code> reverses
-because the predictor difference reverses.</p></li>
-<li><p><code>.dy_dsm_role_contrast</code> reverses because the
-represented outcome difference reverses.</p></li>
-<li><p><code>.dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast</code>
+<li><p><code>.provided_support_within_dyad_diff</code> reverses because
+the predictor difference reverses.</p></li>
+<li><p><code>.dsm_role_contrast</code> reverses because the represented
+outcome difference reverses.</p></li>
+<li><p><code>.provided_support_dyad_mean_gmc:.dsm_role_contrast</code>
 reverses because only the outcome difference reverses.</p></li>
-<li><p><code>.dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast</code>
+<li><p><code>.provided_support_within_dyad_diff:.dsm_role_contrast</code>
 remains unchanged because both differences reverse.</p></li>
 </ul>
-<p>The intercept and <code>.dy_provided_support_dyad_mean_gmc</code>
-also remain unchanged. For the random effects, the variances of
-<code>(Intercept)</code> and <code>.dy_dsm_role_contrast</code> remain
+<p>The intercept and <code>.provided_support_dyad_mean_gmc</code> also
+remain unchanged. For the random effects, the variances of
+<code>(Intercept)</code> and <code>.dsm_role_contrast</code> remain
 unchanged, whereas their covariance reverses sign.</p>
 </div>
 </div>
@@ -569,21 +562,21 @@ associations <span class="citation">(Iida et al. 2018)</span>.</p>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span>    <span class="co"># Role-specific intercepts</span></span>
 <span>    <span class="fl">0</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_female</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_male</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_female</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_male</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific actor effects</span></span>
-<span>    <span class="va">.dy_is_female</span><span class="op">:</span><span class="va">.dy_provided_support_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_male</span><span class="op">:</span><span class="va">.dy_provided_support_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_actor</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific partner effects</span></span>
-<span>    <span class="va">.dy_is_female</span><span class="op">:</span><span class="va">.dy_provided_support_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_is_male</span><span class="op">:</span><span class="va">.dy_provided_support_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Role-specific Gaussian residual covariance structure</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span></span>
-<span>         <span class="va">.dy_is_female</span> <span class="op">+</span></span>
-<span>         <span class="va">.dy_is_male</span></span>
+<span>         <span class="va">.is_female</span> <span class="op">+</span></span>
+<span>         <span class="va">.is_male</span></span>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -844,31 +837,30 @@ models and their cautions, see the <a href="apim.html#dynamic-models">dynamic IL
 <span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                  inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role             composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp                   within-person predictor: momentary</span></span>
-<span><span class="co">#&gt; #                                    deviations from each person's usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp                   between-person predictor: stable</span></span>
-<span><span class="co">#&gt; #                                    differences from the average person's</span></span>
-<span><span class="co">#&gt; #                                    usual level</span></span>
-<span><span class="co">#&gt; #   .dy_dsm_role_contrast            DSM role contrast: +0.5 for the first</span></span>
-<span><span class="co">#&gt; #                                    declared role and -0.5 for the second</span></span>
-<span><span class="co">#&gt; #                                    declared role</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_dyad_mean_gmc         dyad-mean predictor: dyad's average</span></span>
-<span><span class="co">#&gt; #                                    predictor level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_within_dyad_diff      DSM signed predictor difference: first</span></span>
-<span><span class="co">#&gt; #                                    declared role minus second declared role</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_dyad_mean         within-person dyad-mean predictor: shared</span></span>
-<span><span class="co">#&gt; #                                    momentary deviations in the dyad</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_within_dyad_diff  DSM within-person signed predictor</span></span>
-<span><span class="co">#&gt; #                                    difference: first declared role minus</span></span>
-<span><span class="co">#&gt; #                                    second declared role</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp_dyad_mean         between-person dyad-mean predictor: dyad's</span></span>
-<span><span class="co">#&gt; #                                    stable usual level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp_within_dyad_diff  DSM between-person signed predictor</span></span>
-<span><span class="co">#&gt; #                                    difference: first declared role minus</span></span>
-<span><span class="co">#&gt; #                                    second declared role</span></span>
+<span><span class="co">#&gt; #   .composition                  inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role             composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{role}                    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp                   within-person predictor: momentary deviations</span></span>
+<span><span class="co">#&gt; #                                 from each person's usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp                   between-person predictor: stable differences</span></span>
+<span><span class="co">#&gt; #                                 from the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .dsm_role_contrast            DSM role contrast: +0.5 for the first</span></span>
+<span><span class="co">#&gt; #                                 declared role and -0.5 for the second</span></span>
+<span><span class="co">#&gt; #                                 declared role</span></span>
+<span><span class="co">#&gt; #   .{pred}_dyad_mean_gmc         dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                                 level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .{pred}_within_dyad_diff      DSM signed predictor difference: first</span></span>
+<span><span class="co">#&gt; #                                 declared role minus second declared role</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_dyad_mean         within-person dyad-mean predictor: shared</span></span>
+<span><span class="co">#&gt; #                                 momentary deviations in the dyad</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_within_dyad_diff  DSM within-person signed predictor</span></span>
+<span><span class="co">#&gt; #                                 difference: first declared role minus second</span></span>
+<span><span class="co">#&gt; #                                 declared role</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp_dyad_mean         between-person dyad-mean predictor: dyad's</span></span>
+<span><span class="co">#&gt; #                                 stable usual level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp_within_dyad_diff  DSM between-person signed predictor</span></span>
+<span><span class="co">#&gt; #                                 difference: first declared role minus second</span></span>
+<span><span class="co">#&gt; #                                 declared role</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,360 × 20</span></span></span>
 <span><span class="co">#&gt;   personID coupleID diaryday gender dyad_composition closeness provided_support</span></span>
@@ -878,12 +870,12 @@ models and their cautions, see the <a href="apim.html#dynamic-models">dynamic IL
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        1        1        1 female female_x_male         5.16             4.89</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        2        1        1 male   female_x_male         5.70             5.18</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,356 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female &lt;dbl&gt;, .dy_is_male &lt;dbl&gt;, .dy_provided_support_cwp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cbp &lt;dbl&gt;, .dy_dsm_role_contrast &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cwp_dyad_mean &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cbp_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: .composition &lt;fct&gt;, .composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;, .provided_support_cwp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_cbp &lt;dbl&gt;, .dsm_role_contrast &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_cwp_dyad_mean &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_cbp_dyad_mean &lt;dbl&gt;, …</span></span></span></code></pre></div>
 <p>The example below estimates same-day associations between support and
 closeness and includes <code>diaryday</code> to allow separate linear
 trends for the outcome level and the female-minus-male outcome
@@ -898,34 +890,34 @@ difference.</p>
 <span>    <span class="va">diaryday</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Within-person predictor level -&gt; outcome level</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_dyad_mean</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cwp_dyad_mean</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Within-person predictor difference -&gt; outcome level</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_within_dyad_diff</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cwp_within_dyad_diff</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Between-person predictor level -&gt; outcome level</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_dyad_mean</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cbp_dyad_mean</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Between-person predictor difference -&gt; outcome level</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_within_dyad_diff</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cbp_within_dyad_diff</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Outcome-difference intercept and linear time trend</span></span>
-<span>    <span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">diaryday</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">diaryday</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Within-person predictor level and difference -&gt; outcome difference</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_dyad_mean</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cwp_within_dyad_diff</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cwp_dyad_mean</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cwp_within_dyad_diff</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Between-person predictor level and difference -&gt; outcome difference</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_dyad_mean</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
-<span>    <span class="va">.dy_provided_support_cbp_within_dyad_diff</span><span class="op">:</span><span class="va">.dy_dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cbp_dyad_mean</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_cbp_within_dyad_diff</span><span class="op">:</span><span class="va">.dsm_role_contrast</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Stable outcome-level and outcome-difference covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dy_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Same-day outcome-level and outcome-difference covariance</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dy_dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span>,</span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.dsm_role_contrast</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">:</span><span class="va">diaryday</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_dsm_data</span></span>
@@ -933,15 +925,13 @@ difference.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_ILD</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
-<span><span class="co">#&gt; Formula:          </span></span>
-<span><span class="co">#&gt; closeness ~ 1 + diaryday + .dy_provided_support_cwp_dyad_mean +  </span></span>
-<span><span class="co">#&gt;     .dy_provided_support_cwp_within_dyad_diff + .dy_provided_support_cbp_dyad_mean +  </span></span>
-<span><span class="co">#&gt;     .dy_provided_support_cbp_within_dyad_diff + .dy_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     diaryday:.dy_dsm_role_contrast + .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast +  </span></span>
-<span><span class="co">#&gt;     us(1 + .dy_dsm_role_contrast | coupleID) + us(1 + .dy_dsm_role_contrast |  </span></span>
+<span><span class="co">#&gt; Formula:          closeness ~ 1 + diaryday + .provided_support_cwp_dyad_mean +  </span></span>
+<span><span class="co">#&gt;     .provided_support_cwp_within_dyad_diff + .provided_support_cbp_dyad_mean +  </span></span>
+<span><span class="co">#&gt;     .provided_support_cbp_within_dyad_diff + .dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     diaryday:.dsm_role_contrast + .provided_support_cwp_dyad_mean:.dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     .provided_support_cwp_within_dyad_diff:.dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     .provided_support_cbp_dyad_mean:.dsm_role_contrast + .provided_support_cbp_within_dyad_diff:.dsm_role_contrast +  </span></span>
+<span><span class="co">#&gt;     us(1 + .dsm_role_contrast | coupleID) + us(1 + .dsm_role_contrast |  </span></span>
 <span><span class="co">#&gt;     coupleID:diaryday)</span></span>
 <span><span class="co">#&gt; Dispersion:                 ~0</span></span>
 <span><span class="co">#&gt; Data: ild_dsm_data</span></span>
@@ -952,66 +942,40 @@ difference.</p>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;  Groups            Name                  Variance Std.Dev. Corr </span></span>
-<span><span class="co">#&gt;  coupleID          (Intercept)           0.4812   0.6937        </span></span>
-<span><span class="co">#&gt;                    .dy_dsm_role_contrast 0.9162   0.9572   0.02 </span></span>
-<span><span class="co">#&gt;  coupleID:diaryday (Intercept)           0.3819   0.6180        </span></span>
-<span><span class="co">#&gt;                    .dy_dsm_role_contrast 0.8551   0.9247   0.01 </span></span>
+<span><span class="co">#&gt;  Groups            Name               Variance Std.Dev. Corr </span></span>
+<span><span class="co">#&gt;  coupleID          (Intercept)        0.4812   0.6937        </span></span>
+<span><span class="co">#&gt;                    .dsm_role_contrast 0.9162   0.9572   0.02 </span></span>
+<span><span class="co">#&gt;  coupleID:diaryday (Intercept)        0.3819   0.6180        </span></span>
+<span><span class="co">#&gt;                    .dsm_role_contrast 0.8551   0.9247   0.01 </span></span>
 <span><span class="co">#&gt; Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
-<span><span class="co">#&gt;                                                                  Estimate</span></span>
-<span><span class="co">#&gt; (Intercept)                                                      5.111583</span></span>
-<span><span class="co">#&gt; diaryday                                                        -0.005238</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean                               0.472112</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff                        0.011992</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean                               1.465964</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                        0.101067</span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                            0.864415</span></span>
-<span><span class="co">#&gt; diaryday:.dy_dsm_role_contrast                                   0.023050</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.212178</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.196322</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.719301</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.923664</span></span>
-<span><span class="co">#&gt;                                                                 Std. Error</span></span>
-<span><span class="co">#&gt; (Intercept)                                                       0.071202</span></span>
-<span><span class="co">#&gt; diaryday                                                          0.003745</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean                                0.027865</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff                         0.017685</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean                                0.092236</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                         0.075770</span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                             0.099661</span></span>
-<span><span class="co">#&gt; diaryday:.dy_dsm_role_contrast                                    0.005604</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast          0.041695</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.026461</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast          0.127875</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast   0.105047</span></span>
-<span><span class="co">#&gt;                                                                 z value</span></span>
-<span><span class="co">#&gt; (Intercept)                                                       71.79</span></span>
-<span><span class="co">#&gt; diaryday                                                          -1.40</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean                                16.94</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff                          0.68</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean                                15.89</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                          1.33</span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                              8.67</span></span>
-<span><span class="co">#&gt; diaryday:.dy_dsm_role_contrast                                     4.11</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast           5.09</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast    7.42</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast           5.63</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast    8.79</span></span>
-<span><span class="co">#&gt;                                                                 Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                                                      &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; diaryday                                                           0.162    </span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean                               &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff                          0.498    </span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean                               &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                          0.182    </span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                            &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; diaryday:.dy_dsm_role_contrast                                  3.90e-05 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast        3.60e-07 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast 1.18e-13 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast        1.85e-08 ***</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt;                                                            Estimate Std. Error</span></span>
+<span><span class="co">#&gt; (Intercept)                                                5.111583   0.071202</span></span>
+<span><span class="co">#&gt; diaryday                                                  -0.005238   0.003745</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean                            0.472112   0.027865</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                     0.011992   0.017685</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean                            1.465964   0.092236</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                     0.101067   0.075770</span></span>
+<span><span class="co">#&gt; .dsm_role_contrast                                         0.864415   0.099661</span></span>
+<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                0.023050   0.005604</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.212178   0.041695</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.196322   0.026461</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.719301   0.127875</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.923664   0.105047</span></span>
+<span><span class="co">#&gt;                                                           z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)                                                 71.79  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; diaryday                                                    -1.40    0.162    </span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean                             16.94  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                       0.68    0.498    </span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean                             15.89  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                       1.33    0.182    </span></span>
+<span><span class="co">#&gt; .dsm_role_contrast                                           8.67  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                  4.11 3.90e-05 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean:.dsm_role_contrast           5.09 3.60e-07 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff:.dsm_role_contrast    7.42 1.18e-13 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast           5.63 1.85e-08 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff:.dsm_role_contrast    8.79  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
 <p>The cross-sectional path interpretation therefore applies separately

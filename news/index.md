@@ -1,5 +1,30 @@
 # Changelog
 
+## dyadMLM (development version)
+
+- Retained generated columns now use a single leading dot instead of
+  `.dy_` for more readable model formulas; for example, `.dy_x_actor`
+  becomes `.x_actor`. The `.dy_` prefix is reserved for temporary
+  implementation columns.
+- [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+  now uses compact composition-column names when the final data contain
+  one composition, such as `.is_female` and
+  `.member_contrast_arbitrary`. Set `short_colnames = FALSE` to retain
+  composition-qualified names.
+  [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
+  recognizes both forms.
+- Added a [`summary()`](https://rdrr.io/r/base/summary.html) method for
+  prepared data that prints the dyadic structure followed by standard
+  summaries of all columns.
+- Generated-column tracking now records all retained composition and
+  modeling columns. Printing and model comparison use these records
+  rather than inferring column ownership from a prefix, and generated
+  names are checked for collisions and valid R syntax before they are
+  written.
+- Updated the APIM, DIM, and DSM vignettes to use a common pooled grand
+  mean when comparing parameterizations, so their intercepts share the
+  same reference point.
+
 ## dyadMLM 0.1.0
 
 - Initial release.
@@ -20,10 +45,6 @@
   `.dy_member_contrast_{composition}_arbitrary`. Covariance recovery
   continues to recognize legacy contrast names in previously fitted
   models.
-- [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
-  now uses shorter composition-column names when the final data contain
-  one composition. Set `short_colnames = FALSE` to retain
-  composition-qualified names.
 - Renamed the package from `interdep` to `dyadMLM`; package-generated
   columns now use the `.dy_` prefix instead of `.i_`.
 - Added validation and preparation of cross-sectional and intensive

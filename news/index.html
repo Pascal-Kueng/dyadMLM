@@ -40,12 +40,19 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="dyadmlm-development-version">dyadMLM (development version)<a class="anchor" aria-label="anchor" href="#dyadmlm-development-version"></a></h2>
+<ul><li>Retained generated columns now use a single leading dot instead of <code>.dy_</code> for more readable model formulas; for example, <code>.dy_x_actor</code> becomes <code>.x_actor</code>. The <code>.dy_</code> prefix is reserved for temporary implementation columns.</li>
+<li>
+<code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now uses compact composition-column names when the final data contain one composition, such as <code>.is_female</code> and <code>.member_contrast_arbitrary</code>. Set <code>short_colnames = FALSE</code> to retain composition-qualified names. <code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code> recognizes both forms.</li>
+<li>Added a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> method for prepared data that prints the dyadic structure followed by standard summaries of all columns.</li>
+<li>Generated-column tracking now records all retained composition and modeling columns. Printing and model comparison use these records rather than inferring column ownership from a prefix, and generated names are checked for collisions and valid R syntax before they are written.</li>
+<li>Updated the APIM, DIM, and DSM vignettes to use a common pooled grand mean when comparing parameterizations, so their intercepts share the same reference point.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="dyadmlm-010">dyadMLM 0.1.0<a class="anchor" aria-label="anchor" href="#dyadmlm-010"></a></h2>
 <ul><li>Initial release.</li>
 <li>Cleaned up the pre-release public API with these direct migration mappings: <code>group</code> to <code>dyad</code>, <code>lag_predictors</code> to <code>lag1_predictors</code>, <code>model_type</code> to <code>model_types</code>, <code>temporal_predictor_decomposition</code> to <code>temporal_decomposition</code>, <code>"time_2l"</code> to <code>"2l"</code>, <code>include_compositions</code> to <code>keep_compositions</code>, <code>compare_dyad_models()</code> to <code><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models()</a></code>, <code>exchangeable_rescov()</code> to <code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code>, <code>pairs</code> to <code>block_pairings</code>, pairing fields <code>shared</code> and <code>difference</code> to <code>shared_block</code> and <code>difference_block</code>, and print argument <code>what</code> to <code>representation</code>.</li>
 <li>Renamed generated exchangeable-member contrasts from <code>.dy_diff_{composition}_arbitrary</code> to <code>.dy_member_contrast_{composition}_arbitrary</code>. Covariance recovery continues to recognize legacy contrast names in previously fitted models.</li>
-<li>
-<code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now uses shorter composition-column names when the final data contain one composition. Set <code>short_colnames = FALSE</code> to retain composition-qualified names.</li>
 <li>Renamed the package from <code>interdep</code> to <code>dyadMLM</code>; package-generated columns now use the <code>.dy_</code> prefix instead of <code>.i_</code>.</li>
 <li>Added validation and preparation of cross-sectional and intensive longitudinal dyadic data with distinguishable, exchangeable, and mixed dyad compositions.</li>
 <li>Added composition filtering, exchangeability overrides, and pooling.</li>
@@ -54,7 +61,8 @@
 <li>Added <code><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models()</a></code> for compatible nested <code>glmmTMB</code> models and <code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code> for back-transforming shared/difference random-effect covariance structures.</li>
 <li>Added example datasets, getting-started and model-specific vignettes, and a concise print method for prepared data.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
