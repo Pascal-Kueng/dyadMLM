@@ -556,13 +556,6 @@ see::plots(
 )
 ```
 
-
-## You may also consider:
-
-- Describing missingness, performing MAR analyses
-
-<!-- TODO: what else to add? -->
-
 ## Workflow
 
 1. **Define dyads, distinguishability, and research questions**
@@ -574,15 +567,21 @@ see::plots(
 
 ## Distinguishable APIM
 
-- Row-Level representation
-- Formula
-- residual matrix?
-- Code
-  - Data prep and inspecting and understanding data structure
-  - Visualizing variables and bivariate relationships
-  - Estimating the model
-  - Checking assumptions
-  - Visualizing results
+[Insert conceptual diagram for repetition]
+
+## Distinguishable APIM - Fitting in a univariate framework
+
+[Insert conceptual diagram member-wise]
+
+## Distinguishable APIM - Fitting in a univariate framework
+
+[Insert formula of both members, and then complete formula]
+
+[Insert covariance matrix]
+
+
+
+<!-------------------------    --------------------------------------------->
   
 
 ## Exchangeable APIM
