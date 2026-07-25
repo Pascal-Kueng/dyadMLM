@@ -755,8 +755,6 @@ summary(apim_distinguishable_model)
 5. [**Verify model adequacy, distinguishability, and robustness**]{.text-highlight}
 6. **Visualize, interpret, and report results**
 
-<!-------------------------  Work in progress  --------------------------------------------->
-
 :::{.notes}
 
 BEFORE interpreting and reporting results, we should ...
@@ -770,7 +768,7 @@ BEFORE interpreting and reporting results, we should ...
 3. Are exchangeability constraints defensible?
 4. Are conclusions driven by one dyad or one consequential modeling choice?
 
-## Verify model adequacy - Convergence and assumptions
+## Did estimation succeed?
 
 The model converged without warnings... a good first sign!
 
@@ -820,6 +818,15 @@ report::report_table(
   include_effectsize = FALSE) |> # otherwise report tries to compute standardized effect sizes for our intercepts and warns
   summary()
 ```
+
+
+
+
+
+
+
+
+<!-------------------------  Work in progress  -------------------------------->
 
 
 ## Exchangeable APIM

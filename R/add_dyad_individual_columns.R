@@ -54,7 +54,10 @@ construct_dyad_predictor_decompositions <- function(data, model_family = "dim") 
   member <- meta_data$member
   has_time <- meta_data$longitudinal
   time <- meta_data$time
-  temporal_decompositions <- meta_data$temporal_decompositions
+  # Grand-mean-centered source components are generated specifically for APIM.
+  # DIM and DSM retain their existing raw dyad-mean centering conventions.
+  temporal_decompositions <- meta_data$temporal_decompositions |>
+    dplyr::filter(.data$component != "gmc")
 
   predictors <- tibble::tibble(
     predictor = character(),

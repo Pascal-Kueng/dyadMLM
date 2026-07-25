@@ -1,9 +1,8 @@
 #' Add lagged temporal predictor columns
 #'
-#' Adds lag-1 raw and within-person columns for predictors selected through
-#' `lag1_predictors`. Values are matched at exactly `time - 1`, so construction
-#' does not depend on row order and does not bridge gaps in the measurement
-#' index. Stable between-person components are not lagged.
+#' Adds eligible lag-1 raw, within-person, and APIM GMC source columns.
+#' Values are matched at exactly `time - 1`; gaps are not bridged. Stable
+#' between-person components are not lagged.
 #'
 #' @param data A `dyadMLM_data` object returned by [prepare_dyad_data()].
 #'
@@ -33,7 +32,7 @@ add_temporal_lag_columns <- function(data) {
   lag_sources <- decompositions |>
     dplyr::filter(
       .data$predictor %in% lag1_predictors,
-      .data$component %in% c("raw", "cwp"),
+      .data$component %in% c("raw", "cwp", "gmc"),
       .data$lag == 0L
     )
 
@@ -54,8 +53,16 @@ add_temporal_lag_columns <- function(data) {
     predictor = lag_sources$predictor,
     temporal_component = lag_sources$component,
     lag = 1L,
-    model_family = "temporal",
-    column_role = "temporal_component",
+    model_family = ifelse(
+      lag_sources$component == "gmc",
+      "apim",
+      "temporal"
+    ),
+    column_role = ifelse(
+      lag_sources$component == "gmc",
+      "source",
+      "temporal_component"
+    ),
     variable_role = "predictor",
     source_column = lag_sources$column
   )

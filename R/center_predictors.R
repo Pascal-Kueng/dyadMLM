@@ -5,6 +5,7 @@
 #' a within-person component and a between-person component. The original
 #' predictor remains available as a raw component for model-specific column
 #' construction.
+#' It can also add GMC source components for numeric APIM predictors.
 #' For two-level temporal centering, the between-person component is centered
 #' around the grand mean of person means, not the grand mean of all observed rows.
 #' This gives each person equal weight even when people have different numbers of
@@ -14,12 +15,13 @@
 #' [prepare_dyad_data()].
 #'
 #' @param data A `dyadMLM_data` object returned by [prepare_dyad_data()].
+#' @param add_apim_gmc_predictors Whether to add APIM GMC source components.
 #'
 #' @return A `dyadMLM_data` object with centered predictor columns added and
 #'   updated predictor metadata.
 #'
 #' @keywords internal
-center_predictors <- function(data) {
+center_predictors <- function(data, add_apim_gmc_predictors = FALSE) {
   if (!inherits(data, "dyadMLM_data")) {
     stop(
       "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
@@ -60,6 +62,55 @@ center_predictors <- function(data) {
   )
 
   if (temporal_decomposition == "none") {
+    if (add_apim_gmc_predictors) {
+      predictor_is_numeric <- logical(length(predictors))
+      for (predictor_index in seq_along(predictors)) {
+        predictor <- predictors[[predictor_index]]
+        predictor_is_numeric[[predictor_index]] <- is.numeric(out[[predictor]])
+      }
+
+      numeric_predictors <- predictors[predictor_is_numeric]
+      numeric_predictor_suffixes <- make_dyad_suffixes(numeric_predictors)
+      grand_mean_centered_columns <- paste0(
+        dyad_retained_prefix,
+        unname(numeric_predictor_suffixes),
+        "_gmc"
+      )
+
+      # Validate all GMC source names before writing any of them.
+      grand_mean_centering_plan <- tibble::tibble(
+        target = grand_mean_centered_columns,
+        predictor = numeric_predictors,
+        temporal_component = "gmc",
+        lag = 0L,
+        model_family = "apim",
+        column_role = "source",
+        variable_role = "predictor",
+        source_column = numeric_predictors
+      )
+      validate_generated_column_plan(out, grand_mean_centering_plan)
+
+      for (i in seq_along(numeric_predictors)) {
+        predictor <- numeric_predictors[[i]]
+        grand_mean_centered_column <- grand_mean_centered_columns[[i]]
+        predictor_grand_mean <- no_NaN_mean(out[[predictor]])
+
+        out[[grand_mean_centered_column]] <-
+          out[[predictor]] - predictor_grand_mean
+
+        temporal_decompositions <- tibble::add_row(
+          temporal_decompositions,
+          predictor = predictor,
+          component = "gmc",
+          column = grand_mean_centered_column,
+          temporal_decomposition = "none",
+          lag = 0L
+        )
+      }
+
+      out <- record_generated_columns(out, grand_mean_centering_plan)
+    }
+
     attr(out, "dyadMLM")$temporal_decompositions <- temporal_decompositions
 
     return(out)

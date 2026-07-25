@@ -22,7 +22,8 @@ prepare_dyad_data(
   missing_role = c("error", "drop"),
   seed = NULL,
   short_colnames = TRUE,
-  include_arbitrary_member_contrast = FALSE
+  include_arbitrary_member_contrast = FALSE,
+  add_apim_gmc_predictors = FALSE
 )
 }
 \arguments{
@@ -53,8 +54,8 @@ decomposition and model-ready predictor construction.}
 model-ready columns should be created. Requires \code{time} to be a finite,
 integer-valued numeric measurement index. Lagging respects the dyad and
 member structure, matches observations at exactly \code{time - 1}, and does not
-bridge missing occasions. Only raw and within-person predictors are
-lagged. Stable between-person versions are not.}
+bridge missing occasions. Eligible raw, within-person, and APIM GMC
+variants are lagged; stable between-person variants are not.}
 
 \item{model_types}{Model-ready column families to construct. Can contain one
 or more of \code{"apim"}, \code{"dim"}, and \code{"dsm"}. \code{"apim"} creates
@@ -143,6 +144,15 @@ and role indicators. It only adds the contrast needed to fit an
 exchangeability-constrained random-effects model to the same prepared
 data. Use \code{set_exchangeable_compositions} instead to reclassify
 compositions for pooling or DIM compatibility.}
+
+\item{add_apim_gmc_predictors}{Whether to add APIM GMC variants for numeric
+predictors. \code{TRUE} retains the raw columns and adds \verb{.\{pred\}_gmc} plus its
+actor and partner versions, centered over all retained non-missing values
+after filtering. Lagged variants use the same mean. Mixed non-numeric
+predictors remain raw and are listed in one warning. In longitudinal data,
+the mean is observation-weighted. Requires \code{"apim"} in \code{model_types}, at
+least one numeric predictor, and resolved \code{temporal_decomposition = "none"}.
+Do not use raw and GMC variants together in a model with an intercept.}
 }
 \value{
 The original data as a tibble with class \code{dyadMLM_data},
@@ -150,8 +160,8 @@ The original data as a tibble with class \code{dyadMLM_data},
 \verb{.is_*} numeric indicator columns, and numeric
 \verb{.member_contrast_*} columns coded \code{-1} and \code{1} for the two members of
 each matching composition and \code{0} otherwise. With one final composition,
-their default names omit the composition label. The \code{dyadMLM}
-attribute containing structural metadata, \code{dyad_compositions}, and
+their default names omit the composition label. The \code{dyadMLM} attribute
+contains structural metadata, \code{dyad_compositions}, and
 predictor metadata such as \code{temporal_decompositions}, \code{lag1_predictors},
 \code{apim_predictors}, and \code{dim_predictors}, as well as \code{dsm_predictors} and
 \code{dsm_role_order} when applicable. The \code{generated_columns} table records each

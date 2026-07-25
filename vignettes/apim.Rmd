@@ -51,11 +51,10 @@ A vignette for non-Gaussian generalized models is planned.
 
 # Cross-sectional APIMs
 
-Throughout the cross-sectional examples, both partners' $X$ terms are
-grand-mean centered by subtracting the same pooled mean across all members in
-the analysis sample. Raw predictor scores could instead be used if zero is
-meaningful for that variable in the analysis sample; this would change the
-intercept reference point, but not the actor or partner slopes.
+These examples use `add_apim_gmc_predictors = TRUE`, which retains raw APIM
+columns and adds variants centered over all retained non-missing source values.
+Using raw columns instead changes only the intercept reference. Do not include
+both variants in a model with an intercept.
 
 ## The distinguishable APIM
 
@@ -124,6 +123,7 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   role = gender,
   predictors = provided_support,
   model_types = "apim",
+  add_apim_gmc_predictors = TRUE,
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
@@ -133,32 +133,10 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
 )
 
 print(apim_distinguishable_data, n=4)
-
-provided_support_grand_mean <- mean(
-  c(
-    apim_distinguishable_data$.provided_support_actor,
-    apim_distinguishable_data$.provided_support_partner
-  ),
-  na.rm = TRUE
-)
-
-# Use one pooled centering constant for both actor and partner predictors.
-apim_distinguishable_data$.provided_support_actor <-
-  apim_distinguishable_data$.provided_support_actor -
-  provided_support_grand_mean
-apim_distinguishable_data$.provided_support_partner <-
-  apim_distinguishable_data$.provided_support_partner -
-  provided_support_grand_mean
-
 ```
 
 The optional member contrast is used later for the restricted model. It does
 not change the composition's distinguishable metadata or role indicators.
-
-`prepare_dyad_data()` initially generated the actor and partner columns on the
-original predictor scale. The lines above subtract one pooled mean from both
-analysis columns, which can now be used directly in the model formula. Here is
-a simple example:
 
 ```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
 apim_distinguishable_model <- glmmTMB::glmmTMB(
@@ -170,12 +148,12 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
     .is_male +
 
     # Gender-specific actor effects
-    .is_female:.provided_support_actor +
-    .is_male:.provided_support_actor +
+    .is_female:.provided_support_gmc_actor +
+    .is_male:.provided_support_gmc_actor +
 
     # Gender-specific partner effects
-    .is_female:.provided_support_partner +
-    .is_male:.provided_support_partner +
+    .is_female:.provided_support_gmc_partner +
+    .is_male:.provided_support_gmc_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
@@ -296,8 +274,8 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     1 +
     
     # Pooled single actor and partner effects
-    .provided_support_actor +
-    .provided_support_partner +
+    .provided_support_gmc_actor +
+    .provided_support_gmc_partner +
     
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks

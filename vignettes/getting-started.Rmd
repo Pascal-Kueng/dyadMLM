@@ -137,6 +137,7 @@ cross_distinguishable_data <- dyadMLM::prepare_dyad_data(
   # and a model type to generate the columns needed for that model type.
   predictors = provided_support,
   model_types = "apim",
+  add_apim_gmc_predictors = TRUE,
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
@@ -147,12 +148,12 @@ print(cross_distinguishable_data, n = 4)
 
 ```
 
-The function retained and recognized 120
-female-male dyads and created APIM-relevant variables
-[@kennyPartnerEffectsRelationship1999]. The generated actor and partner columns
-retain the original predictor scale. They can be used directly when zero is a
-meaningful reference; in the cross-sectional APIM examples, we instead subtract
-the same pooled grand mean from both columns before fitting the model.
+The function retained 120 female-male dyads and created APIM variables
+[@kennyPartnerEffectsRelationship1999]. `add_apim_gmc_predictors = TRUE` keeps
+the raw columns and adds `.provided_support_gmc` plus actor and partner variants,
+centered over all retained non-missing source values. Mixed non-numeric
+predictors remain raw and trigger one warning. With an intercept, use either the
+raw or GMC actor-partner pair, not both.
 
 For fitted APIM examples using these columns, see the
 [Actor-Partner Interdependence Model vignette](apim.html).
@@ -248,6 +249,9 @@ cross_dsm_data <- dyadMLM::prepare_dyad_data(
 print(cross_dsm_data, n = 4)
 ```
 
+APIM GMC uses all retained non-missing values; DIM and DSM center complete-pair
+dyad means. The constants may differ with one-sided missingness.
+
 
 ## Intensive longitudinal dyadic data
 
@@ -284,6 +288,10 @@ decomposed into within-person and between-person components
 is controlled by `temporal_decomposition`. The default `"auto"`
 setting selects `"2l"` for this longitudinal setup and retains raw actor
 and partner columns alongside both components.
+
+`add_apim_gmc_predictors = TRUE` requires resolved
+`temporal_decomposition = "none"`. In longitudinal data, its mean is
+observation-weighted, and lagged GMC columns use the same mean.
 
 Note that observed person means used to construct the between-person (`cbp`) predictors
 can be unreliable when each member contributes few occasions, which can bias

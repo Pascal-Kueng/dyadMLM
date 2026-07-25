@@ -50,11 +50,10 @@ A DSM requires an explicitly declared direction. This direction should be
 substantively meaningful when the directional coefficients are interpreted.
 Here, `c("female", "male")` defines every difference as female minus male.
 
-Throughout this cross-sectional example, $X_{\mathrm{female}}$ and
-$X_{\mathrm{male}}$ denote provided support after subtracting the same pooled
-grand mean across all members in the analysis sample. Raw scores could instead
-be used if zero is meaningful for that variable in the analysis sample; this
-would change the intercept reference point, but not the slope estimates.
+Here $X_{\mathrm{female}}$ and $X_{\mathrm{male}}$ denote provided support
+centered with the pooled mean from complete predictor pairs.
+`prepare_dyad_data()` creates the corresponding DSM dyad-mean column; using the
+original zero requires shifting it manually.
 
 ```{r prepare-cross-dsm}
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
@@ -83,10 +82,10 @@ With this notation, `dyadMLM` creates the equivalent coordinates:
 
 - `.dsm_role_contrast` $= +0.5$ for female and $-0.5$ for male.
 
-The function obtains the first coordinate by grand-mean centering the dyad
-means calculated from the original scores. The common centering shift cancels
-from the signed difference. Both coordinates are repeated on the member rows;
-the outcome remains unchanged and needs no transformation.
+The common centering shift cancels from the signed difference. Both predictor
+scores are repeated on the member rows; the outcome remains unchanged. APIM GMC
+uses all retained non-missing values, whereas DSM uses complete pairs, so their
+constants may differ with one-sided missingness.
 
 ## Cross-Sectional Gaussian DSM
 
@@ -283,25 +282,10 @@ cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   predictors = provided_support,
   # Request APIM columns too for comparison below.
   model_types = c("dsm", "apim"),
+  add_apim_gmc_predictors = TRUE,
   keep_compositions = "female-male",
   dsm_role_order = c("male", "female")
 )
-
-provided_support_grand_mean <- mean(
-  c(
-    cross_dsm_data_inverted$.provided_support_actor,
-    cross_dsm_data_inverted$.provided_support_partner
-  ),
-  na.rm = TRUE
-)
-
-# Use one pooled centering constant for both APIM predictor columns.
-cross_dsm_data_inverted$.provided_support_actor <-
-  cross_dsm_data_inverted$.provided_support_actor -
-  provided_support_grand_mean
-cross_dsm_data_inverted$.provided_support_partner <-
-  cross_dsm_data_inverted$.provided_support_partner -
-  provided_support_grand_mean
 ```
 
 ```{r fit-cross-dsm-inverted, eval=has_glmmTMB}
@@ -369,12 +353,12 @@ apim_model <- glmmTMB::glmmTMB(
     .is_male +
 
     # Role-specific actor effects
-    .is_female:.provided_support_actor +
-    .is_male:.provided_support_actor +
+    .is_female:.provided_support_gmc_actor +
+    .is_male:.provided_support_gmc_actor +
 
     # Role-specific partner effects
-    .is_female:.provided_support_partner +
-    .is_male:.provided_support_partner +
+    .is_female:.provided_support_gmc_partner +
+    .is_male:.provided_support_gmc_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
@@ -447,8 +431,7 @@ a_{22}
 \end{aligned}
 $$
 
-Grand-mean centering both APIM predictor columns with the same pooled constant
-aligns their zero point with the DSM predictor mean. The intercepts therefore
+With complete pairs, the GMC APIM and DSM share a zero point, so the intercepts
 transform as
 
 $$
@@ -457,9 +440,8 @@ a_{10} = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2},
 a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}}.
 $$
 
-With raw APIM predictors, the slope transformations would be unchanged, but
-the intercept transformation would additionally need to account for the
-different zero point.
+Raw APIM predictors leave the slope transformations unchanged but require
+intercept recentering.
 
 For the reverse slope transformation, first recover the role-specific
 actor-plus-partner and actor-minus-partner combinations:
@@ -509,16 +491,16 @@ dsm_coef <- glmmTMB::fixef(dsm_model)$cond
 b0_female <- apim_coef[[".is_female"]]
 b0_male <- apim_coef[[".is_male"]]
 b_actor_female <- apim_coef[[
-  ".is_female:.provided_support_actor"
+  ".is_female:.provided_support_gmc_actor"
 ]]
 b_actor_male <- apim_coef[[
-  ".is_male:.provided_support_actor"
+  ".is_male:.provided_support_gmc_actor"
 ]]
 b_partner_female <- apim_coef[[
-  ".is_female:.provided_support_partner"
+  ".is_female:.provided_support_gmc_partner"
 ]]
 b_partner_male <- apim_coef[[
-  ".is_male:.provided_support_partner"
+  ".is_male:.provided_support_gmc_partner"
 ]]
 
 b_sum_female <- b_actor_female + b_partner_female

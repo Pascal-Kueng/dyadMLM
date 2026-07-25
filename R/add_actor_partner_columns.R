@@ -6,8 +6,8 @@
 #' predictors, this will create actor and partner versions of the raw predictor
 #' and each recorded predictor component, such as the within-person and
 #' between-person components created by [center_predictors()].
-#' Selected lag predictors additionally create lag-1 raw and within-person
-#' actor and partner columns.
+#' Selected lag predictors also create actor and partner columns for eligible
+#' lagged components.
 #'
 #' The function will use the predictor decomposition metadata stored in
 #' `attr(data, "dyadMLM")$temporal_decompositions`, so downstream code does
