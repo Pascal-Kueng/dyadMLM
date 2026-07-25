@@ -410,7 +410,7 @@ df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
   dyad = couple_id,
   member = person_id,
   role = gender,
-  predictors = efficacy,
+  predictors = c(efficacy, total_mvpa), 
   model_types = 'apim'
 )
 
@@ -453,13 +453,13 @@ df_apim[1:6,] |>
 
 
 ```{r}
-library(report)
+library(report, insight)
 
 df_apim |>
   dplyr::select(gender, efficacy, total_mvpa) |>
   report::report_table() |>
   summary() |>
-  slide_table()
+  insight::print_md() # make a Markdown table
   
 ```
 
@@ -469,13 +469,22 @@ df_apim |>
 library(correlation)
 
 df_apim |>
-  select(.efficacy_actor, .efficacy_partner, total_mvpa) |>
+  select(.efficacy_actor, .efficacy_partner, .total_mvpa_actor, .total_mvpa_partner) |>
   correlation::correlation() |>
-  # use summary() for correlation matrix
-  slide_table()
+  summary() |>
+  insight::print_md(footer = "")
   
 ```
 
+::: {.subtle}
+p-value adjustment method: Holm (1979)
+:::
+
+## Describe and visualize measures and observed relationships
+
+- visualize raw distributions by role hist()
+- plot values together like corelation to see spread
+- other useful plots to show here? 
 
 ## slide
 

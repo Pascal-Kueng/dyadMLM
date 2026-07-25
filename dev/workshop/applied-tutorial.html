@@ -2370,7 +2370,7 @@ display:block!important;
 <span id="cb2-5"><a href></a>  <span class="at">dyad =</span> couple_id,</span>
 <span id="cb2-6"><a href></a>  <span class="at">member =</span> person_id,</span>
 <span id="cb2-7"><a href></a>  <span class="at">role =</span> gender,</span>
-<span id="cb2-8"><a href></a>  <span class="at">predictors =</span> efficacy,</span>
+<span id="cb2-8"><a href></a>  <span class="at">predictors =</span> <span class="fu">c</span>(efficacy, total_mvpa), </span>
 <span id="cb2-9"><a href></a>  <span class="at">model_types =</span> <span class="st">&#39;apim&#39;</span></span>
 <span id="cb2-10"><a href></a>)</span>
 <span id="cb2-11"><a href></a></span>
@@ -2396,7 +2396,7 @@ display:block!important;
 #   .{pred}_partner    APIM partner predictor: partner&#39;s original predictor
 #                      values
 #
-# A tibble: 72 × 11
+# A tibble: 72 × 13
    couple_id person_id gender efficacy total_mvpa .composition .composition_role
        &lt;int&gt;     &lt;int&gt; &lt;fct&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;fct&gt;        &lt;fct&gt;            
  1         1         1 male      3.02       33.6  female_x_ma… female_x_male_ma…
@@ -2410,8 +2410,8 @@ display:block!important;
  9         5         9 female    1.48        9.79 female_x_ma… female_x_male_fe…
 10         5        10 male      1.35       11.4  female_x_ma… female_x_male_ma…
 # ℹ 62 more rows
-# ℹ 4 more variables: .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;, .efficacy_actor &lt;dbl&gt;,
-#   .efficacy_partner &lt;dbl&gt;</code></pre>
+# ℹ 6 more variables: .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;, .efficacy_actor &lt;dbl&gt;,
+#   .efficacy_partner &lt;dbl&gt;, .total_mvpa_actor &lt;dbl&gt;, .total_mvpa_partner &lt;dbl&gt;</code></pre>
 </div>
 </div></section><section id="create-the-required-format-and-validate-the-data-2" class="slide level2">
 <h2>Create the required format and validate the data</h2>
@@ -2527,67 +2527,67 @@ is_male, is_female, and _actor and _partner variables. -->
 <section id="describe-and-visualize-measures-and-observed-relationships" class="slide level2">
 <h2>Describe and visualize measures and observed relationships</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href></a><span class="fu">library</span>(report)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href></a><span class="fu">library</span>(report, insight)</span>
 <span id="cb5-2"><a href></a></span>
 <span id="cb5-3"><a href></a>df_apim <span class="sc">|&gt;</span></span>
 <span id="cb5-4"><a href></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
 <span id="cb5-5"><a href></a>  report<span class="sc">::</span><span class="fu">report_table</span>() <span class="sc">|&gt;</span></span>
 <span id="cb5-6"><a href></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-7"><a href></a>  <span class="fu">slide_table</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-7"><a href></a>  insight<span class="sc">::</span><span class="fu">print_md</span>() <span class="co"># make a Markdown table</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Variable</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Level</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">n_Obs</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Mean</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">SD</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Min</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Max</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">n_Missing</th>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Level</th>
+<th style="text-align: right;">n_Obs</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">SD</th>
+<th style="text-align: right;">Min</th>
+<th style="text-align: right;">Max</th>
+<th style="text-align: right;">n_Missing</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">gender</td>
 <td style="text-align: left;">female</td>
-<td style="text-align: right;">36.00</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">gender</td>
 <td style="text-align: left;">male</td>
-<td style="text-align: right;">36.00</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">efficacy</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
 <td style="text-align: right;">2.38</td>
 <td style="text-align: right;">0.99</td>
 <td style="text-align: right;">0.13</td>
 <td style="text-align: right;">4.92</td>
-<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">total_mvpa</td>
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">NA</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
 <td style="text-align: right;">31.21</td>
 <td style="text-align: right;">22.40</td>
 <td style="text-align: right;">3.43</td>
 <td style="text-align: right;">126.35</td>
-<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
 </tr>
 </tbody>
 </table>
@@ -2600,70 +2600,52 @@ is_male, is_female, and _actor and _partner variables. -->
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href></a><span class="fu">library</span>(correlation)</span>
 <span id="cb6-2"><a href></a></span>
 <span id="cb6-3"><a href></a>df_apim <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href></a>  <span class="fu">select</span>(.efficacy_actor, .efficacy_partner, total_mvpa) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href></a>  <span class="fu">select</span>(.efficacy_actor, .efficacy_partner, .total_mvpa_actor, .total_mvpa_partner) <span class="sc">|&gt;</span></span>
 <span id="cb6-5"><a href></a>  correlation<span class="sc">::</span><span class="fu">correlation</span>() <span class="sc">|&gt;</span></span>
-<span id="cb6-6"><a href></a>  <span class="co"># use summary() for correlation matrix</span></span>
-<span id="cb6-7"><a href></a>  <span class="fu">slide_table</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-6"><a href></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a href></a>  insight<span class="sc">::</span><span class="fu">print_md</span>(<span class="at">footer =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<table class="caption-top">
+<table class="caption-top" style="width:100%;">
+<caption>Correlation Matrix (pearson-method)</caption>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 27%">
+<col style="width: 24%">
+<col style="width: 24%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Parameter1</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Parameter2</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">r</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">CI</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">CI_low</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">CI_high</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">t</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">df_error</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Method</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">n_Obs</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: center;">.total_mvpa_partner</th>
+<th style="text-align: center;">.total_mvpa_actor</th>
+<th style="text-align: center;">.efficacy_partner</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">.efficacy_actor</td>
-<td style="text-align: left;">.efficacy_partner</td>
-<td style="text-align: right;">0.59</td>
-<td style="text-align: right;">0.95</td>
-<td style="text-align: right;">0.41</td>
-<td style="text-align: right;">0.72</td>
-<td style="text-align: right;">6.09</td>
-<td style="text-align: right;">70.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: left;">Pearson correlation</td>
-<td style="text-align: right;">72.00</td>
+<td style="text-align: center;">0.41***</td>
+<td style="text-align: center;">0.54***</td>
+<td style="text-align: center;">0.59***</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">.efficacy_actor</td>
-<td style="text-align: left;">total_mvpa</td>
-<td style="text-align: right;">0.54</td>
-<td style="text-align: right;">0.95</td>
-<td style="text-align: right;">0.35</td>
-<td style="text-align: right;">0.69</td>
-<td style="text-align: right;">5.39</td>
-<td style="text-align: right;">70.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: left;">Pearson correlation</td>
-<td style="text-align: right;">72.00</td>
+<td style="text-align: left;">.efficacy_partner</td>
+<td style="text-align: center;">0.54***</td>
+<td style="text-align: center;">0.41***</td>
+<td style="text-align: center;"></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">.efficacy_partner</td>
-<td style="text-align: left;">total_mvpa</td>
-<td style="text-align: right;">0.41</td>
-<td style="text-align: right;">0.95</td>
-<td style="text-align: right;">0.20</td>
-<td style="text-align: right;">0.59</td>
-<td style="text-align: right;">3.77</td>
-<td style="text-align: right;">70.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: left;">Pearson correlation</td>
-<td style="text-align: right;">72.00</td>
+<td style="text-align: left;">.total_mvpa_actor</td>
+<td style="text-align: center;">0.79***</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>
 </div>
+</div>
+<div class="subtle">
+<p>p-value adjustment method: Holm (1979)</p>
 </div>
 </section>
 <section id="slide" class="slide level2">
