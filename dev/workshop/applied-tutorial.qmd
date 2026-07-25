@@ -608,37 +608,6 @@ This is the same conceptual model introduced in Part I.
 
 :::
 
-## One response column, two member rows
-
-**Both members' outcomes occupy one response column:** each member contributes
-one row.
-
-```{r}
-#| label: applied-distinguishable-apim-member-wise
-#| echo: false
-#| dev: svg
-#| fig-width: 9
-#| fig-height: 4.8
-#| out-width: 100%
-#| fig-align: center
-#| fig-alt: "Member-wise representation of a distinguishable APIM fitted in long format. Each member's actor and partner predictors predict that member's outcome, while the two outcome residuals covary within the dyad."
-
-draw_apim_member_diagram("distinguishable")
-```
-
-:::{.notes}
-
-- For the female outcome row, female efficacy is the actor predictor and male
-  efficacy is the partner predictor.
-- These roles reverse for the male outcome row.
-- The two rows are connected through the within-couple residual covariance.
-
-[Sources]
-
-- @kenny2006dyadic
-
-:::
-
 ## The APIM starts with two member-specific equations
 
 For each dyad $i$:
