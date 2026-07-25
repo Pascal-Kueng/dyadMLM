@@ -2131,7 +2131,7 @@ Turu Stadler
 <li><strong>Check data structure</strong></li>
 <li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Verify model adequacy, (distinguishability, if applicable), and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 <!-- konsistent wie hier -->
@@ -2162,7 +2162,7 @@ display:block!important;
 <li><strong>Check data structure</strong></li>
 <li><strong>Describe and visualize measures and simple relationships</strong></li>
 <li><strong>Estimate the models</strong></li>
-<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Verify model adequacy, (distinguishability, if applicable), and robustness</strong></li>
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 <!-- konsistent wie hier -->
@@ -2212,17 +2212,11 @@ display:block!important;
 </ul>
 <p><strong>Total MVPA = solo MVPA + joint MVPA.</strong></p>
 <!-- ca. 1 Minute -->
-</section>
-<section id="workflow" class="slide level2">
-<h2>Workflow</h2>
-<ol type="1">
-<li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
-<li><strong>Prepare the data and verify the dyadic structure</strong></li>
-<li><strong>Describe and visualize measures and observed relationships</strong></li>
-<li><strong>Estimate the models</strong></li>
-<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
-<li><strong>Visualize, interpret, and report results</strong></li>
-</ol>
+</section></section>
+<section>
+<section id="distinguishable-dyads" class="title-slide slide level1 center">
+<h1>Distinguishable dyads</h1>
+<p>Distinguishing by gender</p>
 <aside class="notes">
 <p>Almost done with first step, we still have to decide on distinguishability. In our data, probably makes sense to distinguish by gender. Not always!</p>
 <p>-&gt; Gender, but TEST!</p>
@@ -2237,11 +2231,17 @@ width: 1px!important;
 overflow: hidden!important;
 display:block!important;
 }</style></aside>
-</section></section>
-<section>
-<section id="distinguishable-dyads" class="title-slide slide level1 center">
-<h1>Distinguishable dyads</h1>
-<p>Distinguishing by gender</p>
+</section>
+<section id="workflow" class="slide level2">
+<h2>Workflow</h2>
+<ol type="1">
+<li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
+<li><strong>Prepare the data and verify the dyadic structure</strong></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Visualize, interpret, and report results</strong></li>
+</ol>
 <aside class="notes">
 <p>Important: Gender is not always the only choice!</p>
 <style type="text/css">
@@ -2524,32 +2524,40 @@ is_male, is_female, and _actor and _partner variables. -->
 <li><strong>Visualize, interpret, and report results</strong></li>
 </ol>
 </section>
-<section id="describe-the-overall-sample-and-each-partner-role" class="slide level2">
-<h2>Describe the overall sample and each partner role</h2>
+<section id="create-a-wide-view-for-role-specific-exploration" class="slide level2">
+<h2>Create a wide view for role-specific exploration</h2>
+<ul>
+<li>One row per dyad for straightforward role-specific summaries, plots, and correlations</li>
+<li>The models will still use the <code>df_apim</code> dataset</li>
+<li>For exchangeable dyads, this step is not necessary</li>
+</ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href></a><span class="fu">library</span>(report)</span>
-<span id="cb5-2"><a href></a></span>
-<span id="cb5-3"><a href></a><span class="fu">bind_rows</span>(</span>
-<span id="cb5-4"><a href></a>  df_apim <span class="sc">|&gt;</span></span>
-<span id="cb5-5"><a href></a>    <span class="fu">select</span>(efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
-<span id="cb5-6"><a href></a>    <span class="fu">report_table</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-7"><a href></a>    <span class="fu">mutate</span>(<span class="at">Group =</span> <span class="st">&quot;overall&quot;</span>, <span class="at">.before =</span> <span class="dv">1</span>),</span>
-<span id="cb5-8"><a href></a>  df_apim <span class="sc">|&gt;</span></span>
-<span id="cb5-9"><a href></a>    <span class="fu">select</span>(gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
-<span id="cb5-10"><a href></a>    <span class="fu">group_by</span>(gender) <span class="sc">|&gt;</span></span>
-<span id="cb5-11"><a href></a>    <span class="fu">report_table</span>()</span>
-<span id="cb5-12"><a href></a>) <span class="sc">|&gt;</span></span>
-<span id="cb5-13"><a href></a>  <span class="fu">transmute</span>(Group, Variable, <span class="at">n =</span> <span class="fu">as.character</span>(n_Obs), Mean, SD, Min, Max) <span class="sc">|&gt;</span></span>
-<span id="cb5-14"><a href></a>  <span class="fu">slide_table</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href></a>df_wide <span class="ot">&lt;-</span> df_apim <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href></a>  <span class="fu">select</span>(couple_id, gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb5-4"><a href></a>    <span class="at">names_from =</span> gender,</span>
+<span id="cb5-5"><a href></a>    <span class="at">values_from =</span> <span class="fu">c</span>(efficacy, total_mvpa)</span>
+<span id="cb5-6"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="describe-each-partner-role" class="slide level2">
+<h2>Describe each partner role</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href></a><span class="fu">library</span>(report)</span>
+<span id="cb6-2"><a href></a></span>
+<span id="cb6-3"><a href></a>df_wide <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href></a>  <span class="fu">select</span>(<span class="sc">-</span>couple_id) <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href></a>  <span class="fu">report_table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-6"><a href></a>  <span class="fu">transmute</span>(Variable, <span class="at">n =</span> <span class="fu">as.character</span>(n_Obs), Mean, SD, Min, Max) <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a href></a>  <span class="fu">slide_table</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
-<section id="describe-the-overall-sample-and-each-partner-role-output" class="slide level2 output-location-slide"><h2>Describe the overall sample and each partner role</h2><div class="cell output-location-slide">
+<section id="describe-each-partner-role-output" class="slide level2 output-location-slide"><h2>Describe each partner role</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Group</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">Variable</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">n</th>
 <th style="text-align: right;" data-quarto-table-cell-role="th">Mean</th>
@@ -2560,44 +2568,7 @@ is_male, is_female, and _actor and _partner variables. -->
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">overall</td>
-<td style="text-align: left;">efficacy</td>
-<td style="text-align: left;">72</td>
-<td style="text-align: right;">2.38</td>
-<td style="text-align: right;">0.99</td>
-<td style="text-align: right;">0.13</td>
-<td style="text-align: right;">4.92</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">overall</td>
-<td style="text-align: left;">total_mvpa</td>
-<td style="text-align: left;">72</td>
-<td style="text-align: right;">31.21</td>
-<td style="text-align: right;">22.40</td>
-<td style="text-align: right;">3.43</td>
-<td style="text-align: right;">126.35</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">female</td>
-<td style="text-align: left;">efficacy</td>
-<td style="text-align: left;">36</td>
-<td style="text-align: right;">2.46</td>
-<td style="text-align: right;">1.01</td>
-<td style="text-align: right;">0.46</td>
-<td style="text-align: right;">4.92</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">female</td>
-<td style="text-align: left;">total_mvpa</td>
-<td style="text-align: left;">36</td>
-<td style="text-align: right;">33.58</td>
-<td style="text-align: right;">24.39</td>
-<td style="text-align: right;">3.43</td>
-<td style="text-align: right;">126.35</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">male</td>
-<td style="text-align: left;">efficacy</td>
+<td style="text-align: left;">efficacy_male</td>
 <td style="text-align: left;">36</td>
 <td style="text-align: right;">2.29</td>
 <td style="text-align: right;">0.99</td>
@@ -2605,35 +2576,43 @@ is_male, is_female, and _actor and _partner variables. -->
 <td style="text-align: right;">4.60</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">male</td>
-<td style="text-align: left;">total_mvpa</td>
+<td style="text-align: left;">efficacy_female</td>
+<td style="text-align: left;">36</td>
+<td style="text-align: right;">2.46</td>
+<td style="text-align: right;">1.01</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">4.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_mvpa_male</td>
 <td style="text-align: left;">36</td>
 <td style="text-align: right;">28.84</td>
 <td style="text-align: right;">20.28</td>
 <td style="text-align: right;">3.51</td>
 <td style="text-align: right;">111.16</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;">total_mvpa_female</td>
+<td style="text-align: left;">36</td>
+<td style="text-align: right;">33.58</td>
+<td style="text-align: right;">24.39</td>
+<td style="text-align: right;">3.43</td>
+<td style="text-align: right;">126.35</td>
+</tr>
 </tbody>
 </table>
 </div>
 </div></section><section id="describe-and-visualize-measures-and-observed-relationships" class="slide level2">
 <h2>Describe and visualize measures and observed relationships</h2>
-<p>For a dyadic correlation table, we need to pivot the dataset to wide-format so that each dyad has 1 single row.</p>
+<p>The same wide data let us correlate female and male partners directly.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href></a><span class="fu">library</span>(correlation, tidyr)</span>
-<span id="cb6-2"><a href></a></span>
-<span id="cb6-3"><a href></a>df_apim <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href></a>  <span class="fu">select</span>(couple_id, gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
-<span id="cb6-5"><a href></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb6-6"><a href></a>    <span class="at">names_from =</span> gender,</span>
-<span id="cb6-7"><a href></a>    <span class="at">values_from =</span> <span class="fu">c</span>(efficacy, total_mvpa)</span>
-<span id="cb6-8"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb6-9"><a href></a>  correlation<span class="sc">::</span><span class="fu">correlation</span>(</span>
-<span id="cb6-10"><a href></a>    <span class="at">select =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_female&quot;</span>, <span class="st">&quot;total_mvpa_female&quot;</span>),</span>
-<span id="cb6-11"><a href></a>    <span class="at">select2 =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_male&quot;</span>, <span class="st">&quot;total_mvpa_male&quot;</span>)</span>
-<span id="cb6-12"><a href></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb6-13"><a href></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-14"><a href></a>  insight<span class="sc">::</span><span class="fu">print_md</span>(<span class="at">footer =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href></a><span class="fu">library</span>(correlation)</span>
+<span id="cb7-2"><a href></a></span>
+<span id="cb7-3"><a href></a>dyad_corr <span class="ot">&lt;-</span> df_wide <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href></a>  correlation<span class="sc">::</span><span class="fu">correlation</span>(</span>
+<span id="cb7-5"><a href></a>    <span class="at">select =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_female&quot;</span>, <span class="st">&quot;total_mvpa_female&quot;</span>),</span>
+<span id="cb7-6"><a href></a>    <span class="at">select2 =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_male&quot;</span>, <span class="st">&quot;total_mvpa_male&quot;</span>)</span>
+<span id="cb7-7"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="describe-and-visualize-measures-and-observed-relationships-1" class="slide level2">
@@ -2888,13 +2867,13 @@ display:block!important;
 <h1>Excercises in R</h1>
 <p>Short break - initiate package install before you leave</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href></a><span class="fu">install.packages</span>(</span>
-<span id="cb7-2"><a href></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
-<span id="cb7-3"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
-<span id="cb7-4"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
-<span id="cb7-5"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
-<span id="cb7-6"><a href></a>  )</span>
-<span id="cb7-7"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href></a><span class="fu">install.packages</span>(</span>
+<span id="cb8-2"><a href></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
+<span id="cb8-3"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
+<span id="cb8-4"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
+<span id="cb8-5"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
+<span id="cb8-6"><a href></a>  )</span>
+<span id="cb8-7"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>

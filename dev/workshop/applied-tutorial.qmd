@@ -229,7 +229,7 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 2. **Check data structure**
 3. **Describe and visualize measures and simple relationships**
 4. **Estimate the models**
-5. **Verify model adequacy, distinguishability, and robustness**
+5. **Verify model adequacy, (distinguishability, if applicable), and robustness**
 6. **Visualize, interpret, and report results**
 
 <!-- konsistent wie hier -->
@@ -250,7 +250,7 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 2. **Check data structure**
 3. **Describe and visualize measures and simple relationships**
 4. **Estimate the models**
-5. **Verify model adequacy, distinguishability, and robustness**
+5. **Verify model adequacy, (distinguishability, if applicable), and robustness**
 6. **Visualize, interpret, and report results**
 
 <!-- konsistent wie hier -->
@@ -311,14 +311,8 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 
 <!-- ca. 1 Minute -->
 
-## Workflow
-
-1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
-2. **Prepare the data and verify the dyadic structure**
-3. **Describe and visualize measures and observed relationships**
-4. **Estimate the models**
-5. **Verify model adequacy, distinguishability, and robustness**
-7. **Visualize, interpret, and report results**
+# Distinguishable dyads
+Distinguishing by gender
 
 :::{.notes}
 
@@ -329,8 +323,17 @@ In our data, probably makes sense to distinguish by gender. Not always!
 
 :::
 
-# Distinguishable dyads
-Distinguishing by gender
+## Workflow
+
+1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
+2. **Prepare the data and verify the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+7. **Visualize, interpret, and report results**
+
+
+
 
 :::{.notes}
 
@@ -449,69 +452,57 @@ df_apim[1:6,] |>
 5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
-## Describe the overall sample and each partner role
+## Create a wide view for role-specific exploration
+
+- One row per dyad for straightforward role-specific summaries, plots, and correlations
+- The models will still use the `df_apim` dataset
+- For exchangeable dyads, this step is not necessary 
+
+```{r}
+df_wide <- df_apim |>
+  select(couple_id, gender, efficacy, total_mvpa) |>
+  tidyr::pivot_wider(
+    names_from = gender,
+    values_from = c(efficacy, total_mvpa)
+  )
+```
+
+
+## Describe each partner role
 
 ```{r}
 #| output-location: slide
 
 library(report)
 
-bind_rows(
-  df_apim |>
-    select(efficacy, total_mvpa) |>
-    report_table() |>
-    mutate(Group = "overall", .before = 1),
-  df_apim |>
-    select(gender, efficacy, total_mvpa) |>
-    group_by(gender) |>
-    report_table()
-) |>
-  transmute(Group, Variable, n = as.character(n_Obs), Mean, SD, Min, Max) |>
+df_wide |>
+  select(-couple_id) |>
+  report_table() |>
+  transmute(Variable, n = as.character(n_Obs), Mean, SD, Min, Max) |>
   slide_table()
 ```
 
 ## Describe and visualize measures and observed relationships
 
-For a dyadic correlation table, we need to pivot the dataset to wide-format
-so that each dyad has 1 single row.
+The same wide data let us correlate female and male partners directly.
 
 ```{r results='hide'}
-library(correlation, tidyr)
+library(correlation)
 
-df_apim |>
-  select(couple_id, gender, efficacy, total_mvpa) |>
-  tidyr::pivot_wider(
-    names_from = gender,
-    values_from = c(efficacy, total_mvpa)
-  ) |>
+dyad_corr <- df_wide |>
   correlation::correlation(
     select = c("efficacy_female", "total_mvpa_female"),
     select2 = c("efficacy_male", "total_mvpa_male")
-  ) |> 
-  summary() |> 
-  insight::print_md(footer = "")
-  
+  )
 ```
 
 
 ## Describe and visualize measures and observed relationships
 
 ```{r echo = FALSE}
-library(correlation, tidyr)
-
-df_apim |>
-  select(couple_id, gender, efficacy, total_mvpa) |>
-  tidyr::pivot_wider(
-    names_from = gender,
-    values_from = c(efficacy, total_mvpa)
-  ) |>
-  correlation::correlation(
-    select = c("efficacy_female", "total_mvpa_female"),
-    select2 = c("efficacy_male", "total_mvpa_male")
-  ) |> 
+dyad_corr |>
   summary() |> 
   insight::print_md(footer = "")
-  
 ```
 
 
