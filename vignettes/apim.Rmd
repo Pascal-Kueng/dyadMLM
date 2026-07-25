@@ -125,7 +125,9 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
-  keep_compositions = "female-male"
+  keep_compositions = "female-male",
+  include_arbitrary_member_contrast = TRUE,
+  seed = 123
 )
 
 print(apim_distinguishable_data, n=4)
@@ -147,6 +149,9 @@ apim_distinguishable_data$.provided_support_partner <-
   provided_support_grand_mean
 
 ```
+
+The optional member contrast is used later for the restricted model. It does
+not change the composition's distinguishable metadata or role indicators.
 
 `prepare_dyad_data()` initially generated the actor and partner columns on the
 original predictor scale. The lines above subtract one pooled mean from both
@@ -271,45 +276,13 @@ function that back-transforms the structure to the often more interpretable
 member-level residual covariance matrix.
 
 
-### Fitting the exchangeable APIM with glmmTMB
+### Fitting the restricted exchangeable APIM with glmmTMB
 
-We use the same dataset as before, but do not distinguish males and females.
-We can test distinguishability later by comparing this model with the prior
-model.
-
-We use `set_exchangeable_compositions` for the exchangeability constraints.
-Another option would be to omit roles.
-
-```{r prepare-cross-distinguishability}
-apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  dyads_cross,
-  dyad = coupleID,
-  member = personID,
-  role = gender,
-  predictors = provided_support,
-  keep_compositions = "female-male",
-  set_exchangeable_compositions = "female-male",
-  seed = 123
-)
-
-print(apim_exchangeable_data, n = 4)
-
-exchangeable_support_grand_mean <- mean(
-  c(
-    apim_exchangeable_data$.provided_support_actor,
-    apim_exchangeable_data$.provided_support_partner
-  ),
-  na.rm = TRUE
-)
-
-# Use one pooled centering constant for both actor and partner predictors.
-apim_exchangeable_data$.provided_support_actor <-
-  apim_exchangeable_data$.provided_support_actor -
-  exchangeable_support_grand_mean
-apim_exchangeable_data$.provided_support_partner <-
-  apim_exchangeable_data$.provided_support_partner -
-  exchangeable_support_grand_mean
-```
+The restricted model omits gender-specific fixed effects and uses the
+shared/difference residual representation. We reuse
+`apim_distinguishable_data`, so both models use exactly the same prepared rows
+and centering. `set_exchangeable_compositions` would instead reclassify the
+composition when it should be treated as exchangeable throughout an analysis.
 
 We then use the columns to fit the model as follows: 
 
@@ -330,7 +303,7 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     us(0 + .member_contrast_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
-  data = apim_exchangeable_data
+  data = apim_distinguishable_data
 )
 
 summary(apim_exchangeable_model)
@@ -412,8 +385,9 @@ roles may differ with a restricted exchangeable model. This comparison tests
 the imposed equality constraints jointly. Here, they concern the fixed
 intercepts, actor effects, partner effects, and residual variances.
 
-The two parameterizations require different generated columns, but both models
-above use the same original observations.
+Both models use the same prepared data object. The full model uses its retained
+role indicators. The restricted model instead uses the opt-in arbitrary member
+contrast for the exchangeability-constrained residual structure.
 
 [`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html)
 verifies that both models use equivalent original
