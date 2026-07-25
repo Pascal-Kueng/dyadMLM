@@ -449,18 +449,25 @@ df_apim[1:6,] |>
 5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
-## Describe and visualize measures and observed relationships
-
+## Describe the overall sample and each partner role
 
 ```{r}
-library(report, insight)
+#| output-location: slide
 
-df_apim |>
-  dplyr::select(gender, efficacy, total_mvpa) |>
-  report::report_table() |>
-  summary() |>
-  insight::print_md() # make a Markdown table
-  
+library(report)
+
+bind_rows(
+  df_apim |>
+    select(efficacy, total_mvpa) |>
+    report_table() |>
+    mutate(Group = "overall", .before = 1),
+  df_apim |>
+    select(gender, efficacy, total_mvpa) |>
+    group_by(gender) |>
+    report_table()
+) |>
+  transmute(Group, Variable, n = as.character(n_Obs), Mean, SD, Min, Max) |>
+  slide_table()
 ```
 
 ## Describe and visualize measures and observed relationships
