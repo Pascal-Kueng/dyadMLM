@@ -77,8 +77,9 @@ the two member residuals may have different variances and covary.
 #### Residual random-effects structure
 
 For a distinguishable female-male dyad, the two members can have
-different residual variances. The within-dyad residual covariance block
-(shared across dyads) is:
+different residual variances. In the notation below, the member role is
+written first and $`i`$ indexes dyads. The within-dyad residual
+covariance block (shared across dyads) is:
 
 ``` math
 \operatorname{Cov}
@@ -583,9 +584,6 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_distinguishable_data
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; false convergence (8). See vignette('troubleshooting'),
-#> help('diagnose')
 ```
 
 ##### Random slopes
@@ -1097,9 +1095,9 @@ summary(stability_influence)
 #> 
 #> Conditional model:
 #>                         Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)             5.834951   0.206339  28.278   <2e-16 ***
-#> .closeness_actor_lag1   0.005985   0.019493   0.307   0.7588    
-#> .closeness_partner_lag1 0.002167   0.019493   0.111   0.9115    
+#> (Intercept)             5.834950   0.206341  28.278   <2e-16 ***
+#> .closeness_actor_lag1   0.005987   0.019493   0.307   0.7587    
+#> .closeness_partner_lag1 0.002165   0.019493   0.111   0.9116    
 #> diaryday                0.008910   0.004676   1.905   0.0567 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1

@@ -136,8 +136,11 @@ the two member residuals may have different variances and covary.
 <h4 id="distinguishable-residual-structure">Residual random-effects structure<a class="anchor" aria-label="anchor" href="#distinguishable-residual-structure"></a>
 </h4>
 <p>For a distinguishable female-male dyad, the two members can have
-different residual variances. The within-dyad residual covariance block
-(shared across dyads) is:</p>
+different residual variances. In the notation below, the member role is
+written first and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+indexes dyads. The within-dyad residual covariance block (shared across
+dyads) is:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Cov</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>ϵ</mi><mrow><mi>F</mi><mi>i</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>ϵ</mi><mrow><mi>M</mi><mi>i</mi></mrow></msub></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi mathvariant="normal">Σ</mi><mi>ϵ</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><msub><mi>ϵ</mi><mi>F</mi></msub><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><msub><mi>ρ</mi><mrow><msub><mi>ϵ</mi><mi>F</mi></msub><msub><mi>ϵ</mi><mi>M</mi></msub></mrow></msub><msub><mi>σ</mi><msub><mi>ϵ</mi><mi>F</mi></msub></msub><msub><mi>σ</mi><msub><mi>ϵ</mi><mi>M</mi></msub></msub></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>ρ</mi><mrow><msub><mi>ϵ</mi><mi>F</mi></msub><msub><mi>ϵ</mi><mi>M</mi></msub></mrow></msub><msub><mi>σ</mi><msub><mi>ϵ</mi><mi>F</mi></msub></msub><msub><mi>σ</mi><msub><mi>ϵ</mi><mi>M</mi></msub></msub></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><msub><mi>ϵ</mi><mi>M</mi></msub><mn>2</mn></msubsup></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
 \operatorname{Cov}
 \begin{pmatrix}
@@ -598,10 +601,7 @@ role-specific intercepts refer to the average study day:</p>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_distinguishable_data</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
-<span><span class="co">#&gt; help('diagnose')</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <div class="section level5">
 <h5 id="random-slopes">Random slopes<a class="anchor" aria-label="anchor" href="#random-slopes"></a>
 </h5>
@@ -1076,9 +1076,9 @@ bridged.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                         Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)             5.834951   0.206339  28.278   &lt;2e-16 ***</span></span>
-<span><span class="co">#&gt; .closeness_actor_lag1   0.005985   0.019493   0.307   0.7588    </span></span>
-<span><span class="co">#&gt; .closeness_partner_lag1 0.002167   0.019493   0.111   0.9115    </span></span>
+<span><span class="co">#&gt; (Intercept)             5.834950   0.206341  28.278   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .closeness_actor_lag1   0.005987   0.019493   0.307   0.7587    </span></span>
+<span><span class="co">#&gt; .closeness_partner_lag1 0.002165   0.019493   0.111   0.9116    </span></span>
 <span><span class="co">#&gt; diaryday                0.008910   0.004676   1.905   0.0567 .  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>

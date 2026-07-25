@@ -922,6 +922,9 @@ difference.</p>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_dsm_data</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
+<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
+<span><span class="co">#&gt; help('diagnose')</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_ILD</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
@@ -951,18 +954,18 @@ difference.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                                            Estimate Std. Error</span></span>
-<span><span class="co">#&gt; (Intercept)                                                5.111583   0.071202</span></span>
-<span><span class="co">#&gt; diaryday                                                  -0.005238   0.003745</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_dyad_mean                            0.472112   0.027865</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                     0.011992   0.017685</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_dyad_mean                            1.465964   0.092236</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                     0.101067   0.075770</span></span>
-<span><span class="co">#&gt; .dsm_role_contrast                                         0.864415   0.099661</span></span>
-<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                0.023050   0.005604</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.212178   0.041695</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.196322   0.026461</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.719301   0.127875</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.923664   0.105047</span></span>
+<span><span class="co">#&gt; (Intercept)                                                5.111587   0.071203</span></span>
+<span><span class="co">#&gt; diaryday                                                  -0.005239   0.003745</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean                            0.472112   0.027866</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                     0.011993   0.017685</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean                            1.465978   0.092236</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                     0.101045   0.075771</span></span>
+<span><span class="co">#&gt; .dsm_role_contrast                                         0.864420   0.099661</span></span>
+<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                0.023049   0.005604</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.212177   0.041695</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.196321   0.026462</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.719314   0.127875</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.923647   0.105047</span></span>
 <span><span class="co">#&gt;                                                           z value Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; (Intercept)                                                 71.79  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; diaryday                                                    -1.40    0.162    </span></span>
