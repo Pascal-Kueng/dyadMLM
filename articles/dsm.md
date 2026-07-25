@@ -31,12 +31,11 @@ be substantively meaningful when the directional coefficients are
 interpreted. Here, `c("female", "male")` defines every difference as
 female minus male.
 
-Throughout this cross-sectional example, $`X_{\mathrm{female}}`$ and
-$`X_{\mathrm{male}}`$ denote provided support after subtracting the same
-pooled grand mean across all members in the analysis sample. Raw scores
-could instead be used if zero is meaningful for that variable in the
-analysis sample; this would change the intercept reference point, but
-not the slope estimates.
+Here $`X_{\mathrm{female}}`$ and $`X_{\mathrm{male}}`$ denote provided
+support centered with the pooled mean from complete predictor pairs.
+[`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+creates the corresponding DSM dyad-mean column; using the original zero
+requires shifting it manually.
 
 ``` r
 
@@ -98,11 +97,11 @@ With this notation, `dyadMLM` creates the equivalent coordinates:
 
 - `.dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
 
-The function obtains the first coordinate by grand-mean centering the
-dyad means calculated from the original scores. The common centering
-shift cancels from the signed difference. Both coordinates are repeated
-on the member rows; the outcome remains unchanged and needs no
-transformation.
+The common centering shift cancels from the signed difference. Both
+predictor scores are repeated on the member rows; the outcome remains
+unchanged. APIM GMC uses all retained non-missing values, whereas DSM
+uses complete pairs, so their constants may differ with one-sided
+missingness.
 
 ## Cross-Sectional Gaussian DSM
 
@@ -341,25 +340,10 @@ cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   predictors = provided_support,
   # Request APIM columns too for comparison below.
   model_types = c("dsm", "apim"),
+  add_apim_gmc_predictors = TRUE,
   keep_compositions = "female-male",
   dsm_role_order = c("male", "female")
 )
-
-provided_support_grand_mean <- mean(
-  c(
-    cross_dsm_data_inverted$.provided_support_actor,
-    cross_dsm_data_inverted$.provided_support_partner
-  ),
-  na.rm = TRUE
-)
-
-# Use one pooled centering constant for both APIM predictor columns.
-cross_dsm_data_inverted$.provided_support_actor <-
-  cross_dsm_data_inverted$.provided_support_actor -
-  provided_support_grand_mean
-cross_dsm_data_inverted$.provided_support_partner <-
-  cross_dsm_data_inverted$.provided_support_partner -
-  provided_support_grand_mean
 ```
 
 ``` r
@@ -438,12 +422,12 @@ apim_model <- glmmTMB::glmmTMB(
     .is_male +
 
     # Role-specific actor effects
-    .is_female:.provided_support_actor +
-    .is_male:.provided_support_actor +
+    .is_female:.provided_support_gmc_actor +
+    .is_male:.provided_support_gmc_actor +
 
     # Role-specific partner effects
-    .is_female:.provided_support_partner +
-    .is_male:.provided_support_partner +
+    .is_female:.provided_support_gmc_partner +
+    .is_male:.provided_support_gmc_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
@@ -523,9 +507,8 @@ a_{22}
 \end{aligned}
 ```
 
-Grand-mean centering both APIM predictor columns with the same pooled
-constant aligns their zero point with the DSM predictor mean. The
-intercepts therefore transform as
+With complete pairs, the GMC APIM and DSM share a zero point, so the
+intercepts transform as
 
 ``` math
 a_{10} = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2},
@@ -533,9 +516,8 @@ a_{10} = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2},
 a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}}.
 ```
 
-With raw APIM predictors, the slope transformations would be unchanged,
-but the intercept transformation would additionally need to account for
-the different zero point.
+Raw APIM predictors leave the slope transformations unchanged but
+require intercept recentering.
 
 For the reverse slope transformation, first recover the role-specific
 actor-plus-partner and actor-minus-partner combinations:
@@ -783,9 +765,6 @@ dsm_ILD <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_dsm_data
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; false convergence (8). See vignette('troubleshooting'),
-#> help('diagnose')
 
 summary(dsm_ILD)
 #>  Family: gaussian  ( identity )
@@ -815,18 +794,18 @@ summary(dsm_ILD)
 #> 
 #> Conditional model:
 #>                                                            Estimate Std. Error
-#> (Intercept)                                                5.111587   0.071203
-#> diaryday                                                  -0.005239   0.003745
-#> .provided_support_cwp_dyad_mean                            0.472112   0.027866
-#> .provided_support_cwp_within_dyad_diff                     0.011993   0.017685
-#> .provided_support_cbp_dyad_mean                            1.465978   0.092236
-#> .provided_support_cbp_within_dyad_diff                     0.101045   0.075771
-#> .dsm_role_contrast                                         0.864420   0.099661
-#> diaryday:.dsm_role_contrast                                0.023049   0.005604
-#> .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.212177   0.041695
-#> .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.196321   0.026462
-#> .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.719314   0.127875
-#> .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.923647   0.105047
+#> (Intercept)                                                5.111583   0.071202
+#> diaryday                                                  -0.005238   0.003745
+#> .provided_support_cwp_dyad_mean                            0.472112   0.027865
+#> .provided_support_cwp_within_dyad_diff                     0.011992   0.017685
+#> .provided_support_cbp_dyad_mean                            1.465964   0.092236
+#> .provided_support_cbp_within_dyad_diff                     0.101067   0.075770
+#> .dsm_role_contrast                                         0.864415   0.099661
+#> diaryday:.dsm_role_contrast                                0.023050   0.005604
+#> .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.212178   0.041695
+#> .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.196322   0.026461
+#> .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.719301   0.127875
+#> .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.923664   0.105047
 #>                                                           z value Pr(>|z|)    
 #> (Intercept)                                                 71.79  < 2e-16 ***
 #> diaryday                                                    -1.40    0.162    

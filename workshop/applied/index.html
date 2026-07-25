@@ -934,6 +934,24 @@ background: var(--uzh-surface);
 .reveal .cell > .code-copy-outer-scaffold + .cell-output-stdout {
 margin-top: 0.4em;
 }
+
+.reveal .slides section.output-location-slide.present {
+display: grid !important;
+grid-template-rows: auto minmax(0, 1fr);
+box-sizing: border-box;
+padding-bottom: 1.2em;
+}
+.reveal .slides section.output-location-slide > .cell.output-location-slide,
+.reveal .slides section.output-location-slide .cell-output-stdout,
+.reveal .slides section.output-location-slide .cell-output-stdout > pre {
+min-height: 0;
+height: 100%;
+}
+.reveal .slides section.output-location-slide .cell-output-stdout > pre > code {
+box-sizing: border-box;
+max-height: 100%;
+overflow: auto;
+}
 .reveal blockquote {
 width: auto;
 margin: 0.8em 0;
@@ -2351,10 +2369,9 @@ display:block!important;
 <span id="cb2-7"><a href aria-label="7"></a>  <span class="at">role =</span> gender,</span>
 <span id="cb2-8"><a href aria-label="8"></a>  <span class="at">predictors =</span> efficacy, </span>
 <span id="cb2-9"><a href aria-label="9"></a>  <span class="at">model_types =</span> <span class="st">&#39;apim&#39;</span></span>
-<span id="cb2-10"><a href aria-label="10"></a>)</span>
+<span id="cb2-10"><a href aria-label="10"></a>) </span>
 <span id="cb2-11"><a href aria-label="11"></a></span>
-<span id="cb2-12"><a href aria-label="12"></a></span>
-<span id="cb2-13"><a href aria-label="13"></a><span class="fu">print</span>(df_apim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-12"><a href aria-label="12"></a><span class="fu">print</span>(df_apim)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -2826,45 +2843,29 @@ display:block!important;
 </section>
 <section id="the-apim-starts-with-two-member-specific-equations" class="slide level2">
 <h2>The APIM starts with two member-specific equations</h2>
-<p>For each dyad <span class="math inline">\(i\)</span>:</p>
+<p>For each dyad <span class="math inline">\(i\)</span>, each member with role <span class="math inline">\(r \in \{\mathrm{M},\mathrm{F}\}\)</span> has their own predictor <span class="math inline">\(X^{(\mathrm{A})}_{ri}\)</span> and their partner’s predictor <span class="math inline">\(X^{(\mathrm{P})}_{ri}\)</span>:</p>
 <p><span class="math display">\[
   \begin{gathered}
-  Y_{\mathrm{male},i}
+  Y_{\mathrm{M},i}
   = b_{0,\mathrm{M}}
-  + \color{#1769AA}{a_{\mathrm{M}} \times X^{(\mathrm{A})}_{\mathrm{male},i}}
-  + \color{#7B3FA1}{p_{\mathrm{M}} \times X^{(\mathrm{P})}_{\mathrm{female},i}}
-  + \epsilon_{\mathrm{male},i}
+  + \color{#1769AA}{a_{\mathrm{M}} \times X^{(\mathrm{A})}_{\mathrm{M},i}}
+  + \color{#7B3FA1}{p_{\mathrm{M}} \times X^{(\mathrm{P})}_{\mathrm{M},i}}
+  + \epsilon_{\mathrm{M},i}
   \\
-  Y_{\mathrm{female},i}
+  Y_{\mathrm{F},i}
   = b_{0,\mathrm{F}}
-  + \color{#1769AA}{a_{\mathrm{F}} \times X^{(\mathrm{A})}_{\mathrm{female},i}}
-  + \color{#7B3FA1}{p_{\mathrm{F}} \times X^{(\mathrm{P})}_{\mathrm{male},i}}
-  + \epsilon_{\mathrm{female},i}
+  + \color{#1769AA}{a_{\mathrm{F}} \times X^{(\mathrm{A})}_{\mathrm{F},i}}
+  + \color{#7B3FA1}{p_{\mathrm{F}} \times X^{(\mathrm{P})}_{\mathrm{F},i}}
+  + \epsilon_{\mathrm{F},i}
   \end{gathered}
 \]</span></p>
 <p><span style="color: #1769AA"><strong>- Actor effects</strong></span> <span style="color: #7B3FA1"><strong>- Partner effects</strong></span></p>
 <p>In long format, each equation applies to one member row of the dyad.</p>
-<aside class="notes">
-<p>The signs of the actor and partner associations come from the estimated coefficients. They are not built into the model equation.</p>
-<p>[Sources]</p>
-<ul>
-<li><span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span></li>
-</ul>
-<style type="text/css">
-span.MJX_Assistive_MathML {
-position:absolute!important;
-clip: rect(1px, 1px, 1px, 1px);
-padding: 1px 0 0 0!important;
-border: 0!important;
-height: 1px!important;
-width: 1px!important;
-overflow: hidden!important;
-display:block!important;
-}</style></aside>
+<p>How can we combine these two equations into one model?</p>
 </section>
 <section id="role-indicators-combine-the-equations" class="slide level2">
 <h2>Role indicators combine the equations</h2>
-<p>With <span class="math inline">\(r \in \{\mathrm{M},\mathrm{F}\}\)</span> denoting role and <span class="math inline">\(i\)</span> dyad, <span class="math inline">\(D_{\mathrm{M},ri}\)</span> and <span class="math inline">\(D_{\mathrm{F},ri}\)</span> select the role-specific terms. <span class="math inline">\(X^{(\mathrm{A})}_{ri}\)</span> and <span class="math inline">\(X^{(\mathrm{P})}_{ri}\)</span> contain actor and partner values:</p>
+<p>The indicators <span class="math inline">\(D_{\mathrm{M},ri}\)</span> and <span class="math inline">\(D_{\mathrm{F},ri}\)</span> identify the male or female row:</p>
 <p><span class="math display">\[
 \begin{aligned}
 Y_{ri} ={}&amp;
@@ -2892,7 +2893,7 @@ Y_{ri} ={}&amp;
 \end{aligned}
 \]</span></p>
 <div class="text-smaller">
-<p>Male row: <span class="math inline">\(D_\mathrm{M}=1,\ D_\mathrm{F}=0\)</span>. Female row: the reverse.</p>
+<p>For a male row: <span class="math inline">\(D_\mathrm{M}=1,\ D_\mathrm{F}=0\)</span>. For a female row: the reverse.</p>
 </div>
 <aside class="notes">
 <p>The role indicators correspond to <code>.is_male</code> and <code>.is_female</code>. The actor and partner values correspond to <code>.efficacy_actor</code> and <code>.efficacy_partner</code>. The role index is written first, followed by the dyad index, as in <span class="math inline">\(Y_{\mathrm{male},i}\)</span> and <span class="math inline">\(Y_{\mathrm{female},i}\)</span>.</p>
@@ -2934,15 +2935,80 @@ display:block!important;
 \sigma_{\epsilon_\mathrm{M}}^{2}
 \end{bmatrix}
 \]</span></p>
-<p>In <code>glmmTMB</code>, this is represented by:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href aria-label="1"></a><span class="fu">us</span>(<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id),</span>
-<span id="cb13-2"><a href aria-label="2"></a>dispformula <span class="ot">=</span> <span class="er">~</span> <span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="fitting-the-distinguishable-apim-in-glmmtmb" class="slide level2">
+<h2>Fitting the distinguishable APIM in glmmTMB</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" data-code-line-numbers="1-23|4|5-6|8-10|12-14|16-18|19-20|23|1-23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href aria-label="1"></a><span class="fu">library</span>(glmmTMB)</span>
+<span id="cb13-2"><a href aria-label="2"></a></span>
+<span id="cb13-3"><a href aria-label="3"></a>apim_distinguishable_model <span class="ot">&lt;-</span> <span class="fu">glmmTMB</span>(</span>
+<span id="cb13-4"><a href aria-label="4"></a>  total_mvpa <span class="sc">~</span></span>
+<span id="cb13-5"><a href aria-label="5"></a>    <span class="co"># Role-specific intercepts</span></span>
+<span id="cb13-6"><a href aria-label="6"></a>    <span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">+</span></span>
+<span id="cb13-7"><a href aria-label="7"></a></span>
+<span id="cb13-8"><a href aria-label="8"></a>    <span class="co"># Role-specific actor effects</span></span>
+<span id="cb13-9"><a href aria-label="9"></a>    .is_female<span class="sc">:</span>.efficacy_actor <span class="sc">+</span></span>
+<span id="cb13-10"><a href aria-label="10"></a>    .is_male<span class="sc">:</span>.efficacy_actor <span class="sc">+</span></span>
+<span id="cb13-11"><a href aria-label="11"></a></span>
+<span id="cb13-12"><a href aria-label="12"></a>    <span class="co"># Role-specific partner effects</span></span>
+<span id="cb13-13"><a href aria-label="13"></a>    .is_female<span class="sc">:</span>.efficacy_partner <span class="sc">+</span></span>
+<span id="cb13-14"><a href aria-label="14"></a>    .is_male<span class="sc">:</span>.efficacy_partner <span class="sc">+</span></span>
+<span id="cb13-15"><a href aria-label="15"></a></span>
+<span id="cb13-16"><a href aria-label="16"></a>    <span class="co"># Within-dyad residual covariance</span></span>
+<span id="cb13-17"><a href aria-label="17"></a>    <span class="fu">us</span>(<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id),</span>
+<span id="cb13-18"><a href aria-label="18"></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb13-19"><a href aria-label="19"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb13-20"><a href aria-label="20"></a>  <span class="at">data =</span> df_apim</span>
+<span id="cb13-21"><a href aria-label="21"></a>)</span>
+<span id="cb13-22"><a href aria-label="22"></a></span>
+<span id="cb13-23"><a href aria-label="23"></a><span class="fu">summary</span>(apim_distinguishable_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+</section>
+<section id="fitting-the-distinguishable-apim-in-glmmtmb-output" class="slide level2 output-location-slide"><h2>Fitting the distinguishable APIM in glmmTMB</h2><div class="cell output-location-slide">
+<div class="cell-output cell-output-stdout">
+<pre><code> Family: gaussian  ( identity )
+Formula:          
+total_mvpa ~ 0 + .is_female + .is_male + .is_female:.efficacy_actor +  
+    .is_male:.efficacy_actor + .is_female:.efficacy_partner +  
+    .is_male:.efficacy_partner + us(0 + .is_female + .is_male |      couple_id)
+Dispersion:                  ~0
+Data: df_apim
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    605.4     625.9    -293.7     587.4        63 
+
+Random effects:
+
+Conditional model:
+ Groups    Name       Variance Std.Dev. Corr 
+ couple_id .is_female 388.3    19.70         
+           .is_male   286.0    16.91    0.79 
+Number of obs: 72, groups:  couple_id, 36
+
+Conditional model:
+                             Estimate Std. Error z value Pr(&gt;|z|)   
+.is_female                    -2.6965     9.4731  -0.285  0.77591   
+.is_male                       0.6008     8.1303   0.074  0.94109   
+.is_female:.efficacy_actor    11.8668     4.1389   2.867  0.00414 **
+.is_male:.efficacy_actor       7.9703     3.6110   2.207  0.02730 * 
+.is_female:.efficacy_partner   3.0896     4.2074   0.734  0.46274   
+.is_male:.efficacy_partner     4.0484     3.5522   1.140  0.25442   
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+</div></section><section id="workflow-3" class="slide level2">
+<h2>Workflow</h2>
+<ol type="1">
+<li><strong>Define dyads, distinguishability, and research questions</strong></li>
+<li><strong>Prepare the data and verify the dyadic structure</strong></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><span class="text-highlight"><strong>Verify model adequacy, distinguishability, and robustness</strong></span></li>
+<li><strong>Visualize, interpret, and report results</strong></li>
+</ol>
 <aside class="notes">
-<p>The unstructured block estimates separate female and male residual variances and their covariance. Setting <code>dispformula = ~ 0</code> avoids adding a second observation-level residual variance.</p>
-<p>[Sources]</p>
-<ul>
-<li><span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span></li>
-</ul>
+<p>BEFORE interpreting and reporting results, we should …</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -2954,7 +3020,108 @@ width: 1px!important;
 overflow: hidden!important;
 display:block!important;
 }</style></aside>
-<!-------------------------    --------------------------------------------->
+</section>
+<section id="verify-model-adequacy-distinguishability-and-robustness" class="slide level2">
+<h2>Verify model adequacy, distinguishability, and robustness</h2>
+<ol type="1">
+<li>Did estimation succeed?</li>
+<li>Does the model reproduce the important data patterns?</li>
+<li>Are exchangeability constraints defensible?</li>
+<li>Are conclusions driven by one dyad or one consequential modeling choice?</li>
+</ol>
+</section>
+<section id="did-estimation-succeed" class="slide level2">
+<h2>Did estimation succeed?</h2>
+<p>The model converged without warnings… a good first sign!</p>
+<p>Other things to look out for:</p>
+<ul>
+<li>Residual variances close to zero or correlations close to <span class="math inline">\(-1\)</span> or <span class="math inline">\(+1\)</span> <span class="math inline">\(\rightarrow\)</span> singular fit</li>
+<li>Inspect residuals <span class="math inline">\(\rightarrow\)</span> tricky since we have 2 correlated residuals per couple</li>
+</ul>
+</section>
+<section id="test-distinguishability" class="slide level2">
+<h2>Test distinguishability</h2>
+<ul>
+<li>Compare fixed effects with a Wald test</li>
+<li>Fit exchangeable model and compare models</li>
+</ul>
+<p>If pooling is substantively defensible and compatible with the data, you may pool specific effects or fit an exchangeable model.</p>
+<p>However, non-significant comparisons are not proof that roles are identical <span class="citation" data-cites="gistelinckIndistinguishabilityTests2018">(<a href="#/references" role="doc-biblioref" onclick>Gistelinck et al., 2018</a>)</span>.</p>
+</section>
+<section id="test-robustness---sensitivity-analyses" class="slide level2">
+<h2>Test robustness - sensitivity analyses</h2>
+<ul>
+<li>Refit the model leaving out one dyad at a time
+<ul>
+<li>Examine changes in the key actor and partner estimates and confidence intervals</li>
+</ul></li>
+<li>Refit a small number of prespecified, defensible alternatives where relevant:
+<ul>
+<li>coding or centering decisions</li>
+<li>missing-data handling</li>
+<li>covariates with a substantive confounding or precision rationale</li>
+</ul></li>
+</ul>
+<p>Report any material changes in the conclusions.</p>
+<p><span class="subtle"><span class="citation" data-cites="xiangInfluenceDiagnosticsGeneralized2002">Xiang et al. (<a href="#/references" role="doc-biblioref" onclick>2002</a>)</span></span></p>
+</section>
+<section id="workflow-4" class="slide level2">
+<h2>Workflow</h2>
+<ol type="1">
+<li><strong>Define dyads, distinguishability, and research questions</strong></li>
+<li><strong>Prepare the data and verify the dyadic structure</strong></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><span class="text-highlight"><strong>Visualize, interpret, and report results</strong></span></li>
+</ol>
+</section>
+<section id="visualize-interpret-and-report" class="slide level2">
+<h2>Visualize, interpret, and report</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href aria-label="1"></a>report<span class="sc">::</span><span class="fu">report_table</span>(</span>
+<span id="cb15-2"><a href aria-label="2"></a>  apim_distinguishable_model, </span>
+<span id="cb15-3"><a href aria-label="3"></a>  <span class="at">include_effectsize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> <span class="co"># otherwise report tries to compute standardized effect sizes for our intercepts and warns</span></span>
+<span id="cb15-4"><a href aria-label="4"></a>  <span class="fu">summary</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Parameter                    | Coefficient |          95% CI |     z |  df
+--------------------------------------------------------------------------
+is female                    |       -2.70 | [-21.26, 15.87] | -0.28 | Inf
+is male                      |        0.60 | [-15.33, 16.54] |  0.07 | Inf
+is female × efficacy actor   |       11.87 | [  3.75, 19.98] |  2.87 | Inf
+is male × efficacy actor     |        7.97 | [  0.89, 15.05] |  2.21 | Inf
+is female × efficacy partner |        3.09 | [ -5.16, 11.34] |  0.73 | Inf
+is male × efficacy partner   |        4.05 | [ -2.91, 11.01] |  1.14 | Inf
+(Intercept)                  |    1.22e-04 |                 |       |    
+                             |       19.70 |                 |       |    
+                             |       16.91 |                 |       |    
+                             |        0.79 |                 |       |    
+                             |             |                 |       |    
+AICc                         |             |                 |       |    
+R2 (conditional)             |             |                 |       |    
+R2 (marginal)                |             |                 |       |    
+Sigma                        |             |                 |       |    
+
+Parameter                    |     p | Effects |     Group |   Component |      Fit
+-----------------------------------------------------------------------------------
+is female                    | 0.776 |   fixed |           | conditional |         
+is male                      | 0.941 |   fixed |           | conditional |         
+is female × efficacy actor   | 0.004 |   fixed |           | conditional |         
+is male × efficacy actor     | 0.027 |   fixed |           | conditional |         
+is female × efficacy partner | 0.463 |   fixed |           | conditional |         
+is male × efficacy partner   | 0.254 |   fixed |           | conditional |         
+(Intercept)                  |       |   fixed |           |  dispersion |         
+                             |       |  random | couple_id | conditional |         
+                             |       |  random | couple_id | conditional |         
+                             |       |  random | couple_id | conditional |         
+                             |       |         |           |             |         
+AICc                         |       |         |           |             |   608.34
+R2 (conditional)             |       |         |           |             |     1.00
+R2 (marginal)                |       |         |           |             |     0.32
+Sigma                        |       |         |           |             | 1.22e-04</code></pre>
+</div>
+</div>
+<!-------------------------  Work in progress  -------------------------------->
 </section>
 <section id="exchangeable-apim" class="slide level2">
 <h2>Exchangeable APIM</h2>
@@ -3147,13 +3314,13 @@ display:block!important;
 <h1>Excercises in R</h1>
 <p>Short break - initiate package install before you leave</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href aria-label="1"></a><span class="fu">install.packages</span>(</span>
-<span id="cb14-2"><a href aria-label="2"></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
-<span id="cb14-3"><a href aria-label="3"></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
-<span id="cb14-4"><a href aria-label="4"></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
-<span id="cb14-5"><a href aria-label="5"></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
-<span id="cb14-6"><a href aria-label="6"></a>  )</span>
-<span id="cb14-7"><a href aria-label="7"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href aria-label="1"></a><span class="fu">install.packages</span>(</span>
+<span id="cb17-2"><a href aria-label="2"></a>  <span class="fu">c</span>(<span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span>),</span>
+<span id="cb17-3"><a href aria-label="3"></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
+<span id="cb17-4"><a href aria-label="4"></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
+<span id="cb17-5"><a href aria-label="5"></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
+<span id="cb17-6"><a href aria-label="6"></a>  )</span>
+<span id="cb17-7"><a href aria-label="7"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>
@@ -3215,6 +3382,9 @@ Driver, C. C., Oud, J. H. L., &amp; Voelkle, M. C. (2017). Continuous time struc
 </div>
 <div id="ref-geldhofReliabilityEstimationMultilevel2014" class="csl-entry" role="listitem">
 Geldhof, G. J., Preacher, K. J., &amp; Zyphur, M. J. (2014). Reliability estimation in a multilevel confirmatory factor analysis framework. <em>Psychological Methods</em>, <em>19</em>(1), 72–91. <a href="https://doi.org/10.1037/a0032138">https://doi.org/10.1037/a0032138</a>
+</div>
+<div id="ref-gistelinckIndistinguishabilityTests2018" class="csl-entry" role="listitem">
+Gistelinck, F., Loeys, T., Decuyper, M., &amp; Dewitte, M. (2018). Indistinguishability tests in the actor–partner interdependence model. <em>British Journal of Mathematical and Statistical Psychology</em>, <em>71</em>(3), 472–498. <a href="https://doi.org/10.1111/bmsp.12129">https://doi.org/10.1111/bmsp.12129</a>
 </div>
 <div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry" role="listitem">
 Gistelinck, F., Loeys, T., &amp; Flamant, N. (2021). Multilevel autoregressive models when the number of time points is small. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, <em>28</em>(1), 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517">https://doi.org/10.1080/10705511.2020.1753517</a>
@@ -3296,6 +3466,9 @@ Stas, L., Kenny, D. A., Mayer, A., &amp; Loeys, T. (2018). Giving dyadic data an
 </div>
 <div id="ref-wileyMultilevelTools2025" class="csl-entry" role="listitem">
 Wiley, J. F. (2025). <em><span class="nocase">multilevelTools</span>: Multilevel and mixed effects model diagnostics and effect sizes</em>. <a href="https://doi.org/10.32614/CRAN.package.multilevelTools">https://doi.org/10.32614/CRAN.package.multilevelTools</a>
+</div>
+<div id="ref-xiangInfluenceDiagnosticsGeneralized2002" class="csl-entry" role="listitem">
+Xiang, L., Tse, S.-K., &amp; Lee, A. H. (2002). Influence diagnostics for generalized linear mixed models: Applications to clustered data. <em>Computational Statistics &amp; Data Analysis</em>, <em>40</em>(4), 759–774. <a href="https://doi.org/10.1016/S0167-9473(02)00075-0">https://doi.org/10.1016/S0167-9473(02)00075-0</a>
 </div>
 </div>
 </section></section>

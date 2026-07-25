@@ -25,7 +25,8 @@ prepare_dyad_data(
   missing_role = c("error", "drop"),
   seed = NULL,
   short_colnames = TRUE,
-  include_arbitrary_member_contrast = FALSE
+  include_arbitrary_member_contrast = FALSE,
+  add_apim_gmc_predictors = FALSE
 )
 ```
 
@@ -72,8 +73,8 @@ prepare_dyad_data(
   should be created. Requires `time` to be a finite, integer-valued
   numeric measurement index. Lagging respects the dyad and member
   structure, matches observations at exactly `time - 1`, and does not
-  bridge missing occasions. Only raw and within-person predictors are
-  lagged. Stable between-person versions are not.
+  bridge missing occasions. Eligible raw, within-person, and APIM GMC
+  variants are lagged; stable between-person variants are not.
 
 - model_types:
 
@@ -184,6 +185,18 @@ prepare_dyad_data(
   data. Use `set_exchangeable_compositions` instead to reclassify
   compositions for pooling or DIM compatibility.
 
+- add_apim_gmc_predictors:
+
+  Whether to add APIM GMC variants for numeric predictors. `TRUE`
+  retains the raw columns and adds `.{pred}_gmc` plus its actor and
+  partner versions, centered over all retained non-missing values after
+  filtering. Lagged variants use the same mean. Mixed non-numeric
+  predictors remain raw and are listed in one warning. In longitudinal
+  data, the mean is observation-weighted. Requires `"apim"` in
+  `model_types`, at least one numeric predictor, and resolved
+  `temporal_decomposition = "none"`. Do not use raw and GMC variants
+  together in a model with an intercept.
+
 ## Value
 
 The original data as a tibble with class `dyadMLM_data`, `.composition`
@@ -191,7 +204,7 @@ and `.composition_role` factor columns, `.is_*` numeric indicator
 columns, and numeric `.member_contrast_*` columns coded `-1` and `1` for
 the two members of each matching composition and `0` otherwise. With one
 final composition, their default names omit the composition label. The
-`dyadMLM` attribute containing structural metadata, `dyad_compositions`,
+`dyadMLM` attribute contains structural metadata, `dyad_compositions`,
 and predictor metadata such as `temporal_decompositions`,
 `lag1_predictors`, `apim_predictors`, and `dim_predictors`, as well as
 `dsm_predictors` and `dsm_role_order` when applicable. The

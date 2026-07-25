@@ -121,6 +121,7 @@ retain, pool, and constrain dyad compositions.</p>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
 <span>  <span class="co"># Create both APIM and DIM columns for comparison.</span></span>
 <span>  model_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"apim"</span>, <span class="st">"dim"</span><span class="op">)</span>,</span>
+<span>  add_apim_gmc_predictors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="co"># All three observed compositions in `dyads_cross` are detected and retained by</span></span>
 <span>  <span class="co"># default. This example focuses on `female-female` dyads, so we restrict the</span></span>
 <span>  <span class="co"># analysis here.</span></span>
@@ -128,7 +129,7 @@ retain, pool, and constrain dyad compositions.</p>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Print the first two dyads before changing the generated APIM analysis columns.</span></span>
+<span><span class="co"># Print the first two dyads.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span></span>
@@ -149,12 +150,21 @@ retain, pool, and constrain dyad compositions.</p>
 <span><span class="co">#&gt; #                               predictor values</span></span>
 <span><span class="co">#&gt; #   .{pred}_partner             APIM partner predictor: partner's original</span></span>
 <span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc                 APIM grand-mean-centered predictor source:</span></span>
+<span><span class="co">#&gt; #                               original values minus the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_actor           APIM grand-mean-centered actor predictor:</span></span>
+<span><span class="co">#&gt; #                               actor's value relative to the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_partner         APIM grand-mean-centered partner predictor:</span></span>
+<span><span class="co">#&gt; #                               partner's value relative to the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
 <span><span class="co">#&gt; #   .{pred}_dyad_mean_gmc       dyad-mean predictor: dyad's average predictor</span></span>
 <span><span class="co">#&gt; #                               level, grand-mean centered</span></span>
 <span><span class="co">#&gt; #   .{pred}_within_dyad_dev     DIM within-dyad member-deviation predictor:</span></span>
 <span><span class="co">#&gt; #                               member's difference from the dyad mean</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 14</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 17</span></span></span>
 <span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
 <span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.58             5.41</span></span>
@@ -162,27 +172,12 @@ retain, pool, and constrain dyad compositions.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.28             5.89</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.00             5.57</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: .composition &lt;fct&gt;, .composition_role &lt;fct&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more variables: .composition &lt;fct&gt;, .composition_role &lt;fct&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .is_exchangeable &lt;dbl&gt;, .member_contrast_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_actor &lt;dbl&gt;, .provided_support_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_within_dyad_dev &lt;dbl&gt;</span></span></span>
-<span></span>
-<span><span class="va">provided_support_grand_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="va">cross_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_actor</span>,</span>
-<span>    <span class="va">cross_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Use one pooled centering constant for both APIM predictor columns.</span></span>
-<span><span class="va">cross_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_actor</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">cross_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_actor</span> <span class="op">-</span></span>
-<span>  <span class="va">provided_support_grand_mean</span></span>
-<span><span class="va">cross_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">cross_exchangeable_data</span><span class="op">$</span><span class="va">.provided_support_partner</span> <span class="op">-</span></span>
-<span>  <span class="va">provided_support_grand_mean</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_gmc &lt;dbl&gt;, .provided_support_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_partner &lt;dbl&gt;, .provided_support_gmc_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_gmc_partner &lt;dbl&gt;, .provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For the exchangeable random-effects specification,
 <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code> creates a member-difference
 contrast <code>.member_contrast_*</code>, coded as <code>+1</code> for
@@ -192,13 +187,12 @@ reproducible.</p>
 <div class="section level3">
 <h3 id="example-dim-model">Example DIM Model<a class="anchor" aria-label="anchor" href="#example-dim-model"></a>
 </h3>
-<p>In this cross-sectional example,
+<p>Here
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">x_{ij}</annotation></semantics></math>
-denotes provided support after subtracting the same pooled grand mean
-across all members in the analysis sample. Raw scores could instead be
-used if zero is meaningful for that variable in the analysis sample; the
-slopes would be unchanged, but the intercept would have a different
-reference point.</p>
+denotes provided support centered with the pooled mean from complete
+predictor pairs. <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> creates the
+corresponding DIM dyad-mean column; using the original zero requires
+shifting it manually.</p>
 <p>For member
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">i \in \{1, 2\}</annotation></semantics></math>
 of dyad
@@ -214,6 +208,10 @@ uses the same grand-mean reference,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><annotation encoding="application/x-tex">\bar{x}_j</annotation></semantics></math>
 is already grand-mean centered. The within-dyad deviation is unchanged
 by this common shift.</p>
+<p>APIM GMC uses all retained non-missing values, whereas DIM uses
+complete pairs. The constants agree here; with one-sided missingness,
+intercept references may differ although the slope reparameterization
+still holds.</p>
 <p>The deviations of the two partners have equal magnitude and opposite
 signs:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">v</mi></mrow><mo>,</mo><mn>1</mn><mi>j</mi></mrow></msub><mo>=</mo><mi>−</mi><msub><mi>x</mi><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">v</mi></mrow><mo>,</mo><mn>2</mn><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">x_{\mathrm{dev},1j} = -x_{\mathrm{dev},2j}</annotation></semantics></math>.
@@ -391,7 +389,7 @@ Interdependence Model vignette</a>.</p>
 <span>  <span class="va">closeness</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Fixed effects APIM</span></span>
-<span>    <span class="va">.provided_support_actor</span> <span class="op">+</span> <span class="va">.provided_support_partner</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_gmc_actor</span> <span class="op">+</span> <span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
 <span></span>
 <span>    <span class="co"># Since both models are equivalent, the same random-effects structure</span></span>
 <span>    <span class="co"># can be used. See the APIM vignette to learn how to back-transform</span></span>
@@ -424,12 +422,10 @@ denote the APIM actor and partner slopes, and let
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{mean}}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">v</mi></mrow></msub><annotation encoding="application/x-tex">b_{\mathrm{dev}}</annotation></semantics></math>
-denote the DIM between-dyad and within-dyad slopes. Grand-mean centering
-the APIM actor and partner predictors with the same pooled constant
-gives the APIM and DIM the same zero point. This simplifies the
-fixed-effect transformation to the formulas shown here; with raw APIM
-predictors, the slope formulas would be unchanged but the intercept
-would need to be recentered.</p>
+denote the DIM between-dyad and within-dyad slopes. Complete pairs give
+the GMC APIM and DIM the same zero point, so the fixed effects transform
+as follows. With raw APIM predictors, only the intercept requires
+recentering.</p>
 <p>The shared intercept is</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">D</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">M</mi></mrow></mrow></msub><mo>=</mo><msub><mi>b</mi><mrow><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">A</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">I</mi><mi mathvariant="normal">M</mi></mrow></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 b_{0,\mathrm{DIM}} = b_{0,\mathrm{APIM}}.
@@ -458,8 +454,8 @@ b_{\mathrm{partner}}
 <span><span class="va">dim_coef</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/fixed.effects.html" class="external-link">fixef</a></span><span class="op">(</span><span class="va">dim_1</span><span class="op">)</span><span class="op">$</span><span class="va">cond</span></span>
 <span></span>
 <span><span class="va">b0_apim</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">"(Intercept)"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".provided_support_actor"</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".provided_support_partner"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_actor</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".provided_support_gmc_actor"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">b_partner</span> <span class="op">&lt;-</span> <span class="va">apim_coef</span><span class="op">[[</span><span class="st">".provided_support_gmc_partner"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">b0_dim</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">"(Intercept)"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">b_mean</span> <span class="op">&lt;-</span> <span class="va">dim_coef</span><span class="op">[[</span><span class="st">".provided_support_dyad_mean_gmc"</span><span class="op">]</span><span class="op">]</span></span>
@@ -523,7 +519,7 @@ directly fitted DIM estimates above confirm the equivalence. Both forms
 therefore make the same change in the linear predictor relative to the
 grand-mean reference. The intercept is omitted from both displayed
 equations.</p>
-<div class="interdep-dim-grid interdep-dim-grid--article" id="interdep-dim-grid" data-interdep-dim-grid data-limit="5" data-actor="1.2208359187778481" data-partner="0.32568869288492447" data-mean="1.5465246116627727" data-within="0.89514722589292361">
+<div class="interdep-dim-grid interdep-dim-grid--article" id="interdep-dim-grid" data-interdep-dim-grid data-limit="5" data-actor="1.2208359187761086" data-partner="0.3256886928879103" data-mean="1.546524611664019" data-within="0.89514722588819828">
   <div class="wdg-controls">
     <div class="wdg-toolbar">
       <strong>Provided support coordinates</strong>

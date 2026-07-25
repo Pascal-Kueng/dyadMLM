@@ -132,6 +132,7 @@ cross_distinguishable_data <- dyadMLM::prepare_dyad_data(
   # and a model type to generate the columns needed for that model type.
   predictors = provided_support,
   model_types = "apim",
+  add_apim_gmc_predictors = TRUE,
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
@@ -147,14 +148,24 @@ print(cross_distinguishable_data, n = 4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .composition       inferred dyad composition
-#> #   .composition_role  composition-specific member role
-#> #   .is_{role}         composition-role indicator columns
-#> #   .{pred}_actor      APIM actor predictor: actor's original predictor values
-#> #   .{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                      values
+#> #   .composition         inferred dyad composition
+#> #   .composition_role    composition-specific member role
+#> #   .is_{role}           composition-role indicator columns
+#> #   .{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                        values
+#> #   .{pred}_gmc          APIM grand-mean-centered predictor source: original
+#> #                        values minus the mean across all retained non-missing
+#> #                        observations
+#> #   .{pred}_gmc_actor    APIM grand-mean-centered actor predictor: actor's
+#> #                        value relative to the mean across all retained
+#> #                        non-missing observations
+#> #   .{pred}_gmc_partner  APIM grand-mean-centered partner predictor: partner's
+#> #                        value relative to the mean across all retained
+#> #                        non-missing observations
 #> #
-#> # A tibble: 240 × 12
+#> # A tibble: 240 × 15
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1        1        1 female female_x_male         4.77             4.49
@@ -162,17 +173,18 @@ print(cross_distinguishable_data, n = 4)
 #> 3        3        2 female female_x_male         6.44             4.09
 #> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
-#> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
-#> #   .is_female <dbl>, .is_male <dbl>, .provided_support_actor <dbl>,
-#> #   .provided_support_partner <dbl>
+#> # ℹ 9 more variables: .composition <fct>, .composition_role <fct>,
+#> #   .is_female <dbl>, .is_male <dbl>, .provided_support_gmc <dbl>,
+#> #   .provided_support_actor <dbl>, .provided_support_partner <dbl>,
+#> #   .provided_support_gmc_actor <dbl>, .provided_support_gmc_partner <dbl>
 ```
 
-The function retained and recognized 120 female-male dyads and created
-APIM-relevant variables (Kenny and Cook 1999). The generated actor and
-partner columns retain the original predictor scale. They can be used
-directly when zero is a meaningful reference; in the cross-sectional
-APIM examples, we instead subtract the same pooled grand mean from both
-columns before fitting the model.
+The function retained 120 female-male dyads and created APIM variables
+(Kenny and Cook 1999). `add_apim_gmc_predictors = TRUE` keeps the raw
+columns and adds `.provided_support_gmc` plus actor and partner
+variants, centered over all retained non-missing source values. Mixed
+non-numeric predictors remain raw and trigger one warning. With an
+intercept, use either the raw or GMC actor-partner pair, not both.
 
 For fitted APIM examples using these columns, see the [Actor-Partner
 Interdependence Model
@@ -387,6 +399,10 @@ print(cross_dsm_data, n = 4)
 #> #   .provided_support_within_dyad_diff <dbl>
 ```
 
+APIM GMC uses all retained non-missing values; DIM and DSM center
+complete-pair dyad means. The constants may differ with one-sided
+missingness.
+
 ## Intensive longitudinal dyadic data
 
 `dyads_ild` is an intensive longitudinal dyadic dataset. Each dyad has
@@ -473,6 +489,10 @@ Laurenceau 2013). This temporal predictor decomposition is controlled by
 `temporal_decomposition`. The default `"auto"` setting selects `"2l"`
 for this longitudinal setup and retains raw actor and partner columns
 alongside both components.
+
+`add_apim_gmc_predictors = TRUE` requires resolved
+`temporal_decomposition = "none"`. In longitudinal data, its mean is
+observation-weighted, and lagged GMC columns use the same mean.
 
 Note that observed person means used to construct the between-person
 (`cbp`) predictors can be unreliable when each member contributes few

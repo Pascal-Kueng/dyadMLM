@@ -48,7 +48,8 @@
 <code>prepare_dyad_data(include_arbitrary_member_contrast = TRUE)</code> can now add arbitrary member contrasts for distinguishable compositions without changing their metadata or role indicators. This supports full and exchangeability-constrained APIMs from the same prepared data. <code>set_exchangeable_compositions</code> still performs reclassification for pooling and DIM preparation.</li>
 <li>Added a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> method for prepared data that prints the dyadic structure followed by standard summaries of all columns.</li>
 <li>Generated-column tracking now records all retained composition and modeling columns. Printing and model comparison use these records rather than inferring column ownership from a prefix, and generated names are checked for collisions and valid R syntax before they are written.</li>
-<li>Updated the APIM, DIM, and DSM vignettes to use a common pooled grand mean when comparing parameterizations, so their intercepts share the same reference point.</li>
+<li>
+<code>prepare_dyad_data(add_apim_gmc_predictors = TRUE)</code> now adds GMC source, actor, and partner columns alongside raw APIM columns, plus lagged variants when requested. It uses one mean over retained non-missing values, warns about skipped non-numeric predictors in mixed selections, and leaves DIM/DSM centering unchanged.</li>
 <li>Added package-level help at <code><a href="../reference/dyadMLM-package.html">?dyadMLM</a></code>, with links to the main functions, example datasets, and getting-started documentation.</li>
 </ul></div>
     <div class="section level2">

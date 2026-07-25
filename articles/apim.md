@@ -31,12 +31,10 @@ A vignette for non-Gaussian generalized models is planned.
 
 ## Cross-sectional APIMs
 
-Throughout the cross-sectional examples, both partners’ $`X`$ terms are
-grand-mean centered by subtracting the same pooled mean across all
-members in the analysis sample. Raw predictor scores could instead be
-used if zero is meaningful for that variable in the analysis sample;
-this would change the intercept reference point, but not the actor or
-partner slopes.
+These examples use `add_apim_gmc_predictors = TRUE`, which retains raw
+APIM columns and adds variants centered over all retained non-missing
+source values. Using raw columns instead changes only the intercept
+reference. Do not include both variants in a model with an intercept.
 
 ### The distinguishable APIM
 
@@ -127,6 +125,7 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   role = gender,
   predictors = provided_support,
   model_types = "apim",
+  add_apim_gmc_predictors = TRUE,
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
@@ -155,8 +154,17 @@ print(apim_distinguishable_data, n=4)
 #> #                               predictor values
 #> #   .{pred}_partner             APIM partner predictor: partner's original
 #> #                               predictor values
+#> #   .{pred}_gmc                 APIM grand-mean-centered predictor source:
+#> #                               original values minus the mean across all
+#> #                               retained non-missing observations
+#> #   .{pred}_gmc_actor           APIM grand-mean-centered actor predictor:
+#> #                               actor's value relative to the mean across all
+#> #                               retained non-missing observations
+#> #   .{pred}_gmc_partner         APIM grand-mean-centered partner predictor:
+#> #                               partner's value relative to the mean across all
+#> #                               retained non-missing observations
 #> #
-#> # A tibble: 240 × 13
+#> # A tibble: 240 × 16
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1        1        1 female female_x_male         4.77             4.49
@@ -164,36 +172,16 @@ print(apim_distinguishable_data, n=4)
 #> 3        3        2 female female_x_male         6.44             4.09
 #> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
-#> # ℹ 7 more variables: .composition <fct>, .composition_role <fct>,
+#> # ℹ 10 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female <dbl>, .is_male <dbl>, .member_contrast_arbitrary <dbl>,
-#> #   .provided_support_actor <dbl>, .provided_support_partner <dbl>
-
-provided_support_grand_mean <- mean(
-  c(
-    apim_distinguishable_data$.provided_support_actor,
-    apim_distinguishable_data$.provided_support_partner
-  ),
-  na.rm = TRUE
-)
-
-# Use one pooled centering constant for both actor and partner predictors.
-apim_distinguishable_data$.provided_support_actor <-
-  apim_distinguishable_data$.provided_support_actor -
-  provided_support_grand_mean
-apim_distinguishable_data$.provided_support_partner <-
-  apim_distinguishable_data$.provided_support_partner -
-  provided_support_grand_mean
+#> #   .provided_support_gmc <dbl>, .provided_support_actor <dbl>,
+#> #   .provided_support_partner <dbl>, .provided_support_gmc_actor <dbl>,
+#> #   .provided_support_gmc_partner <dbl>
 ```
 
 The optional member contrast is used later for the restricted model. It
 does not change the composition’s distinguishable metadata or role
 indicators.
-
-[`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
-initially generated the actor and partner columns on the original
-predictor scale. The lines above subtract one pooled mean from both
-analysis columns, which can now be used directly in the model formula.
-Here is a simple example:
 
 ``` r
 
@@ -206,12 +194,12 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
     .is_male +
 
     # Gender-specific actor effects
-    .is_female:.provided_support_actor +
-    .is_male:.provided_support_actor +
+    .is_female:.provided_support_gmc_actor +
+    .is_male:.provided_support_gmc_actor +
 
     # Gender-specific partner effects
-    .is_female:.provided_support_partner +
-    .is_male:.provided_support_partner +
+    .is_female:.provided_support_gmc_partner +
+    .is_male:.provided_support_gmc_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
@@ -229,9 +217,9 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 summary(apim_distinguishable_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> closeness ~ 0 + .is_female + .is_male + .is_female:.provided_support_actor +  
-#>     .is_male:.provided_support_actor + .is_female:.provided_support_partner +  
-#>     .is_male:.provided_support_partner + us(0 + .is_female +  
+#> closeness ~ 0 + .is_female + .is_male + .is_female:.provided_support_gmc_actor +  
+#>     .is_male:.provided_support_gmc_actor + .is_female:.provided_support_gmc_partner +  
+#>     .is_male:.provided_support_gmc_partner + us(0 + .is_female +  
 #>     .is_male | coupleID)
 #> Dispersion:                 ~0
 #> Data: apim_distinguishable_data
@@ -248,13 +236,20 @@ summary(apim_distinguishable_model)
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
-#>                                      Estimate Std. Error z value Pr(>|z|)    
-#> .is_female                            5.58465    0.08210   68.02   <2e-16 ***
-#> .is_male                              4.57041    0.08073   56.62   <2e-16 ***
-#> .is_female:.provided_support_actor    1.47571    0.11416   12.93   <2e-16 ***
-#> .is_male:.provided_support_actor      0.91392    0.10151    9.00   <2e-16 ***
-#> .is_female:.provided_support_partner  0.34990    0.10323    3.39   0.0007 ***
-#> .is_male:.provided_support_partner    0.19240    0.11225    1.71   0.0865 .  
+#>                                          Estimate Std. Error z value Pr(>|z|)
+#> .is_female                                5.58465    0.08210   68.02   <2e-16
+#> .is_male                                  4.57041    0.08073   56.62   <2e-16
+#> .is_female:.provided_support_gmc_actor    1.47571    0.11416   12.93   <2e-16
+#> .is_male:.provided_support_gmc_actor      0.91392    0.10151    9.00   <2e-16
+#> .is_female:.provided_support_gmc_partner  0.34990    0.10323    3.39   0.0007
+#> .is_male:.provided_support_gmc_partner    0.19240    0.11225    1.71   0.0865
+#>                                             
+#> .is_female                               ***
+#> .is_male                                 ***
+#> .is_female:.provided_support_gmc_actor   ***
+#> .is_male:.provided_support_gmc_actor     ***
+#> .is_female:.provided_support_gmc_partner ***
+#> .is_male:.provided_support_gmc_partner   .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -356,8 +351,8 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     1 +
     
     # Pooled single actor and partner effects
-    .provided_support_actor +
-    .provided_support_partner +
+    .provided_support_gmc_actor +
+    .provided_support_gmc_partner +
     
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
@@ -371,7 +366,7 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> closeness ~ 1 + .provided_support_actor + .provided_support_partner +  
+#> closeness ~ 1 + .provided_support_gmc_actor + .provided_support_gmc_partner +  
 #>     us(1 | coupleID) + us(0 + .member_contrast_arbitrary | coupleID)
 #> Dispersion:                 ~0
 #> Data: apim_distinguishable_data
@@ -388,10 +383,10 @@ summary(apim_exchangeable_model)
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
-#>                           Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                5.09820    0.06557   77.75   <2e-16 ***
-#> .provided_support_actor    1.28763    0.08962   14.37   <2e-16 ***
-#> .provided_support_partner  0.16444    0.08962    1.83   0.0665 .  
+#>                               Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                    5.09820    0.06557   77.75   <2e-16 ***
+#> .provided_support_gmc_actor    1.28763    0.08962   14.37   <2e-16 ***
+#> .provided_support_gmc_partner  0.16444    0.08962    1.83   0.0665 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -584,6 +579,9 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_distinguishable_data
 )
+#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
+#> problem; false convergence (8). See vignette('troubleshooting'),
+#> help('diagnose')
 ```
 
 ##### Random slopes
@@ -1095,9 +1093,9 @@ summary(stability_influence)
 #> 
 #> Conditional model:
 #>                         Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)             5.834950   0.206341  28.278   <2e-16 ***
-#> .closeness_actor_lag1   0.005987   0.019493   0.307   0.7587    
-#> .closeness_partner_lag1 0.002165   0.019493   0.111   0.9116    
+#> (Intercept)             5.834951   0.206339  28.278   <2e-16 ***
+#> .closeness_actor_lag1   0.005985   0.019493   0.307   0.7588    
+#> .closeness_partner_lag1 0.002167   0.019493   0.111   0.9115    
 #> diaryday                0.008910   0.004676   1.905   0.0567 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1

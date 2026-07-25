@@ -56,6 +56,7 @@ cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   predictors = provided_support,
   # Create both APIM and DIM columns for comparison.
   model_types = c("apim", "dim"),
+  add_apim_gmc_predictors = TRUE,
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-female` dyads, so we restrict the
   # analysis here.
@@ -63,7 +64,7 @@ cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   seed = 123
 )
 
-# Print the first two dyads before changing the generated APIM analysis columns.
+# Print the first two dyads.
 print(cross_exchangeable_data, n = 4)
 #> # dyadMLM data
 #> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
@@ -84,12 +85,21 @@ print(cross_exchangeable_data, n = 4)
 #> #                               predictor values
 #> #   .{pred}_partner             APIM partner predictor: partner's original
 #> #                               predictor values
+#> #   .{pred}_gmc                 APIM grand-mean-centered predictor source:
+#> #                               original values minus the mean across all
+#> #                               retained non-missing observations
+#> #   .{pred}_gmc_actor           APIM grand-mean-centered actor predictor:
+#> #                               actor's value relative to the mean across all
+#> #                               retained non-missing observations
+#> #   .{pred}_gmc_partner         APIM grand-mean-centered partner predictor:
+#> #                               partner's value relative to the mean across all
+#> #                               retained non-missing observations
 #> #   .{pred}_dyad_mean_gmc       dyad-mean predictor: dyad's average predictor
 #> #                               level, grand-mean centered
 #> #   .{pred}_within_dyad_dev     DIM within-dyad member-deviation predictor:
 #> #                               member's difference from the dyad mean
 #> #
-#> # A tibble: 240 × 14
+#> # A tibble: 240 × 17
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
 #> 1      241      121 female female_x_female       7.58             5.41
@@ -97,27 +107,12 @@ print(cross_exchangeable_data, n = 4)
 #> 3      243      122 female female_x_female       8.28             5.89
 #> 4      244      122 female female_x_female       8.00             5.57
 #> # ℹ 236 more rows
-#> # ℹ 8 more variables: .composition <fct>, .composition_role <fct>,
+#> # ℹ 11 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>,
-#> #   .provided_support_actor <dbl>, .provided_support_partner <dbl>,
-#> #   .provided_support_dyad_mean_gmc <dbl>,
+#> #   .provided_support_gmc <dbl>, .provided_support_actor <dbl>,
+#> #   .provided_support_partner <dbl>, .provided_support_gmc_actor <dbl>,
+#> #   .provided_support_gmc_partner <dbl>, .provided_support_dyad_mean_gmc <dbl>,
 #> #   .provided_support_within_dyad_dev <dbl>
-
-provided_support_grand_mean <- mean(
-  c(
-    cross_exchangeable_data$.provided_support_actor,
-    cross_exchangeable_data$.provided_support_partner
-  ),
-  na.rm = TRUE
-)
-
-# Use one pooled centering constant for both APIM predictor columns.
-cross_exchangeable_data$.provided_support_actor <-
-  cross_exchangeable_data$.provided_support_actor -
-  provided_support_grand_mean
-cross_exchangeable_data$.provided_support_partner <-
-  cross_exchangeable_data$.provided_support_partner -
-  provided_support_grand_mean
 ```
 
 For the exchangeable random-effects specification,
@@ -128,11 +123,11 @@ arbitrary, setting `seed` makes their assignment reproducible.
 
 ### Example DIM Model
 
-In this cross-sectional example, $`x_{ij}`$ denotes provided support
-after subtracting the same pooled grand mean across all members in the
-analysis sample. Raw scores could instead be used if zero is meaningful
-for that variable in the analysis sample; the slopes would be unchanged,
-but the intercept would have a different reference point.
+Here $`x_{ij}`$ denotes provided support centered with the pooled mean
+from complete predictor pairs.
+[`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+creates the corresponding DIM dyad-mean column; using the original zero
+requires shifting it manually.
 
 For member $`i \in \{1, 2\}`$ of dyad $`j`$, define the dyad mean and
 within-dyad member deviation as:
@@ -145,6 +140,10 @@ x_{\mathrm{dev},ij} = x_{ij} - \bar{x}_j.
 Because each $`x_{ij}`$ uses the same grand-mean reference,
 $`\bar{x}_j`$ is already grand-mean centered. The within-dyad deviation
 is unchanged by this common shift.
+
+APIM GMC uses all retained non-missing values, whereas DIM uses complete
+pairs. The constants agree here; with one-sided missingness, intercept
+references may differ although the slope reparameterization still holds.
 
 The deviations of the two partners have equal magnitude and opposite
 signs: $`x_{\mathrm{dev},1j} = -x_{\mathrm{dev},2j}`$. Outcome means and
@@ -339,7 +338,7 @@ apim_1 <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
     # Fixed effects APIM
-    .provided_support_actor + .provided_support_partner +
+    .provided_support_gmc_actor + .provided_support_gmc_partner +
 
     # Since both models are equivalent, the same random-effects structure
     # can be used. See the APIM vignette to learn how to back-transform
@@ -374,11 +373,9 @@ Once APIM estimates are present, one can easily obtain DIM estimates,
 and the other way around. Let $`b_{\mathrm{actor}}`$ and
 $`b_{\mathrm{partner}}`$ denote the APIM actor and partner slopes, and
 let $`b_{\mathrm{mean}}`$ and $`b_{\mathrm{dev}}`$ denote the DIM
-between-dyad and within-dyad slopes. Grand-mean centering the APIM actor
-and partner predictors with the same pooled constant gives the APIM and
-DIM the same zero point. This simplifies the fixed-effect transformation
-to the formulas shown here; with raw APIM predictors, the slope formulas
-would be unchanged but the intercept would need to be recentered.
+between-dyad and within-dyad slopes. Complete pairs give the GMC APIM
+and DIM the same zero point, so the fixed effects transform as follows.
+With raw APIM predictors, only the intercept requires recentering.
 
 The shared intercept is
 
@@ -420,8 +417,8 @@ apim_coef <- glmmTMB::fixef(apim_1)$cond
 dim_coef <- glmmTMB::fixef(dim_1)$cond
 
 b0_apim <- apim_coef[["(Intercept)"]]
-b_actor <- apim_coef[[".provided_support_actor"]]
-b_partner <- apim_coef[[".provided_support_partner"]]
+b_actor <- apim_coef[[".provided_support_gmc_actor"]]
+b_partner <- apim_coef[[".provided_support_gmc_partner"]]
 
 b0_dim <- dim_coef[["(Intercept)"]]
 b_mean <- dim_coef[[".provided_support_dyad_mean_gmc"]]

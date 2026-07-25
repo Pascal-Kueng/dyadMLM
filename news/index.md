@@ -27,9 +27,11 @@
   rather than inferring column ownership from a prefix, and generated
   names are checked for collisions and valid R syntax before they are
   written.
-- Updated the APIM, DIM, and DSM vignettes to use a common pooled grand
-  mean when comparing parameterizations, so their intercepts share the
-  same reference point.
+- `prepare_dyad_data(add_apim_gmc_predictors = TRUE)` now adds GMC
+  source, actor, and partner columns alongside raw APIM columns, plus
+  lagged variants when requested. It uses one mean over retained
+  non-missing values, warns about skipped non-numeric predictors in
+  mixed selections, and leaves DIM/DSM centering unchanged.
 - Added package-level help at
   [`?dyadMLM`](https://pascal-kueng.github.io/dyadMLM/reference/dyadMLM-package.md),
   with links to the main functions, example datasets, and
