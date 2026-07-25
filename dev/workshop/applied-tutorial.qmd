@@ -776,6 +776,7 @@ Other things to look out for:
 
 - Residual variances close to zero or correlations close to $-1$ or $+1$ $\rightarrow$ singular fit
 - Inspect residuals $\rightarrow$ tricky since we have 2 correlated residuals per couple
+  - the Gaussian APIM assumes the conditional two-member deviation vector is approximately bivariate normal with the fitted covariance.
 
 ## Test distinguishability
 
@@ -794,6 +795,7 @@ However, non-significant comparisons are not proof that roles are identical
   - Examine changes in the key actor and partner estimates and confidence intervals
 - Refit a small number of prespecified, defensible alternatives where relevant:
   - coding or centering decisions
+  - different plausible outcome families
   - missing-data handling
   - covariates with a substantive confounding or precision rationale
 
