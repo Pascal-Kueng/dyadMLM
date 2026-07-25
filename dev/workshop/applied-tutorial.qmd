@@ -465,20 +465,49 @@ df_apim |>
 
 ## Describe and visualize measures and observed relationships
 
-```{r}
-library(correlation)
+For a dyadic correlation table, we need to pivot the dataset to wide-format
+so that each dyad has 1 single row.
+
+```{r results='hide'}
+library(correlation, tidyr)
 
 df_apim |>
-  select(.efficacy_actor, .efficacy_partner, .total_mvpa_actor, .total_mvpa_partner) |>
-  correlation::correlation() |>
-  summary() |>
+  select(couple_id, gender, efficacy, total_mvpa) |>
+  tidyr::pivot_wider(
+    names_from = gender,
+    values_from = c(efficacy, total_mvpa)
+  ) |>
+  correlation::correlation(
+    select = c("efficacy_female", "total_mvpa_female"),
+    select2 = c("efficacy_male", "total_mvpa_male")
+  ) |> 
+  summary() |> 
   insight::print_md(footer = "")
   
 ```
 
-::: {.subtle}
-p-value adjustment method: Holm (1979)
-:::
+
+## Describe and visualize measures and observed relationships
+
+```{r echo = FALSE}
+library(correlation, tidyr)
+
+df_apim |>
+  select(couple_id, gender, efficacy, total_mvpa) |>
+  tidyr::pivot_wider(
+    names_from = gender,
+    values_from = c(efficacy, total_mvpa)
+  ) |>
+  correlation::correlation(
+    select = c("efficacy_female", "total_mvpa_female"),
+    select2 = c("efficacy_male", "total_mvpa_male")
+  ) |> 
+  summary() |> 
+  insight::print_md(footer = "")
+  
+```
+
+
 
 ## Describe and visualize measures and observed relationships
 

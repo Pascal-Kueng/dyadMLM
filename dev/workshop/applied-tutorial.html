@@ -877,7 +877,7 @@ border: 0;
 border-top: 1px solid var(--uzh-rule);
 border-bottom: 1px solid var(--uzh-rule);
 background: transparent;
-font-size: 0.58em;
+font-size: 0.65em;
 }
 .reveal table th {
 padding: 0.3em 0.5em;
@@ -2596,57 +2596,60 @@ is_male, is_female, and _actor and _partner variables. -->
 </section>
 <section id="describe-and-visualize-measures-and-observed-relationships-1" class="slide level2">
 <h2>Describe and visualize measures and observed relationships</h2>
+<p>For a dyadic correlation table, we need to pivot the dataset to wide-format so that each dyad has 1 single row.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href></a><span class="fu">library</span>(correlation)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href></a><span class="fu">library</span>(correlation, tidyr)</span>
 <span id="cb6-2"><a href></a></span>
 <span id="cb6-3"><a href></a>df_apim <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href></a>  <span class="fu">select</span>(.efficacy_actor, .efficacy_partner, .total_mvpa_actor, .total_mvpa_partner) <span class="sc">|&gt;</span></span>
-<span id="cb6-5"><a href></a>  correlation<span class="sc">::</span><span class="fu">correlation</span>() <span class="sc">|&gt;</span></span>
-<span id="cb6-6"><a href></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
-<span id="cb6-7"><a href></a>  insight<span class="sc">::</span><span class="fu">print_md</span>(<span class="at">footer =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-4"><a href></a>  <span class="fu">select</span>(couple_id, gender, efficacy, total_mvpa) <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb6-6"><a href></a>    <span class="at">names_from =</span> gender,</span>
+<span id="cb6-7"><a href></a>    <span class="at">values_from =</span> <span class="fu">c</span>(efficacy, total_mvpa)</span>
+<span id="cb6-8"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb6-9"><a href></a>  correlation<span class="sc">::</span><span class="fu">correlation</span>(</span>
+<span id="cb6-10"><a href></a>    <span class="at">select =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_female&quot;</span>, <span class="st">&quot;total_mvpa_female&quot;</span>),</span>
+<span id="cb6-11"><a href></a>    <span class="at">select2 =</span> <span class="fu">c</span>(<span class="st">&quot;efficacy_male&quot;</span>, <span class="st">&quot;total_mvpa_male&quot;</span>)</span>
+<span id="cb6-12"><a href></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb6-13"><a href></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-14"><a href></a>  insight<span class="sc">::</span><span class="fu">print_md</span>(<span class="at">footer =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="describe-and-visualize-measures-and-observed-relationships-2" class="slide level2">
+<h2>Describe and visualize measures and observed relationships</h2>
+<div class="cell">
 <div class="cell-output-display">
-<table class="caption-top" style="width:100%;">
+<table class="caption-top">
 <caption>Correlation Matrix (pearson-method)</caption>
-<colgroup>
-<col style="width: 23%">
-<col style="width: 27%">
-<col style="width: 24%">
-<col style="width: 24%">
-</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">Parameter</th>
-<th style="text-align: center;">.total_mvpa_partner</th>
-<th style="text-align: center;">.total_mvpa_actor</th>
-<th style="text-align: center;">.efficacy_partner</th>
+<th style="text-align: center;">efficacy_male</th>
+<th style="text-align: center;">total_mvpa_male</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">.efficacy_actor</td>
-<td style="text-align: center;">0.41***</td>
-<td style="text-align: center;">0.54***</td>
-<td style="text-align: center;">0.59***</td>
+<td style="text-align: left;">efficacy_female</td>
+<td style="text-align: center;">0.60***</td>
+<td style="text-align: center;">0.43*</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">.efficacy_partner</td>
-<td style="text-align: center;">0.54***</td>
-<td style="text-align: center;">0.41***</td>
-<td style="text-align: center;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">.total_mvpa_actor</td>
-<td style="text-align: center;">0.79***</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td style="text-align: left;">total_mvpa_female</td>
+<td style="text-align: center;">0.42*</td>
+<td style="text-align: center;">0.82***</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div class="subtle">
-<p>p-value adjustment method: Holm (1979)</p>
-</div>
+</section>
+<section id="describe-and-visualize-measures-and-observed-relationships-3" class="slide level2">
+<h2>Describe and visualize measures and observed relationships</h2>
+<ul>
+<li>visualize raw distributions by role hist()</li>
+<li>plot values together like corelation to see spread</li>
+<li>other useful plots to show here?</li>
+</ul>
 </section>
 <section id="slide" class="slide level2">
 <h2>slide</h2>
