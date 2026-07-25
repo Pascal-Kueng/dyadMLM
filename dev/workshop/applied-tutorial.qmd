@@ -632,16 +632,8 @@ $$
 
 In long format, each equation applies to one member row of the dyad.
 
-:::{.notes}
+How do we write this equation into a single formula?
 
-The signs of the actor and partner associations come from the estimated
-coefficients. They are not built into the model equation.
-
-[Sources]
-
-- @kenny2006dyadic
-
-:::
 
 ## Role indicators combine the equations
 
