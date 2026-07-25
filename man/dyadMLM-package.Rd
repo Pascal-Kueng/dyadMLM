@@ -19,8 +19,6 @@ model-ready variables.
 models fitted to equivalent data.
 \item \code{\link[=recover_exchangeable_covariance]{recover_exchangeable_covariance()}} converts exchangeable
 shared/difference covariance structures to member-level quantities.
-\item \code{\link[=summary.dyadMLM_data]{summary.dyadMLM_data()}} summarizes data returned by
-\code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.
 }
 }
 

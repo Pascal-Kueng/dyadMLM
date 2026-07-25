@@ -13,8 +13,6 @@
 #'   models fitted to equivalent data.
 #' - [recover_exchangeable_covariance()] converts exchangeable
 #'   shared/difference covariance structures to member-level quantities.
-#' - [summary.dyadMLM_data()] summarizes data returned by
-#'   [prepare_dyad_data()].
 #'
 #' @section Example data:
 #' See [dyads_cross] and [dyads_ild] for Gaussian examples, and
