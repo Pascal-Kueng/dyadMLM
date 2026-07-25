@@ -396,8 +396,7 @@ df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
   role = gender,
   predictors = efficacy, 
   model_types = 'apim'
-)
-
+) 
 
 print(df_apim)
 
@@ -743,6 +742,10 @@ apim_distinguishable_model <- glmmTMB(
 )
 
 summary(apim_distinguishable_model)
+
+report::report_table(apim_distinguishable_model, include_effectsize = FALSE) |> 
+  summary()
+  
 ```
 
 ## Workflow
@@ -762,24 +765,31 @@ BEFORE interpreting and reporting results, we should ...
 
 :::
 
+## Verify model adequacy, distinguishability, and robustness
+
+1. Did estimation succeed?
+2. Does the model reproduce the important data patterns?
+3. Are exchangeability constraints defensible?
+4. Are conclusions driven by one dyad or one consequential modeling choice?
+
 ## Verify model adequacy - Convergence and assumptions
 
 The model converged without warnings... a good first sign!
 
 Other things to look out for: 
 
-- Residual variances close to zero or correlations close to zero or one $\rightarrow$ singular fit
+- Residual variances close to zero or correlations close to $-1$ or $+1$ $\rightarrow$ singular fit
 - Inspect residuals $\rightarrow$ tricky since we have 2 correlated residuals per couple
 
 ## Test distinguishability
 
-- Compare fixed effects with wald-test
+- Compare fixed effects with a Wald test
 - Fit exchangeable model and compare models
 
-If effects are not different, you may pool them. If distinguishability does 
-not make the model better, you may treat the whole dyad as exchangeable. 
+If pooling is substantively defensible and compatible with the data, you may
+pool specific effects or fit an exchangeable model.
 
-However,non-significant comparisons are not proof that roles are identical
+However, non-significant comparisons are not proof that roles are identical
 [@gistelinckIndistinguishabilityTests2018].
 
 ## Test robustness - sensitivity analyses
@@ -791,7 +801,7 @@ However,non-significant comparisons are not proof that roles are identical
   - missing-data handling
   - covariates with a substantive confounding or precision rationale
 
-Report any changes
+Report any material changes in the conclusions.
 
 [@xiangInfluenceDiagnosticsGeneralized2002]{.subtle}
 

@@ -2962,7 +2962,6 @@ display:block!important;
 <span id="cb13-23"><a href></a><span class="fu">summary</span>(apim_distinguishable_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
-<!-------------------------  Work in progress  --------------------------------------------->
 </section>
 <section id="fitting-the-distinguishable-apim-in-glmmtmb-output" class="slide level2 output-location-slide"><h2>Fitting the distinguishable APIM in glmmTMB</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
@@ -2996,7 +2995,67 @@ Conditional model:
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
-</div></section><section id="exchangeable-apim" class="slide level2">
+</div></section><section id="workflow-3" class="slide level2">
+<h2>Workflow</h2>
+<ol type="1">
+<li><strong>Define dyads, distinguishability, and research questions</strong></li>
+<li><strong>Prepare the data and verify the dyadic structure</strong></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><span class="text-highlight"><strong>Verify model adequacy, distinguishability, and robustness</strong></span></li>
+<li><strong>Visualize, interpret, and report results</strong></li>
+</ol>
+<!-------------------------  Work in progress  --------------------------------------------->
+<aside class="notes">
+<p>BEFORE interpreting and reporting results, we should …</p>
+<style type="text/css">
+span.MJX_Assistive_MathML {
+position:absolute!important;
+clip: rect(1px, 1px, 1px, 1px);
+padding: 1px 0 0 0!important;
+border: 0!important;
+height: 1px!important;
+width: 1px!important;
+overflow: hidden!important;
+display:block!important;
+}</style></aside>
+</section>
+<section id="verify-model-adequacy---convergence-and-assumptions" class="slide level2">
+<h2>Verify model adequacy - Convergence and assumptions</h2>
+<p>The model converged without warnings… a good first sign!</p>
+<p>Other things to look out for:</p>
+<ul>
+<li>Residual variances close to zero or correlations close to <span class="math inline">\(-1\)</span> or <span class="math inline">\(+1\)</span> <span class="math inline">\(\rightarrow\)</span> singular fit</li>
+<li>Inspect residuals <span class="math inline">\(\rightarrow\)</span> tricky since we have 2 correlated residuals per couple</li>
+</ul>
+</section>
+<section id="test-distinguishability" class="slide level2">
+<h2>Test distinguishability</h2>
+<ul>
+<li>Compare fixed effects with a Wald test</li>
+<li>Fit exchangeable model and compare models</li>
+</ul>
+<p>If pooling is substantively defensible and compatible with the data, you may pool specific effects or fit an exchangeable model.</p>
+<p>However, non-significant comparisons are not proof that roles are identical <span class="citation" data-cites="gistelinckIndistinguishabilityTests2018">(<a href="#/references" role="doc-biblioref" onclick>Gistelinck et al., 2018</a>)</span>.</p>
+</section>
+<section id="test-robustness---sensitivity-analyses" class="slide level2">
+<h2>Test robustness - sensitivity analyses</h2>
+<ul>
+<li>Refit the model leaving out one dyad at a time
+<ul>
+<li>Examine changes in the key actor and partner estimates and confidence intervals</li>
+</ul></li>
+<li>Refit a small number of prespecified, defensible alternatives where relevant:
+<ul>
+<li>coding or centering decisions</li>
+<li>missing-data handling</li>
+<li>covariates with a substantive confounding or precision rationale</li>
+</ul></li>
+</ul>
+<p>Report any material changes in the conclusions.</p>
+<p><span class="subtle"><span class="citation" data-cites="xiangInfluenceDiagnosticsGeneralized2002">Xiang et al. (<a href="#/references" role="doc-biblioref" onclick>2002</a>)</span></span></p>
+</section>
+<section id="exchangeable-apim" class="slide level2">
 <h2>Exchangeable APIM</h2>
 <ul>
 <li>Row-Level representation</li>
@@ -3256,6 +3315,9 @@ Driver, C. C., Oud, J. H. L., &amp; Voelkle, M. C. (2017). Continuous time struc
 <div id="ref-geldhofReliabilityEstimationMultilevel2014" class="csl-entry" role="listitem">
 Geldhof, G. J., Preacher, K. J., &amp; Zyphur, M. J. (2014). Reliability estimation in a multilevel confirmatory factor analysis framework. <em>Psychological Methods</em>, <em>19</em>(1), 72–91. <a href="https://doi.org/10.1037/a0032138">https://doi.org/10.1037/a0032138</a>
 </div>
+<div id="ref-gistelinckIndistinguishabilityTests2018" class="csl-entry" role="listitem">
+Gistelinck, F., Loeys, T., Decuyper, M., &amp; Dewitte, M. (2018). Indistinguishability tests in the actor–partner interdependence model. <em>British Journal of Mathematical and Statistical Psychology</em>, <em>71</em>(3), 472–498. <a href="https://doi.org/10.1111/bmsp.12129">https://doi.org/10.1111/bmsp.12129</a>
+</div>
 <div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry" role="listitem">
 Gistelinck, F., Loeys, T., &amp; Flamant, N. (2021). Multilevel autoregressive models when the number of time points is small. <em>Structural Equation Modeling: A Multidisciplinary Journal</em>, <em>28</em>(1), 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517">https://doi.org/10.1080/10705511.2020.1753517</a>
 </div>
@@ -3336,6 +3398,9 @@ Stas, L., Kenny, D. A., Mayer, A., &amp; Loeys, T. (2018). Giving dyadic data an
 </div>
 <div id="ref-wileyMultilevelTools2025" class="csl-entry" role="listitem">
 Wiley, J. F. (2025). <em><span class="nocase">multilevelTools</span>: Multilevel and mixed effects model diagnostics and effect sizes</em>. <a href="https://doi.org/10.32614/CRAN.package.multilevelTools">https://doi.org/10.32614/CRAN.package.multilevelTools</a>
+</div>
+<div id="ref-xiangInfluenceDiagnosticsGeneralized2002" class="csl-entry" role="listitem">
+Xiang, L., Tse, S.-K., &amp; Lee, A. H. (2002). Influence diagnostics for generalized linear mixed models: Applications to clustered data. <em>Computational Statistics &amp; Data Analysis</em>, <em>40</em>(4), 759–774. <a href="https://doi.org/10.1016/S0167-9473(02)00075-0">https://doi.org/10.1016/S0167-9473(02)00075-0</a>
 </div>
 </div>
 </section></section>
