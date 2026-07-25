@@ -395,7 +395,10 @@ df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
   member = person_id,
   role = gender,
   predictors = efficacy, 
-  model_types = 'apim'
+  model_types = 'apim',
+  # if we want to fit an exchangeable model from the same data we can:
+  include_arbitrary_member_contrast = TRUE,
+  add_apim_gmc_predictors = TRUE 
 ) 
 
 print(df_apim)
@@ -414,8 +417,7 @@ Looking at the columns immediately relevant to us:
 
 df_apim[1:6,] |>
   dplyr::select(
-    couple_id, person_id, gender, .is_female, .is_male, efficacy,
-    .efficacy_actor, .efficacy_partner, total_mvpa
+    couple_id, person_id, gender, .is_female, .is_male, .efficacy_gmc, .efficacy_gmc_actor, .efficacy_gmc_partner, total_mvpa
   ) |>
   slide_table()
 
@@ -594,7 +596,8 @@ see::plots(
 #| fig-align: center
 #| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths and correlated outcome residuals."
 
-draw_apim_diagram("distinguishable")
+draw_apim_diagram("distinguishable", predictors_centered = TRUE,
+                  labels = c(predictor = "Efficacy", outcome = "MVPA"))
 ```
 
 :::{.notes}
@@ -727,12 +730,12 @@ apim_distinguishable_model <- glmmTMB(
     0 + .is_female + .is_male +
 
     # Role-specific actor effects
-    .is_female:.efficacy_actor +
-    .is_male:.efficacy_actor +
+    .is_female:.efficacy_gmc_actor +
+    .is_male:.efficacy_gmc_actor +
 
     # Role-specific partner effects
-    .is_female:.efficacy_partner +
-    .is_male:.efficacy_partner +
+    .is_female:.efficacy_gmc_partner +
+    .is_male:.efficacy_gmc_partner +
 
     # Within-dyad residual covariance
     us(0 + .is_female + .is_male | couple_id),
@@ -820,6 +823,14 @@ report::report_table(
   include_effectsize = FALSE) |> # otherwise report tries to compute standardized effect sizes for our intercepts and warns
   summary()
 ```
+
+## What should be reported?
+
+- **Analysis sample:** number of dyads and observations, exclusions, aggregation, and missing-data handling
+- **Model specification:** outcome family and link, fixed effects, dyadic covariance structure, and any equality constraints
+- **Estimation:** estimator, software and version, convergence, and boundary estimates
+- **Results:** estimates with confidence intervals and the fitted variance-covariance parameters
+- **Model checks:** relevant residual diagnostics, influential dyads, and sensitivity analyses
 
 
 
