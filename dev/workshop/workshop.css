@@ -415,7 +415,7 @@
 .reveal .cell > .code-copy-outer-scaffold + .cell-output,
 .reveal .cell > .code-copy-outer-scaffold + .cell-output-display,
 .reveal .cell > .code-copy-outer-scaffold + .cell-output-stdout {
-  margin-top: 0.25em;
+  margin-top: 0.4em;
 }
 
 .reveal blockquote {

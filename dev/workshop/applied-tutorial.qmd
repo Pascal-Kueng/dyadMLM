@@ -32,7 +32,19 @@ editor: source
 library(dplyr)
 library(ggplot2)
 
-options(knitr.kable.NA = "")
+slide_table <- function(x, digits = 2, ...) {
+  knitr::kable(
+    x,
+    format = "html",
+    digits = digits,
+    format.args = list(
+      nsmall = digits,
+      scientific = FALSE
+    ),
+    row.names = FALSE,
+    ...
+  )
+}
 
 diagram_helper_candidates <- c(
   "diagram-helpers.Rinc",
@@ -124,22 +136,33 @@ sys.source(
 
 ## SEM vs. MLM: Missing data {.smaller}
 
+:::{.fragment}
 - **MLM: Complete-case**
   - **Outcome missing:** Valid under MAR, ML uses remaining observations
-  - **Predictor missing:** Valid under MAR, if missingness does **not depend**
-    on the outcome after accounting for predictors
+  - **Predictor missing:** Valid under MAR, if missingness does **not depend** on the outcome after accounting for predictors
+  
+:::
+
+:::{.fragment}
 - **SEM with FIML and joint likelihood**
   - Valid under MAR: Models predictors and outcomes jointly
+
+:::
+
+:::{.fragment}
 - **MI: Imputation**
   - Handles missing outcomes, predictors, and auxiliary information
   - Must match the analysis and preserve person, dyad, role, and time structure
 
-::: {.subtle}
+:::
+
+::: {.fragment}
 Include important predictors of missingness and missing values. FIML and MI
 cover more MAR situations than row omission; none automatically solves MNAR.
-[@ledermannAnalyzingDyadicData2017;
-@hughesAccountingMissingData2019; @grundMultipleImputationMissing2018]
+
 :::
+
+[@ledermannAnalyzingDyadicData2017; @hughesAccountingMissingData2019; @grundMultipleImputationMissing2018]{.subtle}
 
 <!-- ca. 2.5 Minutes -->
 
@@ -151,16 +174,20 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 
 ### Why we teach R
 
+:::{.fragment}
 - **Free to use:** no license fees or institutional access barriers
 - **Open source:** statistical implementations can be inspected, audited, and adapted
 - **Reproducible:** workflows can be rerun, reviewed, shared, and version-controlled
 - **Extensible:** specialized methods integrate with data, graphics, and reporting
+:::
 
 :::
 
 ::: {.column width="54%"}
 
 ### Current trade-offs
+
+:::{.fragment}
 
 - **SEM/DSEM:** R's capabilities are spread across specialized packages
   - `lavaan` handles explicitly specified, fixed-wave lagged SEMs (e.g.,
@@ -171,6 +198,8 @@ cover more MAR situations than row omission; none automatically solves MNAR.
   - Neither directly offers a separable partner-by-time residual structure such
     as $\mathrm{UN}\otimes\mathrm{AR}(1)$; SAS `PROC MIXED` and SPSS `MIXED` do
     for Gaussian repeated-measures models
+
+:::
 
 :::
 
@@ -329,7 +358,8 @@ df <- readRDS("dyadic-person-means.rds") |>
     couple_id, person_id, gender, efficacy, total_mvpa
   )
 
-knitr::kable(df[1:4,], digits = 2, row.names = FALSE)
+# usually use head(df), slide_table is a custom function for html tables on these slides
+slide_table(df[1:4,]) 
 ```
 
 :::{.subtle}
@@ -366,13 +396,9 @@ as a missing value.
 - you only have the type of dyad you expect
 :::
 
-:::{.fragment}
+## Create the required format and validate the data
 
 We can use the `dyadMLM` package to help with data preparation and validation.
-
-:::
-
-## Create the required format and validate the data
 
 ```{r}
 #| output-location: slide
@@ -408,7 +434,7 @@ df_apim[1:6,] |>
     couple_id, person_id, gender, .is_female, .is_male, efficacy,
     .efficacy_actor, .efficacy_partner, total_mvpa
   ) |>
-  knitr::kable(digits = 2, row.names = FALSE)
+  slide_table()
 
 ```
 
@@ -429,14 +455,27 @@ df_apim[1:6,] |>
 ```{r}
 library(report)
 
-variables <- c('gender', 'efficacy', 'total_mvpa')
-
 df_apim |>
-  dplyr::select(all_of(variables)) |>
+  dplyr::select(gender, efficacy, total_mvpa) |>
   report::report_table() |>
   summary() |>
-  knitr::kable(digits = 2, row.names = FALSE)
+  slide_table()
+  
 ```
+
+## Describe and visualize measures and observed relationships
+
+```{r}
+library(correlation)
+
+df_apim |>
+  select(.efficacy_actor, .efficacy_partner, total_mvpa) |>
+  correlation::correlation() |>
+  # use summary() for correlation matrix
+  slide_table()
+  
+```
+
 
 ## slide
 
