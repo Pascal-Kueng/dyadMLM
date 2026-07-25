@@ -526,33 +526,51 @@ df_wide |>
 ## Visualize partner similarity
 
 ```{r}
+plot_partner_similarity <- function(data, x, y, id, title, n_mahalanobis = 3) {
+  x_name <- rlang::as_name(rlang::enquo(x))
+  y_name <- rlang::as_name(rlang::enquo(y))
+  xy <- cbind(data[[x_name]], data[[y_name]])
+  labels <- data |>
+    dplyr::mutate(
+      .distance = mahalanobis(xy, colMeans(xy), cov(xy))
+    ) |>
+    dplyr::slice_max(.distance, n = n_mahalanobis)
+
+  ggplot(data, aes(x = {{ x }}, y = {{ y }})) +
+    geom_point(color = "steelblue") +
+    geom_smooth(method = "lm", se = FALSE, color = "navy") +
+    geom_text(
+      data = labels,
+      aes(label = {{ id }}),
+      vjust = -0.6, check_overlap = TRUE, size = 4
+    ) +
+    labs(title = title, x = "Female", y = "Male") +
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.12))) +
+    see::theme_modern(base_size = 16)
+}
+```
+
+## Visualize partner similarity
+
+```{r}
 #| output-location: slide
 #| dev: svglite
 #| fig-width: 12
-#| fig-height: 5.1
+#| fig-height: 5.5
 #| out-width: 100%
+#| fig-cap: "Labels: three largest Mahalanobis distances (most unusual joint values)."
 
-p_efficacy <- ggplot(
-  df_wide,
-  aes(efficacy_female, efficacy_male)
-) +
-  geom_point(color = "steelblue") +
-  geom_smooth(method = "lm", se = FALSE, color = "navy") +
-  labs(title = "Efficacy", x = "Female", y = "Male") +
-  see::theme_modern(base_size = 16)
-
-p_mvpa <- ggplot(
-  df_wide,
-  aes(total_mvpa_female, total_mvpa_male)
-) +
-  geom_point(color = "steelblue") +
-  geom_smooth(method = "lm", se = FALSE, color = "navy") +
-  labs(title = "Daily MVPA", x = "Female", y = "Male") +
-  see::theme_modern(base_size = 16)
+n_mahalanobis <- 4
 
 see::plots(
-  p_efficacy, p_mvpa,
-  caption = "Each point is one couple; positive slopes indicate partner similarity."
+  plot_partner_similarity(
+    df_wide, efficacy_female, efficacy_male, couple_id, "Efficacy",
+    n_mahalanobis = n_mahalanobis
+  ),
+  plot_partner_similarity(
+    df_wide, total_mvpa_female, total_mvpa_male, couple_id, "Daily MVPA",
+    n_mahalanobis = n_mahalanobis
+  )
 )
 ```
 
@@ -567,18 +585,137 @@ see::plots(
 
 ## Distinguishable APIM
 
-[Insert conceptual diagram for repetition]
+```{r}
+#| label: applied-conceptual-distinguishable-apim
+#| echo: false
+#| dev: svg
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths and correlated outcome residuals."
 
-## Distinguishable APIM - Fitting in a univariate framework
+draw_apim_diagram("distinguishable")
+```
 
-[Insert conceptual diagram member-wise]
+:::{.notes}
 
-## Distinguishable APIM - Fitting in a univariate framework
+This is the same conceptual model introduced in Part I.
 
-[Insert formula of both members, and then complete formula]
+[Sources]
 
-[Insert covariance matrix]
+- @kenny2006dyadic
 
+:::
+
+## One response column, two member rows
+
+**Both members' outcomes occupy one response column:** each member contributes
+one row.
+
+```{r}
+#| label: applied-distinguishable-apim-member-wise
+#| echo: false
+#| dev: svg
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Member-wise representation of a distinguishable APIM fitted in long format. Each member's actor and partner predictors predict that member's outcome, while the two outcome residuals covary within the dyad."
+
+draw_apim_member_diagram("distinguishable")
+```
+
+:::{.notes}
+
+- For the female outcome row, female efficacy is the actor predictor and male
+  efficacy is the partner predictor.
+- These roles reverse for the male outcome row.
+- The two rows are connected through the within-couple residual covariance.
+
+[Sources]
+
+- @kenny2006dyadic
+
+:::
+
+## Two equations become one stacked model
+
+The two member-specific equations are:
+
+$$
+  \begin{gathered}
+  Y_{\mathrm{male},i}
+  = b_{0,\mathrm{M}} + a_{1,\mathrm{M}} \times X_{\mathrm{male},i}
+  + p_{2,\mathrm{M}} \times X_{\mathrm{female},i} + \epsilon_{\mathrm{male},i}
+  \\
+  Y_{\mathrm{female},i}
+  = b_{0,\mathrm{F}} + a_{1,\mathrm{F}} \times X_{\mathrm{female},i}
+  + p_{2,\mathrm{F}} \times X_{\mathrm{male},i} + \epsilon_{\mathrm{female},i}
+  \end{gathered}
+$$
+
+With $X_{0,\mathrm{male}}$ (0 = no male, 1 = is male) and $X_{0,\mathrm{female}}$ (0 = no female, 1 = is female):
+
+$$
+Y_{ji} = X_{0,\mathrm{male}} \times Y_{\mathrm{male},i} + X_{0,\mathrm{female}} \times Y_{\mathrm{female}, i}
+$$
+
+Or written in full: 
+
+$$
+Y_{ji} = 
+$$
+
+:::{.notes}
+
+The response remains univariate at the row level. The role indicators select
+the appropriate intercept, actor effect, and partner effect for each row.
+
+:::
+
+## Residuals remain correlated within dyads
+
+The two member rows from the same dyad retain a joint residual structure:
+
+$$
+\operatorname{Cov}
+\begin{pmatrix}
+\epsilon_{\mathrm{F}i} \\
+\epsilon_{\mathrm{M}i}
+\end{pmatrix}
+= \boldsymbol{\Sigma}_{\epsilon}
+=
+\begin{bmatrix}
+\sigma_{\epsilon_\mathrm{F}}^{2}
+&
+\rho_{\epsilon_\mathrm{F}\epsilon_\mathrm{M}}
+\sigma_{\epsilon_\mathrm{F}}\sigma_{\epsilon_\mathrm{M}} \\
+\rho_{\epsilon_\mathrm{F}\epsilon_\mathrm{M}}
+\sigma_{\epsilon_\mathrm{F}}\sigma_{\epsilon_\mathrm{M}}
+&
+\sigma_{\epsilon_\mathrm{M}}^{2}
+\end{bmatrix}
+$$
+
+In `glmmTMB`, this is represented by:
+
+```r
+us(0 + .is_female + .is_male | couple_id),
+dispformula = ~ 0
+```
+
+:::{.notes}
+
+The unstructured block estimates separate female and male residual variances
+and their covariance. Setting `dispformula = ~ 0` avoids adding a second
+observation-level residual variance.
+
+[Sources]
+
+- @kenny2006dyadic
+
+:::
 
 
 <!-------------------------    --------------------------------------------->
