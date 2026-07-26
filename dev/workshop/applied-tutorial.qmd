@@ -825,11 +825,9 @@ values.
 
 ::: {.column width="66%"}
 
-```{r}
+```{r echo = FALSE}
+#| fig-format: svg
 #| echo: false
-#| fig-width: 9.5
-#| fig-height: 5.2
-#| out-width: 100%
 
 plot(dharma_residuals)
 ```
@@ -872,6 +870,71 @@ dyad-level and outcome-scale sensitivity analyses.
 - DHARMa reference manual, sections on residual rotation and conditional versus
   unconditional simulations:
   <https://stat.ethz.ch/CRAN/web/packages/DHARMa/refman/DHARMa.html>
+
+:::
+
+## Square-root MVPA improves the diagnostic pattern {.smaller}
+
+```{r}
+#| include: false
+
+df_apim_sqrt <- df_apim |>
+  dplyr::mutate(sqrt_total_mvpa = sqrt(total_mvpa))
+
+apim_distinguishable_sqrt_model <- update(
+  apim_distinguishable_model,
+  sqrt_total_mvpa ~ .,
+  data = df_apim_sqrt
+)
+
+sqrt_dharma_residuals <- DHARMa::simulateResiduals(
+  fittedModel = apim_distinguishable_sqrt_model,
+  n = 1000,
+  simulateREs = "unconditional",
+  seed = 123
+)
+```
+
+:::: {.columns}
+
+::: {.column width="66%"}
+
+```{r}
+#| echo: false
+#| fig-format: svg
+
+plot(sqrt_dharma_residuals)
+```
+
+:::
+
+::: {.column width="34%"}
+
+**Compared with raw MVPA:**
+
+- No excess residual outliers
+- Overall uniformity and dispersion are broadly plausible
+- The fitted-value pattern is much weaker
+
+**Conclusion unchanged:** actor effects remain positive; partner effects remain
+unclear.
+
+:::
+
+::::
+
+:::{.subtle}
+
+Treat the transformation as a prespecified or transparently reported
+sensitivity analysis—not as a scale chosen only by diagnostic p-values.
+
+:::
+
+:::{.notes}
+
+The coefficient magnitudes are not comparable across outcome scales. The
+sensitivity question is whether the substantive pattern of actor and partner
+effects changes.
 
 :::
 
@@ -1127,6 +1190,7 @@ see @laiCompositeReliabilityMultilevel2021.
 
 ```{r}
 #| label: plot-longitudinal-apim-reporting-gaps
+#| fig-format: svg
 #| echo: false
 #| fig-width: 10.5
 #| fig-height: 4.5
