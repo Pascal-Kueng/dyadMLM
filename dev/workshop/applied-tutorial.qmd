@@ -821,7 +821,7 @@ library(DHARMa)
 
 dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_model,
-  n = 1000,
+  n = 10000,
   
   # Since our models use dispformula = ~ 0, we cannot use DHARMa's standard "conditional".
   # With "unconditional", the random effect block representing our residuals is
@@ -957,7 +957,7 @@ apim_distinguishable_sqrt_model <- update(
 
 sqrt_dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_sqrt_model,
-  n = 1000,
+  n = 10000,
   simulateREs = "unconditional",
   rotation = 'estimated',
   seed = 123
