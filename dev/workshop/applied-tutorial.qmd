@@ -772,22 +772,47 @@ BEFORE interpreting and reporting results, we should ...
 3. Are exchangeability constraints defensible?
 4. Are conclusions driven by one dyad or one consequential modeling choice?
 
-## Did estimation succeed?
+## Did estimation succeed / converge?
 
 The model converged without warnings... a good first sign!
 
-Other things to look out for: 
+:::{.fragment}
+**Other things to look out for in the model output:**
 
-- Residual variances close to zero or correlations close to $-1$ or $+1$ $\rightarrow$ singular fit
-- NaN in estimates, standard errors, or model fit indices
-- Inspect residuals $\rightarrow$ tricky since we have 2 correlated residuals per couple
-  - the Gaussian APIM assumes the conditional two-member deviation vector is approximately bivariate normal with the fitted covariance.
+- Residual variances close to $0$ or correlations close to $-/+1$ $\rightarrow$ singular fit
+- `NaN` in estimates, standard errors, or model fit indices
 
-## Simulated residuals ask whether the model reproduces the data
+:::
 
-DHARMa compares the observed outcomes with outcomes simulated from the fitted
-model. Under an adequate model, its scaled residuals should be approximately
-uniform—even for non-Gaussian outcomes.
+## Simulated residuals - does the model reproduce the data?
+
+Added complexity: 
+
+:::{.incremental}
+- For regular linear models: simply check normality and independence of residuals
+- MLM with random effects: residuals are not necessarily expected to be normal anymore!
+- Generalized MLM: different distributional families have different assumptions
+- Dyadic (G)MLM: two correlated residuals per couple 
+
+:::
+
+:::{.fragment}
+
+**Solution:** use simulation-based methods
+
+:::
+
+## Simulated residuals - does the model reproduce the data?
+
+The DHARMa package [@hartigDHARMaResidualDiagnostics2026] compares observed 
+outcomes with outcomes simulated from the fitted model. 
+
+- Simulate datasets based on the model
+- Compare whether the residuals from these simulations match the observed residuals from our data
+
+This works for all model families!
+
+## Simulated residuals - does the model reproduce the data?
 
 ```{r}
 library(DHARMa)
@@ -795,41 +820,32 @@ library(DHARMa)
 dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_model,
   n = 1000,
+  
+  # Since our models use dispformula = ~ 0, we cannot use DHARMa's standard "conditional".
+  # With "unconditional", the random effect block representing our residuals is
+  # re-simulated correctly. 
   simulateREs = "unconditional",
+  
+  # Since we model male and female residuals as correlated, we can let the model 
+  # rotate the residuals to "remove" the correlation. This improves calibration.
+  rotation = 'estimated',
   seed = 123
 )
 ```
 
-Unconditional simulation re-simulates all hierarchical levels, providing a
-whole-model screen across model families supported by DHARMa.
 
-[@hartigDHARMaResidualDiagnostics2026]{.subtle}
-
-:::{.notes}
-
-DHARMa uses probability-integral-transform residuals. The unconditional option
-re-simulates all fitted random effects rather than conditioning on their fitted
-values.
-
-[Sources]
-
-- @hartigDHARMaResidualDiagnostics2026
-- DHARMa vignette:
-  <https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html>
-
-:::
-
-## The standard plot flags patterns worth investigating {.smaller}
+## Simulated residuals - does the model reproduce the data? {.smaller}
 
 :::: {.columns}
 
 ::: {.column width="70%"}
 
-```{r echo = FALSE}
+```{r}
 #| fig-format: svg
 #| echo: false
 
 plot(dharma_residuals)
+
 ```
 
 :::
@@ -838,11 +854,11 @@ plot(dharma_residuals)
 
 **In this model:**
 
-- Overall distribution and dispersion are broadly plausible
-- Two extreme observations are flagged
-- Residual quantiles vary with the fitted values
+- Overall uniformity and dispersion seem plausible
+- Two extreme observations remain
+- The unrotated role plots locate the fitted-value pattern among women
 
-**Next:** identify the corresponding dyads; refit the prespecified outcome
+**Next:** inspect the roles separately, then refit the prespecified outcome
 transformation or family.
 
 :::
@@ -851,18 +867,33 @@ transformation or family.
 
 :::{.subtle}
 
-Unconditional dyadic residuals remain correlated. Use the printed tests as
-screening signals—not as proof that every dyadic assumption is satisfied
-[@hartigDHARMaResidualDiagnostics2026].
+`rotation = "estimated"` is approximate; use the printed tests as screening
+signals, not proof that every dyadic assumption is satisfied
+[@hartigDHARMaResidualDiagnostics2026]. See the
+[DHARMa vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
+for additional diagnostics.
 
 :::
 
 :::{.notes}
 
-DHARMa warns that unconditional simulations can retain residual correlation,
-which can affect the power and type-I error of formal residual tests. This is
-why the plot is interpreted as a graphical screen and followed by targeted
-dyad-level and outcome-scale sensitivity analyses.
+Without rotation, unconditional simulations retain residual correlation, which
+can affect the power and type-I error of formal residual tests. The
+simulation-estimated rotation aims to remove that dependence approximately.
+The plot is nevertheless interpreted as a graphical screen and followed by
+targeted dyad-level and outcome-scale sensitivity analyses.
+
+The standard plot already shows the uniformity, dispersion, and outlier tests,
+plus residual quantiles against fitted values. `plotResiduals(..., form = ...)`
+can additionally be used for important continuous predictors when a
+predictor-specific pattern is plausible. Zero-inflation is tested separately
+and is relevant only when excess zeros are possible; `total_mvpa` contains no
+zeros.
+
+Rotation mixes residual coordinates without transforming the plotted
+predictor. Therefore, predictor-specific follow-up plots should use a separate
+unrotated unconditional DHARMa object; interpret the rotated residual-versus-
+fitted panel only as a heuristic screen.
 
 [Sources]
 
@@ -870,6 +901,74 @@ dyad-level and outcome-scale sensitivity analyses.
 - DHARMa reference manual, sections on residual rotation and conditional versus
   unconditional simulations:
   <https://stat.ethz.ch/CRAN/web/packages/DHARMa/refman/DHARMa.html>
+
+:::
+
+## The fitted-value pattern is stronger among women {.smaller}
+
+```{r}
+#| include: false
+
+female_dharma_residuals <- DHARMa::recalculateResiduals(
+  dharma_residuals,
+  sel = ~ .is_female == 1,
+  rotation = NULL,
+  seed = 123
+)
+
+male_dharma_residuals <- DHARMa::recalculateResiduals(
+  dharma_residuals,
+  sel = ~ .is_male == 1,
+  rotation = NULL,
+  seed = 123
+)
+```
+
+```{r}
+#| echo: false
+#| fig-format: svg
+#| fig-width: 10
+#| fig-height: 4.6
+#| out-width: 100%
+
+old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 2.5, 1))
+DHARMa::plotResiduals(
+  female_dharma_residuals,
+  main = "Women"
+)
+DHARMa::plotResiduals(
+  male_dharma_residuals,
+  main = "Men"
+)
+par(old_par)
+```
+
+:::{.subtle}
+
+Each panel contains one observation per couple. Recalculating without rotation
+preserves the female/male interpretation and avoids within-panel partner
+dependence.
+
+:::
+
+:::{.notes}
+
+These are marginal, role-specific residuals reconstructed from the same
+unconditional simulations; the model is not refitted. The declining lower
+quantile among women produces the pooled fitted-value pattern, whereas the
+men's panel shows no significant quantile deviation. With 36 observations per
+role, treat the quantile tests as screening evidence.
+
+The same approach can be used with
+`plotResiduals(..., form = ~ .efficacy_gmc_actor)` or another important
+continuous predictor. Such follow-up plots are useful when a
+predictor-specific functional-form problem is plausible.
+
+[Sources]
+
+- @hartigDHARMaResidualDiagnostics2026
+- DHARMa vignette:
+  <https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html>
 
 :::
 
@@ -891,6 +990,7 @@ sqrt_dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_sqrt_model,
   n = 1000,
   simulateREs = "unconditional",
+  rotation = 'estimated',
   seed = 123
 )
 ```
@@ -935,6 +1035,10 @@ sensitivity analysis—not as a scale chosen only by diagnostic p-values.
 The coefficient magnitudes are not comparable across outcome scales. The
 sensitivity question is whether the substantive pattern of actor and partner
 effects changes.
+
+Both diagnostic objects use unconditional simulations and their own
+simulation-estimated rotation, so the plots compare each model after accounting
+approximately for its fitted dyadic dependence.
 
 :::
 
