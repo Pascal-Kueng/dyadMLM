@@ -823,7 +823,7 @@ values.
 
 :::: {.columns}
 
-::: {.column width="66%"}
+::: {.column width="70%"}
 
 ```{r echo = FALSE}
 #| fig-format: svg
@@ -834,7 +834,7 @@ plot(dharma_residuals)
 
 :::
 
-::: {.column width="34%"}
+::: {.column width="30%"}
 
 **In this model:**
 
@@ -897,7 +897,7 @@ sqrt_dharma_residuals <- DHARMa::simulateResiduals(
 
 :::: {.columns}
 
-::: {.column width="66%"}
+::: {.column width="70%"}
 
 ```{r}
 #| echo: false
@@ -908,7 +908,7 @@ plot(sqrt_dharma_residuals)
 
 :::
 
-::: {.column width="34%"}
+::: {.column width="30%"}
 
 **Compared with raw MVPA:**
 
