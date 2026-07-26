@@ -15,7 +15,7 @@ APIMs, DIMs, and DSMs and provides supporting post-estimation tools.
 \itemize{
 \item \code{\link[=prepare_dyad_data]{prepare_dyad_data()}} validates long-format dyadic data and creates
 model-ready variables.
-\item \code{\link[=compare_nested_glmmTMB_models]{compare_nested_glmmTMB_models()}} compares compatible nested \code{glmmTMB}
+\item \code{\link[=compare_nested_models]{compare_nested_models()}} compares compatible nested \code{glmmTMB}
 models fitted to equivalent data.
 \item \code{\link[=recover_exchangeable_covariance]{recover_exchangeable_covariance()}} converts exchangeable
 shared/difference covariance structures to member-level quantities.

@@ -44,7 +44,7 @@ reference:
   contents:
   - prepare_dyad_data
   - summary.dyadMLM_data
-  - compare_nested_glmmTMB_models
+  - compare_nested_models
   - recover_exchangeable_covariance
 
 - title: Example data

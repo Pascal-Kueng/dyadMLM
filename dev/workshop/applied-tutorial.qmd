@@ -398,7 +398,8 @@ df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
   model_types = 'apim',
   # if we want to fit an exchangeable model from the same data we can:
   include_arbitrary_member_contrast = TRUE,
-  add_apim_gmc_predictors = TRUE 
+  add_apim_gmc_predictors = TRUE, 
+  seed = 123
 ) 
 
 print(df_apim)
@@ -778,12 +779,112 @@ The model converged without warnings... a good first sign!
 Other things to look out for: 
 
 - Residual variances close to zero or correlations close to $-1$ or $+1$ $\rightarrow$ singular fit
+- NaN in estimates, standard errors, or model fit indices
 - Inspect residuals $\rightarrow$ tricky since we have 2 correlated residuals per couple
   - the Gaussian APIM assumes the conditional two-member deviation vector is approximately bivariate normal with the fitted covariance.
 
+## Simulated residuals ask whether the model reproduces the data
+
+DHARMa compares the observed outcomes with outcomes simulated from the fitted
+model. Under an adequate model, its scaled residuals should be approximately
+uniform—even for non-Gaussian outcomes.
+
+```{r}
+library(DHARMa)
+
+dharma_residuals <- DHARMa::simulateResiduals(
+  fittedModel = apim_distinguishable_model,
+  n = 1000,
+  simulateREs = "unconditional",
+  seed = 123
+)
+```
+
+Unconditional simulation re-simulates all hierarchical levels, providing a
+whole-model screen across model families supported by DHARMa.
+
+[@hartigDHARMaResidualDiagnostics2026]{.subtle}
+
+:::{.notes}
+
+DHARMa uses probability-integral-transform residuals. The unconditional option
+re-simulates all fitted random effects rather than conditioning on their fitted
+values.
+
+[Sources]
+
+- @hartigDHARMaResidualDiagnostics2026
+- DHARMa vignette:
+  <https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html>
+
+:::
+
+## The standard plot flags patterns worth investigating {.smaller}
+
+:::: {.columns}
+
+::: {.column width="66%"}
+
+```{r}
+#| echo: false
+#| fig-width: 9.5
+#| fig-height: 5.2
+#| out-width: 100%
+
+plot(dharma_residuals)
+```
+
+:::
+
+::: {.column width="34%"}
+
+**In this model:**
+
+- Overall distribution and dispersion are broadly plausible
+- Two extreme observations are flagged
+- Residual quantiles vary with the fitted values
+
+**Next:** identify the corresponding dyads; refit the prespecified outcome
+transformation or family.
+
+:::
+
+::::
+
+:::{.subtle}
+
+Unconditional dyadic residuals remain correlated. Use the printed tests as
+screening signals—not as proof that every dyadic assumption is satisfied
+[@hartigDHARMaResidualDiagnostics2026].
+
+:::
+
+:::{.notes}
+
+DHARMa warns that unconditional simulations can retain residual correlation,
+which can affect the power and type-I error of formal residual tests. This is
+why the plot is interpreted as a graphical screen and followed by targeted
+dyad-level and outcome-scale sensitivity analyses.
+
+[Sources]
+
+- @hartigDHARMaResidualDiagnostics2026
+- DHARMa reference manual, sections on residual rotation and conditional versus
+  unconditional simulations:
+  <https://stat.ethz.ch/CRAN/web/packages/DHARMa/refman/DHARMa.html>
+
+:::
+
 ## Test distinguishability
 
-Fit exchangeable model and compare models
+Fit exchangeable model and compare models.
+
+If pooling is substantively defensible and compatible with the data, you may
+pool specific effects or fit an exchangeable model.
+
+However, non-significant comparisons are not proof that roles are identical
+[@gistelinckIndistinguishabilityTests2018].
+
 
 ```{r include=FALSE}
 
@@ -814,18 +915,16 @@ dyadMLM::recover_exchangeable_covariance(apim_exchangeable_model)
 
 ```{r}
 
-dyadMLM::compare_nested_glmmTMB_models(
+dyadMLM::compare_nested_models(
   apim_distinguishable_model, apim_exchangeable_model
 )
 
 ```
 
-
-If pooling is substantively defensible and compatible with the data, you may
-pool specific effects or fit an exchangeable model.
-
-However, non-significant comparisons are not proof that roles are identical
-[@gistelinckIndistinguishabilityTests2018].
+Depending on your analysis goals and preregistration, you may switch to the
+more parsimonious exchangeable model, or report the distinguishable model while
+reporting no improved fit. In our example, we keep going with the distinguishable
+model.
 
 ## Test robustness - sensitivity analyses
 

@@ -556,7 +556,7 @@ Complete these before calling the feature set CRAN-ready:
 
 ## Near-term maintenance after 0.1.0
 
-- Extend `compare_dyad_models()` to support fitted `brms` models, using a
+- Extend `compare_nested_models()` to support fitted `brms` models, using a
   Bayesian-appropriate comparison method and similarly clear output.
 
 ## Post-0.1.0 method development

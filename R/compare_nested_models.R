@@ -54,11 +54,11 @@
 #'     data = full_data
 #'   )
 #'
-#'   compare_nested_glmmTMB_models(restricted_model, full_model)
+#'   compare_nested_models(restricted_model, full_model)
 #' }
 #'
 #' @export
-compare_nested_glmmTMB_models <- function(model1, model2) {
+compare_nested_models <- function(model1, model2) {
   validate_comparison_model(model1, "model1")
   validate_comparison_model(model2, "model2")
 
@@ -142,7 +142,7 @@ comparison_model_data <- function(model, caller_env, argument) {
   model_formula <- stats::formula(model, component = "cond")
 
   # A model fitted inside a helper may keep its data with its formula.
-  # Search there first, then where compare_nested_glmmTMB_models() was called.
+  # Search there first, then where compare_nested_models() was called.
   environments <- list(environment(model_formula), caller_env)
 
   for (search_env in environments) {

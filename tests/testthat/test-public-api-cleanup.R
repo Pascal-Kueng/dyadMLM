@@ -18,10 +18,15 @@ test_that("the public API and metadata use only the cleaned names", {
     getNamespaceExports("dyadMLM"),
     c(
       "prepare_dyad_data",
-      "compare_nested_glmmTMB_models",
+      "compare_nested_models",
       "recover_exchangeable_covariance"
     )
   )
+  expect_false(exists(
+    "compare_nested_glmmTMB_models",
+    envir = asNamespace("dyadMLM"),
+    inherits = FALSE
+  ))
 
   prepare_arguments <- names(formals(prepare_dyad_data))
   expect_true(all(c(

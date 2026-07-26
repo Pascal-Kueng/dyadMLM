@@ -626,7 +626,7 @@ signup_exchangeable_apim <- glmmTMB(
   data = signup_exchangeable_data
 )
 
-model_comparison <- dyadMLM::compare_nested_glmmTMB_models(
+model_comparison <- dyadMLM::compare_nested_models(
   signup_exchangeable_apim,
   signup_distinguishable_apim
 )

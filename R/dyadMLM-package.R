@@ -9,7 +9,7 @@
 #' @section Main functions:
 #' - [prepare_dyad_data()] validates long-format dyadic data and creates
 #'   model-ready variables.
-#' - [compare_nested_glmmTMB_models()] compares compatible nested `glmmTMB`
+#' - [compare_nested_models()] compares compatible nested `glmmTMB`
 #'   models fitted to equivalent data.
 #' - [recover_exchangeable_covariance()] converts exchangeable
 #'   shared/difference covariance structures to member-level quantities.

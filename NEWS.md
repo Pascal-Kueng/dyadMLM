@@ -26,6 +26,7 @@
   when requested. It uses one mean over retained non-missing values, warns
   about skipped non-numeric predictors in mixed selections, and leaves DIM/DSM
   centering unchanged.
+* Renamed `compare_nested_glmmTMB_models()` to `compare_nested_models()`.
 * Added package-level help at `?dyadMLM`, with links to the main functions,
   example datasets, and getting-started documentation.
 

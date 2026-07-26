@@ -21,7 +21,7 @@ test_that("comparison treats unregistered prefixed columns as original data", {
   )
 })
 
-test_that("compare_nested_glmmTMB_models compares reparameterized nested models", {
+test_that("compare_nested_models compares reparameterized nested models", {
   skip_if_not_installed("glmmTMB")
 
   full_data <- prepare_dyad_data(
@@ -74,7 +74,7 @@ test_that("compare_nested_glmmTMB_models compares reparameterized nested models"
     data = restricted_data
   )
 
-  comparison <- compare_nested_glmmTMB_models(restricted_model, full_model)
+  comparison <- compare_nested_models(restricted_model, full_model)
 
   expect_s3_class(comparison, "anova")
   expect_equal(comparison$`Chi Df`[2], 5)
@@ -135,7 +135,7 @@ test_that("one prepared object supports both distinguishability models", {
     data = exchangeable_data
   )
 
-  comparison <- compare_nested_glmmTMB_models(
+  comparison <- compare_nested_models(
     restricted_model,
     full_model
   )
@@ -161,7 +161,7 @@ test_that("one prepared object supports both distinguishability models", {
   )
 })
 
-test_that("compare_nested_glmmTMB_models requires exact original data", {
+test_that("compare_nested_models requires exact original data", {
   skip_if_not_installed("glmmTMB")
 
   data_one <- prepare_dyad_data(
@@ -189,7 +189,7 @@ test_that("compare_nested_glmmTMB_models requires exact original data", {
   )
 
   expect_error(
-    compare_nested_glmmTMB_models(model_one, model_two),
+    compare_nested_models(model_one, model_two),
     "Column `closeness` differs"
   )
 
@@ -206,7 +206,7 @@ test_that("compare_nested_glmmTMB_models requires exact original data", {
   )
 })
 
-test_that("compare_nested_glmmTMB_models checks source and fitted rows", {
+test_that("compare_nested_models checks source and fitted rows", {
   skip_if_not_installed("glmmTMB")
 
   complete_data <- prepare_dyad_data(
@@ -253,16 +253,16 @@ test_that("compare_nested_glmmTMB_models checks source and fitted rows", {
   )
 
   expect_error(
-    compare_nested_glmmTMB_models(complete_restricted, shorter_full),
+    compare_nested_models(complete_restricted, shorter_full),
     "different numbers of rows"
   )
   expect_error(
-    compare_nested_glmmTMB_models(row_restricted, row_full),
+    compare_nested_models(row_restricted, row_full),
     "different observation rows"
   )
 })
 
-test_that("compare_nested_glmmTMB_models supports and checks model families", {
+test_that("compare_nested_models supports and checks model families", {
   skip_if_not_installed("glmmTMB")
 
   data <- comparison_female_male_cross_dyads
@@ -298,7 +298,7 @@ test_that("compare_nested_glmmTMB_models supports and checks model families", {
     data = full_data
   )
 
-  comparison <- compare_nested_glmmTMB_models(restricted_model, full_model)
+  comparison <- compare_nested_models(restricted_model, full_model)
 
   expect_s3_class(comparison, "anova")
   expect_equal(comparison$`Chi Df`[2], 1)
@@ -307,12 +307,12 @@ test_that("compare_nested_glmmTMB_models supports and checks model families", {
     2 * as.numeric(logLik(full_model) - logLik(restricted_model))
   )
   expect_error(
-    compare_nested_glmmTMB_models(restricted_model, gaussian_model),
+    compare_nested_models(restricted_model, gaussian_model),
     "same family and link"
   )
 })
 
-test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
+test_that("compare_nested_models compares APIM, DIM, and DSM models", {
   skip_if_not_installed("glmmTMB")
 
   distinguishable_data <- prepare_dyad_data(
@@ -386,11 +386,11 @@ test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
     data = exchangeable_data
   )
 
-  dsm_comparison <- compare_nested_glmmTMB_models(
+  dsm_comparison <- compare_nested_models(
     distinguishable_dsm,
     exchangeable_apim
   )
-  apim_dim_comparison <- compare_nested_glmmTMB_models(
+  apim_dim_comparison <- compare_nested_models(
     distinguishable_apim,
     exchangeable_dim
   )
@@ -400,7 +400,7 @@ test_that("compare_nested_glmmTMB_models compares APIM, DIM, and DSM models", {
   expect_equal(dsm_comparison$Chisq[2], apim_dim_comparison$Chisq[2])
 })
 
-test_that("compare_nested_glmmTMB_models supports ordinary and mixed named data", {
+test_that("compare_nested_models supports ordinary and mixed named data", {
   skip_if_not_installed("glmmTMB")
 
   plain_data_one <- comparison_female_male_cross_dyads
@@ -435,8 +435,8 @@ test_that("compare_nested_glmmTMB_models supports ordinary and mixed named data"
     data = as.data.frame(plain_data_one)
   )
 
-  plain_comparison <- compare_nested_glmmTMB_models(plain_smaller, plain_larger)
-  mixed_comparison <- compare_nested_glmmTMB_models(plain_smaller, prepared_larger)
+  plain_comparison <- compare_nested_models(plain_smaller, plain_larger)
+  mixed_comparison <- compare_nested_models(plain_smaller, prepared_larger)
 
   expect_equal(plain_comparison$`Chi Df`[2], 1)
   expect_equal(
@@ -448,11 +448,11 @@ test_that("compare_nested_glmmTMB_models supports ordinary and mixed named data"
     plain_comparison$Chisq[2]
   )
   expect_error(
-    compare_nested_glmmTMB_models(plain_smaller, changed_model),
+    compare_nested_models(plain_smaller, changed_model),
     "Column `provided_support` differs"
   )
   expect_error(
-    compare_nested_glmmTMB_models(inline_model, plain_larger),
+    compare_nested_models(inline_model, plain_larger),
     "must have been fitted with a named data frame"
   )
 
@@ -469,7 +469,7 @@ test_that("compare_nested_glmmTMB_models supports ordinary and mixed named data"
   )
 })
 
-test_that("compare_nested_glmmTMB_models sorts models and agrees with anova.glmmTMB", {
+test_that("compare_nested_models sorts models and agrees with anova.glmmTMB", {
   skip_if_not_installed("glmmTMB")
 
   model_data <- prepare_dyad_data(
@@ -488,8 +488,8 @@ test_that("compare_nested_glmmTMB_models sorts models and agrees with anova.glmm
   )
 
   reference <- stats::anova(restricted_model, full_model)
-  comparison <- compare_nested_glmmTMB_models(restricted_model, full_model)
-  reversed <- compare_nested_glmmTMB_models(full_model, restricted_model)
+  comparison <- compare_nested_models(restricted_model, full_model)
+  reversed <- compare_nested_models(full_model, restricted_model)
 
   expect_equal(comparison$Chisq[2], reference$Chisq[2])
   expect_equal(comparison$`Chi Df`[2], reference$`Chi Df`[2])
@@ -501,7 +501,7 @@ test_that("compare_nested_glmmTMB_models sorts models and agrees with anova.glmm
     reference$`Pr(>Chisq)`[2] < 0.05
   )
   expect_error(
-    compare_nested_glmmTMB_models(restricted_model, restricted_model),
+    compare_nested_models(restricted_model, restricted_model),
     "different numbers of estimated parameters"
   )
 
@@ -539,7 +539,7 @@ test_that("compare_nested_glmmTMB_models sorts models and agrees with anova.glmm
   model_data$noise <- stats::rnorm(nrow(model_data))
   smaller_model <- glmmTMB::glmmTMB(closeness ~ 1, data = model_data)
   larger_model <- glmmTMB::glmmTMB(closeness ~ noise, data = model_data)
-  no_clear_improvement <- compare_nested_glmmTMB_models(smaller_model, larger_model)
+  no_clear_improvement <- compare_nested_models(smaller_model, larger_model)
   printed <- capture.output(print(no_clear_improvement))
 
   expect_gt(no_clear_improvement$`Pr(>Chisq)`[2], 0.05)
@@ -569,7 +569,7 @@ test_that("compare_nested_glmmTMB_models sorts models and agrees with anova.glmm
   )
 })
 
-test_that("compare_nested_glmmTMB_models rejects transformed and changed outcomes", {
+test_that("compare_nested_models rejects transformed and changed outcomes", {
   skip_if_not_installed("glmmTMB")
 
   model_data <- prepare_dyad_data(
@@ -594,11 +594,11 @@ test_that("compare_nested_glmmTMB_models rejects transformed and changed outcome
   )
 
   expect_error(
-    compare_nested_glmmTMB_models(restricted_model, transformed_model),
+    compare_nested_models(restricted_model, transformed_model),
     "Only an untransformed outcome"
   )
   expect_error(
-    compare_nested_glmmTMB_models(restricted_model, alternate_outcome_model),
+    compare_nested_models(restricted_model, alternate_outcome_model),
     "use different outcome variables"
   )
 
@@ -608,12 +608,12 @@ test_that("compare_nested_glmmTMB_models rejects transformed and changed outcome
     data = model_data
   )
   expect_error(
-    compare_nested_glmmTMB_models(restricted_model, changed_model),
+    compare_nested_models(restricted_model, changed_model),
     "fitted outcome values differ"
   )
 })
 
-test_that("compare_nested_glmmTMB_models recovers local model data", {
+test_that("compare_nested_models recovers local model data", {
   skip_if_not_installed("glmmTMB")
 
   fit_models <- function() {
@@ -630,40 +630,40 @@ test_that("compare_nested_glmmTMB_models recovers local model data", {
   }
 
   models <- fit_models()
-  comparison <- compare_nested_glmmTMB_models(models$restricted, models$full)
+  comparison <- compare_nested_models(models$restricted, models$full)
 
   expect_s3_class(comparison, "anova")
 })
 
-test_that("compare_nested_glmmTMB_models rejects unsuitable fitted models", {
+test_that("compare_nested_models rejects unsuitable fitted models", {
   skip_if_not_installed("glmmTMB")
 
   model_data <- comparison_female_male_cross_dyads
   valid_model <- glmmTMB::glmmTMB(closeness ~ 1, data = model_data)
 
   expect_error(
-    compare_nested_glmmTMB_models(stats::lm(closeness ~ 1, data = model_data), valid_model),
+    compare_nested_models(stats::lm(closeness ~ 1, data = model_data), valid_model),
     "`model1` must be a fitted `glmmTMB` model"
   )
 
   reml_model <- valid_model
   reml_model$modelInfo$REML <- TRUE
   expect_error(
-    compare_nested_glmmTMB_models(valid_model, reml_model),
+    compare_nested_models(valid_model, reml_model),
     "`model2` model was fitted with REML"
   )
 
   unconverged_model <- valid_model
   unconverged_model$fit$convergence <- 1L
   expect_error(
-    compare_nested_glmmTMB_models(valid_model, unconverged_model),
+    compare_nested_models(valid_model, unconverged_model),
     "`model2` model did not converge"
   )
 
   indefinite_hessian_model <- valid_model
   indefinite_hessian_model$sdr$pdHess <- FALSE
   expect_error(
-    compare_nested_glmmTMB_models(valid_model, indefinite_hessian_model),
+    compare_nested_models(valid_model, indefinite_hessian_model),
     "`model2` model has a non-positive-definite Hessian matrix"
   )
 
@@ -679,7 +679,7 @@ test_that("compare_nested_glmmTMB_models rejects unsuitable fitted models", {
   )
 })
 
-test_that("compare_nested_glmmTMB_models checks weights and offsets", {
+test_that("compare_nested_models checks weights and offsets", {
   skip_if_not_installed("glmmTMB")
 
   data <- comparison_female_male_cross_dyads
@@ -713,15 +713,15 @@ test_that("compare_nested_glmmTMB_models checks weights and offsets", {
   )
 
   expect_error(
-    compare_nested_glmmTMB_models(full_model, weighted_model),
+    compare_nested_models(full_model, weighted_model),
     "different observation weights"
   )
   expect_error(
-    compare_nested_glmmTMB_models(full_model, offset_model),
+    compare_nested_models(full_model, offset_model),
     "different offsets"
   )
   expect_error(
-    compare_nested_glmmTMB_models(offset_model, zero_inflation_offset_model),
+    compare_nested_models(offset_model, zero_inflation_offset_model),
     "different offsets"
   )
 })

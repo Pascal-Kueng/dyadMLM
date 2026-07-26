@@ -941,7 +941,7 @@ exchangeable_apim <- fit_and_draw_exchangeable_apim(
 ```{r}
 library(dyadMLM)
 
-compare_nested_glmmTMB_models(
+compare_nested_models(
   exchangeable_apim,
   distinguishable_apim
 )
