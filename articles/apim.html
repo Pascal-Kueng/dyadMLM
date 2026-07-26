@@ -490,11 +490,11 @@ residual variances.</p>
 its retained role indicators. The restricted model instead uses the
 opt-in arbitrary member contrast for the exchangeability-constrained
 residual structure.</p>
-<p><a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html"><code>dyadMLM::compare_nested_glmmTMB_models()</code></a>
-verifies that both models use equivalent original observations before
-performing the likelihood-ratio test:</p>
+<p><code><a href="../reference/compare_nested_models.html">dyadMLM::compare_nested_models()</a></code> verifies that both
+models use equivalent original observations before performing the
+likelihood-ratio test:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_models.html">compare_nested_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_exchangeable_model</span>,</span>
 <span>  <span class="va">apim_distinguishable_model</span></span>
 <span><span class="op">)</span></span>
@@ -853,7 +853,7 @@ the model:</p>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models</a></span><span class="op">(</span></span>
+<span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_models.html">compare_nested_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_no_contrast_slope</span>,</span>
 <span>  <span class="va">ild_apim_model</span></span>
 <span><span class="op">)</span></span>
@@ -918,7 +918,7 @@ member-contrast block again remains in the model:</p>
 <span>       <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_glmmTMB_models.html">compare_nested_glmmTMB_models</a></span><span class="op">(</span></span>
+<span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/compare_nested_models.html">compare_nested_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">ild_apim_no_contrast_block</span>,</span>
 <span>  <span class="va">ild_apim_model</span></span>
 <span><span class="op">)</span></span>

@@ -32,6 +32,8 @@
   lagged variants when requested. It uses one mean over retained
   non-missing values, warns about skipped non-numeric predictors in
   mixed selections, and leaves DIM/DSM centering unchanged.
+- Renamed `compare_nested_glmmTMB_models()` to
+  [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md).
 - Added package-level help at
   [`?dyadMLM`](https://pascal-kueng.github.io/dyadMLM/reference/dyadMLM-package.md),
   with links to the main functions, example datasets, and
@@ -45,9 +47,7 @@
   `model_type` to `model_types`, `temporal_predictor_decomposition` to
   `temporal_decomposition`, `"time_2l"` to `"2l"`,
   `include_compositions` to `keep_compositions`, `compare_dyad_models()`
-  to
-  [`compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.md),
-  `exchangeable_rescov()` to
+  to `compare_nested_glmmTMB_models()`, `exchangeable_rescov()` to
   [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md),
   `pairs` to `block_pairings`, pairing fields `shared` and `difference`
   to `shared_block` and `difference_block`, and print argument `what` to
@@ -66,9 +66,8 @@
 - Exchangeable-dyad difference columns now use an `_arbitrary` suffix.
 - Added temporal predictor decomposition and model-ready columns for
   APIM, DIM, and DSM parameterizations.
-- Added
-  [`compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.md)
-  for compatible nested `glmmTMB` models and
+- Added `compare_nested_glmmTMB_models()` for compatible nested
+  `glmmTMB` models and
   [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
   for back-transforming shared/difference random-effect covariance
   structures.

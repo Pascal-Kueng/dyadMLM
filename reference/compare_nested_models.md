@@ -10,7 +10,7 @@ parameters is shown first in the result.
 ## Usage
 
 ``` r
-compare_nested_glmmTMB_models(model1, model2)
+compare_nested_models(model1, model2)
 ```
 
 ## Arguments
@@ -70,7 +70,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     data = full_data
   )
 
-  compare_nested_glmmTMB_models(restricted_model, full_model)
+  compare_nested_models(restricted_model, full_model)
 }
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.

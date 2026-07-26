@@ -775,7 +775,7 @@ selected exchangeable dyad compositions and analyze them as if they were
 one. Pooling can impose equality constraints among compositions. After
 fitting nested pooled and unpooled models to the same observations,
 these constraints can be tested with
-[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html);
+[`dyadMLM::compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md);
 see [Testing distinguishability in the APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-distinguishability)
 for the model-comparison workflow.

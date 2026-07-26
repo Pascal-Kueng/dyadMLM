@@ -464,13 +464,13 @@ retained role indicators. The restricted model instead uses the opt-in
 arbitrary member contrast for the exchangeability-constrained residual
 structure.
 
-[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html)
+[`dyadMLM::compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md)
 verifies that both models use equivalent original observations before
 performing the likelihood-ratio test:
 
 ``` r
 
-dyadMLM::compare_nested_glmmTMB_models(
+dyadMLM::compare_nested_models(
   apim_exchangeable_model,
   apim_distinguishable_model
 )
@@ -847,7 +847,7 @@ ild_apim_no_contrast_slope <- update(
     us(0 + .member_contrast_arbitrary | coupleID)
 )
 
-dyadMLM::compare_nested_glmmTMB_models(
+dyadMLM::compare_nested_models(
   ild_apim_no_contrast_slope,
   ild_apim_model
 )
@@ -922,7 +922,7 @@ ild_apim_no_contrast_block <- update(
        | coupleID)
 )
 
-dyadMLM::compare_nested_glmmTMB_models(
+dyadMLM::compare_nested_models(
   ild_apim_no_contrast_block,
   ild_apim_model
 )
