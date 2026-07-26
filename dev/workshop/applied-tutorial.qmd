@@ -779,42 +779,39 @@ The model converged without warnings... a good first sign!
 :::{.fragment}
 **Other things to look out for in the model output:**
 
-- Residual variances close to $0$ or correlations close to $-/+1$ $\rightarrow$ singular fit
-- `NaN` in estimates, standard errors, or model fit indices
+- Estimated variances near $0$ or correlations near $\pm 1$ $\rightarrow$ possible boundary fit
+- `NaN` or infinite estimates, standard errors, or model fit indices
 
 :::
 
-## Does the model reproduce the data?
-<!-- TODO: Does the slide title still fit here? -->
-**Added complexity for residual diagnostics:**
+## Why use simulated residuals?
 
 :::{.incremental}
-- For regular linear models: simply check normality and independence of residuals
-- MLM with random effects: residuals are not necessarily expected to be normal anymore!
-- Generalized MLM: different distributional families have different assumptions
-- Dyadic (G)MLM: two correlated residuals per couple 
+- Linear models: check form, variance, normality, and independence
+- Mixed models: residuals arise at multiple levels
+- Generalized models: expectations depend on the family and link
+- Dyadic models: partners' residuals are correlated
 
 :::
-
-<!-- TODO: texts accurate? -->
 
 :::{.fragment}
 
-**Solution:** Use simulation-based methods
+**Solution:** Compare the data with simulations from the fitted model.
 
 :::
 
-## Does the model reproduce the data?
+## DHARMa: one diagnostic scale across models
 
 The `DHARMa` package [@hartigDHARMaResidualDiagnostics2026]:
 
-- Simulates many datasets based on the model (if the model was correct, what would the data look like?)
-- Compares whether the residuals from these simulations match the observed residuals from our data
-- Provides many powerful functions to help with diagnosis and a [useful vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
+- Simulates outcomes from the fitted model
+- Checks whether the observed residuals behave as expected under simulations from the fitted model.
+- Adequate fit $\rightarrow$ approximately uniform, pattern-free residuals
+- Offers more tests in its [vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
 
-This works for all model families!
+One function works across many model families!
 
-## Does the model reproduce the data?
+## Simulate the full dyadic residual structure
 
 ```{r}
 library(DHARMa)
@@ -823,22 +820,19 @@ dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_model,
   n = 10000,
   
-  # Since our models use dispformula = ~ 0, we cannot use DHARMa's standard "conditional".
-  # With "unconditional", the random effect block representing our residuals is
-  # re-simulated correctly. 
+  # Since our model uses dispformula = ~ 0, we cannot use DHARMa's default
+  # conditional simulations. With unconditional, the us() block representing
+  # our residuals is re-simulated.
   simulateREs = "unconditional",
   
-  # Since we model male and female residuals as correlated, we can let the model 
-  # rotate the residuals to "remove" the correlation. This improves calibration.
-  # Ideally, we would provide the exact known rotation -> Will be a future dyadMLM capability.
+  # Male and female residuals are correlated. DHARMa estimates this correlation
+  # from the simulations and rotates the residuals to "remove" it.
   rotation = 'estimated',
   seed = 123
 )
 ```
 
-<!-- TODO: texts accurate? can it be shorter without loosing clarity? -->
-
-## Does the model reproduce the data? {.smaller}
+## Raw MVPA leaves a fitted-value pattern {.smaller}
 
 :::: {.columns}
 
@@ -858,10 +852,11 @@ plot(dharma_residuals)
 
 **In this model:**
 
-- Overall uniformity and dispersion are plausible
-- Two extreme observations remain
+- Uniformity and dispersion are plausible
+- No simulation outliers
+- A fitted-value pattern remains
 
-**Next:** inspect the roles separately, since rotation mixes residual coordinates.
+**Next:** inspect roles without rotation.
 
 :::
 
@@ -869,14 +864,15 @@ plot(dharma_residuals)
 
 
 
-## The fitted-value pattern is stronger among women
+## Inspect residuals by role
 
 ```{r}
 
 female_dharma_residuals <- DHARMa::recalculateResiduals(
   dharma_residuals,
   
-  # Only simulate female residuals, no rotation necessary
+  # Recalculate from the same simulations for one role.
+  # One observation per couple: no rotation needed.
   sel = ~ .is_female == 1,
   rotation = NULL,
   seed = 123
@@ -884,15 +880,13 @@ female_dharma_residuals <- DHARMa::recalculateResiduals(
 
 male_dharma_residuals <- DHARMa::recalculateResiduals(
   dharma_residuals,
-  
-  # Only simulate male residuals, no rotation necessary
   sel = ~ .is_male == 1,
   rotation = NULL,
   seed = 123
 )
 ```
 
-## The fitted-value pattern is stronger among women {.smaller}
+## The fitted-value pattern appears among women {.smaller}
 
 
 :::: {.columns}
@@ -906,7 +900,7 @@ male_dharma_residuals <- DHARMa::recalculateResiduals(
 #| fig-height: 4.6
 #| out-width: 100%
 
-old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 2.5, 1))
+old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 4.5, 1))
 DHARMa::plotResiduals(
   female_dharma_residuals,
   main = "Women"
@@ -925,23 +919,20 @@ par(old_par)
 
 **In this model:**
 
-- Conclusions?
-- Conclusions?
+- Pattern detected among women
+- No comparable pattern among men
 
-**Next:** inspect the roles separately, since rotation mixes residual coordinates.
+**Next:** try a defensible outcome scale.
 
 
 :::
 
 ::::
 
-See the
-[DHARMa vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
-for additional diagnostics steps and interpretation. 
+More targeted checks:
+[DHARMa vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html).
 
-<!-- TODO: should we refit without the outliar and check? -->
-
-## Square-root MVPA improves the diagnostic pattern {.smaller}
+## Square-root MVPA reduces the fitted-value pattern {.smaller}
 
 ```{r}
 #| include: false
@@ -974,19 +965,18 @@ sqrt_dharma_residuals <- DHARMa::simulateResiduals(
 
 plot(sqrt_dharma_residuals)
 ```
-<!-- TODO: should we add the gender-specific plots for the transformed model to this same slide? -->
 :::
 
 ::: {.column width="30%"}
 
 **Compared with raw MVPA:**
 
-- No excess residual outliers
-- Overall uniformity and dispersion are plausible
-- No more obvious patterns
+- Uniformity and dispersion are plausible
+- No simulation outliers
+- No pooled fitted-value pattern
 
-**Conclusion unchanged:** actor effects remain positive; partner effects remain
-unclear.
+**Substantive result unchanged:** actor effects remain positive and supported;
+partner effects remain unsupported.
 
 :::
 
@@ -994,21 +984,26 @@ unclear.
 
 :::{.subtle}
 
-Treat the transformation as a prespecified or transparently reported
-sensitivity analysis—not as a scale chosen only by diagnostic p-values.
+Treat this as a prespecified or transparently reported sensitivity analysis—not
+a scale selected by diagnostic p-values.
 
 :::
 
 ## Test distinguishability
 
-Fit exchangeable model and compare models.
+- Fit model with exchangeability constraints
 
-If pooling is substantively defensible and compatible with the data, you may
-pool specific effects or fit an exchangeable model.
+- Compare models
+
+- Pool only if theoretically defensible, aligned with RQ and theory, and 
+compatible with the data
+  - Depending on goals you can also report the distinguishable model and 
+  report results from this analysis
 
 However, non-significant comparisons are not proof that roles are identical
 [@gistelinckIndistinguishabilityTests2018].
 
+## Estimate and compare: 
 
 ```{r include=FALSE}
 
@@ -1050,10 +1045,31 @@ more parsimonious exchangeable model, or report the distinguishable model while
 reporting no improved fit. In our example, we keep going with the distinguishable
 model.
 
+## Leave one dyad out to assess prediction
+
+```{r}
+library(cv)
+
+loo_dyads <- cv::cv(
+  apim_distinguishable_model,
+  # Cluster CV defaults to one held-out cluster per fold
+  clusterVariables = "couple_id",
+  criterion = cv::rmse
+)
+
+summary(loo_dyads)
+```
+
+- Each fold holds out both partners; predictions use fixed effects only.
+- Estimated RMSE for a new dyad: about 21 minutes/day.
+
+:::{.subtle}
+Predictive validation—not an influence or covariance diagnostic.
+[@foxCrossValidatingRegressionModels2026]
+:::
+
 ## Test robustness - sensitivity analyses
 
-- Refit the model leaving out one dyad at a time
-  - Examine changes in the key actor and partner estimates and confidence intervals
 - Refit a small number of prespecified, defensible alternatives where relevant:
   - coding or centering decisions
   - different plausible outcome families or transformations
@@ -1061,10 +1077,6 @@ model.
   - covariates with a substantive confounding or precision rationale
 
 Report any material changes in the conclusions.
-
-[@xiangInfluenceDiagnosticsGeneralized2002]{.subtle}
-
-## Test robustness - leave one out
 
 ## Workflow
 
@@ -1336,7 +1348,7 @@ Short break - initiate package install before you leave
 ```{r eval = FALSE}
 
 install.packages(
-  c("dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "dplyr", "ggplot2", "tibble"),
+  c("dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "cv", "dplyr", "ggplot2", "tibble"),
   repos = c(
     "https://pascal-kueng.r-universe.dev",
     "https://cloud.r-project.org"
