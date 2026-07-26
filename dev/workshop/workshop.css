@@ -380,6 +380,12 @@
   border-bottom: 0;
 }
 
+/* Let the compact leave-one-dyad-out summary use the available slide space. */
+.reveal .loo-summary-table table {
+  margin-top: 1em;
+  font-size: 0.8em;
+}
+
 /* Reserve the branded treatment for presentation-oriented overview tables. */
 .reveal .fancy-table table {
   width: 100%;

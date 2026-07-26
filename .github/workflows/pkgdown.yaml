@@ -36,6 +36,7 @@ jobs:
             any::DHARMa
             any::ggplot2
             any::gridExtra
+            any::modelbased
             any::patchwork
             any::pkgdown
             any::report
