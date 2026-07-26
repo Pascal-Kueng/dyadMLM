@@ -786,7 +786,7 @@ The model converged without warnings... a good first sign!
 
 ## Does the model reproduce the data?
 <!-- TODO: Does the slide title still fit here? -->
-Added complexity for residual diagnostics: 
+**Added complexity for residual diagnostics:**
 
 :::{.incremental}
 - For regular linear models: simply check normality and independence of residuals
@@ -842,7 +842,7 @@ dharma_residuals <- DHARMa::simulateResiduals(
 
 :::: {.columns}
 
-::: {.column width="70%"}
+::: {.column width="75%"}
 
 ```{r}
 #| fig-format: svg
@@ -854,59 +854,29 @@ plot(dharma_residuals)
 
 :::
 
-::: {.column width="30%"}
+::: {.column width="25%"}
 
 **In this model:**
 
 - Overall uniformity and dispersion are plausible
 - Two extreme observations remain
 
-**Next:** inspect the roles separately, then refit the prespecified outcome
-transformation or family.
+**Next:** inspect the roles separately, since rotation mixes residual coordinates.
 
 :::
 
 ::::
 
-See the
-[DHARMa vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
-for additional diagnostics steps and interpretation. 
 
 
-:::{.notes}
-
-The simulation-estimated rotation aims to remove that dependence approximately.
-The plot is nevertheless interpreted as a graphical screen and followed by
-targeted dyad-level and outcome-scale sensitivity analyses.
-
-The standard plot already shows the uniformity, dispersion, and outlier tests,
-plus residual quantiles against fitted values. `plotResiduals(..., form = ...)`
-can additionally be used for important continuous predictors when a
-predictor-specific pattern is plausible. Zero-inflation is tested separately
-and is relevant only when excess zeros are possible; `total_mvpa` contains no
-zeros.
-
-Rotation mixes residual coordinates without transforming the plotted
-predictor. Therefore, predictor-specific follow-up plots should use a separate
-unrotated unconditional DHARMa object; interpret the rotated residual-versus-
-fitted panel only as a heuristic screen.
-
-[Sources]
-
-- @hartigDHARMaResidualDiagnostics2026
-- DHARMa reference manual, sections on residual rotation and conditional versus
-  unconditional simulations:
-  <https://stat.ethz.ch/CRAN/web/packages/DHARMa/refman/DHARMa.html>
-
-:::
-
-## The fitted-value pattern is stronger among women {.smaller}
+## The fitted-value pattern is stronger among women
 
 ```{r}
-#| include: false
 
 female_dharma_residuals <- DHARMa::recalculateResiduals(
   dharma_residuals,
+  
+  # Only simulate female residuals, no rotation necessary
   sel = ~ .is_female == 1,
   rotation = NULL,
   seed = 123
@@ -914,11 +884,20 @@ female_dharma_residuals <- DHARMa::recalculateResiduals(
 
 male_dharma_residuals <- DHARMa::recalculateResiduals(
   dharma_residuals,
+  
+  # Only simulate male residuals, no rotation necessary
   sel = ~ .is_male == 1,
   rotation = NULL,
   seed = 123
 )
 ```
+
+## The fitted-value pattern is stronger among women {.smaller}
+
+
+:::: {.columns}
+
+::: {.column width="75%"}
 
 ```{r}
 #| echo: false
@@ -939,34 +918,28 @@ DHARMa::plotResiduals(
 par(old_par)
 ```
 
-:::{.subtle}
-
-Each panel contains one observation per couple. Recalculating without rotation
-preserves the female/male interpretation and avoids within-panel partner
-dependence.
 
 :::
 
-:::{.notes}
+::: {.column width="25%"}
 
-These are marginal, role-specific residuals reconstructed from the same
-unconditional simulations; the model is not refitted. The declining lower
-quantile among women produces the pooled fitted-value pattern, whereas the
-men's panel shows no significant quantile deviation. With 36 observations per
-role, treat the quantile tests as screening evidence.
+**In this model:**
 
-The same approach can be used with
-`plotResiduals(..., form = ~ .efficacy_gmc_actor)` or another important
-continuous predictor. Such follow-up plots are useful when a
-predictor-specific functional-form problem is plausible.
+- Conclusions?
+- Conclusions?
 
-[Sources]
+**Next:** inspect the roles separately, since rotation mixes residual coordinates.
 
-- @hartigDHARMaResidualDiagnostics2026
-- DHARMa vignette:
-  <https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html>
 
 :::
+
+::::
+
+See the
+[DHARMa vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
+for additional diagnostics steps and interpretation. 
+
+<!-- TODO: should we refit without the outliar and check? -->
 
 ## Square-root MVPA improves the diagnostic pattern {.smaller}
 
@@ -1001,7 +974,7 @@ sqrt_dharma_residuals <- DHARMa::simulateResiduals(
 
 plot(sqrt_dharma_residuals)
 ```
-
+<!-- TODO: should we add the gender-specific plots for the transformed model to this same slide? -->
 :::
 
 ::: {.column width="30%"}
@@ -1009,8 +982,8 @@ plot(sqrt_dharma_residuals)
 **Compared with raw MVPA:**
 
 - No excess residual outliers
-- Overall uniformity and dispersion are broadly plausible
-- The fitted-value pattern is much weaker
+- Overall uniformity and dispersion are plausible
+- No more obvious patterns
 
 **Conclusion unchanged:** actor effects remain positive; partner effects remain
 unclear.
@@ -1023,18 +996,6 @@ unclear.
 
 Treat the transformation as a prespecified or transparently reported
 sensitivity analysis—not as a scale chosen only by diagnostic p-values.
-
-:::
-
-:::{.notes}
-
-The coefficient magnitudes are not comparable across outcome scales. The
-sensitivity question is whether the substantive pattern of actor and partner
-effects changes.
-
-Both diagnostic objects use unconditional simulations and their own
-simulation-estimated rotation, so the plots compare each model after accounting
-approximately for its fitted dyadic dependence.
 
 :::
 
