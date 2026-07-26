@@ -784,9 +784,9 @@ The model converged without warnings... a good first sign!
 
 :::
 
-## Simulated residuals - does the model reproduce the data?
-
-Added complexity: 
+## Does the model reproduce the data?
+<!-- TODO: Does the slide title still fit here? -->
+Added complexity for residual diagnostics: 
 
 :::{.incremental}
 - For regular linear models: simply check normality and independence of residuals
@@ -796,23 +796,25 @@ Added complexity:
 
 :::
 
+<!-- TODO: texts accurate? -->
+
 :::{.fragment}
 
-**Solution:** use simulation-based methods
+**Solution:** Use simulation-based methods
 
 :::
 
-## Simulated residuals - does the model reproduce the data?
+## Does the model reproduce the data?
 
-The DHARMa package [@hartigDHARMaResidualDiagnostics2026] compares observed 
-outcomes with outcomes simulated from the fitted model. 
+The `DHARMa` package [@hartigDHARMaResidualDiagnostics2026]:
 
-- Simulate datasets based on the model
-- Compare whether the residuals from these simulations match the observed residuals from our data
+- Simulates many datasets based on the model (if the model was correct, what would the data look like?)
+- Compares whether the residuals from these simulations match the observed residuals from our data
+- Provides many powerful functions to help with diagnosis and a [useful vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
 
 This works for all model families!
 
-## Simulated residuals - does the model reproduce the data?
+## Does the model reproduce the data?
 
 ```{r}
 library(DHARMa)
@@ -828,13 +830,15 @@ dharma_residuals <- DHARMa::simulateResiduals(
   
   # Since we model male and female residuals as correlated, we can let the model 
   # rotate the residuals to "remove" the correlation. This improves calibration.
+  # Ideally, we would provide the exact known rotation -> Will be a future dyadMLM capability.
   rotation = 'estimated',
   seed = 123
 )
 ```
 
+<!-- TODO: texts accurate? can it be shorter without loosing clarity? -->
 
-## Simulated residuals - does the model reproduce the data? {.smaller}
+## Does the model reproduce the data? {.smaller}
 
 :::: {.columns}
 
@@ -854,9 +858,8 @@ plot(dharma_residuals)
 
 **In this model:**
 
-- Overall uniformity and dispersion seem plausible
+- Overall uniformity and dispersion are plausible
 - Two extreme observations remain
-- The unrotated role plots locate the fitted-value pattern among women
 
 **Next:** inspect the roles separately, then refit the prespecified outcome
 transformation or family.
@@ -865,21 +868,14 @@ transformation or family.
 
 ::::
 
-:::{.subtle}
-
-`rotation = "estimated"` is approximate; use the printed tests as screening
-signals, not proof that every dyadic assumption is satisfied
-[@hartigDHARMaResidualDiagnostics2026]. See the
+See the
 [DHARMa vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
-for additional diagnostics.
+for additional diagnostics steps and interpretation. 
 
-:::
 
 :::{.notes}
 
-Without rotation, unconditional simulations retain residual correlation, which
-can affect the power and type-I error of formal residual tests. The
-simulation-estimated rotation aims to remove that dependence approximately.
+The simulation-estimated rotation aims to remove that dependence approximately.
 The plot is nevertheless interpreted as a graphical screen and followed by
 targeted dyad-level and outcome-scale sensitivity analyses.
 
