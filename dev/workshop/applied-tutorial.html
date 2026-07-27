@@ -2920,7 +2920,7 @@ Y_{ri} ={}&amp;
 <p>For a male row: <span class="math inline">\(D_\mathrm{M}=1,\ D_\mathrm{F}=0\)</span>. For a female row: the reverse.</p>
 </div>
 <aside class="notes">
-<p>The role indicators correspond to <code>.is_male</code> and <code>.is_female</code>. The actor and partner values correspond to <code>.efficacy_actor</code> and <code>.efficacy_partner</code>. The role index is written first, followed by the dyad index, as in <span class="math inline">\(Y_{\mathrm{male},i}\)</span> and <span class="math inline">\(Y_{\mathrm{female},i}\)</span>.</p>
+<p>The role indicators correspond to <code>.is_male</code> and <code>.is_female</code>. The actor and partner values correspond to <code>.efficacy_gmc_actor</code> and <code>.efficacy_gmc_partner</code>. The role index is written first, followed by the dyad index, as in <span class="math inline">\(Y_{\mathrm{male},i}\)</span> and <span class="math inline">\(Y_{\mathrm{female},i}\)</span>.</p>
 <p>[Sources]</p>
 <ul>
 <li><span class="citation" data-cites="kenny2006dyadic">Kenny et al. (<a href="#/references" role="doc-biblioref" onclick>2006</a>)</span></li>
@@ -2979,7 +2979,7 @@ display:block!important;
 <span id="cb13-14"><a href></a>    .is_male<span class="sc">:</span>.efficacy_gmc_partner <span class="sc">+</span></span>
 <span id="cb13-15"><a href></a></span>
 <span id="cb13-16"><a href></a>    <span class="co"># Within-dyad residual covariance</span></span>
-<span id="cb13-17"><a href></a>    <span class="fu">us</span>(<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id),</span>
+<span id="cb13-17"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id),</span>
 <span id="cb13-18"><a href></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
 <span id="cb13-19"><a href></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
 <span id="cb13-20"><a href></a>  <span class="at">data =</span> apim_distinguishable_data</span>
@@ -2995,7 +2995,7 @@ display:block!important;
 Formula:          
 total_mvpa ~ 0 + .is_female + .is_male + .is_female:.efficacy_gmc_actor +  
     .is_male:.efficacy_gmc_actor + .is_female:.efficacy_gmc_partner +  
-    .is_male:.efficacy_gmc_partner + us(0 + .is_female + .is_male |  
+    .is_male:.efficacy_gmc_partner + (0 + .is_female + .is_male |  
     couple_id)
 Dispersion:                  ~0
 Data: apim_distinguishable_data
@@ -3097,7 +3097,7 @@ display:block!important;
 <span id="cb15-5"><a href></a>  <span class="at">n =</span> <span class="dv">10000</span>,</span>
 <span id="cb15-6"><a href></a>  </span>
 <span id="cb15-7"><a href></a>  <span class="co"># Since our model uses dispformula = ~ 0, we cannot use DHARMa&#39;s default</span></span>
-<span id="cb15-8"><a href></a>  <span class="co"># conditional simulations. With unconditional, the us() block representing</span></span>
+<span id="cb15-8"><a href></a>  <span class="co"># conditional simulations. With unconditional, the random-effects block representing</span></span>
 <span id="cb15-9"><a href></a>  <span class="co"># our residuals is re-simulated.</span></span>
 <span id="cb15-10"><a href></a>  <span class="at">simulateREs =</span> <span class="st">&quot;unconditional&quot;</span>,</span>
 <span id="cb15-11"><a href></a>  </span>
@@ -3313,87 +3313,8 @@ Conclusion (5% level): The likelihood-ratio test finds no clear improvement from
 <span id="cb21-7"><a href></a>  <span class="st">`</span><span class="at">Full data</span><span class="st">`</span> <span class="ot">=</span> apim_distinguishable_model,</span>
 <span id="cb21-8"><a href></a>  <span class="st">`</span><span class="at">Without Couple 28</span><span class="st">`</span> <span class="ot">=</span> apim_without_couple_28,</span>
 <span id="cb21-9"><a href></a>  <span class="at">keep =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.efficacy_gmc_actor&quot;</span></span>
-<span id="cb21-10"><a href></a>)</span>
-<span id="cb21-11"><a href></a></span>
-<span id="cb21-12"><a href></a>parameters<span class="sc">::</span><span class="fu">model_parameters</span>(apim_without_couple_28, <span class="at">effects =</span> <span class="st">&quot;fixed&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb21-13"><a href></a>  insight<span class="sc">::</span><span class="fu">print_md</span>(<span class="at">footer =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<table class="caption-top" style="width:100%;">
-<caption>Fixed Effects</caption>
-<colgroup>
-<col style="width: 39%">
-<col style="width: 15%">
-<col style="width: 7%">
-<col style="width: 19%">
-<col style="width: 8%">
-<col style="width: 9%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Parameter</th>
-<th style="text-align: center;">Coefficient</th>
-<th style="text-align: center;">SE</th>
-<th style="text-align: center;">95% CI</th>
-<th style="text-align: center;">z</th>
-<th style="text-align: center;">p</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">is female</td>
-<td style="text-align: center;">30.86</td>
-<td style="text-align: center;">2.89</td>
-<td style="text-align: center;">(25.19, 36.52)</td>
-<td style="text-align: center;">10.68</td>
-<td style="text-align: center;">&lt; .001</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">is male</td>
-<td style="text-align: center;">27.26</td>
-<td style="text-align: center;">2.35</td>
-<td style="text-align: center;">(22.65, 31.87)</td>
-<td style="text-align: center;">11.60</td>
-<td style="text-align: center;">&lt; .001</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">is female × efficacy gmc actor</td>
-<td style="text-align: center;">8.44</td>
-<td style="text-align: center;">3.63</td>
-<td style="text-align: center;">(1.33, 15.56)</td>
-<td style="text-align: center;">2.33</td>
-<td style="text-align: center;">0.020</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">is male × efficacy gmc actor</td>
-<td style="text-align: center;">5.23</td>
-<td style="text-align: center;">2.97</td>
-<td style="text-align: center;">(-0.59, 11.06)</td>
-<td style="text-align: center;">1.76</td>
-<td style="text-align: center;">0.078</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">is female × efficacy gmc partner</td>
-<td style="text-align: center;">0.23</td>
-<td style="text-align: center;">3.65</td>
-<td style="text-align: center;">(-6.94, 7.39)</td>
-<td style="text-align: center;">0.06</td>
-<td style="text-align: center;">0.950</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">is male × efficacy gmc partner</td>
-<td style="text-align: center;">0.77</td>
-<td style="text-align: center;">2.95</td>
-<td style="text-align: center;">(-5.01, 6.56)</td>
-<td style="text-align: center;">0.26</td>
-<td style="text-align: center;">0.793</td>
-</tr>
-</tbody>
-</table>
+<span id="cb21-10"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<p>:::</p>
-<div class="column" style="width:58%;">
-<div class="loo-summary-table">
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top">
@@ -3419,8 +3340,8 @@ Conclusion (5% level): The likelihood-ratio test finds no clear improvement from
 </table>
 </div>
 </div>
-</div>
-</div><p>::::</p>
+<!-- TODO: we should avoid invisible code if possible so they can 
+reporduce everything -->
 <div class="subtle">
 <p>* <span class="math inline">\(p &lt; .05\)</span>; ** <span class="math inline">\(p &lt; .01\)</span>. Couple 28 was flagged in both visual screens. Its omission weakens both slopes; only the men’s result crosses <span class="math inline">\(p=.05\)</span>.</p>
 </div>
@@ -3617,10 +3538,10 @@ display:block!important;
 <section id="define-dyads-distinguishability-and-research-questions" class="slide level2">
 <h2>Define dyads, distinguishability, and research questions</h2>
 <blockquote>
-<p>Same data, RQ, and dyads, but now treated as exchangeable!</p>
+<p>Same data and RQ, now with exchangeability constraints for illustration.</p>
 </blockquote>
 <aside class="notes">
-<p>Since we now know that a distinguishable model is not better than an exchangeable one, we can use the same RQ and data to demonstrate the exchangeable workflow.</p>
+<p>The distinguishable model did not clearly improve fit, so we use the same data to demonstrate the constrained workflow.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -4025,10 +3946,10 @@ $note
 <span id="cb34-12"><a href></a>    <span class="co"># Within-dyad residual covariance (Sum/Deviation) ------</span></span>
 <span id="cb34-13"><a href></a>  </span>
 <span id="cb34-14"><a href></a>    <span class="co"># Residuals of partners might be similar (positively correlated)</span></span>
-<span id="cb34-15"><a href></a>    <span class="fu">us</span>(<span class="dv">1</span> <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
+<span id="cb34-15"><a href></a>    (<span class="dv">1</span> <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
 <span id="cb34-16"><a href></a>    </span>
 <span id="cb34-17"><a href></a>    <span class="co"># Residuals of partners might move opposite (negatively correlated)</span></span>
-<span id="cb34-18"><a href></a>    <span class="fu">us</span>(<span class="dv">0</span> <span class="sc">+</span> .member_contrast_arbitrary <span class="sc">|</span> couple_id),</span>
+<span id="cb34-18"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .member_contrast_arbitrary <span class="sc">|</span> couple_id),</span>
 <span id="cb34-19"><a href></a>  </span>
 <span id="cb34-20"><a href></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
 <span id="cb34-21"><a href></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
@@ -4188,9 +4109,9 @@ display:block!important;
 <p>Often it is preferable to rotate the covariance back to the familiar member-level covariance matrix:</p>
 <ul>
 <li><p>Member residual variance: <span class="math inline">\(\operatorname{Var}(\epsilon_{1i})=\operatorname{Var}(\epsilon_{2i})
-=\sigma_{r_\mathrm{M}}^2+\sigma_{r_\mathrm{D}}^2\)</span></p></li>
+=\operatorname{Var}(r_{\mathrm{M}i})+\operatorname{Var}(r_{\mathrm{D}i})\)</span></p></li>
 <li><p>Partner residual covariance: <span class="math inline">\(\operatorname{Cov}(\epsilon_{1i},\epsilon_{2i})
-=\sigma_{r_\mathrm{M}}^2-\sigma_{r_\mathrm{D}}^2\)</span></p></li>
+=\operatorname{Var}(r_{\mathrm{M}i})-\operatorname{Var}(r_{\mathrm{D}i})\)</span></p></li>
 </ul>
 </div>
 </section>
@@ -4389,15 +4310,14 @@ display:block!important;
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href></a><span class="fu">install.packages</span>(</span>
 <span id="cb40-2"><a href></a>  <span class="fu">c</span>(</span>
-<span id="cb40-3"><a href></a>    <span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;cv&quot;</span>,</span>
-<span id="cb40-4"><a href></a>    <span class="st">&quot;modelbased&quot;</span>, <span class="st">&quot;see&quot;</span>,</span>
-<span id="cb40-5"><a href></a>    <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span></span>
-<span id="cb40-6"><a href></a>  ),</span>
-<span id="cb40-7"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
-<span id="cb40-8"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
-<span id="cb40-9"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
-<span id="cb40-10"><a href></a>  )</span>
-<span id="cb40-11"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb40-3"><a href></a>    <span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;see&quot;</span>,</span>
+<span id="cb40-4"><a href></a>    <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span></span>
+<span id="cb40-5"><a href></a>  ),</span>
+<span id="cb40-6"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
+<span id="cb40-7"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
+<span id="cb40-8"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
+<span id="cb40-9"><a href></a>  )</span>
+<span id="cb40-10"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>

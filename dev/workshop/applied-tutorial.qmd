@@ -675,7 +675,7 @@ For a male row: $D_\mathrm{M}=1,\ D_\mathrm{F}=0$. For a female row: the reverse
 :::{.notes}
 
 The role indicators correspond to `.is_male` and `.is_female`. The actor and
-partner values correspond to `.efficacy_actor` and `.efficacy_partner`.
+partner values correspond to `.efficacy_gmc_actor` and `.efficacy_gmc_partner`.
 The role index is written first, followed by the dyad index, as in
 $Y_{\mathrm{male},i}$ and $Y_{\mathrm{female},i}$.
 
@@ -732,7 +732,7 @@ apim_distinguishable_model <- glmmTMB(
     .is_male:.efficacy_gmc_partner +
 
     # Within-dyad residual covariance
-    us(0 + .is_female + .is_male | couple_id),
+    (0 + .is_female + .is_male | couple_id),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_distinguishable_data
@@ -814,7 +814,7 @@ apim_distinguishable_dharma_residuals <- DHARMa::simulateResiduals(
   n = 10000,
   
   # Since our model uses dispformula = ~ 0, we cannot use DHARMa's default
-  # conditional simulations. With unconditional, the us() block representing
+  # conditional simulations. With unconditional, the random-effects block representing
   # our residuals is re-simulated.
   simulateREs = "unconditional",
   
@@ -1018,8 +1018,8 @@ apim_exchangeable_comparison_model <- glmmTMB(
     .efficacy_gmc_partner +
 
     # Within-dyad residual covariance
-    us(1 | couple_id) +
-    us(0 + .member_contrast_arbitrary | couple_id),
+    (1 | couple_id) +
+    (0 + .member_contrast_arbitrary | couple_id),
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_distinguishable_data
@@ -1104,6 +1104,7 @@ see::plots(
 
 ## Omitting Couple 28 changes the associations
 
+
 ```{r}
 
 apim_without_couple_28 <- update(
@@ -1117,16 +1118,9 @@ actor_sensitivity <- parameters::compare_parameters(
   keep = "\\.efficacy_gmc_actor"
 )
 
-parameters::model_parameters(apim_without_couple_28, effects = "fixed") |>
-  insight::print_md(footer = "")
-
 ```
 
-:::
 
-::: {.column width="58%"}
-
-::: {.loo-summary-table}
 
 ```{r}
 #| echo: false
@@ -1153,11 +1147,8 @@ slide_table(
 )
 ```
 
-:::
-
-:::
-
-::::
+<!-- TODO: we should avoid invisible code if possible so they can 
+reporduce everything -->
 
 :::{.subtle}
 \* $p < .05$; \*\* $p < .01$. Couple 28 was flagged in both visual screens.
@@ -1257,7 +1248,7 @@ The same model but constrained
 
 ## Define dyads, distinguishability, and research questions
 
-> Same data, RQ, and dyads, but now treated as exchangeable!
+> Same data and RQ, now with exchangeability constraints for illustration.
 
 :::{.notes}
 
@@ -1514,10 +1505,10 @@ apim_exchangeable_model <- glmmTMB(
     # Within-dyad residual covariance (Sum/Deviation) ------
   
     # Residuals of partners might be similar (positively correlated)
-    us(1 | couple_id) +
+    (1 | couple_id) +
     
     # Residuals of partners might move opposite (negatively correlated)
-    us(0 + .member_contrast_arbitrary | couple_id),
+    (0 + .member_contrast_arbitrary | couple_id),
   
   dispformula = ~ 0,
   family = gaussian(),
@@ -1835,8 +1826,7 @@ Short break - initiate package install before you leave
 
 install.packages(
   c(
-    "dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "cv",
-    "modelbased", "see",
+    "dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "see",
     "dplyr", "ggplot2", "tibble"
   ),
   repos = c(
