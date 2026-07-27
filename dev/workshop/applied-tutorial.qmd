@@ -1116,7 +1116,8 @@ model_without_28 <- update(
   data = filter(df_apim, couple_id != 28)
 )
 
-parameters::model_parameters(model_without_28, effects = c('fixed'))
+parameters::model_parameters(model_without_28, effects = c('fixed')) |>
+  insight::print_md(footer = "")
 
 ```
 
@@ -1222,8 +1223,11 @@ parameters::model_parameters(apim_distinguishable_model, effects = 'random') |>
 ## Visualize results
 
 ```{r}
+#| fig-format: svg
+#| out-width: 80%
 
-parameters::model_parameters(apim_distinguishable_model) |>
+
+parameters::model_parameters(apim_distinguishable_model, effects = "fixed") |>
   plot()
 
 ```
@@ -1387,8 +1391,229 @@ Diagonal ICCs: How much variability is within couples vs. between couples?
 
 <!-- TODO: Are these interpretations correct? can ICC be interpreted as a correlation too here? -->
 
+## Visualize partner similarity
+
+<!-- TODO: is there some easy code for this that does not need wide-format? or should we quickly pivot to wide with .arbitrary_member_contrast -->
+
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. [**Estimate the models**]{.text-highlight}
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
+## Exchangeable APIM
+
+```{r}
+#| label: applied-conceptual-distinguishable-apim
+#| echo: false
+#| dev: svg
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Conceptual exchangeable APIM with pooled actor and partner paths and correlated outcome residuals."
+
+draw_apim_diagram("exchangeable", predictors_centered = TRUE,
+                  labels = c(predictor = "Efficacy", outcome = "MVPA"))
+```
+
+## In MLM we constrain / pool by omitting terms
+
+Both partners' formulas are identical, so no need to combine them. We can just write: 
+
+For each dyad $i$, each member $j$ has their own predictor 
+$X^{(\mathrm{A})}_{ri}$ and their partner's predictor $X^{(\mathrm{P})}_{ri}$:
+
+$$
+  Y_{j,i}
+  = b_{0}
+  + \color{#1769AA}{a \times X^{(\mathrm{A})}_{j,i}}
+  + \color{#7B3FA1}{p \times X^{(\mathrm{P})}_{j,i}}
+  + \epsilon_{j,i}
+$$
+
+[**- Actor effects**]{style="color: #1769AA"} [**- Partner effects**]{style="color: #7B3FA1"}
+
+In long format, each equation applies to one member row of the dyad.
+
+Since both members use the same equation, the model pools the effects.
+
+<!-- TODO: check if this is equivalent enough to the distinguishable explanation
+above, and correct -->
+
+## The tricky part: residuals need to remain correlated within dyads
+
+- The two member rows from the same dyad retain a joint residual structure
+
+- Both members now have the same residual variance (pooled)
+
+- Position 1 and 2 within the dyad are arbitrary
+
+
+$$
+\operatorname{Cov}
+\begin{pmatrix}
+\epsilon_{j,1} \\
+\epsilon_{j,2}
+\end{pmatrix}
+= \boldsymbol{\Sigma}_{\epsilon}
+=
+\begin{bmatrix}
+\sigma_{\epsilon}^{2}
+&
+\rho_{\epsilon}
+\sigma_{\epsilon}\sigma_{\epsilon} \\
+\rho_{\epsilon}
+\sigma_{\epsilon}\sigma_{\epsilon}
+&
+\sigma_{\epsilon}^{2}
+\end{bmatrix}
+$$
+
+
+<!-- TODO: notation fine? -->
+
+## Fitting the distinguishable APIM in glmmTMB
+
+```{r results='hide'}
+#| code-line-numbers: "1-25|2|3-4|6-7|9-10|12-20|14-15|17-18|20|1-23"
+apim_exchangeable_model <- glmmTMB(
+  total_mvpa ~
+    # Pooled intercept -------------------------------------
+    1 + 
+
+    # Pooled actor effect ----------------------------------
+    .efficacy_gmc_actor +
+
+    # Pooled partner effect --------------------------------
+    .efficacy_gmc_partner +
+
+    # Within-dyad residual covariance (Sum/Deviation) ------
+  
+    # Residuals of partners might be similar (positively correlated)
+    us(1 | couple_id) +
+    
+    # Residuals of partners might move opposite (negatively correlated)
+    us(0 + .member_contrast_arbitrary | couple_id),
+  
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = df_exch
+)
+
+summary(apim_exchangeable_model)
+```
+
+## The sum-difference parametrization
+
+- Previously we have seen how the DIM uses uncorrelated sum and deviation residuals
+
+- We have established, that the DIM is a roated APIM
+
+- Consequently we can specify a DIM residual structure and rotate it back later
+  - Sum block `(1 | coupleID)`: residuals of members within couples move together
+  - Deviation block `(0 + .member_contrast_arbitrary | coupleID)`: residuals of mebmers within couples move opposite (seesaw)
+  
+<!-- TODO: is this explanation enough? -->
+
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. [**Verify model adequacy, distinguishability, and robustness**]{.text-highlight}
+6. **Visualize, interpret, and report results**
+
+## Verify model adequacy, distinguishability, and robustness
+
+Essentially the same steps and code can be used to check:
+
+1. Did estimation succeed?
+2. Does the model reproduce the important data patterns?
+3. Is exchangeability supported? $\rightarrow$ Test potential distinguishable models
+3. Are conclusions robust or driven by few dyads or consequential
+   modeling choices? (sensitivity analyses)
+
+<!-- TODO: fine to skip actually doing all of this and just 
+give a brief recap?-->
+
+:::{.notes}
+
+Regarding distinguishability: Sensitivity analyses where different ways of
+distinguishing are tested are possible (if there are feasible ways)
+
+:::
+
+
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. [**Visualize, interpret, and report results**]{.text-highlight}
+
+
+## Reporting results and answering the research questions
+
+```{r}
+parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
+  insight::print_md(footer = "")
+```
+
+
+## Reporting results and answering the research questions
+
+We could report and interpret the sum/deviation residuals: 
+
+```{r}
+parameters::model_parameters(apim_exchangeable_model, effects = 'random') |>
+  insight::print_md(footer = "")
+```
+
+But often it is preferable to rotate them back to the familiar member-level
+covariance matrix
+
+Conceptually, extract variances and covariances and:
+
+- $var(Intercept) = \frac{var(sum) + var(deviation)}{2}$
+- $cov(Intercept) = \frac{var(sum) - var(deviation)}{2}$
+
+<!-- TODO: format var() etc. consistently with dyad-day.qmd 
+Also, check if the formulas are correct -->
+
+
+## Reporting results and answering the research questions
+
+No need to do so by hand. Rotating back with `dyadMLM`:
+
+```{r}
+
+dyadMLM::recover_exchangeable_covariance(apim_exchangeable_model)
+
+```
+
+
+## Visualize results
+
+
+```{r}
+#| fig-format: svg
+#| out-width: 80%
+
+parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
+  plot()
+
+```
+
 
 <!-------------------------  Work in progress  -------------------------------->
+
 
 # Excursion: DIM and DSM
 
