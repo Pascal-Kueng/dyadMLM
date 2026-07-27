@@ -17,6 +17,67 @@
       sep = "\n"
     )
   ),
+  descriptive_summary = list(
+    functions = paste(
+      "Use tidyr::pivot_wider() to create one row per couple, then",
+      "report::report_table() to summarize the role-specific columns."
+    ),
+    example_code = paste(
+      "my_wide_data <- my_data |>",
+      "  dplyr::select(couple_id, gender, YOUR_PREDICTOR, YOUR_OUTCOME) |>",
+      "  tidyr::pivot_wider(",
+      "    names_from = gender,",
+      "    values_from = c(YOUR_PREDICTOR, YOUR_OUTCOME)",
+      "  )",
+      "",
+      "my_wide_data |>",
+      "  dplyr::select(-couple_id) |>",
+      "  report::report_table() |>",
+      "  summary()",
+      sep = "\n"
+    )
+  ),
+  histograms = list(
+    functions = paste(
+      "hist() plots a numeric vector.",
+      "Use dplyr::filter() and dplyr::pull() to select one role and variable."
+    ),
+    example_code = paste(
+      "hist(my_data$YOUR_VARIABLE)",
+      "",
+      "my_data |>",
+      "  dplyr::filter(gender == \"male\") |>",
+      "  dplyr::pull(YOUR_VARIABLE) |>",
+      "  hist()",
+      sep = "\n"
+    )
+  ),
+  partner_similarity = list(
+    correlations = paste(
+      "Use correlation::correlation() on my_wide_data. For example:",
+      "",
+      "correlation::correlation(",
+      "  my_wide_data,",
+      "  select = c(\"YOUR_PREDICTOR_female\", \"YOUR_OUTCOME_female\"),",
+      "  select2 = c(\"YOUR_PREDICTOR_male\", \"YOUR_OUTCOME_male\")",
+      ")",
+      sep = "\n"
+    ),
+    plot = paste(
+      "For one focal variable:",
+      "",
+      "plot(",
+      "  my_wide_data$YOUR_VARIABLE_female,",
+      "  my_wide_data$YOUR_VARIABLE_male,",
+      "  xlab = \"Women\", ylab = \"Men\"",
+      ")",
+      "abline(",
+      "  lm(YOUR_VARIABLE_male ~ YOUR_VARIABLE_female, data = my_wide_data),",
+      "  col = \"navy\", lwd = 2",
+      ")",
+      sep = "\n"
+    )
+  ),
   distinguishable_model = list(
     concept = paste(
       "A distinguishable APIM needs role-specific intercepts, actor effects,",
@@ -49,13 +110,69 @@
       sep = "\n"
     )
   ),
-    structure = paste(
-      "Useful functions:",
-      "- parameters::model_parameters(model, effects = \"fixed\")",
-      "- parameters::model_parameters(model, effects = \"random\")",
-      "- plot(parameters::model_parameters(model, effects = \"fixed\"))",
-      "- dyadMLM::recover_exchangeable_covariance(model)",
+  robustness_refit = list(
+    ids = paste(
+      "Store the IDs in a vector. For example:",
+      "DYAD_IDS_TO_EXCLUDE <- c(2, 35)"
+    )
+  ),
+  exchangeable_model = list(
+    fixed_effects = paste(
+      "Replace the role-specific fixed effects with one pooled intercept,",
+      "one actor effect, and one partner effect."
+    ),
+    random_effects = paste(
+      "Represent the exchangeable residual covariance with a shared block",
+      "(1 | couple_id) and a difference block",
+      "(0 + .member_contrast_arbitrary | couple_id)."
+    ),
+    example_code = paste(
+      "my_exchangeable_model <- glmmTMB(",
+      "  YOUR_OUTCOME ~",
+      "    1 +",
+      "    YOUR_ACTOR_PREDICTOR +",
+      "    YOUR_PARTNER_PREDICTOR +",
+      "    (1 | couple_id) +",
+      "    (0 + .member_contrast_arbitrary | couple_id),",
+      "  dispformula = ~ 0,",
+      "  family = gaussian(),",
+      "  data = my_data",
+      ")",
       sep = "\n"
+    )
+  ),
+  report_results = list(
+    fixed_effects = paste(
+      "parameters::model_parameters(YOUR_MODEL, effects = \"fixed\")"
+    ),
+    random_effects = paste(
+      "parameters::model_parameters(YOUR_MODEL, effects = \"random\")",
+      "",
+      "For an exchangeable model, also use:",
+      "dyadMLM::recover_exchangeable_covariance(YOUR_MODEL)",
+      sep = "\n"
+    ),
+    plot = paste(
+      "parameters::model_parameters(YOUR_MODEL, effects = \"fixed\") |>",
+      "  plot()",
+      sep = "\n"
+    )
+  ),
+  dim_transformation = list(
+    formulas = paste(
+      "The between-dyad effect is the sum of the actor and partner effects:",
+      "b_mean <- b_actor + b_partner",
+      "",
+      "The within-dyad effect is their difference:",
+      "b_dev <- b_actor - b_partner",
+      sep = "\n"
+    )
+  ),
+  ild_research_question = list(
+    concept = paste(
+      "First decide whether time is part of the scientific question.",
+      "Concurrent effects concern the same occasion; lagged effects concern carryover.",
+      "A residual AR process handles remaining dependence but is not itself a carryover effect."
     )
   ),
   ild_prepare_data = list(
