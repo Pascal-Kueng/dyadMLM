@@ -1,14 +1,11 @@
 # Run this file once, in a fresh R session, before the workshop.
 
-workshop_repositories <- c(
-  PascalKueng = "https://pascal-kueng.r-universe.dev",
-  CRAN = "https://cloud.r-project.org"
+cran_repository <- c(
+  CRAN = "https://packagemanager.posit.co/cran/latest"
 )
 
-workshop_packages <- c(
-  "dyadMLM",
-  "wbCorr",
-  "glmmTMB",
+cran_packages <- c(
+  "glmmTMB?reinstall",
   "DHARMa",
   "easystats",
   "dplyr",
@@ -17,17 +14,58 @@ workshop_packages <- c(
   "tidyr"
 )
 
-options(repos = workshop_repositories)
+universe_packages <- c("dyadMLM", "wbCorr")
+workshop_packages <- c(
+  sub("\\?.*$", "", cran_packages),
+  universe_packages
+)
+
+options(repos = cran_repository)
 
 if (!requireNamespace("pak", quietly = TRUE)) {
   install.packages("pak")
 }
 
 pak::pkg_install(
-  workshop_packages,
+  cran_packages,
   upgrade = TRUE,
   ask = FALSE
 )
+
+options(
+  repos = c(
+    PascalKueng = "https://pascal-kueng.r-universe.dev",
+    cran_repository
+  )
+)
+
+pak::pkg_install(
+  universe_packages,
+  upgrade = TRUE,
+  ask = FALSE
+)
+
+glmmTMB_warnings <- character()
+
+withCallingHandlers(
+  requireNamespace("glmmTMB", quietly = TRUE),
+  warning = function(warning) {
+    glmmTMB_warnings <<- c(
+      glmmTMB_warnings,
+      conditionMessage(warning)
+    )
+    invokeRestart("muffleWarning")
+  }
+)
+
+if (any(grepl("version mismatch", glmmTMB_warnings, fixed = TRUE))) {
+  stop(
+    "glmmTMB still has incompatible binary dependencies. ",
+    "Restart R, run install.packages(\"glmmTMB\", type = \"source\"), ",
+    "then rerun 00_setup.R.",
+    call. = FALSE
+  )
+}
 
 missing_packages <- workshop_packages[
   !vapply(workshop_packages, requireNamespace, logical(1), quietly = TRUE)
