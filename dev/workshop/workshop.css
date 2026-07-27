@@ -414,6 +414,10 @@
   background: var(--uzh-surface);
 }
 
+.reveal .agenda-completed {
+  color: #9aa7bd;
+}
+
 /* Give executed code and its output a little visual separation. */
 .reveal .cell > .cell-code + .cell-output,
 .reveal .cell > .cell-code + .cell-output-display,

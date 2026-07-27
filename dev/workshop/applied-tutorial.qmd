@@ -72,8 +72,8 @@ sys.source(
 
 | Time | Focus |
 |---|---|
-| 11:00–12:45 | Introduction and types of dyadic models |
-| 12:45–14:00 | *Lunch break*|
+| [11:00–12:45]{.agenda-completed} | [Introduction and types of dyadic models]{.agenda-completed} |
+| [12:45–14:00]{.agenda-completed} | [*Lunch break*]{.agenda-completed} |
 | 14:00–15:30 | Estimating cross-sectional dyadic models in R |
 | 15:30–15:45 | *Short break* |
 | 15:45–16:45 | Intensive longitudinal extensions |
@@ -81,8 +81,6 @@ sys.source(
 | 17:00–18:00 | Exercises in R |
 
 :::
-
-<!-- TODO @codex: please grey out the first two points, intro and lunch break). -->
 
 <!-- ca. 2 Minutes -->
 
@@ -405,10 +403,7 @@ print(apim_distinguishable_data)
 ```
 
 
-## Create the required format and validate the data
-<!-- TODO: link to an appendix, just like we did in the dyad-day.qmd file, with code-snippets of how to manually achieve the
-is_male, is_female, and _actor and _partner variables. -->
-
+## Create the required format and validate the data [Manual code →](#manual-apim-preparation){.results-forward-link} {#prepared-apim-data}
 
 Looking at the columns immediately relevant to us:
 
@@ -421,8 +416,6 @@ head(apim_distinguishable_data) |>
   slide_table()
 
 ```
-
-<!-- TODO: color code partner values? -->
 
 ## Workflow
 
@@ -1378,8 +1371,7 @@ see::plots(
 
 ## Observed correlations
 
-Correlations between the two partners' values do not inherently make sense,
-since the random assignment cancels them out. We could compute ICCs: 
+For exchangeable dyads, ICCs summarize partner similarity:
 
 ```{r}
 library(wbCorr)
@@ -1392,12 +1384,9 @@ apim_exchangeable_correlations <- wbCorr(
 summary(apim_exchangeable_correlations, 'wb')
 ```
 
-Top right: if one partner's efficacy is high, is the others' MVPA high?
-Bottom left: In a couple with high MVPA, does that couple also have high efficacy?
-Diagonal ICCs: How much variability is within couples vs. between couples?
+**Diagonal ICCs:** expected correlation between partners on each variable
 
-
-<!-- TODO: Are these interpretations correct? can ICC be interpreted as a correlation too here? -->
+[**Off-diagonals:** top right = within-couple correlation; bottom left = between-couple correlation]{.subtle}
 
 ## Visualize partner similarity
 
@@ -1463,7 +1452,7 @@ draw_apim_diagram("exchangeable", predictors_centered = TRUE,
 Both partners' formulas are identical, so no need to combine them. We can just write: 
 
 For each dyad $i$, each member $j$ has their own predictor 
-$X^{(\mathrm{A})}_{ri}$ and their partner's predictor $X^{(\mathrm{P})}_{ri}$:
+$X^{(\mathrm{A})}_{j,i}$ and their partner's predictor $X^{(\mathrm{P})}_{j,i}$:
 
 $$
   Y_{j,i}
@@ -1477,10 +1466,8 @@ $$
 
 In long format, each equation applies to one member row of the dyad.
 
-Since both members use the same equation, the model pools the effects.
-
-<!-- TODO: check if this is equivalent enough to the distinguishable explanation
-above, and correct -->
+The model pools the effects, but actor and partner values are exchanged between
+member rows, so their predictions may still differ.
 
 ## The tricky part: residuals need to remain correlated within dyads
 
@@ -1494,25 +1481,20 @@ above, and correct -->
 $$
 \operatorname{Cov}
 \begin{pmatrix}
-\epsilon_{j,1} \\
-\epsilon_{j,2}
+\epsilon_{1i} \\
+\epsilon_{2i}
 \end{pmatrix}
 = \boldsymbol{\Sigma}_{\epsilon}
 =
 \begin{bmatrix}
 \sigma_{\epsilon}^{2}
 &
-\rho_{\epsilon}
-\sigma_{\epsilon}\sigma_{\epsilon} \\
-\rho_{\epsilon}
-\sigma_{\epsilon}\sigma_{\epsilon}
+\rho_{\epsilon_1\epsilon_2}\sigma_{\epsilon}^{2} \\
+\rho_{\epsilon_1\epsilon_2}\sigma_{\epsilon}^{2}
 &
 \sigma_{\epsilon}^{2}
 \end{bmatrix}
 $$
-
-
-<!-- TODO: notation fine? -->
 
 ## Fitting the exchangeable APIM in glmmTMB
 
@@ -1545,17 +1527,15 @@ apim_exchangeable_model <- glmmTMB(
 summary(apim_exchangeable_model)
 ```
 
-## The sum-difference parametrization
+## The mean-deviation parameterization
 
-- Previously we have seen how the DIM uses uncorrelated sum and deviation residuals
+- The DIM represents member residuals using two uncorrelated components:
 
-- We have established, that the DIM is a roated APIM
+  - Mean block `(1 | couple_id)`:
+    $r_{\mathrm{M}i}=(\epsilon_{1i}+\epsilon_{2i})/2$; both members move together
 
-- Consequently we can specify a DIM residual structure and rotate it back later
-  - Sum block `(1 | coupleID)`: residuals of members within couples move together
-  - Deviation block `(0 + .member_contrast_arbitrary | coupleID)`: residuals of mebmers within couples move opposite (seesaw)
-  
-<!-- TODO: is this explanation enough? -->
+  - Deviation block `(0 + .member_contrast_arbitrary | couple_id)`:
+    $r_{\mathrm{D}i}=(\epsilon_{1i}-\epsilon_{2i})/2$; members move in opposite directions
 
 ## Workflow
 
@@ -1575,9 +1555,6 @@ Essentially the same steps and code can be used to check:
 3. Is exchangeability supported? $\rightarrow$ Test potential distinguishable models
 3. Are conclusions robust or driven by few dyads or consequential
    modeling choices? (sensitivity analyses)
-
-<!-- TODO: fine to skip actually doing all of this and just 
-give a brief recap?-->
 
 :::{.notes}
 
@@ -1607,24 +1584,23 @@ parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
 
 ## Reporting results and answering the research questions
 
-We could report and interpret the sum/deviation residuals: 
-
 ```{r}
 parameters::model_parameters(apim_exchangeable_model, effects = 'random') |>
   insight::print_md(footer = "")
 ```
 
-But often it is preferable to rotate them back to the familiar member-level
-covariance matrix
+:::{.fragment}
+Often it is preferable to rotate the covariance back to the familiar member-level covariance matrix: 
 
-Conceptually, extract variances and covariances and:
+- Member residual variance:
+  $\operatorname{Var}(\epsilon_{1i})=\operatorname{Var}(\epsilon_{2i})
+  =\sigma_{r_\mathrm{M}}^2+\sigma_{r_\mathrm{D}}^2$
 
-- $var(Intercept) = \frac{var(sum) + var(deviation)}{2}$
-- $cov(Intercept) = \frac{var(sum) - var(deviation)}{2}$
-
-<!-- TODO: format var() etc. consistently with dyad-day.qmd 
-Also, check if the formulas are correct -->
-
+- Partner residual covariance:
+  $\operatorname{Cov}(\epsilon_{1i},\epsilon_{2i})
+  =\sigma_{r_\mathrm{M}}^2-\sigma_{r_\mathrm{D}}^2$
+  
+:::
 
 ## Reporting results and answering the research questions
 
@@ -1890,8 +1866,6 @@ install.packages(
 
 <!-- ILD-part: 
 
-- see dev note on ar1 processes careful to consider degrees of freedom! relevant here?
-  - TODO @codex: are degrees of freedom alreaedy important in the cross-sectional case and should we teach anything regarding those?
 - see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
 
 -->
@@ -1904,3 +1878,29 @@ correlations (wb corr)?
 -->
 
 ## References
+
+::: {#refs}
+:::
+
+# Appendix
+
+## Create the APIM variables manually [← Data preparation](#prepared-apim-data){.appendix-back-link} {#manual-apim-preparation .smaller}
+
+This shortcut assumes validation has confirmed exactly two rows per dyad.
+
+```{r}
+#| eval: false
+
+apim_manual_data <- raw_dyad_data |>
+  dplyr::mutate(
+    .is_female = as.numeric(gender == "female"),
+    .is_male = as.numeric(gender == "male"),
+    .efficacy_gmc = efficacy - mean(efficacy, na.rm = TRUE)
+  ) |>
+  dplyr::group_by(couple_id) |>
+  dplyr::mutate(
+    .efficacy_gmc_actor = .efficacy_gmc,
+    .efficacy_gmc_partner = rev(.efficacy_gmc)
+  ) |>
+  dplyr::ungroup()
+```
