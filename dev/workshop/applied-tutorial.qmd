@@ -26,7 +26,7 @@ editor: source
 ---
 
 ```{r}
-#| label: setup-pilot-data
+#| label: setup-applied-tutorial
 #| include: false
 
 library(dplyr)
@@ -335,13 +335,13 @@ In our data, probably makes sense to distinguish by gender. Not always!
 ```{r}
 library(dplyr) # for easier data-wrangling, exports functions like `select()`
 
-df <- readRDS("dyadic-person-means.rds") |>
+raw_dyad_data <- readRDS("dyadic-person-means.rds") |>
   dplyr::select(
     couple_id, person_id, gender, efficacy, total_mvpa
   )
 
-# usually use head(df), slide_table is a custom function for html tables on these slides
-slide_table(df[1:4,]) 
+# usually use head(raw_dyad_data), slide_table is a custom function for html tables on these slides
+slide_table(raw_dyad_data[1:4,])
 ```
 
 :::{.subtle}
@@ -387,8 +387,8 @@ We can use the `dyadMLM` package to help with data preparation and validation.
 
 library(dyadMLM)
 
-df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
-  data = df,
+apim_distinguishable_data <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
+  data = raw_dyad_data,
   dyad = couple_id,
   member = person_id,
   role = gender,
@@ -400,7 +400,7 @@ df_apim <- dyadMLM::prepare_dyad_data( # exported function from dyadMLM
   seed = 123
 ) 
 
-print(df_apim)
+print(apim_distinguishable_data)
 
 ```
 
@@ -414,7 +414,7 @@ Looking at the columns immediately relevant to us:
 
 ```{r}
 
-head(df_apim) |>
+head(apim_distinguishable_data) |>
   dplyr::select(
     couple_id, person_id, gender, .is_female, .is_male, .efficacy_gmc, .efficacy_gmc_actor, .efficacy_gmc_partner, total_mvpa
   ) |>
@@ -438,14 +438,14 @@ head(df_apim) |>
 The models will **NOT** use this dataset
 
 ```{r}
-df_wide <- df_apim |>
+apim_distinguishable_wide_data <- apim_distinguishable_data |>
   dplyr::select(couple_id, gender, efficacy, total_mvpa) |>
   tidyr::pivot_wider(
     names_from = gender,
     values_from = c(efficacy, total_mvpa)
   )
 
-slide_table(head(df_wide))
+slide_table(head(apim_distinguishable_wide_data))
 ```
 
 
@@ -454,7 +454,7 @@ slide_table(head(df_wide))
 ```{r}
 library(report)
 
-df_wide |>
+apim_distinguishable_wide_data |>
   dplyr::select(-couple_id) |>
   report::report_table() |>
   slide_table()
@@ -467,7 +467,7 @@ df_wide |>
 library(ggplot2)
 library(see)
 
-plot_dyadic_histograms <- function(data, group, var) {
+plot_role_histograms <- function(data, group, var) {
   var_label <- rlang::as_label(rlang::enquo(var))
 
   ggplot(
@@ -493,7 +493,7 @@ plot_dyadic_histograms <- function(data, group, var) {
 ```{r}
 #| dev: svglite
 
-plot_dyadic_histograms(df_apim, gender, efficacy)
+plot_role_histograms(apim_distinguishable_data, gender, efficacy)
 ```
 
 
@@ -502,7 +502,7 @@ plot_dyadic_histograms(df_apim, gender, efficacy)
 ```{r}
 #| dev: svglite
 
-plot_dyadic_histograms(df_apim, gender, total_mvpa)
+plot_role_histograms(apim_distinguishable_data, gender, total_mvpa)
 ```
 
 ## Observed dyadic correlations
@@ -513,7 +513,7 @@ The wide data ensure that each couple contributes once.
 library(correlation)
 library(insight)
 
-df_wide |>
+apim_distinguishable_wide_data |>
   correlation::correlation(
     select = c("efficacy_female", "total_mvpa_female"),
     select2 = c("efficacy_male", "total_mvpa_male")
@@ -564,11 +564,13 @@ n_mahalanobis <- 4
 
 see::plots(
   plot_partner_similarity(
-    df_wide, efficacy_female, efficacy_male, couple_id, "Efficacy",
+    apim_distinguishable_wide_data,
+    efficacy_female, efficacy_male, couple_id, "Efficacy",
     n_mahalanobis = n_mahalanobis
   ),
   plot_partner_similarity(
-    df_wide, total_mvpa_female, total_mvpa_male, couple_id, "Daily MVPA",
+    apim_distinguishable_wide_data,
+    total_mvpa_female, total_mvpa_male, couple_id, "Daily MVPA",
     n_mahalanobis = n_mahalanobis
   )
 )
@@ -740,7 +742,7 @@ apim_distinguishable_model <- glmmTMB(
     us(0 + .is_female + .is_male | couple_id),
   dispformula = ~ 0,
   family = gaussian(),
-  data = df_apim
+  data = apim_distinguishable_data
 )
 
 summary(apim_distinguishable_model)
@@ -808,13 +810,13 @@ One function works across many model families!
 ## Simulate the full dyadic residual structure
 
 ```{r}
-#| label: simulate-dharma
+#| label: simulate-dharma-distinguishable
 #| cache: true
 #| cache.extra: !expr digest::digest(list(stats::logLik(apim_distinguishable_model), stats::model.frame(apim_distinguishable_model)))
 
 library(DHARMa)
 
-dharma_residuals <- DHARMa::simulateResiduals(
+apim_distinguishable_dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_model,
   n = 10000,
   
@@ -840,7 +842,7 @@ dharma_residuals <- DHARMa::simulateResiduals(
 #| fig-format: svg
 #| echo: false
 
-plot(dharma_residuals)
+plot(apim_distinguishable_dharma_residuals)
 
 ```
 
@@ -867,8 +869,8 @@ More targeted checks and guidance on interpretation of the plots:
 
 ```{r}
 
-female_dharma_residuals <- DHARMa::recalculateResiduals(
-  dharma_residuals,
+apim_distinguishable_female_dharma_residuals <- DHARMa::recalculateResiduals(
+  apim_distinguishable_dharma_residuals,
   
   # Recalculate from the same simulations for one role.
   # One observation per couple: no rotation needed.
@@ -877,8 +879,8 @@ female_dharma_residuals <- DHARMa::recalculateResiduals(
   seed = 123
 )
 
-male_dharma_residuals <- DHARMa::recalculateResiduals(
-  dharma_residuals,
+apim_distinguishable_male_dharma_residuals <- DHARMa::recalculateResiduals(
+  apim_distinguishable_dharma_residuals,
   sel = ~ .is_male == 1,
   rotation = NULL,
   seed = 123
@@ -901,11 +903,11 @@ male_dharma_residuals <- DHARMa::recalculateResiduals(
 
 old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 4.5, 1))
 DHARMa::plotResiduals(
-  female_dharma_residuals,
+  apim_distinguishable_female_dharma_residuals,
   main = "Women"
 )
 DHARMa::plotResiduals(
-  male_dharma_residuals,
+  apim_distinguishable_male_dharma_residuals,
   main = "Men"
 )
 par(old_par)
@@ -934,21 +936,21 @@ More targeted checks and guidance on interpretation of the plots:
 ## Square-root MVPA reduces the fitted-value pattern {.smaller}
 
 ```{r}
-#| label: simulate-dharma-sqrt
+#| label: simulate-dharma-distinguishable-sqrt
 #| include: false
 #| cache: true
 #| cache.extra: !expr digest::digest(list(stats::logLik(apim_distinguishable_model), stats::model.frame(apim_distinguishable_model)))
 
-df_apim_sqrt <- df_apim |>
+apim_distinguishable_sqrt_data <- apim_distinguishable_data |>
   dplyr::mutate(sqrt_total_mvpa = sqrt(total_mvpa))
 
 apim_distinguishable_sqrt_model <- update(
   apim_distinguishable_model,
   sqrt_total_mvpa ~ .,
-  data = df_apim_sqrt
+  data = apim_distinguishable_sqrt_data
 )
 
-sqrt_dharma_residuals <- DHARMa::simulateResiduals(
+apim_distinguishable_sqrt_dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_sqrt_model,
   n = 10000,
   simulateREs = "unconditional",
@@ -965,7 +967,7 @@ sqrt_dharma_residuals <- DHARMa::simulateResiduals(
 #| echo: false
 #| fig-format: svg
 
-plot(sqrt_dharma_residuals)
+plot(apim_distinguishable_sqrt_dharma_residuals)
 
 ```
 :::
@@ -1011,7 +1013,7 @@ However, non-significant comparisons are not proof that roles are identical.
 
 ```{r include=FALSE}
 
-apim_exchangeable_model <- glmmTMB(
+apim_exchangeable_comparison_model <- glmmTMB(
   total_mvpa ~
     # Pooled intercept
     1 +
@@ -1027,19 +1029,19 @@ apim_exchangeable_model <- glmmTMB(
     us(0 + .member_contrast_arbitrary | couple_id),
   dispformula = ~ 0,
   family = gaussian(),
-  data = df_apim
+  data = apim_distinguishable_data
 )
 
-summary(apim_exchangeable_model)
+summary(apim_exchangeable_comparison_model)
 
-dyadMLM::recover_exchangeable_covariance(apim_exchangeable_model)
+dyadMLM::recover_exchangeable_covariance(apim_exchangeable_comparison_model)
 
 ```
 
 ```{r}
 
 dyadMLM::compare_nested_models(
-  apim_distinguishable_model, apim_exchangeable_model
+  apim_distinguishable_model, apim_exchangeable_comparison_model
 )
 
 ```
@@ -1090,12 +1092,12 @@ n_mahalanobis <- 4
 
 see::plots(
   plot_actor_association(
-    dplyr::filter(df_apim, gender == "female"),
+    dplyr::filter(apim_distinguishable_data, gender == "female"),
     apim_distinguishable_model, ".is_female", "Women",
     n_mahalanobis = n_mahalanobis
   ),
   plot_actor_association(
-    dplyr::filter(df_apim, gender == "male"),
+    dplyr::filter(apim_distinguishable_data, gender == "male"),
     apim_distinguishable_model, ".is_male", "Men",
     n_mahalanobis = n_mahalanobis
   )
@@ -1111,12 +1113,18 @@ see::plots(
 
 ```{r}
 
-model_without_28 <- update(
+apim_without_couple_28 <- update(
   apim_distinguishable_model,
-  data = filter(df_apim, couple_id != 28)
+  data = filter(apim_distinguishable_data, couple_id != 28)
 )
 
-parameters::model_parameters(model_without_28, effects = c('fixed')) |>
+actor_sensitivity <- parameters::compare_parameters(
+  `Full data` = apim_distinguishable_model,
+  `Without Couple 28` = apim_without_couple_28,
+  keep = "\\.efficacy_gmc_actor"
+)
+
+parameters::model_parameters(apim_without_couple_28, effects = "fixed") |>
   insight::print_md(footer = "")
 
 ```
@@ -1285,17 +1293,17 @@ we would pass `role` and set `include_arbitrary_member_contrast = TRUE`.
 ```{r}
 #| output-results: slide
 
-df_exch <- dyadMLM::prepare_dyad_data(
-  data = df, 
-  dyad = couple_id, 
-  member = person_id, 
-  predictor = efficacy, 
-  model_type = 'apim', 
+apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
+  data = raw_dyad_data,
+  dyad = couple_id,
+  member = person_id,
+  predictors = efficacy,
+  model_types = 'apim',
   add_apim_gmc_predictors = TRUE,
   seed = 123
 )
 
-print(df_exch)
+print(apim_exchangeable_data)
 
 ```
 
@@ -1304,7 +1312,7 @@ print(df_exch)
 Looking at the relevant columns: 
 
 ```{r}
-head(df_exch) |>
+head(apim_exchangeable_data) |>
   dplyr::select(
     couple_id, person_id, .member_contrast_arbitrary, .efficacy_gmc, .efficacy_gmc_actor, .efficacy_gmc_partner, total_mvpa
   ) |>
@@ -1327,7 +1335,7 @@ No wide-view of the data is needed for exchangeable dyads.
 We can describe the data directly to obtain pooled estimates: 
 
 ```{r}
-df_exch |>
+apim_exchangeable_data |>
   dplyr::select(efficacy, total_mvpa) |>
   report::report_table() |>
   slide_table()
@@ -1337,7 +1345,7 @@ df_exch |>
 
 ```{r}
 
-plot_dyadic_histograms <- function(data, var) {
+plot_pooled_histogram <- function(data, var) {
   var_label <- rlang::as_label(rlang::enquo(var))
 
   ggplot(
@@ -1363,8 +1371,8 @@ plot_dyadic_histograms <- function(data, var) {
 #| out-width: 100%
 
 see::plots(
-  plot_dyadic_histograms(df_apim, efficacy),
-  plot_dyadic_histograms(df_apim, total_mvpa)
+  plot_pooled_histogram(apim_exchangeable_data, efficacy),
+  plot_pooled_histogram(apim_exchangeable_data, total_mvpa)
 )
 ```
 
@@ -1376,12 +1384,12 @@ since the random assignment cancels them out. We could compute ICCs:
 ```{r}
 library(wbCorr)
 
-within_between_correlations <- wbCorr(
-  df_exch[,c('efficacy','total_mvpa')], 
-  cluster = df_exch$couple_id
+apim_exchangeable_correlations <- wbCorr(
+  apim_exchangeable_data[,c('efficacy','total_mvpa')],
+  cluster = apim_exchangeable_data$couple_id
 )
 
-summary(within_between_correlations, 'wb')
+summary(apim_exchangeable_correlations, 'wb')
 ```
 
 Top right: if one partner's efficacy is high, is the others' MVPA high?
@@ -1393,7 +1401,37 @@ Diagonal ICCs: How much variability is within couples vs. between couples?
 
 ## Visualize partner similarity
 
-<!-- TODO: is there some easy code for this that does not need wide-format? or should we quickly pivot to wide with .arbitrary_member_contrast -->
+```{r}
+#| output-location: slide
+#| dev: svglite
+#| fig-width: 12
+#| fig-height: 5.5
+#| out-width: 100%
+#| fig-cap: "Each couple is shown twice—once with each person as the focal member."
+
+partner_similarity_data <- apim_exchangeable_data |>
+  dplyr::group_by(couple_id) |>
+  dplyr::mutate(
+    efficacy_partner = rev(efficacy),
+    total_mvpa_partner = rev(total_mvpa)
+  ) |>
+  dplyr::ungroup()
+
+see::plots(
+  plot_partner_similarity(
+    partner_similarity_data,
+    efficacy, efficacy_partner, couple_id, "Efficacy",
+    n_mahalanobis = 0
+  ) +
+    labs(x = "Focal member", y = "Partner"),
+  plot_partner_similarity(
+    partner_similarity_data,
+    total_mvpa, total_mvpa_partner, couple_id, "Daily MVPA",
+    n_mahalanobis = 0
+  ) +
+    labs(x = "Focal member", y = "Partner")
+)
+```
 
 ## Workflow
 
@@ -1407,7 +1445,7 @@ Diagonal ICCs: How much variability is within couples vs. between couples?
 ## Exchangeable APIM
 
 ```{r}
-#| label: applied-conceptual-distinguishable-apim
+#| label: applied-conceptual-exchangeable-apim
 #| echo: false
 #| dev: svg
 #| fig-width: 9
@@ -1476,7 +1514,7 @@ $$
 
 <!-- TODO: notation fine? -->
 
-## Fitting the distinguishable APIM in glmmTMB
+## Fitting the exchangeable APIM in glmmTMB
 
 ```{r results='hide'}
 #| code-line-numbers: "1-25|2|3-4|6-7|9-10|12-20|14-15|17-18|20|1-23"
@@ -1501,7 +1539,7 @@ apim_exchangeable_model <- glmmTMB(
   
   dispformula = ~ 0,
   family = gaussian(),
-  data = df_exch
+  data = apim_exchangeable_data
 )
 
 summary(apim_exchangeable_model)
