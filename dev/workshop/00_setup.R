@@ -1,11 +1,9 @@
 # Run this file once, in a fresh R session, before the workshop.
 
-cran_repository <- c(
-  CRAN = "https://packagemanager.posit.co/cran/latest"
-)
+cran_repository <- "https://cloud.r-project.org"
 
 cran_packages <- c(
-  "glmmTMB?reinstall",
+  "glmmTMB",
   "DHARMa",
   "easystats",
   "dplyr",
@@ -15,12 +13,10 @@ cran_packages <- c(
 )
 
 universe_packages <- c("dyadMLM", "wbCorr")
-workshop_packages <- c(
-  sub("\\?.*$", "", cran_packages),
-  universe_packages
-)
+universe_package_references <- paste0(universe_packages, "?reinstall")
+workshop_packages <- c(cran_packages, universe_packages)
 
-options(repos = cran_repository)
+options(repos = c(CRAN = cran_repository))
 
 if (!requireNamespace("pak", quietly = TRUE)) {
   install.packages("pak")
@@ -28,44 +24,22 @@ if (!requireNamespace("pak", quietly = TRUE)) {
 
 pak::pkg_install(
   cran_packages,
-  upgrade = TRUE,
+  upgrade = FALSE,
   ask = FALSE
 )
 
 options(
   repos = c(
     PascalKueng = "https://pascal-kueng.r-universe.dev",
-    cran_repository
+    CRAN = cran_repository
   )
 )
 
 pak::pkg_install(
-  universe_packages,
-  upgrade = TRUE,
+  universe_package_references,
+  upgrade = FALSE,
   ask = FALSE
 )
-
-glmmTMB_warnings <- character()
-
-withCallingHandlers(
-  requireNamespace("glmmTMB", quietly = TRUE),
-  warning = function(warning) {
-    glmmTMB_warnings <<- c(
-      glmmTMB_warnings,
-      conditionMessage(warning)
-    )
-    invokeRestart("muffleWarning")
-  }
-)
-
-if (any(grepl("version mismatch", glmmTMB_warnings, fixed = TRUE))) {
-  stop(
-    "glmmTMB still has incompatible binary dependencies. ",
-    "Restart R, run install.packages(\"glmmTMB\", type = \"source\"), ",
-    "then rerun 00_setup.R.",
-    call. = FALSE
-  )
-}
 
 missing_packages <- workshop_packages[
   !vapply(workshop_packages, requireNamespace, logical(1), quietly = TRUE)

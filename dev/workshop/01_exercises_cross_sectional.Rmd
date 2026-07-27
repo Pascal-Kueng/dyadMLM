@@ -28,8 +28,9 @@ An R Markdown (`.Rmd`) file combines *markdown* text -- such as this paragraph -
 with runnable R code chunks.
 
 Run code chunks individually via the green little play button on the 
-top-right of each chunk. Try it and run the next chunk. It installs/updates
-all workshop packages and their dependencies. This may take several minutes.
+top-right of each chunk. Try it and run the next chunk. It installs or updates
+the workshop packages and any dependencies that need updating. This may take
+several minutes.
 
 ```{r eval=FALSE}
 source("00_setup.R")
@@ -75,6 +76,11 @@ the whole line a comment that is not evaluated by R.
 After deleting the `#`, run the chunk (again). You can try it above.
 
 
+
+------------ Let's get started! ------------------
+
+
+
 # Loading, inspecting, and preparing the data
 
 Follow a simplified workflow:
@@ -91,13 +97,12 @@ Follow a simplified workflow:
 You may use any of the variables in the dataset as outcome or predictor.
 
 Place `dyadic-person-means.rds` in the same folder as this exercise file, then
-load and inspect the dataset:
+load and inspect the raw aggregated dataset:
 
 ```{r}
 raw_dyad_data <- readRDS("dyadic-person-means.rds")
 
 head(raw_dyad_data)
-names(raw_dyad_data)
 ```
 
 

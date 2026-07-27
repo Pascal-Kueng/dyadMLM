@@ -1823,8 +1823,9 @@ populations
 - Download and unzip all workshop materials
 - Or use the files in the Teams channel
 
-Run this once in a fresh R session before the break. It updates all workshop
-packages and their dependencies and may take several minutes.
+Run this once in a fresh R session before the break. It installs or updates the
+workshop packages and any dependencies that need updating; this may take
+several minutes.
 
 ```{r eval = FALSE}
 source("00_setup.R")
