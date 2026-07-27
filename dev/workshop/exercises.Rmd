@@ -95,9 +95,13 @@ Adding a `?` before any package function will produce a helpful help-page.
 
 ---
 
-Prepare and validate the data for a **distinguishable** model now: 
+Prepare and validate the data for a **distinguishable** model now. 
+
+Hint: if you set `include_arbitrary_member_contrast = TRUE` you can use the 
+same data to fit both distinguishable and exchangeable models later.
 
 ```{r}
+
 
 ```
 
@@ -138,11 +142,14 @@ summary(my_model)
 ```
 
 
-Check if the model converged and if all estimates look plausible.
 
 # 5. Verify model adequacy, distinguishability, and robustness
 
-Use DHARMa for residual diagnostics via simulation:
+### Adequacy:
+
+Check if the model converged and if all estimates look plausible.
+
+Then, use DHARMa for residual diagnostics via simulation:
 
 ```{r}
 # Should we already provide the code?
@@ -151,6 +158,8 @@ Use DHARMa for residual diagnostics via simulation:
 Interpreting these residual diagnostics is not easy. In practice, refer to 
 the vignette. For now, just acknowledge whether they seem acceptable or not. 
 
+
+### Influential dyads
 
 Next, check visually whether results could be driven by few dyads. You can use 
 the following function (just run it to create it in your environment):
@@ -174,6 +183,28 @@ you may use `easy call`:
 ```{r}
 
 ```
+
+
+### Distinguishability
+
+Fit the equivalent model as exchangeable dyads. Hint: you need a 
+`.arbitrary_member_contrast` column in the data. You may already have included
+one earlier, or you may need to prepare the data freshly. You can check
+your column names with `names(your_data)`. 
+
+
+```{r}
+
+
+```
+
+
+Insert your brief conclusion, and choose whether you want to go forward with
+the distinguishable or exchangeable model for the rest of the excercise:
+
+[Insert conclusion]
+
+[Insert decision and reasoning]
 
 
 # 6. Visualize, interpret, and report results
@@ -204,20 +235,50 @@ Your interpretation:
 
 [insert interpretation]
 
-# Cross-sectional dyads
 
-## Distinguishable APIM
+You have now completed the APIM-workflow!!
 
-## Exchangeable APIM
-
-## Compare models
-
-Select one
 
 ## Compute DSM or DIM estimates
 
-If you want to fit a DIM or DSM from scratch, see: Vignette of dyadMLM
+Since the transformation to DIM estimate is much sipmler, let's try this. 
+Check the output from your **exchangeable** model, and enter your coefficients
+here: 
+
+```{r}
+
+b_actor <- # [insert from your model output]
+b_partner <- # [insert from your model output]
+  
+```
+
+Recover the DIM estimates:
+
+```{r}
+
+b_mean <- # [insert formula]
+b_dev <- # [insert formula]
+  
+paste0("The between-dyad effect is: ", b_mean)
+paste0("The within-dyad effect is: ", b_dev)
+
+```
+
+
+Interpret the effects: 
+
+[Insert interpretation]
+
+
+Optionally, if you want to fit a DIM or DSM from scratch, see: Vignette of dyadMLM
+
 
 # Intensive longitudinal dyads
 
 - Now use the dataset xyz...
+
+
+
+
+
+
