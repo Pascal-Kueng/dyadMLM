@@ -15,3 +15,34 @@ editor: source
 # Exercises
 
 The workshop exercises will be added here.
+
+# Getting started
+
+Briefly explain how a .Rmd file works, and that they can run chunks, and how
+to insert new chunks with ctrl + alt + i (how on Mac?)
+
+```{r}
+
+```
+
+# Loading, expecting, and preparing the data
+
+Follow the workflow of the presentation.
+
+# Cross-sectional dyads
+
+## Distinguishable APIM
+
+## Exchangeable APIM
+
+## Compare models
+
+Select one
+
+## Compute DSM or DIM estimates
+
+If you want to fit a DIM or DSM from scratch, see: Vignette of dyadMLM
+
+# Intensive longitudinal dyads
+
+- Now use the dataset xyz...
