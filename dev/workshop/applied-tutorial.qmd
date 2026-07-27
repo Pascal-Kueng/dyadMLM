@@ -224,12 +224,11 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 
 1. **Define dyads, distinguishability, and research questions**
 2. **Prepare the data and validate the dyadic structure**
-3. **Describe and visualize measures and simple relationships**
+3. **Describe and visualize measures and observed relationships**
 4. **Estimate the models**
-5. **Verify model adequacy, (distinguishability, if applicable), and robustness**
+5. **Verify model adequacy, distinguishability (if applicable), and robustness**
 6. **Visualize, interpret, and report results**
 
-<!-- konsistent wie hier -->
 ::: {.subtle}
 Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and @stasGivingDyadicData2018.
 :::
@@ -244,12 +243,11 @@ Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and
 
 1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
 2. **Prepare the data and validate the dyadic structure**
-3. **Describe and visualize measures and simple relationships**
+3. **Describe and visualize measures and observed relationships**
 4. **Estimate the models**
-5. **Verify model adequacy, (distinguishability, if applicable), and robustness**
+5. **Verify model adequacy, distinguishability (if applicable), and robustness**
 6. **Visualize, interpret, and report results**
 
-<!-- konsistent wie hier -->
 ::: {.subtle}
 Synthesized from @kenny2006dyadic, @ledermannToolboxProgramsRestructure2015, and @stasGivingDyadicData2018.
 :::
@@ -754,7 +752,8 @@ summary(apim_distinguishable_model)
 
 :::{.notes}
 
-BEFORE interpreting and reporting results, we should ...
+Before interpreting results, verify estimation, model adequacy,
+distinguishability, and robustness.
 
 :::
 
@@ -1201,6 +1200,11 @@ parameters::model_parameters(apim_distinguishable_model, effects = 'fixed') |>
 
 ```
 
+::: {.fragment}
+In this sample, higher self-efficacy was associated with more of one’s own MVPA
+for both women and men, but not clearly with the partner’s MVPA.
+:::
+
 ## Reporting results and answering the research question
 
 Random effects in our model represent the residual structure
@@ -1616,15 +1620,15 @@ parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
 
 ```
 
+# Optional: DIM and DSM
 
-<!-------------------------  Work in progress  -------------------------------->
+::: {.workshop-next}
+Worked examples are available in the package vignettes.
 
+[Open the DIM vignette →](https://pascal-kueng.github.io/dyadMLM/articles/dim.html){.workshop-next-link}
 
-# Excursion: DIM and DSM
-
-- Link to online materials
-
-# Excursion: non-Gaussian generalized models
+[Open the DSM vignette →](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html){.workshop-next-link}
+:::
 
 # Intensive longitudinal dyads
 
@@ -1718,14 +1722,6 @@ see @laiCompositeReliabilityMultilevel2021.
   - Data prep and inspecting and understanding data structure
   - Visualizing variables and bivariate relationships on both levels (wbCorr)
   - Estimating the model
-  - Checking assumptions
-  - Visualizing results
-
-## DIM (potentially omit)
-
-- Code
-  - Data prep and inspecting and unerstanding data structure
-  - Estimating the model show equivalence on both models
   - Checking assumptions
   - Visualizing results
 
