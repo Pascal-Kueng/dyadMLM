@@ -33,15 +33,18 @@ jobs:
         with:
           extra-packages: |
             any::DHARMa
+            any::digest
             any::ggplot2
             any::gridExtra
             any::modelbased
+            any::parameters
             any::patchwork
             any::pkgdown
             any::report
             any::RSA
             any::see
             any::tidyr
+            any::wbCorr
             local::.
           needs: website
 
