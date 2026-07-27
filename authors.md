@@ -11,11 +11,11 @@ Source:
 [`inst/CITATION`](https://github.com/Pascal-Kueng/dyadMLM/blob/fix/workshop-model-comparison/inst/CITATION)
 
 Küng P (????). *dyadMLM: Tools for Dyadic Multilevel Models*. R package
-version 0.1.0, <https://pascal-kueng.github.io/dyadMLM/>.
+version 0.1.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
 
     @Manual{,
       title = {dyadMLM: Tools for Dyadic Multilevel Models},
       author = {Pascal Küng},
-      note = {R package version 0.1.0},
+      note = {R package version 0.1.0.9000},
       url = {https://pascal-kueng.github.io/dyadMLM/},
     }
