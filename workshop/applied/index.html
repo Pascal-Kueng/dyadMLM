@@ -2088,7 +2088,7 @@ Turu Stadler
 <ul>
 <li><strong>MLM: Complete-case</strong>
 <ul>
-<li><strong>Outcome missing:</strong> Valid under MAR, ML uses remaining observations</li>
+<li><strong>Outcome missing:</strong> Valid under MAR, MLM uses remaining observations</li>
 <li><strong>Predictor missing:</strong> Valid under MAR, if missingness does <strong>not depend</strong> on the outcome after accounting for predictors</li>
 </ul></li>
 </ul>
@@ -2116,8 +2116,8 @@ Turu Stadler
 <p><span class="subtle"><span class="citation" data-cites="ledermannAnalyzingDyadicData2017">Ledermann &amp; Kenny (<a href="#/references" role="doc-biblioref" onclick>2017</a>)</span>; <span class="citation" data-cites="hughesAccountingMissingData2019">Hughes et al. (<a href="#/references" role="doc-biblioref" onclick>2019</a>)</span>; <span class="citation" data-cites="grundMultipleImputationMissing2018">Grund et al. (<a href="#/references" role="doc-biblioref" onclick>2018</a>)</span></span></p>
 <!-- ca. 2.5 Minutes -->
 </section>
-<section id="why-rand-where-other-software-helps" class="slide level2 smaller">
-<h2>Why R—and where other software helps</h2>
+<section id="why-r" class="slide level2 smaller">
+<h2>Why R</h2>
 <div class="columns">
 <div class="column" style="width:46%;">
 <h3 id="why-we-teach-r">Why we teach R</h3>
@@ -2135,14 +2135,14 @@ Turu Stadler
 <ul>
 <li><strong>SEM/DSEM:</strong> R’s capabilities are spread across specialized packages
 <ul>
-<li><code>lavaan</code> handles explicitly specified, fixed-wave lagged SEMs (e.g., CLPM/RI-CLPM), but has no native DSEM or residual AR(1) structure</li>
-<li>Version 0.7 adds restricted two-level random slopes; <code>mlts</code> implements Bayesian multilevel time-series models, while Mplus integrates DSEM/RDSEM</li>
+<li>(Multilevel) SEM: <code>lavaan</code> (e.g., CLPM/RI-CLPM), but has no native DSEM or residual AR(1) structure. Niche packages for DSEM or continuous time SEM <code>ctsem</code> exist, but no complete package can rival Mplus.</li>
 </ul></li>
 <li><strong>MLM/ILD:</strong> <code>glmmTMB</code> and <code>brms</code> both model serial dependence
 <ul>
 <li>Neither directly offers a separable partner-by-time residual structure such as <span class="math inline">\(\mathrm{UN}\otimes\mathrm{AR}(1)\)</span>; SAS <code>PROC MIXED</code> and SPSS <code>MIXED</code> do for Gaussian repeated-measures models</li>
 </ul></li>
 </ul>
+<!--TODO: cite the ctsem package -->
 </div>
 </div></div>
 <div class="subtle">
