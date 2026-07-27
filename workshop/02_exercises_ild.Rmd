@@ -29,9 +29,9 @@ Keep this file, `00_setup.R`, `dyadic-data.rds`, and `hints.R` in the same
 folder.
 
 If you have not already run the workshop setup, run the next chunk once, in a
-fresh R session. It updates all workshop packages and their dependencies to the
-newest available versions, but does not update unrelated packages. This may
-take several minutes.
+fresh R session. It installs or updates the workshop packages and any
+dependencies that need updating, but does not update unrelated packages. This
+may take several minutes.
 
 ```{r eval=FALSE}
 source("00_setup.R")
