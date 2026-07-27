@@ -66,6 +66,10 @@ jobs:
           cp dev/workshop/dyad-day.html docs/workshop/conceptual/index.html
           cp dev/workshop/applied-tutorial.html docs/workshop/applied/index.html
           cp dev/workshop/exercises.Rmd docs/workshop/exercises.Rmd
+          zip -jq docs/workshop/dyadic-data-analysis-workshop.zip \
+            dev/workshop/exercises.Rmd \
+            dev/workshop/dyadic-person-means.rds \
+            dev/workshop/dyadic-data.rds
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'

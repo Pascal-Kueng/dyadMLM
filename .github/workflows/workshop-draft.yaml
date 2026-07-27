@@ -67,6 +67,10 @@ jobs:
           cp dev/workshop/dyad-day.html docs/workshop/conceptual/index.html
           cp dev/workshop/applied-tutorial.html docs/workshop/applied/index.html
           cp dev/workshop/exercises.Rmd docs/workshop/exercises.Rmd
+          zip -jq docs/workshop/dyadic-data-analysis-workshop.zip \
+            dev/workshop/exercises.Rmd \
+            dev/workshop/dyadic-person-means.rds \
+            dev/workshop/dyadic-data.rds
 
       - name: Deploy the full branch site
         uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
