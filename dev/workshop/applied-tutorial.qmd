@@ -414,7 +414,7 @@ Looking at the columns immediately relevant to us:
 
 ```{r}
 
-df_apim[1:6,] |>
+head(df_apim) |>
   dplyr::select(
     couple_id, person_id, gender, .is_female, .is_male, .efficacy_gmc, .efficacy_gmc_actor, .efficacy_gmc_partner, total_mvpa
   ) |>
@@ -767,8 +767,9 @@ BEFORE interpreting and reporting results, we should ...
 
 1. Did estimation succeed?
 2. Does the model reproduce the important data patterns?
-3. Are exchangeability constraints defensible?
-4. Are conclusions driven by few dyads or consequential modeling choices?
+3. Is distinguishability supported?
+3. Are conclusions robust or driven by few dyads or consequential
+   modeling choices? (sensitivity analyses)
 
 ## Did estimation succeed / converge?
 
@@ -807,6 +808,10 @@ One function works across many model families!
 ## Simulate the full dyadic residual structure
 
 ```{r}
+#| label: simulate-dharma
+#| cache: true
+#| cache.extra: !expr digest::digest(list(stats::logLik(apim_distinguishable_model), stats::model.frame(apim_distinguishable_model)))
+
 library(DHARMa)
 
 dharma_residuals <- DHARMa::simulateResiduals(
@@ -929,7 +934,10 @@ More targeted checks and guidance on interpretation of the plots:
 ## Square-root MVPA reduces the fitted-value pattern {.smaller}
 
 ```{r}
+#| label: simulate-dharma-sqrt
 #| include: false
+#| cache: true
+#| cache.extra: !expr digest::digest(list(stats::logLik(apim_distinguishable_model), stats::model.frame(apim_distinguishable_model)))
 
 df_apim_sqrt <- df_apim |>
   dplyr::mutate(sqrt_total_mvpa = sqrt(total_mvpa))
@@ -1036,7 +1044,7 @@ dyadMLM::compare_nested_models(
 
 ```
 
-## Are conclusions driven by few dyads?
+## Test robustness - are conclusions driven by few dyads?
 
 ```{r}
 plot_actor_association <- function(data, model, role, title,
@@ -1068,7 +1076,7 @@ plot_actor_association <- function(data, model, role, title,
 }
 ```
 
-## Couple 28 is still the most unusual {#inspect-unusual-dyad}
+## Test robustness - are conclusions driven by few dyads?
 
 ```{r}
 #| output-location: slide
@@ -1099,290 +1107,87 @@ see::plots(
 ```
 
 
-
-:::{.notes}
-
-Here Mahalanobis distance is calculated separately for women and men from the
-two quantities shown in each panel: actor efficacy and raw MVPA. The four
-largest distances are Women: Couples 28, 4, 25, and 20; Men: Couples 28, 2, 25,
-and 9.
-
-This is a descriptive screen for unusual value combinations. A distant point
-can still lie close to the fitted line, and Mahalanobis distance does not say
-how much deleting that dyad changes a coefficient. The next slide answers that
-question directly.
-
-The points show raw MVPA. The lines show the full-sample APIM fixed-effect actor
-associations with partner efficacy held at its sample mean. Therefore, they are
-not simple bivariate regression lines through the raw points.
-
-Because efficacy is grand-mean centered, the fitted APIM intercept and actor
-slope give the line for each role when partner efficacy equals its sample mean.
-`see` arranges and styles the two plots.
-
-:::
-
-## No leave-one-dyad-out refit reverses either actor effect {#sensitivity-without-unusual-dyad .smaller}
+## Omitting Couple 28 changes the associations
 
 ```{r}
-#| include: false
 
-apim_cv <- cv::cv(
+model_without_28 <- update(
   apim_distinguishable_model,
-  data = df_apim,
-  clusterVariables = "couple_id",
-  details = TRUE
+  data = filter(df_apim, couple_id != 28)
 )
 
-actor_dfbeta <- as.data.frame(
-  apim_cv,
-  rows = "folds",
-  columns = "coefficients"
-) |>
-  tibble::as_tibble() |>
-  dplyr::transmute(
-    couple_id = unique(df_apim$couple_id),
-    Women =
-      apim_cv$coefficients[
-        "cond..is_female:.efficacy_gmc_actor"
-      ] -
-      .data[[
-        "coef.cond..is_female:.efficacy_gmc_actor"
-      ]],
-    Men =
-      apim_cv$coefficients[
-        "cond..is_male:.efficacy_gmc_actor"
-      ] -
-      .data[[
-        "coef.cond..is_male:.efficacy_gmc_actor"
-      ]]
-  ) |>
-  tidyr::pivot_longer(
-    c(Women, Men),
-    names_to = "role",
-    values_to = "dfbeta"
-  ) |>
-  dplyr::mutate(
-    role = factor(role, levels = c("Women", "Men")),
-    marked = dplyr::min_rank(
-      dplyr::desc(abs(dfbeta))
-    ) <= 4,
-    labelled = dplyr::min_rank(
-      dplyr::desc(abs(dfbeta))
-    ) <= 2,
-    .by = role
-  )
+parameters::model_parameters(model_without_28, effects = c('fixed'))
 
-cv_influence_plot <- ggplot(
-  actor_dfbeta,
-  aes(x = couple_id, y = dfbeta)
-) +
-  geom_hline(
-    yintercept = 0,
-    color = "#1769AA", linewidth = 1
-  ) +
-  geom_point(color = "#9AA5AD", alpha = 0.8, size = 2.4) +
-  geom_point(
-    data = dplyr::filter(actor_dfbeta, marked),
-    color = "#D55E00", size = 4
-  ) +
-  geom_text(
-    data = dplyr::filter(actor_dfbeta, labelled),
-    aes(
-      label = couple_id,
-      vjust = dplyr::if_else(dfbeta > 0, -0.5, 1.4)
-    ),
-    color = "#D55E00", fontface = "bold", size = 4
-  ) +
-  facet_wrap(~role, nrow = 1) +
-  scale_x_continuous(breaks = seq(5, 35, by = 5)) +
-  coord_cartesian(ylim = c(-4.5, 4.5)) +
-  labs(
-    x = "Couple omitted",
-    y = "Actor-effect DFBETA\n(full − leave-one-dyad-out)"
-  ) +
-  see::theme_modern(base_size = 16) +
-  theme(strip.text = element_text(face = "bold"))
-```
-
-:::: {.columns}
-
-::: {.column width="42%"}
-
-```{r}
-#| eval: false
-
-# Leave each whole dyad out once
-apim_cv <- cv::cv(
-  apim_distinguishable_model,
-  data = df_apim,
-  clusterVariables = "couple_id",
-  details = TRUE
-)
-
-# Compare the actor coefficients
-actor_terms <- grep(
-  "actor$",
-  names(apim_cv$coefficients),
-  value = TRUE
-)
-
-deleted_actor <- as.data.frame(
-  apim_cv,
-  rows = "folds",
-  columns = "coefficients"
-) |>
-  select(contains("actor")) |>
-  as.matrix()
-
-actor_dfbeta <- sweep(
-  deleted_actor,
-  2,
-  apim_cv$coefficients[actor_terms],
-  \(deleted, full) full - deleted
-)
 ```
 
 :::
 
 ::: {.column width="58%"}
 
+::: {.loo-summary-table}
+
 ```{r}
 #| echo: false
-#| fig-format: svg
-#| fig-width: 8
-#| fig-height: 5.2
-#| out-width: 100%
 
-cv_influence_plot
+actor_sensitivity_table <- format(
+  actor_sensitivity,
+  select = "{estimate}{stars}",
+  format = "text"
+) |>
+  filter(
+    !is.na(Parameter),
+    Parameter != "Observations"
+  ) |>
+  mutate(
+    Parameter = c("Women", "Men")
+  ) |>
+  rename(
+    `Actor slope` = Parameter
+  )
+
+slide_table(
+  actor_sensitivity_table,
+  align = c("l", "r", "r")
+)
 ```
+
+:::
 
 :::
 
 ::::
 
 :::{.subtle}
-**Result:** Couple 28 most changes the women's actor effect; Couple 2 most
-changes the men's. Across all 36 refits, both actor coefficients remain
-positive. [@foxCrossValidatingRegressionModels2026]
+\* $p < .05$; \*\* $p < .01$. Couple 28 was flagged in both visual screens.
+Its omission weakens both slopes; only the men's result crosses $p=.05$.
 :::
 
 :::{.notes}
 
-With `clusterVariables = "couple_id"`, `cv::cv()` omits both partners together.
-Cluster-level cross-validation defaults to one fold per cluster. Because 36
-folds exceed the package's automatic detail threshold, `details = TRUE` is
-needed to retain the coefficient estimates.
+Couple 28 had the largest Mahalanobis distance in both role-specific visual
+screens. Mahalanobis distance identifies an unusual value combination, not
+formal coefficient influence. This targeted refit asks the narrower question:
+do the actor-effect conclusions materially change without that dyad?
 
-The plotted DFBETA is the unstandardized full-sample actor coefficient minus
-the corresponding leave-one-dyad-out coefficient. We use the refits to assess
-coefficient influence and do not interpret the cross-validation MSE here.
+Both actor slopes remain positive. The women's slope decreases from 11.87 to
+8.44 and remains significant. The men's slope decreases from 7.97 to 5.23,
+with its two-sided Wald $p$-value moving from .027 to .078.
 
-The four largest changes are Women: Couples 28, 4, 20, and 3; Men: Couples 2,
-28, 9, and 20. The two largest per role are labelled. All deleted-dyad actor
-estimates remain positive.
-
-The fold order follows the first appearance of each cluster in the model data;
-here that order is Couples 1 through 36.
-
-[Sources]
-
-- @foxCrossValidatingRegressionModels2026
+The full-data analysis remains primary. Do not remove Couple 28 merely because
+its omission changes a significance label. If several cases were
+substantively or procedurally flagged before modeling, repeat the same
+sensitivity check for those cases.
 
 :::
 
-## Alternative: summarize the same refits in a table {.smaller}
+## Other sensitivity analyses you could do
 
-```{r}
-#| include: false
+Fit a small set of (prespecified) models to test: 
 
-full_actor_effects <- c(
-  Women = unname(
-    glmmTMB::fixef(apim_distinguishable_model)$cond[
-      ".is_female:.efficacy_gmc_actor"
-    ]
-  ),
-  Men = unname(
-    glmmTMB::fixef(apim_distinguishable_model)$cond[
-      ".is_male:.efficacy_gmc_actor"
-    ]
-  )
-)
-
-loo_actor_summary <- actor_dfbeta |>
-  dplyr::mutate(
-    full_model = unname(
-      full_actor_effects[as.character(role)]
-    ),
-    leave_one_out = full_model - dfbeta
-  ) |>
-  dplyr::summarise(
-    `Full model` = dplyr::first(full_model),
-    `Lowest estimate` = sprintf(
-      "%.1f (omit Couple %s)",
-      min(leave_one_out),
-      couple_id[which.min(leave_one_out)]
-    ),
-    `Highest estimate` = sprintf(
-      "%.1f (omit Couple %s)",
-      max(leave_one_out),
-      couple_id[which.max(leave_one_out)]
-    ),
-    `Across 36 refits` = dplyr::if_else(
-      all(leave_one_out > 0),
-      "Always positive",
-      "Changed sign"
-    ),
-    .by = role
-  ) |>
-  dplyr::rename(`Actor effect` = role)
-```
-
-::: {.loo-summary-table}
-
-```{r}
-#| echo: false
-
-slide_table(
-  loo_actor_summary,
-  digits = 1,
-  align = c("l", "r", "l", "l", "l")
-)
-```
-
-:::
-
-:::{.subtle}
-**Result:** The complete leave-one-dyad-out range remains positive for both
-actor effects. [@foxCrossValidatingRegressionModels2026]
-:::
-
-:::{.notes}
-
-This table summarizes the same 36 refits as the preceding plot. It reports the
-full-model estimate, the lowest and highest deleted-dyad estimates, and the
-dyad omitted at each endpoint.
-
-The table makes the conclusion and numerical range faster to read. The plot
-retains more information about the full distribution of influence across
-dyads. These are alternative presentations of the same sensitivity analysis,
-not two separate analyses.
-
-[Sources]
-
-- @foxCrossValidatingRegressionModels2026
-
-:::
-
-## Test robustness - sensitivity analyses
-
-- Refit a small number of prespecified, defensible alternatives where relevant:
-  - coding or centering decisions
-  - different plausible outcome families or transformations
-  - missing-data handling
-  - covariates with a substantive confounding or precision rationale
-
-Report any material changes in the conclusions.
+- coding decisions
+- different plausible outcome families or transformations
+- missing-data handling
+- covariates with a substantive confounding or precision rationale
 
 ## Workflow
 
@@ -1393,174 +1198,35 @@ Report any material changes in the conclusions.
 5. **Verify model adequacy, distinguishability, and robustness**
 6. [**Visualize, interpret, and report results**]{.text-highlight}
 
-## Your turn: answer the research question {.smaller}
-
-**Write three sentences:** interpret the actor and partner associations,
-describe the remaining within-couple correlation, and qualify the result using
-the model comparison and sensitivity analyses.
+## Reporting results and answering the research question
 
 ```{r}
-apim_model_summary <- summary(apim_distinguishable_model)
-apim_model_summary$varcor
-stats::printCoefmat(apim_model_summary$coefficients$cond)
+library(parameters)
+
+parameters::model_parameters(apim_distinguishable_model, effects = 'fixed') |>
+  insight::print_md(footer = "")
+
 ```
 
-## Own efficacy showed the clearest associations {.smaller}
+## Reporting results and answering the research question
+
+Random effects in our model represent the residual structure
 
 ```{r}
-#| include: false
 
-apim_fixed_ci <- stats::confint(
-  apim_distinguishable_model,
-  parm = "beta_",
-  method = "wald"
-)
+parameters::model_parameters(apim_distinguishable_model, effects = 'random') |>
+  insight::print_md(footer = "")
 
-apim_focal_terms <- c(
-  ".is_female:.efficacy_gmc_actor",
-  ".is_male:.efficacy_gmc_actor",
-  ".is_female:.efficacy_gmc_partner",
-  ".is_male:.efficacy_gmc_partner"
-)
-
-apim_focal_labels <- c(
-  "Own efficacy → women's MVPA",
-  "Own efficacy → men's MVPA",
-  "Partner efficacy → women's MVPA",
-  "Partner efficacy → men's MVPA"
-)
-
-apim_focal_results <- tibble::tibble(
-  term = apim_focal_terms,
-  label = factor(
-    apim_focal_labels,
-    levels = rev(apim_focal_labels)
-  ),
-  association = factor(
-    c("Actor", "Actor", "Partner", "Partner"),
-    levels = c("Actor", "Partner")
-  ),
-  estimate = apim_fixed_ci[apim_focal_terms, "Estimate"],
-  lower = apim_fixed_ci[apim_focal_terms, "2.5 %"],
-  upper = apim_fixed_ci[apim_focal_terms, "97.5 %"]
-)
-
-apim_within_couple <- VarCorr(
-  apim_distinguishable_model
-)$cond$couple_id
-
-apim_within_correlation <- attr(
-  apim_within_couple,
-  "correlation"
-)[1, 2]
-
-apim_distinguishability_test <- stats::anova(
-  apim_exchangeable_model,
-  apim_distinguishable_model
-)
-
-apim_distinguishability_p <- apim_distinguishability_test[
-  2,
-  "Pr(>Chisq)"
-]
-
-apim_results_plot <- ggplot(
-  apim_focal_results,
-  aes(x = estimate, y = label, color = association)
-) +
-  geom_vline(
-    xintercept = 0,
-    color = "#6C757D",
-    linetype = "dashed"
-  ) +
-  geom_segment(
-    aes(x = lower, xend = upper, yend = label),
-    linewidth = 1.8,
-    lineend = "round"
-  ) +
-  geom_point(size = 4.5) +
-  scale_color_manual(
-    values = c("Actor" = "#1769AA", "Partner" = "#7B3FA1")
-  ) +
-  scale_x_continuous(
-    breaks = seq(-5, 20, by = 5),
-    limits = c(-7, 21)
-  ) +
-  labs(
-    x = "Change in daily MVPA (minutes)\nper one-point higher efficacy",
-    y = NULL,
-    color = NULL
-  ) +
-  see::theme_modern(base_size = 16) +
-  theme(
-    legend.position = "top",
-    legend.justification = "left",
-    axis.text.y = element_text(color = "#273746"),
-    panel.grid.major.y = element_blank()
-  )
 ```
 
-:::: {.columns}
-
-::: {.column width="68%"}
+## Visualize results
 
 ```{r}
-#| echo: false
-#| fig-format: svg
-#| fig-width: 8
-#| fig-height: 5
-#| out-width: 100%
 
-apim_results_plot
+parameters::model_parameters(apim_distinguishable_model) |>
+  plot()
+
 ```
-
-:::
-
-::: {.column width="32%"}
-
-**One-point higher own efficacy**
-
-- Women: **`r sprintf("%.1f", apim_focal_results$estimate[1])` minutes/day**
-- Men: **`r sprintf("%.1f", apim_focal_results$estimate[2])` minutes/day**
-
-**Partner efficacy**
-
-- Both intervals include zero
-
-**Dyadic dependence**
-
-- Within-couple correlation: **`r sprintf("r = %.2f", apim_within_correlation)`**
-
-:::
-
-::::
-
-:::{.subtle}
-95% Wald confidence intervals. The distinguishable model did not clearly
-improve fit over the exchangeable model
-(*p* = `r sprintf("%.3f", apim_distinguishability_p)`). Associations are not causal.
-:::
-
-:::{.notes}
-
-The four estimates answer the research question directly. Each is the expected
-difference in daily MVPA minutes associated with a one-point difference in
-self-efficacy, holding the other predictor constant.
-
-The actor estimates are 11.9 minutes for women (95% CI 3.8 to 20.0) and 8.0
-minutes for men (95% CI 0.9 to 15.0). The partner estimates are 3.1 minutes for
-women's MVPA (95% CI -5.2 to 11.3) and 4.0 minutes for men's MVPA (95% CI -2.9
-to 11.0).
-
-Separate confidence intervals do not test whether the role-specific
-coefficients differ. The likelihood-ratio comparison found no clear
-improvement from the distinguishable model, so we do not claim gender
-differences.
-
-The square-root outcome retained the actor-versus-partner conclusion, and all
-leave-one-dyad-out actor coefficients remained positive.
-
-:::
 
 ## What should be reported?
 
@@ -1574,6 +1240,8 @@ leave-one-dyad-out actor coefficients remained positive.
 
 # Exchangeable dyads
 The same model but constrained
+
+## 
 
 ## Workflow
 
@@ -1595,8 +1263,38 @@ we can use the same RQ and data to demonstrate the exchangeable workflow.
 
 :::
 
-## Prepare the Data
+## Create the required format and validate the data
 
+For truly exchangeable dyads, we can just omit the `role` argument. 
+If we want to estimate both distinguishable and exchangeable versions, 
+we would pass `role` and set `include_arbitrary_member_contrast = TRUE`.
+
+```{r}
+#| output-results: slide
+
+df_exch <- dyadMLM::prepare_dyad_data(
+  data = df, 
+  dyad = couple_id, 
+  member = person_id, 
+  predictor = efficacy, 
+  model_type = 'apim', 
+  add_apim_gmc_predictors = TRUE,
+  seed = 123
+)
+
+```
+
+## Create the required format and validate the data
+
+Looking at the relevant columns: 
+
+```{r}
+head(df_exch) |>
+  dplyr::select(
+    couple_id, person_id, .member_contrast_arbitrary, .efficacy_gmc, .efficacy_gmc_actor, .efficacy_gmc_partner, total_mvpa
+  ) |>
+  slide_table()
+```
 
 
 <!-------------------------  Work in progress  -------------------------------->

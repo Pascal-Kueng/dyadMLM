@@ -10,3 +10,4 @@ docs
 /dyadMLM_*.tar.gz
 /*.Rcheck/
 /dev/workshop/temp_audit/
+/dev/workshop/applied-tutorial_cache/
