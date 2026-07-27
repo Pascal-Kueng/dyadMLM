@@ -1,6 +1,6 @@
 ---
 title: "Dyadic Data Analysis with R"
-subtitle: "Workshop Exercises"
+subtitle: "Cross-Sectional Workshop Exercises"
 author:
   - "Pascal Küng"
   - "Turu Stadler"
@@ -24,11 +24,11 @@ are available through the [`dyadMLM` homepage](https://pascal-kueng.github.io/dy
 
 # Getting started
 
-An R Markdown (`.Rmd`) file combines *markdown* text -- such as this paragraph --
+An R Markdown (`.Rmd`) file combines *Markdown* text -- such as this paragraph --
 with runnable R code chunks.
 
-Run code chunks individually via the green little play button on the 
-top-right of each chunk. Try it and run the next chunk. It installs or updates
+Run code chunks individually via the small green play button in the
+top-right of each chunk. Try it by running the next chunk. It installs or updates
 the workshop packages and any dependencies that need updating. This may take
 several minutes.
 
@@ -67,13 +67,11 @@ source("hints.R")
 While going through the exercises you can sometimes spot optional hints: 
 
 ```{r}
-# hint('example_hint', 'run_chunk_without_comment') 
+# hint("example_hint", "run_chunk_without_comment")
 ```
 
-To get the hints, delete the `#` of the hint you want to read. `#` marks 
-the whole line a comment that is not evaluated by R. 
-
-After deleting the `#`, run the chunk (again). You can try it above.
+To reveal a hint, delete the `#` in front of the hint you want to read, then
+run the chunk (again). You can try it above.
 
 
 
@@ -94,7 +92,8 @@ Follow a simplified workflow:
 
 # 1. Define dyads, distinguishability, and research questions
 
-You may use any of the variables in the dataset as outcome or predictor.
+You may use any of the substantive numeric variables in the dataset as outcome
+or predictor.
 
 Place `dyadic-person-means.rds` in the same folder as this exercise file, then
 load and inspect the raw aggregated dataset:
@@ -102,55 +101,47 @@ load and inspect the raw aggregated dataset:
 ```{r}
 raw_dyad_data <- readRDS("dyadic-person-means.rds")
 
-head(raw_dyad_data)
+raw_dyad_data
 ```
 
 
 Choose your research question. 
 
-> [Insert your Actor-RQ]
+> [Insert your actor research question]
 
-> [Insert your Partner-RQ]
+> [Insert your partner research question]
 
-```{r}
-# hint("research_question", "concept")
-```
+
 
 # 2. Prepare the data and validate the dyadic structure
 
-You may use `dyadMLM::prepare_dyad_data()`. Load the package:
+Use `dyadMLM::prepare_dyad_data()`. For help with its arguments, run:
 
-```{r}
-library(dyadMLM)
+```{r eval=FALSE}
+?dyadMLM::prepare_dyad_data
 ```
 
-For help with the arguments and how to use the function, run:
-
-```{r}
-?prepare_dyad_data()
-```
-
-Adding a `?` before any package function will produce a helpful help-page.
+Adding `?` before a function name opens its help page in RStudio.
 
 ---
 
 Prepare and validate the data for a **distinguishable** model now.
 
-Hint: distinguish partners using `role = gender`. Set
-`include_arbitrary_member_contrast = TRUE` to use the same prepared data for
-distinguishable and exchangeable models later. Use
-`add_apim_gmc_predictors = TRUE` if you want the grand-mean-centered APIM
-predictors used in the tutorial.
+- Distinguish partners using `role = gender`. 
+- Set `include_arbitrary_member_contrast = TRUE` to use the same prepared data 
+  for distinguishable and exchangeable models later. 
+- Use `add_apim_gmc_predictors = TRUE` if you want the grand-mean-centered APIM
+  predictors used in the tutorial.
 
 Save the prepared data as `my_data`; later exercise code uses this name.
 
 ```{r}
-# hint("prepare_data", "concept")
 # hint("prepare_data", "structure")
 ```
 
-Inspect the prepared data and verify the dyad IDs, member IDs, roles, row
-counts, missingness, and generated columns:
+Inspect the prepared data (like you did above with the raw data) and verify the 
+dyad IDs, member IDs, roles, row counts, missingness, and generated columns 
+make sense:
 
 ```{r}
 
@@ -163,9 +154,43 @@ Adapt the summary and plotting code from the tutorial to your focal variables.
 At minimum, summarize the variables by role, inspect their distributions,
 calculate observed dyadic correlations, and visualize partner similarity.
 
+For role-specific summaries and dyadic correlations, create a wide view with
+one row per couple using `tidyr::pivot_wider()`. Save it as `my_wide_data`;
+continue using `my_data` for modeling.
+
+Summaries:
+
 ```{r}
-# hint("describe_data", "concept")
+# hint("descriptive_summary", "functions")
+# hint("descriptive_summary", "example_code")
 ```
+
+Visualize distributions by gender. The easiest way to visualize a distribution
+is with `hist()`. You may subset data with `dplyr::filter()`.
+
+```{r}
+# Pooled histogram
+# hint("histograms", "functions")
+# hint("histograms", "example_code")
+
+# Male histogram
+
+# Female histogram
+
+```
+
+
+Describe partner similarity:
+
+```{r}
+# Correlations
+# hint("partner_similarity", "correlations")
+
+# Plot
+# hint("partner_similarity", "plot")
+
+```
+
 
 Describe what you see and how you interpret the summaries and plots:
 
@@ -182,7 +207,9 @@ First, estimate a model for distinguishable dyads:
 # hint("distinguishable_model", "example_code")
 
 my_model <- glmmTMB(
-  formula = YOUR_MODEL_FORMULA,
+  
+  YOUR_MODEL_FORMULA,
+  
   data = my_data,
   family = gaussian()
 )
@@ -234,6 +261,7 @@ male_dharma_residuals <- DHARMa::recalculateResiduals(
   seed = 123
 )
 
+# Show both role-specific plots side by side, then restore the previous layout.
 old_par <- par(mfrow = c(1, 2))
 DHARMa::plotResiduals(female_dharma_residuals, main = "Women")
 DHARMa::plotResiduals(male_dharma_residuals, main = "Men")
@@ -249,8 +277,10 @@ for each role.
 
 ### Robustness
 
-Optionally, use the supplied helper to inspect unusual predictor–outcome
-combinations separately by role:
+Inspect unusual dyads separately by role. 
+
+Optionally, you can use the supplied helper that is loaded here from a separate
+file `helpers.R`:
 
 ```{r eval=FALSE}
 # The function is defined in the separate helper file.
@@ -273,6 +303,13 @@ men_mahalanobis_plot <- plot_mahalanobis(
 see::plots(women_mahalanobis_plot, men_mahalanobis_plot)
 ```
 
+Repeat the same for partner effects:
+
+```{r}
+
+```
+
+
 Mahalanobis distance identifies unusual bivariate combinations, not formal
 model influence, and the displayed regression line is not the adjusted APIM
 effect. Use the labels to guide data inspection rather than to automatically
@@ -282,6 +319,8 @@ If a dyad was flagged for a substantive or procedural reason, optionally refit
 the model without it:
 
 ```{r eval=FALSE}
+# hint("robustness_refit", "ids")
+
 data_without_selected_dyads <- dplyr::filter(
   my_data,
   !couple_id %in% DYAD_IDS_TO_EXCLUDE
@@ -291,6 +330,8 @@ model_without_selected_dyads <- update(
   my_model,
   data = data_without_selected_dyads
 )
+
+summary(model_without_selected_dyads)
 ```
 
 Do not exclude dyads merely because their removal changes a significance label.
@@ -305,13 +346,18 @@ with `names(my_data)`.
 
 
 ```{r}
-# hint("distinguishability", "concept")
-# hint("distinguishability", "structure")
+# hint("exchangeable_model", "fixed_effects")
+# hint("exchangeable_model", "random_effects")
+# hint("exchangeable_model", "example_code")
 
 ```
 
 Compare the distinguishable and exchangeable models using
 `dyadMLM::compare_nested_models()`.
+
+```{r}
+
+```
 
 Insert your brief conclusion, and choose whether you want to continue with
 the distinguishable or exchangeable model for the rest of the exercise:
@@ -323,24 +369,22 @@ the distinguishable or exchangeable model for the rest of the exercise:
 
 # 6. Visualize, interpret, and report results
 
-Print a fixed-effects table using `parameters::model_parameters()` (remember
-to use `?` if you need help with arguments):
+Print a fixed-effects table using `parameters::model_parameters()`:
 
 ```{r}
-# hint("report_results", "concept")
-# hint("report_results", "structure")
+# hint("report_results", "fixed_effects")
 ```
 
 Print a random-effects table:
 
 ```{r}
-
+# hint("report_results", "random_effects")
 ```
 
 Plot the fixed effects:
 
 ```{r}
-
+# hint("report_results", "plot")
 ```
 
 
@@ -359,12 +403,11 @@ You have now completed the APIM workflow!
 
 The transformation from exchangeable APIM coefficients to DIM estimates is
 particularly simple.
+
 Check the output from your **exchangeable** model, and enter your coefficients
 here:
 
-```{r}
-
-# hint("dim_transformation", "concept")
+```{r eval=FALSE}
 
 b_actor <- YOUR_ACTOR_COEFFICIENT
 b_partner <- YOUR_PARTNER_COEFFICIENT
@@ -373,13 +416,15 @@ b_partner <- YOUR_PARTNER_COEFFICIENT
 
 Recover the DIM estimates:
 
-```{r}
+```{r eval=FALSE}
+# hint("dim_transformation", "formulas")
 
 b_mean <- YOUR_FORMULA
 b_dev <- YOUR_FORMULA
 
-cat("The between-dyad effect is: ", round(b_mean, 2), "\n", # newline
-    "The within-dyad effect is: ", round(b_dev, 2)
+cat(
+  "The between-dyad effect is: ", round(b_mean, 2), "\n",
+  "The within-dyad effect is: ", round(b_dev, 2)
 )
 
 ```
@@ -398,4 +443,5 @@ Optionally, fit a DIM or DSM directly using the package vignettes:
 
 # Intensive longitudinal dyads
 
-The intensive longitudinal exercises will be added with the ILD tutorial.
+Continue with the
+[intensive longitudinal exercises](02_exercises_ild.Rmd).
