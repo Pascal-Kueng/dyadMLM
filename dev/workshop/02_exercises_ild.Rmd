@@ -1,0 +1,289 @@
+---
+title: "Dyadic Data Analysis with R"
+subtitle: "Intensive Longitudinal Workshop Exercises"
+author:
+  - "Pascal Küng"
+  - "Turu Stadler"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-title: "ILD Exercises"
+editor: source
+---
+
+# Exercises
+
+These exercises extend the cross-sectional APIM workflow to intensive
+longitudinal dyadic data.
+
+Download the complete workshop materials from the
+[workshop page](https://pascal-kueng.github.io/dyadMLM/workshop/). Package
+documentation and vignettes are available on the
+[`dyadMLM` homepage](https://pascal-kueng.github.io/dyadMLM/).
+
+
+# Getting started
+
+Keep this file, `dyadic-data.rds`, and `hints.R` in the same folder.
+
+If needed, install the required packages once:
+
+```{r eval=FALSE}
+install.packages(
+  c(
+    "dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "easystats",
+    "dplyr", "ggplot2", "tidyr"
+  ),
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
+  )
+)
+```
+
+Load the required packages and optional hints:
+
+```{r}
+library(glmmTMB)
+library(dyadMLM)
+library(wbCorr)
+library(easystats)
+library(DHARMa)
+library(dplyr)
+library(ggplot2)
+
+source("hints.R")
+```
+
+Optional hints appear as commented `hint()` calls. Uncomment and run them one
+at a time.
+
+Load and inspect the intensive longitudinal dataset:
+
+```{r}
+raw_ild_data <- readRDS("dyadic-data.rds")
+
+head(raw_ild_data)
+names(raw_ild_data)
+```
+
+
+# The ILD workflow
+
+The same six-step workflow still applies:
+
+1. Define dyads, distinguishability, and research questions
+2. Prepare the data and validate the dyadic and temporal structure
+3. Describe measures, trajectories, and within- and between-person relationships
+4. Specify and estimate the model
+5. Verify model adequacy, temporal dependence, and robustness
+6. Visualize, interpret, and report results
+
+ILD additionally requires decisions about matched occasions, time gaps,
+within- and between-person variation, trends, lagging, and residual temporal
+dependence.
+
+
+# 1. Define the research question and temporal target
+
+Choose one outcome and one predictor. State the actor and partner questions.
+
+> [Insert your research question]
+
+Also decide whether your primary question is:
+
+- **Concurrent:** are partners' predictor and outcome values associated on the
+  same occasion?
+- **Lagged:** do prior values predict either partner's later outcome?
+
+> [Insert your temporal target and reasoning]
+
+```{r}
+# hint("ild_research_question", "concept")
+```
+
+
+# 2. Prepare and validate the data
+
+Use `dyadMLM::prepare_dyad_data()` and save the result as `my_ild_data`.
+
+```{r}
+?prepare_dyad_data()
+
+# hint("ild_prepare_data", "concept")
+# hint("ild_prepare_data", "structure")
+```
+
+Your preparation call should identify the dyad, member, role, time variable,
+and focal predictor. Use a two-level temporal decomposition for a concurrent
+ILD APIM. If your research question is lagged, also create the required lagged
+predictors without bridging missing occasions.
+
+```{r}
+
+```
+
+
+## Validate the dyadic and temporal structure
+
+Check:
+
+- exactly two members per retained dyad
+- stable member roles
+- at most one row per dyad, member, and occasion
+- the scheduled and observed time range
+- missing observations, compliance, and matched partner occasions
+- actual time gaps
+
+```{r}
+
+```
+
+Summarize what you found:
+
+> [Insert your data-structure and missingness summary]
+
+
+# 3. Describe trajectories and relationships
+
+```{r}
+# hint("ild_describe_data", "concept")
+```
+
+
+## Plot paired trajectories
+
+Plot the outcome and focal predictor over time. Show both members of each dyad
+and inspect a manageable selection of dyads rather than drawing every
+trajectory in one panel.
+
+```{r}
+
+```
+
+
+## Separate within- and between-person information
+
+At minimum:
+
+- describe the focal variables by role
+- calculate ICCs
+- calculate within- and between-person correlations
+- note whether multilevel reliability would be needed for multi-item measures
+  (item-level data are not included here)
+
+```{r}
+
+```
+
+Describe the main patterns:
+
+> [Insert your descriptive interpretation]
+
+
+# 4. Specify and estimate the model
+
+Begin with the scientific mean structure. Include plausible time trends before
+adding a residual temporal process.
+
+```{r eval=FALSE}
+# hint("ild_model", "concept")
+# hint("ild_model", "structure")
+
+my_ild_model <- glmmTMB(
+  formula = YOUR_ILD_MODEL_FORMULA,
+  data = my_ild_data,
+  family = gaussian()
+)
+
+summary(my_ild_model)
+```
+
+
+## Choose the temporal specification
+
+Decide whether the remaining temporal dependence is best represented by:
+
+- no residual temporal process
+- discrete-time AR(1) for equally spaced scheduled occasions
+- continuous-time decay for unequal time gaps
+- lagged actor and partner outcomes when carryover is the scientific target
+
+Document the time scale, lag, trend, covariance structure, and any constraints.
+
+```{r}
+# hint("ild_time_structure", "concept")
+```
+
+If required, update your model with the selected temporal structure:
+
+```{r eval=FALSE}
+
+```
+
+
+# 5. Verify adequacy and robustness
+
+Check estimation first: convergence, the Hessian, and whether all parameter
+estimates are plausible.
+
+
+## Residual diagnostics
+
+Use the ILD DHARMa block from the applied tutorial. Inspect overall calibration,
+patterns against fitted values and time, and remaining temporal or
+cross-partner dependence.
+
+```{r eval=FALSE}
+# hint("ild_diagnostics", "concept")
+```
+
+
+## Robustness
+
+Consider whether conclusions depend on:
+
+- the chosen time trend
+- the temporal covariance structure
+- treatment of incomplete or unmatched occasions
+- substantively questionable dyads or measurement periods
+
+Do not select a specification solely because it changes a significance label.
+
+> [Insert your robustness conclusion]
+
+
+# 6. Visualize, interpret, and report
+
+Report the actor and partner effects with uncertainty. Clearly distinguish
+within-person from between-person effects and describe the temporal and
+cross-partner covariance structure.
+
+```{r}
+# hint("ild_report_results", "concept")
+# hint("ild_report_results", "structure")
+```
+
+Plot the focal fitted effects or model-implied trajectories:
+
+```{r}
+
+```
+
+Interpret the results in practical terms:
+
+> [Insert your interpretation]
+
+
+# Optional: exchangeability as a model constraint
+
+If scientifically defensible, fit the exchangeability-constrained version as a
+change to the completed distinguishable ILD workflow. Compare the models and
+document every imposed constraint.
+
+```{r eval=FALSE}
+
+```
+
+> [Insert your distinguishability conclusion]

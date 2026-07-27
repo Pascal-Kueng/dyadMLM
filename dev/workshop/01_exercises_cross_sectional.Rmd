@@ -17,6 +17,11 @@ editor: source
 These exercises follow the six-step cross-sectional APIM workflow from the
 applied tutorial.
 
+Download the complete workshop materials from the
+[workshop page](https://pascal-kueng.github.io/dyadMLM/workshop/). Package
+documentation and vignettes are available on the
+[`dyadMLM` homepage](https://pascal-kueng.github.io/dyadMLM/).
+
 Install the necessary packages (run this block once):
 
 ```{r}
@@ -49,7 +54,13 @@ library(easystats)
 library(DHARMa)
 library(dplyr)
 
+source("hints.R")
+
 ```
+
+Optional hints appear as commented `hint()` calls throughout the worksheet.
+Uncomment and run them one at a time. Run `hint_topics()` to list all available
+topics.
 
 
 # Loading, inspecting, and preparing the data
@@ -82,6 +93,10 @@ Choose your research question:
 
 > [Insert your RQ]
 
+```{r}
+# hint("research_question", "concept")
+```
+
 # 2. Prepare the data and validate the dyadic structure
 
 You may use `dyadMLM::prepare_dyad_data()`. Load the package:
@@ -108,9 +123,11 @@ distinguishable and exchangeable models later. Use
 `add_apim_gmc_predictors = TRUE` if you want the grand-mean-centered APIM
 predictors used in the tutorial.
 
+Save the prepared data as `my_data`; later exercise code uses this name.
+
 ```{r}
-
-
+# hint("prepare_data", "concept")
+# hint("prepare_data", "structure")
 ```
 
 Inspect the prepared data and verify the dyad IDs, member IDs, roles, row
@@ -127,6 +144,9 @@ Adapt the summary and plotting code from the tutorial to your focal variables.
 At minimum, summarize the variables by role, inspect their distributions,
 calculate observed dyadic correlations, and visualize partner similarity.
 
+```{r}
+# hint("describe_data", "concept")
+```
 
 Describe what you see and how you interpret the summaries and plots:
 
@@ -138,10 +158,13 @@ Describe what you see and how you interpret the summaries and plots:
 First, estimate a model for distinguishable dyads:
 
 ```{r eval=FALSE}
+# hint("distinguishable_model", "concept")
+# hint("distinguishable_model", "structure")
+# hint("distinguishable_model", "example_code")
 
 my_model <- glmmTMB(
   formula = YOUR_MODEL_FORMULA,
-  data = YOUR_PREPARED_DATA,
+  data = my_data,
   family = gaussian()
 )
 
@@ -207,12 +230,41 @@ for each role.
 
 ### Robustness
 
-Review your earlier plots and data checks. If a dyad was flagged for a
-substantive or procedural reason, optionally refit the model without it:
+Optionally, use the supplied helper to inspect unusual predictor–outcome
+combinations separately by role:
+
+```{r eval=FALSE}
+# The function is defined in the separate helper file.
+source("helpers.R")
+
+women_mahalanobis_plot <- plot_mahalanobis(
+  data = dplyr::filter(my_data, gender == "female"),
+  x = "YOUR_ACTOR_PREDICTOR_COLUMN",
+  y = "YOUR_OUTCOME_COLUMN",
+  title = "Women"
+)
+
+men_mahalanobis_plot <- plot_mahalanobis(
+  data = dplyr::filter(my_data, gender == "male"),
+  x = "YOUR_ACTOR_PREDICTOR_COLUMN",
+  y = "YOUR_OUTCOME_COLUMN",
+  title = "Men"
+)
+
+see::plots(women_mahalanobis_plot, men_mahalanobis_plot)
+```
+
+Mahalanobis distance identifies unusual bivariate combinations, not formal
+model influence, and the displayed regression line is not the adjusted APIM
+effect. Use the labels to guide data inspection rather than to automatically
+exclude dyads.
+
+If a dyad was flagged for a substantive or procedural reason, optionally refit
+the model without it:
 
 ```{r eval=FALSE}
 data_without_selected_dyads <- dplyr::filter(
-  YOUR_PREPARED_DATA,
+  my_data,
   !couple_id %in% DYAD_IDS_TO_EXCLUDE
 )
 
@@ -230,14 +282,17 @@ Do not exclude dyads merely because their removal changes a significance label.
 Fit the equivalent model under exchangeability constraints. Hint: you need an
 `.arbitrary_member_contrast` column in the data. You may already have included
 one earlier, or you may need to prepare the data again. Check your column names
-with `names(YOUR_PREPARED_DATA)`.
+with `names(my_data)`.
 
 
 ```{r}
-
+# hint("distinguishability", "concept")
+# hint("distinguishability", "structure")
 
 ```
 
+Compare the distinguishable and exchangeable models using
+`dyadMLM::compare_nested_models()`.
 
 Insert your brief conclusion, and choose whether you want to continue with
 the distinguishable or exchangeable model for the rest of the exercise:
@@ -253,7 +308,8 @@ Print a fixed-effects table using `parameters::model_parameters()` (remember
 to use `?` if you need help with arguments):
 
 ```{r}
-
+# hint("report_results", "concept")
+# hint("report_results", "structure")
 ```
 
 Print a random-effects table:
@@ -289,6 +345,8 @@ here:
 
 ```{r}
 
+# hint("dim_transformation", "concept")
+
 b_actor <- YOUR_ACTOR_COEFFICIENT
 b_partner <- YOUR_PARTNER_COEFFICIENT
 
@@ -322,4 +380,3 @@ Optionally, fit a DIM or DSM directly using the package vignettes:
 # Intensive longitudinal dyads
 
 The intensive longitudinal exercises will be added with the ILD tutorial.
-

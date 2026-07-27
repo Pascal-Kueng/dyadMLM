@@ -899,6 +899,11 @@ background: transparent;
 border-bottom: 0;
 }
 
+.reveal .loo-summary-table table {
+margin-top: 1em;
+font-size: 0.8em;
+}
+
 .reveal .fancy-table table {
 width: 100%;
 max-width: 100%;
@@ -922,6 +927,9 @@ border-bottom: 1px solid var(--uzh-rule);
 .reveal .fancy-table table tr:nth-child(even) td {
 background: var(--uzh-surface);
 }
+.reveal .agenda-completed {
+color: #9aa7bd;
+}
 
 .reveal .cell > .cell-code + .cell-output,
 .reveal .cell > .cell-code + .cell-output-display,
@@ -930,6 +938,24 @@ background: var(--uzh-surface);
 .reveal .cell > .code-copy-outer-scaffold + .cell-output-display,
 .reveal .cell > .code-copy-outer-scaffold + .cell-output-stdout {
 margin-top: 0.4em;
+}
+
+.reveal .slides section.output-location-slide.present {
+display: grid !important;
+grid-template-rows: auto minmax(0, 1fr);
+box-sizing: border-box;
+padding-bottom: 1.2em;
+}
+.reveal .slides section.output-location-slide > .cell.output-location-slide,
+.reveal .slides section.output-location-slide .cell-output-stdout,
+.reveal .slides section.output-location-slide .cell-output-stdout > pre {
+min-height: 0;
+height: 100%;
+}
+.reveal .slides section.output-location-slide .cell-output-stdout > pre > code {
+box-sizing: border-box;
+max-height: 100%;
+overflow: auto;
 }
 .reveal blockquote {
 width: auto;

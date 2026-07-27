@@ -2085,7 +2085,7 @@ Turu Stadler
 <ul>
 <li><strong>MLM: Complete-case</strong>
 <ul>
-<li><strong>Outcome missing:</strong> Valid under MAR, ML uses remaining observations</li>
+<li><strong>Outcome missing:</strong> Valid under MAR, MLM uses remaining observations</li>
 <li><strong>Predictor missing:</strong> Valid under MAR, if missingness does <strong>not depend</strong> on the outcome after accounting for predictors</li>
 </ul></li>
 </ul>
@@ -2113,8 +2113,8 @@ Turu Stadler
 <p><span class="subtle"><span class="citation" data-cites="ledermannAnalyzingDyadicData2017">Ledermann &amp; Kenny (<a href="#/references" role="doc-biblioref" onclick>2017</a>)</span>; <span class="citation" data-cites="hughesAccountingMissingData2019">Hughes et al. (<a href="#/references" role="doc-biblioref" onclick>2019</a>)</span>; <span class="citation" data-cites="grundMultipleImputationMissing2018">Grund et al. (<a href="#/references" role="doc-biblioref" onclick>2018</a>)</span></span></p>
 <!-- ca. 2.5 Minutes -->
 </section>
-<section id="why-rand-where-other-software-helps" class="slide level2 smaller">
-<h2>Why R—and where other software helps</h2>
+<section id="why-r" class="slide level2 smaller">
+<h2>Why R</h2>
 <div class="columns">
 <div class="column" style="width:46%;">
 <h3 id="why-we-teach-r">Why we teach R</h3>
@@ -2130,20 +2130,27 @@ Turu Stadler
 <h3 id="current-trade-offs">Current trade-offs</h3>
 <div class="fragment">
 <ul>
-<li><strong>SEM/DSEM:</strong> R’s capabilities are spread across specialized packages
+<li><strong>SEM/DSEM:</strong> R spreads these capabilities across specialized packages
 <ul>
-<li><code>lavaan</code> handles explicitly specified, fixed-wave lagged SEMs (e.g., CLPM/RI-CLPM), but has no native DSEM or residual AR(1) structure</li>
-<li>Version 0.7 adds restricted two-level random slopes; <code>mlts</code> implements Bayesian multilevel time-series models, while Mplus integrates DSEM/RDSEM</li>
+<li><code>lavaan</code>: fixed-wave and limited two-level SEM</li>
+<li><code>mlts</code> and <code>ctsem</code>: multivariate dynamic models
+<ul>
+<li>Dyadic DSEM in R remains cumbersome and limited</li>
+<li>Mplus remains the most complete (non-open) option with DSEM capabilities</li>
+</ul></li>
 </ul></li>
 <li><strong>MLM/ILD:</strong> <code>glmmTMB</code> and <code>brms</code> both model serial dependence
 <ul>
-<li>Neither directly offers a separable partner-by-time residual structure such as <span class="math inline">\(\mathrm{UN}\otimes\mathrm{AR}(1)\)</span>; SAS <code>PROC MIXED</code> and SPSS <code>MIXED</code> do for Gaussian repeated-measures models</li>
+<li>Neither directly offers a separable partner-by-time residual structure such as <span class="math inline">\(\mathrm{UN}\otimes\mathrm{AR}(1)\)</span>
+<ul>
+<li>SAS <code>PROC MIXED</code> and SPSS <code>MIXED</code> do for Gaussian repeated-measures models</li>
+</ul></li>
 </ul></li>
 </ul>
 </div>
 </div></div>
 <div class="subtle">
-<p><span class="citation" data-cites="lavaanMultilevelSEM mulderThreeExtensions2021 blavaanTwoLevelSEM koslowskiMlts2025 asparouhovDynamicStructuralEquation2018 asparouhovComparisonModelsAnalysis2020 kristensenCovarianceStructuresGlmmTMB2023 buerknerAutocorrelationStructuresBrms sasInstituteMixedProcedure ibmCovarianceStructureList">(<a href="#/references" role="doc-biblioref" onclick>Asparouhov et al., 2018</a>; <a href="#/references" role="doc-biblioref" onclick>Asparouhov &amp; Muthén, 2020</a>; <a href="#/references" role="doc-biblioref" onclick>Bürkner, n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>IBM Corp., n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>Koslowski et al., 2025</a>; <a href="#/references" role="doc-biblioref" onclick>Kristensen &amp; McGillycuddy, 2023</a>; <a href="#/references" role="doc-biblioref" onclick><span class="nocase">lavaan project</span>, n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>Merkle et al., n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>Mulder &amp; Hamaker, 2021</a>; <a href="#/references" role="doc-biblioref" onclick>SAS Institute Inc., n.d.</a>)</span></p>
+<p><span class="citation" data-cites="lavaanMultilevelSEM mulderThreeExtensions2021 blavaanTwoLevelSEM koslowskiMlts2025 driverContinuousTimeStructural2017 asparouhovDynamicStructuralEquation2018 asparouhovComparisonModelsAnalysis2020 kristensenCovarianceStructuresGlmmTMB2023 buerknerAutocorrelationStructuresBrms sasInstituteMixedProcedure ibmCovarianceStructureList">(<a href="#/references" role="doc-biblioref" onclick>Asparouhov et al., 2018</a>; <a href="#/references" role="doc-biblioref" onclick>Asparouhov &amp; Muthén, 2020</a>; <a href="#/references" role="doc-biblioref" onclick>Bürkner, n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>Driver et al., 2017</a>; <a href="#/references" role="doc-biblioref" onclick>IBM Corp., n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>Koslowski et al., 2025</a>; <a href="#/references" role="doc-biblioref" onclick>Kristensen &amp; McGillycuddy, 2023</a>; <a href="#/references" role="doc-biblioref" onclick><span class="nocase">lavaan project</span>, n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>Merkle et al., n.d.</a>; <a href="#/references" role="doc-biblioref" onclick>Mulder &amp; Hamaker, 2021</a>; <a href="#/references" role="doc-biblioref" onclick>SAS Institute Inc., n.d.</a>)</span></p>
 </div>
 <!-- ca. 2.5 Minutes -->
 </section></section>

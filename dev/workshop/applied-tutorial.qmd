@@ -187,14 +187,16 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 
 :::{.fragment}
 
-- **SEM/DSEM:** R's capabilities are spread across specialized packages
-  - (Multilevel) SEM: `lavaan` (e.g., CLPM/RI-CLPM), but has no native DSEM or     residual AR(1) structure. Niche packages for DSEM or continuous time SEM       `ctsem` exist, but no complete package can rival Mplus. 
+- **SEM/DSEM:** R spreads these capabilities across specialized packages
+  - `lavaan`: fixed-wave and limited two-level SEM
+  - `mlts` and `ctsem`: multivariate dynamic models
+    - Dyadic DSEM in R remains cumbersome and limited
+    - Mplus remains the most complete (non-open) option with DSEM capabilities
 - **MLM/ILD:** `glmmTMB` and `brms` both model serial dependence
   - Neither directly offers a separable partner-by-time residual structure such
-    as $\mathrm{UN}\otimes\mathrm{AR}(1)$; SAS `PROC MIXED` and SPSS `MIXED` do
-    for Gaussian repeated-measures models
+    as $\mathrm{UN}\otimes\mathrm{AR}(1)$
+    - SAS `PROC MIXED` and SPSS `MIXED` do for Gaussian repeated-measures models
 
-<!--TODO: cite the ctsem package -->
 :::
 
 :::
@@ -206,6 +208,7 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 @mulderThreeExtensions2021;
 @blavaanTwoLevelSEM;
 @koslowskiMlts2025;
+@driverContinuousTimeStructural2017;
 @asparouhovDynamicStructuralEquation2018;
 @asparouhovComparisonModelsAnalysis2020;
 @kristensenCovarianceStructuresGlmmTMB2023;
