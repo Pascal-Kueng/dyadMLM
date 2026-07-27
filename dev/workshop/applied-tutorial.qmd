@@ -1594,11 +1594,11 @@ Often it is preferable to rotate the covariance back to the familiar member-leve
 
 - Member residual variance:
   $\operatorname{Var}(\epsilon_{1i})=\operatorname{Var}(\epsilon_{2i})
-  =\sigma_{r_\mathrm{M}}^2+\sigma_{r_\mathrm{D}}^2$
+  =\operatorname{Var}(r_{\mathrm{M}i})+\operatorname{Var}(r_{\mathrm{D}i})$
 
 - Partner residual covariance:
   $\operatorname{Cov}(\epsilon_{1i},\epsilon_{2i})
-  =\sigma_{r_\mathrm{M}}^2-\sigma_{r_\mathrm{D}}^2$
+  =\operatorname{Var}(r_{\mathrm{M}i})-\operatorname{Var}(r_{\mathrm{D}i})$
   
 :::
 
