@@ -16,6 +16,10 @@ trap cleanup EXIT
 
 mkdir -p "${temporary_input}" "${temporary_output}" "${workshop_output}"
 
+# DeckTape runs as a non-root user whose UID may differ from the host runner.
+# This directory is temporary and contains only the generated PDFs.
+chmod 0777 "${temporary_output}"
+
 # Give the container only the publication-bound slide files.
 cp "${repository_root}/dev/workshop/dyad-day.html" \
   "${temporary_input}/dyad-day.html"
