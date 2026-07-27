@@ -106,9 +106,11 @@ head(raw_dyad_data)
 ```
 
 
-Choose your research question:
+Choose your research question. 
 
-> [Insert your RQ]
+> [Insert your Actor-RQ]
+
+> [Insert your Partner-RQ]
 
 ```{r}
 # hint("research_question", "concept")
