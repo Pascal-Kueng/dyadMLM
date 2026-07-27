@@ -15,3 +15,270 @@ editor: source
 # Exercises
 
 The workshop exercises will be added here.
+
+Install necessary packages (run this block):
+
+```{r}
+install.packages("dyadMLM", repos = c(
+  "https://pascal-kueng.r-universe.dev",
+  "https://cloud.r-project.org"
+  )
+)
+
+# TODO: add all other packages they need, like easystats, DHARMa, and glmmTMB
+```
+
+
+# Getting started
+
+Briefly explain how a .Rmd file works, and that they can run chunks, and how
+to insert new chunks with ctrl + alt + i (how on Mac?)
+
+```{r}
+
+```
+
+
+Load all required package:
+
+```{r}
+library(glmmTMB)
+library(dyadMLM)
+library(easystats)
+library(DHARMa)
+library(dplry)
+
+```
+
+
+# Loading, expecting, and preparing the data
+
+Follow a simplified workflow:
+
+1. Define dyads, distinguishability, and research questions
+2. Prepare the data and validate the dyadic structure
+3. Describe and visualize measures and observed relationships
+4. Estimate the model
+5. Verify model adequacy, distinguishability, and robustness
+6. Visualize, interpret, and report results
+
+# 1. Define dyads, distinguishability, and research questions
+
+You may use any of the variables in the dataset as outcome or predictor. 
+
+Inspect dataset 
+
+```{r}
+data
+```
+
+
+Choose your RQ: 
+
+> [Insert your RQ]
+
+# 2. Prepare the data and validate the dyadic structure
+
+You may use `dyadMLM::prepare_dyad_data()`. Load the package:
+
+```{r}
+library(dyadMLM)
+```
+
+For help with the arguments and how to use the function, run: 
+
+```{r}
+?prepare_dyad_data()
+```
+
+Adding a `?` before any package function will produce a helpful help-page.
+
+---
+
+Prepare and validate the data for a **distinguishable** model now. 
+
+Hint: if you set `include_arbitrary_member_contrast = TRUE` you can use the 
+same data to fit both distinguishable and exchangeable models later.
+
+```{r}
+
+
+```
+
+Inspect and see if columns make sense: 
+
+```{r}
+
+```
+
+
+# 3. Describe and visualize measures and observed relationships
+
+Here, should we provide the code already and only have them enter their
+variables? And then ask them to interpret the output?
+
+
+-> Describe what you can see and how you interpret the summaries and plots: 
+
+[Insert your brief summary here]
+
+
+# 4. Estimate the model
+
+First, estimate a model for distinguishable dyads: 
+
+```{r}
+
+my_model <- glmmTMB(
+  
+  #[specify your model here]
+  
+  , data = # [insert your dataset]
+  , family = gaussian()
+)
+
+summary(my_model)
+
+```
+
+
+
+# 5. Verify model adequacy, distinguishability, and robustness
+
+### Adequacy:
+
+Check if the model converged and if all estimates look plausible.
+
+Then, use DHARMa for residual diagnostics via simulation:
+
+```{r}
+# Should we already provide the code?
+```
+
+Interpreting these residual diagnostics is not easy. In practice, refer to 
+the vignette. For now, just acknowledge whether they seem acceptable or not. 
+
+
+### Influential dyads
+
+Next, check visually whether results could be driven by few dyads. You can use 
+the following function (just run it to create it in your environment):
+
+```{r}
+# We should provide the full function
+```
+
+Use the function for each effect separately once: 
+
+```{r}
+
+```
+
+
+Interpret the results. Should you refit with some dyads excluded? 
+
+Optionally, refit the model here. To remove certain dyads from the dataset, 
+you may use `easy call`: 
+
+```{r}
+
+```
+
+
+### Distinguishability
+
+Fit the equivalent model as exchangeable dyads. Hint: you need a 
+`.arbitrary_member_contrast` column in the data. You may already have included
+one earlier, or you may need to prepare the data freshly. You can check
+your column names with `names(your_data)`. 
+
+
+```{r}
+
+
+```
+
+
+Insert your brief conclusion, and choose whether you want to go forward with
+the distinguishable or exchangeable model for the rest of the excercise:
+
+[Insert conclusion]
+
+[Insert decision and reasoning]
+
+
+# 6. Visualize, interpret, and report results
+
+Print a nice fixed effects table using model_parameters (remember to use `?` if you need help with arguments): 
+
+```{r}
+
+```
+
+Print a nice random effects table: 
+
+```{r}
+
+```
+
+Plot the fixed effects: 
+
+```{r}
+
+```
+
+
+Interpret your results in practical terms. Remember that the interpretation
+of the intercepts depends on whether you used grand-mean centred variables.
+
+Your interpretation: 
+
+[insert interpretation]
+
+
+You have now completed the APIM-workflow!!
+
+
+## Compute DSM or DIM estimates
+
+Since the transformation to DIM estimate is much sipmler, let's try this. 
+Check the output from your **exchangeable** model, and enter your coefficients
+here: 
+
+```{r}
+
+b_actor <- # [insert from your model output]
+b_partner <- # [insert from your model output]
+  
+```
+
+Recover the DIM estimates:
+
+```{r}
+
+b_mean <- # [insert formula]
+b_dev <- # [insert formula]
+  
+paste0("The between-dyad effect is: ", b_mean)
+paste0("The within-dyad effect is: ", b_dev)
+
+```
+
+
+Interpret the effects: 
+
+[Insert interpretation]
+
+
+Optionally, if you want to fit a DIM or DSM from scratch, see: Vignette of dyadMLM
+
+
+# Intensive longitudinal dyads
+
+- Now use the dataset xyz...
+
+
+
+
+
+
