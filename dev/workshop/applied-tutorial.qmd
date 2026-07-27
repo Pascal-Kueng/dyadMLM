@@ -1241,8 +1241,6 @@ parameters::model_parameters(apim_distinguishable_model) |>
 # Exchangeable dyads
 The same model but constrained
 
-## 
-
 ## Workflow
 
 1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
@@ -1263,9 +1261,20 @@ we can use the same RQ and data to demonstrate the exchangeable workflow.
 
 :::
 
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. [**Prepare the data and validate the dyadic structure**]{.text-highlight}
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
 ## Create the required format and validate the data
 
-For truly exchangeable dyads, we can just omit the `role` argument. 
+You can use `dyadMLM::prepare_dyad_data()` to prepare and validate the data. 
+
+For exchangeable dyads, we can just omit the `role` argument. 
 If we want to estimate both distinguishable and exchangeable versions, 
 we would pass `role` and set `include_arbitrary_member_contrast = TRUE`.
 
@@ -1282,6 +1291,8 @@ df_exch <- dyadMLM::prepare_dyad_data(
   seed = 123
 )
 
+print(df_exch)
+
 ```
 
 ## Create the required format and validate the data
@@ -1297,38 +1308,95 @@ head(df_exch) |>
 ```
 
 
+## Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. [**Describe and visualize measures and observed relationships**]{.text-highlight}
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
+## Describe focal variables (pooled)
+
+No wide-view of the data is needed for exchangeable dyads. 
+We can describe the data directly to obtain pooled estimates: 
+
+```{r}
+df_exch |>
+  dplyr::select(efficacy, total_mvpa) |>
+  report::report_table() |>
+  slide_table()
+```
+
+## Visualize focal variables
+
+```{r}
+
+plot_dyadic_histograms <- function(data, var) {
+  var_label <- rlang::as_label(rlang::enquo(var))
+
+  ggplot(
+    data,
+    aes(x = {{ var }}, y = after_stat(density))
+  ) +
+    geom_histogram(
+      bins = 15, boundary = 0,
+      fill = "steelblue", color = "white", alpha = 0.75
+    ) +
+    geom_density(
+      bounds = c(0, Inf), color = "navy", linewidth = 1.1
+    ) +
+    see::theme_modern(base_size = 16)
+}
+
+```
+
+## Visualize focal variables
+
+```{r}
+#| fig-format: svg
+#| out-width: 100%
+
+see::plots(
+  plot_dyadic_histograms(df_apim, efficacy),
+  plot_dyadic_histograms(df_apim, total_mvpa)
+)
+```
+
+## Observed correlations
+
+Correlations between the two partners' values do not inherently make sense,
+since the random assignment cancels them out. We could compute ICCs: 
+
+```{r}
+library(wbCorr)
+
+within_between_correlations <- wbCorr(
+  df_exch[,c('efficacy','total_mvpa')], 
+  cluster = df_exch$couple_id
+)
+
+summary(within_between_correlations, 'wb')
+```
+
+Top right: if one partner's efficacy is high, is the others' MVPA high?
+Bottom left: In a couple with high MVPA, does that couple also have high efficacy?
+Diagonal ICCs: How much variability is within couples vs. between couples?
+
+
+<!-- TODO: Are these interpretations correct? can ICC be interpreted as a correlation too here? -->
+
+
 <!-------------------------  Work in progress  -------------------------------->
 
+# Excursion: DIM and DSM
 
-## Exchangeable APIM
+- Link to online materials
 
-- Row-Level representation
-- Formula
-- residual matrix?
-- Code
-  - Data prep and inspecting and understanding data structure
-  - Visualizing variables and bivariate relationships
-  - Estimating the model
-  - Checking assumptions
-  - Visualizing results
+# Excursion: non-Gaussian generalized models
 
-## DIM (potentially omit)
-
-- Row-Level representation
-- Formula
-- residual matrix?
-- Code
-  - Data prep and inspecting and understanding data structure
-  - Visualizing variables and bivariate relationships
-  - Estimating the model
-  - Checking assumptions
-  - Visualizing results
-
-## Excursion: non-Gaussian generalized models
-
-## Q&A and discussion
-
-# Intensive longitudinal extensions
+# Intensive longitudinal dyads
 
 ## ILD extends rather than replaces the workflow {.smaller}
 
