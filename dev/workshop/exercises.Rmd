@@ -14,44 +14,45 @@ editor: source
 
 # Exercises
 
-The workshop exercises will be added here.
+These exercises follow the six-step cross-sectional APIM workflow from the
+applied tutorial.
 
-Install necessary packages (run this block):
+Install the necessary packages (run this block once):
 
 ```{r}
-install.packages("dyadMLM", repos = c(
-  "https://pascal-kueng.r-universe.dev",
-  "https://cloud.r-project.org"
+install.packages(
+  c(
+    "dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "easystats",
+    "dplyr", "ggplot2", "tibble", "tidyr"
+  ),
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
   )
 )
-
-# TODO: add all other packages they need, like easystats, DHARMa, and glmmTMB
 ```
 
 
 # Getting started
 
-Briefly explain how a .Rmd file works, and that they can run chunks, and how
-to insert new chunks with ctrl + alt + i (how on Mac?)
-
-```{r}
-
-```
+An R Markdown (`.Rmd`) file combines instructions with runnable R code chunks.
+Run chunks individually as you work. In RStudio, insert a new R chunk with
+Ctrl+Alt+I on Windows or Linux, or Cmd+Option+I on macOS.
 
 
-Load all required package:
+Load all required packages:
 
 ```{r}
 library(glmmTMB)
 library(dyadMLM)
 library(easystats)
 library(DHARMa)
-library(dplry)
+library(dplyr)
 
 ```
 
 
-# Loading, expecting, and preparing the data
+# Loading, inspecting, and preparing the data
 
 Follow a simplified workflow:
 
@@ -64,16 +65,20 @@ Follow a simplified workflow:
 
 # 1. Define dyads, distinguishability, and research questions
 
-You may use any of the variables in the dataset as outcome or predictor. 
+You may use any of the variables in the dataset as outcome or predictor.
 
-Inspect dataset 
+Place `dyadic-person-means.rds` in the same folder as this exercise file, then
+load and inspect the dataset:
 
 ```{r}
-data
+raw_dyad_data <- readRDS("dyadic-person-means.rds")
+
+head(raw_dyad_data)
+names(raw_dyad_data)
 ```
 
 
-Choose your RQ: 
+Choose your research question:
 
 > [Insert your RQ]
 
@@ -85,7 +90,7 @@ You may use `dyadMLM::prepare_dyad_data()`. Load the package:
 library(dyadMLM)
 ```
 
-For help with the arguments and how to use the function, run: 
+For help with the arguments and how to use the function, run:
 
 ```{r}
 ?prepare_dyad_data()
@@ -95,17 +100,21 @@ Adding a `?` before any package function will produce a helpful help-page.
 
 ---
 
-Prepare and validate the data for a **distinguishable** model now. 
+Prepare and validate the data for a **distinguishable** model now.
 
-Hint: if you set `include_arbitrary_member_contrast = TRUE` you can use the 
-same data to fit both distinguishable and exchangeable models later.
+Hint: distinguish partners using `role = gender`. Set
+`include_arbitrary_member_contrast = TRUE` to use the same prepared data for
+distinguishable and exchangeable models later. Use
+`add_apim_gmc_predictors = TRUE` if you want the grand-mean-centered APIM
+predictors used in the tutorial.
 
 ```{r}
 
 
 ```
 
-Inspect and see if columns make sense: 
+Inspect the prepared data and verify the dyad IDs, member IDs, roles, row
+counts, missingness, and generated columns:
 
 ```{r}
 
@@ -114,27 +123,26 @@ Inspect and see if columns make sense:
 
 # 3. Describe and visualize measures and observed relationships
 
-Here, should we provide the code already and only have them enter their
-variables? And then ask them to interpret the output?
+Adapt the summary and plotting code from the tutorial to your focal variables.
+At minimum, summarize the variables by role, inspect their distributions,
+calculate observed dyadic correlations, and visualize partner similarity.
 
 
--> Describe what you can see and how you interpret the summaries and plots: 
+Describe what you see and how you interpret the summaries and plots:
 
 [Insert your brief summary here]
 
 
 # 4. Estimate the model
 
-First, estimate a model for distinguishable dyads: 
+First, estimate a model for distinguishable dyads:
 
-```{r}
+```{r eval=FALSE}
 
 my_model <- glmmTMB(
-  
-  #[specify your model here]
-  
-  , data = # [insert your dataset]
-  , family = gaussian()
+  formula = YOUR_MODEL_FORMULA,
+  data = YOUR_PREPARED_DATA,
+  family = gaussian()
 )
 
 summary(my_model)
@@ -145,52 +153,84 @@ summary(my_model)
 
 # 5. Verify model adequacy, distinguishability, and robustness
 
-### Adequacy:
+### Adequacy
 
 Check if the model converged and if all estimates look plausible.
 
 Then, use DHARMa for residual diagnostics via simulation:
 
-```{r}
-# Should we already provide the code?
+```{r eval=FALSE}
+my_model_dharma_residuals <- DHARMa::simulateResiduals(
+  fittedModel = my_model,
+  n = 10000,
+
+  # Re-simulate the random-effects block that represents the residuals.
+  simulateREs = "unconditional",
+
+  # Account for the correlation between partners' residuals.
+  rotation = "estimated",
+  seed = 123
+)
+
+plot(my_model_dharma_residuals)
 ```
 
-Interpreting these residual diagnostics is not easy. In practice, refer to 
-the vignette. For now, just acknowledge whether they seem acceptable or not. 
+Next, inspect each role separately:
 
+```{r eval=FALSE}
+female_dharma_residuals <- DHARMa::recalculateResiduals(
+  my_model_dharma_residuals,
+  sel = ~ .is_female == 1,
+  rotation = NULL,
+  seed = 123
+)
 
-### Influential dyads
+male_dharma_residuals <- DHARMa::recalculateResiduals(
+  my_model_dharma_residuals,
+  sel = ~ .is_male == 1,
+  rotation = NULL,
+  seed = 123
+)
 
-Next, check visually whether results could be driven by few dyads. You can use 
-the following function (just run it to create it in your environment):
-
-```{r}
-# We should provide the full function
+old_par <- par(mfrow = c(1, 2))
+DHARMa::plotResiduals(female_dharma_residuals, main = "Women")
+DHARMa::plotResiduals(male_dharma_residuals, main = "Men")
+par(old_par)
 ```
 
-Use the function for each effect separately once: 
+Interpreting these residual diagnostics takes practice. Consult the DHARMa
+vignette section on
+[interpreting residuals and recognizing misspecification](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html#interpreting-residuals-and-recognizing-misspecification-problems).
+For now, briefly assess whether the diagnostics appear acceptable overall and
+for each role.
 
-```{r}
 
+### Robustness
+
+Review your earlier plots and data checks. If a dyad was flagged for a
+substantive or procedural reason, optionally refit the model without it:
+
+```{r eval=FALSE}
+data_without_selected_dyads <- dplyr::filter(
+  YOUR_PREPARED_DATA,
+  !couple_id %in% DYAD_IDS_TO_EXCLUDE
+)
+
+model_without_selected_dyads <- update(
+  my_model,
+  data = data_without_selected_dyads
+)
 ```
 
-
-Interpret the results. Should you refit with some dyads excluded? 
-
-Optionally, refit the model here. To remove certain dyads from the dataset, 
-you may use `easy call`: 
-
-```{r}
-
-```
+Do not exclude dyads merely because their removal changes a significance label.
 
 
 ### Distinguishability
 
-Fit the equivalent model as exchangeable dyads. Hint: you need a 
+Fit the equivalent model under exchangeability constraints. Hint: you need an
 `.arbitrary_member_contrast` column in the data. You may already have included
-one earlier, or you may need to prepare the data freshly. You can check
-your column names with `names(your_data)`. 
+one earlier, or you may need to prepare the data again. Check your column names
+with `names(YOUR_PREPARED_DATA)`.
 
 
 ```{r}
@@ -199,8 +239,8 @@ your column names with `names(your_data)`.
 ```
 
 
-Insert your brief conclusion, and choose whether you want to go forward with
-the distinguishable or exchangeable model for the rest of the excercise:
+Insert your brief conclusion, and choose whether you want to continue with
+the distinguishable or exchangeable model for the rest of the exercise:
 
 [Insert conclusion]
 
@@ -209,19 +249,20 @@ the distinguishable or exchangeable model for the rest of the excercise:
 
 # 6. Visualize, interpret, and report results
 
-Print a nice fixed effects table using model_parameters (remember to use `?` if you need help with arguments): 
+Print a fixed-effects table using `parameters::model_parameters()` (remember
+to use `?` if you need help with arguments):
 
 ```{r}
 
 ```
 
-Print a nice random effects table: 
+Print a random-effects table:
 
 ```{r}
 
 ```
 
-Plot the fixed effects: 
+Plot the fixed effects:
 
 ```{r}
 
@@ -229,36 +270,37 @@ Plot the fixed effects:
 
 
 Interpret your results in practical terms. Remember that the interpretation
-of the intercepts depends on whether you used grand-mean centred variables.
+of the intercepts depends on whether you used grand-mean-centered variables.
 
-Your interpretation: 
+Your interpretation:
 
 [insert interpretation]
 
 
-You have now completed the APIM-workflow!!
+You have now completed the APIM workflow!
 
 
-## Compute DSM or DIM estimates
+## Compute DIM estimates from the exchangeable APIM
 
-Since the transformation to DIM estimate is much sipmler, let's try this. 
+The transformation from exchangeable APIM coefficients to DIM estimates is
+particularly simple.
 Check the output from your **exchangeable** model, and enter your coefficients
-here: 
+here:
 
 ```{r}
 
-b_actor <- # [insert from your model output]
-b_partner <- # [insert from your model output]
-  
+b_actor <- YOUR_ACTOR_COEFFICIENT
+b_partner <- YOUR_PARTNER_COEFFICIENT
+
 ```
 
 Recover the DIM estimates:
 
 ```{r}
 
-b_mean <- # [insert formula]
-b_dev <- # [insert formula]
-  
+b_mean <- YOUR_FORMULA
+b_dev <- YOUR_FORMULA
+
 cat("The between-dyad effect is: ", round(b_mean, 2), "\n", # newline
     "The within-dyad effect is: ", round(b_dev, 2)
 )
@@ -266,20 +308,18 @@ cat("The between-dyad effect is: ", round(b_mean, 2), "\n", # newline
 ```
 
 
-Interpret the effects: 
+Interpret the effects:
 
 [Insert interpretation]
 
 
-Optionally, if you want to fit a DIM or DSM from scratch, see: Vignette of dyadMLM
+Optionally, fit a DIM or DSM directly using the package vignettes:
+
+- [DIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html)
+- [DSM vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html)
 
 
 # Intensive longitudinal dyads
 
-- Now use the dataset xyz...
-
-
-
-
-
+The intensive longitudinal exercises will be added with the ILD tutorial.
 

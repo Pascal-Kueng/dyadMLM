@@ -136,7 +136,7 @@ sys.source(
 
 :::{.fragment}
 - **MLM: Complete-case**
-  - **Outcome missing:** Valid under MAR, ML uses remaining observations
+  - **Outcome missing:** Valid under MAR, MLM uses remaining observations
   - **Predictor missing:** Valid under MAR, if missingness does **not depend** on the outcome after accounting for predictors
   
 :::
@@ -164,7 +164,7 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 
 <!-- ca. 2.5 Minutes -->
 
-## Why R—and where other software helps {.smaller}
+## Why R {.smaller}
 
 :::: {.columns}
 
@@ -188,15 +188,13 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 :::{.fragment}
 
 - **SEM/DSEM:** R's capabilities are spread across specialized packages
-  - `lavaan` handles explicitly specified, fixed-wave lagged SEMs (e.g.,
-    CLPM/RI-CLPM), but has no native DSEM or residual AR(1) structure
-  - Version 0.7 adds restricted two-level random slopes; `mlts` implements
-    Bayesian multilevel time-series models, while Mplus integrates DSEM/RDSEM
+  - (Multilevel) SEM: `lavaan` (e.g., CLPM/RI-CLPM), but has no native DSEM or     residual AR(1) structure. Niche packages for DSEM or continuous time SEM       `ctsem` exist, but no complete package can rival Mplus. 
 - **MLM/ILD:** `glmmTMB` and `brms` both model serial dependence
   - Neither directly offers a separable partner-by-time residual structure such
     as $\mathrm{UN}\otimes\mathrm{AR}(1)$; SAS `PROC MIXED` and SPSS `MIXED` do
     for Gaussian repeated-measures models
 
+<!--TODO: cite the ctsem package -->
 :::
 
 :::
