@@ -70,10 +70,8 @@ While going through the exercises you can sometimes spot optional hints:
 # hint('example_hint', 'run_chunk_without_comment') 
 ```
 
-To get the hints, delete the `#` of the hint you want to read. `#` marks 
-the whole line a comment that is not evaluated by R. 
-
-After deleting the `#`, run the chunk (again). You can try it above.
+To reveal the hints, delete the `#` infron of the hint you want to read, then
+run the chunk (again). You can try it above.
 
 
 
@@ -102,7 +100,7 @@ load and inspect the raw aggregated dataset:
 ```{r}
 raw_dyad_data <- readRDS("dyadic-person-means.rds")
 
-head(raw_dyad_data)
+raw_dyad_data
 ```
 
 
@@ -112,13 +110,14 @@ Choose your research question.
 
 > [Insert your Partner-RQ]
 
-```{r}
-# hint("research_question", "concept")
-```
+
 
 # 2. Prepare the data and validate the dyadic structure
 
 You may use `dyadMLM::prepare_dyad_data()`. Load the package:
+
+<!-- TODO: load packages as we go or at the start? use dyadMLM::function() every
+times so it is clear where each function comes from? -->
 
 ```{r}
 library(dyadMLM)
@@ -130,27 +129,28 @@ For help with the arguments and how to use the function, run:
 ?prepare_dyad_data()
 ```
 
-Adding a `?` before any package function will produce a helpful help-page.
+Adding a `?` before any package function will produce a help-page on the 
+bottom right of R-Studio.
 
 ---
 
 Prepare and validate the data for a **distinguishable** model now.
 
-Hint: distinguish partners using `role = gender`. Set
-`include_arbitrary_member_contrast = TRUE` to use the same prepared data for
-distinguishable and exchangeable models later. Use
-`add_apim_gmc_predictors = TRUE` if you want the grand-mean-centered APIM
-predictors used in the tutorial.
+- Distinguish partners using `role = gender`. 
+- Set `include_arbitrary_member_contrast = TRUE` to use the same prepared data 
+  for distinguishable and exchangeable models later. 
+- Use `add_apim_gmc_predictors = TRUE` if you want the grand-mean-centered APIM
+  predictors used in the tutorial.
 
 Save the prepared data as `my_data`; later exercise code uses this name.
 
 ```{r}
-# hint("prepare_data", "concept")
 # hint("prepare_data", "structure")
 ```
 
-Inspect the prepared data and verify the dyad IDs, member IDs, roles, row
-counts, missingness, and generated columns:
+Inspect the prepared data (like you did above with the raw data) and verify the 
+dyad IDs, member IDs, roles, row counts, missingness, and generated columns 
+make sense:
 
 ```{r}
 
@@ -163,9 +163,44 @@ Adapt the summary and plotting code from the tutorial to your focal variables.
 At minimum, summarize the variables by role, inspect their distributions,
 calculate observed dyadic correlations, and visualize partner similarity.
 
+To summarize and plot by role, it is easiest to pivot the dataset to wide-format
+via `pivot_wider()`. 
+
+Summaries:
+
 ```{r}
-# hint("describe_data", "concept")
+# hint() use package and function X
+# hint() the exact call structure is...
 ```
+
+Visualize distributions by gender. The easiest way to visualize a distribution
+is with `hist()`. You may subset data with `dplyr::filter()`.
+
+```{r}
+# Pooled Histogram 
+# hint()
+
+# Male histogram
+# hint()
+# hint()
+
+# Female histogram
+
+```
+
+
+Descript partner similarities:
+
+```{r}
+# Correlations
+# hint()
+# hint()
+
+# Plot
+# hint()
+
+```
+
 
 Describe what you see and how you interpret the summaries and plots:
 
@@ -182,7 +217,9 @@ First, estimate a model for distinguishable dyads:
 # hint("distinguishable_model", "example_code")
 
 my_model <- glmmTMB(
-  formula = YOUR_MODEL_FORMULA,
+  
+  YOUR_MODEL_FORMULA,
+  
   data = my_data,
   family = gaussian()
 )
@@ -249,8 +286,10 @@ for each role.
 
 ### Robustness
 
-Optionally, use the supplied helper to inspect unusual predictor–outcome
-combinations separately by role:
+Inspect unusual dyads separately by role. 
+
+Optionally, you can use the supplied helper that is loaded here from a separate
+file `helpers.R`:
 
 ```{r eval=FALSE}
 # The function is defined in the separate helper file.
@@ -273,6 +312,13 @@ men_mahalanobis_plot <- plot_mahalanobis(
 see::plots(women_mahalanobis_plot, men_mahalanobis_plot)
 ```
 
+Repeat the same for partner effects:
+
+```{r}
+
+```
+
+
 Mahalanobis distance identifies unusual bivariate combinations, not formal
 model influence, and the displayed regression line is not the adjusted APIM
 effect. Use the labels to guide data inspection rather than to automatically
@@ -282,6 +328,8 @@ If a dyad was flagged for a substantive or procedural reason, optionally refit
 the model without it:
 
 ```{r eval=FALSE}
+# hint(about a vector of ids)
+
 data_without_selected_dyads <- dplyr::filter(
   my_data,
   !couple_id %in% DYAD_IDS_TO_EXCLUDE
@@ -291,6 +339,8 @@ model_without_selected_dyads <- update(
   my_model,
   data = data_without_selected_dyads
 )
+
+summarise(model_without_selected_dyads)
 ```
 
 Do not exclude dyads merely because their removal changes a significance label.
@@ -305,13 +355,18 @@ with `names(my_data)`.
 
 
 ```{r}
-# hint("distinguishability", "concept")
-# hint("distinguishability", "structure")
+# hint(about the fixed effects)
+# hint(about the random effects)
+# hint(about the random effects 2 with example)
 
 ```
 
 Compare the distinguishable and exchangeable models using
 `dyadMLM::compare_nested_models()`.
+
+```{r}
+
+```
 
 Insert your brief conclusion, and choose whether you want to continue with
 the distinguishable or exchangeable model for the rest of the exercise:
@@ -323,11 +378,9 @@ the distinguishable or exchangeable model for the rest of the exercise:
 
 # 6. Visualize, interpret, and report results
 
-Print a fixed-effects table using `parameters::model_parameters()` (remember
-to use `?` if you need help with arguments):
+Print a fixed-effects table using `parameters::model_parameters()`:
 
 ```{r}
-# hint("report_results", "concept")
 # hint("report_results", "structure")
 ```
 
@@ -340,7 +393,7 @@ Print a random-effects table:
 Plot the fixed effects:
 
 ```{r}
-
+# hint("report_results", "structure")
 ```
 
 
@@ -359,12 +412,11 @@ You have now completed the APIM workflow!
 
 The transformation from exchangeable APIM coefficients to DIM estimates is
 particularly simple.
+
 Check the output from your **exchangeable** model, and enter your coefficients
 here:
 
 ```{r}
-
-# hint("dim_transformation", "concept")
 
 b_actor <- YOUR_ACTOR_COEFFICIENT
 b_partner <- YOUR_PARTNER_COEFFICIENT
@@ -374,6 +426,7 @@ b_partner <- YOUR_PARTNER_COEFFICIENT
 Recover the DIM estimates:
 
 ```{r}
+# hint(formulas)
 
 b_mean <- YOUR_FORMULA
 b_dev <- YOUR_FORMULA
