@@ -259,8 +259,9 @@ Recover the DIM estimates:
 b_mean <- # [insert formula]
 b_dev <- # [insert formula]
   
-paste0("The between-dyad effect is: ", b_mean)
-paste0("The within-dyad effect is: ", b_dev)
+cat("The between-dyad effect is: ", round(b_mean, 2), "\n", # newline
+    "The within-dyad effect is: ", round(b_dev, 2)
+)
 
 ```
 
