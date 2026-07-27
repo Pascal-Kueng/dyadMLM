@@ -71,6 +71,7 @@ jobs:
           cp dev/workshop/01_exercises_cross_sectional.Rmd docs/workshop/01_exercises_cross_sectional.Rmd
           cp dev/workshop/02_exercises_ild.Rmd docs/workshop/02_exercises_ild.Rmd
           zip -jq docs/workshop/dyadic-data-analysis-workshop.zip \
+            dev/workshop/00_setup.R \
             dev/workshop/01_exercises_cross_sectional.Rmd \
             dev/workshop/02_exercises_ild.Rmd \
             dev/workshop/hints.R \

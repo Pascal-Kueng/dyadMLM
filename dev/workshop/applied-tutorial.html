@@ -4297,25 +4297,17 @@ display:block!important;
 <p><span class="subtle"><span class="citation" data-cites="mohammadzadehYazdBeyondIndividual2026">Mohammadzadeh Yazd et al. (<a href="#/references" role="doc-biblioref" onclick>2026</a>)</span></span></p>
 </section></section>
 <section>
-<section id="excercises-in-r" class="title-slide slide level1 center">
-<h1>Excercises in R</h1>
-<p>Short break - initiate package install before you leave</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href></a><span class="fu">install.packages</span>(</span>
-<span id="cb40-2"><a href></a>  <span class="fu">c</span>(</span>
-<span id="cb40-3"><a href></a>    <span class="st">&quot;dyadMLM&quot;</span>, <span class="st">&quot;wbCorr&quot;</span>, <span class="st">&quot;glmmTMB&quot;</span>, <span class="st">&quot;DHARMa&quot;</span>, <span class="st">&quot;see&quot;</span>,</span>
-<span id="cb40-4"><a href></a>    <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;ggplot2&quot;</span>, <span class="st">&quot;tibble&quot;</span></span>
-<span id="cb40-5"><a href></a>  ),</span>
-<span id="cb40-6"><a href></a>  <span class="at">repos =</span> <span class="fu">c</span>(</span>
-<span id="cb40-7"><a href></a>    <span class="st">&quot;https://pascal-kueng.r-universe.dev&quot;</span>,</span>
-<span id="cb40-8"><a href></a>    <span class="st">&quot;https://cloud.r-project.org&quot;</span></span>
-<span id="cb40-9"><a href></a>  )</span>
-<span id="cb40-10"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+<section id="exercises-in-r" class="title-slide slide level1 center">
+<h1>Exercises in R</h1>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>
-<li>or Teams channel</li>
+<li>Download and unzip all workshop materials</li>
+<li>Or use the files in the Teams channel</li>
 </ul>
+<p>Run this once in a fresh R session before the break. It updates all workshop packages and their dependencies and may take several minutes.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href></a><span class="fu">source</span>(<span class="st">&quot;00_setup.R&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <!--
 
 - DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?

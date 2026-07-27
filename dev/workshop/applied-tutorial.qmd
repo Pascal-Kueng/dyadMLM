@@ -1817,28 +1817,18 @@ populations
 [@mohammadzadehYazdBeyondIndividual2026]{.subtle}
 
 
-# Excercises in R
+# Exercises in R
 
-Short break - initiate package install before you leave
+- Go to https://pascal-kueng.github.io/dyadMLM/workshop/
+- Download and unzip all workshop materials
+- Or use the files in the Teams channel
+
+Run this once in a fresh R session before the break. It updates all workshop
+packages and their dependencies and may take several minutes.
 
 ```{r eval = FALSE}
-
-install.packages(
-  c(
-    "dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "see",
-    "dplyr", "ggplot2", "tibble"
-  ),
-  repos = c(
-    "https://pascal-kueng.r-universe.dev",
-    "https://cloud.r-project.org"
-  )
-)
-
+source("00_setup.R")
 ```
-
-
-- Go to https://pascal-kueng.github.io/dyadMLM/workshop/ 
-- or Teams channel
 
 <!--
 

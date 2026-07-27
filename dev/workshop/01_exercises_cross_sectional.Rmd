@@ -22,19 +22,12 @@ Download the complete workshop materials from the
 documentation and vignettes are available on the
 [`dyadMLM` homepage](https://pascal-kueng.github.io/dyadMLM/).
 
-Install the necessary packages (run this block once):
+Run the next chunk once, in a fresh R session, before the workshop. It updates
+all workshop packages and their dependencies to the newest available versions,
+but does not update unrelated packages. This may take several minutes.
 
-```{r}
-install.packages(
-  c(
-    "dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "easystats",
-    "dplyr", "ggplot2", "tibble", "tidyr"
-  ),
-  repos = c(
-    "https://pascal-kueng.r-universe.dev",
-    "https://cloud.r-project.org"
-  )
-)
+```{r eval=FALSE}
+source("00_setup.R")
 ```
 
 

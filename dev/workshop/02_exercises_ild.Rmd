@@ -25,21 +25,16 @@ documentation and vignettes are available on the
 
 # Getting started
 
-Keep this file, `dyadic-data.rds`, and `hints.R` in the same folder.
+Keep this file, `00_setup.R`, `dyadic-data.rds`, and `hints.R` in the same
+folder.
 
-If needed, install the required packages once:
+If you have not already run the workshop setup, run the next chunk once, in a
+fresh R session. It updates all workshop packages and their dependencies to the
+newest available versions, but does not update unrelated packages. This may
+take several minutes.
 
 ```{r eval=FALSE}
-install.packages(
-  c(
-    "dyadMLM", "wbCorr", "glmmTMB", "DHARMa", "easystats",
-    "dplyr", "ggplot2", "tidyr"
-  ),
-  repos = c(
-    "https://pascal-kueng.r-universe.dev",
-    "https://cloud.r-project.org"
-  )
-)
+source("00_setup.R")
 ```
 
 Load the required packages and optional hints:
