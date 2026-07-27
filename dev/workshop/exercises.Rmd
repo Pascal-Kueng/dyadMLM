@@ -16,6 +16,19 @@ editor: source
 
 The workshop exercises will be added here.
 
+Install necessary packages (run this block):
+
+```{r}
+install.packages("dyadMLM", repos = c(
+  "https://pascal-kueng.r-universe.dev",
+  "https://cloud.r-project.org"
+  )
+)
+
+# TODO: add all other packages they need, like easystats, DHARMa, and glmmTMB
+```
+
+
 # Getting started
 
 Briefly explain how a .Rmd file works, and that they can run chunks, and how
@@ -25,9 +38,171 @@ to insert new chunks with ctrl + alt + i (how on Mac?)
 
 ```
 
+
+Load all required package:
+
+```{r}
+library(glmmTMB)
+library(dyadMLM)
+library(easystats)
+library(DHARMa)
+library(dplry)
+
+```
+
+
 # Loading, expecting, and preparing the data
 
-Follow the workflow of the presentation.
+Follow a simplified workflow:
+
+1. Define dyads, distinguishability, and research questions
+2. Prepare the data and validate the dyadic structure
+3. Describe and visualize measures and observed relationships
+4. Estimate the model
+5. Verify model adequacy, distinguishability, and robustness
+6. Visualize, interpret, and report results
+
+# 1. Define dyads, distinguishability, and research questions
+
+You may use any of the variables in the dataset as outcome or predictor. 
+
+Inspect dataset 
+
+```{r}
+data
+```
+
+
+Choose your RQ: 
+
+> [Insert your RQ]
+
+# 2. Prepare the data and validate the dyadic structure
+
+You may use `dyadMLM::prepare_dyad_data()`. Load the package:
+
+```{r}
+library(dyadMLM)
+```
+
+For help with the arguments and how to use the function, run: 
+
+```{r}
+?prepare_dyad_data()
+```
+
+Adding a `?` before any package function will produce a helpful help-page.
+
+---
+
+Prepare and validate the data for a **distinguishable** model now: 
+
+```{r}
+
+```
+
+Inspect and see if columns make sense: 
+
+```{r}
+
+```
+
+
+# 3. Describe and visualize measures and observed relationships
+
+Here, should we provide the code already and only have them enter their
+variables? And then ask them to interpret the output?
+
+
+-> Describe what you can see and how you interpret the summaries and plots: 
+
+[Insert your brief summary here]
+
+
+# 4. Estimate the model
+
+First, estimate a model for distinguishable dyads: 
+
+```{r}
+
+my_model <- glmmTMB(
+  
+  #[specify your model here]
+  
+  , data = # [insert your dataset]
+  , family = gaussian()
+)
+
+summary(my_model)
+
+```
+
+
+Check if the model converged and if all estimates look plausible.
+
+# 5. Verify model adequacy, distinguishability, and robustness
+
+Use DHARMa for residual diagnostics via simulation:
+
+```{r}
+# Should we already provide the code?
+```
+
+Interpreting these residual diagnostics is not easy. In practice, refer to 
+the vignette. For now, just acknowledge whether they seem acceptable or not. 
+
+
+Next, check visually whether results could be driven by few dyads. You can use 
+the following function (just run it to create it in your environment):
+
+```{r}
+# We should provide the full function
+```
+
+Use the function for each effect separately once: 
+
+```{r}
+
+```
+
+
+Interpret the results. Should you refit with some dyads excluded? 
+
+Optionally, refit the model here. To remove certain dyads from the dataset, 
+you may use `easy call`: 
+
+```{r}
+
+```
+
+
+# 6. Visualize, interpret, and report results
+
+Print a nice fixed effects table using model_parameters (remember to use `?` if you need help with arguments): 
+
+```{r}
+
+```
+
+Print a nice random effects table: 
+
+```{r}
+
+```
+
+Plot the fixed effects: 
+
+```{r}
+
+```
+
+
+Interpret your results in practical terms. Remember that the interpretation
+of the intercepts depends on whether you used grand-mean centred variables.
+
+Your interpretation: 
+
+[insert interpretation]
 
 # Cross-sectional dyads
 
