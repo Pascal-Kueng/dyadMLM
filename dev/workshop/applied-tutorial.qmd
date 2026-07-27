@@ -762,7 +762,7 @@ distinguishability, and robustness.
 1. Did estimation succeed?
 2. Does the model reproduce the important data patterns?
 3. Is distinguishability supported?
-3. Are conclusions robust or driven by few dyads or consequential
+4. Are conclusions robust or driven by few dyads or consequential
    modeling choices? (sensitivity analyses)
 
 ## Did estimation succeed / converge?
@@ -1145,9 +1145,6 @@ slide_table(
   align = c("l", "r", "r")
 )
 ```
-
-<!-- TODO: we should avoid invisible code if possible so they can 
-reporduce everything -->
 
 :::{.subtle}
 \* $p < .05$; \*\* $p < .01$. Couple 28 was flagged in both visual screens.
@@ -1547,8 +1544,8 @@ Essentially the same steps and code can be used to check:
 
 1. Did estimation succeed?
 2. Does the model reproduce the important data patterns?
-3. Is exchangeability supported? $\rightarrow$ Test potential distinguishable models
-3. Are conclusions robust or driven by few dyads or consequential
+3. Does a distinguishable model fit clearly better?
+4. Are conclusions robust or driven by few dyads or consequential
    modeling choices? (sensitivity analyses)
 
 :::{.notes}
@@ -1575,6 +1572,11 @@ distinguishing are tested are possible (if there are feasible ways)
 parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
   insight::print_md(footer = "")
 ```
+
+::: {.fragment}
+In the parsimonious exchangeable model, higher self-efficacy was associated
+with more of one’s own MVPA, but not clearly with the partner’s MVPA.
+:::
 
 
 ## Reporting results and answering the research questions
