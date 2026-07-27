@@ -768,7 +768,7 @@ BEFORE interpreting and reporting results, we should ...
 1. Did estimation succeed?
 2. Does the model reproduce the important data patterns?
 3. Are exchangeability constraints defensible?
-4. Are conclusions driven by one dyad or one consequential modeling choice?
+4. Are conclusions driven by few dyads or consequential modeling choices?
 
 ## Did estimation succeed / converge?
 
@@ -786,19 +786,13 @@ The model converged without warnings... a good first sign!
 
 Residual diagnostics are not as straightforward anymore
 
-:::{.incremental}
 - Linear models: straightforward checks
 - Mixed models: residuals arise at multiple levels
 - Generalized models: expectations depend on the family and link
 - Dyadic models: partners' residuals are correlated
 
-:::
-
-:::{.fragment}
-
 **Solution:** Compare the data with simulations from the fitted model.
 
-:::
 
 ## DHARMa: one diagnostic scale across models
 
@@ -807,7 +801,6 @@ The `DHARMa` package [@hartigDHARMaResidualDiagnostics2026]:
 - Simulates outcomes from the fitted model
 - Checks whether the observed residuals behave as expected under simulations from the fitted model.
 - Adequate fit $\rightarrow$ approximately uniform, pattern-free residuals
-- Offers more tests in its [vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html)
 
 One function works across many model families!
 
@@ -832,7 +825,7 @@ dharma_residuals <- DHARMa::simulateResiduals(
 )
 ```
 
-## Raw MVPA leaves a fitted-value pattern {.smaller}
+## Inspect DHARMa residuals {.smaller}
 
 :::: {.columns}
 
@@ -865,7 +858,7 @@ plot(dharma_residuals)
 More targeted checks and guidance on interpretation of the plots:
 [DHARMa vignette](https://stat.ethz.ch/CRAN/web/packages/DHARMa/vignettes/DHARMa.html).
 
-## Inspect residuals by role
+## Inspect DHARMa residuals by role
 
 ```{r}
 
@@ -1043,12 +1036,7 @@ dyadMLM::compare_nested_models(
 
 ```
 
-Depending on your analysis goals and preregistration, you may switch to the
-more parsimonious exchangeable model, or report the distinguishable model while
-reporting no improved fit. In our example, we keep going with the distinguishable
-model.
-
-## Visualize role-specific actor associations {.smaller}
+## Are conclusions driven by few dyads?
 
 ```{r}
 plot_actor_association <- function(data, model, role, title,
