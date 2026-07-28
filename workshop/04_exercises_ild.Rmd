@@ -25,8 +25,8 @@ documentation and vignettes are available on the
 
 # Getting started
 
-Keep this file, `00_setup.R`, `dyadic-data.rds`, and `hints.R` in the same
-folder.
+Keep `04_exercises_ild.Rmd`, `00_setup.R`, `dyadic-data.rds`, and `hints.R` in
+the same folder.
 
 If you have not already run the workshop setup, run the next chunk once, in a
 fresh R session. It installs or updates the workshop packages and any
@@ -215,6 +215,15 @@ estimates are plausible.
 Use the ILD DHARMa block from the applied tutorial. Inspect overall calibration,
 patterns against fitted values and time, and remaining temporal or
 cross-partner dependence.
+
+If convergence problems or DHARMa patterns suggest a problematic outcome
+scale, inspect a histogram. For a nonnegative, right-skewed outcome, try
+`sqrt()` or `log1p()` (which handles zeros), check whether the histogram is less
+skewed, refit the model, and rerun the residual and temporal checks.
+
+For some outcomes, an appropriate non-Gaussian family may be preferable to a
+transformation. Generalized families have different assumptions and require
+case-specific choices, so they are not covered in this workshop.
 
 ## Robustness
 
