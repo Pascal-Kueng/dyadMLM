@@ -64,6 +64,11 @@ sys.source(
   envir = knitr::knit_global()
 )
 
+sys.source(
+  "helpers.R",
+  envir = knitr::knit_global()
+)
+
 ```
 
 ## Today's aims and program
@@ -1434,9 +1439,6 @@ see::plots(
 )
 ```
 
-<!-- TODO: can't we re-use the function we created earlier for the similarity plots?
-And either way, we should use the same mahalanobis of 4 right? I change it
-from 0 to 4-->
 
 ## Workflow
 
@@ -1465,7 +1467,7 @@ draw_apim_diagram("exchangeable", predictors_centered = TRUE,
 
 ## In MLM we constrain / pool by omitting terms
 
-Both partners' formulas are identical, so no need to combine them. We can just write: 
+One single equation:
 
 For each dyad $i$, each member $j$ has their own predictor 
 $X^{(\mathrm{A})}_{j,i}$ and their partner's predictor $X^{(\mathrm{P})}_{j,i}$:
@@ -1482,8 +1484,6 @@ $$
 
 In long format, each equation applies to one member row of the dyad.
 
-The model pools the effects, but actor and partner values are exchanged between
-member rows, so their predictions may still differ.
 
 ## The tricky part: residuals need to remain correlated within dyads
 
@@ -1518,16 +1518,16 @@ $$
 #| code-line-numbers: "1-25|2|3-4|6-7|9-10|12-20|14-15|17-18|20|1-23"
 apim_exchangeable_model <- glmmTMB(
   total_mvpa ~
-    # Pooled intercept -------------------------------------
+    # Pooled intercept
     1 + 
 
-    # Pooled actor effect ----------------------------------
+    # Pooled actor effect
     .efficacy_gmc_actor +
 
-    # Pooled partner effect --------------------------------
+    # Pooled partner effect
     .efficacy_gmc_partner +
 
-    # Within-dyad residual covariance (Sum/Deviation) ------
+    #------ Within-dyad residual covariance (Sum/Deviation) ------
   
     # Residuals of partners might be similar (positively correlated)
     (1 | couple_id) +
@@ -1543,7 +1543,16 @@ apim_exchangeable_model <- glmmTMB(
 summary(apim_exchangeable_model)
 ```
 
+
+:::{.notes}
+
+Explain why we do this on next page
+
+:::
+
 ## The mean-deviation parameterization
+
+- The DIM is equivalent to the APIM
 
 - The DIM represents member residuals using two uncorrelated components:
 
@@ -1551,7 +1560,13 @@ summary(apim_exchangeable_model)
     $r_{\mathrm{M}i}=(\epsilon_{1i}+\epsilon_{2i})/2$; both members move together
 
   - Deviation block `(0 + .member_contrast_arbitrary | couple_id)`:
-    $r_{\mathrm{D}i}=(\epsilon_{1i}-\epsilon_{2i})/2$; members move in opposite directions
+    $r_{\mathrm{D}i}=(\epsilon_{1i}-\epsilon_{2i})/2$; members move in opposite
+    directions
+    
+Using this parametrization allows us to represent random effects and later
+in ILD even random slopes with the correct constraints. 
+
+We can later backtransform to the familiar person-level structure.
 
 ## Workflow
 
@@ -1564,7 +1579,7 @@ summary(apim_exchangeable_model)
 
 ## Verify model adequacy, distinguishability, and robustness
 
-Essentially the same steps and code can be used to check:
+Same as before: 
 
 1. Did estimation succeed?
 2. Does the model reproduce the important data patterns?
@@ -1574,8 +1589,10 @@ Essentially the same steps and code can be used to check:
 
 :::{.notes}
 
-Regarding distinguishability: Sensitivity analyses where different ways of
-distinguishing are tested are possible (if there are feasible ways)
+Just brief recap, no more slides
+
+- Regarding distinguishability: depends on the data! could test various
+distinguishing variables.
 
 :::
 
@@ -1597,7 +1614,6 @@ parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
   insight::print_md(footer = "")
 ```
 
-<!-- TODO: soes a 
 
 ::: {.fragment}
 In the parsimonious exchangeable model, higher self-efficacy was associated
@@ -1647,6 +1663,8 @@ parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
   plot()
 
 ```
+
+<!-- TODO: can we also plot the intercept?? -->
 
 # Optional: DIM and DSM
 
@@ -2006,10 +2024,42 @@ ild_apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(ild_apim_exchangeable_model)
 ```
 
-
+## Simulate residuals from the exchangeable ILD model
 
 ```{r}
-performance::check_predictions(ild_apim_exchangeable_model)
+#| label: simulate-dharma-ild
+#| cache: true
+#| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_exchangeable_model), stats::model.frame(ild_apim_exchangeable_model), body(simulate_ild_dharma)))
+
+ild_apim_dharma_residuals <- simulate_ild_dharma(
+  model = ild_apim_exchangeable_model,
+  dyad = ild_apim_data$couple_id,
+  member = ild_apim_data$person_id,
+  time = ild_apim_data$diaryday,
+  n = 1000,
+  seed = 123
+)
+```
+
+## Inspect block-whitened DHARMa residuals {.smaller}
+
+```{r}
+#| fig-format: svg
+#| fig-width: 10
+#| fig-height: 4.4
+#| out-width: 92%
+#| fig-align: center
+
+plot(
+  ild_apim_dharma_residuals,
+  title = "Block-whitened DHARMa residual"
+)
+```
+
+## Check consecutive-day residual dependence
+
+```{r}
+test_ild_lag1(ild_apim_dharma_residuals)
 ```
 
 
