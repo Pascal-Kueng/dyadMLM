@@ -38,17 +38,12 @@
     )
   ),
   histograms = list(
-    functions = paste(
-      "hist() plots a numeric vector.",
-      "Use dplyr::filter() and dplyr::pull() to select one role and variable."
-    ),
     example_code = paste(
       "hist(my_data$YOUR_VARIABLE)",
       "",
-      "my_data |>",
-      "  dplyr::filter(gender == \"male\") |>",
-      "  dplyr::pull(YOUR_VARIABLE) |>",
-      "  hist()",
+      "hist(",
+      "  my_data[my_data$gender == \"male\", ]$YOUR_VARIABLE",
+      ")",
       sep = "\n"
     )
   ),
@@ -168,18 +163,7 @@
       sep = "\n"
     )
   ),
-  ild_research_question = list(
-    concept = paste(
-      "First decide whether time is part of the scientific question.",
-      "Concurrent effects concern the same occasion; lagged effects concern carryover.",
-      "A residual AR process handles remaining dependence but is not itself a carryover effect."
-    )
-  ),
   ild_prepare_data = list(
-    concept = paste(
-      "ILD preparation must preserve the dyad, member, role, and actual occasion.",
-      "Do not silently treat observations separated by a missing occasion as adjacent."
-    ),
     structure = paste(
       "Use prepare_dyad_data() with:",
       "- dyad = couple_id",
@@ -193,18 +177,7 @@
       sep = "\n"
     )
   ),
-  ild_describe_data = list(
-    concept = paste(
-      "Start with compliance and matched occasions, then plot paired trajectories.",
-      "Use ICCs and level-specific correlations to separate stable differences",
-      "between people from occasion-to-occasion covariation."
-    )
-  ),
   ild_model = list(
-    concept = paste(
-      "Separate within-person actor and partner effects from between-person effects.",
-      "Add plausible trends to the mean before interpreting a residual temporal process."
-    ),
     structure = paste(
       "Check that the model documents:",
       "- role-specific or pooled intercepts",
@@ -215,26 +188,7 @@
       sep = "\n"
     )
   ),
-  ild_time_structure = list(
-    concept = paste(
-      "Use discrete-time AR(1) only when the factor levels represent the scheduled spacing.",
-      "For unequal time gaps, continuous-time decay may be more natural.",
-      "Use lagged outcomes only when carryover is part of the research question."
-    )
-  ),
-  ild_diagnostics = list(
-    concept = paste(
-      "Standard residual calibration is only the first check.",
-      "Also inspect residual patterns over time and remaining temporal and",
-      "cross-partner dependence."
-    )
-  ),
   ild_report_results = list(
-    concept = paste(
-      "Report within-person and between-person actor and partner effects separately.",
-      "Also document the time trend, residual temporal process, and",
-      "same-occasion cross-partner covariance."
-    ),
     structure = paste(
       "Useful starting points:",
       "- parameters::model_parameters(model, effects = \"fixed\")",
