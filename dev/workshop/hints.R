@@ -11,6 +11,7 @@
       "- dyad = couple_id",
       "- member = person_id",
       "- role = gender",
+      "- predictors = YOUR_PREDICTOR",
       "- model_types = \"apim\"",
       "- include_arbitrary_member_contrast = TRUE",
       "- add_apim_gmc_predictors = TRUE",
@@ -149,7 +150,7 @@
     ),
     plot = paste(
       "parameters::model_parameters(retained_model, effects = \"fixed\") |>",
-      "  plot()",
+      "  plot(show_intercept = TRUE)",
       sep = "\n"
     )
   ),

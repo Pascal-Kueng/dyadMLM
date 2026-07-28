@@ -92,8 +92,9 @@ Follow a simplified workflow:
 
 # 1. Define dyads, distinguishability, and research questions
 
-You may use any of the substantive numeric variables in the dataset as outcome
-or predictor.
+Do not reproduce a predictor--outcome combination from the workshop examples,
+such as self-efficacy predicting MVPA or received support predicting MVPA.
+Any other substantively sensible combination is fine.
 
 Place `dyadic-person-means.rds` in the same folder as this exercise file, then
 load and inspect the raw aggregated dataset:
@@ -294,8 +295,8 @@ continuing.
 
 Fit the equivalent model under exchangeability constraints. It should use the
 same adequate specification and differ only in its exchangeability constraints.
-Hint: you need an
-`.arbitrary_member_contrast` column in the data. You may already have included
+Hint: you need a
+`.member_contrast_arbitrary` column in the data. You may already have included
 one earlier, or you may need to prepare the data again. Check your column names
 with `names(my_data)`.
 
@@ -475,12 +476,15 @@ Write a brief results paragraph that:
 - describes the analysis sample and any exclusions or missing-data handling
 - identifies the retained model and explains the distinguishability decision
 - answers the actor and partner research questions using estimates and 95%
-  confidence intervals in substantive units
+  confidence intervals, clearly stating the modeled outcome scale
 - summarizes the fitted residual covariance, adequacy checks, and robustness
   analysis
 
 Remember that the interpretation of the intercepts depends on whether you used
 grand-mean-centered variables.
+
+If you transformed the outcome, state the modeled scale and interpret estimates
+on that scale—or use back-transformed predictions.
 
 > [Insert your brief results paragraph]
 
