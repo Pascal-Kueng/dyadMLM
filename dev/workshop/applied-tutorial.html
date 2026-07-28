@@ -4159,7 +4159,7 @@ Standard deviations and correlations:
 <section id="optional-dim-and-dsm" class="title-slide slide level1 center">
 <h1>Optional: DIM and DSM</h1>
 <div class="workshop-next">
-<p>Worked examples are available in the package vignettes.</p>
+<p>Worked examples are available in the package vignettes of <code>dyadMLM</code>.</p>
 <p><a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html" class="workshop-next-link">Open the DIM vignette →</a></p>
 <p><a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html" class="workshop-next-link">Open the DSM vignette →</a></p>
 </div>
@@ -4170,19 +4170,19 @@ Standard deviations and correlations:
 <h1>Intensive longitudinal dyads</h1>
 
 </section>
-<section id="ild-extends-rather-than-replaces-the-workflow" class="slide level2 smaller">
-<h2>ILD extends rather than replaces the workflow</h2>
+<section id="ild-workflow" class="slide level2 smaller">
+<h2>ILD workflow</h2>
 <div class="columns">
 <div class="column" style="width:43%;">
 <h3 id="the-same-core-workflow">The same core workflow</h3>
 <div class="subtle">
 <ol type="1">
-<li>Define dyads, roles, distinguishability, and research questions</li>
-<li>Check data structure, completeness, and missing-data handling</li>
-<li>Describe measures and dyadic relationships</li>
-<li>Specify, document, and estimate the APIM</li>
-<li>Verify estimation; check residuals and influential dyads</li>
-<li>Interpret, visualize, and report the results</li>
+<li>Define dyads, distinguishability, and research questions</li>
+<li>Prepare the data and validate the dyadic structure</li>
+<li>Describe and visualize measures and observed relationships</li>
+<li>Estimate the models</li>
+<li>Verify model adequacy, distinguishability, and robustness</li>
+<li>Visualize, interpret, and report results</li>
 </ol>
 </div>
 </div><div class="column" style="width:57%;">
@@ -4198,16 +4198,34 @@ Standard deviations and correlations:
 <ul>
 <li>Time scale and lag, trends/stationarity, concurrent versus lagged effects, and discrete versus continuous time <span class="citation" data-cites="driverContinuousTimeStructural2017">(<a href="#/references" role="doc-biblioref" onclick>Driver et al., 2017</a>)</span></li>
 </ul></li>
+<li>Model dyads on multiple levels</li>
 <li>Check residual temporal and cross-partner dependence</li>
 </ul>
+<!-- TODO: best to account for temporal dependecneis from the beginning (e.g., via ar1) and then check for any remaining patterns? Or only account for it, if a pattern 
+exists? are there citable recommendations? -->
+<!-- TODO: this list is currently rather extensive. Do we really need to talk 
+about stationarity, for instance? -->
 </div></div>
 <div class="subtle">
-<p>Workflow synthesized from <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013">Bolger &amp; Laurenceau (<a href="#/references" role="doc-biblioref" onclick>2013</a>)</span>, <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">Revol et al. (<a href="#/references" role="doc-biblioref" onclick>2024</a>)</span>, <span class="citation" data-cites="mcneishPrimerTwoLevel2020">McNeish &amp; Hamaker (<a href="#/references" role="doc-biblioref" onclick>2020</a>)</span>, and <span class="citation" data-cites="delrosarioPracticalGuideSpecifying2025">del Rosario &amp; West (<a href="#/references" role="doc-biblioref" onclick>2025</a>)</span>.</p>
+<p>Synthesized from <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013">Bolger &amp; Laurenceau (<a href="#/references" role="doc-biblioref" onclick>2013</a>)</span>, <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">Revol et al. (<a href="#/references" role="doc-biblioref" onclick>2024</a>)</span>, <span class="citation" data-cites="mcneishPrimerTwoLevel2020">McNeish &amp; Hamaker (<a href="#/references" role="doc-biblioref" onclick>2020</a>)</span>, and <span class="citation" data-cites="delrosarioPracticalGuideSpecifying2025">del Rosario &amp; West (<a href="#/references" role="doc-biblioref" onclick>2025</a>)</span>.</p>
 </div>
 <aside class="notes">
 <p>For ILD-specific power analysis, see <span class="citation" data-cites="lafitPowerLAPIMApplication2022">Lafit et al. (<a href="#/references" role="doc-biblioref" onclick>2022</a>)</span>. Perry et al. belongs with interpretation of fitted dynamics: their change-score APIM and vector-field diagrams show the joint implications of actor and partner coefficients <span class="citation" data-cites="perryGraphicMethodsInterpreting2017">(<a href="#/references" role="doc-biblioref" onclick>Perry et al., 2017</a>)</span>.</p>
+<!-- TODO: should we insert a link with ressources to cross-sectionaln and ILD
+power analysis in each section, or maybe better at that last few slides that
+talk about reporting (the meta analysis)? This should then be moved from 
+the notes to an appropriate place. -->
 <p>We will use <code>wbCorr</code> for pooled within- and between-person correlations <span class="citation" data-cites="kuengWbCorrBivariateWithin2026">(<a href="#/references" role="doc-biblioref" onclick>Küng, 2026</a>)</span>; <span class="citation" data-cites="hamakerCuriousCaseCrossSectional2024">Hamaker (<a href="#/references" role="doc-biblioref" onclick>2024</a>)</span> provides the methodological rationale.</p>
-<p><code>omegaSEM()</code> is provided by <code>multilevelTools</code>, not <code>semTools</code>. It implements level-specific internal-consistency coefficients based on a two-level one-factor model <span class="citation" data-cites="wileyMultilevelTools2025 geldhofReliabilityEstimationMultilevel2014">(<a href="#/references" role="doc-biblioref" onclick>Geldhof et al., 2014</a>; <a href="#/references" role="doc-biblioref" onclick>Wiley, 2025</a>)</span>. These coefficients are not temporal stability or the precision of observed person means; for the latter, see <span class="citation" data-cites="laiCompositeReliabilityMultilevel2021">Lai (<a href="#/references" role="doc-biblioref" onclick>2021</a>)</span>.</p>
+<!-- TODO: should be implemented correctly. Can we do something like this
+also for cross-sectional dyads? Maybe use wb-corr on different levels, just
+without inference then? Or is there another package than can do what we want 
+for exchangeable dyads? -->
+<p><code>omegaSEM()</code> is provided by <code>multilevelTools</code>. It implements level-specific internal-consistency coefficients based on a two-level one-factor model <span class="citation" data-cites="wileyMultilevelTools2025 geldhofReliabilityEstimationMultilevel2014">(<a href="#/references" role="doc-biblioref" onclick>Geldhof et al., 2014</a>; <a href="#/references" role="doc-biblioref" onclick>Wiley, 2025</a>)</span>. These coefficients are not temporal stability or the precision of observed person means; for the latter, see <span class="citation" data-cites="laiCompositeReliabilityMultilevel2021">Lai (<a href="#/references" role="doc-biblioref" onclick>2021</a>)</span>.</p>
+<!-- TODO: add multilevelTools to the install pacakges function for the 
+exercises. And should we add a brief reliability section to the cross-sectional
+part? Maybe just a mention of reporting reliability where applicable, in 
+"what to report" or so? Then we could omit it from both cross-sectional and ILD
+parts and only mention it in the end, and mention omegaSEM? -->
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -4220,8 +4238,29 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="distinguishable-apim-1" class="slide level2">
-<h2>Distinguishable APIM</h2>
+<section id="ild-workflow-1" class="slide level2">
+<h2>ILD Workflow</h2>
+<ol type="1">
+<li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
+<li><strong>Prepare the data and validate the dyadic structure</strong></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Visualize, interpret, and report results</strong></li>
+</ol>
+</section>
+<section id="ild-research-question" class="slide level2 rq-slide">
+<h2>ILD Research Question</h2>
+<div class="rq-center">
+<div class="rq-card">
+<p><span class="rq-label">RQ:</span> <span class="rq-text">In romantic couples, is a person’s daily and person-mean <strong>self-efficacy</strong> linked to daily and person-mean physical activity in both partners?</span></p>
+</div>
+</div>
+<!-- TODO: how to best formulate this? to not sound too much like a hypothesis
+but distinct from the cross-sectional RQ? Fine as is?-->
+</section>
+<section id="distinguishable-ild-apim" class="slide level2">
+<h2>Distinguishable ILD APIM</h2>
 <ul>
 <li>Formula</li>
 <li>Random effects and residual covariance explained</li>

@@ -1626,7 +1626,7 @@ parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
 # Optional: DIM and DSM
 
 ::: {.workshop-next}
-Worked examples are available in the package vignettes.
+Worked examples are available in the package vignettes of `dyadMLM`.
 
 [Open the DIM vignette →](https://pascal-kueng.github.io/dyadMLM/articles/dim.html){.workshop-next-link}
 
@@ -1635,7 +1635,7 @@ Worked examples are available in the package vignettes.
 
 # Intensive longitudinal dyads
 
-## ILD extends rather than replaces the workflow {.smaller}
+## ILD workflow {.smaller}
 
 :::: {.columns}
 
@@ -1645,12 +1645,14 @@ Worked examples are available in the package vignettes.
 
 ::: {.subtle}
 
-1. Define dyads, roles, distinguishability, and research questions
-2. Check data structure, completeness, and missing-data handling
-3. Describe measures and dyadic relationships
-4. Specify, document, and estimate the APIM
-5. Verify estimation; check residuals and influential dyads
-6. Interpret, visualize, and report the results
+
+1. Define dyads, distinguishability, and research questions
+2. Prepare the data and validate the dyadic structure
+3. Describe and visualize measures and observed relationships
+4. Estimate the models
+5. Verify model adequacy, distinguishability, and robustness
+6. Visualize, interpret, and report results
+
 
 :::
 
@@ -1674,14 +1676,21 @@ Worked examples are available in the package vignettes.
   - Time scale and lag, trends/stationarity, concurrent versus lagged effects,
     and discrete versus continuous time
     [@driverContinuousTimeStructural2017]
+- Model dyads on multiple levels
 - Check residual temporal and cross-partner dependence
+
+<!-- TODO: best to account for temporal dependecneis from the beginning (e.g., via ar1) and then check for any remaining patterns? Or only account for it, if a pattern 
+exists? are there citable recommendations? -->
+
+<!-- TODO: this list is currently rather extensive. Do we really need to talk 
+about stationarity, for instance? -->
 
 :::
 
 ::::
 
 ::: {.subtle}
-Workflow synthesized from @bolgerIntensiveLongitudinalMethods2013,
+Synthesized from @bolgerIntensiveLongitudinalMethods2013,
 @revolPreprocessingExperienceSampling2024, @mcneishPrimerTwoLevel2020, and
 @delrosarioPracticalGuideSpecifying2025.
 :::
@@ -1693,20 +1702,83 @@ al. belongs with interpretation of fitted dynamics: their change-score APIM and
 vector-field diagrams show the joint implications of actor and partner
 coefficients [@perryGraphicMethodsInterpreting2017].
 
+<!-- TODO: should we insert a link with ressources to cross-sectionaln and ILD
+power analysis in each section, or maybe better at that last few slides that
+talk about reporting (the meta analysis)? This should then be moved from 
+the notes to an appropriate place. -->
+
 We will use `wbCorr` for pooled within- and between-person correlations
 [@kuengWbCorrBivariateWithin2026]; @hamakerCuriousCaseCrossSectional2024
 provides the methodological rationale.
 
-`omegaSEM()` is provided by `multilevelTools`, not `semTools`. It implements
+<!-- TODO: should be implemented correctly. Can we do something like this
+also for cross-sectional dyads? Maybe use wb-corr on different levels, just
+without inference then? Or is there another package than can do what we want 
+for exchangeable dyads? -->
+
+
+`omegaSEM()` is provided by `multilevelTools`. It implements
 level-specific internal-consistency coefficients based on a two-level
 one-factor model [@wileyMultilevelTools2025;
 @geldhofReliabilityEstimationMultilevel2014]. These coefficients are not
 temporal stability or the precision of observed person means; for the latter,
 see @laiCompositeReliabilityMultilevel2021.
 
+<!-- TODO: add multilevelTools to the install pacakges function for the 
+exercises. And should we add a brief reliability section to the cross-sectional
+part? Maybe just a mention of reporting reliability where applicable, in 
+"what to report" or so? Then we could omit it from both cross-sectional and ILD
+parts and only mention it in the end, and mention omegaSEM? -->
+
 :::
 
-## Distinguishable APIM
+## ILD Workflow
+
+1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
+2. **Prepare the data and validate the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
+## The Dataset
+
+**Same as before: **
+
+- 36 physically inactive romantic couples
+- Both partners intended to become more physically active
+- Smartphone-based planning interventions and JITAIs
+- Daily diaries over 55 days
+
+**Not aggregated anymore:**
+
+- Daily total MVPA in minutes
+- Daily self-efficacy 0-5 $\rightarrow$ lag 1!
+
+<!-- TODO: should we use self-efficacy again? This means that we will need to 
+lag efficacy, right? Which we can do with dyadMLM::prepare_dyad_data() -->
+
+
+## ILD Research Question {.rq-slide}
+
+::: {.rq-center}
+::: {.rq-card}
+[RQ:]{.rq-label} [In romantic couples, is a person's daily and person-mean
+**self-efficacy** linked to daily and person-mean physical activity in 
+both partners?]{.rq-text}
+:::
+:::
+
+<!-- TODO: how to best formulate this? to not sound too much like a hypothesis
+but distinct from the cross-sectional RQ? Fine as is?-->
+
+
+
+
+
+
+
+## Distinguishable ILD APIM
 
 - Formula
 - Random effects and residual covariance explained
