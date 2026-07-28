@@ -982,8 +982,13 @@ partner effects remain unsupported.
 
 :::{.subtle}
 
-Treat this as a prespecified or transparently reported sensitivity analysis—not
-a scale selected by diagnostic p-values.
+**In this example:**
+
+- **Sensitivity analysis:** square-root MVPA; conclusions unchanged
+- **Primary analysis:** report the prespecified raw-MVPA model because the
+  deviation was modest and minutes are directly interpretable
+- **General rule:** larger or consequential diagnostic problems: revise main 
+  model
 
 :::
 

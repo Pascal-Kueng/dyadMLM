@@ -3204,7 +3204,12 @@ display:block!important;
 <p><strong>Substantive result unchanged:</strong> actor effects remain positive and supported; partner effects remain unsupported.</p>
 </div></div>
 <div class="subtle">
-<p>Treat this as a prespecified or transparently reported sensitivity analysis—not a scale selected by diagnostic p-values.</p>
+<p><strong>In this example:</strong></p>
+<ul>
+<li><strong>Sensitivity analysis:</strong> square-root MVPA; conclusions unchanged</li>
+<li><strong>Primary analysis:</strong> report the prespecified raw-MVPA model because the deviation was modest and minutes are directly interpretable</li>
+<li><strong>General rule:</strong> larger or consequential diagnostic problems should prompt model revision</li>
+</ul>
 </div>
 </section>
 <section id="test-distinguishability" class="slide level2">
@@ -4163,6 +4168,15 @@ Standard deviations and correlations:
 <p><a href="https://pascal-kueng.github.io/dyadMLM/articles/dim.html" class="workshop-next-link">Open the DIM vignette →</a></p>
 <p><a href="https://pascal-kueng.github.io/dyadMLM/articles/dsm.html" class="workshop-next-link">Open the DSM vignette →</a></p>
 </div>
+<!----------------------------------------------------------------------------
+
+##############################################################################
+
+INTENSIVE LONGITUDINAL
+
+##############################################################################
+
+------------------------------------------------------------------------------>
 </section>
 
 <section>
@@ -4201,8 +4215,9 @@ Standard deviations and correlations:
 <li>Model dyads on multiple levels</li>
 <li>Check residual temporal and cross-partner dependence</li>
 </ul>
-<!-- TODO: best to account for temporal dependecneis from the beginning (e.g., via ar1) and then check for any remaining patterns? Or only account for it, if a pattern 
-exists? are there citable recommendations? -->
+<!-- TODO: best to account for temporal dependencies from the beginning (e.g.,
+via AR(1)) and then check for any remaining patterns? Or only account for it if
+a pattern exists? Are there citable recommendations? -->
 <!-- TODO: this list is currently rather extensive. Do we really need to talk 
 about stationarity, for instance? -->
 </div></div>
@@ -4211,17 +4226,17 @@ about stationarity, for instance? -->
 </div>
 <aside class="notes">
 <p>For ILD-specific power analysis, see <span class="citation" data-cites="lafitPowerLAPIMApplication2022">Lafit et al. (<a href="#/references" role="doc-biblioref" onclick>2022</a>)</span>. Perry et al. belongs with interpretation of fitted dynamics: their change-score APIM and vector-field diagrams show the joint implications of actor and partner coefficients <span class="citation" data-cites="perryGraphicMethodsInterpreting2017">(<a href="#/references" role="doc-biblioref" onclick>Perry et al., 2017</a>)</span>.</p>
-<!-- TODO: should we insert a link with ressources to cross-sectionaln and ILD
-power analysis in each section, or maybe better at that last few slides that
-talk about reporting (the meta analysis)? This should then be moved from 
+<!-- TODO: should we insert a link with resources for cross-sectional and ILD
+power analysis in each section, or maybe better in the final few slides that
+talk about reporting (the meta-analysis)? This should then be moved from
 the notes to an appropriate place. -->
 <p>We will use <code>wbCorr</code> for pooled within- and between-person correlations <span class="citation" data-cites="kuengWbCorrBivariateWithin2026">(<a href="#/references" role="doc-biblioref" onclick>Küng, 2026</a>)</span>; <span class="citation" data-cites="hamakerCuriousCaseCrossSectional2024">Hamaker (<a href="#/references" role="doc-biblioref" onclick>2024</a>)</span> provides the methodological rationale.</p>
 <!-- TODO: should be implemented correctly. Can we do something like this
-also for cross-sectional dyads? Maybe use wb-corr on different levels, just
-without inference then? Or is there another package than can do what we want 
+also for cross-sectional dyads? Maybe use wbCorr on different levels, just
+without inference then? Or is there another package that can do what we want
 for exchangeable dyads? -->
 <p><code>omegaSEM()</code> is provided by <code>multilevelTools</code>. It implements level-specific internal-consistency coefficients based on a two-level one-factor model <span class="citation" data-cites="wileyMultilevelTools2025 geldhofReliabilityEstimationMultilevel2014">(<a href="#/references" role="doc-biblioref" onclick>Geldhof et al., 2014</a>; <a href="#/references" role="doc-biblioref" onclick>Wiley, 2025</a>)</span>. These coefficients are not temporal stability or the precision of observed person means; for the latter, see <span class="citation" data-cites="laiCompositeReliabilityMultilevel2021">Lai (<a href="#/references" role="doc-biblioref" onclick>2021</a>)</span>.</p>
-<!-- TODO: add multilevelTools to the install pacakges function for the 
+<!-- TODO: add multilevelTools to the install packages function for the
 exercises. And should we add a brief reliability section to the cross-sectional
 part? Maybe just a mention of reporting reliability where applicable, in 
 "what to report" or so? Then we could omit it from both cross-sectional and ILD
@@ -4251,7 +4266,7 @@ display:block!important;
 </section>
 <section id="the-dataset-1" class="slide level2">
 <h2>The Dataset</h2>
-<p><strong>Same as before: </strong></p>
+<p><strong>Same as before:</strong></p>
 <ul>
 <li>36 physically inactive romantic couples</li>
 <li>Both partners intended to become more physically active</li>
@@ -4261,7 +4276,7 @@ display:block!important;
 <p><strong>Not aggregated anymore:</strong></p>
 <ul>
 <li>Daily total MVPA in minutes</li>
-<li>Daily self-efficacy 0-5 <span class="math inline">\(\rightarrow\)</span> lag 1!</li>
+<li>Daily self-efficacy 0–5 <span class="math inline">\(\rightarrow\)</span> lag 1!</li>
 </ul>
 <!-- TODO: should we use self-efficacy again? This means that we will need to 
 lag efficacy, right? Which we can do with dyadMLM::prepare_dyad_data() -->
@@ -4274,22 +4289,132 @@ lag efficacy, right? Which we can do with dyadMLM::prepare_dyad_data() -->
 </div>
 </div>
 <!-- TODO: how to best formulate this? to not sound too much like a hypothesis
-but distinct from the cross-sectional RQ? Fine as is?-->
+but distinct from the cross-sectional RQ? Fine as is? -->
+<!-- TODO: should we briefly show the slides again with the measures? Just 5
+seconds each. -->
+</section></section>
+<section>
+<section id="distinguishable-ild-apim" class="title-slide slide level1 center">
+<h1>Distinguishable ILD APIM</h1>
+<p>Distinguishing by gender</p>
 </section>
-<section id="distinguishable-ild-apim" class="slide level2">
-<h2>Distinguishable ILD APIM</h2>
+<section id="ild-workflow-2" class="slide level2">
+<h2>ILD Workflow</h2>
+<ol type="1">
+<li><strong>Define dyads, distinguishability, and research questions</strong></li>
+<li><span class="text-highlight"><strong>Prepare the data and validate the dyadic structure</strong></span></li>
+<li><strong>Describe and visualize measures and observed relationships</strong></li>
+<li><strong>Estimate the models</strong></li>
+<li><strong>Verify model adequacy, distinguishability, and robustness</strong></li>
+<li><strong>Visualize, interpret, and report results</strong></li>
+</ol>
+</section>
+<section id="load-and-inspect-the-raw-data-1" class="slide level2">
+<h2>Load and inspect the raw data</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href></a>raw_ild_dyad_data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;dyadic-data.rds&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb40-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb40-3"><a href></a>    couple_id, person_id, diaryday, gender, efficacy, total_mvpa</span>
+<span id="cb40-4"><a href></a>  ) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(couple_id, diaryday)</span>
+<span id="cb40-5"><a href></a></span>
+<span id="cb40-6"><a href></a><span class="fu">slide_table</span>(<span class="fu">head</span>(raw_ild_dyad_data))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">couple_id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">person_id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">diaryday</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">gender</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">efficacy</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">total_mvpa</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">60.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">30.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">60.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">90.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">5.00</td>
+<td style="text-align: right;">60.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">0.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="create-the-required-format-and-validate-the-data-4" class="slide level2">
+<h2>Create the required format and validate the data</h2>
+<p>Decompose each time-varying predictor <span class="math inline">\(X_{rit}\)</span>, where <span class="math inline">\(r\)</span> denotes role, <span class="math inline">\(i\)</span> dyad, and <span class="math inline">\(t\)</span> occasion:</p>
+<ul>
+<li>Between-person component: Person mean centered on the mean of person means
+<ul>
+<li><span class="math inline">\(\bar X_{ri} - \bar X\)</span></li>
+</ul></li>
+<li>Within-person component: Daily deviation from the person mean
+<ul>
+<li><span class="math inline">\(X_{rit} - \bar X_{ri}\)</span></li>
+</ul></li>
+</ul>
+<p>Here, <span class="math inline">\(\bar X_{ri}\)</span> is member <span class="math inline">\(r\)</span>’s observed mean in dyad <span class="math inline">\(i\)</span>, and <span class="math inline">\(\bar X\)</span> is the equally weighted mean of the observed person means.</p>
 </section>
 <section id="exchangeable-apim-1" class="slide level2">
 <h2>Exchangeable APIM</h2>
 </section>
 <section id="ar1-ou-and-dynamic-models" class="slide level2">
-<h2>AR1, OU, and Dynamic Models</h2>
+<h2>AR(1), OU, and Dynamic Models</h2>
 <ul>
 <li>When to use dynamic models vs. concurrent models</li>
-<li>Current possibilities in R MLM for AR1 or ou models</li>
-<li>Current possibilites in R MLM for dynamic models</li>
-<li>Alternatives (DSEM in MPLUS or lavaan for X)</li>
+<li>Current possibilities in R MLM for AR(1) or OU models</li>
+<li>Current possibilities in R MLM for dynamic models</li>
+<li>Alternatives (DSEM in Mplus or lavaan for X)</li>
 </ul>
+<!----------------------------------------------------------------------------
+
+GENERAL REPORTING GUIDELINES
+
+------------------------------------------------------------------------------>
 </section>
 <section id="power-analysis-is-the-clearest-reporting-gap" class="slide level2">
 <h2>Power analysis is the clearest reporting gap</h2>
@@ -4327,36 +4452,13 @@ display:block!important;
 <h1>Exercises in R</h1>
 <ul>
 <li>Go to https://pascal-kueng.github.io/dyadMLM/workshop/</li>
-<li>Link should be in the Temas channel</li>
+<li>Link should be in the Teams channel</li>
 <li>Download and unzip all workshop materials</li>
 </ul>
 <p>Run this once in a fresh R session before the break. It installs or updates the workshop packages and any dependencies that need updating; this may take several minutes.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href></a><span class="fu">source</span>(<span class="st">&quot;00_setup.R&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href></a><span class="fu">source</span>(<span class="st">&quot;00_setup.R&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<!--
-
-- DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
-
-- glmmTMB -> as required 
-- dyadMLM -> as required (via R-universe, see instructions).
-- dplyr -> required
-- tibble -> required
-- lavaan -> required
-- ggplot2 -> required
-
--------------->
-<!-- ILD-part: 
-
-- see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
-
--->
-<!-- Excercises part: separate files! Include on overview page?
-
-Create exercises with data visalization, etc. Panel plots, histograms
-correlations (wb corr)?
-
--->
 </section>
 <section id="references" class="slide level2 smaller scrollable">
 <h2>References</h2>
@@ -4485,20 +4587,24 @@ Wiley, J. F. (2025). <em><span class="nocase">multilevelTools</span>: Multilevel
 <section id="manual-apim-preparation" class="slide level2 smaller">
 <h2>Create the APIM variables manually <a href="#/prepared-apim-data" class="appendix-back-link">← Data preparation</a></h2>
 <p>This shortcut assumes validation has confirmed exactly two rows per dyad.</p>
+<!-- TODO: I think we should provide code that is safe with missing partners. -->
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href></a>apim_manual_data <span class="ot">&lt;-</span> raw_dyad_data <span class="sc">|&gt;</span></span>
-<span id="cb41-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb41-3"><a href></a>    <span class="at">.is_female =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;female&quot;</span>),</span>
-<span id="cb41-4"><a href></a>    <span class="at">.is_male =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;male&quot;</span>),</span>
-<span id="cb41-5"><a href></a>    <span class="at">.efficacy_gmc =</span> efficacy <span class="sc">-</span> <span class="fu">mean</span>(efficacy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb41-6"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb41-7"><a href></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(couple_id) <span class="sc">|&gt;</span></span>
-<span id="cb41-8"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb41-9"><a href></a>    <span class="at">.efficacy_gmc_actor =</span> .efficacy_gmc,</span>
-<span id="cb41-10"><a href></a>    <span class="at">.efficacy_gmc_partner =</span> <span class="fu">rev</span>(.efficacy_gmc)</span>
-<span id="cb41-11"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb41-12"><a href></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href></a>apim_manual_data <span class="ot">&lt;-</span> raw_dyad_data <span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb42-3"><a href></a>    <span class="at">.is_female =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;female&quot;</span>),</span>
+<span id="cb42-4"><a href></a>    <span class="at">.is_male =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;male&quot;</span>),</span>
+<span id="cb42-5"><a href></a>    <span class="at">.efficacy_gmc =</span> efficacy <span class="sc">-</span> <span class="fu">mean</span>(efficacy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-6"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb42-7"><a href></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(couple_id) <span class="sc">|&gt;</span></span>
+<span id="cb42-8"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb42-9"><a href></a>    <span class="at">.efficacy_gmc_actor =</span> .efficacy_gmc,</span>
+<span id="cb42-10"><a href></a>    <span class="at">.efficacy_gmc_partner =</span> <span class="fu">rev</span>(.efficacy_gmc)</span>
+<span id="cb42-11"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb42-12"><a href></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<!-- TODO: We should also create an ILD version of that code for manual computation
+of actor effects and link back and forth appropriately. Safe for unordered rows
+and missing rows, but as clear and short as possible. -->
 
 </section></section>
     </div>
