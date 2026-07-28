@@ -1237,7 +1237,7 @@ parameters::model_parameters(apim_distinguishable_model, effects = 'random') |>
 
 ```{r}
 #| fig-format: svg
-#| out-width: 80%
+#| out-width: 70%
 
 
 parameters::model_parameters(apim_distinguishable_model, effects = "fixed") |>
@@ -1657,14 +1657,12 @@ dyadMLM::recover_exchangeable_covariance(apim_exchangeable_model)
 
 ```{r}
 #| fig-format: svg
-#| out-width: 80%
+#| out-width: 70%
 
 parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
-  plot()
+  plot(show_intercept = TRUE)
 
 ```
-
-<!-- TODO: can we also plot the intercept?? -->
 
 # Optional: DIM and DSM
 
@@ -1728,31 +1726,18 @@ INTENSIVE LONGITUDINAL
     applicable [@bolgerIntensiveLongitudinalMethods2013;
     @hamakerCuriousCaseCrossSectional2024;
     @geldhofReliabilityEstimationMultilevel2014]
-- Choose the temporal specification
-  - Time scale and lag, trends/stationarity, concurrent versus lagged effects,
-    and discrete versus continuous time
-    [@driverContinuousTimeStructural2017]
 - Model dyads on multiple levels
 - Check residual temporal and cross-partner dependence
-
-<!-- TODO: best to account for temporal dependencies from the beginning (e.g.,
-via AR(1)) and then check for any remaining patterns? Or only account for it if
-a pattern exists? Are there citable recommendations? -->
-
-<!-- TODO: this list is currently rather extensive. Do we really need to talk 
-about stationarity, for instance? -->
 
 :::
 
 ::::
 
-::: {.subtle}
+:::{.notes}
+
 Synthesized from @bolgerIntensiveLongitudinalMethods2013,
 @revolPreprocessingExperienceSampling2024, @mcneishPrimerTwoLevel2020, and
 @delrosarioPracticalGuideSpecifying2025.
-:::
-
-:::{.notes}
 
 Perry et al. belongs with interpretation of fitted dynamics: their change-score
 APIM and vector-field diagrams show the joint implications of actor and partner
@@ -1777,26 +1762,25 @@ until the nested three-level implementation is available
 
 ## The Dataset
 
-**Same as before:**
+**Same diary study, daily level:**
 
 - 36 physically inactive romantic couples
-- Both partners intended to become more physically active
-- Smartphone-based planning interventions and JITAIs
-- Daily diaries over 55 days
+- Daily diaries over up to 55 days
+- Provided support (0–5): observed daily predictor
 
-**Not aggregated anymore:**
+**Simulated teaching outcome:**
 
-- Daily total MVPA in minutes
-- Daily self-efficacy (0–5): “I am sure I can be active tomorrow”
-- Self-efficacy on day $t-1$ $\rightarrow$ physical activity on day $t$
+- Sedentary time in hours per day
+- Plausible daily distribution with some roughness and skew
+- More own and partner support tends to accompany less sedentary time
 
 ## ILD Research Question {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
 [RQ:]{.rq-label} [How are daily deviations and stable between-person
-differences in **self-efficacy** associated with one's own and one's partner's
-physical activity the next day?]{.rq-text}
+differences in **provided support** associated with one's own and one's
+partner's **sedentary time on the same day**?]{.rq-text}
 :::
 :::
 
@@ -1848,13 +1832,13 @@ slide_table(head(raw_ild_dyad_data))
 
 ### For ILD
 
-Index time by the outcome day $t$. For self-efficacy $X_{ri,t-1}$ measured on
-the previous day:
+Index support and sedentary time by the same diary day $t$. For provided
+support $X_{ri,t}$:
 
 - Between-person component: Person mean centered on the mean of person means
   - $\bar X_{ri} - \bar X$
-- Lagged within-person component: Previous-day deviation from the person mean
-  - $X_{ri,t-1} - \bar X_{ri}$
+- Within-person component: Same-day deviation from the person mean
+  - $X_{ri,t} - \bar X_{ri}$
 
 Here, $\bar X_{ri}$ is member $r$'s observed mean in dyad $i$, and $\bar X$ is
 the equally weighted mean of the observed person means.
@@ -1968,7 +1952,7 @@ be estimated separately.
 
 ```{r}
 #| code-line-numbers: "1-28|4|6-10|12-16|18-19|21-22|23-25|1-28"
-#| output-location: slide
+#| output: false
 
 ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
   sedentary_hours ~
@@ -2024,6 +2008,18 @@ ild_apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(ild_apim_exchangeable_model)
 ```
 
+## No clear fit improvement from gender-specific parameters {.smaller}
+
+```{r}
+dyadMLM::compare_nested_models(
+  ild_apim_distinguishable_model,
+  ild_apim_exchangeable_model
+)
+```
+
+- Exchangeability constraints compatible with these data
+- More parsimonious exchangeable model retained for diagnostics
+
 ## Simulate residuals from the exchangeable ILD model
 
 ```{r}
@@ -2040,6 +2036,11 @@ ild_apim_dharma_residuals <- simulate_ild_dharma(
   seed = 123
 )
 ```
+
+:::{.subtle}
+Block whitening accounts for modeled partner and repeated-measure covariance;
+the lag-1 check tests remaining consecutive-day dependence.
+:::
 
 ## Inspect block-whitened DHARMa residuals {.smaller}
 
@@ -2062,6 +2063,18 @@ plot(
 test_ild_lag1(ild_apim_dharma_residuals)
 ```
 
+## Recap: dyadic ILD APIM {.smaller}
+
+- **For the simulated sedentary outcome:** One support point above usual was
+  associated with about 8 fewer own and 4 fewer partner sedentary minutes
+- **Between persons:** No clear actor or partner associations
+- **Distinguishability:** Exchangeability constraints compatible with these
+  data; more parsimonious exchangeable model retained
+- **Diagnostics:** No clear model misfit or evidence of remaining lag-1
+  dependence
+- **Teaching example:** Estimates illustrate the workflow, not substantive
+  study findings
+
 
 <!----------------------------------------------------------------------------
 
@@ -2069,7 +2082,7 @@ GENERAL REPORTING GUIDELINES
 
 ------------------------------------------------------------------------------>
 
-## Power analysis is the clearest reporting gap
+## Reporting practices in longitudinal APIM studies
 
 ```{r}
 #| label: plot-longitudinal-apim-reporting-gaps
@@ -2123,18 +2136,18 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
 
 - The chart shows reporting rates because they are easier to read as adherence
   to good practice.
+- The power-analysis bar is descriptive; it does not imply that one generic
+  analytic solution is suitable for every longitudinal APIM.
 
 :::
 
 ## Make every dyadic analysis decision visible {.smaller}
 
 1. **Preregister** actor and partner hypotheses and key analysis decisions.
-2. **Plan and report power:** use simulation matched to the complete planned
-   model.
-3. **Explain missing data:** describe missingness and the handling strategy.
-4. **Specify the full model:** roles and distinguishability, actor and partner
+2. **Explain missing data:** describe missingness and the handling strategy.
+3. **Specify the full model:** roles and distinguishability, actor and partner
    paths, constraints, and covariance structure.
-5. **Report reliability where applicable:** within- and between-level omega for
+4. **Report reliability where applicable:** within- and between-level omega for
    multilevel item scales, e.g., `multilevelTools::omegaSEM()`
    [@wileyMultilevelTools2025; @geldhofReliabilityEstimationMultilevel2014].
 
