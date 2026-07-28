@@ -224,7 +224,11 @@ summary(my_model)
 
 ### Adequacy
 
-Check if the model converged and if all estimates look plausible.
+First, check estimation:
+
+- no convergence warnings
+- finite estimates, standard errors, and fit indices
+- no variances near zero or correlations near $-1$ or $1$
 
 Then, use DHARMa for residual diagnostics via simulation:
 
@@ -430,6 +434,11 @@ summary(model_without_selected_dyads)
 
 Do not exclude dyads merely because their removal changes a significance label.
 
+Compare the focal estimates and their uncertainty with those from
+`retained_model`. State whether any substantive conclusion changed:
+
+> [Insert your robustness conclusion]
+
 
 # 6. Visualize, interpret, and report results
 
@@ -453,12 +462,19 @@ Plot the fixed effects:
 ```
 
 
-Interpret your results in practical terms. Remember that the interpretation
-of the intercepts depends on whether you used grand-mean-centered variables.
+Write a brief results paragraph that:
 
-Your interpretation:
+- describes the analysis sample and any exclusions or missing-data handling
+- identifies the retained model and explains the distinguishability decision
+- answers the actor and partner research questions using estimates and 95%
+  confidence intervals in substantive units
+- summarizes the fitted residual covariance, adequacy checks, and robustness
+  analysis
 
-[insert interpretation]
+Remember that the interpretation of the intercepts depends on whether you used
+grand-mean-centered variables.
+
+> [Insert your brief results paragraph]
 
 
 You have now completed the APIM workflow!

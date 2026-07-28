@@ -1633,6 +1633,19 @@ Worked examples are available in the package vignettes of `dyadMLM`.
 [Open the DSM vignette →](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html){.workshop-next-link}
 :::
 
+
+
+
+<!----------------------------------------------------------------------------
+
+##############################################################################
+
+INTENSIVE LONGITUDINAL
+
+##############################################################################
+
+------------------------------------------------------------------------------>
+
 # Intensive longitudinal dyads
 
 ## ILD workflow {.smaller}
@@ -1679,8 +1692,9 @@ Worked examples are available in the package vignettes of `dyadMLM`.
 - Model dyads on multiple levels
 - Check residual temporal and cross-partner dependence
 
-<!-- TODO: best to account for temporal dependecneis from the beginning (e.g., via ar1) and then check for any remaining patterns? Or only account for it, if a pattern 
-exists? are there citable recommendations? -->
+<!-- TODO: best to account for temporal dependencies from the beginning (e.g.,
+via AR(1)) and then check for any remaining patterns? Or only account for it if
+a pattern exists? Are there citable recommendations? -->
 
 <!-- TODO: this list is currently rather extensive. Do we really need to talk 
 about stationarity, for instance? -->
@@ -1702,9 +1716,9 @@ al. belongs with interpretation of fitted dynamics: their change-score APIM and
 vector-field diagrams show the joint implications of actor and partner
 coefficients [@perryGraphicMethodsInterpreting2017].
 
-<!-- TODO: should we insert a link with ressources to cross-sectionaln and ILD
-power analysis in each section, or maybe better at that last few slides that
-talk about reporting (the meta analysis)? This should then be moved from 
+<!-- TODO: should we insert a link with resources for cross-sectional and ILD
+power analysis in each section, or maybe better in the final few slides that
+talk about reporting (the meta-analysis)? This should then be moved from
 the notes to an appropriate place. -->
 
 We will use `wbCorr` for pooled within- and between-person correlations
@@ -1712,8 +1726,8 @@ We will use `wbCorr` for pooled within- and between-person correlations
 provides the methodological rationale.
 
 <!-- TODO: should be implemented correctly. Can we do something like this
-also for cross-sectional dyads? Maybe use wb-corr on different levels, just
-without inference then? Or is there another package than can do what we want 
+also for cross-sectional dyads? Maybe use wbCorr on different levels, just
+without inference then? Or is there another package that can do what we want
 for exchangeable dyads? -->
 
 
@@ -1724,7 +1738,7 @@ one-factor model [@wileyMultilevelTools2025;
 temporal stability or the precision of observed person means; for the latter,
 see @laiCompositeReliabilityMultilevel2021.
 
-<!-- TODO: add multilevelTools to the install pacakges function for the 
+<!-- TODO: add multilevelTools to the install packages function for the
 exercises. And should we add a brief reliability section to the cross-sectional
 part? Maybe just a mention of reporting reliability where applicable, in 
 "what to report" or so? Then we could omit it from both cross-sectional and ILD
@@ -1743,7 +1757,7 @@ parts and only mention it in the end, and mention omegaSEM? -->
 
 ## The Dataset
 
-**Same as before: **
+**Same as before:**
 
 - 36 physically inactive romantic couples
 - Both partners intended to become more physically active
@@ -1753,7 +1767,7 @@ parts and only mention it in the end, and mention omegaSEM? -->
 **Not aggregated anymore:**
 
 - Daily total MVPA in minutes
-- Daily self-efficacy 0-5 $\rightarrow$ lag 1!
+- Daily self-efficacy 0–5 $\rightarrow$ lag 1!
 
 <!-- TODO: should we use self-efficacy again? This means that we will need to 
 lag efficacy, right? Which we can do with dyadMLM::prepare_dyad_data() -->
@@ -1770,42 +1784,67 @@ both partners?]{.rq-text}
 :::
 
 <!-- TODO: how to best formulate this? to not sound too much like a hypothesis
-but distinct from the cross-sectional RQ? Fine as is?-->
+but distinct from the cross-sectional RQ? Fine as is? -->
+
+
+<!-- TODO: should we briefly show the slides again with the measures? Just 5
+seconds each. -->
+
+# Distinguishable ILD APIM
+Distinguishing by gender
+
+## ILD Workflow
+
+1. **Define dyads, distinguishability, and research questions**
+2. [**Prepare the data and validate the dyadic structure**]{.text-highlight}
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
+## Load and inspect the raw data
+
+```{r}
+raw_ild_dyad_data <- readRDS("dyadic-data.rds") |>
+  dplyr::select(
+    couple_id, person_id, diaryday, gender, efficacy, total_mvpa
+  ) |> dplyr::arrange(couple_id, diaryday)
+
+slide_table(head(raw_ild_dyad_data))
+```
 
 
 
+## Create the required format and validate the data
 
+Decompose each time-varying predictor $X_{rit}$, where $r$ denotes role,
+$i$ dyad, and $t$ occasion:
 
+- Between-person component: Person mean centered on the mean of person means
+  - $\bar X_{ri} - \bar X$
+- Within-person component: Daily deviation from the person mean
+  - $X_{rit} - \bar X_{ri}$
 
+Here, $\bar X_{ri}$ is member $r$'s observed mean in dyad $i$, and $\bar X$ is
+the equally weighted mean of the observed person means.
 
-## Distinguishable ILD APIM
-
-- Formula
-- Random effects and residual covariance explained
-- Code
-  - Data prep and inspecting and understanding data structure
-  - Visualizing variables and bivariate relationships on both levels (wbCorr)
-  - Estimating the model
-  - Checking assumptions
-  - Visualizing results
   
 ## Exchangeable APIM
 
-- Formula
-- Random effects and residual covariance explained
-- Code
-  - Data prep and inspecting and understanding data structure
-  - Visualizing variables and bivariate relationships on both levels (wbCorr)
-  - Estimating the model
-  - Checking assumptions
-  - Visualizing results
-
-## AR1, OU, and Dynamic Models
+## AR(1), OU, and Dynamic Models
 
 - When to use dynamic models vs. concurrent models
-- Current possibilities in R MLM for AR1 or ou models
-- Current possibilites in R MLM for dynamic models
-- Alternatives (DSEM in MPLUS or lavaan for X)
+- Current possibilities in R MLM for AR(1) or OU models
+- Current possibilities in R MLM for dynamic models
+- Alternatives (DSEM in Mplus or lavaan for X)
+
+
+
+<!----------------------------------------------------------------------------
+
+GENERAL REPORTING GUIDELINES
+
+------------------------------------------------------------------------------>
 
 ## Power analysis is the clearest reporting gap
 
@@ -1860,18 +1899,7 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
 :::{.notes}
 
 - The chart shows reporting rates because they are easier to read as adherence
-  to good practice. The paper directly reports 17.8% for power analyses; 64.4%
-  and 75.3% are the complements of the reported omission rates.
-- This was a methodological systematic review, not a meta-analysis of effect
-  sizes. Its sample was restricted to longitudinal APIM studies with at least
-  70 dyads and follow-up longer than one year.
-- The review therefore supports “reporting gaps remain common,” not the broader
-  claim that all dyadic analyses are reported inadequately.
-
-[Sources]
-
-- Mohammadzadeh Yazd et al. (2026), abstract:
-  <https://doi.org/10.1177/02654075261443593>
+  to good practice.
 
 :::
 
@@ -1892,8 +1920,8 @@ populations
 # Exercises in R
 
 - Go to https://pascal-kueng.github.io/dyadMLM/workshop/
+- Link should be in the Teams channel
 - Download and unzip all workshop materials
-- Or use the files in the Teams channel
 
 Run this once in a fresh R session before the break. It installs or updates the
 workshop packages and any dependencies that need updating; this may take
@@ -1903,31 +1931,6 @@ several minutes.
 source("00_setup.R")
 ```
 
-<!--
-
-- DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
-
-- glmmTMB -> as required 
-- dyadMLM -> as required (via R-universe, see instructions).
-- dplyr -> required
-- tibble -> required
-- lavaan -> required
-- ggplot2 -> required
-
--------------->
-
-<!-- ILD-part: 
-
-- see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
-
--->
-
-<!-- Excercises part: separate files! Include on overview page?
-
-Create exercises with data visalization, etc. Panel plots, histograms
-correlations (wb corr)?
-
--->
 
 ## References
 
@@ -1939,6 +1942,8 @@ correlations (wb corr)?
 ## Create the APIM variables manually [← Data preparation](#prepared-apim-data){.appendix-back-link} {#manual-apim-preparation .smaller}
 
 This shortcut assumes validation has confirmed exactly two rows per dyad.
+
+<!-- TODO: I think we should provide code that is safe with missing partners. -->
 
 ```{r}
 #| eval: false
@@ -1956,3 +1961,7 @@ apim_manual_data <- raw_dyad_data |>
   ) |>
   dplyr::ungroup()
 ```
+
+<!-- TODO: We should also create an ILD version of that code for manual computation
+of actor effects and link back and forth appropriately. Safe for unordered rows
+and missing rows, but as clear and short as possible. -->
