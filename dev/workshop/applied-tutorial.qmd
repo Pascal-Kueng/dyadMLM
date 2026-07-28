@@ -992,6 +992,18 @@ partner effects remain unsupported.
 
 :::
 
+## Transform—or change the outcome family?
+
+- **Transformation may help** for a nonnegative, right-skewed outcome
+  - Try `sqrt()` or `log1p()` (handles zeros)
+  - Refit and rerun DHARMa; the histogram alone is not sufficient
+
+- **A non-Gaussian family may be preferable**
+  - Particularly for counts, proportions, bounded, or zero-heavy outcomes
+  - Family and link choices require outcome-specific care
+
+- **Workshop scope:** generalized models are not covered here
+
 ## Test distinguishability
 
 - Fit model with exchangeability constraints
@@ -1720,15 +1732,11 @@ Perry et al. belongs with interpretation of fitted dynamics: their change-score
 APIM and vector-field diagrams show the joint implications of actor and partner
 coefficients [@perryGraphicMethodsInterpreting2017].
 
-We will use `wbCorr` for pooled within- and between-person correlations
-[@kuengWbCorrBivariateWithin2026]; @hamakerCuriousCaseCrossSectional2024
-provides the methodological rationale.
-
-<!-- TODO: should be implemented correctly. Can we do something like this
-also for cross-sectional dyads? Maybe use wbCorr on different levels, just
-without inference then? Or is there another package that can do what we want
-for exchangeable dyads? -->
-
+For distinguishable ILD, reshape to one row per dyad-occasion with
+role-specific columns, then use `wbCorr` with `cluster = couple_id`. This is a
+two-level structure: occasions within dyads. Omit `wbCorr` for exchangeable ILD
+until the nested three-level implementation is available
+[@kuengWbCorrBivariateWithin2026; @hamakerCuriousCaseCrossSectional2024].
 
 :::
 
@@ -1754,7 +1762,7 @@ for exchangeable dyads? -->
 
 - Daily total MVPA in minutes
 - Daily self-efficacy (0–5): “I am sure I can be active tomorrow”
-- Predictor on day $t$ $\rightarrow$ physical activity on day $t+1$
+- Self-efficacy on day $t-1$ $\rightarrow$ physical activity on day $t$
 
 ## ILD Research Question {.rq-slide}
 
@@ -1791,26 +1799,38 @@ slide_table(head(raw_ild_dyad_data))
 
 
 
-## Create the required format and validate the data
+## Create the required format and validate the data {.smaller}
 
-**We still need to:* *
+:::: {.columns}
 
-- Create actor and partner variables
-- Create an arbitrary member contrast
-- Validate dyads are as expected
+::: {.column width="38%"}
 
-**Additionally:**
+### As before
 
-Decompose each time-varying predictor $X_{rit}$, where $r$ denotes role,
-$i$ dyad, and $t$ occasion:
+- Actor and partner variables
+- Arbitrary member contrast
+- Dyad validation
+
+:::
+
+::: {.column width="62%"}
+
+### For ILD
+
+Index time by the outcome day $t$. For self-efficacy $X_{ri,t-1}$ measured on
+the previous day:
 
 - Between-person component: Person mean centered on the mean of person means
   - $\bar X_{ri} - \bar X$
-- Within-person component: Daily deviation from the person mean
-  - $X_{rit} - \bar X_{ri}$
+- Lagged within-person component: Previous-day deviation from the person mean
+  - $X_{ri,t-1} - \bar X_{ri}$
 
 Here, $\bar X_{ri}$ is member $r$'s observed mean in dyad $i$, and $\bar X$ is
 the equally weighted mean of the observed person means.
+
+:::
+
+::::
 
 ## Create the required format and validate the data [Manual code →](#manual-ild-apim-preparation){.results-forward-link} {#prepared-ild-apim-data .smaller}
 
@@ -1824,11 +1844,12 @@ ild_apim_data <- dyadMLM::prepare_dyad_data(
   predictors = efficacy,
   lag1_predictors = efficacy,
   model_types = "apim",
+  include_arbitrary_member_contrast = TRUE,
   seed = 123
 )
 ```
 
-- Lagged CWP terms: day-$t$ efficacy $\rightarrow$ day-$t+1$ MVPA
+- Lagged CWP terms: day-$t-1$ efficacy $\rightarrow$ day-$t$ MVPA
 - CBP terms: stable between-person differences; not lagged
 - Exact day matching: missing occasions are not bridged
 
@@ -1906,10 +1927,11 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
 
 :::
 
-## Make every dyadic analysis decision visible
+## Make every dyadic analysis decision visible {.smaller}
 
 1. **Preregister** actor and partner hypotheses and key analysis decisions.
-2. **Plan and report power** using dyad-specific tools.
+2. **Plan and report power:** use simulation matched to the complete planned
+   model.
 3. **Explain missing data:** describe missingness and the handling strategy.
 4. **Specify the full model:** roles and distinguishability, actor and partner
    paths, constraints, and covariance structure.
@@ -1945,11 +1967,10 @@ source("00_setup.R")
 
 # Appendix
 
-## Create the APIM variables manually [← Data preparation](#prepared-apim-data){.appendix-back-link} {#manual-apim-preparation .smaller}
+## Create the cross-sectional APIM variables manually [← Data preparation](#prepared-apim-data){.appendix-back-link} {#manual-apim-preparation .smaller}
 
-This shortcut assumes validation has confirmed exactly two rows per dyad.
-
-<!-- TODO: I think we should provide code that is safe with missing partners. -->
+- Explicit matching by couple and role
+- Missing partner $\rightarrow$ `NA`
 
 ```{r}
 #| eval: false
@@ -1958,14 +1979,23 @@ apim_manual_data <- raw_dyad_data |>
   dplyr::mutate(
     .is_female = as.numeric(gender == "female"),
     .is_male = as.numeric(gender == "male"),
-    .efficacy_gmc = efficacy - mean(efficacy, na.rm = TRUE)
-  ) |>
-  dplyr::group_by(couple_id) |>
-  dplyr::mutate(
-    .efficacy_gmc_actor = .efficacy_gmc,
-    .efficacy_gmc_partner = rev(.efficacy_gmc)
-  ) |>
-  dplyr::ungroup()
+    .efficacy_gmc = efficacy - mean(efficacy, na.rm = TRUE),
+    .efficacy_gmc_actor = .efficacy_gmc
+  )
+
+partner_values <- apim_manual_data |>
+  dplyr::transmute(
+    couple_id,
+    gender = dplyr::recode(gender, female = "male", male = "female"),
+    .efficacy_gmc_partner = .efficacy_gmc
+  )
+
+apim_manual_data <- apim_manual_data |>
+  dplyr::left_join(
+    partner_values,
+    by = c("couple_id", "gender"),
+    relationship = "one-to-one"
+  )
 ```
 
 ## Decompose self-efficacy manually [← Data preparation](#prepared-ild-apim-data){.appendix-back-link} {#manual-ild-apim-preparation .smaller}
