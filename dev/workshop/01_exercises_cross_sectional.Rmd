@@ -274,10 +274,104 @@ vignette section on
 For now, briefly assess whether the diagnostics appear acceptable overall and
 for each role.
 
+If the model is not adequate, revise its outcome scale, family, mean structure,
+or covariance structure and repeat these checks before continuing.
+
+
+### Distinguishability
+
+Fit the equivalent model under exchangeability constraints. It should use the
+same adequate specification and differ only in its exchangeability constraints.
+Hint: you need an
+`.arbitrary_member_contrast` column in the data. You may already have included
+one earlier, or you may need to prepare the data again. Check your column names
+with `names(my_data)`.
+
+
+```{r}
+# hint("exchangeable_model", "fixed_effects")
+# hint("exchangeable_model", "random_effects")
+# hint("exchangeable_model", "example_code")
+
+```
+
+Compare the distinguishable and exchangeable models using
+`dyadMLM::compare_nested_models()`.
+
+```{r}
+
+```
+
+Insert your brief conclusion, and choose whether you want to continue with
+the distinguishable or exchangeable model for the rest of the exercise:
+
+[Insert conclusion]
+
+[Insert decision and reasoning]
+
+Save the model you retained as `retained_model`:
+
+```{r eval=FALSE}
+retained_model <- YOUR_RETAINED_MODEL
+```
+
+
+### If exchangeable: recheck adequacy
+
+If you retained the distinguishable model unchanged, its adequacy was already
+checked above. If you retained the exchangeable model, repeat the overall
+DHARMa check:
+
+```{r eval=FALSE}
+retained_model_dharma_residuals <- DHARMa::simulateResiduals(
+  fittedModel = retained_model,
+  n = 10000,
+
+  # Re-simulate the random-effects block that represents the residuals.
+  simulateREs = "unconditional",
+
+  # Account for the correlation between partners' residuals.
+  rotation = "estimated",
+  seed = 123
+)
+
+plot(retained_model_dharma_residuals)
+```
+
+You can also inspect the two arbitrary members separately. Each plot then
+contains one observation per dyad, so no within-dyad residual correlation
+remains within either plot:
+
+```{r eval=FALSE}
+member_a_dharma_residuals <- DHARMa::recalculateResiduals(
+  retained_model_dharma_residuals,
+  sel = ~ .member_contrast_arbitrary == -1,
+  rotation = NULL,
+  seed = 123
+)
+
+member_b_dharma_residuals <- DHARMa::recalculateResiduals(
+  retained_model_dharma_residuals,
+  sel = ~ .member_contrast_arbitrary == 1,
+  rotation = NULL,
+  seed = 123
+)
+
+old_par <- par(mfrow = c(1, 2))
+DHARMa::plotResiduals(member_a_dharma_residuals, main = "Arbitrary member A")
+DHARMa::plotResiduals(member_b_dharma_residuals, main = "Arbitrary member B")
+par(old_par)
+```
+
+The arbitrary labels have no substantive meaning. Do not interpret differences
+between the panels as member or role differences.
+
+Briefly assess whether the exchangeable model remains adequate.
+
 
 ### Robustness
 
-Inspect unusual dyads separately by role. 
+Inspect unusual dyads separately by role.
 
 Optionally, you can use the supplied helper that is loaded here from a separate
 file `helpers.R`:
@@ -316,7 +410,7 @@ effect. Use the labels to guide data inspection rather than to automatically
 exclude dyads.
 
 If a dyad was flagged for a substantive or procedural reason, optionally refit
-the model without it:
+the retained model without it:
 
 ```{r eval=FALSE}
 # hint("robustness_refit", "ids")
@@ -327,7 +421,7 @@ data_without_selected_dyads <- dplyr::filter(
 )
 
 model_without_selected_dyads <- update(
-  my_model,
+  retained_model,
   data = data_without_selected_dyads
 )
 
@@ -337,39 +431,10 @@ summary(model_without_selected_dyads)
 Do not exclude dyads merely because their removal changes a significance label.
 
 
-### Distinguishability
-
-Fit the equivalent model under exchangeability constraints. Hint: you need an
-`.arbitrary_member_contrast` column in the data. You may already have included
-one earlier, or you may need to prepare the data again. Check your column names
-with `names(my_data)`.
-
-
-```{r}
-# hint("exchangeable_model", "fixed_effects")
-# hint("exchangeable_model", "random_effects")
-# hint("exchangeable_model", "example_code")
-
-```
-
-Compare the distinguishable and exchangeable models using
-`dyadMLM::compare_nested_models()`.
-
-```{r}
-
-```
-
-Insert your brief conclusion, and choose whether you want to continue with
-the distinguishable or exchangeable model for the rest of the exercise:
-
-[Insert conclusion]
-
-[Insert decision and reasoning]
-
-
 # 6. Visualize, interpret, and report results
 
-Print a fixed-effects table using `parameters::model_parameters()`:
+Print a fixed-effects table for `retained_model` using
+`parameters::model_parameters()`:
 
 ```{r}
 # hint("report_results", "fixed_effects")

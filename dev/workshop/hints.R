@@ -138,17 +138,17 @@
   ),
   report_results = list(
     fixed_effects = paste(
-      "parameters::model_parameters(YOUR_MODEL, effects = \"fixed\")"
+      "parameters::model_parameters(retained_model, effects = \"fixed\")"
     ),
     random_effects = paste(
-      "parameters::model_parameters(YOUR_MODEL, effects = \"random\")",
+      "parameters::model_parameters(retained_model, effects = \"random\")",
       "",
       "For an exchangeable model, also use:",
-      "dyadMLM::recover_exchangeable_covariance(YOUR_MODEL)",
+      "dyadMLM::recover_exchangeable_covariance(retained_model)",
       sep = "\n"
     ),
     plot = paste(
-      "parameters::model_parameters(YOUR_MODEL, effects = \"fixed\") |>",
+      "parameters::model_parameters(retained_model, effects = \"fixed\") |>",
       "  plot()",
       sep = "\n"
     )
