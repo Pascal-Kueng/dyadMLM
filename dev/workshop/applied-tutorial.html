@@ -3208,9 +3208,25 @@ display:block!important;
 <ul>
 <li><strong>Sensitivity analysis:</strong> square-root MVPA; conclusions unchanged</li>
 <li><strong>Primary analysis:</strong> report the prespecified raw-MVPA model because the deviation was modest and minutes are directly interpretable</li>
-<li><strong>General rule:</strong> larger or consequential diagnostic problems should prompt model revision</li>
+<li><strong>General rule:</strong> larger or consequential diagnostic problems: revise main model</li>
 </ul>
 </div>
+</section>
+<section id="transformor-change-the-outcome-family" class="slide level2">
+<h2>Transform—or change the outcome family?</h2>
+<ul>
+<li><strong>Transformation may help</strong> for a nonnegative, right-skewed outcome
+<ul>
+<li>Try <code>sqrt()</code> or <code>log1p()</code> (handles zeros)</li>
+<li>Refit and rerun DHARMa; the histogram alone is not sufficient</li>
+</ul></li>
+<li><strong>A non-Gaussian family may be preferable</strong>
+<ul>
+<li>Particularly for counts, proportions, bounded, or zero-heavy outcomes</li>
+<li>Family and link choices require outcome-specific care</li>
+</ul></li>
+<li><strong>Workshop scope:</strong> generalized models are not covered here</li>
+</ul>
 </section>
 <section id="test-distinguishability" class="slide level2">
 <h2>Test distinguishability</h2>
@@ -4225,22 +4241,8 @@ about stationarity, for instance? -->
 <p>Synthesized from <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013">Bolger &amp; Laurenceau (<a href="#/references" role="doc-biblioref" onclick>2013</a>)</span>, <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">Revol et al. (<a href="#/references" role="doc-biblioref" onclick>2024</a>)</span>, <span class="citation" data-cites="mcneishPrimerTwoLevel2020">McNeish &amp; Hamaker (<a href="#/references" role="doc-biblioref" onclick>2020</a>)</span>, and <span class="citation" data-cites="delrosarioPracticalGuideSpecifying2025">del Rosario &amp; West (<a href="#/references" role="doc-biblioref" onclick>2025</a>)</span>.</p>
 </div>
 <aside class="notes">
-<p>For ILD-specific power analysis, see <span class="citation" data-cites="lafitPowerLAPIMApplication2022">Lafit et al. (<a href="#/references" role="doc-biblioref" onclick>2022</a>)</span>. Perry et al. belongs with interpretation of fitted dynamics: their change-score APIM and vector-field diagrams show the joint implications of actor and partner coefficients <span class="citation" data-cites="perryGraphicMethodsInterpreting2017">(<a href="#/references" role="doc-biblioref" onclick>Perry et al., 2017</a>)</span>.</p>
-<!-- TODO: should we insert a link with resources for cross-sectional and ILD
-power analysis in each section, or maybe better in the final few slides that
-talk about reporting (the meta-analysis)? This should then be moved from
-the notes to an appropriate place. -->
-<p>We will use <code>wbCorr</code> for pooled within- and between-person correlations <span class="citation" data-cites="kuengWbCorrBivariateWithin2026">(<a href="#/references" role="doc-biblioref" onclick>Küng, 2026</a>)</span>; <span class="citation" data-cites="hamakerCuriousCaseCrossSectional2024">Hamaker (<a href="#/references" role="doc-biblioref" onclick>2024</a>)</span> provides the methodological rationale.</p>
-<!-- TODO: should be implemented correctly. Can we do something like this
-also for cross-sectional dyads? Maybe use wbCorr on different levels, just
-without inference then? Or is there another package that can do what we want
-for exchangeable dyads? -->
-<p><code>omegaSEM()</code> is provided by <code>multilevelTools</code>. It implements level-specific internal-consistency coefficients based on a two-level one-factor model <span class="citation" data-cites="wileyMultilevelTools2025 geldhofReliabilityEstimationMultilevel2014">(<a href="#/references" role="doc-biblioref" onclick>Geldhof et al., 2014</a>; <a href="#/references" role="doc-biblioref" onclick>Wiley, 2025</a>)</span>. These coefficients are not temporal stability or the precision of observed person means; for the latter, see <span class="citation" data-cites="laiCompositeReliabilityMultilevel2021">Lai (<a href="#/references" role="doc-biblioref" onclick>2021</a>)</span>.</p>
-<!-- TODO: add multilevelTools to the install packages function for the
-exercises. And should we add a brief reliability section to the cross-sectional
-part? Maybe just a mention of reporting reliability where applicable, in 
-"what to report" or so? Then we could omit it from both cross-sectional and ILD
-parts and only mention it in the end, and mention omegaSEM? -->
+<p>Perry et al. belongs with interpretation of fitted dynamics: their change-score APIM and vector-field diagrams show the joint implications of actor and partner coefficients <span class="citation" data-cites="perryGraphicMethodsInterpreting2017">(<a href="#/references" role="doc-biblioref" onclick>Perry et al., 2017</a>)</span>.</p>
+<p>For distinguishable ILD, reshape to one row per dyad-occasion with role-specific columns, then use <code>wbCorr</code> with <code>cluster = couple_id</code>. This is a two-level structure: occasions within dyads. Omit <code>wbCorr</code> for exchangeable ILD until the nested three-level implementation is available <span class="citation" data-cites="kuengWbCorrBivariateWithin2026 hamakerCuriousCaseCrossSectional2024">(<a href="#/references" role="doc-biblioref" onclick>Hamaker, 2024</a>; <a href="#/references" role="doc-biblioref" onclick>Küng, 2026</a>)</span>.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -4276,22 +4278,17 @@ display:block!important;
 <p><strong>Not aggregated anymore:</strong></p>
 <ul>
 <li>Daily total MVPA in minutes</li>
-<li>Daily self-efficacy 0–5 <span class="math inline">\(\rightarrow\)</span> lag 1!</li>
+<li>Daily self-efficacy (0–5): “I am sure I can be active tomorrow”</li>
+<li>Self-efficacy on day <span class="math inline">\(t-1\)</span> <span class="math inline">\(\rightarrow\)</span> physical activity on day <span class="math inline">\(t\)</span></li>
 </ul>
-<!-- TODO: should we use self-efficacy again? This means that we will need to 
-lag efficacy, right? Which we can do with dyadMLM::prepare_dyad_data() -->
 </section>
 <section id="ild-research-question" class="slide level2 rq-slide">
 <h2>ILD Research Question</h2>
 <div class="rq-center">
 <div class="rq-card">
-<p><span class="rq-label">RQ:</span> <span class="rq-text">In romantic couples, is a person’s daily and person-mean <strong>self-efficacy</strong> linked to daily and person-mean physical activity in both partners?</span></p>
+<p><span class="rq-label">RQ:</span> <span class="rq-text">How are daily deviations and stable between-person differences in <strong>self-efficacy</strong> associated with one’s own and one’s partner’s physical activity the next day?</span></p>
 </div>
 </div>
-<!-- TODO: how to best formulate this? to not sound too much like a hypothesis
-but distinct from the cross-sectional RQ? Fine as is? -->
-<!-- TODO: should we briefly show the slides again with the measures? Just 5
-seconds each. -->
 </section></section>
 <section>
 <section id="distinguishable-ild-apim" class="title-slide slide level1 center">
@@ -4314,10 +4311,15 @@ seconds each. -->
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href></a>raw_ild_dyad_data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;dyadic-data.rds&quot;</span>) <span class="sc">|&gt;</span></span>
 <span id="cb40-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
-<span id="cb40-3"><a href></a>    couple_id, person_id, diaryday, gender, efficacy, total_mvpa</span>
-<span id="cb40-4"><a href></a>  ) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(couple_id, diaryday)</span>
-<span id="cb40-5"><a href></a></span>
-<span id="cb40-6"><a href></a><span class="fu">slide_table</span>(<span class="fu">head</span>(raw_ild_dyad_data))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb40-3"><a href></a>    couple_id, person_id, diaryday, gender,</span>
+<span id="cb40-4"><a href></a>    provided_support, sedentary</span>
+<span id="cb40-5"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb40-6"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb40-7"><a href></a>    <span class="at">sedentary_hours =</span> sedentary <span class="sc">/</span> <span class="dv">60</span></span>
+<span id="cb40-8"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb40-9"><a href></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(couple_id, diaryday)</span>
+<span id="cb40-10"><a href></a></span>
+<span id="cb40-11"><a href></a><span class="fu">slide_table</span>(<span class="fu">head</span>(raw_ild_dyad_data))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top">
 <thead>
@@ -4326,8 +4328,9 @@ seconds each. -->
 <th style="text-align: right;" data-quarto-table-cell-role="th">person_id</th>
 <th style="text-align: right;" data-quarto-table-cell-role="th">diaryday</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">gender</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">efficacy</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">total_mvpa</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">provided_support</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sedentary</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sedentary_hours</th>
 </tr>
 </thead>
 <tbody>
@@ -4336,87 +4339,243 @@ seconds each. -->
 <td style="text-align: right;">1.00</td>
 <td style="text-align: right;">0.00</td>
 <td style="text-align: left;">male</td>
-<td style="text-align: right;">5.00</td>
-<td style="text-align: right;">60.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">526.00</td>
+<td style="text-align: right;">8.77</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1.00</td>
 <td style="text-align: right;">2.00</td>
 <td style="text-align: right;">0.00</td>
 <td style="text-align: left;">female</td>
-<td style="text-align: right;">2.00</td>
-<td style="text-align: right;">30.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">514.00</td>
+<td style="text-align: right;">8.57</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1.00</td>
 <td style="text-align: right;">1.00</td>
 <td style="text-align: right;">1.00</td>
 <td style="text-align: left;">male</td>
-<td style="text-align: right;">5.00</td>
-<td style="text-align: right;">60.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">503.00</td>
+<td style="text-align: right;">8.38</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1.00</td>
 <td style="text-align: right;">2.00</td>
 <td style="text-align: right;">1.00</td>
 <td style="text-align: left;">female</td>
-<td style="text-align: right;">2.00</td>
-<td style="text-align: right;">90.00</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">506.00</td>
+<td style="text-align: right;">8.43</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1.00</td>
 <td style="text-align: right;">1.00</td>
 <td style="text-align: right;">2.00</td>
 <td style="text-align: left;">male</td>
-<td style="text-align: right;">5.00</td>
-<td style="text-align: right;">60.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">2.00</td>
-<td style="text-align: right;">2.00</td>
-<td style="text-align: left;">female</td>
-<td style="text-align: right;">2.00</td>
 <td style="text-align: right;">0.00</td>
+<td style="text-align: right;">611.00</td>
+<td style="text-align: right;">10.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">564.00</td>
+<td style="text-align: right;">9.40</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </section>
-<section id="create-the-required-format-and-validate-the-data-4" class="slide level2">
+<section id="create-the-required-format-and-validate-the-data-4" class="slide level2 smaller">
 <h2>Create the required format and validate the data</h2>
-<p>Decompose each time-varying predictor <span class="math inline">\(X_{rit}\)</span>, where <span class="math inline">\(r\)</span> denotes role, <span class="math inline">\(i\)</span> dyad, and <span class="math inline">\(t\)</span> occasion:</p>
+<div class="columns">
+<div class="column" style="width:38%;">
+<h3 id="as-before">As before</h3>
+<ul>
+<li>Actor and partner variables</li>
+<li>Arbitrary member contrast</li>
+<li>Dyad validation</li>
+</ul>
+</div><div class="column" style="width:62%;">
+<h3 id="for-ild">For ILD</h3>
+<p>Index time by the outcome day <span class="math inline">\(t\)</span>. For self-efficacy <span class="math inline">\(X_{ri,t-1}\)</span> measured on the previous day:</p>
 <ul>
 <li>Between-person component: Person mean centered on the mean of person means
 <ul>
 <li><span class="math inline">\(\bar X_{ri} - \bar X\)</span></li>
 </ul></li>
-<li>Within-person component: Daily deviation from the person mean
+<li>Lagged within-person component: Previous-day deviation from the person mean
 <ul>
-<li><span class="math inline">\(X_{rit} - \bar X_{ri}\)</span></li>
+<li><span class="math inline">\(X_{ri,t-1} - \bar X_{ri}\)</span></li>
 </ul></li>
 </ul>
 <p>Here, <span class="math inline">\(\bar X_{ri}\)</span> is member <span class="math inline">\(r\)</span>’s observed mean in dyad <span class="math inline">\(i\)</span>, and <span class="math inline">\(\bar X\)</span> is the equally weighted mean of the observed person means.</p>
+</div></div>
 </section>
-<section id="exchangeable-apim-1" class="slide level2">
-<h2>Exchangeable APIM</h2>
+<section id="prepared-ild-apim-data" class="slide level2 smaller">
+<h2>Create the required format and validate the data <a href="#/manual-ild-apim-preparation" class="results-forward-link">Manual code →</a></h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href></a>ild_apim_data <span class="ot">&lt;-</span> dyadMLM<span class="sc">::</span><span class="fu">prepare_dyad_data</span>(</span>
+<span id="cb41-2"><a href></a>  <span class="at">data =</span> raw_ild_dyad_data,</span>
+<span id="cb41-3"><a href></a>  <span class="at">dyad =</span> couple_id,</span>
+<span id="cb41-4"><a href></a>  <span class="at">member =</span> person_id,</span>
+<span id="cb41-5"><a href></a>  <span class="at">role =</span> gender,</span>
+<span id="cb41-6"><a href></a>  <span class="at">time =</span> diaryday,</span>
+<span id="cb41-7"><a href></a>  <span class="at">predictors =</span> provided_support,</span>
+<span id="cb41-8"><a href></a>  <span class="at">model_types =</span> <span class="st">&quot;apim&quot;</span>,</span>
+<span id="cb41-9"><a href></a>  <span class="at">include_arbitrary_member_contrast =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb41-10"><a href></a>  <span class="at">seed =</span> <span class="dv">123</span></span>
+<span id="cb41-11"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
-<section id="ar1-ou-and-dynamic-models" class="slide level2">
-<h2>AR(1), OU, and Dynamic Models</h2>
-<ul>
-<li>When to use dynamic models vs. concurrent models</li>
-<li>Current possibilities in R MLM for AR(1) or OU models</li>
-<li>Current possibilities in R MLM for dynamic models</li>
-<li>Alternatives (DSEM in Mplus or lavaan for X)</li>
-</ul>
+<section id="distinguishable-ild-apim-1" class="slide level2 smaller">
+<h2>Distinguishable ILD APIM</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href></a>ild_apim_distinguishable_model <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(</span>
+<span id="cb42-2"><a href></a>  sedentary_hours <span class="sc">~</span></span>
+<span id="cb42-3"><a href></a>    <span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">+</span></span>
+<span id="cb42-4"><a href></a>    .is_female<span class="sc">:</span>.provided_support_cwp_actor <span class="sc">+</span></span>
+<span id="cb42-5"><a href></a>    .is_male<span class="sc">:</span>.provided_support_cwp_actor <span class="sc">+</span></span>
+<span id="cb42-6"><a href></a>    .is_female<span class="sc">:</span>.provided_support_cwp_partner <span class="sc">+</span></span>
+<span id="cb42-7"><a href></a>    .is_male<span class="sc">:</span>.provided_support_cwp_partner <span class="sc">+</span></span>
+<span id="cb42-8"><a href></a>    .is_female<span class="sc">:</span>.provided_support_cbp_actor <span class="sc">+</span></span>
+<span id="cb42-9"><a href></a>    .is_male<span class="sc">:</span>.provided_support_cbp_actor <span class="sc">+</span></span>
+<span id="cb42-10"><a href></a>    .is_female<span class="sc">:</span>.provided_support_cbp_partner <span class="sc">+</span></span>
+<span id="cb42-11"><a href></a>    .is_male<span class="sc">:</span>.provided_support_cbp_partner <span class="sc">+</span></span>
+<span id="cb42-12"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
+<span id="cb42-13"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id<span class="sc">:</span>diaryday),</span>
+<span id="cb42-14"><a href></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb42-15"><a href></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb42-16"><a href></a>  <span class="at">data =</span> ild_apim_data</span>
+<span id="cb42-17"><a href></a>)</span>
+<span id="cb42-18"><a href></a></span>
+<span id="cb42-19"><a href></a><span class="fu">summary</span>(ild_apim_distinguishable_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+</section>
+<section id="distinguishable-ild-apim-1-output" class="slide level2 smaller output-location-slide"><h2>Distinguishable ILD APIM</h2><div class="cell output-location-slide">
+<div class="cell-output cell-output-stdout">
+<pre><code> Family: gaussian  ( identity )
+Formula:          
+sedentary_hours ~ 0 + .is_female + .is_male + .is_female:.provided_support_cwp_actor +  
+    .is_male:.provided_support_cwp_actor + .is_female:.provided_support_cwp_partner +  
+    .is_male:.provided_support_cwp_partner + .is_female:.provided_support_cbp_actor +  
+    .is_male:.provided_support_cbp_actor + .is_female:.provided_support_cbp_partner +  
+    .is_male:.provided_support_cbp_partner + (0 + .is_female +  
+    .is_male | couple_id) + (0 + .is_female + .is_male | couple_id:diaryday)
+Dispersion:                       ~0
+Data: ild_apim_data
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  11032.6   11131.3   -5500.3   11000.6      3508 
+
+Random effects:
+
+Conditional model:
+ Groups             Name       Variance Std.Dev. Corr 
+ couple_id          .is_female 0.5816   0.7626        
+                    .is_male   0.5854   0.7651   0.39 
+ couple_id:diaryday .is_female 1.2643   1.1244        
+                    .is_male   1.2833   1.1328   0.20 
+Number of obs: 3524, groups:  couple_id, 36; couple_id:diaryday, 1762
+
+Conditional model:
+                                         Estimate Std. Error z value Pr(&gt;|z|)
+.is_female                                8.91065    0.13554   65.74  &lt; 2e-16
+.is_male                                  8.88052    0.13601   65.29  &lt; 2e-16
+.is_female:.provided_support_cwp_actor   -0.13020    0.02202   -5.91 3.39e-09
+.is_male:.provided_support_cwp_actor     -0.12892    0.02440   -5.28 1.27e-07
+.is_female:.provided_support_cwp_partner -0.06173    0.02422   -2.55 0.010818
+.is_male:.provided_support_cwp_partner   -0.07609    0.02219   -3.43 0.000606
+.is_female:.provided_support_cbp_actor   -0.03071    0.24123   -0.13 0.898688
+.is_male:.provided_support_cbp_actor     -0.09757    0.23337   -0.42 0.675873
+.is_female:.provided_support_cbp_partner -0.01315    0.23256   -0.06 0.954895
+.is_male:.provided_support_cbp_partner   -0.07785    0.24206   -0.32 0.747741
+                                            
+.is_female                               ***
+.is_male                                 ***
+.is_female:.provided_support_cwp_actor   ***
+.is_male:.provided_support_cwp_actor     ***
+.is_female:.provided_support_cwp_partner *  
+.is_male:.provided_support_cwp_partner   ***
+.is_female:.provided_support_cbp_actor      
+.is_male:.provided_support_cbp_actor        
+.is_female:.provided_support_cbp_partner    
+.is_male:.provided_support_cbp_partner      
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+</div></section><section id="exchangeable-ild-apim" class="slide level2 smaller">
+<h2>Exchangeable ILD APIM</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href></a>ild_apim_exchangeable_model <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(</span>
+<span id="cb44-2"><a href></a>  sedentary_hours <span class="sc">~</span></span>
+<span id="cb44-3"><a href></a>    <span class="dv">1</span> <span class="sc">+</span></span>
+<span id="cb44-4"><a href></a>    .provided_support_cwp_actor <span class="sc">+</span></span>
+<span id="cb44-5"><a href></a>    .provided_support_cwp_partner <span class="sc">+</span></span>
+<span id="cb44-6"><a href></a>    .provided_support_cbp_actor <span class="sc">+</span></span>
+<span id="cb44-7"><a href></a>    .provided_support_cbp_partner <span class="sc">+</span></span>
+<span id="cb44-8"><a href></a>    (<span class="dv">1</span> <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
+<span id="cb44-9"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .member_contrast_arbitrary <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
+<span id="cb44-10"><a href></a>    (<span class="dv">1</span> <span class="sc">|</span> couple_id<span class="sc">:</span>diaryday) <span class="sc">+</span></span>
+<span id="cb44-11"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .member_contrast_arbitrary <span class="sc">|</span> couple_id<span class="sc">:</span>diaryday),</span>
+<span id="cb44-12"><a href></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb44-13"><a href></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb44-14"><a href></a>  <span class="at">data =</span> ild_apim_data</span>
+<span id="cb44-15"><a href></a>)</span>
+<span id="cb44-16"><a href></a></span>
+<span id="cb44-17"><a href></a><span class="fu">summary</span>(ild_apim_exchangeable_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
 <!----------------------------------------------------------------------------
 
 GENERAL REPORTING GUIDELINES
 
 ------------------------------------------------------------------------------>
 </section>
-<section id="power-analysis-is-the-clearest-reporting-gap" class="slide level2">
+<section id="exchangeable-ild-apim-output" class="slide level2 smaller output-location-slide"><h2>Exchangeable ILD APIM</h2><div class="cell output-location-slide">
+<div class="cell-output cell-output-stdout">
+<pre><code> Family: gaussian  ( identity )
+Formula:          
+sedentary_hours ~ 1 + .provided_support_cwp_actor + .provided_support_cwp_partner +  
+    .provided_support_cbp_actor + .provided_support_cbp_partner +  
+    (1 | couple_id) + (0 + .member_contrast_arbitrary | couple_id) +  
+    (1 | couple_id:diaryday) + (0 + .member_contrast_arbitrary |  
+    couple_id:diaryday)
+Dispersion:                       ~0
+Data: ild_apim_data
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  11019.5   11075.1   -5500.8   11001.5      3515 
+
+Random effects:
+
+Conditional model:
+ Groups               Name                       Variance Std.Dev.
+ couple_id            (Intercept)                0.4043   0.6359  
+ couple_id.1          .member_contrast_arbitrary 0.1828   0.4276  
+ couple_id.diaryday   (Intercept)                0.7672   0.8759  
+ couple_id.diaryday.1 .member_contrast_arbitrary 0.5066   0.7118  
+Number of obs: 3524, groups:  couple_id, 36; couple_id:diaryday, 1762
+
+Conditional model:
+                              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                    8.89566    0.10805   82.33  &lt; 2e-16 ***
+.provided_support_cwp_actor   -0.12946    0.01585   -8.17 3.16e-16 ***
+.provided_support_cwp_partner -0.06959    0.01585   -4.39 1.13e-05 ***
+.provided_support_cbp_actor   -0.06242    0.13639   -0.46    0.647    
+.provided_support_cbp_partner -0.04706    0.13639   -0.35    0.730    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+</div></section><section id="power-analysis-is-the-clearest-reporting-gap" class="slide level2">
 <h2>Power analysis is the clearest reporting gap</h2>
 
 <img role="img" aria-label="Bar chart of reporting practices in 73 longitudinal APIM studies: 17.8 percent reported a power analysis, 64.4 percent documented model constraints, and 75.3 percent reported a missing-data strategy." data-src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNzU2cHQiIGhlaWdodD0iMzI0cHQiIHZpZXdCb3g9IjAgMCA3NTYgMzI0Ij4KPGRlZnM+CjxnPgo8ZyBpZD0iZ2x5cGgtMC0wIj4KPHBhdGggZD0iTSA1LjE1NjI1IC0xMC4yNjU2MjUgTCA1LjE1NjI1IDAgTCA2LjkwNjI1IDAgTCA2LjkwNjI1IC0xNC40MDYyNSBMIDUuNzUgLTE0LjQwNjI1IEMgNS4xNDA2MjUgLTEyLjE4NzUgNC43MzQzNzUgLTExLjg5MDYyNSAyLjAzMTI1IC0xMS41MzEyNSBMIDIuMDMxMjUgLTEwLjI2NTYyNSBaIE0gNS4xNTYyNSAtMTAuMjY1NjI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0wLTEiPgo8cGF0aCBkPSJNIDEwLjM1OTM3NSAtMTQuMTI1IEwgMC45MjE4NzUgLTE0LjEyNSBMIDAuOTIxODc1IC0xMi4zOTA2MjUgTCA4LjU0Njg3NSAtMTIuMzkwNjI1IEMgNS4xNzE4NzUgLTcuNTkzNzUgMy44MTI1IC00LjY0MDYyNSAyLjc1IDAgTCA0LjYyNSAwIEMgNS40MDYyNSAtNC41MTU2MjUgNy4xNzE4NzUgLTguNDA2MjUgMTAuMzU5Mzc1IC0xMi42NTYyNSBaIE0gMTAuMzU5Mzc1IC0xNC4xMjUgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTAtMiI+CjxwYXRoIGQ9Ik0gMy44MTI1IC0yLjA3ODEyNSBMIDEuNzM0Mzc1IC0yLjA3ODEyNSBMIDEuNzM0Mzc1IDAgTCAzLjgxMjUgMCBaIE0gMy44MTI1IC0yLjA3ODEyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMC0zIj4KPHBhdGggZD0iTSA3Ljc5Njg3NSAtNy41OTM3NSBDIDkuMjY1NjI1IC04LjQ4NDM3NSA5LjcxODc1IC05LjIwMzEyNSA5LjcxODc1IC0xMC41NjI1IEMgOS43MTg3NSAtMTIuODI4MTI1IDcuOTg0Mzc1IC0xNC40MDYyNSA1LjQ4NDM3NSAtMTQuNDA2MjUgQyAyLjk4NDM3NSAtMTQuNDA2MjUgMS4yMzQzNzUgLTEyLjgyODEyNSAxLjIzNDM3NSAtMTAuNTc4MTI1IEMgMS4yMzQzNzUgLTkuMjAzMTI1IDEuNjg3NSAtOC41IDMuMTQwNjI1IC03LjU5Mzc1IEMgMS41MzEyNSAtNi43NjU2MjUgMC43MzQzNzUgLTUuNTkzNzUgMC43MzQzNzUgLTQgQyAwLjczNDM3NSAtMS4zNzUgMi42NzE4NzUgMC40NTMxMjUgNS40ODQzNzUgMC40NTMxMjUgQyA4LjI2NTYyNSAwLjQ1MzEyNSAxMC4yMTg3NSAtMS4zNzUgMTAuMjE4NzUgLTQgQyAxMC4yMTg3NSAtNS41OTM3NSA5LjQyMTg3NSAtNi43NjU2MjUgNy43OTY4NzUgLTcuNTkzNzUgWiBNIDUuNDg0Mzc1IC0xMi44NDM3NSBDIDYuOTY4NzUgLTEyLjg0Mzc1IDcuOTIxODc1IC0xMS45NTMxMjUgNy45MjE4NzUgLTEwLjUxNTYyNSBDIDcuOTIxODc1IC05LjE1NjI1IDYuOTUzMTI1IC04LjI2NTYyNSA1LjQ4NDM3NSAtOC4yNjU2MjUgQyAzLjk4NDM3NSAtOC4yNjU2MjUgMy4wMzEyNSAtOS4xNTYyNSAzLjAzMTI1IC0xMC41NjI1IEMgMy4wMzEyNSAtMTEuOTUzMTI1IDMuOTg0Mzc1IC0xMi44NDM3NSA1LjQ4NDM3NSAtMTIuODQzNzUgWiBNIDUuNDg0Mzc1IC02Ljc5Njg3NSBDIDcuMjM0Mzc1IC02Ljc5Njg3NSA4LjQyMTg3NSAtNS42NDA2MjUgOC40MjE4NzUgLTMuOTY4NzUgQyA4LjQyMTg3NSAtMi4yMzQzNzUgNy4yNSAtMS4wOTM3NSA1LjQzNzUgLTEuMDkzNzUgQyAzLjcxODc1IC0xLjA5Mzc1IDIuNTMxMjUgLTIuMjY1NjI1IDIuNTMxMjUgLTMuOTM3NSBDIDIuNTMxMjUgLTUuNjU2MjUgMy43MDMxMjUgLTYuNzk2ODc1IDUuNDg0Mzc1IC02Ljc5Njg3NSBaIE0gNS40ODQzNzUgLTYuNzk2ODc1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0wLTQiPgo8cGF0aCBkPSJNIDMuOTY4NzUgLTEzLjY0MDYyNSBDIDIuMDkzNzUgLTEzLjY0MDYyNSAwLjU3ODEyNSAtMTIuMTA5Mzc1IDAuNTc4MTI1IC0xMC4yMzQzNzUgQyAwLjU3ODEyNSAtOC4zNTkzNzUgMi4wOTM3NSAtNi44MjgxMjUgMy45ODQzNzUgLTYuODI4MTI1IEMgNS44NDM3NSAtNi44MjgxMjUgNy4zNzUgLTguMzU5Mzc1IDcuMzc1IC0xMC4yMDMxMjUgQyA3LjM3NSAtMTIuMTI1IDUuODc1IC0xMy42NDA2MjUgMy45Njg3NSAtMTMuNjQwNjI1IFogTSAzLjk2ODc1IC0xMi4yNSBDIDUuMDkzNzUgLTEyLjI1IDYgLTExLjM1OTM3NSA2IC0xMC4yMTg3NSBDIDYgLTkuMTI1IDUuMDc4MTI1IC04LjIzNDM3NSAzLjk4NDM3NSAtOC4yMzQzNzUgQyAyLjg3NSAtOC4yMzQzNzUgMS45NTMxMjUgLTkuMTI1IDEuOTUzMTI1IC0xMC4yMzQzNzUgQyAxLjk1MzEyNSAtMTEuMzU5Mzc1IDIuODQzNzUgLTEyLjI1IDMuOTY4NzUgLTEyLjI1IFogTSAxMi4xMjUgLTE0LjEyNSBMIDQuMjY1NjI1IDAuMzkwNjI1IEwgNS41NzgxMjUgMC4zOTA2MjUgTCAxMy40NTMxMjUgLTE0LjEyNSBaIE0gMTMuNzAzMTI1IC02LjQyMTg3NSBDIDExLjgyODEyNSAtNi40MjE4NzUgMTAuMzEyNSAtNC45MDYyNSAxMC4zMTI1IC0zLjAzMTI1IEMgMTAuMzEyNSAtMS4xNDA2MjUgMTEuODI4MTI1IDAuMzc1IDEzLjcxODc1IDAuMzc1IEMgMTUuNTc4MTI1IDAuMzc1IDE3LjEwOTM3NSAtMS4xNDA2MjUgMTcuMTA5Mzc1IC0yLjk4NDM3NSBDIDE3LjEwOTM3NSAtNC45MDYyNSAxNS42MjUgLTYuNDIxODc1IDEzLjcwMzEyNSAtNi40MjE4NzUgWiBNIDEzLjcwMzEyNSAtNS4wMTU2MjUgQyAxNC44NDM3NSAtNS4wMTU2MjUgMTUuNzM0Mzc1IC00LjEyNSAxNS43MzQzNzUgLTIuOTg0Mzc1IEMgMTUuNzM0Mzc1IC0xLjkwNjI1IDE0LjgyODEyNSAtMS4wMTU2MjUgMTMuNzE4NzUgLTEuMDE1NjI1IEMgMTIuNTkzNzUgLTEuMDE1NjI1IDExLjY4NzUgLTEuOTA2MjUgMTEuNjg3NSAtMy4wMzEyNSBDIDExLjY4NzUgLTQuMTI1IDEyLjU5Mzc1IC01LjAxNTYyNSAxMy43MDMxMjUgLTUuMDE1NjI1IFogTSAxMy43MDMxMjUgLTUuMDE1NjI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0wLTUiPgo8cGF0aCBkPSJNIDkuOTIxODc1IC0xMC42NTYyNSBDIDkuNTc4MTI1IC0xMy4wMTU2MjUgOC4wNjI1IC0xNC40MDYyNSA1LjkyMTg3NSAtMTQuNDA2MjUgQyA0LjM1OTM3NSAtMTQuNDA2MjUgMi45Njg3NSAtMTMuNjQwNjI1IDIuMTI1IC0xMi4zNDM3NSBDIDEuMjM0Mzc1IC0xMC45Mzc1IDAuODU5Mzc1IC05LjE4NzUgMC44NTkzNzUgLTYuNTc4MTI1IEMgMC44NTkzNzUgLTQuMTQwNjI1IDEuMTg3NSAtMi42MDkzNzUgMi4wNDY4NzUgLTEuMzI4MTI1IEMgMi44MTI1IC0wLjE1NjI1IDQuMDQ2ODc1IDAuNDUzMTI1IDUuNTkzNzUgMC40NTMxMjUgQyA4LjI4MTI1IDAuNDUzMTI1IDEwLjIxODc1IC0xLjU0Njg3NSAxMC4yMTg3NSAtNC4zNTkzNzUgQyAxMC4yMTg3NSAtNy4wMTU2MjUgOC40MjE4NzUgLTguODkwNjI1IDUuODkwNjI1IC04Ljg5MDYyNSBDIDQuNSAtOC44OTA2MjUgMy40MDYyNSAtOC4zNTkzNzUgMi42NTYyNSAtNy4zMTI1IEMgMi42NzE4NzUgLTEwLjg3NSAzLjc4MTI1IC0xMi44NDM3NSA1Ljc5Njg3NSAtMTIuODQzNzUgQyA3LjAzMTI1IC0xMi44NDM3NSA3Ljg5MDYyNSAtMTIuMDQ2ODc1IDguMTcxODc1IC0xMC42NTYyNSBaIE0gNS42NzE4NzUgLTcuMzI4MTI1IEMgNy4zNzUgLTcuMzI4MTI1IDguNDIxODc1IC02LjE0MDYyNSA4LjQyMTg3NSAtNC4yMTg3NSBDIDguNDIxODc1IC0yLjQwNjI1IDcuMjM0Mzc1IC0xLjA5Mzc1IDUuNjI1IC0xLjA5Mzc1IEMgMy45ODQzNzUgLTEuMDkzNzUgMi43NSAtMi40Njg3NSAyLjc1IC00LjI5Njg3NSBDIDIuNzUgLTYuMDkzNzUgMy45Mzc1IC03LjMyODEyNSA1LjY3MTg3NSAtNy4zMjgxMjUgWiBNIDUuNjcxODc1IC03LjMyODEyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMC02Ij4KPHBhdGggZD0iTSA2LjUxNTYyNSAtMy40ODQzNzUgTCA2LjUxNTYyNSAwIEwgOC4yNjU2MjUgMCBMIDguMjY1NjI1IC0zLjQ4NDM3NSBMIDEwLjM1OTM3NSAtMy40ODQzNzUgTCAxMC4zNTkzNzUgLTUuMDYyNSBMIDguMjY1NjI1IC01LjA2MjUgTCA4LjI2NTYyNSAtMTQuNDA2MjUgTCA2Ljk2ODc1IC0xNC40MDYyNSBMIDAuNTYyNSAtNS4zNDM3NSBMIDAuNTYyNSAtMy40ODQzNzUgWiBNIDYuNTE1NjI1IC01LjA2MjUgTCAyLjA5Mzc1IC01LjA2MjUgTCA2LjUxNTYyNSAtMTEuNDIxODc1IFogTSA2LjUxNTYyNSAtNS4wNjI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0wLTciPgo8cGF0aCBkPSJNIDkuNDg0Mzc1IC0xNC4xMjUgTCAyLjE4NzUgLTE0LjEyNSBMIDEuMTQwNjI1IC02LjQzNzUgTCAyLjc1IC02LjQzNzUgQyAzLjU2MjUgLTcuNDA2MjUgNC4yNSAtNy43NSA1LjM1OTM3NSAtNy43NSBDIDcuMjUgLTcuNzUgOC40MjE4NzUgLTYuNDUzMTI1IDguNDIxODc1IC00LjM1OTM3NSBDIDguNDIxODc1IC0yLjMyODEyNSA3LjI1IC0xLjA5Mzc1IDUuMzQzNzUgLTEuMDkzNzUgQyAzLjgxMjUgLTEuMDkzNzUgMi44NzUgLTEuODc1IDIuNDUzMTI1IC0zLjQ2ODc1IEwgMC43MDMxMjUgLTMuNDY4NzUgQyAwLjkzNzUgLTIuMzEyNSAxLjE0MDYyNSAtMS43NSAxLjU0Njg3NSAtMS4yMzQzNzUgQyAyLjM0Mzc1IC0wLjE1NjI1IDMuNzgxMjUgMC40NTMxMjUgNS4zNzUgMC40NTMxMjUgQyA4LjIzNDM3NSAwLjQ1MzEyNSAxMC4yMTg3NSAtMS42MDkzNzUgMTAuMjE4NzUgLTQuNjA5Mzc1IEMgMTAuMjE4NzUgLTcuMzkwNjI1IDguMzU5Mzc1IC05LjI5Njg3NSA1LjY1NjI1IC05LjI5Njg3NSBDIDQuNjU2MjUgLTkuMjk2ODc1IDMuODU5Mzc1IC05LjA0Njg3NSAzLjA0Njg3NSAtOC40NTMxMjUgTCAzLjYwOTM3NSAtMTIuMzkwNjI1IEwgOS40ODQzNzUgLTEyLjM5MDYyNSBaIE0gOS40ODQzNzUgLTE0LjEyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMC04Ij4KPHBhdGggZD0iTSA0LjQwNjI1IC02LjY0MDYyNSBMIDUuMzU5Mzc1IC02LjY0MDYyNSBDIDcuMjY1NjI1IC02LjY0MDYyNSA4LjI4MTI1IC01LjczNDM3NSA4LjI4MTI1IC00IEMgOC4yODEyNSAtMi4xODc1IDcuMTg3NSAtMS4wOTM3NSA1LjM3NSAtMS4wOTM3NSBDIDMuNDUzMTI1IC0xLjA5Mzc1IDIuNTE1NjI1IC0yLjA3ODEyNSAyLjM5MDYyNSAtNC4xODc1IEwgMC42NDA2MjUgLTQuMTg3NSBDIDAuNzE4NzUgLTMuMDMxMjUgMC45MjE4NzUgLTIuMjY1NjI1IDEuMjUgLTEuNjQwNjI1IEMgMS45ODQzNzUgLTAuMjM0Mzc1IDMuMzU5Mzc1IDAuNDUzMTI1IDUuMjk2ODc1IDAuNDUzMTI1IEMgOC4yMDMxMjUgMC40NTMxMjUgMTAuMDc4MTI1IC0xLjI5Njg3NSAxMC4wNzgxMjUgLTQuMDMxMjUgQyAxMC4wNzgxMjUgLTUuODU5Mzc1IDkuMzkwNjI1IC02Ljg1OTM3NSA3LjY4NzUgLTcuNDUzMTI1IEMgOSAtNy45ODQzNzUgOS42NTYyNSAtOC45ODQzNzUgOS42NTYyNSAtMTAuNDM3NSBDIDkuNjU2MjUgLTEyLjkwNjI1IDguMDQ2ODc1IC0xNC40MDYyNSA1LjM1OTM3NSAtMTQuNDA2MjUgQyAyLjUxNTYyNSAtMTQuNDA2MjUgMSAtMTIuODEyNSAwLjkzNzUgLTkuNzY1NjI1IEwgMi42ODc1IC05Ljc2NTYyNSBDIDIuNzAzMTI1IC0xMC42NDA2MjUgMi43ODEyNSAtMTEuMTQwNjI1IDMuMDE1NjI1IC0xMS41NzgxMjUgQyAzLjQwNjI1IC0xMi4zOTA2MjUgNC4yODEyNSAtMTIuODc1IDUuMzc1IC0xMi44NzUgQyA2LjkzNzUgLTEyLjg3NSA3Ljg3NSAtMTEuOTM3NSA3Ljg3NSAtMTAuMzc1IEMgNy44NzUgLTkuMzU5Mzc1IDcuNTE1NjI1IC04Ljc1IDYuNzM0Mzc1IC04LjQwNjI1IEMgNi4yNSAtOC4yMDMxMjUgNS42MjUgLTguMTI1IDQuNDA2MjUgLTguMTA5Mzc1IFogTSA0LjQwNjI1IC02LjY0MDYyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0wIj4KPHBhdGggZD0iTSA3Ljg1OTM3NSAwIEwgMTEuMjk2ODc1IC0xMC4yNjU2MjUgTCAxMS4yOTY4NzUgMCBMIDEyLjc4MTI1IDAgTCAxMi43ODEyNSAtMTIuMjUgTCAxMC42MDkzNzUgLTEyLjI1IEwgNy4wNDY4NzUgLTEuNTc4MTI1IEwgMy40MjE4NzUgLTEyLjI1IEwgMS4yNjU2MjUgLTEyLjI1IEwgMS4yNjU2MjUgMCBMIDIuNzM0Mzc1IDAgTCAyLjczNDM3NSAtMTAuMjY1NjI1IEwgNi4yMTg3NSAwIFogTSA3Ljg1OTM3NSAwICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTEiPgo8cGF0aCBkPSJNIDIuNTE1NjI1IC04Ljc5Njg3NSBMIDEuMTI1IC04Ljc5Njg3NSBMIDEuMTI1IDAgTCAyLjUxNTYyNSAwIFogTSAyLjUxNTYyNSAtMTIuMjUgTCAxLjEwOTM3NSAtMTIuMjUgTCAxLjEwOTM3NSAtMTAuNDg0Mzc1IEwgMi41MTU2MjUgLTEwLjQ4NDM3NSBaIE0gMi41MTU2MjUgLTEyLjI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTIiPgo8cGF0aCBkPSJNIDcuMzU5Mzc1IC02LjM0Mzc1IEMgNy4zNDM3NSAtOC4wNzgxMjUgNi4yMDMxMjUgLTkuMDQ2ODc1IDQuMTcxODc1IC05LjA0Njg3NSBDIDIuMTA5Mzc1IC05LjA0Njg3NSAwLjc5Njg3NSAtOCAwLjc5Njg3NSAtNi4zNTkzNzUgQyAwLjc5Njg3NSAtNC45ODQzNzUgMS41IC00LjMyODEyNSAzLjU3ODEyNSAtMy44MjgxMjUgTCA0Ljg5MDYyNSAtMy41MTU2MjUgQyA1Ljg1OTM3NSAtMy4yODEyNSA2LjI1IC0yLjkyMTg3NSA2LjI1IC0yLjI5Njg3NSBDIDYuMjUgLTEuNDY4NzUgNS40MjE4NzUgLTAuOTA2MjUgNC4yMDMxMjUgLTAuOTA2MjUgQyAzLjQzNzUgLTAuOTA2MjUgMi44MTI1IC0xLjEyNSAyLjQ1MzEyNSAtMS41IEMgMi4yMzQzNzUgLTEuNzUgMi4xNDA2MjUgLTIgMi4wNDY4NzUgLTIuNjI1IEwgMC41NzgxMjUgLTIuNjI1IEMgMC42NDA2MjUgLTAuNTkzNzUgMS43ODEyNSAwLjM5MDYyNSA0LjA3ODEyNSAwLjM5MDYyNSBDIDYuMjk2ODc1IDAuMzkwNjI1IDcuNzAzMTI1IC0wLjcwMzEyNSA3LjcwMzEyNSAtMi40MDYyNSBDIDcuNzAzMTI1IC0zLjcxODc1IDYuOTY4NzUgLTQuNDM3NSA1LjIxODc1IC00Ljg1OTM3NSBMIDMuODc1IC01LjE3MTg3NSBDIDIuNzM0Mzc1IC01LjQzNzUgMi4yNSAtNS44MTI1IDIuMjUgLTYuNDM3NSBDIDIuMjUgLTcuMjUgMi45Njg3NSAtNy43NjU2MjUgNC4xMDkzNzUgLTcuNzY1NjI1IEMgNS4yMzQzNzUgLTcuNzY1NjI1IDUuODQzNzUgLTcuMjY1NjI1IDUuODc1IC02LjM0Mzc1IFogTSA3LjM1OTM3NSAtNi4zNDM3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0zIj4KPHBhdGggZD0iTSAxLjE3MTg3NSAtOC43OTY4NzUgTCAxLjE3MTg3NSAwIEwgMi41OTM3NSAwIEwgMi41OTM3NSAtNC44NTkzNzUgQyAyLjU5Mzc1IC02LjY1NjI1IDMuNTMxMjUgLTcuODI4MTI1IDQuOTY4NzUgLTcuODI4MTI1IEMgNi4wNzgxMjUgLTcuODI4MTI1IDYuNzgxMjUgLTcuMTU2MjUgNi43ODEyNSAtNi4wOTM3NSBMIDYuNzgxMjUgMCBMIDguMTg3NSAwIEwgOC4xODc1IC02LjY1NjI1IEMgOC4xODc1IC04LjEwOTM3NSA3LjA5Mzc1IC05LjA0Njg3NSA1LjM5MDYyNSAtOS4wNDY4NzUgQyA0LjA3ODEyNSAtOS4wNDY4NzUgMy4yMzQzNzUgLTguNTQ2ODc1IDIuNDY4NzUgLTcuMzI4MTI1IEwgMi40Njg3NSAtOC43OTY4NzUgWiBNIDEuMTcxODc1IC04Ljc5Njg3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS00Ij4KPHBhdGggZD0iTSA2Ljc4MTI1IC04Ljc5Njg3NSBMIDYuNzgxMjUgLTcuNTMxMjUgQyA2LjA3ODEyNSAtOC41NzgxMjUgNS4zMTI1IC05LjA0Njg3NSA0LjIwMzEyNSAtOS4wNDY4NzUgQyAyLjA2MjUgLTkuMDQ2ODc1IDAuNTkzNzUgLTcuMDc4MTI1IDAuNTkzNzUgLTQuMjUgQyAwLjU5Mzc1IC0yLjc2NTYyNSAwLjkzNzUgLTEuNzAzMTI1IDEuNzAzMTI1IC0wLjgxMjUgQyAyLjM0Mzc1IC0wLjAzMTI1IDMuMTg3NSAwLjM5MDYyNSA0LjA5Mzc1IDAuMzkwNjI1IEMgNS4xNTYyNSAwLjM5MDYyNSA1LjkwNjI1IC0wLjA3ODEyNSA2LjY1NjI1IC0xLjE4NzUgTCA2LjY1NjI1IC0wLjczNDM3NSBDIDYuNjU2MjUgMS42MDkzNzUgNiAyLjQ4NDM3NSA0LjI1IDIuNDg0Mzc1IEMgMy4wNjI1IDIuNDg0Mzc1IDIuNDM3NSAyLjAxNTYyNSAyLjI5Njg3NSAxIEwgMC44NzUgMSBDIDEgMi42NDA2MjUgMi4yOTY4NzUgMy42NTYyNSA0LjIxODc1IDMuNjU2MjUgQyA1LjUxNTYyNSAzLjY1NjI1IDYuNTc4MTI1IDMuMjM0Mzc1IDcuMTU2MjUgMi41MzEyNSBDIDcuODI4MTI1IDEuNzE4NzUgOC4wNzgxMjUgMC42MjUgOC4wNzgxMjUgLTEuNDM3NSBMIDguMDc4MTI1IC04Ljc5Njg3NSBaIE0gNC4zMjgxMjUgLTcuNzY1NjI1IEMgNS44MTI1IC03Ljc2NTYyNSA2LjY1NjI1IC02LjUxNTYyNSA2LjY1NjI1IC00LjI4MTI1IEMgNi42NTYyNSAtMi4xNTYyNSA1Ljc5Njg3NSAtMC45MDYyNSA0LjMyODEyNSAtMC45MDYyNSBDIDIuODkwNjI1IC0wLjkwNjI1IDIuMDQ2ODc1IC0yLjE3MTg3NSAyLjA0Njg3NSAtNC4zMjgxMjUgQyAyLjA0Njg3NSAtNi40ODQzNzUgMi44OTA2MjUgLTcuNzY1NjI1IDQuMzI4MTI1IC03Ljc2NTYyNSBaIE0gNC4zMjgxMjUgLTcuNzY1NjI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTUiPgo8cGF0aCBkPSJNIDQuNzY1NjI1IC01LjIzNDM3NSBMIDAuNzY1NjI1IC01LjIzNDM3NSBMIDAuNzY1NjI1IC00LjAzMTI1IEwgNC43NjU2MjUgLTQuMDMxMjUgWiBNIDQuNzY1NjI1IC01LjIzNDM3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS02Ij4KPHBhdGggZD0iTSA4LjMxMjUgLTEyLjI1IEwgNi45MjE4NzUgLTEyLjI1IEwgNi45MjE4NzUgLTcuNjg3NSBDIDYuMzI4MTI1IC04LjU3ODEyNSA1LjM5MDYyNSAtOS4wNDY4NzUgNC4yMTg3NSAtOS4wNDY4NzUgQyAxLjkzNzUgLTkuMDQ2ODc1IDAuNDM3NSAtNy4yMTg3NSAwLjQzNzUgLTQuNDIxODc1IEMgMC40Mzc1IC0xLjQzNzUgMS44NzUgMC4zOTA2MjUgNC4yNjU2MjUgMC4zOTA2MjUgQyA1LjQ2ODc1IDAuMzkwNjI1IDYuMzEyNSAtMC4wNjI1IDcuMDc4MTI1IC0xLjE1NjI1IEwgNy4wNzgxMjUgMCBMIDguMzEyNSAwIFogTSA0LjQ1MzEyNSAtNy43NSBDIDUuOTY4NzUgLTcuNzUgNi45MjE4NzUgLTYuNDIxODc1IDYuOTIxODc1IC00LjI5Njg3NSBDIDYuOTIxODc1IC0yLjI2NTYyNSA1Ljk1MzEyNSAtMC45MjE4NzUgNC40Njg3NSAtMC45MjE4NzUgQyAyLjkyMTg3NSAtMC45MjE4NzUgMS44OTA2MjUgLTIuMjgxMjUgMS44OTA2MjUgLTQuMzI4MTI1IEMgMS44OTA2MjUgLTYuMzc1IDIuOTIxODc1IC03Ljc1IDQuNDUzMTI1IC03Ljc1IFogTSA0LjQ1MzEyNSAtNy43NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS03Ij4KPHBhdGggZD0iTSA4Ljk4NDM3NSAtMC44MjgxMjUgQyA4LjgyODEyNSAtMC43OTY4NzUgOC43NjU2MjUgLTAuNzk2ODc1IDguNjg3NSAtMC43OTY4NzUgQyA4LjIwMzEyNSAtMC43OTY4NzUgNy45MjE4NzUgLTEuMDQ2ODc1IDcuOTIxODc1IC0xLjQ4NDM3NSBMIDcuOTIxODc1IC02LjY1NjI1IEMgNy45MjE4NzUgLTguMjE4NzUgNi43ODEyNSAtOS4wNDY4NzUgNC42MjUgLTkuMDQ2ODc1IEMgMy4zMjgxMjUgLTkuMDQ2ODc1IDIuMjk2ODc1IC04LjY4NzUgMS43MDMxMjUgLTguMDMxMjUgQyAxLjI5Njg3NSAtNy41NzgxMjUgMS4xMjUgLTcuMDc4MTI1IDEuMDkzNzUgLTYuMjAzMTI1IEwgMi41IC02LjIwMzEyNSBDIDIuNjI1IC03LjI2NTYyNSAzLjI2NTYyNSAtNy43NjU2MjUgNC41NjI1IC03Ljc2NTYyNSBDIDUuODQzNzUgLTcuNzY1NjI1IDYuNTMxMjUgLTcuMjk2ODc1IDYuNTMxMjUgLTYuNDUzMTI1IEwgNi41MzEyNSAtNi4wNzgxMjUgQyA2LjUxNTYyNSAtNS40Njg3NSA2LjIxODc1IC01LjI1IDUuMDc4MTI1IC01LjEwOTM3NSBDIDMuMDkzNzUgLTQuODU5Mzc1IDIuNzgxMjUgLTQuNzgxMjUgMi4yNSAtNC41NjI1IEMgMS4yMTg3NSAtNC4xMjUgMC43MDMxMjUgLTMuMzU5Mzc1IDAuNzAzMTI1IC0yLjIxODc1IEMgMC43MDMxMjUgLTAuNjI1IDEuODEyNSAwLjM5MDYyNSAzLjU5Mzc1IDAuMzkwNjI1IEMgNC43MDMxMjUgMC4zOTA2MjUgNS41OTM3NSAwIDYuNTc4MTI1IC0wLjkwNjI1IEMgNi42ODc1IDAgNy4xMjUgMC4zOTA2MjUgOC4wMzEyNSAwLjM5MDYyNSBDIDguMzI4MTI1IDAuMzkwNjI1IDguNTE1NjI1IDAuMzU5Mzc1IDguOTg0Mzc1IDAuMjM0Mzc1IFogTSA2LjUzMTI1IC0yLjc2NTYyNSBDIDYuNTMxMjUgLTIuMjk2ODc1IDYuNDA2MjUgLTIuMDE1NjI1IDUuOTg0Mzc1IC0xLjYyNSBDIDUuNDA2MjUgLTEuMTA5Mzc1IDQuNzE4NzUgLTAuODQzNzUgMy44OTA2MjUgLTAuODQzNzUgQyAyLjgxMjUgLTAuODQzNzUgMi4xNzE4NzUgLTEuMzU5Mzc1IDIuMTcxODc1IC0yLjI1IEMgMi4xNzE4NzUgLTMuMTcxODc1IDIuNzY1NjI1IC0zLjY0MDYyNSA0LjI4MTI1IC0zLjg1OTM3NSBDIDUuNzgxMjUgLTQuMDYyNSA2LjA2MjUgLTQuMTI1IDYuNTMxMjUgLTQuMzQzNzUgWiBNIDYuNTMxMjUgLTIuNzY1NjI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTgiPgo8cGF0aCBkPSJNIDQuMjY1NjI1IC04Ljc5Njg3NSBMIDIuODI4MTI1IC04Ljc5Njg3NSBMIDIuODI4MTI1IC0xMS4yMTg3NSBMIDEuNDIxODc1IC0xMS4yMTg3NSBMIDEuNDIxODc1IC04Ljc5Njg3NSBMIDAuMjM0Mzc1IC04Ljc5Njg3NSBMIDAuMjM0Mzc1IC03LjY1NjI1IEwgMS40MjE4NzUgLTcuNjU2MjUgTCAxLjQyMTg3NSAtMSBDIDEuNDIxODc1IC0wLjA5Mzc1IDIuMDMxMjUgMC4zOTA2MjUgMy4xMjUgMC4zOTA2MjUgQyAzLjUgMC4zOTA2MjUgMy43OTY4NzUgMC4zNTkzNzUgNC4yNjU2MjUgMC4yNjU2MjUgTCA0LjI2NTYyNSAtMC45MDYyNSBDIDQuMDYyNSAtMC44NTkzNzUgMy44NzUgLTAuODQzNzUgMy41OTM3NSAtMC44NDM3NSBDIDIuOTg0Mzc1IC0wLjg0Mzc1IDIuODI4MTI1IC0xIDIuODI4MTI1IC0xLjYyNSBMIDIuODI4MTI1IC03LjY1NjI1IEwgNC4yNjU2MjUgLTcuNjU2MjUgWiBNIDQuMjY1NjI1IC04Ljc5Njg3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS05Ij4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xMCI+CjxwYXRoIGQ9Ik0gMS4xNTYyNSAtOC43OTY4NzUgTCAxLjE1NjI1IDAgTCAyLjU2MjUgMCBMIDIuNTYyNSAtNC41NjI1IEMgMi41OTM3NSAtNi42ODc1IDMuNDUzMTI1IC03LjYyNSA1LjM5MDYyNSAtNy41NzgxMjUgTCA1LjM5MDYyNSAtOSBDIDUuMTU2MjUgLTkuMDMxMjUgNS4wMTU2MjUgLTkuMDQ2ODc1IDQuODU5Mzc1IC05LjA0Njg3NSBDIDMuOTUzMTI1IC05LjA0Njg3NSAzLjI2NTYyNSAtOC41MTU2MjUgMi40NTMxMjUgLTcuMjAzMTI1IEwgMi40NTMxMjUgLTguNzk2ODc1IFogTSAxLjE1NjI1IC04Ljc5Njg3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xMSI+CjxwYXRoIGQ9Ik0gOC42MDkzNzUgLTMuOTM3NSBDIDguNjA5Mzc1IC01LjI4MTI1IDguNTE1NjI1IC02LjA3ODEyNSA4LjI2NTYyNSAtNi43MzQzNzUgQyA3LjY4NzUgLTguMTg3NSA2LjM0Mzc1IC05LjA0Njg3NSA0LjcwMzEyNSAtOS4wNDY4NzUgQyAyLjI1IC05LjA0Njg3NSAwLjY3MTg3NSAtNy4xODc1IDAuNjcxODc1IC00LjI4MTI1IEMgMC42NzE4NzUgLTEuMzc1IDIuMTg3NSAwLjM5MDYyNSA0LjY3MTg3NSAwLjM5MDYyNSBDIDYuNjg3NSAwLjM5MDYyNSA4LjA3ODEyNSAtMC43NSA4LjQzNzUgLTIuNjcxODc1IEwgNy4wMTU2MjUgLTIuNjcxODc1IEMgNi42NDA2MjUgLTEuNTE1NjI1IDUuODQzNzUgLTAuOTA2MjUgNC43MTg3NSAtMC45MDYyNSBDIDMuODI4MTI1IC0wLjkwNjI1IDMuMDc4MTI1IC0xLjMxMjUgMi42MDkzNzUgLTIuMDQ2ODc1IEMgMi4yNjU2MjUgLTIuNTQ2ODc1IDIuMTU2MjUgLTMuMDYyNSAyLjE0MDYyNSAtMy45Mzc1IFogTSAyLjE3MTg3NSAtNS4wNzgxMjUgQyAyLjI4MTI1IC02LjcwMzEyNSAzLjI4MTI1IC03Ljc2NTYyNSA0LjY4NzUgLTcuNzY1NjI1IEMgNi4xMDkzNzUgLTcuNzY1NjI1IDcuMTA5Mzc1IC02LjY1NjI1IDcuMTA5Mzc1IC01LjA3ODEyNSBaIE0gMi4xNzE4NzUgLTUuMDc4MTI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTEyIj4KPHBhdGggZD0iTSA2LjUxNTYyNSAtOC43OTY4NzUgTCA0LjA3ODEyNSAtMS45NTMxMjUgTCAxLjgyODEyNSAtOC43OTY4NzUgTCAwLjMyODEyNSAtOC43OTY4NzUgTCAzLjMxMjUgMC4wMzEyNSBMIDIuNzY1NjI1IDEuNDIxODc1IEMgMi41MzEyNSAyLjA0Njg3NSAyLjIzNDM3NSAyLjI4MTI1IDEuNjQwNjI1IDIuMjgxMjUgQyAxLjQwNjI1IDIuMjgxMjUgMS4yMDMxMjUgMi4yNSAwLjkwNjI1IDIuMTg3NSBMIDAuOTA2MjUgMy40Mzc1IEMgMS4xODc1IDMuNTkzNzUgMS40ODQzNzUgMy42NTYyNSAxLjg0Mzc1IDMuNjU2MjUgQyAyLjI5Njg3NSAzLjY1NjI1IDIuNzgxMjUgMy41MTU2MjUgMy4xNTYyNSAzLjIzNDM3NSBDIDMuNTkzNzUgMi45MjE4NzUgMy44NDM3NSAyLjU0Njg3NSA0LjEwOTM3NSAxLjg0Mzc1IEwgOC4wMzEyNSAtOC43OTY4NzUgWiBNIDYuNTE1NjI1IC04Ljc5Njg3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xMyI+CjxwYXRoIGQ9Ik0gNC41NjI1IC05LjA0Njg3NSBDIDIuMDc4MTI1IC05LjA0Njg3NSAwLjYwOTM3NSAtNy4yOTY4NzUgMC42MDkzNzUgLTQuMzI4MTI1IEMgMC42MDkzNzUgLTEuMzU5Mzc1IDIuMDc4MTI1IDAuMzkwNjI1IDQuNTc4MTI1IDAuMzkwNjI1IEMgNy4wNzgxMjUgMC4zOTA2MjUgOC41NjI1IC0xLjM3NSA4LjU2MjUgLTQuMjY1NjI1IEMgOC41NjI1IC03LjMyODEyNSA3LjEyNSAtOS4wNDY4NzUgNC41NjI1IC05LjA0Njg3NSBaIE0gNC41NzgxMjUgLTcuNzY1NjI1IEMgNi4xNzE4NzUgLTcuNzY1NjI1IDcuMTA5Mzc1IC02LjQ2ODc1IDcuMTA5Mzc1IC00LjI4MTI1IEMgNy4xMDkzNzUgLTIuMjAzMTI1IDYuMTI1IC0wLjkwNjI1IDQuNTc4MTI1IC0wLjkwNjI1IEMgMy4wMTU2MjUgLTAuOTA2MjUgMi4wNjI1IC0yLjIwMzEyNSAyLjA2MjUgLTQuMzI4MTI1IEMgMi4wNjI1IC02LjQ2ODc1IDMuMDE1NjI1IC03Ljc2NTYyNSA0LjU3ODEyNSAtNy43NjU2MjUgWiBNIDQuNTc4MTI1IC03Ljc2NTYyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xNCI+CjxwYXRoIGQ9Ik0gMi41NDY4NzUgLTEyLjI1IEwgMS4xNDA2MjUgLTEyLjI1IEwgMS4xNDA2MjUgMCBMIDIuNTQ2ODc1IDAgWiBNIDIuNTQ2ODc1IC0xMi4yNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xNSI+CjxwYXRoIGQ9Ik0gNy45MDYyNSAtNS44NDM3NSBDIDcuODQzNzUgLTYuNzAzMTI1IDcuNjU2MjUgLTcuMjUgNy4zMjgxMjUgLTcuNzUgQyA2LjcxODc1IC04LjU2MjUgNS42NTYyNSAtOS4wNDY4NzUgNC40Mzc1IC05LjA0Njg3NSBDIDIuMDQ2ODc1IC05LjA0Njg3NSAwLjUxNTYyNSAtNy4xNzE4NzUgMC41MTU2MjUgLTQuMjUgQyAwLjUxNTYyNSAtMS40MDYyNSAyLjAzMTI1IDAuMzkwNjI1IDQuNDIxODc1IDAuMzkwNjI1IEMgNi41MTU2MjUgMC4zOTA2MjUgNy44NDM3NSAtMC44NzUgOC4wMTU2MjUgLTMuMDE1NjI1IEwgNi41OTM3NSAtMy4wMTU2MjUgQyA2LjM1OTM3NSAtMS42MDkzNzUgNS42NDA2MjUgLTAuOTA2MjUgNC40NTMxMjUgLTAuOTA2MjUgQyAyLjkwNjI1IC0wLjkwNjI1IDEuOTg0Mzc1IC0yLjE3MTg3NSAxLjk4NDM3NSAtNC4yNSBDIDEuOTg0Mzc1IC02LjQ1MzEyNSAyLjg5MDYyNSAtNy43NjU2MjUgNC40MjE4NzUgLTcuNzY1NjI1IEMgNS41OTM3NSAtNy43NjU2MjUgNi4zMjgxMjUgLTcuMDc4MTI1IDYuNSAtNS44NDM3NSBaIE0gNy45MDYyNSAtNS44NDM3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xNiI+CjxwYXRoIGQ9Ik0gMy4wOTM3NSAtNS4xODc1IEwgNi45Mzc1IC01LjE4NzUgQyA3Ljg5MDYyNSAtNS4xODc1IDguNjU2MjUgLTUuNDY4NzUgOS4zMTI1IC02LjA2MjUgQyAxMC4wNDY4NzUgLTYuNzM0Mzc1IDEwLjM1OTM3NSAtNy41MzEyNSAxMC4zNTkzNzUgLTguNjU2MjUgQyAxMC4zNTkzNzUgLTEwLjk1MzEyNSA5IC0xMi4yNSA2LjU3ODEyNSAtMTIuMjUgTCAxLjUzMTI1IC0xMi4yNSBMIDEuNTMxMjUgMCBMIDMuMDkzNzUgMCBaIE0gMy4wOTM3NSAtNi41NjI1IEwgMy4wOTM3NSAtMTAuODc1IEwgNi4zNDM3NSAtMTAuODc1IEMgNy44NDM3NSAtMTAuODc1IDguNzM0Mzc1IC0xMC4wNjI1IDguNzM0Mzc1IC04LjcxODc1IEMgOC43MzQzNzUgLTcuMzc1IDcuODQzNzUgLTYuNTYyNSA2LjM0Mzc1IC02LjU2MjUgWiBNIDMuMDkzNzUgLTYuNTYyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xNyI+CjxwYXRoIGQ9Ik0gOS4zMTI1IDAgTCAxMS44OTA2MjUgLTguNzk2ODc1IEwgMTAuMzEyNSAtOC43OTY4NzUgTCA4LjU2MjUgLTEuOTUzMTI1IEwgNi44NDM3NSAtOC43OTY4NzUgTCA1LjEyNSAtOC43OTY4NzUgTCAzLjQzNzUgLTEuOTUzMTI1IEwgMS42NDA2MjUgLTguNzk2ODc1IEwgMC4wOTM3NSAtOC43OTY4NzUgTCAyLjY1NjI1IDAgTCA0LjIzNDM3NSAwIEwgNS45MjE4NzUgLTYuOTA2MjUgTCA3LjcwMzEyNSAwIFogTSA5LjMxMjUgMCAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xOCI+CjxwYXRoIGQ9Ik0gNC42MjUgLTEyLjE0MDYyNSBDIDMuNTE1NjI1IC0xMi4xNDA2MjUgMi41IC0xMS42NDA2MjUgMS44NzUgLTEwLjgxMjUgQyAxLjEwOTM3NSAtOS43MzQzNzUgMC43MTg3NSAtOC4xMjUgMC43MTg3NSAtNS44NzUgQyAwLjcxODc1IC0xLjc4MTI1IDIuMDYyNSAwLjM5MDYyNSA0LjYyNSAwLjM5MDYyNSBDIDcuMTQwNjI1IDAuMzkwNjI1IDguNTE1NjI1IC0xLjc4MTI1IDguNTE1NjI1IC01Ljc4MTI1IEMgOC41MTU2MjUgLTguMTI1IDguMTQwNjI1IC05LjcwMzEyNSA3LjM1OTM3NSAtMTAuODEyNSBDIDYuNzM0Mzc1IC0xMS42NTYyNSA1Ljc1IC0xMi4xNDA2MjUgNC42MjUgLTEyLjE0MDYyNSBaIE0gNC42MjUgLTEwLjgyODEyNSBDIDYuMjE4NzUgLTEwLjgyODEyNSA3IC05LjIwMzEyNSA3IC01LjkwNjI1IEMgNyAtMi40NTMxMjUgNi4yMzQzNzUgLTAuODQzNzUgNC41NzgxMjUgLTAuODQzNzUgQyAzLjAxNTYyNSAtMC44NDM3NSAyLjIzNDM3NSAtMi41MTU2MjUgMi4yMzQzNzUgLTUuODU5Mzc1IEMgMi4yMzQzNzUgLTkuMjAzMTI1IDMuMDE1NjI1IC0xMC44MjgxMjUgNC42MjUgLTEwLjgyODEyNSBaIE0gNC42MjUgLTEwLjgyODEyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMS0xOSI+CjxwYXRoIGQ9Ik0gMy4zNDM3NSAtMTEuNSBDIDEuNzY1NjI1IC0xMS41IDAuNDg0Mzc1IC0xMC4yMTg3NSAwLjQ4NDM3NSAtOC42NDA2MjUgQyAwLjQ4NDM3NSAtNy4wNDY4NzUgMS43NjU2MjUgLTUuNzY1NjI1IDMuMzU5Mzc1IC01Ljc2NTYyNSBDIDQuOTIxODc1IC01Ljc2NTYyNSA2LjIxODc1IC03LjA0Njg3NSA2LjIxODc1IC04LjU5Mzc1IEMgNi4yMTg3NSAtMTAuMjM0Mzc1IDQuOTUzMTI1IC0xMS41IDMuMzQzNzUgLTExLjUgWiBNIDMuMzQzNzUgLTEwLjMyODEyNSBDIDQuMjk2ODc1IC0xMC4zMjgxMjUgNS4wNjI1IC05LjU3ODEyNSA1LjA2MjUgLTguNjA5Mzc1IEMgNS4wNjI1IC03LjY4NzUgNC4yODEyNSAtNi45Mzc1IDMuMzU5Mzc1IC02LjkzNzUgQyAyLjQyMTg3NSAtNi45Mzc1IDEuNjQwNjI1IC03LjY4NzUgMS42NDA2MjUgLTguNjQwNjI1IEMgMS42NDA2MjUgLTkuNTc4MTI1IDIuNDA2MjUgLTEwLjMyODEyNSAzLjM0Mzc1IC0xMC4zMjgxMjUgWiBNIDEwLjIzNDM3NSAtMTEuOTA2MjUgTCAzLjU5Mzc1IDAuMzI4MTI1IEwgNC43MDMxMjUgMC4zMjgxMjUgTCAxMS4zNDM3NSAtMTEuOTA2MjUgWiBNIDExLjU2MjUgLTUuNDA2MjUgQyA5Ljk4NDM3NSAtNS40MDYyNSA4LjcwMzEyNSAtNC4xMjUgOC43MDMxMjUgLTIuNTQ2ODc1IEMgOC43MDMxMjUgLTAuOTUzMTI1IDkuOTg0Mzc1IDAuMzEyNSAxMS41NzgxMjUgMC4zMTI1IEMgMTMuMTQwNjI1IDAuMzEyNSAxNC40MjE4NzUgLTAuOTUzMTI1IDE0LjQyMTg3NSAtMi41MTU2MjUgQyAxNC40MjE4NzUgLTQuMTI1IDEzLjE3MTg3NSAtNS40MDYyNSAxMS41NjI1IC01LjQwNjI1IFogTSAxMS41NjI1IC00LjIzNDM3NSBDIDEyLjUxNTYyNSAtNC4yMzQzNzUgMTMuMjY1NjI1IC0zLjQ4NDM3NSAxMy4yNjU2MjUgLTIuNTE1NjI1IEMgMTMuMjY1NjI1IC0xLjYwOTM3NSAxMi41IC0wLjg1OTM3NSAxMS41NzgxMjUgLTAuODU5Mzc1IEMgMTAuNjA5Mzc1IC0wLjg1OTM3NSA5Ljg1OTM3NSAtMS42MDkzNzUgOS44NTkzNzUgLTIuNTQ2ODc1IEMgOS44NTkzNzUgLTMuNDg0Mzc1IDEwLjYwOTM3NSAtNC4yMzQzNzUgMTEuNTYyNSAtNC4yMzQzNzUgWiBNIDExLjU2MjUgLTQuMjM0Mzc1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTIwIj4KPHBhdGggZD0iTSA4LjUgLTEuNDY4NzUgTCAyLjIzNDM3NSAtMS40Njg3NSBDIDIuMzkwNjI1IC0yLjQ2ODc1IDIuOTIxODc1IC0zLjEwOTM3NSA0LjM5MDYyNSAtNCBMIDYuMDYyNSAtNC45Mzc1IEMgNy43MTg3NSAtNS44NTkzNzUgOC41NzgxMjUgLTcuMTA5Mzc1IDguNTc4MTI1IC04LjU5Mzc1IEMgOC41NzgxMjUgLTkuNjA5Mzc1IDguMTg3NSAtMTAuNTQ2ODc1IDcuNDY4NzUgLTExLjIwMzEyNSBDIDYuNzY1NjI1IC0xMS44NDM3NSA1Ljg5MDYyNSAtMTIuMTQwNjI1IDQuNzY1NjI1IC0xMi4xNDA2MjUgQyAzLjI2NTYyNSAtMTIuMTQwNjI1IDIuMTQwNjI1IC0xMS42MDkzNzUgMS40ODQzNzUgLTEwLjU2MjUgQyAxLjA2MjUgLTkuOTIxODc1IDAuODc1IC05LjE3MTg3NSAwLjg0Mzc1IC03LjkzNzUgTCAyLjMxMjUgLTcuOTM3NSBDIDIuMzc1IC04Ljc2NTYyNSAyLjQ2ODc1IC05LjI1IDIuNjcxODc1IC05LjY1NjI1IEMgMy4wNjI1IC0xMC4zOTA2MjUgMy44MjgxMjUgLTEwLjg0Mzc1IDQuNzE4NzUgLTEwLjg0Mzc1IEMgNi4wNjI1IC0xMC44NDM3NSA3LjA3ODEyNSAtOS44NzUgNy4wNzgxMjUgLTguNTYyNSBDIDcuMDc4MTI1IC03LjU5Mzc1IDYuNTE1NjI1IC02Ljc1IDUuNDUzMTI1IC02LjE0MDYyNSBMIDMuOTA2MjUgLTUuMjM0Mzc1IEMgMS40MjE4NzUgLTMuODEyNSAwLjcwMzEyNSAtMi42NzE4NzUgMC41NzgxMjUgLTAuMDE1NjI1IEwgOC41IC0wLjAxNTYyNSBaIE0gOC41IC0xLjQ2ODc1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTIxIj4KPHBhdGggZD0iTSA1LjUgLTIuOTM3NSBMIDUuNSAwIEwgNi45Njg3NSAwIEwgNi45Njg3NSAtMi45Mzc1IEwgOC43MzQzNzUgLTIuOTM3NSBMIDguNzM0Mzc1IC00LjI2NTYyNSBMIDYuOTY4NzUgLTQuMjY1NjI1IEwgNi45Njg3NSAtMTIuMTQwNjI1IEwgNS44NzUgLTEyLjE0MDYyNSBMIDAuNDY4NzUgLTQuNSBMIDAuNDY4NzUgLTIuOTM3NSBaIE0gNS41IC00LjI2NTYyNSBMIDEuNzY1NjI1IC00LjI2NTYyNSBMIDUuNSAtOS42MjUgWiBNIDUuNSAtNC4yNjU2MjUgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTEtMjIiPgo8cGF0aCBkPSJNIDguMzU5Mzc1IC04Ljk4NDM3NSBDIDguMDc4MTI1IC0xMC45Njg3NSA2Ljc5Njg3NSAtMTIuMTQwNjI1IDQuOTg0Mzc1IC0xMi4xNDA2MjUgQyAzLjY3MTg3NSAtMTIuMTQwNjI1IDIuNSAtMTEuNSAxLjc5Njg3NSAtMTAuNDA2MjUgQyAxLjA0Njg3NSAtOS4yMTg3NSAwLjcxODc1IC03Ljc1IDAuNzE4NzUgLTUuNTQ2ODc1IEMgMC43MTg3NSAtMy41IDEgLTIuMjAzMTI1IDEuNzM0Mzc1IC0xLjEyNSBDIDIuMzc1IC0wLjE0MDYyNSAzLjQwNjI1IDAuMzkwNjI1IDQuNzE4NzUgMC4zOTA2MjUgQyA2Ljk4NDM3NSAwLjM5MDYyNSA4LjYwOTM3NSAtMS4zMTI1IDguNjA5Mzc1IC0zLjY3MTg3NSBDIDguNjA5Mzc1IC01LjkwNjI1IDcuMTA5Mzc1IC03LjQ4NDM3NSA0Ljk2ODc1IC03LjQ4NDM3NSBDIDMuNzk2ODc1IC03LjQ4NDM3NSAyLjg3NSAtNy4wNDY4NzUgMi4yMzQzNzUgLTYuMTcxODc1IEMgMi4yNSAtOS4xNzE4NzUgMy4xODc1IC0xMC44MjgxMjUgNC44OTA2MjUgLTEwLjgyODEyNSBDIDUuOTIxODc1IC0xMC44MjgxMjUgNi42NTYyNSAtMTAuMTU2MjUgNi44OTA2MjUgLTguOTg0Mzc1IFogTSA0Ljc4MTI1IC02LjE4NzUgQyA2LjIxODc1IC02LjE4NzUgNy4xMDkzNzUgLTUuMTcxODc1IDcuMTA5Mzc1IC0zLjU2MjUgQyA3LjEwOTM3NSAtMi4wMzEyNSA2LjA5Mzc1IC0wLjkyMTg3NSA0LjczNDM3NSAtMC45MjE4NzUgQyAzLjM1OTM3NSAtMC45MjE4NzUgMi4zMTI1IC0yLjA3ODEyNSAyLjMxMjUgLTMuNjI1IEMgMi4zMTI1IC01LjE0MDYyNSAzLjMyODEyNSAtNi4xODc1IDQuNzgxMjUgLTYuMTg3NSBaIE0gNC43ODEyNSAtNi4xODc1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTIzIj4KPHBhdGggZD0iTSA2LjU2MjUgLTYuNDA2MjUgQyA3LjgxMjUgLTcuMTU2MjUgOC4yMDMxMjUgLTcuNzY1NjI1IDguMjAzMTI1IC04LjkwNjI1IEMgOC4yMDMxMjUgLTEwLjgxMjUgNi43MzQzNzUgLTEyLjE0MDYyNSA0LjYyNSAtMTIuMTQwNjI1IEMgMi41MTU2MjUgLTEyLjE0MDYyNSAxLjA0Njg3NSAtMTAuODEyNSAxLjA0Njg3NSAtOC45MjE4NzUgQyAxLjA0Njg3NSAtNy43NjU2MjUgMS40MjE4NzUgLTcuMTcxODc1IDIuNjU2MjUgLTYuNDA2MjUgQyAxLjI5Njg3NSAtNS43MDMxMjUgMC42MjUgLTQuNzE4NzUgMC42MjUgLTMuMzc1IEMgMC42MjUgLTEuMTU2MjUgMi4yNSAwLjM5MDYyNSA0LjYyNSAwLjM5MDYyNSBDIDYuOTY4NzUgMC4zOTA2MjUgOC42MDkzNzUgLTEuMTU2MjUgOC42MDkzNzUgLTMuMzc1IEMgOC42MDkzNzUgLTQuNzE4NzUgNy45Mzc1IC01LjcwMzEyNSA2LjU2MjUgLTYuNDA2MjUgWiBNIDQuNjI1IC0xMC44MjgxMjUgQyA1Ljg3NSAtMTAuODI4MTI1IDYuNjg3NSAtMTAuMDc4MTI1IDYuNjg3NSAtOC44NzUgQyA2LjY4NzUgLTcuNzE4NzUgNS44NTkzNzUgLTYuOTY4NzUgNC42MjUgLTYuOTY4NzUgQyAzLjM1OTM3NSAtNi45Njg3NSAyLjU0Njg3NSAtNy43MTg3NSAyLjU0Njg3NSAtOC45MDYyNSBDIDIuNTQ2ODc1IC0xMC4wNzgxMjUgMy4zNTkzNzUgLTEwLjgyODEyNSA0LjYyNSAtMTAuODI4MTI1IFogTSA0LjYyNSAtNS43MzQzNzUgQyA2LjA5Mzc1IC01LjczNDM3NSA3LjEwOTM3NSAtNC43NSA3LjEwOTM3NSAtMy4zNDM3NSBDIDcuMTA5Mzc1IC0xLjg3NSA2LjEwOTM3NSAtMC45MjE4NzUgNC41NzgxMjUgLTAuOTIxODc1IEMgMy4xNDA2MjUgLTAuOTIxODc1IDIuMTQwNjI1IC0xLjkyMTg3NSAyLjE0MDYyNSAtMy4zMjgxMjUgQyAyLjE0MDYyNSAtNC43NjU2MjUgMy4xMjUgLTUuNzM0Mzc1IDQuNjI1IC01LjczNDM3NSBaIE0gNC42MjUgLTUuNzM0Mzc1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0xLTI0Ij4KPHBhdGggZD0iTSA0LjM0Mzc1IC04LjY1NjI1IEwgNC4zNDM3NSAwIEwgNS44MjgxMjUgMCBMIDUuODI4MTI1IC0xMi4xNDA2MjUgTCA0Ljg1OTM3NSAtMTIuMTQwNjI1IEMgNC4zMjgxMjUgLTEwLjI4MTI1IDQgLTEwLjAzMTI1IDEuNzE4NzUgLTkuNzE4NzUgTCAxLjcxODc1IC04LjY1NjI1IFogTSA0LjM0Mzc1IC04LjY1NjI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0yLTAiPgo8cGF0aCBkPSJNIDEyLjUxNTYyNSAtMTAuODEyNSBDIDEyLjUxNTYyNSAtMTEuODU5Mzc1IDEyLjQ1MzEyNSAtMTIuMTU2MjUgMTIuMTA5Mzc1IC0xMi44NzUgQyAxMS4yODEyNSAtMTQuNjQwNjI1IDkuNDg0Mzc1IC0xNS41NjI1IDYuOTA2MjUgLTE1LjU2MjUgQyAzLjU0Njg3NSAtMTUuNTYyNSAxLjQ2ODc1IC0xMy44NDM3NSAxLjQ2ODc1IC0xMS4wNjI1IEMgMS40Njg3NSAtOS4yMDMxMjUgMi40NTMxMjUgLTguMDE1NjI1IDQuNDY4NzUgLTcuNSBMIDguMjgxMjUgLTYuNDg0Mzc1IEMgMTAuMjM0Mzc1IC01Ljk4NDM3NSAxMS4wOTM3NSAtNS4yMDMxMjUgMTEuMDkzNzUgLTQuMDE1NjI1IEMgMTEuMDkzNzUgLTMuMTg3NSAxMC42NDA2MjUgLTIuMzU5Mzc1IDEwIC0xLjg5MDYyNSBDIDkuMzkwNjI1IC0xLjQ1MzEyNSA4LjQyMTg3NSAtMS4yMzQzNzUgNy4xODc1IC0xLjIzNDM3NSBDIDUuNSAtMS4yMzQzNzUgNC4zOTA2MjUgLTEuNjQwNjI1IDMuNjU2MjUgLTIuNTE1NjI1IEMgMy4wOTM3NSAtMy4xODc1IDIuODI4MTI1IC0zLjkyMTg3NSAyLjg1OTM3NSAtNC44NzUgTCAxLjAxNTYyNSAtNC44NzUgQyAxLjAzMTI1IC0zLjQ2ODc1IDEuMjk2ODc1IC0yLjU0Njg3NSAxLjkwNjI1IC0xLjcwMzEyNSBDIDIuOTY4NzUgLTAuMjUgNC43MTg3NSAwLjQ4NDM3NSA3LjA2MjUgMC40ODQzNzUgQyA4Ljg5MDYyNSAwLjQ4NDM3NSAxMC4zNzUgMC4wNjI1IDExLjM1OTM3NSAtMC42ODc1IEMgMTIuMzkwNjI1IC0xLjUxNTYyNSAxMy4wNDY4NzUgLTIuODc1IDEzLjA0Njg3NSAtNC4yMDMxMjUgQyAxMy4wNDY4NzUgLTYuMDkzNzUgMTEuODU5Mzc1IC03LjQ2ODc1IDkuNzgxMjUgLTguMDQ2ODc1IEwgNS45Mzc1IC05LjA3ODEyNSBDIDQuMDkzNzUgLTkuNTc4MTI1IDMuNDIxODc1IC0xMC4xNTYyNSAzLjQyMTg3NSAtMTEuMzQzNzUgQyAzLjQyMTg3NSAtMTIuODkwNjI1IDQuNzgxMjUgLTEzLjkyMTg3NSA2Ljg0Mzc1IC0xMy45MjE4NzUgQyA5LjI4MTI1IC0xMy45MjE4NzUgMTAuNjQwNjI1IC0xMi44MjgxMjUgMTAuNjcxODc1IC0xMC44MTI1IFogTSAxMi41MTU2MjUgLTEwLjgxMjUgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTItMSI+CjxwYXRoIGQ9Ik0gNS4zMjgxMjUgLTExIEwgMy41MzEyNSAtMTEgTCAzLjUzMTI1IC0xNC4wMzEyNSBMIDEuNzgxMjUgLTE0LjAzMTI1IEwgMS43ODEyNSAtMTEgTCAwLjI5Njg3NSAtMTEgTCAwLjI5Njg3NSAtOS41NzgxMjUgTCAxLjc4MTI1IC05LjU3ODEyNSBMIDEuNzgxMjUgLTEuMjY1NjI1IEMgMS43ODEyNSAtMC4xMjUgMi41NDY4NzUgMC40ODQzNzUgMy45MDYyNSAwLjQ4NDM3NSBDIDQuMzc1IDAuNDg0Mzc1IDQuNzUgMC40Mzc1IDUuMzI4MTI1IDAuMzQzNzUgTCA1LjMyODEyNSAtMS4xNDA2MjUgQyA1LjA3ODEyNSAtMS4wNzgxMjUgNC44NDM3NSAtMS4wNDY4NzUgNC41IC0xLjA0Njg3NSBDIDMuNzM0Mzc1IC0xLjA0Njg3NSAzLjUzMTI1IC0xLjI2NTYyNSAzLjUzMTI1IC0yLjAzMTI1IEwgMy41MzEyNSAtOS41NzgxMjUgTCA1LjMyODEyNSAtOS41NzgxMjUgWiBNIDUuMzI4MTI1IC0xMSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMi0yIj4KPHBhdGggZD0iTSAxMC4xMjUgMCBMIDEwLjEyNSAtMTEgTCA4LjM3NSAtMTEgTCA4LjM3NSAtNC43NjU2MjUgQyA4LjM3NSAtMi41MTU2MjUgNy4yMDMxMjUgLTEuMDQ2ODc1IDUuMzc1IC0xLjA0Njg3NSBDIDMuOTg0Mzc1IC0xLjA0Njg3NSAzLjEwOTM3NSAtMS44OTA2MjUgMy4xMDkzNzUgLTMuMjE4NzUgTCAzLjEwOTM3NSAtMTEgTCAxLjM1OTM3NSAtMTEgTCAxLjM1OTM3NSAtMi41MTU2MjUgQyAxLjM1OTM3NSAtMC42ODc1IDIuNzM0Mzc1IDAuNDg0Mzc1IDQuODc1IDAuNDg0Mzc1IEMgNi40ODQzNzUgMC40ODQzNzUgNy41MTU2MjUgLTAuMDc4MTI1IDguNTQ2ODc1IC0xLjUzMTI1IEwgOC41NDY4NzUgMCBaIE0gMTAuMTI1IDAgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTItMyI+CjxwYXRoIGQ9Ik0gMTAuMzkwNjI1IC0xNS4zMTI1IEwgOC42NTYyNSAtMTUuMzEyNSBMIDguNjU2MjUgLTkuNjI1IEMgNy45MjE4NzUgLTEwLjczNDM3NSA2LjczNDM3NSAtMTEuMzEyNSA1LjI2NTYyNSAtMTEuMzEyNSBDIDIuNDIxODc1IC0xMS4zMTI1IDAuNTQ2ODc1IC05LjAzMTI1IDAuNTQ2ODc1IC01LjUxNTYyNSBDIDAuNTQ2ODc1IC0xLjgxMjUgMi4zNTkzNzUgMC40ODQzNzUgNS4zMjgxMjUgMC40ODQzNzUgQyA2Ljg0Mzc1IDAuNDg0Mzc1IDcuODkwNjI1IC0wLjA3ODEyNSA4Ljg0Mzc1IC0xLjQ1MzEyNSBMIDguODQzNzUgMCBMIDEwLjM5MDYyNSAwIFogTSA1LjU2MjUgLTkuNjg3NSBDIDcuNDUzMTI1IC05LjY4NzUgOC42NTYyNSAtOC4wMTU2MjUgOC42NTYyNSAtNS4zNzUgQyA4LjY1NjI1IC0yLjgyODEyNSA3LjQzNzUgLTEuMTU2MjUgNS41OTM3NSAtMS4xNTYyNSBDIDMuNjU2MjUgLTEuMTU2MjUgMi4zNzUgLTIuODU5Mzc1IDIuMzc1IC01LjQyMTg3NSBDIDIuMzc1IC03Ljk4NDM3NSAzLjY1NjI1IC05LjY4NzUgNS41NjI1IC05LjY4NzUgWiBNIDUuNTYyNSAtOS42ODc1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0yLTQiPgo8cGF0aCBkPSJNIDMuMTU2MjUgLTExIEwgMS40MDYyNSAtMTEgTCAxLjQwNjI1IDAgTCAzLjE1NjI1IDAgWiBNIDMuMTU2MjUgLTE1LjMxMjUgTCAxLjM5MDYyNSAtMTUuMzEyNSBMIDEuMzkwNjI1IC0xMy4xMDkzNzUgTCAzLjE1NjI1IC0xMy4xMDkzNzUgWiBNIDMuMTU2MjUgLTE1LjMxMjUgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTItNSI+CjxwYXRoIGQ9Ik0gMTAuNzY1NjI1IC00LjkwNjI1IEMgMTAuNzY1NjI1IC02LjU5Mzc1IDEwLjY0MDYyNSAtNy42MDkzNzUgMTAuMzI4MTI1IC04LjQyMTg3NSBDIDkuNjI1IC0xMC4yMzQzNzUgNy45Mzc1IC0xMS4zMTI1IDUuODc1IC0xMS4zMTI1IEMgMi44MTI1IC0xMS4zMTI1IDAuODQzNzUgLTguOTg0Mzc1IDAuODQzNzUgLTUuMzU5Mzc1IEMgMC44NDM3NSAtMS43MTg3NSAyLjczNDM3NSAwLjQ4NDM3NSA1Ljg0Mzc1IDAuNDg0Mzc1IEMgOC4zNTkzNzUgMC40ODQzNzUgMTAuMDkzNzUgLTAuOTM3NSAxMC41NDY4NzUgLTMuMzQzNzUgTCA4Ljc4MTI1IC0zLjM0Mzc1IEMgOC4yOTY4NzUgLTEuODkwNjI1IDcuMzEyNSAtMS4xNDA2MjUgNS45MDYyNSAtMS4xNDA2MjUgQyA0Ljc4MTI1IC0xLjE0MDYyNSAzLjg0Mzc1IC0xLjY0MDYyNSAzLjI1IC0yLjU2MjUgQyAyLjgyODEyNSAtMy4xODc1IDIuNjg3NSAtMy44MjgxMjUgMi42NzE4NzUgLTQuOTA2MjUgWiBNIDIuNzAzMTI1IC02LjM0Mzc1IEMgMi44NTkzNzUgLTguMzc1IDQuMDkzNzUgLTkuNzAzMTI1IDUuODU5Mzc1IC05LjcwMzEyNSBDIDcuNjQwNjI1IC05LjcwMzEyNSA4Ljg5MDYyNSAtOC4zMTI1IDguODkwNjI1IC02LjM0Mzc1IFogTSAyLjcwMzEyNSAtNi4zNDM3NSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMi02Ij4KPHBhdGggZD0iTSA5LjIwMzEyNSAtNy45Mzc1IEMgOS4xNzE4NzUgLTEwLjA5Mzc1IDcuNzUgLTExLjMxMjUgNS4yMDMxMjUgLTExLjMxMjUgQyAyLjY0MDYyNSAtMTEuMzEyNSAwLjk4NDM3NSAtMTAgMC45ODQzNzUgLTcuOTUzMTI1IEMgMC45ODQzNzUgLTYuMjM0Mzc1IDEuODc1IC01LjQyMTg3NSA0LjQ2ODc1IC00Ljc4MTI1IEwgNi4xMDkzNzUgLTQuMzkwNjI1IEMgNy4zMjgxMjUgLTQuMDkzNzUgNy44MTI1IC0zLjY1NjI1IDcuODEyNSAtMi44NzUgQyA3LjgxMjUgLTEuODI4MTI1IDYuNzgxMjUgLTEuMTQwNjI1IDUuMjUgLTEuMTQwNjI1IEMgNC4zMTI1IC0xLjE0MDYyNSAzLjUgLTEuNDA2MjUgMy4wNjI1IC0xLjg3NSBDIDIuNzk2ODc1IC0yLjE4NzUgMi42NzE4NzUgLTIuNSAyLjU2MjUgLTMuMjgxMjUgTCAwLjcxODc1IC0zLjI4MTI1IEMgMC43OTY4NzUgLTAuNzM0Mzc1IDIuMjE4NzUgMC40ODQzNzUgNS4xMDkzNzUgMC40ODQzNzUgQyA3Ljg3NSAwLjQ4NDM3NSA5LjY0MDYyNSAtMC44NzUgOS42NDA2MjUgLTMgQyA5LjY0MDYyNSAtNC42NDA2MjUgOC43MTg3NSAtNS41NDY4NzUgNi41MzEyNSAtNi4wNjI1IEwgNC44NDM3NSAtNi40Njg3NSBDIDMuNDIxODc1IC02Ljc5Njg3NSAyLjgxMjUgLTcuMjY1NjI1IDIuODEyNSAtOC4wNDY4NzUgQyAyLjgxMjUgLTkuMDc4MTI1IDMuNzE4NzUgLTkuNzAzMTI1IDUuMTQwNjI1IC05LjcwMzEyNSBDIDYuNTQ2ODc1IC05LjcwMzEyNSA3LjMxMjUgLTkuMDkzNzUgNy4zNDM3NSAtNy45Mzc1IFogTSA5LjIwMzEyNSAtNy45Mzc1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0yLTciPgo8L2c+CjxnIGlkPSJnbHlwaC0yLTgiPgo8cGF0aCBkPSJNIDEuNDUzMTI1IC0xMSBMIDEuNDUzMTI1IDAgTCAzLjIxODc1IDAgTCAzLjIxODc1IC01LjcxODc1IEMgMy4yMzQzNzUgLTguMzU5Mzc1IDQuMzI4MTI1IC05LjUzMTI1IDYuNzM0Mzc1IC05LjQ2ODc1IEwgNi43MzQzNzUgLTExLjI1IEMgNi40NTMxMjUgLTExLjI5Njg3NSA2LjI4MTI1IC0xMS4zMTI1IDYuMDYyNSAtMTEuMzEyNSBDIDQuOTM3NSAtMTEuMzEyNSA0LjA3ODEyNSAtMTAuNjQwNjI1IDMuMDYyNSAtOS4wMTU2MjUgTCAzLjA2MjUgLTExIFogTSAxLjQ1MzEyNSAtMTEgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTItOSI+CjxwYXRoIGQ9Ik0gMS4xNDA2MjUgNC41NzgxMjUgTCAyLjg5MDYyNSA0LjU3ODEyNSBMIDIuODkwNjI1IC0xLjE1NjI1IEMgMy44MjgxMjUgLTAuMDE1NjI1IDQuODQzNzUgMC40ODQzNzUgNi4yODEyNSAwLjQ4NDM3NSBDIDkuMTQwNjI1IDAuNDg0Mzc1IDEwLjk4NDM3NSAtMS44MTI1IDEwLjk4NDM3NSAtNS4zMTI1IEMgMTAuOTg0Mzc1IC05LjAxNTYyNSA5LjE3MTg3NSAtMTEuMzEyNSA2LjI2NTYyNSAtMTEuMzEyNSBDIDQuNzY1NjI1IC0xMS4zMTI1IDMuNTYyNSAtMTAuNjQwNjI1IDIuNzUgLTkuMzQzNzUgTCAyLjc1IC0xMSBMIDEuMTQwNjI1IC0xMSBaIE0gNS45Njg3NSAtOS42ODc1IEMgNy44OTA2MjUgLTkuNjg3NSA5LjE1NjI1IC03Ljk4NDM3NSA5LjE1NjI1IC01LjM1OTM3NSBDIDkuMTU2MjUgLTIuODU5Mzc1IDcuODc1IC0xLjE1NjI1IDUuOTY4NzUgLTEuMTU2MjUgQyA0LjA5Mzc1IC0xLjE1NjI1IDIuODkwNjI1IC0yLjgyODEyNSAyLjg5MDYyNSAtNS40MjE4NzUgQyAyLjg5MDYyNSAtOCA0LjA5Mzc1IC05LjY4NzUgNS45Njg3NSAtOS42ODc1IFogTSA1Ljk2ODc1IC05LjY4NzUgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTItMTAiPgo8cGF0aCBkPSJNIDUuNzE4NzUgLTExLjMxMjUgQyAyLjYwOTM3NSAtMTEuMzEyNSAwLjc1IC05LjEwOTM3NSAwLjc1IC01LjQyMTg3NSBDIDAuNzUgLTEuNzAzMTI1IDIuNjA5Mzc1IDAuNDg0Mzc1IDUuNzM0Mzc1IDAuNDg0Mzc1IEMgOC44NDM3NSAwLjQ4NDM3NSAxMC43MDMxMjUgLTEuNzE4NzUgMTAuNzAzMTI1IC01LjMyODEyNSBDIDEwLjcwMzEyNSAtOS4xNTYyNSA4LjkwNjI1IC0xMS4zMTI1IDUuNzE4NzUgLTExLjMxMjUgWiBNIDUuNzM0Mzc1IC05LjcwMzEyNSBDIDcuNzAzMTI1IC05LjcwMzEyNSA4Ljg5MDYyNSAtOC4wNzgxMjUgOC44OTA2MjUgLTUuMzU5Mzc1IEMgOC44OTA2MjUgLTIuNzUgNy42NzE4NzUgLTEuMTQwNjI1IDUuNzM0Mzc1IC0xLjE0MDYyNSBDIDMuNzgxMjUgLTEuMTQwNjI1IDIuNTc4MTI1IC0yLjc1IDIuNTc4MTI1IC01LjQyMTg3NSBDIDIuNTc4MTI1IC04LjA3ODEyNSAzLjc4MTI1IC05LjcwMzEyNSA1LjczNDM3NSAtOS43MDMxMjUgWiBNIDUuNzM0Mzc1IC05LjcwMzEyNSAiLz4KPC9nPgo8ZyBpZD0iZ2x5cGgtMi0xMSI+CjxwYXRoIGQ9Ik0gMS40Njg3NSAtMTEgTCAxLjQ2ODc1IDAgTCAzLjIzNDM3NSAwIEwgMy4yMzQzNzUgLTYuMDYyNSBDIDMuMjM0Mzc1IC04LjMxMjUgNC40MDYyNSAtOS43ODEyNSA2LjIxODc1IC05Ljc4MTI1IEMgNy42MDkzNzUgLTkuNzgxMjUgOC40ODQzNzUgLTguOTUzMTI1IDguNDg0Mzc1IC03LjYyNSBMIDguNDg0Mzc1IDAgTCAxMC4yMzQzNzUgMCBMIDEwLjIzNDM3NSAtOC4zMTI1IEMgMTAuMjM0Mzc1IC0xMC4xNDA2MjUgOC44NTkzNzUgLTExLjMxMjUgNi43MzQzNzUgLTExLjMxMjUgQyA1LjEwOTM3NSAtMTEuMzEyNSA0LjA0Njg3NSAtMTAuNjg3NSAzLjA5Mzc1IC05LjE1NjI1IEwgMy4wOTM3NSAtMTEgWiBNIDEuNDY4NzUgLTExICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0yLTEyIj4KPHBhdGggZD0iTSA4LjQ4NDM3NSAtMTEgTCA4LjQ4NDM3NSAtOS40MDYyNSBDIDcuNjA5Mzc1IC0xMC43MzQzNzUgNi42NDA2MjUgLTExLjMxMjUgNS4yNSAtMTEuMzEyNSBDIDIuNTc4MTI1IC0xMS4zMTI1IDAuNzM0Mzc1IC04Ljg0Mzc1IDAuNzM0Mzc1IC01LjMxMjUgQyAwLjczNDM3NSAtMy40Njg3NSAxLjE3MTg3NSAtMi4xMjUgMi4xMjUgLTEuMDE1NjI1IEMgMi45Mzc1IC0wLjA0Njg3NSAzLjk4NDM3NSAwLjQ4NDM3NSA1LjEyNSAwLjQ4NDM3NSBDIDYuNDUzMTI1IDAuNDg0Mzc1IDcuMzkwNjI1IC0wLjEwOTM3NSA4LjMxMjUgLTEuNDg0Mzc1IEwgOC4zMTI1IC0wLjkyMTg3NSBDIDguMzEyNSAyLjAxNTYyNSA3LjUgMy4xMDkzNzUgNS4zMTI1IDMuMTA5Mzc1IEMgMy44MjgxMjUgMy4xMDkzNzUgMy4wNDY4NzUgMi41MTU2MjUgMi44NzUgMS4yNjU2MjUgTCAxLjA5Mzc1IDEuMjY1NjI1IEMgMS4yNjU2MjUgMy4yOTY4NzUgMi44NzUgNC41NzgxMjUgNS4yNjU2MjUgNC41NzgxMjUgQyA2Ljg5MDYyNSA0LjU3ODEyNSA4LjIzNDM3NSA0LjA0Njg3NSA4Ljk1MzEyNSAzLjE3MTg3NSBDIDkuNzgxMjUgMi4xNDA2MjUgMTAuMDkzNzUgMC43ODEyNSAxMC4wOTM3NSAtMS44MTI1IEwgMTAuMDkzNzUgLTExIFogTSA1LjQyMTg3NSAtOS43MDMxMjUgQyA3LjI2NTYyNSAtOS43MDMxMjUgOC4zMTI1IC04LjE0MDYyNSA4LjMxMjUgLTUuMzU5Mzc1IEMgOC4zMTI1IC0yLjY4NzUgNy4yNSAtMS4xNDA2MjUgNS40MjE4NzUgLTEuMTQwNjI1IEMgMy42MDkzNzUgLTEuMTQwNjI1IDIuNTYyNSAtMi43MDMxMjUgMi41NjI1IC01LjQyMTg3NSBDIDIuNTYyNSAtOC4xMDkzNzUgMy42MDkzNzUgLTkuNzAzMTI1IDUuNDIxODc1IC05LjcwMzEyNSBaIE0gNS40MjE4NzUgLTkuNzAzMTI1ICIvPgo8L2c+CjxnIGlkPSJnbHlwaC0yLTEzIj4KPHBhdGggZD0iTSAxLjQ2ODc1IC0xNS4zMTI1IEwgMS40Njg3NSAwIEwgMy4yMTg3NSAwIEwgMy4yMTg3NSAtNi4wNjI1IEMgMy4yMTg3NSAtOC4zMTI1IDQuMzkwNjI1IC05Ljc4MTI1IDYuMTg3NSAtOS43ODEyNSBDIDYuNzgxMjUgLTkuNzgxMjUgNy4zMjgxMjUgLTkuNjI1IDcuNzUgLTkuMjk2ODc1IEMgOC4yNSAtOC45MjE4NzUgOC40Njg3NSAtOC40MDYyNSA4LjQ2ODc1IC03LjYyNSBMIDguNDY4NzUgMCBMIDEwLjIwMzEyNSAwIEwgMTAuMjAzMTI1IC04LjMxMjUgQyAxMC4yMDMxMjUgLTEwLjE1NjI1IDguODkwNjI1IC0xMS4zMTI1IDYuNzM0Mzc1IC0xMS4zMTI1IEMgNS4xODc1IC0xMS4zMTI1IDQuMjM0Mzc1IC0xMC44NDM3NSAzLjIxODc1IC05LjQ4NDM3NSBMIDMuMjE4NzUgLTE1LjMxMjUgWiBNIDEuNDY4NzUgLTE1LjMxMjUgIi8+CjwvZz4KPGcgaWQ9ImdseXBoLTItMTQiPgo8cGF0aCBkPSJNIDEuNDY4NzUgLTExIEwgMS40Njg3NSAwIEwgMy4yMzQzNzUgMCBMIDMuMjM0Mzc1IC02LjkwNjI1IEMgMy4yMzQzNzUgLTguNSA0LjM5MDYyNSAtOS43ODEyNSA1LjgxMjUgLTkuNzgxMjUgQyA3LjEyNSAtOS43ODEyNSA3Ljg1OTM3NSAtOC45ODQzNzUgNy44NTkzNzUgLTcuNTc4MTI1IEwgNy44NTkzNzUgMCBMIDkuNjI1IDAgTCA5LjYyNSAtNi45MDYyNSBDIDkuNjI1IC04LjUgMTAuNzY1NjI1IC05Ljc4MTI1IDEyLjIwMzEyNSAtOS43ODEyNSBDIDEzLjQ4NDM3NSAtOS43ODEyNSAxNC4yMzQzNzUgLTguOTY4NzUgMTQuMjM0Mzc1IC03LjU3ODEyNSBMIDE0LjIzNDM3NSAwIEwgMTYgMCBMIDE2IC04LjI1IEMgMTYgLTEwLjIzNDM3NSAxNC44NzUgLTExLjMxMjUgMTIuODEyNSAtMTEuMzEyNSBDIDExLjM0Mzc1IC0xMS4zMTI1IDEwLjQ1MzEyNSAtMTAuODc1IDkuNDIxODc1IC05LjY0MDYyNSBDIDguNzgxMjUgLTEwLjgxMjUgNy44OTA2MjUgLTExLjMxMjUgNi40Njg3NSAtMTEuMzEyNSBDIDUgLTExLjMxMjUgNC4wMTU2MjUgLTEwLjc2NTYyNSAzLjA5Mzc1IC05LjQ1MzEyNSBMIDMuMDkzNzUgLTExIFogTSAxLjQ2ODc1IC0xMSAiLz4KPC9nPgo8L2c+CjwvZGVmcz4KPHJlY3QgeD0iLTc1LjYiIHk9Ii0zMi40IiB3aWR0aD0iOTA3LjIiIGhlaWdodD0iMzg4LjgiIGZpbGw9InJnYigxMDAlLCAxMDAlLCAxMDAlKSIgZmlsbC1vcGFjaXR5PSIxIi8+CjxyZWN0IHg9Ii03NS42IiB5PSItMzIuNCIgd2lkdGg9IjkwNy4yIiBoZWlnaHQ9IjM4OC44IiBmaWxsPSJyZ2IoMTAwJSwgMTAwJSwgMTAwJSkiIGZpbGwtb3BhY2l0eT0iMSIvPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2Utd2lkdGg9IjIuMDM2OTU5IiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSJyZ2IoOTIuMTU2ODYzJSwgOTIuMTU2ODYzJSwgOTIuMTU2ODYzJSkiIHN0cm9rZS1vcGFjaXR5PSIxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0gMTcxLjg5NDUzMSAyNjUuODc1IEwgMTcxLjg5NDUzMSA1LjQ4MDQ2OSAiLz4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIyLjAzNjk1OSIgc3Ryb2tlLWxpbmVjYXA9ImJ1dHQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0icmdiKDkyLjE1Njg2MyUsIDkyLjE1Njg2MyUsIDkyLjE1Njg2MyUpIiBzdHJva2Utb3BhY2l0eT0iMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNIDI4NC43MzA0NjkgMjY1Ljg3NSBMIDI4NC43MzA0NjkgNS40ODA0NjkgIi8+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZS13aWR0aD0iMi4wMzY5NTkiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9InJnYig5Mi4xNTY4NjMlLCA5Mi4xNTY4NjMlLCA5Mi4xNTY4NjMlKSIgc3Ryb2tlLW9wYWNpdHk9IjEiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTSAzOTcuNTY2NDA2IDI2NS44NzUgTCAzOTcuNTY2NDA2IDUuNDgwNDY5ICIvPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2Utd2lkdGg9IjIuMDM2OTU5IiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlPSJyZ2IoOTIuMTU2ODYzJSwgOTIuMTU2ODYzJSwgOTIuMTU2ODYzJSkiIHN0cm9rZS1vcGFjaXR5PSIxIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik0gNTEwLjQwMjM0NCAyNjUuODc1IEwgNTEwLjQwMjM0NCA1LjQ4MDQ2OSAiLz4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIyLjAzNjk1OSIgc3Ryb2tlLWxpbmVjYXA9ImJ1dHQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0icmdiKDkyLjE1Njg2MyUsIDkyLjE1Njg2MyUsIDkyLjE1Njg2MyUpIiBzdHJva2Utb3BhY2l0eT0iMSIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNIDYyMy4yMzgyODEgMjY1Ljg3NSBMIDYyMy4yMzgyODEgNS40ODA0NjkgIi8+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZS13aWR0aD0iMi4wMzY5NTkiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9InJnYig5Mi4xNTY4NjMlLCA5Mi4xNTY4NjMlLCA5Mi4xNTY4NjMlKSIgc3Ryb2tlLW9wYWNpdHk9IjEiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTSA3MzYuMDc0MjE5IDI2NS44NzUgTCA3MzYuMDc0MjE5IDUuNDgwNDY5ICIvPgo8cGF0aCBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGw9InJnYigwJSwgMTUuNjg2Mjc1JSwgNjQuNzA1ODgyJSkiIGZpbGwtb3BhY2l0eT0iMSIgZD0iTSAxNzEuODk0NTMxIDgwLjc1IEwgMjcyLjMyMDMxMiA4MC43NSBMIDI3Mi4zMjAzMTIgMjcuODU1NDY5IEwgMTcxLjg5NDUzMSAyNy44NTU0NjkgWiBNIDE3MS44OTQ1MzEgODAuNzUgIi8+CjxwYXRoIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbD0icmdiKDYwLjM5MjE1NyUsIDY1LjQ5MDE5NiUsIDc0LjExNzY0NyUpIiBmaWxsLW9wYWNpdHk9IjEiIGQ9Ik0gMTcxLjg5NDUzMSAxNjIuMTI1IEwgNTM1LjIyNjU2MiAxNjIuMTI1IEwgNTM1LjIyNjU2MiAxMDkuMjMwNDY5IEwgMTcxLjg5NDUzMSAxMDkuMjMwNDY5IFogTSAxNzEuODk0NTMxIDE2Mi4xMjUgIi8+CjxwYXRoIGZpbGwtcnVsZT0ibm9uemVybyIgZmlsbD0icmdiKDYwLjM5MjE1NyUsIDY1LjQ5MDE5NiUsIDc0LjExNzY0NyUpIiBmaWxsLW9wYWNpdHk9IjEiIGQ9Ik0gMTcxLjg5NDUzMSAyNDMuNDk2MDk0IEwgNTk2LjcyMjY1NiAyNDMuNDk2MDk0IEwgNTk2LjcyMjY1NiAxOTAuNjAxNTYyIEwgMTcxLjg5NDUzMSAxOTAuNjAxNTYyIFogTSAxNzEuODk0NTMxIDI0My40OTYwOTQgIi8+CjxnIGZpbGw9InJnYigwJSwgMCUsIDAlKSIgZmlsbC1vcGFjaXR5PSIxIj4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0wIiB4PSIyODAuODY3MTg4IiB5PSI2MS4zMjQyMTkiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0xIiB4PSIyOTEuODY3MTg4IiB5PSI2MS4zMjQyMTkiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0yIiB4PSIzMDIuODY3MTg4IiB5PSI2MS4zMjQyMTkiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0zIiB4PSIzMDguODY3MTg4IiB5PSI2MS4zMjQyMTkiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC00IiB4PSIzMTkuODY3MTg4IiB5PSI2MS4zMjQyMTkiLz4KPC9nPgo8ZyBmaWxsPSJyZ2IoMCUsIDAlLCAwJSkiIGZpbGwtb3BhY2l0eT0iMSI+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTAtNSIgeD0iNTQzLjc3NzM0NCIgeT0iMTQyLjY5NTMxMiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0wLTYiIHg9IjU1NC43NzczNDQiIHk9IjE0Mi42OTUzMTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0yIiB4PSI1NjUuNzc3MzQ0IiB5PSIxNDIuNjk1MzEyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTAtNiIgeD0iNTcxLjc3NzM0NCIgeT0iMTQyLjY5NTMxMiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0wLTQiIHg9IjU4Mi43NzczNDQiIHk9IjE0Mi42OTUzMTIiLz4KPC9nPgo8ZyBmaWxsPSJyZ2IoMCUsIDAlLCAwJSkiIGZpbGwtb3BhY2l0eT0iMSI+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTAtMSIgeD0iNjA1LjI3MzQzOCIgeT0iMjI0LjA3MDMxMiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0wLTciIHg9IjYxNi4yNzM0MzgiIHk9IjIyNC4wNzAzMTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMC0yIiB4PSI2MjcuMjczNDM4IiB5PSIyMjQuMDcwMzEyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTAtOCIgeD0iNjMzLjI3MzQzOCIgeT0iMjI0LjA3MDMxMiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0wLTQiIHg9IjY0NC4yNzM0MzgiIHk9IjIyNC4wNzAzMTIiLz4KPC9nPgo8ZyBmaWxsPSJyZ2IoMzAuMTk2MDc4JSwgMzAuMTk2MDc4JSwgMzAuMTk2MDc4JSkiIGZpbGwtb3BhY2l0eT0iMSI+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMCIgeD0iNS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xIiB4PSIxOS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0yIiB4PSIyMy40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0yIiB4PSIzMS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xIiB4PSIzOS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0zIiB4PSI0My40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS00IiB4PSI1Mi40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS01IiB4PSI2MS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS02IiB4PSI2Ny40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS03IiB4PSI3Ni40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS04IiB4PSI4NS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS03IiB4PSI5MC40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS05IiB4PSI5OS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0yIiB4PSIxMDQuNDgwNDY5IiB5PSIyMjIuNzk3ODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtOCIgeD0iMTEyLjQ4MDQ2OSIgeT0iMjIyLjc5Nzg1MiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTEwIiB4PSIxMTcuNDgwNDY5IiB5PSIyMjIuNzk3ODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtNyIgeD0iMTIzLjQ4MDQ2OSIgeT0iMjIyLjc5Nzg1MiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTgiIHg9IjEzMi40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xMSIgeD0iMTM2LjQ4MDQ2OSIgeT0iMjIyLjc5Nzg1MiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTQiIHg9IjE0NS40ODA0NjkiIHk9IjIyMi43OTc4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xMiIgeD0iMTU0LjQ4MDQ2OSIgeT0iMjIyLjc5Nzg1MiIvPgo8L2c+CjxnIGZpbGw9InJnYigzMC4xOTYwNzglLCAzMC4xOTYwNzglLCAzMC4xOTYwNzglKSIgZmlsbC1vcGFjaXR5PSIxIj4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0wIiB4PSIzMS40ODA0NjkiIHk9IjE0MS40MjI4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xMyIgeD0iNDUuNDgwNDY5IiB5PSIxNDEuNDIyODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtNiIgeD0iNTQuNDgwNDY5IiB5PSIxNDEuNDIyODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMTEiIHg9IjYzLjQ4MDQ2OSIgeT0iMTQxLjQyMjg1MiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTE0IiB4PSI3Mi40ODA0NjkiIHk9IjE0MS40MjI4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS05IiB4PSI3Ni40ODA0NjkiIHk9IjE0MS40MjI4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xNSIgeD0iODEuNDgwNDY5IiB5PSIxNDEuNDIyODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMTMiIHg9IjkwLjQ4MDQ2OSIgeT0iMTQxLjQyMjg1MiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTMiIHg9Ijk5LjQ4MDQ2OSIgeT0iMTQxLjQyMjg1MiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTIiIHg9IjEwOC40ODA0NjkiIHk9IjE0MS40MjI4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS04IiB4PSIxMTYuNDgwNDY5IiB5PSIxNDEuNDIyODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMTAiIHg9IjEyMS40ODA0NjkiIHk9IjE0MS40MjI4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS03IiB4PSIxMjcuNDgwNDY5IiB5PSIxNDEuNDIyODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMSIgeD0iMTM2LjQ4MDQ2OSIgeT0iMTQxLjQyMjg1MiIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTMiIHg9IjE0MC40ODA0NjkiIHk9IjE0MS40MjI4NTIiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS04IiB4PSIxNDkuNDgwNDY5IiB5PSIxNDEuNDIyODUyIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMiIgeD0iMTU0LjQ4MDQ2OSIgeT0iMTQxLjQyMjg1MiIvPgo8L2c+CjxnIGZpbGw9InJnYigzMC4xOTYwNzglLCAzMC4xOTYwNzglLCAzMC4xOTYwNzglKSIgZmlsbC1vcGFjaXR5PSIxIj4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xNiIgeD0iNTEuNDgwNDY5IiB5PSI2MC4wNTE3NTgiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xMyIgeD0iNjIuNDgwNDY5IiB5PSI2MC4wNTE3NTgiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xNyIgeD0iNzEuNDgwNDY5IiB5PSI2MC4wNTE3NTgiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xMSIgeD0iODMuNDgwNDY5IiB5PSI2MC4wNTE3NTgiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xMCIgeD0iOTIuNDgwNDY5IiB5PSI2MC4wNTE3NTgiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS05IiB4PSI5OC40ODA0NjkiIHk9IjYwLjA1MTc1OCIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTciIHg9IjEwMy40ODA0NjkiIHk9IjYwLjA1MTc1OCIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTMiIHg9IjExMi40ODA0NjkiIHk9IjYwLjA1MTc1OCIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTciIHg9IjEyMS40ODA0NjkiIHk9IjYwLjA1MTc1OCIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTE0IiB4PSIxMzAuNDgwNDY5IiB5PSI2MC4wNTE3NTgiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xMiIgeD0iMTM0LjQ4MDQ2OSIgeT0iNjAuMDUxNzU4Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMiIgeD0iMTQyLjQ4MDQ2OSIgeT0iNjAuMDUxNzU4Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMSIgeD0iMTUwLjQ4MDQ2OSIgeT0iNjAuMDUxNzU4Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMiIgeD0iMTU0LjQ4MDQ2OSIgeT0iNjAuMDUxNzU4Ii8+CjwvZz4KPGcgZmlsbD0icmdiKDMwLjE5NjA3OCUsIDMwLjE5NjA3OCUsIDMwLjE5NjA3OCUpIiBmaWxsLW9wYWNpdHk9IjEiPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTE4IiB4PSIxNTkuODk0NTMxIiB5PSIyODcuNTM2MTMzIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMTkiIHg9IjE2OC44OTQ1MzEiIHk9IjI4Ny41MzYxMzMiLz4KPC9nPgo8ZyBmaWxsPSJyZ2IoMzAuMTk2MDc4JSwgMzAuMTk2MDc4JSwgMzAuMTk2MDc4JSkiIGZpbGwtb3BhY2l0eT0iMSI+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMjAiIHg9IjI2OC4yMzA0NjkiIHk9IjI4Ny41MzYxMzMiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xOCIgeD0iMjc3LjIzMDQ2OSIgeT0iMjg3LjUzNjEzMyIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTE5IiB4PSIyODYuMjMwNDY5IiB5PSIyODcuNTM2MTMzIi8+CjwvZz4KPGcgZmlsbD0icmdiKDMwLjE5NjA3OCUsIDMwLjE5NjA3OCUsIDMwLjE5NjA3OCUpIiBmaWxsLW9wYWNpdHk9IjEiPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTIxIiB4PSIzODEuMDY2NDA2IiB5PSIyODcuNTM2MTMzIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMTgiIHg9IjM5MC4wNjY0MDYiIHk9IjI4Ny41MzYxMzMiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xOSIgeD0iMzk5LjA2NjQwNiIgeT0iMjg3LjUzNjEzMyIvPgo8L2c+CjxnIGZpbGw9InJnYigzMC4xOTYwNzglLCAzMC4xOTYwNzglLCAzMC4xOTYwNzglKSIgZmlsbC1vcGFjaXR5PSIxIj4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0yMiIgeD0iNDkzLjkwMjM0NCIgeT0iMjg3LjUzNjEzMyIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTE4IiB4PSI1MDIuOTAyMzQ0IiB5PSIyODcuNTM2MTMzIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMTkiIHg9IjUxMS45MDIzNDQiIHk9IjI4Ny41MzYxMzMiLz4KPC9nPgo8ZyBmaWxsPSJyZ2IoMzAuMTk2MDc4JSwgMzAuMTk2MDc4JSwgMzAuMTk2MDc4JSkiIGZpbGwtb3BhY2l0eT0iMSI+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMjMiIHg9IjYwNi43MzgyODEiIHk9IjI4Ny41MzYxMzMiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xOCIgeD0iNjE1LjczODI4MSIgeT0iMjg3LjUzNjEzMyIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTE5IiB4PSI2MjQuNzM4MjgxIiB5PSIyODcuNTM2MTMzIi8+CjwvZz4KPGcgZmlsbD0icmdiKDMwLjE5NjA3OCUsIDMwLjE5NjA3OCUsIDMwLjE5NjA3OCUpIiBmaWxsLW9wYWNpdHk9IjEiPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTI0IiB4PSI3MTUuMDc0MjE5IiB5PSIyODcuNTM2MTMzIi8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTEtMTgiIHg9IjcyNC4wNzQyMTkiIHk9IjI4Ny41MzYxMzMiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMS0xOCIgeD0iNzMzLjA3NDIxOSIgeT0iMjg3LjUzNjEzMyIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0xLTE5IiB4PSI3NDIuMDc0MjE5IiB5PSIyODcuNTM2MTMzIi8+CjwvZz4KPGcgZmlsbD0icmdiKDAlLCAwJSwgMCUpIiBmaWxsLW9wYWNpdHk9IjEiPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTAiIHg9IjMzMC45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi0xIiB4PSIzNDQuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItMiIgeD0iMzUwLjk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTMiIHg9IjM2Mi45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi00IiB4PSIzNzQuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItNSIgeD0iMzc5Ljk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTYiIHg9IjM5MS45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi03IiB4PSI0MDIuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItOCIgeD0iNDA4Ljk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTUiIHg9IjQxNS45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi05IiB4PSI0MjcuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItMTAiIHg9IjQzOS45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi04IiB4PSI0NTEuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItMSIgeD0iNDU5Ljk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTQiIHg9IjQ2NS45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi0xMSIgeD0iNDcwLjk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTEyIiB4PSI0ODIuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItNyIgeD0iNDk0Ljk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTEiIHg9IjUwMC45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi0xMyIgeD0iNTA2Ljk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTUiIHg9IjUxOC45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi03IiB4PSI1MzAuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItNCIgeD0iNTM2Ljk4NDM3NSIgeT0iMzEyLjgyODEyNSIvPgo8dXNlIHhsaW5rOmhyZWY9IiNnbHlwaC0yLTEiIHg9IjU0MS45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPHVzZSB4bGluazpocmVmPSIjZ2x5cGgtMi01IiB4PSI1NDcuOTg0Mzc1IiB5PSIzMTIuODI4MTI1Ii8+Cjx1c2UgeGxpbms6aHJlZj0iI2dseXBoLTItMTQiIHg9IjU1OS45ODQzNzUiIHk9IjMxMi44MjgxMjUiLz4KPC9nPgo8L3N2Zz4K" class="quarto-figure quarto-figure-center r-stretch" style="width:92.0%" alt="Bar chart of reporting practices in 73 longitudinal APIM studies: 17.8 percent reported a power analysis, 64.4 percent documented model constraints, and 75.3 percent reported a missing-data strategy."><p>Systematic review of 73 longitudinal APIM studies published from 2008–2025 <span class="citation" data-cites="mohammadzadehYazdBeyondIndividual2026">(<a href="#/references" role="doc-biblioref" onclick>Mohammadzadeh Yazd et al., 2026</a>)</span>.</p>
@@ -4436,13 +4595,14 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="make-every-dyadic-analysis-decision-visible" class="slide level2">
+<section id="make-every-dyadic-analysis-decision-visible" class="slide level2 smaller">
 <h2>Make every dyadic analysis decision visible</h2>
 <ol type="1">
 <li><strong>Preregister</strong> actor and partner hypotheses and key analysis decisions.</li>
-<li><strong>Plan and report power</strong> using dyad-specific tools.</li>
+<li><strong>Plan and report power:</strong> use simulation matched to the complete planned model.</li>
 <li><strong>Explain missing data:</strong> describe missingness and the handling strategy.</li>
 <li><strong>Specify the full model:</strong> roles and distinguishability, actor and partner paths, constraints, and covariance structure.</li>
+<li><strong>Report reliability where applicable:</strong> within- and between-level omega for multilevel item scales, e.g., <code>multilevelTools::omegaSEM()</code> <span class="citation" data-cites="wileyMultilevelTools2025 geldhofReliabilityEstimationMultilevel2014">(<a href="#/references" role="doc-biblioref" onclick>Geldhof et al., 2014</a>; <a href="#/references" role="doc-biblioref" onclick>Wiley, 2025</a>)</span>.</li>
 </ol>
 <p>The review also recommends multi-method measurement and more diverse populations</p>
 <p><span class="subtle"><span class="citation" data-cites="mohammadzadehYazdBeyondIndividual2026">Mohammadzadeh Yazd et al. (<a href="#/references" role="doc-biblioref" onclick>2026</a>)</span></span></p>
@@ -4457,7 +4617,7 @@ display:block!important;
 </ul>
 <p>Run this once in a fresh R session before the break. It installs or updates the workshop packages and any dependencies that need updating; this may take several minutes.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href></a><span class="fu">source</span>(<span class="st">&quot;00_setup.R&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href></a><span class="fu">source</span>(<span class="st">&quot;00_setup.R&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="references" class="slide level2 smaller scrollable">
@@ -4523,12 +4683,6 @@ Kristensen, K., &amp; McGillycuddy, M. (2023, October 14). <em>Covariance struct
 <div id="ref-kuengWbCorrBivariateWithin2026" class="csl-entry" role="listitem">
 Küng, P. (2026). <em><span class="nocase">wbCorr</span>: Bivariate within- and between-cluster correlations</em>. University of Zürich. <a href="https://doi.org/10.32614/CRAN.package.wbCorr">https://doi.org/10.32614/CRAN.package.wbCorr</a>
 </div>
-<div id="ref-lafitPowerLAPIMApplication2022" class="csl-entry" role="listitem">
-Lafit, G., Sels, L., Adolf, J. K., Loeys, T., &amp; Ceulemans, E. (2022). <span>PowerLAPIM</span>: An application to conduct power analysis for linear and quadratic longitudinal actor–partner interdependence models in intensive longitudinal dyadic designs. <em>Journal of Social and Personal Relationships</em>, <em>39</em>(10), 3085–3115. <a href="https://doi.org/10.1177/02654075221080128">https://doi.org/10.1177/02654075221080128</a>
-</div>
-<div id="ref-laiCompositeReliabilityMultilevel2021" class="csl-entry" role="listitem">
-Lai, M. H. C. (2021). Composite reliability of multilevel data: It’s about observed scores and construct meanings. <em>Psychological Methods</em>, <em>26</em>(1), 90–102. <a href="https://doi.org/10.1037/met0000287">https://doi.org/10.1037/met0000287</a>
-</div>
 <div id="ref-lavaanMultilevelSEM" class="csl-entry" role="listitem">
 <span class="nocase">lavaan project</span>. (n.d.). <em>Multilevel <span>SEM</span></em>. Retrieved July 23, 2026, from <a href="https://lavaan.ugent.be/tutorial/multilevel.html">https://lavaan.ugent.be/tutorial/multilevel.html</a>
 </div>
@@ -4585,26 +4739,77 @@ Wiley, J. F. (2025). <em><span class="nocase">multilevelTools</span>: Multilevel
 
 </section>
 <section id="manual-apim-preparation" class="slide level2 smaller">
-<h2>Create the APIM variables manually <a href="#/prepared-apim-data" class="appendix-back-link">← Data preparation</a></h2>
-<p>This shortcut assumes validation has confirmed exactly two rows per dyad.</p>
-<!-- TODO: I think we should provide code that is safe with missing partners. -->
+<h2>Create the cross-sectional APIM variables manually <a href="#/prepared-apim-data" class="appendix-back-link">← Data preparation</a></h2>
+<ul>
+<li>Explicit matching by couple and role</li>
+<li>Missing partner <span class="math inline">\(\rightarrow\)</span> <code>NA</code></li>
+</ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href></a>apim_manual_data <span class="ot">&lt;-</span> raw_dyad_data <span class="sc">|&gt;</span></span>
-<span id="cb42-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb42-3"><a href></a>    <span class="at">.is_female =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;female&quot;</span>),</span>
-<span id="cb42-4"><a href></a>    <span class="at">.is_male =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;male&quot;</span>),</span>
-<span id="cb42-5"><a href></a>    <span class="at">.efficacy_gmc =</span> efficacy <span class="sc">-</span> <span class="fu">mean</span>(efficacy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb42-6"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb42-7"><a href></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(couple_id) <span class="sc">|&gt;</span></span>
-<span id="cb42-8"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb42-9"><a href></a>    <span class="at">.efficacy_gmc_actor =</span> .efficacy_gmc,</span>
-<span id="cb42-10"><a href></a>    <span class="at">.efficacy_gmc_partner =</span> <span class="fu">rev</span>(.efficacy_gmc)</span>
-<span id="cb42-11"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb42-12"><a href></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href></a>apim_manual_data <span class="ot">&lt;-</span> raw_dyad_data <span class="sc">|&gt;</span></span>
+<span id="cb47-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb47-3"><a href></a>    <span class="at">.is_female =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;female&quot;</span>),</span>
+<span id="cb47-4"><a href></a>    <span class="at">.is_male =</span> <span class="fu">as.numeric</span>(gender <span class="sc">==</span> <span class="st">&quot;male&quot;</span>),</span>
+<span id="cb47-5"><a href></a>    <span class="at">.efficacy_gmc =</span> efficacy <span class="sc">-</span> <span class="fu">mean</span>(efficacy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb47-6"><a href></a>    <span class="at">.efficacy_gmc_actor =</span> .efficacy_gmc</span>
+<span id="cb47-7"><a href></a>  )</span>
+<span id="cb47-8"><a href></a></span>
+<span id="cb47-9"><a href></a>partner_values <span class="ot">&lt;-</span> apim_manual_data <span class="sc">|&gt;</span></span>
+<span id="cb47-10"><a href></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb47-11"><a href></a>    couple_id,</span>
+<span id="cb47-12"><a href></a>    <span class="at">gender =</span> dplyr<span class="sc">::</span><span class="fu">recode</span>(gender, <span class="at">female =</span> <span class="st">&quot;male&quot;</span>, <span class="at">male =</span> <span class="st">&quot;female&quot;</span>),</span>
+<span id="cb47-13"><a href></a>    <span class="at">.efficacy_gmc_partner =</span> .efficacy_gmc</span>
+<span id="cb47-14"><a href></a>  )</span>
+<span id="cb47-15"><a href></a></span>
+<span id="cb47-16"><a href></a>apim_manual_data <span class="ot">&lt;-</span> apim_manual_data <span class="sc">|&gt;</span></span>
+<span id="cb47-17"><a href></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb47-18"><a href></a>    partner_values,</span>
+<span id="cb47-19"><a href></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;couple_id&quot;</span>, <span class="st">&quot;gender&quot;</span>),</span>
+<span id="cb47-20"><a href></a>    <span class="at">relationship =</span> <span class="st">&quot;one-to-one&quot;</span></span>
+<span id="cb47-21"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<!-- TODO: We should also create an ILD version of that code for manual computation
-of actor effects and link back and forth appropriately. Safe for unordered rows
-and missing rows, but as clear and short as possible. -->
+</section>
+<section id="manual-ild-apim-preparation" class="slide level2 smaller">
+<h2>Decompose provided support manually <a href="#/prepared-ild-apim-data" class="appendix-back-link">← Data preparation</a></h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href></a>support_components <span class="ot">&lt;-</span> raw_ild_dyad_data <span class="sc">|&gt;</span></span>
+<span id="cb48-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(person_id) <span class="sc">|&gt;</span></span>
+<span id="cb48-3"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-4"><a href></a>    <span class="at">.person_mean =</span> <span class="fu">mean</span>(provided_support, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb48-5"><a href></a>    <span class="at">.provided_support_cwp =</span> provided_support <span class="sc">-</span> .person_mean</span>
+<span id="cb48-6"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb48-7"><a href></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb48-8"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-9"><a href></a>    <span class="at">.provided_support_cbp =</span> .person_mean <span class="sc">-</span></span>
+<span id="cb48-10"><a href></a>      <span class="fu">mean</span>(.person_mean[<span class="sc">!</span><span class="fu">duplicated</span>(person_id)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb48-11"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="manual-ild-apim-matching" class="slide level2 smaller">
+<h2>Match actor and partner components manually <a href="#/prepared-ild-apim-data" class="appendix-back-link">← Data preparation</a></h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href></a>partner_components <span class="ot">&lt;-</span> support_components <span class="sc">|&gt;</span></span>
+<span id="cb49-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb49-3"><a href></a>    couple_id,</span>
+<span id="cb49-4"><a href></a>    diaryday,</span>
+<span id="cb49-5"><a href></a>    <span class="at">gender =</span> dplyr<span class="sc">::</span><span class="fu">recode</span>(gender, <span class="at">female =</span> <span class="st">&quot;male&quot;</span>, <span class="at">male =</span> <span class="st">&quot;female&quot;</span>),</span>
+<span id="cb49-6"><a href></a>    <span class="at">.provided_support_cwp_partner =</span> .provided_support_cwp,</span>
+<span id="cb49-7"><a href></a>    <span class="at">.provided_support_cbp_partner =</span> .provided_support_cbp</span>
+<span id="cb49-8"><a href></a>  )</span>
+<span id="cb49-9"><a href></a></span>
+<span id="cb49-10"><a href></a>ild_manual_data <span class="ot">&lt;-</span> support_components <span class="sc">|&gt;</span></span>
+<span id="cb49-11"><a href></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb49-12"><a href></a>    <span class="at">.provided_support_cwp_actor =</span> .provided_support_cwp,</span>
+<span id="cb49-13"><a href></a>    <span class="at">.provided_support_cbp_actor =</span> .provided_support_cbp</span>
+<span id="cb49-14"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb49-15"><a href></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb49-16"><a href></a>    partner_components,</span>
+<span id="cb49-17"><a href></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;couple_id&quot;</span>, <span class="st">&quot;diaryday&quot;</span>, <span class="st">&quot;gender&quot;</span>),</span>
+<span id="cb49-18"><a href></a>    <span class="at">relationship =</span> <span class="st">&quot;one-to-one&quot;</span></span>
+<span id="cb49-19"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li>Explicit day-role matching: independent of row order</li>
+</ul>
 
 </section></section>
     </div>

@@ -1791,8 +1791,13 @@ Distinguishing by gender
 ```{r}
 raw_ild_dyad_data <- readRDS("dyadic-data.rds") |>
   dplyr::select(
-    couple_id, person_id, diaryday, gender, efficacy, total_mvpa
-  ) |> dplyr::arrange(couple_id, diaryday)
+    couple_id, person_id, diaryday, gender,
+    provided_support, sedentary
+  ) |>
+  dplyr::mutate(
+    sedentary_hours = sedentary / 60
+  ) |>
+  dplyr::arrange(couple_id, diaryday)
 
 slide_table(head(raw_ild_dyad_data))
 ```
@@ -1841,27 +1846,75 @@ ild_apim_data <- dyadMLM::prepare_dyad_data(
   member = person_id,
   role = gender,
   time = diaryday,
-  predictors = efficacy,
-  lag1_predictors = efficacy,
+  predictors = provided_support,
   model_types = "apim",
   include_arbitrary_member_contrast = TRUE,
   seed = 123
 )
 ```
 
-- Lagged CWP terms: day-$t-1$ efficacy $\rightarrow$ day-$t$ MVPA
-- CBP terms: stable between-person differences; not lagged
-- Exact day matching: missing occasions are not bridged
+## Distinguishable ILD APIM {.smaller}
 
-## Exchangeable APIM
+```{r}
+#| output-location: slide
 
-## AR(1), OU, and Dynamic Models
+ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
+  sedentary_hours ~
+    
+    0 + .is_female + .is_male +
+    
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor +
+    
+    .is_female:.provided_support_cwp_partner +
+    .is_male:.provided_support_cwp_partner +
+    
+    .is_female:.provided_support_cbp_actor +
+    .is_male:.provided_support_cbp_actor +
+    
+    .is_female:.provided_support_cbp_partner +
+    .is_male:.provided_support_cbp_partner +
+    
+    (0 + .is_female + .is_male | couple_id) + # optionally, add slopes
+    
+    (0 + .is_female + .is_male | couple_id:diaryday),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_apim_data
+)
 
-- When to use dynamic models vs. concurrent models
-- Current possibilities in R MLM for AR(1) or OU models
-- Current possibilities in R MLM for dynamic models
-- Alternatives (DSEM in Mplus or lavaan for X)
+summary(ild_apim_distinguishable_model)
+```
 
+## Exchangeable ILD APIM {.smaller}
+
+```{r}
+#| output-location: slide
+
+ild_apim_exchangeable_model <- glmmTMB::glmmTMB(
+  sedentary_hours ~
+    1 +
+    .provided_support_cwp_actor +
+    .provided_support_cwp_partner +
+    .provided_support_cbp_actor +
+    .provided_support_cbp_partner +
+    (1 | couple_id) +
+    (0 + .member_contrast_arbitrary | couple_id) +
+    (1 | couple_id:diaryday) +
+    (0 + .member_contrast_arbitrary | couple_id:diaryday),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_apim_data
+)
+
+summary(ild_apim_exchangeable_model)
+```
+
+
+
+```{r}
+performance::check_predictions(ild_apim_exchangeable_model)
+```
 
 
 <!----------------------------------------------------------------------------
@@ -1998,20 +2051,20 @@ apim_manual_data <- apim_manual_data |>
   )
 ```
 
-## Decompose self-efficacy manually [← Data preparation](#prepared-ild-apim-data){.appendix-back-link} {#manual-ild-apim-preparation .smaller}
+## Decompose provided support manually [← Data preparation](#prepared-ild-apim-data){.appendix-back-link} {#manual-ild-apim-preparation .smaller}
 
 ```{r}
 #| eval: false
 
-efficacy_components <- raw_ild_dyad_data |>
+support_components <- raw_ild_dyad_data |>
   dplyr::group_by(person_id) |>
   dplyr::mutate(
-    .person_mean = mean(efficacy, na.rm = TRUE),
-    .cwp = efficacy - .person_mean
+    .person_mean = mean(provided_support, na.rm = TRUE),
+    .provided_support_cwp = provided_support - .person_mean
   ) |>
   dplyr::ungroup() |>
   dplyr::mutate(
-    .cbp = .person_mean -
+    .provided_support_cbp = .person_mean -
       mean(.person_mean[!duplicated(person_id)], na.rm = TRUE)
   )
 ```
@@ -2021,36 +2074,25 @@ efficacy_components <- raw_ild_dyad_data |>
 ```{r}
 #| eval: false
 
-between_by_role <- efficacy_components |>
-  dplyr::distinct(couple_id, gender, .cbp) |>
-  tidyr::pivot_wider(names_from = gender, values_from = .cbp,
-                     names_glue = ".cbp_{gender}")
+partner_components <- support_components |>
+  dplyr::transmute(
+    couple_id,
+    diaryday,
+    gender = dplyr::recode(gender, female = "male", male = "female"),
+    .provided_support_cwp_partner = .provided_support_cwp,
+    .provided_support_cbp_partner = .provided_support_cbp
+  )
 
-lagged_within_by_role <- efficacy_components |>
-  dplyr::transmute(couple_id, diaryday = diaryday + 1L, gender, .cwp) |>
-  tidyr::pivot_wider(names_from = gender, values_from = .cwp,
-                     names_glue = ".cwp_{gender}")
-
-ild_manual_data <- raw_ild_dyad_data |>
-  dplyr::left_join(between_by_role, by = "couple_id") |>
-  dplyr::left_join(
-    lagged_within_by_role,
-    by = c("couple_id", "diaryday")
+ild_manual_data <- support_components |>
+  dplyr::rename(
+    .provided_support_cwp_actor = .provided_support_cwp,
+    .provided_support_cbp_actor = .provided_support_cbp
   ) |>
-  dplyr::mutate(
-    .efficacy_cbp_actor = dplyr::if_else(
-      gender == "female", .cbp_female, .cbp_male
-    ),
-    .efficacy_cbp_partner = dplyr::if_else(
-      gender == "female", .cbp_male, .cbp_female
-    ),
-    .efficacy_cwp_actor_lag1 = dplyr::if_else(
-      gender == "female", .cwp_female, .cwp_male
-    ),
-    .efficacy_cwp_partner_lag1 = dplyr::if_else(
-      gender == "female", .cwp_male, .cwp_female
-    )
+  dplyr::left_join(
+    partner_components,
+    by = c("couple_id", "diaryday", "gender"),
+    relationship = "one-to-one"
   )
 ```
 
-- Explicit day-role matching: independent of row order; unmatched lags remain `NA`
+- Explicit day-role matching: independent of row order
