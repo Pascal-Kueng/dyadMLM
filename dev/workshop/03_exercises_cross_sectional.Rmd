@@ -533,4 +533,4 @@ Optionally, fit a DIM or DSM directly using the package vignettes:
 # Intensive longitudinal dyads
 
 Continue with the
-[intensive longitudinal exercises](02_exercises_ild.Rmd).
+[intensive longitudinal exercises](04_exercises_ild.Rmd).

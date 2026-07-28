@@ -37,7 +37,7 @@ docker run --rm \
   --load-pause 2000 \
   --chrome-arg=--allow-file-access-from-files \
   "file:///slides/dyad-day.html" \
-  "/output/01_conceptual-foundations.pdf"
+  "/output/01_conceptual_foundations.pdf"
 
 docker run --rm \
   --volume "${temporary_input}:/slides:ro,Z" \
@@ -48,12 +48,12 @@ docker run --rm \
   --load-pause 2000 \
   --chrome-arg=--allow-file-access-from-files \
   "file:///slides/applied-tutorial.html" \
-  "/output/02_applied-tutorial.pdf"
+  "/output/02_applied_tutorial.pdf"
 
-test -s "${temporary_output}/01_conceptual-foundations.pdf"
-test -s "${temporary_output}/02_applied-tutorial.pdf"
+test -s "${temporary_output}/01_conceptual_foundations.pdf"
+test -s "${temporary_output}/02_applied_tutorial.pdf"
 
-install -m 0644 "${temporary_output}/01_conceptual-foundations.pdf" \
-  "${workshop_output}/01_conceptual-foundations.pdf"
-install -m 0644 "${temporary_output}/02_applied-tutorial.pdf" \
-  "${workshop_output}/02_applied-tutorial.pdf"
+install -m 0644 "${temporary_output}/01_conceptual_foundations.pdf" \
+  "${workshop_output}/01_conceptual_foundations.pdf"
+install -m 0644 "${temporary_output}/02_applied_tutorial.pdf" \
+  "${workshop_output}/02_applied_tutorial.pdf"
