@@ -94,19 +94,14 @@ Also decide whether your primary question is:
 
 > [Insert your temporal target and reasoning]
 
-```{r}
-# hint("ild_research_question", "concept")
-```
-
 
 # 2. Prepare and validate the data
 
 Use `dyadMLM::prepare_dyad_data()` and save the result as `my_ild_data`.
 
-```{r}
-?prepare_dyad_data()
+```{r eval=FALSE}
+?dyadMLM::prepare_dyad_data
 
-# hint("ild_prepare_data", "concept")
 # hint("ild_prepare_data", "structure")
 ```
 
@@ -141,10 +136,6 @@ Summarize what you found:
 
 
 # 3. Describe trajectories and relationships
-
-```{r}
-# hint("ild_describe_data", "concept")
-```
 
 
 ## Plot paired trajectories
@@ -183,7 +174,6 @@ Begin with the scientific mean structure. Include plausible time trends before
 adding a residual temporal process.
 
 ```{r eval=FALSE}
-# hint("ild_model", "concept")
 # hint("ild_model", "structure")
 
 my_ild_model <- glmmTMB(
@@ -207,10 +197,6 @@ Decide whether the remaining temporal dependence is best represented by:
 
 Document the time scale, lag, trend, covariance structure, and any constraints.
 
-```{r}
-# hint("ild_time_structure", "concept")
-```
-
 If required, update your model with the selected temporal structure:
 
 ```{r eval=FALSE}
@@ -229,11 +215,6 @@ estimates are plausible.
 Use the ILD DHARMa block from the applied tutorial. Inspect overall calibration,
 patterns against fitted values and time, and remaining temporal or
 cross-partner dependence.
-
-```{r eval=FALSE}
-# hint("ild_diagnostics", "concept")
-```
-
 
 ## Robustness
 
@@ -256,7 +237,6 @@ within-person from between-person effects and describe the temporal and
 cross-partner covariance structure.
 
 ```{r}
-# hint("ild_report_results", "concept")
 # hint("ild_report_results", "structure")
 ```
 

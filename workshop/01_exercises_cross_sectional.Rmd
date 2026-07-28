@@ -166,11 +166,10 @@ Summaries:
 ```
 
 Visualize distributions by gender. The easiest way to visualize a distribution
-is with `hist()`. You may subset data with `dplyr::filter()`.
+is with `hist()`. You can select rows directly with `[rows, columns]`.
 
 ```{r}
 # Pooled histogram
-# hint("histograms", "functions")
 # hint("histograms", "example_code")
 
 # Male histogram
@@ -199,7 +198,8 @@ Describe what you see and how you interpret the summaries and plots:
 
 # 4. Estimate the model
 
-First, estimate a model for distinguishable dyads:
+Inspect `names(my_data)` to find the generated columns you need in the formula.
+Then estimate a model for distinguishable dyads:
 
 ```{r eval=FALSE}
 # hint("distinguishable_model", "concept")
