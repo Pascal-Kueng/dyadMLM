@@ -311,9 +311,6 @@ Distinguishing by gender
 
 :::{.notes}
 
-Almost done with first step, we still have to decide on distinguishability. 
-In our data, probably makes sense to distinguish by gender. Not always!
-
 -> Gender, but TEST!
 
 :::
@@ -1285,16 +1282,15 @@ we can use the same RQ and data to demonstrate the exchangeable workflow.
 5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
+
 ## Create the required format and validate the data
 
 You can use `dyadMLM::prepare_dyad_data()` to prepare and validate the data. 
 
 For exchangeable dyads, we can just omit the `role` argument. 
-If we want to estimate both distinguishable and exchangeable versions, 
-we would pass `role` and set `include_arbitrary_member_contrast = TRUE`.
 
 ```{r}
-#| output-results: slide
+#| output-location: slide
 
 apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
   data = raw_dyad_data,
@@ -1310,6 +1306,11 @@ print(apim_exchangeable_data)
 
 ```
 
+:::{.subtle}
+If we want to estimate both distinguishable and exchangeable versions, 
+we would pass `role` and set `include_arbitrary_member_contrast = TRUE`.
+:::
+
 ## Create the required format and validate the data
 
 Looking at the relevant columns: 
@@ -1317,7 +1318,8 @@ Looking at the relevant columns:
 ```{r}
 head(apim_exchangeable_data) |>
   dplyr::select(
-    couple_id, person_id, .member_contrast_arbitrary, .efficacy_gmc, .efficacy_gmc_actor, .efficacy_gmc_partner, total_mvpa
+    couple_id, person_id, .member_contrast_arbitrary, .efficacy_gmc,
+    .efficacy_gmc_actor, .efficacy_gmc_partner, total_mvpa
   ) |>
   slide_table()
 ```
@@ -1420,17 +1422,21 @@ see::plots(
   plot_partner_similarity(
     partner_similarity_data,
     efficacy, efficacy_partner, couple_id, "Efficacy",
-    n_mahalanobis = 0
+    n_mahalanobis = 4
   ) +
     labs(x = "Focal member", y = "Partner"),
   plot_partner_similarity(
     partner_similarity_data,
     total_mvpa, total_mvpa_partner, couple_id, "Daily MVPA",
-    n_mahalanobis = 0
+    n_mahalanobis = 4
   ) +
     labs(x = "Focal member", y = "Partner")
 )
 ```
+
+<!-- TODO: can't we re-use the function we created earlier for the similarity plots?
+And either way, we should use the same mahalanobis of 4 right? I change it
+from 0 to 4-->
 
 ## Workflow
 
@@ -1590,6 +1596,8 @@ distinguishing are tested are possible (if there are feasible ways)
 parameters::model_parameters(apim_exchangeable_model, effects = 'fixed') |>
   insight::print_md(footer = "")
 ```
+
+<!-- TODO: soes a 
 
 ::: {.fragment}
 In the parsimonious exchangeable model, higher self-efficacy was associated
@@ -1853,9 +1861,95 @@ ild_apim_data <- dyadMLM::prepare_dyad_data(
 )
 ```
 
-## Distinguishable ILD APIM {.smaller}
+## The ILD APIM starts with two member-specific equations {.smaller}
+
+For dyad $i$ at occasion $t$, superscripts $\mathrm{W}$ and $\mathrm{B}$
+denote within-person and between-person components:
+
+$$
+\begin{aligned}
+Y_{\mathrm{M},it} ={}&
+b_{0,\mathrm{M}}
++ \color{#1769AA}{
+  a^{\mathrm{W}}_{\mathrm{M}}X^{(\mathrm{A,W})}_{\mathrm{M},it}
+  + a^{\mathrm{B}}_{\mathrm{M}}X^{(\mathrm{A,B})}_{\mathrm{M},i}
+}
++ \color{#7B3FA1}{
+  p^{\mathrm{W}}_{\mathrm{M}}X^{(\mathrm{P,W})}_{\mathrm{M},it}
+  + p^{\mathrm{B}}_{\mathrm{M}}X^{(\mathrm{P,B})}_{\mathrm{M},i}
+}
++ u_{0,\mathrm{M}i}
++ \epsilon_{\mathrm{M},it}
+\\[0.6em]
+Y_{\mathrm{F},it} ={}&
+b_{0,\mathrm{F}}
++ \color{#1769AA}{
+  a^{\mathrm{W}}_{\mathrm{F}}X^{(\mathrm{A,W})}_{\mathrm{F},it}
+  + a^{\mathrm{B}}_{\mathrm{F}}X^{(\mathrm{A,B})}_{\mathrm{F},i}
+}
++ \color{#7B3FA1}{
+  p^{\mathrm{W}}_{\mathrm{F}}X^{(\mathrm{P,W})}_{\mathrm{F},it}
+  + p^{\mathrm{B}}_{\mathrm{F}}X^{(\mathrm{P,B})}_{\mathrm{F},i}
+}
++ u_{0,\mathrm{F}i}
++ \epsilon_{\mathrm{F},it}.
+\end{aligned}
+$$
+
+[**Actor effects**]{style="color: #1769AA"} ·
+[**Partner effects**]{style="color: #7B3FA1"}
+
+:::{.text-smaller}
+
+- $u_{0,ri}$: stable member-within-dyad deviation
+- $\epsilon_{r,it}$: occasion-specific residual
+- **Optional random slope:** add
+  $u_{\mathrm{A},ri}X^{(\mathrm{A,W})}_{r,it}$
+- **Same stacking approach:** role indicators select the male or female equation
+
+:::
+
+## Repeated measures separate two covariance levels {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+### Stable across occasions
+
+`couple_id`
+
+- Role-specific random intercepts
+- Optional random slopes
+- Partner covariance in stable levels or slopes
+
+:::
+
+::: {.column width="50%"}
+
+### New at each occasion
+
+`couple_id:diaryday`
+
+- Partner-specific Gaussian residual variance
+- Same-occasion residual correlation
+- Independent across occasions unless modeled otherwise
+
+:::
+
+::::
+
+:::{.subtle}
+
+One cross-sectional observation per member $\rightarrow$ these sources cannot
+be estimated separately.
+
+:::
+
+## Fitting the distinguishable ILD APIM in glmmTMB {.smaller}
 
 ```{r}
+#| code-line-numbers: "1-28|4|6-10|12-16|18-19|21-22|23-25|1-28"
 #| output-location: slide
 
 ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
@@ -1875,8 +1969,10 @@ ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
     .is_female:.provided_support_cbp_partner +
     .is_male:.provided_support_cbp_partner +
     
-    (0 + .is_female + .is_male | couple_id) + # optionally, add slopes
+    # Stable dyad/member random effects (optionally, add slopes)
+    (0 + .is_female + .is_male | couple_id) +
     
+    # Same-occasion Gaussian residual covariance
     (0 + .is_female + .is_male | couple_id:diaryday),
   dispformula = ~ 0,
   family = gaussian(),
