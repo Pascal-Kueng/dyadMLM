@@ -765,9 +765,6 @@ dsm_ILD <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_dsm_data
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; false convergence (8). See vignette('troubleshooting'),
-#> help('diagnose')
 
 summary(dsm_ILD)
 #>  Family: gaussian  ( identity )
@@ -797,18 +794,18 @@ summary(dsm_ILD)
 #> 
 #> Conditional model:
 #>                                                            Estimate Std. Error
-#> (Intercept)                                                5.111587   0.071203
-#> diaryday                                                  -0.005239   0.003745
-#> .provided_support_cwp_dyad_mean                            0.472112   0.027866
-#> .provided_support_cwp_within_dyad_diff                     0.011993   0.017685
-#> .provided_support_cbp_dyad_mean                            1.465978   0.092236
-#> .provided_support_cbp_within_dyad_diff                     0.101045   0.075771
-#> .dsm_role_contrast                                         0.864420   0.099661
-#> diaryday:.dsm_role_contrast                                0.023049   0.005604
-#> .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.212177   0.041695
-#> .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.196321   0.026462
-#> .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.719314   0.127875
-#> .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.923647   0.105047
+#> (Intercept)                                                5.111583   0.071202
+#> diaryday                                                  -0.005238   0.003745
+#> .provided_support_cwp_dyad_mean                            0.472112   0.027865
+#> .provided_support_cwp_within_dyad_diff                     0.011992   0.017685
+#> .provided_support_cbp_dyad_mean                            1.465964   0.092236
+#> .provided_support_cbp_within_dyad_diff                     0.101067   0.075770
+#> .dsm_role_contrast                                         0.864415   0.099661
+#> diaryday:.dsm_role_contrast                                0.023050   0.005604
+#> .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.212178   0.041695
+#> .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.196322   0.026461
+#> .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.719301   0.127875
+#> .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.923664   0.105047
 #>                                                           z value Pr(>|z|)    
 #> (Intercept)                                                 71.79  < 2e-16 ***
 #> diaryday                                                    -1.40    0.162    
