@@ -278,8 +278,16 @@ vignette section on
 For now, briefly assess whether the diagnostics appear acceptable overall and
 for each role.
 
-If the model is not adequate, revise its outcome scale, family, mean structure,
-or covariance structure and repeat these checks before continuing.
+If convergence problems or DHARMa patterns suggest a problematic outcome
+scale, inspect a histogram. For a nonnegative, right-skewed outcome, try
+`sqrt()` or `log1p()` (which handles zeros), check whether the histogram is less
+skewed, refit the model, and rerun DHARMa.
+
+For some outcomes, an appropriate non-Gaussian family may be preferable to a
+transformation. Generalized families have different assumptions and require
+case-specific choices, so they are not covered in this workshop. If the model
+remains inadequate, reconsider its mean and covariance structure before
+continuing.
 
 
 ### Distinguishability

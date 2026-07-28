@@ -1716,15 +1716,9 @@ Synthesized from @bolgerIntensiveLongitudinalMethods2013,
 
 :::{.notes}
 
-For ILD-specific power analysis, see @lafitPowerLAPIMApplication2022. Perry et
-al. belongs with interpretation of fitted dynamics: their change-score APIM and
-vector-field diagrams show the joint implications of actor and partner
+Perry et al. belongs with interpretation of fitted dynamics: their change-score
+APIM and vector-field diagrams show the joint implications of actor and partner
 coefficients [@perryGraphicMethodsInterpreting2017].
-
-<!-- TODO: should we insert a link with resources for cross-sectional and ILD
-power analysis in each section, or maybe better in the final few slides that
-talk about reporting (the meta-analysis)? This should then be moved from
-the notes to an appropriate place. -->
 
 We will use `wbCorr` for pooled within- and between-person correlations
 [@kuengWbCorrBivariateWithin2026]; @hamakerCuriousCaseCrossSectional2024
@@ -1735,19 +1729,6 @@ also for cross-sectional dyads? Maybe use wbCorr on different levels, just
 without inference then? Or is there another package that can do what we want
 for exchangeable dyads? -->
 
-
-`omegaSEM()` is provided by `multilevelTools`. It implements
-level-specific internal-consistency coefficients based on a two-level
-one-factor model [@wileyMultilevelTools2025;
-@geldhofReliabilityEstimationMultilevel2014]. These coefficients are not
-temporal stability or the precision of observed person means; for the latter,
-see @laiCompositeReliabilityMultilevel2021.
-
-<!-- TODO: add multilevelTools to the install packages function for the
-exercises. And should we add a brief reliability section to the cross-sectional
-part? Maybe just a mention of reporting reliability where applicable, in 
-"what to report" or so? Then we could omit it from both cross-sectional and ILD
-parts and only mention it in the end, and mention omegaSEM? -->
 
 :::
 
@@ -1772,28 +1753,18 @@ parts and only mention it in the end, and mention omegaSEM? -->
 **Not aggregated anymore:**
 
 - Daily total MVPA in minutes
-- Daily self-efficacy 0–5 $\rightarrow$ lag 1!
-
-<!-- TODO: should we use self-efficacy again? This means that we will need to 
-lag efficacy, right? Which we can do with dyadMLM::prepare_dyad_data() -->
-
+- Daily self-efficacy (0–5): “I am sure I can be active tomorrow”
+- Predictor on day $t$ $\rightarrow$ physical activity on day $t+1$
 
 ## ILD Research Question {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ:]{.rq-label} [In romantic couples, is a person's daily and person-mean
-**self-efficacy** linked to daily and person-mean physical activity in 
-both partners?]{.rq-text}
+[RQ:]{.rq-label} [How are daily deviations and stable between-person
+differences in **self-efficacy** associated with one's own and one's partner's
+physical activity the next day?]{.rq-text}
 :::
 :::
-
-<!-- TODO: how to best formulate this? to not sound too much like a hypothesis
-but distinct from the cross-sectional RQ? Fine as is? -->
-
-
-<!-- TODO: should we briefly show the slides again with the measures? Just 5
-seconds each. -->
 
 # Distinguishable ILD APIM
 Distinguishing by gender
@@ -1822,6 +1793,14 @@ slide_table(head(raw_ild_dyad_data))
 
 ## Create the required format and validate the data
 
+**We still need to:* *
+
+- Create actor and partner variables
+- Create an arbitrary member contrast
+- Validate dyads are as expected
+
+**Additionally:**
+
 Decompose each time-varying predictor $X_{rit}$, where $r$ denotes role,
 $i$ dyad, and $t$ occasion:
 
@@ -1833,7 +1812,26 @@ $i$ dyad, and $t$ occasion:
 Here, $\bar X_{ri}$ is member $r$'s observed mean in dyad $i$, and $\bar X$ is
 the equally weighted mean of the observed person means.
 
-  
+## Create the required format and validate the data [Manual code →](#manual-ild-apim-preparation){.results-forward-link} {#prepared-ild-apim-data .smaller}
+
+```{r}
+ild_apim_data <- dyadMLM::prepare_dyad_data(
+  data = raw_ild_dyad_data,
+  dyad = couple_id,
+  member = person_id,
+  role = gender,
+  time = diaryday,
+  predictors = efficacy,
+  lag1_predictors = efficacy,
+  model_types = "apim",
+  seed = 123
+)
+```
+
+- Lagged CWP terms: day-$t$ efficacy $\rightarrow$ day-$t+1$ MVPA
+- CBP terms: stable between-person differences; not lagged
+- Exact day matching: missing occasions are not bridged
+
 ## Exchangeable APIM
 
 ## AR(1), OU, and Dynamic Models
@@ -1915,6 +1913,9 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
 3. **Explain missing data:** describe missingness and the handling strategy.
 4. **Specify the full model:** roles and distinguishability, actor and partner
    paths, constraints, and covariance structure.
+5. **Report reliability where applicable:** within- and between-level omega for
+   multilevel item scales, e.g., `multilevelTools::omegaSEM()`
+   [@wileyMultilevelTools2025; @geldhofReliabilityEstimationMultilevel2014].
 
 The review also recommends multi-method measurement and more diverse
 populations
@@ -1967,6 +1968,59 @@ apim_manual_data <- raw_dyad_data |>
   dplyr::ungroup()
 ```
 
-<!-- TODO: We should also create an ILD version of that code for manual computation
-of actor effects and link back and forth appropriately. Safe for unordered rows
-and missing rows, but as clear and short as possible. -->
+## Decompose self-efficacy manually [← Data preparation](#prepared-ild-apim-data){.appendix-back-link} {#manual-ild-apim-preparation .smaller}
+
+```{r}
+#| eval: false
+
+efficacy_components <- raw_ild_dyad_data |>
+  dplyr::group_by(person_id) |>
+  dplyr::mutate(
+    .person_mean = mean(efficacy, na.rm = TRUE),
+    .cwp = efficacy - .person_mean
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    .cbp = .person_mean -
+      mean(.person_mean[!duplicated(person_id)], na.rm = TRUE)
+  )
+```
+
+## Match actor and partner components manually [← Data preparation](#prepared-ild-apim-data){.appendix-back-link} {#manual-ild-apim-matching .smaller}
+
+```{r}
+#| eval: false
+
+between_by_role <- efficacy_components |>
+  dplyr::distinct(couple_id, gender, .cbp) |>
+  tidyr::pivot_wider(names_from = gender, values_from = .cbp,
+                     names_glue = ".cbp_{gender}")
+
+lagged_within_by_role <- efficacy_components |>
+  dplyr::transmute(couple_id, diaryday = diaryday + 1L, gender, .cwp) |>
+  tidyr::pivot_wider(names_from = gender, values_from = .cwp,
+                     names_glue = ".cwp_{gender}")
+
+ild_manual_data <- raw_ild_dyad_data |>
+  dplyr::left_join(between_by_role, by = "couple_id") |>
+  dplyr::left_join(
+    lagged_within_by_role,
+    by = c("couple_id", "diaryday")
+  ) |>
+  dplyr::mutate(
+    .efficacy_cbp_actor = dplyr::if_else(
+      gender == "female", .cbp_female, .cbp_male
+    ),
+    .efficacy_cbp_partner = dplyr::if_else(
+      gender == "female", .cbp_male, .cbp_female
+    ),
+    .efficacy_cwp_actor_lag1 = dplyr::if_else(
+      gender == "female", .cwp_female, .cwp_male
+    ),
+    .efficacy_cwp_partner_lag1 = dplyr::if_else(
+      gender == "female", .cwp_male, .cwp_female
+    )
+  )
+```
+
+- Explicit day-role matching: independent of row order; unmatched lags remain `NA`

@@ -1480,9 +1480,6 @@ positive female–male MVPA difference than predicted.
 
 In other words, their unexplained MVPA tends to tilt toward the female partner.
 
-<!-- TODO: after the workshop perhaps create a slide-deck that has the 
-interpretations on a separate slide for each model -->
-
 :::
 
 
