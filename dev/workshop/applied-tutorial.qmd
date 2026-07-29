@@ -1033,6 +1033,7 @@ partner effects remain unsupported.
 ## Test distinguishability
 
 - Fit model with exchangeability constraints
+  - Partial constraints can be very informative!
 
 - Compare models
 
@@ -1278,6 +1279,13 @@ parameters::model_parameters(apim_distinguishable_model, effects = "fixed") |>
 - **Checks and interpretation:** residual diagnostics, influential dyads, prespecified sensitivity analyses, material changes, and causal limits
 
 
+# Short break!
+
+:::{.notes}
+
+15:30 - 15:45 
+
+:::
 
 # Exchangeable dyads
 The same model but constrained
@@ -2099,17 +2107,33 @@ simulated from the fitted model.
 - Role-specific residual variability and persistence $\rho$
 - Same-day partner covariance retained separately
 
+```{r eval = FALSE}
+ild_apim_distinguishable_ar1_model <- update(
+  ild_apim_distinguishable_model,
+  . ~ . +
+    ar1(0 + .is_female:diaryday_f | couple_id) +
+    ar1(0 + .is_male:diaryday_f | couple_id)
+)
+```
+
 ```{r}
-#| output-location: slide
+#| label: fit-ild-distinguishable-ar1
+#| include: false
 
 ild_apim_distinguishable_ar1_model <- update(
   ild_apim_distinguishable_model,
-  . ~ . -
-    (0 + .is_female + .is_male | couple_id:diaryday) +
+  . ~ . +
     ar1(0 + .is_female:diaryday_f | couple_id) +
-    ar1(0 + .is_male:diaryday_f | couple_id) +
-    (0 + .is_female + .is_male | couple_id:diaryday)
+    ar1(0 + .is_male:diaryday_f | couple_id)
 )
+
+ild_apim_distinguishable_ar1_model <- refit_glmmTMB_with_bfgs_if_needed(
+  ild_apim_distinguishable_ar1_model
+)
+```
+
+```{r}
+#| output-location: slide
 
 glmmTMB::VarCorr(ild_apim_distinguishable_ar1_model)
 ```
@@ -2257,12 +2281,15 @@ dyadMLM::recover_exchangeable_covariance(ild_apim_exchangeable_ar1_model)
 
 ## Compare distinguishable and exchangeable models
 
+This is a global test, **partial constraints can be informative too!** 
+
 ```{r}
 dyadMLM::compare_nested_models(
   ild_apim_distinguishable_ar1_model,
   ild_apim_exchangeable_ar1_model
 )
 ```
+
 
 
 ## Workflow
@@ -2387,6 +2414,7 @@ plot(
   )
 ```
 
+
 :::{.text-smaller}
 **Within person:** Men’s MVPA was 3.5% higher when their own previous-day PBC was
 one point above usual, and 2.5% higher when their partner’s was.
@@ -2492,7 +2520,7 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
 - Go to https://pascal-kueng.github.io/dyadMLM/workshop/
 - Link is also in the Teams channel
 - Download and unzip all workshop materials
-- Start R from this folder (by opening one of the files)
+- Start R from that folder (by opening one of the files)
 
 Run this to ensure all relevant packages are installed and up to date:
 
