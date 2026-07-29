@@ -140,6 +140,10 @@ Save the prepared data as `my_data`; later exercise code uses this name.
 # hint("prepare_data", "structure")
 ```
 
+```{r}
+# Prepare the data and save it as my_data.
+```
+
 Inspect the prepared data (like you did above with the raw data) and verify the 
 dyad IDs, member IDs, roles, row counts, missingness, and generated columns 
 make sense:
@@ -166,29 +170,37 @@ Summaries:
 # hint("descriptive_summary", "example_code")
 ```
 
+```{r}
+# Create my_wide_data and add your summaries here.
+```
+
 Visualize distributions by gender. The easiest way to visualize a distribution
 is with `hist()`. You can select rows directly with `[rows, columns]`.
 
 ```{r}
-# Pooled histogram
 # hint("histograms", "example_code")
+```
+
+```{r}
+# Pooled histogram
 
 # Male histogram
 
 # Female histogram
-
 ```
 
 
 Describe partner similarity:
 
 ```{r}
-# Correlations
 # hint("partner_similarity", "correlations")
+# hint("partner_similarity", "plot")
+```
+
+```{r}
+# Correlations
 
 # Plot
-# hint("partner_similarity", "plot")
-
 ```
 
 
@@ -206,7 +218,9 @@ Then estimate a model for distinguishable dyads:
 # hint("distinguishable_model", "concept")
 # hint("distinguishable_model", "structure")
 # hint("distinguishable_model", "example_code")
+```
 
+```{r eval=FALSE}
 my_model <- glmmTMB(
   
   YOUR_MODEL_FORMULA,
@@ -305,7 +319,12 @@ with `names(my_data)`.
 # hint("exchangeable_model", "fixed_effects")
 # hint("exchangeable_model", "random_effects")
 # hint("exchangeable_model", "example_code")
+# hint("outcome_scale", "matched_models")
 
+```
+
+```{r}
+# Fit the equivalent exchangeable model here.
 ```
 
 Compare the distinguishable and exchangeable models using
@@ -427,7 +446,9 @@ the retained model without it:
 
 ```{r eval=FALSE}
 # hint("robustness_refit", "ids")
+```
 
+```{r eval=FALSE}
 data_without_selected_dyads <- dplyr::filter(
   my_data,
   !couple_id %in% DYAD_IDS_TO_EXCLUDE
@@ -458,16 +479,28 @@ Print a fixed-effects table for `retained_model` using
 # hint("report_results", "fixed_effects")
 ```
 
+```{r}
+# Add your fixed-effects table here.
+```
+
 Print a random-effects table:
 
 ```{r}
 # hint("report_results", "random_effects")
 ```
 
+```{r}
+# Add your random-effects table here.
+```
+
 Plot the fixed effects:
 
 ```{r}
 # hint("report_results", "plot")
+```
+
+```{r}
+# Add your fixed-effects plot here.
 ```
 
 
@@ -492,7 +525,7 @@ on that scale—or use back-transformed predictions.
 You have now completed the APIM workflow!
 
 
-## Compute DIM estimates from the exchangeable APIM
+## Optional: Compute DIM estimates from the exchangeable APIM
 
 The transformation from exchangeable APIM coefficients to DIM estimates is
 particularly simple.
@@ -511,7 +544,9 @@ Recover the DIM estimates:
 
 ```{r eval=FALSE}
 # hint("dim_transformation", "formulas")
+```
 
+```{r eval=FALSE}
 b_mean <- YOUR_FORMULA
 b_dev <- YOUR_FORMULA
 
@@ -536,5 +571,5 @@ Optionally, fit a DIM or DSM directly using the package vignettes:
 
 # Intensive longitudinal dyads
 
-Continue with the
+If you finish early, or for take-home practice, continue with the
 [intensive longitudinal exercises](04_exercises_ild.Rmd).

@@ -765,6 +765,9 @@ dsm_ILD <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_dsm_data
 )
+#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
+#> problem; false convergence (8). See vignette('troubleshooting'),
+#> help('diagnose')
 
 summary(dsm_ILD)
 #>  Family: gaussian  ( identity )
@@ -794,30 +797,30 @@ summary(dsm_ILD)
 #> 
 #> Conditional model:
 #>                                                            Estimate Std. Error
-#> (Intercept)                                                5.139695   0.075933
+#> (Intercept)                                                5.139696   0.075933
 #> diaryday                                                  -0.006523   0.004421
-#> .provided_support_cwp_dyad_mean                            0.473415   0.032891
-#> .provided_support_cwp_within_dyad_diff                     0.017513   0.020874
-#> .provided_support_cbp_dyad_mean                            1.474829   0.096888
-#> .provided_support_cbp_within_dyad_diff                     0.106984   0.079592
-#> .dsm_role_contrast                                         0.947550   0.113747
-#> diaryday:.dsm_role_contrast                                0.012131   0.007388
-#> .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.176599   0.054969
-#> .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.208779   0.034886
-#> .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.682294   0.142140
-#> .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.903122   0.116765
+#> .provided_support_cwp_dyad_mean                            0.473411   0.032891
+#> .provided_support_cwp_within_dyad_diff                     0.017511   0.020874
+#> .provided_support_cbp_dyad_mean                            1.474831   0.096887
+#> .provided_support_cbp_within_dyad_diff                     0.106980   0.079591
+#> .dsm_role_contrast                                         0.947571   0.113748
+#> diaryday:.dsm_role_contrast                                0.012130   0.007388
+#> .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.176606   0.054969
+#> .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.208786   0.034886
+#> .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.682311   0.142140
+#> .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.903119   0.116766
 #>                                                           z value Pr(>|z|)    
 #> (Intercept)                                                 67.69  < 2e-16 ***
-#> diaryday                                                    -1.48  0.14003    
+#> diaryday                                                    -1.48  0.14002    
 #> .provided_support_cwp_dyad_mean                             14.39  < 2e-16 ***
-#> .provided_support_cwp_within_dyad_diff                       0.84  0.40150    
+#> .provided_support_cwp_within_dyad_diff                       0.84  0.40154    
 #> .provided_support_cbp_dyad_mean                             15.22  < 2e-16 ***
-#> .provided_support_cbp_within_dyad_diff                       1.34  0.17890    
+#> .provided_support_cbp_within_dyad_diff                       1.34  0.17891    
 #> .dsm_role_contrast                                           8.33  < 2e-16 ***
-#> diaryday:.dsm_role_contrast                                  1.64  0.10057    
+#> diaryday:.dsm_role_contrast                                  1.64  0.10060    
 #> .provided_support_cwp_dyad_mean:.dsm_role_contrast           3.21  0.00131 ** 
 #> .provided_support_cwp_within_dyad_diff:.dsm_role_contrast    5.98 2.17e-09 ***
-#> .provided_support_cbp_dyad_mean:.dsm_role_contrast           4.80 1.59e-06 ***
+#> .provided_support_cbp_dyad_mean:.dsm_role_contrast           4.80 1.58e-06 ***
 #> .provided_support_cbp_within_dyad_diff:.dsm_role_contrast    7.73 1.04e-14 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
