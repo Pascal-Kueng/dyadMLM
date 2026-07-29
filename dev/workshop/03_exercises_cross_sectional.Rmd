@@ -305,6 +305,7 @@ with `names(my_data)`.
 # hint("exchangeable_model", "fixed_effects")
 # hint("exchangeable_model", "random_effects")
 # hint("exchangeable_model", "example_code")
+# hint("outcome_scale", "matched_models")
 
 ```
 
@@ -492,7 +493,7 @@ on that scale—or use back-transformed predictions.
 You have now completed the APIM workflow!
 
 
-## Compute DIM estimates from the exchangeable APIM
+## Optional: Compute DIM estimates from the exchangeable APIM
 
 The transformation from exchangeable APIM coefficients to DIM estimates is
 particularly simple.
@@ -536,5 +537,5 @@ Optionally, fit a DIM or DSM directly using the package vignettes:
 
 # Intensive longitudinal dyads
 
-Continue with the
+If you finish early, or for take-home practice, continue with the
 [intensive longitudinal exercises](04_exercises_ild.Rmd).

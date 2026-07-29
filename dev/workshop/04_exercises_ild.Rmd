@@ -14,8 +14,9 @@ editor: source
 
 # Exercises
 
-These exercises extend the cross-sectional APIM workflow to intensive
-longitudinal dyadic data.
+These exercises are a fast-finisher or take-home extension of the
+cross-sectional APIM workflow. Complete the cross-sectional exercise first;
+faster participants can continue here during the workshop.
 
 Download the complete workshop materials from the
 [workshop page](https://pascal-kueng.github.io/dyadMLM/workshop/). Package
@@ -178,6 +179,7 @@ Check:
 
 ```{r}
 # hint("ild_validation", "functions")
+# hint("ild_validation", "solution")
 
 ```
 
@@ -191,10 +193,16 @@ Summarize what you found:
 
 ## Describe the focal variables
 
-Summarize `provided_support` and `closeness` by role and inspect their
-distributions.
+Reuse the simple tools from the cross-sectional exercise: summarize
+`provided_support` and `closeness` overall and by role, then inspect
+role-specific histograms. Means and standard deviations are sufficient here.
 
 ```{r}
+# Overall and role-specific summaries
+# hint("ild_descriptives", "summary")
+
+# Role-specific histograms
+# hint("ild_descriptives", "histograms")
 
 ```
 
@@ -205,26 +213,31 @@ Plot both variables over time for a manageable selection of dyads. Make the two
 members identifiable and avoid drawing every trajectory in one panel.
 
 ```{r}
+# hint("ild_trajectories", "structure")
+# hint("ild_trajectories", "solution")
 
 ```
 
 
-## Separate within- and between-person information
+## Optional extension: separate within- and between-person information
 
-At minimum:
+If time permits, adapt the wide-data correlation workflow from the
+cross-sectional exercise. Create one row per couple and day, with separate
+female and male columns for each focal variable. Then use `wbCorr()` with
+`coupleID` as the cluster to inspect:
 
-- calculate ICCs for the focal variables
-- describe their within-person and between-person variation
-- calculate within- and between-level associations that are relevant to the
-  actor and partner questions
-- note whether multilevel reliability would be needed for multi-item measures
-  (item-level data are not included here)
+- ICCs for each role-specific series
+- correlations among daily deviations within couples
+- correlations among role-specific person means between couples
 
-Use methods from your ILD training and the applied tutorial. Treat descriptive
+Map the relevant entries to the actor and partner questions. Treat these
 correlations as descriptive rather than as replacements for the APIM.
+Multilevel reliability would also matter for multi-item measures, but the
+item-level data needed to estimate it are not included here.
 
 ```{r}
 # hint("ild_level_associations", "structure")
+# hint("ild_level_associations", "solution")
 
 ```
 
@@ -473,6 +486,7 @@ Print the fixed and random effects, and inspect the fitted covariance
 parameters:
 
 ```{r}
+# hint("ild_reporting", "solution")
 
 ```
 
@@ -483,6 +497,7 @@ member-level stable and same-occasion covariance.
 Plot the focal fixed effects or model-implied associations:
 
 ```{r}
+# hint("ild_reporting", "plot")
 
 ```
 
@@ -500,6 +515,10 @@ Write a brief results paragraph that:
 Interpret the estimates as associations, not causal effects. If effects are
 role-specific, a significant estimate for one role and a nonsignificant
 estimate for the other do not by themselves establish that the roles differ.
+
+```{r}
+# hint("ild_reporting", "paragraph_template")
+```
 
 > [Insert your brief results paragraph]
 

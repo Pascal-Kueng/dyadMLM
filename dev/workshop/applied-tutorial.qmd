@@ -1731,23 +1731,6 @@ Synthesized from @bolgerIntensiveLongitudinalMethods2013,
 
 :::
 
-<!-- TODO: we need to insert a paird trajectories plot. We can re-use this code 
-but make it ideally much shorter (maybe with the see package?) and also make it
-prettier. 
-
-ggplot(data = subset(BLdyads_doubleentry, coupleid <= 9), aes(x = time, group = personid), legend = FALSE) +
-  geom_rect(mapping = aes(xmin = time-.5, xmax = time+.5, ymin = 0, ymax = 5, fill = f_wrkstrsc_w), alpha = 0.6) + # creating rectangles in the background of the plot colored by female work stressors
-  geom_rect(mapping = aes(xmin = time-.5, xmax = time+.5, ymin = 5, ymax = 10, fill = m_wrkstrsc_w), alpha = 0.6) + # creating rectangles in the background of the plot colored by male work stressors
-  geom_point(aes(x = time, y = reldis, color = factor(gender)), shape = 17, size = 3) + # creating a different colored point for each gender
-  geom_line(aes(x = time, y = reldis, color = factor(gender)), lty = 1, size=1) + # creating a different colored line for each gender
-  xlab("Time") + 
-  ylab("Relationship Dissatisfaction") + ylim(0, 10) +
-  scale_x_continuous(breaks=seq(0, 20, by = 5)) + 
-  facet_wrap( ~ coupleid) +# creating a separate plot for each dyad
-  theme(legend.position = "none")
-  
--->
-
 ## Workflow
 
 1. [**Define dyads, distinguishability, and research questions**]{.text-highlight}
@@ -1910,8 +1893,30 @@ print(ild_apim_data)
 6. **Visualize, interpret, and report results**
 
 
-<!--TODO: insert panel plots of trajectories. Or should we do this before data
-prep maybe? Would be inconsistent with the cross-sectional workflow though -->
+## Plot paired raw MVPA trajectories
+
+```{r}
+#| label: paired-raw-mvpa-trajectories
+#| output-location: slide
+#| fig-format: svg
+#| fig-width: 10
+#| fig-height: 4.7
+#| out-width: 90%
+#| fig-align: center
+#| fig-cap: "Four couples shown; gaps indicate missing or excluded MVPA days."
+
+raw_ild_dyad_data |>
+  dplyr::filter(couple_id <= 4) |>
+  ggplot(aes(diaryday, device_based_mvpa, color = gender,
+             group = person_id)) +
+  geom_line(linewidth = 0.65, na.rm = TRUE) +
+  geom_point(size = 1.1, na.rm = TRUE) +
+  facet_wrap(~ couple_id, ncol = 2) +
+  scale_color_manual(values = c(female = "#1769AA", male = "#7B3FA1")) +
+  labs(x = "Diary day", y = "MVPA (minutes)", color = NULL) +
+  see::theme_modern(base_size = 16) +
+  theme(legend.position = "top")
+```
 
 ## Workflow
 1. **Define dyads, distinguishability, and research questions**
@@ -2001,10 +2006,8 @@ $$
 
 ## Fitting the distinguishable ILD APIM with glmmTMB
 
-<!-- TODO: Fix the line-numbers -->
-
 ```{r}
-#| code-line-numbers: "1-30|4-6|8-12|14-18|20-24|1-30"
+#| code-line-numbers: "1-38|4-5|7-8|10-17|19-26|28-29|31-36|38|1-38"
 #| output: false
 
 ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
@@ -2061,6 +2064,11 @@ summary(ild_apim_distinguishable_model)
 #| label: simulate-dharma-ild-no-ar
 #| cache: true
 #| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_distinguishable_model), stats::model.frame(ild_apim_distinguishable_model), body(simulate_ild_dharma)))
+#| fig-format: svg
+#| fig-width: 8
+#| fig-height: 3.3
+#| out-width: 70%
+#| fig-align: center
 
 ild_apim_no_ar_dharma <- simulate_ild_dharma(
   model = ild_apim_distinguishable_model,
@@ -2071,14 +2079,15 @@ ild_apim_no_ar_dharma <- simulate_ild_dharma(
   seed = 123
 )
 
-test_ild_lag1(ild_apim_no_ar_dharma)
+ild_apim_no_ar_lag1_test <- test_ild_lag1(
+  ild_apim_no_ar_dharma,
+  plot = TRUE
+)
 ```
-<!-- TODO: no plot is being printed! Please fix. Also, needing multiple 
-custom functions here is a bit intransparent. Cans' we use raw code for the
-AR test? or is it more than a handful of lines? -->
 
 :::{.subtle}
-The independence-across-days assumption is not adequate here
+The helper compares the observed consecutive-day correlation with correlations
+simulated from the fitted model. Independence across days is not adequate here
 ($\hat r_{\mathrm{lag1}}\approx .17$, $p<.001$).
 :::
 
@@ -2108,9 +2117,27 @@ dyad-day SDs and correlation describe the remaining same-day variation.
 
 :::{.notes}
 
-<!-- TODO: insert interpretation of each parameter please. what does 
-a couple-level std.dev intercept of 0.23 mean? and the correlation of 0.34? what does the
-daily level SD intercept of 0.35 mean, and the 0.38 corr? in applied terms. -->
+- The `couple_id` SDs of 0.24 for women and 0.26 for men describe stable
+  between-couple variation in each member's log-MVPA after accounting for the
+  fixed effects. A one-SD positive deviation corresponds to about 1.27 and 1.30
+  times the geometric-mean MVPA, respectively.
+- The couple-level correlation of 0.34 means that partners' stable deviations
+  tend to align moderately: when one partner is persistently above their
+  expected level, the other also tends to be above theirs.
+- The AR(1) SDs of about 0.23 describe the size of each member's persistent
+  occasion-level component. The AR correlations of 0.88 and 0.81 describe
+  one-day persistence within those components, not the correlation of the
+  complete residual.
+- The dyad-day SDs of 0.35 and 0.38 describe the remaining nonpersistent
+  same-day variation. A one-SD positive deviation corresponds to about 1.42
+  and 1.46 times the geometric-mean MVPA.
+- The dyad-day correlation of 0.39 means that partners' remaining same-day
+  deviations tend to move together after the stable and persistent components
+  have been separated.
+- The complete occasion-level residual combines the AR and dyad-day variances:
+  its SDs are about 0.42 and 0.44. Because the two AR processes are independent
+  across partners, the complete same-day residual correlation is about 0.28,
+  not 0.39.
 
 :::
 
@@ -2138,9 +2165,13 @@ ild_apim_dharma_residuals <- simulate_ild_dharma(
 #| out-width: 92%
 #| fig-align: center
 
+ild_dharma_graphics_parameters <- graphics::par(no.readonly = TRUE)
+
 plot(
   ild_apim_dharma_residuals
 )
+
+graphics::par(ild_dharma_graphics_parameters)
 ```
 
 :::{.subtle}
@@ -2153,11 +2184,20 @@ becomes more meaningful.
 ## Does the fitted AR(1) reproduce lag-1 dependence?
 
 ```{r}
-test_ild_lag1(ild_apim_dharma_residuals)
+#| fig-format: svg
+#| fig-width: 8
+#| fig-height: 3.3
+#| out-width: 70%
+#| fig-align: center
+
+ild_apim_ar1_lag1_test <- test_ild_lag1(
+  ild_apim_dharma_residuals,
+  plot = TRUE
+)
 ```
 
 :::{.subtle}
-The correlation need not become zero. They should be typical under simulations
+The correlation need not become zero. It should be typical under simulations
 from the fitted AR(1) model.
 :::
 
@@ -2504,20 +2544,19 @@ pbc_components <- raw_ild_dyad_data |>
   dplyr::arrange(couple_id, person_id, diaryday) |>
   dplyr::group_by(couple_id, person_id) |>
   dplyr::mutate(
-    .person_mean = mean(perceived_behavioral_control, na.rm = TRUE),
-    .perceived_behavioral_control_cwp =
-      perceived_behavioral_control - .person_mean,
-    .perceived_behavioral_control_cwp_lag1 = dplyr::if_else(
+    .pbc_person_mean = mean(pbc, na.rm = TRUE),
+    .pbc_cwp = pbc - .pbc_person_mean,
+    .pbc_cwp_lag1 = dplyr::if_else(
       diaryday == dplyr::lag(diaryday) + 1,
-      dplyr::lag(.perceived_behavioral_control_cwp),
+      dplyr::lag(.pbc_cwp),
       NA_real_
     )
   ) |>
   dplyr::ungroup() |>
   dplyr::mutate(
-    .perceived_behavioral_control_cbp = .person_mean -
+    .pbc_cbp = .pbc_person_mean -
       mean(
-        .person_mean[
+        .pbc_person_mean[
           !duplicated(paste(couple_id, person_id))
         ],
         na.rm = TRUE
@@ -2535,22 +2574,16 @@ partner_components <- pbc_components |>
     couple_id,
     diaryday,
     gender = dplyr::recode(gender, female = "male", male = "female"),
-    .perceived_behavioral_control_cwp_partner =
-      .perceived_behavioral_control_cwp,
-    .perceived_behavioral_control_cwp_partner_lag1 =
-      .perceived_behavioral_control_cwp_lag1,
-    .perceived_behavioral_control_cbp_partner =
-      .perceived_behavioral_control_cbp
+    .pbc_cwp_partner = .pbc_cwp,
+    .pbc_cwp_partner_lag1 = .pbc_cwp_lag1,
+    .pbc_cbp_partner = .pbc_cbp
   )
 
 ild_manual_data <- pbc_components |>
   dplyr::rename(
-    .perceived_behavioral_control_cwp_actor =
-      .perceived_behavioral_control_cwp,
-    .perceived_behavioral_control_cwp_actor_lag1 =
-      .perceived_behavioral_control_cwp_lag1,
-    .perceived_behavioral_control_cbp_actor =
-      .perceived_behavioral_control_cbp
+    .pbc_cwp_actor = .pbc_cwp,
+    .pbc_cwp_actor_lag1 = .pbc_cwp_lag1,
+    .pbc_cbp_actor = .pbc_cbp
   ) |>
   dplyr::left_join(
     partner_components,
