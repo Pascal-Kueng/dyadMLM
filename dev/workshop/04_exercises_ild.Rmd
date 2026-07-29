@@ -175,25 +175,20 @@ names(my_ild_data)
 
 ## Validate the dyadic and temporal structure
 
-This teaching dataset is deliberately complete and balanced. Run the checks
-anyway: the same checks reveal unmatched occasions and time gaps in real ILD.
+This teaching dataset is deliberately complete and balanced. Use separate
+summaries for women and men to check that both roles have the expected number
+of observations and day range, and inspect variable ranges and missingness.
 
-Check:
+```{r eval=FALSE}
+my_ild_data |>
+  dplyr::filter(gender == "male") |>
+  dplyr::select(diaryday, provided_support, closeness) |>
+  report::report_table()
 
-- the number of retained dyads and members
-- whether every dyad contains exactly two members with stable roles
-- whether dyad--member--day combinations are unique
-- the scheduled and observed day ranges
-- missing observations and matched partner occasions
-- whether consecutive observations are always one day apart
-
-```{r}
-# hint("ild_validation", "functions")
-# hint("ild_validation", "solution")
-```
-
-```{r}
-# Add your validation checks here.
+my_ild_data |>
+  dplyr::filter(gender == "female") |>
+  dplyr::select(diaryday, provided_support, closeness) |>
+  report::report_table()
 ```
 
 Summarize what you found:

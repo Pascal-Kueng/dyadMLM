@@ -403,10 +403,19 @@ Briefly assess whether the exchangeable model remains adequate.
 
 ### Robustness
 
-Inspect unusual dyads separately by role.
+Inspect unusual dyads in separate role panels. Use the same panels if you
+retained the exchangeable model: the split simply keeps one observation per
+dyad in each plot and does not imply role-specific model effects. Use the same
+predictor and outcome versions as in your retained model. For example, use the
+generated actor or partner predictor column and, if applicable, the transformed
+outcome column.
 
 Optionally, you can use the supplied helper that is loaded here from a separate
 file `helpers.R`:
+
+```{r}
+# hint("robustness_mahalanobis", "columns")
+```
 
 ```{r eval=FALSE}
 # The function is defined in the separate helper file.
