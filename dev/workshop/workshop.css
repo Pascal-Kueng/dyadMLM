@@ -399,16 +399,16 @@
 }
 
 .reveal .fancy-table table col:first-child {
-  width: 15% !important;
+  width: 18% !important;
 }
 
 .reveal .fancy-table table col:last-child {
-  width: 85% !important;
+  width: 82% !important;
 }
 
 .reveal .fancy-table table th:first-child,
 .reveal .fancy-table table td:first-child {
-  width: 15%;
+  width: 18%;
 }
 
 .reveal .fancy-table table th {

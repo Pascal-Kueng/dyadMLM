@@ -907,11 +907,22 @@ font-size: 0.8em;
 .reveal .fancy-table table {
 width: 100%;
 max-width: 100%;
+table-layout: fixed;
 border-collapse: separate;
 border: 1px solid var(--uzh-rule);
 border-radius: 7px;
 font-size: 0.78em;
 overflow: hidden;
+}
+.reveal .fancy-table table col:first-child {
+width: 15% !important;
+}
+.reveal .fancy-table table col:last-child {
+width: 85% !important;
+}
+.reveal .fancy-table table th:first-child,
+.reveal .fancy-table table td:first-child {
+width: 15%;
 }
 .reveal .fancy-table table th {
 padding: 0.46em 0.65em;
@@ -919,10 +930,12 @@ border-bottom: 0;
 background: var(--uzh-blue);
 color: white;
 font-weight: 600;
+text-align: left;
 }
 .reveal .fancy-table table td {
 padding: 0.4em 0.65em;
 border-bottom: 1px solid var(--uzh-rule);
+text-align: left;
 }
 .reveal .fancy-table table tr:nth-child(even) td {
 background: var(--uzh-surface);
@@ -4123,8 +4136,6 @@ display:block!important;
 <p><strong>Residual correlations</strong></p>
 <p>After accounting for the support mean and female–male support difference, couples whose average MVPA is higher than predicted also tend to have a more positive female–male MVPA difference than predicted.</p>
 <p>In other words, their unexplained MVPA tends to tilt toward the female partner.</p>
-<!-- TODO: after the workshop perhaps create a slide-deck that has the 
-interpretations on a separate slide for each model -->
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;

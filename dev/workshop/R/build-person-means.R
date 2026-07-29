@@ -65,11 +65,18 @@ full <- full |>
     couple_id = match(coupleID, couple_ids),
     person_id = match(userID, person_ids),
     gender = recode_gender(gender),
-    perceived_resources = .data[["ss _res"]],
-    objective_mvpa = minutes_mvpa_wearawake_filtered,
+    perceived_behavioral_control = .data[["ss _res"]],
+    device_based_mvpa = minutes_mvpa_wearawake_filtered,
     awake_wear_minutes = wear_awake_minutes
   ) |>
-  relocate(couple_id, person_id, gender)
+  select(-any_of(c("perceived_resources", "objective_mvpa"))) |>
+  relocate(couple_id, person_id, gender) |>
+  relocate(
+    perceived_behavioral_control,
+    device_based_mvpa,
+    awake_wear_minutes,
+    .after = last_col()
+  )
 
 mixed_gender_couples <- full |>
   distinct(couple_id, person_id, gender) |>
@@ -119,12 +126,21 @@ if (anyNA(daily_to_full)) {
   stop("Could not align all daily rows to the full data.", call. = FALSE)
 }
 
-daily$perceived_resources <-
-  full$perceived_resources[daily_to_full]
-daily$objective_mvpa <-
-  full$objective_mvpa[daily_to_full]
+daily$perceived_behavioral_control <-
+  full$perceived_behavioral_control[daily_to_full]
+daily <- daily |>
+  select(-any_of(c("perceived_resources", "objective_mvpa")))
+daily$device_based_mvpa <-
+  full$device_based_mvpa[daily_to_full]
 daily$awake_wear_minutes <-
   full$awake_wear_minutes[daily_to_full]
+daily <- daily |>
+  relocate(
+    perceived_behavioral_control,
+    device_based_mvpa,
+    awake_wear_minutes,
+    .after = last_col()
+  )
 
 generate_sedentary <- function(data, seed = 20260728L, skew = 0.02) {
   required_columns <- c(
@@ -372,8 +388,8 @@ stopifnot(
   "efficacy" %in% names(person_means),
   all(
     c(
-      "perceived_resources",
-      "objective_mvpa",
+      "perceived_behavioral_control",
+      "device_based_mvpa",
       "awake_wear_minutes"
     ) %in% names(daily)
   ),
@@ -383,13 +399,19 @@ stopifnot(
   !any(c("self_efficacy", "ss_eff") %in% names(daily)),
   !any(c("self_efficacy", "ss_eff") %in% names(full)),
   !any(c("self_efficacy", "ss_eff") %in% names(person_means)),
+  !"perceived_resources" %in% names(daily),
+  !"perceived_resources" %in% names(full),
+  !"perceived_resources" %in% names(person_means),
+  !"objective_mvpa" %in% names(daily),
+  !"objective_mvpa" %in% names(full),
+  !"objective_mvpa" %in% names(person_means),
   identical(
-    daily$perceived_resources,
-    full$perceived_resources[daily_to_full]
+    daily$perceived_behavioral_control,
+    full$perceived_behavioral_control[daily_to_full]
   ),
   identical(
-    daily$objective_mvpa,
-    full$objective_mvpa[daily_to_full]
+    daily$device_based_mvpa,
+    full$device_based_mvpa[daily_to_full]
   ),
   identical(
     daily$awake_wear_minutes,
