@@ -103,9 +103,9 @@ refit_glmmTMB_with_bfgs_if_needed <- function(model) {
 |---|---|
 | [11:00–12:45]{.agenda-completed} | [Introduction and types of dyadic models]{.agenda-completed} |
 | [12:45–14:00]{.agenda-completed} | [*Lunch break*]{.agenda-completed} |
-| 14:00–15:30 | Estimating cross-sectional dyadic models in R |
+| 14:00–15:30 | Cross-sectional APIM in R |
 | 15:30–15:45 | *Short break* |
-| 15:45–16:45 | Intensive longitudinal extensions |
+| 15:45–16:45 | Intensive longitudinal APIM in R |
 | 16:45–17:00 | *Short break* |
 | 17:00–18:00 | Exercises in R |
 
@@ -248,7 +248,7 @@ cover more MAR situations than row omission; none automatically solves MNAR.
 
 <!-- ca. 2.5 Minutes -->
 
-# Estimating cross-sectional dyadic models in R
+# Cross-sectional APIM in R
 
 ## One possible workflow
 
@@ -1711,51 +1711,24 @@ INTENSIVE LONGITUDINAL
 
 ------------------------------------------------------------------------------>
 
-# Intensive longitudinal dyads
+# Intensive longitudinal APIM
 
-## ILD workflow {.smaller}
+## Intensive longitudinal APIM - Workflow
 
-:::: {.columns}
+**We can follow the same workflow. ILD additionally requires:**
 
-::: {.column width="43%"}
-
-### The same core workflow
-
-::: {.subtle}
-
-
-1. Define dyads, distinguishability, and research questions
-2. Prepare the data and validate the dyadic structure
-3. Describe and visualize measures and observed relationships
-4. Estimate the models
-5. Verify model adequacy, distinguishability, and robustness
-6. Visualize, interpret, and report results
-
-
-:::
-
-:::
-
-::: {.column width="57%"}
-
-### ILD additionally requires
-
-- Check compliance, matched occasions, and actual time gaps
+- Check compliance / missingness
   [@revolPreprocessingExperienceSampling2024]
-- Plot paired trajectories and inspect raw temporal and cross-partner patterns
+- Inspect and visualize paired trajectories and patterns
   [@bolgerIntensiveLongitudinalMethods2013;
   @revolPreprocessingExperienceSampling2024]
 - Separate within- and between-person variation
-  - ICCs, level-specific correlations, and multilevel reliability where
+  - Inspect ICCs, level-specific correlations, and multilevel reliability where
     applicable [@bolgerIntensiveLongitudinalMethods2013;
     @hamakerCuriousCaseCrossSectional2024;
     @geldhofReliabilityEstimationMultilevel2014]
 - Model dyads on multiple levels
-- Check residual temporal and cross-partner dependence
-
-:::
-
-::::
+- Check and account for residual temporal dependence
 
 :::{.notes}
 

@@ -390,11 +390,25 @@
 .reveal .fancy-table table {
   width: 100%;
   max-width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border: 1px solid var(--uzh-rule);
   border-radius: 7px;
   font-size: 0.78em;
   overflow: hidden;
+}
+
+.reveal .fancy-table table col:first-child {
+  width: 15% !important;
+}
+
+.reveal .fancy-table table col:last-child {
+  width: 85% !important;
+}
+
+.reveal .fancy-table table th:first-child,
+.reveal .fancy-table table td:first-child {
+  width: 15%;
 }
 
 .reveal .fancy-table table th {
@@ -403,11 +417,13 @@
   background: var(--uzh-blue);
   color: white;
   font-weight: 600;
+  text-align: left;
 }
 
 .reveal .fancy-table table td {
   padding: 0.4em 0.65em;
   border-bottom: 1px solid var(--uzh-rule);
+  text-align: left;
 }
 
 .reveal .fancy-table table tr:nth-child(even) td {

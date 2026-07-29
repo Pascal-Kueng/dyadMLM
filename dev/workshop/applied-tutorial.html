@@ -907,11 +907,22 @@ font-size: 0.8em;
 .reveal .fancy-table table {
 width: 100%;
 max-width: 100%;
+table-layout: fixed;
 border-collapse: separate;
 border: 1px solid var(--uzh-rule);
 border-radius: 7px;
 font-size: 0.78em;
 overflow: hidden;
+}
+.reveal .fancy-table table col:first-child {
+width: 15% !important;
+}
+.reveal .fancy-table table col:last-child {
+width: 85% !important;
+}
+.reveal .fancy-table table th:first-child,
+.reveal .fancy-table table td:first-child {
+width: 15%;
 }
 .reveal .fancy-table table th {
 padding: 0.46em 0.65em;
@@ -919,10 +930,12 @@ border-bottom: 0;
 background: var(--uzh-blue);
 color: white;
 font-weight: 600;
+text-align: left;
 }
 .reveal .fancy-table table td {
 padding: 0.4em 0.65em;
 border-bottom: 1px solid var(--uzh-rule);
+text-align: left;
 }
 .reveal .fancy-table table tr:nth-child(even) td {
 background: var(--uzh-surface);
@@ -2021,7 +2034,7 @@ Turu Stadler
 </tr>
 <tr class="odd">
 <td>14:00–15:30</td>
-<td>Estimating cross-sectional dyadic models in R</td>
+<td>Cross-sectional APIM in R</td>
 </tr>
 <tr class="even">
 <td>15:30–15:45</td>
@@ -2029,7 +2042,7 @@ Turu Stadler
 </tr>
 <tr class="odd">
 <td>15:45–16:45</td>
-<td>Intensive longitudinal extensions</td>
+<td>Intensive longitudinal APIM in R</td>
 </tr>
 <tr class="even">
 <td>16:45–17:00</td>
@@ -2155,8 +2168,8 @@ Turu Stadler
 <!-- ca. 2.5 Minutes -->
 </section></section>
 <section>
-<section id="estimating-cross-sectional-dyadic-models-in-r" class="title-slide slide level1 center">
-<h1>Estimating cross-sectional dyadic models in R</h1>
+<section id="cross-sectional-apim-in-r" class="title-slide slide level1 center">
+<h1>Cross-sectional APIM in R</h1>
 
 </section>
 <section id="one-possible-workflow" class="slide level2">
@@ -4219,29 +4232,15 @@ INTENSIVE LONGITUDINAL
 </section>
 
 <section>
-<section id="intensive-longitudinal-dyads" class="title-slide slide level1 center">
-<h1>Intensive longitudinal dyads</h1>
+<section id="intensive-longitudinal-apim" class="title-slide slide level1 center">
+<h1>Intensive longitudinal APIM</h1>
 
 </section>
-<section id="ild-workflow" class="slide level2 smaller">
-<h2>ILD workflow</h2>
-<div class="columns">
-<div class="column" style="width:43%;">
-<h3 id="the-same-core-workflow">The same core workflow</h3>
-<div class="subtle">
-<ol type="1">
-<li>Define dyads, distinguishability, and research questions</li>
-<li>Prepare the data and validate the dyadic structure</li>
-<li>Describe and visualize measures and observed relationships</li>
-<li>Estimate the models</li>
-<li>Verify model adequacy, distinguishability, and robustness</li>
-<li>Visualize, interpret, and report results</li>
-</ol>
-</div>
-</div><div class="column" style="width:57%;">
-<h3 id="ild-additionally-requires">ILD additionally requires</h3>
+<section id="intensive-longitudinal-apim---workflow" class="slide level2">
+<h2>Intensive longitudinal APIM - Workflow</h2>
+<p><strong>We can follow the same workflow. ILD additionally requires:</strong></p>
 <ul>
-<li>Check compliance, matched occasions, and actual time gaps <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">(<a href="#/references" role="doc-biblioref" onclick>Revol et al., 2024</a>)</span></li>
+<li>Check compliance / missingness <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">(<a href="#/references" role="doc-biblioref" onclick>Revol et al., 2024</a>)</span></li>
 <li>Plot paired trajectories and inspect raw temporal and cross-partner patterns <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013 revolPreprocessingExperienceSampling2024">(<a href="#/references" role="doc-biblioref" onclick>Bolger &amp; Laurenceau, 2013</a>; <a href="#/references" role="doc-biblioref" onclick>Revol et al., 2024</a>)</span></li>
 <li>Separate within- and between-person variation
 <ul>
@@ -4250,7 +4249,6 @@ INTENSIVE LONGITUDINAL
 <li>Model dyads on multiple levels</li>
 <li>Check residual temporal and cross-partner dependence</li>
 </ul>
-</div></div>
 <aside class="notes">
 <p>Synthesized from <span class="citation" data-cites="bolgerIntensiveLongitudinalMethods2013">Bolger &amp; Laurenceau (<a href="#/references" role="doc-biblioref" onclick>2013</a>)</span>, <span class="citation" data-cites="revolPreprocessingExperienceSampling2024">Revol et al. (<a href="#/references" role="doc-biblioref" onclick>2024</a>)</span>, <span class="citation" data-cites="mcneishPrimerTwoLevel2020">McNeish &amp; Hamaker (<a href="#/references" role="doc-biblioref" onclick>2020</a>)</span>, and <span class="citation" data-cites="delrosarioPracticalGuideSpecifying2025">del Rosario &amp; West (<a href="#/references" role="doc-biblioref" onclick>2025</a>)</span>.</p>
 <p>Perry et al. belongs with interpretation of fitted dynamics: their change-score APIM and vector-field diagrams show the joint implications of actor and partner coefficients <span class="citation" data-cites="perryGraphicMethodsInterpreting2017">(<a href="#/references" role="doc-biblioref" onclick>Perry et al., 2017</a>)</span>.</p>
@@ -4267,7 +4265,7 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="ild-workflow-1" class="slide level2">
+<section id="ild-workflow" class="slide level2">
 <h2>ILD Workflow</h2>
 <ol type="1">
 <li><span class="text-highlight"><strong>Define dyads, distinguishability, and research questions</strong></span></li>
@@ -4342,7 +4340,7 @@ display:block!important;
 <h1>Distinguishable ILD APIM</h1>
 <p>Distinguishing by gender</p>
 </section>
-<section id="ild-workflow-2" class="slide level2">
+<section id="ild-workflow-1" class="slide level2">
 <h2>ILD Workflow</h2>
 <ol type="1">
 <li><strong>Define dyads, distinguishability, and research questions</strong></li>
