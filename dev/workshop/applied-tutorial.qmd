@@ -2517,12 +2517,12 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
 
 # Exercises in R
 
-- Go to https://pascal-kueng.github.io/dyadMLM/workshop/
+- Go to [https://pascal-kueng.github.io/dyadMLM/workshop/](https://pascal-kueng.github.io/dyadMLM/workshop/)
 - Link is also in the Teams channel
 - Download and unzip all workshop materials
 - Start R from that folder (by opening one of the files)
 
-Run this to ensure all relevant packages are installed and up to date:
+Run this in the console to ensure all relevant packages are installed and up to date:
 
 ```{r eval = FALSE}
 source("00_setup.R")

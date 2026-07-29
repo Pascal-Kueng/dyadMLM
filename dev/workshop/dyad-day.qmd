@@ -2085,16 +2085,17 @@ might be most relevant for your own data/research questions? (ca. 5 min)
 
 # Prepare for later exercises in R
 
-- Go to https://pascal-kueng.github.io/dyadMLM/workshop/
+- Go to [https://pascal-kueng.github.io/dyadMLM/workshop/](https://pascal-kueng.github.io/dyadMLM/workshop/)
 - Link is also in the Teams channel
 - Download and unzip all workshop materials
 - Start R from that folder (by opening one of the files)
 
-Run this to ensure all relevant packages are installed and up to date:
+Run this in the console to ensure all relevant packages are installed and up to date:
 
 ```{r eval = FALSE}
 source("00_setup.R")
 ```
+
 
 
 ## References
