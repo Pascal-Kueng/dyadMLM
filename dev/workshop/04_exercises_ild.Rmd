@@ -145,7 +145,7 @@ my_ild_data <- dyadMLM::prepare_dyad_data(
 
 Add two time variables:
 
-- `day_c`: anchored at 0 on the first scheduled day and scaled in 14-day units
+- `diaryday_c`: centered at the study midpoint and scaled in full-study units
 - `diaryday_f`: a factor containing every scheduled day from 0 through 13
 
 These names are used below.
@@ -153,7 +153,7 @@ These names are used below.
 ```{r eval=FALSE}
 my_ild_data <- my_ild_data |>
   dplyr::mutate(
-    # Create day_c and diaryday_f.
+    # Create diaryday_c and diaryday_f.
   )
 ```
 

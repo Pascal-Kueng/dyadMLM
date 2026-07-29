@@ -1718,16 +1718,10 @@ INTENSIVE LONGITUDINAL
 **We can follow the same workflow. Additional possible ILD considerations:**
 
 - Check compliance / missingness
-  [@revolPreprocessingExperienceSampling2024]
 - Inspect and visualize paired trajectories and patterns
-  [@bolgerIntensiveLongitudinalMethods2013;
-  @revolPreprocessingExperienceSampling2024]
 - Separate within- and between-person variation
-  - Inspect ICCs, level-specific correlations, and multilevel reliability where
-    applicable [@bolgerIntensiveLongitudinalMethods2013;
-    @hamakerCuriousCaseCrossSectional2024;
-    @geldhofReliabilityEstimationMultilevel2014]
-- Model dyads on multiple levels
+  - Inspect ICCs and multilevel reliability where applicable
+  - Model dyads on multiple levels
 - Check and account for residual temporal dependence
 
 ::: {.subtle}
@@ -1736,6 +1730,23 @@ Synthesized from @bolgerIntensiveLongitudinalMethods2013,
 @delrosarioPracticalGuideSpecifying2025.
 
 :::
+
+<!-- TODO: we need to insert a paird trajectories plot. We can re-use this code 
+but make it ideally much shorter (maybe with the see package?) and also make it
+prettier. 
+
+ggplot(data = subset(BLdyads_doubleentry, coupleid <= 9), aes(x = time, group = personid), legend = FALSE) +
+  geom_rect(mapping = aes(xmin = time-.5, xmax = time+.5, ymin = 0, ymax = 5, fill = f_wrkstrsc_w), alpha = 0.6) + # creating rectangles in the background of the plot colored by female work stressors
+  geom_rect(mapping = aes(xmin = time-.5, xmax = time+.5, ymin = 5, ymax = 10, fill = m_wrkstrsc_w), alpha = 0.6) + # creating rectangles in the background of the plot colored by male work stressors
+  geom_point(aes(x = time, y = reldis, color = factor(gender)), shape = 17, size = 3) + # creating a different colored point for each gender
+  geom_line(aes(x = time, y = reldis, color = factor(gender)), lty = 1, size=1) + # creating a different colored line for each gender
+  xlab("Time") + 
+  ylab("Relationship Dissatisfaction") + ylim(0, 10) +
+  scale_x_continuous(breaks=seq(0, 20, by = 5)) + 
+  facet_wrap( ~ coupleid) +# creating a separate plot for each dyad
+  theme(legend.position = "none")
+  
+-->
 
 ## Workflow
 
@@ -1821,8 +1832,8 @@ Distinguishing by gender
 
 ## Load the daily measures
 
-We set MVPA to `NA` on days with less than 10 hours of weartime, center
-time between 0 and 1 (start to end of the study), and select the needed variables.
+We set MVPA to `NA` on days with less than 10 hours of weartime, center time at
+the middle of the study in full-study units, and select the needed variables.
 
 ```{r}
 #| output-location: slide
@@ -1833,12 +1844,13 @@ raw_ild_dyad_data <- readRDS("dyadic-data.rds") |>
       device_based_mvpa,
       NA
     ),
-  diaryday_c = (diaryday + 1) / 55
+    log_device_based_mvpa = log(device_based_mvpa),
+    diaryday_c = (diaryday - 27) / 54
   )|>
   dplyr::select(
     couple_id, person_id, diaryday, diaryday_c, gender,
     pbc = perceived_behavioral_control,
-    device_based_mvpa, awake_wear_minutes
+    device_based_mvpa, log_device_based_mvpa, awake_wear_minutes
   ) |>
   dplyr::arrange(couple_id, diaryday, person_id)
 
@@ -1861,6 +1873,9 @@ In this example we then lag the within-person component ($X_{ri,t-1}$)
 
 ## Create the required format and validate the data [Manual code →](#manual-ild-apim-preparation){.results-forward-link} {#prepared-ild-apim-data}
 
+The `dyadMLM` package can handle centering alongside the construction
+and validation of the dyadic dataset:
+
 ```{r}
 #| output-location: slide
 
@@ -1878,10 +1893,15 @@ ild_apim_data <- dyadMLM::prepare_dyad_data(
   seed = 123
 )
 
+ild_apim_data <- ild_apim_data |>
+  dplyr::mutate(
+    diaryday_f = factor(diaryday, levels = 0:54)
+  )
+
 print(ild_apim_data)
 ```
 
-## The ILD APIM: Two member-specific equations
+## The ILD APIM: Two member-specific equations {.smaller}
 
 For dyad $i$ at occasion $t$, superscripts $\mathrm{W}$ and $\mathrm{B}$
 denote within-person and between-person components. Here, $X_{ri,t-1}$ is
@@ -1968,7 +1988,7 @@ $$
 #| output: false
 
 ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
-  log(device_based_mvpa) ~
+  log_device_based_mvpa ~
 
     # Role-specific fixed intercepts
     0 + .is_female + .is_male +
@@ -2025,6 +2045,9 @@ ild_apim_no_ar_dharma <- simulate_ild_dharma(
 
 test_ild_lag1(ild_apim_no_ar_dharma)
 ```
+<!-- TODO: no plot is being printed! Please fix. Also, needing multiple 
+custom functions here is a bit intransparent. Cans' we use raw code for the
+AR test? or is it more than a handful of lines? -->
 
 :::{.subtle}
 The independence-across-days assumption is not adequate here
@@ -2042,8 +2065,8 @@ ild_apim_distinguishable_ar1_model <- update(
   ild_apim_distinguishable_model,
   . ~ . -
     (0 + .is_female + .is_male | couple_id:diaryday) +
-    ar1(0 + .is_female:as.factor(diaryday) | couple_id) +
-    ar1(0 + .is_male:as.factor(diaryday) | couple_id) +
+    ar1(0 + .is_female:diaryday_f | couple_id) +
+    ar1(0 + .is_male:diaryday_f | couple_id) +
     (0 + .is_female + .is_male | couple_id:diaryday)
 )
 
@@ -2051,13 +2074,21 @@ glmmTMB::VarCorr(ild_apim_distinguishable_ar1_model)
 ```
 
 :::{.subtle}
-AR(1) describes residual persistence; actor and partner effects remain
-prospective.
+The two AR(1) terms represent independent member-specific persistence. The
+dyad-day SDs and correlation describe the remaining same-day variation.
+:::
+
+:::{.notes}
+
+<!-- TODO: insert interpretation of each parameter please. what does 
+a couple-level std.dev intercept of 0.23 mean? and the correlation of 0.34? what does the
+daily level SD intercept of 0.35 mean, and the 0.38 corr? in applied terms. -->
+
 :::
 
 ## Simulate residuals from the AR(1) model
 
-```{r}
+```{r include=FALSE}
 #| label: simulate-dharma-ild
 #| cache: true
 #| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_distinguishable_ar1_model), stats::model.frame(ild_apim_distinguishable_ar1_model), body(simulate_ild_dharma)))
@@ -2067,18 +2098,12 @@ ild_apim_dharma_residuals <- simulate_ild_dharma(
   dyad = ild_apim_data$couple_id,
   member = ild_apim_data$person_id,
   time = ild_apim_data$diaryday,
-  n = 1000,
+  n = 10000,
   seed = 123
 )
 ```
 
-:::{.subtle}
-Block whitening accounts for modeled partner and repeated-measure covariance.
-:::
-
-## Inspect block-whitened DHARMa residuals {.smaller}
-
-```{r}
+```{r echo = FALSE}
 #| fig-format: svg
 #| fig-width: 10
 #| fig-height: 4.4
@@ -2086,16 +2111,14 @@ Block whitening accounts for modeled partner and repeated-measure covariance.
 #| fig-align: center
 
 plot(
-  ild_apim_dharma_residuals,
-  title = "Block-whitened DHARMa residuals"
+  ild_apim_dharma_residuals
 )
 ```
 
-:::{.notes}
+:::{.subtle}
 
-With almost 2,800 observations, DHARMa tests are sensitive to small
-departures; consider their visual magnitude and pattern as well as the
-p-values.
+With almost 2,800 observations, DHARMa tests are very sensitive. Visual inspection
+becomes more meaningful.
 
 :::
 
@@ -2106,32 +2129,38 @@ test_ild_lag1(ild_apim_dharma_residuals)
 ```
 
 :::{.subtle}
-The correlation need not become zero; it should be typical under simulations
+The correlation need not become zero. They should be typical under simulations
 from the fitted AR(1) model.
 :::
 
-## Fit the exchangeable model with pooled AR(1) {.smaller}
+## Fit the exchangeable model with pooled AR(1)
 
 ```{r}
-#| output: false
+#| output-location: slide
 
 ild_apim_exchangeable_ar1_model <- glmmTMB::glmmTMB(
   log_device_based_mvpa ~
     1 +
-    day_c +
-    .perceived_behavioral_control_cwp_actor_lag1 +
-    .perceived_behavioral_control_cwp_partner_lag1 +
-    .perceived_behavioral_control_cbp_actor +
-    .perceived_behavioral_control_cbp_partner +
+    diaryday_c +
+    .pbc_cwp_actor_lag1 +
+    .pbc_cwp_partner_lag1 +
+    .pbc_cbp_actor +
+    .pbc_cbp_partner +
+    
+    # Couple-level variance-covariance structure
     (1 | couple_id) +
     (0 + .member_contrast_arbitrary | couple_id) +
-    ar1(0 + diaryday_f | couple_id:person_id) +
+    
+    # Occasion-level residual variance-covariance structure
     (1 | couple_id:diaryday) +
-    (0 + .member_contrast_arbitrary | couple_id:diaryday),
+    (0 + .member_contrast_arbitrary | couple_id:diaryday) +
+    ar1(0 + diaryday_f | couple_id:person_id),
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_apim_data
 )
+
+summary(ild_apim_exchangeable_ar1_model)
 ```
 
 ```{r}
@@ -2147,7 +2176,7 @@ Each member retains a separate series, but residual variability and
 persistence $\rho$ are pooled across members.
 :::
 
-## Gender-specific parameters improve fit {.smaller}
+## Gender-specific parameters improve fit
 
 ```{r}
 dyadMLM::compare_nested_models(
@@ -2176,6 +2205,8 @@ dyadMLM::compare_nested_models(
 Supported effects for men but not women do not by themselves establish that
 the effects differ by gender; that requires a direct comparison of the slopes.
 
+<!-- TODO: can probably be simplified and shortened. Answering the research
+question, and visualizing the effects? -->
 
 <!----------------------------------------------------------------------------
 
@@ -2183,7 +2214,9 @@ GENERAL REPORTING GUIDELINES
 
 ------------------------------------------------------------------------------>
 
-## Reporting practices in longitudinal APIM studies
+# General reporting practices for ILD APIM studies
+
+## Many studies lack complete reporting
 
 ```{r}
 #| label: plot-longitudinal-apim-reporting-gaps
@@ -2242,7 +2275,7 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
 
 :::
 
-## Make every dyadic analysis decision visible {.smaller}
+## Make every dyadic analysis decision visible
 
 1. **Preregister** actor and partner hypotheses and key analysis decisions.
 2. **Explain missing data:** describe missingness and the handling strategy.
@@ -2252,21 +2285,17 @@ Systematic review of 73 longitudinal APIM studies published from 2008–2025
    multilevel item scales, e.g., `multilevelTools::omegaSEM()`
    [@wileyMultilevelTools2025; @geldhofReliabilityEstimationMultilevel2014].
 
-The review also recommends multi-method measurement and more diverse
-populations
-
 [@mohammadzadehYazdBeyondIndividual2026]{.subtle}
 
 
 # Exercises in R
 
 - Go to https://pascal-kueng.github.io/dyadMLM/workshop/
-- Link should be in the Teams channel
+- Link is also in the Teams channel
 - Download and unzip all workshop materials
+- Start R from this folder (by opening one of the files)
 
-Run this once in a fresh R session before the break. It installs or updates the
-workshop packages and any dependencies that need updating; this may take
-several minutes.
+Run this to ensure all relevant packages are installed and up to date:
 
 ```{r eval = FALSE}
 source("00_setup.R")
