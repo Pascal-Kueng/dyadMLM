@@ -217,8 +217,13 @@ check_ild_exercise_model_structure <- function(prepared_data) {
   invisible(model_structure)
 }
 
+# Seed 20260719 was selected after checking 20260719:20260721 with the exact
+# workshop full and pooled models; both candidates converged for all three.
+# The selected seed had interior covariance estimates, recovered the intended
+# role-specific AR(1) pattern clearly, and reached the same optimum from three
+# starting values.
 simulate_ild_exercise_data <- function(
-    seed = 20260720L,
+    seed = 20260719L,
     n_dyads = 120L) {
   installed_glmmTMB <- as.character(utils::packageVersion("glmmTMB"))
   if (!identical(installed_glmmTMB, "1.1.14")) {

@@ -2082,7 +2082,7 @@ ild_apim_no_ar_dharma <- simulate_ild_dharma(
   seed = 123
 )
 
-test_ild_lag1(
+diagnostic <- test_ild_lag1(
   ild_apim_no_ar_dharma,
   plot = TRUE
 )
@@ -2093,13 +2093,15 @@ The helper compares the observed consecutive-day correlation with correlations
 simulated from the fitted model.
 :::
 
-## Add role-specific residual AR(1) processes {.smaller}
+## Add role-specific residual AR(1) processes
 
 - Separate AR(1) series for the female and male partner
 - Role-specific residual variability and persistence $\rho$
 - Same-day partner covariance retained separately
 
 ```{r}
+#| output-location: slide
+
 ild_apim_distinguishable_ar1_model <- update(
   ild_apim_distinguishable_model,
   . ~ . -

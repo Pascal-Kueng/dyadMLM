@@ -502,7 +502,7 @@
   ild_model_choices = list(
     role_solution = paste(
       "Checkpoint: For the supplied dataset, the four-df likelihood-ratio test",
-      "is chi-squared = 88.45, p < .001. Retain the role-specific focal",
+      "is chi-squared = 89.70, p < .001. Retain the role-specific focal",
       "associations. This is not a test of full exchangeability because the",
       "baseline, covariance, and AR(1) parameters remain role-specific.",
       "",

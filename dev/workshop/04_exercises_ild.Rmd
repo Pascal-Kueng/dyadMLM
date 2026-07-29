@@ -40,7 +40,7 @@ source("00_setup.R")
 
 Load the required packages, optional hints, and ILD diagnostic helpers:
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(glmmTMB)
 library(dyadMLM)
 library(wbCorr)
@@ -232,7 +232,7 @@ role-specific histograms. Means and standard deviations are sufficient here.
 Plot both variables over time for a manageable selection of dyads. Make the two
 members identifiable and avoid drawing every trajectory in one panel.
 
-```{r}
+```{r eval=FALSE}
 trajectory_dyads <- sort(unique(my_ild_data$coupleID))[1:4]
 
 trajectory_data <- my_ild_data |>
