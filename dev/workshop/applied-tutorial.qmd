@@ -1821,7 +1821,7 @@ Exponentiated coefficients describe multiplicative differences in MVPA.
 # Distinguishable ILD APIM
 Distinguishing by gender
 
-## ILD Workflow
+## Workflow
 
 1. **Define dyads, distinguishability, and research questions**
 2. [**Prepare the data and validate the dyadic structure**]{.text-highlight}
@@ -1901,7 +1901,27 @@ ild_apim_data <- ild_apim_data |>
 print(ild_apim_data)
 ```
 
-## The ILD APIM: Two member-specific equations
+## Workflow
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. [**Describe and visualize measures and observed relationships**]{.text-highlight}
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
+
+<!--TODO: insert panel plots of trajectories. Or should we do this before data
+prep maybe? Would be inconsistent with the cross-sectional workflow though -->
+
+## Workflow
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. [**Estimate the models**]{.text-highlight}
+5. **Verify model adequacy, distinguishability, and robustness**
+6. **Visualize, interpret, and report results**
+
+## Fitting the ILD APIM: Two member-specific equations
 
 For dyad $i$ at occasion $t$, superscripts $\mathrm{W}$ and $\mathrm{B}$
 denote within-person and between-person components.
@@ -1979,7 +1999,7 @@ $$
 
 ::::
 
-## Fitting the distinguishable ILD APIM in glmmTMB
+## Fitting the distinguishable ILD APIM with glmmTMB
 
 <!-- TODO: Fix the line-numbers -->
 
@@ -2026,6 +2046,14 @@ ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
 
 summary(ild_apim_distinguishable_model)
 ```
+
+## Workflow
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. [**Verify model adequacy, distinguishability, and robustness**]{.text-highlight}
+6. **Visualize, interpret, and report results**
 
 ## Consecutive-day dependence remains {.smaller}
 
@@ -2135,7 +2163,6 @@ from the fitted AR(1) model.
 
 ## Fit the exchangeable model with pooled AR(1)
 
-
 ```{r}
 #| output-location: slide
 
@@ -2193,10 +2220,20 @@ dyadMLM::compare_nested_models(
 )
 ```
 
+
+## Workflow
+1. **Define dyads, distinguishability, and research questions**
+2. **Prepare the data and validate the dyadic structure**
+3. **Describe and visualize measures and observed relationships**
+4. **Estimate the models**
+5. **Verify model adequacy, distinguishability, and robustness**
+6. [**Visualize, interpret, and report results**]{.text-highlight}
+
+
 ## Report the retained distinguishable model
 
 We exponentiate estimates from the log-transformed outcome to obtain geometric
-mean ratios (GMRs).
+mean ratios (GMRs; representing multiplicative changes).
 
 ```{r}
 #| label: ild-retained-fixed-effects-table
@@ -2307,10 +2344,11 @@ plot(
 ```
 
 :::{.text-smaller}
-In this sample, one-point above-usual own and partner PBC on the previous day
-were associated with about 3.5% and 2.5% higher current-day MVPA among men,
-respectively; the corresponding associations among women and all between-person
-associations were not clear.
+**Within-person:** A one-point higher than usual perceived behavioral control in 
+men was associated with 3.5% more MVPA in men and 2.5% more MVPA in woman on the 
+following day. 
+
+**Between-person:** Associations remain unclear (non-significant).
 :::
 
 :::{.notes}
