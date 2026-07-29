@@ -102,10 +102,10 @@ print(cross_exchangeable_data, n = 4)
 #> # A tibble: 240 × 17
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121 female female_x_female       7.58             5.41
-#> 2      242      121 female female_x_female       6.15             5.19
-#> 3      243      122 female female_x_female       8.28             5.89
-#> 4      244      122 female female_x_female       8.00             5.57
+#> 1      241      121 female female_x_female       7.34             5.41
+#> 2      242      121 female female_x_female       6.43             5.19
+#> 3      243      122 female female_x_female       8.18             5.89
+#> 4      244      122 female female_x_female       8.48             5.57
 #> # ℹ 236 more rows
 #> # ℹ 11 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>,
@@ -249,21 +249,21 @@ summary(dim_1)
 #> Data: cross_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     631.5     648.9    -310.7     621.5       235 
+#>     658.1     675.5    -324.1     648.1       235 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups     Name                       Variance Std.Dev.
-#>  coupleID   (Intercept)                0.5650   0.7516  
-#>  coupleID.1 .member_contrast_arbitrary 0.2692   0.5189  
+#>  coupleID   (Intercept)                0.5781   0.7603  
+#>  coupleID.1 .member_contrast_arbitrary 0.3286   0.5732  
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
 #>                                   Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                        5.94511    0.06861   86.64   <2e-16 ***
-#> .provided_support_dyad_mean_gmc    1.54652    0.09582   16.14   <2e-16 ***
-#> .provided_support_within_dyad_dev  0.89515    0.10726    8.35   <2e-16 ***
+#> (Intercept)                        5.94717    0.06941   85.69  < 2e-16 ***
+#> .provided_support_dyad_mean_gmc    1.55347    0.09692   16.03  < 2e-16 ***
+#> .provided_support_within_dyad_dev  0.84449    0.11850    7.13 1.03e-12 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -272,7 +272,7 @@ The same mean-and-deviation diagram can now be labelled with the
 estimated fixed effects and residual-component standard deviations:
 
 ![Fitted DIM. Intercept 5.95, between-dyad effect 1.55, within-dyad
-effect 0.90, and mean/deviation residual SDs 0.75 and 0.52; their
+effect 0.84, and mean/deviation residual SDs 0.76 and 0.57; their
 correlation is fixed at
 zero.](dim_files/figure-html/fitted-dim-diagram-1.svg)
 
@@ -361,9 +361,9 @@ data.frame(
   BIC = c(BIC(dim_1), BIC(apim_1)),
   logLik = c(as.numeric(logLik(dim_1)), as.numeric(logLik(apim_1)))
 )
-#>   model      AIC     BIC    logLik
-#> 1   DIM 631.4539 648.857 -310.7269
-#> 2  APIM 631.4539 648.857 -310.7269
+#>   model      AIC      BIC   logLik
+#> 1   DIM 658.1339 675.5371 -324.067
+#> 2  APIM 658.1339 675.5371 -324.067
 ```
 
 This demonstrates that the same statistical model is being estimated
@@ -440,18 +440,18 @@ cat("From APIM model:\n",
      "  within-dyad effect:            ", round(b_dev, 3), "\n"
 )
 #> From APIM model:
-#>    intercept:                      5.945 
-#>    actor effect:                   1.221 
-#>    partner effect:                 0.326 
+#>    intercept:                      5.947 
+#>    actor effect:                   1.199 
+#>    partner effect:                 0.354 
 #> 
 #>  DIM transformation:
-#>    b_mean = b_actor + b_partner:   1.547 
-#>    b_dev = b_actor - b_partner:    0.895 
+#>    b_mean = b_actor + b_partner:   1.553 
+#>    b_dev = b_actor - b_partner:    0.844 
 #> 
 #>  From DIM model:
-#>    intercept:                      5.945 
-#>    between-dyad effect:            1.547 
-#>    within-dyad effect:             0.895
+#>    intercept:                      5.947 
+#>    between-dyad effect:            1.553 
+#>    within-dyad effect:             0.844
 ```
 
 The DIM and APIM intercepts are equal up to numerical estimation
@@ -636,16 +636,16 @@ print(ild_exchangeable_data)
 #> # A tibble: 3,360 × 25
 #>    personID coupleID diaryday gender dyad_composition closeness provided_support
 #>       <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#>  1      241      121        0 female female_x_female       6.59             6.18
-#>  2      242      121        0 female female_x_female       5.73             5.70
-#>  3      241      121        1 female female_x_female       8.70             4.57
-#>  4      242      121        1 female female_x_female       5.61             5.30
-#>  5      241      121        2 female female_x_female       7.06             5.19
-#>  6      242      121        2 female female_x_female       6.72             3.89
-#>  7      241      121        3 female female_x_female       6.36             6.28
-#>  8      242      121        3 female female_x_female       6.67             5.26
-#>  9      241      121        4 female female_x_female       7.91             6.94
-#> 10      242      121        4 female female_x_female       7.35             5.59
+#>  1      241      121        0 female female_x_female       6.60             6.18
+#>  2      242      121        0 female female_x_female       5.22             5.70
+#>  3      241      121        1 female female_x_female       8.33             4.57
+#>  4      242      121        1 female female_x_female       5.24             5.30
+#>  5      241      121        2 female female_x_female       6.55             5.19
+#>  6      242      121        2 female female_x_female       6.85             3.89
+#>  7      241      121        3 female female_x_female       6.31             6.28
+#>  8      242      121        3 female female_x_female       8.16             5.26
+#>  9      241      121        4 female female_x_female       8.57             6.94
+#> 10      242      121        4 female female_x_female       8.09             5.59
 #> # ℹ 3,350 more rows
 #> # ℹ 18 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>,
@@ -700,26 +700,26 @@ summary(dim_ILD)
 #> Data: ild_exchangeable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    8514.6    8575.8   -4247.3    8494.6      3350 
+#>    9901.1    9962.3   -4940.6    9881.1      3350 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups              Name                       Variance Std.Dev.
-#>  coupleID            (Intercept)                0.5359   0.7320  
-#>  coupleID.1          .member_contrast_arbitrary 0.2536   0.5036  
-#>  coupleID.diaryday   (Intercept)                0.4070   0.6380  
-#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.2182   0.4672  
+#>  coupleID            (Intercept)                0.5372   0.7330  
+#>  coupleID.1          .member_contrast_arbitrary 0.3021   0.5496  
+#>  coupleID.diaryday   (Intercept)                0.5717   0.7561  
+#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.3714   0.6094  
 #> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
 #> 
 #> Conditional model:
 #>                                        Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                            5.898698   0.073060   80.74   <2e-16 ***
-#> diaryday                               0.007138   0.003861    1.85   0.0645 .  
-#> .provided_support_cwp_dyad_mean        0.493141   0.029327   16.82   <2e-16 ***
-#> .provided_support_cwp_within_dyad_dev -0.005806   0.026949   -0.22   0.8294    
-#> .provided_support_cbp_dyad_mean        1.546530   0.095815   16.14   <2e-16 ***
-#> .provided_support_cbp_within_dyad_dev  0.895142   0.107261    8.35   <2e-16 ***
+#> (Intercept)                            5.906493   0.075513   78.22  < 2e-16 ***
+#> diaryday                               0.006260   0.004576    1.37    0.171    
+#> .provided_support_cwp_dyad_mean        0.481722   0.034760   13.86  < 2e-16 ***
+#> .provided_support_cwp_within_dyad_dev -0.008331   0.035157   -0.24    0.813    
+#> .provided_support_cbp_dyad_mean        1.553466   0.096922   16.03  < 2e-16 ***
+#> .provided_support_cbp_within_dyad_dev  0.844496   0.118504    7.13 1.03e-12 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

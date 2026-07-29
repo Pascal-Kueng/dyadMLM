@@ -110,12 +110,12 @@ omitted when the supplied data already contain only the intended
 composition.
 
     #>   personID coupleID gender dyad_composition closeness provided_support
-    #> 1        1        1 female    female_x_male  4.767889         4.494570
-    #> 2        2        1   male    female_x_male  4.463017         4.757241
-    #> 3        3        2 female    female_x_male  6.437603         4.092390
-    #> 4        4        2   male    female_x_male  5.993620         6.199226
-    #> 5        5        3 female    female_x_male  4.756118         4.223651
-    #> 6        6        3   male    female_x_male  4.483926         5.029079
+    #> 1        1        1 female    female_x_male  4.705258         4.494570
+    #> 2        2        1   male    female_x_male  4.608436         4.757241
+    #> 3        3        2 female    female_x_male  6.690937         4.092390
+    #> 4        4        2   male    female_x_male  5.976549         6.199226
+    #> 5        5        3 female    female_x_male  5.272910         4.223651
+    #> 6        6        3   male    female_x_male  4.366967         5.029079
 
 We validate and prepare the data with the function
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
@@ -168,10 +168,10 @@ print(cross_distinguishable_data, n = 4)
 #> # A tibble: 240 × 15
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> 1        1        1 female female_x_male         4.71             4.49
+#> 2        2        1 male   female_x_male         4.61             4.76
+#> 3        3        2 female female_x_male         6.69             4.09
+#> 4        4        2 male   female_x_male         5.98             6.20
 #> # ℹ 236 more rows
 #> # ℹ 9 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female <dbl>, .is_male <dbl>, .provided_support_gmc <dbl>,
@@ -226,10 +226,10 @@ print(cross_exchangeable_data, n = 4)
 #> # A tibble: 240 × 10
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121 female female_x_female       7.58             5.41
-#> 2      242      121 female female_x_female       6.15             5.19
-#> 3      243      122 female female_x_female       8.28             5.89
-#> 4      244      122 female female_x_female       8.00             5.57
+#> 1      241      121 female female_x_female       7.34             5.41
+#> 2      242      121 female female_x_female       6.43             5.19
+#> 3      243      122 female female_x_female       8.18             5.89
+#> 4      244      122 female female_x_female       8.48             5.57
 #> # ℹ 236 more rows
 #> # ℹ 4 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>
@@ -280,10 +280,10 @@ print(cross_exchangeable_data, n = 4)
 #> # A tibble: 240 × 10
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> 1        1        1 female female_x_male         4.71             4.49
+#> 2        2        1 male   female_x_male         4.61             4.76
+#> 3        3        2 female female_x_male         6.69             4.09
+#> 4        4        2 male   female_x_male         5.98             6.20
 #> # ℹ 236 more rows
 #> # ℹ 4 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>
@@ -337,10 +337,10 @@ print(cross_dim_data, n = 4)
 #> # A tibble: 240 × 12
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121 female female_x_female       7.58             5.41
-#> 2      242      121 female female_x_female       6.15             5.19
-#> 3      243      122 female female_x_female       8.28             5.89
-#> 4      244      122 female female_x_female       8.00             5.57
+#> 1      241      121 female female_x_female       7.34             5.41
+#> 2      242      121 female female_x_female       6.43             5.19
+#> 3      243      122 female female_x_female       8.18             5.89
+#> 4      244      122 female female_x_female       8.48             5.57
 #> # ℹ 236 more rows
 #> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>,
@@ -388,10 +388,10 @@ print(cross_dsm_data, n = 4)
 #> # A tibble: 240 × 13
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> 1        1        1 female female_x_male         4.71             4.49
+#> 2        2        1 male   female_x_male         4.61             4.76
+#> 3        3        2 female female_x_male         6.69             4.09
+#> 4        4        2 male   female_x_male         5.98             6.20
 #> # ℹ 236 more rows
 #> # ℹ 7 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female <dbl>, .is_male <dbl>, .dsm_role_contrast <dbl>,
@@ -411,12 +411,12 @@ repeated observations over `diaryday`, with one row per person-day.
     #> # A tibble: 6 × 7
     #>   personID coupleID diaryday gender dyad_composition closeness provided_support
     #>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-    #> 1        1        1        0 female female_x_male         4.40             4.93
-    #> 2        2        1        0 male   female_x_male         5.14             5.59
-    #> 3        1        1        1 female female_x_male         5.16             4.89
-    #> 4        2        1        1 male   female_x_male         5.70             5.18
-    #> 5        1        1        2 female female_x_male         3.28             4.38
-    #> 6        2        1        2 male   female_x_male         2.82             4.99
+    #> 1        1        1        0 female female_x_male         3.74             4.93
+    #> 2        2        1        0 male   female_x_male         5.91             5.59
+    #> 3        1        1        1 female female_x_male         3.72             4.89
+    #> 4        2        1        1 male   female_x_male         6.32             5.18
+    #> 5        1        1        2 female female_x_male         2.45             4.38
+    #> 6        2        1        2 male   female_x_male         3.44             4.99
 
 To prepare intensive longitudinal data, pass the `time` variable to
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
@@ -468,12 +468,12 @@ print(ild_apim_data, n = 6)
 #> # A tibble: 3,360 × 19
 #>   personID coupleID diaryday gender dyad_composition closeness provided_support
 #>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1        0 female female_x_male         4.40             4.93
-#> 2        2        1        0 male   female_x_male         5.14             5.59
-#> 3        1        1        1 female female_x_male         5.16             4.89
-#> 4        2        1        1 male   female_x_male         5.70             5.18
-#> 5        1        1        2 female female_x_male         3.28             4.38
-#> 6        2        1        2 male   female_x_male         2.82             4.99
+#> 1        1        1        0 female female_x_male         3.74             4.93
+#> 2        2        1        0 male   female_x_male         5.91             5.59
+#> 3        1        1        1 female female_x_male         3.72             4.89
+#> 4        2        1        1 male   female_x_male         6.32             5.18
+#> 5        1        1        2 female female_x_male         2.45             4.38
+#> 6        2        1        2 male   female_x_male         3.44             4.99
 #> # ℹ 3,354 more rows
 #> # ℹ 12 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female <dbl>, .is_male <dbl>, .provided_support_cwp <dbl>,
@@ -577,12 +577,12 @@ print(ild_apim_data_dynamic, n = 6)
 #> # A tibble: 3,360 × 25
 #>   personID coupleID diaryday gender dyad_composition closeness provided_support
 #>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121        0 female female_x_female       6.59             6.18
-#> 2      242      121        0 female female_x_female       5.73             5.70
-#> 3      241      121        1 female female_x_female       8.70             4.57
-#> 4      242      121        1 female female_x_female       5.61             5.30
-#> 5      241      121        2 female female_x_female       7.06             5.19
-#> 6      242      121        2 female female_x_female       6.72             3.89
+#> 1      241      121        0 female female_x_female       6.60             6.18
+#> 2      242      121        0 female female_x_female       5.22             5.70
+#> 3      241      121        1 female female_x_female       8.33             4.57
+#> 4      242      121        1 female female_x_female       5.24             5.30
+#> 5      241      121        2 female female_x_female       6.55             5.19
+#> 6      242      121        2 female female_x_female       6.85             3.89
 #> # ℹ 3,354 more rows
 #> # ℹ 18 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>,
@@ -641,10 +641,10 @@ print(mixed_cross_data, n = 4)
 #> # A tibble: 720 × 14
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> 1        1        1 female female_x_male         4.71             4.49
+#> 2        2        1 male   female_x_male         4.61             4.76
+#> 3        3        2 female female_x_male         6.69             4.09
+#> 4        4        2 male   female_x_male         5.98             6.20
 #> # ℹ 716 more rows
 #> # ℹ 8 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female_x_female <dbl>, .is_female_x_male_female <dbl>,
@@ -703,10 +703,10 @@ print(mixed_cross_data_included, n = 4)
 #> # A tibble: 480 × 12
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121 female female_x_female       7.58             5.41
-#> 2      242      121 female female_x_female       6.15             5.19
-#> 3      243      122 female female_x_female       8.28             5.89
-#> 4      244      122 female female_x_female       8.00             5.57
+#> 1      241      121 female female_x_female       7.34             5.41
+#> 2      242      121 female female_x_female       6.43             5.19
+#> 3      243      122 female female_x_female       8.18             5.89
+#> 4      244      122 female female_x_female       8.48             5.57
 #> # ℹ 476 more rows
 #> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female_x_female <dbl>, .is_male_x_male <dbl>,
@@ -756,10 +756,10 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> # A tibble: 720 × 14
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> 1        1        1 female female_x_male         4.71             4.49
+#> 2        2        1 male   female_x_male         4.61             4.76
+#> 3        3        2 female female_x_male         6.69             4.09
+#> 4        4        2 male   female_x_male         5.98             6.20
 #> # ℹ 716 more rows
 #> # ℹ 8 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female_x_female <dbl>, .is_female_x_male <dbl>, .is_male_x_male <dbl>,
@@ -820,16 +820,16 @@ print(mixed_cross_data_pooled)
 #> # A tibble: 720 × 12
 #>    personID coupleID gender dyad_composition closeness provided_support
 #>       <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#>  1        1        1 female female_x_male         4.77             4.49
-#>  2        2        1 male   female_x_male         4.46             4.76
-#>  3        3        2 female female_x_male         6.44             4.09
-#>  4        4        2 male   female_x_male         5.99             6.20
-#>  5        5        3 female female_x_male         4.76             4.22
-#>  6        6        3 male   female_x_male         4.48             5.03
-#>  7        7        4 female female_x_male         7.76             5.36
-#>  8        8        4 male   female_x_male         5.59             5.25
-#>  9        9        5 female female_x_male         7.28             5.78
-#> 10       10        5 male   female_x_male         5.42             4.98
+#>  1        1        1 female female_x_male         4.71             4.49
+#>  2        2        1 male   female_x_male         4.61             4.76
+#>  3        3        2 female female_x_male         6.69             4.09
+#>  4        4        2 male   female_x_male         5.98             6.20
+#>  5        5        3 female female_x_male         5.27             4.22
+#>  6        6        3 male   female_x_male         4.37             5.03
+#>  7        7        4 female female_x_male         7.85             5.36
+#>  8        8        4 male   female_x_male         5.42             5.25
+#>  9        9        5 female female_x_male         7.54             5.78
+#> 10       10        5 male   female_x_male         5.19             4.98
 #> # ℹ 710 more rows
 #> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female_x_male_female <dbl>, .is_female_x_male_male <dbl>,
@@ -878,16 +878,16 @@ print(mixed_cross_data_pooled_constrained)
 #> # A tibble: 720 × 12
 #>    personID coupleID gender dyad_composition closeness provided_support
 #>       <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#>  1        1        1 female female_x_male         4.77             4.49
-#>  2        2        1 male   female_x_male         4.46             4.76
-#>  3        3        2 female female_x_male         6.44             4.09
-#>  4        4        2 male   female_x_male         5.99             6.20
-#>  5        5        3 female female_x_male         4.76             4.22
-#>  6        6        3 male   female_x_male         4.48             5.03
-#>  7        7        4 female female_x_male         7.76             5.36
-#>  8        8        4 male   female_x_male         5.59             5.25
-#>  9        9        5 female female_x_male         7.28             5.78
-#> 10       10        5 male   female_x_male         5.42             4.98
+#>  1        1        1 female female_x_male         4.71             4.49
+#>  2        2        1 male   female_x_male         4.61             4.76
+#>  3        3        2 female female_x_male         6.69             4.09
+#>  4        4        2 male   female_x_male         5.98             6.20
+#>  5        5        3 female female_x_male         5.27             4.22
+#>  6        6        3 male   female_x_male         4.37             5.03
+#>  7        7        4 female female_x_male         7.85             5.36
+#>  8        8        4 male   female_x_male         5.42             5.25
+#>  9        9        5 female female_x_male         7.54             5.78
+#> 10       10        5 male   female_x_male         5.19             4.98
 #> # ℹ 710 more rows
 #> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female_x_female <dbl>, .is_pooled_exchangeable <dbl>,

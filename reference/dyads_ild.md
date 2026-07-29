@@ -53,6 +53,12 @@ Modelling* (v2.0.9). Zenodo.
 
 ## Details
 
+The Gaussian outcome includes independent member-specific stationary
+AR(1) residual processes. Their marginal standard deviation is 0.60 for
+both genders, with correlations of 0.55 for female members and 0.50 for
+male members. Separate shared and difference residuals induce
+same-occasion partner covariance.
+
 Prepare with `dyad = coupleID`, `member = personID`, `role = gender`,
 and `time = diaryday`. These data contain three compositions. Use
 `keep_compositions` in

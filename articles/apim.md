@@ -167,10 +167,10 @@ print(apim_distinguishable_data, n=4)
 #> # A tibble: 240 × 16
 #>   personID coupleID gender dyad_composition closeness provided_support
 #>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> 1        1        1 female female_x_male         4.71             4.49
+#> 2        2        1 male   female_x_male         4.61             4.76
+#> 3        3        2 female female_x_male         6.69             4.09
+#> 4        4        2 male   female_x_male         5.98             6.20
 #> # ℹ 236 more rows
 #> # ℹ 10 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_female <dbl>, .is_male <dbl>, .member_contrast_arbitrary <dbl>,
@@ -225,30 +225,30 @@ summary(apim_distinguishable_model)
 #> Data: apim_distinguishable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     615.1     646.5    -298.6     597.1       231 
+#>     652.2     683.5    -317.1     634.2       231 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups   Name       Variance Std.Dev. Corr 
-#>  coupleID .is_female 0.7655   0.8749        
-#>           .is_male   0.7401   0.8603   0.35 
+#>  coupleID .is_female 0.8916   0.9442        
+#>           .is_male   0.8343   0.9134   0.30 
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
 #>                                          Estimate Std. Error z value Pr(>|z|)
-#> .is_female                                5.58465    0.08210   68.02   <2e-16
-#> .is_male                                  4.57041    0.08073   56.62   <2e-16
-#> .is_female:.provided_support_gmc_actor    1.47571    0.11416   12.93   <2e-16
-#> .is_male:.provided_support_gmc_actor      0.91392    0.10151    9.00   <2e-16
-#> .is_female:.provided_support_gmc_partner  0.34990    0.10323    3.39   0.0007
-#> .is_male:.provided_support_gmc_partner    0.19240    0.11225    1.71   0.0865
+#> .is_female                                5.61050    0.08860   63.32  < 2e-16
+#> .is_male                                  4.58410    0.08571   53.48  < 2e-16
+#> .is_female:.provided_support_gmc_actor    1.46654    0.12321   11.90  < 2e-16
+#> .is_male:.provided_support_gmc_actor      0.91142    0.10777    8.46  < 2e-16
+#> .is_female:.provided_support_gmc_partner  0.34944    0.11141    3.14  0.00171
+#> .is_male:.provided_support_gmc_partner    0.22226    0.11918    1.86  0.06219
 #>                                             
 #> .is_female                               ***
 #> .is_male                                 ***
 #> .is_female:.provided_support_gmc_actor   ***
 #> .is_male:.provided_support_gmc_actor     ***
-#> .is_female:.provided_support_gmc_partner ***
+#> .is_female:.provided_support_gmc_partner ** 
 #> .is_male:.provided_support_gmc_partner   .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -258,10 +258,10 @@ With the common centering, the two intercepts are the expected female
 and male closeness scores when both partners’ provided support equals
 the pooled sample mean. The estimated coefficients map as follows:
 
-![Fitted distinguishable APIM. Female and male intercepts 5.58 and 4.57;
-actor effects 1.48 and 0.91; partner effects 0.35 and 0.19; residual SDs
-0.87 and 0.86, with correlation
-0.35.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg)
+![Fitted distinguishable APIM. Female and male intercepts 5.61 and 4.58;
+actor effects 1.47 and 0.91; partner effects 0.35 and 0.22; residual SDs
+0.94 and 0.91, with correlation
+0.30.](apim_files/figure-html/fitted-distinguishable-apim-diagram-1.svg)
 
 Fitted cross-sectional distinguishable APIM for the example data. Fixed
 effects, residual standard deviations, and the residual correlation are
@@ -372,21 +372,21 @@ summary(apim_exchangeable_model)
 #> Data: apim_distinguishable_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     708.2     725.6    -349.1     698.2       235 
+#>     731.7     749.1    -360.8     721.7       235 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups     Name                       Variance Std.Dev.
-#>  coupleID   (Intercept)                0.5160   0.7183  
-#>  coupleID.1 .member_contrast_arbitrary 0.5589   0.7476  
+#>  coupleID   (Intercept)                0.5695   0.7547  
+#>  coupleID.1 .member_contrast_arbitrary 0.6156   0.7846  
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
 #>                               Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                    5.09820    0.06557   77.75   <2e-16 ***
-#> .provided_support_gmc_actor    1.28763    0.08962   14.37   <2e-16 ***
-#> .provided_support_gmc_partner  0.16444    0.08962    1.83   0.0665 .  
+#> (Intercept)                    5.11917    0.06889   74.31   <2e-16 ***
+#> .provided_support_gmc_actor    1.28459    0.09408   13.65   <2e-16 ***
+#> .provided_support_gmc_partner  0.17553    0.09408    1.87   0.0621 .  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -409,13 +409,13 @@ print(backtransformed)
 #> 
 #> Variance-covariance:
 #>                        1      2     
-#> 1 member1: (Intercept) 1.075  -0.043
-#> 2 member2: (Intercept) -0.043 1.075 
+#> 1 member1: (Intercept) 1.185  -0.046
+#> 2 member2: (Intercept) -0.046 1.185 
 #> 
 #> Standard deviations and correlations:
 #>                        1      2     
-#> 1 member1: (Intercept) 1.037  -0.040
-#> 2 member2: (Intercept) -0.040 1.037
+#> 1 member1: (Intercept) 1.089  -0.039
+#> 2 member2: (Intercept) -0.039 1.089
 ```
 
 The back-transformation follows directly from the shared and
@@ -443,8 +443,8 @@ With the common centering, the shared intercept is the expected
 closeness of either member when both partners’ provided support equals
 the pooled sample mean. The output can now be mapped as follows:
 
-![Fitted exchangeable APIM. Intercept 5.10, actor effect 1.29, partner
-effect 0.16, common residual SD 1.04, and residual correlation
+![Fitted exchangeable APIM. Intercept 5.12, actor effect 1.28, partner
+effect 0.18, common residual SD 1.09, and residual correlation
 -0.04.](apim_files/figure-html/fitted-exchangeable-apim-diagram-1.svg)
 
 Fitted cross-sectional exchangeable APIM for the example data. The
@@ -477,9 +477,9 @@ dyadMLM::compare_nested_models(
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
-#>                            Df    AIC    BIC  logLik deviance Chisq Chi Df
-#> apim_exchangeable_model     5 708.23 725.64 -349.12   698.23             
-#> apim_distinguishable_model  9 615.13 646.46 -298.57   597.13 101.1      4
+#>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
+#> apim_exchangeable_model     5 731.67 749.07 -360.83   721.67              
+#> apim_distinguishable_model  9 652.22 683.55 -317.11   634.22 87.448      4
 #>                            Pr(>Chisq)    
 #> apim_exchangeable_model                  
 #> apim_distinguishable_model  < 2.2e-16 ***
@@ -666,10 +666,10 @@ print(ild_apim_data, n = 4)
 #> # A tibble: 3,360 × 19
 #>   personID coupleID diaryday gender dyad_composition closeness provided_support
 #>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121        0 female female_x_female       6.59             6.18
-#> 2      242      121        0 female female_x_female       5.73             5.70
-#> 3      241      121        1 female female_x_female       8.70             4.57
-#> 4      242      121        1 female female_x_female       5.61             5.30
+#> 1      241      121        0 female female_x_female       6.60             6.18
+#> 2      242      121        0 female female_x_female       5.22             5.70
+#> 3      241      121        1 female female_x_female       8.33             4.57
+#> 4      242      121        1 female female_x_female       5.24             5.30
 #> # ℹ 3,356 more rows
 #> # ℹ 12 more variables: .composition <fct>, .composition_role <fct>,
 #> #   .is_exchangeable <dbl>, .member_contrast_arbitrary <dbl>,
@@ -737,7 +737,7 @@ summary(ild_apim_model)
 #> Data: ild_apim_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    8303.5    8389.2   -4137.7    8275.5      3346 
+#>    9800.8    9886.4   -4886.4    9772.8      3346 
 #> 
 #> Random effects:
 #> 
@@ -750,22 +750,22 @@ summary(ild_apim_model)
 #>  coupleID.diaryday   (Intercept)                                           
 #>  coupleID.diaryday.1 .member_contrast_arbitrary                            
 #>  Variance Std.Dev. Corr  
-#>  0.53933  0.7344         
-#>  0.08265  0.2875   0.31  
-#>  0.25635  0.5063         
-#>  0.08180  0.2860   -0.19 
-#>  0.36229  0.6019         
-#>  0.18043  0.4248         
+#>  0.54063  0.7353         
+#>  0.08670  0.2945   0.31  
+#>  0.30482  0.5521         
+#>  0.07939  0.2818   -0.19 
+#>  0.52697  0.7259         
+#>  0.33368  0.5776         
 #> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
 #> 
 #> Conditional model:
 #>                               Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)                   5.894110   0.072751   81.02  < 2e-16 ***
-#> diaryday                      0.007846   0.003713    2.11   0.0346 *  
-#> .provided_support_cwp_actor   0.245909   0.032678    7.53 5.26e-14 ***
-#> .provided_support_cwp_partner 0.247470   0.018980   13.04  < 2e-16 ***
-#> .provided_support_cbp_actor   1.215919   0.070694   17.20  < 2e-16 ***
-#> .provided_support_cbp_partner 0.308590   0.070711    4.36 1.28e-05 ***
+#> (Intercept)                   5.899847   0.075262   78.39  < 2e-16 ***
+#> diaryday                      0.007281   0.004473    1.63    0.104    
+#> .provided_support_cwp_actor   0.238714   0.036466    6.55 5.90e-11 ***
+#> .provided_support_cwp_partner 0.243605   0.024108   10.10  < 2e-16 ***
+#> .provided_support_cbp_actor   1.197020   0.075638   15.83  < 2e-16 ***
+#> .provided_support_cbp_partner 0.337414   0.075660    4.46 8.21e-06 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -788,17 +788,17 @@ print(recovered_covariance)
 #> 
 #> Variance-covariance:
 #>                                        1     2     3     4    
-#> 1 member1: (Intercept)                 0.796 0.038 0.283 0.093
-#> 2 member1: .provided_support_cwp_actor 0.038 0.164 0.093 0.001
-#> 3 member2: (Intercept)                 0.283 0.093 0.796 0.038
-#> 4 member2: .provided_support_cwp_actor 0.093 0.001 0.038 0.164
+#> 1 member1: (Intercept)                 0.845 0.038 0.236 0.097
+#> 2 member1: .provided_support_cwp_actor 0.038 0.166 0.097 0.007
+#> 3 member2: (Intercept)                 0.236 0.097 0.845 0.038
+#> 4 member2: .provided_support_cwp_actor 0.097 0.007 0.038 0.166
 #> 
 #> Standard deviations and correlations:
 #>                                        1     2     3     4    
-#> 1 member1: (Intercept)                 0.892 0.104 0.356 0.257
-#> 2 member1: .provided_support_cwp_actor 0.104 0.406 0.257 0.005
-#> 3 member2: (Intercept)                 0.356 0.257 0.892 0.104
-#> 4 member2: .provided_support_cwp_actor 0.257 0.005 0.104 0.406
+#> 1 member1: (Intercept)                 0.919 0.101 0.279 0.260
+#> 2 member1: .provided_support_cwp_actor 0.101 0.408 0.260 0.044
+#> 3 member2: (Intercept)                 0.279 0.260 0.919 0.101
+#> 4 member2: .provided_support_cwp_actor 0.260 0.044 0.101 0.408
 #> 
 #> Pair `pair_2`
 #> Shared:     us(1 | coupleID:diaryday)
@@ -806,13 +806,13 @@ print(recovered_covariance)
 #> 
 #> Variance-covariance:
 #>                        1     2    
-#> 1 member1: (Intercept) 0.543 0.182
-#> 2 member2: (Intercept) 0.182 0.543
+#> 1 member1: (Intercept) 0.861 0.193
+#> 2 member2: (Intercept) 0.193 0.861
 #> 
 #> Standard deviations and correlations:
 #>                        1     2    
-#> 1 member1: (Intercept) 0.737 0.335
-#> 2 member2: (Intercept) 0.335 0.737
+#> 1 member1: (Intercept) 0.928 0.225
+#> 2 member2: (Intercept) 0.225 0.928
 ```
 
 The `cwp` terms estimate actor and partner associations for
@@ -855,11 +855,11 @@ dyadMLM::compare_nested_models(
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
-#> ild_apim_no_contrast_slope 12 8419.8 8493.2 -4197.9   8395.8              
-#> ild_apim_model             14 8303.5 8389.2 -4137.7   8275.5 120.33      2
+#> ild_apim_no_contrast_slope 12 9849.5 9922.9 -4912.8   9825.5              
+#> ild_apim_model             14 9800.8 9886.4 -4886.4   9772.8 52.744      2
 #>                            Pr(>Chisq)    
 #> ild_apim_no_contrast_slope               
-#> ild_apim_model              < 2.2e-16 ***
+#> ild_apim_model              3.522e-12 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -900,10 +900,10 @@ print(no_contrast_slope_covariance, representation = "sdcor")
 #> 
 #> Standard deviations and correlations:
 #>                                        1     2     3     4    
-#> 1 member1: (Intercept)                 0.890 0.259 0.357 0.259
-#> 2 member1: .provided_support_cwp_actor 0.259 0.291 0.259 1.000
-#> 3 member2: (Intercept)                 0.357 0.259 0.890 0.259
-#> 4 member2: .provided_support_cwp_actor 0.259 1.000 0.259 0.291
+#> 1 member1: (Intercept)                 0.918 0.263 0.281 0.263
+#> 2 member1: .provided_support_cwp_actor 0.263 0.294 0.263 1.000
+#> 3 member2: (Intercept)                 0.281 0.263 0.918 0.263
+#> 4 member2: .provided_support_cwp_actor 0.263 1.000 0.263 0.294
 ```
 
 We can impose the stronger constraint by omitting the full
@@ -929,9 +929,9 @@ dyadMLM::compare_nested_models(
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
-#>                            Df    AIC    BIC  logLik deviance  Chisq Chi Df
-#> ild_apim_no_contrast_block 11 9421.3 9488.6 -4699.6   9399.3              
-#> ild_apim_model             14 8303.5 8389.2 -4137.7   8275.5 1123.8      3
+#>                            Df     AIC     BIC  logLik deviance  Chisq Chi Df
+#> ild_apim_no_contrast_block 11 10566.7 10634.1 -5272.4  10544.7              
+#> ild_apim_model             14  9800.8  9886.4 -4886.4   9772.8 771.97      3
 #>                            Pr(>Chisq)    
 #> ild_apim_no_contrast_block               
 #> ild_apim_model              < 2.2e-16 ***
@@ -969,10 +969,10 @@ print(no_contrast_block_covariance, representation = "sdcor")
 #> 
 #> Standard deviations and correlations:
 #>                                        1     2     3     4    
-#> 1 member1: (Intercept)                 0.733 0.344 1.000 0.344
-#> 2 member1: .provided_support_cwp_actor 0.344 0.272 0.344 1.000
-#> 3 member2: (Intercept)                 1.000 0.344 0.733 0.344
-#> 4 member2: .provided_support_cwp_actor 0.344 1.000 0.344 0.272
+#> 1 member1: (Intercept)                 0.734 0.406 1.000 0.406
+#> 2 member1: .provided_support_cwp_actor 0.406 0.276 0.406 1.000
+#> 3 member2: (Intercept)                 1.000 0.406 0.734 0.406
+#> 4 member2: .provided_support_cwp_actor 0.406 1.000 0.406 0.276
 ```
 
 These are constraints on the stable dyad-level random effects, not on
@@ -1079,24 +1079,24 @@ summary(stability_influence)
 #> Data: ild_apim_data_dynamic
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    8341.7    8390.1   -4162.9    8325.7      3112 
+#>    9474.7    9523.1   -4729.4    9458.7      3112 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
 #>  Groups              Name                       Variance Std.Dev.
-#>  coupleID            (Intercept)                1.7348   1.3171  
-#>  coupleID.1          .member_contrast_arbitrary 0.4077   0.6385  
-#>  coupleID.diaryday   (Intercept)                0.4769   0.6906  
-#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.2161   0.4649  
+#>  coupleID            (Intercept)                1.3712   1.1710  
+#>  coupleID.1          .member_contrast_arbitrary 0.2633   0.5131  
+#>  coupleID.diaryday   (Intercept)                0.6470   0.8044  
+#>  coupleID.diaryday.1 .member_contrast_arbitrary 0.3676   0.6063  
 #> Number of obs: 3120, groups:  coupleID, 120; coupleID:diaryday, 1560
 #> 
 #> Conditional model:
-#>                         Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)             5.834951   0.206339  28.278   <2e-16 ***
-#> .closeness_actor_lag1   0.005985   0.019493   0.307   0.7588    
-#> .closeness_partner_lag1 0.002167   0.019493   0.111   0.9115    
-#> diaryday                0.008910   0.004676   1.905   0.0567 .  
+#>                          Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)              5.175072   0.203933  25.376   <2e-16 ***
+#> .closeness_actor_lag1    0.172402   0.020086   8.583   <2e-16 ***
+#> .closeness_partner_lag1 -0.049740   0.020086  -2.476   0.0133 *  
+#> diaryday                 0.006553   0.005444   1.204   0.2287    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

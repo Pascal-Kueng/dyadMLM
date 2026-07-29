@@ -92,7 +92,12 @@ Multilevel Modelling</em> (v2.0.9). Zenodo.
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Prepare with <code>dyad = coupleID</code>, <code>member = personID</code>, <code>role = gender</code>, and
+    <p>The Gaussian outcome includes independent member-specific stationary AR(1)
+residual processes. Their marginal standard deviation is 0.60 for both
+genders, with correlations of 0.55 for female members and 0.50 for male
+members. Separate shared and difference residuals induce same-occasion
+partner covariance.</p>
+<p>Prepare with <code>dyad = coupleID</code>, <code>member = personID</code>, <code>role = gender</code>, and
 <code>time = diaryday</code>. These data contain three compositions. Use
 <code>keep_compositions</code> in <code><a href="prepare_dyad_data.html">prepare_dyad_data()</a></code> when an analysis should retain
 only selected compositions; omit it when all supplied compositions should
