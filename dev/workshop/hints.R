@@ -382,8 +382,10 @@
     )
   ),
   ild_models = list(
-    distinguishable_no_ar = paste(
-      "distinguishable_no_ar_model <- glmmTMB::glmmTMB(",
+    distinguishable_ar1 = paste(
+      "ild_ar1_start <- make_ild_ar1_start(my_ild_data)",
+      "",
+      "distinguishable_ar1_model <- glmmTMB::glmmTMB(",
       "  closeness ~",
       "    0 + .is_female + .is_male +",
       "    .is_female:diaryday_c +",
@@ -397,24 +399,13 @@
       "    .is_female:.provided_support_cbp_partner +",
       "    .is_male:.provided_support_cbp_partner +",
       "    (0 + .is_female + .is_male | coupleID) +",
+      "    ar1(0 + .is_female:diaryday_f | coupleID) +",
+      "    ar1(0 + .is_male:diaryday_f | coupleID) +",
       "    (0 + .is_female + .is_male | coupleID:diaryday),",
       "  dispformula = ~ 0,",
       "  family = gaussian(),",
       "  data = my_ild_data,",
-      "  control = ild_control",
-      ")",
-      sep = "\n"
-    ),
-    distinguishable_ar1 = paste(
-      "ild_ar1_start <- make_ild_ar1_start(distinguishable_no_ar_model)",
-      "",
-      "distinguishable_ar1_model <- update(",
-      "  distinguishable_no_ar_model,",
-      "  formula = . ~ . -",
-      "    (0 + .is_female + .is_male | coupleID:diaryday) +",
-      "    ar1(0 + .is_female:diaryday_f | coupleID) +",
-      "    ar1(0 + .is_male:diaryday_f | coupleID) +",
-      "    (0 + .is_female + .is_male | coupleID:diaryday),",
+      "  control = ild_control,",
       "  start = ild_ar1_start",
       ")",
       sep = "\n"
@@ -474,8 +465,8 @@
       "Use this structure and replace every bracketed item with your result:",
       "",
       "\"We analyzed [number] female-male dyads measured on up to [number]",
-      "days. [No AR(1) / role-specific AR(1)] was retained because [diagnostic",
-      "reason]. [Role-specific / pooled] APIM associations were retained because",
+      "days. Role-specific AR(1) residual processes were fitted and [diagnostic",
+      "result]. [Role-specific / pooled] APIM associations were retained because",
       "[four-df comparison and substantive reason]. Within-person actor and",
       "partner associations were [estimates and 95% CIs]; between-person actor",
       "and partner associations were [estimates and 95% CIs]. Stable dyad,",
@@ -493,6 +484,16 @@
       "",
       "The levels of diaryday_f must follow the scheduled day order. Keep",
       "the separate coupleID:diaryday covariance block in the model.",
+      sep = "\n"
+    )
+  ),
+  ild_model_choices = list(
+    role_solution = paste(
+      "Checkpoint: The four-df comparison supports retaining role-specific",
+      "focal associations. This is not a test of full exchangeability because",
+      "the baseline, covariance, and AR(1) parameters remain role-specific.",
+      "",
+      "retained_model <- distinguishable_model",
       sep = "\n"
     )
   ),

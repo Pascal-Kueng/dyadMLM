@@ -2070,7 +2070,6 @@ summary(ild_apim_distinguishable_model)
 #| cache: true
 #| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_distinguishable_model), stats::model.frame(ild_apim_distinguishable_model), body(simulate_ild_dharma)))
 #| fig-format: svg
-#| fig-align: center
 #| output-location: slide
 
 
@@ -2083,22 +2082,15 @@ ild_apim_no_ar_dharma <- simulate_ild_dharma(
   seed = 123
 )
 
-ild_lag1_label_parameters <- graphics::par(col.lab = "transparent")
-ild_apim_no_ar_lag1_test <- test_ild_lag1(
+test_ild_lag1(
   ild_apim_no_ar_dharma,
   plot = TRUE
-)
-graphics::par(ild_lag1_label_parameters)
-graphics::title(
-  xlab = "Simulated values; red = observed; p < .001",
-  ylab = "Frequency"
 )
 ```
 
 :::{.subtle}
 The helper compares the observed consecutive-day correlation with correlations
-simulated from the fitted model. Independence across days is not adequate here
-($\hat r_{\mathrm{lag1}}\approx .17$, $p<.001$).
+simulated from the fitted model.
 :::
 
 ## Add role-specific residual AR(1) processes {.smaller}

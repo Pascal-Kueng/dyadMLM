@@ -76,53 +76,101 @@ plot_mahalanobis <- function(data, x, y, dyad = "couple_id",
 }
 
 make_ild_ar1_start <- function(
-    no_ar_model,
-    ar_sd = c(female = 0.40, male = 0.40),
-    ar_rho = c(female = 0.30, male = 0.30)) {
-  if (!inherits(no_ar_model, "glmmTMB")) {
-    stop("no_ar_model must be a fitted glmmTMB model.", call. = FALSE)
-  }
-  if (no_ar_model$fit$convergence != 0L ||
-      !isTRUE(no_ar_model$sdr$pdHess)) {
+    data,
+    stable_sd = c(female = 0.50, male = 0.50),
+    stable_rho = 0.20,
+    ar_sd = c(female = 0.50, male = 0.50),
+    ar_rho = c(female = 0.50, male = 0.50),
+    same_day_sd = c(female = 0.50, male = 0.50),
+    same_day_rho = 0.20) {
+  required_columns <- c(
+    "closeness",
+    ".is_female",
+    ".is_male",
+    "diaryday_c",
+    ".provided_support_cwp_actor",
+    ".provided_support_cwp_partner",
+    ".provided_support_cbp_actor",
+    ".provided_support_cbp_partner"
+  )
+  missing_columns <- setdiff(required_columns, names(data))
+  if (length(missing_columns) > 0L) {
     stop(
-      "The no-AR model must converge with a positive-definite Hessian.",
+      "Missing columns: ",
+      paste(missing_columns, collapse = ", "),
       call. = FALSE
     )
   }
+  if (length(stable_sd) != 2L ||
+      any(!is.finite(stable_sd)) ||
+      any(stable_sd <= 0)) {
+    stop("stable_sd must contain two positive finite values.", call. = FALSE)
+  }
   if (length(ar_sd) != 2L || any(!is.finite(ar_sd)) || any(ar_sd <= 0)) {
     stop("ar_sd must contain two positive finite values.", call. = FALSE)
+  }
+  if (length(same_day_sd) != 2L ||
+      any(!is.finite(same_day_sd)) ||
+      any(same_day_sd <= 0)) {
+    stop("same_day_sd must contain two positive finite values.", call. = FALSE)
   }
   if (length(ar_rho) != 2L ||
       any(!is.finite(ar_rho)) ||
       any(abs(ar_rho) >= 1)) {
     stop("ar_rho must contain two finite values between -1 and 1.", call. = FALSE)
   }
-
-  no_ar_theta <- glmmTMB::getME(no_ar_model, "theta")
-  covariance_blocks <- glmmTMB::VarCorr(no_ar_model)$cond
-  two_role_blocks <- vapply(
-    covariance_blocks,
-    nrow,
-    integer(1)
-  ) == 2L
-  if (length(no_ar_theta) != 6L ||
-      length(covariance_blocks) != 2L ||
-      !all(two_role_blocks)) {
+  if (length(stable_rho) != 1L ||
+      !is.finite(stable_rho) ||
+      abs(stable_rho) >= 1) {
     stop(
-      "Expected stable and dyad-day two-role covariance blocks only.",
+      "stable_rho must be one finite value between -1 and 1.",
+      call. = FALSE
+    )
+  }
+  if (length(same_day_rho) != 1L ||
+      !is.finite(same_day_rho) ||
+      abs(same_day_rho) >= 1) {
+    stop(
+      "same_day_rho must be one finite value between -1 and 1.",
+      call. = FALSE
+    )
+  }
+
+  fixed_formula <- closeness ~
+    0 + .is_female + .is_male +
+    .is_female:diaryday_c +
+    .is_male:diaryday_c +
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor +
+    .is_female:.provided_support_cwp_partner +
+    .is_male:.provided_support_cwp_partner +
+    .is_female:.provided_support_cbp_actor +
+    .is_male:.provided_support_cbp_actor +
+    .is_female:.provided_support_cbp_partner +
+    .is_male:.provided_support_cbp_partner
+
+  fixed_model <- stats::lm(fixed_formula, data = data)
+  beta_start <- stats::coef(fixed_model)
+  if (length(beta_start) != 12L || any(!is.finite(beta_start))) {
+    stop(
+      "The fixed-effects starting model must have 12 finite coefficients.",
       call. = FALSE
     )
   }
 
   list(
-    beta = unname(glmmTMB::fixef(no_ar_model)$cond),
+    beta = unname(beta_start),
     theta = unname(c(
-      no_ar_theta[1:3],
+      log(stable_sd[[1L]]),
+      log(stable_sd[[2L]]),
+      glmmTMB::put_cor(stable_rho, input_val = "vec"),
       log(ar_sd[[1L]]),
       glmmTMB::put_cor(ar_rho[[1L]], input_val = "vec"),
       log(ar_sd[[2L]]),
       glmmTMB::put_cor(ar_rho[[2L]], input_val = "vec"),
-      no_ar_theta[4:6]
+      log(same_day_sd[[1L]]),
+      log(same_day_sd[[2L]]),
+      glmmTMB::put_cor(same_day_rho, input_val = "vec")
     ))
   )
 }
@@ -332,6 +380,11 @@ test_ild_lag1 <- function(residuals, plot = FALSE, by_role = FALSE) {
       )
     }
 
+    if (isTRUE(plot)) {
+      lag1_label_parameters <- graphics::par(col.lab = "transparent")
+      on.exit(graphics::par(lag1_label_parameters), add = TRUE)
+    }
+
     test <- DHARMa::testGeneric(
       residuals,
       summary = lag1_correlation,
@@ -342,6 +395,18 @@ test_ild_lag1 <- function(residuals, plot = FALSE, by_role = FALSE) {
         label
       )
     )
+    if (isTRUE(plot)) {
+      graphics::par(lag1_label_parameters)
+      p_text <- if (test$p.value < .001) {
+        "p < .001"
+      } else {
+        paste0("p = ", sub("^0", "", sprintf("%.3f", test$p.value)))
+      }
+      graphics::title(
+        xlab = paste("Simulated values; red = observed;", p_text),
+        ylab = "Frequency"
+      )
+    }
     test$statistic <- c(
       `lag-1 correlation` = lag1_correlation(residuals$observedResponse)
     )

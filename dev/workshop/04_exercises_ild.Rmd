@@ -137,12 +137,14 @@ Your call should:
 Save the result as `my_ild_data`; all later models should use this object.
 
 ```{r eval=FALSE}
+# hint("ild_preparation", "solution")
+```
+
+```{r eval=FALSE}
 my_ild_data <- dyadMLM::prepare_dyad_data(
   data = raw_ild_data,
   # Complete the required arguments.
 )
-
-# hint("ild_preparation", "solution")
 ```
 
 Add two time variables:
@@ -153,12 +155,14 @@ Add two time variables:
 These names are used below.
 
 ```{r eval=FALSE}
+# hint("ild_preparation", "time_variables")
+```
+
+```{r eval=FALSE}
 my_ild_data <- my_ild_data |>
   dplyr::mutate(
     # Create diaryday_c and diaryday_f.
   )
-
-# hint("ild_preparation", "time_variables")
 ```
 
 Inspect the prepared data and its generated columns:
@@ -186,7 +190,10 @@ Check:
 ```{r}
 # hint("ild_validation", "functions")
 # hint("ild_validation", "solution")
+```
 
+```{r}
+# Add your validation checks here.
 ```
 
 Summarize what you found:
@@ -204,12 +211,19 @@ Reuse the simple tools from the cross-sectional exercise: summarize
 role-specific histograms. Means and standard deviations are sufficient here.
 
 ```{r}
-# Overall and role-specific summaries
 # hint("ild_descriptives", "summary")
+```
 
-# Role-specific histograms
+```{r}
+# Add your overall and role-specific summaries here.
+```
+
+```{r}
 # hint("ild_descriptives", "histograms")
+```
 
+```{r}
+# Add your role-specific histograms here.
 ```
 
 
@@ -232,7 +246,14 @@ trajectory_data <- my_ild_data |>
     names_to = "measure",
     values_to = "score"
   )
+```
 
+```{r}
+# hint("ild_trajectories", "structure")
+# hint("ild_trajectories", "solution")
+```
+
+```{r}
 # Complete the mappings and facet specification, then run the plot:
 # ggplot2::ggplot(
 #   trajectory_data,
@@ -248,10 +269,6 @@ trajectory_data <- my_ild_data |>
 #   ggplot2::facet_grid(... ~ ..., scales = "free_y") +
 #   ggplot2::labs(x = "Diary day", y = NULL, color = "Gender") +
 #   ggplot2::theme_minimal()
-
-# hint("ild_trajectories", "structure")
-# hint("ild_trajectories", "solution")
-
 ```
 
 
@@ -274,7 +291,10 @@ item-level data needed to estimate it are not included here.
 ```{r}
 # hint("ild_level_associations", "structure")
 # hint("ild_level_associations", "solution")
+```
 
+```{r}
+# Add your optional level-specific association code here.
 ```
 
 Describe the main patterns:
@@ -282,20 +302,25 @@ Describe the main patterns:
 > [Insert your descriptive interpretation]
 
 
-# 4. Estimate the initial distinguishable model
+# 4. Estimate the role-specific AR(1) model
 
-Begin with the scientific mean structure and no residual temporal process. Fit
-a Gaussian distinguishable APIM with:
+Fit a Gaussian distinguishable APIM with:
 
 - role-specific intercepts and linear time trends
 - role-specific within-person actor and partner effects
 - role-specific between-person actor and partner effects
 - stable role-specific covariance at the dyad level
+- separate female and male AR(1) residual processes
 - same-occasion role-specific covariance at the dyad--day level
 
 Use `dispformula = ~ 0` so the modeled dyad--day block represents the Gaussian
 observation-level residual structure. Adapt the distinguishable ILD model from
 the applied tutorial and inspect `names(my_ild_data)` when selecting columns.
+
+The applied tutorial shows how residual temporal dependence motivates AR(1).
+For this focused extension, fit the planned role-specific AR(1) specification
+directly. This avoids spending workshop time estimating a deliberately
+misspecified no-AR intermediate model.
 
 To keep this exercise focused and fitting times manageable, use random
 intercepts but no random slopes. In substantive analyses, consider
@@ -316,18 +341,28 @@ ild_control <- glmmTMB::glmmTMBControl(
 ```
 
 ```{r eval=FALSE}
-# hint("ild_models", "distinguishable_no_ar")
+# hint("ild_ar1", "role_specific_syntax")
+# hint("ild_models", "distinguishable_ar1")
+```
 
-distinguishable_no_ar_model <- glmmTMB::glmmTMB(
-  formula = YOUR_DISTINGUISHABLE_FORMULA,
+```{r eval=FALSE}
+ild_ar1_start <- make_ild_ar1_start(my_ild_data)
+
+distinguishable_ar1_model <- glmmTMB::glmmTMB(
+  formula = YOUR_ROLE_SPECIFIC_AR1_FORMULA,
   dispformula = ~ 0,
   family = gaussian(),
   data = my_ild_data,
-  control = ild_control
+  control = ild_control,
+  start = ild_ar1_start
 )
 
-summary(distinguishable_no_ar_model)
+summary(distinguishable_ar1_model)
 ```
+
+The start helper fits only an ordinary fixed-effects regression, then supplies
+generic interior values for the covariance parameters. It does not fit a
+mixed model or use the simulation truth.
 
 Inspect the model output for convergence or Hessian warnings, boundary
 estimates, and the plausibility of all estimates before continuing. A zero
@@ -346,67 +381,7 @@ person-day as independent. Pass `role` and request `by_role = TRUE` so the
 female and male lag-1 checks are not averaged together.
 
 ```{r eval=FALSE}
-no_ar_dharma_residuals <- simulate_ild_dharma(
-  model = distinguishable_no_ar_model,
-  dyad = my_ild_data$coupleID,
-  member = my_ild_data$personID,
-  time = my_ild_data$diaryday,
-  role = my_ild_data$gender,
-  n = 1000,
-  seed = 123
-)
-
-plot(
-  no_ar_dharma_residuals,
-  title = "Block-whitened DHARMa residuals"
-)
-
-test_ild_lag1(no_ar_dharma_residuals, by_role = TRUE)
-```
-
-Consider:
-
-- overall calibration and visible residual patterns
-- the magnitude of the observed lag-1 correlation for each role
-- whether each correlation is typical under simulations from the fitted model
-
-Do not base the decision on a significance label alone.
-
-> [Insert your diagnostic interpretation]
-
-> [State whether you retain residual independence or add AR(1), and why]
-
-
-## If selected: add role-specific AR(1)
-
-If you decided that residual independence is adequate, skip this section.
-
-Otherwise, add separate female and male AR(1) processes using `diaryday_f`.
-Retain the dyad--day block because AR(1) dependence and same-occasion partner
-covariance represent different parts of the residual structure.
-
-```{r eval=FALSE}
-# hint("ild_ar1", "role_specific_syntax")
-# hint("ild_models", "distinguishable_ar1")
-
-ild_ar1_start <- make_ild_ar1_start(distinguishable_no_ar_model)
-
-distinguishable_ar1_model <- update(
-  distinguishable_no_ar_model,
-  formula = YOUR_AR1_FORMULA_UPDATE,
-  start = ild_ar1_start
-)
-```
-
-The start helper reuses the fitted no-AR coefficients and covariance estimates,
-then inserts moderate interior AR values. It does not use the simulation truth.
-
-Check estimation again. Then rerun the DHARMa and lag-1 checks using the
-**AR(1) model object**, and decide whether the revised specification is
-adequate.
-
-```{r eval=FALSE}
-ar1_dharma_residuals <- simulate_ild_dharma(
+distinguishable_dharma_residuals <- simulate_ild_dharma(
   model = distinguishable_ar1_model,
   dyad = my_ild_data$coupleID,
   member = my_ild_data$personID,
@@ -417,24 +392,31 @@ ar1_dharma_residuals <- simulate_ild_dharma(
 )
 
 plot(
-  ar1_dharma_residuals,
-  title = "AR(1) block-whitened DHARMa residuals"
+  distinguishable_dharma_residuals,
+  title = "Block-whitened DHARMa residuals"
 )
 
-test_ild_lag1(ar1_dharma_residuals, by_role = TRUE)
+test_ild_lag1(distinguishable_dharma_residuals, by_role = TRUE)
 ```
 
-> [Insert your updated diagnostic interpretation]
+Consider:
 
+- overall calibration and visible residual patterns
+- the magnitude of the observed lag-1 correlation for each role
+- whether each correlation is typical under simulations from the fitted model
 
-## Retain the distinguishable temporal specification
+The plot uses block-whitened scaled residuals. The lag-1 helper instead uses a
+raw response-residual correlation and compares it with the same statistic in
+simulations from the fitted model.
 
-Save the selected distinguishable model and its matching residual object under
-the names below. Do not return to the no-AR objects if you selected AR(1).
+Do not base the decision on a significance label alone.
+
+> [Insert your diagnostic interpretation]
+
+Use one stable name for the model comparison:
 
 ```{r eval=FALSE}
-distinguishable_model <- YOUR_SELECTED_DISTINGUISHABLE_MODEL
-distinguishable_dharma_residuals <- YOUR_MATCHING_DHARMA_OBJECT
+distinguishable_model <- distinguishable_ar1_model
 ```
 
 
@@ -451,12 +433,12 @@ This creates a regular four-degree-of-freedom test of one clear question:
 
 Because the temporal and covariance terms are identical in both candidates,
 the comparison does not mix that question with a change in residual structure.
-The same fixed-effect update works whether you selected the no-AR or AR(1)
-distinguishable model.
 
 ```{r eval=FALSE}
 # hint("ild_models", "pooled_apim_effects")
+```
 
+```{r eval=FALSE}
 pooled_apim_effects_start <- make_pooled_apim_effects_start(
   distinguishable_model
 )
@@ -487,6 +469,13 @@ AR(1) parameters remain role-specific.
 > [Insert your role-difference conclusion and decision]
 
 Use one stable name for all further processing and reporting:
+
+After making your role-difference decision, you can reveal the optional
+checkpoint and compare whether you reached the same conclusion.
+
+```{r eval=FALSE}
+# hint("ild_model_choices", "role_solution")
+```
 
 ```{r eval=FALSE}
 retained_model <- YOUR_RETAINED_MODEL
@@ -525,10 +514,10 @@ Briefly assess whether the pooled-effects model remains adequate:
 
 ## Robustness
 
-If you fitted both no-AR and AR(1) candidates, compare their focal estimates and
-state whether modeling temporal dependence materially changes the substantive
-conclusions. If time permits, assess a different plausible time trend. Do not
-select a specification solely because it changes a significance label.
+If time permits, assess a different plausible time trend and compare the focal
+estimates. In a substantive analysis, you could also assess theoretically
+plausible random slopes if the design supports them. Do not select a
+specification solely because it changes a significance label.
 
 > [Insert your robustness conclusion]
 
@@ -547,7 +536,10 @@ parameters:
 
 ```{r}
 # hint("ild_reporting", "solution")
+```
 
+```{r}
+# Add your reporting code here.
 ```
 
 Interpret each AR(1) SD as the stationary SD of that role's persistent latent
@@ -559,7 +551,10 @@ Plot the focal fixed effects or model-implied associations:
 
 ```{r}
 # hint("ild_reporting", "plot")
+```
 
+```{r}
+# Add your plotting code here.
 ```
 
 Write a brief results paragraph that:

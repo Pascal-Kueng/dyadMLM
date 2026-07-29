@@ -169,8 +169,56 @@ ild_exercise_theta <- c(
   "same_day_correlation" = glmmTMB::put_cor(0.25, input_val = "vec")
 )
 
+check_ild_exercise_model_structure <- function(prepared_data) {
+  fitting_formula <- update(
+    ild_exercise_simulation_formula,
+    closeness ~ .
+  )
+  model_structure <- glmmTMB::glmmTMB(
+    formula = fitting_formula,
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = prepared_data,
+    doFit = FALSE
+  )
+
+  random_structure <- model_structure$condReStruc
+  expected_terms <- c(
+    "0 + .is_female + .is_male | coupleID",
+    "0 + .is_female:diaryday_f | coupleID",
+    "0 + .is_male:diaryday_f | coupleID",
+    "0 + .is_female + .is_male | coupleID:diaryday"
+  )
+  expected_covariance_types <- c("us", "ar1", "ar1", "us")
+  expected_theta_counts <- c(3, 2, 2, 3)
+
+  stopifnot(
+    identical(names(random_structure), expected_terms),
+    identical(
+      unname(vapply(
+        random_structure,
+        function(term) names(term$blockCode),
+        character(1)
+      )),
+      expected_covariance_types
+    ),
+    identical(
+      as.double(vapply(
+        random_structure,
+        function(term) term$blockNumTheta,
+        numeric(1)
+      )),
+      expected_theta_counts
+    ),
+    length(model_structure$parameters$theta) ==
+      length(ild_exercise_theta)
+  )
+
+  invisible(model_structure)
+}
+
 simulate_ild_exercise_data <- function(
-    seed = 20260729L,
+    seed = 20260720L,
     n_dyads = 120L) {
   installed_glmmTMB <- as.character(utils::packageVersion("glmmTMB"))
   if (!identical(installed_glmmTMB, "1.1.14")) {
@@ -191,11 +239,24 @@ simulate_ild_exercise_data <- function(
     data = raw_data
   )
 
+  raw_row_keys <- paste(
+    raw_data$coupleID,
+    raw_data$personID,
+    raw_data$diaryday
+  )
+  prepared_row_keys <- paste(
+    prepared_data$coupleID,
+    prepared_data$personID,
+    prepared_data$diaryday
+  )
+  stopifnot(identical(raw_row_keys, prepared_row_keys))
+
   fixed_columns <- colnames(stats::model.matrix(
     ild_exercise_fixed_formula,
     data = prepared_data
   ))
   stopifnot(identical(fixed_columns, names(ild_exercise_fixed_effects)))
+  check_ild_exercise_model_structure(prepared_data)
 
   simulated_outcome <- glmmTMB::simulate_new(
     object = ild_exercise_simulation_formula,
