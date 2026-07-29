@@ -174,6 +174,45 @@ stable_effects <- dplyr::bind_rows(stable_effect_rows)
 residual_process <- dplyr::bind_rows(residual_rows)
 
 ###############################################################################
+### MEMBER-SPECIFIC AR(1) RESIDUAL PROCESSES
+###############################################################################
+
+# Female and male members have separate stationary AR(1) processes with the
+# same marginal variability and deliberately similar persistence.
+ar1_parameters <- tibble::tribble(
+  ~gender, ~ar1_sd, ~ar1_rho,
+  "female",     0.60,     0.55,
+  "male",       0.60,     0.50
+)
+
+set.seed(81029)
+ar1_rows <- vector("list", nrow(persons))
+
+for (person_index in seq_len(nrow(persons))) {
+  person <- persons[person_index, ]
+  parameters <- ar1_parameters[
+    ar1_parameters$gender == person$gender,
+  ]
+  ar1_values <- numeric(length(diary_days))
+  ar1_values[1L] <- stats::rnorm(1L, 0, parameters$ar1_sd)
+  innovation_sd <- parameters$ar1_sd * sqrt(1 - parameters$ar1_rho^2)
+
+  for (day_index in 2:length(diary_days)) {
+    ar1_values[day_index] <-
+      parameters$ar1_rho * ar1_values[day_index - 1L] +
+      stats::rnorm(1L, 0, innovation_sd)
+  }
+
+  ar1_rows[[person_index]] <- tibble::tibble(
+    personID = person$personID,
+    diaryday = diary_days,
+    ar1_residual = ar1_values
+  )
+}
+
+ar1_process <- dplyr::bind_rows(ar1_rows)
+
+###############################################################################
 ### OUTCOME FIXED EFFECTS
 ###############################################################################
 
@@ -251,9 +290,10 @@ panel <- panel |>
 
 dyads_ild <- panel |>
   dplyr::left_join(residual_process, by = c("coupleID", "diaryday")) |>
+  dplyr::left_join(ar1_process, by = c("personID", "diaryday")) |>
   dplyr::mutate(
     closeness = expected_closeness + shared_residual +
-      member_contrast * difference_residual,
+      member_contrast * difference_residual + ar1_residual,
     gender = factor(gender, levels = c("female", "male")),
     dyad_composition = factor(
       dyad_composition,

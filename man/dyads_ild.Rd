@@ -33,6 +33,12 @@ dyads and exchangeable female-female and male-male dyads. Each dyad has two
 members observed on 14 diary days.
 }
 \details{
+The Gaussian outcome includes independent member-specific stationary AR(1)
+residual processes. Their marginal standard deviation is 0.60 for both
+genders, with correlations of 0.55 for female members and 0.50 for male
+members. Separate shared and difference residuals induce same-occasion
+partner covariance.
+
 Prepare with \code{dyad = coupleID}, \code{member = personID}, \code{role = gender}, and
 \code{time = diaryday}. These data contain three compositions. Use
 \code{keep_compositions} in \code{\link[=prepare_dyad_data]{prepare_dyad_data()}} when an analysis should retain
