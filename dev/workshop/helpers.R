@@ -242,7 +242,7 @@ make_pooled_apim_effects_start <- function(role_specific_model) {
 }
 
 simulate_ild_dharma <- function(model, dyad, member, time, role = NULL,
-                                n = 1000, seed = 123) {
+                                n = 250, seed = 123) {
   model_family <- stats::family(model)
   if (model_family$family != "gaussian" ||
       model_family$link != "identity") {

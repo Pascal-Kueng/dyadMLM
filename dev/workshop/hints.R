@@ -475,6 +475,18 @@
       sep = "\n"
     )
   ),
+  ild_diagnostics = list(
+    solution = paste(
+      "Checkpoint: With the supplied dataset and diagnostic seed, the observed",
+      "female and male lag-1 statistics are both compatible with simulations",
+      "from the fitted role-specific AR(1) model. Retain the AR(1)",
+      "specification unless your other residual plots reveal a clear problem.",
+      "",
+      "Remember that a nonzero raw residual correlation is not itself a failure:",
+      "the calibrated check asks whether it is unusual under the fitted model.",
+      sep = "\n"
+    )
+  ),
   ild_ar1 = list(
     role_specific_syntax = paste(
       "Add these two terms:",
@@ -489,9 +501,10 @@
   ),
   ild_model_choices = list(
     role_solution = paste(
-      "Checkpoint: The four-df comparison supports retaining role-specific",
-      "focal associations. This is not a test of full exchangeability because",
-      "the baseline, covariance, and AR(1) parameters remain role-specific.",
+      "Checkpoint: For the supplied dataset, the four-df likelihood-ratio test",
+      "is chi-squared = 88.45, p < .001. Retain the role-specific focal",
+      "associations. This is not a test of full exchangeability because the",
+      "baseline, covariance, and AR(1) parameters remain role-specific.",
       "",
       "retained_model <- distinguishable_model",
       sep = "\n"

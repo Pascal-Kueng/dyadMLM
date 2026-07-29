@@ -387,7 +387,7 @@ distinguishable_dharma_residuals <- simulate_ild_dharma(
   member = my_ild_data$personID,
   time = my_ild_data$diaryday,
   role = my_ild_data$gender,
-  n = 1000,
+  n = 250,
   seed = 123
 )
 
@@ -409,9 +409,16 @@ The plot uses block-whitened scaled residuals. The lag-1 helper instead uses a
 raw response-residual correlation and compares it with the same statistic in
 simulations from the fitted model.
 
+The exercise uses 250 simulations to keep this extension manageable during the
+workshop. Increase that number for a final substantive analysis.
+
 Do not base the decision on a significance label alone.
 
 > [Insert your diagnostic interpretation]
+
+```{r eval=FALSE}
+# hint("ild_diagnostics", "solution")
+```
 
 Use one stable name for the model comparison:
 
@@ -495,7 +502,7 @@ retained_model_dharma_residuals <- simulate_ild_dharma(
   member = my_ild_data$personID,
   time = my_ild_data$diaryday,
   role = my_ild_data$gender,
-  n = 1000,
+  n = 250,
   seed = 123
 )
 
