@@ -25,8 +25,8 @@ documentation and vignettes are available on the
 
 # Getting started
 
-Keep `04_exercises_ild.Rmd`, `00_setup.R`, `dyadic-data.rds`, and `hints.R` in
-the same folder.
+Keep `04_exercises_ild.Rmd`, `00_setup.R`, `hints.R`, and `helpers.R` in the
+same folder.
 
 If you have not already run the workshop setup, run the next chunk once, in a
 fresh R session. It installs or updates the workshop packages and any
@@ -37,31 +37,23 @@ may take several minutes.
 source("00_setup.R")
 ```
 
-Load the required packages and optional hints:
+Load the required packages, optional hints, and ILD diagnostic helpers:
 
 ```{r}
 library(glmmTMB)
 library(dyadMLM)
 library(wbCorr)
-library(easystats)
+library(easystats, quietly = TRUE)
 library(DHARMa)
 library(dplyr)
 library(ggplot2)
 
 source("hints.R")
+source("helpers.R")
 ```
 
 Optional hints appear as commented `hint()` calls. Uncomment and run them one
 at a time.
-
-Load and inspect the intensive longitudinal dataset:
-
-```{r}
-raw_ild_data <- readRDS("dyadic-data.rds")
-
-head(raw_ild_data)
-names(raw_ild_data)
-```
 
 
 # The ILD workflow
@@ -69,49 +61,102 @@ names(raw_ild_data)
 The same six-step workflow still applies:
 
 1. Define dyads, distinguishability, and research questions
-2. Prepare the data and validate the dyadic and temporal structure
-3. Describe measures, trajectories, and within- and between-person relationships
-4. Specify and estimate the model
-5. Verify model adequacy, temporal dependence, and robustness
+2. Prepare the data and validate the dyadic structure
+3. Describe and visualize measures and observed relationships
+4. Estimate the models
+5. Verify model adequacy, distinguishability, and robustness
 6. Visualize, interpret, and report results
 
-ILD additionally requires decisions about matched occasions, time gaps,
-within- and between-person variation, trends, lagging, and residual temporal
+ILD additionally requires attention to matched occasions, time gaps,
+within- and between-person variation, time trends, and residual temporal
 dependence.
 
 
-# 1. Define the research question and temporal target
+# 1. Define dyads, distinguishability, and research questions
 
-Choose one outcome and one predictor. State the actor and partner questions.
+The cross-sectional exercise let you choose the predictor and outcome. Here,
+everyone uses one prescribed question and a focused simulated dataset so that
+the focus remains on the new ILD decisions and results can be compared across
+groups. This is a teaching choice, not a claim that there is only one sensible
+question or causal direction.
 
-> [Insert your research question]
-
-Also decide whether your primary question is:
-
-- **Concurrent:** are partners' predictor and outcome values associated on the
-  same occasion?
-- **Lagged:** do prior values predict either partner's later outcome?
-
-> [Insert your temporal target and reasoning]
-
-
-# 2. Prepare and validate the data
-
-Use `dyadMLM::prepare_dyad_data()` and save the result as `my_ild_data`.
-
-```{r eval=FALSE}
-?dyadMLM::prepare_dyad_data
-
-# hint("ild_prepare_data", "structure")
-```
-
-Your preparation call should identify the dyad, member, role, time variable,
-and focal predictor. Use a two-level temporal decomposition for a concurrent
-ILD APIM. If your research question is lagged, also create the required lagged
-predictors without bridging missing occasions.
+Load and inspect the package dataset:
 
 ```{r}
+raw_ild_data <- dyadMLM::dyads_ild
 
+raw_ild_data
+names(raw_ild_data)
+```
+
+The data contain simulated daily scores for several dyad compositions. This
+exercise retains the female--male dyads and treats gender as the distinguishing
+variable. Higher scores indicate more provided support and greater closeness.
+
+Our concurrent research question is:
+
+> **How are daily deviations and stable between-person differences in provided
+> support associated with one's own and one's partner's closeness on the same
+> day?**
+
+Translate this into four questions:
+
+> [Insert the within-person actor question]
+
+> [Insert the within-person partner question]
+
+> [Insert the between-person actor question]
+
+> [Insert the between-person partner question]
+
+Briefly state what the concurrent design can and cannot establish:
+
+> [Insert your answer]
+
+
+# 2. Prepare the data and validate the dyadic structure
+
+Prepare a **distinguishable** APIM dataset with
+`dyadMLM::prepare_dyad_data()`. Reuse the preparation workflow from the
+cross-sectional exercise, now adding the time variable and a two-level temporal
+decomposition.
+
+Your call should:
+
+- identify `coupleID`, `personID`, `gender`, and `diaryday`
+- use `provided_support` as the predictor
+- retain the female--male composition
+- create APIM predictors at the within-person and between-person levels
+- include the arbitrary member contrast needed for a later exchangeable model
+
+Save the result as `my_ild_data`; all later models should use this object.
+
+```{r eval=FALSE}
+my_ild_data <- dyadMLM::prepare_dyad_data(
+  data = raw_ild_data,
+  # Complete the required arguments.
+)
+```
+
+Add two time variables:
+
+- `.day10`: centered at the mean diary day and scaled in 10-day units
+- `diaryday_f`: a factor containing every scheduled day from 0 through 13
+
+These names are used below.
+
+```{r eval=FALSE}
+my_ild_data <- my_ild_data |>
+  dplyr::mutate(
+    # Create .day10 and diaryday_f.
+  )
+```
+
+Inspect the prepared data and its generated columns:
+
+```{r eval=FALSE}
+my_ild_data
+names(my_ild_data)
 ```
 
 
@@ -119,12 +164,12 @@ predictors without bridging missing occasions.
 
 Check:
 
-- exactly two members per retained dyad
-- stable member roles
-- at most one row per dyad, member, and occasion
-- the scheduled and observed time range
-- missing observations, compliance, and matched partner occasions
-- actual time gaps
+- the number of retained dyads and members
+- whether every dyad contains exactly two members with stable roles
+- whether dyad--member--day combinations are unique
+- the scheduled and observed day ranges
+- missing observations and matched partner occasions
+- whether consecutive observations are always one day apart
 
 ```{r}
 
@@ -135,14 +180,23 @@ Summarize what you found:
 > [Insert your data-structure and missingness summary]
 
 
-# 3. Describe trajectories and relationships
+# 3. Describe and visualize measures and observed relationships
+
+
+## Describe the focal variables
+
+Summarize `provided_support` and `closeness` by role and inspect their
+distributions.
+
+```{r}
+
+```
 
 
 ## Plot paired trajectories
 
-Plot the outcome and focal predictor over time. Show both members of each dyad
-and inspect a manageable selection of dyads rather than drawing every
-trajectory in one panel.
+Plot both variables over time for a manageable selection of dyads. Make the two
+members identifiable and avoid drawing every trajectory in one panel.
 
 ```{r}
 
@@ -153,11 +207,15 @@ trajectory in one panel.
 
 At minimum:
 
-- describe the focal variables by role
-- calculate ICCs
-- calculate within- and between-person correlations
+- calculate ICCs for the focal variables
+- describe their within-person and between-person variation
+- calculate within- and between-level associations that are relevant to the
+  actor and partner questions
 - note whether multilevel reliability would be needed for multi-item measures
   (item-level data are not included here)
+
+Use methods from your ILD training and the applied tutorial. Treat descriptive
+correlations as descriptive rather than as replacements for the APIM.
 
 ```{r}
 
@@ -168,106 +226,274 @@ Describe the main patterns:
 > [Insert your descriptive interpretation]
 
 
-# 4. Specify and estimate the model
+# 4. Estimate the initial distinguishable model
 
-Begin with the scientific mean structure. Include plausible time trends before
-adding a residual temporal process.
+Begin with the scientific mean structure and no residual temporal process. Fit
+a Gaussian distinguishable APIM with:
+
+- role-specific intercepts and linear time trends
+- role-specific within-person actor and partner effects
+- role-specific between-person actor and partner effects
+- stable role-specific covariance at the dyad level
+- same-occasion role-specific covariance at the dyad--day level
+
+Use `dispformula = ~ 0` so the modeled dyad--day block represents the Gaussian
+observation-level residual structure. Adapt the distinguishable ILD model from
+the applied tutorial and inspect `names(my_ild_data)` when selecting columns.
+
+To keep this exercise focused and fitting times manageable, use random
+intercepts but no random slopes. In substantive analyses, consider
+theoretically plausible within-person random slopes when the data can support
+them; their omission here is a teaching and computational simplification.
 
 ```{r eval=FALSE}
-# hint("ild_model", "structure")
+# Only after false convergence:
+# hint("ild_optimizer", "bfgs")
 
-my_ild_model <- glmmTMB(
-  formula = YOUR_ILD_MODEL_FORMULA,
-  data = my_ild_data,
-  family = gaussian()
+distinguishable_no_ar_model <- glmmTMB::glmmTMB(
+  formula = YOUR_DISTINGUISHABLE_FORMULA,
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = my_ild_data
 )
 
-summary(my_ild_model)
+summary(distinguishable_no_ar_model)
 ```
 
+Check convergence, the Hessian, boundary estimates, and the plausibility of all
+estimates before continuing. If you needed alternative optimizer control,
+reuse the same working control for subsequent candidate models.
 
-## Choose the temporal specification
 
-Decide whether the remaining temporal dependence is best represented by:
+# 5. Verify model adequacy, distinguishability, and robustness
 
-- no residual temporal process
-- discrete-time AR(1) for equally spaced scheduled occasions
-- continuous-time decay for unequal time gaps
-- lagged actor and partner outcomes when carryover is the scientific target
 
-Document the time scale, lag, trend, covariance structure, and any constraints.
+## Does the model reproduce the temporal dependence?
 
-If required, update your model with the selected temporal structure:
+Use the workshop helper to simulate block-whitened DHARMa residuals. The helper
+accounts for fitted dependence within each dyad rather than treating every
+person-day as independent.
 
 ```{r eval=FALSE}
+no_ar_dharma_residuals <- simulate_ild_dharma(
+  model = distinguishable_no_ar_model,
+  dyad = my_ild_data$coupleID,
+  member = my_ild_data$personID,
+  time = my_ild_data$diaryday,
+  n = 1000,
+  seed = 123
+)
 
+plot(
+  no_ar_dharma_residuals,
+  title = "Block-whitened DHARMa residuals"
+)
+
+test_ild_lag1(no_ar_dharma_residuals)
+```
+
+Consider:
+
+- overall calibration and visible residual patterns
+- the magnitude of the observed lag-1 correlation
+- whether that correlation is typical under simulations from the fitted model
+
+Do not base the decision on a significance label alone.
+
+> [Insert your diagnostic interpretation]
+
+> [State whether you retain residual independence or add AR(1), and why]
+
+
+## If selected: add role-specific AR(1)
+
+If you decided that residual independence is adequate, skip this section.
+
+Otherwise, add separate female and male AR(1) processes using `diaryday_f`.
+Retain the dyad--day block because AR(1) dependence and same-occasion partner
+covariance represent different parts of the residual structure.
+
+```{r eval=FALSE}
+# hint("ild_ar1", "role_specific_syntax")
+# Only after false convergence:
+# hint("ild_optimizer", "bfgs")
+
+distinguishable_ar1_model <- update(
+  distinguishable_no_ar_model,
+  formula = YOUR_AR1_FORMULA_UPDATE
+)
+```
+
+Check estimation again. Then rerun the DHARMa and lag-1 checks using the
+**AR(1) model object**, and decide whether the revised specification is
+adequate.
+
+```{r eval=FALSE}
+ar1_dharma_residuals <- simulate_ild_dharma(
+  model = distinguishable_ar1_model,
+  dyad = my_ild_data$coupleID,
+  member = my_ild_data$personID,
+  time = my_ild_data$diaryday,
+  n = 1000,
+  seed = 123
+)
+
+plot(
+  ar1_dharma_residuals,
+  title = "AR(1) block-whitened DHARMa residuals"
+)
+
+test_ild_lag1(ar1_dharma_residuals)
+```
+
+> [Insert your updated diagnostic interpretation]
+
+
+## Retain the distinguishable temporal specification
+
+Save the selected distinguishable model and its matching residual object under
+the names below. Do not return to the no-AR objects if you selected AR(1).
+
+```{r eval=FALSE}
+distinguishable_model <- YOUR_SELECTED_DISTINGUISHABLE_MODEL
+distinguishable_dharma_residuals <- YOUR_MATCHING_DHARMA_OBJECT
 ```
 
 
-# 5. Verify adequacy and robustness
+## Test exchangeability
 
-Check estimation first: convergence, the Hessian, and whether all parameter
-estimates are plausible.
+Fit an exchangeability-constrained version of the selected distinguishable
+model. The two models should use the same outcome, rows, time trend, scientific
+predictors, and temporal choice. They should differ only in the constraints
+required by exchangeability:
+
+- pool fixed effects across members
+- use shared and difference blocks for stable dyad covariance
+- use shared and difference blocks for same-occasion covariance
+- if AR(1) was selected, pool its parameters while retaining a separate time
+  series for each member
+
+If you retained residual independence, neither comparison model should contain
+AR(1).
+
+```{r eval=FALSE}
+# If you retained AR(1) and need help with its exchangeable grouping:
+# hint("ild_ar1", "exchangeable_series")
+# Only after false convergence:
+# hint("ild_optimizer", "bfgs")
+
+exchangeable_model <- glmmTMB::glmmTMB(
+  formula = YOUR_MATCHED_EXCHANGEABLE_FORMULA,
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = my_ild_data
+)
+
+summary(exchangeable_model)
+```
+
+Check estimation, then compare the matched models:
+
+```{r eval=FALSE}
+dyadMLM::compare_nested_models(
+  distinguishable_model,
+  exchangeable_model
+)
+```
+
+Choose the model you will retain. Consider statistical evidence,
+parsimony, and whether the constraints are substantively defensible.
+
+> [Insert your distinguishability conclusion and decision]
+
+Use one stable name for all further processing and reporting:
+
+```{r eval=FALSE}
+retained_model <- YOUR_RETAINED_MODEL
+```
 
 
-## Residual diagnostics
+## If exchangeable: recheck adequacy
 
-Use the ILD DHARMa block from the applied tutorial. Inspect overall calibration,
-patterns against fitted values and time, and remaining temporal or
-cross-partner dependence.
+If you retained the exchangeable model, repeat the DHARMa and lag-1 checks with
+`retained_model`. If you retained the already-checked distinguishable model,
+skip this step.
 
-If convergence problems or DHARMa patterns suggest a problematic outcome
-scale, inspect a histogram. For a nonnegative, right-skewed outcome, try
-`sqrt()` or `log1p()` (which handles zeros), check whether the histogram is less
-skewed, refit the model, and rerun the residual and temporal checks.
+```{r eval=FALSE}
+retained_model_dharma_residuals <- simulate_ild_dharma(
+  model = retained_model,
+  dyad = my_ild_data$coupleID,
+  member = my_ild_data$personID,
+  time = my_ild_data$diaryday,
+  n = 1000,
+  seed = 123
+)
 
-For some outcomes, an appropriate non-Gaussian family may be preferable to a
-transformation. Generalized families have different assumptions and require
-case-specific choices, so they are not covered in this workshop.
+plot(
+  retained_model_dharma_residuals,
+  title = "Retained-model block-whitened residuals"
+)
+
+test_ild_lag1(retained_model_dharma_residuals)
+```
+
+Briefly assess whether the exchangeable model remains adequate:
+
+> [Insert your conclusion, or state that you skipped this step]
+
 
 ## Robustness
 
-Consider whether conclusions depend on:
-
-- the chosen time trend
-- the temporal covariance structure
-- treatment of incomplete or unmatched occasions
-- substantively questionable dyads or measurement periods
-
-Do not select a specification solely because it changes a significance label.
+Compare focal estimates across any temporal candidates you fitted. Consider
+whether a different plausible time trend or temporal specification would
+materially alter the substantive conclusions. Do not select a specification
+solely because it changes a significance label.
 
 > [Insert your robustness conclusion]
 
+For a future nonnegative, right-skewed outcome, `sqrt()` or `log1p()` may
+improve the scale; inspect its histogram, refit, and rerun all diagnostics. An
+appropriate non-Gaussian family may instead be preferable, but generalized
+families have different assumptions and require case-specific choices.
 
-# 6. Visualize, interpret, and report
 
-Report the actor and partner effects with uncertainty. Clearly distinguish
-within-person from between-person effects and describe the temporal and
-cross-partner covariance structure.
+# 6. Visualize, interpret, and report results
+
+Use `retained_model` for every table, plot, and interpretation below.
+
+Print the fixed and random effects, and inspect the fitted covariance
+parameters:
 
 ```{r}
-# hint("ild_report_results", "structure")
+
 ```
 
-Plot the focal fitted effects or model-implied trajectories:
+If `retained_model` is exchangeable, use
+`dyadMLM::recover_exchangeable_covariance(retained_model)` before describing
+member-level stable and same-occasion covariance.
+
+Plot the focal fixed effects or model-implied associations:
 
 ```{r}
 
 ```
 
-Interpret the results in practical terms:
+Write a brief results paragraph that:
 
-> [Insert your interpretation]
+- describes the analysis sample and temporal structure
+- explains the selected temporal specification
+- explains the distinguishability decision
+- reports within-person and between-person actor and partner effects with
+  estimates and 95% confidence intervals
+- summarizes stable dyad covariance, same-occasion partner covariance, and any
+  fitted AR(1) parameters
+- reports the adequacy and robustness checks
+
+Interpret the estimates as associations, not causal effects. If effects are
+role-specific, a significant estimate for one role and a nonsignificant
+estimate for the other do not by themselves establish that the roles differ.
+
+> [Insert your brief results paragraph]
 
 
-# Optional: exchangeability as a model constraint
-
-If scientifically defensible, fit the exchangeability-constrained version as a
-change to the completed distinguishable ILD workflow. Compare the models and
-document every imposed constraint.
-
-```{r eval=FALSE}
-
-```
-
-> [Insert your distinguishability conclusion]
+You have now completed the ILD APIM workflow!

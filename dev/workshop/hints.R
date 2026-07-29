@@ -164,37 +164,40 @@
       sep = "\n"
     )
   ),
-  ild_prepare_data = list(
-    structure = paste(
-      "Use prepare_dyad_data() with:",
-      "- dyad = couple_id",
-      "- member = person_id",
-      "- role = gender",
-      "- time = diaryday",
-      "- predictors = your focal predictor",
-      "- model_types = \"apim\"",
-      "- temporal_decomposition = \"2l\"",
-      "- include_arbitrary_member_contrast = TRUE",
+  ild_ar1 = list(
+    role_specific_syntax = paste(
+      "Add these two terms:",
+      "",
+      "ar1(0 + .is_female:diaryday_f | coupleID) +",
+      "ar1(0 + .is_male:diaryday_f | coupleID)",
+      "",
+      "The levels of diaryday_f must follow the scheduled day order. Keep",
+      "the separate coupleID:diaryday covariance block in the model.",
+      sep = "\n"
+    ),
+    exchangeable_series = paste(
+      "Pooling AR(1) parameters does not combine both members into one",
+      "series. Use:",
+      "",
+      "ar1(0 + diaryday_f | coupleID:personID)",
+      "",
+      "This retains a separate series for each member.",
       sep = "\n"
     )
   ),
-  ild_model = list(
-    structure = paste(
-      "Check that the model documents:",
-      "- role-specific or pooled intercepts",
-      "- within-person actor and partner effects",
-      "- between-person actor and partner effects",
-      "- stable and same-occasion dyadic covariance",
-      "- the chosen time trend and residual temporal structure",
-      sep = "\n"
-    )
-  ),
-  ild_report_results = list(
-    structure = paste(
-      "Useful starting points:",
-      "- parameters::model_parameters(model, effects = \"fixed\")",
-      "- parameters::model_parameters(model, effects = \"random\")",
-      "- plot(parameters::model_parameters(model, effects = \"fixed\"))",
+  ild_optimizer = list(
+    bfgs = paste(
+      "If an otherwise plausible model reports false convergence, refit with:",
+      "",
+      "ild_control <- glmmTMB::glmmTMBControl(",
+      "  profile = TRUE,",
+      "  optimizer = stats::optim,",
+      "  optArgs = list(method = \"BFGS\")",
+      ")",
+      "",
+      "Then add control = ild_control to glmmTMB() or update(). Recheck",
+      "convergence and the Hessian; an optimizer change does not rescue a",
+      "statistically inadequate specification.",
       sep = "\n"
     )
   )
