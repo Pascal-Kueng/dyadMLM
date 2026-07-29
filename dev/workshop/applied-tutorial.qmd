@@ -2307,13 +2307,37 @@ We exponentiate estimates from the log-transformed outcome to obtain geometric
 mean ratios (GMRs; representing multiplicative differences).
 
 ```{r}
-#| label: ild-retained-fixed-effects-table
-#| echo: false
+parameters::model_parameters(
+  ild_apim_distinguishable_ar1_model,
+  effects = 'fixed',
+  exponentiate = TRUE
+  ) |>
+  insight::print_md(footer = "")
 
-ild_apim_retained_model <- ild_apim_distinguishable_ar1_model
+```
+
+## Report the retained distinguishable model
+
+```{r}
+results <- parameters::model_parameters(
+  ild_apim_distinguishable_ar1_model,
+  effects = "fixed",
+  exponentiate = TRUE,
+  drop = "^\\.is_(female|male)$"
+) |> plot()
+
+results
+```
+
+
+## Answering the ILD research question
+
+```{r}
+#| label: prepare-ild-focal-effects
+#| include: false
 
 ild_apim_focal_effects <- parameters::model_parameters(
-  ild_apim_retained_model,
+  ild_apim_distinguishable_ar1_model,
   effects = "fixed"
 ) |>
   dplyr::filter(grepl("\\.pbc_(cwp|cbp)_(actor|partner)", Parameter)) |>
@@ -2334,43 +2358,7 @@ ild_apim_focal_effects <- parameters::model_parameters(
       "Men"
     )
   )
-
-ild_apim_focal_effects |>
-  as.data.frame() |>
-  dplyr::mutate(
-    Level = factor(
-      Level,
-      levels = c("Within person", "Between persons")
-    ),
-    `Outcome role` = factor(
-      `Outcome role`,
-      levels = c("Women", "Men")
-    ),
-    Effect = factor(
-      Effect,
-      levels = c("Actor", "Partner")
-    )
-  ) |>
-  dplyr::arrange(Level, `Outcome role`, Effect) |>
-  dplyr::transmute(
-    Level,
-    Effect,
-    `Outcome role`,
-    GMR = sprintf("%.3f", exp(Coefficient)),
-    `95% CI` = sprintf(
-      "%.3f to %.3f",
-      exp(CI_low),
-      exp(CI_high)
-    ),
-    p = dplyr::if_else(p < .001, "< .001", sprintf("%.3f", p))
-  ) |>
-  slide_table(
-    align = c("l", "l", "l", "r", "r", "r"),
-    table.attr = 'style="font-size: 0.8em;"'
-  )
 ```
-
-## Answering the ILD research question
 
 ```{r}
 #| label: ild-retained-fixed-effects-plot
