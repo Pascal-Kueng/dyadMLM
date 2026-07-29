@@ -910,11 +910,22 @@ font-size: 0.8em;
 .reveal .fancy-table table {
 width: 100%;
 max-width: 100%;
+table-layout: fixed;
 border-collapse: separate;
 border: 1px solid var(--uzh-rule);
 border-radius: 7px;
 font-size: 0.78em;
 overflow: hidden;
+}
+.reveal .fancy-table table col:first-child {
+width: 18% !important;
+}
+.reveal .fancy-table table col:last-child {
+width: 82% !important;
+}
+.reveal .fancy-table table th:first-child,
+.reveal .fancy-table table td:first-child {
+width: 18%;
 }
 .reveal .fancy-table table th {
 padding: 0.46em 0.65em;
@@ -922,10 +933,12 @@ border-bottom: 0;
 background: var(--uzh-blue);
 color: white;
 font-weight: 600;
+text-align: left;
 }
 .reveal .fancy-table table td {
 padding: 0.4em 0.65em;
 border-bottom: 1px solid var(--uzh-rule);
+text-align: left;
 }
 .reveal .fancy-table table tr:nth-child(even) td {
 background: var(--uzh-surface);
@@ -952,6 +965,7 @@ padding-bottom: 1.2em;
 .reveal .slides section.output-location-slide > .cell.output-location-slide,
 .reveal .slides section.output-location-slide .cell-output-stdout,
 .reveal .slides section.output-location-slide .cell-output-stdout > pre {
+min-width: 0;
 min-height: 0;
 height: 100%;
 }
@@ -3699,7 +3713,7 @@ display:block!important;
 </section>
 <section id="dim-predictors-are-apim-predictors-in-disguise" class="slide level2">
 <h2>DIM predictors are APIM predictors in disguise!</h2>
-<div class="interdep-dim-grid workshop-dim-grid" id="dim-grid-introduction" data-interdep-dim-grid data-limit="4" data-actor="7.7497648598657678" data-partner="1.9743493145101942" data-mean="9.7241141743759627" data-within="5.7754155453555738">
+<div class="interdep-dim-grid workshop-dim-grid" id="dim-grid-introduction" data-interdep-dim-grid data-limit="4" data-actor="7.7497648598657651" data-partner="1.9743493145101956" data-mean="9.7241141743759609" data-within="5.7754155453555693">
   <div class="wdg-controls">
     <div class="wdg-toolbar">
       <strong>Provided support coordinates</strong>
@@ -3928,7 +3942,7 @@ b_{\mathrm{dev}}=a-p.
 </section>
 <section id="dim-to-exchangeable-apim-coefficients-3" class="slide level2">
 <h2>DIM to exchangeable APIM coefficients</h2>
-<div class="interdep-dim-grid workshop-dim-grid" id="dim-grid-coefficients" data-interdep-dim-grid data-limit="4" data-actor="7.7497648598657678" data-partner="1.9743493145101942" data-mean="9.7241141743759627" data-within="5.7754155453555738">
+<div class="interdep-dim-grid workshop-dim-grid" id="dim-grid-coefficients" data-interdep-dim-grid data-limit="4" data-actor="7.7497648598657651" data-partner="1.9743493145101956" data-mean="9.7241141743759609" data-within="5.7754155453555693">
   <div class="wdg-controls">
     <div class="wdg-toolbar">
       <strong>Provided support coordinates</strong>
