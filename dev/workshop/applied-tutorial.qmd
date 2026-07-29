@@ -1901,12 +1901,10 @@ ild_apim_data <- ild_apim_data |>
 print(ild_apim_data)
 ```
 
-## The ILD APIM: Two member-specific equations {.smaller}
+## The ILD APIM: Two member-specific equations
 
 For dyad $i$ at occasion $t$, superscripts $\mathrm{W}$ and $\mathrm{B}$
-denote within-person and between-person components. Here, $X_{ri,t-1}$ is
-previous-day perceived behavioral control and
-$Y_{ri,t}=\log(\mathrm{MVPA}_{ri,t})$:
+denote within-person and between-person components.
 
 $$
 \begin{aligned}
@@ -1981,7 +1979,9 @@ $$
 
 ::::
 
-## Fitting the distinguishable ILD APIM in glmmTMB {.smaller}
+## Fitting the distinguishable ILD APIM in glmmTMB
+
+<!-- TODO: Fix the line-numbers -->
 
 ```{r}
 #| code-line-numbers: "1-30|4-6|8-12|14-18|20-24|1-30"
@@ -2135,6 +2135,7 @@ from the fitted AR(1) model.
 
 ## Fit the exchangeable model with pooled AR(1)
 
+
 ```{r}
 #| output-location: slide
 
@@ -2176,7 +2177,14 @@ Each member retains a separate series, but residual variability and
 persistence $\rho$ are pooled across members.
 :::
 
-## Gender-specific parameters improve fit
+## Backtransform to member-level variance-covariance structure
+
+```{r}
+dyadMLM::recover_exchangeable_covariance(ild_apim_exchangeable_ar1_model)
+```
+
+
+## Compare distinguishable and exchangeable models
 
 ```{r}
 dyadMLM::compare_nested_models(
@@ -2184,9 +2192,6 @@ dyadMLM::compare_nested_models(
   ild_apim_exchangeable_ar1_model
 )
 ```
-
-- Both models include residual AR(1)
-- Retain the distinguishable model for interpretation and reporting
 
 ## Recap: dyadic ILD APIM {.smaller}
 
