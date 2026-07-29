@@ -69,6 +69,30 @@ sys.source(
   envir = knitr::knit_global()
 )
 
+refit_glmmTMB_with_bfgs_if_needed <- function(model) {
+  fit_converged <- isTRUE(model$fit$convergence == 0)
+  hessian_ok <- !identical(model$sdr$pdHess, FALSE)
+  if (fit_converged && hessian_ok) {
+    return(model)
+  }
+
+  fitted_parameters <- model$fit$par
+  start_values <- list(
+    beta = unname(fitted_parameters[names(fitted_parameters) == "beta"]),
+    theta = unname(fitted_parameters[names(fitted_parameters) == "theta"])
+  )
+
+  update(
+    model,
+    start = start_values,
+    control = glmmTMB::glmmTMBControl(
+      optimizer = stats::optim,
+      optArgs = list(method = "BFGS"),
+      optCtrl = list(maxit = 1000, reltol = 1e-10)
+    )
+  )
+}
+
 ```
 
 ## Today's aims and program
@@ -2162,10 +2186,15 @@ ild_apim_exchangeable_ar1_model <- glmmTMB::glmmTMB(
     (0 + .member_contrast_arbitrary | couple_id:diaryday),
   dispformula = ~ 0,
   family = gaussian(),
-  data = ild_apim_data,
-  control = glmmTMB::glmmTMBControl(
-    optCtrl = list(iter.max = 10000, eval.max = 10000)
-  )
+  data = ild_apim_data
+)
+```
+
+```{r}
+#| include: false
+
+ild_apim_exchangeable_ar1_model <- refit_glmmTMB_with_bfgs_if_needed(
+  ild_apim_exchangeable_ar1_model
 )
 ```
 
