@@ -2193,25 +2193,160 @@ dyadMLM::compare_nested_models(
 )
 ```
 
-## Recap: dyadic ILD APIM {.smaller}
+## Report the retained distinguishable model
 
-- **Within persons:** For male outcomes, own perceived behavioral control one
-  point above usual on the previous day corresponded to about 3.5% more MVPA;
-  the same previous-day increase in the partner's perceived behavioral control
-  corresponded to about 2.5% more
-- **Between persons:** No clear actor or partner associations
-- **Distinguishability:** Gender constraints reduced fit; retained the
-  distinguishable model
-- **Residual persistence:** $\hat\rho_{\mathrm{F}}\approx .88$ and
-  $\hat\rho_{\mathrm{M}}\approx .81$
-- **Diagnostics:** Small visual departures; lag-1 dependence compatible with
-  the fitted AR(1), $p=.92$
+We exponentiate estimates (due to log-transformed outcome): Incidence rate ratios (IRR)
 
-Supported effects for men but not women do not by themselves establish that
-the effects differ by gender; that requires a direct comparison of the slopes.
+<!-- TODO: fix to the correct term, it is not IRR -->
 
-<!-- TODO: can probably be simplified and shortened. Answering the research
-question, and visualizing the effects? -->
+```{r}
+#| label: ild-retained-fixed-effects-table
+#| echo: false
+
+ild_apim_retained_model <- ild_apim_distinguishable_ar1_model
+
+ild_apim_focal_effects <- parameters::model_parameters(
+  ild_apim_retained_model,
+  effects = "fixed"
+) |>
+  as.data.frame() |>
+  dplyr::filter(grepl("\\.pbc_(cwp|cbp)_(actor|partner)", Parameter)) |>
+  dplyr::mutate(
+    Level = dplyr::if_else(
+      grepl("_cwp_", Parameter),
+      "Within person",
+      "Between persons"
+    ),
+    Effect = dplyr::if_else(
+      grepl("_actor", Parameter),
+      "Actor",
+      "Partner"
+    ),
+    `Outcome role` = dplyr::if_else(
+      grepl("\\.is_female", Parameter),
+      "Women",
+      "Men"
+    ),
+    estimate_percent = 100 * (exp(Coefficient) - 1),
+    ci_low_percent = 100 * (exp(CI_low) - 1),
+    ci_high_percent = 100 * (exp(CI_high) - 1)
+  )
+
+ild_apim_focal_effects |>
+  dplyr::mutate(
+    Level = factor(
+      Level,
+      levels = c("Within person", "Between persons")
+    ),
+    `Outcome role` = factor(
+      `Outcome role`,
+      levels = c("Women", "Men")
+    ),
+    Effect = factor(
+      Effect,
+      levels = c("Actor", "Partner")
+    )
+  ) |>
+  dplyr::arrange(Level, `Outcome role`, Effect) |>
+  dplyr::transmute(
+    Level,
+    Effect,
+    `Outcome role`,
+    `Estimated MVPA difference` = sprintf("%+.1f%%", estimate_percent),
+    `95% CI` = sprintf(
+      "%+.1f%% to %+.1f%%",
+      ci_low_percent,
+      ci_high_percent
+    ),
+    p = dplyr::if_else(p < .001, "< .001", sprintf("%.3f", p))
+  ) |>
+  slide_table(
+    align = c("l", "l", "l", "r", "r", "r"),
+    table.attr = 'style="font-size: 0.8em;"'
+  )
+```
+
+## Answering the ILD research question
+
+```{r}
+#| label: ild-retained-fixed-effects-plot
+#| echo: false
+#| fig-format: svg
+#| fig-width: 10
+#| fig-height: 4.1
+#| out-width: 82%
+#| fig-align: center
+
+ild_apim_focal_effects |>
+  dplyr::mutate(
+    Level = factor(
+      Level,
+      levels = c("Within person", "Between persons")
+    ),
+    term = factor(
+      paste(`Outcome role`, Effect, sep = " — "),
+      levels = rev(c(
+        "Women — Actor",
+        "Women — Partner",
+        "Men — Actor",
+        "Men — Partner"
+      ))
+    )
+  ) |>
+  ggplot(
+    aes(
+      x = estimate_percent,
+      y = term,
+      color = Effect
+    )
+  ) +
+  geom_vline(xintercept = 0, color = "grey65", linetype = 2) +
+  geom_errorbar(
+    aes(
+      xmin = ci_low_percent,
+      xmax = ci_high_percent
+    ),
+    orientation = "y",
+    width = 0.12,
+    linewidth = 0.8
+  ) +
+  geom_point(size = 3) +
+  facet_wrap(~ Level, nrow = 1, scales = "free_x") +
+  scale_color_manual(
+    values = c("Actor" = "#1769AA", "Partner" = "#7B3FA1")
+  ) +
+  scale_x_continuous(
+    labels = function(x) paste0(x, "%")
+  ) +
+  labs(
+    x = "Estimated difference in current-day MVPA (%)",
+    y = NULL,
+    color = NULL
+  ) +
+  see::theme_modern(base_size = 16) +
+  theme(legend.position = "top")
+```
+<!-- TODO: doesn't the package we use for plotting results in the cross-sectional example
+already provide functions to plot like this with much less code?? -->
+
+:::{.text-smaller}
+In this sample, one-point above-usual own and partner PBC on the previous day
+were associated with about 3.5% and 2.5% higher current-day MVPA among men,
+respectively; the corresponding associations among women and all between-person
+associations were not clear.
+:::
+
+:::{.notes}
+
+Supported associations for men but not women do not by themselves establish
+that the effects differ by gender; that requires a direct comparison of the
+slopes.
+
+Within-person estimates compare previous-day PBC with one's own usual level;
+between-person estimates compare person means. Percent differences are
+back-transformations from the log-MVPA model.
+
+:::
 
 <!----------------------------------------------------------------------------
 
