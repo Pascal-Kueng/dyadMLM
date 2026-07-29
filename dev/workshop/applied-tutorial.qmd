@@ -2323,17 +2323,22 @@ parameters::model_parameters(
 ```{r}
 #| fig-format: svg
 #| output-location: slide
-#| fig-width: 8
-#| fig-height: 3.3
-#| out-width: 70%
-#| fig-align: center
-
-parameters::model_parameters(
-  ild_apim_distinguishable_ar1_model,
-  effects = "fixed",
-  exponentiate = TRUE,
-  drop = "^\\.is_(female|male)$"
-) |> plot()
+see::plots(
+  parameters::model_parameters(
+    ild_apim_distinguishable_ar1_model,
+    effects = "fixed",
+    exponentiate = TRUE,
+    keep = "_cwp_"
+  ) |> plot(),
+  parameters::model_parameters(
+    ild_apim_distinguishable_ar1_model,
+    effects = "fixed",
+    exponentiate = TRUE,
+    keep = "_cbp_"
+  ) |> plot(),
+  n_columns = 2,
+  tags = c("Within person", "Between persons")
+)
 ```
 
 ## Report the retained distinguishable model
