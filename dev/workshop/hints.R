@@ -164,6 +164,21 @@
       sep = "\n"
     )
   ),
+  outcome_scale = list(
+    matched_models = paste(
+      "The distinguishable and exchangeable models must use the same stored",
+      "outcome column and the same analysis rows.",
+      "",
+      "If you transform the outcome, first add one new column to my_data.",
+      "Then refit and diagnose both candidate models with that column as the",
+      "outcome before comparing them.",
+      "",
+      "Do not compare a raw-outcome model with a transformed-outcome model.",
+      "compare_nested_models() will reject models fitted on different outcome",
+      "columns or values.",
+      sep = "\n"
+    )
+  ),
   ild_validation = list(
     functions = paste(
       "Useful operations for these checks include:",

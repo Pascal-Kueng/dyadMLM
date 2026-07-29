@@ -1903,16 +1903,16 @@ print(ild_apim_data)
 #| fig-height: 4.7
 #| out-width: 90%
 #| fig-align: center
-#| fig-cap: "Four couples shown; gaps indicate missing or excluded MVPA days."
 
 raw_ild_dyad_data |>
-  dplyr::filter(couple_id <= 4) |>
+  dplyr::filter(couple_id <= 6) |>
   ggplot(aes(diaryday, device_based_mvpa, color = gender,
              group = person_id)) +
   geom_line(linewidth = 0.65, na.rm = TRUE) +
   geom_point(size = 1.1, na.rm = TRUE) +
-  facet_wrap(~ couple_id, ncol = 2) +
+  facet_wrap(~ couple_id, ncol = 3) +
   scale_color_manual(values = c(female = "#1769AA", male = "#7B3FA1")) +
+  scale_y_continuous(breaks = seq(0, 500, by = 200)) +
   labs(x = "Diary day", y = "MVPA (minutes)", color = NULL) +
   see::theme_modern(base_size = 16) +
   theme(legend.position = "top")
