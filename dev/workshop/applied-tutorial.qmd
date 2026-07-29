@@ -552,7 +552,8 @@ plot_partner_similarity <- function(data, x, y, id, title, n_mahalanobis = 3) {
     dplyr::mutate(
       .distance = mahalanobis(xy, colMeans(xy), cov(xy))
     ) |>
-    dplyr::slice_max(.distance, n = n_mahalanobis)
+    dplyr::distinct({{ id }}, .keep_all = TRUE) |>
+    dplyr::slice_max(.distance, n = n_mahalanobis, with_ties = FALSE)
 
   ggplot(data, aes(x = {{ x }}, y = {{ y }})) +
     geom_point(color = "steelblue") +
@@ -1445,7 +1446,7 @@ summary(apim_exchangeable_correlations, 'wb')
 #| fig-width: 12
 #| fig-height: 5.5
 #| out-width: 100%
-#| fig-cap: "Each couple is shown twice—once with each person as the focal member."
+#| fig-cap: "Each couple is shown twice—once in each orientation; labels mark the four largest dyad-level Mahalanobis distances."
 
 partner_similarity_data <- apim_exchangeable_data |>
   dplyr::group_by(couple_id) |>
@@ -2322,6 +2323,7 @@ parameters::model_parameters(
 
 ```{r}
 #| fig-format: svg
+#| fig-width: 13
 #| output-location: slide
 see::plots(
   parameters::model_parameters(
@@ -2338,7 +2340,8 @@ see::plots(
   ) |> plot(),
   n_columns = 2,
   tags = c("Within person", "Between persons")
-)
+) &
+  ggplot2::labs(x = "GMR")
 ```
 
 ## Report the retained distinguishable model
