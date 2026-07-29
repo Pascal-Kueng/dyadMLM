@@ -164,6 +164,26 @@
       sep = "\n"
     )
   ),
+  ild_validation = list(
+    functions = paste(
+      "Useful operations for these checks include:",
+      "- dplyr::count() and dplyr::n_distinct() for dyads and members",
+      "- dplyr::distinct() for unique dyad-member-day combinations",
+      "- dplyr::arrange(), dplyr::group_by(), and dplyr::lag() for time gaps",
+      "",
+      "Decide which grouping variables are required for each check.",
+      sep = "\n"
+    )
+  ),
+  ild_level_associations = list(
+    structure = paste(
+      "Reuse tidyr::pivot_wider() to create one row per coupleID and diaryday,",
+      "with role-specific columns for provided_support and closeness.",
+      "Select the column pairs that correspond to the actor and partner",
+      "questions, then use wbCorr() with coupleID as the cluster.",
+      sep = "\n"
+    )
+  ),
   ild_ar1 = list(
     role_specific_syntax = paste(
       "Add these two terms:",

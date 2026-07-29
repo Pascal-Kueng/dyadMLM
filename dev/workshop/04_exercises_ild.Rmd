@@ -172,6 +172,7 @@ Check:
 - whether consecutive observations are always one day apart
 
 ```{r}
+# hint("ild_validation", "functions")
 
 ```
 
@@ -218,6 +219,7 @@ Use methods from your ILD training and the applied tutorial. Treat descriptive
 correlations as descriptive rather than as replacements for the APIM.
 
 ```{r}
+# hint("ild_level_associations", "structure")
 
 ```
 
@@ -260,9 +262,10 @@ distinguishable_no_ar_model <- glmmTMB::glmmTMB(
 summary(distinguishable_no_ar_model)
 ```
 
-Check convergence, the Hessian, boundary estimates, and the plausibility of all
-estimates before continuing. If you needed alternative optimizer control,
-reuse the same working control for subsequent candidate models.
+Inspect the model output for convergence or Hessian warnings, boundary
+estimates, and the plausibility of all estimates before continuing. If you
+needed alternative optimizer control, reuse the same working control for
+subsequent candidate models.
 
 
 # 5. Verify model adequacy, distinguishability, and robustness
@@ -444,10 +447,10 @@ Briefly assess whether the exchangeable model remains adequate:
 
 ## Robustness
 
-Compare focal estimates across any temporal candidates you fitted. Consider
-whether a different plausible time trend or temporal specification would
-materially alter the substantive conclusions. Do not select a specification
-solely because it changes a significance label.
+If you fitted both no-AR and AR(1) candidates, compare their focal estimates and
+state whether modeling temporal dependence materially changes the substantive
+conclusions. If time permits, assess a different plausible time trend. Do not
+select a specification solely because it changes a significance label.
 
 > [Insert your robustness conclusion]
 

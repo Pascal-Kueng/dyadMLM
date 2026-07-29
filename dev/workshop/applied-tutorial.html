@@ -4667,8 +4667,11 @@ alternative hypothesis: two.sided</code></pre>
 <span id="cb51-13"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .member_contrast_arbitrary <span class="sc">|</span> couple_id<span class="sc">:</span>diaryday),</span>
 <span id="cb51-14"><a href></a>  <span class="at">dispformula =</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
 <span id="cb51-15"><a href></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
-<span id="cb51-16"><a href></a>  <span class="at">data =</span> ild_apim_data</span>
-<span id="cb51-17"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb51-16"><a href></a>  <span class="at">data =</span> ild_apim_data,</span>
+<span id="cb51-17"><a href></a>  <span class="at">control =</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMBControl</span>(</span>
+<span id="cb51-18"><a href></a>    <span class="at">optCtrl =</span> <span class="fu">list</span>(<span class="at">iter.max =</span> <span class="dv">10000</span>, <span class="at">eval.max =</span> <span class="dv">10000</span>)</span>
+<span id="cb51-19"><a href></a>  )</span>
+<span id="cb51-20"><a href></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="subtle">
 <p>Each member retains a separate series, but residual variability and persistence <span class="math inline">\(\rho\)</span> are pooled across members.</p>
