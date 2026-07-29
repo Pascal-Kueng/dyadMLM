@@ -1821,7 +1821,11 @@ Distinguishing by gender
 
 ## Load the daily measures
 
+We set MVPA to `NA` on days with less than 10 hours of weartime, center
+time between 0 and 1 (start to end of the study), and select the needed variables.
+
 ```{r}
+#| output-location: slide
 raw_ild_dyad_data <- readRDS("dyadic-data.rds") |>
   dplyr::mutate(
     device_based_mvpa = dplyr::if_else(
@@ -1829,16 +1833,16 @@ raw_ild_dyad_data <- readRDS("dyadic-data.rds") |>
       device_based_mvpa,
       NA
     ),
-    log_device_based_mvpa = log(device_based_mvpa)
+  diaryday_c = (diaryday + 1) / 55
   )|>
   dplyr::select(
-    couple_id, person_id, diaryday, gender,
-    perceived_behavioral_control,
-    device_based_mvpa, log_device_based_mvpa, awake_wear_minutes
+    couple_id, person_id, diaryday, diaryday_c, gender,
+    pbc = perceived_behavioral_control,
+    device_based_mvpa, awake_wear_minutes
   ) |>
   dplyr::arrange(couple_id, diaryday, person_id)
 
-head(raw_ild_dyad_data)
+slide_table(head(raw_ild_dyad_data))
 ```
 
 
@@ -1848,15 +1852,14 @@ head(raw_ild_dyad_data)
 For ILD we **decompose the predictor(s)**:
 
 - Between-person component: Person mean centered on the mean of person means
-  (stable; not lagged)
+  (stable)
   - $\bar X_{ri} - \bar X$
-- Within-person component: Previous-day deviation from the person mean
-  - $X_{ri,t-1} - \bar X_{ri}$
+- Within-person component: Daily deviations from the person mean
+  - $X_{ri,t} - \bar X_{ri}$
 
-`lag1_predictors` matches the predictor from exactly day $t-1$; it does not
-bridge missing days.
+In this example we then lag the within-person component ($X_{ri,t-1}$)
 
-## Create the required format and validate the data [Manual code →](#manual-ild-apim-preparation){.results-forward-link} {#prepared-ild-apim-data .smaller}
+## Create the required format and validate the data [Manual code →](#manual-ild-apim-preparation){.results-forward-link} {#prepared-ild-apim-data}
 
 ```{r}
 #| output-location: slide
@@ -1867,24 +1870,18 @@ ild_apim_data <- dyadMLM::prepare_dyad_data(
   member = person_id,
   role = gender,
   time = diaryday,
-  predictors = perceived_behavioral_control,
-  lag1_predictors = perceived_behavioral_control,
+  predictors = pbc,
+  lag1_predictors = pbc,
   model_types = "apim",
   temporal_decomposition = "2l",
   include_arbitrary_member_contrast = TRUE,
   seed = 123
 )
 
-ild_apim_data <- ild_apim_data |>
-  dplyr::mutate(
-    day_c = diaryday  / 55,
-    diaryday_f = factor(diaryday, levels = 0:54)
-  )
-
 print(ild_apim_data)
 ```
 
-## The ILD APIM starts with two member-specific equations {.smaller}
+## The ILD APIM: Two member-specific equations
 
 For dyad $i$ at occasion $t$, superscripts $\mathrm{W}$ and $\mathrm{B}$
 denote within-person and between-person components. Here, $X_{ri,t-1}$ is
@@ -1924,7 +1921,7 @@ $$
 [**Actor effects**]{style="color: #1769AA"} ·
 [**Partner effects**]{style="color: #7B3FA1"}
 
-:::{.text-smaller}
+:::{.text-smaller .fragment}
 
 - $u_{0,ri}$: stable member-within-dyad deviation
 - $\epsilon_{r,it}$: occasion-specific residual
@@ -1934,7 +1931,7 @@ $$
 
 :::
 
-## Repeated measures separate two covariance levels {.smaller}
+## Repeated measures separate two covariance levels
 
 :::: {.columns}
 
@@ -1945,14 +1942,14 @@ $$
 `couple_id`
 
 - Role-specific random intercepts
-- Optional random slopes
+- Optional role-specific random slopes
 - Partner covariance in stable levels or slopes
 
 :::
 
 ::: {.column width="50%"}
 
-### New at each occasion
+### At each single occasion
 
 `couple_id:diaryday`
 
@@ -1964,13 +1961,6 @@ $$
 
 ::::
 
-:::{.subtle}
-
-One cross-sectional observation per member $\rightarrow$ these sources cannot
-be estimated separately.
-
-:::
-
 ## Fitting the distinguishable ILD APIM in glmmTMB {.smaller}
 
 ```{r}
@@ -1978,26 +1968,33 @@ be estimated separately.
 #| output: false
 
 ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
-  log_device_based_mvpa ~
+  log(device_based_mvpa) ~
 
+    # Role-specific fixed intercepts
     0 + .is_female + .is_male +
 
-    .is_female:day_c +
-    .is_male:day_c +
+    # Role-specific fixed time-slope
+    .is_female:diaryday_c + .is_male:diaryday_c +
 
-    .is_female:.perceived_behavioral_control_cwp_actor_lag1 +
-    .is_male:.perceived_behavioral_control_cwp_actor_lag1 +
+    # --------------- WITHIN PERSON APIM ---------------
+    # Role-specific fixed actor- and partner effects
+  
+    .is_female:.pbc_cwp_actor_lag1 +
+    .is_male:.pbc_cwp_actor_lag1 +
 
-    .is_female:.perceived_behavioral_control_cwp_partner_lag1 +
-    .is_male:.perceived_behavioral_control_cwp_partner_lag1 +
+    .is_female:.pbc_cwp_partner_lag1 +
+    .is_male:.pbc_cwp_partner_lag1 +
 
-    .is_female:.perceived_behavioral_control_cbp_actor +
-    .is_male:.perceived_behavioral_control_cbp_actor +
+    # --------------- BETWEEN PERSON APIM ---------------
+    # Role-specific fixed actor-and partner effects
+  
+    .is_female:.pbc_cbp_actor +
+    .is_male:.pbc_cbp_actor +
 
-    .is_female:.perceived_behavioral_control_cbp_partner +
-    .is_male:.perceived_behavioral_control_cbp_partner +
+    .is_female:.pbc_cbp_partner +
+    .is_male:.pbc_cbp_partner +
 
-    # Stable dyad/member random effects
+    # Stable dyad/member random intercepts (correlated)
     (0 + .is_female + .is_male | couple_id) +
 
     # Same-occasion Gaussian residual covariance
@@ -2045,8 +2042,8 @@ ild_apim_distinguishable_ar1_model <- update(
   ild_apim_distinguishable_model,
   . ~ . -
     (0 + .is_female + .is_male | couple_id:diaryday) +
-    ar1(0 + .is_female:diaryday_f | couple_id) +
-    ar1(0 + .is_male:diaryday_f | couple_id) +
+    ar1(0 + .is_female:as.factor(diaryday) | couple_id) +
+    ar1(0 + .is_male:as.factor(diaryday) | couple_id) +
     (0 + .is_female + .is_male | couple_id:diaryday)
 )
 

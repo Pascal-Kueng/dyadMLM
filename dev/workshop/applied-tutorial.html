@@ -4344,23 +4344,105 @@ display:block!important;
 <h2>Load the daily measures</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href></a>raw_ild_dyad_data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;dyadic-data.rds&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb40-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
-<span id="cb40-3"><a href></a>    couple_id, person_id, diaryday, gender,</span>
-<span id="cb40-4"><a href></a>    <span class="at">pbc =</span> perceived_resources,</span>
-<span id="cb40-5"><a href></a>    objective_mvpa, awake_wear_minutes</span>
-<span id="cb40-6"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb40-7"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb40-8"><a href></a>    <span class="at">objective_mvpa =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
-<span id="cb40-9"><a href></a>      awake_wear_minutes <span class="sc">&gt;=</span> <span class="dv">600</span>,</span>
-<span id="cb40-10"><a href></a>      objective_mvpa,</span>
-<span id="cb40-11"><a href></a>      <span class="cn">NA_real_</span></span>
-<span id="cb40-12"><a href></a>    ),</span>
-<span id="cb40-13"><a href></a>    <span class="at">log_objective_mvpa =</span> <span class="fu">log</span>(objective_mvpa)</span>
+<span id="cb40-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb40-3"><a href></a>    <span class="at">device_based_mvpa =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
+<span id="cb40-4"><a href></a>      awake_wear_minutes <span class="sc">&gt;=</span> <span class="dv">600</span>,</span>
+<span id="cb40-5"><a href></a>      device_based_mvpa,</span>
+<span id="cb40-6"><a href></a>      <span class="cn">NA</span></span>
+<span id="cb40-7"><a href></a>    ),</span>
+<span id="cb40-8"><a href></a>    <span class="at">log_device_based_mvpa =</span> <span class="fu">log</span>(device_based_mvpa)</span>
+<span id="cb40-9"><a href></a>  )<span class="sc">|&gt;</span></span>
+<span id="cb40-10"><a href></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb40-11"><a href></a>    couple_id, person_id, diaryday, gender,</span>
+<span id="cb40-12"><a href></a>    perceived_behavioral_control,</span>
+<span id="cb40-13"><a href></a>    device_based_mvpa, log_device_based_mvpa, awake_wear_minutes</span>
 <span id="cb40-14"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb40-15"><a href></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(couple_id, diaryday, person_id)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb40-15"><a href></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(couple_id, diaryday, person_id)</span>
+<span id="cb40-16"><a href></a></span>
+<span id="cb40-17"><a href></a><span class="fu">slide_table</span>(<span class="fu">head</span>(raw_ild_dyad_data))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+
 </section>
-<section id="create-the-required-format-and-validate-the-data-4" class="slide level2">
+<section id="load-the-daily-measures-output" class="slide level2 output-location-slide"><h2>Load the daily measures</h2><div class="cell output-location-slide">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">couple_id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">person_id</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">diaryday</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">gender</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">perceived_behavioral_control</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">device_based_mvpa</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">log_device_based_mvpa</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">awake_wear_minutes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">6.00</td>
+<td style="text-align: right;">156.25</td>
+<td style="text-align: right;">5.05</td>
+<td style="text-align: right;">876.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">585.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">6.00</td>
+<td style="text-align: right;">134.50</td>
+<td style="text-align: right;">4.90</td>
+<td style="text-align: right;">761.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">152.00</td>
+<td style="text-align: right;">5.02</td>
+<td style="text-align: right;">778.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: left;">male</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">99.00</td>
+<td style="text-align: right;">4.60</td>
+<td style="text-align: right;">841.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: left;">female</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">444.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></section><section id="create-the-required-format-and-validate-the-data-4" class="slide level2">
 <h2>Create the required format and validate the data</h2>
 <p>For ILD we <strong>decompose the predictor(s)</strong>:</p>
 <ul>
@@ -4384,8 +4466,8 @@ display:block!important;
 <span id="cb41-4"><a href></a>  <span class="at">member =</span> person_id,</span>
 <span id="cb41-5"><a href></a>  <span class="at">role =</span> gender,</span>
 <span id="cb41-6"><a href></a>  <span class="at">time =</span> diaryday,</span>
-<span id="cb41-7"><a href></a>  <span class="at">predictors =</span> pbc,</span>
-<span id="cb41-8"><a href></a>  <span class="at">lag1_predictors =</span> pbc,</span>
+<span id="cb41-7"><a href></a>  <span class="at">predictors =</span> perceived_behavioral_control,</span>
+<span id="cb41-8"><a href></a>  <span class="at">lag1_predictors =</span> perceived_behavioral_control,</span>
 <span id="cb41-9"><a href></a>  <span class="at">model_types =</span> <span class="st">&quot;apim&quot;</span>,</span>
 <span id="cb41-10"><a href></a>  <span class="at">temporal_decomposition =</span> <span class="st">&quot;2l&quot;</span>,</span>
 <span id="cb41-11"><a href></a>  <span class="at">include_arbitrary_member_contrast =</span> <span class="cn">TRUE</span>,</span>
@@ -4453,25 +4535,25 @@ display:block!important;
 #                               person&#39;s usual level
 #
 # A tibble: 3,960 × 29
-   couple_id person_id diaryday gender   pbc objective_mvpa awake_wear_minutes
-       &lt;int&gt;     &lt;int&gt;    &lt;dbl&gt; &lt;fct&gt;  &lt;dbl&gt;          &lt;dbl&gt;              &lt;dbl&gt;
- 1         1         1        0 male       6          156.                 876
- 2         1         2        0 female     2           NA                  585
- 3         1         1        1 male       6          134.                 761
- 4         1         2        1 female     3          152                  778
- 5         1         1        2 male       4           99                  841
- 6         1         2        2 female     3           NA                  444
- 7         1         1        3 male       5          110                  860
- 8         1         2        3 female     1           NA                  583
- 9         1         1        4 male       3           71.2                783
-10         1         2        4 female     0          130.                 684
+   couple_id person_id diaryday gender perceived_behavioral_…¹ device_based_mvpa
+       &lt;int&gt;     &lt;int&gt;    &lt;dbl&gt; &lt;fct&gt;                    &lt;dbl&gt;             &lt;dbl&gt;
+ 1         1         1        0 male                         6             156. 
+ 2         1         2        0 female                       2              NA  
+ 3         1         1        1 male                         6             134. 
+ 4         1         2        1 female                       3             152  
+ 5         1         1        2 male                         4              99  
+ 6         1         2        2 female                       3              NA  
+ 7         1         1        3 male                         5             110  
+ 8         1         2        3 female                       1              NA  
+ 9         1         1        4 male                         3              71.2
+10         1         2        4 female                       0             130. 
 # ℹ 3,950 more rows
-# ℹ 22 more variables: log_objective_mvpa &lt;dbl&gt;, .composition &lt;fct&gt;,
-#   .composition_role &lt;fct&gt;, .is_female &lt;dbl&gt;, .is_male &lt;dbl&gt;,
-#   .member_contrast_arbitrary &lt;dbl&gt;, .pbc_cwp &lt;dbl&gt;, .pbc_cbp &lt;dbl&gt;,
-#   .pbc_lag1 &lt;dbl&gt;, .pbc_cwp_lag1 &lt;dbl&gt;, .pbc_actor &lt;dbl&gt;, .pbc_partner &lt;dbl&gt;,
-#   .pbc_cwp_actor &lt;dbl&gt;, .pbc_cwp_partner &lt;dbl&gt;, .pbc_cbp_actor &lt;dbl&gt;,
-#   .pbc_cbp_partner &lt;dbl&gt;, .pbc_actor_lag1 &lt;dbl&gt;, .pbc_partner_lag1 &lt;dbl&gt;, …</code></pre>
+# ℹ abbreviated name: ¹​perceived_behavioral_control
+# ℹ 23 more variables: log_device_based_mvpa &lt;dbl&gt;, awake_wear_minutes &lt;dbl&gt;,
+#   .composition &lt;fct&gt;, .composition_role &lt;fct&gt;, .is_female &lt;dbl&gt;,
+#   .is_male &lt;dbl&gt;, .member_contrast_arbitrary &lt;dbl&gt;,
+#   .perceived_behavioral_control_cwp &lt;dbl&gt;,
+#   .perceived_behavioral_control_cbp &lt;dbl&gt;, …</code></pre>
 </div>
 </div></section><section id="the-ild-apim-starts-with-two-member-specific-equations" class="slide level2 smaller">
 <h2>The ILD APIM starts with two member-specific equations</h2>
@@ -4543,24 +4625,24 @@ b_{0,\mathrm{F}}
 <h2>Fitting the distinguishable ILD APIM in glmmTMB</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43" data-code-line-numbers="1-30|4-6|8-12|14-18|20-24|1-30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href></a>ild_apim_distinguishable_model <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(</span>
-<span id="cb43-2"><a href></a>  log_objective_mvpa <span class="sc">~</span></span>
+<span id="cb43-2"><a href></a>  log_device_based_mvpa <span class="sc">~</span></span>
 <span id="cb43-3"><a href></a></span>
 <span id="cb43-4"><a href></a>    <span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">+</span></span>
 <span id="cb43-5"><a href></a></span>
 <span id="cb43-6"><a href></a>    .is_female<span class="sc">:</span>day_c <span class="sc">+</span></span>
 <span id="cb43-7"><a href></a>    .is_male<span class="sc">:</span>day_c <span class="sc">+</span></span>
 <span id="cb43-8"><a href></a></span>
-<span id="cb43-9"><a href></a>    .is_female<span class="sc">:</span>.pbc_cwp_actor_lag1 <span class="sc">+</span></span>
-<span id="cb43-10"><a href></a>    .is_male<span class="sc">:</span>.pbc_cwp_actor_lag1 <span class="sc">+</span></span>
+<span id="cb43-9"><a href></a>    .is_female<span class="sc">:</span>.perceived_behavioral_control_cwp_actor_lag1 <span class="sc">+</span></span>
+<span id="cb43-10"><a href></a>    .is_male<span class="sc">:</span>.perceived_behavioral_control_cwp_actor_lag1 <span class="sc">+</span></span>
 <span id="cb43-11"><a href></a></span>
-<span id="cb43-12"><a href></a>    .is_female<span class="sc">:</span>.pbc_cwp_partner_lag1 <span class="sc">+</span></span>
-<span id="cb43-13"><a href></a>    .is_male<span class="sc">:</span>.pbc_cwp_partner_lag1 <span class="sc">+</span></span>
+<span id="cb43-12"><a href></a>    .is_female<span class="sc">:</span>.perceived_behavioral_control_cwp_partner_lag1 <span class="sc">+</span></span>
+<span id="cb43-13"><a href></a>    .is_male<span class="sc">:</span>.perceived_behavioral_control_cwp_partner_lag1 <span class="sc">+</span></span>
 <span id="cb43-14"><a href></a></span>
-<span id="cb43-15"><a href></a>    .is_female<span class="sc">:</span>.pbc_cbp_actor <span class="sc">+</span></span>
-<span id="cb43-16"><a href></a>    .is_male<span class="sc">:</span>.pbc_cbp_actor <span class="sc">+</span></span>
+<span id="cb43-15"><a href></a>    .is_female<span class="sc">:</span>.perceived_behavioral_control_cbp_actor <span class="sc">+</span></span>
+<span id="cb43-16"><a href></a>    .is_male<span class="sc">:</span>.perceived_behavioral_control_cbp_actor <span class="sc">+</span></span>
 <span id="cb43-17"><a href></a></span>
-<span id="cb43-18"><a href></a>    .is_female<span class="sc">:</span>.pbc_cbp_partner <span class="sc">+</span></span>
-<span id="cb43-19"><a href></a>    .is_male<span class="sc">:</span>.pbc_cbp_partner <span class="sc">+</span></span>
+<span id="cb43-18"><a href></a>    .is_female<span class="sc">:</span>.perceived_behavioral_control_cbp_partner <span class="sc">+</span></span>
+<span id="cb43-19"><a href></a>    .is_male<span class="sc">:</span>.perceived_behavioral_control_cbp_partner <span class="sc">+</span></span>
 <span id="cb43-20"><a href></a></span>
 <span id="cb43-21"><a href></a>    <span class="co"># Stable dyad/member random effects</span></span>
 <span id="cb43-22"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .is_female <span class="sc">+</span> .is_male <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
@@ -4577,7 +4659,7 @@ b_{0,\mathrm{F}}
 </section>
 <section id="consecutive-day-dependence-remains" class="slide level2 smaller">
 <h2>Consecutive-day dependence remains</h2>
-<div class="cell" data-cache.extra="9f24f6fb1204175d9d3f7be2d1802892">
+<div class="cell" data-cache.extra="0fa4280384888ad8710b6898925d5c0b">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href></a>ild_apim_no_ar_dharma <span class="ot">&lt;-</span> <span class="fu">simulate_ild_dharma</span>(</span>
 <span id="cb44-2"><a href></a>  <span class="at">model =</span> ild_apim_distinguishable_model,</span>
 <span id="cb44-3"><a href></a>  <span class="at">dyad =</span> ild_apim_data<span class="sc">$</span>couple_id,</span>
@@ -4637,7 +4719,7 @@ Conditional model:
 </section>
 <section id="simulate-residuals-from-the-ar1-model" class="slide level2">
 <h2>Simulate residuals from the AR(1) model</h2>
-<div class="cell" data-cache.extra="615428adf0493bee0d843abb0de3fde9">
+<div class="cell" data-cache.extra="9c55ea98e4b215c28406fdb1b64bb742">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href></a>ild_apim_dharma_residuals <span class="ot">&lt;-</span> <span class="fu">simulate_ild_dharma</span>(</span>
 <span id="cb48-2"><a href></a>  <span class="at">model =</span> ild_apim_distinguishable_ar1_model,</span>
 <span id="cb48-3"><a href></a>  <span class="at">dyad =</span> ild_apim_data<span class="sc">$</span>couple_id,</span>
@@ -4695,13 +4777,13 @@ alternative hypothesis: two.sided</code></pre>
 <h2>Fit the exchangeable model with pooled AR(1)</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href></a>ild_apim_exchangeable_ar1_model <span class="ot">&lt;-</span> glmmTMB<span class="sc">::</span><span class="fu">glmmTMB</span>(</span>
-<span id="cb52-2"><a href></a>  log_objective_mvpa <span class="sc">~</span></span>
+<span id="cb52-2"><a href></a>  log_device_based_mvpa <span class="sc">~</span></span>
 <span id="cb52-3"><a href></a>    <span class="dv">1</span> <span class="sc">+</span></span>
 <span id="cb52-4"><a href></a>    day_c <span class="sc">+</span></span>
-<span id="cb52-5"><a href></a>    .pbc_cwp_actor_lag1 <span class="sc">+</span></span>
-<span id="cb52-6"><a href></a>    .pbc_cwp_partner_lag1 <span class="sc">+</span></span>
-<span id="cb52-7"><a href></a>    .pbc_cbp_actor <span class="sc">+</span></span>
-<span id="cb52-8"><a href></a>    .pbc_cbp_partner <span class="sc">+</span></span>
+<span id="cb52-5"><a href></a>    .perceived_behavioral_control_cwp_actor_lag1 <span class="sc">+</span></span>
+<span id="cb52-6"><a href></a>    .perceived_behavioral_control_cwp_partner_lag1 <span class="sc">+</span></span>
+<span id="cb52-7"><a href></a>    .perceived_behavioral_control_cbp_actor <span class="sc">+</span></span>
+<span id="cb52-8"><a href></a>    .perceived_behavioral_control_cbp_partner <span class="sc">+</span></span>
 <span id="cb52-9"><a href></a>    (<span class="dv">1</span> <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
 <span id="cb52-10"><a href></a>    (<span class="dv">0</span> <span class="sc">+</span> .member_contrast_arbitrary <span class="sc">|</span> couple_id) <span class="sc">+</span></span>
 <span id="cb52-11"><a href></a>    <span class="fu">ar1</span>(<span class="dv">0</span> <span class="sc">+</span> diaryday_f <span class="sc">|</span> couple_id<span class="sc">:</span>person_id) <span class="sc">+</span></span>
@@ -4957,24 +5039,25 @@ Wiley, J. F. (2025). <em><span class="nocase">multilevelTools</span>: Multilevel
 <span id="cb57-2"><a href></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(couple_id, person_id, diaryday) <span class="sc">|&gt;</span></span>
 <span id="cb57-3"><a href></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(couple_id, person_id) <span class="sc">|&gt;</span></span>
 <span id="cb57-4"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb57-5"><a href></a>    <span class="at">.person_mean =</span> <span class="fu">mean</span>(pbc, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb57-6"><a href></a>    <span class="at">.pbc_cwp =</span> pbc <span class="sc">-</span> .person_mean,</span>
-<span id="cb57-7"><a href></a>    <span class="at">.pbc_cwp_lag1 =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
-<span id="cb57-8"><a href></a>      diaryday <span class="sc">==</span> dplyr<span class="sc">::</span><span class="fu">lag</span>(diaryday) <span class="sc">+</span> <span class="dv">1</span>,</span>
-<span id="cb57-9"><a href></a>      dplyr<span class="sc">::</span><span class="fu">lag</span>(.pbc_cwp),</span>
-<span id="cb57-10"><a href></a>      <span class="cn">NA_real_</span></span>
-<span id="cb57-11"><a href></a>    )</span>
-<span id="cb57-12"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb57-13"><a href></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb57-14"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb57-15"><a href></a>    <span class="at">.pbc_cbp =</span> .person_mean <span class="sc">-</span></span>
-<span id="cb57-16"><a href></a>      <span class="fu">mean</span>(</span>
-<span id="cb57-17"><a href></a>        .person_mean[</span>
-<span id="cb57-18"><a href></a>          <span class="sc">!</span><span class="fu">duplicated</span>(<span class="fu">paste</span>(couple_id, person_id))</span>
-<span id="cb57-19"><a href></a>        ],</span>
-<span id="cb57-20"><a href></a>        <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
-<span id="cb57-21"><a href></a>      )</span>
-<span id="cb57-22"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb57-5"><a href></a>    <span class="at">.person_mean =</span> <span class="fu">mean</span>(perceived_behavioral_control, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-6"><a href></a>    <span class="at">.perceived_behavioral_control_cwp =</span></span>
+<span id="cb57-7"><a href></a>      perceived_behavioral_control <span class="sc">-</span> .person_mean,</span>
+<span id="cb57-8"><a href></a>    <span class="at">.perceived_behavioral_control_cwp_lag1 =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
+<span id="cb57-9"><a href></a>      diaryday <span class="sc">==</span> dplyr<span class="sc">::</span><span class="fu">lag</span>(diaryday) <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb57-10"><a href></a>      dplyr<span class="sc">::</span><span class="fu">lag</span>(.perceived_behavioral_control_cwp),</span>
+<span id="cb57-11"><a href></a>      <span class="cn">NA_real_</span></span>
+<span id="cb57-12"><a href></a>    )</span>
+<span id="cb57-13"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb57-14"><a href></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb57-15"><a href></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb57-16"><a href></a>    <span class="at">.perceived_behavioral_control_cbp =</span> .person_mean <span class="sc">-</span></span>
+<span id="cb57-17"><a href></a>      <span class="fu">mean</span>(</span>
+<span id="cb57-18"><a href></a>        .person_mean[</span>
+<span id="cb57-19"><a href></a>          <span class="sc">!</span><span class="fu">duplicated</span>(<span class="fu">paste</span>(couple_id, person_id))</span>
+<span id="cb57-20"><a href></a>        ],</span>
+<span id="cb57-21"><a href></a>        <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
+<span id="cb57-22"><a href></a>      )</span>
+<span id="cb57-23"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="manual-ild-apim-matching" class="slide level2 smaller">
@@ -4985,22 +5068,28 @@ Wiley, J. F. (2025). <em><span class="nocase">multilevelTools</span>: Multilevel
 <span id="cb58-3"><a href></a>    couple_id,</span>
 <span id="cb58-4"><a href></a>    diaryday,</span>
 <span id="cb58-5"><a href></a>    <span class="at">gender =</span> dplyr<span class="sc">::</span><span class="fu">recode</span>(gender, <span class="at">female =</span> <span class="st">&quot;male&quot;</span>, <span class="at">male =</span> <span class="st">&quot;female&quot;</span>),</span>
-<span id="cb58-6"><a href></a>    <span class="at">.pbc_cwp_partner =</span> .pbc_cwp,</span>
-<span id="cb58-7"><a href></a>    <span class="at">.pbc_cwp_partner_lag1 =</span> .pbc_cwp_lag1,</span>
-<span id="cb58-8"><a href></a>    <span class="at">.pbc_cbp_partner =</span> .pbc_cbp</span>
-<span id="cb58-9"><a href></a>  )</span>
-<span id="cb58-10"><a href></a></span>
-<span id="cb58-11"><a href></a>ild_manual_data <span class="ot">&lt;-</span> pbc_components <span class="sc">|&gt;</span></span>
-<span id="cb58-12"><a href></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
-<span id="cb58-13"><a href></a>    <span class="at">.pbc_cwp_actor =</span> .pbc_cwp,</span>
-<span id="cb58-14"><a href></a>    <span class="at">.pbc_cwp_actor_lag1 =</span> .pbc_cwp_lag1,</span>
-<span id="cb58-15"><a href></a>    <span class="at">.pbc_cbp_actor =</span> .pbc_cbp</span>
-<span id="cb58-16"><a href></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb58-17"><a href></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
-<span id="cb58-18"><a href></a>    partner_components,</span>
-<span id="cb58-19"><a href></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;couple_id&quot;</span>, <span class="st">&quot;diaryday&quot;</span>, <span class="st">&quot;gender&quot;</span>),</span>
-<span id="cb58-20"><a href></a>    <span class="at">relationship =</span> <span class="st">&quot;one-to-one&quot;</span></span>
-<span id="cb58-21"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb58-6"><a href></a>    <span class="at">.perceived_behavioral_control_cwp_partner =</span></span>
+<span id="cb58-7"><a href></a>      .perceived_behavioral_control_cwp,</span>
+<span id="cb58-8"><a href></a>    <span class="at">.perceived_behavioral_control_cwp_partner_lag1 =</span></span>
+<span id="cb58-9"><a href></a>      .perceived_behavioral_control_cwp_lag1,</span>
+<span id="cb58-10"><a href></a>    <span class="at">.perceived_behavioral_control_cbp_partner =</span></span>
+<span id="cb58-11"><a href></a>      .perceived_behavioral_control_cbp</span>
+<span id="cb58-12"><a href></a>  )</span>
+<span id="cb58-13"><a href></a></span>
+<span id="cb58-14"><a href></a>ild_manual_data <span class="ot">&lt;-</span> pbc_components <span class="sc">|&gt;</span></span>
+<span id="cb58-15"><a href></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb58-16"><a href></a>    <span class="at">.perceived_behavioral_control_cwp_actor =</span></span>
+<span id="cb58-17"><a href></a>      .perceived_behavioral_control_cwp,</span>
+<span id="cb58-18"><a href></a>    <span class="at">.perceived_behavioral_control_cwp_actor_lag1 =</span></span>
+<span id="cb58-19"><a href></a>      .perceived_behavioral_control_cwp_lag1,</span>
+<span id="cb58-20"><a href></a>    <span class="at">.perceived_behavioral_control_cbp_actor =</span></span>
+<span id="cb58-21"><a href></a>      .perceived_behavioral_control_cbp</span>
+<span id="cb58-22"><a href></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb58-23"><a href></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb58-24"><a href></a>    partner_components,</span>
+<span id="cb58-25"><a href></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;couple_id&quot;</span>, <span class="st">&quot;diaryday&quot;</span>, <span class="st">&quot;gender&quot;</span>),</span>
+<span id="cb58-26"><a href></a>    <span class="at">relationship =</span> <span class="st">&quot;one-to-one&quot;</span></span>
+<span id="cb58-27"><a href></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Explicit day-role matching: independent of row order</li>

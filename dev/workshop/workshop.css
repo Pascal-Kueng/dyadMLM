@@ -455,6 +455,7 @@
 .reveal .slides section.output-location-slide > .cell.output-location-slide,
 .reveal .slides section.output-location-slide .cell-output-stdout,
 .reveal .slides section.output-location-slide .cell-output-stdout > pre {
+  min-width: 0;
   min-height: 0;
   height: 100%;
 }
