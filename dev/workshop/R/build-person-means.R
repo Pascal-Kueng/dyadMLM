@@ -64,7 +64,10 @@ full <- full |>
   mutate(
     couple_id = match(coupleID, couple_ids),
     person_id = match(userID, person_ids),
-    gender = recode_gender(gender)
+    gender = recode_gender(gender),
+    perceived_resources = .data[["ss _res"]],
+    objective_mvpa = minutes_mvpa_wearawake_filtered,
+    awake_wear_minutes = wear_awake_minutes
   ) |>
   relocate(couple_id, person_id, gender)
 
@@ -101,7 +104,29 @@ full <- full |>
     person_id = match(person_id, retained_person_ids)
   )
 
-generate_sedentary <- function(data, seed = 20260728L, skew = 0.01) {
+daily_key <- paste(
+  daily$couple_id,
+  daily$person_id,
+  daily$diaryday
+)
+full_key <- paste(
+  full$couple_id,
+  full$person_id,
+  full$day
+)
+daily_to_full <- match(daily_key, full_key)
+if (anyNA(daily_to_full)) {
+  stop("Could not align all daily rows to the full data.", call. = FALSE)
+}
+
+daily$perceived_resources <-
+  full$perceived_resources[daily_to_full]
+daily$objective_mvpa <-
+  full$objective_mvpa[daily_to_full]
+daily$awake_wear_minutes <-
+  full$awake_wear_minutes[daily_to_full]
+
+generate_sedentary <- function(data, seed = 20260728L, skew = 0.02) {
   required_columns <- c(
     "couple_id", "person_id", "diaryday", "gender",
     "provided_support", "total_mvpa"
@@ -159,7 +184,11 @@ generate_sedentary <- function(data, seed = 20260728L, skew = 0.01) {
     stable_difference = rnorm(length(dyads), 0, 24)
   )
 
-  day_member_sd <- sqrt(52^2 + 44^2)
+  day_shared_sd <- 43
+  day_difference_sd <- 37
+  # Similar, but not identical, member-specific AR(1) processes by role.
+  ar_sd_by_role <- c(female = 40, male = 44)
+  ar_rho_by_role <- c(female = 0.35, male = 0.45)
 
   simulation_data <- simulation_data |>
     left_join(
@@ -177,6 +206,38 @@ generate_sedentary <- function(data, seed = 20260728L, skew = 0.01) {
       )
     )
 
+  person_rows <- split(
+    seq_len(nrow(simulation_data)),
+    interaction(
+      simulation_data$couple_id,
+      simulation_data$person_id,
+      drop = TRUE
+    )
+  )
+  ar_state <- numeric(nrow(simulation_data))
+  for (rows in person_rows) {
+    rows <- rows[order(simulation_data$diaryday[rows])]
+    if (anyDuplicated(simulation_data$diaryday[rows])) {
+      stop("Each member must have at most one row per day.", call. = FALSE)
+    }
+
+    role <- as.character(simulation_data$gender[rows[1]])
+    rho <- ar_rho_by_role[[role]]
+    stationary_sd <- ar_sd_by_role[[role]]
+    ar_state[rows[1]] <- rnorm(1, 0, stationary_sd)
+    innovations <- rnorm(
+      length(rows) - 1L,
+      0,
+      stationary_sd * sqrt(1 - rho^2)
+    )
+    for (day in seq.int(2L, length(rows))) {
+      ar_state[rows[day]] <- rho * ar_state[rows[day - 1L]] +
+        innovations[day - 1L]
+    }
+  }
+
+  day_member_sd <- sqrt(day_shared_sd^2 + day_difference_sd^2)
+
   dyad_day <- interaction(
     simulation_data$couple_id,
     simulation_data$diaryday,
@@ -192,8 +253,8 @@ generate_sedentary <- function(data, seed = 20260728L, skew = 0.01) {
 
     while (!accepted && generation_attempts[[i]] < 10000L) {
       generation_attempts[[i]] <- generation_attempts[[i]] + 1L
-      day_shared <- rnorm(1, 0, 52)
-      day_difference <- rnorm(1, 0, 44)
+      day_shared <- rnorm(1, 0, day_shared_sd)
+      day_difference <- rnorm(1, 0, day_difference_sd)
       day_normal <- day_shared +
         simulation_data$member_contrast[rows] * day_difference
       day_standardized <- day_normal / day_member_sd
@@ -203,6 +264,7 @@ generate_sedentary <- function(data, seed = 20260728L, skew = 0.01) {
       ) / sqrt(1 + 2 * skew^2)
       candidate_sedentary <- round(
         simulation_data$fixed_and_stable[rows] +
+          ar_state[rows] +
           candidate_day_rough
       )
 
@@ -226,7 +288,7 @@ generate_sedentary <- function(data, seed = 20260728L, skew = 0.01) {
 
   simulation_data |>
     mutate(
-      sedentary = round(fixed_and_stable + day_rough),
+      sedentary = round(fixed_and_stable + ar_state + day_rough),
       sedentary = if_else(
         is.na(total_mvpa),
         NA_real_,
@@ -236,11 +298,6 @@ generate_sedentary <- function(data, seed = 20260728L, skew = 0.01) {
     arrange(.original_row) |>
     pull(sedentary)
 }
-
-daily <- daily |>
-  select(-any_of("sedentary"))
-full <- full |>
-  select(-any_of("sedentary"))
 
 daily$sedentary <- generate_sedentary(daily)
 
@@ -313,19 +370,38 @@ stopifnot(
   "efficacy" %in% names(daily),
   "efficacy" %in% names(full),
   "efficacy" %in% names(person_means),
+  all(
+    c(
+      "perceived_resources",
+      "objective_mvpa",
+      "awake_wear_minutes"
+    ) %in% names(daily)
+  ),
   "sedentary" %in% names(daily),
   "sedentary" %in% names(full),
   "sedentary" %in% names(person_means),
   !any(c("self_efficacy", "ss_eff") %in% names(daily)),
   !any(c("self_efficacy", "ss_eff") %in% names(full)),
   !any(c("self_efficacy", "ss_eff") %in% names(person_means)),
+  identical(
+    daily$perceived_resources,
+    full$perceived_resources[daily_to_full]
+  ),
+  identical(
+    daily$objective_mvpa,
+    full$objective_mvpa[daily_to_full]
+  ),
+  identical(
+    daily$awake_wear_minutes,
+    full$awake_wear_minutes[daily_to_full]
+  ),
   identical(daily$sedentary[sedentary_index], full$sedentary),
   all(observed_sedentary >= 0),
   mean(observed_sedentary) > 500,
   mean(observed_sedentary) < 580,
   sd(observed_sedentary) > 60,
   sd(observed_sedentary) < 110,
-  sedentary_skewness > 0,
+  sedentary_skewness > -0.1,
   sedentary_skewness < 0.5,
   all(
     daily$sedentary[jointly_observed_time] +

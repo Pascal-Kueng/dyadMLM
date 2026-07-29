@@ -1766,23 +1766,54 @@ until the nested three-level implementation is available
 
 - 36 physically inactive romantic couples
 - Daily diaries over up to 55 days
-- Provided support (0–5): observed daily predictor
-
-**Simulated teaching outcome:**
-
-- Sedentary time in hours per day
-- Plausible daily distribution with some roughness and skew
-- More own and partner support tends to accompany less sedentary time
+- Perceived resources for next-day physical activity (0–6)
+- Accelerometer-derived MVPA on the following day
+- Only days with at least 10 hours of awake wear time
 
 ## ILD Research Question {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
 [RQ:]{.rq-label} [How are daily deviations and stable between-person
-differences in **provided support** associated with one's own and one's
-partner's **sedentary time on the same day**?]{.rq-text}
+differences in **perceived resources for physical activity** associated with
+one's own and one's partner's **MVPA the next day**?]{.rq-text}
 :::
 :::
+
+:::{.notes}
+
+Partner effects may reflect shared schedules, constraints, plans, or
+support—not necessarily causal interpersonal influence.
+
+:::
+
+## Measurement - predictor
+
+### Perceived resources for next-day physical activity
+
+> **Rough English translation of the original German item**<br>
+> “Being physically active tomorrow would/will be for me …”
+
+- **0:** impossible—crucial prerequisites are not met
+- **3:** possible with some effort—several prerequisites are not met
+- **6:** easily possible—all prerequisites are met
+
+<!-- ca. 1 Minute -->
+
+## Measurement - outcome
+
+### Objective moderate-to-vigorous physical activity (MVPA)
+
+- Daily minutes derived from accelerometer data
+- At least 10 hours of awake wear time
+- Next-day outcome: predictor on day $t$, MVPA on day $t+1$
+- Analyze $\log(\text{MVPA})$ to reduce right skew
+
+:::{.subtle}
+Exponentiated coefficients describe multiplicative differences in MVPA.
+:::
+
+<!-- ca. 1 Minute -->
 
 # Distinguishable ILD APIM
 Distinguishing by gender
@@ -1796,20 +1827,33 @@ Distinguishing by gender
 5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
-## Load and inspect the raw data
+## Load and align the next-day outcome {.smaller}
 
 ```{r}
 raw_ild_dyad_data <- readRDS("dyadic-data.rds") |>
   dplyr::select(
     couple_id, person_id, diaryday, gender,
-    provided_support, sedentary
+    perceived_resources, objective_mvpa, awake_wear_minutes
   ) |>
   dplyr::mutate(
-    sedentary_hours = sedentary / 60
+    objective_mvpa = dplyr::if_else(
+      awake_wear_minutes >= 600,
+      objective_mvpa,
+      NA_real_
+    ),
+    log_objective_mvpa = log(objective_mvpa)
   ) |>
-  dplyr::arrange(couple_id, diaryday)
-
-slide_table(head(raw_ild_dyad_data))
+  dplyr::arrange(couple_id, person_id, diaryday) |>
+  dplyr::group_by(couple_id, person_id) |>
+  dplyr::mutate(
+    next_day_log_mvpa = dplyr::if_else(
+      dplyr::lead(diaryday) == diaryday + 1,
+      dplyr::lead(log_objective_mvpa),
+      NA_real_
+    )
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::arrange(couple_id, diaryday, person_id)
 ```
 
 
@@ -1832,8 +1876,8 @@ slide_table(head(raw_ild_dyad_data))
 
 ### For ILD
 
-Index support and sedentary time by the same diary day $t$. For provided
-support $X_{ri,t}$:
+Index perceived resources at day $t$ and MVPA at day $t+1$. For resources
+$X_{ri,t}$:
 
 - Between-person component: Person mean centered on the mean of person means
   - $\bar X_{ri} - \bar X$
@@ -1856,21 +1900,29 @@ ild_apim_data <- dyadMLM::prepare_dyad_data(
   member = person_id,
   role = gender,
   time = diaryday,
-  predictors = provided_support,
+  predictors = perceived_resources,
   model_types = "apim",
+  temporal_decomposition = "2l",
   include_arbitrary_member_contrast = TRUE,
   seed = 123
 )
+
+ild_apim_data <- ild_apim_data |>
+  dplyr::mutate(
+    .day10 = (diaryday - mean(diaryday)) / 10,
+    diaryday_f = factor(diaryday, levels = 0:54)
+  )
 ```
 
 ## The ILD APIM starts with two member-specific equations {.smaller}
 
 For dyad $i$ at occasion $t$, superscripts $\mathrm{W}$ and $\mathrm{B}$
-denote within-person and between-person components:
+denote within-person and between-person components. Here, $X_{ri,t}$ is
+perceived resources and $Y_{ri,t+1}=\log(\mathrm{MVPA}_{ri,t+1})$:
 
 $$
 \begin{aligned}
-Y_{\mathrm{M},it} ={}&
+Y_{\mathrm{M},i,t+1} ={}&
 b_{0,\mathrm{M}}
 + \color{#1769AA}{
   a^{\mathrm{W}}_{\mathrm{M}}X^{(\mathrm{A,W})}_{\mathrm{M},it}
@@ -1881,9 +1933,9 @@ b_{0,\mathrm{M}}
   + p^{\mathrm{B}}_{\mathrm{M}}X^{(\mathrm{P,B})}_{\mathrm{M},i}
 }
 + u_{0,\mathrm{M}i}
-+ \epsilon_{\mathrm{M},it}
++ \epsilon_{\mathrm{M},i,t+1}
 \\[0.6em]
-Y_{\mathrm{F},it} ={}&
+Y_{\mathrm{F},i,t+1} ={}&
 b_{0,\mathrm{F}}
 + \color{#1769AA}{
   a^{\mathrm{W}}_{\mathrm{F}}X^{(\mathrm{A,W})}_{\mathrm{F},it}
@@ -1894,7 +1946,7 @@ b_{0,\mathrm{F}}
   + p^{\mathrm{B}}_{\mathrm{F}}X^{(\mathrm{P,B})}_{\mathrm{F},i}
 }
 + u_{0,\mathrm{F}i}
-+ \epsilon_{\mathrm{F},it}.
++ \epsilon_{\mathrm{F},i,t+1}.
 \end{aligned}
 $$
 
@@ -1951,29 +2003,32 @@ be estimated separately.
 ## Fitting the distinguishable ILD APIM in glmmTMB {.smaller}
 
 ```{r}
-#| code-line-numbers: "1-28|4|6-10|12-16|18-19|21-22|23-25|1-28"
+#| code-line-numbers: "1-30|4-6|8-12|14-18|20-24|1-30"
 #| output: false
 
 ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
-  sedentary_hours ~
-    
+  next_day_log_mvpa ~
+
     0 + .is_female + .is_male +
-    
-    .is_female:.provided_support_cwp_actor +
-    .is_male:.provided_support_cwp_actor +
-    
-    .is_female:.provided_support_cwp_partner +
-    .is_male:.provided_support_cwp_partner +
-    
-    .is_female:.provided_support_cbp_actor +
-    .is_male:.provided_support_cbp_actor +
-    
-    .is_female:.provided_support_cbp_partner +
-    .is_male:.provided_support_cbp_partner +
-    
-    # Stable dyad/member random effects (optionally, add slopes)
+
+    .is_female:.day10 +
+    .is_male:.day10 +
+
+    .is_female:.perceived_resources_cwp_actor +
+    .is_male:.perceived_resources_cwp_actor +
+
+    .is_female:.perceived_resources_cwp_partner +
+    .is_male:.perceived_resources_cwp_partner +
+
+    .is_female:.perceived_resources_cbp_actor +
+    .is_male:.perceived_resources_cbp_actor +
+
+    .is_female:.perceived_resources_cbp_partner +
+    .is_male:.perceived_resources_cbp_partner +
+
+    # Stable dyad/member random effects
     (0 + .is_female + .is_male | couple_id) +
-    
+
     # Same-occasion Gaussian residual covariance
     (0 + .is_female + .is_male | couple_id:diaryday),
   dispformula = ~ 0,
@@ -1984,51 +2039,63 @@ ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
 summary(ild_apim_distinguishable_model)
 ```
 
-## Exchangeable ILD APIM {.smaller}
+## Consecutive-day dependence remains {.smaller}
 
 ```{r}
-#| output-location: slide
+#| label: simulate-dharma-ild-no-ar
+#| cache: true
+#| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_distinguishable_model), stats::model.frame(ild_apim_distinguishable_model), body(simulate_ild_dharma)))
 
-ild_apim_exchangeable_model <- glmmTMB::glmmTMB(
-  sedentary_hours ~
-    1 +
-    .provided_support_cwp_actor +
-    .provided_support_cwp_partner +
-    .provided_support_cbp_actor +
-    .provided_support_cbp_partner +
-    (1 | couple_id) +
-    (0 + .member_contrast_arbitrary | couple_id) +
-    (1 | couple_id:diaryday) +
-    (0 + .member_contrast_arbitrary | couple_id:diaryday),
-  dispformula = ~ 0,
-  family = gaussian(),
-  data = ild_apim_data
+ild_apim_no_ar_dharma <- simulate_ild_dharma(
+  model = ild_apim_distinguishable_model,
+  dyad = ild_apim_data$couple_id,
+  member = ild_apim_data$person_id,
+  time = ild_apim_data$diaryday,
+  n = 1000,
+  seed = 123
 )
 
-summary(ild_apim_exchangeable_model)
+test_ild_lag1(ild_apim_no_ar_dharma)
 ```
 
-## No clear fit improvement from gender-specific parameters {.smaller}
+:::{.subtle}
+The independence-across-days assumption is not adequate here
+($\hat r_{\mathrm{lag1}}\approx .17$, $p<.001$).
+:::
+
+## Add role-specific residual AR(1) processes {.smaller}
+
+- Separate AR(1) series for the female and male partner
+- Role-specific residual variability and persistence $\rho$
+- Same-day partner covariance retained separately
 
 ```{r}
-dyadMLM::compare_nested_models(
+ild_apim_distinguishable_ar1_model <- update(
   ild_apim_distinguishable_model,
-  ild_apim_exchangeable_model
+  . ~ . -
+    (0 + .is_female + .is_male | couple_id:diaryday) +
+    ar1(0 + .is_female:diaryday_f | couple_id) +
+    ar1(0 + .is_male:diaryday_f | couple_id) +
+    (0 + .is_female + .is_male | couple_id:diaryday)
 )
+
+glmmTMB::VarCorr(ild_apim_distinguishable_ar1_model)
 ```
 
-- Exchangeability constraints compatible with these data
-- More parsimonious exchangeable model retained for diagnostics
+:::{.subtle}
+AR(1) describes residual persistence; actor and partner effects remain
+prospective.
+:::
 
-## Simulate residuals from the exchangeable ILD model
+## Simulate residuals from the AR(1) model
 
 ```{r}
 #| label: simulate-dharma-ild
 #| cache: true
-#| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_exchangeable_model), stats::model.frame(ild_apim_exchangeable_model), body(simulate_ild_dharma)))
+#| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_distinguishable_ar1_model), stats::model.frame(ild_apim_distinguishable_ar1_model), body(simulate_ild_dharma)))
 
 ild_apim_dharma_residuals <- simulate_ild_dharma(
-  model = ild_apim_exchangeable_model,
+  model = ild_apim_distinguishable_ar1_model,
   dyad = ild_apim_data$couple_id,
   member = ild_apim_data$person_id,
   time = ild_apim_data$diaryday,
@@ -2038,8 +2105,7 @@ ild_apim_dharma_residuals <- simulate_ild_dharma(
 ```
 
 :::{.subtle}
-Block whitening accounts for modeled partner and repeated-measure covariance;
-the lag-1 check tests remaining consecutive-day dependence.
+Block whitening accounts for modeled partner and repeated-measure covariance.
 :::
 
 ## Inspect block-whitened DHARMa residuals {.smaller}
@@ -2053,27 +2119,85 @@ the lag-1 check tests remaining consecutive-day dependence.
 
 plot(
   ild_apim_dharma_residuals,
-  title = "Block-whitened DHARMa residual"
+  title = "Block-whitened DHARMa residuals"
 )
 ```
 
-## Check consecutive-day residual dependence
+:::{.notes}
+
+With almost 2,800 observations, DHARMa tests are sensitive to small
+departures; consider their visual magnitude and pattern as well as the
+p-values.
+
+:::
+
+## Does the fitted AR(1) reproduce lag-1 dependence?
 
 ```{r}
 test_ild_lag1(ild_apim_dharma_residuals)
 ```
 
+:::{.subtle}
+The correlation need not become zero; it should be typical under simulations
+from the fitted AR(1) model.
+:::
+
+## Fit the exchangeable model with pooled AR(1) {.smaller}
+
+```{r}
+#| output: false
+
+ild_apim_exchangeable_ar1_model <- glmmTMB::glmmTMB(
+  next_day_log_mvpa ~
+    1 +
+    .day10 +
+    .perceived_resources_cwp_actor +
+    .perceived_resources_cwp_partner +
+    .perceived_resources_cbp_actor +
+    .perceived_resources_cbp_partner +
+    (1 | couple_id) +
+    (0 + .member_contrast_arbitrary | couple_id) +
+    ar1(0 + diaryday_f | couple_id:person_id) +
+    (1 | couple_id:diaryday) +
+    (0 + .member_contrast_arbitrary | couple_id:diaryday),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_apim_data
+)
+```
+
+:::{.subtle}
+Each member retains a separate series, but residual variability and
+persistence $\rho$ are pooled across members.
+:::
+
+## Gender-specific parameters improve fit {.smaller}
+
+```{r}
+dyadMLM::compare_nested_models(
+  ild_apim_distinguishable_ar1_model,
+  ild_apim_exchangeable_ar1_model
+)
+```
+
+- Both models include residual AR(1)
+- Retain the distinguishable model for interpretation and reporting
+
 ## Recap: dyadic ILD APIM {.smaller}
 
-- **For the simulated sedentary outcome:** One support point above usual was
-  associated with about 8 fewer own and 4 fewer partner sedentary minutes
+- **Within persons:** For male outcomes, one own resource point above usual
+  corresponded to about 3.5% more next-day MVPA; one partner resource point
+  above usual corresponded to about 2.5% more
 - **Between persons:** No clear actor or partner associations
-- **Distinguishability:** Exchangeability constraints compatible with these
-  data; more parsimonious exchangeable model retained
-- **Diagnostics:** No clear model misfit or evidence of remaining lag-1
-  dependence
-- **Teaching example:** Estimates illustrate the workflow, not substantive
-  study findings
+- **Distinguishability:** Gender constraints reduced fit; retained the
+  distinguishable model
+- **Residual persistence:** $\hat\rho_{\mathrm{F}}\approx .88$ and
+  $\hat\rho_{\mathrm{M}}\approx .81$
+- **Diagnostics:** Small visual departures; lag-1 dependence compatible with
+  the fitted AR(1), $p=.92$
+
+Supported effects for men but not women do not by themselves establish that
+the effects differ by gender; that requires a direct comparison of the slopes.
 
 
 <!----------------------------------------------------------------------------
@@ -2210,21 +2334,26 @@ apim_manual_data <- apim_manual_data |>
   )
 ```
 
-## Decompose provided support manually [← Data preparation](#prepared-ild-apim-data){.appendix-back-link} {#manual-ild-apim-preparation .smaller}
+## Decompose perceived resources manually [← Data preparation](#prepared-ild-apim-data){.appendix-back-link} {#manual-ild-apim-preparation .smaller}
 
 ```{r}
 #| eval: false
 
-support_components <- raw_ild_dyad_data |>
-  dplyr::group_by(person_id) |>
+resource_components <- raw_ild_dyad_data |>
+  dplyr::group_by(couple_id, person_id) |>
   dplyr::mutate(
-    .person_mean = mean(provided_support, na.rm = TRUE),
-    .provided_support_cwp = provided_support - .person_mean
+    .person_mean = mean(perceived_resources, na.rm = TRUE),
+    .perceived_resources_cwp = perceived_resources - .person_mean
   ) |>
   dplyr::ungroup() |>
   dplyr::mutate(
-    .provided_support_cbp = .person_mean -
-      mean(.person_mean[!duplicated(person_id)], na.rm = TRUE)
+    .perceived_resources_cbp = .person_mean -
+      mean(
+        .person_mean[
+          !duplicated(paste(couple_id, person_id))
+        ],
+        na.rm = TRUE
+      )
   )
 ```
 
@@ -2233,19 +2362,19 @@ support_components <- raw_ild_dyad_data |>
 ```{r}
 #| eval: false
 
-partner_components <- support_components |>
+partner_components <- resource_components |>
   dplyr::transmute(
     couple_id,
     diaryday,
     gender = dplyr::recode(gender, female = "male", male = "female"),
-    .provided_support_cwp_partner = .provided_support_cwp,
-    .provided_support_cbp_partner = .provided_support_cbp
+    .perceived_resources_cwp_partner = .perceived_resources_cwp,
+    .perceived_resources_cbp_partner = .perceived_resources_cbp
   )
 
-ild_manual_data <- support_components |>
+ild_manual_data <- resource_components |>
   dplyr::rename(
-    .provided_support_cwp_actor = .provided_support_cwp,
-    .provided_support_cbp_actor = .provided_support_cbp
+    .perceived_resources_cwp_actor = .perceived_resources_cwp,
+    .perceived_resources_cbp_actor = .perceived_resources_cbp
   ) |>
   dplyr::left_join(
     partner_components,
