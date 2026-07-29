@@ -2195,9 +2195,8 @@ dyadMLM::compare_nested_models(
 
 ## Report the retained distinguishable model
 
-We exponentiate estimates (due to log-transformed outcome): Incidence rate ratios (IRR)
-
-<!-- TODO: fix to the correct term, it is not IRR -->
+We exponentiate estimates from the log-transformed outcome to obtain geometric
+mean ratios (GMRs).
 
 ```{r}
 #| label: ild-retained-fixed-effects-table
@@ -2209,7 +2208,6 @@ ild_apim_focal_effects <- parameters::model_parameters(
   ild_apim_retained_model,
   effects = "fixed"
 ) |>
-  as.data.frame() |>
   dplyr::filter(grepl("\\.pbc_(cwp|cbp)_(actor|partner)", Parameter)) |>
   dplyr::mutate(
     Level = dplyr::if_else(
@@ -2226,13 +2224,11 @@ ild_apim_focal_effects <- parameters::model_parameters(
       grepl("\\.is_female", Parameter),
       "Women",
       "Men"
-    ),
-    estimate_percent = 100 * (exp(Coefficient) - 1),
-    ci_low_percent = 100 * (exp(CI_low) - 1),
-    ci_high_percent = 100 * (exp(CI_high) - 1)
+    )
   )
 
 ild_apim_focal_effects |>
+  as.data.frame() |>
   dplyr::mutate(
     Level = factor(
       Level,
@@ -2252,11 +2248,11 @@ ild_apim_focal_effects |>
     Level,
     Effect,
     `Outcome role`,
-    `Estimated MVPA difference` = sprintf("%+.1f%%", estimate_percent),
+    GMR = sprintf("%.3f", exp(Coefficient)),
     `95% CI` = sprintf(
-      "%+.1f%% to %+.1f%%",
-      ci_low_percent,
-      ci_high_percent
+      "%.3f to %.3f",
+      exp(CI_low),
+      exp(CI_high)
     ),
     p = dplyr::if_else(p < .001, "< .001", sprintf("%.3f", p))
   ) |>
@@ -2277,57 +2273,38 @@ ild_apim_focal_effects |>
 #| out-width: 82%
 #| fig-align: center
 
-ild_apim_focal_effects |>
+ild_apim_focal_effects_plot <- ild_apim_focal_effects |>
   dplyr::mutate(
-    Level = factor(
+    Effects = factor(
       Level,
       levels = c("Within person", "Between persons")
     ),
-    term = factor(
-      paste(`Outcome role`, Effect, sep = " — "),
-      levels = rev(c(
-        "Women — Actor",
-        "Women — Partner",
-        "Men — Actor",
-        "Men — Partner"
-      ))
+    `Outcome role` = factor(
+      `Outcome role`,
+      levels = c("Women", "Men")
+    ),
+    Effect = factor(
+      Effect,
+      levels = c("Actor", "Partner")
     )
   ) |>
-  ggplot(
-    aes(
-      x = estimate_percent,
-      y = term,
-      color = Effect
-    )
-  ) +
-  geom_vline(xintercept = 0, color = "grey65", linetype = 2) +
-  geom_errorbar(
-    aes(
-      xmin = ci_low_percent,
-      xmax = ci_high_percent
-    ),
-    orientation = "y",
-    width = 0.12,
-    linewidth = 0.8
-  ) +
-  geom_point(size = 3) +
-  facet_wrap(~ Level, nrow = 1, scales = "free_x") +
-  scale_color_manual(
-    values = c("Actor" = "#1769AA", "Partner" = "#7B3FA1")
-  ) +
-  scale_x_continuous(
-    labels = function(x) paste0(x, "%")
-  ) +
+  dplyr::arrange(Effects, `Outcome role`, Effect) |>
+  dplyr::mutate(
+    Parameter = paste(`Outcome role`, Effect, sep = " — ")
+  )
+
+attr(ild_apim_focal_effects_plot, "pretty_names") <- NULL
+
+plot(
+  ild_apim_focal_effects_plot,
+  show_direction = FALSE,
+  n_columns = 2
+) +
   labs(
-    x = "Estimated difference in current-day MVPA (%)",
-    y = NULL,
-    color = NULL
-  ) +
-  see::theme_modern(base_size = 16) +
-  theme(legend.position = "top")
+    x = "Coefficient on the log(MVPA) scale",
+    y = NULL
+  )
 ```
-<!-- TODO: doesn't the package we use for plotting results in the cross-sectional example
-already provide functions to plot like this with much less code?? -->
 
 :::{.text-smaller}
 In this sample, one-point above-usual own and partner PBC on the previous day
