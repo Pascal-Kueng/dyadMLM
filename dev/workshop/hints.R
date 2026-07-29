@@ -108,16 +108,19 @@
   ),
   robustness_mahalanobis = list(
     columns = paste(
-      "For example, suppose retained_model uses:",
-      "sqrt_total_mvpa ~ .efficacy_gmc_actor + .efficacy_gmc_partner + ...",
+      "Example only: suppose retained_model uses the stored outcome",
+      "sqrt_total_mvpa and the generated efficacy predictors.",
       "",
-      "Then use these quoted column names:",
-      "- actor plots: x = \".efficacy_gmc_actor\", y = \"sqrt_total_mvpa\"",
-      "- partner plots: x = \".efficacy_gmc_partner\", y = \"sqrt_total_mvpa\"",
+      "women_actor_plot <- plot_mahalanobis(",
+      "  data = dplyr::filter(my_data, gender == \"female\"),",
+      "  x = \".efficacy_gmc_actor\",",
+      "  y = \"sqrt_total_mvpa\",",
+      "  title = \"Women\"",
+      ")",
       "",
-      "Replace the example names with the columns from your own model. Do not",
-      "switch back to raw efficacy or total_mvpa if your model used the",
-      "centered predictors and stored transformed outcome.",
+      "For the partner plot, change x to \".efficacy_gmc_partner\". Apply the",
+      "same change to the men's plot, and replace all example names with the",
+      "columns from your own model.",
       sep = "\n"
     )
   ),
