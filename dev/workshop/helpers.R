@@ -75,7 +75,125 @@ plot_mahalanobis <- function(data, x, y, dyad = "couple_id",
     )
 }
 
-simulate_ild_dharma <- function(model, dyad, member, time,
+make_ild_ar1_start <- function(
+    no_ar_model,
+    ar_sd = c(female = 0.40, male = 0.40),
+    ar_rho = c(female = 0.30, male = 0.30)) {
+  if (!inherits(no_ar_model, "glmmTMB")) {
+    stop("no_ar_model must be a fitted glmmTMB model.", call. = FALSE)
+  }
+  if (no_ar_model$fit$convergence != 0L ||
+      !isTRUE(no_ar_model$sdr$pdHess)) {
+    stop(
+      "The no-AR model must converge with a positive-definite Hessian.",
+      call. = FALSE
+    )
+  }
+  if (length(ar_sd) != 2L || any(!is.finite(ar_sd)) || any(ar_sd <= 0)) {
+    stop("ar_sd must contain two positive finite values.", call. = FALSE)
+  }
+  if (length(ar_rho) != 2L ||
+      any(!is.finite(ar_rho)) ||
+      any(abs(ar_rho) >= 1)) {
+    stop("ar_rho must contain two finite values between -1 and 1.", call. = FALSE)
+  }
+
+  no_ar_theta <- glmmTMB::getME(no_ar_model, "theta")
+  covariance_blocks <- glmmTMB::VarCorr(no_ar_model)$cond
+  two_role_blocks <- vapply(
+    covariance_blocks,
+    nrow,
+    integer(1)
+  ) == 2L
+  if (length(no_ar_theta) != 6L ||
+      length(covariance_blocks) != 2L ||
+      !all(two_role_blocks)) {
+    stop(
+      "Expected stable and dyad-day two-role covariance blocks only.",
+      call. = FALSE
+    )
+  }
+
+  list(
+    beta = unname(glmmTMB::fixef(no_ar_model)$cond),
+    theta = unname(c(
+      no_ar_theta[1:3],
+      log(ar_sd[[1L]]),
+      glmmTMB::put_cor(ar_rho[[1L]], input_val = "vec"),
+      log(ar_sd[[2L]]),
+      glmmTMB::put_cor(ar_rho[[2L]], input_val = "vec"),
+      no_ar_theta[4:6]
+    ))
+  )
+}
+
+make_pooled_apim_effects_start <- function(role_specific_model) {
+  if (!inherits(role_specific_model, "glmmTMB")) {
+    stop("role_specific_model must be a fitted glmmTMB model.", call. = FALSE)
+  }
+  if (role_specific_model$fit$convergence != 0L ||
+      !isTRUE(role_specific_model$sdr$pdHess)) {
+    stop(
+      "The role-specific model must converge with a positive-definite Hessian.",
+      call. = FALSE
+    )
+  }
+
+  role_specific_beta <- glmmTMB::fixef(role_specific_model)$cond
+  intercept_names <- c(
+    ".is_female",
+    ".is_male"
+  )
+  time_names <- c(
+    ".is_female:diaryday_c",
+    ".is_male:diaryday_c"
+  )
+  effect_pairs <- list(
+    c(
+      ".is_female:.provided_support_cwp_actor",
+      ".is_male:.provided_support_cwp_actor"
+    ),
+    c(
+      ".is_female:.provided_support_cwp_partner",
+      ".is_male:.provided_support_cwp_partner"
+    ),
+    c(
+      ".is_female:.provided_support_cbp_actor",
+      ".is_male:.provided_support_cbp_actor"
+    ),
+    c(
+      ".is_female:.provided_support_cbp_partner",
+      ".is_male:.provided_support_cbp_partner"
+    )
+  )
+  required_names <- c(intercept_names, time_names, unlist(effect_pairs))
+  missing_names <- setdiff(required_names, names(role_specific_beta))
+  if (length(missing_names) > 0L) {
+    stop(
+      "Missing fixed effects: ",
+      paste(missing_names, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  pooled_effects <- numeric(length(effect_pairs))
+  for (effect_index in seq_along(effect_pairs)) {
+    pooled_effects[[effect_index]] <- mean(
+      role_specific_beta[effect_pairs[[effect_index]]]
+    )
+  }
+
+  list(
+    beta = unname(c(
+      role_specific_beta[intercept_names],
+      pooled_effects,
+      role_specific_beta[time_names]
+    )),
+    theta = unname(glmmTMB::getME(role_specific_model, "theta"))
+  )
+}
+
+simulate_ild_dharma <- function(model, dyad, member, time, role = NULL,
                                 n = 1000, seed = 123) {
   model_family <- stats::family(model)
   if (model_family$family != "gaussian" ||
@@ -101,8 +219,12 @@ simulate_ild_dharma <- function(model, dyad, member, time,
   dyad_id <- align_rows(dyad)
   member_id <- align_rows(member)
   time_id <- align_rows(time)
+  role_id <- if (is.null(role)) NULL else align_rows(role)
   if (anyNA(dyad_id) || anyNA(member_id) || anyNA(time_id)) {
     stop("Dyad, member, and time identifiers must be complete.", call. = FALSE)
+  }
+  if (!is.null(role_id) && anyNA(role_id)) {
+    stop("Role identifiers must be complete.", call. = FALSE)
   }
   if (!is.numeric(time_id)) {
     stop("Time must be numeric.", call. = FALSE)
@@ -165,13 +287,14 @@ simulate_ild_dharma <- function(model, dyad, member, time,
   )
   attr(dharma_residuals, "ild_index") <- list(
     person = interaction(dyad_id, member_id, drop = TRUE),
-    time = time_id
+    time = time_id,
+    role = role_id
   )
 
   dharma_residuals
 }
 
-test_ild_lag1 <- function(residuals, plot = FALSE) {
+test_ild_lag1 <- function(residuals, plot = FALSE, by_role = FALSE) {
   index <- attr(residuals, "ild_index")
   if (is.null(index)) {
     stop("Use residuals created by simulate_ild_dharma().", call. = FALSE)
@@ -179,6 +302,13 @@ test_ild_lag1 <- function(residuals, plot = FALSE) {
 
   person <- index$person
   time <- index$time
+  role <- index$role
+  if (by_role && is.null(role)) {
+    stop(
+      "Supply role to simulate_ild_dharma() before requesting role-specific tests.",
+      call. = FALSE
+    )
+  }
   ordering <- order(person, time)
   previous <- ordering[-length(ordering)]
   current <- ordering[-1]
@@ -187,22 +317,54 @@ test_ild_lag1 <- function(residuals, plot = FALSE) {
   previous <- previous[consecutive]
   current <- current[consecutive]
 
-  lag1_correlation <- function(response) {
-    model_residual <- response - residuals$fittedPredictedResponse
-    model_residual <- model_residual -
-      ave(model_residual, person, FUN = mean)
-    stats::cor(model_residual[previous], model_residual[current])
+  test_pairs <- function(previous_rows, current_rows, label) {
+    if (length(current_rows) < 3L) {
+      stop("At least three consecutive-day pairs are required.", call. = FALSE)
+    }
+
+    lag1_correlation <- function(response) {
+      model_residual <- response - residuals$fittedPredictedResponse
+      model_residual <- model_residual -
+        ave(model_residual, person, FUN = mean)
+      stats::cor(
+        model_residual[previous_rows],
+        model_residual[current_rows]
+      )
+    }
+
+    test <- DHARMa::testGeneric(
+      residuals,
+      summary = lag1_correlation,
+      alternative = "two.sided",
+      plot = plot,
+      methodName = paste0(
+        "Consecutive-day lag-1 residual-dependence check",
+        label
+      )
+    )
+    test$statistic <- c(
+      `lag-1 correlation` = lag1_correlation(residuals$observedResponse)
+    )
+    test
   }
 
-  test <- DHARMa::testGeneric(
-    residuals,
-    summary = lag1_correlation,
-    alternative = "two.sided",
-    plot = plot,
-    methodName = "Consecutive-day lag-1 residual-dependence check"
-  )
-  test$statistic <- c(
-    `lag-1 correlation` = lag1_correlation(residuals$observedResponse)
-  )
-  test
+  if (!by_role) {
+    return(test_pairs(previous, current, ""))
+  }
+
+  role_values <- unique(as.character(role[current]))
+  role_tests <- vector("list", length(role_values))
+  names(role_tests) <- role_values
+
+  for (role_index in seq_along(role_values)) {
+    role_value <- role_values[[role_index]]
+    role_pairs <- as.character(role[current]) == role_value
+    role_tests[[role_index]] <- test_pairs(
+      previous[role_pairs],
+      current[role_pairs],
+      paste0(" for ", role_value)
+    )
+  }
+
+  role_tests
 }

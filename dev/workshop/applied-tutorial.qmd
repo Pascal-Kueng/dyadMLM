@@ -1801,9 +1801,6 @@ Exponentiated coefficients describe multiplicative differences in MVPA.
 
 <!-- ca. 1 Minute -->
 
-# Distinguishable ILD APIM
-Distinguishing by gender
-
 ## Workflow
 
 1. **Define dyads, distinguishability, and research questions**
@@ -1892,6 +1889,14 @@ print(ild_apim_data)
 5. **Verify model adequacy, distinguishability, and robustness**
 6. **Visualize, interpret, and report results**
 
+## Report measures
+
+Among other things you may check and report: 
+
+- Missingness and general summary statistics
+- ICCs
+- Within- and between- person correlations (e.g., with `wbCorr`)
+- Visualize outcome trajectories over time 
 
 ## Plot paired raw MVPA trajectories
 
@@ -1900,19 +1905,19 @@ print(ild_apim_data)
 #| output-location: slide
 #| fig-format: svg
 #| fig-width: 10
-#| fig-height: 4.7
-#| out-width: 90%
+#| fig-height: 5.2
+#| out-width: 100%
 #| fig-align: center
 
 raw_ild_dyad_data |>
-  dplyr::filter(couple_id <= 6) |>
+  dplyr::filter(couple_id %in% c(2, 7, 17, 26)) |>
   ggplot(aes(diaryday, device_based_mvpa, color = gender,
              group = person_id)) +
   geom_line(linewidth = 0.65, na.rm = TRUE) +
   geom_point(size = 1.1, na.rm = TRUE) +
-  facet_wrap(~ couple_id, ncol = 3) +
-  scale_color_manual(values = c(female = "#1769AA", male = "#7B3FA1")) +
-  scale_y_continuous(breaks = seq(0, 500, by = 200)) +
+  facet_wrap(~ couple_id, ncol = 2) +
+  scale_color_manual(values = c(female = "#004D40", male = "#00A6B2")) +
+  scale_y_continuous(breaks = seq(0, 300, by = 100)) +
   labs(x = "Diary day", y = "MVPA (minutes)", color = NULL) +
   see::theme_modern(base_size = 16) +
   theme(legend.position = "top")
@@ -2007,7 +2012,7 @@ $$
 ## Fitting the distinguishable ILD APIM with glmmTMB
 
 ```{r}
-#| code-line-numbers: "1-38|4-5|7-8|10-17|19-26|28-29|31-36|38|1-38"
+#| code-line-numbers: "1-38|4-5|7-8|10-17|19-26|28-29|31-36|38"
 #| output: false
 
 ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
@@ -2058,17 +2063,16 @@ summary(ild_apim_distinguishable_model)
 5. [**Verify model adequacy, distinguishability, and robustness**]{.text-highlight}
 6. **Visualize, interpret, and report results**
 
-## Consecutive-day dependence remains {.smaller}
+## Testing for residual autocorrelation
 
 ```{r}
 #| label: simulate-dharma-ild-no-ar
 #| cache: true
 #| cache.extra: !expr digest::digest(list(stats::logLik(ild_apim_distinguishable_model), stats::model.frame(ild_apim_distinguishable_model), body(simulate_ild_dharma)))
 #| fig-format: svg
-#| fig-width: 8
-#| fig-height: 3.3
-#| out-width: 70%
 #| fig-align: center
+#| output-location: slide
+
 
 ild_apim_no_ar_dharma <- simulate_ild_dharma(
   model = ild_apim_distinguishable_model,
@@ -2079,9 +2083,15 @@ ild_apim_no_ar_dharma <- simulate_ild_dharma(
   seed = 123
 )
 
+ild_lag1_label_parameters <- graphics::par(col.lab = "transparent")
 ild_apim_no_ar_lag1_test <- test_ild_lag1(
   ild_apim_no_ar_dharma,
   plot = TRUE
+)
+graphics::par(ild_lag1_label_parameters)
+graphics::title(
+  xlab = "Simulated values; red = observed; p < .001",
+  ylab = "Frequency"
 )
 ```
 
@@ -2273,7 +2283,7 @@ dyadMLM::compare_nested_models(
 ## Report the retained distinguishable model
 
 We exponentiate estimates from the log-transformed outcome to obtain geometric
-mean ratios (GMRs; representing multiplicative changes).
+mean ratios (GMRs; representing multiplicative differences).
 
 ```{r}
 #| label: ild-retained-fixed-effects-table
@@ -2384,11 +2394,11 @@ plot(
 ```
 
 :::{.text-smaller}
-**Within-person:** A one-point higher than usual perceived behavioral control in 
-men was associated with 3.5% more MVPA in men and 2.5% more MVPA in woman on the 
-following day. 
+**Within person:** Men’s MVPA was 3.5% higher when their own previous-day PBC was
+one point above usual, and 2.5% higher when their partner’s was.
 
-**Between-person:** Associations remain unclear (non-significant).
+**Between persons:** There was no clear evidence of actor or partner
+associations.
 :::
 
 :::{.notes}

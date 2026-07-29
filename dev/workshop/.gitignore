@@ -13,3 +13,4 @@
 .~lock.*#
 !/dyadic-data.rds
 !/dyadic-person-means.rds
+!/dyadic-ild-exercise.rds

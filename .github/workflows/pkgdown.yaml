@@ -77,6 +77,7 @@ jobs:
             dev/workshop/03_exercises_cross_sectional.Rmd \
             dev/workshop/04_exercises_ild.Rmd \
             dev/workshop/dyadic-data.rds \
+            dev/workshop/dyadic-ild-exercise.rds \
             dev/workshop/dyadic-person-means.rds \
             dev/workshop/helpers.R \
             dev/workshop/hints.R

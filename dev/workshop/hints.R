@@ -176,6 +176,33 @@
       "Do not compare a raw-outcome model with a transformed-outcome model.",
       "compare_nested_models() will reject models fitted on different outcome",
       "columns or values.",
+      "",
+      "The helper checks compatibility and estimation quality, but it cannot",
+      "prove mathematical nesting. The formulas must differ only by the",
+      "constraints you intend to test.",
+      sep = "\n"
+    )
+  ),
+  ild_preparation = list(
+    solution = paste(
+      "my_ild_data <- dyadMLM::prepare_dyad_data(",
+      "  data = raw_ild_data,",
+      "  dyad = coupleID,",
+      "  member = personID,",
+      "  role = gender,",
+      "  time = diaryday,",
+      "  predictors = provided_support,",
+      "  model_types = \"apim\",",
+      "  temporal_decomposition = \"2l\"",
+      ")",
+      sep = "\n"
+    ),
+    time_variables = paste(
+      "my_ild_data <- my_ild_data |>",
+      "  dplyr::mutate(",
+      "    diaryday_c = (diaryday - 6.5) / 13,",
+      "    diaryday_f = factor(diaryday, levels = 0:13)",
+      "  )",
       sep = "\n"
     )
   ),
@@ -298,26 +325,12 @@
   ),
   ild_trajectories = list(
     structure = paste(
-      "Select about four couple IDs, reshape provided_support and closeness",
-      "into one measure column, and facet by measure and couple.",
-      "Map gender to color and group lines by personID within coupleID.",
+      "The measure and score columns now identify what is measured and its value.",
+      "Each line needs one group per person within couple. Put measures in facet",
+      "rows and couples in facet columns.",
       sep = "\n"
     ),
     solution = paste(
-      "trajectory_dyads <- sort(unique(my_ild_data$coupleID))[1:4]",
-      "",
-      "trajectory_data <- my_ild_data |>",
-      "  dplyr::filter(coupleID %in% trajectory_dyads) |>",
-      "  dplyr::select(",
-      "    coupleID, personID, diaryday, gender,",
-      "    provided_support, closeness",
-      "  ) |>",
-      "  tidyr::pivot_longer(",
-      "    cols = c(provided_support, closeness),",
-      "    names_to = \"measure\",",
-      "    values_to = \"score\"",
-      "  )",
-      "",
       "ggplot2::ggplot(",
       "  trajectory_data,",
       "  ggplot2::aes(",
@@ -368,6 +381,69 @@
       sep = "\n"
     )
   ),
+  ild_models = list(
+    distinguishable_no_ar = paste(
+      "distinguishable_no_ar_model <- glmmTMB::glmmTMB(",
+      "  closeness ~",
+      "    0 + .is_female + .is_male +",
+      "    .is_female:diaryday_c +",
+      "    .is_male:diaryday_c +",
+      "    .is_female:.provided_support_cwp_actor +",
+      "    .is_male:.provided_support_cwp_actor +",
+      "    .is_female:.provided_support_cwp_partner +",
+      "    .is_male:.provided_support_cwp_partner +",
+      "    .is_female:.provided_support_cbp_actor +",
+      "    .is_male:.provided_support_cbp_actor +",
+      "    .is_female:.provided_support_cbp_partner +",
+      "    .is_male:.provided_support_cbp_partner +",
+      "    (0 + .is_female + .is_male | coupleID) +",
+      "    (0 + .is_female + .is_male | coupleID:diaryday),",
+      "  dispformula = ~ 0,",
+      "  family = gaussian(),",
+      "  data = my_ild_data,",
+      "  control = ild_control",
+      ")",
+      sep = "\n"
+    ),
+    distinguishable_ar1 = paste(
+      "ild_ar1_start <- make_ild_ar1_start(distinguishable_no_ar_model)",
+      "",
+      "distinguishable_ar1_model <- update(",
+      "  distinguishable_no_ar_model,",
+      "  formula = . ~ . -",
+      "    (0 + .is_female + .is_male | coupleID:diaryday) +",
+      "    ar1(0 + .is_female:diaryday_f | coupleID) +",
+      "    ar1(0 + .is_male:diaryday_f | coupleID) +",
+      "    (0 + .is_female + .is_male | coupleID:diaryday),",
+      "  start = ild_ar1_start",
+      ")",
+      sep = "\n"
+    ),
+    pooled_apim_effects = paste(
+      "pooled_apim_effects_start <- make_pooled_apim_effects_start(",
+      "  distinguishable_model",
+      ")",
+      "",
+      "pooled_apim_effects_model <- update(",
+      "  distinguishable_model,",
+      "  formula = . ~ . -",
+      "    .is_female:.provided_support_cwp_actor -",
+      "    .is_male:.provided_support_cwp_actor -",
+      "    .is_female:.provided_support_cwp_partner -",
+      "    .is_male:.provided_support_cwp_partner -",
+      "    .is_female:.provided_support_cbp_actor -",
+      "    .is_male:.provided_support_cbp_actor -",
+      "    .is_female:.provided_support_cbp_partner -",
+      "    .is_male:.provided_support_cbp_partner +",
+      "    .provided_support_cwp_actor +",
+      "    .provided_support_cwp_partner +",
+      "    .provided_support_cbp_actor +",
+      "    .provided_support_cbp_partner,",
+      "  start = pooled_apim_effects_start",
+      ")",
+      sep = "\n"
+    )
+  ),
   ild_reporting = list(
     solution = paste(
       "ild_fixed_effects <- parameters::model_parameters(",
@@ -385,9 +461,6 @@
       "ild_fixed_effects",
       "ild_random_effects",
       "glmmTMB::VarCorr(retained_model)",
-      "",
-      "# Run this only if retained_model is exchangeable:",
-      "# dyadMLM::recover_exchangeable_covariance(retained_model)",
       sep = "\n"
     ),
     plot = paste(
@@ -402,10 +475,10 @@
       "",
       "\"We analyzed [number] female-male dyads measured on up to [number]",
       "days. [No AR(1) / role-specific AR(1)] was retained because [diagnostic",
-      "reason]. [Distinguishable / exchangeable] effects were retained because",
-      "[comparison and substantive reason]. Within-person actor and partner",
-      "associations were [estimates and 95% CIs]; between-person actor and",
-      "partner associations were [estimates and 95% CIs]. Stable dyad,",
+      "reason]. [Role-specific / pooled] APIM associations were retained because",
+      "[four-df comparison and substantive reason]. Within-person actor and",
+      "partner associations were [estimates and 95% CIs]; between-person actor",
+      "and partner associations were [estimates and 95% CIs]. Stable dyad,",
       "same-occasion partner, and AR(1) covariance estimates were [summary].",
       "Residual and robustness checks [brief conclusion].\"",
       sep = "\n"
@@ -421,30 +494,22 @@
       "The levels of diaryday_f must follow the scheduled day order. Keep",
       "the separate coupleID:diaryday covariance block in the model.",
       sep = "\n"
-    ),
-    exchangeable_series = paste(
-      "Pooling AR(1) parameters does not combine both members into one",
-      "series. Use:",
-      "",
-      "ar1(0 + diaryday_f | coupleID:personID)",
-      "",
-      "This retains a separate series for each member.",
-      sep = "\n"
     )
   ),
   ild_optimizer = list(
     bfgs = paste(
-      "If an otherwise plausible model reports false convergence, refit with:",
+      "The exercise uses this tested control for every candidate model:",
       "",
       "ild_control <- glmmTMB::glmmTMBControl(",
       "  profile = TRUE,",
       "  optimizer = stats::optim,",
-      "  optArgs = list(method = \"BFGS\")",
+      "  optArgs = list(method = \"BFGS\"),",
+      "  optCtrl = list(maxit = 2000, reltol = 1e-10)",
       ")",
       "",
-      "Then add control = ild_control to glmmTMB() or update(). Recheck",
-      "convergence and the Hessian; an optimizer change does not rescue a",
-      "statistically inadequate specification.",
+      "Add control = ild_control to each direct glmmTMB() call. update() then",
+      "inherits it. Still check convergence, the Hessian, and boundaries; the",
+      "optimizer does not rescue a statistically inadequate specification.",
       sep = "\n"
     )
   )
