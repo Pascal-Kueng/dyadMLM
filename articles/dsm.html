@@ -904,9 +904,6 @@ difference.</p>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_dsm_data</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
-<span><span class="co">#&gt; help('diagnose')</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_ILD</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
@@ -936,30 +933,30 @@ difference.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                                            Estimate Std. Error</span></span>
-<span><span class="co">#&gt; (Intercept)                                                5.139696   0.075933</span></span>
+<span><span class="co">#&gt; (Intercept)                                                5.139695   0.075933</span></span>
 <span><span class="co">#&gt; diaryday                                                  -0.006523   0.004421</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_dyad_mean                            0.473411   0.032891</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                     0.017511   0.020874</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_dyad_mean                            1.474831   0.096887</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                     0.106980   0.079591</span></span>
-<span><span class="co">#&gt; .dsm_role_contrast                                         0.947571   0.113748</span></span>
-<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                0.012130   0.007388</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.176606   0.054969</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.208786   0.034886</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.682311   0.142140</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.903119   0.116766</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean                            0.473415   0.032891</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                     0.017513   0.020874</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean                            1.474829   0.096888</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                     0.106984   0.079592</span></span>
+<span><span class="co">#&gt; .dsm_role_contrast                                         0.947550   0.113747</span></span>
+<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                0.012131   0.007388</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_dyad_mean:.dsm_role_contrast         0.176599   0.054969</span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff:.dsm_role_contrast  0.208779   0.034886</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast         0.682294   0.142140</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff:.dsm_role_contrast  0.903122   0.116765</span></span>
 <span><span class="co">#&gt;                                                           z value Pr(&gt;|z|)    </span></span>
 <span><span class="co">#&gt; (Intercept)                                                 67.69  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; diaryday                                                    -1.48  0.14002    </span></span>
+<span><span class="co">#&gt; diaryday                                                    -1.48  0.14003    </span></span>
 <span><span class="co">#&gt; .provided_support_cwp_dyad_mean                             14.39  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                       0.84  0.40154    </span></span>
+<span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff                       0.84  0.40150    </span></span>
 <span><span class="co">#&gt; .provided_support_cbp_dyad_mean                             15.22  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                       1.34  0.17891    </span></span>
+<span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff                       1.34  0.17890    </span></span>
 <span><span class="co">#&gt; .dsm_role_contrast                                           8.33  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                  1.64  0.10060    </span></span>
+<span><span class="co">#&gt; diaryday:.dsm_role_contrast                                  1.64  0.10057    </span></span>
 <span><span class="co">#&gt; .provided_support_cwp_dyad_mean:.dsm_role_contrast           3.21  0.00131 ** </span></span>
 <span><span class="co">#&gt; .provided_support_cwp_within_dyad_diff:.dsm_role_contrast    5.98 2.17e-09 ***</span></span>
-<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast           4.80 1.58e-06 ***</span></span>
+<span><span class="co">#&gt; .provided_support_cbp_dyad_mean:.dsm_role_contrast           4.80 1.59e-06 ***</span></span>
 <span><span class="co">#&gt; .provided_support_cbp_within_dyad_diff:.dsm_role_contrast    7.73 1.04e-14 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>

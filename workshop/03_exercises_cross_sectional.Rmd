@@ -17,7 +17,7 @@ editor: source
 These exercises follow the six-step cross-sectional APIM workflow from the
 applied tutorial.
 
-Download the complete workshop materials from the 
+Download the complete workshop materials at any time from the
 [workshop page](https://pascal-kueng.github.io/dyadMLM/workshop/). 
 Package documentation and vignettes describing model fitting for dyadic MLMs
 are available through the [`dyadMLM` homepage](https://pascal-kueng.github.io/dyadMLM/).
@@ -30,7 +30,7 @@ with runnable R code chunks.
 Run code chunks individually via the small green play button in the
 top-right of each chunk. Try it by running the next chunk. It installs or updates
 the workshop packages and any dependencies that need updating. This may take
-several minutes.
+several minutes; you can read ahead while it runs.
 
 ```{r eval=FALSE}
 source("00_setup.R")
@@ -341,6 +341,10 @@ the distinguishable or exchangeable model for the rest of the exercise:
 
 [Insert decision and reasoning]
 
+You may also test selected equality constraints rather than full exchangeability.
+If you do, compare that model with the distinguishable model and include it in
+your retention decision.
+
 Save the model you retained as `retained_model`:
 
 ```{r eval=FALSE}
@@ -370,43 +374,21 @@ retained_model_dharma_residuals <- DHARMa::simulateResiduals(
 plot(retained_model_dharma_residuals)
 ```
 
-You can also inspect the two arbitrary members separately. Each plot then
-contains one observation per dyad, so no within-dyad residual correlation
-remains within either plot:
-
-```{r eval=FALSE}
-member_a_dharma_residuals <- DHARMa::recalculateResiduals(
-  retained_model_dharma_residuals,
-  sel = ~ .member_contrast_arbitrary == -1,
-  rotation = NULL,
-  seed = 123
-)
-
-member_b_dharma_residuals <- DHARMa::recalculateResiduals(
-  retained_model_dharma_residuals,
-  sel = ~ .member_contrast_arbitrary == 1,
-  rotation = NULL,
-  seed = 123
-)
-
-old_par <- par(mfrow = c(1, 2))
-DHARMa::plotResiduals(member_a_dharma_residuals, main = "Arbitrary member A")
-DHARMa::plotResiduals(member_b_dharma_residuals, main = "Arbitrary member B")
-par(old_par)
-```
-
-The arbitrary labels have no substantive meaning. Do not interpret differences
-between the panels as member or role differences.
-
-Briefly assess whether the exchangeable model remains adequate.
-
-
 ### Robustness
 
-Inspect unusual dyads separately by role.
+Inspect unusual dyads in separate role panels. Use the same panels if you
+retained the exchangeable model: the split simply keeps one observation per
+dyad in each plot and does not imply role-specific model effects. Use the same
+predictor and outcome versions as in your retained model. For example, use the
+generated actor or partner predictor column and, if applicable, the transformed
+outcome column.
 
 Optionally, you can use the supplied helper that is loaded here from a separate
 file `helpers.R`:
+
+```{r}
+# hint("robustness_mahalanobis", "columns")
+```
 
 ```{r eval=FALSE}
 # The function is defined in the separate helper file.
@@ -571,5 +553,5 @@ Optionally, fit a DIM or DSM directly using the package vignettes:
 
 # Intensive longitudinal dyads
 
-If you finish early, or for take-home practice, continue with the
+You may continue with the
 [intensive longitudinal exercises](04_exercises_ild.Rmd).
