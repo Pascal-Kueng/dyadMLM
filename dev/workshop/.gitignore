@@ -2,8 +2,6 @@
 **/*.quarto_ipynb
 /*.html
 !/branding.html
-!/dyad-day.html
-!/applied-tutorial.html
 /*.pdf
 /*_files/
 *.xlsx

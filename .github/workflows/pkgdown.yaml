@@ -4,8 +4,6 @@ on:
   push:
     branches: [main, master]
   pull_request:
-  release:
-    types: [published]
   workflow_dispatch:
 
 name: pkgdown
@@ -24,6 +22,45 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Determine whether workshop materials changed
+        id: workshop-changes
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          rebuild=true
+          # Paths that directly define the published workshop outputs.
+          workshop_paths=(
+            dev/workshop
+            vignettes/diagram-helpers.Rinc
+            vignettes/dim-grid.Rinc
+            vignettes/references.bib
+            pkgdown/templates/content-workshop.html
+            _pkgdown.yml
+            .github/scripts/export-workshop-slides.sh
+            .github/workflows/pkgdown.yaml
+          )
+
+          if [[ "$EVENT_NAME" == "push" && ! "$BEFORE_SHA" =~ ^0+$ ]]; then
+            if git diff --quiet "$BEFORE_SHA" "$HEAD_SHA" -- \
+              "${workshop_paths[@]}"; then
+              rebuild=false
+            fi
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            if git diff --quiet "$BASE_SHA...$PR_HEAD_SHA" -- \
+              "${workshop_paths[@]}"; then
+              rebuild=false
+            fi
+          fi
+
+          echo "rebuild=$rebuild" >> "$GITHUB_OUTPUT"
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -51,6 +88,7 @@ jobs:
       - uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Render all workshop materials
+        if: steps.workshop-changes.outputs.rebuild == 'true'
         run: |
           quarto render dev/workshop/dyad-day.qmd
           quarto render dev/workshop/applied-tutorial.qmd
@@ -60,9 +98,11 @@ jobs:
         shell: Rscript {0}
 
       - name: Export workshop slides to PDF
+        if: steps.workshop-changes.outputs.rebuild == 'true'
         run: bash .github/scripts/export-workshop-slides.sh
 
       - name: Add workshop materials
+        if: steps.workshop-changes.outputs.rebuild == 'true'
         run: |
           mkdir -p docs/workshop/conceptual docs/workshop/applied
           Rscript -e 'pkgdown::render_page(".", "workshop", data = list(pagetitle = "Workshop", description = "Dyadic Data Analysis workshop materials."), path = "workshop/index.html", depth = 1)'
@@ -81,6 +121,38 @@ jobs:
             dev/workshop/dyadic-person-means.rds \
             dev/workshop/helpers.R \
             dev/workshop/hints.R
+
+      - name: Preserve previously published workshop materials
+        if: >-
+          steps.workshop-changes.outputs.rebuild != 'true' &&
+          github.event_name != 'pull_request'
+        run: |
+          git fetch --no-tags --depth=1 origin gh-pages
+          git archive --format=tar \
+            --output=/tmp/dyadmlm-published-workshop.tar \
+            FETCH_HEAD workshop
+          tar -xf /tmp/dyadmlm-published-workshop.tar -C docs
+
+      - name: Validate staged workshop materials
+        if: github.event_name != 'pull_request' || steps.workshop-changes.outputs.rebuild == 'true'
+        shell: bash
+        run: |
+          workshop_files=(
+            docs/workshop/index.html
+            docs/workshop/conceptual/index.html
+            docs/workshop/applied/index.html
+            docs/workshop/01_conceptual_foundations.pdf
+            docs/workshop/02_applied_tutorial.pdf
+            docs/workshop/03_exercises_cross_sectional.Rmd
+            docs/workshop/04_exercises_ild.Rmd
+            docs/workshop/dyadic-data-analysis-workshop.zip
+          )
+
+          for workshop_file in "${workshop_files[@]}"; do
+            test -s "$workshop_file"
+          done
+
+          unzip -tq docs/workshop/dyadic-data-analysis-workshop.zip
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
