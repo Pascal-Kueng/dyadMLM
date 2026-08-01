@@ -7,8 +7,8 @@ longitudinal predictors, this will create actor and partner versions of
 the raw predictor and each recorded predictor component, such as the
 within-person and between-person components created by
 [`center_predictors()`](https://pascal-kueng.github.io/dyadMLM/reference/center_predictors.md).
-Selected lag predictors also create actor and partner columns for
-eligible lagged components.
+Selected lag predictors additionally create lag-1 raw and within-person
+actor and partner columns.
 
 ## Usage
 

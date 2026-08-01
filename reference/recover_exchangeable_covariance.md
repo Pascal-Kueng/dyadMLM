@@ -64,11 +64,11 @@ by coefficient arrays.
 
 ## Details
 
-Automatic matching recognizes the compact `.member_contrast_arbitrary`
-and composition-qualified `.member_contrast_*_arbitrary` names. It first
-looks for the corresponding `.is_*` shared block. It requires the two
-blocks to use the same grouping factor and the same underlying terms.
-Most models fitted with `dyadMLM`-generated columns therefore need only:
+Automatic matching recognizes exact `.dy_member_contrast_*_arbitrary`
+and legacy `.dy_diff_*_arbitrary` coefficient names and first looks for
+the corresponding `.dy_is_*` shared block. It requires the two blocks to
+use the same grouping factor and the same underlying terms. Most models
+fitted with `dyadMLM`-generated columns therefore need only:
 
     result <- dyadMLM::recover_exchangeable_covariance(model)
     print(result)
@@ -97,15 +97,15 @@ difference time slope and the same-occasion partner residual covariance:
       block_pairings = list(
         dyad = list(
           shared_block = "(1 + diaryday | coupleID)",
-          difference_block = "(0 + .member_contrast_arbitrary | coupleID)",
+          difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID)",
           difference_indicator =
-            ".member_contrast_arbitrary"
+            ".dy_member_contrast_assumed_exchangeable_arbitrary"
         ),
         same_occasion = list(
           shared_block = "(1 | coupleID:diaryday)",
-          difference_block = "(0 + .member_contrast_arbitrary | coupleID:diaryday)",
+          difference_block = "(0 + .dy_member_contrast_assumed_exchangeable_arbitrary | coupleID:diaryday)",
           difference_indicator =
-            ".member_contrast_arbitrary"
+            ".dy_member_contrast_assumed_exchangeable_arbitrary"
         )
       )
     )
@@ -217,7 +217,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
   model <- glmmTMB::glmmTMB(
     closeness ~ 1 +
       us(1 | coupleID) +
-      us(0 + .member_contrast_arbitrary | coupleID),
+      us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID),
     dispformula = ~ 0,
     data = example_data
   )
@@ -228,15 +228,15 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
-#> Difference: us(0 + .member_contrast_arbitrary | coupleID)
+#> Difference: us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
 #> 
 #> Variance-covariance:
 #>                        1     2    
-#> 1 member1: (Intercept) 2.283 1.348
-#> 2 member2: (Intercept) 1.348 2.283
+#> 1 member1: (Intercept) 2.217 1.366
+#> 2 member2: (Intercept) 1.366 2.217
 #> 
 #> Standard deviations and correlations:
 #>                        1     2    
-#> 1 member1: (Intercept) 1.511 0.590
-#> 2 member2: (Intercept) 0.590 1.511
+#> 1 member1: (Intercept) 1.489 0.616
+#> 2 member2: (Intercept) 0.616 1.489
 ```

@@ -17,8 +17,7 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/assign_arbitrary_member_roles.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/canonical_composition.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/center_predictors.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyadMLM-package.html</loc></url>
+<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyad_generated_columns.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyads_cross.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/dyads_ild.html</loc></url>
@@ -35,7 +34,6 @@
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/resolve_composition_references.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/resolve_dsm_role_order.html</loc></url>
-<url><loc>https://pascal-kueng.github.io/dyadMLM/reference/summary.dyadMLM_data.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/validate_dim_compatibility.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/validate_dsm_compatibility.html</loc></url>
 <url><loc>https://pascal-kueng.github.io/dyadMLM/reference/validate_dyad_data.html</loc></url>

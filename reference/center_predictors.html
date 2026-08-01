@@ -4,7 +4,6 @@ supports two-level temporal centering for intensive longitudinal predictors:
 a within-person component and a between-person component. The original
 predictor remains available as a raw component for model-specific column
 construction.
-It can also add GMC source components for numeric APIM predictors.
 For two-level temporal centering, the between-person component is centered
 around the grand mean of person means, not the grand mean of all observed rows.
 This gives each person equal weight even when people have different numbers of
@@ -13,7 +12,6 @@ supports two-level temporal centering for intensive longitudinal predictors:
 a within-person component and a between-person component. The original
 predictor remains available as a raw component for model-specific column
 construction.
-It can also add GMC source components for numeric APIM predictors.
 For two-level temporal centering, the between-person component is centered
 around the grand mean of person means, not the grand mean of all observed rows.
 This gives each person equal weight even when people have different numbers of
@@ -25,7 +23,7 @@ observed measurement occasions."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +52,7 @@ observed measurement occasions."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Center predictor variables for dyadic models</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/fix/workshop-model-comparison/R/center_predictors.R" class="external-link"><code>R/center_predictors.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/R/center_predictors.R" class="external-link"><code>R/center_predictors.R</code></a></small>
       <div class="d-none name"><code>center_predictors.Rd</code></div>
     </div>
 
@@ -64,7 +62,6 @@ supports two-level temporal centering for intensive longitudinal predictors:
 a within-person component and a between-person component. The original
 predictor remains available as a raw component for model-specific column
 construction.
-It can also add GMC source components for numeric APIM predictors.
 For two-level temporal centering, the between-person component is centered
 around the grand mean of person means, not the grand mean of all observed rows.
 This gives each person equal weight even when people have different numbers of
@@ -73,7 +70,7 @@ observed measurement occasions.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">center_predictors</span><span class="op">(</span><span class="va">data</span>, add_apim_gmc_predictors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">center_predictors</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -82,10 +79,6 @@ observed measurement occasions.</p>
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>A <code>dyadMLM_data</code> object returned by <code><a href="prepare_dyad_data.html">prepare_dyad_data()</a></code>.</p></dd>
-
-
-<dt id="arg-add-apim-gmc-predictors">add_apim_gmc_predictors<a class="anchor" aria-label="anchor" href="#arg-add-apim-gmc-predictors"></a></dt>
-<dd><p>Whether to add APIM GMC source components.</p></dd>
 
 </dl></div>
     <div class="section level2">

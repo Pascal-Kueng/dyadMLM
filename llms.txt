@@ -34,15 +34,19 @@ DIM workflows, with models fitted primarily using `brms`
 
 ## Installation
 
-You can install the development version with:
+You can install the released version of `dyadMLM` from CRAN with:
 
 ``` r
 
-install.packages("dyadMLM", repos = c(
-  "https://pascal-kueng.r-universe.dev",
-  "https://cloud.r-project.org"
-  )
-)
+install.packages("dyadMLM")
+```
+
+You can install the development version from GitHub with:
+
+``` r
+
+# install.packages("pak")
+pak::pak("Pascal-Kueng/dyadMLM")
 ```
 
 ## Simple Cross-Sectional Example
@@ -75,12 +79,13 @@ print(prepared_data, n = 4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .composition       inferred dyad composition
-#> #   .composition_role  composition-specific member role
-#> #   .is_{role}         composition-role indicator columns
-#> #   .{pred}_actor      APIM actor predictor: actor's original predictor values
-#> #   .{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                      values
+#> #   .dy_composition       inferred dyad composition
+#> #   .dy_composition_role  composition-specific member role
+#> #   .dy_is_{comp-role}    composition-role indicator columns
+#> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
+#> #                         values
+#> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                         values
 #> #
 #> # A tibble: 240 × 12
 #>   personID coupleID gender dyad_composition closeness provided_support
@@ -90,9 +95,9 @@ print(prepared_data, n = 4)
 #> 3        3        2 female female_x_male         6.44             4.09
 #> 4        4        2 male   female_x_male         5.99             6.20
 #> # ℹ 236 more rows
-#> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
-#> #   .is_female <dbl>, .is_male <dbl>, .provided_support_actor <dbl>,
-#> #   .provided_support_partner <dbl>
+#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
+#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
+#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
 ```
 
 The prepared data contains the composition indicators and APIM
@@ -106,19 +111,19 @@ simple_apim <- glmmTMB::glmmTMB(
   closeness ~
 
     # Gender-specific intercepts
-    0 + .is_female + .is_male +
+    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
 
     # Gender-specific actor effects
-    .provided_support_actor:.is_female +
-    .provided_support_actor:.is_male +
+    .dy_provided_support_actor:.dy_is_female_x_male_female +
+    .dy_provided_support_actor:.dy_is_female_x_male_male +
 
     # Gender-specific partner effects
-    .provided_support_partner:.is_female +
-    .provided_support_partner:.is_male +
+    .dy_provided_support_partner:.dy_is_female_x_male_female +
+    .dy_provided_support_partner:.dy_is_female_x_male_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure
-    us(0 + .is_female + .is_male | coupleID),
+    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID),
 
   # With the residual covariance represented by the dyad-level
   # random effects above, the Gaussian residual dispersion is fixed near zero.
@@ -167,9 +172,7 @@ Or go directly to a model-specific vignette:
 
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   : Prepare dyadic data for multilevel models
-- [`summary(`*`<dyadMLM_data>`*`)`](https://pascal-kueng.github.io/dyadMLM/reference/summary.dyadMLM_data.md)
-  : Summarize prepared dyadic data
-- [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md)
+- [`compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.md)
   : Compare nested glmmTMB models fitted to equivalent data
 - [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
   : Recover member-level residual covariance from exchangeable
