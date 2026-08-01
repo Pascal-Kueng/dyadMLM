@@ -256,15 +256,15 @@ GMC columns remain APIM-specific.
   explicit `dsm_role_order`.
 - DIM and DSM cannot be requested in the same preparation call.
 
-## Remaining v0.1.0 Work
+## Maintenance Constraints and Deferred Work after v0.1.0
 
 - Keep the print header descriptions for DIM and DSM column families explicit but
   compact.
-- Treat `dim_predictors` and `dsm_predictors` metadata as stable for v0.1 unless
-  review finds a concrete problem.
-- Keep `dyad_generated_columns()` internal for v0.1. It is the normalized
-  table used by `print.dyadMLM_data()` and documentation-facing summaries, not
-  a public inspection API.
+- Continue treating `dim_predictors` and `dsm_predictors` metadata as stable
+  unless review finds a concrete problem.
+- Keep `dyad_generated_columns()` internal unless a concrete need for a public
+  inspection API emerges. It is the normalized table used by
+  `print.dyadMLM_data()` and documentation-facing summaries.
 - Keep normalized generated-column interpretation focused on
   `temporal_decomposition`, `dyadic_decomposition`, and `column_centering`.
   Source metadata can still record implementation details such as whether a DIM

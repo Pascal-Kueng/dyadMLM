@@ -2,21 +2,23 @@
 
 ## Status
 
-This is the implementation specification for the first public covariance
-back-transformation helper in `dyadMLM`. It records the decisions made for
-v0.0.1 and the intended path to later model engines and more complex covariance
-structures.
+This is the implementation record for the first public covariance
+back-transformation helper in `dyadMLM`. It records the decisions shipped in
+v0.1.0 and the intended path to later model engines and more complex covariance
+structures. The current code, generated documentation, and tests are
+authoritative for exact API behavior.
 
 Public function name:
 
 ```r
-exchangeable_rescov(model)
+recover_exchangeable_covariance(model)
 ```
 
 Extraction, matching, structural-zero alignment, and the numerical
 back-transformation are implemented for `glmmTMB` and single-response
-`brmsfit` models. `exchangeable_rescov()` returns one named member-level
-covariance result per matched shared/difference block pair.
+`brmsfit` models. `recover_exchangeable_covariance()` returns one named
+member-level covariance result per matched shared/difference block pair; its
+returned S3 class remains `exchangeable_rescov`.
 
 ## Purpose
 
@@ -127,7 +129,7 @@ Sigma_member <- T %*% Sigma_score %*% t(T)
 independently of any model engine. The model-facing code is responsible only
 for discovering blocks and extracting `Sigma_score`.
 
-## Public scope for v0.0.1
+## Public scope for v0.1.0
 
 The function supports fitted `glmmTMB` and single-response `brmsfit` models
 containing one or more shared/difference random-effect pairs. The common block
@@ -142,7 +144,7 @@ representation already supports:
 - explicit partial pairs and wholly omitted components, represented by
   structural zeros.
 
-### Deliberate v0.0.1 restrictions
+### Deliberate v0.1.0 restrictions
 
 The first version does not support:
 
@@ -383,13 +385,13 @@ and output while replacing only formula access and covariance extraction.
 
 ## Implementation sequence
 
-The v0.0.1 numerical path is implemented: normalized extraction, automatic and
+The v0.1.0 numerical path is implemented: normalized extraction, automatic and
 supplied matching, mixed compositions and grouping levels, partial and omitted
 components, structural-zero alignment, draw-wise back-transformation,
 `varcov`/`sdcor` construction, deterministic names, and boundary tests. The
-remaining work is release-facing example and vignette polish; posterior summary
-and print methods can be considered later without changing the draw-wise
-result.
+accepted release also includes the public orchestration and print methods.
+Additional uncertainty summaries can be added later without changing the
+draw-wise result.
 
 ## Test specification
 

@@ -1,9 +1,10 @@
 # Directional Dyadic Score Model
 
 **Status:** predictor preparation, validation, metadata, and printing are
-complete for the current v0.1 scope. The vignette contains the cross-sectional
-long-format model and APIM transformations. Its final review, direct model-level
-equivalence tests, and the planned ILD section remain open.
+complete for the v0.1.0 scope. The vignette contains the cross-sectional
+long-format model, APIM transformations, and a brief ILD extension. An
+automated direct score-equation versus long-interaction coefficient and
+covariance equivalence test remains a possible follow-up.
 
 ## Purpose
 
@@ -19,8 +20,8 @@ The relevant source is:
 > Models of interdependent individuals versus dyadic processes in relationship
 > research. *Journal of Social and Personal Relationships, 35*(1), 59-88.
 
-The paper is stored in
-`dev/iida-et-al-2017-models-of-interdependent-individuals-versus-dyadic-processes-in-relationship-research.pdf`.
+A local ignored copy of the paper is stored in
+`dev/References/iida-et-al-2017-models-of-interdependent-individuals-versus-dyadic-processes-in-relationship-research.pdf`.
 
 ## What Iida's DSM estimates
 

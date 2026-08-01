@@ -12,16 +12,16 @@ helpers, and eventually model syntax explicit and reproducible.
 
 - Temporal predictor decomposition and predictor-shape planning:
   [`centering.md`](centering.md)
-- Possible future reintroduction of inspection-only incomplete/unknown dyads:
-  [`keep-behavior-notes.md`](keep-behavior-notes.md)
+- Inspection-only incomplete/unknown dyads remain intentionally unsupported;
+  revisit that boundary only for a concrete user-facing need.
 - Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
   - the note is provisional and must be revised against the methodological
     papers in [`References/`](References/) before implementation
 - Directional DSM derivation and implementation record: [`dsm.md`](dsm.md)
-- Initial covariance back-transformation mathematics and design history:
+- Covariance back-transformation mathematics and design history:
   [`backtransform.md`](backtransform.md)
-  - its original API scope and implementation-status sections are stale; use
-    the current-state section below and the code as authoritative
+  - use the current code, generated documentation, and tests as authoritative
+    for exact API behavior
 - ILD non-independence evidence and tutorial policy:
   [`ild-nonindependence.md`](ild-nonindependence.md)
 - Data-preparation debugging scratch helpers:
@@ -29,10 +29,10 @@ helpers, and eventually model syntax explicit and reproducible.
 
 ## Current State
 
-The package is currently in final preparation for its first CRAN release. The
-core data-preparation API is implemented and covered by tests, the README links
-to the pkgdown site, and GitHub Actions are configured for R CMD check and
-pkgdown publishing.
+Version 0.1.0 has been accepted by CRAN and tagged as `v0.1.0`. Development now
+continues as version 0.1.0.9000. The core data-preparation API is implemented
+and covered by tests, the README links to the pkgdown site, and GitHub Actions
+are configured for R CMD check and pkgdown publishing.
 
 Recently completed cleanup:
 
@@ -70,11 +70,13 @@ Recently completed cleanup:
   products, and fitted-row coding validation when the indicator columns remain
   available
 
-Immediate sequence:
+Immediate post-release sequence:
 
-1. synchronize the 0.1.0 release metadata and reserved Zenodo concept DOI
-2. rerun the complete source-package, vignette, and pkgdown checks
-3. submit to CRAN after final review and explicit approval
+1. create the GitHub Release from the accepted `v0.1.0` tag
+2. upload the exact accepted source archive to the prepared Zenodo draft,
+   verify its metadata and checksum, and publish it
+3. complete the post-release documentation and workshop cleanup, then verify
+   the pkgdown and stable workshop URLs after deployment from `main`
 
 The engine-independent covariance-array back-transformation and final named
 `varcov`/`sdcor` results are implemented for `glmmTMB` point estimates and
@@ -129,15 +131,17 @@ Target vignette structure:
   - a brief ILD extension
   - outcomes remain unchanged in the MLM-focused preparation API
 
-## Version 0.1.0 - First CRAN Release Candidate
+## Version 0.1.0 - Accepted CRAN Release
 
 Goal: ship a small, reliable data-preparation and interpretation workflow with
 enough ILD support to be useful for composition-aware dyadic MLMs before adding
 larger model-building features.
 
-### v0.1.0 Release Gate
+### v0.1.0 Release Record and Follow-up
 
-The first release milestone is complete when all of the following are true:
+Version 0.1.0 was accepted by CRAN and tagged. Completed items below record the
+accepted scope; unchecked items are post-release documentation or maintenance
+follow-up rather than claims about the CRAN release state.
 
 - [x] Core composition-aware validation and APIM, DIM, and DSM column
   construction are implemented and tested.
@@ -159,7 +163,9 @@ The first release milestone is complete when all of the following are true:
   example data or explicitly presented as advanced/diagnostic specifications.
 - [ ] Documentation, README, citation metadata, pkgdown, tests, and multi-platform
   R CMD checks are clean.
-- [ ] Version `0.1.0` is released, tagged, and archived.
+- [x] Version `0.1.0` is released on CRAN and tagged as `v0.1.0`.
+- [ ] Create the GitHub Release and publish the exact accepted source archive
+  through the prepared Zenodo record.
 
 Not required for v0.1.0: model fitting or syntax-generation wrappers, public
 fitted-diagram functions, automated AR(1)/VAR diagnostics, a universal
@@ -365,9 +371,10 @@ Detailed implemented scope and final checks follow.
   - `inst/CITATION` for R users
   - `CITATION.cff` for GitHub and future Zenodo metadata
 
-### Pre-CRAN v0.1.0 Checklist
+### v0.1.0 Implementation Record and Follow-up Checklist
 
-Complete these before calling the feature set CRAN-ready:
+This section preserves the implementation record used for the first release.
+Remaining unchecked or imperative items are follow-up maintenance work.
 
 - Rebuild and inspect generated documentation
   - run `devtools::document()`
@@ -433,7 +440,8 @@ Complete these before calling the feature set CRAN-ready:
   - in `apim.Rmd`, show concise versions of both the manifest raw-lag and
     manifest within-between lag specifications; describe them as different
     parameterizations rather than interchangeable corrections
-  - complete the planned ILD DSM section and final review of `dsm.Rmd`
+  - keep the completed ILD DSM section aligned with the implemented API and
+    complete any remaining review of `dsm.Rmd`
   - keep heavy or convergence-sensitive examples out of `getting-started.Rmd`
     and mark advanced examples `eval = FALSE` where needed
 - Keep the completed DIM vignette stable
@@ -544,14 +552,13 @@ Complete these before calling the feature set CRAN-ready:
   - inspect README, vignette, examples, `inst/CITATION`, and package metadata
     for CRAN-facing clarity
 
-- Release to CRAN once checks, tests, docs, README, and vignette are clean
-  - Keep Zenodo draft `21481721` for 0.1.0 unpublished during CRAN review;
-    its reserved version DOI is `10.5281/zenodo.21481721`
-  - Submit source package to CRAN without requiring a Git tag first
-  - After CRAN acceptance, tag the accepted commit as `v0.1.0`
-  - Create a GitHub release from that tag
-  - Upload the exact accepted source archive to the prepared Zenodo draft
-  - Verify the draft metadata and checksum, then publish it
+- Complete release archiving after CRAN acceptance
+  - [x] Submit the source package to CRAN and obtain acceptance
+  - [x] Tag the accepted commit as `v0.1.0`
+  - [ ] Create a GitHub Release from that tag
+  - [ ] Upload the exact accepted source archive to Zenodo draft `21481721`,
+    whose reserved version DOI is `10.5281/zenodo.21481721`
+  - [ ] Verify the Zenodo metadata and checksum, then publish it
   - Continue to use the concept DOI in package-level citation metadata
 
 ## Near-term maintenance after 0.1.0
