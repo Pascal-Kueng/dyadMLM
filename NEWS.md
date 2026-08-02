@@ -27,6 +27,8 @@
   about skipped non-numeric predictors in mixed selections, and leaves DIM/DSM
   centering unchanged.
 * Renamed `compare_nested_glmmTMB_models()` to `compare_nested_models()`.
+* Naming changes in this development version are intentionally breaking;
+  names from 0.1.0 are not retained.
 * Added package-level help at `?dyadMLM`, with links to the main functions,
   example datasets, and getting-started documentation.
 
@@ -44,8 +46,7 @@
   and print argument `what` to `representation`.
 * Renamed generated exchangeable-member contrasts from
   `.dy_diff_{composition}_arbitrary` to
-  `.dy_member_contrast_{composition}_arbitrary`. Covariance recovery continues
-  to recognize legacy contrast names in previously fitted models.
+  `.dy_member_contrast_{composition}_arbitrary`.
 * Renamed the package from `interdep` to `dyadMLM`; package-generated columns
   now use the `.dy_` prefix instead of `.i_`.
 * Added validation and preparation of cross-sectional and intensive

@@ -8,7 +8,10 @@
 [![R-CMD-check](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/Pascal-Kueng/dyadMLM/graph/badge.svg)](https://app.codecov.io/gh/Pascal-Kueng/dyadMLM)
-[![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
 <!-- badges: end -->
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
