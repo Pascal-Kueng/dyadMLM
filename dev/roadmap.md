@@ -368,7 +368,7 @@ Detailed implemented scope and final checks follow.
 - Keep the focused DIM vignette separate from APIM/ILD APIM examples
 - Keep the DSM data-preparation examples aligned with the implemented API
 - Add citation metadata
-  - `inst/CITATION` for R users
+  - metadata-driven `inst/CITATION` for R users
   - `CITATION.cff` for GitHub and future Zenodo metadata
 
 ### v0.1.0 Implementation Record and Follow-up Checklist
@@ -561,7 +561,8 @@ Remaining unchecked or imperative items are follow-up maintenance work.
   - [x] Verify the Zenodo metadata and checksum, then publish it
   - Continue to use the concept DOI in package-level citation metadata
   - For future releases:
-    1. update the version and release date in `CITATION.cff` before tagging
+    1. update the version and release date in `DESCRIPTION` and `CITATION.cff`
+       before tagging
     2. create the GitHub Release from the tag
     3. create a new version from the latest Zenodo record
     4. upload the exact release archive, verify its metadata and checksum, and
