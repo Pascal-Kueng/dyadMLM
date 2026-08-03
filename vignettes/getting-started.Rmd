@@ -83,6 +83,10 @@ Roughly, the expected structure for `dyadMLM` is:
 | 1 | 2 | 1 | 4.0 | 6.9 |
 | 1 | 2 | 2 | 5.3 | 6.6 |
 
+Measured variables may contain missing values, but `dyad`, `member`, and
+optional `time` must be complete; missing measurement occasions may instead be
+represented by absent rows.
+
 If your raw data are currently in wide format (for time or dyads or both),
 reshape them to this long structure first. See the
 [tidyr pivoting vignette](https://tidyr.tidyverse.org/articles/pivot.html) or
