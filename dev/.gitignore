@@ -1,3 +1,4 @@
 *.pdf
+*.html
+!workshop/branding.html
 References
-

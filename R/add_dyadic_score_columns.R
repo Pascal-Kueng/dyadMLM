@@ -38,6 +38,18 @@ add_dyadic_score_columns <- function(data) {
   dsm_role_order <- meta_data$dsm_role_order
   role <- meta_data$role
 
+  role_contrast_plan <- tibble::tibble(
+    target = dyad_dsm_role_contrast_col,
+    predictor = role,
+    temporal_component = "raw",
+    lag = 0L,
+    model_family = "dsm",
+    column_role = "role_contrast",
+    variable_role = "role",
+    source_column = role
+  )
+  validate_generated_column_plan(data, role_contrast_plan)
+
   data[[dyad_dsm_role_contrast_col]] <- ifelse(
     as.character(data[[role]]) == dsm_role_order[[1]],
     0.5,
@@ -78,7 +90,9 @@ add_dyadic_score_columns <- function(data) {
     temporal_component = decomposition$predictors$component,
     lag = decomposition$predictors$lag,
     model_family = rep("dsm", n_predictors),
-    column_role = rep("dyad_difference", n_predictors)
+    column_role = rep("dyad_difference", n_predictors),
+    variable_role = rep("predictor", n_predictors),
+    source_column = decomposition$predictors$source_column
   )
   validate_generated_column_plan(out, difference_plan)
 
@@ -108,6 +122,15 @@ add_dyadic_score_columns <- function(data) {
 
   attr(out, "dyadMLM")$dsm_predictors <- dsm_predictors
   attr(out, "dyadMLM")$dsm_role_contrast_column <- dyad_dsm_role_contrast_col
+  generated_column_plan <- dplyr::bind_rows(
+    role_contrast_plan,
+    dplyr::filter(
+      decomposition$column_plan,
+      .data$column_role == "dyad_mean"
+    ),
+    difference_plan
+  )
+  out <- record_generated_columns(out, generated_column_plan)
 
   out
 }

@@ -2,21 +2,23 @@
 
 ## Status
 
-This is the implementation specification for the first public covariance
-back-transformation helper in `dyadMLM`. It records the decisions made for
-v0.0.1 and the intended path to later model engines and more complex covariance
-structures.
+This is the implementation record for the first public covariance
+back-transformation helper in `dyadMLM`. It records the decisions shipped in
+v0.1.0 and the intended path to later model engines and more complex covariance
+structures. The current code, generated documentation, and tests are
+authoritative for exact API behavior.
 
 Public function name:
 
 ```r
-exchangeable_rescov(model)
+recover_exchangeable_covariance(model)
 ```
 
 Extraction, matching, structural-zero alignment, and the numerical
 back-transformation are implemented for `glmmTMB` and single-response
-`brmsfit` models. `exchangeable_rescov()` returns one named member-level
-covariance result per matched shared/difference block pair.
+`brmsfit` models. `recover_exchangeable_covariance()` returns one named
+member-level covariance result per matched shared/difference block pair; its
+returned S3 class remains `exchangeable_rescov`.
 
 ## Purpose
 
@@ -24,7 +26,7 @@ Exchangeable DIMs and APIMs represent the two members' residuals through two
 independent random-effect blocks:
 
 - a **shared residual block**, which moves both members in the same direction;
-- a **difference residual block**, identified by a `dyadMLM` `.dy_diff_*`
+- a **difference residual block**, identified by a `dyadMLM` `.member_contrast_*`
   column, which moves them in opposite directions.
 
 The fitted variances of these blocks are useful computationally but are not the
@@ -127,7 +129,7 @@ Sigma_member <- T %*% Sigma_score %*% t(T)
 independently of any model engine. The model-facing code is responsible only
 for discovering blocks and extracting `Sigma_score`.
 
-## Public scope for v0.0.1
+## Public scope for v0.1.0
 
 The function supports fitted `glmmTMB` and single-response `brmsfit` models
 containing one or more shared/difference random-effect pairs. The common block
@@ -142,7 +144,7 @@ representation already supports:
 - explicit partial pairs and wholly omitted components, represented by
   structural zeros.
 
-### Deliberate v0.0.1 restrictions
+### Deliberate v0.1.0 restrictions
 
 The first version does not support:
 
@@ -158,9 +160,9 @@ The first version does not support:
   `unstr(time = member, gr = pair_id)` residual structures that are already on
   the member scale.
 
-Automatic matching requires untouched `dyadMLM` `.dy_diff_*` names and complete,
-unambiguous pairs. Exact supplied pairs support custom indicator names and
-constrained structures.
+Automatic matching requires untouched `dyadMLM` `.member_contrast_*` names and
+complete, unambiguous pairs. Exact supplied pairs support custom indicator
+names and constrained structures.
 
 ## Source of structural information
 
@@ -217,7 +219,7 @@ rather than guessing.
 Automatic matching starts from a canonical column matching
 
 ```text
-.dy_diff_{composition}_arbitrary
+.member_contrast_{composition}_arbitrary
 ```
 
 The `{composition}` substring becomes the composition key. Every coefficient in
@@ -230,7 +232,7 @@ For a composition-specific or mixed-composition model, the corresponding shared
 block contains exactly
 
 ```text
-.dy_is_{composition}
+.is_{composition}
 ```
 
 For a single exchangeable composition, a generic intercept-and-slope block may
@@ -263,16 +265,16 @@ hold:
 Grouping expressions are part of the pair key. Thus the same composition may
 produce separate results for `coupleID` and `coupleID:diaryday`.
 
-Every discovered `.dy_diff_*` block must match exactly one shared block. Stop on
-zero or multiple candidates; never silently drop or guess an ambiguous block.
-If the model contains no supported `.dy_diff_*` block, explain that no
-exchangeable shared/difference residual structure was found.
+Every discovered `.member_contrast_*` block must match exactly one shared
+block. Stop on zero or multiple candidates; never silently drop or guess an
+ambiguous block. If the model contains no supported `.member_contrast_*` block,
+explain that no exchangeable shared/difference residual structure was found.
 
 ### Renaming policy
 
 Users may freely name their original variables, grouping variables, outcomes,
-and predictors. Automatic discovery requires the `dyadMLM`-generated
-`.dy_is_*` and `.dy_diff_*` columns to retain their generated names. Explicit
+and predictors. Automatic discovery requires the `dyadMLM`-generated `.is_*`
+and `.member_contrast_*` columns to retain their generated names. Explicit
 matching also supports user-created indicator names because the user declares
 their meaning:
 
@@ -383,13 +385,13 @@ and output while replacing only formula access and covariance extraction.
 
 ## Implementation sequence
 
-The v0.0.1 numerical path is implemented: normalized extraction, automatic and
+The v0.1.0 numerical path is implemented: normalized extraction, automatic and
 supplied matching, mixed compositions and grouping levels, partial and omitted
 components, structural-zero alignment, draw-wise back-transformation,
 `varcov`/`sdcor` construction, deterministic names, and boundary tests. The
-remaining work is release-facing example and vignette polish; posterior summary
-and print methods can be considered later without changing the draw-wise
-result.
+accepted release also includes the public orchestration and print methods.
+Additional uncertainty summaries can be added later without changing the
+draw-wise result.
 
 ## Test specification
 
@@ -402,14 +404,14 @@ result.
 - A larger difference variance produces negative member correlation.
 - Zero shared or difference variance is handled as a valid boundary case.
 - The matrix is symmetric and positive semidefinite.
-- Reversing the arbitrary sign of `.dy_diff_*` leaves the covariance result
-  unchanged.
+- Reversing the arbitrary sign of `.member_contrast_*` leaves the covariance
+  result unchanged.
 - Forward and inverse transformations round-trip within numerical tolerance.
 
 ### Discovery and extraction tests
 
 - Single-composition model with an intercept shared block.
-- Single-composition model with a `.dy_is_*` shared block.
+- Single-composition model with a `.is_*` shared block.
 - Mixed model with two exchangeable compositions.
 - Mixed model containing both distinguishable and exchangeable blocks.
 - Pooled composition with a generated pool name.
@@ -423,8 +425,8 @@ result.
 
 ### Failure tests
 
-- No `.dy_diff_*` block.
-- Unmatched `.dy_diff_*` block.
+- No `.member_contrast_*` block.
+- Unmatched `.member_contrast_*` block.
 - Multiple possible shared matches.
 - Shared and difference columns with inconsistent row support.
 - Renamed generated columns.

@@ -37,8 +37,8 @@ apim_exchangeable_fitted_alt <-
 
 This vignette focuses on Gaussian cross-sectional and intensive longitudinal
 Actor-Partner Interdependence models for distinguishable and exchangeable
-dyads. The intensive longitudinal examples cover concurrent associations and a
-simple dynamic model of stability and partner influence.
+dyads. The intensive longitudinal examples cover concurrent associations,
+member-specific residual persistence, and a brief lagged-outcome extension.
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the
@@ -51,26 +51,33 @@ A vignette for non-Gaussian generalized models is planned.
 
 # Cross-sectional APIMs
 
+These examples use `add_apim_gmc_predictors = TRUE`, which retains raw APIM
+columns and adds variants centered over all retained non-missing source values.
+Using raw columns instead changes only the intercept reference. Do not include
+both variants in a model with an intercept.
+
 ## The distinguishable APIM
 
 A conceptual example for distinguishable female-male dyads:
 
-```{r distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads. Intercepts $b_\\mathrm{0}$, actor effects $a$, and partner effects $p$ can differ by the role of the outcome member (F and M), and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Female and male outcomes have separate intercepts. Female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. The female and male outcome residuals covary."}
-draw_apim_diagram("distinguishable")
+```{r distinguishable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for distinguishable female-male dyads, with both predictors centered using one pooled grand mean. Intercepts $b_\\mathrm{0}$, actor effects $a$, and partner effects $p$ can differ by the role of the outcome member (F and M), and the two outcome residuals covary within dyads.", fig.alt="Path diagram for a distinguishable cross-sectional APIM. Grand-mean-centered female and male predictors each have an actor path to their own outcome and a partner path to the other member's outcome. Female and male outcomes have separate intercepts, and their residuals covary."}
+draw_apim_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 For univariate MLM software like `glmmTMB`, this model is fitted in long format 
 with one outcome row per member, which can be visualized as:
 
-```{r distinguishable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the distinguishable cross-sectional APIM used for the long-format multilevel model. For the female outcome, the female predictor is the actor predictor and the male predictor is the partner predictor. These roles reverse for the male outcome. Intercepts, actor coefficients, and partner coefficients may differ by outcome role, and the two member residuals may have different variances and covary.", fig.alt="Two-panel path diagram for a distinguishable female-male APIM. The female and male outcomes have separate intercepts. In the female outcome panel, female X is the actor predictor and male X is the partner predictor of female Y, with coefficients a F and p F. In the male outcome panel, male X is the actor predictor and female X is the partner predictor of male Y, with coefficients a M and p M. The female and male outcome residuals covary."}
-draw_apim_member_diagram("distinguishable")
+```{r distinguishable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the distinguishable cross-sectional APIM used for the long-format multilevel model. Both predictors use one pooled grand-mean reference. For the female outcome, the female predictor is the actor predictor and the male predictor is the partner predictor. These roles reverse for the male outcome. Intercepts, actor coefficients, and partner coefficients may differ by outcome role, and the two member residuals may have different variances and covary.", fig.alt="Two-panel path diagram for a distinguishable female-male APIM with grand-mean-centered predictors. In the female outcome panel, female X is the actor predictor and male X is the partner predictor of female Y, with coefficients a F and p F. In the male outcome panel, male X is the actor predictor and female X is the partner predictor of male Y, with coefficients a M and p M. The outcomes have separate intercepts and their residuals covary."}
+draw_apim_member_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 
 ### Residual random-effects structure {#distinguishable-residual-structure}
 
 For a distinguishable female-male dyad, the two members can have different
-residual variances. The within-dyad residual covariance block (shared across dyads) is:
+residual variances. In the notation below, the member role is written first and
+$i$ indexes dyads. The within-dyad residual covariance block (shared across
+dyads) is:
 
 $$
 \operatorname{Cov}
@@ -78,7 +85,7 @@ $$
 \epsilon_{Fi} \\
 \epsilon_{Mi}
 \end{pmatrix}
-= \boldsymbol{\Sigma}_{\epsilon}
+= \Sigma_{\epsilon}
 = \begin{bmatrix}
 \sigma_{\epsilon_F}^{2}
 & \rho_{\epsilon_F\epsilon_M}\sigma_{\epsilon_F}\sigma_{\epsilon_M} \\
@@ -90,18 +97,18 @@ $$
 And the full residual covariance matrix for all dyads (first three shown) is then block-diagonal:
 
 $$
-\boldsymbol{\Sigma}_{\mathrm{model}}
+\Sigma_{\mathrm{model}}
 = \begin{bmatrix}
-\boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \boldsymbol{0} & \cdots \\
-\boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \boldsymbol{0} & \cdots \\
-\boldsymbol{0} & \boldsymbol{0} & \boldsymbol{\Sigma}_{\epsilon} & \cdots \\
+\Sigma_{\epsilon} & 0 & 0 & \cdots \\
+0 & \Sigma_{\epsilon} & 0 & \cdots \\
+0 & 0 & \Sigma_{\epsilon} & \cdots \\
 \vdots & \vdots & \vdots & \ddots
 \end{bmatrix}
 $$
 
 
 This structure is estimated with an unstructured random-effects block such as
-`us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID)`
+`us(0 + .is_female + .is_male | coupleID)`
 and `dispformula = ~ 0`. 
 
 ### Fitting the distinguishable APIM with glmmTMB
@@ -116,18 +123,20 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data(
   role = gender,
   predictors = provided_support,
   model_types = "apim",
+  add_apim_gmc_predictors = TRUE,
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
-  keep_compositions = "female-male"
+  keep_compositions = "female-male",
+  include_arbitrary_member_contrast = TRUE,
+  seed = 123
 )
 
 print(apim_distinguishable_data, n=4)
-
 ```
 
-The generated `.dy_*` columns can be used directly in the model formula. Here is
-a simple example:
+The optional member contrast is used later for the restricted model. It does
+not change the composition's distinguishable metadata or role indicators.
 
 ```{r fit-cross-distinguishable-gaussian, eval = has_glmmTMB}
 apim_distinguishable_model <- glmmTMB::glmmTMB(
@@ -135,23 +144,23 @@ apim_distinguishable_model <- glmmTMB::glmmTMB(
 
     # Gender-specific intercepts
     0 +
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
+    .is_female +
+    .is_male +
 
     # Gender-specific actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_actor +
+    .is_female:.provided_support_gmc_actor +
+    .is_male:.provided_support_gmc_actor +
 
     # Gender-specific partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_partner +
+    .is_female:.provided_support_gmc_partner +
+    .is_male:.provided_support_gmc_partner +
 
     # Dyad-level unstructured random effects represent the two partner
     # residual variances and their covariance when dispformula = ~ 0.
     # This is glmmTMB-specific syntax! `brms` uses different syntax.
     us(0 +
-         .dy_is_female_x_male_female +
-         .dy_is_female_x_male_male
+         .is_female +
+         .is_male
        | coupleID)
 
   , dispformula = ~ 0
@@ -192,13 +201,16 @@ apim_distinguishable_fitted_alt <- sprintf(
 )
 ```
 
-The estimated coefficients map as follows: 
+With the common centering, the two intercepts are the expected female and male
+closeness scores when both partners' provided support equals the pooled sample
+mean. The estimated coefficients map as follows:
 
 ```{r fitted-distinguishable-apim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional distinguishable APIM for the example data. Fixed effects, residual standard deviations, and the residual correlation are extracted from the fitted model.", fig.alt=apim_distinguishable_fitted_alt}
 draw_apim_diagram(
   "distinguishable",
   model = apim_distinguishable_model,
-  labels = c(predictor = "Provided support", outcome = "Closeness")
+  labels = c(predictor = "Provided support", outcome = "Closeness"),
+  predictors_centered = TRUE
 )
 ```
 
@@ -206,8 +218,8 @@ draw_apim_diagram(
 
 Conceptually, the exchangeable APIM constrains several of the effects to be equal: 
 
-```{r exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for exchangeable dyads. The two members share one intercept, one actor effect, and one partner effect. Their outcome residuals have equal variances, yet still covary within dyads.", fig.alt="Path diagram for an exchangeable cross-sectional APIM. Both outcomes have the same intercept. Each member's predictor has the same actor effect on their own outcome and the same partner effect on the other member's outcome. The two outcome residuals have equal variances and covary."}
-draw_apim_diagram("exchangeable")
+```{r exchangeable-apim-diagram, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Conceptual cross-sectional APIM for exchangeable dyads, with both predictors centered using one pooled grand mean. The two members share one intercept, one actor effect, and one partner effect. Their outcome residuals have equal variances, yet still covary within dyads.", fig.alt="Path diagram for an exchangeable cross-sectional APIM with grand-mean-centered predictors. Both outcomes have the same intercept. Each member's predictor has the same actor effect on their own outcome and the same partner effect on the other member's outcome. The two outcome residuals have equal variances and covary."}
+draw_apim_diagram("exchangeable", predictors_centered = TRUE)
 ```
 
 Because the member labels are arbitrary, swapping members 1 and 2 does **not**
@@ -216,8 +228,8 @@ change the model.
 To estimate this model in a univariate MLM framework, we can draw a conceptual
 diagram as such: 
 
-```{r exchangeable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the exchangeable cross-sectional APIM used for the long-format multilevel model. Both members share the same intercept. Each member's own predictor has the shared actor effect, and the other member's predictor has the shared partner effect. The two residual variances are equal and the residuals may covary.", fig.alt="Two-panel path diagram for an exchangeable APIM. Both outcomes have the same intercept. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary."}
-draw_apim_member_diagram("exchangeable")
+```{r exchangeable-apim-member-diagram, echo=FALSE, fig.width=9, fig.height=5.2, out.width="100%", fig.cap="Individual-level representation of the exchangeable cross-sectional APIM used for the long-format multilevel model. Both predictors use one pooled grand-mean reference. The members share the same intercept; each member's own predictor has the shared actor effect, and the other member's predictor has the shared partner effect. The two residual variances are equal and the residuals may covary.", fig.alt="Two-panel path diagram for an exchangeable APIM with grand-mean-centered predictors. Both outcomes have the same intercept. For arbitrary member 1, X 1 is the actor predictor and X 2 is the partner predictor of Y 1. For arbitrary member 2, X 2 is the actor predictor and X 1 is the partner predictor of Y 2. Both panels use the same actor coefficient a and partner coefficient p, and their outcome residuals covary."}
+draw_apim_member_diagram("exchangeable", predictors_centered = TRUE)
 ```
 
 
@@ -232,7 +244,7 @@ slopes, whereas separate structures would omit their correlations.
 The shared/difference representation works for residuals and other random-effect
 terms, including random slopes. Following
 @delrosarioPracticalGuideSpecifying2025, `dyadMLM::prepare_dyad_data()`
-generates an arbitrary member-difference column, named `.dy_member_contrast_*`.
+generates an arbitrary member-difference column, named `.member_contrast_*`.
 This contrast is `+1` for one member and `-1` for the other. The exchangeable
 residual structure is represented by two separate random-effects terms: a
 shared dyad random intercept and a random coefficient for this difference
@@ -244,29 +256,13 @@ function that back-transforms the structure to the often more interpretable
 member-level residual covariance matrix.
 
 
-### Fitting the exchangeable APIM with glmmTMB
+### Fitting the restricted exchangeable APIM with glmmTMB
 
-We use the same dataset as before, but do not distinguish males and females.
-We can test distinguishability later by comparing this model with the prior
-model.
-
-We use `set_exchangeable_compositions` for the exchangeability constraints.
-Another option would be to omit roles.
-
-```{r prepare-cross-distinguishability}
-apim_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  dyads_cross,
-  dyad = coupleID,
-  member = personID,
-  role = gender,
-  predictors = provided_support,
-  keep_compositions = "female-male",
-  set_exchangeable_compositions = "female-male",
-  seed = 123
-)
-
-print(apim_exchangeable_data, n = 4)
-```
+The restricted model omits gender-specific fixed effects and uses the
+shared/difference residual representation. We reuse
+`apim_distinguishable_data`, so both models use exactly the same prepared rows
+and centering. `set_exchangeable_compositions` would instead reclassify the
+composition when it should be treated as exchangeable throughout an analysis.
 
 We then use the columns to fit the model as follows: 
 
@@ -278,16 +274,16 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
     1 +
     
     # Pooled single actor and partner effects
-    .dy_provided_support_actor +
-    .dy_provided_support_partner +
+    .provided_support_gmc_actor +
+    .provided_support_gmc_partner +
     
     # Residual variance covariance matrix via the shared/difference
     # specification in two uncorrelated blocks
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_female_x_male_arbitrary | coupleID),
+    us(0 + .member_contrast_arbitrary | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
-  data = apim_exchangeable_data
+  data = apim_distinguishable_data
 )
 
 summary(apim_exchangeable_model)
@@ -349,13 +345,16 @@ apim_exchangeable_fitted_alt <- sprintf(
 
 
 
-The output can now be mapped as follows:
+With the common centering, the shared intercept is the expected closeness of
+either member when both partners' provided support equals the pooled sample
+mean. The output can now be mapped as follows:
 
 ```{r fitted-exchangeable-apim-diagram, echo=FALSE, eval=has_glmmTMB, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Fitted cross-sectional exchangeable APIM for the example data. The common member residual standard deviation and residual correlation are back-transformed from the fitted mean and difference components.", fig.alt=apim_exchangeable_fitted_alt}
 draw_apim_diagram(
   "exchangeable",
   model = apim_exchangeable_model,
-  labels = c(predictor = "Provided support", outcome = "Closeness")
+  labels = c(predictor = "Provided support", outcome = "Closeness"),
+  predictors_centered = TRUE
 )
 ```
 
@@ -366,15 +365,15 @@ roles may differ with a restricted exchangeable model. This comparison tests
 the imposed equality constraints jointly. Here, they concern the fixed
 intercepts, actor effects, partner effects, and residual variances.
 
-The two parameterizations require different generated columns, but both models
-above use the same original observations.
+Both models use the same prepared data object. The full model uses its retained
+role indicators. The restricted model instead uses the opt-in arbitrary member
+contrast for the exchangeability-constrained residual structure.
 
-[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html)
-verifies that both models use equivalent original
+`dyadMLM::compare_nested_models()` verifies that both models use equivalent original
 observations before performing the likelihood-ratio test:
 
 ```{r compare-cross-distinguishability, eval = has_glmmTMB}
-dyadMLM::compare_nested_glmmTMB_models(
+dyadMLM::compare_nested_models(
   apim_exchangeable_model,
   apim_distinguishable_model
 )
@@ -438,40 +437,104 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
     0 +
 
     # Role-specific intercepts
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
+    .is_female +
+    .is_male +
 
     # Role-specific time trends
-    .dy_is_female_x_male_female:diaryday_gmc +
-    .dy_is_female_x_male_male:diaryday_gmc +
+    .is_female:diaryday_gmc +
+    .is_male:diaryday_gmc +
 
     # Role-specific within-person actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_cwp_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_cwp_actor +
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor +
 
     # Role-specific within-person partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_cwp_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_cwp_partner +
+    .is_female:.provided_support_cwp_partner +
+    .is_male:.provided_support_cwp_partner +
 
     # Role-specific between-person actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_cbp_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_cbp_actor +
+    .is_female:.provided_support_cbp_actor +
+    .is_male:.provided_support_cbp_actor +
 
     # Role-specific between-person partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_cbp_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_cbp_partner +
+    .is_female:.provided_support_cbp_partner +
+    .is_male:.provided_support_cbp_partner +
 
     # Stable dyad-level covariance
-    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID) +
+    us(0 + .is_female + .is_male | coupleID) +
 
     # Same-occasion covariance
-    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male |
+    us(0 + .is_female + .is_male |
          coupleID:diaryday),
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_distinguishable_data
 )
 ```
+
+#### Adding role-specific residual AR(1) {#distinguishable-residual-ar1}
+
+The same-occasion block above allows the partners' residuals to covary within a
+day, but it does not describe persistence across days. In glmmTMB, we can
+model independent persistent AR(1) components per member.
+
+For distinguishable dyads, we add one term for each role while retaining the
+same-occasion covariance. We spell out the complete model so the concurrent
+and persistent components are visible together.
+
+```{r fit-ild-distinguishable-ar1, eval = has_glmmTMB}
+ild_distinguishable_ar_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 +
+
+    # Role-specific intercepts
+    .is_female +
+    .is_male +
+
+    # Role-specific time trends
+    .is_female:diaryday_gmc +
+    .is_male:diaryday_gmc +
+
+    # Role-specific within-person actor effects
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor +
+
+    # Role-specific within-person partner effects
+    .is_female:.provided_support_cwp_partner +
+    .is_male:.provided_support_cwp_partner +
+
+    # Role-specific between-person actor effects
+    .is_female:.provided_support_cbp_actor +
+    .is_male:.provided_support_cbp_actor +
+
+    # Role-specific between-person partner effects
+    .is_female:.provided_support_cbp_partner +
+    .is_male:.provided_support_cbp_partner +
+
+    # Stable dyad-level covariance
+    us(0 + .is_female + .is_male | coupleID) +
+
+    # Same-occasion covariance
+    us(0 + .is_female + .is_male |
+         coupleID:diaryday) +
+
+    # Role-specific residual persistence
+    ar1(0 + .is_female:factor(diaryday) | coupleID) +
+    ar1(0 + .is_male:factor(diaryday) | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_distinguishable_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
+)
+
+glmmTMB::VarCorr(ild_distinguishable_ar_model)
+```
+
+The two AR standard deviations and correlations describe each role's persistent
+component. They are not correlations of the complete residual and do not
+represent partner influence. The dyad-day block continues to describe the
+remaining same-day variation and partner covariance.
 
 #### Random slopes
 
@@ -481,10 +544,10 @@ replacing the stable dyad-level block above with:
 ```{r ild-distinguishable-random-slopes, eval = FALSE}
 us(
   0 +
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
-    .dy_is_female_x_male_female:.dy_provided_support_cwp_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_cwp_actor
+    .is_female +
+    .is_male +
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor
   | coupleID
 )
 ```
@@ -520,18 +583,11 @@ print(ild_apim_data, n = 4)
 ```
 
 The example below estimates same-day associations between support and closeness
-and includes `diaryday` to adjust for a linear time trend. We also include an
-actor random slope in both stable dyad-level blocks so that we can demonstrate
-the random-slope back-transformation below.
+and includes `diaryday` to adjust for a linear time trend. Its stable and
+same-occasion covariance blocks impose exchangeability through paired shared
+and member-contrast terms.
 
 ```{r fit-ild-exchangeable-apim, eval = has_glmmTMB}
-# Profile the fixed effects and use BFGS for stable cross-platform optimization.
-ild_apim_control <- glmmTMB::glmmTMBControl(
-  profile = TRUE,
-  optimizer = stats::optim,
-  optArgs = list(method = "BFGS")
-)
-
 ild_apim_model <- glmmTMB::glmmTMB(
   closeness ~
     1 +
@@ -539,40 +595,82 @@ ild_apim_model <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person actor and partner effects
-    .dy_provided_support_cwp_actor +
-    .dy_provided_support_cwp_partner +
+    .provided_support_cwp_actor +
+    .provided_support_cwp_partner +
 
     # Between-person actor and partner effects
-    .dy_provided_support_cbp_actor +
-    .dy_provided_support_cbp_partner +
+    .provided_support_cbp_actor +
+    .provided_support_cbp_partner +
 
-    # Stable exchangeable dyad-level covariance with actor random slopes
-    us(1 + .dy_provided_support_cwp_actor | coupleID) + # shared intercept and slope
-    us(0 + .dy_member_contrast_female_x_female_arbitrary + # difference intercept
-         .dy_member_contrast_female_x_female_arbitrary:
-           .dy_provided_support_cwp_actor                       # difference slope
-       | coupleID) +
+    # Stable exchangeable dyad-level covariance
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
 
     # Same-occasion exchangeable covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID:diaryday)
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
-  , control = ild_apim_control
 )
 
 summary(ild_apim_model)
 ```
 
-We can now recover the member-level covariance matrices for both the stable
-dyad effects and the same-occasion residual dependence. The two matched block
-pairs are returned separately:
+#### Adding pooled residual AR(1) {#exchangeable-residual-ar1}
+
+Under exchangeability, each member still has a separate time series, but the AR
+standard deviation and correlation are pooled. We add one term grouped by the
+member nested within the dyad:
+
+```{r fit-ild-exchangeable-ar1, eval = has_glmmTMB}
+ild_exchangeable_ar_model <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+
+    diaryday +
+
+    # Within-person actor and partner effects
+    .provided_support_cwp_actor +
+    .provided_support_cwp_partner +
+
+    # Between-person actor and partner effects
+    .provided_support_cbp_actor +
+    .provided_support_cbp_partner +
+
+    # Stable exchangeable dyad-level covariance
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
+
+    # Same-occasion exchangeable covariance
+    us(1 | coupleID:diaryday) +
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday) +
+
+    # Pooled residual persistence across member series
+    ar1(0 + factor(diaryday) | coupleID:personID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_apim_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
+)
+
+glmmTMB::VarCorr(ild_exchangeable_ar_model)
+```
+
+The pooled AR parameters describe persistent within-member variation; the
+dyad-day blocks continue to describe same-day partner covariance.
+
+For the fitted AR model, we can recover the member-level covariance matrices for
+both the stable dyad effects and the same-occasion residual dependence. The two
+matched block pairs are returned separately:
 
 ```{r backtransform-ild-exchangeable-apim, eval = has_glmmTMB}
 
-recovered_covariance <- dyadMLM::recover_exchangeable_covariance(ild_apim_model)
+recovered_covariance <- dyadMLM::recover_exchangeable_covariance(
+  ild_exchangeable_ar_model
+)
 
 print(recovered_covariance)
 
@@ -586,32 +684,65 @@ carryover.
 
 #### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
 
+For a focused random-slope demonstration, we branch from the concurrent base
+model and replace its stable intercept blocks with shared and member-contrast
+intercept-and-slope blocks. This advanced fit does not include the AR term
+above, so its covariance estimates illustrate the parameterization
+rather than complete recovery of the simulation.
+
+```{r fit-ild-exchangeable-random-slopes, eval = has_glmmTMB}
+ild_apim_random_slope_model <- update(
+  ild_apim_model,
+  formula = . ~ . -
+    us(1 | coupleID) -
+    us(0 + .member_contrast_arbitrary | coupleID) +
+    us(1 + .provided_support_cwp_actor | coupleID) +
+    us(0 +
+         .member_contrast_arbitrary +
+         .member_contrast_arbitrary:
+           .provided_support_cwp_actor
+       | coupleID),
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    optimizer = stats::optim,
+    optArgs = list(method = "BFGS")
+  )
+)
+
+random_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
+  ild_apim_random_slope_model
+)
+
+print(random_slope_covariance)
+```
+
 The same shared/difference back-transformation described above applies
 separately to every random slope. It also applies to covariances among the
 random intercept, actor slope, and partner slope.
 
 #### Testing random-effect constraints {#fitted-constraints-and-omitted-blocks}
 
-The full model above estimates both a shared and a member-contrast actor random
-slope. We can first test a smaller model that omits only the actor random slope
-from the member-contrast block. The member-contrast random intercept and both
-same-occasion blocks remain in the model:
+The random-slope model above estimates both a shared and a member-contrast actor
+random slope. We can first test a smaller model that omits only the actor random
+slope from the member-contrast block. The member-contrast random intercept and
+both same-occasion blocks remain in the model:
 
 ```{r fit-ild-no-contrast-slope, eval = has_glmmTMB}
 ild_apim_no_contrast_slope <- update(
-  ild_apim_model,
+  ild_apim_random_slope_model,
   formula = . ~ . -
     us(0 +
-         .dy_member_contrast_female_x_female_arbitrary +
-         .dy_member_contrast_female_x_female_arbitrary:
-           .dy_provided_support_cwp_actor
+         .member_contrast_arbitrary +
+         .member_contrast_arbitrary:
+           .provided_support_cwp_actor
        | coupleID) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)
+    us(0 + .member_contrast_arbitrary | coupleID)
 )
 
-dyadMLM::compare_nested_glmmTMB_models(
+dyadMLM::compare_nested_models(
   ild_apim_no_contrast_slope,
-  ild_apim_model
+  ild_apim_random_slope_model
 )
 ```
 
@@ -629,11 +760,11 @@ no_contrast_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
   block_pairings = list(
     dyad = list(
       shared_block =
-        "us(1 + .dy_provided_support_cwp_actor | coupleID)",
+        "us(1 + .provided_support_cwp_actor | coupleID)",
       difference_block =
-        "us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID)",
+        "us(0 + .member_contrast_arbitrary | coupleID)",
       difference_indicator =
-        ".dy_member_contrast_female_x_female_arbitrary"
+        ".member_contrast_arbitrary"
     )
   )
 )
@@ -647,18 +778,18 @@ remains in the model:
 
 ```{r fit-ild-no-contrast-block, eval = has_glmmTMB}
 ild_apim_no_contrast_block <- update(
-  ild_apim_model,
+  ild_apim_random_slope_model,
   formula = . ~ . -
     us(0 +
-         .dy_member_contrast_female_x_female_arbitrary +
-         .dy_member_contrast_female_x_female_arbitrary:
-           .dy_provided_support_cwp_actor
+         .member_contrast_arbitrary +
+         .member_contrast_arbitrary:
+           .provided_support_cwp_actor
        | coupleID)
 )
 
-dyadMLM::compare_nested_glmmTMB_models(
+dyadMLM::compare_nested_models(
   ild_apim_no_contrast_block,
-  ild_apim_model
+  ild_apim_random_slope_model
 )
 ```
 
@@ -672,10 +803,10 @@ no_contrast_block_covariance <- dyadMLM::recover_exchangeable_covariance(
   block_pairings = list(
     dyad = list(
       shared_block =
-        "us(1 + .dy_provided_support_cwp_actor | coupleID)",
+        "us(1 + .provided_support_cwp_actor | coupleID)",
       difference_block = NULL,
       difference_indicator =
-        ".dy_member_contrast_female_x_female_arbitrary"
+        ".member_contrast_arbitrary"
     )
   )
 )
@@ -690,40 +821,23 @@ boundary of the parameter space, the usual chi-squared reference distribution
 for the likelihood-ratio tests should be interpreted cautiously.
 
 
-### Current limitations of dyadic ILD designs in R
+### When carryover is the research question {#dynamic-models}
 
-Concurrent dyadic ILD models can adjust for a time trend and account for stable
-dyadic dependence and same-occasion partner dependence. They do not model
-residual serial dependence, however, and therefore estimate concurrent
-associations under the assumption that residuals from different days are
-independent.
-
-If the goal is to retain these concurrent APIM associations while accounting
-for serial dependence, the closest extension is a dyadic residual dynamic
-structural equation model (RDSEM). It keeps the concurrent regression separate
-from a VAR model for its residuals [@asparouhovComparisonModelsAnalysis2020;
-@mcneishPrimerTwoLevel2020]. This residual-VAR structure is not directly
-available through the `glmmTMB` interface used here, and open-source support for
-dyadic dynamic models remains very limited
-[@delrosarioPracticalGuideSpecifying2025]. Within open-source R, such a model
-generally requires custom TMB or Stan code.
-
-### Dynamic ILD APIM example {#dynamic-models}
-
-A **practical alternative** is a model with lagged outcomes, especially when
-carryover or temporal dynamics are part of the research question
-[@gistelinckMultilevelAutoregressiveDyadic2020]. In such a model, the
-member's own lagged outcome represents stability and the partner's lagged
-outcome represents influence. All other APIM predictor effects then describe
-associations conditional on the members' prior outcomes.
+Residual AR(1) and lagged-outcome models answer different questions. The AR(1)
+terms above retain the concurrent APIM mean model while describing residual
+persistence. When temporal carryover is itself the research question, the
+member's own and the partner's lagged outcomes can enter the mean model
+[@gistelinckMultilevelAutoregressiveDyadic2020;
+@delrosarioPracticalGuideSpecifying2025]. A partner-lag coefficient is an
+association; interpreting it as influence requires stronger assumptions.
+Residual dependence should still be assessed after adding outcome lags.
 
 By adding the outcome to `predictors` and selecting it with `lag1_predictors`,
 `dyadMLM::prepare_dyad_data()` returns lag-1 raw and within-person scores alongside
 the contemporaneous scores. Between-person scores are not lagged because they
 describe stable differences between members.
 
-For this example, we obtain the lagged actor and partner outcome columns through
-the `lag1_predictors` argument:
+Here, `lag1_predictors` creates the lagged actor and partner outcome columns:
 
 ```{r prepare-ild-apim-dynamic-model}
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
@@ -740,75 +854,59 @@ ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
 )
 ```
 
-This returns all necessary variables for either choice, including lag-1 raw
-and within-person closeness scores. Lags are matched at exactly
+This returns lag-1 raw and within-person closeness scores. Lags match exactly
 `diaryday - 1`, so omitted diary days are not bridged.
 
-A simple fixed-slope dyadic stability and influence model
-[@delrosarioPracticalGuideSpecifying2025]:
+These data were generated with residual AR(1), not a lagged-outcome mean model.
+The following unevaluated model demonstrates the specification only; its
+coefficients would not recover the data-generating process.
 
-```{r fit-ild-stability-influence, eval = has_glmmTMB}
-stability_influence <- glmmTMB::glmmTMB(
+```{r specify-ild-lagged-outcomes, eval = FALSE}
+lagged_outcome_example <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
-    # Stability (actor effect across time)
-    .dy_closeness_actor_lag1 +
+    # Own-outcome lag (stability association)
+    .closeness_actor_lag1 +
 
-    # Influence (partner effect across time)
-    .dy_closeness_partner_lag1 +
+    # Partner-outcome lag association
+    .closeness_partner_lag1 +
 
     # Linear time trend
     diaryday +
 
     # Stable exchangeable dyad-level covariance
     us(1 | coupleID) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
 
     # Same-day exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .dy_member_contrast_female_x_female_arbitrary | coupleID:diaryday)
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data_dynamic
+  # Non-default settings help this example converge.
+  , control = glmmTMB::glmmTMBControl(
+      profile = TRUE,
+      optimizer = stats::optim,
+      optArgs = list(method = "BFGS")
+    )
 )
-
-summary(stability_influence)
 ```
 
-This model can be extended with contemporaneous actor and partner predictor
-associations and other lagged predictors. Time-varying predictors should usually
-be separated into within-person and between-person components. Their
-contemporaneous coefficients are then conditional on both partners' prior
-outcomes.
+The model uses raw outcome lags. Within-person-centered alternatives end in
+`_cwp_actor_lag1` and `_cwp_partner_lag1`, but person-mean centering can bias
+carryover downward in short panels [@hamakerCenterNotCenter2015;
+@nickellBiasesDynamicModels1981]. Raw lags avoid that centering bias but can
+remain related to stable member levels
+[@gistelinckMultilevelAutoregressiveSmall2021]. For short panels, an LD-APIM can
+model the initial outcomes jointly with those stable levels
+[@gistelinckMultilevelAutoregressiveDyadic2020].
 
-The model above uses raw lagged outcomes. The corresponding
-within-person-centered lagged terms are `.dy_closeness_cwp_actor_lag1` and
-`.dy_closeness_cwp_partner_lag1`.
-
-Whether to use a raw or within-person-centered lagged outcome depends on the
-research question and the data. Person-mean centering the outcome lag can bias
-the average carryover estimate downward [@hamakerCenterNotCenter2015]. This
-downward bias is known as Nickell bias [@nickellBiasesDynamicModels1981]. A raw
-lag avoids this centering bias, but a standard random-intercept model can still
-be biased because it assumes that the lag is unrelated to stable member levels
-[@gistelinckMultilevelAutoregressiveSmall2021].
-
-Both problems matter most when there are few occasions. In one simple
-simulation, most approaches other than person-mean centering performed
-acceptably from about ten occasions, but this is not a universal cutoff
-[@gistelinckMultilevelAutoregressiveSmall2021]. For shorter panels, consider an
-LD-APIM, which lets the first outcomes relate to the members' stable levels in a
-wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020].
-
-These manifest-lag models are not equivalent to Mplus DSEM, which uses latent
-person-mean centering by default and can estimate multivariate or residual
-dynamics jointly [@mcneishPrimerTwoLevel2020]. For very short panels, however,
-default DSEM may still be biased or unstable, so the LD-APIM recommendation
-above may be preferable [@gistelinckMultilevelAutoregressiveSmall2021].
-
-These lagged-outcome issues are separate from the earlier concern about
-unreliable person means used to construct `cbp` predictors with few occasions.
+Independent member AR(1) terms do not represent cross-partner residual
+carryover. A full residual VAR or RDSEM is a different model and is not directly
+available through the `glmmTMB` interface used here
+[@asparouhovComparisonModelsAnalysis2020; @mcneishPrimerTwoLevel2020].
 
 
 ---

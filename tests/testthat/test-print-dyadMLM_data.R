@@ -38,7 +38,7 @@ test_that("dyadMLM data prints a header before the tibble", {
   printed <- capture_wide_print(result)
 
   expect_true(any(grepl("# dyadMLM data", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_is_{comp-role}", printed, fixed = TRUE)))
+  expect_true(any(grepl(".is_{comp-role}", printed, fixed = TRUE)))
   expect_true(any(grepl("# A tibble:", printed, fixed = TRUE)))
 })
 
@@ -132,28 +132,59 @@ test_that("dyadMLM data print describes generated predictor columns", {
   )
 
   printed <- capture_wide_print(result)
+  short_indicator_pattern <- paste0(dyad_retained_prefix, "is_exchangeable")
+  short_member_contrast_pattern <- paste0(
+    dyad_retained_prefix,
+    "member_contrast_arbitrary"
+  )
 
   expect_false(any(grepl("sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_member_contrast_{comp}", printed, fixed = TRUE)))
+  expect_true(any(grepl(short_indicator_pattern, printed, fixed = TRUE)))
+  expect_false(any(grepl(".is_{role}", printed, fixed = TRUE)))
+  expect_true(any(grepl(short_member_contrast_pattern, printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_member_contrast_{comp}_arbitrary",
-    "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
+    short_member_contrast_pattern,
+    paste(
+      "composition-specific member contrasts coded -1/+1 in arbitrary",
+      "direction for exchangeability-constrained random effects. Values are",
+      "0 for other compositions"
+    )
   )
-  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_actor", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_actor",
+    ".{pred}_actor",
     "APIM actor predictor: actor's original predictor values"
   )
-  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_partner", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_partner",
+    ".{pred}_partner",
     "APIM partner predictor: partner's original predictor values"
   )
-  expect_false(any(grepl(".dy_{pred}_actor           actor", printed, fixed = TRUE)))
-  expect_false(any(grepl(".dy_{pred}_partner         partner", printed, fixed = TRUE)))
+  expect_false(any(grepl(".{pred}_actor           actor", printed, fixed = TRUE)))
+  expect_false(any(grepl(".{pred}_partner         partner", printed, fixed = TRUE)))
+})
+
+test_that("dyadMLM data print retains the short distinguishable indicator pattern", {
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c(1, 2, 3, 4),
+    role = rep(c("female", "male"), 2)
+  )
+
+  result <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  printed <- capture_wide_print(result)
+
+  expect_true(any(grepl(".is_{role}", printed, fixed = TRUE)))
+  expect_false(any(grepl(".is_exchangeable", printed, fixed = TRUE)))
 })
 
 test_that("added column descriptions align and wrap to console width", {
@@ -189,13 +220,21 @@ test_that("dyadMLM data print does not describe removed generated model column f
     seed = 123
   )
 
-  result$.dy_x_actor <- NULL
+  result$.x_actor <- NULL
 
   printed <- capture_wide_print(result)
+  short_member_contrast_pattern <- paste0(
+    dyad_retained_prefix,
+    "member_contrast_arbitrary"
+  )
 
-  expect_false(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_member_contrast_{comp}", printed, fixed = TRUE)))
+  expect_false(any(grepl(".{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(
+    short_member_contrast_pattern,
+    printed,
+    fixed = TRUE
+  )))
 })
 
 test_that("dyadMLM data print describes longitudinal APIM columns", {
@@ -217,24 +256,24 @@ test_that("dyadMLM data print describes longitudinal APIM columns", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".dy_{pred}_cwp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_cwp",
+    ".{pred}_cwp",
     "within-person predictor: momentary deviations from each person's usual level"
   )
-  expect_true(any(grepl(".dy_{pred}_cbp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_cbp",
+    ".{pred}_cbp",
     "between-person predictor: stable differences from the average person's usual level"
   )
-  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cwp_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cwp_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cbp_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cbp_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp_partner", printed, fixed = TRUE)))
 })
 
 test_that("dyadMLM data print orders generated column descriptions", {
@@ -261,9 +300,9 @@ test_that("dyadMLM data print orders generated column descriptions", {
 
   lines <- added_column_lines(capture_wide_print(result))
 
-  expect_lt(added_column_index(lines, ".dy_{pred}_cwp"), added_column_index(lines, ".dy_{pred}_cwp_actor"))
-  expect_lt(added_column_index(lines, ".dy_{pred}_cbp"), added_column_index(lines, ".dy_{pred}_cbp_actor"))
-  expect_lt(added_column_index(lines, ".dy_{pred}_cbp_partner"), added_column_index(lines, ".dy_{pred}_cwp_dyad_mean"))
+  expect_lt(added_column_index(lines, ".{pred}_cwp"), added_column_index(lines, ".{pred}_cwp_actor"))
+  expect_lt(added_column_index(lines, ".{pred}_cbp"), added_column_index(lines, ".{pred}_cbp_actor"))
+  expect_lt(added_column_index(lines, ".{pred}_cbp_partner"), added_column_index(lines, ".{pred}_cwp_dyad_mean"))
 })
 
 test_that("dyadMLM data print collapses repeated generated column types", {
@@ -286,14 +325,14 @@ test_that("dyadMLM data print collapses repeated generated column types", {
 
   lines <- added_column_lines(capture_wide_print(result))
 
-  expect_equal(added_column_count(lines, ".dy_{pred}_cwp"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_cbp"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_actor"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_partner"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_cwp_actor"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_cwp_partner"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_cbp_actor"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_cbp_partner"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cwp"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cbp"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_actor"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_partner"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cwp_actor"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cwp_partner"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cbp_actor"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cbp_partner"), 1)
 })
 
 test_that("dyadMLM data print does not describe removed temporal source columns", {
@@ -313,13 +352,13 @@ test_that("dyadMLM data print does not describe removed temporal source columns"
     seed = 123
   )
 
-  result$.dy_x_cwp <- NULL
+  result$.x_cwp <- NULL
 
   lines <- added_column_lines(capture_wide_print(result))
 
-  expect_equal(added_column_count(lines, ".dy_{pred}_cwp"), 0)
-  expect_equal(added_column_count(lines, ".dy_{pred}_cbp"), 1)
-  expect_equal(added_column_count(lines, ".dy_{pred}_cwp_actor"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cwp"), 0)
+  expect_equal(added_column_count(lines, ".{pred}_cbp"), 1)
+  expect_equal(added_column_count(lines, ".{pred}_cwp_actor"), 1)
 })
 
 test_that("dyadMLM data print describes cross-sectional DIM columns", {
@@ -340,16 +379,16 @@ test_that("dyadMLM data print describes cross-sectional DIM columns", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_dyad_mean_gmc",
+    ".{pred}_dyad_mean_gmc",
     "dyad-mean predictor: dyad's average predictor level, grand-mean centered"
   )
-  expect_true(any(grepl(".dy_{pred}_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_within_dyad_dev", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_within_dyad_dev",
+    ".{pred}_within_dyad_dev",
     "DIM within-dyad member-deviation predictor: member's difference from the dyad mean"
   )
 })
@@ -374,30 +413,30 @@ test_that("dyadMLM data print describes longitudinal DIM columns", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_within_dyad_dev", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_cwp_dyad_mean",
+    ".{pred}_cwp_dyad_mean",
     "within-person dyad-mean predictor: shared momentary deviations in the dyad"
   )
-  expect_true(any(grepl(".dy_{pred}_cwp_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp_within_dyad_dev", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_cwp_within_dyad_dev",
+    ".{pred}_cwp_within_dyad_dev",
     "DIM within-person, within-dyad member-deviation predictor: member's momentary deviation from the dyad mean"
   )
-  expect_true(any(grepl(".dy_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_cbp_dyad_mean",
+    ".{pred}_cbp_dyad_mean",
     "between-person dyad-mean predictor: dyad's stable usual level, grand-mean centered"
   )
-  expect_true(any(grepl(".dy_{pred}_cbp_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp_within_dyad_dev", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_cbp_within_dyad_dev",
+    ".{pred}_cbp_within_dyad_dev",
     "DIM between-person, within-dyad member-deviation predictor: member's stable difference from the dyad's usual level"
   )
 })
@@ -426,16 +465,16 @@ test_that("dyadMLM data print describes longitudinal DSM predictors", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".dy_{pred}_cwp", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cbp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp", printed, fixed = TRUE)))
   expect_true(any(grepl("DSM direction: female - male", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_dsm_role_contrast", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_within_dyad_diff", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cwp_within_dyad_diff", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_cbp_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".dsm_role_contrast", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp_dyad_mean", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cwp_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_cbp_within_dyad_diff", printed, fixed = TRUE)))
   expect_false(any(grepl("within_dyad_dev", printed, fixed = TRUE)))
 })
 
@@ -457,10 +496,10 @@ test_that("dyadMLM data print combines APIM and DIM column descriptions", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_partner", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_within_dyad_dev", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_partner", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_within_dyad_dev", printed, fixed = TRUE)))
 })
 
 test_that("dyadMLM data print combines APIM and DSM predictors", {
@@ -485,14 +524,14 @@ test_that("dyadMLM data print combines APIM and DSM predictors", {
 
   printed <- capture_wide_print(result)
 
-  expect_true(any(grepl(".dy_{pred}_actor", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_actor", printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
-    ".dy_{pred}_actor",
+    ".{pred}_actor",
     "APIM actor predictor: actor's original predictor values"
   )
-  expect_true(any(grepl(".dy_{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
-  expect_true(any(grepl(".dy_{pred}_within_dyad_diff", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_dyad_mean_gmc", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_within_dyad_diff", printed, fixed = TRUE)))
 })
 
 test_that("dyadMLM data print describes dropped dyads with missing role information", {

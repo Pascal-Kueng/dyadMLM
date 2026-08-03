@@ -18,15 +18,20 @@ test_that("the public API and metadata use only the cleaned names", {
     getNamespaceExports("dyadMLM"),
     c(
       "prepare_dyad_data",
-      "compare_nested_glmmTMB_models",
+      "compare_nested_models",
       "recover_exchangeable_covariance"
     )
   )
+  expect_false(exists(
+    "compare_nested_glmmTMB_models",
+    envir = asNamespace("dyadMLM"),
+    inherits = FALSE
+  ))
 
   prepare_arguments <- names(formals(prepare_dyad_data))
   expect_true(all(c(
     "dyad", "lag1_predictors", "model_types", "temporal_decomposition",
-    "keep_compositions"
+    "keep_compositions", "include_arbitrary_member_contrast"
   ) %in% prepare_arguments))
   expect_false(any(c(
     "group", "lag_predictors", "model_type",
@@ -91,19 +96,19 @@ test_that("DIM and DSM collision preflights cover suffixes and predictor order",
   collision_cases <- list(
     list(
       predictors = c("x", "x_cwp"),
-      target = ".dy_x_cwp_within_dyad_dev"
+      target = ".x_cwp_within_dyad_dev"
     ),
     list(
       predictors = c("x_cwp", "x"),
-      target = ".dy_x_cwp_within_dyad_dev"
+      target = ".x_cwp_within_dyad_dev"
     ),
     list(
       predictors = c("x", "x_cbp"),
-      target = ".dy_x_cbp_within_dyad_dev"
+      target = ".x_cbp_within_dyad_dev"
     ),
     list(
       predictors = c("x_cbp", "x"),
-      target = ".dy_x_cbp_within_dyad_dev"
+      target = ".x_cbp_within_dyad_dev"
     )
   )
 
@@ -165,11 +170,97 @@ test_that("lag collisions with earlier generated columns are rejected", {
       model_types = "apim"
     ),
     paste0(
-      "`.dy_x_actor_lag1`.*predictor `x`.*lag 1.*model family `apim`.*",
+      "`.x_actor_lag1`.*predictor `x`.*lag 1.*model family `apim`.*",
       "predictor `x_actor`.*lag 1.*model family `temporal`"
     ),
     fixed = FALSE
   )
+})
+
+test_that("generated names must be syntactically valid in formulas", {
+  data <- collision_test_data()
+  names(data)[names(data) == "x"] <- "1x"
+
+  expect_error(
+    prepare_dyad_data(
+      data,
+      dyad = dyad_id,
+      member = member_id,
+      time = time,
+      predictors = tidyselect::all_of("1x"),
+      model_types = "apim",
+      temporal_decomposition = "none"
+    ),
+    "Generated column name `.1x_actor` is not syntactically valid in R.*Rename",
+    fixed = FALSE
+  )
+})
+
+test_that("collision ownership uses the registry, not a name prefix", {
+  data <- tibble::tibble(
+    x = 1,
+    generated_short = 1,
+    original_short = 1
+  )
+
+  generated_plan <- tibble::tibble(
+    target = "generated_short",
+    predictor = "x",
+    temporal_component = "raw",
+    lag = 0L,
+    model_family = "apim",
+    column_role = "actor",
+    variable_role = "predictor",
+    source_column = "x"
+  )
+  data <- record_generated_columns(data, generated_plan)
+
+  proposed_plan <- generated_plan
+  proposed_plan$model_family <- "temporal"
+  proposed_plan$column_role <- "temporal_component"
+
+  expect_error(
+    validate_generated_column_plan(data, proposed_plan),
+    paste0(
+      "`generated_short`.*model family `temporal`.*",
+      "model family `apim`.*column role `actor`"
+    )
+  )
+
+  proposed_plan$target <- "original_short"
+  expect_error(
+    validate_generated_column_plan(data, proposed_plan),
+    paste0(
+      "`original_short`.*model family `temporal`.*",
+      "model family `input`.*column role `original`"
+    )
+  )
+})
+
+test_that("composition columns cannot overwrite input columns", {
+  original_data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    member_id = c("a", "b", "c", "d")
+  )
+
+  for (column_name in c(".composition", ".composition_role")) {
+    data <- original_data
+    data[[column_name]] <- "original"
+
+    expect_error(
+      prepare_dyad_data(
+        data,
+        dyad = dyad_id,
+        member = member_id,
+        model_types = "none"
+      ),
+      paste0(
+        "Generated-column collision for `", column_name, "`.*",
+        "model family `composition`.*model family `input`"
+      ),
+      fixed = FALSE
+    )
+  }
 })
 
 test_that("predictor columns cannot overwrite composition columns", {
@@ -177,8 +268,9 @@ test_that("predictor columns cannot overwrite composition columns", {
     dyad_id = rep(1:2, each = 2),
     member_id = rep(c("a", "b"), 2),
     role = rep(c("actor", "f"), 2),
-    is_actor_x_f = 1:4
+    is = 1:4
   )
+  collision_name <- paste0(dyad_retained_prefix, "is_actor")
 
   expect_error(
     prepare_dyad_data(
@@ -186,29 +278,13 @@ test_that("predictor columns cannot overwrite composition columns", {
       dyad = dyad_id,
       member = member_id,
       role = role,
-      predictors = is_actor_x_f,
+      predictors = is,
       model_types = "apim"
     ),
     paste0(
-      "`.dy_is_actor_x_f_actor`.*predictor `is_actor_x_f`.*",
+      "`", collision_name, "`.*predictor `is`.*",
       "model family `apim`.*model family `composition`"
     ),
     fixed = FALSE
   )
-})
-
-test_that("only the new member contrast is generated", {
-  data <- collision_test_data()
-  prepared <- prepare_dyad_data(
-    data,
-    dyad = dyad_id,
-    member = member_id,
-    time = time,
-    model_types = "none",
-    seed = 1
-  )
-  expect_true(
-    ".dy_member_contrast_assumed_exchangeable_arbitrary" %in% names(prepared)
-  )
-  expect_false(any(startsWith(names(prepared), ".dy_diff_")))
 })

@@ -4,8 +4,8 @@
 #' `dyadMLM_data` object.
 #'
 #' @param data A `dyadMLM_data` object returned by [validate_dyad_data()].
-#' @param seed Optional seed for random `.dy_member_contrast_*` sign assignment in
-#'   exchangeable dyads. If `NULL`, the current R session's RNG state is used.
+#' @param seed Optional seed for random `.member_contrast_*` sign assignment.
+#'   If `NULL`, the current R session's RNG state is used.
 #' @param keep_compositions Optional observed dyad compositions to keep
 #'   before exchangeability overrides and pooling.
 #' @param set_exchangeable_compositions Optional dyad compositions to treat as
@@ -13,20 +13,40 @@
 #' @param pool_compositions Optional named list that pools exchangeable dyad
 #'   compositions into user-named final composition labels. Each pool must
 #'   resolve to at least two distinct observed compositions.
+#' @param short_colnames Whether to use shorter composition-dependent generated
+#'   column names when the final data contain one composition.
+#' @param include_arbitrary_member_contrast Whether to also generate arbitrary
+#'   `.member_contrast_*` columns for distinguishable compositions without
+#'   changing their composition metadata, roles, or indicators.
 #'
-#' @return A `dyadMLM_data` object with added `.dy_composition` and
-#'   `.dy_composition_role` factor columns, `.dy_is_*` numeric indicator columns,
-#'   composition-specific numeric `.dy_member_contrast_*` columns coded `-1` and
-#'   `1` for the two members of matching exchangeable dyads and `0` otherwise,
+#' @return A `dyadMLM_data` object with added `.composition` and
+#'   `.composition_role` factor columns, `.is_*` numeric indicator columns,
+#'   composition-specific numeric `.member_contrast_*` columns coded `-1` and
+#'   `1` for the two members of each matching composition and `0` otherwise,
 #'   and dyad composition metadata.
 #'
 #' @keywords internal
 infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
                                     set_exchangeable_compositions = NULL,
-                                    pool_compositions = NULL) {
+                                    pool_compositions = NULL,
+                                    short_colnames = TRUE,
+                                    include_arbitrary_member_contrast = FALSE) {
   if (!inherits(data, "dyadMLM_data")) {
     stop(
       "`data` must be a `dyadMLM_data` object returned by `prepare_dyad_data()`.",
+      call. = FALSE
+    )
+  }
+  if (!is.logical(short_colnames) ||
+      length(short_colnames) != 1L ||
+      is.na(short_colnames)) {
+    stop("`short_colnames` must be `TRUE` or `FALSE`.", call. = FALSE)
+  }
+  if (!is.logical(include_arbitrary_member_contrast) ||
+      length(include_arbitrary_member_contrast) != 1L ||
+      is.na(include_arbitrary_member_contrast)) {
+    stop(
+      "`include_arbitrary_member_contrast` must be `TRUE` or `FALSE`.",
       call. = FALSE
     )
   }
@@ -34,6 +54,20 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
   meta_data <- attr(data, "dyadMLM")
   group_name <- meta_data$dyad
   member_name <- meta_data$member
+
+  # These retained columns are created before the composition-dependent names
+  # are known, so protect them from input collisions before either is written.
+  fixed_composition_column_plan <- tibble::tibble(
+    target = c(dyad_composition_col, dyad_composition_role_col),
+    predictor = NA_character_,
+    temporal_component = "none",
+    lag = 0L,
+    model_family = "composition",
+    column_role = c("composition", "composition_role"),
+    variable_role = c("composition", "composition_role"),
+    source_column = NA_character_
+  )
+  validate_generated_column_plan(data, fixed_composition_column_plan)
 
   # The case if no role column was provided
   if (is.null(meta_data$role)) {
@@ -81,9 +115,12 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
 
     data[[dyad_diff_col]] <- ifelse(data[[dyad_arbitrary_role_col]] == "arbitrary_1", -1, 1)
 
-    # convert to factors, sanitize role names, construct .dy_is_{indicator} variables.
-    # remove temporary cols, create composition-specific diff cols for exchangeable dyads.
-    data <- finalize_composition_columns(data)
+    # Finalize factors and construct the generated composition columns.
+    data <- finalize_composition_columns(
+      data,
+      short_colnames,
+      fixed_composition_column_plan
+    )
 
     return(data)
   }
@@ -117,7 +154,7 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
       .groups = "drop"
     ) |>
     dplyr::mutate(
-      .dy_composition = .data$.dy_raw_composition,
+      "{dyad_composition_col}" := .data[[dyad_raw_composition_col]],
       .dy_pool_member = NA_character_
     )
 
@@ -178,8 +215,8 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
     by = group_name
   )
 
-  # Only exchangeable dyads need arbitrary labels for their difference
-  # contrasts.
+  # Assign exchangeable dyads first so their seeded assignments remain
+  # unchanged when optional distinguishable contrasts are requested.
   exchangeable_data <- data[data[[dyad_type_col]] == "exchangeable", , drop = FALSE]
   arbitrary_roles <- assign_arbitrary_member_roles(
     exchangeable_data,
@@ -187,6 +224,21 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
     member_name = member_name,
     seed = seed
   )
+
+  if (include_arbitrary_member_contrast) {
+    distinguishable_data <-
+      data[data[[dyad_type_col]] == "distinguishable", , drop = FALSE]
+    distinguishable_arbitrary_roles <- assign_arbitrary_member_roles(
+      distinguishable_data,
+      group_name = group_name,
+      member_name = member_name,
+      seed = seed
+    )
+    arbitrary_roles <- dplyr::bind_rows(
+      arbitrary_roles,
+      distinguishable_arbitrary_roles
+    )
+  }
 
   data <- dplyr::left_join(
     data,
@@ -203,9 +255,13 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
   )
 
   # Add a temporary pooled contrast, then expand it into one contrast column
-  # per exchangeable composition in finalize_composition_columns().
+  # per selected composition in finalize_composition_columns().
+  needs_member_contrast <-
+    data[[dyad_type_col]] == "exchangeable" |
+    (include_arbitrary_member_contrast &
+       data[[dyad_type_col]] == "distinguishable")
   data[[dyad_diff_col]] <- ifelse(
-    data[[dyad_type_col]] == "exchangeable",
+    needs_member_contrast,
     ifelse(data[[dyad_arbitrary_role_col]] == "arbitrary_1", -1, 1),
     0
   )
@@ -216,9 +272,12 @@ infer_dyad_compositions <- function(data, seed = NULL, keep_compositions = NULL,
   data[[dyad_type_source_col]] <- NULL
   data[[dyad_pool_member_col]] <- NULL
 
-  # convert to factors, sanitize role names, construct .dy_is_{indicator} variables.
-  # remove temporary cols, create composition-specific diff cols for exchangeable dyads.
-  data <- finalize_composition_columns(data)
+  # Finalize factors and construct the generated composition columns.
+  data <- finalize_composition_columns(
+    data,
+    short_colnames,
+    fixed_composition_column_plan
+  )
 
   data
 }
@@ -472,7 +531,7 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
     ## subsetting all rows **within the current pooling step**.
     is_pooled <- dyad_roles[[dyad_composition_col]] %in% resolved_compositions_to_pool
 
-    # Before overwriting .dy_composition, copy the old composition into .dy_pool_member.
+    # Retain each row's source composition before assigning the pool label.
     dyad_roles[[dyad_pool_member_col]][is_pooled] <- dyad_roles[[dyad_composition_col]][is_pooled]
 
     # Now replace the current composition with the pool name.
@@ -485,45 +544,102 @@ apply_pool_compositions <- function(dyad_roles, pool_compositions) {
 }
 
 
-finalize_composition_columns <- function(data) {
+finalize_composition_columns <- function(
+    data,
+    short_colnames,
+    fixed_composition_column_plan
+  ) {
 
   # Convert to factors before returning.
   data[[dyad_composition_col]] <- factor(data[[dyad_composition_col]])
   data[[dyad_composition_role_col]] <- factor(data[[dyad_composition_role_col]])
 
-  # This was only needed for contrast construction, we remove it.
+  meta_data <- attr(data, "dyadMLM")
+  # Short names omit the composition label. They are unambiguous only when
+  # filtering and pooling leave one final composition; with more than one,
+  # short names would be ambiguous and therefore are not allowed.
+  has_single_composition <- nrow(meta_data$dyad_compositions) == 1L
+  use_short_composition_colnames <-
+    short_colnames && has_single_composition
+
+  # Store the resolved choice so later lookup and printing use the names that
+  # were actually created, rather than the user's original request.
+  meta_data$short_colnames <- use_short_composition_colnames
+  attr(data, "dyadMLM") <- meta_data
+
+  # The arbitrary role is only needed while constructing member contrasts.
   data[[dyad_arbitrary_role_col]] <- NULL
 
-  # These named vectors map the labels in the data to safe column suffixes.
-  # Only exchangeable compositions have a non-zero member contrast and
-  # therefore need a composition-specific contrast column.
-  composition_role_suffixes <- make_dyad_suffixes(
-    data[[dyad_composition_role_col]]
-  )
-  exchangeable_composition_suffixes <- make_dyad_suffixes(
-    data[[dyad_composition_col]][data[[dyad_diff_col]] != 0]
-  )
-
   # Build the exact output names once and reuse them for validation and writing.
-  composition_role_labels <- sort(names(composition_role_suffixes))
-  composition_indicator_columns <- paste0(
-    dyad_reserved_prefix,
-    "is_",
-    unname(composition_role_suffixes[composition_role_labels])
-  )
+  composition_role_labels <- sort(unique(
+    as.character(data[[dyad_composition_role_col]])
+  ))
+  if (use_short_composition_colnames &&
+      meta_data$dyad_compositions$dyad_type[[1L]] == "exchangeable") {
+    composition_indicator_columns <- paste0(
+      dyad_retained_prefix,
+      "is_exchangeable"
+    )
+  } else if (use_short_composition_colnames) {
+    # With one distinguishable composition, the observed role alone identifies
+    # each indicator; the composition portion of the label is redundant.
+    observed_role_labels <- as.character(data[[meta_data$role]])[
+      match(
+        composition_role_labels,
+        as.character(data[[dyad_composition_role_col]])
+      )
+    ]
+    observed_role_suffixes <- make_dyad_suffixes(
+      observed_role_labels,
+      label_type = "role labels",
+      rename_hint = "role labels"
+    )
+    composition_indicator_columns <- paste0(
+      dyad_retained_prefix,
+      "is_",
+      unname(observed_role_suffixes[observed_role_labels])
+    )
+  } else {
+    composition_role_suffixes <- make_dyad_suffixes(
+      composition_role_labels
+    )
+    composition_indicator_columns <- paste0(
+      dyad_retained_prefix,
+      "is_",
+      unname(composition_role_suffixes[composition_role_labels])
+    )
+  }
   names(composition_indicator_columns) <- composition_role_labels
 
-  exchangeable_compositions <- sort(names(exchangeable_composition_suffixes))
-  member_contrast_columns <- paste0(
-    dyad_reserved_prefix,
-    "member_contrast_",
-    unname(exchangeable_composition_suffixes[exchangeable_compositions]),
-    "_arbitrary"
-  )
-  names(member_contrast_columns) <- exchangeable_compositions
+  # Only compositions with non-zero member contrasts need a contrast column.
+  contrast_composition_labels <- sort(unique(as.character(
+    data[[dyad_composition_col]][data[[dyad_diff_col]] != 0]
+  )))
+  member_contrast_columns <- character(length(contrast_composition_labels))
+  if (length(contrast_composition_labels) > 0L) {
+    if (use_short_composition_colnames) {
+      member_contrast_columns <- paste0(
+        dyad_retained_prefix,
+        "member_contrast_arbitrary"
+      )
+    } else {
+      contrast_composition_suffixes <- make_dyad_suffixes(
+        contrast_composition_labels
+      )
+      member_contrast_columns <- paste0(
+        dyad_retained_prefix,
+        "member_contrast_",
+        unname(
+          contrast_composition_suffixes[contrast_composition_labels]
+        ),
+        "_arbitrary"
+      )
+    }
+  }
+  names(member_contrast_columns) <- contrast_composition_labels
 
-  # Shape: one row per column that this function is about to create. The
-  # descriptive fields are used only to make collision errors informative.
+  # Use one row per column for both pre-write collision validation and the
+  # generated-column metadata recorded after all columns exist.
   composition_column_plan <- tibble::tibble(
     target = c(
       unname(composition_indicator_columns),
@@ -536,11 +652,19 @@ finalize_composition_columns <- function(data) {
     column_role = c(
       rep("composition_indicator", length(composition_indicator_columns)),
       rep("member_contrast", length(member_contrast_columns))
+    ),
+    variable_role = c(
+      rep("composition_role", length(composition_indicator_columns)),
+      rep("composition", length(member_contrast_columns))
+    ),
+    source_column = c(
+      rep(dyad_composition_role_col, length(composition_indicator_columns)),
+      rep(dyad_composition_col, length(member_contrast_columns))
     )
   )
   validate_generated_column_plan(data, composition_column_plan)
 
-  # Create numeric indicator columns .dy_is_{composition_role}
+  # Create numeric indicator columns using the exact planned names.
   for (composition_role in composition_role_labels) {
     composition_indicator_column <-
       composition_indicator_columns[[composition_role]]
@@ -552,19 +676,27 @@ finalize_composition_columns <- function(data) {
   }
 
   # Composition-specific member contrasts let mixed-composition models target
-  # each exchangeable composition.
-  for (composition in exchangeable_compositions) {
-    row_has_composition <-
-      as.character(data[[dyad_composition_col]]) == composition
-    member_contrast_column <- member_contrast_columns[[composition]]
+  # each selected composition.
+  for (composition_label in contrast_composition_labels) {
+    row_matches_composition <-
+      as.character(data[[dyad_composition_col]]) == composition_label
+    member_contrast_column <- member_contrast_columns[[composition_label]]
     data[[member_contrast_column]] <- ifelse(
-      row_has_composition,
+      row_matches_composition,
       data[[dyad_diff_col]],
       0
     )
   }
 
   data[[dyad_diff_col]] <- NULL
+  # Record the complete composition stage only after every column exists.
+  data <- record_generated_columns(
+    data,
+    dplyr::bind_rows(
+      fixed_composition_column_plan,
+      composition_column_plan
+    )
+  )
 
   data
 }

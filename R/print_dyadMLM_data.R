@@ -1,8 +1,24 @@
 #' @export
 print.dyadMLM_data <- function(x, ...) {
+  print_dyadMLM_header(x)
+
+  meta <- attr(x, "dyadMLM")
+  cat("# Added columns:\n")
+  print_added_columns(added_columns_for_print(x, meta))
+  cat("#\n")
+
+  modified <- x
+  class(modified) <- class(modified)[class(modified) != "dyadMLM_data"]
+  print(modified, ...)
+
+  # return original unchanged tibble
+  invisible(x)
+}
+
+print_dyadMLM_header <- function(x, title = "dyadMLM data") {
   meta <- attr(x, "dyadMLM")
 
-  cat(pillar::style_subtle("# dyadMLM data\n"))
+  cat(pillar::style_subtle(paste0("# ", title, "\n")))
   print_wrapped_comment_fields(
     fields = c(
       paste0("Rows: ", nrow(x)),
@@ -62,17 +78,7 @@ print.dyadMLM_data <- function(x, ...) {
   }
 
   print_dyad_compositions(meta$dyad_compositions)
-
-  cat("# Added columns:\n")
-  print_added_columns(added_columns_for_print(x, meta))
-  cat("#\n")
-
-  modified <- x
-  class(modified) <- class(modified)[class(modified) != "dyadMLM_data"]
-  print(modified, ...)
-
-  # return original unchanged tibble
-  invisible(x)
+  invisible(NULL)
 }
 
 print_dyad_compositions <- function(dyad_compositions) {
@@ -126,27 +132,9 @@ print_dyad_compositions <- function(dyad_compositions) {
 }
 
 added_columns_for_print <- function(x, meta) {
-  fixed_added_columns <- tibble::tribble(
-    ~column_pattern,        ~description,
-    ".dy_composition",       "inferred dyad composition",
-    ".dy_composition_role",  "composition-specific member role",
-    ".dy_is_{comp-role}",    "composition-role indicator columns",
-    ".dy_member_contrast_{comp}_arbitrary", "composition-specific member contrasts with arbitrary direction; 0 for distinguishable dyads or other exchangeable compositions"
-  )
-  show_fixed_added_columns <- c(
-    dyad_composition_col %in% names(x),
-    dyad_composition_role_col %in% names(x),
-    any(startsWith(names(x), paste0(dyad_reserved_prefix, "is_"))),
-    any(startsWith(
-      names(x),
-      paste0(dyad_reserved_prefix, "member_contrast_")
-    ))
-  )
-  added_columns <- fixed_added_columns[show_fixed_added_columns, ]
-
   # Users may remove generated columns while keeping the dyadMLM metadata.
-  # Only advertise generated model columns that are still present in the data.
-  generated_column_specs <- dyad_generated_columns(meta) |>
+  # Only advertise generated columns that are still present in the data.
+  dyad_generated_columns(meta) |>
     dplyr::filter(.data$column %in% names(x)) |>
     # Avoid repeated descriptions when several generated columns share a family.
     dplyr::distinct(
@@ -154,16 +142,8 @@ added_columns_for_print <- function(x, meta) {
       .data$column_pattern,
       .data$description
     ) |>
-    dplyr::arrange(.data$print_order)
-
-  if (nrow(generated_column_specs) > 0) {
-    added_columns <- dplyr::bind_rows(
-      added_columns,
-      generated_column_specs[, c("column_pattern", "description")]
-    )
-  }
-
-  added_columns
+    dplyr::arrange(.data$print_order) |>
+    dplyr::select("column_pattern", "description")
 }
 
 print_added_columns <- function(added_columns) {

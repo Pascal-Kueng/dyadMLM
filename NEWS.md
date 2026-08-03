@@ -1,3 +1,39 @@
+# dyadMLM (development version)
+
+* Retained generated columns now use a single leading dot instead of `.dy_`
+  for more readable model formulas; for example, `.dy_x_actor` becomes
+  `.x_actor`. The `.dy_` prefix is reserved for temporary implementation
+  columns.
+* `prepare_dyad_data()` now uses compact composition-column names when the
+  final data contain one composition, such as `.is_female` and
+  `.member_contrast_arbitrary`. Set `short_colnames = FALSE` to retain
+  composition-qualified names. `recover_exchangeable_covariance()` recognizes
+  both forms.
+* `prepare_dyad_data(include_arbitrary_member_contrast = TRUE)` can now add arbitrary
+  member contrasts for distinguishable compositions without changing their
+  metadata or role indicators. This supports full and
+  exchangeability-constrained APIMs from the same prepared data.
+  `set_exchangeable_compositions` still performs reclassification for pooling
+  and DIM preparation.
+* Added a `summary()` method for prepared data that prints the dyadic structure
+  followed by standard summaries of all columns.
+* Generated-column tracking now records all retained composition and modeling
+  columns. Printing and model comparison use these records rather than
+  inferring column ownership from a prefix, and generated names are checked for
+  collisions and valid R syntax before they are written.
+* `prepare_dyad_data(add_apim_gmc_predictors = TRUE)` now adds GMC source,
+  actor, and partner columns alongside raw APIM columns, plus lagged variants
+  when requested. It uses one mean over retained non-missing values, warns
+  about skipped non-numeric predictors in mixed selections, and leaves DIM/DSM
+  centering unchanged.
+* Renamed `compare_nested_glmmTMB_models()` to `compare_nested_models()`.
+* Naming changes in this development version are intentionally breaking;
+  names from 0.1.0 are not retained.
+* Added package-level help at `?dyadMLM`, with links to the main functions,
+  example datasets, and getting-started documentation.
+* Example datasets no longer include the redundant `dyad_composition` column;
+  `dyads_ild` now includes member-specific AR(1) residual processes.
+
 # dyadMLM 0.1.0
 
 * Initial release.
@@ -12,8 +48,7 @@
   and print argument `what` to `representation`.
 * Renamed generated exchangeable-member contrasts from
   `.dy_diff_{composition}_arbitrary` to
-  `.dy_member_contrast_{composition}_arbitrary`. Covariance recovery continues
-  to recognize legacy contrast names in previously fitted models.
+  `.dy_member_contrast_{composition}_arbitrary`.
 * Renamed the package from `interdep` to `dyadMLM`; package-generated columns
   now use the `.dy_` prefix instead of `.i_`.
 * Added validation and preparation of cross-sectional and intensive

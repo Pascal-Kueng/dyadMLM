@@ -1,3 +1,7 @@
-## Generate the package citation from DESCRIPTION so that the version,
-## authorship metadata, and release year stay synchronized.
-citation(auto = meta)
+## Keep the citation synchronized with DESCRIPTION while using the stable
+## Zenodo concept DOI across package releases.
+local({
+  package_citation <- citation(auto = meta)
+  package_citation$doi <- "10.5281/zenodo.21481720"
+  package_citation
+})

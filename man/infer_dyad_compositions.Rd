@@ -9,14 +9,16 @@ infer_dyad_compositions(
   seed = NULL,
   keep_compositions = NULL,
   set_exchangeable_compositions = NULL,
-  pool_compositions = NULL
+  pool_compositions = NULL,
+  short_colnames = TRUE,
+  include_arbitrary_member_contrast = FALSE
 )
 }
 \arguments{
 \item{data}{A \code{dyadMLM_data} object returned by \code{\link[=validate_dyad_data]{validate_dyad_data()}}.}
 
-\item{seed}{Optional seed for random \verb{.dy_member_contrast_*} sign assignment in
-exchangeable dyads. If \code{NULL}, the current R session's RNG state is used.}
+\item{seed}{Optional seed for random \verb{.member_contrast_*} sign assignment.
+If \code{NULL}, the current R session's RNG state is used.}
 
 \item{keep_compositions}{Optional observed dyad compositions to keep
 before exchangeability overrides and pooling.}
@@ -27,12 +29,19 @@ exchangeable for analysis.}
 \item{pool_compositions}{Optional named list that pools exchangeable dyad
 compositions into user-named final composition labels. Each pool must
 resolve to at least two distinct observed compositions.}
+
+\item{short_colnames}{Whether to use shorter composition-dependent generated
+column names when the final data contain one composition.}
+
+\item{include_arbitrary_member_contrast}{Whether to also generate arbitrary
+\verb{.member_contrast_*} columns for distinguishable compositions without
+changing their composition metadata, roles, or indicators.}
 }
 \value{
-A \code{dyadMLM_data} object with added \code{.dy_composition} and
-\code{.dy_composition_role} factor columns, \verb{.dy_is_*} numeric indicator columns,
-composition-specific numeric \verb{.dy_member_contrast_*} columns coded \code{-1} and
-\code{1} for the two members of matching exchangeable dyads and \code{0} otherwise,
+A \code{dyadMLM_data} object with added \code{.composition} and
+\code{.composition_role} factor columns, \verb{.is_*} numeric indicator columns,
+composition-specific numeric \verb{.member_contrast_*} columns coded \code{-1} and
+\code{1} for the two members of each matching composition and \code{0} otherwise,
 and dyad composition metadata.
 }
 \description{

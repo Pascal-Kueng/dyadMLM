@@ -4,10 +4,12 @@
 \alias{center_predictors}
 \title{Center predictor variables for dyadic models}
 \usage{
-center_predictors(data)
+center_predictors(data, add_apim_gmc_predictors = FALSE)
 }
 \arguments{
 \item{data}{A \code{dyadMLM_data} object returned by \code{\link[=prepare_dyad_data]{prepare_dyad_data()}}.}
+
+\item{add_apim_gmc_predictors}{Whether to add APIM GMC source components.}
 }
 \value{
 A \code{dyadMLM_data} object with centered predictor columns added and
@@ -19,6 +21,7 @@ supports two-level temporal centering for intensive longitudinal predictors:
 a within-person component and a between-person component. The original
 predictor remains available as a raw component for model-specific column
 construction.
+It can also add GMC source components for numeric APIM predictors.
 For two-level temporal centering, the between-person component is centered
 around the grand mean of person means, not the grand mean of all observed rows.
 This gives each person equal weight even when people have different numbers of

@@ -8,24 +8,63 @@
 [![R-CMD-check](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/Pascal-Kueng/dyadMLM/graph/badge.svg)](https://app.codecov.io/gh/Pascal-Kueng/dyadMLM)
-[![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21481720.svg)](https://doi.org/10.5281/zenodo.21481720)
 <!-- badges: end -->
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
-generalized linear mixed-effects models. It validates and prepares
-cross-sectional and intensive longitudinal dyadic data.
+generalized linear mixed-effects models.
 
-It supports distinguishable and exchangeable dyads and can also prepare
-datasets containing multiple dyad compositions. It creates
-composition-aware, model-ready columns for dyadic multilevel model
-parameterizations such as the Actor-Partner Interdependence Model
-(APIM), Dyad-Individual Model (DIM), and Dyadic Score Model (DSM).
+It provides supporting functions for:
 
-Selected post-estimation tools compare compatible fitted models and
-back-transform exchangeable random-effect covariance structures into
-member-level quantities.
+1.  [Data preparation and validation of dyadic
+    data](#1-data-preparation-and-validation)
+2.  [Post-estimation tools](#2-post-estimation-tools)
 
-Start with the vignettes, or scroll down for a quick-start.
+You can install the development version with:
+
+``` r
+install.packages("dyadMLM", repos = c(
+  "https://pascal-kueng.r-universe.dev",
+  "https://cloud.r-project.org"
+  )
+)
+```
+
+## 1. Data preparation and validation
+
+The core feature of this package is data preparation and validation for
+various types of dyadic data. It creates model-ready columns for dyadic
+multilevel models, including the Actor-Partner Interdependence Model
+(APIM), Dyad-Individual Model (DIM), and the Dyadic Score Model (DSM).
+
+The package currently supports:
+
+- cross-sectional and intensive longitudinal dyadic data (e.g., daily
+  diary data)
+- distinguishable and exchangeable (indistinguishable) dyads
+- datasets containing multiple dyad compositions (e.g., opposite-sex
+  partners and same-sex partners)
+
+See the [Getting Started
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html).
+
+## 2. Post-estimation tools
+
+Selected post-estimation tools currently include:
+
+- a function to compare compatible nested models
+- a function to back-transform exchangeable random-effect covariance
+  structures into interpretable member-level quantities, as described in
+  the [APIM
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)
+
+## Vignettes and examples
+
+Start with the vignettes, or scroll down for a quick example.
 
 | Vignette | Focus |
 |----|----|
@@ -34,31 +73,17 @@ Start with the vignettes, or scroll down for a quick-start.
 | [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
 | [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
 
-For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see [Distinguishable and
-Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
-uses `dyadMLM` for cross-sectional and intensive longitudinal APIM and
-DIM workflows, with models fitted primarily using `brms`
+For theoretical foundations and a practical walkthrough of dyadic data
+analysis, from data preparation and model fitting to interpretation and
+diagnostics using `dyadMLM` with `glmmTMB`, see the [Dyadic Data
+Analysis Workshop](https://pascal-kueng.github.io/dyadMLM/workshop/).
+For a Bayesian workflow using `dyadMLM` and `brms`, refer to
+[Distinguishable and Exchangeable Dyads: Bayesian Multilevel
+Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/)
 ([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
 [DOI](https://doi.org/10.5281/zenodo.17400655)).
 
-## Installation
-
-You can install the released version of `dyadMLM` from CRAN with:
-
-``` r
-install.packages("dyadMLM")
-```
-
-You can install the development version from GitHub with:
-
-``` r
-# install.packages("pak")
-pak::pak("Pascal-Kueng/dyadMLM")
-```
-
-## Simple Cross-Sectional Example
+### Simple Cross-Sectional Example
 
 Prepare distinguishable dyads for a cross-sectional APIM:
 
@@ -87,25 +112,24 @@ print(prepared_data, n = 4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition       inferred dyad composition
-#> #   .dy_composition_role  composition-specific member role
-#> #   .dy_is_{comp-role}    composition-role indicator columns
-#> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
-#> #                         values
-#> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                         values
+#> #   .composition       inferred dyad composition
+#> #   .composition_role  composition-specific member role
+#> #   .is_{role}         composition-role indicator columns
+#> #   .{pred}_actor      APIM actor predictor: actor's original predictor values
+#> #   .{pred}_partner    APIM partner predictor: partner's original predictor
+#> #                      values
 #> #
-#> # A tibble: 240 × 12
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> # A tibble: 240 × 11
+#>   personID coupleID gender closeness provided_support .composition
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>
+#> 1        1        1 female      4.71             4.49 female_x_male
+#> 2        2        1 male        4.61             4.76 female_x_male
+#> 3        3        2 female      6.69             4.09 female_x_male
+#> 4        4        2 male        5.98             6.20 female_x_male
 #> # ℹ 236 more rows
-#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
+#> # ℹ 5 more variables: .composition_role <fct>, .is_female <dbl>,
+#> #   .is_male <dbl>, .provided_support_actor <dbl>,
+#> #   .provided_support_partner <dbl>
 ```
 
 The prepared data contains the composition indicators and APIM
@@ -118,19 +142,19 @@ simple_apim <- glmmTMB::glmmTMB(
   closeness ~
 
     # Gender-specific intercepts
-    0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male +
+    0 + .is_female + .is_male +
 
     # Gender-specific actor effects
-    .dy_provided_support_actor:.dy_is_female_x_male_female +
-    .dy_provided_support_actor:.dy_is_female_x_male_male +
+    .provided_support_actor:.is_female +
+    .provided_support_actor:.is_male +
 
     # Gender-specific partner effects
-    .dy_provided_support_partner:.dy_is_female_x_male_female +
-    .dy_provided_support_partner:.dy_is_female_x_male_male +
+    .provided_support_partner:.is_female +
+    .provided_support_partner:.is_male +
 
     # Dyad-level random effects represent the two members'
     # residual covariance structure
-    us(0 + .dy_is_female_x_male_female + .dy_is_female_x_male_male | coupleID),
+    us(0 + .is_female + .is_male | coupleID),
 
   # With the residual covariance represented by the dyad-level
   # random effects above, the Gaussian residual dispersion is fixed near zero.
@@ -142,21 +166,29 @@ simple_apim <- glmmTMB::glmmTMB(
 
 ## Citation
 
-If you use `dyadMLM`, please cite the package directly:
+If you use `dyadMLM`, please cite the version of the package you use.
+Obtain the citation via:
 
-``` bibtex
-@Manual{dyadMLM,
-  title = {dyadMLM: Tools for Dyadic Multilevel Models},
-  author = {Pascal Küng},
-  year = {2026},
-  note = {R package version 0.1.0},
-  doi = {10.5281/zenodo.21481720},
-  url = {https://github.com/Pascal-Kueng/dyadMLM},
-}
+``` r
+citation("dyadMLM")
+#> To cite package 'dyadMLM' in publications use:
+#>
+#>   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.
+#>   doi:10.5281/zenodo.21481720
+#>   <https://doi.org/10.5281/zenodo.21481720>. R package version
+#>   0.1.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
+#>
+#> A BibTeX entry for LaTeX users is
+#>
+#>   @Manual{,
+#>     title = {dyadMLM: Tools for Dyadic Multilevel Models},
+#>     author = {Pascal Küng},
+#>     year = {2026},
+#>     note = {R package version 0.1.0.9000},
+#>     url = {https://pascal-kueng.github.io/dyadMLM/},
+#>     doi = {10.5281/zenodo.21481720},
+#>   }
 ```
-
-The package uses the concept DOI `10.5281/zenodo.21481720` across
-releases.
 
 ------------------------------------------------------------------------
 

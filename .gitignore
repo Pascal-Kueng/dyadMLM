@@ -9,3 +9,6 @@ HANDOFF.md
 docs
 /dyadMLM_*.tar.gz
 /*.Rcheck/
+/Rplots.pdf
+/dev/workshop/temp_audit/
+/dev/workshop/applied-tutorial_cache/

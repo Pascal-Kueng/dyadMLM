@@ -6,8 +6,7 @@ check_example_dyads <- function(
   }
   structural_columns <- c(
     structural_columns,
-    "gender",
-    "dyad_composition"
+    "gender"
   )
 
   expect_equal(
@@ -66,18 +65,18 @@ check_example_dyads <- function(
   expect_equal(dyad_compositions$n_dyads, c(120L, 120L, 120L))
   expect_false(dyad_diff_col %in% names(prepared))
   expect_true(
-    ".dy_member_contrast_female_x_female_arbitrary" %in% names(prepared)
+    ".member_contrast_female_x_female_arbitrary" %in% names(prepared)
   )
   expect_true(
-    ".dy_member_contrast_male_x_male_arbitrary" %in% names(prepared)
+    ".member_contrast_male_x_male_arbitrary" %in% names(prepared)
   )
 
-  female_female <- prepared$.dy_composition == "female_x_female"
-  male_male <- prepared$.dy_composition == "male_x_male"
+  female_female <- prepared$.composition == "female_x_female"
+  male_male <- prepared$.composition == "male_x_male"
   female_female_contrast <-
-    prepared$.dy_member_contrast_female_x_female_arbitrary
+    prepared$.member_contrast_female_x_female_arbitrary
   male_male_contrast <-
-    prepared$.dy_member_contrast_male_x_male_arbitrary
+    prepared$.member_contrast_male_x_male_arbitrary
 
   expect_true(all(abs(female_female_contrast[female_female]) == 1))
   expect_true(all(female_female_contrast[!female_female] == 0))
@@ -186,15 +185,13 @@ test_that("example datasets use parallel dyad structures", {
   cross_structural_columns <- c(
     "personID",
     "coupleID",
-    "gender",
-    "dyad_composition"
+    "gender"
   )
   ild_structural_columns <- c(
     "personID",
     "coupleID",
     "diaryday",
-    "gender",
-    "dyad_composition"
+    "gender"
   )
 
   expect_identical(

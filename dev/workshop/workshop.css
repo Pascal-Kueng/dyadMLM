@@ -18,6 +18,44 @@
   --interdep-residual-correlation: #546e7a;
 }
 
+/* Interpretation cautions ----------------------------------------------- */
+.reveal .not-significant,
+.reveal .interpretation-footnote {
+  color: #b42318;
+}
+
+.reveal .interpretation-footnote {
+  font-size: 0.66em;
+  line-height: 1.2;
+  margin-top: 0.45em;
+}
+
+.reveal .interpretation-footnote p {
+  margin: 0;
+}
+
+.reveal .slides section.interpretation-slide p {
+  margin: 0.38em 0;
+}
+
+.reveal .slides section.interpretation-slide ul {
+  margin-top: 0.18em;
+  margin-bottom: 0.42em;
+}
+
+.reveal .slides section.interpretation-slide li {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+.reveal .appendix-back-link,
+.reveal .results-forward-link {
+  float: right;
+  font-size: 0.36em;
+  font-weight: 500;
+  margin-top: 0.85em;
+}
+
 /* Transition between the two workshop decks ------------------------------ */
 .reveal .workshop-next {
   display: grid;
@@ -307,36 +345,125 @@
 }
 
 .reveal table {
-  width: 100%;
-  margin-top: 0.35em;
-  border-collapse: separate;
+  width: auto;
+  max-width: 100%;
+  margin: 0.35em auto 0;
+  border-collapse: collapse;
   border-spacing: 0;
-  font-size: 0.78em;
-  overflow: hidden;
-  border: 1px solid var(--uzh-rule);
-  border-radius: 7px;
+  border: 0;
+  border-top: 1px solid var(--uzh-rule);
+  border-bottom: 1px solid var(--uzh-rule);
+  background: transparent;
+  font-size: 0.65em;
 }
 
 .reveal table th {
-  padding: 0.46em 0.65em;
+  padding: 0.3em 0.5em;
   border: 0;
-  background: var(--uzh-blue);
-  color: white;
+  border-bottom: 1.5px solid var(--uzh-muted);
+  background: transparent;
+  color: var(--uzh-ink);
   font-weight: 600;
 }
 
 .reveal table td {
-  padding: 0.4em 0.65em;
+  padding: 0.26em 0.5em;
   border: 0;
   border-bottom: 1px solid var(--uzh-rule);
 }
 
 .reveal table tr:nth-child(even) td {
-  background: var(--uzh-surface);
+  background: transparent;
 }
 
 .reveal table tr:last-child td {
   border-bottom: 0;
+}
+
+/* Let the compact leave-one-dyad-out summary use the available slide space. */
+.reveal .loo-summary-table table {
+  margin-top: 1em;
+  font-size: 0.8em;
+}
+
+/* Reserve the branded treatment for presentation-oriented overview tables. */
+.reveal .fancy-table table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border: 1px solid var(--uzh-rule);
+  border-radius: 7px;
+  font-size: 0.78em;
+  overflow: hidden;
+}
+
+.reveal .fancy-table table col:first-child {
+  width: 18% !important;
+}
+
+.reveal .fancy-table table col:last-child {
+  width: 82% !important;
+}
+
+.reveal .fancy-table table th:first-child,
+.reveal .fancy-table table td:first-child {
+  width: 18%;
+}
+
+.reveal .fancy-table table th {
+  padding: 0.46em 0.65em;
+  border-bottom: 0;
+  background: var(--uzh-blue);
+  color: white;
+  font-weight: 600;
+  text-align: left;
+}
+
+.reveal .fancy-table table td {
+  padding: 0.4em 0.65em;
+  border-bottom: 1px solid var(--uzh-rule);
+  text-align: left;
+}
+
+.reveal .fancy-table table tr:nth-child(even) td {
+  background: var(--uzh-surface);
+}
+
+.reveal .agenda-completed {
+  color: #9aa7bd;
+}
+
+/* Give executed code and its output a little visual separation. */
+.reveal .cell > .cell-code + .cell-output,
+.reveal .cell > .cell-code + .cell-output-display,
+.reveal .cell > .cell-code + .cell-output-stdout,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output-display,
+.reveal .cell > .code-copy-outer-scaffold + .cell-output-stdout {
+  margin-top: 0.4em;
+}
+
+/* Let separate console-output slides use the available height before scrolling. */
+.reveal .slides section.output-location-slide.present {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr);
+  box-sizing: border-box;
+  padding-bottom: 1.2em;
+}
+
+.reveal .slides section.output-location-slide > .cell.output-location-slide,
+.reveal .slides section.output-location-slide .cell-output-stdout,
+.reveal .slides section.output-location-slide .cell-output-stdout > pre {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.reveal .slides section.output-location-slide .cell-output-stdout > pre > code {
+  box-sizing: border-box;
+  max-height: 100%;
+  overflow: auto;
 }
 
 .reveal blockquote {
@@ -353,12 +480,29 @@
   color: var(--uzh-blue-dark);
 }
 
+.reveal .text-smaller {
+  font-size: 0.82em;
+}
+
 .reveal .subtle {
   font-size: 0.76em;
   color: var(--uzh-muted);
 }
 
 .reveal .subtle a {
+  color: inherit;
+}
+
+.reveal h2 .heading-reference {
+  margin-left: 0.45em;
+  color: var(--uzh-muted);
+  font-size: 0.42em;
+  font-weight: 400;
+  white-space: nowrap;
+  vertical-align: 0.12em;
+}
+
+.reveal h2 .heading-reference a {
   color: inherit;
 }
 

@@ -44,6 +44,10 @@ because the dyadic structure is unchanged. The interpretation of the fitted
 model differs: fixed and random effects act on the log-mean scale, while the
 observation-level negative-binomial variance remains part of the model.
 
+These examples use `add_apim_gmc_predictors = TRUE`, which retains raw APIM
+columns and adds stress variants centered over all retained non-missing values.
+Using raw columns instead changes only the intercept reference.
+
 ### Distinguishable negative-binomial APIM
 
 ```{r prepare-nbinom-distinguishable}
@@ -53,6 +57,7 @@ nbinom_distinguishable_data <- dyadMLM::prepare_dyad_data(
   member = personID,
   role = gender,
   predictors = stress,
+  add_apim_gmc_predictors = TRUE,
   # All three observed compositions in `dyads_nbinom_cross` are detected and
   # retained by default. This example focuses on `female-male` dyads, so we
   # restrict the analysis here.
@@ -69,16 +74,16 @@ summary(nbinom_distinguishable_data)
 nbinom_distinguishable_model <- glmmTMB::glmmTMB(
   conflict_count ~ 0 +
     # Role-specific intercepts
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
+    .is_female +
+    .is_male +
 
     # Role-specific actor effects of stress
-    .dy_is_female_x_male_female:.dy_stress_actor +
-    .dy_is_female_x_male_male:.dy_stress_actor +
+    .is_female:.stress_gmc_actor +
+    .is_male:.stress_gmc_actor +
 
     # Role-specific partner effects of stress
-    .dy_is_female_x_male_female:.dy_stress_partner +
-    .dy_is_female_x_male_male:.dy_stress_partner +
+    .is_female:.stress_gmc_partner +
+    .is_male:.stress_gmc_partner +
 
     # Shared latent dyad effect for stable non-independence
     (1 | coupleID),
@@ -106,6 +111,7 @@ nbinom_exchangeable_data <- dyadMLM::prepare_dyad_data(
   member = personID,
   role = gender,
   predictors = stress,
+  add_apim_gmc_predictors = TRUE,
   keep_compositions = "male-male",
   seed = 123
 )
@@ -119,12 +125,12 @@ nbinom_exchangeable_model <- glmmTMB::glmmTMB(
   conflict_count ~
     # Pooled intercept and actor and partner effects
     1 +
-    .dy_stress_actor +
-    .dy_stress_partner +
+    .stress_gmc_actor +
+    .stress_gmc_partner +
 
     # Exchangeable latent dyad covariance on the log-mean scale
     (1 | coupleID) +
-    (0 + .dy_member_contrast_male_x_male_arbitrary | coupleID),
+    (0 + .member_contrast_arbitrary | coupleID),
   family = glmmTMB::nbinom2(link = "log"),
   data = nbinom_exchangeable_data
 )

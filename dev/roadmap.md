@@ -12,16 +12,16 @@ helpers, and eventually model syntax explicit and reproducible.
 
 - Temporal predictor decomposition and predictor-shape planning:
   [`centering.md`](centering.md)
-- Possible future reintroduction of inspection-only incomplete/unknown dyads:
-  [`keep-behavior-notes.md`](keep-behavior-notes.md)
+- Inspection-only incomplete/unknown dyads remain intentionally unsupported;
+  revisit that boundary only for a concrete user-facing need.
 - Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
   - the note is provisional and must be revised against the methodological
     papers in [`References/`](References/) before implementation
 - Directional DSM derivation and implementation record: [`dsm.md`](dsm.md)
-- Initial covariance back-transformation mathematics and design history:
+- Covariance back-transformation mathematics and design history:
   [`backtransform.md`](backtransform.md)
-  - its original API scope and implementation-status sections are stale; use
-    the current-state section below and the code as authoritative
+  - use the current code, generated documentation, and tests as authoritative
+    for exact API behavior
 - ILD non-independence evidence and tutorial policy:
   [`ild-nonindependence.md`](ild-nonindependence.md)
 - Data-preparation debugging scratch helpers:
@@ -29,10 +29,10 @@ helpers, and eventually model syntax explicit and reproducible.
 
 ## Current State
 
-The package is currently in final preparation for its first CRAN release. The
-core data-preparation API is implemented and covered by tests, the README links
-to the pkgdown site, and GitHub Actions are configured for R CMD check and
-pkgdown publishing.
+Version 0.1.0 has been accepted by CRAN and tagged as `v0.1.0`. Development now
+continues as version 0.1.0.9000. The core data-preparation API is implemented
+and covered by tests, the README links to the pkgdown site, and GitHub Actions
+are configured for R CMD check and pkgdown publishing.
 
 Recently completed cleanup:
 
@@ -70,11 +70,13 @@ Recently completed cleanup:
   products, and fitted-row coding validation when the indicator columns remain
   available
 
-Immediate sequence:
+Post-release sequence:
 
-1. synchronize the 0.1.0 release metadata and reserved Zenodo concept DOI
-2. rerun the complete source-package, vignette, and pkgdown checks
-3. submit to CRAN after final review and explicit approval
+1. [x] Create the GitHub Release from the accepted `v0.1.0` tag.
+2. [x] Upload the exact accepted source archive to the prepared Zenodo record,
+   verify its metadata and checksum, and publish it.
+3. [ ] Complete the post-release documentation and workshop cleanup, then verify
+   the pkgdown and stable workshop URLs after deployment from `main`.
 
 The engine-independent covariance-array back-transformation and final named
 `varcov`/`sdcor` results are implemented for `glmmTMB` point estimates and
@@ -105,7 +107,7 @@ Target vignette structure:
   - distinguishable and exchangeable APIMs
   - within-person and between-person actor/partner effects
   - generalized outcomes, including negative-binomial examples
-  - `.dy_is_*`, `.dy_member_contrast_*`, and raw actor/partner predictor columns
+  - `.is_*`, `.member_contrast_*`, and raw actor/partner predictor columns
   - a brief comparison of manifest raw outcome lags and separately estimated
     within-/between-person outcome-lag components, with their different
     interpretations and small-T cautions
@@ -129,15 +131,17 @@ Target vignette structure:
   - a brief ILD extension
   - outcomes remain unchanged in the MLM-focused preparation API
 
-## Version 0.1.0 - First CRAN Release Candidate
+## Version 0.1.0 - Accepted CRAN Release
 
 Goal: ship a small, reliable data-preparation and interpretation workflow with
 enough ILD support to be useful for composition-aware dyadic MLMs before adding
 larger model-building features.
 
-### v0.1.0 Release Gate
+### v0.1.0 Release Record and Follow-up
 
-The first release milestone is complete when all of the following are true:
+Version 0.1.0 was accepted by CRAN and tagged. Completed items below record the
+accepted scope; unchecked items are post-release documentation or maintenance
+follow-up rather than claims about the CRAN release state.
 
 - [x] Core composition-aware validation and APIM, DIM, and DSM column
   construction are implemented and tested.
@@ -145,7 +149,7 @@ The first release milestone is complete when all of the following are true:
   filtering, exchangeability overrides, pooling, metadata, and printing are
   implemented and tested for the documented scope.
 - [x] `recover_exchangeable_covariance()` converts fitted
-  shared/`.dy_member_contrast_*` random-effect
+  shared/`.member_contrast_*` random-effect
   structures to interpretable member-level covariance matrices. Backend
   extraction and matching are implemented for `glmmTMB` and single-response
   `brms`, including draw-wise transformation, constrained components, final
@@ -159,7 +163,9 @@ The first release milestone is complete when all of the following are true:
   example data or explicitly presented as advanced/diagnostic specifications.
 - [ ] Documentation, README, citation metadata, pkgdown, tests, and multi-platform
   R CMD checks are clean.
-- [ ] Version `0.1.0` is released, tagged, and archived.
+- [x] Version `0.1.0` is released on CRAN and tagged as `v0.1.0`.
+- [x] Create the GitHub Release and publish the exact accepted source archive
+  through the prepared Zenodo record.
 
 Not required for v0.1.0: model fitting or syntax-generation wrappers, public
 fitted-diagram functions, automated AR(1)/VAR diagnostics, a universal
@@ -211,8 +217,8 @@ Detailed implemented scope and final checks follow.
     3. apply `set_exchangeable_compositions`
     4. apply `pool_compositions` only to compositions that are exchangeable
        after step 3
-    5. build `.dy_composition`, `.dy_composition_role`, `.dy_is_*`,
-       `.dy_member_contrast_*`,
+    5. build `.composition`, `.composition_role`, `.is_*`,
+       `.member_contrast_*`,
        print summaries, and metadata from the final analysis compositions
   - Do not generate an additional raw-composition column. Preserve any
     user-supplied columns, and record pooling provenance in
@@ -221,8 +227,8 @@ Detailed implemented scope and final checks follow.
     definitions, or pooling requests that include non-exchangeable compositions
 - Handle incomplete dyads and missing roles with explicit `error` and `drop`
   behavior
-- Return factor columns for `.dy_composition` and
-  `.dy_composition_role`
+- Return factor columns for `.composition` and
+  `.composition_role`
 - Add temporal predictor decomposition and predictor-shape helpers for ILD data
   - Keep the implemented `"2l"` workflow described in [`centering.md`](centering.md)
   - Keep APIM, DIM, and DSM on the same temporal predictor decomposition
@@ -242,7 +248,7 @@ Detailed implemented scope and final checks follow.
       from the shared metadata
     - decompose raw longitudinal DIM/DSM predictors within dyad-occasion, while
       retaining dyad-level construction for CBP components
-    - keep the established `.dy_{pred}_actor` and `.dy_{pred}_partner` names; do
+    - keep the established `.{pred}_actor` and `.{pred}_partner` names; do
       not reintroduce `_raw_` into generated column names
     - document that raw and decomposed versions of the same contemporaneous
       predictor should not all be included in one formula because they are
@@ -269,8 +275,8 @@ Detailed implemented scope and final checks follow.
   - Show structural columns: dyad, member, optional role, optional time
   - Show dyad compositions with composition name, dyad type, and dyad count
   - Show generated column families and one-line meanings:
-    `.dy_composition`, `.dy_composition_role`, `.dy_is_*`,
-    `.dy_member_contrast_*`,
+    `.composition`, `.composition_role`, `.is_*`,
+    `.member_contrast_*`,
     temporal predictor components, APIM predictor columns, DIM deviations, and
     DSM directional predictor columns
   - Drive generated-column printing from `dyad_generated_columns()`, which
@@ -289,51 +295,51 @@ Detailed implemented scope and final checks follow.
     # male_x_male     exchangeable    120 dyads
     #
     # Added columns:
-    #   .dy_composition                  inferred dyad composition
-    #   .dy_composition_role             composition-specific member role
-    #   .dy_is_{comp-role}               composition-role indicator columns
-    #   .dy_member_contrast_{comp}_arbitrary
+    #   .composition                  inferred dyad composition
+    #   .composition_role             composition-specific member role
+    #   .is_{comp-role}               composition-role indicator columns
+    #   .member_contrast_{comp}_arbitrary
     #                                   composition-specific member contrasts
     #                                   with arbitrary direction; 0 for
     #                                   distinguishable dyads or other
     #                                   exchangeable compositions
-    #   .dy_{pred}_cwp                   within-person predictor: momentary
+    #   .{pred}_cwp                   within-person predictor: momentary
     #                                   deviations from each person's usual level
-    #   .dy_{pred}_cbp                   between-person predictor: stable
+    #   .{pred}_cbp                   between-person predictor: stable
     #                                   differences from the average person's usual
     #                                   level
-    #   .dy_{pred}_actor                 APIM actor predictor: actor's original values
-    #   .dy_{pred}_partner               APIM partner predictor: partner's original values
-    #   .dy_{pred}_cwp_actor             APIM within-person actor predictor: actor's
+    #   .{pred}_actor                 APIM actor predictor: actor's original values
+    #   .{pred}_partner               APIM partner predictor: partner's original values
+    #   .{pred}_cwp_actor             APIM within-person actor predictor: actor's
     #                                   momentary deviations from their usual level
-    #   .dy_{pred}_cwp_partner           APIM within-person partner predictor:
+    #   .{pred}_cwp_partner           APIM within-person partner predictor:
     #                                   partner's momentary deviations from their
     #                                   usual level
-    #   .dy_{pred}_cbp_actor             APIM between-person actor predictor:
+    #   .{pred}_cbp_actor             APIM between-person actor predictor:
     #                                   actor's stable difference from the average
     #                                   person's usual level
-    #   .dy_{pred}_cbp_partner           APIM between-person partner predictor:
+    #   .{pred}_cbp_partner           APIM between-person partner predictor:
     #                                   partner's stable difference from the
     #                                   average person's usual level
-    #   .dy_{pred}_dyad_mean_gmc         raw dyad-mean predictor, grand-mean centered
-    #   .dy_{pred}_within_dyad_dev       DIM raw within-dyad predictor deviation
-    #   .dy_{pred}_within_dyad_diff      DSM raw signed predictor difference
-    #   .dy_{pred}_cwp_dyad_mean         within-person dyad-mean predictor:
+    #   .{pred}_dyad_mean_gmc         raw dyad-mean predictor, grand-mean centered
+    #   .{pred}_within_dyad_dev       DIM raw within-dyad predictor deviation
+    #   .{pred}_within_dyad_diff      DSM raw signed predictor difference
+    #   .{pred}_cwp_dyad_mean         within-person dyad-mean predictor:
     #                                   shared momentary deviations in the dyad
-    #   .dy_{pred}_cwp_within_dyad_dev
+    #   .{pred}_cwp_within_dyad_dev
     #                                   DIM within-person within-dyad predictor
     #                                   deviation: person's momentary deviation
     #                                   from the dyad average
-    #   .dy_{pred}_cbp_dyad_mean         between-person dyad-mean predictor:
+    #   .{pred}_cbp_dyad_mean         between-person dyad-mean predictor:
     #                                   dyad's stable usual level, grand-mean
     #                                   centered
-    #   .dy_{pred}_cbp_within_dyad_dev
+    #   .{pred}_cbp_within_dyad_dev
     #                                   DIM between-person within-dyad predictor
     #                                   deviation: person's stable difference from
     #                                   the dyad's usual level
-    #   .dy_dsm_role_contrast            DSM +0.5/-0.5 directional role contrast
-    #   .dy_{pred}_cwp_within_dyad_diff   DSM within-person signed predictor difference
-    #   .dy_{pred}_cbp_within_dyad_diff   DSM between-person signed predictor difference
+    #   .dsm_role_contrast            DSM +0.5/-0.5 directional role contrast
+    #   .{pred}_cwp_within_dyad_diff   DSM within-person signed predictor difference
+    #   .{pred}_cbp_within_dyad_diff   DSM between-person signed predictor difference
     #
     # A tibble: 10,080 x 23
        personID coupleID diaryday gender dyad_composition closeness provided_support ...
@@ -362,12 +368,13 @@ Detailed implemented scope and final checks follow.
 - Keep the focused DIM vignette separate from APIM/ILD APIM examples
 - Keep the DSM data-preparation examples aligned with the implemented API
 - Add citation metadata
-  - `inst/CITATION` for R users
+  - metadata-driven `inst/CITATION` for R users
   - `CITATION.cff` for GitHub and future Zenodo metadata
 
-### Pre-CRAN v0.1.0 Checklist
+### v0.1.0 Implementation Record and Follow-up Checklist
 
-Complete these before calling the feature set CRAN-ready:
+This section preserves the implementation record used for the first release.
+Remaining unchecked or imperative items are follow-up maintenance work.
 
 - Rebuild and inspect generated documentation
   - run `devtools::document()`
@@ -433,7 +440,8 @@ Complete these before calling the feature set CRAN-ready:
   - in `apim.Rmd`, show concise versions of both the manifest raw-lag and
     manifest within-between lag specifications; describe them as different
     parameterizations rather than interchangeable corrections
-  - complete the planned ILD DSM section and final review of `dsm.Rmd`
+  - keep the completed ILD DSM section aligned with the implemented API and
+    complete any remaining review of `dsm.Rmd`
   - keep heavy or convergence-sensitive examples out of `getting-started.Rmd`
     and mark advanced examples `eval = FALSE` where needed
 - Keep the completed DIM vignette stable
@@ -544,19 +552,26 @@ Complete these before calling the feature set CRAN-ready:
   - inspect README, vignette, examples, `inst/CITATION`, and package metadata
     for CRAN-facing clarity
 
-- Release to CRAN once checks, tests, docs, README, and vignette are clean
-  - Keep Zenodo draft `21481721` for 0.1.0 unpublished during CRAN review;
-    its reserved version DOI is `10.5281/zenodo.21481721`
-  - Submit source package to CRAN without requiring a Git tag first
-  - After CRAN acceptance, tag the accepted commit as `v0.1.0`
-  - Create a GitHub release from that tag
-  - Upload the exact accepted source archive to the prepared Zenodo draft
-  - Verify the draft metadata and checksum, then publish it
+- Complete release archiving after CRAN acceptance
+  - [x] Submit the source package to CRAN and obtain acceptance
+  - [x] Tag the accepted commit as `v0.1.0`
+  - [x] Create a GitHub Release from that tag
+  - [x] Upload the exact accepted source archive to Zenodo record `21481721`,
+    whose reserved version DOI is `10.5281/zenodo.21481721`
+  - [x] Verify the Zenodo metadata and checksum, then publish it
   - Continue to use the concept DOI in package-level citation metadata
+  - For future releases:
+    1. update the version and release date in `DESCRIPTION` and `CITATION.cff`
+       before tagging
+    2. create the GitHub Release from the tag
+    3. create a new version from the latest Zenodo record
+    4. upload the exact release archive, verify its metadata and checksum, and
+       publish it
+  - This preserves the concept DOI across releases.
 
 ## Near-term maintenance after 0.1.0
 
-- Extend `compare_dyad_models()` to support fitted `brms` models, using a
+- Extend `compare_nested_models()` to support fitted `brms` models, using a
   Bayesian-appropriate comparison method and similarly clear output.
 
 ## Post-0.1.0 method development
@@ -682,7 +697,7 @@ Minimum expected state:
 - clear metadata for raw observed compositions versus final analysis
   compositions
 - complete getting-started, APIM, mixed-APIM, DIM, and DSM documentation paths
-- interpretation helpers for `.dy_member_contrast_*` structures
+- interpretation helpers for `.member_contrast_*` structures
 - syntax generation for at least one primary model engine, preferably
   `glmmTMB`, with tests that protect intended estimands
 - CRAN release history and pkgdown documentation that match the current API
@@ -702,7 +717,7 @@ Target state before JOSS submission:
   package
 - Robust temporal predictor decomposition for ILD data
 - Composition filtering, exchangeability, and pooling helpers
-- `.dy_member_contrast_*` interpretation helpers
+- `.member_contrast_*` interpretation helpers
 - Formula or syntax generation for at least `glmmTMB`; a second modeling
   backend is optional and is not a JOSS submission gate
 - Reproducible vignettes showing composition-aware dyadic MLM workflows

@@ -1,9 +1,10 @@
 # Directional Dyadic Score Model
 
 **Status:** predictor preparation, validation, metadata, and printing are
-complete for the current v0.1 scope. The vignette contains the cross-sectional
-long-format model and APIM transformations. Its final review, direct model-level
-equivalence tests, and the planned ILD section remain open.
+complete for the v0.1.0 scope. The vignette contains the cross-sectional
+long-format model, APIM transformations, and a brief ILD extension. An
+automated direct score-equation versus long-interaction coefficient and
+covariance equivalence test remains a possible follow-up.
 
 ## Purpose
 
@@ -19,8 +20,8 @@ The relevant source is:
 > Models of interdependent individuals versus dyadic processes in relationship
 > research. *Journal of Social and Personal Relationships, 35*(1), 59-88.
 
-The paper is stored in
-`dev/iida-et-al-2017-models-of-interdependent-individuals-versus-dyadic-processes-in-relationship-research.pdf`.
+A local ignored copy of the paper is stored in
+`dev/References/iida-et-al-2017-models-of-interdependent-individuals-versus-dyadic-processes-in-relationship-research.pdf`.
 
 ## What Iida's DSM estimates
 
@@ -231,8 +232,8 @@ The package must generate a signed dyad-level predictor difference. For an
 order `c("female", "male")`, for example:
 
 ```text
-.dy_communication_dyad_mean_gmc
-.dy_communication_within_dyad_diff
+.communication_dyad_mean_gmc
+.communication_within_dyad_diff
 ```
 
 Both values must be repeated on both member rows of a dyad. The difference
@@ -242,7 +243,7 @@ This constant column is necessary for the `XDiff -> YLevel` main effect.
 The existing column
 
 ```text
-.dy_communication_within_dyad_dev
+.communication_within_dyad_dev
 ```
 
 is not a DSM difference score. It contains `Xi - XLevel`, so its two values are
@@ -266,16 +267,16 @@ adding unused outcome transformations to the MLM-focused API.
 The package needs a DSM-specific contrast such as
 
 ```text
-.dy_dsm_role_contrast
+.dsm_role_contrast
 ```
 
 with `+0.5` for the first declared role and `-0.5` for the second. Existing
-`.dy_diff_{comp}` columns are not suitable: they are arbitrary contrasts for
-exchangeable dyads and are currently zero for distinguishable dyads. DSM
-direction must instead be stable and substantively interpretable. Their
-different scaling is intentional: a `-1/+1` exchangeable contrast makes its
-random slope a member deviation, or half-difference, whereas the DSM contrast
-makes its random slope the full directional difference.
+`.member_contrast_{comp}_arbitrary` columns are not suitable: they are
+arbitrary contrasts for exchangeable dyads and are currently zero for
+distinguishable dyads. DSM direction must instead be stable and substantively
+interpretable. Their different scaling is intentional: a `-1/+1` exchangeable
+contrast makes its random slope a member deviation, or half-difference, whereas
+the DSM contrast makes its random slope the full directional difference.
 
 ## Relation to the DIM and reduced DSM
 
@@ -310,8 +311,8 @@ The clean conceptual division is:
 
 ## Why the preliminary separate models are problematic
 
-Fitting the repeated `.dy_*_dyad_mean` and
-`.dy_*_within_dyad_dev` columns as two ordinary univariate mixed models is
+Fitting the repeated `.{pred}_dyad_mean` and
+`.{pred}_within_dyad_dev` columns as two ordinary univariate mixed models is
 not Iida's full DSM:
 
 - the cross-paths are omitted;
@@ -374,7 +375,7 @@ would obscure the core implementation.
    same internal dyad-mean and member-deviation calculations.
 3. `dsm_role_order` must contain exactly the two observed roles without
    duplicates or missing values.
-4. `.dy_dsm_role_contrast` is coded `+0.5/-0.5` from the declared order.
+4. `.dsm_role_contrast` is coded `+0.5/-0.5` from the declared order.
 5. Each predictor receives a dyad level and full signed dyad difference,
    repeated on both member rows.
 6. Outcome variables remain unchanged and are selected in the model formula.
@@ -386,13 +387,13 @@ would obscure the core implementation.
 Generated-column patterns are:
 
 ```text
-.dy_dsm_role_contrast
-.dy_{pred}_dyad_mean_gmc
-.dy_{pred}_within_dyad_diff
-.dy_{pred}_cwp_dyad_mean
-.dy_{pred}_cwp_within_dyad_diff
-.dy_{pred}_cbp_dyad_mean
-.dy_{pred}_cbp_within_dyad_diff
+.dsm_role_contrast
+.{pred}_dyad_mean_gmc
+.{pred}_within_dyad_diff
+.{pred}_cwp_dyad_mean
+.{pred}_cwp_within_dyad_diff
+.{pred}_cbp_dyad_mean
+.{pred}_cbp_within_dyad_diff
 ```
 
 The exact use of `_gmc` should continue to reflect actual centering. Signed

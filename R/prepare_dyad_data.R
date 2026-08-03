@@ -36,8 +36,8 @@
 #'   model-ready columns should be created. Requires `time` to be a finite,
 #'   integer-valued numeric measurement index. Lagging respects the dyad and
 #'   member structure, matches observations at exactly `time - 1`, and does not
-#'   bridge missing occasions. Only raw and within-person predictors are
-#'   lagged. Stable between-person versions are not.
+#'   bridge missing occasions. Eligible raw, within-person, and APIM GMC
+#'   variants are lagged; stable between-person variants are not.
 #' @param model_types Model-ready column families to construct. Can contain one
 #'   or more of `"apim"`, `"dim"`, and `"dsm"`. `"apim"` creates
 #'   actor and partner predictors. `"dim"` creates dyad-mean and
@@ -74,6 +74,10 @@
 #'   for example `"female_x_male"`, `"female-male"`, `"female_male"`, or
 #'   `"female male"`, in arbitrary order.
 #'   To set multiple compositions, use a character vector of such strings.
+#'   Unlike `include_arbitrary_member_contrast`, this reclassifies the selected
+#'   compositions as exchangeable and changes their composition-role coding and
+#'   indicators, which is required for composition pooling and DIM
+#'   compatibility.
 #' @param keep_compositions Optional observed dyad compositions to keep
 #'   before exchangeability overrides and pooling. Requires `role`. Composition
 #'   references use the same format as `set_exchangeable_compositions`. `NULL`
@@ -96,18 +100,41 @@
 #'   is applied. `"error"` stops with an error and `"drop"` removes the entire
 #'   dyad. Conflicting non-missing roles always cause an error. Ignored when no
 #'   `role` column is supplied.
-#' @param seed Optional seed for random `.dy_member_contrast_*` sign assignment
-#'   in exchangeable dyads. If `NULL`, the current R session's RNG state is used.
+#' @param seed Optional seed for random `.member_contrast_*` sign assignment.
+#'   If `NULL`, the current R session's RNG state is used.
+#' @param short_colnames Whether to use shorter composition-dependent generated
+#'   column names when the final data contain one composition. The default `TRUE`
+#'   omits the redundant composition label from `.is_*` and
+#'   `.member_contrast_*` names. `FALSE` always retains composition-qualified
+#'   names. Other generated column names are unaffected.
+#' @param include_arbitrary_member_contrast Whether to also generate arbitrary
+#'   `.member_contrast_*` columns for distinguishable compositions. The default
+#'   `FALSE` generates these columns only for exchangeable compositions.
+#'   `TRUE` retains distinguishable composition metadata, composition roles,
+#'   and role indicators. It only adds the contrast needed to fit an
+#'   exchangeability-constrained random-effects model to the same prepared
+#'   data. Use `set_exchangeable_compositions` instead to reclassify
+#'   compositions for pooling or DIM compatibility.
+#' @param add_apim_gmc_predictors Whether to add APIM GMC variants for numeric
+#'   predictors. `TRUE` retains the raw columns and adds `.{pred}_gmc` plus its
+#'   actor and partner versions, centered over all retained non-missing values
+#'   after filtering. Lagged variants use the same mean. Mixed non-numeric
+#'   predictors remain raw and are listed in one warning. In longitudinal data,
+#'   the mean is observation-weighted. Requires `"apim"` in `model_types`, at
+#'   least one numeric predictor, and resolved `temporal_decomposition = "none"`.
+#'   Do not use raw and GMC variants together in a model with an intercept.
 #'
 #' @return The original data as a tibble with class `dyadMLM_data`,
-#'   `.dy_composition` and `.dy_composition_role` factor columns,
-#'   `.dy_is_*` numeric indicator columns, composition-specific
-#'   numeric `.dy_member_contrast_*` columns coded `-1` and `1` for the two
-#'   members of matching exchangeable dyads and `0` otherwise, and a `dyadMLM`
-#'   attribute containing structural metadata, `dyad_compositions`, and
+#'   `.composition` and `.composition_role` factor columns,
+#'   `.is_*` numeric indicator columns, and numeric
+#'   `.member_contrast_*` columns coded `-1` and `1` for the two members of
+#'   each matching composition and `0` otherwise. With one final composition,
+#'   their default names omit the composition label. The `dyadMLM` attribute
+#'   contains structural metadata, `dyad_compositions`, and
 #'   predictor metadata such as `temporal_decompositions`, `lag1_predictors`,
 #'   `apim_predictors`, and `dim_predictors`, as well as `dsm_predictors` and
-#'   `dsm_role_order` when applicable.
+#'   `dsm_role_order` when applicable. The `generated_columns` table records each
+#'   package-generated column retained in the returned data.
 #'
 #' @examples
 #' data <- data.frame(
@@ -180,13 +207,34 @@ prepare_dyad_data <- function(
     pool_compositions = NULL,
     incomplete_dyads = c("error", "drop"),
     missing_role = c("error", "drop"),
-    seed = NULL
+    seed = NULL,
+    short_colnames = TRUE,
+    include_arbitrary_member_contrast = FALSE,
+    add_apim_gmc_predictors = FALSE
   ) {
 
   model_types <- normalize_model_types(model_types)
   temporal_decomposition <- rlang::arg_match(temporal_decomposition)
   incomplete_dyads <- rlang::arg_match(incomplete_dyads)
   missing_role <- rlang::arg_match(missing_role)
+
+  if (!is.logical(add_apim_gmc_predictors) ||
+      length(add_apim_gmc_predictors) != 1L ||
+      is.na(add_apim_gmc_predictors)) {
+    stop(
+      "`add_apim_gmc_predictors` must be `TRUE` or `FALSE`.",
+      call. = FALSE
+    )
+  }
+  if (add_apim_gmc_predictors && !"apim" %in% model_types) {
+    stop(
+      paste0(
+        "`add_apim_gmc_predictors = TRUE` requires that `model_types` ",
+        "includes \"apim\"."
+      ),
+      call. = FALSE
+    )
+  }
 
   out <- validate_dyad_data(
     data = data,
@@ -203,12 +251,60 @@ prepare_dyad_data <- function(
     missing_role = missing_role
   )
 
+  if (add_apim_gmc_predictors) {
+    meta_data <- attr(out, "dyadMLM")
+    if (meta_data$temporal_decomposition != "none") {
+      stop(
+        paste0(
+          "`add_apim_gmc_predictors = TRUE` requires ",
+          "`temporal_decomposition = \"none\"` after `\"auto\"` is resolved."
+        ),
+        call. = FALSE
+      )
+    }
+
+    predictors <- meta_data$predictors
+    predictor_is_numeric <- logical(length(predictors))
+    for (predictor_index in seq_along(predictors)) {
+      predictor <- predictors[[predictor_index]]
+      predictor_is_numeric[[predictor_index]] <- is.numeric(out[[predictor]])
+    }
+
+    numeric_predictors <- predictors[predictor_is_numeric]
+    if (length(numeric_predictors) == 0L) {
+      stop(
+        paste0(
+          "`add_apim_gmc_predictors = TRUE` requires at least one numeric ",
+          "variable selected by `predictors`."
+        ),
+        call. = FALSE
+      )
+    }
+
+    non_numeric_predictors <- predictors[!predictor_is_numeric]
+    if (length(non_numeric_predictors) > 0L) {
+      warning(
+        paste0(
+          "`add_apim_gmc_predictors = TRUE` was not applied to non-numeric ",
+          "predictor(s): ",
+          paste0("`", non_numeric_predictors, "`", collapse = ", "),
+          ". Their raw actor and partner columns were retained. Recode ",
+          "predictors explicitly as numeric only when grand-mean centering ",
+          "is substantively meaningful."
+        ),
+        call. = FALSE
+      )
+    }
+  }
+
   out <- infer_dyad_compositions(
     out,
     seed = seed,
     keep_compositions = keep_compositions,
     set_exchangeable_compositions = set_exchangeable_compositions,
-    pool_compositions = pool_compositions
+    pool_compositions = pool_compositions,
+    short_colnames = short_colnames,
+    include_arbitrary_member_contrast = include_arbitrary_member_contrast
   )
 
   # Validate model compatibilities
@@ -216,7 +312,10 @@ prepare_dyad_data <- function(
     validate_dsm_compatibility(out)
   }
 
-  out <- center_predictors(out)
+  out <- center_predictors(
+    out,
+    add_apim_gmc_predictors = add_apim_gmc_predictors
+  )
   out <- add_temporal_lag_columns(out)
 
   if ("dim" %in% model_types) {

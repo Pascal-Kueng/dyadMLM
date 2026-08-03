@@ -105,31 +105,27 @@ sys.source(
   envir = knitr::knit_global()
 )
 
-data_file <- if (file.exists("long.rds")) "long.rds" else "dev/workshop/long.rds"
+truth_bias_draw_file <- if (
+    file.exists(file.path("R", "draw-truth-bias.R"))) {
+  file.path("R", "draw-truth-bias.R")
+} else {
+  file.path("dev", "workshop", "R", "draw-truth-bias.R")
+}
 
-pilot <- readRDS(data_file) |>
-  select(
-    coupleID, userID, gender, ss_pa, ss_pa_min_solo, ss_pa_min_collab,
-    ss_emo_pleasure, sc_actionplan
-  ) |>
-  transmute(
-    couple_id = coupleID,
-    person_id = userID,
-    role = factor(gender, levels = c(1, 2), labels = c("female", "male")),
-    provided_emotional_support = ss_emo_pleasure,
-    collaborative_planning = sc_actionplan,
-    mvpa_solo = if_else(ss_pa == 0, 0, ss_pa_min_solo),
-    mvpa_joint = if_else(ss_pa == 0, 0, ss_pa_min_collab),
-    mvpa_total = mvpa_solo + mvpa_joint
-  )
+sys.source(
+  normalizePath(truth_bias_draw_file),
+  envir = knitr::knit_global()
+)
 
+# Nice distribution plots ----------------------------------------------
 distribution_plot <- function(data, variables, bin_widths) {
   labels <- c(
-    provided_emotional_support = "Provided emotional support",
+    provided_support = "Provided emotional support",
+    received_support = "Received emotional support",
     collaborative_planning = "Collaborative planning (daily mean)",
-    mvpa_solo = "Mean solo MVPA (minutes/day)",
-    mvpa_joint = "Mean joint MVPA (minutes/day)",
-    mvpa_total = "Mean MVPA (minutes/day)"
+    solo_mvpa = "Mean solo MVPA (minutes/day)",
+    joint_mvpa = "Mean joint MVPA (minutes/day)",
+    total_mvpa = "Mean MVPA (minutes/day)"
   )
 
   missing_widths <- setdiff(variables, names(bin_widths))
@@ -188,22 +184,26 @@ distribution_plot <- function(data, variables, bin_widths) {
   
 <!-- ca. 15 Minutes -->
 
-## Today's Aims and Program
+## Today's aims and program
+
+::: {.fancy-table}
 
 | Time | Focus |
 |---|---|
 | 11:00–12:45 | Introduction and types of dyadic models |
 | 12:45–14:00 | *Lunch break* |
-| 14:00–15:30 | Estimating cross-sectional models in R |
+| 14:00–15:30 | Estimating cross-sectional dyadic models in R |
 | 15:30–15:45 | *Short break* |
 | 15:45–16:45 | Intensive longitudinal extensions |
 | 16:45–17:00 | *Short break* |
 | 17:00–18:00 | Exercises in R |
 
+:::
+
 <!-- ca. 2.5 Minutes -->
 
 # Introduction
-Relevance and todays' example dataset
+Relevance and today's example dataset
 
 ## Why dyadic data?
 
@@ -215,8 +215,8 @@ Relevance and todays' example dataset
 *my partner's characteristics*.
 - **Some constructs and processes are dyadic:** Shared contexts and interdependence
 processes can make partners' outcomes correlated.
-- **The configuration matters:** Partners' similarity, or complementarity (differences) 
-may predict outcomes beyond either individual score.
+- **The configuration matters:** Partners' similarity or theoretically patterned
+differences, such as complementarity, may predict outcomes beyond either individual score.
 :::
 
 [@kennyPartnerEffectsRelationship1999;
@@ -226,8 +226,8 @@ may predict outcomes beyond either individual score.
 
 ## Introducing today's dyadic dataset!
 
-- 38 physically inactive opposite-sex romantic couples
-- Both partners intended to increase their physical activity together
+- 36 physically inactive romantic couples
+- Both partners intended to become more physically active
 - Smartphone-based planning interventions and JITAIs
 - Daily diaries over 55 days
 
@@ -236,11 +236,11 @@ may predict outcomes beyond either individual score.
 
 <!-- ca. 1.5 Minutes -->
 
-## Research Question 1 {.rq-slide}
+## Guiding question {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ1:]{.rq-label} [In romantic couples, how is provided health-related social support linked to physical activity?]{.rq-text}
+[Guiding question:]{.rq-label} [In romantic couples, how is provided health-related social support linked to physical activity?]{.rq-text}
 :::
 :::
 
@@ -248,14 +248,14 @@ may predict outcomes beyond either individual score.
 This is intentionally broad, since we will look at it through different lenses
 and analyze this with different models. 
 
-Basically answering differt sub-RQs each time that I will introduce.
+Basically answering different sub-RQs each time that I will introduce.
 :::
 
 <!-- ca. 0.5 Minutes -->
 
-## Measurement - Predictor
+## Measurement - predictor
 
-### Emotional support provided
+### Provided emotional support
 
 > **Rough English translation of the original German item**<br>
 > “How much did you emotionally support your partner today so that they would
@@ -268,14 +268,15 @@ be physically active with greater enjoyment?”
 
 <!-- ca. 1 Minute -->
 
-## Measurement - Outcome
+## Measurement - outcome
 
 ### Moderate to vigorous physical activity (MVPA)
 
 > **Rough English translation of the original German item**<br>
 > “How many minutes did you spend engaging in moderate-to-vigorous physical
-activity today?” 
-[Adapted from @amireaultGodinShephardQuestionnaire2015]{.subtle}
+> activity today?”
+>
+> [Adapted from @amireaultGodinShephardQuestionnaire2015]{.subtle}
 
 - **Alone:** _____ minutes
 - **Together with your partner:** _____ minutes
@@ -284,27 +285,21 @@ activity today?”
 
 <!-- ca. 1 Minute -->
 
-## Aggregating for cross-sectional examples
+## Person-level data for cross-sectional examples
 
-To show simple dyadic models we aggregate the daily diary data to
-obtain a "cross-sectional" dataset.
+For the cross-sectional examples, we use a prepared person-level version of
+the daily diary data.
 
 ```{r}
-library(dplyr)
-
-pilot_aggregated <- pilot |>
-  group_by(couple_id, person_id, role) |>
-  summarise(
-    across(where(is.numeric), ~ mean(.x, na.rm = TRUE)),
-    .groups = "drop"
-  )
+pilot_aggregated <- readRDS("dyadic-person-means.rds")
 ```
 
 ::: {.fragment}
-The variables now represent person-level daily averages across the study:
+Each row is one partner. Measures are averages across available diary days:
 
-- `provided_emotional_support`: average daily support provided
-- `mvpa_total`: average daily total MVPA (minutes)
+- `provided_support`: average daily support provided
+- `received_support`: average daily support received
+- `total_mvpa`: average daily total MVPA (minutes)
 :::
 
 <!-- ca. 1 Minute -->
@@ -318,7 +313,7 @@ The variables now represent person-level daily averages across the study:
 
 support_distribution_plot <- ggplot(
   pilot_aggregated,
-  aes(provided_emotional_support, y = after_stat(density))
+  aes(provided_support, y = after_stat(density))
 ) +
   geom_histogram(
     bins = 15, boundary = 0,
@@ -327,7 +322,7 @@ support_distribution_plot <- ggplot(
   geom_density(
     bounds = c(0, Inf), color = "navy", linewidth = 1.1
   ) +
-  facet_wrap(~role, nrow = 1) +
+  facet_wrap(~gender, nrow = 1) +
   labs(x = "Average provided support", y = "Density") +
   see::theme_modern(base_size = 16)
 ```
@@ -364,7 +359,7 @@ support_distribution_plot
 #| fig-alt: "Histograms and boundary-corrected density curves of average daily MVPA, shown separately for female and male partners."
 
 ggplot(pilot_aggregated,
-       aes(mvpa_total, y = after_stat(density))) +
+       aes(total_mvpa, y = after_stat(density))) +
   geom_histogram(
     bins = 15, boundary = 0,
     fill = "steelblue", color = "white", alpha = 0.75
@@ -372,7 +367,7 @@ ggplot(pilot_aggregated,
   geom_density(
     bounds = c(0, Inf), color = "navy", linewidth = 1.1
   ) +
-  facet_wrap(~role, nrow = 1) +
+  facet_wrap(~gender, nrow = 1) +
   labs(x = "Average MVPA (minutes/day)", y = "Density") +
   see::theme_modern(base_size = 16)
 ```
@@ -424,7 +419,7 @@ ggplot(model_use) +
 Preliminary results from an ongoing systematic review (APIM use coded for
 $n = 998$ eligible articles)
 
-[@sakalukRenewalDyadicStructural2025, p. 5].
+[@sakalukRenewalDyadicStructural2025, p. 6].
 :::
 
 <!-- ca. 1 Minute -->
@@ -434,16 +429,16 @@ $n = 998$ eligible articles)
 **Various dyadic models** can be used, each answering different questions!
 
 ::: {.incremental}
-- **Actor-partner interdependence model (APIM)**: interdependent individuals
-- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
-- **Common fate model (CFM)**: latent dyadic process
+- **Actor-partner interdependence model (APIM)**: actor and partner associations between interdependent individuals
+- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: associations involving dyad levels and within-dyad differences
+- **Common fate model (CFM)**: latent dyad-level constructs reflected in both partners' reports
 :::
 
-::: {.fragment}
+::: {.fragment .text-smaller}
 Other approaches include the **mutual-influence model**, for reciprocal influence
-between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
-**Truth and Bias model**, for separating mean-level bias from correlational
-accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
+between partners [@iidaModelsInterdependentIndividuals2018, p. 62], and the
+**Truth and Bias model**, for separating directional bias, direct accuracy, and
+assumed-similarity bias in judgments of a partner [@kennyAccuracyBiasPerception2001;
 @westTruthBiasModel2011].
 :::
 
@@ -453,22 +448,37 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 
 **Various dyadic models** can be used, each answering different questions!
 
-- [**Actor-partner interdependence model (APIM)**: interdependent individuals]{.text-highlight}
-- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: within- and between dyad associations
-- **Common fate model (CFM)**: latent dyadic process
+- [**Actor-partner interdependence model (APIM)**: actor and partner associations between interdependent individuals]{.text-highlight}
+- **Dyad-individual model (DIM)** and **dyadic score model (DSM)**: associations involving dyad levels and within-dyad differences
+- **Common fate model (CFM)**: latent dyad-level constructs reflected in both partners' reports
 
+:::{.text-smaller}
 Other approaches include the **mutual-influence model**, for reciprocal influence
-between partners [@iidaModelsInterdependentIndividuals2018, p. 61], and the
-**Truth and Bias model**, for separating mean-level bias from correlational
-accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
+between partners [@iidaModelsInterdependentIndividuals2018, p. 62], and the
+**Truth and Bias model**, for separating directional bias, direct accuracy, and
+assumed-similarity bias in judgments of a partner [@kennyAccuracyBiasPerception2001;
 @westTruthBiasModel2011].
+:::
 
 ::: {.notes}
-"For broad RQ 1 we first use Actor-Partner interdependence model"
+"For the guiding question, we first use the Actor-Partner Interdependence Model."
 :::
 
 
 <!-- ca. 1 Minute -->
+
+# Actor-partner interdependence models
+Distinguishable & exchangeable APIM
+
+## RQ1 · Actor and partner associations {.rq-slide}
+
+::: {.rq-center}
+::: {.rq-card}
+[RQ1:]{.rq-label} [Is a person's provided emotional support associated with (a) their own MVPA and (b) their partner's MVPA?]{.rq-text}
+:::
+:::
+
+<!-- ca. 0.5 Minutes -->
 
 
 ## The distinguishable APIM
@@ -483,7 +493,10 @@ accuracy in judgments of a partner [@kennyAccuracyBiasPerception2001;
 #| fig-align: center
 #| fig-alt: "Conceptual distinguishable APIM with actor and partner paths."
 
-draw_apim_diagram("distinguishable", show_residuals = FALSE)
+draw_apim_diagram(
+  "distinguishable", show_residuals = FALSE,
+  predictors_centered = TRUE
+)
 ```
 
 ::: {.fragment}
@@ -512,7 +525,7 @@ outcomes.
 #| fig-align: center
 #| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
 
-draw_apim_diagram("distinguishable")
+draw_apim_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 Actor and partner effects together explain some of the covariance between partners' 
@@ -520,13 +533,17 @@ outcomes.  $\rightarrow$ But some covariance may remain!
 
 :::{.notes}
 But more on the residuals later!!!
+
+-> Ask students what grand-mean centering is.
+
 :::
 
 <!-- ca. 0.5 Minutes -->
 
 ## How to estimate actor and partner effects?
 
-Conceptually, we are esimating these two equations in a single model:
+Conceptually, we are estimating these two equations in a single model:
+The member role is written first, and $i$ indexes dyads.
 
 $$
   \begin{gathered}
@@ -541,9 +558,12 @@ $$
   \end{gathered}
 $$
 <br>
+
 [Could we just use two separate models?]{.fragment}
 
-<!-- ca. 1 Minutes -->
+
+
+<!-- ca. 2 Minutes -->
 
 ## Could we just use two separate models?
 
@@ -575,19 +595,19 @@ female_model <- glmmTMB(
 
 ## Could we just use two separate models?
 
-**Yes, we could! But then we: **
+**Yes, we could! But separate fits:**
 
 :::{.incremental}
-- can't test whether the two actor effects or partner effects are equal
-- can't pool equal paths into a shared estimate, which can increase power
-- ignore unmodelled sources of interdependence between partners
-  - joint modelling tells us how much interdependence remains after accounting for the predictors
+- Do not directly test whether the actor or partner effects are equal
+- Do not pool equal paths into a shared estimate, which can increase power
+- Do not jointly estimate residual interdependence between partners
+  - Joint modelling shows how much interdependence remains after accounting for the predictors
 
 :::
 
 ::: {.bottom-reference}
-[@kennyPartnerEffectsRelationship1999, pp. 439–440;
-@iidaModelsInterdependentIndividuals2018, pp. 68–69]
+[@kennyPartnerEffectsRelationship1999, pp. 434, 439–440;
+@iidaModelsInterdependentIndividuals2018, pp. 67–69]
 :::
 
 :::{.notes}
@@ -612,10 +632,13 @@ within-dyad covariance is accounted for by the predictors.
 #| fig-align: center
 #| fig-alt: "Conceptual distinguishable APIM with role-specific actor and partner paths."
 
-draw_apim_diagram("distinguishable")
+draw_apim_diagram("distinguishable", predictors_centered = TRUE)
 ```
 
 :::{.notes}
+
+"This represents the two model formulas before, but in a single model with correlated
+residuals."
 
 Map the preceding visual onto the APIM notation:
 
@@ -693,7 +716,7 @@ On the right:
 <!-- ca. 4 Minutes -->
 
 
-## Fitting the distinguishable APIM
+## Fitting the distinguishable APIM [Interpretation →](#interpreting-the-distinguishable-apim-results){.results-forward-link} {#fitting-the-distinguishable-apim}
 
 ```{r}
 #| label: fitted-distinguishable-apim
@@ -707,8 +730,8 @@ On the right:
 
 distinguishable_apim <- fit_and_draw_distinguishable_apim(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "Provided\nsupport", outcome = "MVPA")
 )
 ```
@@ -721,8 +744,9 @@ distinguishable_apim <- fit_and_draw_distinguishable_apim(
 
 - All associations are conditional on both partners' provided support.
 
-- The intercepts, 25.68 for female partners and 23.85 for male partners, are the
-  predicted daily MVPA when both partners' average provided support is zero.
+- The intercepts, 35.28 for female partners and 31.24 for male partners, are the
+  predicted daily MVPA when both partners' average provided support equals the
+  pooled sample mean (0.92 on the original scale).
   
 - Female actor effect, -4.61: for each one-unit higher support provided by a
   female partner, her own predicted daily MVPA is 4.61 minutes lower, holding
@@ -761,11 +785,13 @@ These are associations in the aggregated observational data, not causal effects.
 
 **Sometimes:** 
 
-- partners may not be theoretically meaningfully distinguishable
-- no evidence of difference in effects $\rightarrow$ pool effects for greater power
-- we want to formally test distinguishability
+- Partners may not be theoretically meaningfully distinguishable
+- No evidence of difference in effects $\rightarrow$ pool effects for greater power
+- We want to formally test distinguishability
 
+:::{.fragment}
 $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
+:::
 
 <!-- ca. 2 Minutes -->
 
@@ -781,7 +807,10 @@ $\rightarrow$ Then, we may fit an exchangeable model that imposes symmetry
 #| fig-align: center
 #| fig-alt: "Conceptual exchangeable APIM with pooled actor and partner paths."
 
-draw_apim_diagram("exchangeable", show_residuals = FALSE)
+draw_apim_diagram(
+  "exchangeable", show_residuals = FALSE,
+  predictors_centered = TRUE
+)
 ```
 
 :::{.notes}
@@ -809,7 +838,7 @@ pooled intercepts pooling
 #| fig-align: center
 #| fig-alt: "Conceptual exchangeable APIM with pooled actor and partner paths."
 
-draw_apim_diagram("exchangeable")
+draw_apim_diagram("exchangeable", predictors_centered = TRUE)
 ```
 
 :::{.notes}
@@ -842,7 +871,8 @@ draw_apim_exchangeability_comparison()
 
 :::{.notes}
 
-In this example, imagine we have a few couples with an exactly $X_F = 1$ and $X_M = 1$. 
+In this example, imagine we have a few couples with exactly $X_F = 1$ and $X_M = 1$
+on the GM-centered scale.
 For these couples, the following would be true... 
 
 On the left: 
@@ -876,7 +906,7 @@ On the right:
 
 <!-- ca. 4 Minutes -->
 
-## Fitting the exchangeable APIM
+## Fitting the exchangeable APIM [Interpretation →](#interpreting-the-exchangeable-apim-results){.results-forward-link} {#fitting-the-exchangeable-apim}
 
 ```{r}
 #| label: fitted-exchangeable-apim
@@ -890,8 +920,8 @@ On the right:
 
 exchangeable_apim <- fit_and_draw_exchangeable_apim(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "Provided\nsupport", outcome = "MVPA")
 )
 ```
@@ -911,25 +941,67 @@ exchangeable_apim <- fit_and_draw_exchangeable_apim(
 ```{r}
 library(dyadMLM)
 
-compare_nested_glmmTMB_models(
+compare_nested_models(
   exchangeable_apim,
   distinguishable_apim
 )
 ```
 
+# Level-and-difference models
+Dyad-individual model & dyadic score model
+
+## Shifting the analytical lens
+
+Sometimes, actor and partner associations are not the primary interest.
+
+Instead, we may want to understand:
+
+- How couples compare with other couples
+- How partners stand relative to one another within a couple
+
+::: {.fragment}
+
+This shifts the focus to **dyadic levels and within-dyad differences**.
+
+:::
+
+::: {.fragment}
+
+  - For exchangeable dyads, use the **dyad-individual model (DIM)**
+  - For distinguishable dyads, use the **dyadic score model (DSM)**
+
+:::
+
+<!-- ca. 2 Minutes -->
+
+## RQ2 · Dyad levels and differences {.rq-slide}
+
+::: {.rq-center}
+::: {.rq-card}
+[RQ2:]{.rq-label} [How are couples' average levels and partner differences in provided emotional support associated with the couple-average MVPA and partner differences in MVPA?]{.rq-text}
+:::
+:::
+
+<!-- ca. 0.5 Minutes -->
 
 
-## The DIM
+## The dyad-individual model (DIM)
+
+**The DIM is:**
 
 - A re-parametrization of the **exchangeable** APIM!
 - We decompose predictors into two variables:
   - Dyad mean (GM-centered): $\bar{X} - \mu_{X}$
   - Within-dyad member deviation: $X_i - \bar{X}$
-  
+
+:::{.fragment}
+
 In other words, these predictors express: 
 
 - A couple's average level compared with the average of all couples
 - A partner's level compared with the average of their couple
+
+:::
 
 :::{.notes}
 
@@ -1094,7 +1166,7 @@ IS exactly equivalent to the APIM
 
 <!-- ca. 4 Minutes -->
 
-## Fitting the DIM
+## Fitting the DIM [Interpretation →](#interpreting-the-fitted-dim-results){.results-forward-link} {#fitting-the-dim}
 
 ```{r}
 #| label: fitted-dim
@@ -1108,8 +1180,8 @@ IS exactly equivalent to the APIM
 
 fit_and_draw_dim(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "support", outcome = "MVPA")
 )
 ```
@@ -1126,31 +1198,31 @@ we fit the DIM here with the same data and variables to demonstrate.
 
 -> Why no intercept? for the deviation? 
 
-No intercept for the MVPA deviation, because that would break exchangeability. 
-if support deviation is zero, then the expected MVPA deviation is also zero. 
+  No intercept for the MVPA deviation, because that would break exchangeability.
+  if support deviation is zero, then the expected MVPA deviation is also zero.
 
--> We conceptually DO have an intercept, it is just constrained to be ZERO!
+  -> We conceptually DO have an intercept, it is just constrained to be ZERO!
 
--> just like the correlation between the residuals, they are not estimated, which 
-effectively constrains them to be zero. 
+  -> just like the correlation between the residuals, they are not estimated, which
+  effectively constrains them to be zero.
 
 :::
 
-## DIM to APIM coefficients
+## DIM to exchangeable APIM coefficients
 
 - Once we fit an APIM, we have already fitted a DIM—and vice versa.
 
 - We can transform values from a fitted APIM into DIM values.
 
 
-## DIM to APIM coefficients {.compact-derivation}
+## DIM to exchangeable APIM coefficients {.compact-derivation}
 
-[For this example, the intercept is omitted.]{.derivation-context}
+[The intercept is omitted; APIM predictors are grand-mean centered.]{.derivation-context}
 
-If our APIM predictor values for a focal person are:
+For a focal person, let
 $X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=1$,
 
-the same predictor profile in DIM coordinates is:
+so that in DIM coordinates:
 $X_{\mathrm{mean}}=1,\quad X_{\mathrm{dev,self}}=0.$
 
 So,
@@ -1172,14 +1244,14 @@ $$
 b_{\mathrm{mean}}=a+p.
 $$
 
-## DIM to APIM coefficients {.compact-derivation}
+## DIM to exchangeable APIM coefficients {.compact-derivation}
 
-[For this example, the intercept is omitted.]{.derivation-context}
+[The intercept is omitted; APIM predictors are grand-mean centered.]{.derivation-context}
 
-If our APIM predictor values for a focal person are:
+For a focal person, let
 $X_{\mathrm{self}}=1,\quad X_{\mathrm{partner}}=-1$,
 
-the same predictor profile in DIM coordinates is:
+so that in DIM coordinates:
 $X_{\mathrm{mean}}=0,\quad X_{\mathrm{dev,self}}=1$.
 
 So,
@@ -1188,8 +1260,7 @@ $$
 \hat Y_{\mathrm{self}}=1\times a+(-1)\times p
 $$
 
-implies for the focal person, whose $X_{\mathrm{self}}$ is 1 unit above the
-couple mean:
+implies:
 
 $$
 \hat Y_{\mathrm{self}}=0\times b_{\mathrm{mean}}+1\times b_{\mathrm{dev}}
@@ -1203,7 +1274,7 @@ b_{\mathrm{dev}}=a-p.
 $$
 
 
-## DIM to APIM coefficients
+## DIM to exchangeable APIM coefficients
 
 ```{r}
 #| label: interactive-apim-dim-grid-coefficients
@@ -1223,22 +1294,22 @@ dim_reparameterization_grid(
 
 <!-- ca. 5 Minutes -->
 
-## The DSM
+## The dyadic score model (DSM)
 
 What if we want DIM-style interpretation but have distinguishable dyads?
 
 :::{.fragment}
-### The dyadic score model (DSM) is: 
+**The DSM is:**
 
-- the unconstrained distinguishable version of the DIM
-- a re-parametrization of the distinguishable APIM
+- The unconstrained distinguishable version of the DIM
+- A re-parametrization of the distinguishable APIM
 :::
 
 :::{.fragment}
 - **DIM**: deviation from the couple mean $X_i - \bar{X}$
   - opposite for each partner 
 - **DSM**: meaningful directed differences $X_\mathrm{female} - X_\mathrm{male}$
-  - repeated for both partners. 
+  - repeated for both partners
 :::
 
 
@@ -1359,7 +1430,7 @@ difference than predicted.
 
 <!-- ca. 3 Minutes -->
 
-## Fitting the DSM
+## Fitting the DSM [Interpretation →](#interpreting-the-fitted-dsm-results){.results-forward-link} {#fitted-dsm-results}
 
 ```{r}
 #| label: fitted-dsm
@@ -1373,8 +1444,8 @@ difference than predicted.
 
 fit_and_draw_dsm(
   pilot_aggregated,
-  predictor = provided_emotional_support,
-  outcome = mvpa_total,
+  predictor = provided_support,
+  outcome = total_mvpa,
   labels = c(predictor = "support", outcome = "MVPA")
 )
 ```
@@ -1384,31 +1455,98 @@ fit_and_draw_dsm(
 
 -> students interpret results, including correlation. 
 
-**Intercepts**: A couple with *average mean level* and *zero male-female difference* is expected to be:
+**Intercepts**: For a couple with an average support mean and no female–male support difference:
 
-- a10: 33.26 min more active on average,
-- a20: have a female that is 4.04 min more active than the male.
+- a10: predicted couple-mean MVPA is 33.26 minutes,
+- a20: the female is predicted to be 4.04 min more active than the male.
 
-A couple providing 1 unit more average support is expected to be:
+Holding the couple-difference score at zero,
+**a 1 unit higher couple-mean support score** is associated with:
 
-- a11: 9.25 minutes more active on average,
-- a21: have a female that is 2.4 minutes + 4.04 minutes more active than the male
+- a11: 9.25 additional minutes of couple-mean MVPA,
+- a21: a 2.4-minute larger female-male MVPA difference (The female is 2.4 minutes + 4.04 minutes more active than the male).
 
-A couple with a female providing 1 unit more support than the male is expected to:
+Holding the couple-mean score at the *sample-average*,
+**a one-unit larger female-male support difference** is associated with:
 
-- a12: have a couple-mean MVPA 11.86 minutes lower. 
-- a22: have a female that is 4.06 minutes + 4.04 minutes more active than the male
+- a12: 11.86 fewer minutes of couple-mean MVPA
+- a22: a 4.06-minute larger female-male MVPA difference (The female is 4.06 minutes + 4.04 minutes more active than the male)
 
-<!-- @codex, check if correctly interpreted -->
+**Residual correlations**
+
+After accounting for the support mean and female–male support difference,
+couples whose average MVPA is higher than predicted also tend to have a more
+positive female–male MVPA difference than predicted.
+
+In other words, their unexplained MVPA tends to tilt toward the female partner.
 
 :::
 
-## Research Question 2 {.rq-slide}
+
+## DSM to distinguishable APIM coefficients {.smaller}
+
+- Once we fit a DSM, we have already fitted a distinguishable APIM—and vice versa.
+
+- We can back-transform the DSM fixed effects into APIM coefficients:
+
+$$
+\begin{aligned}
+b_{0,\mathrm F}
+  &=a_{10}+\tfrac12a_{20},
+&
+b_{0,\mathrm M}
+  &=a_{10}-\tfrac12a_{20},\\[0.4em]
+b_{1,\mathrm F}
+  &=\tfrac12a_{11}+a_{12}+\tfrac14a_{21}+\tfrac12a_{22},
+&
+b_{1,\mathrm M}
+  &=\tfrac12a_{11}-a_{12}-\tfrac14a_{21}+\tfrac12a_{22},\\[0.4em]
+b_{2,\mathrm F}
+  &=\tfrac12a_{11}-a_{12}+\tfrac14a_{21}-\tfrac12a_{22},
+&
+b_{2,\mathrm M}
+  &=\tfrac12a_{11}+a_{12}-\tfrac14a_{21}-\tfrac12a_{22}.
+\end{aligned}
+$$
+
+Here, $b_1$ is the actor effect and $b_2$ is the partner effect. The APIM
+predictors and DSM couple mean now use the same pooled grand-mean reference, so
+no additional centering adjustment is needed for the intercepts.
+
+# Common fate model
+Modeling dyadic constructs
+
+## When the construct is dyadic
+
+Sometimes, a construct describes the **couple as a unit**, rather than either
+partner individually.
+
+- Both partners report on the same dyadic phenomenon.
+- Differences between their reports are not the substantive focus.
+- Interest lies in the couple's underlying dyadic level.
+
+:::{.fragment}
+
+**For our data example:**
+
+- Collaborative planning as a dyadic predictor
+- Joint physical activity as a dyadic outcome
+
+:::
+
+<!-- ca. 1 Minute -->
+
+:::{.notes}
+
+-> Ask students if they had ideas on a dyadic construct
+
+:::
+
+## RQ3 · Shared dyadic constructs {.rq-slide}
 
 ::: {.rq-center}
 ::: {.rq-card}
-[RQ2:]{.rq-label} [In romantic couples, how is collaborative planning linked to physical 
-activity?]{.rq-text}
+[RQ3:]{.rq-label} [How is collaborative planning associated with joint physical activity in romantic couples?]{.rq-text}
 :::
 :::
 
@@ -1416,96 +1554,85 @@ activity?]{.rq-text}
 
 ### Dyadic predictor: collaborative planning
 
-> **Rough english translation of the original German item**<br>
+> **Rough English translation of the original German item**<br>
 > “We have already planned precisely for tomorrow when, where, and how we will
-be physically active together.”
-[Adapted from @scholzBeyondBehaviouralIntentions2008]{.subtle}
+> be physically active together.”
+>
+> [Adapted from @scholzBeyondBehaviouralIntentions2008]{.subtle}
 
 0 = *not at all true today*<br>
-to 5 = *completely true today*
+5 = *completely true today*
 
 We aggregate each person's ratings into their **average daily collaborative
 planning** across the 55 days.
 
-## Collaborative planning by partner role
+## Do partners report similar dyadic levels?
 
 ```{r}
-#| label: pilot-planning-distributions-by-role
+#| label: cfm-partner-agreement
 #| echo: false
 #| dev: svglite
 #| fig-width: 12
 #| fig-height: 5.1
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Histograms and boundary-corrected density curves of average collaborative planning, shown separately for female and male partners."
+#| fig-alt: "Partner-agreement plots for collaborative planning and joint MVPA, with female reports on the horizontal axis, male reports on the vertical axis, and diagonal identity lines."
 
-ggplot(pilot_aggregated,
-       aes(collaborative_planning, y = after_stat(density))) +
-  geom_histogram(
-    bins = 15, boundary = 0,
-    fill = "steelblue", color = "white", alpha = 0.75
+cfm_data <- pilot_aggregated |>
+  group_by(couple_id) |>
+  filter(n_distinct(gender) == 2) |>
+  ungroup() |>
+  select(couple_id, gender, collaborative_planning, joint_mvpa) |>
+  tidyr::pivot_wider(
+    names_from = gender,
+    values_from = c(collaborative_planning, joint_mvpa),
+    names_sep = "_"
+  )
+
+planning_agreement_plot <- ggplot(
+  cfm_data,
+  aes(collaborative_planning_female, collaborative_planning_male)
+) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey55") +
+  geom_point(color = "steelblue", size = 2.4, alpha = 0.8) +
+  coord_equal() +
+  labs(
+    title = "Collaborative planning (0–5)",
+    x = "Female report",
+    y = "Male report"
   ) +
-  geom_density(
-    bounds = c(0, Inf), color = "navy", linewidth = 1.1
-  ) +
-  facet_wrap(~role, nrow = 1) +
-  labs(x = "Average collaborative planning", y = "Density") +
   see::theme_modern(base_size = 16)
+
+mvpa_agreement_plot <- ggplot(
+  cfm_data,
+  aes(joint_mvpa_female, joint_mvpa_male)
+) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey55") +
+  geom_point(color = "steelblue", size = 2.4, alpha = 0.8) +
+  coord_equal() +
+  labs(
+    title = "Joint MVPA (minutes/day)",
+    x = "Female report",
+    y = "Male report"
+  ) +
+  see::theme_modern(base_size = 16)
+
+patchwork::wrap_plots(planning_agreement_plot, mvpa_agreement_plot)
 ```
 
 :::{.notes}
 
-- Each panel shows a partner's average daily collaborative planning across the
-  study.
-- The shared axes allow direct comparison of the two role-specific
-  distributions.
-- These are descriptive role differences, not evidence that the CFM parameters
-  differ by role.
+- Each point is one couple; the diagonal indicates identical partner reports.
+- The partners need not report exactly the same value. The CFM treats both
+  reports as imperfect indicators of an underlying dyadic level.
+- Marginal distributions alone would not show the within-couple correspondence
+  that motivates the CFM.
 
 :::
 
 <!-- ca. 1 Minute -->
 
-## Joint MVPA by partner role
-
-```{r}
-#| label: pilot-joint-mvpa-distributions-by-role
-#| echo: false
-#| dev: svglite
-#| fig-width: 12
-#| fig-height: 5.1
-#| out-width: 100%
-#| fig-align: center
-#| fig-alt: "Histograms and boundary-corrected density curves of average daily joint MVPA, shown separately for female and male partners."
-
-ggplot(pilot_aggregated,
-       aes(mvpa_joint, y = after_stat(density))) +
-  geom_histogram(
-    bins = 15, boundary = 0,
-    fill = "steelblue", color = "white", alpha = 0.75
-  ) +
-  geom_density(
-    bounds = c(0, Inf), color = "navy", linewidth = 1.1
-  ) +
-  facet_wrap(~role, nrow = 1) +
-  labs(x = "Average joint MVPA (minutes/day)", y = "Density") +
-  see::theme_modern(base_size = 16)
-```
-
-:::{.notes}
-
-- Each panel shows person-level average daily MVPA performed jointly with the
-  partner.
-- Both roles share the same axes and each dyad contributes one person to each
-  panel.
-- The distributions are descriptive inputs to the subsequent common fate
-  model.
-
-:::
-
-<!-- ca. 1 Minute -->
-
-## The CFM
+## The distinguishable CFM
 
 ```{r}
 #| label: conceptual-cfm-paths-only
@@ -1515,12 +1642,16 @@ ggplot(pilot_aggregated,
 #| fig-height: 5.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Conceptual Common Fate Model with shared latent levels."
+#| fig-alt: "Conceptual distinguishable Common Fate Model with female and male reports as indicators of shared latent levels."
 
-draw_cfm_diagram(show_residuals = FALSE)
+draw_cfm_diagram(
+  show_residuals = FALSE,
+  member_ids = c("F", "M"),
+  member_names = c("Female", "Male")
+)
 ```
 
-## The CFM
+## The distinguishable CFM
 
 ```{r}
 #| label: conceptual-cfm
@@ -1530,17 +1661,21 @@ draw_cfm_diagram(show_residuals = FALSE)
 #| fig-height: 5.8
 #| out-width: 100%
 #| fig-align: center
-#| fig-alt: "Conceptual Common Fate Model with four observed indicator intercepts, shared latent predictor and outcome levels, and symbolic standard deviations for all four indicator residuals."
+#| fig-alt: "Conceptual distinguishable Common Fate Model with female and male indicator intercepts, shared latent predictor and outcome levels, and symbolic standard deviations for all four indicator residuals."
 
-draw_cfm_diagram()
+draw_cfm_diagram(
+  member_ids = c("F", "M"),
+  member_names = c("Female", "Male")
+)
 ```
 
 
 :::{.notes}
 
-- The intercepts are measurement intercepts. The expected values of each members' report
-when the corresponding latent dyad level is zero. 
-  - because latent means are fixed to zero (as a reference point) they represent the mean reported values.
+- The intercepts are measurement intercepts: the expected values of each member's
+  report when the corresponding latent dyad level is zero.
+  - Because latent means are fixed to zero (as a reference point), they represent
+    the mean reported values.
 
 - Member 1 and Member 2 may be meaningful, **distinguishable** roles, such as
   female and male.
@@ -1554,9 +1689,8 @@ when the corresponding latent dyad level is zero.
 ## Fitted distinguishable CFM
 
 ::: {.cfm-constraint}
-**Constraint:**
-$\sigma^2_{\epsilon_{Y_F}} = \sigma^2_{\epsilon_{Y_M}}$.
-Without it, the estimated male outcome residual variance was negative.
+**Model constraint:** The female and male joint-MVPA residual variances were
+constrained equal to obtain admissible fit.
 :::
 
 ```{r}
@@ -1569,36 +1703,25 @@ Without it, the estimated male outcome residual variance was negative.
 #| fig-align: center
 #| fig-alt: "Fitted Common Fate Model for collaborative planning and joint MVPA, including four observed indicator intercepts and unstandardized standard deviations for all four indicator residuals."
 
-cfm_data <- pilot_aggregated |>
-  group_by(couple_id) |>
-  filter(n_distinct(role) == 2) |>
-  ungroup() |>
-  select(couple_id, role, collaborative_planning, mvpa_joint) |>
-  tidyr::pivot_wider(
-    names_from = role,
-    values_from = c(collaborative_planning, mvpa_joint),
-    names_sep = "_"
-  )
-
 distinguishable_cfm_model <- '
   # Shared dyad levels: fix all four loadings to 1.
   planning_level =~
     1 * collaborative_planning_female +
     1 * collaborative_planning_male
   joint_mvpa_level =~
-    1 * mvpa_joint_female +
-    1 * mvpa_joint_male
+    1 * joint_mvpa_female +
+    1 * joint_mvpa_male
 
   # Association between the two shared levels.
   joint_mvpa_level ~ b_level * planning_level
 
   # Same-member residual covariances.
-  collaborative_planning_female ~~ c_female * mvpa_joint_female
-  collaborative_planning_male ~~ c_male * mvpa_joint_male
+  collaborative_planning_female ~~ c_female * joint_mvpa_female
+  collaborative_planning_male ~~ c_male * joint_mvpa_male
 
   # Both partners report the same jointly performed activity.
-  mvpa_joint_female ~~ e_mvpa * mvpa_joint_female
-  mvpa_joint_male ~~ e_mvpa * mvpa_joint_male
+  joint_mvpa_female ~~ e_mvpa * joint_mvpa_female
+  joint_mvpa_male ~~ e_mvpa * joint_mvpa_male
 '
 
 workshop_distinguishable_cfm <- lavaan::sem(
@@ -1633,7 +1756,467 @@ draw_cfm_diagram(
 
 <!-- ca. 2 Minutes -->
 
-## The exchangeable CFM
+## When should we model a CFM as exchangeable?
+
+:::{.incremental}
+- Partner positions are arbitrary, or theory and the data support treating the
+  measurement process as invariant across roles.
+- Swapping the partner labels should then leave the model unchanged.
+- We constrain corresponding partner parameters to be equal:
+  - **intercepts:** the same expected report level
+  - **residual variances:** the same amount of indicator-specific variation
+  - **same-member residual associations:** the same residual predictor–outcome
+    association for both partners
+
+:::
+
+[@ledermannMediationDyadicData2009; @peughAnalyzingMixedDyadic2013]{.subtle}
+
+:::{.notes}
+
+- Equality constraints express the assumption that the measurement process does
+  not depend on which arbitrary partner position receives a report.
+- A well-fitting constrained model does not by itself make substantively
+  meaningful roles exchangeable; the decision must also follow the design and
+  research question.
+
+:::
+
+## Fitted CFM with partner-role equality constraints
+
+```{r}
+#| label: fitted-exchangeable-cfm
+#| echo: false
+#| dev: svg
+#| fig-width: 10
+#| fig-height: 5.35
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Fitted exchangeable Common Fate Model for collaborative planning and joint MVPA. Female and male indicator intercepts, corresponding residual variances, and same-member residual covariances are constrained to equality."
+
+exchangeable_cfm_model <- '
+  # Shared dyad levels: fix all four loadings to 1.
+  planning_level =~
+    1 * collaborative_planning_female +
+    1 * collaborative_planning_male
+  joint_mvpa_level =~
+    1 * joint_mvpa_female +
+    1 * joint_mvpa_male
+
+  # Association between the two shared levels.
+  joint_mvpa_level ~ b_level * planning_level
+
+  # Equal indicator intercepts across positions.
+  collaborative_planning_female ~ i_planning * 1
+  collaborative_planning_male ~ i_planning * 1
+  joint_mvpa_female ~ i_mvpa * 1
+  joint_mvpa_male ~ i_mvpa * 1
+
+  # Equal residual variances across positions.
+  collaborative_planning_female ~~ e_planning * collaborative_planning_female
+  collaborative_planning_male ~~ e_planning * collaborative_planning_male
+  joint_mvpa_female ~~ e_mvpa * joint_mvpa_female
+  joint_mvpa_male ~~ e_mvpa * joint_mvpa_male
+
+  # Equal same-member residual covariances across positions.
+  collaborative_planning_female ~~ c_female * joint_mvpa_female
+  collaborative_planning_male ~~ c_male * joint_mvpa_male
+  c_female == c_male
+'
+
+workshop_exchangeable_cfm <- lavaan::sem(
+  exchangeable_cfm_model,
+  data = cfm_data,
+  missing = "fiml",
+  meanstructure = TRUE
+)
+
+cfm_model_comparison <- lavaan::lavTestLRT(
+  workshop_distinguishable_cfm,
+  workshop_exchangeable_cfm
+)
+
+cfm_chisq_difference <- cfm_model_comparison$`Chisq diff`[2]
+cfm_df_difference <- cfm_model_comparison$`Df diff`[2]
+cfm_comparison_p <- cfm_model_comparison$`Pr(>Chisq)`[2]
+
+draw_cfm_diagram(
+  model = workshop_exchangeable_cfm,
+  parameter_labels = c(
+    level = "b_level",
+    residual_1 = "c_female",
+    residual_2 = "c_male"
+  ),
+  member_ids = c("F", "M"),
+  member_names = c("Female", "Male"),
+  predictor_name = "collaborative planning",
+  outcome_name = "joint MVPA",
+  show_standardized_effect = FALSE
+)
+
+cfm_level_estimate <- lavaan::parameterEstimates(
+  workshop_exchangeable_cfm
+) |>
+  filter(label == "b_level") |>
+  pull(est)
+
+cfm_level_r2 <- lavaan::lavInspect(
+  workshop_exchangeable_cfm, "rsquare"
+)[["joint_mvpa_level"]]
+```
+
+::: {.cfm-constraint}
+**Likelihood-ratio test of the remaining partner-role equality constraints:**
+$\Delta\chi^2(`r cfm_df_difference`) = `r sprintf("%.2f", cfm_chisq_difference)`$,
+$p = `r sub("^0", "", sprintf("%.3f", cfm_comparison_p))`$; no detectable loss
+of fit.
+:::
+
+:::{.notes}
+
+- The four additional equality constraints fit the data very well. The
+  likelihood-ratio test provides no evidence that they worsen fit.
+- This is evidence that pooling the female and male measurement parameters is
+  compatible with this small sample; it does not establish that gender is
+  substantively irrelevant or that the partners were arbitrarily assigned.
+- The fitted shared-level association remains observational.
+
+:::
+
+<!-- ca. 3 Minutes -->
+
+## RQ3 result {.rq-slide}
+
+::: {.rq-center}
+
+> **RQ3:** In this small observational sample, a one-unit higher latent
+> collaborative-planning level was associated with
+> `r sprintf("%.2f", cfm_level_estimate)` more minutes of joint MVPA per day at
+> the couple level ($R^2 = `r sprintf("%.2f", cfm_level_r2)`$).
+
+:::
+
+
+:::{.notes}
+
+- Here, $R^2 = `r sprintf("%.2f", cfm_level_r2)`$ means that collaborative
+  planning, the model's only predictor, accounts for
+  `r sprintf("%.0f", 100 * cfm_level_r2)`% of the total model-implied variance
+  across couples in the **latent joint-MVPA level**. It does not refer to the
+  total variance in the two observed partner reports.
+- This is an outcome-specific, model-based descriptive summary—not an overall
+  fit measure or evidence of a causal effect.
+
+:::
+<!-- ca. 1 Minute -->
+
+# Other interesting dyadic models to consider
+
+## Other dyadic models and designs {.smaller}
+
+- **Truth and Bias model:** Separates direct accuracy in judging a partner from
+  directional bias and assumed-similarity bias [@westTruthBiasModel2011].
+
+- **Mutual-influence model:** Tests whether partners' outcomes directly and
+  reciprocally influence one another [@kennyModelsNonIndependenceDyadic1996].
+
+- **APIM mediation model:** Traces whether actor and partner associations operate
+  through either partner's mediator [@ledermannAssessingMediationDyadic2011].
+
+- **Dyadic response surface analysis:** Tests whether partner similarity,
+  discrepancy, or particular combinations of scores relate to an outcome
+  [@schonbrodtTestingSimilarityEffects2018].
+
+- **One-with-many and Social Relations models:** Extend dyadic analysis to
+  repeated relationships with several partners or round-robin groups, separating
+  person and relationship components
+  [@kenny2006dyadic; @kennySocialRelationsModel1984].
+
+- **Network models:** Explain the formation and evolution of ties within an
+  interconnected group, including reciprocity, transitivity, and actor-oriented
+  network change [@hollandExponentialFamilyDirected1981;
+  @snijdersStatisticalEvaluationNetwork2001].
+
+<!-- ca. 1 minute -->
+
+```{r}
+#| label: fit-truth-bias
+#| include: false
+
+truth_bias_fit_file <- if (
+    file.exists(file.path("R", "fit-truth-bias.R"))) {
+  file.path("R", "fit-truth-bias.R")
+} else {
+  file.path("dev", "workshop", "R", "fit-truth-bias.R")
+}
+
+sys.source(
+  normalizePath(truth_bias_fit_file),
+  envir = knitr::knit_global()
+)
+
+truth_bias_result <- fit_truth_bias(pilot_aggregated)
+```
+
+## The Truth and Bias model [[@kennyAccuracyBiasPerception2001; @westTruthBiasModel2011]]{.heading-reference} {#the-truth-and-bias-model}
+
+```{r}
+#| label: fitted-truth-bias
+#| echo: false
+#| dev: svg
+#| fig-width: 9
+#| fig-height: 4.8
+#| out-width: 90%
+#| fig-align: center
+#| fig-alt: "Fitted dyadic Truth and Bias model for provided and received emotional support. Estimates and significance stars annotate female- and male-specific assumed-similarity, direct-accuracy, and directional-bias paths. The partners' provided-support correlation represents actual similarity, and received-support judgment residuals covary."
+
+draw_truth_bias_diagram(truth_bias_result)
+```
+
+::: {.text-smaller}
+
+- The partner's report is the researcher-defined “truth”, not necessarily
+an objective truth.
+
+- After truth-mean centering, $b_0$ is **directional bias**.
+
+:::
+
+:::{.notes}
+
+- Received support is the judgment; the partner's provided support is the
+  operational “truth”; one's own provision is the assumed-similarity predictor.
+- **Intercept:** At average provision by both partners, does the perceiver report
+  receiving more or less than the partner reports providing?
+- **Slopes:** Does perceived support track the partner's provision (direct
+  accuracy) or one's own provision (assumed similarity)?
+- The correlation between partners' provision is actual similarity, which lets
+  assumed similarity contribute indirectly to accuracy.
+- Here, assumed similarity was strong; direct accuracy was positive for female
+  perceivers but not evident for male perceivers. Treat this small,
+  cross-sectional example descriptively.
+
+:::
+
+<!-- ca. 2 minutes -->
+
+```{r}
+#| label: fit-dyadic-response-surface
+#| include: false
+
+drsa_fit_file <- if (
+    file.exists(file.path("R", "fit-dyadic-response-surface.R"))) {
+  file.path("R", "fit-dyadic-response-surface.R")
+} else {
+  file.path("dev", "workshop", "R", "fit-dyadic-response-surface.R")
+}
+
+drsa_draw_file <- if (
+    file.exists(file.path("R", "draw-dyadic-response-surface.R"))) {
+  file.path("R", "draw-dyadic-response-surface.R")
+} else {
+  file.path("dev", "workshop", "R", "draw-dyadic-response-surface.R")
+}
+
+sys.source(normalizePath(drsa_fit_file), envir = knitr::knit_global())
+sys.source(normalizePath(drsa_draw_file), envir = knitr::knit_global())
+
+drsa_result <- fit_dyadic_response_surface(pilot_aggregated)
+
+```
+
+## Dyadic response surface analysis [[@schonbrodtTestingSimilarityEffects2018]]{.heading-reference}
+
+```{r}
+#| label: fitted-dyadic-response-surface
+#| echo: false
+#| dev: svglite
+#| fig-width: 12
+#| fig-height: 4.65
+#| out-width: 100%
+#| fig-align: center
+#| fig-alt: "Two fitted response surfaces from one joint dyadic polynomial model. Each shows predicted female or male average daily total MVPA as a function of female-provided and male-provided emotional support centered at the pooled mean. Points and loops mark the observed couples and predictor region; the solid blue line is the line of congruence and the dashed purple line is the line of incongruence."
+
+draw_dyadic_response_surface(drsa_result)
+```
+
+::: {.text-smaller}
+
+- **[Line of incongruence]{style="color: #7B3FA1"}** curves upward; no clear slope or curvature along the **[line of congruence]{style="color: #1769AA"}**.
+
+- **Interpretation:** No similarity-benefit pattern; instead, some evidence of a dissimilarity pattern.
+
+
+:::
+
+:::{.notes}
+
+- Each surface predicts one partner's MVPA. Higher areas mean more MVPA; a
+  slope shows change, and a bend shows that the association itself changes.
+- **Blue line (congruence):** Both partners report the same support. Moving
+  along it compares low-low with high-high couples.
+- **Dashed purple line (incongruence):** One partner reports above-average and
+  the other equally below-average support. Moving away from its centre means
+  greater disagreement.
+- Here, the purple line curves upward for both outcomes: larger discrepancies
+  are associated with more MVPA. This is a dissimilarity pattern, not evidence
+  that dissimilarity causes a benefit.
+- Points and loops show the observed data region. With 36 couples, especially
+  avoid interpreting the surface far outside it.
+
+:::
+
+<!-- ca. 2 minutes -->
+
+## Q&A and discussion
+
+Questions?
+
+:::{.fragment}
+
+- Discuss the different approaches briefly with your neighbor: which ones
+might be most relevant for your own data/research questions? (ca. 5 min)
+
+- Share with the group.
+
+:::
+
+<!-- ca. 10 minutes -->
+
+# Prepare for later exercises in R
+
+- Go to [https://pascal-kueng.github.io/dyadMLM/workshop/](https://pascal-kueng.github.io/dyadMLM/workshop/)
+- Link is also in the Teams channel
+- Download and unzip all workshop materials
+- Start R from that folder (by opening one of the files)
+
+Run this in the console to ensure all relevant packages are installed and up to date:
+
+```{r eval = FALSE}
+source("00_setup.R")
+```
+
+
+
+## References
+
+::: {#refs}
+:::
+
+## Continue with the applied tutorial {.rq-slide}
+
+::: {.workshop-next}
+
+Thank you for your attention!
+
+[Continue to Part II: Applied Tutorial →](https://pascal-kueng.github.io/dyadMLM/workshop/applied/){.workshop-next-link}
+:::
+
+
+
+# Appendix
+
+## Interpreting the distinguishable APIM [← Results](#fitting-the-distinguishable-apim){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+APIM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+**Intercepts:** When both partners' support scores equal the pooled sample mean:
+
+- $b_{0,\mathrm{F}}$: Predicted female MVPA is 35.28 minutes.
+- $b_{0,\mathrm{M}}$: Predicted male MVPA is 31.24 minutes.
+
+**Female MVPA**, holding the male partner's support constant:
+
+- [$a_{\mathrm{F}}$: One-unit higher female support is associated with 4.61 fewer minutes of her own MVPA.]{.not-significant}
+- $p_{\mathrm{F}}$: One-unit higher male support is associated with 15.06 additional minutes of female MVPA.
+
+**Male MVPA**, holding the female partner's support constant:
+
+- $a_{\mathrm{M}}$: One-unit higher male support is associated with 17.92 additional minutes of his own MVPA.
+- [$p_{\mathrm{M}}$: One-unit higher female support is associated with 9.87 fewer minutes of male MVPA.]{.not-significant}
+
+**Residual correlation ($\rho = .78$):** When the female's MVPA is higher than predicted, the male's MVPA also tends to be higher than predicted, and likewise for being lower. This is the remaining within-couple interdependence after accounting for both support scores.
+
+## Interpreting the exchangeable APIM [← Results](#fitting-the-exchangeable-apim){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+APIM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+The intercept, actor effect, partner effect, and residual SD are **pooled across members**.
+
+**Pooled intercept:** When both partners' support scores equal the pooled sample mean:
+
+- $b_0$: Predicted MVPA is 31.21 minutes for either member position.
+
+**Pooled effects:** For either member, holding the other support score constant:
+
+- $a$: One-unit higher own support is associated with 7.75 additional minutes of own MVPA.
+- [$p$: One-unit higher partner support is associated with 1.97 additional minutes of own MVPA.]{.not-significant}
+
+Pooling means that the same coefficients are used for both member positions. It does not require the two members to have identical predictions because their own and partner support scores may differ.
+
+**Residual correlation ($\rho = .77$):** When one member's MVPA is higher than predicted, the partner's MVPA also tends to be higher than predicted, and likewise for being lower. The residual correlation remains freely estimated even though the other parameters are pooled.
+
+## Interpreting the fitted DIM [← Results](#fitting-the-dim){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+DIM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+**Intercepts:** For a couple with an average support mean:
+
+- $b_0$: Predicted couple-mean MVPA is 31.21 minutes.
+- The member-deviation intercept is constrained to zero: a member with no support deviation has no predicted MVPA deviation from the couple mean.
+
+Holding the **members' support deviations fixed**, a one-unit higher couple-mean support score is associated with:
+
+- $b_{\mathrm{mean}}$: 9.72 additional minutes of couple-mean MVPA.
+
+Holding couple-mean support at the **sample average**, a one-unit larger member support deviation from the couple mean is associated with:
+
+- [$b_{\mathrm{dev}}$: A 5.78-minute larger member MVPA deviation from the couple mean. Thus, a member whose support is one unit above the couple mean is predicted to have MVPA 5.78 minutes above the couple mean.]{.not-significant}
+
+**Residual correlation:** Exchangeability constrains the correlation between the residual couple mean and residual member deviation to zero. Thus, couples whose MVPA is higher than predicted on average are not expected to tilt systematically toward either arbitrarily labeled member in residual MVPA. This is a model constraint, not an empirical finding, and it does not imply that the two partners' residuals are independent.
+
+## Interpreting the fitted DSM [← Results](#fitted-dsm-results){.appendix-back-link} {.smaller .interpretation-slide}
+
+::: {.interpretation-footnote}
+Red estimates are not statistically distinguishable from zero at
+$\alpha = .05$. Their numerical translations are shown only to demonstrate how
+DSM coefficients are interpreted; they should not be treated as evidence of a
+nonzero effect.
+:::
+
+**Intercepts:** For a couple with an average support mean and no female–male support difference:
+
+- $a_{10}$: Predicted couple-mean MVPA is 33.26 minutes.
+- [$a_{20}$: The female is predicted to be 4.04 minutes more active than the male.]{.not-significant}
+
+Holding the **female–male support difference at zero**, a one-unit higher couple-mean support score is associated with:
+
+- $a_{11}$: 9.25 additional minutes of couple-mean MVPA.
+- [$a_{21}$: A 2.40-minute larger female–male MVPA difference. Thus, when couple-mean support is one unit above the sample average, the predicted difference is $4.04 + 2.40 = 6.44$ minutes.]{.not-significant}
+
+Holding couple-mean support at the **sample average**, a one-unit larger female–male support difference is associated with:
+
+- $a_{12}$: 11.86 fewer minutes of couple-mean MVPA.
+- [$a_{22}$: A 4.06-minute larger female–male MVPA difference. Thus, when the female–male support difference is one unit, the predicted difference is $4.04 + 4.06 = 8.10$ minutes.]{.not-significant}
+
+**Residual correlation ($\rho = .37$):** Couples with higher-than-predicted mean MVPA also tend to show a more positive-than-predicted female–male MVPA difference; residual MVPA therefore tilts toward the female.
+
+## Exchangeable CFM: constraints and degrees of freedom {.smaller}
 
 Positions 1 and 2 are arbitrary. The model must be unchanged when they are
 swapped [@ledermannMediationDyadicData2009; @peughAnalyzingMixedDyadic2013].
@@ -1668,181 +2251,10 @@ $$
   test of the basic CFM structure.
 - An unconstrained distinguishable CFM has df = 1, giving the usual five-degree-
   of-freedom exchangeability test. Our distinguishable model already equates the
-  two outcome residual variances and has df = 2, so the comparison on the next
-  slide tests the four remaining equality constraints.
-- A well-fitting constrained model does not make substantively meaningful roles
-  exchangeable; that decision must also follow the research question.
+  two outcome residual variances and has df = 2, so the comparison tests the four
+  remaining equality constraints.
 
 :::
-
-## Fitted exchangeable CFM
-
-```{r}
-#| label: fitted-exchangeable-cfm
-#| echo: false
-#| dev: svg
-#| fig-width: 10
-#| fig-height: 5.35
-#| out-width: 100%
-#| fig-align: center
-#| fig-alt: "Fitted exchangeable Common Fate Model for collaborative planning and joint MVPA. Female and male indicator intercepts, corresponding residual variances, and same-member residual covariances are constrained to equality."
-
-exchangeable_cfm_model <- '
-  # Shared dyad levels: fix all four loadings to 1.
-  planning_level =~
-    1 * collaborative_planning_female +
-    1 * collaborative_planning_male
-  joint_mvpa_level =~
-    1 * mvpa_joint_female +
-    1 * mvpa_joint_male
-
-  # Association between the two shared levels.
-  joint_mvpa_level ~ b_level * planning_level
-
-  # Equal indicator intercepts across positions.
-  collaborative_planning_female ~ i_planning * 1
-  collaborative_planning_male ~ i_planning * 1
-  mvpa_joint_female ~ i_mvpa * 1
-  mvpa_joint_male ~ i_mvpa * 1
-
-  # Equal residual variances across positions.
-  collaborative_planning_female ~~ e_planning * collaborative_planning_female
-  collaborative_planning_male ~~ e_planning * collaborative_planning_male
-  mvpa_joint_female ~~ e_mvpa * mvpa_joint_female
-  mvpa_joint_male ~~ e_mvpa * mvpa_joint_male
-
-  # Equal same-member residual covariances across positions.
-  collaborative_planning_female ~~ c_female * mvpa_joint_female
-  collaborative_planning_male ~~ c_male * mvpa_joint_male
-  c_female == c_male
-'
-
-workshop_exchangeable_cfm <- lavaan::sem(
-  exchangeable_cfm_model,
-  data = cfm_data,
-  missing = "fiml",
-  meanstructure = TRUE
-)
-
-cfm_model_comparison <- lavaan::lavTestLRT(
-  workshop_distinguishable_cfm,
-  workshop_exchangeable_cfm
-)
-
-cfm_chisq_difference <- cfm_model_comparison$`Chisq diff`[2]
-cfm_df_difference <- cfm_model_comparison$`Df diff`[2]
-cfm_comparison_p <- cfm_model_comparison$`Pr(>Chisq)`[2]
-
-cfm_distinguishable_aic <- lavaan::fitMeasures(
-  workshop_distinguishable_cfm, "aic"
-)
-cfm_exchangeable_aic <- lavaan::fitMeasures(
-  workshop_exchangeable_cfm, "aic"
-)
-cfm_distinguishable_bic <- lavaan::fitMeasures(
-  workshop_distinguishable_cfm, "bic"
-)
-cfm_exchangeable_bic <- lavaan::fitMeasures(
-  workshop_exchangeable_cfm, "bic"
-)
-
-draw_cfm_diagram(
-  model = workshop_exchangeable_cfm,
-  parameter_labels = c(
-    level = "b_level",
-    residual_1 = "c_female",
-    residual_2 = "c_male"
-  ),
-  member_ids = c("F", "M"),
-  member_names = c("Female", "Male"),
-  predictor_name = "collaborative planning",
-  outcome_name = "joint MVPA",
-  show_standardized_effect = FALSE
-)
-```
-
-::: {.cfm-constraint}
-**No detectable loss of fit:**
-$\Delta\chi^2(`r cfm_df_difference`) = `r sprintf("%.2f", cfm_chisq_difference)`$,
-$p = `r sub("^0", "", sprintf("%.3f", cfm_comparison_p))`$.
-**Parsimony favours the exchangeable model:**
-AIC `r sprintf("%.2f", cfm_distinguishable_aic)` $\rightarrow$
-`r sprintf("%.2f", cfm_exchangeable_aic)`;
-BIC `r sprintf("%.2f", cfm_distinguishable_bic)` $\rightarrow$
-`r sprintf("%.2f", cfm_exchangeable_bic)`.
-:::
-
-:::{.notes}
-
-- The four additional equality constraints fit the data very well. The
-  likelihood-ratio test provides no evidence that they worsen fit.
-- AIC and BIC are lower for the exchangeable model because it achieves almost
-  the same likelihood with four fewer free parameters.
-- This is evidence that pooling the female and male measurement parameters is
-  compatible with this small sample; it does not establish that gender is
-  substantively irrelevant or that the partners were arbitrarily assigned.
-- The fitted shared-level association remains observational.
-
-:::
-
-<!-- ca. 3 Minutes -->
-
-
-## Honorable mention: The truth and bias model 
-
-<!-- add ref, basic idea, example graphic and basic interpretation of paths -->
-
-<!-- ca. 2 minutes -->
-
-
-
-<!----------------- APPLIED PART (plus MLM vs. SEM and software) 
-
-TODO: Probably create a second slide deck!
-
-- DHARMa plots!?! -> as required package for workshop -> link to materials or do in tutorial? Also check AR1 etc., etc. can dharma do this if resid is set to almost zero?
-
-- glmmTMB -> as required 
-- dyadMLM -> as required (via pak, see instructions; or should we already try a CRAN release now?? We may want to still add additional functions like rotating variance structs back, so probably not). -> maybe just require pak and we install newest version on workshop-day?
-- dplyr -> required
-- tibble -> required
-- lavaan -> required
-- ggplot2 -> required
-
--------------->
-
-<!-- ILD-part: 
-
-- see dev note on ar1 processes careful to consider degrees of freedom! relevant here?
-  - TODO @codex: are degrees of freedom alreaedy important in the cross-sectional case and should we teach anything regarding those?
-- see plots on: https://quantdev.ssri.psu.edu/tutorials/apa-ati-intensive-longitudinal-data-session-m-dyadic-multilevel-model
-
--->
-
-<!-- Excercises part
-
-Create exercises with data visalization, etc. Panel plots, histograms
-correlations (wb corr)?
-
--->
-
-## References
-
-::: {#refs}
-:::
-
-## Continue with the applied tutorial {.rq-slide}
-
-::: {.workshop-next}
-
-Thank you for your attention!
-
-[Continue to Part II: Applied Tutorial →](https://pascal-kueng.github.io/dyadMLM/workshop/applied/){.workshop-next-link}
-:::
-
-
-
-# Appendix
 
 ## Distinguishable APIM: residual covariance
 

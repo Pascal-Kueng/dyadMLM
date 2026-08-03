@@ -339,7 +339,7 @@ the seesaw tends to tilt farther at higher elevator residuals. Conditional sign
 symmetry—not the sample correlation by itself—is what guarantees that neither
 arbitrary seat is preferred.
 
-The simulation core is only four lines:
+Inside `simulate_location_scale_dim()`, the simulation core is only four lines:
 
 ```{r simulation-core, eval=FALSE}
 r_mean <- sigma_mean * z_mean
@@ -472,6 +472,7 @@ fit_dim_ls <- function(dat, extended = TRUE) {
       extended = extended,
       lower = lower,
       upper = upper,
+      # Non-default settings help this example converge.
       control = list(
         eval.max = 3000,
         iter.max = 2000,
@@ -1200,7 +1201,7 @@ $\operatorname{Cov}(r_{\mathrm{M}},r_{\mathrm{D}})=0$, the expanded exchangeable
 covariance matrix is
 
 $$
-\boldsymbol{\Sigma}_{\mathrm{e}}
+\Sigma_{\mathrm{e}}
 =
 \begin{pmatrix}
 v_{\mathrm{M}}+v_{\mathrm{D}} & v_{\mathrm{M}}-v_{\mathrm{D}}\\
@@ -1231,7 +1232,7 @@ A conventional Gaussian exchangeable APIM with one constant covariance matrix
 can match the extended model's **marginal** covariance matrix,
 
 $$
-\boldsymbol{\Sigma}_{\mathrm{e}}
+\Sigma_{\mathrm{e}}
 =
 \begin{pmatrix}
 \sigma_{\mathrm{M}}^2+\bar v_{\mathrm{D}} & \sigma_{\mathrm{M}}^2-\bar v_{\mathrm{D}}\\
@@ -1396,7 +1397,7 @@ $r_{\mathrm{D}}\mid z_X\sim\mathcal{N}(0,v_{\mathrm{D}}(z_X))$, and the two comp
 conditionally independent. The member-level conditional covariance matrix is
 
 $$
-\boldsymbol{\Sigma}_{\mathrm{e}}(z_X)
+\Sigma_{\mathrm{e}}(z_X)
 =
 \begin{pmatrix}
 v_{\mathrm{M}}+v_{\mathrm{D}}(z_X) & v_{\mathrm{M}}-v_{\mathrm{D}}(z_X)\\

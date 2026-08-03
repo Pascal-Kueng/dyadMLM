@@ -2,8 +2,6 @@
 **/*.quarto_ipynb
 /*.html
 !/branding.html
-!/dyad-day.html
-!/applied-tutorial.html
 /*.pdf
 /*_files/
 *.xlsx
@@ -11,4 +9,6 @@
 *.rda
 *.RData
 .~lock.*#
-*.rds
+!/dyadic-data.rds
+!/dyadic-person-means.rds
+!/dyadic-ild-exercise.rds

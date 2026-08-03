@@ -20,23 +20,23 @@ test_that("lag predictors are matched at exactly time minus one", {
   )
 
   expect_equal(result$row_id, data$row_id)
-  expect_equal(result$.dy_x_lag1, c(21, NA, NA, NA, NA, NA, 31, NA, 22, 32))
+  expect_equal(result$.x_lag1, c(21, NA, NA, NA, NA, NA, 31, NA, 22, 32))
 
-  prior_cwp <- result$.dy_x_cwp[match(
+  prior_cwp <- result$.x_cwp[match(
     paste(result$dyad_id, result$person_id, result$time - 1),
     paste(result$dyad_id, result$person_id, result$time)
   )]
-  expect_equal(result$.dy_x_cwp_lag1, prior_cwp)
-  expect_equal(result$.dy_x_actor_lag1, result$.dy_x_lag1)
+  expect_equal(result$.x_cwp_lag1, prior_cwp)
+  expect_equal(result$.x_actor_lag1, result$.x_lag1)
 
   partner_id <- c(A = "B", B = "A", C = "D", D = "C")[result$person_id]
-  expected_partner_lag <- result$.dy_x_lag1[match(
+  expected_partner_lag <- result$.x_lag1[match(
     paste(result$dyad_id, result$time, partner_id),
     paste(result$dyad_id, result$time, result$person_id)
   )]
-  expect_equal(result$.dy_x_partner_lag1, expected_partner_lag)
+  expect_equal(result$.x_partner_lag1, expected_partner_lag)
 
-  expect_false(any(grepl(".dy_z.*lag1", names(result))))
+  expect_false(any(grepl(".z.*lag1", names(result))))
   expect_false(any(grepl("cbp.*lag1", names(result))))
   expect_equal(attr(result, "dyadMLM")$lag1_predictors, "x")
   expect_equal(
@@ -49,17 +49,17 @@ test_that("lag predictors are matched at exactly time minus one", {
   expect_equal(
     generated_lags$column,
     c(
-      ".dy_x_lag1",
-      ".dy_x_cwp_lag1",
-      ".dy_x_actor_lag1",
-      ".dy_x_cwp_actor_lag1",
-      ".dy_x_partner_lag1",
-      ".dy_x_cwp_partner_lag1"
+      ".x_lag1",
+      ".x_cwp_lag1",
+      ".x_actor_lag1",
+      ".x_cwp_actor_lag1",
+      ".x_partner_lag1",
+      ".x_cwp_partner_lag1"
     )
   )
 
   printed <- capture.output(print(result, n = 1))
-  expect_true(any(grepl(".dy_{pred}_actor_lag1", printed, fixed = TRUE)))
+  expect_true(any(grepl(".{pred}_actor_lag1", printed, fixed = TRUE)))
   expect_true(any(grepl("lag-1 APIM actor predictor", printed, fixed = TRUE)))
 })
 
@@ -86,8 +86,8 @@ test_that("lag predictors handle a missing row for one member", {
     result$person_id == "A" &
     result$time == 3
 
-  expect_true(is.na(result$.dy_x_actor_lag1[member_a_time_3]))
-  expect_equal(result$.dy_x_partner_lag1[member_a_time_3], 21)
+  expect_true(is.na(result$.x_actor_lag1[member_a_time_3]))
+  expect_equal(result$.x_partner_lag1[member_a_time_3], 21)
 })
 
 test_that("lag predictors create DIM and DSM model-ready columns", {
@@ -110,15 +110,40 @@ test_that("lag predictors create DIM and DSM model-ready columns", {
   )
 
   expect_true(all(c(
-    ".dy_x_dyad_mean_gmc_lag1",
-    ".dy_x_within_dyad_dev_lag1",
-    ".dy_x_cwp_dyad_mean_lag1",
-    ".dy_x_cwp_within_dyad_dev_lag1"
+    ".x_dyad_mean_gmc_lag1",
+    ".x_within_dyad_dev_lag1",
+    ".x_cwp_dyad_mean_lag1",
+    ".x_cwp_within_dyad_dev_lag1"
   ) %in% names(dim_result)))
-  expect_true(all(is.na(dim_result$.dy_x_dyad_mean_gmc_lag1[dim_result$time == 1])))
+  expect_true(all(is.na(dim_result$.x_dyad_mean_gmc_lag1[dim_result$time == 1])))
   expect_equal(
-    dim_result$.dy_x_within_dyad_dev_lag1[dim_result$time > 1],
+    dim_result$.x_within_dyad_dev_lag1[dim_result$time > 1],
     rep(c(-0.5, 0.5), 4)
+  )
+
+  dim_generated_lags <- dyad_generated_columns(attr(dim_result, "dyadMLM")) |>
+    dplyr::filter(.data$model_family == "dim", .data$lag == 1L) |>
+    dplyr::select("component", "column_role", "column", "source_column") |>
+    dplyr::arrange(.data$column)
+  expect_equal(
+    dim_generated_lags,
+    tibble::tibble(
+      component = c("cwp", "cwp", "raw", "raw"),
+      column_role = c(
+        "dyad_mean", "within_dyad_deviation",
+        "dyad_mean", "within_dyad_deviation"
+      ),
+      column = c(
+        ".x_cwp_dyad_mean_lag1",
+        ".x_cwp_within_dyad_dev_lag1",
+        ".x_dyad_mean_gmc_lag1",
+        ".x_within_dyad_dev_lag1"
+      ),
+      source_column = c(
+        ".x_cwp_lag1", ".x_cwp_lag1",
+        ".x_lag1", ".x_lag1"
+      )
+    )
   )
 
   distinguishable <- dplyr::mutate(
@@ -139,14 +164,39 @@ test_that("lag predictors create DIM and DSM model-ready columns", {
   )
 
   expect_true(all(c(
-    ".dy_x_dyad_mean_gmc_lag1",
-    ".dy_x_within_dyad_diff_lag1",
-    ".dy_x_cwp_dyad_mean_lag1",
-    ".dy_x_cwp_within_dyad_diff_lag1"
+    ".x_dyad_mean_gmc_lag1",
+    ".x_within_dyad_diff_lag1",
+    ".x_cwp_dyad_mean_lag1",
+    ".x_cwp_within_dyad_diff_lag1"
   ) %in% names(dsm_result)))
   expect_equal(
-    dsm_result$.dy_x_within_dyad_diff_lag1[dsm_result$time > 1],
+    dsm_result$.x_within_dyad_diff_lag1[dsm_result$time > 1],
     rep(-1, 8)
+  )
+
+  dsm_generated_lags <- dyad_generated_columns(attr(dsm_result, "dyadMLM")) |>
+    dplyr::filter(.data$model_family == "dsm", .data$lag == 1L) |>
+    dplyr::select("component", "column_role", "column", "source_column") |>
+    dplyr::arrange(.data$column)
+  expect_equal(
+    dsm_generated_lags,
+    tibble::tibble(
+      component = c("cwp", "cwp", "raw", "raw"),
+      column_role = c(
+        "dyad_mean", "dyad_difference",
+        "dyad_mean", "dyad_difference"
+      ),
+      column = c(
+        ".x_cwp_dyad_mean_lag1",
+        ".x_cwp_within_dyad_diff_lag1",
+        ".x_dyad_mean_gmc_lag1",
+        ".x_within_dyad_diff_lag1"
+      ),
+      source_column = c(
+        ".x_cwp_lag1", ".x_cwp_lag1",
+        ".x_lag1", ".x_lag1"
+      )
+    )
   )
 })
 
@@ -170,7 +220,7 @@ test_that("lag predictors work without temporal centering", {
     seed = 123
   )
 
-  expect_equal(result$.dy_x_lag1, c(NA, NA, "a", "b", NA, NA, "e", "f"))
-  expect_equal(result$.dy_x_actor_lag1, result$.dy_x_lag1)
+  expect_equal(result$.x_lag1, c(NA, NA, "a", "b", NA, NA, "e", "f"))
+  expect_equal(result$.x_actor_lag1, result$.x_lag1)
   expect_false(any(grepl("cwp.*lag1", names(result))))
 })

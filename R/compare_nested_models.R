@@ -12,7 +12,7 @@
 #' Both model calls must use named data-frame objects that remain available when
 #' the models are compared. The checks assume these objects have not been
 #' modified since fitting. All ordinary data columns must be identical,
-#' including their types and attributes. For `dyadMLM_data`, generated `.dy_`
+#' including their types and attributes. For `dyadMLM_data`, package-generated
 #' columns may differ, but the original columns must be identical. Ordinary and
 #' prepared data may be compared with each other. Dyad metadata are checked when
 #' both models use `dyadMLM_data`. The function also checks fitted rows,
@@ -54,11 +54,11 @@
 #'     data = full_data
 #'   )
 #'
-#'   compare_nested_glmmTMB_models(restricted_model, full_model)
+#'   compare_nested_models(restricted_model, full_model)
 #' }
 #'
 #' @export
-compare_nested_glmmTMB_models <- function(model1, model2) {
+compare_nested_models <- function(model1, model2) {
   validate_comparison_model(model1, "model1")
   validate_comparison_model(model2, "model2")
 
@@ -142,7 +142,7 @@ comparison_model_data <- function(model, caller_env, argument) {
   model_formula <- stats::formula(model, component = "cond")
 
   # A model fitted inside a helper may keep its data with its formula.
-  # Search there first, then where compare_nested_glmmTMB_models() was called.
+  # Search there first, then where compare_nested_models() was called.
   environments <- list(environment(model_formula), caller_env)
 
   for (search_env in environments) {
@@ -200,14 +200,21 @@ validate_comparison_data <- function(model1, model2,
     }
   }
 
-  # Generated dyadMLM columns may differ across model parameterizations.
+  # Generated dyadMLM columns may differ across model parameterizations. Use
+  # their recorded names rather than treating a prefix as column ownership.
   model1_columns <- names(model1_data)
   model2_columns <- names(model2_data)
   if (inherits(model1_data, "dyadMLM_data")) {
-    model1_columns <- model1_columns[!startsWith(model1_columns, ".dy_")]
+    generated_columns <- dyad_generated_columns(
+      attr(model1_data, "dyadMLM")
+    )$column
+    model1_columns <- model1_columns[!model1_columns %in% generated_columns]
   }
   if (inherits(model2_data, "dyadMLM_data")) {
-    model2_columns <- model2_columns[!startsWith(model2_columns, ".dy_")]
+    generated_columns <- dyad_generated_columns(
+      attr(model2_data, "dyadMLM")
+    )$column
+    model2_columns <- model2_columns[!model2_columns %in% generated_columns]
   }
 
   if (!setequal(model1_columns, model2_columns)) {
