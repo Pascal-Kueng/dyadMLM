@@ -70,13 +70,13 @@ Recently completed cleanup:
   products, and fitted-row coding validation when the indicator columns remain
   available
 
-Immediate post-release sequence:
+Post-release sequence:
 
-1. create the GitHub Release from the accepted `v0.1.0` tag
-2. upload the exact accepted source archive to the prepared Zenodo draft,
-   verify its metadata and checksum, and publish it
-3. complete the post-release documentation and workshop cleanup, then verify
-   the pkgdown and stable workshop URLs after deployment from `main`
+1. [x] Create the GitHub Release from the accepted `v0.1.0` tag.
+2. [x] Upload the exact accepted source archive to the prepared Zenodo record,
+   verify its metadata and checksum, and publish it.
+3. [ ] Complete the post-release documentation and workshop cleanup, then verify
+   the pkgdown and stable workshop URLs after deployment from `main`.
 
 The engine-independent covariance-array back-transformation and final named
 `varcov`/`sdcor` results are implemented for `glmmTMB` point estimates and
@@ -164,7 +164,7 @@ follow-up rather than claims about the CRAN release state.
 - [ ] Documentation, README, citation metadata, pkgdown, tests, and multi-platform
   R CMD checks are clean.
 - [x] Version `0.1.0` is released on CRAN and tagged as `v0.1.0`.
-- [ ] Create the GitHub Release and publish the exact accepted source archive
+- [x] Create the GitHub Release and publish the exact accepted source archive
   through the prepared Zenodo record.
 
 Not required for v0.1.0: model fitting or syntax-generation wrappers, public
@@ -555,11 +555,18 @@ Remaining unchecked or imperative items are follow-up maintenance work.
 - Complete release archiving after CRAN acceptance
   - [x] Submit the source package to CRAN and obtain acceptance
   - [x] Tag the accepted commit as `v0.1.0`
-  - [ ] Create a GitHub Release from that tag
-  - [ ] Upload the exact accepted source archive to Zenodo draft `21481721`,
+  - [x] Create a GitHub Release from that tag
+  - [x] Upload the exact accepted source archive to Zenodo record `21481721`,
     whose reserved version DOI is `10.5281/zenodo.21481721`
-  - [ ] Verify the Zenodo metadata and checksum, then publish it
+  - [x] Verify the Zenodo metadata and checksum, then publish it
   - Continue to use the concept DOI in package-level citation metadata
+  - For future releases:
+    1. update the version and release date in `CITATION.cff` before tagging
+    2. create the GitHub Release from the tag
+    3. create a new version from the latest Zenodo record
+    4. upload the exact release archive, verify its metadata and checksum, and
+       publish it
+  - This preserves the concept DOI across releases.
 
 ## Near-term maintenance after 0.1.0
 

@@ -5,13 +5,11 @@
 \alias{dyads_nbinom_cross}
 \title{Example negative-binomial cross-sectional dyadic data}
 \format{
-A data frame with 720 rows and 6 variables:
+A data frame with 720 rows and 5 variables:
 \describe{
 \item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}
 \item{gender}{Gender role, with levels \code{female} and \code{male}.}
-\item{dyad_composition}{Observed dyad composition, with levels
-\code{female_x_male}, \code{female_x_female}, and \code{male_x_male}.}
 \item{conflict_count}{Simulated number of conflictual interactions reported
 by a member.}
 \item{stress}{Mean simulated stress score across 14 days.}

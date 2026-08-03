@@ -5,14 +5,12 @@
 \alias{dyads_nbinom_ild}
 \title{Example negative-binomial intensive longitudinal dyadic data}
 \format{
-A data frame with 10,080 rows and 7 variables:
+A data frame with 10,080 rows and 6 variables:
 \describe{
 \item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}
 \item{diaryday}{Measurement day, from 0 through 13.}
 \item{gender}{Gender role, with levels \code{female} and \code{male}.}
-\item{dyad_composition}{Observed dyad composition, with levels
-\code{female_x_male}, \code{female_x_female}, and \code{male_x_male}.}
 \item{conflict_count}{Simulated number of conflictual interactions reported
 by a member on that day.}
 \item{stress}{Simulated stress score.}

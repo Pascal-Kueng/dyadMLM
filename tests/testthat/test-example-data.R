@@ -6,8 +6,7 @@ check_example_dyads <- function(
   }
   structural_columns <- c(
     structural_columns,
-    "gender",
-    "dyad_composition"
+    "gender"
   )
 
   expect_equal(
@@ -186,15 +185,13 @@ test_that("example datasets use parallel dyad structures", {
   cross_structural_columns <- c(
     "personID",
     "coupleID",
-    "gender",
-    "dyad_composition"
+    "gender"
   )
   ild_structural_columns <- c(
     "personID",
     "coupleID",
     "diaryday",
-    "gender",
-    "dyad_composition"
+    "gender"
   )
 
   expect_identical(

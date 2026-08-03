@@ -12,8 +12,12 @@ load(file.path("data", "dyads_ild.rda"))
 
 diary_days <- sort(unique(dyads_ild$diaryday))
 couples <- dyads_ild |>
-  dplyr::distinct(coupleID, dyad_composition) |>
-  dplyr::arrange(coupleID)
+  dplyr::filter(diaryday == min(diaryday)) |>
+  dplyr::group_by(coupleID) |>
+  dplyr::summarise(
+    dyad_composition = paste(sort(as.character(gender)), collapse = "_x_"),
+    .groups = "drop"
+  )
 
 # `member_position` and `member_contrast` are simulation-only columns.
 panel <- dyads_ild |>
@@ -21,9 +25,9 @@ panel <- dyads_ild |>
     personID,
     coupleID,
     diaryday,
-    gender,
-    dyad_composition
+    gender
   ) |>
+  dplyr::left_join(couples, by = "coupleID") |>
   dplyr::mutate(
     member_position = ifelse(personID %% 2L == 1L, 1L, 2L),
     member_contrast = ifelse(member_position == 1L, 1, -1),
@@ -212,7 +216,6 @@ dyads_nbinom_ild <- panel |>
     coupleID,
     diaryday,
     gender,
-    dyad_composition,
     conflict_count,
     stress
   ) |>
@@ -226,7 +229,6 @@ dyads_nbinom_cross <- panel |>
     personID,
     coupleID,
     gender,
-    dyad_composition,
     stress = stress_person_mean,
     log_expected_conflicts_cross =
       intercept + member_stable_intercept +
@@ -248,7 +250,6 @@ dyads_nbinom_cross <- dyads_nbinom_cross |>
     personID,
     coupleID,
     gender,
-    dyad_composition,
     conflict_count,
     stress
   ) |>

@@ -294,18 +294,13 @@ dyads_ild <- panel |>
   dplyr::mutate(
     closeness = expected_closeness + shared_residual +
       member_contrast * difference_residual + ar1_residual,
-    gender = factor(gender, levels = c("female", "male")),
-    dyad_composition = factor(
-      dyad_composition,
-      levels = c("female_x_male", "female_x_female", "male_x_male")
-    )
+    gender = factor(gender, levels = c("female", "male"))
   ) |>
   dplyr::select(
     personID,
     coupleID,
     diaryday,
     gender,
-    dyad_composition,
     closeness,
     provided_support
   ) |>
@@ -317,8 +312,7 @@ dyads_cross <- dyads_ild |>
   dplyr::group_by(
     personID,
     coupleID,
-    gender,
-    dyad_composition
+    gender
   ) |>
   dplyr::summarise(
     closeness = mean(closeness),

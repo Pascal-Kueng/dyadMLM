@@ -5,14 +5,12 @@
 \alias{dyads_ild}
 \title{Example Gaussian intensive longitudinal dyadic data}
 \format{
-A data frame with 10,080 rows and 7 variables:
+A data frame with 10,080 rows and 6 variables:
 \describe{
 \item{personID}{Unique person identifier.}
 \item{coupleID}{Dyad identifier.}
 \item{diaryday}{Measurement day, from 0 through 13.}
 \item{gender}{Gender role, with levels \code{female} and \code{male}.}
-\item{dyad_composition}{Observed dyad composition, with levels
-\code{female_x_male}, \code{female_x_female}, and \code{male_x_male}.}
 \item{closeness}{Simulated Gaussian closeness outcome.}
 \item{provided_support}{Simulated provided-support score.}
 }
@@ -34,10 +32,10 @@ members observed on 14 diary days.
 }
 \details{
 The Gaussian outcome includes independent member-specific stationary AR(1)
-residual processes. Their marginal standard deviation is 0.60 for both
-genders, with correlations of 0.55 for female members and 0.50 for male
-members. Separate shared and difference residuals induce same-occasion
-partner covariance.
+residual components. Their marginal standard deviation is 0.60 for both
+genders, with lag-1 correlations within these components of 0.55 for female
+members and 0.50 for male members. Separate shared and difference residuals
+induce same-occasion partner covariance.
 
 Prepare with \code{dyad = coupleID}, \code{member = personID}, \code{role = gender}, and
 \code{time = diaryday}. These data contain three compositions. Use

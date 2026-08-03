@@ -1,5 +1,7 @@
 comparison_female_male_cross_dyads <- dyads_cross |>
-  dplyr::filter(dyad_composition == "female_x_male")
+  dplyr::group_by(coupleID) |>
+  dplyr::filter(dplyr::n_distinct(gender) == 2L) |>
+  dplyr::ungroup()
 
 test_that("comparison treats unregistered prefixed columns as original data", {
   data <- data.frame(
