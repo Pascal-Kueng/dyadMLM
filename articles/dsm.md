@@ -769,9 +769,6 @@ dsm_ILD <- glmmTMB::glmmTMB(
   family = gaussian(),
   data = ild_dsm_data
 )
-#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
-#> problem; false convergence (8). See vignette('troubleshooting'),
-#> help('diagnose')
 
 summary(dsm_ILD)
 #>  Family: gaussian  ( identity )
@@ -803,29 +800,29 @@ summary(dsm_ILD)
 #> 
 #> Conditional model:
 #>                                                                  Estimate
-#> (Intercept)                                                      5.111587
-#> diaryday                                                        -0.005239
+#> (Intercept)                                                      5.111583
+#> diaryday                                                        -0.005238
 #> .dy_provided_support_cwp_dyad_mean                               0.472112
-#> .dy_provided_support_cwp_within_dyad_diff                        0.011993
-#> .dy_provided_support_cbp_dyad_mean                               1.465978
-#> .dy_provided_support_cbp_within_dyad_diff                        0.101045
-#> .dy_dsm_role_contrast                                            0.864420
-#> diaryday:.dy_dsm_role_contrast                                   0.023049
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.212177
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.196321
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.719314
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.923647
+#> .dy_provided_support_cwp_within_dyad_diff                        0.011992
+#> .dy_provided_support_cbp_dyad_mean                               1.465964
+#> .dy_provided_support_cbp_within_dyad_diff                        0.101067
+#> .dy_dsm_role_contrast                                            0.864415
+#> diaryday:.dy_dsm_role_contrast                                   0.023050
+#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.212178
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.196322
+#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.719301
+#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.923664
 #>                                                                 Std. Error
-#> (Intercept)                                                       0.071203
+#> (Intercept)                                                       0.071202
 #> diaryday                                                          0.003745
-#> .dy_provided_support_cwp_dyad_mean                                0.027866
+#> .dy_provided_support_cwp_dyad_mean                                0.027865
 #> .dy_provided_support_cwp_within_dyad_diff                         0.017685
 #> .dy_provided_support_cbp_dyad_mean                                0.092236
-#> .dy_provided_support_cbp_within_dyad_diff                         0.075771
+#> .dy_provided_support_cbp_within_dyad_diff                         0.075770
 #> .dy_dsm_role_contrast                                             0.099661
 #> diaryday:.dy_dsm_role_contrast                                    0.005604
 #> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast          0.041695
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.026462
+#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.026461
 #> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast          0.127875
 #> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast   0.105047
 #>                                                                 z value

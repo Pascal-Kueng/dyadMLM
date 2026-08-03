@@ -64,7 +64,7 @@
 Küng</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/vignettes/dsm.Rmd" class="external-link"><code>vignettes/dsm.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/v0.1.0/vignettes/dsm.Rmd" class="external-link"><code>vignettes/dsm.Rmd</code></a></small>
       <div class="d-none name"><code>dsm.Rmd</code></div>
     </div>
 
@@ -911,9 +911,6 @@ difference.</p>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_dsm_data</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
-<span><span class="co">#&gt; help('diagnose')</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dsm_ILD</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian  ( identity )</span></span>
@@ -945,29 +942,29 @@ difference.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                                                                  Estimate</span></span>
-<span><span class="co">#&gt; (Intercept)                                                      5.111587</span></span>
-<span><span class="co">#&gt; diaryday                                                        -0.005239</span></span>
+<span><span class="co">#&gt; (Intercept)                                                      5.111583</span></span>
+<span><span class="co">#&gt; diaryday                                                        -0.005238</span></span>
 <span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean                               0.472112</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff                        0.011993</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean                               1.465978</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                        0.101045</span></span>
-<span><span class="co">#&gt; .dy_dsm_role_contrast                                            0.864420</span></span>
-<span><span class="co">#&gt; diaryday:.dy_dsm_role_contrast                                   0.023049</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.212177</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.196321</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.719314</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.923647</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff                        0.011992</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean                               1.465964</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                        0.101067</span></span>
+<span><span class="co">#&gt; .dy_dsm_role_contrast                                            0.864415</span></span>
+<span><span class="co">#&gt; diaryday:.dy_dsm_role_contrast                                   0.023050</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.212178</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.196322</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.719301</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.923664</span></span>
 <span><span class="co">#&gt;                                                                 Std. Error</span></span>
-<span><span class="co">#&gt; (Intercept)                                                       0.071203</span></span>
+<span><span class="co">#&gt; (Intercept)                                                       0.071202</span></span>
 <span><span class="co">#&gt; diaryday                                                          0.003745</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean                                0.027866</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean                                0.027865</span></span>
 <span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff                         0.017685</span></span>
 <span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean                                0.092236</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                         0.075771</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff                         0.075770</span></span>
 <span><span class="co">#&gt; .dy_dsm_role_contrast                                             0.099661</span></span>
 <span><span class="co">#&gt; diaryday:.dy_dsm_role_contrast                                    0.005604</span></span>
 <span><span class="co">#&gt; .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast          0.041695</span></span>
-<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.026462</span></span>
+<span><span class="co">#&gt; .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.026461</span></span>
 <span><span class="co">#&gt; .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast          0.127875</span></span>
 <span><span class="co">#&gt; .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast   0.105047</span></span>
 <span><span class="co">#&gt;                                                                 z value</span></span>

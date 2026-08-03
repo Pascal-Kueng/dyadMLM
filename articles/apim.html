@@ -64,7 +64,7 @@
 Küng</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/vignettes/apim.Rmd" class="external-link"><code>vignettes/apim.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/v0.1.0/vignettes/apim.Rmd" class="external-link"><code>vignettes/apim.Rmd</code></a></small>
       <div class="d-none name"><code>apim.Rmd</code></div>
     </div>
 
@@ -610,7 +610,10 @@ role-specific intercepts refer to the average study day:</p>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ild_distinguishable_data</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
+<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
+<span><span class="co">#&gt; help('diagnose')</span></span></code></pre></div>
 <div class="section level5">
 <h5 id="random-slopes">Random slopes<a class="anchor" aria-label="anchor" href="#random-slopes"></a>
 </h5>
@@ -1102,9 +1105,9 @@ bridged.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Conditional model:</span></span>
 <span><span class="co">#&gt;                            Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; (Intercept)                5.834950   0.206341  28.278   &lt;2e-16 ***</span></span>
-<span><span class="co">#&gt; .dy_closeness_actor_lag1   0.005987   0.019493   0.307   0.7587    </span></span>
-<span><span class="co">#&gt; .dy_closeness_partner_lag1 0.002165   0.019493   0.111   0.9116    </span></span>
+<span><span class="co">#&gt; (Intercept)                5.834951   0.206339  28.278   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; .dy_closeness_actor_lag1   0.005985   0.019493   0.307   0.7588    </span></span>
+<span><span class="co">#&gt; .dy_closeness_partner_lag1 0.002167   0.019493   0.111   0.9115    </span></span>
 <span><span class="co">#&gt; diaryday                   0.008910   0.004676   1.905   0.0567 .  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code></pre></div>
