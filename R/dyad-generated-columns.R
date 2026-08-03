@@ -21,6 +21,12 @@ dyad_generated_columns <- function(meta) {
   # composition filtering, not merely the value requested by the user.
   if (isTRUE(meta$short_colnames)) {
     columns$column_pattern <- columns$short_column_pattern
+    is_exchangeable_indicator <-
+      columns$model_family == "composition" &
+      columns$column_role == "composition_indicator" &
+      columns$column == paste0(dyad_retained_prefix, "is_exchangeable")
+    columns$column_pattern[is_exchangeable_indicator] <-
+      columns$column[is_exchangeable_indicator]
   }
   columns
 }

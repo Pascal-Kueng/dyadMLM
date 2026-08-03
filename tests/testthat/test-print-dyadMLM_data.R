@@ -132,7 +132,7 @@ test_that("dyadMLM data print describes generated predictor columns", {
   )
 
   printed <- capture_wide_print(result)
-  short_indicator_pattern <- paste0(dyad_retained_prefix, "is_{role}")
+  short_indicator_pattern <- paste0(dyad_retained_prefix, "is_exchangeable")
   short_member_contrast_pattern <- paste0(
     dyad_retained_prefix,
     "member_contrast_arbitrary"
@@ -140,6 +140,7 @@ test_that("dyadMLM data print describes generated predictor columns", {
 
   expect_false(any(grepl("sum-diff contrast for exchangeable dyads; 0 for distinguishable dyads", printed, fixed = TRUE)))
   expect_true(any(grepl(short_indicator_pattern, printed, fixed = TRUE)))
+  expect_false(any(grepl(".is_{role}", printed, fixed = TRUE)))
   expect_true(any(grepl(short_member_contrast_pattern, printed, fixed = TRUE)))
   expect_added_column_description(
     printed,
@@ -164,6 +165,26 @@ test_that("dyadMLM data print describes generated predictor columns", {
   )
   expect_false(any(grepl(".{pred}_actor           actor", printed, fixed = TRUE)))
   expect_false(any(grepl(".{pred}_partner         partner", printed, fixed = TRUE)))
+})
+
+test_that("dyadMLM data print retains the short distinguishable indicator pattern", {
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c(1, 2, 3, 4),
+    role = rep(c("female", "male"), 2)
+  )
+
+  result <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    role = role
+  )
+
+  printed <- capture_wide_print(result)
+
+  expect_true(any(grepl(".is_{role}", printed, fixed = TRUE)))
+  expect_false(any(grepl(".is_exchangeable", printed, fixed = TRUE)))
 })
 
 test_that("added column descriptions align and wrap to console width", {
