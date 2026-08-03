@@ -31,6 +31,8 @@
   names from 0.1.0 are not retained.
 * Added package-level help at `?dyadMLM`, with links to the main functions,
   example datasets, and getting-started documentation.
+* Example datasets no longer include the redundant `dyad_composition` column;
+  `dyads_ild` now includes member-specific AR(1) residual processes.
 
 # dyadMLM 0.1.0
 

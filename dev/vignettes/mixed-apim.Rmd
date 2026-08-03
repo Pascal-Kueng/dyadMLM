@@ -443,6 +443,7 @@ mixed_ild_gaussian_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = mixed_ild_data
+  # Non-default settings help this example converge.
   , control = glmmTMB::glmmTMBControl(
       optimizer = stats::optim,
       optArgs = list(method = "BFGS"),

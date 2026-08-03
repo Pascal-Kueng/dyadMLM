@@ -479,25 +479,62 @@ day, but it does not describe persistence across days. In glmmTMB, we can
 model independent persistent AR(1) components per member.
 
 For distinguishable dyads, we add one term for each role while retaining the
-same-occasion covariance. This full-data update is computationally demanding,
-so it is shown but not run during vignette builds. Check convergence before
-interpreting a fitted model.
+same-occasion covariance. We spell out the complete model so the concurrent
+and persistent components are visible together.
 
-```{r specify-ild-distinguishable-ar1, eval = FALSE}
-ild_distinguishable_ar_model <- update(
-  ild_distinguishable_model,
-  formula = . ~ . +
+```{r fit-ild-distinguishable-ar1, eval = has_glmmTMB}
+ild_distinguishable_ar_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 +
+
+    # Role-specific intercepts
+    .is_female +
+    .is_male +
+
+    # Role-specific time trends
+    .is_female:diaryday_gmc +
+    .is_male:diaryday_gmc +
+
+    # Role-specific within-person actor effects
+    .is_female:.provided_support_cwp_actor +
+    .is_male:.provided_support_cwp_actor +
+
+    # Role-specific within-person partner effects
+    .is_female:.provided_support_cwp_partner +
+    .is_male:.provided_support_cwp_partner +
+
+    # Role-specific between-person actor effects
+    .is_female:.provided_support_cbp_actor +
+    .is_male:.provided_support_cbp_actor +
+
+    # Role-specific between-person partner effects
+    .is_female:.provided_support_cbp_partner +
+    .is_male:.provided_support_cbp_partner +
+
+    # Stable dyad-level covariance
+    us(0 + .is_female + .is_male | coupleID) +
+
+    # Same-occasion covariance
+    us(0 + .is_female + .is_male |
+         coupleID:diaryday) +
+
+    # Role-specific residual persistence
     ar1(0 + .is_female:factor(diaryday) | coupleID) +
-    ar1(0 + .is_male:factor(diaryday) | coupleID)
+    ar1(0 + .is_male:factor(diaryday) | coupleID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_distinguishable_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
 )
 
 glmmTMB::VarCorr(ild_distinguishable_ar_model)
 ```
 
-When fitted, the two AR standard deviations and correlations describe each
-role's persistent component. They are not correlations of the complete residual
-and do not represent partner influence. The dyad-day block continues to
-describe the remaining same-day variation and partner covariance.
+The two AR standard deviations and correlations describe each role's persistent
+component. They are not correlations of the complete residual and do not
+represent partner influence. The dyad-day block continues to describe the
+remaining same-day variation and partner covariance.
 
 #### Random slopes
 
@@ -587,28 +624,53 @@ Under exchangeability, each member still has a separate time series, but the AR
 standard deviation and correlation are pooled. We add one term grouped by the
 member nested within the dyad:
 
-```{r specify-ild-exchangeable-ar1, eval = FALSE}
-ild_exchangeable_ar_model <- update(
-  ild_apim_model,
-  formula = . ~ . +
-    ar1(0 + factor(diaryday) | coupleID:personID)
+```{r fit-ild-exchangeable-ar1, eval = has_glmmTMB}
+ild_exchangeable_ar_model <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+
+    diaryday +
+
+    # Within-person actor and partner effects
+    .provided_support_cwp_actor +
+    .provided_support_cwp_partner +
+
+    # Between-person actor and partner effects
+    .provided_support_cbp_actor +
+    .provided_support_cbp_partner +
+
+    # Stable exchangeable dyad-level covariance
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
+
+    # Same-occasion exchangeable covariance
+    us(1 | coupleID:diaryday) +
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday) +
+
+    # Pooled residual persistence across member series
+    ar1(0 + factor(diaryday) | coupleID:personID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_apim_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
 )
 
 glmmTMB::VarCorr(ild_exchangeable_ar_model)
 ```
 
-This full-data update is also computationally demanding and is therefore not
-run during vignette builds. When fitted, its AR parameters describe persistent
-within-member variation; the dyad-day blocks continue to describe same-day
-partner covariance.
+The pooled AR parameters describe persistent within-member variation; the
+dyad-day blocks continue to describe same-day partner covariance.
 
-For the fitted concurrent base model, we can recover the member-level covariance
-matrices for both the stable dyad effects and the same-occasion residual
-dependence. The two matched block pairs are returned separately:
+For the fitted AR model, we can recover the member-level covariance matrices for
+both the stable dyad effects and the same-occasion residual dependence. The two
+matched block pairs are returned separately:
 
 ```{r backtransform-ild-exchangeable-apim, eval = has_glmmTMB}
 
-recovered_covariance <- dyadMLM::recover_exchangeable_covariance(ild_apim_model)
+recovered_covariance <- dyadMLM::recover_exchangeable_covariance(
+  ild_exchangeable_ar_model
+)
 
 print(recovered_covariance)
 
@@ -624,8 +686,8 @@ carryover.
 
 For a focused random-slope demonstration, we branch from the concurrent base
 model and replace its stable intercept blocks with shared and member-contrast
-intercept-and-slope blocks. This advanced fit does not include the optional AR
-update above, so its covariance estimates illustrate the parameterization
+intercept-and-slope blocks. This advanced fit does not include the AR term
+above, so its covariance estimates illustrate the parameterization
 rather than complete recovery of the simulation.
 
 ```{r fit-ild-exchangeable-random-slopes, eval = has_glmmTMB}
@@ -640,7 +702,7 @@ ild_apim_random_slope_model <- update(
          .member_contrast_arbitrary:
            .provided_support_cwp_actor
        | coupleID),
-  # The larger random-slope model benefits from profiling and BFGS.
+  # Non-default settings help this example converge.
   control = glmmTMB::glmmTMBControl(
     profile = TRUE,
     optimizer = stats::optim,
@@ -823,6 +885,7 @@ lagged_outcome_example <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data_dynamic
+  # Non-default settings help this example converge.
   , control = glmmTMB::glmmTMBControl(
       profile = TRUE,
       optimizer = stats::optim,

@@ -472,6 +472,7 @@ fit_dim_ls <- function(dat, extended = TRUE) {
       extended = extended,
       lower = lower,
       upper = upper,
+      # Non-default settings help this example converge.
       control = list(
         eval.max = 3000,
         iter.max = 2000,

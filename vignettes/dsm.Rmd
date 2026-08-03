@@ -645,7 +645,7 @@ closeness and allows separate linear trends for the outcome level and the
 female-minus-male outcome difference. It also includes the role-specific AR(1)
 components specified and interpreted in the APIM vignette.
 
-```{r fit-ild-dsm, eval = FALSE}
+```{r fit-ild-dsm, eval = has_glmmTMB}
 
 dsm_ILD <- glmmTMB::glmmTMB(
   closeness ~
@@ -689,15 +689,21 @@ dsm_ILD <- glmmTMB::glmmTMB(
     ar1(0 + .is_male:factor(diaryday) | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
-  data = ild_dsm_data
+  data = ild_dsm_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    optimizer = stats::optim,
+    optArgs = list(method = "BFGS")
+  )
 )
 
-summary(dsm_ILD)
+glmmTMB::VarCorr(dsm_ILD)
 
 ```
 
-We show this AR-adjusted, fixed-slope DSM specification without refitting it
-here. It omits the actor random slopes present in the simulation. See the
+This AR-adjusted, fixed-slope DSM omits the actor random slopes present in the
+simulation. See the
 [distinguishable APIM AR(1) section](apim.html#distinguishable-residual-ar1) for
 the corresponding specification and interpretation.
 

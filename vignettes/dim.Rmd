@@ -505,23 +505,48 @@ summary(dim_ILD)
 
 This concurrent model includes stable dyad-level and same-day partner
 covariance. To add persistent within-member variation while pooling the AR
-parameters across exchangeable members, update it with one member-series term:
+parameters across exchangeable members, we fit the complete model with one
+member-series term:
 
-```{r specify-ild-dim-ar1, eval = FALSE}
-dim_ILD_ar_model <- update(
-  dim_ILD,
-  formula = . ~ . +
-    ar1(0 + factor(diaryday) | coupleID:personID)
+```{r fit-ild-dim-ar1, eval = has_glmmTMB}
+dim_ILD_ar_model <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+
+    diaryday +
+
+    # Within-person DIM
+    .provided_support_cwp_dyad_mean +
+    .provided_support_cwp_within_dyad_dev +
+
+    # Between-person DIM
+    .provided_support_cbp_dyad_mean +
+    .provided_support_cbp_within_dyad_dev +
+
+    # Stable exchangeable dyad-level covariance
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
+
+    # Same-occasion exchangeable covariance
+    us(1 | coupleID:diaryday) +
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday) +
+
+    # Pooled residual persistence across member series
+    ar1(0 + factor(diaryday) | coupleID:personID),
+  dispformula = ~ 0,
+  family = gaussian(),
+  data = ild_exchangeable_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
 )
 
 glmmTMB::VarCorr(dim_ILD_ar_model)
 ```
 
-The full-data AR update is not run during vignette builds. See the
-[exchangeable APIM AR(1) section](apim.html#exchangeable-residual-ar1) for the
-distinction between persistent within-member variation and same-day partner
-covariance. To keep this example focused, both models omit the actor random
-slopes that are also present in the simulation.
+See the [exchangeable APIM AR(1) section](apim.html#exchangeable-residual-ar1)
+for the distinction between persistent within-member variation and same-day
+partner covariance. To keep this example focused, both models omit the actor
+random slopes that are also present in the simulation.
 
 ### Interpretation of concurrent ILD DIM coefficients
 
