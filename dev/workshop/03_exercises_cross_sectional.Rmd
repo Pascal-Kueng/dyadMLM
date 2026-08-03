@@ -18,7 +18,7 @@ These exercises follow the six-step cross-sectional APIM workflow from the
 applied tutorial.
 
 Download the complete workshop materials at any time from the
-[workshop page](https://pascal-kueng.github.io/dyadMLM/workshop/). 
+[workshop page](https://pascal-kueng.github.io/dyadMLM/workshop/).
 Package documentation and vignettes describing model fitting for dyadic MLMs
 are available through the [`dyadMLM` homepage](https://pascal-kueng.github.io/dyadMLM/).
 
@@ -41,7 +41,7 @@ source("00_setup.R")
 In RStudio, insert a new R chunk with
 Ctrl+Alt+I on Windows or Linux, or Cmd+Option+I on macOS.
 
-Try it and insert a new chunk between the green lines: 
+Try it and insert a new chunk between the green lines:
 
 ---
 
@@ -64,7 +64,7 @@ source("hints.R")
 ```
 
 
-While going through the exercises you can sometimes spot optional hints: 
+While going through the exercises you can sometimes spot optional hints:
 
 ```{r}
 # hint("example_hint", "run_chunk_without_comment")
@@ -106,7 +106,7 @@ raw_dyad_data
 ```
 
 
-Choose your research question. 
+Choose your research question.
 
 > [Insert your actor research question]
 
@@ -128,9 +128,9 @@ Adding `?` before a function name opens its help page in RStudio.
 
 Prepare and validate the data for a **distinguishable** model now.
 
-- Distinguish partners using `role = gender`. 
-- Set `include_arbitrary_member_contrast = TRUE` to use the same prepared data 
-  for distinguishable and exchangeable models later. 
+- Distinguish partners using `role = gender`.
+- Set `include_arbitrary_member_contrast = TRUE` to use the same prepared data
+  for distinguishable and exchangeable models later.
 - Use `add_apim_gmc_predictors = TRUE` if you want the grand-mean-centered APIM
   predictors used in the tutorial.
 
@@ -144,8 +144,8 @@ Save the prepared data as `my_data`; later exercise code uses this name.
 # Prepare the data and save it as my_data.
 ```
 
-Inspect the prepared data (like you did above with the raw data) and verify the 
-dyad IDs, member IDs, roles, row counts, missingness, and generated columns 
+Inspect the prepared data (like you did above with the raw data) and verify the
+dyad IDs, member IDs, roles, row counts, missingness, and generated columns
 make sense:
 
 ```{r}
@@ -222,9 +222,9 @@ Then estimate a model for distinguishable dyads:
 
 ```{r eval=FALSE}
 my_model <- glmmTMB(
-  
+
   YOUR_MODEL_FORMULA,
-  
+
   data = my_data,
   family = gaussian()
 )

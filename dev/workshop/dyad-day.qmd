@@ -534,7 +534,7 @@ outcomes.  $\rightarrow$ But some covariance may remain!
 :::{.notes}
 But more on the residuals later!!!
 
--> Ask students what grand-mean centering is. 
+-> Ask students what grand-mean centering is.
 
 :::
 
@@ -638,7 +638,7 @@ draw_apim_diagram("distinguishable", predictors_centered = TRUE)
 :::{.notes}
 
 "This represents the two model formulas before, but in a single model with correlated
-residuals." 
+residuals."
 
 Map the preceding visual onto the APIM notation:
 
@@ -647,7 +647,7 @@ Map the preceding visual onto the APIM notation:
   partners. Their squares are the residual variances from the previous slide.
 - The curved double-headed arrow is the residual correlation,
   $\rho_{\epsilon_F\epsilon_M}$.
-  
+
 :::
 
 <!-- ca. 2 Minutes -->
@@ -969,7 +969,7 @@ This shifts the focus to **dyadic levels and within-dyad differences**.
 
   - For exchangeable dyads, use the **dyad-individual model (DIM)**
   - For distinguishable dyads, use the **dyadic score model (DSM)**
-  
+
 :::
 
 <!-- ca. 2 Minutes -->
@@ -1198,14 +1198,14 @@ we fit the DIM here with the same data and variables to demonstrate.
 
 -> Why no intercept? for the deviation? 
 
-  No intercept for the MVPA deviation, because that would break exchangeability. 
-  if support deviation is zero, then the expected MVPA deviation is also zero. 
-  
+  No intercept for the MVPA deviation, because that would break exchangeability.
+  if support deviation is zero, then the expected MVPA deviation is also zero.
+
   -> We conceptually DO have an intercept, it is just constrained to be ZERO!
-  
-  -> just like the correlation between the residuals, they are not estimated, which 
-  effectively constrains them to be zero. 
-  
+
+  -> just like the correlation between the residuals, they are not estimated, which
+  effectively constrains them to be zero.
+
 :::
 
 ## DIM to exchangeable APIM coefficients
@@ -1460,13 +1460,13 @@ fit_and_draw_dsm(
 - a10: predicted couple-mean MVPA is 33.26 minutes,
 - a20: the female is predicted to be 4.04 min more active than the male.
 
-Holding the couple-difference score at zero, 
+Holding the couple-difference score at zero,
 **a 1 unit higher couple-mean support score** is associated with:
 
 - a11: 9.25 additional minutes of couple-mean MVPA,
-- a21: a 2.4-minute larger female-male MVPA difference (The female is 2.4 minutes + 4.04 minutes more active than the male). 
+- a21: a 2.4-minute larger female-male MVPA difference (The female is 2.4 minutes + 4.04 minutes more active than the male).
 
-Holding the couple-mean score at the *sample-average*, 
+Holding the couple-mean score at the *sample-average*,
 **a one-unit larger female-male support difference** is associated with:
 
 - a12: 11.86 fewer minutes of couple-mean MVPA
@@ -1474,9 +1474,9 @@ Holding the couple-mean score at the *sample-average*,
 
 **Residual correlations**
 
-After accounting for the support mean and female–male support difference, 
-couples whose average MVPA is higher than predicted also tend to have a more 
-positive female–male MVPA difference than predicted. 
+After accounting for the support mean and female–male support difference,
+couples whose average MVPA is higher than predicted also tend to have a more
+positive female–male MVPA difference than predicted.
 
 In other words, their unexplained MVPA tends to tilt toward the female partner.
 
@@ -1767,7 +1767,7 @@ draw_cfm_diagram(
   - **residual variances:** the same amount of indicator-specific variation
   - **same-member residual associations:** the same residual predictor–outcome
     association for both partners
-  
+
 :::
 
 [@ledermannMediationDyadicData2009; @peughAnalyzingMixedDyadic2013]{.subtle}
@@ -1975,8 +1975,8 @@ draw_truth_bias_diagram(truth_bias_result)
 
 ::: {.text-smaller}
 
-- The partner's report is the researcher-defined “truth”, not necessarily 
-an objective truth. 
+- The partner's report is the researcher-defined “truth”, not necessarily
+an objective truth.
 
 - After truth-mean centering, $b_0$ is **directional bias**.
 

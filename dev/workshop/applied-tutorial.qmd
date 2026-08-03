@@ -167,7 +167,7 @@ refit_glmmTMB_with_bfgs_if_needed <- function(model) {
 - **MLM: Complete-case**
   - **Outcome missing:** Valid under MAR, MLM uses remaining observations
   - **Predictor missing:** Valid under MAR, if missingness does **not depend** on the outcome after accounting for predictors
-  
+
 :::
 
 :::{.fragment}
@@ -377,10 +377,10 @@ This dataset is stored as an R object. Other packages provide functions to impor
 
 :::{.notes}
 
-Manual inspection at each step is important! 
+Manual inspection at each step is important!
 
-Example that Lilly told me: weird associations, until discovered that 
-missing values were coded as 99, in a software that didn't recognize this 
+Example that Lilly told me: weird associations, until discovered that
+missing values were coded as 99, in a software that didn't recognize this
 as a missing value.
 
 :::
@@ -415,13 +415,13 @@ apim_distinguishable_data <- dyadMLM::prepare_dyad_data( # exported function fro
   dyad = couple_id,
   member = person_id,
   role = gender,
-  predictors = efficacy, 
+  predictors = efficacy,
   model_types = 'apim',
   # if we want to fit an exchangeable model from the same data we can:
   include_arbitrary_member_contrast = TRUE,
-  add_apim_gmc_predictors = TRUE, 
+  add_apim_gmc_predictors = TRUE,
   seed = 123
-) 
+)
 
 print(apim_distinguishable_data)
 
@@ -535,7 +535,7 @@ apim_distinguishable_wide_data |>
   correlation::correlation(
     select = c("efficacy_female", "total_mvpa_female"),
     select2 = c("efficacy_male", "total_mvpa_male")
-  ) |> 
+  ) |>
   summary() |>
   insight::print_md(footer = "")
 ```
@@ -766,7 +766,7 @@ apim_distinguishable_model <- glmmTMB(
 
 summary(apim_distinguishable_model)
 
-  
+
 ```
 
 ## Workflow
@@ -839,12 +839,12 @@ library(DHARMa)
 apim_distinguishable_dharma_residuals <- DHARMa::simulateResiduals(
   fittedModel = apim_distinguishable_model,
   n = 10000,
-  
+
   # Since our model uses dispformula = ~ 0, we cannot use DHARMa's default
   # conditional simulations. With unconditional, the random-effects block representing
   # our residuals is re-simulated.
   simulateREs = "unconditional",
-  
+
   # Male and female residuals are correlated. DHARMa estimates this correlation
   # from the simulations and rotates the residuals to "remove" it.
   rotation = 'estimated',
@@ -891,7 +891,7 @@ More targeted checks and guidance on interpretation of the plots:
 
 apim_distinguishable_female_dharma_residuals <- DHARMa::recalculateResiduals(
   apim_distinguishable_dharma_residuals,
-  
+
   # Recalculate from the same simulations for one role.
   # One observation per couple: no rotation needed.
   sel = ~ .is_female == 1,
@@ -1014,7 +1014,7 @@ partner effects remain unsupported.
 - **Sensitivity analysis:** square-root MVPA; conclusions unchanged
 - **Primary analysis:** report the prespecified raw-MVPA model because the
   deviation was modest and minutes are directly interpretable
-- **General rule:** larger or consequential diagnostic problems: revise main 
+- **General rule:** larger or consequential diagnostic problems: revise main
   model
 
 :::
@@ -1038,16 +1038,16 @@ partner effects remain unsupported.
 
 - Compare models
 
-- Pool only if theoretically defensible, aligned with RQ and theory, and 
+- Pool only if theoretically defensible, aligned with RQ and theory, and
 compatible with the data
-  - Depending on goals you can also report the distinguishable model and 
+  - Depending on goals you can also report the distinguishable model and
   report results from this analysis
 
 However, non-significant comparisons are not proof that roles are identical.
 
 [@gistelinckIndistinguishabilityTests2018]{.subtle}
 
-## Estimate and compare: 
+## Estimate and compare:
 
 ```{r include=FALSE}
 
@@ -1217,7 +1217,7 @@ sensitivity check for those cases.
 
 ## Other sensitivity analyses you could do
 
-Fit a small set of (prespecified) models to test: 
+Fit a small set of (prespecified) models to test:
 
 - coding decisions
 - different plausible outcome families or transformations
@@ -1284,7 +1284,7 @@ parameters::model_parameters(apim_distinguishable_model, effects = "fixed") |>
 
 :::{.notes}
 
-15:30 - 15:45 
+15:30 - 15:45
 
 :::
 
@@ -1323,9 +1323,9 @@ we can use the same RQ and data to demonstrate the exchangeable workflow.
 
 ## Create the required format and validate the data
 
-You can use `dyadMLM::prepare_dyad_data()` to prepare and validate the data. 
+You can use `dyadMLM::prepare_dyad_data()` to prepare and validate the data.
 
-For exchangeable dyads, we can just omit the `role` argument. 
+For exchangeable dyads, we can just omit the `role` argument.
 
 ```{r}
 #| output-location: slide
@@ -1345,13 +1345,13 @@ print(apim_exchangeable_data)
 ```
 
 :::{.subtle}
-If we want to estimate both distinguishable and exchangeable versions, 
+If we want to estimate both distinguishable and exchangeable versions,
 we would pass `role` and set `include_arbitrary_member_contrast = TRUE`.
 :::
 
 ## Create the required format and validate the data
 
-Looking at the relevant columns: 
+Looking at the relevant columns:
 
 ```{r}
 head(apim_exchangeable_data) |>
@@ -1374,8 +1374,8 @@ head(apim_exchangeable_data) |>
 
 ## Describe focal variables (pooled)
 
-No wide-view of the data is needed for exchangeable dyads. 
-We can describe the data directly to obtain pooled estimates: 
+No wide-view of the data is needed for exchangeable dyads.
+We can describe the data directly to obtain pooled estimates:
 
 ```{r}
 apim_exchangeable_data |>
@@ -1502,7 +1502,7 @@ draw_apim_diagram("exchangeable", predictors_centered = TRUE,
 
 One single equation:
 
-For each dyad $i$, each member $j$ has their own predictor 
+For each dyad $i$, each member $j$ has their own predictor
 $X^{(\mathrm{A})}_{j,i}$ and their partner's predictor $X^{(\mathrm{P})}_{j,i}$:
 
 $$
@@ -1552,7 +1552,7 @@ $$
 apim_exchangeable_model <- glmmTMB(
   total_mvpa ~
     # Pooled intercept
-    1 + 
+    1 +
 
     # Pooled actor effect
     .efficacy_gmc_actor +
@@ -1561,13 +1561,13 @@ apim_exchangeable_model <- glmmTMB(
     .efficacy_gmc_partner +
 
     #------ Within-dyad residual covariance (Sum/Deviation) ------
-  
+
     # Residuals of partners might be similar (positively correlated)
     (1 | couple_id) +
-    
+
     # Residuals of partners might move opposite (negatively correlated)
     (0 + .member_contrast_arbitrary | couple_id),
-  
+
   dispformula = ~ 0,
   family = gaussian(),
   data = apim_exchangeable_data
@@ -1595,9 +1595,9 @@ Explain why we do this on next page
   - Deviation block `(0 + .member_contrast_arbitrary | couple_id)`:
     $r_{\mathrm{D}i}=(\epsilon_{1i}-\epsilon_{2i})/2$; members move in opposite
     directions
-    
+
 Using this parametrization allows us to represent random effects and later
-in ILD even random slopes with the correct constraints. 
+in ILD even random slopes with the correct constraints.
 
 We can later backtransform to the familiar person-level structure.
 
@@ -1612,7 +1612,7 @@ We can later backtransform to the familiar person-level structure.
 
 ## Verify model adequacy, distinguishability, and robustness
 
-Same as before: 
+Same as before:
 
 1. Did estimation succeed?
 2. Does the model reproduce the important data patterns?
@@ -1662,7 +1662,7 @@ parameters::model_parameters(apim_exchangeable_model, effects = 'random') |>
 ```
 
 :::{.fragment}
-Often it is preferable to rotate the covariance back to the familiar member-level covariance matrix: 
+Often it is preferable to rotate the covariance back to the familiar member-level covariance matrix:
 
 - Member residual variance:
   $\operatorname{Var}(\epsilon_{1i})=\operatorname{Var}(\epsilon_{2i})
@@ -1671,7 +1671,7 @@ Often it is preferable to rotate the covariance back to the familiar member-leve
 - Partner residual covariance:
   $\operatorname{Cov}(\epsilon_{1i},\epsilon_{2i})
   =\operatorname{Var}(r_{\mathrm{M}i})-\operatorname{Var}(r_{\mathrm{D}i})$
-  
+
 :::
 
 ## Reporting results and answering the research questions
@@ -1900,12 +1900,12 @@ print(ild_apim_data)
 
 ## Report measures
 
-Among other things you may check and report: 
+Among other things you may check and report:
 
 - Missingness and general summary statistics
 - ICCs
 - Within- and between- person correlations (e.g., with `wbCorr`)
-- Visualize outcome trajectories over time 
+- Visualize outcome trajectories over time
 
 ## Plot paired raw MVPA trajectories
 
@@ -2035,7 +2035,7 @@ ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
 
     # --------------- WITHIN PERSON APIM ---------------
     # Role-specific fixed actor- and partner effects
-  
+
     .is_female:.pbc_cwp_actor_lag1 +
     .is_male:.pbc_cwp_actor_lag1 +
 
@@ -2044,7 +2044,7 @@ ild_apim_distinguishable_model <- glmmTMB::glmmTMB(
 
     # --------------- BETWEEN PERSON APIM ---------------
     # Role-specific fixed actor-and partner effects
-  
+
     .is_female:.pbc_cbp_actor +
     .is_male:.pbc_cbp_actor +
 
@@ -2243,11 +2243,11 @@ ild_apim_exchangeable_ar1_model <- glmmTMB::glmmTMB(
     .pbc_cwp_partner_lag1 +
     .pbc_cbp_actor +
     .pbc_cbp_partner +
-    
+
     # Couple-level variance-covariance structure
     (1 | couple_id) +
     (0 + .member_contrast_arbitrary | couple_id) +
-    
+
     # Occasion-level residual variance-covariance structure
     (1 | couple_id:diaryday) +
     (0 + .member_contrast_arbitrary | couple_id:diaryday) +
@@ -2282,7 +2282,7 @@ dyadMLM::recover_exchangeable_covariance(ild_apim_exchangeable_ar1_model)
 
 ## Compare distinguishable and exchangeable models
 
-This is a global test, **partial constraints can be informative too!** 
+This is a global test, **partial constraints can be informative too!**
 
 ```{r}
 dyadMLM::compare_nested_models(
@@ -2311,12 +2311,12 @@ mean ratios (GMRs; representing multiplicative differences).
 #| output-location: slide
 
 parameters::model_parameters(
-  ild_apim_distinguishable_ar1_model, 
-  effects = 'fixed', 
+  ild_apim_distinguishable_ar1_model,
+  effects = 'fixed',
   exponentiate = TRUE
-  ) |> 
+  ) |>
   insight::print_md(footer = "")
-  
+
 ```
 
 ## Report the retained distinguishable model
