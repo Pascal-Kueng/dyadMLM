@@ -12,41 +12,17 @@ coverage](https://codecov.io/gh/Pascal-Kueng/dyadMLM/graph/badge.svg)](https://a
 status](https://www.r-pkg.org/badges/version/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
 [![CRAN
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21481720.svg)](https://doi.org/10.5281/zenodo.21481720)
 <!-- badges: end -->
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
-generalized linear mixed-effects models. It validates and prepares
-cross-sectional and intensive longitudinal dyadic data.
+generalized linear mixed-effects models.
 
-It supports distinguishable and exchangeable dyads and can also prepare
-datasets containing multiple dyad compositions. It creates
-composition-aware, model-ready columns for dyadic multilevel model
-parameterizations such as the Actor-Partner Interdependence Model
-(APIM), Dyad-Individual Model (DIM), and Dyadic Score Model (DSM).
+It provides supporting functions for:
 
-Selected post-estimation tools compare compatible fitted models and
-back-transform exchangeable random-effect covariance structures into
-member-level quantities.
-
-Start with the vignettes, or scroll down for a quick-start.
-
-| Vignette | Focus |
-|----|----|
-| [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
-| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
-| [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
-| [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
-
-For an in-depth tutorial covering data preparation, model fitting,
-diagnostics, and assumption checks, see [Distinguishable and
-Exchangeable Dyads: Bayesian Multilevel
-Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/). It
-uses `dyadMLM` for cross-sectional and intensive longitudinal APIM and
-DIM workflows, with models fitted primarily using `brms`
-([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
-[DOI](https://doi.org/10.5281/zenodo.17400655)).
-
-## Installation
+1.  [Data preparation and validation of dyadic
+    data](#1-data-preparation-and-validation)
+2.  [Post-estimation tools](#2-post-estimation-tools)
 
 You can install the development version with:
 
@@ -58,7 +34,56 @@ install.packages("dyadMLM", repos = c(
 )
 ```
 
-## Simple Cross-Sectional Example
+## 1. Data preparation and validation
+
+The core feature of this package is data preparation and validation for
+various types of dyadic data. It creates model-ready columns for dyadic
+multilevel models, including the Actor-Partner Interdependence Model
+(APIM), Dyad-Individual Model (DIM), and the Dyadic Score Model (DSM).
+
+The package currently supports:
+
+- cross-sectional and intensive longitudinal dyadic data (e.g., daily
+  diary data)
+- distinguishable and exchangeable (indistinguishable) dyads
+- datasets containing multiple dyad compositions (e.g., opposite-sex
+  partners and same-sex partners)
+
+See the [Getting Started
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html).
+
+## 2. Post-estimation tools
+
+Selected post-estimation tools currently include:
+
+- a function to compare compatible nested models
+- a function to back-transform exchangeable random-effect covariance
+  structures into interpretable member-level quantities, as described in
+  the [APIM
+  vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)
+
+## Vignettes and examples
+
+Start with the vignettes, or scroll down for a quick example.
+
+| Vignette | Focus |
+|----|----|
+| [Getting Started](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html) | Data structure, validation, dyad compositions, generated columns, and basic preparation |
+| [Actor-Partner Interdependence Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) | APIM preparation and formulas for distinguishable and exchangeable dyads in cross-sectional and intensive longitudinal data |
+| [Dyad-Individual Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.html) | DIM predictor construction, formulas, and an interactive demonstration of APIM-DIM equivalence for exchangeable dyads |
+| [Dyadic Score Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html) | DSM predictor-score and contrast construction, formulas, and the relationship between the DSM and APIM for distinguishable dyads |
+
+For theoretical foundations and a practical walkthrough of dyadic data
+analysis, from data preparation and model fitting to interpretation and
+diagnostics using `dyadMLM` with `glmmTMB`, see the [Dyadic Data
+Analysis Workshop](https://pascal-kueng.github.io/dyadMLM/workshop/).
+For a Bayesian workflow using `dyadMLM` and `brms`, refer to
+[Distinguishable and Exchangeable Dyads: Bayesian Multilevel
+Modelling](https://pascal-kueng.github.io/05DyadicDataAnalysis/)
+([source](https://github.com/Pascal-Kueng/05DyadicDataAnalysis),
+[DOI](https://doi.org/10.5281/zenodo.17400655)).
+
+### Simple Cross-Sectional Example
 
 Prepare distinguishable dyads for a cross-sectional APIM:
 
@@ -141,21 +166,27 @@ simple_apim <- glmmTMB::glmmTMB(
 
 ## Citation
 
-If you use `dyadMLM`, please cite the package directly:
+If you use `dyadMLM`, please cite the version of the package you use.
+Obtain the citation via:
 
-``` bibtex
-@Manual{dyadMLM,
-  title = {dyadMLM: Tools for Dyadic Multilevel Models},
-  author = {Pascal Küng},
-  year = {2026},
-  note = {R package version 0.1.0},
-  doi = {10.5281/zenodo.21481720},
-  url = {https://github.com/Pascal-Kueng/dyadMLM},
-}
+``` r
+citation("dyadMLM")
+#> To cite package 'dyadMLM' in publications use:
+#>
+#>   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_. R
+#>   package version 0.1.0.9000,
+#>   <https://pascal-kueng.github.io/dyadMLM/>.
+#>
+#> A BibTeX entry for LaTeX users is
+#>
+#>   @Manual{,
+#>     title = {dyadMLM: Tools for Dyadic Multilevel Models},
+#>     author = {Pascal Küng},
+#>     year = {2026},
+#>     note = {R package version 0.1.0.9000},
+#>     url = {https://pascal-kueng.github.io/dyadMLM/},
+#>   }
 ```
-
-The package uses the concept DOI `10.5281/zenodo.21481720` across
-releases.
 
 ------------------------------------------------------------------------
 

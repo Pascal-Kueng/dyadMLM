@@ -35,23 +35,23 @@ install.packages("dyadMLM", repos = c(
 )
 ```
 
-## About this Vignette
+## About this vignette
 
 `dyadMLM` helps researchers prepare cross-sectional and intensive longitudinal
-dyadic data for (generalized) multilevel models. 
+dyadic data for (generalized) multilevel models.
 
 **This vignette focuses on automatic data preparation for multilevel models
 (MLMs).** For a comparison of MLM and structural equation modeling (SEM)
 approaches to dyadic data, see @ledermannAnalyzingDyadicData2017.
 
-Post processing functions of `dyadMLM`, including model comparison and
-back-transforming the exchangeable random-effect covariance structures, are 
-described in the [Actor-Partner Interdependence  Vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
+Post-processing functions in `dyadMLM`, including model comparison and
+back-transformation of exchangeable random-effect covariance structures, are
+described in the [Actor-Partner Interdependence Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
 
-Other vignettes cover the [Dyad-Individual Model](dim.html) and its' equivalence
-and back-transformation to the *exchangeble APIM*, and the 
-[Dyadic Score Model](dsm.html) with its' equivalence and back-tranfsformation
-to the *distinguishable APIM*. 
+Other vignettes cover the [Dyad-Individual Model](dim.html) and its equivalence
+and back-transformation to the *exchangeable APIM*, and the
+[Dyadic Score Model](dsm.html) with its equivalence and back-transformation
+to the *distinguishable APIM*.
 
 The [online package overview](https://pascal-kueng.github.io/dyadMLM/)
 provides the current online versions of these vignettes and the complete
@@ -88,11 +88,10 @@ reshape them to this long structure first. See the
 [tidyr pivoting vignette](https://tidyr.tidyverse.org/articles/pivot.html) or
 the [`pivot_longer()` reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
 
-<!-- TODO: insert example code for reshaping? -->
-
 ## Data preparation for distinguishable dyads
 
-`dyads_cross` is a simulated cross-sectional dataset that contains three dyad compositions. 
+`dyads_cross` is a simulated cross-sectional dataset that contains three dyad
+compositions.
 
 Because these example data contain multiple compositions, `keep_compositions`
 selects the composition modeled below. It can be omitted when the supplied data
@@ -110,10 +109,10 @@ cross_distinguishable_data <- dyadMLM::prepare_dyad_data(
   dyad = coupleID,
   member = personID,
   role = gender,
-  predictors = provided_support, 
+  predictors = provided_support,
   model_types = "apim",
-  add_apim_gmc_predictors = TRUE, # optional grand-mean centering
-  
+  add_apim_gmc_predictors = TRUE, # Optional grand-mean centering
+
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
@@ -124,15 +123,15 @@ print(cross_distinguishable_data, n = 4)
 
 ```
 
-The function retained 120 female-male dyads and created raw and grand-mean 
-centered APIM variables [@kennyPartnerEffectsRelationship1999]. 
+The function retained 120 female-male dyads and created raw and grand-mean
+centered APIM variables [@kennyPartnerEffectsRelationship1999].
 
 For fitted APIM examples using these columns, see the
 [Actor-Partner Interdependence Model vignette](apim.html).
 
 ## Data preparation for exchangeable dyads
 
-For this example, we pretend that we have a dataset with no distinguishable 
+For this example, we pretend that we have a dataset with no distinguishable
 variable (e.g., same-sex friend dyads). Then, we simply omit the `role` argument:
 
 ```{r prepare-cross-exchangeable-basic}
@@ -155,7 +154,7 @@ and `1` to the two members of each exchangeable dyad
 [@delrosarioPracticalGuideSpecifying2025]. Its direction is arbitrary, and
 `seed` makes the assignment reproducible.
 
-Refer to the APIM vigenttes' 
+Refer to the APIM vignette's
 [exchangeable APIM section](apim.html#exchangeable-residual-structure)
 for how to use these columns to specify an exchangeable dyadic APIM and recover
 the constrained actor-partner variance-covariance structure with
@@ -164,10 +163,10 @@ the constrained actor-partner variance-covariance structure with
 
 ## Generating DIM and DSM columns
 
-For exchangeable dyads, we can request DIM predictor columns. 
+For exchangeable dyads, we can request DIM predictor columns.
 **DIM preparation requires exactly one exchangeable composition**. This can be
-achieved by omitting `role`. For more control on compositions, refer to later 
-sections in (LINK TO THERE). <!--TODO: complete this -->
+achieved by omitting `role`. For more control over compositions, see
+[Working with multiple dyad compositions](#working-with-multiple-dyad-compositions).
 
 ```{r prepare-cross-dim}
 cross_dim_data <- dyadMLM::prepare_dyad_data(
@@ -182,10 +181,10 @@ cross_dim_data <- dyadMLM::prepare_dyad_data(
 print(cross_dim_data, n = 4)
 ```
 
-For distinguishable dyads, we can request DSM columns. 
-**DSM preparation currently requires exactly one distinguishable composition**. 
-To compute these columns, a explicit role order is required. 
-The role order defines the direction of all DSM predictor differences and the 
+For distinguishable dyads, we can request DSM columns.
+**DSM preparation currently requires exactly one distinguishable composition**.
+To compute these columns, an explicit role order is required.
+The role order defines the direction of all DSM predictor differences and the
 DSM role contrast [@iidaModelsInterdependentIndividuals2018].
 
 ```{r prepare-cross-dsm}
@@ -206,8 +205,8 @@ print(cross_dsm_data, n = 4)
 APIM GMC uses all retained non-missing values. DIM and DSM center complete-pair
 dyad means. The constants may differ with one-sided missingness.
 
-In DIM and DSM, mean predictors are grand-mean centered by convention, thus
-no additional argument is required to request them. 
+In DIM and DSM, mean predictors are grand-mean centered by convention; thus,
+no additional argument is required to request them.
 
 ## Intensive longitudinal dyadic data
 
@@ -242,26 +241,27 @@ By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components
 [@bolgerIntensiveLongitudinalMethods2013]. This temporal predictor decomposition
 is controlled by `temporal_decomposition`. The default `"auto"`
-setting selects `"2l"` (2-level temporal decomposition). 
+setting selects `"2l"` (2-level temporal decomposition).
 
 `add_apim_gmc_predictors = TRUE` requires resolved
-`temporal_decomposition = "none"`, since the between-person component is 
-always already grand-mean centered by convention. 
+`temporal_decomposition = "none"`, since the between-person component is
+always already grand-mean centered by convention.
 
-Note that observed person means used to construct the between-person (`cbp`) predictors can be unreliable when each member contributes few occasions, which 
+Note that observed person means used to construct the between-person (`cbp`)
+predictors can be unreliable when each member contributes few occasions, which
 can bias between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
 
-For fitted examples of intensive longitudinal dyadic models and how 
-autocorrleation can be modelled for distinguishable and exchangeable dyads, 
-refer to <!--TODO: insert link to vignette section -->
+For fitted examples of intensive longitudinal dyadic models and how
+autocorrelation can be modeled for distinguishable and exchangeable dyads,
+refer to the [intensive longitudinal APIM section](apim.html#intensive-longitudinal-apims).
 
 ### Preparing lagged predictors
 
 Lagged versions of variables, including an outcome that is also passed to
-`predictors` for dynamic models, can be obtained through the 
-`lag1_predictors` argument. 
+`predictors` for dynamic models, can be obtained through the
+`lag1_predictors` argument.
 
-Lagging respects the dyad and member structure, matches observations at exactly 
+Lagging respects the dyad and member structure, matches observations at exactly
 `time - 1`, and does not bridge missing occasions when rows are missing
 in the dataset.
 
@@ -283,10 +283,10 @@ print(ild_apim_data_dynamic, n = 6)
 
 ```
 
-**Note:** Whether to use the prepared raw or within-person-centered lagged 
+**Note:** Whether to use the prepared raw or within-person-centered lagged
 outcome depends on the research question and the data. See the
 [dynamic ILD APIM example](apim.html#dynamic-models) for a more detailed
-discussion and guidance. 
+discussion and guidance.
 
 ## Working with multiple dyad compositions
 
@@ -310,8 +310,8 @@ print(mixed_cross_data, n = 4)
 
 Note that when role compositions are available, each *exchangeable* composition
 receives its own difference contrast, such as
-`.member_contrast_female_x_female_arbitrary`, which is `0` for all other 
-compositions. 
+`.member_contrast_female_x_female_arbitrary`, which is `0` for all other
+compositions.
 
 We can use this data to model these dyad types as separate or in the same model.
 
@@ -321,7 +321,7 @@ Sometimes a mixed dataset contains dyad compositions that should not be part of
 a given analysis. Use `keep_compositions` to keep only dyads whose *observed*
 composition matches the requested labels. The filtering happens before
 exchangeability constraints and pooling, so `set_exchangeable_compositions`
-and `pool_compositions` (described later) can only refer to retained dyad 
+and `pool_compositions` (described later) can only refer to retained dyad
 compositions.
 
 ```{r prepare-mixed-cross-sectional-included}
@@ -337,18 +337,17 @@ mixed_cross_data_included <- dyadMLM::prepare_dyad_data(
 print(mixed_cross_data_included, n = 4)
 ```
 
-*Note* that whenever you need to refer to a dyad type, the order of members does 
-not matter (e.g., `male-female` and `female-male` will both work), and you can 
+*Note* that whenever you need to refer to a dyad type, the order of members does
+not matter (e.g., `male-female` and `female-male` will both work), and you can
 use different separators like `male_female`, `male_x_female`, or `male female`.
 
 ### Setting distinguishable dyads to be treated as exchangeable
 
-We can list all compositions that should be treated as exchangeable in 
-`set_exchangeable_compositions`. The composition-type is retained. 
-Note that simply omitting `role` is different, as it would pool all dyad 
-compositions into one exchangeable composition and not lead to separate 
-contrasts per exchangeable dyad-composition, but a single global contrast.
-<!-- TODO: clearer explanation here -->
+`set_exchangeable_compositions` changes how selected role-defined compositions
+are modeled while preserving their composition labels. By contrast, omitting
+`role` indicates that no distinguishing variable is available, so all dyads are
+treated as one exchangeable composition with a single global arbitrary-member
+contrast.
 
 ```{r prepare-mixed-cross-sectional-exchangeable}
 mixed_cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
@@ -366,10 +365,10 @@ print(mixed_cross_exchangeable_data, n = 4)
 
 ### Pooling different dyad compositions
 
-Sometimes, we may want to pool selected *exchangeable* dyad compositions and 
+Sometimes, we may want to pool selected *exchangeable* dyad compositions and
 analyze them as if they were one. Pooling can impose equality constraints among
 compositions. After fitting nested pooled and unpooled models to the same
-observations, these constraints can be tested with 
+observations, these constraints can be tested with
 `dyadMLM::compare_nested_models()`; see
 [testing distinguishability in the APIM vignette](apim.html#testing-distinguishability)
 for the model-comparison workflow.
@@ -392,7 +391,7 @@ mixed_cross_data_pooled <- dyadMLM::prepare_dyad_data(
 print(mixed_cross_data_pooled)
 ```
 
-Note that you cannot pool distinguishable dyads. If we wanted to pool 
+Note that you cannot pool distinguishable dyads. If we wanted to pool
 `female-male` with `male-male`, we would first have to treat `female-male` as
 exchangeable:
 
