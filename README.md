@@ -94,16 +94,16 @@ print(prepared_data, n = 4)
 #> #   .{pred}_partner    APIM partner predictor: partner's original predictor
 #> #                      values
 #> #
-#> # A tibble: 240 × 12
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> # A tibble: 240 × 11
+#>   personID coupleID gender closeness provided_support .composition
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>
+#> 1        1        1 female      4.71             4.49 female_x_male
+#> 2        2        1 male        4.61             4.76 female_x_male
+#> 3        3        2 female      6.69             4.09 female_x_male
+#> 4        4        2 male        5.98             6.20 female_x_male
 #> # ℹ 236 more rows
-#> # ℹ 6 more variables: .composition <fct>, .composition_role <fct>,
-#> #   .is_female <dbl>, .is_male <dbl>, .provided_support_actor <dbl>,
+#> # ℹ 5 more variables: .composition_role <fct>, .is_female <dbl>,
+#> #   .is_male <dbl>, .provided_support_actor <dbl>,
 #> #   .provided_support_partner <dbl>
 ```
 
