@@ -44,6 +44,9 @@ dyadic data for (generalized) multilevel models.
 (MLMs).** For a comparison of MLM and structural equation modeling (SEM)
 approaches to dyadic data, see @ledermannAnalyzingDyadicData2017.
 
+The model-fitting examples in the model-specific vignettes use the
+`glmmTMB` package.
+
 Post-processing functions in `dyadMLM`, including model comparison and
 back-transformation of exchangeable random-effect covariance structures, are
 described in the [Actor-Partner Interdependence Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
@@ -255,9 +258,9 @@ Note that observed person means used to construct the between-person (`cbp`)
 predictors can be unreliable when each member contributes few occasions, which
 can bias between-person estimates [@gottfredsonStraightforwardApproachCoping2019].
 
-For fitted examples of intensive longitudinal dyadic models and how
-autocorrelation can be modeled for distinguishable and exchangeable dyads,
-refer to the [intensive longitudinal APIM section](apim.html#intensive-longitudinal-apims).
+For fitted concurrent examples and AR(1) specifications for distinguishable
+and exchangeable dyads, refer to the
+[intensive longitudinal APIM section](apim.html#intensive-longitudinal-apims).
 
 ### Preparing lagged predictors
 

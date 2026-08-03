@@ -492,10 +492,7 @@ dim_ILD <- glmmTMB::glmmTMB(
 
     # Residual (same-day) exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .member_contrast_arbitrary | coupleID:diaryday) +
-
-    # Separate member AR(1) series with pooled parameters
-    ar1(0 + factor(diaryday) | coupleID:personID)
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -506,12 +503,25 @@ summary(dim_ILD)
 
 ```
 
-The AR term gives each member a separate persistent residual series while
-pooling its standard deviation and correlation across exchangeable members.
-The dyad-day blocks continue to describe same-day partner covariance. See the
-[APIM vignette](apim.html#member-specific-residual-ar1) for the distinction
-between these components. To keep this example focused, it omits the actor
-random slopes that are also present in the simulation.
+This concurrent model includes stable dyad-level and same-day partner
+covariance. To add persistent within-member variation while pooling the AR
+parameters across exchangeable members, update it with one member-series term:
+
+```{r specify-ild-dim-ar1, eval = FALSE}
+dim_ILD_ar_model <- update(
+  dim_ILD,
+  formula = . ~ . +
+    ar1(0 + factor(diaryday) | coupleID:personID)
+)
+
+glmmTMB::VarCorr(dim_ILD_ar_model)
+```
+
+The full-data AR update is not run during vignette builds. See the
+[exchangeable APIM AR(1) section](apim.html#exchangeable-residual-ar1) for the
+distinction between persistent within-member variation and same-day partner
+covariance. To keep this example focused, both models omit the actor random
+slopes that are also present in the simulation.
 
 ### Interpretation of concurrent ILD DIM coefficients
 

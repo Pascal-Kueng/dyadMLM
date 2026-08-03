@@ -339,7 +339,7 @@ the seesaw tends to tilt farther at higher elevator residuals. Conditional sign
 symmetry—not the sample correlation by itself—is what guarantees that neither
 arbitrary seat is preferred.
 
-The simulation core is only four lines:
+Inside `simulate_location_scale_dim()`, the simulation core is only four lines:
 
 ```{r simulation-core, eval=FALSE}
 r_mean <- sigma_mean * z_mean

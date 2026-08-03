@@ -37,8 +37,8 @@ apim_exchangeable_fitted_alt <-
 
 This vignette focuses on Gaussian cross-sectional and intensive longitudinal
 Actor-Partner Interdependence models for distinguishable and exchangeable
-dyads. The intensive longitudinal examples cover concurrent associations and a
-simple dynamic model of stability and partner influence.
+dyads. The intensive longitudinal examples cover concurrent associations,
+member-specific residual persistence, and a brief lagged-outcome extension.
 
 For the broader package workflow and an overview of the available
 model-specific vignettes, including the
@@ -472,6 +472,33 @@ ild_distinguishable_model <- glmmTMB::glmmTMB(
 )
 ```
 
+#### Adding role-specific residual AR(1) {#distinguishable-residual-ar1}
+
+The same-occasion block above allows the partners' residuals to covary within a
+day, but it does not describe persistence across days. In glmmTMB, we can
+model independent persistent AR(1) components per member.
+
+For distinguishable dyads, we add one term for each role while retaining the
+same-occasion covariance. This full-data update is computationally demanding,
+so it is shown but not run during vignette builds. Check convergence before
+interpreting a fitted model.
+
+```{r specify-ild-distinguishable-ar1, eval = FALSE}
+ild_distinguishable_ar_model <- update(
+  ild_distinguishable_model,
+  formula = . ~ . +
+    ar1(0 + .is_female:factor(diaryday) | coupleID) +
+    ar1(0 + .is_male:factor(diaryday) | coupleID)
+)
+
+glmmTMB::VarCorr(ild_distinguishable_ar_model)
+```
+
+When fitted, the two AR standard deviations and correlations describe each
+role's persistent component. They are not correlations of the complete residual
+and do not represent partner influence. The dyad-day block continues to
+describe the remaining same-day variation and partner covariance.
+
 #### Random slopes
 
 For example, role-specific within-person actor random slopes can be added by
@@ -519,18 +546,11 @@ print(ild_apim_data, n = 4)
 ```
 
 The example below estimates same-day associations between support and closeness
-and includes `diaryday` to adjust for a linear time trend. We also include an
-actor random slope in both stable dyad-level blocks so that we can demonstrate
-the random-slope back-transformation below.
+and includes `diaryday` to adjust for a linear time trend. Its stable and
+same-occasion covariance blocks impose exchangeability through paired shared
+and member-contrast terms.
 
 ```{r fit-ild-exchangeable-apim, eval = has_glmmTMB}
-# Profile the fixed effects and use BFGS for stable cross-platform optimization.
-ild_apim_control <- glmmTMB::glmmTMBControl(
-  profile = TRUE,
-  optimizer = stats::optim,
-  optArgs = list(method = "BFGS")
-)
-
 ild_apim_model <- glmmTMB::glmmTMB(
   closeness ~
     1 +
@@ -545,12 +565,9 @@ ild_apim_model <- glmmTMB::glmmTMB(
     .provided_support_cbp_actor +
     .provided_support_cbp_partner +
 
-    # Stable exchangeable dyad-level covariance with actor random slopes
-    us(1 + .provided_support_cwp_actor | coupleID) + # shared intercept and slope
-    us(0 + .member_contrast_arbitrary + # difference intercept
-         .member_contrast_arbitrary:
-           .provided_support_cwp_actor                       # difference slope
-       | coupleID) +
+    # Stable exchangeable dyad-level covariance
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID) +
 
     # Same-occasion exchangeable covariance
     us(1 | coupleID:diaryday) +
@@ -559,15 +576,35 @@ ild_apim_model <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data
-  , control = ild_apim_control
 )
 
 summary(ild_apim_model)
 ```
 
-We can now recover the member-level covariance matrices for both the stable
-dyad effects and the same-occasion residual dependence. The two matched block
-pairs are returned separately:
+#### Adding pooled residual AR(1) {#exchangeable-residual-ar1}
+
+Under exchangeability, each member still has a separate time series, but the AR
+standard deviation and correlation are pooled. We add one term grouped by the
+member nested within the dyad:
+
+```{r specify-ild-exchangeable-ar1, eval = FALSE}
+ild_exchangeable_ar_model <- update(
+  ild_apim_model,
+  formula = . ~ . +
+    ar1(0 + factor(diaryday) | coupleID:personID)
+)
+
+glmmTMB::VarCorr(ild_exchangeable_ar_model)
+```
+
+This full-data update is also computationally demanding and is therefore not
+run during vignette builds. When fitted, its AR parameters describe persistent
+within-member variation; the dyad-day blocks continue to describe same-day
+partner covariance.
+
+For the fitted concurrent base model, we can recover the member-level covariance
+matrices for both the stable dyad effects and the same-occasion residual
+dependence. The two matched block pairs are returned separately:
 
 ```{r backtransform-ild-exchangeable-apim, eval = has_glmmTMB}
 
@@ -585,20 +622,53 @@ carryover.
 
 #### Extension to exchangeable random slopes {#exchangeable-random-slope-back-transformation}
 
+For a focused random-slope demonstration, we branch from the concurrent base
+model and replace its stable intercept blocks with shared and member-contrast
+intercept-and-slope blocks. This advanced fit does not include the optional AR
+update above, so its covariance estimates illustrate the parameterization
+rather than complete recovery of the simulation.
+
+```{r fit-ild-exchangeable-random-slopes, eval = has_glmmTMB}
+ild_apim_random_slope_model <- update(
+  ild_apim_model,
+  formula = . ~ . -
+    us(1 | coupleID) -
+    us(0 + .member_contrast_arbitrary | coupleID) +
+    us(1 + .provided_support_cwp_actor | coupleID) +
+    us(0 +
+         .member_contrast_arbitrary +
+         .member_contrast_arbitrary:
+           .provided_support_cwp_actor
+       | coupleID),
+  # The larger random-slope model benefits from profiling and BFGS.
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    optimizer = stats::optim,
+    optArgs = list(method = "BFGS")
+  )
+)
+
+random_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
+  ild_apim_random_slope_model
+)
+
+print(random_slope_covariance)
+```
+
 The same shared/difference back-transformation described above applies
 separately to every random slope. It also applies to covariances among the
 random intercept, actor slope, and partner slope.
 
 #### Testing random-effect constraints {#fitted-constraints-and-omitted-blocks}
 
-The full model above estimates both a shared and a member-contrast actor random
-slope. We can first test a smaller model that omits only the actor random slope
-from the member-contrast block. The member-contrast random intercept and both
-same-occasion blocks remain in the model:
+The random-slope model above estimates both a shared and a member-contrast actor
+random slope. We can first test a smaller model that omits only the actor random
+slope from the member-contrast block. The member-contrast random intercept and
+both same-occasion blocks remain in the model:
 
 ```{r fit-ild-no-contrast-slope, eval = has_glmmTMB}
 ild_apim_no_contrast_slope <- update(
-  ild_apim_model,
+  ild_apim_random_slope_model,
   formula = . ~ . -
     us(0 +
          .member_contrast_arbitrary +
@@ -610,7 +680,7 @@ ild_apim_no_contrast_slope <- update(
 
 dyadMLM::compare_nested_models(
   ild_apim_no_contrast_slope,
-  ild_apim_model
+  ild_apim_random_slope_model
 )
 ```
 
@@ -646,7 +716,7 @@ remains in the model:
 
 ```{r fit-ild-no-contrast-block, eval = has_glmmTMB}
 ild_apim_no_contrast_block <- update(
-  ild_apim_model,
+  ild_apim_random_slope_model,
   formula = . ~ . -
     us(0 +
          .member_contrast_arbitrary +
@@ -657,7 +727,7 @@ ild_apim_no_contrast_block <- update(
 
 dyadMLM::compare_nested_models(
   ild_apim_no_contrast_block,
-  ild_apim_model
+  ild_apim_random_slope_model
 )
 ```
 
@@ -689,40 +759,23 @@ boundary of the parameter space, the usual chi-squared reference distribution
 for the likelihood-ratio tests should be interpreted cautiously.
 
 
-### Current limitations of dyadic ILD designs in R
+### When carryover is the research question {#dynamic-models}
 
-Concurrent dyadic ILD models can adjust for a time trend and account for stable
-dyadic dependence and same-occasion partner dependence. They do not model
-residual serial dependence, however, and therefore estimate concurrent
-associations under the assumption that residuals from different days are
-independent.
-
-If the goal is to retain these concurrent APIM associations while accounting
-for serial dependence, the closest extension is a dyadic residual dynamic
-structural equation model (RDSEM). It keeps the concurrent regression separate
-from a VAR model for its residuals [@asparouhovComparisonModelsAnalysis2020;
-@mcneishPrimerTwoLevel2020]. This residual-VAR structure is not directly
-available through the `glmmTMB` interface used here, and open-source support for
-dyadic dynamic models remains very limited
-[@delrosarioPracticalGuideSpecifying2025]. Within open-source R, such a model
-generally requires custom TMB or Stan code.
-
-### Dynamic ILD APIM example {#dynamic-models}
-
-A **practical alternative** is a model with lagged outcomes, especially when
-carryover or temporal dynamics are part of the research question
-[@gistelinckMultilevelAutoregressiveDyadic2020]. In such a model, the
-member's own lagged outcome represents stability and the partner's lagged
-outcome represents influence. All other APIM predictor effects then describe
-associations conditional on the members' prior outcomes.
+Residual AR(1) and lagged-outcome models answer different questions. The AR(1)
+terms above retain the concurrent APIM mean model while describing residual
+persistence. When temporal carryover is itself the research question, the
+member's own and the partner's lagged outcomes can enter the mean model
+[@gistelinckMultilevelAutoregressiveDyadic2020;
+@delrosarioPracticalGuideSpecifying2025]. A partner-lag coefficient is an
+association; interpreting it as influence requires stronger assumptions.
+Residual dependence should still be assessed after adding outcome lags.
 
 By adding the outcome to `predictors` and selecting it with `lag1_predictors`,
 `dyadMLM::prepare_dyad_data()` returns lag-1 raw and within-person scores alongside
 the contemporaneous scores. Between-person scores are not lagged because they
 describe stable differences between members.
 
-For this example, we obtain the lagged actor and partner outcome columns through
-the `lag1_predictors` argument:
+Here, `lag1_predictors` creates the lagged actor and partner outcome columns:
 
 ```{r prepare-ild-apim-dynamic-model}
 ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
@@ -739,21 +792,21 @@ ild_apim_data_dynamic <- dyadMLM::prepare_dyad_data(
 )
 ```
 
-This returns all necessary variables for either choice, including lag-1 raw
-and within-person closeness scores. Lags are matched at exactly
+This returns lag-1 raw and within-person closeness scores. Lags match exactly
 `diaryday - 1`, so omitted diary days are not bridged.
 
-A simple fixed-slope dyadic stability and influence model
-[@delrosarioPracticalGuideSpecifying2025]:
+These data were generated with residual AR(1), not a lagged-outcome mean model.
+The following unevaluated model demonstrates the specification only; its
+coefficients would not recover the data-generating process.
 
-```{r fit-ild-stability-influence, eval = has_glmmTMB}
-stability_influence <- glmmTMB::glmmTMB(
+```{r specify-ild-lagged-outcomes, eval = FALSE}
+lagged_outcome_example <- glmmTMB::glmmTMB(
   closeness ~ 1 +
 
-    # Stability (actor effect across time)
+    # Own-outcome lag (stability association)
     .closeness_actor_lag1 +
 
-    # Influence (partner effect across time)
+    # Partner-outcome lag association
     .closeness_partner_lag1 +
 
     # Linear time trend
@@ -770,44 +823,27 @@ stability_influence <- glmmTMB::glmmTMB(
   , dispformula = ~ 0
   , family = gaussian()
   , data = ild_apim_data_dynamic
+  , control = glmmTMB::glmmTMBControl(
+      profile = TRUE,
+      optimizer = stats::optim,
+      optArgs = list(method = "BFGS")
+    )
 )
-
-summary(stability_influence)
 ```
 
-This model can be extended with contemporaneous actor and partner predictor
-associations and other lagged predictors. Time-varying predictors should usually
-be separated into within-person and between-person components. Their
-contemporaneous coefficients are then conditional on both partners' prior
-outcomes.
+The model uses raw outcome lags. Within-person-centered alternatives end in
+`_cwp_actor_lag1` and `_cwp_partner_lag1`, but person-mean centering can bias
+carryover downward in short panels [@hamakerCenterNotCenter2015;
+@nickellBiasesDynamicModels1981]. Raw lags avoid that centering bias but can
+remain related to stable member levels
+[@gistelinckMultilevelAutoregressiveSmall2021]. For short panels, an LD-APIM can
+model the initial outcomes jointly with those stable levels
+[@gistelinckMultilevelAutoregressiveDyadic2020].
 
-The model above uses raw lagged outcomes. The corresponding
-within-person-centered lagged terms are `.closeness_cwp_actor_lag1` and
-`.closeness_cwp_partner_lag1`.
-
-Whether to use a raw or within-person-centered lagged outcome depends on the
-research question and the data. Person-mean centering the outcome lag can bias
-the average carryover estimate downward [@hamakerCenterNotCenter2015]. This
-downward bias is known as Nickell bias [@nickellBiasesDynamicModels1981]. A raw
-lag avoids this centering bias, but a standard random-intercept model can still
-be biased because it assumes that the lag is unrelated to stable member levels
-[@gistelinckMultilevelAutoregressiveSmall2021].
-
-Both problems matter most when there are few occasions. In one simple
-simulation, most approaches other than person-mean centering performed
-acceptably from about ten occasions, but this is not a universal cutoff
-[@gistelinckMultilevelAutoregressiveSmall2021]. For shorter panels, consider an
-LD-APIM, which lets the first outcomes relate to the members' stable levels in a
-wide-format SEM [@gistelinckMultilevelAutoregressiveDyadic2020].
-
-These manifest-lag models are not equivalent to Mplus DSEM, which uses latent
-person-mean centering by default and can estimate multivariate or residual
-dynamics jointly [@mcneishPrimerTwoLevel2020]. For very short panels, however,
-default DSEM may still be biased or unstable, so the LD-APIM recommendation
-above may be preferable [@gistelinckMultilevelAutoregressiveSmall2021].
-
-These lagged-outcome issues are separate from the earlier concern about
-unreliable person means used to construct `cbp` predictors with few occasions.
+Independent member AR(1) terms do not represent cross-partner residual
+carryover. A full residual VAR or RDSEM is a different model and is not directly
+available through the `glmmTMB` interface used here
+[@asparouhovComparisonModelsAnalysis2020; @mcneishPrimerTwoLevel2020].
 
 
 ---
