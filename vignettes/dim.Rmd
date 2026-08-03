@@ -492,7 +492,10 @@ dim_ILD <- glmmTMB::glmmTMB(
 
     # Residual (same-day) exchangeable dyad-level covariance
     us(1 | coupleID:diaryday) +
-    us(0 + .member_contrast_arbitrary | coupleID:diaryday)
+    us(0 + .member_contrast_arbitrary | coupleID:diaryday) +
+
+    # Separate member AR(1) series with pooled parameters
+    ar1(0 + factor(diaryday) | coupleID:personID)
 
   , dispformula = ~ 0
   , family = gaussian()
@@ -502,6 +505,13 @@ dim_ILD <- glmmTMB::glmmTMB(
 summary(dim_ILD)
 
 ```
+
+The AR term gives each member a separate persistent residual series while
+pooling its standard deviation and correlation across exchangeable members.
+The dyad-day blocks continue to describe same-day partner covariance. See the
+[APIM vignette](apim.html#member-specific-residual-ar1) for the distinction
+between these components. To keep this example focused, it omits the actor
+random slopes that are also present in the simulation.
 
 ### Interpretation of concurrent ILD DIM coefficients
 
@@ -516,20 +526,20 @@ both members' deviations and their expected difference.
   higher for the higher-support couple. Equivalently, each member is expected to
   report 1.55 points higher closeness.
 
-- The `cwp` dyad-mean estimate (about 0.49) means that when both members are one
+- The `cwp` dyad-mean estimate (about 0.48) means that when both members are one
   point above their respective usual support levels, each member's expected
-  closeness is 0.49 points higher than when both are at their usual levels,
+  closeness is 0.48 points higher than when both are at their usual levels,
   holding the difference between their momentary deviations constant.
-  Equivalently, expected couple-average closeness is 0.49 points higher on that
+  Equivalently, expected couple-average closeness is 0.48 points higher on that
   occasion.
 
-- The `cbp` within-dyad member-deviation estimate (about 0.90) means that if
+- The `cbp` within-dyad member-deviation estimate (about 0.84) means that if
   partners differ by one point in their usual support levels, they are expected
-  to differ by 0.90 points in closeness, holding the couple's average usual
+  to differ by 0.84 points in closeness, holding the couple's average usual
   support and the other predictors constant. In member terms, suppose one member
   is 0.5 points above the couple's average usual support and the other is 0.5
-  points below it. Their expected closeness is then about 0.45 points above and below
-  the couple's predicted mean, respectively.
+  points below it. Their expected closeness is then about 0.42 points above and
+  below the couple's predicted mean, respectively.
 
 - The `cwp` within-dyad member-deviation estimate (about -0.01) is close to zero.
   If one partner's momentary deviation from usual support is one point higher
@@ -537,11 +547,13 @@ both members' deviations and their expected difference.
   closeness difference between them from this term, holding the
   occasion-specific dyad mean and the other predictors constant.
 
-### Equivalence of APIM and DIM in ILD
+### APIM and DIM parameterizations in ILD
 
-The equivalent APIM uses actor and partner effects on both levels, as shown in
+The corresponding APIM uses actor and partner effects on both levels, as shown in
 the [concurrent ILD APIM example](apim.html#concurrent-ild-gaussian-apim-for-exchangeable-dyads).
-The APIM and DIM again estimate the same model with different coefficients.
+The fixed effects below are equivalent parameterizations. The complete fitted
+models are equivalent only when they also use the same random-effect and
+temporal covariance structures.
 
 The equivalence holds separately for the within-person (`cwp`) and
 between-person (`cbp`) predictor components. For the within-person component:
@@ -569,8 +581,7 @@ b_{\mathrm{cbp,dev}}
 $$
 
 An APIM parameterization can therefore be used on one level and a DIM
-parameterization on the other. This mixed parameterization changes the
-coefficients, but still estimates the same model.
+parameterization on the other without changing the implied fixed effects.
 
 ### Including Random Slopes
 
@@ -619,10 +630,12 @@ The APIM vignette also shows how to
 ### Dynamic ILD models
 
 Dynamic dyadic models are most directly expressed in APIM terms: a member's own
-lagged outcome represents stability, whereas the partner's lagged outcome
-represents influence. See the
+lagged outcome represents an own-lag association, whereas the partner's lagged
+outcome represents a partner-lag association. Interpreting either causally
+requires stronger assumptions. See the
 [dynamic ILD APIM example](apim.html#dynamic-models) for data preparation, a
-fitted model, and important cautions about outcome lags in short time series.
+model specification, and important cautions about outcome lags in short time
+series.
 
 Under exchangeability, the same fixed effects can be reparameterized as lagged
 DIM effects. The lagged dyad mean describes how the members' shared prior

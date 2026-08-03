@@ -640,11 +640,12 @@ ild_dsm_data <- dyadMLM::prepare_dyad_data(
 print(ild_dsm_data, n = 4)
 ```
 
-The example below estimates same-day associations between support and closeness
-and includes `diaryday` to allow separate linear trends for the outcome level
-and the female-minus-male outcome difference.
+The specification below estimates same-day associations between support and
+closeness and allows separate linear trends for the outcome level and the
+female-minus-male outcome difference. It also includes the role-specific AR(1)
+components fitted and interpreted in the APIM vignette.
 
-```{r fit-ild-dsm, eval = has_glmmTMB}
+```{r fit-ild-dsm, eval = FALSE}
 
 dsm_ILD <- glmmTMB::glmmTMB(
   closeness ~
@@ -681,7 +682,11 @@ dsm_ILD <- glmmTMB::glmmTMB(
     us(1 + .dsm_role_contrast | coupleID) +
 
     # Same-day outcome-level and outcome-difference covariance
-    us(1 + .dsm_role_contrast | coupleID:diaryday),
+    us(1 + .dsm_role_contrast | coupleID:diaryday) +
+
+    # Role-specific residual persistence
+    ar1(0 + .is_female:factor(diaryday) | coupleID) +
+    ar1(0 + .is_male:factor(diaryday) | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = ild_dsm_data
@@ -690,6 +695,11 @@ dsm_ILD <- glmmTMB::glmmTMB(
 summary(dsm_ILD)
 
 ```
+
+We show this AR-adjusted, fixed-slope DSM specification without refitting it
+here. It omits the actor random slopes present in the simulation. See the
+[fitted APIM example](apim.html#member-specific-residual-ar1) for estimation
+and interpretation of the same two AR components.
 
 The cross-sectional path interpretation therefore applies separately at the
 within-person and between-person levels. At each level, the predictor dyad mean
