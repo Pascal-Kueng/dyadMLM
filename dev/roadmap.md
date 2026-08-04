@@ -29,10 +29,19 @@ helpers, and eventually model syntax explicit and reproducible.
 
 ## Current State
 
-Version 0.1.0 has been accepted by CRAN and tagged as `v0.1.0`. Development now
-continues as version 0.1.0.9000. The core data-preparation API is implemented
-and covered by tests, the README links to the pkgdown site, and GitHub Actions
-are configured for R CMD check and pkgdown publishing.
+Version 0.1.0 has been accepted by CRAN, tagged as `v0.1.0`, archived on
+Zenodo, and published as a GitHub Release. Development now continues as version
+0.1.0.9000 and contains intentionally breaking changes. The next CRAN release
+is planned as version 0.2.0: a focused correctness and API-stabilization release
+before broader adoption, not a large model-fitting feature release.
+
+The core data-preparation API is implemented and covered by tests, the README
+links to the pkgdown site, and GitHub Actions are configured for R CMD check,
+coverage, pkgdown publishing, and workshop-material deployment. A four-pass
+API, edge-case, and general review identified release-blocking longitudinal
+missingness, validation, and prepared-object integrity issues. These findings
+and the associated API recommendations are recorded under the 0.2.0 milestone
+below.
 
 Recently completed cleanup:
 
@@ -66,17 +75,19 @@ Recently completed cleanup:
 - implemented automatic matching of package-generated shared/difference blocks
   and exact formula-block pairs for custom or constrained models, including
   random slopes, multiple compositions/grouping levels, partial or wholly
-  omitted components, coefficient reordering, literal `I(idiff * time)`
-  products, and fitted-row coding validation when the indicator columns remain
-  available
+  omitted components, coefficient reordering, literal difference-indicator by
+  time products, and fitted-row coding validation when the indicator columns
+  remain available
 
 Post-release sequence:
 
 1. [x] Create the GitHub Release from the accepted `v0.1.0` tag.
 2. [x] Upload the exact accepted source archive to the prepared Zenodo record,
    verify its metadata and checksum, and publish it.
-3. [ ] Complete the post-release documentation and workshop cleanup, then verify
+3. [x] Complete the post-release documentation and workshop cleanup and verify
    the pkgdown and stable workshop URLs after deployment from `main`.
+4. [ ] Complete the 0.2.0 stabilization milestone below, run the exact release
+   checks, and submit one bundled update to CRAN.
 
 The engine-independent covariance-array back-transformation and final named
 `varcov`/`sdcor` results are implemented for `glmmTMB` point estimates and
@@ -95,7 +106,7 @@ Target vignette structure:
 
 - `getting-started.Rmd`
   - package purpose and expected long data structure
-  - `group`, `member`, `role`, and `time`
+  - `dyad`, `member`, `role`, and `time`
   - distinguishable, exchangeable, and mixed dyad types
   - missing structural data rules
   - compact examples of `predictors`, `model_types`, `temporal_decomposition`,
@@ -154,9 +165,9 @@ follow-up rather than claims about the CRAN release state.
   extraction and matching are implemented for `glmmTMB` and single-response
   `brms`, including draw-wise transformation, constrained components, final
   named output, and numerical end-to-end tests.
-- [ ] Documentation shows a correct `glmmTMB`/DHARMa workflow for
-  `dispformula = ~ 0`, role-specific checks, and clear limitations concerning
-  autocorrelation and multicollinearity.
+- [ ] A bounded `glmmTMB`/DHARMa workflow is deferred to the conditional 0.2.0
+  documentation stretch goal below; it was not part of the accepted 0.1.0
+  release.
 - [ ] APIM, mixed-APIM, DIM, and DSM vignettes are internally consistent and
   clearly distinguish implemented workflows from methodological limitations.
 - [ ] Mixed-composition ILD convergence examples are either supported by the
@@ -342,11 +353,11 @@ Detailed implemented scope and final checks follow.
     #   .{pred}_cbp_within_dyad_diff   DSM between-person signed predictor difference
     #
     # A tibble: 10,080 x 23
-       personID coupleID diaryday gender dyad_composition closeness provided_support ...
-          <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl> ...
-     1        1        1        0 female female_x_male         4.40             4.93 ...
-     2        2        1        0 male   female_x_male         5.14             5.59 ...
-     3        1        1        1 female female_x_male         5.16             4.89 ...
+       personID coupleID diaryday gender closeness provided_support ... .composition ...
+          <int>    <int>    <int> <fct>      <dbl>            <dbl> ... <fct>        ...
+     1        1        1        0 female      4.40             4.93 ... female_x_male ...
+     2        2        1        0 male        5.14             5.59 ... female_x_male ...
+     3        1        1        1 female      5.16             4.89 ... female_x_male ...
     # i 10,077 more rows
     ```
   - Do not add sparse-composition warnings to `print()` yet; thresholds are too
@@ -448,7 +459,7 @@ Remaining unchecked or imperative items are follow-up maintenance work.
   - retain cross-sectional and ILD APIM-DIM equivalence
   - retain raw and `"2l"` ILD construction and the current concise
     methodological limitations
-  - retain selective `lag_predictors` construction for lag-1 raw and CWP
+  - retain selective `lag1_predictors` construction for lag-1 raw and CWP
     model-ready columns without bridging missing time indexes
   - keep mixed-composition models in the APIM vignettes
 - Resolve mixed-composition ILD model convergence documentation
@@ -470,15 +481,16 @@ Remaining unchecked or imperative items are follow-up maintenance work.
     - Automatic matching supports complete, unambiguous pairs across multiple
       compositions and grouping levels. It aligns coefficient and interaction
       order and leaves unrelated blocks alone.
-    - `pairs` selects exact shared and difference random-effect terms copied
-      from the fitted formula, plus `idiff` and optional `shared_indicator`.
+    - `block_pairings` selects exact shared and difference random-effect terms
+      copied from the fitted formula, plus `difference_indicator` and optional
+      `shared_indicator`.
       Backend-normalized equivalents such as `(1 | group)`/`us(1 | group)` and
       `(0 + x || group)`/`diag(0 + x | group)` are recognized.
-    - Supplied pairs may contain different coefficient sets or set one whole
-      block to `NULL`. The common term union and `NA` term-index entries record
-      where the numerical transformation must insert structural zeros.
-    - Difference slopes support `idiff:time`, `time:idiff`, and the narrow
-      literal products `I(idiff * time)` and `I(time * idiff)`. More complex
+    - Supplied block pairings may contain different coefficient sets or set one
+      whole block to `NULL`. The common term union and `NA` term-index entries
+      record where the numerical transformation must insert structural zeros.
+    - Difference slopes support either interaction order and narrow literal
+      products such as `I(difference_indicator * time)`. More complex
       arithmetic inside `I()` is rejected.
     - Fitted rows are validated when their indicator columns remain available:
       the difference column must use `-1/+1` where the shared indicator equals
@@ -497,7 +509,8 @@ Remaining unchecked or imperative items are follow-up maintenance work.
       compact print method can show both representations or either one alone.
     - A simple fitted-row detector flags grouping levels whose units always
       contain at most two observations. Its cautious warning does not inspect
-      `idiff` or claim that the rows are verified member pairs; it highlights
+      the difference indicator or claim that the rows are verified member
+      pairs; it highlights
       `brms` residual structures, omitted components, and non-intercept terms.
   - Remaining release polish:
     - decide later whether a posterior summary is useful beside the retained
@@ -509,40 +522,8 @@ Remaining unchecked or imperative items are follow-up maintenance work.
     transformed covariance of exchangeable dyads.
   - `dev/backtransform.md` records the matching contract, mathematical
     transformation, backend boundaries, and remaining implementation sequence.
-- Add a bounded `glmmTMB` diagnostics workflow for v0.1.0
-  - Keep this documentation-first: one focused section that other model
-    vignettes can link to, with no exported diagnostics or plotting API.
-  - Start with optimizer convergence, positive-definite Hessian, finite standard
-    errors, and boundary covariance estimates; present `glmmTMB::diagnose()` as
-    supporting evidence rather than an automatic verdict.
-  - Explain that `dispformula = ~ 0` places the dyadic residual covariance in
-    random-effect blocks. DHARMa 0.5.0 conditions on all random effects by
-    default, so use
-    `simulateResiduals(..., simulateREs = "unconditional")` for the primary
-    whole-model check. If examples run during builds, add a versioned DHARMa
-    `Suggests` entry and guard or precompute expensive work.
-  - Show role-/composition-specific checks using only fitted rows, because
-    missing outcomes can change row alignment. Do not treat paired partner
-    residuals as independent groups.
-  - Compare role-specific means, standard deviations, and quantiles, and show
-    the dyadic quantities most directly tied to the model: partner
-    covariance/correlation and partner-difference variability.
-  - State the autocorrelation limitation clearly: one pooled
-    `testTemporalAutocorrelation()` call is invalid when time values repeat
-    across members, and aggregating everyone by diary day does not test
-    within-person AR(1). Respect gaps and distinguish own-series AR(1) from a
-    dyadic residual VAR. Defer an automated lag-1 simulation test and covariance
-    rotation to the next milestone.
-  - Treat multicollinearity as a design issue. Full-formula VIFs can be
-    misleading for no-intercept role-indicator interactions; instead document
-    fixed-design rank, numerical conditioning, and substantive predictor
-    correlations within composition-role. Retain the warning against jointly
-    entering algebraically dependent raw, CWP, and CBP versions.
-  - Validate the documented cross-sectional workflow with distinguishable and
-    exchangeable examples and verify row mapping under missing outcomes. Defer
-    comprehensive mixed/ILD diagnostic simulation, `check_dyad_fit()`,
-    generalized-family diagnostics, influence analysis, and a general plotting
-    interface.
+- The bounded `glmmTMB`/DHARMa diagnostics documentation considered after the
+  first release is now scoped as a conditional 0.2.0 stretch goal below.
 - Rerun final release checks after vignette/doc cleanup
   - release checks have already been run during development, but must be run
     again after building and polishing the vignettes
@@ -569,12 +550,12 @@ Remaining unchecked or imperative items are follow-up maintenance work.
        publish it
   - This preserves the concept DOI across releases.
 
-## Near-term maintenance after 0.1.0
+## Deferred maintenance after 0.2.0
 
 - Extend `compare_nested_models()` to support fitted `brms` models, using a
   Bayesian-appropriate comparison method and similarly clear output.
 
-## Post-0.1.0 method development
+## Longer-term method development (not required for 0.2.0)
 
 - Extend the v0.1.0 covariance back-transformation only where applied use
   justifies it:
@@ -584,7 +565,8 @@ Remaining unchecked or imperative items are follow-up maintenance work.
     scale can be validated safely
   - extend posterior summaries for `brms` only where the v0.1.0 return proves
     insufficient in applied use
-- Develop advanced diagnostics only after validating the v0.1.0 guidance:
+- Develop advanced diagnostics only after validating the bounded 0.2.0
+  documentation:
   - evaluate a within-member lag-1 statistic against unconditional full-model
     simulations, respecting gaps and repeated series
   - validate joint DHARMa covariance rotation and mixed/ILD diagnostic behavior
@@ -619,26 +601,232 @@ Remaining unchecked or imperative items are follow-up maintenance work.
 - Add tests that generated syntax matches intended estimands and model
   structures
 
-## Version 0.2.0
+## Version 0.2.0 - CRAN API-Stabilization Release
 
-- Estimation helpers for supported model engines
-  - Prefer thin wrappers around established engines
-  - Do not add a custom Stan backend unless the package contribution becomes a
-    new estimator rather than preparation/syntax infrastructure
-- Model summaries focused on dyadic interpretation
-- Exported or advanced diagnostic helpers and sparse-composition guidance,
-  building on the documentation-first v0.1.0 workflow and subsequent
-  validation
-- Optional wide-to-long preprocessing helper
-  - Keep `prepare_dyad_data()` strict: it should continue to validate one
-    canonical long-format dyadic structure
-  - Add reshaping only as a separate helper that converts common two-person
-    wide formats into the long structure expected by `prepare_dyad_data()`
-  - Treat this as convenience infrastructure, not part of the core validation
-    contract
-- Optional preprint or methods note
-  - Cite the Zenodo software DOI for the implementation
-  - Use the preprint for the composition-aware dyadic MLM framework
+Status: planned. Items below are proposals until they have been reviewed,
+implemented, and checked. Because development already contains intentionally
+breaking names and defaults, this release should be version 0.2.0 rather than
+0.1.1. Keep the direct-migration policy: do not add deprecated wrappers for the
+0.1.0 API.
+
+Goal: correct the model-ready longitudinal columns, settle the small public API
+while changes are still inexpensive, and submit one bundled early-stabilization
+release before many users adopt the 0.1.0 interface. Do not follow 0.2.0 with
+another routine breaking CRAN update shortly afterward.
+
+### Implemented on the development branch and requiring final revalidation
+
+- [x] Use a single leading dot for retained generated columns while reserving
+  `.dy_` for temporary implementation columns.
+- [x] Support compact composition-dependent names through `short_colnames`.
+  The default remains an open 0.2.0 API decision below.
+- [x] Add optional arbitrary member contrasts for distinguishable compositions
+  without reclassifying their composition metadata.
+- [x] Add `summary.dyadMLM_data()` and complete generated-column tracking,
+  collision preflights, and print integration.
+- [x] Add optional APIM GMC source, actor, partner, and lagged columns while
+  retaining raw predictors.
+- [x] Rename `compare_nested_glmmTMB_models()` to
+  `compare_nested_models()` without a compatibility wrapper.
+- [x] Remove redundant composition columns from the example datasets and use
+  member-specific AR(1) residual processes in `dyads_ild`.
+- [x] Use the Zenodo concept DOI consistently in citation-facing metadata and
+  documentation.
+
+### Release-blocking correctness fixes
+
+- [ ] Preserve stable partner CBP values on unpaired occasions.
+  - Current problem: longitudinal partner construction joins every component on
+    `dyad + time`, so an actor receives a missing partner CBP whenever the
+    partner has no row at that occasion, even though CBP is a known person-level
+    quantity.
+  - Recommended implementation: match CBP partner values by dyad and partner
+    member, independently of current-time row availability. Keep raw and CWP
+    contemporaneous partner values matched within dyad-occasion.
+  - Test absent partner rows against equivalent explicit rows with missing
+    outcomes; stable partner CBP values should agree in both representations.
+- [ ] Construct partner and dyadic lagged predictors from the source occasion.
+  - Current problem: a partner's `t - 1` value is first stored on that partner's
+    row at `t`, so it is lost when the partner has no current row even if the
+    required source row exists.
+  - Recommended APIM implementation: retrieve the partner's source value at
+    exactly `current_time - 1` and attach it to the actor's current row.
+  - Recommended DIM/DSM implementation: form the dyad mean, deviation, or
+    directional difference from both members at source time `t - 1`, then attach
+    that completed score to available outcome rows at `t`.
+  - Continue to require exact lag spacing and never bridge missing time indexes.
+    The existing own-actor lag behavior can remain.
+  - Add asymmetric-missingness tests for APIM, DIM, and DSM and for raw and CWP
+    lag sources.
+- [ ] Reject infinite values before generating model-ready columns.
+  - Reject `Inf` and `-Inf` in selected numeric predictors with an error naming
+    the affected variables and rows; continue to treat `NA` and `NaN` as
+    missing values.
+  - Reject non-finite values in numeric `dyad`, `member`, and `time` columns while
+    continuing to support character and factor identifiers.
+  - Cover GMC, CWP/CBP, APIM, DIM, DSM, and structural-column validation in
+    regression tests so one infinite value cannot contaminate many generated
+    rows through a mean.
+- [ ] Define and enforce the post-preparation modification contract.
+  - Current problem: base and dplyr subsetting can preserve the
+    `dyadMLM_data` class and its frozen metadata after rows or structural columns
+    change; source-variable mutation can also leave generated columns stale.
+  - Recommended contract: treat `dyadMLM_data` as an immutable prepared analysis
+    artifact. Filter and transform the raw data first, then call
+    `prepare_dyad_data()` as the final preparation step.
+  - Add base/dplyr reconstruction behavior that invalidates the custom class and
+    metadata after unsupported row or column mutations. Adjust package internals
+    so the class is restored only after a validated generation stage.
+  - Do not silently re-center or rebuild after filtering because the package
+    cannot know whether the original or filtered reference population is the
+    intended estimand.
+  - Test base `[`, `filter()`, `slice()`, `select()`, and `mutate()`.
+
+### API decisions to settle before the 0.2.0 freeze
+
+- [ ] Make arbitrary member assignment reproducible without using the session's
+  RNG state by default.
+  - Preferred lean API: assign `-1/+1` deterministically from a documented stable
+    member ordering and remove the public `seed` argument.
+  - Smaller alternative: retain `seed` but use a fixed non-`NULL` default and
+    preserve the caller's RNG state. This is reproducible for identical data but
+    less stable when dyads are added or removed.
+  - Keep the documentation explicit that the sign is arbitrary and has no
+    substantive member interpretation.
+  - If `seed` is removed, update every package vignette, workshop source, example,
+    test, and NEWS migration entry in the same change.
+- [ ] Use stable composition-qualified generated names by default.
+  - Recommended default: `short_colnames = FALSE` so adding a composition does
+    not change the columns referenced by an existing formula.
+  - Vignettes and workshop examples that deliberately retain one composition
+    may request `short_colnames = TRUE` for teaching-friendly formulas.
+  - If compact context-dependent names remain the default, add a supported
+    generated-column accessor rather than making direct attribute access the
+    programmatic API.
+- [ ] Make prepared-data summaries concise by default.
+  - Recommended interface:
+    `summary(x, include_generated = FALSE)` and
+    `summary(x, include_generated = TRUE)` for the full table.
+  - The default should show structural/composition information and original
+    columns, then point users to the opt-in full generated-column summary.
+- [ ] Keep model-comparison conclusions neutral and configurable.
+  - Recommended interface:
+    `compare_nested_models(model1, model2, alpha = 0.05)`.
+  - Report evidence or no clear evidence of improvement at `alpha`; do not tell
+    users to prefer the restricted model solely because the test is not
+    significant, and retain the warning that this does not establish equal fit.
+  - Keep the shorter function name, but state consistently that the current
+    backend is `glmmTMB` only.
+- [ ] Use covariance terminology that covers residual and higher-level random
+  effects.
+  - Recommended direct rename before the API freeze: class
+    `exchangeable_covariance` and print heading "Recovered exchangeable
+    member-level covariance". The public function name
+    `recover_exchangeable_covariance()` already has the right scope.
+  - Preserve the backend, grouping factor, underlying coefficient names,
+    selected shared/difference terms, and indicator names in each returned block
+    pairing so results are self-describing.
+
+### Conditional documentation stretch goal after stabilization
+
+Only begin this work after all release-blocking correctness fixes are complete,
+the 0.2.0 API decisions are settled, and the full test suite is green. This would
+be a useful addition, but it is not a release gate; defer it rather than delay
+the CRAN release.
+
+- [ ] Adapt the validated workshop DHARMa diagnostics into one focused package-
+  vignette section. Keep the first addition documentation-only, without an
+  exported diagnostic helper or plotting API.
+  - Start with model convergence, a positive-definite Hessian, finite standard
+    errors, and boundary covariance estimates. Use `glmmTMB::diagnose()` as
+    supporting evidence rather than as a pass/fail verdict.
+  - Scope the initial workflow to the documented two-member Gaussian `glmmTMB`
+    models with dyad random effects and `dispformula = ~ 0`.
+  - Use unconditional DHARMa simulation, for example
+    `simulateResiduals(model, n = 2000, simulateREs = "unconditional",`
+    `refit = FALSE, plot = FALSE)`, because conditioning on the fitted dyad
+    effects can make this model's residual simulations nearly degenerate.
+  - Supplement the ordinary residual checks with fitted-row-aligned
+    `recalculateResiduals()` checks for dyad means and within-dyad differences.
+    Do not treat partners as independent observations when outcome missingness
+    leaves incomplete fitted dyads.
+  - State the boundary clearly: these checks do not by themselves validate the
+    dyadic covariance structure, exchangeability, or temporal dependence. Do
+    not pool temporal autocorrelation tests across repeated member series.
+  - Validate the workflow on both distinguishable and exchangeable
+    cross-sectional examples, including asymmetric outcome missingness.
+  - If the section is executed during vignette builds, add a versioned DHARMa
+    entry to `Suggests`, keep runtime CRAN-safe, and verify that simulation does
+    not leave altered `glmmTMB` state behind. Otherwise, guard or precompute the
+    expensive output explicitly.
+  - Require a clean local vignette render and CI/pkgdown render. If the workflow
+    remains slow or fragile, retain it in the workshop materials and defer the
+    package-vignette addition.
+
+### Additional tests and optional polish
+
+- [ ] Test fitted exchangeable-covariance recovery when outcome missingness
+  leaves only one member in some fitted grouping units while both member signs
+  remain represented overall.
+- [ ] Add a direct `compare_nested_models()` regression test for a valid
+  `glmmTMB` fit created with `se = FALSE` if that variant remains supported.
+- [ ] If random assignment remains available, document and test how factor-level
+  ordering affects reproducibility under a fixed seed.
+- [ ] Consider `summary.exchangeable_covariance()` for `brms` draws, with a
+  point summary and interval rather than only array dimensions. This is useful
+  but additive and is not a 0.2.0 release gate.
+- [ ] Consider splitting the large covariance implementation into backend
+  extraction, block matching, validation, transformation, and printing files.
+  This is maintainability work, not a release gate.
+
+### CRAN release checklist
+
+- [ ] Resolve every release-blocking correctness item and every API decision
+  above; update this roadmap with the chosen contracts rather than leaving both
+  alternatives documented as if implemented.
+- [ ] Update `NEWS.md` with short 0.1.0-to-0.2.0 migration guidance, including
+  all changed defaults and generated-column or S3-class names. Do not add
+  deprecated wrappers.
+- [ ] Update `DESCRIPTION` to version 0.2.0 and the release date; update
+  `CITATION.cff` to the same version and date. Verify that
+  `citation("dyadMLM")` reports version 0.2.0 while retaining the Zenodo concept
+  DOI.
+- [ ] Run `devtools::document()`, render `README.Rmd`, and rebuild every package
+  vignette affected by the API or numerical changes. Check examples and package
+  help for stale names and defaults.
+- [ ] If the conditional DHARMa section is included, verify its declared
+  dependency, build-time behavior, runtime, fitted-row alignment, and simulation
+  state in the exact release tarball.
+- [ ] Run the complete test suite, including all new asymmetric-missingness and
+  mutation-contract regressions, with no failures, warnings, or unexpected
+  skips.
+- [ ] Build the exact source tarball and run `R CMD check --as-cran` on that
+  tarball, including the manual. Treat ordinary GitHub Actions checks as ongoing
+  CI rather than a substitute for this release artifact.
+- [ ] Run Win-builder or an equivalent current Windows submission check and
+  review all CRAN-check platforms for the current release candidate.
+- [ ] Build and inspect pkgdown, deploy from `main`, and verify the stable
+  package, vignette, workshop-slide, exercise-source, PDF, and ZIP URLs. Confirm
+  that the workshop ZIP still contains only the intended synthetic datasets.
+- [ ] Submit one frozen 0.2.0 candidate to CRAN. After acceptance, tag the exact
+  accepted commit as `v0.2.0`, create the GitHub Release, archive the release on
+  Zenodo, and verify the version-specific DOI while continuing to cite the
+  concept DOI in package-facing materials.
+
+### Explicitly deferred beyond 0.2.0
+
+- Estimation helpers or syntax-generating wrappers for supported model engines.
+- Bayesian model-comparison support for `compare_nested_models()`.
+- Exported or generalized diagnostic automation, diagnostic plotting helpers,
+  and generalized sparse-composition guidance. The bounded documentation
+  workflow above does not imply a new public diagnostics API.
+- A wide-to-long preprocessing helper; `prepare_dyad_data()` remains strict
+  about the canonical long format.
+- A custom Stan backend, advanced ILD/EMA infrastructure, and automated
+  AR(1)/VAR diagnostics.
+- A preprint or methods note. When developed, cite the Zenodo concept DOI for
+  the implementation and use the paper for the broader composition-aware dyadic
+  MLM framework.
 
 ## Version 0.3.0
 
@@ -657,9 +845,11 @@ Remaining unchecked or imperative items are follow-up maintenance work.
   - Add transition-record or dyad-occasion data helpers only if needed by the
     model-syntax or custom-model tracks
   - Support ragged complete dyad-days and full dyad-day gaps before attempting
-    one-partner missingness in dynamic models
-  - Keep one-partner missingness and latent-state handling out of the core
-    preparation API until a modeling layer needs them
+    latent one-partner missingness in dynamic models
+  - Distinguish latent-state handling from the observed-data preparation fixed
+    for 0.2.0: known CBP and exact observed `t - 1` values should survive an
+    absent current partner row, but latent-state imputation remains out of the
+    core preparation API until a modeling layer needs it
 
 ## Version 0.4.0 and Later
 
