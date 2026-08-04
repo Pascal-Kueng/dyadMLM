@@ -9,7 +9,7 @@ dyadMLM_data object."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@ dyadMLM_data object."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Infer dyad compositions</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/v0.1.0/R/infer_dyad_compositions.R" class="external-link"><code>R/infer_dyad_compositions.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/R/infer_dyad_compositions.R" class="external-link"><code>R/infer_dyad_compositions.R</code></a></small>
       <div class="d-none name"><code>infer_dyad_compositions.Rd</code></div>
     </div>
 
@@ -54,7 +54,9 @@ dyadMLM_data object."></head><body>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  keep_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  set_exchangeable_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  pool_compositions <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pool_compositions <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  short_colnames <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_arbitrary_member_contrast <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -67,8 +69,8 @@ dyadMLM_data object."></head><body>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Optional seed for random <code>.dy_member_contrast_*</code> sign assignment in
-exchangeable dyads. If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
+<dd><p>Optional seed for random <code>.member_contrast_*</code> sign assignment.
+If <code>NULL</code>, the current R session's RNG state is used.</p></dd>
 
 
 <dt id="arg-keep-compositions">keep_compositions<a class="anchor" aria-label="anchor" href="#arg-keep-compositions"></a></dt>
@@ -86,13 +88,24 @@ exchangeable for analysis.</p></dd>
 compositions into user-named final composition labels. Each pool must
 resolve to at least two distinct observed compositions.</p></dd>
 
+
+<dt id="arg-short-colnames">short_colnames<a class="anchor" aria-label="anchor" href="#arg-short-colnames"></a></dt>
+<dd><p>Whether to use shorter composition-dependent generated
+column names when the final data contain one composition.</p></dd>
+
+
+<dt id="arg-include-arbitrary-member-contrast">include_arbitrary_member_contrast<a class="anchor" aria-label="anchor" href="#arg-include-arbitrary-member-contrast"></a></dt>
+<dd><p>Whether to also generate arbitrary
+<code>.member_contrast_*</code> columns for distinguishable compositions without
+changing their composition metadata, roles, or indicators.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>dyadMLM_data</code> object with added <code>.dy_composition</code> and
-<code>.dy_composition_role</code> factor columns, <code>.dy_is_*</code> numeric indicator columns,
-composition-specific numeric <code>.dy_member_contrast_*</code> columns coded <code>-1</code> and
-<code>1</code> for the two members of matching exchangeable dyads and <code>0</code> otherwise,
+    <p>A <code>dyadMLM_data</code> object with added <code>.composition</code> and
+<code>.composition_role</code> factor columns, <code>.is_*</code> numeric indicator columns,
+composition-specific numeric <code>.member_contrast_*</code> columns coded <code>-1</code> and
+<code>1</code> for the two members of each matching composition and <code>0</code> otherwise,
 and dyad composition metadata.</p>
     </div>
 

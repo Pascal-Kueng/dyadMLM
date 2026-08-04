@@ -12,7 +12,7 @@ dyads_ild
 
 ## Format
 
-A data frame with 10,080 rows and 7 variables:
+A data frame with 10,080 rows and 6 variables:
 
 - personID:
 
@@ -29,11 +29,6 @@ A data frame with 10,080 rows and 7 variables:
 - gender:
 
   Gender role, with levels `female` and `male`.
-
-- dyad_composition:
-
-  Observed dyad composition, with levels `female_x_male`,
-  `female_x_female`, and `male_x_male`.
 
 - closeness:
 
@@ -52,6 +47,12 @@ Modelling* (v2.0.9). Zenodo.
 [doi:10.5281/zenodo.20720321](https://doi.org/10.5281/zenodo.20720321) .
 
 ## Details
+
+The Gaussian outcome includes independent member-specific stationary
+AR(1) residual components. Their marginal standard deviation is 0.60 for
+both genders, with lag-1 correlations within these components of 0.55
+for female members and 0.50 for male members. Separate shared and
+difference residuals induce same-occasion partner covariance.
 
 Prepare with `dyad = coupleID`, `member = personID`, `role = gender`,
 and `time = diaryday`. These data contain three compositions. Use

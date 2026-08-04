@@ -14,7 +14,7 @@ dyads_nbinom_ild
 
 ## Format
 
-A data frame with 10,080 rows and 7 variables:
+A data frame with 10,080 rows and 6 variables:
 
 - personID:
 
@@ -31,11 +31,6 @@ A data frame with 10,080 rows and 7 variables:
 - gender:
 
   Gender role, with levels `female` and `male`.
-
-- dyad_composition:
-
-  Observed dyad composition, with levels `female_x_male`,
-  `female_x_female`, and `male_x_male`.
 
 - conflict_count:
 

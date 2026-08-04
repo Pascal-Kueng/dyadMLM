@@ -1,9 +1,8 @@
 # Collect dyadMLM-generated columns
 
-Creates a normalized, one-row-per-column view over temporal predictor,
-APIM, DIM, and DSM columns stored in a `dyadMLM` attribute. This is a
-derived lookup table; the model-specific metadata tables remain the
-source records.
+Returns a normalized, one-row-per-column view of the generated columns
+recorded in a `dyadMLM` attribute. Shared semantics and display text are
+supplied by `generated_column_spec_lookup()`.
 
 ## Usage
 
@@ -19,6 +18,5 @@ dyad_generated_columns(meta)
 
 ## Value
 
-A tibble with one row per generated temporal predictor, APIM, DIM, or
-DSM column. The `lag` column is `0` for contemporaneous columns and `1`
-for lag-1 columns.
+A tibble with one row per generated column. The `lag` column is `0` for
+contemporaneous columns and `1` for lag-1 columns.

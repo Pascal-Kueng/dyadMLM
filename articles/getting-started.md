@@ -7,43 +7,41 @@ library(dyadMLM)
 
 ## Installation
 
-You can install the released version of `dyadMLM` from CRAN with:
+You can install the development version with:
 
 ``` r
 
-install.packages("dyadMLM")
+install.packages("dyadMLM", repos = c(
+  "https://pascal-kueng.r-universe.dev",
+  "https://cloud.r-project.org"
+  )
+)
 ```
 
-You can install the development version from GitHub with:
-
-``` r
-
-# install.packages("pak")
-pak::pak("Pascal-Kueng/dyadMLM")
-```
-
-## About this Vignette
+## About this vignette
 
 `dyadMLM` helps researchers prepare cross-sectional and intensive
-longitudinal dyadic data for (generalized) multilevel models. It
-automatically creates model-ready columns for dyadic multilevel model
-parameterizations such as Actor-Partner Interdependence Models (APIM),
-Dyad-Individual Models (DIM), and Dyadic Score Models (DSM). DIM
-currently supports one exchangeable dyad composition, whereas DSM
-supports one distinguishable dyad composition.
+longitudinal dyadic data for (generalized) multilevel models.
 
 **This vignette focuses on automatic data preparation for multilevel
 models (MLMs).** For a comparison of MLM and structural equation
 modeling (SEM) approaches to dyadic data, see Ledermann and Kenny
 (2017).
 
-The available model-specific vignettes include the [Actor-Partner
-Interdependence
-Model](https://pascal-kueng.github.io/dyadMLM/articles/apim.md),
-[Dyad-Individual
-Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md), and
+The model-fitting examples in the model-specific vignettes use the
+`glmmTMB` package.
+
+Post-processing functions in `dyadMLM`, including model comparison and
+back-transformation of exchangeable random-effect covariance structures,
+are described in the [Actor-Partner Interdependence Model
+vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
+
+Other vignettes cover the [Dyad-Individual
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) and its
+equivalence and back-transformation to the *exchangeable APIM*, and the
 [Dyadic Score
-Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md).
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md) with its
+equivalence and back-transformation to the *distinguishable APIM*.
 
 The [online package overview](https://pascal-kueng.github.io/dyadMLM/)
 provides the current online versions of these vignettes and the complete
@@ -54,12 +52,6 @@ function reference.
 The basic data structure needed for `dyadMLM` is a long data frame where
 dyads are stacked on top of each other and both members of a dyad appear
 as separate rows.
-
-If your raw data are currently in wide format (for time or dyads or
-both), reshape them to this long structure first. See the [tidyr
-pivoting vignette](https://tidyr.tidyverse.org/articles/pivot.html) or
-the [`pivot_longer()`
-reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
 
 Roughly, the expected structure for `dyadMLM` is:
 
@@ -82,44 +74,33 @@ Roughly, the expected structure for `dyadMLM` is:
 |    1 |    2 |      1 | 4.0 | 6.9 |
 |    1 |    2 |      2 | 5.3 | 6.6 |
 
-Measured variables may contain missing values. The structural `dyad`,
-`member`, and optional `time` variables must not contain missing values.
+Measured variables may contain missing values, but `dyad`, `member`, and
+optional `time` must be complete; missing measurement occasions may
+instead be represented by absent rows.
 
-In intensive longitudinal data, missing measurement occasions can be
-represented by absent rows, as long as the time variable preserves the
-observed measurement occasions. For example:
-
-| dyad | personID | time |   x |   y |
-|-----:|---------:|-----:|----:|----:|
-|    1 |        1 |    1 | 4.2 | 7.1 |
-|    1 |        1 |    3 | 4.0 | 6.9 |
-|    1 |        2 |    1 | 5.3 | 6.6 |
-|    1 |        2 |    2 | 4.7 | 6.1 |
-|    1 |        2 |    3 | 5.1 | 6.4 |
-
-In this example, the row for person 1 at time 2 is absent. The time
-variable preserves the observed measurement occasions and skips from
-time 1 to time 3 for that person. `dyadMLM` accepts this structure
-without requiring a placeholder row for the missing occasion.
+If your raw data are currently in wide format (for time or dyads or
+both), reshape them to this long structure first. See the [tidyr
+pivoting vignette](https://tidyr.tidyverse.org/articles/pivot.html) or
+the [`pivot_longer()`
+reference](https://tidyr.tidyverse.org/reference/pivot_longer.html).
 
 ## Data preparation for distinguishable dyads
 
-`dyads_cross` contains three dyad compositions. Each dyad has two rows:
-one for each member. The closeness and provided-support scores are
-member-level averages across the 14 days in `dyads_ild`.
+`dyads_cross` is a simulated cross-sectional dataset that contains three
+dyad compositions.
 
 Because these example data contain multiple compositions,
 `keep_compositions` selects the composition modeled below. It can be
 omitted when the supplied data already contain only the intended
 composition.
 
-    #>   personID coupleID gender dyad_composition closeness provided_support
-    #> 1        1        1 female    female_x_male  4.767889         4.494570
-    #> 2        2        1   male    female_x_male  4.463017         4.757241
-    #> 3        3        2 female    female_x_male  6.437603         4.092390
-    #> 4        4        2   male    female_x_male  5.993620         6.199226
-    #> 5        5        3 female    female_x_male  4.756118         4.223651
-    #> 6        6        3   male    female_x_male  4.483926         5.029079
+    #>   personID coupleID gender closeness provided_support
+    #> 1        1        1 female  4.705258         4.494570
+    #> 2        2        1   male  4.608436         4.757241
+    #> 3        3        2 female  6.690937         4.092390
+    #> 4        4        2   male  5.976549         6.199226
+    #> 5        5        3 female  5.272910         4.223651
+    #> 6        6        3   male  4.366967         5.029079
 
 We validate and prepare the data with the function
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
@@ -131,11 +112,10 @@ cross_distinguishable_data <- dyadMLM::prepare_dyad_data(
   dyad = coupleID,
   member = personID,
   role = gender,
-
-  # In this example, we optionally specify a predictor variable
-  # and a model type to generate the columns needed for that model type.
   predictors = provided_support,
   model_types = "apim",
+  add_apim_gmc_predictors = TRUE, # Optional grand-mean centering
+
   # All three observed compositions in `dyads_cross` are detected and retained by
   # default. This example focuses on `female-male` dyads, so we restrict the
   # analysis here.
@@ -151,30 +131,39 @@ print(cross_distinguishable_data, n = 4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition       inferred dyad composition
-#> #   .dy_composition_role  composition-specific member role
-#> #   .dy_is_{comp-role}    composition-role indicator columns
-#> #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor
-#> #                         values
-#> #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor
-#> #                         values
+#> #   .composition         inferred dyad composition
+#> #   .composition_role    composition-specific member role
+#> #   .is_{role}           composition-role indicator columns
+#> #   .{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                        values
+#> #   .{pred}_gmc          APIM grand-mean-centered predictor source: original
+#> #                        values minus the mean across all retained non-missing
+#> #                        observations
+#> #   .{pred}_gmc_actor    APIM grand-mean-centered actor predictor: actor's
+#> #                        value relative to the mean across all retained
+#> #                        non-missing observations
+#> #   .{pred}_gmc_partner  APIM grand-mean-centered partner predictor: partner's
+#> #                        value relative to the mean across all retained
+#> #                        non-missing observations
 #> #
-#> # A tibble: 240 × 12
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> # A tibble: 240 × 14
+#>   personID coupleID gender closeness provided_support .composition 
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#> 1        1        1 female      4.71             4.49 female_x_male
+#> 2        2        1 male        4.61             4.76 female_x_male
+#> 3        3        2 female      6.69             4.09 female_x_male
+#> 4        4        2 male        5.98             6.20 female_x_male
 #> # ℹ 236 more rows
-#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>
+#> # ℹ 8 more variables: .composition_role <fct>, .is_female <dbl>,
+#> #   .is_male <dbl>, .provided_support_gmc <dbl>, .provided_support_actor <dbl>,
+#> #   .provided_support_partner <dbl>, .provided_support_gmc_actor <dbl>,
+#> #   .provided_support_gmc_partner <dbl>
 ```
 
-The function retained and recognized 120 female-male dyads and created
-APIM-relevant variables (Kenny and Cook 1999). These generated `.dy_*`
-columns can be used directly in model formulas.
+The function retained 120 female-male dyads and created raw and
+grand-mean centered APIM variables (Kenny and Cook 1999).
 
 For fitted APIM examples using these columns, see the [Actor-Partner
 Interdependence Model
@@ -182,8 +171,9 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.md).
 
 ## Data preparation for exchangeable dyads
 
-To work with one exchangeable dyad composition, use `keep_compositions`
-to retain it during preparation:
+For this example, we pretend that we have a dataset with no
+distinguishable variable (e.g., same-sex friend dyads). Then, we simply
+omit the `role` argument:
 
 ``` r
 
@@ -191,106 +181,74 @@ cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
   data = dyads_cross,
   dyad = coupleID,
   member = personID,
-  role = gender,
-  keep_compositions = "female-female",
+  predictors = provided_support,
+  model_types = "apim",
+  add_apim_gmc_predictors = TRUE,
   seed = 123
 )
 
 print(cross_exchangeable_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
-#> # Structure: dyad = coupleID, member = personID, role = gender
+#> # Rows: 720 | Dyads: 360 | Intensive longitudinal: no
+#> # Structure: dyad = coupleID, member = personID
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable 120 dyads
+#> # assumed_exchangeable exchangeable 360 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
+#> #   .composition                inferred dyad composition
+#> #   .composition_role           composition-specific member role
+#> #   .is_exchangeable            composition-role indicator columns
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
+#> #   .{pred}_actor               APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .{pred}_partner             APIM partner predictor: partner's original
+#> #                               predictor values
+#> #   .{pred}_gmc                 APIM grand-mean-centered predictor source:
+#> #                               original values minus the mean across all
+#> #                               retained non-missing observations
+#> #   .{pred}_gmc_actor           APIM grand-mean-centered actor predictor:
+#> #                               actor's value relative to the mean across all
+#> #                               retained non-missing observations
+#> #   .{pred}_gmc_partner         APIM grand-mean-centered partner predictor:
+#> #                               partner's value relative to the mean across all
+#> #                               retained non-missing observations
 #> #
-#> # A tibble: 240 × 10
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121 female female_x_female       7.58             5.41
-#> 2      242      121 female female_x_female       6.15             5.19
-#> 3      243      122 female female_x_female       8.28             5.89
-#> 4      244      122 female female_x_female       8.00             5.57
-#> # ℹ 236 more rows
-#> # ℹ 4 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_female <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>
+#> # A tibble: 720 × 14
+#>   personID coupleID gender closeness provided_support .composition        
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>               
+#> 1        1        1 female      4.71             4.49 assumed_exchangeable
+#> 2        2        1 male        4.61             4.76 assumed_exchangeable
+#> 3        3        2 female      6.69             4.09 assumed_exchangeable
+#> 4        4        2 male        5.98             6.20 assumed_exchangeable
+#> # ℹ 716 more rows
+#> # ℹ 8 more variables: .composition_role <fct>, .is_exchangeable <dbl>,
+#> #   .member_contrast_arbitrary <dbl>, .provided_support_gmc <dbl>,
+#> #   .provided_support_actor <dbl>, .provided_support_partner <dbl>,
+#> #   .provided_support_gmc_actor <dbl>, .provided_support_gmc_partner <dbl>
 ```
 
-The generated `.dy_member_contrast_female_x_female_arbitrary` contrast
-assigns `-1` and `1` to the two members of each exchangeable dyad (del
-Rosario and West 2025). Its direction is arbitrary, and `seed` makes the
-assignment reproducible.
+The generated `.member_contrast_arbitrary` contrast assigns `-1` and `1`
+to the two members of each exchangeable dyad (del Rosario and West
+2025). Its direction is arbitrary, and `seed` makes the assignment
+reproducible.
 
-Refer to the [exchangeable APIM
+Refer to the APIM vignette’s [exchangeable APIM
 section](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure)
 for how to use these columns to specify an exchangeable dyadic APIM and
 recover the constrained actor-partner variance-covariance structure with
 [`dyadMLM::recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html).
 
-Alternatively, we can explicitly set a dyad composition to exchangeable:
-
-``` r
-
-cross_exchangeable_data <- dyadMLM::prepare_dyad_data(
-  data = dyads_cross,
-  dyad = coupleID,
-  member = personID,
-  role = gender,
-  keep_compositions = "female-male",
-  set_exchangeable_compositions = "male-female",
-  seed = 123
-)
-
-print(cross_exchangeable_data, n = 4)
-#> # dyadMLM data
-#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
-#> # Structure: dyad = coupleID, member = personID, role = gender
-#> #
-#> # Dyad compositions:
-#> # female_x_male exchangeable (set by user) 120 dyads
-#> #
-#> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
-#> #
-#> # A tibble: 240 × 10
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
-#> # ℹ 236 more rows
-#> # ℹ 4 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male <dbl>,
-#> #   .dy_member_contrast_female_x_male_arbitrary <dbl>
-```
-
-*Note* that whenever you need to refer to a dyad type, the order of
-members does not matter (e.g., `male-female` and `female-male` will both
-work), and you can use different separators like `male_female`,
-`male_x_female`, or `male female`.
-
 ## Generating DIM and DSM columns
 
-For exchangeable dyads, we can request DIM predictor columns. DIM
-preparation requires exactly one exchangeable composition, which we
-retain here with `keep_compositions`.
+For exchangeable dyads, we can request DIM predictor columns. **DIM
+preparation requires exactly one exchangeable composition**. This can be
+achieved by omitting `role`. For more control over compositions, see
+[Working with multiple dyad
+compositions](#working-with-multiple-dyad-compositions).
 
 ``` r
 
@@ -298,53 +256,50 @@ cross_dim_data <- dyadMLM::prepare_dyad_data(
   data = dyads_cross,
   dyad = coupleID,
   member = personID,
-  role = gender,
   predictors = provided_support,
   model_types = "dim",
-  keep_compositions = "female-female",
   seed = 123
 )
 
 print(cross_dim_data, n = 4)
 #> # dyadMLM data
-#> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
-#> # Structure: dyad = coupleID, member = personID, role = gender
+#> # Rows: 720 | Dyads: 360 | Intensive longitudinal: no
+#> # Structure: dyad = coupleID, member = personID
 #> #
 #> # Dyad compositions:
-#> # female_x_female exchangeable 120 dyads
+#> # assumed_exchangeable exchangeable 360 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
-#> #   .dy_{pred}_dyad_mean_gmc              dyad-mean predictor: dyad's average
-#> #                                         predictor level, grand-mean centered
-#> #   .dy_{pred}_within_dyad_dev            DIM within-dyad member-deviation
-#> #                                         predictor: member's difference from
-#> #                                         the dyad mean
+#> #   .composition                inferred dyad composition
+#> #   .composition_role           composition-specific member role
+#> #   .is_exchangeable            composition-role indicator columns
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
+#> #   .{pred}_dyad_mean_gmc       dyad-mean predictor: dyad's average predictor
+#> #                               level, grand-mean centered
+#> #   .{pred}_within_dyad_dev     DIM within-dyad member-deviation predictor:
+#> #                               member's difference from the dyad mean
 #> #
-#> # A tibble: 240 × 12
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121 female female_x_female       7.58             5.41
-#> 2      242      121 female female_x_female       6.15             5.19
-#> 3      243      122 female female_x_female       8.28             5.89
-#> 4      244      122 female female_x_female       8.00             5.57
-#> # ℹ 236 more rows
-#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_female <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
-#> #   .dy_provided_support_dyad_mean_gmc <dbl>,
-#> #   .dy_provided_support_within_dyad_dev <dbl>
+#> # A tibble: 720 × 11
+#>   personID coupleID gender closeness provided_support .composition        
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>               
+#> 1        1        1 female      4.71             4.49 assumed_exchangeable
+#> 2        2        1 male        4.61             4.76 assumed_exchangeable
+#> 3        3        2 female      6.69             4.09 assumed_exchangeable
+#> 4        4        2 male        5.98             6.20 assumed_exchangeable
+#> # ℹ 716 more rows
+#> # ℹ 5 more variables: .composition_role <fct>, .is_exchangeable <dbl>,
+#> #   .member_contrast_arbitrary <dbl>, .provided_support_dyad_mean_gmc <dbl>,
+#> #   .provided_support_within_dyad_dev <dbl>
 ```
 
-Generating DSM columns for distinguishable dyads additionally requires
-an explicit role order. The role order defines the direction of all DSM
-predictor differences and the DSM role contrast (Iida et al. 2018).
+For distinguishable dyads, we can request DSM columns. **DSM preparation
+currently requires exactly one distinguishable composition**. To compute
+these columns, an explicit role order is required. The role order
+defines the direction of all DSM predictor differences and the DSM role
+contrast (Iida et al. 2018).
 
 ``` r
 
@@ -369,44 +324,52 @@ print(cross_dsm_data, n = 4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition              inferred dyad composition
-#> #   .dy_composition_role         composition-specific member role
-#> #   .dy_is_{comp-role}           composition-role indicator columns
-#> #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared
-#> #                                role and -0.5 for the second declared role
-#> #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
-#> #                                level, grand-mean centered
-#> #   .dy_{pred}_within_dyad_diff  DSM signed predictor difference: first
-#> #                                declared role minus second declared role
+#> #   .composition              inferred dyad composition
+#> #   .composition_role         composition-specific member role
+#> #   .is_{role}                composition-role indicator columns
+#> #   .dsm_role_contrast        DSM role contrast: +0.5 for the first declared
+#> #                             role and -0.5 for the second declared role
+#> #   .{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
+#> #                             level, grand-mean centered
+#> #   .{pred}_within_dyad_diff  DSM signed predictor difference: first declared
+#> #                             role minus second declared role
 #> #
-#> # A tibble: 240 × 13
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> # A tibble: 240 × 12
+#>   personID coupleID gender closeness provided_support .composition 
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#> 1        1        1 female      4.71             4.49 female_x_male
+#> 2        2        1 male        4.61             4.76 female_x_male
+#> 3        3        2 female      6.69             4.09 female_x_male
+#> 4        4        2 male        5.98             6.20 female_x_male
 #> # ℹ 236 more rows
-#> # ℹ 7 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_dsm_role_contrast <dbl>, .dy_provided_support_dyad_mean_gmc <dbl>,
-#> #   .dy_provided_support_within_dyad_diff <dbl>
+#> # ℹ 6 more variables: .composition_role <fct>, .is_female <dbl>,
+#> #   .is_male <dbl>, .dsm_role_contrast <dbl>,
+#> #   .provided_support_dyad_mean_gmc <dbl>,
+#> #   .provided_support_within_dyad_diff <dbl>
 ```
+
+APIM GMC uses all retained non-missing values. DIM and DSM center
+complete-pair dyad means. The constants may differ with one-sided
+missingness.
+
+In DIM and DSM, mean predictors are grand-mean centered by convention;
+thus, no additional argument is required to request them.
 
 ## Intensive longitudinal dyadic data
 
-`dyads_ild` is an intensive longitudinal dyadic dataset. Each dyad has
-repeated observations over `diaryday`, with one row per person-day.
+`dyads_ild` is a simulated intensive longitudinal dyadic dataset. Each
+dyad has repeated observations over `diaryday`, with one row per
+person-day.
 
-    #> # A tibble: 6 × 7
-    #>   personID coupleID diaryday gender dyad_composition closeness provided_support
-    #>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-    #> 1        1        1        0 female female_x_male         4.40             4.93
-    #> 2        2        1        0 male   female_x_male         5.14             5.59
-    #> 3        1        1        1 female female_x_male         5.16             4.89
-    #> 4        2        1        1 male   female_x_male         5.70             5.18
-    #> 5        1        1        2 female female_x_male         3.28             4.38
-    #> 6        2        1        2 male   female_x_male         2.82             4.99
+    #> # A tibble: 6 × 6
+    #>   personID coupleID diaryday gender closeness provided_support
+    #>      <int>    <int>    <int> <fct>      <dbl>            <dbl>
+    #> 1        1        1        0 female      3.74             4.93
+    #> 2        2        1        0 male        5.91             5.59
+    #> 3        1        1        1 female      3.72             4.89
+    #> 4        2        1        1 male        6.32             5.18
+    #> 5        1        1        2 female      2.45             4.38
+    #> 6        2        1        2 male        3.44             4.99
 
 To prepare intensive longitudinal data, pass the `time` variable to
 [`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md).
@@ -434,68 +397,72 @@ print(ild_apim_data, n = 6)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition         inferred dyad composition
-#> #   .dy_composition_role    composition-specific member role
-#> #   .dy_is_{comp-role}      composition-role indicator columns
-#> #   .dy_{pred}_cwp          within-person predictor: momentary deviations from
-#> #                           each person's usual level
-#> #   .dy_{pred}_cbp          between-person predictor: stable differences from
-#> #                           the average person's usual level
-#> #   .dy_{pred}_actor        APIM actor predictor: actor's original predictor
-#> #                           values
-#> #   .dy_{pred}_partner      APIM partner predictor: partner's original
-#> #                           predictor values
-#> #   .dy_{pred}_cwp_actor    APIM within-person actor predictor: actor's
-#> #                           momentary deviations from their usual level
-#> #   .dy_{pred}_cwp_partner  APIM within-person partner predictor: partner's
-#> #                           momentary deviations from their usual level
-#> #   .dy_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable
-#> #                           difference from the average person's usual level
-#> #   .dy_{pred}_cbp_partner  APIM between-person partner predictor: partner's
-#> #                           stable difference from the average person's usual
-#> #                           level
+#> #   .composition         inferred dyad composition
+#> #   .composition_role    composition-specific member role
+#> #   .is_{role}           composition-role indicator columns
+#> #   .{pred}_cwp          within-person predictor: momentary deviations from
+#> #                        each person's usual level
+#> #   .{pred}_cbp          between-person predictor: stable differences from the
+#> #                        average person's usual level
+#> #   .{pred}_actor        APIM actor predictor: actor's original predictor
+#> #                        values
+#> #   .{pred}_partner      APIM partner predictor: partner's original predictor
+#> #                        values
+#> #   .{pred}_cwp_actor    APIM within-person actor predictor: actor's momentary
+#> #                        deviations from their usual level
+#> #   .{pred}_cwp_partner  APIM within-person partner predictor: partner's
+#> #                        momentary deviations from their usual level
+#> #   .{pred}_cbp_actor    APIM between-person actor predictor: actor's stable
+#> #                        difference from the average person's usual level
+#> #   .{pred}_cbp_partner  APIM between-person partner predictor: partner's
+#> #                        stable difference from the average person's usual
+#> #                        level
 #> #
-#> # A tibble: 3,360 × 19
-#>   personID coupleID diaryday gender dyad_composition closeness provided_support
-#>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1        0 female female_x_male         4.40             4.93
-#> 2        2        1        0 male   female_x_male         5.14             5.59
-#> 3        1        1        1 female female_x_male         5.16             4.89
-#> 4        2        1        1 male   female_x_male         5.70             5.18
-#> 5        1        1        2 female female_x_male         3.28             4.38
-#> 6        2        1        2 male   female_x_male         2.82             4.99
+#> # A tibble: 3,360 × 18
+#>   personID coupleID diaryday gender closeness provided_support .composition 
+#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#> 1        1        1        0 female      3.74             4.93 female_x_male
+#> 2        2        1        0 male        5.91             5.59 female_x_male
+#> 3        1        1        1 female      3.72             4.89 female_x_male
+#> 4        2        1        1 male        6.32             5.18 female_x_male
+#> 5        1        1        2 female      2.45             4.38 female_x_male
+#> 6        2        1        2 male        3.44             4.99 female_x_male
 #> # ℹ 3,354 more rows
-#> # ℹ 12 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_provided_support_cwp <dbl>, .dy_provided_support_cbp <dbl>,
-#> #   .dy_provided_support_actor <dbl>, .dy_provided_support_partner <dbl>,
-#> #   .dy_provided_support_cwp_actor <dbl>,
-#> #   .dy_provided_support_cwp_partner <dbl>, …
+#> # ℹ 11 more variables: .composition_role <fct>, .is_female <dbl>,
+#> #   .is_male <dbl>, .provided_support_cwp <dbl>, .provided_support_cbp <dbl>,
+#> #   .provided_support_actor <dbl>, .provided_support_partner <dbl>,
+#> #   .provided_support_cwp_actor <dbl>, .provided_support_cwp_partner <dbl>,
+#> #   .provided_support_cbp_actor <dbl>, .provided_support_cbp_partner <dbl>
 ```
 
 By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components (Bolger and
 Laurenceau 2013). This temporal predictor decomposition is controlled by
 `temporal_decomposition`. The default `"auto"` setting selects `"2l"`
-for this longitudinal setup and retains raw actor and partner columns
-alongside both components.
+(2-level temporal decomposition).
+
+`add_apim_gmc_predictors = TRUE` requires resolved
+`temporal_decomposition = "none"`, since the between-person component is
+always already grand-mean centered by convention.
 
 Note that observed person means used to construct the between-person
 (`cbp`) predictors can be unreliable when each member contributes few
 occasions, which can bias between-person estimates (Gottfredson 2019).
 
+For fitted concurrent examples and AR(1) specifications for
+distinguishable and exchangeable dyads, refer to the [intensive
+longitudinal APIM
+section](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#intensive-longitudinal-apims).
+
 ### Preparing lagged predictors
 
 Lagged versions of variables, including an outcome that is also passed
-to `predictors`, can be obtained through the `lag1_predictors` argument.
-[`dyadMLM::prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
-then returns lag-1 raw and within-person-centered actor and partner
-columns alongside their contemporaneous versions. Lagging respects the
-dyad and member structure, matches observations at exactly `time - 1`,
-and does not bridge missing occasions.
+to `predictors` for dynamic models, can be obtained through the
+`lag1_predictors` argument.
 
-For a simpler dynamic model, this example retains the exchangeable
-female-female composition:
+Lagging respects the dyad and member structure, matches observations at
+exactly `time - 1`, and does not bridge missing occasions when rows are
+missing in the dataset.
 
 ``` r
 
@@ -521,74 +488,66 @@ print(ild_apim_data_dynamic, n = 6)
 #> # female_x_female exchangeable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
-#> #   .dy_{pred}_lag1                       lag-1 raw predictor values
-#> #   .dy_{pred}_cwp                        within-person predictor: momentary
-#> #                                         deviations from each person's usual
-#> #                                         level
-#> #   .dy_{pred}_cwp_lag1                   lag-1 within-person predictor:
-#> #                                         momentary deviations from each
-#> #                                         person's usual level
-#> #   .dy_{pred}_cbp                        between-person predictor: stable
-#> #                                         differences from the average person's
-#> #                                         usual level
-#> #   .dy_{pred}_actor                      APIM actor predictor: actor's
-#> #                                         original predictor values
-#> #   .dy_{pred}_actor_lag1                 lag-1 APIM actor predictor: actor's
-#> #                                         original predictor values
-#> #   .dy_{pred}_partner                    APIM partner predictor: partner's
-#> #                                         original predictor values
-#> #   .dy_{pred}_partner_lag1               lag-1 APIM partner predictor:
-#> #                                         partner's original predictor values
-#> #   .dy_{pred}_cwp_actor                  APIM within-person actor predictor:
-#> #                                         actor's momentary deviations from
-#> #                                         their usual level
-#> #   .dy_{pred}_cwp_actor_lag1             lag-1 APIM within-person actor
-#> #                                         predictor: actor's momentary
-#> #                                         deviations from their usual level
-#> #   .dy_{pred}_cwp_partner                APIM within-person partner predictor:
-#> #                                         partner's momentary deviations from
-#> #                                         their usual level
-#> #   .dy_{pred}_cwp_partner_lag1           lag-1 APIM within-person partner
-#> #                                         predictor: partner's momentary
-#> #                                         deviations from their usual level
-#> #   .dy_{pred}_cbp_actor                  APIM between-person actor predictor:
-#> #                                         actor's stable difference from the
-#> #                                         average person's usual level
-#> #   .dy_{pred}_cbp_partner                APIM between-person partner
-#> #                                         predictor: partner's stable
-#> #                                         difference from the average person's
-#> #                                         usual level
+#> #   .composition                inferred dyad composition
+#> #   .composition_role           composition-specific member role
+#> #   .is_exchangeable            composition-role indicator columns
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
+#> #   .{pred}_lag1                lag-1 raw predictor values
+#> #   .{pred}_cwp                 within-person predictor: momentary deviations
+#> #                               from each person's usual level
+#> #   .{pred}_cwp_lag1            lag-1 within-person predictor: momentary
+#> #                               deviations from each person's usual level
+#> #   .{pred}_cbp                 between-person predictor: stable differences
+#> #                               from the average person's usual level
+#> #   .{pred}_actor               APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .{pred}_actor_lag1          lag-1 APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .{pred}_partner             APIM partner predictor: partner's original
+#> #                               predictor values
+#> #   .{pred}_partner_lag1        lag-1 APIM partner predictor: partner's
+#> #                               original predictor values
+#> #   .{pred}_cwp_actor           APIM within-person actor predictor: actor's
+#> #                               momentary deviations from their usual level
+#> #   .{pred}_cwp_actor_lag1      lag-1 APIM within-person actor predictor:
+#> #                               actor's momentary deviations from their usual
+#> #                               level
+#> #   .{pred}_cwp_partner         APIM within-person partner predictor: partner's
+#> #                               momentary deviations from their usual level
+#> #   .{pred}_cwp_partner_lag1    lag-1 APIM within-person partner predictor:
+#> #                               partner's momentary deviations from their usual
+#> #                               level
+#> #   .{pred}_cbp_actor           APIM between-person actor predictor: actor's
+#> #                               stable difference from the average person's
+#> #                               usual level
+#> #   .{pred}_cbp_partner         APIM between-person partner predictor:
+#> #                               partner's stable difference from the average
+#> #                               person's usual level
 #> #
-#> # A tibble: 3,360 × 25
-#>   personID coupleID diaryday gender dyad_composition closeness provided_support
-#>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121        0 female female_x_female       6.59             6.18
-#> 2      242      121        0 female female_x_female       5.73             5.70
-#> 3      241      121        1 female female_x_female       8.70             4.57
-#> 4      242      121        1 female female_x_female       5.61             5.30
-#> 5      241      121        2 female female_x_female       7.06             5.19
-#> 6      242      121        2 female female_x_female       6.72             3.89
+#> # A tibble: 3,360 × 24
+#>   personID coupleID diaryday gender closeness provided_support .composition   
+#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>          
+#> 1      241      121        0 female      6.60             6.18 female_x_female
+#> 2      242      121        0 female      5.22             5.70 female_x_female
+#> 3      241      121        1 female      8.33             4.57 female_x_female
+#> 4      242      121        1 female      5.24             5.30 female_x_female
+#> 5      241      121        2 female      6.55             5.19 female_x_female
+#> 6      242      121        2 female      6.85             3.89 female_x_female
 #> # ℹ 3,354 more rows
-#> # ℹ 18 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_female <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
-#> #   .dy_closeness_cwp <dbl>, .dy_closeness_cbp <dbl>, .dy_closeness_lag1 <dbl>,
-#> #   .dy_closeness_cwp_lag1 <dbl>, .dy_closeness_actor <dbl>,
-#> #   .dy_closeness_partner <dbl>, .dy_closeness_cwp_actor <dbl>, …
+#> # ℹ 17 more variables: .composition_role <fct>, .is_exchangeable <dbl>,
+#> #   .member_contrast_arbitrary <dbl>, .closeness_cwp <dbl>,
+#> #   .closeness_cbp <dbl>, .closeness_lag1 <dbl>, .closeness_cwp_lag1 <dbl>,
+#> #   .closeness_actor <dbl>, .closeness_partner <dbl>,
+#> #   .closeness_cwp_actor <dbl>, .closeness_cwp_partner <dbl>,
+#> #   .closeness_cbp_actor <dbl>, .closeness_cbp_partner <dbl>, …
 ```
 
-**Note:** Whether to use the raw or within-person-centered lagged
-outcome depends on the research question and the data. Including a
-lagged **outcome** in dynamic models can introduce bias, especially in
-shorter time series (Hamaker and Grasman 2015; Nickell 1981; Gistelinck
-et al. 2021). See the [dynamic ILD APIM
+**Note:** Whether to use the prepared raw or within-person-centered
+lagged outcome depends on the research question and the data. See the
+[dynamic ILD APIM
 example](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#dynamic-models)
 for a more detailed discussion and guidance.
 
@@ -621,33 +580,33 @@ print(mixed_cross_data, n = 4)
 #> # male_x_male     exchangeable    120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
+#> #   .composition                       inferred dyad composition
+#> #   .composition_role                  composition-specific member role
+#> #   .is_{comp-role}                    composition-role indicator columns
+#> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
-#> # A tibble: 720 × 14
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> # A tibble: 720 × 13
+#>   personID coupleID gender closeness provided_support .composition 
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#> 1        1        1 female      4.71             4.49 female_x_male
+#> 2        2        1 male        4.61             4.76 female_x_male
+#> 3        3        2 female      6.69             4.09 female_x_male
+#> 4        4        2 male        5.98             6.20 female_x_male
 #> # ℹ 716 more rows
-#> # ℹ 8 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_female <dbl>, .dy_is_female_x_male_female <dbl>,
-#> #   .dy_is_female_x_male_male <dbl>, .dy_is_male_x_male <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
-#> #   .dy_member_contrast_male_x_male_arbitrary <dbl>
+#> # ℹ 7 more variables: .composition_role <fct>, .is_female_x_female <dbl>,
+#> #   .is_female_x_male_female <dbl>, .is_female_x_male_male <dbl>,
+#> #   .is_male_x_male <dbl>, .member_contrast_female_x_female_arbitrary <dbl>,
+#> #   .member_contrast_male_x_male_arbitrary <dbl>
 ```
 
-Note that when role compositions are available, each exchangeable
+Note that when role compositions are available, each *exchangeable*
 composition receives its own difference contrast, such as
-`.dy_member_contrast_female_x_female_arbitrary`, which is `0` for all
-other compositions (del Rosario and West 2025).
+`.member_contrast_female_x_female_arbitrary`, which is `0` for all other
+compositions.
 
 We can use this data to model these dyad types as separate or in the
 same model.
@@ -658,8 +617,8 @@ Sometimes a mixed dataset contains dyad compositions that should not be
 part of a given analysis. Use `keep_compositions` to keep only dyads
 whose *observed* composition matches the requested labels. The filtering
 happens before exchangeability constraints and pooling, so
-`set_exchangeable_compositions` and `pool_compositions` can only refer
-to retained dyad compositions.
+`set_exchangeable_compositions` and `pool_compositions` (described
+later) can only refer to retained dyad compositions.
 
 ``` r
 
@@ -682,35 +641,40 @@ print(mixed_cross_data_included, n = 4)
 #> # male_x_male     exchangeable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
+#> #   .composition                       inferred dyad composition
+#> #   .composition_role                  composition-specific member role
+#> #   .is_{comp-role}                    composition-role indicator columns
+#> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
-#> # A tibble: 480 × 12
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1      241      121 female female_x_female       7.58             5.41
-#> 2      242      121 female female_x_female       6.15             5.19
-#> 3      243      122 female female_x_female       8.28             5.89
-#> 4      244      122 female female_x_female       8.00             5.57
+#> # A tibble: 480 × 11
+#>   personID coupleID gender closeness provided_support .composition   
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>          
+#> 1      241      121 female      7.34             5.41 female_x_female
+#> 2      242      121 female      6.43             5.19 female_x_female
+#> 3      243      122 female      8.18             5.89 female_x_female
+#> 4      244      122 female      8.48             5.57 female_x_female
 #> # ℹ 476 more rows
-#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_female <dbl>, .dy_is_male_x_male <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
-#> #   .dy_member_contrast_male_x_male_arbitrary <dbl>
+#> # ℹ 5 more variables: .composition_role <fct>, .is_female_x_female <dbl>,
+#> #   .is_male_x_male <dbl>, .member_contrast_female_x_female_arbitrary <dbl>,
+#> #   .member_contrast_male_x_male_arbitrary <dbl>
 ```
+
+*Note* that whenever you need to refer to a dyad type, the order of
+members does not matter (e.g., `male-female` and `female-male` will both
+work), and you can use different separators like `male_female`,
+`male_x_female`, or `male female`.
 
 ### Setting distinguishable dyads to be treated as exchangeable
 
-As mentioned earlier, a distinguishable dyad composition can be treated
-as exchangeable. In a mixed dyad composition dataset, this specification
-keeps the differentiation between the kinds of dyads (e.g., `male-male`,
-`female-female`, and `male-female`), as opposed to omitting role, which
-would pool all dyad compositions into one exchangeable composition.
+`set_exchangeable_compositions` changes how selected role-defined
+compositions are modeled while preserving their composition labels. By
+contrast, omitting `role` indicates that no distinguishing variable is
+available, so all dyads are treated as one exchangeable composition with
+a single global arbitrary-member contrast.
 
 ``` r
 
@@ -734,39 +698,38 @@ print(mixed_cross_exchangeable_data, n = 4)
 #> # male_x_male     exchangeable               120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
+#> #   .composition                       inferred dyad composition
+#> #   .composition_role                  composition-specific member role
+#> #   .is_{comp-role}                    composition-role indicator columns
+#> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
-#> # A tibble: 720 × 14
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> # A tibble: 720 × 13
+#>   personID coupleID gender closeness provided_support .composition 
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#> 1        1        1 female      4.71             4.49 female_x_male
+#> 2        2        1 male        4.61             4.76 female_x_male
+#> 3        3        2 female      6.69             4.09 female_x_male
+#> 4        4        2 male        5.98             6.20 female_x_male
 #> # ℹ 716 more rows
-#> # ℹ 8 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_female <dbl>, .dy_is_female_x_male <dbl>,
-#> #   .dy_is_male_x_male <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
-#> #   .dy_member_contrast_female_x_male_arbitrary <dbl>,
-#> #   .dy_member_contrast_male_x_male_arbitrary <dbl>
+#> # ℹ 7 more variables: .composition_role <fct>, .is_female_x_female <dbl>,
+#> #   .is_female_x_male <dbl>, .is_male_x_male <dbl>,
+#> #   .member_contrast_female_x_female_arbitrary <dbl>,
+#> #   .member_contrast_female_x_male_arbitrary <dbl>,
+#> #   .member_contrast_male_x_male_arbitrary <dbl>
 ```
 
 ### Pooling different dyad compositions
 
-Sometimes for theoretical or practical reasons, we may want to pool
-selected exchangeable dyad compositions and analyze them as if they were
-one. Pooling can impose equality constraints among compositions. After
-fitting nested pooled and unpooled models to the same observations,
-these constraints can be tested with
-[`dyadMLM::compare_nested_glmmTMB_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html);
-see [Testing distinguishability in the APIM
+Sometimes, we may want to pool selected *exchangeable* dyad compositions
+and analyze them as if they were one. Pooling can impose equality
+constraints among compositions. After fitting nested pooled and unpooled
+models to the same observations, these constraints can be tested with
+[`dyadMLM::compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md);
+see [testing distinguishability in the APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#testing-distinguishability)
 for the model-comparison workflow.
 
@@ -798,31 +761,32 @@ print(mixed_cross_data_pooled)
 #> #   male_x_male
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
+#> #   .composition                       inferred dyad composition
+#> #   .composition_role                  composition-specific member role
+#> #   .is_{comp-role}                    composition-role indicator columns
+#> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
-#> # A tibble: 720 × 12
-#>    personID coupleID gender dyad_composition closeness provided_support
-#>       <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#>  1        1        1 female female_x_male         4.77             4.49
-#>  2        2        1 male   female_x_male         4.46             4.76
-#>  3        3        2 female female_x_male         6.44             4.09
-#>  4        4        2 male   female_x_male         5.99             6.20
-#>  5        5        3 female female_x_male         4.76             4.22
-#>  6        6        3 male   female_x_male         4.48             5.03
-#>  7        7        4 female female_x_male         7.76             5.36
-#>  8        8        4 male   female_x_male         5.59             5.25
-#>  9        9        5 female female_x_male         7.28             5.78
-#> 10       10        5 male   female_x_male         5.42             4.98
+#> # A tibble: 720 × 11
+#>    personID coupleID gender closeness provided_support .composition 
+#>       <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#>  1        1        1 female      4.71             4.49 female_x_male
+#>  2        2        1 male        4.61             4.76 female_x_male
+#>  3        3        2 female      6.69             4.09 female_x_male
+#>  4        4        2 male        5.98             6.20 female_x_male
+#>  5        5        3 female      5.27             4.22 female_x_male
+#>  6        6        3 male        4.37             5.03 female_x_male
+#>  7        7        4 female      7.85             5.36 female_x_male
+#>  8        8        4 male        5.42             5.25 female_x_male
+#>  9        9        5 female      7.54             5.78 female_x_male
+#> 10       10        5 male        5.19             4.98 female_x_male
 #> # ℹ 710 more rows
-#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_is_same_sex <dbl>, .dy_member_contrast_same_sex_arbitrary <dbl>
+#> # ℹ 5 more variables: .composition_role <fct>, .is_female_x_male_female <dbl>,
+#> #   .is_female_x_male_male <dbl>, .is_same_sex <dbl>,
+#> #   .member_contrast_same_sex_arbitrary <dbl>
 ```
 
 Note that you cannot pool distinguishable dyads. If we wanted to pool
@@ -855,32 +819,33 @@ print(mixed_cross_data_pooled_constrained)
 #> #   male_x_male
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
+#> #   .composition                       inferred dyad composition
+#> #   .composition_role                  composition-specific member role
+#> #   .is_{comp-role}                    composition-role indicator columns
+#> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
 #> #
-#> # A tibble: 720 × 12
-#>    personID coupleID gender dyad_composition closeness provided_support
-#>       <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#>  1        1        1 female female_x_male         4.77             4.49
-#>  2        2        1 male   female_x_male         4.46             4.76
-#>  3        3        2 female female_x_male         6.44             4.09
-#>  4        4        2 male   female_x_male         5.99             6.20
-#>  5        5        3 female female_x_male         4.76             4.22
-#>  6        6        3 male   female_x_male         4.48             5.03
-#>  7        7        4 female female_x_male         7.76             5.36
-#>  8        8        4 male   female_x_male         5.59             5.25
-#>  9        9        5 female female_x_male         7.28             5.78
-#> 10       10        5 male   female_x_male         5.42             4.98
+#> # A tibble: 720 × 11
+#>    personID coupleID gender closeness provided_support .composition       
+#>       <int>    <int> <fct>      <dbl>            <dbl> <fct>              
+#>  1        1        1 female      4.71             4.49 pooled_exchangeable
+#>  2        2        1 male        4.61             4.76 pooled_exchangeable
+#>  3        3        2 female      6.69             4.09 pooled_exchangeable
+#>  4        4        2 male        5.98             6.20 pooled_exchangeable
+#>  5        5        3 female      5.27             4.22 pooled_exchangeable
+#>  6        6        3 male        4.37             5.03 pooled_exchangeable
+#>  7        7        4 female      7.85             5.36 pooled_exchangeable
+#>  8        8        4 male        5.42             5.25 pooled_exchangeable
+#>  9        9        5 female      7.54             5.78 pooled_exchangeable
+#> 10       10        5 male        5.19             4.98 pooled_exchangeable
 #> # ℹ 710 more rows
-#> # ℹ 6 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_female <dbl>, .dy_is_pooled_exchangeable <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
-#> #   .dy_member_contrast_pooled_exchangeable_arbitrary <dbl>
+#> # ℹ 5 more variables: .composition_role <fct>, .is_female_x_female <dbl>,
+#> #   .is_pooled_exchangeable <dbl>,
+#> #   .member_contrast_female_x_female_arbitrary <dbl>,
+#> #   .member_contrast_pooled_exchangeable_arbitrary <dbl>
 ```
 
 ------------------------------------------------------------------------
@@ -910,20 +875,10 @@ Dyads.” *Innovations in Interpersonal Relationships and Health Research:
 Advancing the Integration of Interdisciplinary Approaches to Dyadic
 Behavior Change*. <https://doi.org/10.17605/OSF.IO/WYDCJ>.
 
-Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. “Multilevel
-Autoregressive Models When the Number of Time Points Is Small.”
-*Structural Equation Modeling: A Multidisciplinary Journal* 28 (1):
-15–27. <https://doi.org/10.1080/10705511.2020.1753517>.
-
 Gottfredson, Nisha C. 2019. “A Straightforward Approach for Coping with
 Unreliability of Person Means When Parsing Within-Person and
 Between-Person Effects in Longitudinal Studies.” *Addictive Behaviors*
 94: 156–61. <https://doi.org/10.1016/j.addbeh.2018.09.031>.
-
-Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. “To Center or Not
-to Center? Investigating Inertia with a Multilevel Autoregressive
-Model.” *Frontiers in Psychology* 5: 1492.
-<https://doi.org/10.3389/fpsyg.2014.01492>.
 
 Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018. “Models of
 Interdependent Individuals Versus Dyadic Processes in Relationship
@@ -939,9 +894,6 @@ Ledermann, Thomas, and David A. Kenny. 2017. “Analyzing Dyadic Data with
 Multilevel Modeling Versus Structural Equation Modeling: A Tale of Two
 Methods.” *Journal of Family Psychology* 31 (4): 442–52.
 <https://doi.org/10.1037/fam0000290>.
-
-Nickell, Stephen. 1981. “Biases in Dynamic Models with Fixed Effects.”
-*Econometrica* 49 (6): 1417–26. <https://doi.org/10.2307/1911408>.
 
 Rosario, Kareena S. del, and Tessa V. West. 2025. “A Practical Guide to
 Specifying Random Effects in Longitudinal Dyadic Multilevel Modeling.”

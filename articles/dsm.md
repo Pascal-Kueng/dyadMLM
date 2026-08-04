@@ -31,6 +31,12 @@ be substantively meaningful when the directional coefficients are
 interpreted. Here, `c("female", "male")` defines every difference as
 female minus male.
 
+Here $`X_{\mathrm{female}}`$ and $`X_{\mathrm{male}}`$ denote provided
+support centered with the pooled mean from complete predictor pairs.
+[`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+creates the corresponding DSM dyad-mean column; using the original zero
+requires shifting it manually.
+
 ``` r
 
 cross_dsm_data <- dyadMLM::prepare_dyad_data(
@@ -57,45 +63,45 @@ print(cross_dsm_data, n = 4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition              inferred dyad composition
-#> #   .dy_composition_role         composition-specific member role
-#> #   .dy_is_{comp-role}           composition-role indicator columns
-#> #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared
-#> #                                role and -0.5 for the second declared role
-#> #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
-#> #                                level, grand-mean centered
-#> #   .dy_{pred}_within_dyad_diff  DSM signed predictor difference: first
-#> #                                declared role minus second declared role
+#> #   .composition              inferred dyad composition
+#> #   .composition_role         composition-specific member role
+#> #   .is_{role}                composition-role indicator columns
+#> #   .dsm_role_contrast        DSM role contrast: +0.5 for the first declared
+#> #                             role and -0.5 for the second declared role
+#> #   .{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor
+#> #                             level, grand-mean centered
+#> #   .{pred}_within_dyad_diff  DSM signed predictor difference: first declared
+#> #                             role minus second declared role
 #> #
-#> # A tibble: 240 × 13
-#>   personID coupleID gender dyad_composition closeness provided_support
-#>      <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1 female female_x_male         4.77             4.49
-#> 2        2        1 male   female_x_male         4.46             4.76
-#> 3        3        2 female female_x_male         6.44             4.09
-#> 4        4        2 male   female_x_male         5.99             6.20
+#> # A tibble: 240 × 12
+#>   personID coupleID gender closeness provided_support .composition 
+#>      <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#> 1        1        1 female      4.71             4.49 female_x_male
+#> 2        2        1 male        4.61             4.76 female_x_male
+#> 3        3        2 female      6.69             4.09 female_x_male
+#> 4        4        2 male        5.98             6.20 female_x_male
 #> # ℹ 236 more rows
-#> # ℹ 7 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_dsm_role_contrast <dbl>, .dy_provided_support_dyad_mean_gmc <dbl>,
-#> #   .dy_provided_support_within_dyad_diff <dbl>
+#> # ℹ 6 more variables: .composition_role <fct>, .is_female <dbl>,
+#> #   .is_male <dbl>, .dsm_role_contrast <dbl>,
+#> #   .provided_support_dyad_mean_gmc <dbl>,
+#> #   .provided_support_within_dyad_diff <dbl>
 ```
 
-For predictor values $`X_{\mathrm{female}}`$ and $`X_{\mathrm{male}}`$,
-`dyadMLM` then creates:
+With this notation, `dyadMLM` creates the equivalent coordinates:
 
-- `.dy_provided_support_dyad_mean_gmc` $`=
-  \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X`$ (with
-  $`\mu_X`$ representing the sample grand mean of the dyad-level
-  predictor means)
+- `.provided_support_dyad_mean_gmc` $`=
+  \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2}`$
 
-- `.dy_provided_support_within_dyad_diff`
+- `.provided_support_within_dyad_diff`
   $`= X_{\mathrm{female}} - X_{\mathrm{male}}`$
 
-- `.dy_dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
+- `.dsm_role_contrast` $`= +0.5`$ for female and $`-0.5`$ for male.
 
-The dyad mean and signed difference are repeated on both member rows.
-The outcome remains unchanged and no transformation is needed.
+The common centering shift cancels from the signed difference. Both
+predictor scores are repeated on the member rows; the outcome remains
+unchanged. APIM GMC uses all retained non-missing values, whereas DSM
+uses complete pairs, so their constants may differ with one-sided
+missingness.
 
 ## Cross-Sectional Gaussian DSM
 
@@ -143,22 +149,22 @@ dsm_model <- glmmTMB::glmmTMB(
     1 +
 
     # Predictor level -> outcome level (a11)
-    .dy_provided_support_dyad_mean_gmc +
+    .provided_support_dyad_mean_gmc +
 
     # Predictor difference -> outcome level (a12)
-    .dy_provided_support_within_dyad_diff +
+    .provided_support_within_dyad_diff +
 
     # Outcome-difference intercept (a20)
-    .dy_dsm_role_contrast +
+    .dsm_role_contrast +
 
     # Predictor level -> outcome difference (a21)
-    .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
+    .provided_support_dyad_mean_gmc:.dsm_role_contrast +
 
     # Predictor difference -> outcome difference (a22)
-    .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
+    .provided_support_within_dyad_diff:.dsm_role_contrast +
 
     # Outcome-level and outcome-difference residual variances and their covariance
-    us(1 + .dy_dsm_role_contrast | coupleID),
+    us(1 + .dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data
@@ -167,46 +173,39 @@ dsm_model <- glmmTMB::glmmTMB(
 summary(dsm_model)
 #>  Family: gaussian  ( identity )
 #> Formula:          
-#> closeness ~ 1 + .dy_provided_support_dyad_mean_gmc + .dy_provided_support_within_dyad_diff +  
-#>     .dy_dsm_role_contrast + .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +  
-#>     .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +  
-#>     us(1 + .dy_dsm_role_contrast | coupleID)
+#> closeness ~ 1 + .provided_support_dyad_mean_gmc + .provided_support_within_dyad_diff +  
+#>     .dsm_role_contrast + .provided_support_dyad_mean_gmc:.dsm_role_contrast +  
+#>     .provided_support_within_dyad_diff:.dsm_role_contrast + us(1 +  
+#>     .dsm_role_contrast | coupleID)
 #> Dispersion:                 ~0
 #> Data: cross_dsm_data
 #> 
 #>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>     615.1     646.5    -298.6     597.1       231 
+#>     652.2     683.5    -317.1     634.2       231 
 #> 
 #> Random effects:
 #> 
 #> Conditional model:
-#>  Groups   Name                  Variance Std.Dev. Corr 
-#>  coupleID (Intercept)           0.5085   0.7131        
-#>           .dy_dsm_role_contrast 0.9773   0.9886   0.02 
+#>  Groups   Name               Variance Std.Dev. Corr 
+#>  coupleID (Intercept)        0.5611   0.749         
+#>           .dsm_role_contrast 1.2075   1.099    0.03 
 #> Number of obs: 240, groups:  coupleID, 120
 #> 
 #> Conditional model:
-#>                                                             Estimate Std. Error
-#> (Intercept)                                                  5.07753    0.06691
-#> .dy_provided_support_dyad_mean_gmc                           1.46596    0.09224
-#> .dy_provided_support_within_dyad_diff                        0.10107    0.07577
-#> .dy_dsm_role_contrast                                        1.01425    0.09277
-#> .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast     0.71929    0.12788
-#> .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast  0.92366    0.10505
-#>                                                             z value Pr(>|z|)
-#> (Intercept)                                                   75.88  < 2e-16
-#> .dy_provided_support_dyad_mean_gmc                            15.89  < 2e-16
-#> .dy_provided_support_within_dyad_diff                          1.33    0.182
-#> .dy_dsm_role_contrast                                         10.93  < 2e-16
-#> .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast       5.62 1.86e-08
-#> .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast    8.79  < 2e-16
-#>                                                                
-#> (Intercept)                                                 ***
-#> .dy_provided_support_dyad_mean_gmc                          ***
-#> .dy_provided_support_within_dyad_diff                          
-#> .dy_dsm_role_contrast                                       ***
-#> .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast    ***
-#> .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast ***
+#>                                                       Estimate Std. Error
+#> (Intercept)                                            5.09730    0.07029
+#> .provided_support_dyad_mean_gmc                        1.47483    0.09689
+#> .provided_support_within_dyad_diff                     0.10699    0.07959
+#> .dsm_role_contrast                                     1.02640    0.10311
+#> .provided_support_dyad_mean_gmc:.dsm_role_contrast     0.68230    0.14214
+#> .provided_support_within_dyad_diff:.dsm_role_contrast  0.90313    0.11677
+#>                                                       z value Pr(>|z|)    
+#> (Intercept)                                             72.52  < 2e-16 ***
+#> .provided_support_dyad_mean_gmc                         15.22  < 2e-16 ***
+#> .provided_support_within_dyad_diff                       1.34    0.179    
+#> .dsm_role_contrast                                       9.95  < 2e-16 ***
+#> .provided_support_dyad_mean_gmc:.dsm_role_contrast       4.80 1.59e-06 ***
+#> .provided_support_within_dyad_diff:.dsm_role_contrast    7.73 1.04e-14 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -221,13 +220,14 @@ decomposed in the same way:
 
 ``` math
 X_{\mathrm{mean}}
-= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2} - \mu_X,
+= \frac{X_{\mathrm{female}} + X_{\mathrm{male}}}{2},
 \qquad
-X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}},
+X_{\mathrm{diff}} = X_{\mathrm{female}} - X_{\mathrm{male}}.
 ```
 
-where $`\mu_X`$ is the sample grand mean of the dyad-level predictor
-means.
+Here the two member predictors already share the pooled grand-mean
+reference, so $`X_{\mathrm{mean}}`$ is grand-mean centered and the
+common shift cancels from $`X_{\mathrm{diff}}`$.
 
 The **outcomes** are also decomposed:
 
@@ -256,9 +256,9 @@ Consider the conceptual SEM formulas:
 
 The fitted paths for this example are:
 
-![Fitted DSM. Intercepts a10 5.08 and a20 1.01; paths a11 1.47, a12
-0.10, a21 0.72, and a22 0.92; residual SDs 0.71 and 0.99, with
-correlation 0.02.](dsm_files/figure-html/fitted-dsm-diagram-1.svg)
+![Fitted DSM. Intercepts a10 5.10 and a20 1.03; paths a11 1.47, a12
+0.11, a21 0.68, and a22 0.90; residual SDs 0.75 and 1.10, with
+correlation 0.03.](dsm_files/figure-html/fitted-dsm-diagram-1.svg)
 
 Fitted cross-sectional DSM for the example data. The nodes identify the
 mean and difference scores; edge and intercept labels show the estimated
@@ -340,6 +340,7 @@ cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
   predictors = provided_support,
   # Request APIM columns too for comparison below.
   model_types = c("dsm", "apim"),
+  add_apim_gmc_predictors = TRUE,
   keep_compositions = "female-male",
   dsm_role_order = c("male", "female")
 )
@@ -349,12 +350,12 @@ cross_dsm_data_inverted <- dyadMLM::prepare_dyad_data(
 
 dsm_model_inverted <- glmmTMB::glmmTMB(
   closeness ~
-    .dy_provided_support_dyad_mean_gmc +
-    .dy_provided_support_within_dyad_diff +
-    .dy_dsm_role_contrast +
-    .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast +
-    .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast +
-    us(1 + .dy_dsm_role_contrast | coupleID),
+    .provided_support_dyad_mean_gmc +
+    .provided_support_within_dyad_diff +
+    .dsm_role_contrast +
+    .provided_support_dyad_mean_gmc:.dsm_role_contrast +
+    .provided_support_within_dyad_diff:.dsm_role_contrast +
+    us(1 + .dsm_role_contrast | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
   data = cross_dsm_data_inverted
@@ -377,31 +378,31 @@ knitr::kable(
 
 | model term | female - male | male - female |
 |:---|---:|---:|
-| (Intercept) | 5.078 | 5.078 |
-| .dy_provided_support_dyad_mean_gmc | 1.466 | 1.466 |
-| .dy_provided_support_within_dyad_diff | 0.101 | -0.101 |
-| .dy_dsm_role_contrast | 1.014 | -1.014 |
-| .dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast | 0.719 | -0.719 |
-| .dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast | 0.924 | 0.924 |
+| (Intercept) | 5.097 | 5.097 |
+| .provided_support_dyad_mean_gmc | 1.475 | 1.475 |
+| .provided_support_within_dyad_diff | 0.107 | -0.107 |
+| .dsm_role_contrast | 1.026 | -1.026 |
+| .provided_support_dyad_mean_gmc:.dsm_role_contrast | 0.682 | -0.682 |
+| .provided_support_within_dyad_diff:.dsm_role_contrast | 0.903 | 0.903 |
 
 The two models have identical fitted values and model fit:
 
-- `.dy_provided_support_within_dyad_diff` reverses because the predictor
+- `.provided_support_within_dyad_diff` reverses because the predictor
   difference reverses.
 
-- `.dy_dsm_role_contrast` reverses because the represented outcome
+- `.dsm_role_contrast` reverses because the represented outcome
   difference reverses.
 
-- `.dy_provided_support_dyad_mean_gmc:.dy_dsm_role_contrast` reverses
-  because only the outcome difference reverses.
+- `.provided_support_dyad_mean_gmc:.dsm_role_contrast` reverses because
+  only the outcome difference reverses.
 
-- `.dy_provided_support_within_dyad_diff:.dy_dsm_role_contrast` remains
+- `.provided_support_within_dyad_diff:.dsm_role_contrast` remains
   unchanged because both differences reverse.
 
-The intercept and `.dy_provided_support_dyad_mean_gmc` also remain
+The intercept and `.provided_support_dyad_mean_gmc` also remain
 unchanged. For the random effects, the variances of `(Intercept)` and
-`.dy_dsm_role_contrast` remain unchanged, whereas their covariance
-reverses sign.
+`.dsm_role_contrast` remain unchanged, whereas their covariance reverses
+sign.
 
 ## Relationship to the APIM and DIM
 
@@ -417,21 +418,21 @@ apim_model <- glmmTMB::glmmTMB(
   closeness ~
     # Role-specific intercepts
     0 +
-    .dy_is_female_x_male_female +
-    .dy_is_female_x_male_male +
+    .is_female +
+    .is_male +
 
     # Role-specific actor effects
-    .dy_is_female_x_male_female:.dy_provided_support_actor +
-    .dy_is_female_x_male_male:.dy_provided_support_actor +
+    .is_female:.provided_support_gmc_actor +
+    .is_male:.provided_support_gmc_actor +
 
     # Role-specific partner effects
-    .dy_is_female_x_male_female:.dy_provided_support_partner +
-    .dy_is_female_x_male_male:.dy_provided_support_partner +
+    .is_female:.provided_support_gmc_partner +
+    .is_male:.provided_support_gmc_partner +
 
     # Role-specific Gaussian residual covariance structure
     us(0 +
-         .dy_is_female_x_male_female +
-         .dy_is_female_x_male_male
+         .is_female +
+         .is_male
        | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
@@ -453,10 +454,10 @@ data.frame(
     as.numeric(logLik(apim_model))
   ), 3)
 )
-#>                model     AIC    BIC   logLik
-#> 1 DSM: female - male 615.134 646.46 -298.567
-#> 2 DSM: male - female 615.134 646.46 -298.567
-#> 3               APIM 615.134 646.46 -298.567
+#>                model     AIC     BIC  logLik
+#> 1 DSM: female - male 652.219 683.545 -317.11
+#> 2 DSM: male - female 652.219 683.545 -317.11
+#> 3               APIM 652.219 683.545 -317.11
 ```
 
 ### Fixed-effect transformation
@@ -506,19 +507,17 @@ a_{22}
 \end{aligned}
 ```
 
-The APIM predictors retain their original scale, whereas the DSM
-predictor level is grand-mean centered. Keeping the raw APIM predictors
-on their original scale preserves their reference values; the centering
-difference is handled explicitly in the intercept transformation. If
-$`\mu_X`$ is the grand mean subtracted from the DSM predictor level, the
+With complete pairs, the GMC APIM and DSM share a zero point, so the
 intercepts transform as
 
 ``` math
-a_{10}
-= \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2} + \mu_X a_{11},
+a_{10} = \frac{b_{0,\mathrm{female}} + b_{0,\mathrm{male}}}{2},
 \qquad
-a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}} + \mu_X a_{21}.
+a_{20} = b_{0,\mathrm{female}} - b_{0,\mathrm{male}}.
 ```
+
+Raw APIM predictors leave the slope transformations unchanged but
+require intercept recentering.
 
 For the reverse slope transformation, first recover the role-specific
 actor-plus-partner and actor-minus-partner combinations:
@@ -551,13 +550,11 @@ b_{\mathrm{partner},r}
 The intercepts transform back as
 
 ``` math
-b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2}
-- \mu_X\left(a_{11} + \frac{a_{21}}{2}\right),
+b_{0,\mathrm{female}} = a_{10} + \frac{a_{20}}{2},
 ```
 
 ``` math
-b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}
-- \mu_X\left(a_{11} - \frac{a_{21}}{2}\right).
+b_{0,\mathrm{male}} = a_{10} - \frac{a_{20}}{2}.
 ```
 
 The following comparison applies the APIM-to-DSM transformation to all
@@ -565,15 +562,15 @@ six fixed effects:
 
 | DSM path | From APIM transformation | From DSM model |
 |:---------|-------------------------:|---------------:|
-| a10      |                    5.078 |          5.078 |
-| a11      |                    1.466 |          1.466 |
-| a12      |                    0.101 |          0.101 |
-| a20      |                    1.014 |          1.014 |
-| a21      |                    0.719 |          0.719 |
-| a22      |                    0.924 |          0.924 |
+| a10      |                    5.097 |          5.097 |
+| a11      |                    1.475 |          1.475 |
+| a12      |                    0.107 |          0.107 |
+| a20      |                    1.026 |          1.026 |
+| a21      |                    0.682 |          0.682 |
+| a22      |                    0.903 |          0.903 |
 
-APIM-to-DSM fixed-effect transformation (centering constant = 4.909).
-{.table}
+APIM-to-DSM fixed-effect transformation with pooled grand-mean-centered
+actor and partner predictors. {.table}
 
 ### Random-effect transformation
 
@@ -622,9 +619,9 @@ data.frame(
   ), 3)
 )
 #>                         parameter from_DSM from_APIM_transformation
-#> 1               Var(outcome mean)    0.508                    0.508
-#> 2 Cov(outcome mean, outcome diff)    0.013                    0.013
-#> 3               Var(outcome diff)    0.977                    0.977
+#> 1               Var(outcome mean)    0.561                    0.561
+#> 2 Cov(outcome mean, outcome diff)    0.029                    0.029
+#> 3               Var(outcome diff)    1.208                    1.208
 ```
 
 For exchangeable dyads, the direction of a member difference is
@@ -680,51 +677,52 @@ print(ild_dsm_data, n = 4)
 #> # female_x_male distinguishable 120 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                  inferred dyad composition
-#> #   .dy_composition_role             composition-specific member role
-#> #   .dy_is_{comp-role}               composition-role indicator columns
-#> #   .dy_{pred}_cwp                   within-person predictor: momentary
-#> #                                    deviations from each person's usual level
-#> #   .dy_{pred}_cbp                   between-person predictor: stable
-#> #                                    differences from the average person's
-#> #                                    usual level
-#> #   .dy_dsm_role_contrast            DSM role contrast: +0.5 for the first
-#> #                                    declared role and -0.5 for the second
-#> #                                    declared role
-#> #   .dy_{pred}_dyad_mean_gmc         dyad-mean predictor: dyad's average
-#> #                                    predictor level, grand-mean centered
-#> #   .dy_{pred}_within_dyad_diff      DSM signed predictor difference: first
-#> #                                    declared role minus second declared role
-#> #   .dy_{pred}_cwp_dyad_mean         within-person dyad-mean predictor: shared
-#> #                                    momentary deviations in the dyad
-#> #   .dy_{pred}_cwp_within_dyad_diff  DSM within-person signed predictor
-#> #                                    difference: first declared role minus
-#> #                                    second declared role
-#> #   .dy_{pred}_cbp_dyad_mean         between-person dyad-mean predictor: dyad's
-#> #                                    stable usual level, grand-mean centered
-#> #   .dy_{pred}_cbp_within_dyad_diff  DSM between-person signed predictor
-#> #                                    difference: first declared role minus
-#> #                                    second declared role
+#> #   .composition                  inferred dyad composition
+#> #   .composition_role             composition-specific member role
+#> #   .is_{role}                    composition-role indicator columns
+#> #   .{pred}_cwp                   within-person predictor: momentary deviations
+#> #                                 from each person's usual level
+#> #   .{pred}_cbp                   between-person predictor: stable differences
+#> #                                 from the average person's usual level
+#> #   .dsm_role_contrast            DSM role contrast: +0.5 for the first
+#> #                                 declared role and -0.5 for the second
+#> #                                 declared role
+#> #   .{pred}_dyad_mean_gmc         dyad-mean predictor: dyad's average predictor
+#> #                                 level, grand-mean centered
+#> #   .{pred}_within_dyad_diff      DSM signed predictor difference: first
+#> #                                 declared role minus second declared role
+#> #   .{pred}_cwp_dyad_mean         within-person dyad-mean predictor: shared
+#> #                                 momentary deviations in the dyad
+#> #   .{pred}_cwp_within_dyad_diff  DSM within-person signed predictor
+#> #                                 difference: first declared role minus second
+#> #                                 declared role
+#> #   .{pred}_cbp_dyad_mean         between-person dyad-mean predictor: dyad's
+#> #                                 stable usual level, grand-mean centered
+#> #   .{pred}_cbp_within_dyad_diff  DSM between-person signed predictor
+#> #                                 difference: first declared role minus second
+#> #                                 declared role
 #> #
-#> # A tibble: 3,360 × 20
-#>   personID coupleID diaryday gender dyad_composition closeness provided_support
-#>      <int>    <int>    <int> <fct>  <fct>                <dbl>            <dbl>
-#> 1        1        1        0 female female_x_male         4.40             4.93
-#> 2        2        1        0 male   female_x_male         5.14             5.59
-#> 3        1        1        1 female female_x_male         5.16             4.89
-#> 4        2        1        1 male   female_x_male         5.70             5.18
+#> # A tibble: 3,360 × 19
+#>   personID coupleID diaryday gender closeness provided_support .composition 
+#>      <int>    <int>    <int> <fct>      <dbl>            <dbl> <fct>        
+#> 1        1        1        0 female      3.74             4.93 female_x_male
+#> 2        2        1        0 male        5.91             5.59 female_x_male
+#> 3        1        1        1 female      3.72             4.89 female_x_male
+#> 4        2        1        1 male        6.32             5.18 female_x_male
 #> # ℹ 3,356 more rows
-#> # ℹ 13 more variables: .dy_composition <fct>, .dy_composition_role <fct>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_provided_support_cwp <dbl>, .dy_provided_support_cbp <dbl>,
-#> #   .dy_dsm_role_contrast <dbl>, .dy_provided_support_dyad_mean_gmc <dbl>,
-#> #   .dy_provided_support_cwp_dyad_mean <dbl>,
-#> #   .dy_provided_support_cbp_dyad_mean <dbl>, …
+#> # ℹ 12 more variables: .composition_role <fct>, .is_female <dbl>,
+#> #   .is_male <dbl>, .provided_support_cwp <dbl>, .provided_support_cbp <dbl>,
+#> #   .dsm_role_contrast <dbl>, .provided_support_dyad_mean_gmc <dbl>,
+#> #   .provided_support_cwp_dyad_mean <dbl>,
+#> #   .provided_support_cbp_dyad_mean <dbl>,
+#> #   .provided_support_within_dyad_diff <dbl>, …
 ```
 
-The example below estimates same-day associations between support and
-closeness and includes `diaryday` to allow separate linear trends for
-the outcome level and the female-minus-male outcome difference.
+The specification below estimates same-day associations between support
+and closeness and allows separate linear trends for the outcome level
+and the female-minus-male outcome difference. It also includes the
+role-specific AR(1) components specified and interpreted in the APIM
+vignette.
 
 ``` r
 
@@ -737,123 +735,65 @@ dsm_ILD <- glmmTMB::glmmTMB(
     diaryday +
 
     # Within-person predictor level -> outcome level
-    .dy_provided_support_cwp_dyad_mean +
+    .provided_support_cwp_dyad_mean +
 
     # Within-person predictor difference -> outcome level
-    .dy_provided_support_cwp_within_dyad_diff +
+    .provided_support_cwp_within_dyad_diff +
 
     # Between-person predictor level -> outcome level
-    .dy_provided_support_cbp_dyad_mean +
+    .provided_support_cbp_dyad_mean +
 
     # Between-person predictor difference -> outcome level
-    .dy_provided_support_cbp_within_dyad_diff +
+    .provided_support_cbp_within_dyad_diff +
 
     # Outcome-difference intercept and linear time trend
-    .dy_dsm_role_contrast +
-    diaryday:.dy_dsm_role_contrast +
+    .dsm_role_contrast +
+    diaryday:.dsm_role_contrast +
 
     # Within-person predictor level and difference -> outcome difference
-    .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast +
-    .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast +
+    .provided_support_cwp_dyad_mean:.dsm_role_contrast +
+    .provided_support_cwp_within_dyad_diff:.dsm_role_contrast +
 
     # Between-person predictor level and difference -> outcome difference
-    .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast +
-    .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast +
+    .provided_support_cbp_dyad_mean:.dsm_role_contrast +
+    .provided_support_cbp_within_dyad_diff:.dsm_role_contrast +
 
     # Stable outcome-level and outcome-difference covariance
-    us(1 + .dy_dsm_role_contrast | coupleID) +
+    us(1 + .dsm_role_contrast | coupleID) +
 
     # Same-day outcome-level and outcome-difference covariance
-    us(1 + .dy_dsm_role_contrast | coupleID:diaryday),
+    us(1 + .dsm_role_contrast | coupleID:diaryday) +
+
+    # Role-specific residual persistence
+    ar1(0 + .is_female:factor(diaryday) | coupleID) +
+    ar1(0 + .is_male:factor(diaryday) | coupleID),
   dispformula = ~ 0,
   family = gaussian(),
-  data = ild_dsm_data
+  data = ild_dsm_data,
+  # Non-default settings help this example converge.
+  control = glmmTMB::glmmTMBControl(
+    profile = TRUE,
+    optimizer = stats::optim,
+    optArgs = list(method = "BFGS")
+  )
 )
 
-summary(dsm_ILD)
-#>  Family: gaussian  ( identity )
-#> Formula:          
-#> closeness ~ 1 + diaryday + .dy_provided_support_cwp_dyad_mean +  
-#>     .dy_provided_support_cwp_within_dyad_diff + .dy_provided_support_cbp_dyad_mean +  
-#>     .dy_provided_support_cbp_within_dyad_diff + .dy_dsm_role_contrast +  
-#>     diaryday:.dy_dsm_role_contrast + .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast +  
-#>     .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast +  
-#>     .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast +  
-#>     .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast +  
-#>     us(1 + .dy_dsm_role_contrast | coupleID) + us(1 + .dy_dsm_role_contrast |  
-#>     coupleID:diaryday)
-#> Dispersion:                 ~0
-#> Data: ild_dsm_data
-#> 
-#>       AIC       BIC    logLik -2*log(L)  df.resid 
-#>    8375.0    8485.1   -4169.5    8339.0      3342 
-#> 
-#> Random effects:
+glmmTMB::VarCorr(dsm_ILD)
 #> 
 #> Conditional model:
-#>  Groups            Name                  Variance Std.Dev. Corr 
-#>  coupleID          (Intercept)           0.4812   0.6937        
-#>                    .dy_dsm_role_contrast 0.9162   0.9572   0.02 
-#>  coupleID:diaryday (Intercept)           0.3819   0.6180        
-#>                    .dy_dsm_role_contrast 0.8551   0.9247   0.01 
-#> Number of obs: 3360, groups:  coupleID, 120; coupleID:diaryday, 1680
-#> 
-#> Conditional model:
-#>                                                                  Estimate
-#> (Intercept)                                                      5.111583
-#> diaryday                                                        -0.005238
-#> .dy_provided_support_cwp_dyad_mean                               0.472112
-#> .dy_provided_support_cwp_within_dyad_diff                        0.011992
-#> .dy_provided_support_cbp_dyad_mean                               1.465964
-#> .dy_provided_support_cbp_within_dyad_diff                        0.101067
-#> .dy_dsm_role_contrast                                            0.864415
-#> diaryday:.dy_dsm_role_contrast                                   0.023050
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast         0.212178
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast  0.196322
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast         0.719301
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  0.923664
-#>                                                                 Std. Error
-#> (Intercept)                                                       0.071202
-#> diaryday                                                          0.003745
-#> .dy_provided_support_cwp_dyad_mean                                0.027865
-#> .dy_provided_support_cwp_within_dyad_diff                         0.017685
-#> .dy_provided_support_cbp_dyad_mean                                0.092236
-#> .dy_provided_support_cbp_within_dyad_diff                         0.075770
-#> .dy_dsm_role_contrast                                             0.099661
-#> diaryday:.dy_dsm_role_contrast                                    0.005604
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast          0.041695
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast   0.026461
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast          0.127875
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast   0.105047
-#>                                                                 z value
-#> (Intercept)                                                       71.79
-#> diaryday                                                          -1.40
-#> .dy_provided_support_cwp_dyad_mean                                16.94
-#> .dy_provided_support_cwp_within_dyad_diff                          0.68
-#> .dy_provided_support_cbp_dyad_mean                                15.89
-#> .dy_provided_support_cbp_within_dyad_diff                          1.33
-#> .dy_dsm_role_contrast                                              8.67
-#> diaryday:.dy_dsm_role_contrast                                     4.11
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast           5.09
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast    7.42
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast           5.63
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast    8.79
-#>                                                                 Pr(>|z|)    
-#> (Intercept)                                                      < 2e-16 ***
-#> diaryday                                                           0.162    
-#> .dy_provided_support_cwp_dyad_mean                               < 2e-16 ***
-#> .dy_provided_support_cwp_within_dyad_diff                          0.498    
-#> .dy_provided_support_cbp_dyad_mean                               < 2e-16 ***
-#> .dy_provided_support_cbp_within_dyad_diff                          0.182    
-#> .dy_dsm_role_contrast                                            < 2e-16 ***
-#> diaryday:.dy_dsm_role_contrast                                  3.90e-05 ***
-#> .dy_provided_support_cwp_dyad_mean:.dy_dsm_role_contrast        3.60e-07 ***
-#> .dy_provided_support_cwp_within_dyad_diff:.dy_dsm_role_contrast 1.18e-13 ***
-#> .dy_provided_support_cbp_dyad_mean:.dy_dsm_role_contrast        1.85e-08 ***
-#> .dy_provided_support_cbp_within_dyad_diff:.dy_dsm_role_contrast  < 2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#>  Groups            Name                         Std.Dev. Corr        
+#>  coupleID          (Intercept)                  0.70187              
+#>                    .dsm_role_contrast           0.99250  0.072       
+#>  coupleID.diaryday (Intercept)                  0.65167              
+#>                    .dsm_role_contrast           1.00690  0.022       
+#>  coupleID.1        .is_female:factor(diaryday)0 0.49444  0.592 (ar1) 
+#>  coupleID.2        .is_male:factor(diaryday)0   0.57571  0.658 (ar1)
 ```
+
+This AR-adjusted, fixed-slope DSM omits the actor random slopes present
+in the simulation. See the [distinguishable APIM AR(1)
+section](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#distinguishable-residual-ar1)
+for the corresponding specification and interpretation.
 
 The cross-sectional path interpretation therefore applies separately at
 the within-person and between-person levels. At each level, the

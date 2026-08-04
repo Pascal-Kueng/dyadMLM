@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@
 Küng</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/v0.1.0/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
     </div>
 
@@ -79,30 +79,34 @@ Küng</h4>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the released version of <code>dyadMLM</code> from
-CRAN with:</p>
+<p>You can install the development version with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
-<p>You can install the development version from GitHub with:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"Pascal-Kueng/dyadMLM"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"https://pascal-kueng.r-universe.dev"</span>,</span>
+<span>  <span class="st">"https://cloud.r-project.org"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="about-this-vignette">About this Vignette<a class="anchor" aria-label="anchor" href="#about-this-vignette"></a>
+<h2 id="about-this-vignette">About this vignette<a class="anchor" aria-label="anchor" href="#about-this-vignette"></a>
 </h2>
 <p><code>dyadMLM</code> helps researchers prepare cross-sectional and
-intensive longitudinal dyadic data for (generalized) multilevel models.
-It automatically creates model-ready columns for dyadic multilevel model
-parameterizations such as Actor-Partner Interdependence Models (APIM),
-Dyad-Individual Models (DIM), and Dyadic Score Models (DSM). DIM
-currently supports one exchangeable dyad composition, whereas DSM
-supports one distinguishable dyad composition.</p>
+intensive longitudinal dyadic data for (generalized) multilevel
+models.</p>
 <p><strong>This vignette focuses on automatic data preparation for
 multilevel models (MLMs).</strong> For a comparison of MLM and
 structural equation modeling (SEM) approaches to dyadic data, see <span class="citation">Ledermann and Kenny (2017)</span>.</p>
-<p>The available model-specific vignettes include the <a href="apim.html">Actor-Partner Interdependence Model</a>, <a href="dim.html">Dyad-Individual Model</a>, and <a href="dsm.html">Dyadic
-Score Model</a>.</p>
+<p>The model-fitting examples in the model-specific vignettes use the
+<code>glmmTMB</code> package.</p>
+<p>Post-processing functions in <code>dyadMLM</code>, including model
+comparison and back-transformation of exchangeable random-effect
+covariance structures, are described in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">Actor-Partner
+Interdependence Model vignette</a>.</p>
+<p>Other vignettes cover the <a href="dim.html">Dyad-Individual
+Model</a> and its equivalence and back-transformation to the
+<em>exchangeable APIM</em>, and the <a href="dsm.html">Dyadic Score
+Model</a> with its equivalence and back-transformation to the
+<em>distinguishable APIM</em>.</p>
 <p>The <a href="https://pascal-kueng.github.io/dyadMLM/">online package
 overview</a> provides the current online versions of these vignettes and
 the complete function reference.</p>
@@ -113,10 +117,6 @@ the complete function reference.</p>
 <p>The basic data structure needed for <code>dyadMLM</code> is a long
 data frame where dyads are stacked on top of each other and both members
 of a dyad appear as separate rows.</p>
-<p>If your raw data are currently in wide format (for time or dyads or
-both), reshape them to this long structure first. See the <a href="https://tidyr.tidyverse.org/articles/pivot.html" class="external-link">tidyr pivoting
-vignette</a> or the <a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link"><code>pivot_longer()</code>
-reference</a>.</p>
 <p>Roughly, the expected structure for <code>dyadMLM</code> is:</p>
 <ul>
 <li>For cross-sectional data: one row per
@@ -201,95 +201,43 @@ reference</a>.</p>
 </tr>
 </tbody>
 </table>
-<p>Measured variables may contain missing values. The structural
-<code>dyad</code>, <code>member</code>, and optional <code>time</code>
-variables must not contain missing values.</p>
-<p>In intensive longitudinal data, missing measurement occasions can be
-represented by absent rows, as long as the time variable preserves the
-observed measurement occasions. For example:</p>
-<table class="table">
-<thead><tr class="header">
-<th align="right">dyad</th>
-<th align="right">personID</th>
-<th align="right">time</th>
-<th align="right">x</th>
-<th align="right">y</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">4.2</td>
-<td align="right">7.1</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">3</td>
-<td align="right">4.0</td>
-<td align="right">6.9</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">5.3</td>
-<td align="right">6.6</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">4.7</td>
-<td align="right">6.1</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">3</td>
-<td align="right">5.1</td>
-<td align="right">6.4</td>
-</tr>
-</tbody>
-</table>
-<p>In this example, the row for person 1 at time 2 is absent. The time
-variable preserves the observed measurement occasions and skips from
-time 1 to time 3 for that person. <code>dyadMLM</code> accepts this
-structure without requiring a placeholder row for the missing
-occasion.</p>
+<p>Measured variables may contain missing values, but <code>dyad</code>,
+<code>member</code>, and optional <code>time</code> must be complete;
+missing measurement occasions may instead be represented by absent
+rows.</p>
+<p>If your raw data are currently in wide format (for time or dyads or
+both), reshape them to this long structure first. See the <a href="https://tidyr.tidyverse.org/articles/pivot.html" class="external-link">tidyr pivoting
+vignette</a> or the <a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link"><code>pivot_longer()</code>
+reference</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="data-preparation-for-distinguishable-dyads">Data preparation for distinguishable dyads<a class="anchor" aria-label="anchor" href="#data-preparation-for-distinguishable-dyads"></a>
 </h2>
-<p><code>dyads_cross</code> contains three dyad compositions. Each dyad
-has two rows: one for each member. The closeness and provided-support
-scores are member-level averages across the 14 days in
-<code>dyads_ild</code>.</p>
+<p><code>dyads_cross</code> is a simulated cross-sectional dataset that
+contains three dyad compositions.</p>
 <p>Because these example data contain multiple compositions,
 <code>keep_compositions</code> selects the composition modeled below. It
 can be omitted when the supplied data already contain only the intended
 composition.</p>
-<pre><code><span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt; 1        1        1 female    female_x_male  4.767889         4.494570</span></span>
-<span><span class="co">#&gt; 2        2        1   male    female_x_male  4.463017         4.757241</span></span>
-<span><span class="co">#&gt; 3        3        2 female    female_x_male  6.437603         4.092390</span></span>
-<span><span class="co">#&gt; 4        4        2   male    female_x_male  5.993620         6.199226</span></span>
-<span><span class="co">#&gt; 5        5        3 female    female_x_male  4.756118         4.223651</span></span>
-<span><span class="co">#&gt; 6        6        3   male    female_x_male  4.483926         5.029079</span></span></code></pre>
+<pre><code><span><span class="co">#&gt;   personID coupleID gender closeness provided_support</span></span>
+<span><span class="co">#&gt; 1        1        1 female  4.705258         4.494570</span></span>
+<span><span class="co">#&gt; 2        2        1   male  4.608436         4.757241</span></span>
+<span><span class="co">#&gt; 3        3        2 female  6.690937         4.092390</span></span>
+<span><span class="co">#&gt; 4        4        2   male  5.976549         6.199226</span></span>
+<span><span class="co">#&gt; 5        5        3 female  5.272910         4.223651</span></span>
+<span><span class="co">#&gt; 6        6        3   male  4.366967         5.029079</span></span></code></pre>
 <p>We validate and prepare the data with the function
 <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span></span>
-<span>  <span class="co"># In this example, we optionally specify a predictor variable</span></span>
-<span>  <span class="co"># and a model type to generate the columns needed for that model type.</span></span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
 <span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  add_apim_gmc_predictors <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># Optional grand-mean centering</span></span>
+<span></span>
 <span>  <span class="co"># All three observed compositions in `dyads_cross` are detected and retained by</span></span>
 <span>  <span class="co"># default. This example focuses on `female-male` dyads, so we restrict the</span></span>
 <span>  <span class="co"># analysis here.</span></span>
@@ -305,188 +253,166 @@ composition.</p>
 <span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_actor      APIM actor predictor: actor's original predictor</span></span>
-<span><span class="co">#&gt; #                         values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_partner    APIM partner predictor: partner's original predictor</span></span>
-<span><span class="co">#&gt; #                         values</span></span>
+<span><span class="co">#&gt; #   .composition         inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role    composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{role}           composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .{pred}_actor        APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .{pred}_partner      APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc          APIM grand-mean-centered predictor source: original</span></span>
+<span><span class="co">#&gt; #                        values minus the mean across all retained non-missing</span></span>
+<span><span class="co">#&gt; #                        observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_actor    APIM grand-mean-centered actor predictor: actor's</span></span>
+<span><span class="co">#&gt; #                        value relative to the mean across all retained</span></span>
+<span><span class="co">#&gt; #                        non-missing observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_partner  APIM grand-mean-centered partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                        value relative to the mean across all retained</span></span>
+<span><span class="co">#&gt; #                        non-missing observations</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 12</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 14</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female      4.71             4.49 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male        4.61             4.76 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female      6.69             4.09 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male        5.98             6.20 female_x_male</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_actor &lt;dbl&gt;, .dy_provided_support_partner &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>The function retained and recognized 120 female-male dyads and
-created APIM-relevant variables <span class="citation">(Kenny and Cook
-1999)</span>. These generated <code>.dy_*</code> columns can be used
-directly in model formulas.</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: .composition_role &lt;fct&gt;, .is_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_male &lt;dbl&gt;, .provided_support_gmc &lt;dbl&gt;, .provided_support_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_partner &lt;dbl&gt;, .provided_support_gmc_actor &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_gmc_partner &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The function retained 120 female-male dyads and created raw and
+grand-mean centered APIM variables <span class="citation">(Kenny and
+Cook 1999)</span>.</p>
 <p>For fitted APIM examples using these columns, see the <a href="apim.html">Actor-Partner Interdependence Model vignette</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="data-preparation-for-exchangeable-dyads">Data preparation for exchangeable dyads<a class="anchor" aria-label="anchor" href="#data-preparation-for-exchangeable-dyads"></a>
 </h2>
-<p>To work with one exchangeable dyad composition, use
-<code>keep_compositions</code> to retain it during preparation:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>For this example, we pretend that we have a dataset with no
+distinguishable variable (e.g., same-sex friend dyads). Then, we simply
+omit the <code>role</code> argument:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  keep_compositions <span class="op">=</span> <span class="st">"female-female"</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
+<span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  add_apim_gmc_predictors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 720 | Dyads: 360 | Intensive longitudinal: no</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female exchangeable 120 dyads</span></span>
+<span><span class="co">#&gt; # assumed_exchangeable exchangeable 360 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_exchangeable            composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                               -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                               exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                               Values are 0 for other compositions</span></span>
+<span><span class="co">#&gt; #   .{pred}_actor               APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_partner             APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc                 APIM grand-mean-centered predictor source:</span></span>
+<span><span class="co">#&gt; #                               original values minus the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_actor           APIM grand-mean-centered actor predictor:</span></span>
+<span><span class="co">#&gt; #                               actor's value relative to the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_partner         APIM grand-mean-centered partner predictor:</span></span>
+<span><span class="co">#&gt; #                               partner's value relative to the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 10</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.58             5.41</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.15             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.28             5.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.00             5.57</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>The generated
-<code>.dy_member_contrast_female_x_female_arbitrary</code> contrast
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 14</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition        </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female      4.71             4.49 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male        4.61             4.76 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female      6.69             4.09 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male        5.98             6.20 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 716 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: .composition_role &lt;fct&gt;, .is_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_arbitrary &lt;dbl&gt;, .provided_support_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_actor &lt;dbl&gt;, .provided_support_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_gmc_actor &lt;dbl&gt;, .provided_support_gmc_partner &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The generated <code>.member_contrast_arbitrary</code> contrast
 assigns <code>-1</code> and <code>1</code> to the two members of each
 exchangeable dyad <span class="citation">(del Rosario and West
 2025)</span>. Its direction is arbitrary, and <code>seed</code> makes
 the assignment reproducible.</p>
-<p>Refer to the <a href="apim.html#exchangeable-residual-structure">exchangeable APIM
+<p>Refer to the APIM vignette’s <a href="apim.html#exchangeable-residual-structure">exchangeable APIM
 section</a> for how to use these columns to specify an exchangeable
 dyadic APIM and recover the constrained actor-partner
 variance-covariance structure with <a href="https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.html"><code>dyadMLM::recover_exchangeable_covariance()</code></a>.</p>
-<p>Alternatively, we can explicitly set a dyad composition to
-exchangeable:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
-<span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
-<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
-<span>  set_exchangeable_compositions <span class="op">=</span> <span class="st">"male-female"</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_exchangeable_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_male exchangeable (set by user) 120 dyads</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
-<span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 10</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-<p><em>Note</em> that whenever you need to refer to a dyad type, the
-order of members does not matter (e.g., <code>male-female</code> and
-<code>female-male</code> will both work), and you can use different
-separators like <code>male_female</code>, <code>male_x_female</code>, or
-<code>male female</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="generating-dim-and-dsm-columns">Generating DIM and DSM columns<a class="anchor" aria-label="anchor" href="#generating-dim-and-dsm-columns"></a>
 </h2>
-<p>For exchangeable dyads, we can request DIM predictor columns. DIM
-preparation requires exactly one exchangeable composition, which we
-retain here with <code>keep_compositions</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>For exchangeable dyads, we can request DIM predictor columns.
+<strong>DIM preparation requires exactly one exchangeable
+composition</strong>. This can be achieved by omitting
+<code>role</code>. For more control over compositions, see <a href="#working-with-multiple-dyad-compositions">Working with multiple
+dyad compositions</a>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dim_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
 <span>  model_types <span class="op">=</span> <span class="st">"dim"</span>,</span>
-<span>  keep_compositions <span class="op">=</span> <span class="st">"female-female"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cross_dim_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># dyadMLM data</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span></span>
-<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Rows: 720 | Dyads: 360 | Intensive longitudinal: no</span></span></span>
+<span><span class="co"><span style="color: #949494;">#&gt; # Structure: dyad = coupleID, member = personID</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; #</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span># Dyad compositions:</span></span>
-<span><span class="co">#&gt; # female_x_female exchangeable 120 dyads</span></span>
+<span><span class="co">#&gt; # assumed_exchangeable exchangeable 360 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_dyad_mean_gmc              dyad-mean predictor: dyad's average</span></span>
-<span><span class="co">#&gt; #                                         predictor level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_within_dyad_dev            DIM within-dyad member-deviation</span></span>
-<span><span class="co">#&gt; #                                         predictor: member's difference from</span></span>
-<span><span class="co">#&gt; #                                         the dyad mean</span></span>
+<span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_exchangeable            composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                               -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                               exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                               Values are 0 for other compositions</span></span>
+<span><span class="co">#&gt; #   .{pred}_dyad_mean_gmc       dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                               level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .{pred}_within_dyad_dev     DIM within-dyad member-deviation predictor:</span></span>
+<span><span class="co">#&gt; #                               member's difference from the dyad mean</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 12</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.58             5.41</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.15             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.28             5.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.00             5.57</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Generating DSM columns for distinguishable dyads additionally
-requires an explicit role order. The role order defines the direction of
-all DSM predictor differences and the DSM role contrast <span class="citation">(Iida et al. 2018)</span>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 11</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition        </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>               </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female      4.71             4.49 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male        4.61             4.76 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female      6.69             4.09 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male        5.98             6.20 assumed_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 716 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .composition_role &lt;fct&gt;, .is_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_arbitrary &lt;dbl&gt;, .provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_within_dyad_dev &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>For distinguishable dyads, we can request DSM columns. <strong>DSM
+preparation currently requires exactly one distinguishable
+composition</strong>. To compute these columns, an explicit role order
+is required. The role order defines the direction of all DSM predictor
+differences and the DSM role contrast <span class="citation">(Iida et
+al. 2018)</span>.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -508,47 +434,53 @@ all DSM predictor differences and the DSM role contrast <span class="citation">(
 <span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition              inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role         composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}           composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
-<span><span class="co">#&gt; #                                role and -0.5 for the second declared role</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
-<span><span class="co">#&gt; #                                level, grand-mean centered</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_within_dyad_diff  DSM signed predictor difference: first</span></span>
-<span><span class="co">#&gt; #                                declared role minus second declared role</span></span>
+<span><span class="co">#&gt; #   .composition              inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role         composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{role}                composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .dsm_role_contrast        DSM role contrast: +0.5 for the first declared</span></span>
+<span><span class="co">#&gt; #                             role and -0.5 for the second declared role</span></span>
+<span><span class="co">#&gt; #   .{pred}_dyad_mean_gmc     dyad-mean predictor: dyad's average predictor</span></span>
+<span><span class="co">#&gt; #                             level, grand-mean centered</span></span>
+<span><span class="co">#&gt; #   .{pred}_within_dyad_diff  DSM signed predictor difference: first declared</span></span>
+<span><span class="co">#&gt; #                             role minus second declared role</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 13</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 240 × 12</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female      4.71             4.49 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male        4.61             4.76 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female      6.69             4.09 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male        5.98             6.20 female_x_male</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 236 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_dsm_role_contrast &lt;dbl&gt;, .dy_provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .composition_role &lt;fct&gt;, .is_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_male &lt;dbl&gt;, .dsm_role_contrast &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_dyad_mean_gmc &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_within_dyad_diff &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>APIM GMC uses all retained non-missing values. DIM and DSM center
+complete-pair dyad means. The constants may differ with one-sided
+missingness.</p>
+<p>In DIM and DSM, mean predictors are grand-mean centered by
+convention; thus, no additional argument is required to request
+them.</p>
 </div>
 <div class="section level2">
 <h2 id="intensive-longitudinal-dyadic-data">Intensive longitudinal dyadic data<a class="anchor" aria-label="anchor" href="#intensive-longitudinal-dyadic-data"></a>
 </h2>
-<p><code>dyads_ild</code> is an intensive longitudinal dyadic dataset.
-Each dyad has repeated observations over <code>diaryday</code>, with one
-row per person-day.</p>
-<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   personID coupleID diaryday gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1        0 female female_x_male         4.40             4.93</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1        0 male   female_x_male         5.14             5.59</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        1        1        1 female female_x_male         5.16             4.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        2        1        1 male   female_x_male         5.70             5.18</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>        1        1        2 female female_x_male         3.28             4.38</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        2        1        2 male   female_x_male         2.82             4.99</span></span></code></pre>
+<p><code>dyads_ild</code> is a simulated intensive longitudinal dyadic
+dataset. Each dyad has repeated observations over <code>diaryday</code>,
+with one row per person-day.</p>
+<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;   personID coupleID diaryday gender closeness provided_support</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1        0 female      3.74             4.93</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1        0 male        5.91             5.59</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        1        1        1 female      3.72             4.89</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        2        1        1 male        6.32             5.18</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>        1        1        2 female      2.45             4.38</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        2        1        2 male        3.44             4.99</span></span></code></pre>
 <p>To prepare intensive longitudinal data, pass the <code>time</code>
 variable to <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -570,66 +502,66 @@ variable to <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare
 <span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition         inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role    composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}      composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp          within-person predictor: momentary deviations from</span></span>
-<span><span class="co">#&gt; #                           each person's usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp          between-person predictor: stable differences from</span></span>
-<span><span class="co">#&gt; #                           the average person's usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_actor        APIM actor predictor: actor's original predictor</span></span>
-<span><span class="co">#&gt; #                           values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_partner      APIM partner predictor: partner's original</span></span>
-<span><span class="co">#&gt; #                           predictor values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_actor    APIM within-person actor predictor: actor's</span></span>
-<span><span class="co">#&gt; #                           momentary deviations from their usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_partner  APIM within-person partner predictor: partner's</span></span>
-<span><span class="co">#&gt; #                           momentary deviations from their usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp_actor    APIM between-person actor predictor: actor's stable</span></span>
-<span><span class="co">#&gt; #                           difference from the average person's usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp_partner  APIM between-person partner predictor: partner's</span></span>
-<span><span class="co">#&gt; #                           stable difference from the average person's usual</span></span>
-<span><span class="co">#&gt; #                           level</span></span>
+<span><span class="co">#&gt; #   .composition         inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role    composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{role}           composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp          within-person predictor: momentary deviations from</span></span>
+<span><span class="co">#&gt; #                        each person's usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp          between-person predictor: stable differences from the</span></span>
+<span><span class="co">#&gt; #                        average person's usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_actor        APIM actor predictor: actor's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .{pred}_partner      APIM partner predictor: partner's original predictor</span></span>
+<span><span class="co">#&gt; #                        values</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_actor    APIM within-person actor predictor: actor's momentary</span></span>
+<span><span class="co">#&gt; #                        deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_partner  APIM within-person partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                        momentary deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp_actor    APIM between-person actor predictor: actor's stable</span></span>
+<span><span class="co">#&gt; #                        difference from the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp_partner  APIM between-person partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                        stable difference from the average person's usual</span></span>
+<span><span class="co">#&gt; #                        level</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,360 × 19</span></span></span>
-<span><span class="co">#&gt;   personID coupleID diaryday gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1        0 female female_x_male         4.40             4.93</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1        0 male   female_x_male         5.14             5.59</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        1        1        1 female female_x_male         5.16             4.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        2        1        1 male   female_x_male         5.70             5.18</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>        1        1        2 female female_x_male         3.28             4.38</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        2        1        2 male   female_x_male         2.82             4.99</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,360 × 18</span></span></span>
+<span><span class="co">#&gt;   personID coupleID diaryday gender closeness provided_support .composition </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1        0 female      3.74             4.93 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1        0 male        5.91             5.59 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        1        1        1 female      3.72             4.89 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        2        1        1 male        6.32             5.18 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>        1        1        2 female      2.45             4.38 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        2        1        2 male        3.44             4.99 female_x_male</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,354 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cwp &lt;dbl&gt;, .dy_provided_support_cbp &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_actor &lt;dbl&gt;, .dy_provided_support_partner &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cwp_actor &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_provided_support_cwp_partner &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more variables: .composition_role &lt;fct&gt;, .is_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_male &lt;dbl&gt;, .provided_support_cwp &lt;dbl&gt;, .provided_support_cbp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_actor &lt;dbl&gt;, .provided_support_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_cwp_actor &lt;dbl&gt;, .provided_support_cwp_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .provided_support_cbp_actor &lt;dbl&gt;, .provided_support_cbp_partner &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>By default, numeric predictors in longitudinal APIM preparation are
 decomposed into within-person and between-person components <span class="citation">(Bolger and Laurenceau 2013)</span>. This temporal
 predictor decomposition is controlled by
 <code>temporal_decomposition</code>. The default <code>"auto"</code>
-setting selects <code>"2l"</code> for this longitudinal setup and
-retains raw actor and partner columns alongside both components.</p>
+setting selects <code>"2l"</code> (2-level temporal decomposition).</p>
+<p><code>add_apim_gmc_predictors = TRUE</code> requires resolved
+<code>temporal_decomposition = "none"</code>, since the between-person
+component is always already grand-mean centered by convention.</p>
 <p>Note that observed person means used to construct the between-person
 (<code>cbp</code>) predictors can be unreliable when each member
 contributes few occasions, which can bias between-person estimates <span class="citation">(Gottfredson 2019)</span>.</p>
+<p>For fitted concurrent examples and AR(1) specifications for
+distinguishable and exchangeable dyads, refer to the <a href="apim.html#intensive-longitudinal-apims">intensive longitudinal
+APIM section</a>.</p>
 <div class="section level3">
 <h3 id="preparing-lagged-predictors">Preparing lagged predictors<a class="anchor" aria-label="anchor" href="#preparing-lagged-predictors"></a>
 </h3>
 <p>Lagged versions of variables, including an outcome that is also
-passed to <code>predictors</code>, can be obtained through the
-<code>lag1_predictors</code> argument.
-<code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code> then returns lag-1 raw and
-within-person-centered actor and partner columns alongside their
-contemporaneous versions. Lagging respects the dyad and member
-structure, matches observations at exactly <code>time - 1</code>, and
-does not bridge missing occasions.</p>
-<p>For a simpler dynamic model, this example retains the exchangeable
-female-female composition:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+passed to <code>predictors</code> for dynamic models, can be obtained
+through the <code>lag1_predictors</code> argument.</p>
+<p>Lagging respects the dyad and member structure, matches observations
+at exactly <code>time - 1</code>, and does not bridge missing occasions
+when rows are missing in the dataset.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -652,72 +584,64 @@ female-female composition:</p>
 <span><span class="co">#&gt; # female_x_female exchangeable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_lag1                       lag-1 raw predictor values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp                        within-person predictor: momentary</span></span>
-<span><span class="co">#&gt; #                                         deviations from each person's usual</span></span>
-<span><span class="co">#&gt; #                                         level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_lag1                   lag-1 within-person predictor:</span></span>
-<span><span class="co">#&gt; #                                         momentary deviations from each</span></span>
-<span><span class="co">#&gt; #                                         person's usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp                        between-person predictor: stable</span></span>
-<span><span class="co">#&gt; #                                         differences from the average person's</span></span>
-<span><span class="co">#&gt; #                                         usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_actor                      APIM actor predictor: actor's</span></span>
-<span><span class="co">#&gt; #                                         original predictor values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_actor_lag1                 lag-1 APIM actor predictor: actor's</span></span>
-<span><span class="co">#&gt; #                                         original predictor values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_partner                    APIM partner predictor: partner's</span></span>
-<span><span class="co">#&gt; #                                         original predictor values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_partner_lag1               lag-1 APIM partner predictor:</span></span>
-<span><span class="co">#&gt; #                                         partner's original predictor values</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_actor                  APIM within-person actor predictor:</span></span>
-<span><span class="co">#&gt; #                                         actor's momentary deviations from</span></span>
-<span><span class="co">#&gt; #                                         their usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_actor_lag1             lag-1 APIM within-person actor</span></span>
-<span><span class="co">#&gt; #                                         predictor: actor's momentary</span></span>
-<span><span class="co">#&gt; #                                         deviations from their usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_partner                APIM within-person partner predictor:</span></span>
-<span><span class="co">#&gt; #                                         partner's momentary deviations from</span></span>
-<span><span class="co">#&gt; #                                         their usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cwp_partner_lag1           lag-1 APIM within-person partner</span></span>
-<span><span class="co">#&gt; #                                         predictor: partner's momentary</span></span>
-<span><span class="co">#&gt; #                                         deviations from their usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp_actor                  APIM between-person actor predictor:</span></span>
-<span><span class="co">#&gt; #                                         actor's stable difference from the</span></span>
-<span><span class="co">#&gt; #                                         average person's usual level</span></span>
-<span><span class="co">#&gt; #   .dy_{pred}_cbp_partner                APIM between-person partner</span></span>
-<span><span class="co">#&gt; #                                         predictor: partner's stable</span></span>
-<span><span class="co">#&gt; #                                         difference from the average person's</span></span>
-<span><span class="co">#&gt; #                                         usual level</span></span>
+<span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_exchangeable            composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                               -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                               exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                               Values are 0 for other compositions</span></span>
+<span><span class="co">#&gt; #   .{pred}_lag1                lag-1 raw predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp                 within-person predictor: momentary deviations</span></span>
+<span><span class="co">#&gt; #                               from each person's usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_lag1            lag-1 within-person predictor: momentary</span></span>
+<span><span class="co">#&gt; #                               deviations from each person's usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp                 between-person predictor: stable differences</span></span>
+<span><span class="co">#&gt; #                               from the average person's usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_actor               APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_actor_lag1          lag-1 APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_partner             APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_partner_lag1        lag-1 APIM partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                               original predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_actor           APIM within-person actor predictor: actor's</span></span>
+<span><span class="co">#&gt; #                               momentary deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_actor_lag1      lag-1 APIM within-person actor predictor:</span></span>
+<span><span class="co">#&gt; #                               actor's momentary deviations from their usual</span></span>
+<span><span class="co">#&gt; #                               level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_partner         APIM within-person partner predictor: partner's</span></span>
+<span><span class="co">#&gt; #                               momentary deviations from their usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cwp_partner_lag1    lag-1 APIM within-person partner predictor:</span></span>
+<span><span class="co">#&gt; #                               partner's momentary deviations from their usual</span></span>
+<span><span class="co">#&gt; #                               level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp_actor           APIM between-person actor predictor: actor's</span></span>
+<span><span class="co">#&gt; #                               stable difference from the average person's</span></span>
+<span><span class="co">#&gt; #                               usual level</span></span>
+<span><span class="co">#&gt; #   .{pred}_cbp_partner         APIM between-person partner predictor:</span></span>
+<span><span class="co">#&gt; #                               partner's stable difference from the average</span></span>
+<span><span class="co">#&gt; #                               person's usual level</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,360 × 25</span></span></span>
-<span><span class="co">#&gt;   personID coupleID diaryday gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121        0 female female_x_female       6.59             6.18</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121        0 female female_x_female       5.73             5.70</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      241      121        1 female female_x_female       8.70             4.57</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      242      121        1 female female_x_female       5.61             5.30</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      241      121        2 female female_x_female       7.06             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>      242      121        2 female female_x_female       6.72             3.89</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3,360 × 24</span></span></span>
+<span><span class="co">#&gt;   personID coupleID diaryday gender closeness provided_support .composition   </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121        0 female      6.60             6.18 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121        0 female      5.22             5.70 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      241      121        1 female      8.33             4.57 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      242      121        1 female      5.24             5.30 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      241      121        2 female      6.55             5.19 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>      242      121        2 female      6.85             3.89 female_x_female</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3,354 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 18 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_closeness_cwp &lt;dbl&gt;, .dy_closeness_cbp &lt;dbl&gt;, .dy_closeness_lag1 &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_closeness_cwp_lag1 &lt;dbl&gt;, .dy_closeness_actor &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_closeness_partner &lt;dbl&gt;, .dy_closeness_cwp_actor &lt;dbl&gt;, …</span></span></span></code></pre></div>
-<p><strong>Note:</strong> Whether to use the raw or
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 17 more variables: .composition_role &lt;fct&gt;, .is_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_arbitrary &lt;dbl&gt;, .closeness_cwp &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .closeness_cbp &lt;dbl&gt;, .closeness_lag1 &lt;dbl&gt;, .closeness_cwp_lag1 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .closeness_actor &lt;dbl&gt;, .closeness_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .closeness_cwp_actor &lt;dbl&gt;, .closeness_cwp_partner &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .closeness_cbp_actor &lt;dbl&gt;, .closeness_cbp_partner &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<p><strong>Note:</strong> Whether to use the prepared raw or
 within-person-centered lagged outcome depends on the research question
-and the data. Including a lagged <strong>outcome</strong> in dynamic
-models can introduce bias, especially in shorter time series <span class="citation">(Hamaker and Grasman 2015; Nickell 1981; Gistelinck et
-al. 2021)</span>. See the <a href="apim.html#dynamic-models">dynamic ILD
+and the data. See the <a href="apim.html#dynamic-models">dynamic ILD
 APIM example</a> for a more detailed discussion and guidance.</p>
 </div>
 </div>
@@ -729,7 +653,7 @@ distinguishable female-male dyads and exchangeable female-female and
 male-male dyads <span class="citation">(Bolger et al. 2025)</span>.</p>
 <p>Let’s have <code>dyadMLM</code> infer the compositions
 automatically:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -749,32 +673,31 @@ automatically:</p>
 <span><span class="co">#&gt; # male_x_male     exchangeable    120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .composition                       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role                  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{comp-role}                    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
+<span><span class="co">#&gt; #                                      coded -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                                      exchangeability-constrained random</span></span>
+<span><span class="co">#&gt; #                                      effects. Values are 0 for other</span></span>
+<span><span class="co">#&gt; #                                      compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 14</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 13</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female      4.71             4.49 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male        4.61             4.76 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female      6.69             4.09 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male        5.98             6.20 female_x_male</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 716 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_female_x_male_female &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_male &lt;dbl&gt;, .dy_is_male_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Note that when role compositions are available, each exchangeable
-composition receives its own difference contrast, such as
-<code>.dy_member_contrast_female_x_female_arbitrary</code>, which is
-<code>0</code> for all other compositions <span class="citation">(del
-Rosario and West 2025)</span>.</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .composition_role &lt;fct&gt;, .is_female_x_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_female_x_male_female &lt;dbl&gt;, .is_female_x_male_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_male_x_male &lt;dbl&gt;, .member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Note that when role compositions are available, each
+<em>exchangeable</em> composition receives its own difference contrast,
+such as <code>.member_contrast_female_x_female_arbitrary</code>, which
+is <code>0</code> for all other compositions.</p>
 <p>We can use this data to model these dyad types as separate or in the
 same model.</p>
 <div class="section level3">
@@ -785,9 +708,9 @@ be part of a given analysis. Use <code>keep_compositions</code> to keep
 only dyads whose <em>observed</em> composition matches the requested
 labels. The filtering happens before exchangeability constraints and
 pooling, so <code>set_exchangeable_compositions</code> and
-<code>pool_compositions</code> can only refer to retained dyad
-compositions.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code>pool_compositions</code> (described later) can only refer to
+retained dyad compositions.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_included</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -807,37 +730,42 @@ compositions.</p>
 <span><span class="co">#&gt; # male_x_male     exchangeable 120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .composition                       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role                  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{comp-role}                    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
+<span><span class="co">#&gt; #                                      coded -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                                      exchangeability-constrained random</span></span>
+<span><span class="co">#&gt; #                                      effects. Values are 0 for other</span></span>
+<span><span class="co">#&gt; #                                      compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 480 × 12</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female female_x_female       7.58             5.41</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female female_x_female       6.15             5.19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female female_x_female       8.28             5.89</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female female_x_female       8.00             5.57</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 480 × 11</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition   </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      241      121 female      7.34             5.41 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      242      121 female      6.43             5.19 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      243      122 female      8.18             5.89 female_x_female</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      244      122 female      8.48             5.57 female_x_female</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 476 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_male_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .composition_role &lt;fct&gt;, .is_female_x_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_male_x_male &lt;dbl&gt;, .member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<p><em>Note</em> that whenever you need to refer to a dyad type, the
+order of members does not matter (e.g., <code>male-female</code> and
+<code>female-male</code> will both work), and you can use different
+separators like <code>male_female</code>, <code>male_x_female</code>, or
+<code>male female</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="setting-distinguishable-dyads-to-be-treated-as-exchangeable">Setting distinguishable dyads to be treated as exchangeable<a class="anchor" aria-label="anchor" href="#setting-distinguishable-dyads-to-be-treated-as-exchangeable"></a>
 </h3>
-<p>As mentioned earlier, a distinguishable dyad composition can be
-treated as exchangeable. In a mixed dyad composition dataset, this
-specification keeps the differentiation between the kinds of dyads
-(e.g., <code>male-male</code>, <code>female-female</code>, and
-<code>male-female</code>), as opposed to omitting role, which would pool
-all dyad compositions into one exchangeable composition.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<p><code>set_exchangeable_compositions</code> changes how selected
+role-defined compositions are modeled while preserving their composition
+labels. By contrast, omitting <code>role</code> indicates that no
+distinguishing variable is available, so all dyads are treated as one
+exchangeable composition with a single global arbitrary-member
+contrast.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -858,44 +786,42 @@ all dyad compositions into one exchangeable composition.</p>
 <span><span class="co">#&gt; # male_x_male     exchangeable               120 dyads</span></span>
 <span><span class="co">#&gt; #</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .composition                       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role                  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{comp-role}                    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
+<span><span class="co">#&gt; #                                      coded -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                                      exchangeability-constrained random</span></span>
+<span><span class="co">#&gt; #                                      effects. Values are 0 for other</span></span>
+<span><span class="co">#&gt; #                                      compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 14</span></span></span>
-<span><span class="co">#&gt;   personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 13</span></span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition </span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1        1 female      4.71             4.49 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2        1 male        4.61             4.76 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3        2 female      6.69             4.09 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4        2 male        5.98             6.20 female_x_male</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 716 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_female_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_male_x_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_male_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: .composition_role &lt;fct&gt;, .is_female_x_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_female_x_male &lt;dbl&gt;, .is_male_x_male &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_female_x_male_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_male_x_male_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="pooling-different-dyad-compositions">Pooling different dyad compositions<a class="anchor" aria-label="anchor" href="#pooling-different-dyad-compositions"></a>
 </h3>
-<p>Sometimes for theoretical or practical reasons, we may want to pool
-selected exchangeable dyad compositions and analyze them as if they were
-one. Pooling can impose equality constraints among compositions. After
-fitting nested pooled and unpooled models to the same observations,
-these constraints can be tested with <a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_glmmTMB_models.html"><code>dyadMLM::compare_nested_glmmTMB_models()</code></a>;
-see <a href="apim.html#testing-distinguishability">Testing
-distinguishability in the APIM vignette</a> for the model-comparison
-workflow.</p>
+<p>Sometimes, we may want to pool selected <em>exchangeable</em> dyad
+compositions and analyze them as if they were one. Pooling can impose
+equality constraints among compositions. After fitting nested pooled and
+unpooled models to the same observations, these constraints can be
+tested with <code><a href="../reference/compare_nested_models.html">dyadMLM::compare_nested_models()</a></code>; see <a href="apim.html#testing-distinguishability">testing distinguishability
+in the APIM vignette</a> for the model-comparison workflow.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
 dyads:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -919,35 +845,36 @@ dyads:</p>
 <span><span class="co"><span style="color: #949494;">#&gt; #   male_x_male</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span>#</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .composition                       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role                  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{comp-role}                    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
+<span><span class="co">#&gt; #                                      coded -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                                      exchangeability-constrained random</span></span>
+<span><span class="co">#&gt; #                                      effects. Values are 0 for other</span></span>
+<span><span class="co">#&gt; #                                      compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 12</span></span></span>
-<span><span class="co">#&gt;    personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female female_x_male         4.76             4.22</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male   female_x_male         4.48             5.03</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female female_x_male         7.76             5.36</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male   female_x_male         5.59             5.25</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female female_x_male         7.28             5.78</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male   female_x_male         5.42             4.98</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 11</span></span></span>
+<span><span class="co">#&gt;    personID coupleID gender closeness provided_support .composition </span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female      4.71             4.49 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male        4.61             4.76 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female      6.69             4.09 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male        5.98             6.20 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female      5.27             4.22 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male        4.37             5.03 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female      7.85             5.36 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male        5.42             5.25 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female      7.54             5.78 female_x_male</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male        5.19             4.98 female_x_male</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 710 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_male_female &lt;dbl&gt;, .dy_is_female_x_male_male &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_same_sex &lt;dbl&gt;, .dy_member_contrast_same_sex_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .composition_role &lt;fct&gt;, .is_female_x_male_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_female_x_male_male &lt;dbl&gt;, .is_same_sex &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_same_sex_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Note that you cannot pool distinguishable dyads. If we wanted to pool
 <code>female-male</code> with <code>male-male</code>, we would first
 have to treat <code>female-male</code> as exchangeable:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -972,32 +899,33 @@ have to treat <code>female-male</code> as exchangeable:</p>
 <span><span class="co"><span style="color: #949494;">#&gt; #   male_x_male</span></span></span>
 <span><span class="co"><span style="color: #949494;">#&gt; </span>#</span></span>
 <span><span class="co">#&gt; # Added columns:</span></span>
-<span><span class="co">#&gt; #   .dy_composition                       inferred dyad composition</span></span>
-<span><span class="co">#&gt; #   .dy_composition_role                  composition-specific member role</span></span>
-<span><span class="co">#&gt; #   .dy_is_{comp-role}                    composition-role indicator columns</span></span>
-<span><span class="co">#&gt; #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
-<span><span class="co">#&gt; #                                         with arbitrary direction; 0 for</span></span>
-<span><span class="co">#&gt; #                                         distinguishable dyads or other</span></span>
-<span><span class="co">#&gt; #                                         exchangeable compositions</span></span>
+<span><span class="co">#&gt; #   .composition                       inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role                  composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{comp-role}                    composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts</span></span>
+<span><span class="co">#&gt; #                                      coded -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                                      exchangeability-constrained random</span></span>
+<span><span class="co">#&gt; #                                      effects. Values are 0 for other</span></span>
+<span><span class="co">#&gt; #                                      compositions</span></span>
 <span><span class="co">#&gt; #</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 12</span></span></span>
-<span><span class="co">#&gt;    personID coupleID gender dyad_composition closeness provided_support</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female female_x_male         4.77             4.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male   female_x_male         4.46             4.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female female_x_male         6.44             4.09</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male   female_x_male         5.99             6.20</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female female_x_male         4.76             4.22</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male   female_x_male         4.48             5.03</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female female_x_male         7.76             5.36</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male   female_x_male         5.59             5.25</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female female_x_male         7.28             5.78</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male   female_x_male         5.42             4.98</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 720 × 11</span></span></span>
+<span><span class="co">#&gt;    personID coupleID gender closeness provided_support .composition       </span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>              </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1        1 female      4.71             4.49 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2        1 male        4.61             4.76 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3        2 female      6.69             4.09 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4        2 male        5.98             6.20 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5        3 female      5.27             4.22 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6        3 male        4.37             5.03 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7        4 female      7.85             5.36 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8        4 male        5.42             5.25 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9        5 female      7.54             5.78 pooled_exchangeable</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10        5 male        5.19             4.98 pooled_exchangeable</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 710 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: .dy_composition &lt;fct&gt;, .dy_composition_role &lt;fct&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_is_female_x_female &lt;dbl&gt;, .dy_is_pooled_exchangeable &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   .dy_member_contrast_pooled_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: .composition_role &lt;fct&gt;, .is_female_x_female &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .is_pooled_exchangeable &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_female_x_female_arbitrary &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .member_contrast_pooled_exchangeable_arbitrary &lt;dbl&gt;</span></span></span></code></pre></div>
 <hr>
 <p><strong>Continue</strong> with the <a href="apim.html">Actor-Partner
 Interdependence Model (APIM) vignette</a>.</p>
@@ -1028,22 +956,11 @@ Dyads.”</span> <em>Innovations in Interpersonal Relationships and Health
 Research: <span>Advancing</span> the Integration of Interdisciplinary
 Approaches to Dyadic Behavior Change</em>. <a href="https://doi.org/10.17605/OSF.IO/WYDCJ" class="external-link">https://doi.org/10.17605/OSF.IO/WYDCJ</a>.
 </div>
-<div id="ref-gistelinckMultilevelAutoregressiveSmall2021" class="csl-entry">
-Gistelinck, Fien, Tom Loeys, and Nele Flamant. 2021. <span>“Multilevel
-Autoregressive Models When the Number of Time Points Is Small.”</span>
-<em>Structural Equation Modeling: A Multidisciplinary Journal</em> 28
-(1): 15–27. <a href="https://doi.org/10.1080/10705511.2020.1753517" class="external-link">https://doi.org/10.1080/10705511.2020.1753517</a>.
-</div>
 <div id="ref-gottfredsonStraightforwardApproachCoping2019" class="csl-entry">
 Gottfredson, Nisha C. 2019. <span>“A Straightforward Approach for Coping
 with Unreliability of Person Means When Parsing Within-Person and
 Between-Person Effects in Longitudinal Studies.”</span> <em>Addictive
 Behaviors</em> 94: 156–61. <a href="https://doi.org/10.1016/j.addbeh.2018.09.031" class="external-link">https://doi.org/10.1016/j.addbeh.2018.09.031</a>.
-</div>
-<div id="ref-hamakerCenterNotCenter2015" class="csl-entry">
-Hamaker, Ellen L., and Raoul P. P. P. Grasman. 2015. <span>“To Center or
-Not to Center? Investigating Inertia with a Multilevel Autoregressive
-Model.”</span> <em>Frontiers in Psychology</em> 5: 1492. <a href="https://doi.org/10.3389/fpsyg.2014.01492" class="external-link">https://doi.org/10.3389/fpsyg.2014.01492</a>.
 </div>
 <div id="ref-iidaModelsInterdependentIndividuals2018" class="csl-entry">
 Iida, Masumi, Gwendolyn Seidman, and Patrick E. Shrout. 2018.
@@ -1062,10 +979,6 @@ Ledermann, Thomas, and David A. Kenny. 2017. <span>“Analyzing Dyadic
 Data with Multilevel Modeling Versus Structural Equation Modeling:
 <span>A</span> Tale of Two Methods.”</span> <em>Journal of Family
 Psychology</em> 31 (4): 442–52. <a href="https://doi.org/10.1037/fam0000290" class="external-link">https://doi.org/10.1037/fam0000290</a>.
-</div>
-<div id="ref-nickellBiasesDynamicModels1981" class="csl-entry">
-Nickell, Stephen. 1981. <span>“Biases in Dynamic Models with Fixed
-Effects.”</span> <em>Econometrica</em> 49 (6): 1417–26. <a href="https://doi.org/10.2307/1911408" class="external-link">https://doi.org/10.2307/1911408</a>.
 </div>
 <div id="ref-delrosarioPracticalGuideSpecifying2025" class="csl-entry">
 Rosario, Kareena S. del, and Tessa V. West. 2025. <span>“A

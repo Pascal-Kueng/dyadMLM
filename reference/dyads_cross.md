@@ -15,7 +15,7 @@ dyads_cross
 
 ## Format
 
-A data frame with 720 rows and 6 variables:
+A data frame with 720 rows and 5 variables:
 
 - personID:
 
@@ -28,11 +28,6 @@ A data frame with 720 rows and 6 variables:
 - gender:
 
   Gender role, with levels `female` and `male`.
-
-- dyad_composition:
-
-  Observed dyad composition, with levels `female_x_male`,
-  `female_x_female`, and `male_x_male`.
 
 - closeness:
 

@@ -10,7 +10,7 @@ parameters is shown first in the result.
 ## Usage
 
 ``` r
-compare_nested_glmmTMB_models(model1, model2)
+compare_nested_models(model1, model2)
 ```
 
 ## Arguments
@@ -32,7 +32,7 @@ Both model calls must use named data-frame objects that remain available
 when the models are compared. The checks assume these objects have not
 been modified since fitting. All ordinary data columns must be
 identical, including their types and attributes. For `dyadMLM_data`,
-generated `.dy_` columns may differ, but the original columns must be
+package-generated columns may differ, but the original columns must be
 identical. Ordinary and prepared data may be compared with each other.
 Dyad metadata are checked when both models use `dyadMLM_data`. The
 function also checks fitted rows, outcomes, weights and offsets, model
@@ -70,14 +70,14 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     data = full_data
   )
 
-  compare_nested_glmmTMB_models(restricted_model, full_model)
+  compare_nested_models(restricted_model, full_model)
 }
 #> Likelihood-ratio test for nested models fitted to equivalent data
 #> Assumes mathematical nesting and an appropriate chi-squared reference distribution.
 #> 
 #>                  Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)    
-#> restricted_model  3 882.71 893.15 -438.36   876.71                             
-#> full_model        4 813.42 827.35 -402.71   805.42 71.289      1  < 2.2e-16 ***
+#> restricted_model  3 894.85 905.29 -444.42   888.85                             
+#> full_model        4 829.98 843.91 -410.99   821.98 66.862      1  2.911e-16 ***
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 #> 

@@ -23,7 +23,10 @@ prepare_dyad_data(
   pool_compositions = NULL,
   incomplete_dyads = c("error", "drop"),
   missing_role = c("error", "drop"),
-  seed = NULL
+  seed = NULL,
+  short_colnames = TRUE,
+  include_arbitrary_member_contrast = FALSE,
+  add_apim_gmc_predictors = FALSE
 )
 ```
 
@@ -70,8 +73,8 @@ prepare_dyad_data(
   should be created. Requires `time` to be a finite, integer-valued
   numeric measurement index. Lagging respects the dyad and member
   structure, matches observations at exactly `time - 1`, and does not
-  bridge missing occasions. Only raw and within-person predictors are
-  lagged. Stable between-person versions are not.
+  bridge missing occasions. Eligible raw, within-person, and APIM GMC
+  variants are lagged; stable between-person variants are not.
 
 - model_types:
 
@@ -118,7 +121,11 @@ prepare_dyad_data(
   whitespace (` `) between the two role labels, for example
   `"female_x_male"`, `"female-male"`, `"female_male"`, or
   `"female male"`, in arbitrary order. To set multiple compositions, use
-  a character vector of such strings.
+  a character vector of such strings. Unlike
+  `include_arbitrary_member_contrast`, this reclassifies the selected
+  compositions as exchangeable and changes their composition-role coding
+  and indicators, which is required for composition pooling and DIM
+  compatibility.
 
 - keep_compositions:
 
@@ -156,21 +163,53 @@ prepare_dyad_data(
 
 - seed:
 
-  Optional seed for random `.dy_member_contrast_*` sign assignment in
-  exchangeable dyads. If `NULL`, the current R session's RNG state is
-  used.
+  Optional seed for random `.member_contrast_*` sign assignment. If
+  `NULL`, the current R session's RNG state is used.
+
+- short_colnames:
+
+  Whether to use shorter composition-dependent generated column names
+  when the final data contain one composition. The default `TRUE` omits
+  the redundant composition label from `.is_*` and `.member_contrast_*`
+  names. `FALSE` always retains composition-qualified names. Other
+  generated column names are unaffected.
+
+- include_arbitrary_member_contrast:
+
+  Whether to also generate arbitrary `.member_contrast_*` columns for
+  distinguishable compositions. The default `FALSE` generates these
+  columns only for exchangeable compositions. `TRUE` retains
+  distinguishable composition metadata, composition roles, and role
+  indicators. It only adds the contrast needed to fit an
+  exchangeability-constrained random-effects model to the same prepared
+  data. Use `set_exchangeable_compositions` instead to reclassify
+  compositions for pooling or DIM compatibility.
+
+- add_apim_gmc_predictors:
+
+  Whether to add APIM GMC variants for numeric predictors. `TRUE`
+  retains the raw columns and adds `.{pred}_gmc` plus its actor and
+  partner versions, centered over all retained non-missing values after
+  filtering. Lagged variants use the same mean. Mixed non-numeric
+  predictors remain raw and are listed in one warning. In longitudinal
+  data, the mean is observation-weighted. Requires `"apim"` in
+  `model_types`, at least one numeric predictor, and resolved
+  `temporal_decomposition = "none"`. Do not use raw and GMC variants
+  together in a model with an intercept.
 
 ## Value
 
-The original data as a tibble with class `dyadMLM_data`,
-`.dy_composition` and `.dy_composition_role` factor columns, `.dy_is_*`
-numeric indicator columns, composition-specific numeric
-`.dy_member_contrast_*` columns coded `-1` and `1` for the two members
-of matching exchangeable dyads and `0` otherwise, and a `dyadMLM`
-attribute containing structural metadata, `dyad_compositions`, and
-predictor metadata such as `temporal_decompositions`, `lag1_predictors`,
-`apim_predictors`, and `dim_predictors`, as well as `dsm_predictors` and
-`dsm_role_order` when applicable.
+The original data as a tibble with class `dyadMLM_data`, `.composition`
+and `.composition_role` factor columns, `.is_*` numeric indicator
+columns, and numeric `.member_contrast_*` columns coded `-1` and `1` for
+the two members of each matching composition and `0` otherwise. With one
+final composition, their default names omit the composition label. The
+`dyadMLM` attribute contains structural metadata, `dyad_compositions`,
+and predictor metadata such as `temporal_decompositions`,
+`lag1_predictors`, `apim_predictors`, and `dim_predictors`, as well as
+`dsm_predictors` and `dsm_role_order` when applicable. The
+`generated_columns` table records each package-generated column retained
+in the returned data.
 
 ## Details
 
@@ -217,20 +256,21 @@ print(prepared)
 #> # male_x_male     exchangeable    1 dyad
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
-#> #   .dy_{pred}_actor                      APIM actor predictor: actor's
-#> #                                         original predictor values
-#> #   .dy_{pred}_partner                    APIM partner predictor: partner's
-#> #                                         original predictor values
+#> #   .composition                       inferred dyad composition
+#> #   .composition_role                  composition-specific member role
+#> #   .is_{comp-role}                    composition-role indicator columns
+#> #   .member_contrast_{comp}_arbitrary  composition-specific member contrasts
+#> #                                      coded -1/+1 in arbitrary direction for
+#> #                                      exchangeability-constrained random
+#> #                                      effects. Values are 0 for other
+#> #                                      compositions
+#> #   .{pred}_actor                      APIM actor predictor: actor's original
+#> #                                      predictor values
+#> #   .{pred}_partner                    APIM partner predictor: partner's
+#> #                                      original predictor values
 #> #
 #> # A tibble: 6 × 14
-#>   dyad_id person_id role       x .dy_composition .dy_composition_role
+#>   dyad_id person_id role       x .composition    .composition_role   
 #>     <dbl>     <dbl> <chr>  <dbl> <fct>           <fct>               
 #> 1       1         1 female     4 female_x_male   female_x_male_female
 #> 2       1         2 male       7 female_x_male   female_x_male_male  
@@ -238,12 +278,11 @@ print(prepared)
 #> 4       2         4 female     6 female_x_female female_x_female     
 #> 5       3         5 male       3 male_x_male     male_x_male         
 #> 6       3         6 male       8 male_x_male     male_x_male         
-#> # ℹ 8 more variables: .dy_is_female_x_female <dbl>,
-#> #   .dy_is_female_x_male_female <dbl>, .dy_is_female_x_male_male <dbl>,
-#> #   .dy_is_male_x_male <dbl>,
-#> #   .dy_member_contrast_female_x_female_arbitrary <dbl>,
-#> #   .dy_member_contrast_male_x_male_arbitrary <dbl>, .dy_x_actor <dbl>,
-#> #   .dy_x_partner <dbl>
+#> # ℹ 8 more variables: .is_female_x_female <dbl>,
+#> #   .is_female_x_male_female <dbl>, .is_female_x_male_male <dbl>,
+#> #   .is_male_x_male <dbl>, .member_contrast_female_x_female_arbitrary <dbl>,
+#> #   .member_contrast_male_x_male_arbitrary <dbl>, .x_actor <dbl>,
+#> #   .x_partner <dbl>
 
 pooled <- prepare_dyad_data(
   data,
@@ -270,30 +309,29 @@ print(pooled)
 #> #   male_x_male
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
-#> #   .dy_{pred}_actor                      APIM actor predictor: actor's
-#> #                                         original predictor values
-#> #   .dy_{pred}_partner                    APIM partner predictor: partner's
-#> #                                         original predictor values
+#> #   .composition                inferred dyad composition
+#> #   .composition_role           composition-specific member role
+#> #   .is_exchangeable            composition-role indicator columns
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
+#> #   .{pred}_actor               APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .{pred}_partner             APIM partner predictor: partner's original
+#> #                               predictor values
 #> #
 #> # A tibble: 6 × 10
-#>   dyad_id person_id role       x .dy_composition  .dy_composition_role
-#>     <dbl>     <dbl> <chr>  <dbl> <fct>            <fct>               
-#> 1       1         1 female     4 romantic_couples romantic_couples    
-#> 2       1         2 male       7 romantic_couples romantic_couples    
-#> 3       2         3 female     5 romantic_couples romantic_couples    
-#> 4       2         4 female     6 romantic_couples romantic_couples    
-#> 5       3         5 male       3 romantic_couples romantic_couples    
-#> 6       3         6 male       8 romantic_couples romantic_couples    
-#> # ℹ 4 more variables: .dy_is_romantic_couples <dbl>,
-#> #   .dy_member_contrast_romantic_couples_arbitrary <dbl>, .dy_x_actor <dbl>,
-#> #   .dy_x_partner <dbl>
+#>   dyad_id person_id role       x .composition .composition_role .is_exchangeable
+#>     <dbl>     <dbl> <chr>  <dbl> <fct>        <fct>                        <dbl>
+#> 1       1         1 female     4 romantic_co… romantic_couples                 1
+#> 2       1         2 male       7 romantic_co… romantic_couples                 1
+#> 3       2         3 female     5 romantic_co… romantic_couples                 1
+#> 4       2         4 female     6 romantic_co… romantic_couples                 1
+#> 5       3         5 male       3 romantic_co… romantic_couples                 1
+#> 6       3         6 male       8 romantic_co… romantic_couples                 1
+#> # ℹ 3 more variables: .member_contrast_arbitrary <dbl>, .x_actor <dbl>,
+#> #   .x_partner <dbl>
 
 ild_data <- data.frame(
   dyad_id = rep(c(1, 2), each = 4),
@@ -322,67 +360,59 @@ print(ild_prepared)
 #> # assumed_exchangeable exchangeable 2 dyads
 #> #
 #> # Added columns:
-#> #   .dy_composition                       inferred dyad composition
-#> #   .dy_composition_role                  composition-specific member role
-#> #   .dy_is_{comp-role}                    composition-role indicator columns
-#> #   .dy_member_contrast_{comp}_arbitrary  composition-specific member contrasts
-#> #                                         with arbitrary direction; 0 for
-#> #                                         distinguishable dyads or other
-#> #                                         exchangeable compositions
-#> #   .dy_{pred}_lag1                       lag-1 raw predictor values
-#> #   .dy_{pred}_cwp                        within-person predictor: momentary
-#> #                                         deviations from each person's usual
-#> #                                         level
-#> #   .dy_{pred}_cwp_lag1                   lag-1 within-person predictor:
-#> #                                         momentary deviations from each
-#> #                                         person's usual level
-#> #   .dy_{pred}_cbp                        between-person predictor: stable
-#> #                                         differences from the average person's
-#> #                                         usual level
-#> #   .dy_{pred}_actor                      APIM actor predictor: actor's
-#> #                                         original predictor values
-#> #   .dy_{pred}_actor_lag1                 lag-1 APIM actor predictor: actor's
-#> #                                         original predictor values
-#> #   .dy_{pred}_partner                    APIM partner predictor: partner's
-#> #                                         original predictor values
-#> #   .dy_{pred}_partner_lag1               lag-1 APIM partner predictor:
-#> #                                         partner's original predictor values
-#> #   .dy_{pred}_cwp_actor                  APIM within-person actor predictor:
-#> #                                         actor's momentary deviations from
-#> #                                         their usual level
-#> #   .dy_{pred}_cwp_actor_lag1             lag-1 APIM within-person actor
-#> #                                         predictor: actor's momentary
-#> #                                         deviations from their usual level
-#> #   .dy_{pred}_cwp_partner                APIM within-person partner predictor:
-#> #                                         partner's momentary deviations from
-#> #                                         their usual level
-#> #   .dy_{pred}_cwp_partner_lag1           lag-1 APIM within-person partner
-#> #                                         predictor: partner's momentary
-#> #                                         deviations from their usual level
-#> #   .dy_{pred}_cbp_actor                  APIM between-person actor predictor:
-#> #                                         actor's stable difference from the
-#> #                                         average person's usual level
-#> #   .dy_{pred}_cbp_partner                APIM between-person partner
-#> #                                         predictor: partner's stable
-#> #                                         difference from the average person's
-#> #                                         usual level
+#> #   .composition                inferred dyad composition
+#> #   .composition_role           composition-specific member role
+#> #   .is_exchangeable            composition-role indicator columns
+#> #   .member_contrast_arbitrary  composition-specific member contrasts coded
+#> #                               -1/+1 in arbitrary direction for
+#> #                               exchangeability-constrained random effects.
+#> #                               Values are 0 for other compositions
+#> #   .{pred}_lag1                lag-1 raw predictor values
+#> #   .{pred}_cwp                 within-person predictor: momentary deviations
+#> #                               from each person's usual level
+#> #   .{pred}_cwp_lag1            lag-1 within-person predictor: momentary
+#> #                               deviations from each person's usual level
+#> #   .{pred}_cbp                 between-person predictor: stable differences
+#> #                               from the average person's usual level
+#> #   .{pred}_actor               APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .{pred}_actor_lag1          lag-1 APIM actor predictor: actor's original
+#> #                               predictor values
+#> #   .{pred}_partner             APIM partner predictor: partner's original
+#> #                               predictor values
+#> #   .{pred}_partner_lag1        lag-1 APIM partner predictor: partner's
+#> #                               original predictor values
+#> #   .{pred}_cwp_actor           APIM within-person actor predictor: actor's
+#> #                               momentary deviations from their usual level
+#> #   .{pred}_cwp_actor_lag1      lag-1 APIM within-person actor predictor:
+#> #                               actor's momentary deviations from their usual
+#> #                               level
+#> #   .{pred}_cwp_partner         APIM within-person partner predictor: partner's
+#> #                               momentary deviations from their usual level
+#> #   .{pred}_cwp_partner_lag1    lag-1 APIM within-person partner predictor:
+#> #                               partner's momentary deviations from their usual
+#> #                               level
+#> #   .{pred}_cbp_actor           APIM between-person actor predictor: actor's
+#> #                               stable difference from the average person's
+#> #                               usual level
+#> #   .{pred}_cbp_partner         APIM between-person partner predictor:
+#> #                               partner's stable difference from the average
+#> #                               person's usual level
 #> #
 #> # A tibble: 8 × 22
-#>   dyad_id person_id  time     x .dy_composition      .dy_composition_role
-#>     <dbl>     <dbl> <dbl> <dbl> <fct>                <fct>               
-#> 1       1         1     1     4 assumed_exchangeable assumed_exchangeable
-#> 2       1         2     1     7 assumed_exchangeable assumed_exchangeable
-#> 3       1         1     2     5 assumed_exchangeable assumed_exchangeable
-#> 4       1         2     2     8 assumed_exchangeable assumed_exchangeable
-#> 5       2         1     1     3 assumed_exchangeable assumed_exchangeable
-#> 6       2         2     1     6 assumed_exchangeable assumed_exchangeable
-#> 7       2         1     2     4 assumed_exchangeable assumed_exchangeable
-#> 8       2         2     2     7 assumed_exchangeable assumed_exchangeable
-#> # ℹ 16 more variables: .dy_is_assumed_exchangeable <dbl>,
-#> #   .dy_member_contrast_assumed_exchangeable_arbitrary <dbl>, .dy_x_cwp <dbl>,
-#> #   .dy_x_cbp <dbl>, .dy_x_lag1 <dbl>, .dy_x_cwp_lag1 <dbl>, .dy_x_actor <dbl>,
-#> #   .dy_x_partner <dbl>, .dy_x_cwp_actor <dbl>, .dy_x_cwp_partner <dbl>,
-#> #   .dy_x_cbp_actor <dbl>, .dy_x_cbp_partner <dbl>, .dy_x_actor_lag1 <dbl>,
-#> #   .dy_x_partner_lag1 <dbl>, .dy_x_cwp_actor_lag1 <dbl>,
-#> #   .dy_x_cwp_partner_lag1 <dbl>
+#>   dyad_id person_id  time     x .composition  .composition_role .is_exchangeable
+#>     <dbl>     <dbl> <dbl> <dbl> <fct>         <fct>                        <dbl>
+#> 1       1         1     1     4 assumed_exch… assumed_exchange…                1
+#> 2       1         2     1     7 assumed_exch… assumed_exchange…                1
+#> 3       1         1     2     5 assumed_exch… assumed_exchange…                1
+#> 4       1         2     2     8 assumed_exch… assumed_exchange…                1
+#> 5       2         1     1     3 assumed_exch… assumed_exchange…                1
+#> 6       2         2     1     6 assumed_exch… assumed_exchange…                1
+#> 7       2         1     2     4 assumed_exch… assumed_exchange…                1
+#> 8       2         2     2     7 assumed_exch… assumed_exchange…                1
+#> # ℹ 15 more variables: .member_contrast_arbitrary <dbl>, .x_cwp <dbl>,
+#> #   .x_cbp <dbl>, .x_lag1 <dbl>, .x_cwp_lag1 <dbl>, .x_actor <dbl>,
+#> #   .x_partner <dbl>, .x_cwp_actor <dbl>, .x_cwp_partner <dbl>,
+#> #   .x_cbp_actor <dbl>, .x_cbp_partner <dbl>, .x_actor_lag1 <dbl>,
+#> #   .x_partner_lag1 <dbl>, .x_cwp_actor_lag1 <dbl>, .x_cwp_partner_lag1 <dbl>
 ```
