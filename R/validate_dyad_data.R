@@ -506,7 +506,10 @@ resolve_incomplete_dyads <- function(out, dyad_name, member_name, incomplete_dya
           singular = "incomplete dyad",
           plural = "incomplete dyads"
         ),
-        ". Add the missing member rows or use `incomplete_dyads = \"drop\"` ",
+        ". `dyadMLM` cannot create rows for completely unobserved members ",
+        "because their `member` identifiers and, when supplied, `role` values ",
+        "cannot be inferred. Add the missing member rows or use ",
+        "`incomplete_dyads = \"drop\"` ",
         "to drop these dyads."
       ),
       call. = FALSE
