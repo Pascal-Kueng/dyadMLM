@@ -418,6 +418,15 @@ mixed_cross_data_pooled_constrained <- dyadMLM::prepare_dyad_data(
 print(mixed_cross_data_pooled_constrained)
 ```
 
+## Citation
+
+If you use `dyadMLM`, please cite the version of the package you use. Obtain the
+citation via:
+
+```{r eval = TRUE}
+citation("dyadMLM")
+```
+
 ---
 
 **Continue** with the
