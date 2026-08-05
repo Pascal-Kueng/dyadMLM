@@ -12,7 +12,7 @@ coverage](https://codecov.io/gh/Pascal-Kueng/dyadMLM/graph/badge.svg)](https://a
 status](https://www.r-pkg.org/badges/version/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
 [![CRAN
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21481720.svg)](https://doi.org/10.5281/zenodo.21481720)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21481720-blue.svg)](https://doi.org/10.5281/zenodo.21481720)
 <!-- badges: end -->
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
