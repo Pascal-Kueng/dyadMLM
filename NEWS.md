@@ -32,6 +32,10 @@
   APIM, DIM, and DSM lags. Temporary rows are removed before the prepared data
   are returned. This is structural completion for column construction, not
   imputation or the addition of analysis rows.
+* Numeric structural columns and numeric predictors selected for preparation
+  now reject `Inf` and `-Inf` before model-ready columns are generated. Errors
+  identify the affected columns and input rows; `NA` and `NaN` remain supported
+  as missing predictor values.
 * Renamed `compare_nested_glmmTMB_models()` to `compare_nested_models()`.
 * Naming changes in this development version are intentionally breaking:
   names from 0.1.0 are not retained.

@@ -599,15 +599,16 @@ another routine breaking CRAN update shortly afterward.
 
 ### Release-blocking correctness fixes
 
-- [ ] Reject infinite values before generating model-ready columns.
+- [x] Reject infinite values before generating model-ready columns.
   - Reject `Inf` and `-Inf` in selected numeric predictors with an error naming
     the affected variables and rows; continue to treat `NA` and `NaN` as
     missing values.
   - Reject non-finite values in numeric `dyad`, `member`, and `time` columns while
     continuing to support character and factor identifiers.
-  - Cover GMC, CWP/CBP, APIM, DIM, DSM, and structural-column validation in
-    regression tests so one infinite value cannot contaminate many generated
-    rows through a mean.
+  - One central pre-generation check protects GMC, CWP/CBP, APIM, DIM, and DSM
+    construction. Regression tests cover numeric structural columns, multiple
+    selected predictors, supported predictor missingness, and unselected
+    columns.
 - [ ] Define and enforce the post-preparation modification contract.
   - Current problem: base and dplyr subsetting can preserve the
     `dyadMLM_data` class and its frozen metadata after rows or structural columns

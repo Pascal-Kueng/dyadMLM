@@ -175,9 +175,11 @@ and model-ready columns for dyadic multilevel model parameterizations.
 Data must be in long format. Cross-sectional dyadic data may contain at most
 one row per member within dyad. Intensive longitudinal dyadic data may
 contain at most one row per member and observed measurement occasion within
-dyad. Measured variables may contain missing values. Structural completeness
-is assessed across all rows. \code{incomplete_dyads} controls dyads with fewer
-than two members; dyads with more than two members always cause an error.
+dyad. Measured variables may contain missing values. Numeric \code{dyad}, \code{member},
+\code{time}, and selected predictor columns must not contain infinite values.
+Structural completeness is assessed across all rows. \code{incomplete_dyads}
+controls dyads with fewer than two members; dyads with more than two members
+always cause an error.
 When \code{role} is supplied, stable member roles are resolved across repeated
 rows before \code{missing_role} is applied.
 

@@ -202,6 +202,40 @@ validate_dyad_data <- function(
   # Extract and validate user-owned model columns!!!
   predictors_quo <- rlang::enquo(predictors)
   predictor_names <- select_dyad_columns(out, predictors_quo, "predictors")
+
+  columns_to_check <- unique(c(
+    dyad_name,
+    member_name,
+    time_name,
+    predictor_names
+  ))
+  numeric_columns_to_check <- dplyr::select(
+    out[columns_to_check],
+    tidyselect::where(is.numeric)
+  )
+  infinite_value_locations <- which(
+    is.infinite(as.matrix(numeric_columns_to_check)),
+    arr.ind = TRUE
+  )
+
+  if (nrow(infinite_value_locations) > 0L) {
+    affected_values <- paste0(
+      "`",
+      names(numeric_columns_to_check)[infinite_value_locations[, "col"]],
+      "` at input row ",
+      infinite_value_locations[, "row"]
+    )
+
+    stop(
+      "Infinite values are not allowed in numeric `dyad`, `member`, or ",
+      "`time` columns or numeric columns selected by `predictors`. ",
+      "Affected value(s): ",
+      paste(affected_values, collapse = ", "),
+      ". Replace invalid measurements with `NA` if they represent missing values.",
+      call. = FALSE
+    )
+  }
+
   # Avoid different predictors resolving to the same sanitized name later.
   make_dyad_suffixes(
     predictor_names,

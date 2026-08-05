@@ -66,6 +66,74 @@ test_that("validate_dyad_data stores predictor metadata", {
   expect_equal(attr(multiple, "dyadMLM")$predictors, c("x", "z"))
 })
 
+test_that("validate_dyad_data rejects infinite structural values", {
+  data <- data.frame(
+    dyad_id = rep(1:2, each = 4),
+    person_id = rep(c(1, 2), 4),
+    time = rep(rep(1:2, each = 2), 2)
+  )
+
+  for (column in c("dyad_id", "person_id", "time")) {
+    invalid_data <- data
+    invalid_data[[column]][[2L]] <- Inf
+
+    expect_error(
+      validate_dyad_data(
+        invalid_data,
+        dyad = dyad_id,
+        member = person_id,
+        time = time
+      ),
+      paste0("`", column, "` at input row 2"),
+      fixed = TRUE
+    )
+  }
+})
+
+test_that("prepare_dyad_data reports infinite selected predictors", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = c(1, Inf, 3, 4),
+    z = c(5, 6, -Inf, 8)
+  )
+
+  expect_error(
+    prepare_dyad_data(
+      data,
+      dyad = dyad_id,
+      member = person_id,
+      predictors = c(x, z)
+    ),
+    paste0(
+      "Affected value(s): `x` at input row 2, ",
+      "`z` at input row 3."
+    ),
+    fixed = TRUE
+  )
+})
+
+test_that("predictor missingness and unselected infinities remain allowed", {
+  data <- data.frame(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = c("A", "B", "C", "D"),
+    x = c(1, NA_real_, NaN, 4),
+    unused = c(Inf, 2, 3, 4)
+  )
+
+  result <- validate_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    predictors = x,
+    temporal_decomposition = "none"
+  )
+
+  expect_true(is.na(result$x[[2L]]))
+  expect_true(is.nan(result$x[[3L]]))
+  expect_identical(result$unused[[1L]], Inf)
+})
+
 test_that("validate_dyad_data resolves lag predictor metadata", {
   data <- data.frame(
     dyad_id = rep(1:2, each = 4),
