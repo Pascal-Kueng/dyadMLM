@@ -1780,6 +1780,51 @@ test_that("the public function returns member-level glmmTMB matrices", {
   expect_identical(result[[1L]]$difference_term, extracted$blocks[[2L]]$term)
 })
 
+test_that("fitted covariance recovery allows some one-sided groups", {
+  skip_if_not_installed("glmmTMB")
+
+  model_data <- data.frame(
+    coupleID = factor(rep(seq_len(40L), each = 2L)),
+    IDIFF = rep(c(-1, 1), 40L)
+  )
+  couple_index <- as.integer(model_data$coupleID)
+  set.seed(902)
+  shared_effect <- stats::rnorm(40L, sd = 1)
+  difference_effect <- stats::rnorm(40L, sd = 0.5)
+  model_data$outcome <- shared_effect[couple_index] +
+    model_data$IDIFF * difference_effect[couple_index]
+  model_data$outcome[couple_index <= 3L & model_data$IDIFF == 1] <- NA_real_
+
+  model <- suppressWarnings(glmmTMB::glmmTMB(
+    outcome ~ 1 +
+      us(1 | coupleID) +
+      us(0 + IDIFF | coupleID),
+    dispformula = ~0,
+    data = model_data
+  ))
+
+  expect_identical(model$fit$convergence, 0L)
+  expect_true(model$sdr$pdHess)
+  expect_equal(nrow(model$frame), 77L)
+  expect_warning(
+    result <- recover_exchangeable_covariance(
+      model,
+      block_pairings = list(
+        dyad = list(
+          shared_block = "us(1 | coupleID)",
+          difference_block = "us(0 + IDIFF | coupleID)",
+          difference_indicator = "IDIFF"
+        )
+      )
+    ),
+    "3 of 40 supported fitted `coupleID` groups do not contain both -1 and +1",
+    fixed = TRUE
+  )
+
+  expect_s3_class(result, "exchangeable_rescov")
+  expect_true(all(is.finite(result[["dyad"]]$varcov)))
+})
+
 test_that("the public function retains brms draws and labels omitted blocks", {
   data <- data.frame(outcome = 1:4, IDIFF = rep(c(-1, 1), 2L))
   model <- stats::lm(outcome ~ IDIFF, data = data)

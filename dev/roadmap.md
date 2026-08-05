@@ -556,7 +556,7 @@ outside this collapsed section.
 
 ## Version 0.2.0 - CRAN API-Stabilization Release
 
-Status: in progress. Checked items are implemented on the development branch;
+Status: in progress. Checked items are implemented in the development version;
 unchecked items remain proposed until they have been reviewed, implemented, and
 verified. Because development already contains intentionally breaking names and
 defaults, this release should be version 0.2.0 rather than 0.1.1. Keep the
@@ -567,7 +567,7 @@ while changes are still inexpensive, and submit one bundled early-stabilization
 release before many users adopt the 0.1.0 interface. Do not follow 0.2.0 with
 another routine breaking CRAN update shortly afterward.
 
-### Implemented on the development branch and requiring final revalidation
+### Implemented in the development version and requiring final revalidation
 
 - [x] Use a single leading dot for retained generated columns while reserving
   `.dy_` for temporary implementation columns.
@@ -594,8 +594,8 @@ another routine breaking CRAN update shortly afterward.
     columns escape.
   - This is deterministic structural completion for data preparation, not
     statistical imputation and not the creation of additional analysis rows.
-  - Add the user-facing missingness contract and this behavioral change to
-    `NEWS.md` and the affected vignettes before release.
+  - [x] Record the user-facing missingness contract and this behavioral change
+    in `NEWS.md` without expanding the package vignettes.
 
 ### Release-blocking correctness fixes
 
@@ -790,11 +790,11 @@ the release scope or shipping unvalidated guidance.
 
 ### Additional tests and optional polish
 
-- [ ] Test fitted exchangeable-covariance recovery when outcome missingness
+- [x] Test fitted exchangeable-covariance recovery when outcome missingness
   leaves only one member in some fitted grouping units while both member signs
   remain represented overall.
-- [ ] Add a direct `compare_nested_models()` regression test for a valid
-  `glmmTMB` fit created with `se = FALSE` if that variant remains supported.
+- [x] Add a direct `compare_nested_models()` regression test for a valid
+  `glmmTMB` fit created with `se = FALSE`; this variant remains supported.
 
 ### CRAN release checklist
 

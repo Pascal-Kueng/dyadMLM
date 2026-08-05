@@ -1,7 +1,7 @@
 # dyadMLM (development version)
 
 * Retained generated columns now use a single leading dot instead of `.dy_`
-  for more readable model formulas; for example, `.dy_x_actor` becomes
+  for more readable model formulas. For example, `.dy_x_actor` becomes
   `.x_actor`. The `.dy_` prefix is reserved for temporary implementation
   columns.
 * `prepare_dyad_data()` now uses compact composition-column names when the
@@ -26,13 +26,19 @@
   when requested. It uses one mean over retained non-missing values, warns
   about skipped non-numeric predictors in mixed selections, and leaves DIM/DSM
   centering unchanged.
+* For longitudinal data, `prepare_dyad_data()` now temporarily adds an
+  all-missing partner row when only one member is present at an observed
+  dyad-occasion. This preserves partner CBP values and exact source-occasion
+  APIM, DIM, and DSM lags. Temporary rows are removed before the prepared data
+  are returned. This is structural completion for column construction, not
+  imputation or the addition of analysis rows.
 * Renamed `compare_nested_glmmTMB_models()` to `compare_nested_models()`.
-* Naming changes in this development version are intentionally breaking;
+* Naming changes in this development version are intentionally breaking:
   names from 0.1.0 are not retained.
 * Added package-level help at `?dyadMLM`, with links to the main functions,
   example datasets, and getting-started documentation.
-* Example datasets no longer include the redundant `dyad_composition` column;
-  `dyads_ild` now includes member-specific AR(1) residual processes.
+* Example datasets no longer include the redundant `dyad_composition` column. 
+  Instead, `dyads_ild` now includes member-specific AR(1) residual processes.
 
 # dyadMLM 0.1.0
 
@@ -49,7 +55,7 @@
 * Renamed generated exchangeable-member contrasts from
   `.dy_diff_{composition}_arbitrary` to
   `.dy_member_contrast_{composition}_arbitrary`.
-* Renamed the package from `interdep` to `dyadMLM`; package-generated columns
+* Renamed the package from `interdep` to `dyadMLM`. Package-generated columns
   now use the `.dy_` prefix instead of `.i_`.
 * Added validation and preparation of cross-sectional and intensive
   longitudinal dyadic data with distinguishable, exchangeable, and mixed dyad

@@ -571,6 +571,30 @@ test_that("compare_nested_models sorts models and agrees with anova.glmmTMB", {
   )
 })
 
+test_that("compare_nested_models supports fits without standard errors", {
+  skip_if_not_installed("glmmTMB")
+
+  model_data <- comparison_female_male_cross_dyads
+  restricted_model <- glmmTMB::glmmTMB(
+    closeness ~ 1,
+    data = model_data,
+    se = FALSE
+  )
+  full_model <- glmmTMB::glmmTMB(
+    closeness ~ gender,
+    data = model_data,
+    se = FALSE
+  )
+
+  comparison <- compare_nested_models(restricted_model, full_model)
+
+  expect_null(restricted_model$sdr$pdHess)
+  expect_null(full_model$sdr$pdHess)
+  expect_s3_class(comparison, "anova")
+  expect_equal(comparison$`Chi Df`[2L], 1)
+  expect_true(is.finite(comparison$Chisq[2L]))
+})
+
 test_that("compare_nested_models rejects transformed and changed outcomes", {
   skip_if_not_installed("glmmTMB")
 
