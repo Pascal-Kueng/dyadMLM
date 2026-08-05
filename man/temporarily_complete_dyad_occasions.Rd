@@ -10,8 +10,8 @@ temporarily_complete_dyad_occasions(data)
 \item{data}{A validated \code{dyadMLM_data} object.}
 }
 \value{
-A list containing the temporarily completed data and the original
-observed row keys.
+A \code{dyadMLM_data} object containing temporary missing-member rows and
+an internal column recording the original row order.
 }
 \description{
 Adds the missing member row when only one member is present at an observed

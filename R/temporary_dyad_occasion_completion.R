@@ -7,8 +7,8 @@
 #'
 #' @param data A validated `dyadMLM_data` object.
 #'
-#' @return A list containing the temporarily completed data and the original
-#'   observed row keys.
+#' @return A `dyadMLM_data` object containing temporary missing-member rows and
+#'   an internal column recording the original row order.
 #'
 #' @keywords internal
 temporarily_complete_dyad_occasions <- function(data) {
@@ -23,12 +23,9 @@ temporarily_complete_dyad_occasions <- function(data) {
   }
 
   row_key_columns <- c(metadata$dyad, metadata$member, metadata$time)
-  input_data <- tibble::as_tibble(data)
-
-  # Save the structural key and order of every supplied row. These keys are
-  # used after preparation to remove only the rows added below.
-  original_observed_row_keys <- input_data |>
-    dplyr::select(dplyr::all_of(row_key_columns)) |>
+  # Work with a plain tibble and mark every supplied row. Temporary rows added
+  # below receive NA for this column, so the marker also restores row order.
+  input_data <- tibble::as_tibble(data) |>
     dplyr::mutate(.dy_original_row = dplyr::row_number())
 
   dyad_member_columns <- c(metadata$dyad, metadata$member)
@@ -38,17 +35,19 @@ temporarily_complete_dyad_occasions <- function(data) {
     dyad_member_columns <- c(dyad_member_columns, metadata$role)
   }
 
-  # Validation guarantees exactly two known members per dyad. Reduce their
-  # repeated longitudinal rows to one lookup row per member.
+  # Reduce repeated longitudinal rows to one lookup row per member.
+  # Since validation ensures that both members show up at least once, this is
+  # complete.
   known_dyad_members <- input_data |>
     dplyr::select(dplyr::all_of(dyad_member_columns)) |>
     dplyr::distinct()
 
-  # Retain only occasions on which at least one member was observed. Entirely
-  # unobserved occasions are not added.
+  # Retain only occasions on which at least one member was observed.
   observed_dyad_occasions <- input_data |>
     dplyr::select(dplyr::all_of(c(metadata$dyad, metadata$time))) |>
     dplyr::distinct()
+
+  # Join for "complete" data frame (only structural yet)  -----------------
 
   # Within each dyad, cross its observed occasions with its two known members.
   completed_dyad_occasion_keys <- dplyr::left_join(
@@ -58,32 +57,28 @@ temporarily_complete_dyad_occasions <- function(data) {
     relationship = "many-to-many"
   )
 
+  # Find only the missing rows ----------------------------------
+
   # Keep only genuinely absent member rows. Variables not included in the
   # structural lookup are filled with NA when these rows are appended.
   temporary_missing_member_rows <- dplyr::anti_join(
     completed_dyad_occasion_keys,
-    original_observed_row_keys,
+    input_data,
     by = row_key_columns
   )
 
-  if (nrow(temporary_missing_member_rows) == 0L) {
-    return(list(
-      data = data,
-      original_observed_row_keys = original_observed_row_keys
-    ))
-  }
-
+  # Bind rows inserts NA to any variables that are not present in the bound
+  # dataset (e.g., all non-structural columns)
   temporarily_completed_data <- dplyr::bind_rows(
     input_data,
     temporary_missing_member_rows
   )
+
+  # re-add metadata that was removed at the start
   attr(temporarily_completed_data, "dyadMLM") <- metadata
   class(temporarily_completed_data) <- class(data)
 
-  list(
-    data = temporarily_completed_data,
-    original_observed_row_keys = original_observed_row_keys
-  )
+  temporarily_completed_data
 }
 
 
@@ -95,28 +90,21 @@ temporarily_complete_dyad_occasions <- function(data) {
 #'
 #' @param data A temporarily completed `dyadMLM_data` object after model-ready
 #'   columns have been constructed.
-#' @param original_observed_row_keys Original row keys returned by
-#'   [temporarily_complete_dyad_occasions()].
-#'
 #' @return A `dyadMLM_data` object containing only originally observed rows.
 #'
 #' @keywords internal
-restore_observed_dyad_rows <- function(data, original_observed_row_keys) {
+restore_observed_dyad_rows <- function(data) {
   if (!inherits(data, "dyadMLM_data")) {
     stop("`data` must be a `dyadMLM_data` object.", call. = FALSE)
   }
 
   metadata <- attr(data, "dyadMLM")
-  row_key_columns <- c(metadata$dyad, metadata$member, metadata$time)
   original_data_class <- class(data)
 
-  # The inner join drops temporary rows and attaches the original row order.
-  restored_data <- dplyr::inner_join(
-    data,
-    original_observed_row_keys,
-    by = row_key_columns,
-    relationship = "one-to-one"
-  ) |>
+  # Temporary rows have no original row number. Keep the supplied rows, restore
+  # their order, and remove the internal marker.
+  restored_data <- data |>
+    dplyr::filter(!is.na(.data$.dy_original_row)) |>
     dplyr::arrange(.data$.dy_original_row) |>
     dplyr::select(-dplyr::all_of(".dy_original_row"))
 

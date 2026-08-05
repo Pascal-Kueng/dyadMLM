@@ -297,16 +297,11 @@ prepare_dyad_data <- function(
     }
   }
 
-  original_observed_row_keys <- NULL
   if (attr(out, "dyadMLM")$longitudinal) {
     # Temporarily add an absent partner row at occasions observed for at least
     # one member. This lets centering, lagging, and dyadic columns use complete
     # structural pairs. The temporary rows are removed before returning.
-    temporary_dyad_completion <- temporarily_complete_dyad_occasions(out)
-    if (nrow(temporary_dyad_completion$data) > nrow(out)) {
-      out <- temporary_dyad_completion$data
-      original_observed_row_keys <- temporary_dyad_completion$original_observed_row_keys
-    }
+    out <- temporarily_complete_dyad_occasions(out)
   }
 
   out <- infer_dyad_compositions(
@@ -348,11 +343,8 @@ prepare_dyad_data <- function(
     out <- add_dyadic_score_columns(out)
   }
 
-  if (!is.null(original_observed_row_keys)) {
-    out <- restore_observed_dyad_rows(
-      out,
-      original_observed_row_keys
-    )
+  if (attr(out, "dyadMLM")$longitudinal) {
+    out <- restore_observed_dyad_rows(out)
   }
 
   return(out)

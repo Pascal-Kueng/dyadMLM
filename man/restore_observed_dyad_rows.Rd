@@ -4,14 +4,11 @@
 \alias{restore_observed_dyad_rows}
 \title{Restore rows observed in the supplied data}
 \usage{
-restore_observed_dyad_rows(data, original_observed_row_keys)
+restore_observed_dyad_rows(data)
 }
 \arguments{
 \item{data}{A temporarily completed \code{dyadMLM_data} object after model-ready
 columns have been constructed.}
-
-\item{original_observed_row_keys}{Original row keys returned by
-\code{\link[=temporarily_complete_dyad_occasions]{temporarily_complete_dyad_occasions()}}.}
 }
 \value{
 A \code{dyadMLM_data} object containing only originally observed rows.

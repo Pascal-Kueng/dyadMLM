@@ -17,14 +17,10 @@ test_that("temporary completion adds and then removes only missing member rows",
     predictors = x
   )
 
-  completion <- temporarily_complete_dyad_occasions(validated)
-  completed <- completion$data
+  completed <- temporarily_complete_dyad_occasions(validated)
 
-  temporary_missing_member_rows <- dplyr::anti_join(
-    tibble::as_tibble(completed),
-    completion$original_observed_row_keys,
-    by = c("dyad_id", "person_id", "time")
-  )
+  temporary_missing_member_rows <- completed |>
+    dplyr::filter(is.na(.data$.dy_original_row))
 
   expect_equal(nrow(temporary_missing_member_rows), 1L)
   expect_equal(temporary_missing_member_rows$dyad_id, 1)
@@ -34,10 +30,7 @@ test_that("temporary completion adds and then removes only missing member rows",
   expect_true(is.na(temporary_missing_member_rows$x))
   expect_false(2 %in% completed$time[completed$dyad_id == 1])
 
-  restored <- restore_observed_dyad_rows(
-    completed,
-    completion$original_observed_row_keys
-  )
+  restored <- restore_observed_dyad_rows(completed)
 
   expect_equal(restored$row_id, data$row_id)
   expect_identical(names(restored), names(validated))
