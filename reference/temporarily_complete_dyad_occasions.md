@@ -19,5 +19,5 @@ temporarily_complete_dyad_occasions(data)
 
 ## Value
 
-A list containing the temporarily completed data and the original
-observed row keys.
+A `dyadMLM_data` object containing temporary missing-member rows and an
+internal column recording the original row order.

@@ -719,7 +719,7 @@ summary(dim_ILD)
 #> .provided_support_cwp_dyad_mean        0.481722   0.034760   13.86  < 2e-16 ***
 #> .provided_support_cwp_within_dyad_dev -0.008331   0.035157   -0.24    0.813    
 #> .provided_support_cbp_dyad_mean        1.553466   0.096922   16.03  < 2e-16 ***
-#> .provided_support_cbp_within_dyad_dev  0.844495   0.118504    7.13 1.03e-12 ***
+#> .provided_support_cbp_within_dyad_dev  0.844496   0.118504    7.13 1.03e-12 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
