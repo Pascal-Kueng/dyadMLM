@@ -3,7 +3,7 @@
 ## dyadMLM (development version)
 
 - Retained generated columns now use a single leading dot instead of
-  `.dy_` for more readable model formulas; for example, `.dy_x_actor`
+  `.dy_` for more readable model formulas. For example, `.dy_x_actor`
   becomes `.x_actor`. The `.dy_` prefix is reserved for temporary
   implementation columns.
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
@@ -32,17 +32,29 @@
   lagged variants when requested. It uses one mean over retained
   non-missing values, warns about skipped non-numeric predictors in
   mixed selections, and leaves DIM/DSM centering unchanged.
+- For longitudinal data,
+  [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
+  now temporarily adds an all-missing partner row when only one member
+  is present at an observed dyad-occasion. This preserves partner CBP
+  values and exact source-occasion APIM, DIM, and DSM lags. Temporary
+  rows are removed before the prepared data are returned. This is
+  structural completion for column construction, not imputation or the
+  addition of analysis rows.
+- Numeric structural columns and numeric predictors selected for
+  preparation now reject `Inf` and `-Inf` before model-ready columns are
+  generated. Errors identify the affected columns and input rows; `NA`
+  and `NaN` remain supported as missing predictor values.
 - Renamed `compare_nested_glmmTMB_models()` to
   [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md).
-- Naming changes in this development version are intentionally breaking;
+- Naming changes in this development version are intentionally breaking:
   names from 0.1.0 are not retained.
 - Added package-level help at
   [`?dyadMLM`](https://pascal-kueng.github.io/dyadMLM/reference/dyadMLM-package.md),
   with links to the main functions, example datasets, and
   getting-started documentation.
 - Example datasets no longer include the redundant `dyad_composition`
-  column; `dyads_ild` now includes member-specific AR(1) residual
-  processes.
+  column. Instead, `dyads_ild` now includes member-specific AR(1)
+  residual processes.
 
 ## dyadMLM 0.1.0
 
@@ -62,7 +74,7 @@ CRAN release: 2026-07-30
 - Renamed generated exchangeable-member contrasts from
   `.dy_diff_{composition}_arbitrary` to
   `.dy_member_contrast_{composition}_arbitrary`.
-- Renamed the package from `interdep` to `dyadMLM`; package-generated
+- Renamed the package from `interdep` to `dyadMLM`. Package-generated
   columns now use the `.dy_` prefix instead of `.i_`.
 - Added validation and preparation of cross-sectional and intensive
   longitudinal dyadic data with distinguishable, exchangeable, and mixed

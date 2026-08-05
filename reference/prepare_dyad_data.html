@@ -260,9 +260,11 @@ package-generated column retained in the returned data.</p>
     <p>Data must be in long format. Cross-sectional dyadic data may contain at most
 one row per member within dyad. Intensive longitudinal dyadic data may
 contain at most one row per member and observed measurement occasion within
-dyad. Measured variables may contain missing values. Structural completeness
-is assessed across all rows. <code>incomplete_dyads</code> controls dyads with fewer
-than two members; dyads with more than two members always cause an error.
+dyad. Measured variables may contain missing values. Numeric <code>dyad</code>, <code>member</code>,
+<code>time</code>, and selected predictor columns must not contain infinite values.
+Structural completeness is assessed across all rows. <code>incomplete_dyads</code>
+controls dyads with fewer than two members; dyads with more than two members
+always cause an error.
 When <code>role</code> is supplied, stable member roles are resolved across repeated
 rows before <code>missing_role</code> is applied.</p>
 <p>Dyad composition labels are canonical: role labels are sorted alphabetically

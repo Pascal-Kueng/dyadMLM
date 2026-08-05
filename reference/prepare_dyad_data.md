@@ -216,11 +216,13 @@ in the returned data.
 Data must be in long format. Cross-sectional dyadic data may contain at
 most one row per member within dyad. Intensive longitudinal dyadic data
 may contain at most one row per member and observed measurement occasion
-within dyad. Measured variables may contain missing values. Structural
-completeness is assessed across all rows. `incomplete_dyads` controls
-dyads with fewer than two members; dyads with more than two members
-always cause an error. When `role` is supplied, stable member roles are
-resolved across repeated rows before `missing_role` is applied.
+within dyad. Measured variables may contain missing values. Numeric
+`dyad`, `member`, `time`, and selected predictor columns must not
+contain infinite values. Structural completeness is assessed across all
+rows. `incomplete_dyads` controls dyads with fewer than two members;
+dyads with more than two members always cause an error. When `role` is
+supplied, stable member roles are resolved across repeated rows before
+`missing_role` is applied.
 
 Dyad composition labels are canonical: role labels are sorted
 alphabetically before being combined, so labels do not depend on row or
