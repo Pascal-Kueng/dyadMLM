@@ -572,7 +572,7 @@ another routine breaking CRAN update shortly afterward.
 - [x] Use a single leading dot for retained generated columns while reserving
   `.dy_` for temporary implementation columns.
 - [x] Support compact composition-dependent names through `short_colnames`.
-  The default remains an open 0.2.0 API decision below.
+  Keep `short_colnames = TRUE` for the common single-composition workflow.
 - [x] Add optional arbitrary member contrasts for distinguishable compositions
   without reclassifying their composition metadata.
 - [x] Add `summary.dyadMLM_data()` and complete generated-column tracking,
@@ -609,33 +609,43 @@ another routine breaking CRAN update shortly afterward.
     construction. Regression tests cover numeric structural columns, multiple
     selected predictors, supported predictor missingness, and unselected
     columns.
-- [ ] Define and enforce the post-preparation modification contract.
-  - Current problem: base and dplyr subsetting can preserve the
-    `dyadMLM_data` class and its frozen metadata after rows or structural columns
-    change; source-variable mutation can also leave generated columns stale.
-  - Treat `dyadMLM_data` as an immutable prepared analysis artifact. Filter or
-    transform the raw data first, then call `prepare_dyad_data()` as the final
-    preparation step.
-  - Preserve the class and metadata only for pure row or column permutations
-    that retain every row, column, and value, such as `arrange()`, `relocate()`,
-    or a complete permutation with `[`. Row order is not part of the estimand.
-  - Drop both the class and `dyadMLM` attribute when rows are removed, added, or
-    duplicated; a value changes; a column is added, removed, or renamed; or the
-    object is explicitly converted with `as.data.frame()` or `as_tibble()`.
-    Return the ordinary data result and never silently re-center or regenerate.
-  - Vector extraction with `$`, `[[`, or `pull()` returns an ordinary vector.
-    Row extraction such as `x[1, ]` follows the row-removal rule and drops the
-    class and metadata. Package print/summary methods leave the input unchanged,
-    and package internals may restore the class only after a complete, validated
-    generation stage.
-  - Test the full operation matrix across base and dplyr paths, including no-op
-    calls, pure permutations, joins, row binding, and source, generated,
-    structural, and unrelated-column mutations.
-- [ ] Complete the remaining model-level DSM verification in [`dsm.md`](dsm.md).
-  - Define one direct score-space reference implementation, such as a
-    multivariate Gaussian `brms` model for `YLevel` and `YDiff` on one row per
-    dyad, and compare it with the long `glmmTMB` interaction model using
-    `dispformula = ~ 0`.
+- [ ] Track post-preparation modifications while keeping prepared data usable.
+  - Current problem: base and dplyr operations can preserve the
+    `dyadMLM_data` class and frozen metadata after rows or columns change;
+    source-variable mutation can also leave generated columns stale.
+  - Keep the `dyadMLM_data` class and metadata after ordinary filtering,
+    transformation, reordering, and column selection. Record
+    `attr(data, "dyadMLM")$modified = TRUE` when supported base or tidyverse
+    reconstruction methods change the prepared object, with a short reason when
+    practical. Set it to `FALSE` after successful preparation.
+  - Treat the flag as a conservative warning state, not as proof that every
+    possible third-party or manual attribute operation has been intercepted.
+    Never silently re-center, re-lag, or regenerate columns after a modification.
+  - Recompute current row and dyad counts when printing. Recompute composition
+    counts from the current dyad and composition columns when they remain
+    internally usable; otherwise omit that summary with a brief explanation.
+    Continue to list only recorded generated columns that are still present.
+  - When `modified = TRUE`, print a concise warning that stored preparation
+    metadata and generated columns may describe the pre-modification data.
+    Downstream package functions may continue when their required columns and
+    structure are present, but must check those requirements and warn before
+    relying on potentially stale preparation metadata. Missing or incompatible
+    required columns should produce a targeted error.
+  - This supports ordinary sensitivity workflows. Filtering a prepared object
+    intentionally retains centering and lag definitions from the original
+    preparation sample; filtering raw data and preparing again intentionally
+    recomputes them for the sensitivity sample. Document this distinction.
+  - `compare_nested_models()` may still compare nested fits made from the same
+    modified analysis data. Fits from full and outlier-removed samples remain
+    descriptive sensitivity analyses rather than valid likelihood-ratio tests,
+    because they use different observations.
+  - Test common base and dplyr filtering, mutation, selection, reordering, and
+    row-binding paths; the modification warning; live print counts; missing
+    structural or generated columns; and unchanged print/summary inputs.
+- [x] Complete the remaining model-level DSM verification in [`dsm.md`](dsm.md).
+  - Use a direct multivariate linear model for `YLevel` and `YDiff` on one row
+    per dyad, confirm it independently with `lavaan`, and compare both with the
+    long `glmmTMB` interaction model using `dispformula = ~ 0`.
   - With `V_L = Var(YLevel)`, `V_D = Var(YDiff)`, and
     `C_LD = Cov(YLevel, YDiff)`, verify the implied member covariance:
     `Var(Y1) = V_L + V_D / 4 + C_LD`,
@@ -649,38 +659,45 @@ another routine breaking CRAN update shortly afterward.
     unchanged signs for terms containing two directional quantities.
   - Treat a discrepancy as a correctness or documentation blocker rather than
     narrowing the numerical tolerance until the test passes.
+  - The direct multivariate linear-model reference, independent `lavaan`
+    reference, long `glmmTMB` model, and reversed-direction model agree within
+    prespecified tolerances. All fitted models converge, and the `glmmTMB`
+    Hessians are positive definite.
 
 ### API decisions to settle before the 0.2.0 freeze
 
-- [ ] Replace random arbitrary-member assignment with deterministic assignment
-  and remove the public `seed` argument.
-  - Within each dyad, assign `-1` to the canonically first member identifier and
-    `+1` to the second. Order numeric identifiers numerically; order character
-    and factor identifiers by normalized labels using a documented
-    locale-independent rule rather than row order or factor-level codes.
-  - Existing signs must be invariant to input row order, repeated-occasion
-    order, composition filtering or pooling, and adding or removing unrelated
-    dyads. Changing an identifier or its storage type may change the arbitrary
-    orientation.
-  - The operation must neither read nor modify the session RNG state.
-  - Keep the documentation explicit that the sign is arbitrary and has no
-    substantive member interpretation.
-  - Update every function signature, vignette, workshop source, example, test,
-    and NEWS migration entry in the same change.
-- [ ] Use stable composition-qualified generated names by default.
-  - Recommended default: `short_colnames = FALSE` so adding a composition does
-    not change the columns referenced by an existing formula.
-  - Vignettes and workshop examples that deliberately retain one composition
-    may request `short_colnames = TRUE` for teaching-friendly formulas.
-  - If compact context-dependent names remain the default, add a supported
-    generated-column accessor rather than making direct attribute access the
-    programmatic API.
+- [x] Retain random arbitrary-member assignment and the public `seed` argument.
+  - The arbitrary orientation has no substantive member interpretation. Random
+    assignment avoids systematically tying its sign to ordered identifiers,
+    while a supplied seed makes an analysis reproducible.
+  - The current implementation sorts the distinct dyad/member lookup before
+    sampling, so the same data and seed should give the same assignments after
+    input-row or repeated-occasion reordering. A direct regression test covers
+    this contract.
+  - Preserve the existing session-RNG restoration tests. Do not promise that
+    assignments to retained dyads remain unchanged after other dyads are added
+    or removed, because that changes the sequence of random draws.
+  - Keep the documentation explicit that users should set and report `seed`
+    when arbitrary signs need to be reproduced.
+- [x] Retain compact composition-dependent generated names by default.
+  - Keep `short_colnames = TRUE` for the common single-composition workflow.
+    The implementation already uses composition-qualified names when multiple
+    final compositions remain.
+  - Reusable pipelines that require qualified names even for one composition
+    can request `short_colnames = FALSE` explicitly.
 - [ ] Make prepared-data summaries concise by default.
-  - Recommended interface:
+  - Use the interface:
     `summary(x, include_generated = FALSE)` and
     `summary(x, include_generated = TRUE)` for the full table.
-  - The default should show structural/composition information and original
-    columns, then point users to the opt-in full generated-column summary.
+  - The default should show the structural/composition header followed by
+    standard summaries for the currently present columns that were not generated
+    by `dyadMLM`. This retains outcomes, identifiers, predictors, and user-added
+    variables while avoiding a very wide table of actor, partner, centered,
+    lagged, indicator, and contrast columns.
+  - State briefly that `include_generated = TRUE` includes all currently
+    present package-generated columns. Use the generated-column registry
+    intersected with current column names, so removed generated columns are not
+    advertised or summarized.
 - [ ] Keep model-comparison conclusions neutral and configurable.
   - Recommended interface:
     `compare_nested_models(model1, model2, alpha = 0.05)`.
@@ -759,8 +776,16 @@ the release scope or shipping unvalidated guidance.
     signed difference from source row numbers or accidental row order.
   - Preserve ordinary DHARMa objects and functions. Do not rewrite DHARMa object
     internals or produce a package-specific one-number adequacy verdict.
+  - Label the vignette workflow as experimental and not yet independently
+    reviewed. Because users call ordinary DHARMa functions rather than a new
+    `dyadMLM` diagnostic API, use a visible documentation callout instead of a
+    runtime warning.
   - State clearly that these checks do not by themselves establish the
     correctness of dyadic covariance, exchangeability, or temporal dependence.
+  - Defer package guidance for ILD/EMA models until serial dependence and any
+    required block-whitening strategy have been calibrated and independently
+    reviewed. ILD diagnostics may remain in workshop or development material,
+    but are not part of the supported 0.2.0 package workflow.
 
 #### DHARMa calibration and acceptance criteria
 
@@ -796,6 +821,32 @@ the release scope or shipping unvalidated guidance.
   remain represented overall.
 - [x] Add a direct `compare_nested_models()` regression test for a valid
   `glmmTMB` fit created with `se = FALSE`; this variant remains supported.
+- [x] Test that random arbitrary-member assignment is reproducible
+  with a supplied seed and invariant to input-row and repeated-occasion order.
+  This is a small test-only change suitable for `main`; it does not require a
+  dedicated feature branch.
+
+### Recommended implementation order
+
+1. Resolve or explicitly abandon `post-workshop-slide-updates` so the workshop
+   deployment and download contract is settled before package documentation is
+   rendered again.
+2. Implement the prepared-data modification state, live print checks, and
+   focused regression tests on a dedicated branch.
+3. Complete the model-level DSM equivalence verification on a dedicated branch;
+   treat any discrepancy as a correctness blocker.
+4. Add the small arbitrary-assignment ordering regression test directly on
+   `main` when it is otherwise clean.
+5. Implement the concise prepared-data summary default on a small API branch.
+6. Make model-comparison conclusions neutral and configurable on a dedicated
+   branch, including focused comparison-data tests.
+7. Rename and enrich the covariance result class and printing on a dedicated
+   branch without changing covariance calculations.
+8. Complete the negative-binomial APIM workflow and cross-vignette consistency
+   review after the preceding behavior and names are stable.
+9. Attempt the experimental cross-sectional DHARMa guidance last. Defer it if
+   calibration or runtime would delay the release.
+10. Freeze one release candidate and run the complete 0.2.0 CRAN checklist.
 
 ### CRAN release checklist
 
@@ -806,10 +857,10 @@ the release scope or shipping unvalidated guidance.
 - [ ] Update `NEWS.md` before freezing the release candidate.
   - Record temporary structural dyad-occasion completion and the resulting
     partner CBP/lag behavior change; do not call it imputation.
-  - Record deterministic arbitrary-member assignment and removal of `seed`, the
-    prepared-object mutation contract, and every changed default,
-    generated-column name, S3-class name, summary interface, and
-    model-comparison conclusion.
+  - Record the prepared-object modification-state contract and every changed
+    S3-class name, summary interface, and model-comparison conclusion. Do not
+    describe retained random assignment, `seed`, or `short_colnames` defaults as
+    migrations because those interfaces remain unchanged.
   - Include concise 0.1.0-to-0.2.0 migration examples and no deprecated wrappers.
 - [ ] Update `DESCRIPTION` to version 0.2.0 and the release date; update
   `CITATION.cff` to the same version and date. Verify that
@@ -817,14 +868,14 @@ the release scope or shipping unvalidated guidance.
   DOI.
 - [ ] Run `devtools::document()`, render `README.Rmd`, and rebuild every package
   vignette affected by the API or numerical changes. Render and inspect the
-  generalized APIM workflow and every source affected by removal of `seed` or
-  changed generated-column defaults; check examples and package help for stale
-  names and defaults.
+  generalized APIM workflow and every source affected by the final summary,
+  model-comparison, or covariance-output contracts; check examples and package
+  help for stale names and defaults.
 - [ ] If the DHARMa guidance passes calibration and is included, verify its
   declared dependency, build-time behavior, runtime, fitted-row alignment, and
   simulation state in the exact release tarball.
 - [ ] Run the complete test suite with all suggested modeling packages installed,
-  including asymmetric-missingness, mutation-matrix, deterministic-assignment,
+  including asymmetric-missingness, modification-state, random-assignment,
   fitted DSM-equivalence, covariance recovery, and generalized-APIM validation
   tests, with no failures, warnings, or unexpected skips.
 - [ ] Build the exact source tarball and run `R CMD check --as-cran` on that
@@ -844,17 +895,78 @@ the release scope or shipping unvalidated guidance.
 
 Candidate work beyond 0.2.0 is organized below:
 
-- Proposed version 0.3.0 candidates: multiple-imputation integration, dyadic
-  post-processing and reporting, advanced diagnostics, Bayesian comparison
-  design, and advanced ILD/EMA preparation.
+- The intended core of version 0.3.0 is the APIM outcome-covariance
+  decomposition and its accompanying methods paper. Other 0.3.0 candidates are
+  multiple-imputation integration, additional dyadic post-processing and
+  reporting, advanced diagnostics, Bayesian comparison design, and advanced
+  ILD/EMA preparation.
 - Version 0.4.0 and later: fitting/syntax helpers, wider reshaping and
   composition infrastructure, broader DSM and covariance methods, a custom Stan
-  track, and any preprint or methods note.
+  track, and additional preprints or methods notes.
 
 ## Proposed Version 0.3.0 Scope
 
-Status: proposed. Select a small subset after 0.2.0 is accepted rather than
-treating every item below as one release commitment.
+Status: proposed. The APIM covariance decomposition below is the intended core
+feature. Select only a small subset of the remaining candidates after 0.2.0 is
+accepted rather than treating every item below as one release commitment.
+
+### Core feature and methods paper: explaining APIM interdependence
+
+- Develop `decompose_apim_covariance()` as a focused post-estimation function
+  for the five signed sources of model-implied APIM outcome covariance:
+  actor--actor, actor--partner, partner--actor, partner--partner, and residual.
+- Keep the first public contract deliberately narrow:
+  - cross-sectional, independent two-member dyads;
+  - continuous outcomes and a linear Gaussian APIM;
+  - one dyadic predictor construct with fixed slopes;
+  - distinguishable `glmmTMB` models first, followed by the exchangeable special
+    case through the validated member-level covariance recovery machinery;
+  - an explicit term map whenever formula terms or covariance blocks cannot be
+    classified uniquely.
+- Separate the implementation into a backend-neutral algebraic core, backend
+  extraction adapters, APIM semantic mapping and validation, and small output
+  methods. Reuse existing `glmmTMB`/`brms` covariance-array infrastructure where
+  it is semantically appropriate rather than coupling the calculation to one
+  printed `VarCorr()` layout.
+- Return one transparent component table in covariance units and signed
+  outcome-correlation points, plus the model-implied outcome variances, total
+  covariance, total correlation, predictor moments, fitted-dyad count, backend,
+  resolved terms, and covariance source. Do not label components as bounded
+  proportions or force them to sum to the observed sample correlation.
+- Compute predictor moments from complete paired rows in the fitted analysis
+  sample with an explicit role/member reconstruction. Do not calculate them
+  naively from duplicated actor/partner columns in the long model matrix.
+- Validate the first implementation against hand calculations, simulated data,
+  coefficient reordering, changed row order, asymmetric outcome missingness,
+  alternative valid term orderings, boundary covariance estimates, and the
+  package workshop's cross-sectional distinguishable APIM. Require exact
+  agreement of component sums with the model-implied covariance within
+  prespecified numerical tolerances.
+- Add the exchangeable special case only after member-label invariance is tested
+  and the two arbitrary member-driven terms are combined. Add `brms` support
+  afterward while preserving posterior draws. Keep `lme4`, generalized links,
+  mixed compositions, and automatic formula-wide classification outside the
+  first contract.
+- Develop dyad-bootstrap intervals as a separately validated refitting workflow.
+  Resample complete dyads, recompute predictor moments, document the interval
+  type and nonconvergence policy, and do not imply frequentist uncertainty for
+  `glmmTMB` point estimates before this workflow is available.
+- Use
+  [`paper-idea-explaining-interdependence-apim.Rmd`](paper-idea-explaining-interdependence-apim.Rmd)
+  as the manuscript and software-design source. Complete the focused literature
+  review before making a novelty claim, then evaluate finite-sample bias and
+  interval coverage through simulation and include one substantive empirical
+  example with reproducible tables and signed waterfall figures.
+- Publish the function and its documentation in version 0.3.0, freeze the
+  supported estimand and output contract, archive the reproducible paper code
+  and results, and then submit the methods paper. Cite the package's Zenodo
+  concept DOI for the implementation and record the paper citation in package
+  metadata after acceptance.
+- Treat multiple predictors, interactions, ILD level-specific decompositions,
+  random slopes, nonlinear outcomes, and generic variance-share allocations as
+  explicitly deferred extensions. The manuscript may state their governing
+  principles, but the initial function must reject them rather than return an
+  apparently complete decomposition under unstated conventions.
 
 ### Multiple-imputation integration
 

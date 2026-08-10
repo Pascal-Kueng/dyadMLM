@@ -1005,12 +1005,54 @@ The paper should contribute the following package:
    why they are not percentages or separate correlations.
 5. Explain why the residual correlation is not the residual contribution to
    the total outcome correlation.
-6. Provide a plug-in estimator, dyad-bootstrap uncertainty intervals, and a
+6. Provide a plug-in estimator, dyad-bootstrap uncertainty intervals, a
+   focused `dyadMLM::decompose_apim_covariance()` implementation, and a
    reproducible table plus waterfall visualization.
 7. Demonstrate that the same total interdependence can have different
    model-implied route profiles.
 8. End with the compact exchangeable special case, where the two member-driven
    terms become equal and lose their role-specific interpretation.
+
+## Planned software contribution
+
+The package contribution should be deliberately narrower than a universal
+variance-partitioning function. The proposed public function is
+`decompose_apim_covariance()`, not the broader `decompose_apim()`. Its first
+supported contract should cover cross-sectional, two-member, linear Gaussian
+APIMs with one dyadic predictor construct and fixed slopes.
+
+The function should return:
+
+1. the actor--actor, actor--partner, partner--actor, partner--partner, and
+   residual covariance contributions;
+2. the same five contributions in signed outcome-correlation points;
+3. the two model-implied outcome variances, total outcome covariance, and
+   total outcome correlation used to verify and scale the decomposition; and
+4. the fitted sample, predictor moments, resolved coefficient names, residual
+   covariance source, model backend, and assumptions needed to interpret the
+   result.
+
+The outcome variances are required for the common denominator, but the first
+function should not relabel their correlated-predictor cross-products as
+bounded actor, partner, overlap, or interaction shares. The decomposition is
+signed and additive; it is not a percentage-of-covariance or percentage-of-
+variance calculation.
+
+Implementation should separate a small backend-neutral algebraic core from
+model-specific extraction and APIM term mapping. Begin with the cross-sectional
+distinguishable `glmmTMB` specification used in the package vignette. Add the
+exchangeable special case by reusing the validated member-level covariance
+recovery machinery. Add `brms` only after the point-estimate contract is stable,
+retaining posterior draws rather than discarding their uncertainty. Require an
+explicit term map whenever the actor, partner, role, predictor, or residual
+covariance terms cannot be classified uniquely.
+
+Predictor moments must be computed from the fitted paired analysis sample, not
+naively from duplicated long-format design-matrix rows. The function should
+report the number of complete fitted dyads used and reject unsupported or
+ambiguous covariance structures rather than silently selecting one random-
+effect block. A separate dyad-bootstrap workflow can add frequentist intervals
+after its refitting and nonconvergence behavior have been validated.
 
 ## Novelty boundary and literature work
 
@@ -1118,7 +1160,7 @@ profiles.
 7. **Empirical example:** show how similar total interdependence can have
    different route profiles.
 8. **Extensions and limits:** several predictors, the brief exchangeable
-   special case, and causal caution.
+   special case, software scope, and causal caution.
 9. **Discussion:** reporting recommendations, substantive uses, and future
    longitudinal work.
 
@@ -1177,8 +1219,45 @@ Further questions:
 2. Confirm intellectual provenance and naming before presenting a novelty
    claim.
 3. Conduct the focused literature review described above.
-4. Prototype an internal function that extracts model coefficients, predictor
-   moments, total residual covariance, and all five contributions.
+4. Prototype an internal `decompose_apim_covariance()` function that separates
+   the algebraic core from `glmmTMB` extraction and explicit APIM term mapping.
 5. Test the decomposition and extraction logic on the workshop APIM example.
 6. Choose an empirical example with a clear substantive story.
 7. Run a small bootstrap prototype before designing the full simulation.
+
+## Deferred extensions and governing principles
+
+The following extensions are worthwhile, but they should not enlarge the first
+paper or the initial package function before the five-route estimand and its
+uncertainty are stable:
+
+- **Several predictors:** the matrix identity
+  $\boldsymbol B\boldsymbol\Sigma_X\boldsymbol B^\mathsf{T}$ remains exact, but
+  cross-predictor covariance terms require a prespecified, visible grouping or
+  allocation rule. Results will depend on the chosen predictor basis and must
+  not be presented as uniquely determined construct shares.
+- **Interactions and nonlinear terms:** an interaction can be treated as an
+  additional design-matrix column, but centering its constituent predictors
+  does not generally make it orthogonal to their main effects. Do not create an
+  automatic "synergistic" compartment without assumptions and a validated
+  allocation rule; nonlinear links also require a separately defined response-
+  or link-scale estimand.
+- **Intensive longitudinal data:** within-person and between-person predictors
+  suggest useful level-specific questions, but the package models may contain
+  stable dyad effects, same-occasion covariance, random slopes, and serial
+  residual processes. Define the target occasion weighting, fitted-pair sample,
+  and marginalization level before calling any component Level 1 or Level 2.
+- **Random slopes:** terms such as a fixed slope squared plus a random-slope
+  variance are sufficient only under restrictive independence and centering
+  conditions. A general extension must include intercept--slope and cross-member
+  slope covariances and show how contributions change with predictor values.
+- **Variance decompositions:** model-implied outcome variances should remain
+  available as transparent checks and denominators. Any later actor/partner
+  variance allocation with correlated predictors must name and justify its
+  convention rather than implying that path tracing supplies unique bounded
+  proportions.
+
+These extensions can motivate later methodological work. The first paper and
+software release should establish a small result that is exact under stated
+assumptions, reproducible from supported fitted models, and difficult for users
+to misinterpret.
