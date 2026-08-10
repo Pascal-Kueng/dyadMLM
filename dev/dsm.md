@@ -1,10 +1,10 @@
 # Directional Dyadic Score Model
 
 **Status:** predictor preparation, validation, metadata, and printing are
-complete for the v0.1.0 scope. The vignette contains the cross-sectional
-long-format model, APIM transformations, and a brief ILD extension. An
-automated direct score-equation versus long-interaction coefficient and
-covariance equivalence test remains a possible follow-up.
+complete. The vignette contains the cross-sectional long-format model, APIM
+transformations, and a brief ILD extension. Automated model-level tests verify
+the direct score equations against the long interaction model and an
+independent `lavaan` fit.
 
 ## Purpose
 
@@ -415,15 +415,19 @@ construction, and role direction reversal.
 Automated tests reject missing roles or role orders, exchangeable or mixed
 compositions, invalid two-role orders, and combined DIM/DSM requests.
 
-### Remaining model-level verification
+### Model-level equivalence verification
 
-- Simulate data from known `YLevel` and `YDiff` regressions.
-- Reconstruct `Y1` and `Y2` using the `+0.5/-0.5` contrast.
-- Fit the direct two-equation DSM and the long interaction model.
-- Verify all six fixed coefficients agree within numerical tolerance.
-- Verify the random intercept variance, random slope variance, and covariance
-  recover the level variance, difference variance, and their covariance.
-- Verify fitted member outcomes imply the fitted `YLevel` and `YDiff`.
+`test-dsm-model-equivalence.R` simulates data from known `YLevel` and `YDiff`
+regressions, reconstructs `Y1` and `Y2`, and verifies that:
+
+- the long `glmmTMB` interaction model converges with a positive-definite
+  Hessian;
+- all six fixed coefficients agree with a direct multivariate linear model;
+- the random intercept variance, random slope variance, and their covariance
+  agree with the maximum-likelihood covariance of the direct score residuals;
+- fitted member outcomes reconstruct the fitted `YLevel` and `YDiff`; and
+- a separate multivariate `lavaan` model gives the same score-equation
+  coefficients and residual covariance.
 
 ### Direction reversal behavior
 
@@ -437,14 +441,15 @@ Fit the same data after reversing `dsm_role_order`. Expected behavior:
 - parameters involving two directional quantities, such as
   `XDiff -> YDiff`, retain their sign.
 
-This test is important because it distinguishes harmless reparameterization
-from accidental dependence on row order.
+The automated direction-reversal test confirms this behavior. It distinguishes
+harmless reparameterization from accidental dependence on row order.
 
 ### Regression protection
 
 Automated tests verify unchanged DIM behavior, coexistence of APIM and DSM
-columns, generated-column metadata, and concise print patterns. Model-fitting
-equivalence tests remain separate from data-preparation unit tests.
+columns, generated-column metadata, concise print patterns, and model-fitting
+equivalence. Model-fitting tests remain separate from data-preparation unit
+tests.
 
 ## Explicit multivariate alternative
 

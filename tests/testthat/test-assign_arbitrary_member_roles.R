@@ -23,6 +23,32 @@ test_that("assign_arbitrary_member_roles returns one role per member", {
   )
 })
 
+test_that("arbitrary roles are reproducible after row reordering", {
+  data <- data.frame(
+    dyad_id = rep(1:3, each = 6),
+    person_id = rep(rep(c("A", "B"), each = 3), times = 3),
+    time = rep(1:3, times = 6)
+  )
+
+  original_assignment <- assign_arbitrary_member_roles(
+    data,
+    group_name = "dyad_id",
+    member_name = "person_id",
+    seed = 123
+  ) |>
+    dplyr::arrange(.data$dyad_id, .data$person_id)
+
+  reordered_assignment <- assign_arbitrary_member_roles(
+    data[rev(seq_len(nrow(data))), ],
+    group_name = "dyad_id",
+    member_name = "person_id",
+    seed = 123
+  ) |>
+    dplyr::arrange(.data$dyad_id, .data$person_id)
+
+  expect_equal(reordered_assignment, original_assignment)
+})
+
 test_that("add_arbitrary_member_roles preserves repeated member rows", {
   data <- data.frame(
     dyad_id = c(1, 1, 1, 1, 2, 2, 2, 2),
