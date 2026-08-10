@@ -18,7 +18,7 @@
 * Added a `summary()` method for prepared data that prints the dyadic structure
   followed by standard summaries of all columns.
 * Printing prepared data now uses current dyad and composition counts. If a
-  required structural column has been removed, the unavailable summary is
+  required column has been removed, the unavailable summary is
   identified instead of displaying its preparation-time count.
 * Generated-column tracking now records all retained composition and modeling
   columns. Printing and model comparison use these records rather than

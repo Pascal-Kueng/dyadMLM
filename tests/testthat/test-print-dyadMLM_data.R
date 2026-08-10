@@ -93,6 +93,12 @@ test_that("dyadMLM data prints current dyad and composition counts", {
   expect_length(female_male_line, 1L)
   expect_match(female_male_line, "distinguishable +1 dyad$")
   expect_identical(filtered_result, result_before_printing)
+
+  base_filtered_result <- result[result$dyad_id != 3, ]
+  base_filtered_print <- capture_wide_print(base_filtered_result)
+
+  expect_true(any(grepl("# Rows: 4 | Dyads: 2", base_filtered_print, fixed = TRUE)))
+  expect_false(any(grepl("^# female_x_female", base_filtered_print)))
 })
 
 test_that("dyadMLM data identifies unavailable current summaries", {
@@ -107,6 +113,17 @@ test_that("dyadMLM data identifies unavailable current summaries", {
     member = person_id,
     seed = 123
   )
+
+  result_with_missing_dyad <- result
+  result_with_missing_dyad$dyad_id[result_with_missing_dyad$dyad_id == 2] <- NA
+  printed_with_missing_dyad <- capture_wide_print(result_with_missing_dyad)
+  composition_line <- printed_with_missing_dyad[
+    grepl("^# assumed_exchangeable", printed_with_missing_dyad)
+  ]
+
+  expect_true(any(grepl("# Rows: 4 | Dyads: 1", printed_with_missing_dyad, fixed = TRUE)))
+  expect_length(composition_line, 1L)
+  expect_match(composition_line, "exchangeable +1 dyad$")
 
   result_without_composition <- result
   result_without_composition[[dyad_composition_col]] <- NULL

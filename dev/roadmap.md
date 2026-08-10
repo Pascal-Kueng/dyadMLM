@@ -614,7 +614,7 @@ another routine breaking CRAN update shortly afterward.
     `dyadMLM_data` class after rows or columns change, while the print header
     still uses dyad and composition counts recorded during preparation.
   - Compute current row, dyad, and composition counts when printing if the
-    required structural columns remain available. Otherwise omit the unavailable
+    required columns remain available. Otherwise omit the unavailable
     summary with a brief explanation. Continue to list only recorded generated
     columns that are still present.
   - Do not track modifications or silently re-center, re-lag, or regenerate

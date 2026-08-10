@@ -72,11 +72,12 @@ dyad_compositions_with_current_counts <- function(data) {
     return(NULL)
   }
 
-  # Count each dyad once, regardless of member rows or repeated occasions.
+  # Count each identifiable dyad once, regardless of member rows or occasions.
   current_composition_counts <- tibble::tibble(
     dyad = data[[meta_data$dyad]],
     composition = data[[dyad_composition_col]]
   ) |>
+    dplyr::filter(!is.na(.data$dyad)) |>
     dplyr::distinct() |>
     dplyr::count(.data$composition, name = "n_dyads")
 
