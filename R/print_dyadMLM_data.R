@@ -17,12 +17,17 @@ print.dyadMLM_data <- function(x, ...) {
 
 print_dyadMLM_header <- function(x, title = "dyadMLM data") {
   meta <- attr(x, "dyadMLM")
+  current_n_dyads <- if (meta$dyad %in% names(x)) {
+    dplyr::n_distinct(x[[meta$dyad]], na.rm = TRUE)
+  } else {
+    "unavailable"
+  }
 
   cat(pillar::style_subtle(paste0("# ", title, "\n")))
   print_wrapped_comment_fields(
     fields = c(
       paste0("Rows: ", nrow(x)),
-      paste0("Dyads: ", meta$n_dyads),
+      paste0("Dyads: ", current_n_dyads),
       paste0("Intensive longitudinal: ", ifelse(meta$longitudinal, "yes", "no"))
     ),
     sep = " | ",
@@ -77,7 +82,20 @@ print_dyadMLM_header <- function(x, title = "dyadMLM data") {
     }
   }
 
-  print_dyad_compositions(meta$dyad_compositions)
+  if (!is.null(meta$dyad_compositions) && nrow(meta$dyad_compositions) > 0) {
+    current_dyad_compositions <- dyad_compositions_with_current_counts(x)
+
+    if (is.null(current_dyad_compositions)) {
+      print_wrapped_comment_fields(
+        label = "Dyad compositions",
+        fields = "unavailable because required columns are missing",
+        style = "subtle"
+      )
+      cat(pillar::style_subtle("#\n"))
+    } else {
+      print_dyad_compositions(current_dyad_compositions)
+    }
+  }
   invisible(NULL)
 }
 

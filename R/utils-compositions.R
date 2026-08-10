@@ -57,6 +57,41 @@ composition_role_label <- function(composition, role, sep = dyad_composition_rol
 }
 
 
+#' Attach current dyad counts to stored composition metadata
+#'
+#' @param data A prepared `dyadMLM_data` object.
+#'
+#' @return The stored composition metadata with counts from the current rows,
+#'   or `NULL` if the required columns are unavailable.
+#' @noRd
+dyad_compositions_with_current_counts <- function(data) {
+  meta_data <- attr(data, "dyadMLM")
+  required_columns <- c(meta_data$dyad, dyad_composition_col)
+
+  if (!all(required_columns %in% names(data))) {
+    return(NULL)
+  }
+
+  # Count each dyad once, regardless of member rows or repeated occasions.
+  current_composition_counts <- tibble::tibble(
+    dyad = data[[meta_data$dyad]],
+    composition = data[[dyad_composition_col]]
+  ) |>
+    dplyr::distinct() |>
+    dplyr::count(.data$composition, name = "n_dyads")
+
+  # Retain how each composition was prepared, but replace its original count.
+  composition_metadata <- meta_data$dyad_compositions
+  composition_metadata$n_dyads <- NULL
+
+  dplyr::inner_join(
+    composition_metadata,
+    current_composition_counts,
+    by = "composition"
+  )
+}
+
+
 #' Create safe suffixes for generated dyadMLM columns
 #'
 #' @param labels Labels that will be used to build generated column names.

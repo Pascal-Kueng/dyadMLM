@@ -70,6 +70,67 @@ test_that("dyadMLM data header and structure wrap to console width", {
   expect_true(any(grepl("#   role = very_long_role_identifier", printed, fixed = TRUE)))
 })
 
+test_that("dyadMLM data prints current dyad and composition counts", {
+  data <- tibble::tibble(
+    dyad_id = rep(1:3, each = 2),
+    person_id = 1:6,
+    role = c("female", "male", "female", "male", "female", "female")
+  )
+
+  result <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    role = role
+  )
+  filtered_result <- dplyr::filter(result, .data$dyad_id != 2)
+  result_before_printing <- filtered_result
+
+  printed <- capture_wide_print(filtered_result)
+  female_male_line <- printed[grepl("^# female_x_male", printed)]
+
+  expect_true(any(grepl("# Rows: 4 | Dyads: 2", printed, fixed = TRUE)))
+  expect_length(female_male_line, 1L)
+  expect_match(female_male_line, "distinguishable +1 dyad$")
+  expect_identical(filtered_result, result_before_printing)
+})
+
+test_that("dyadMLM data identifies unavailable current summaries", {
+  data <- tibble::tibble(
+    dyad_id = c(1, 1, 2, 2),
+    person_id = 1:4
+  )
+
+  result <- prepare_dyad_data(
+    data,
+    dyad = dyad_id,
+    member = person_id,
+    seed = 123
+  )
+
+  result_without_composition <- result
+  result_without_composition[[dyad_composition_col]] <- NULL
+  printed_without_composition <- capture_wide_print(result_without_composition)
+
+  expect_true(any(grepl("# Rows: 4 | Dyads: 2", printed_without_composition, fixed = TRUE)))
+  expect_true(any(grepl(
+    "# Dyad compositions: unavailable because required columns are missing",
+    printed_without_composition,
+    fixed = TRUE
+  )))
+
+  result_without_dyad <- result
+  result_without_dyad$dyad_id <- NULL
+  printed_without_dyad <- capture_wide_print(result_without_dyad)
+
+  expect_true(any(grepl("# Rows: 4 | Dyads: unavailable", printed_without_dyad, fixed = TRUE)))
+  expect_true(any(grepl(
+    "# Dyad compositions: unavailable because required columns are missing",
+    printed_without_dyad,
+    fixed = TRUE
+  )))
+})
+
 test_that("dyadMLM data prints dropped incomplete dyads", {
   data <- tibble::tibble(
     dyad_id = c(1, 2, 2, 3, 3),
