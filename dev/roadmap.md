@@ -32,8 +32,9 @@ helpers, and eventually model syntax explicit and reproducible.
 Version 0.1.0 has been accepted by CRAN, tagged as `v0.1.0`, archived on
 Zenodo, and published as a GitHub Release. Version 0.2.0 is now prepared as a
 focused correctness and API-stabilization release before broader adoption, not
-a large model-fitting feature release. Its local exact-tarball CRAN check is
-clean; external checks and submission remain.
+a large model-fitting feature release. Its local exact-tarball CRAN check,
+five-platform CI matrix, pkgdown build, and live deployment checks are clean;
+submission remains.
 
 The core data-preparation API is implemented and covered by tests, the README
 links to the pkgdown site, and GitHub Actions are configured for R CMD check,
@@ -773,12 +774,13 @@ another routine breaking CRAN update shortly afterward.
 - [x] Build the exact source tarball and run `R CMD check --as-cran` on that
   tarball, including the manual. Treat ordinary GitHub Actions checks as ongoing
   CI rather than a substitute for this release artifact.
-- [ ] Run Win-builder or an equivalent current Windows submission check and
+- [x] Run Win-builder or an equivalent current Windows submission check and
   review all CRAN-check platforms for the current release candidate.
-- [ ] Build and inspect pkgdown, deploy from `main`, and verify the stable package
-  and vignette URLs. Confirm that the separately maintained workshop deployment
-  remains accessible, but handle its synthetic-data transition and final ZIP
-  contents under issue #6 rather than blocking the CRAN submission.
+- [x] Build and inspect pkgdown, deploy the release candidate, and verify the
+  stable package and vignette URLs. Confirm that the separately maintained
+  workshop deployment remains accessible, but handle its synthetic-data
+  transition and final ZIP contents under issue #6 rather than blocking the
+  CRAN submission.
 - [ ] Submit one frozen 0.2.0 candidate to CRAN. After acceptance, tag the exact
   accepted commit as `v0.2.0`, create the GitHub Release, archive the release on
   Zenodo, and verify the version-specific DOI while continuing to cite the
