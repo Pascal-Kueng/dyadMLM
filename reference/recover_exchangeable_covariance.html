@@ -97,7 +97,7 @@ an ordinary intercept is the shared intercept coordinate.</p></li>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An <code>exchangeable_rescov</code> object: a named list with one element per
+    <p>An <code>exchangeable_covariance</code> object: a named list with one element per
 matched block pairing. Each element contains <code>shared_term</code> and
 <code>difference_term</code> (each a fitted term string or <code>NULL</code>), plus the member-level
 variance-covariance matrix in <code>varcov</code> and its standard-deviation/correlation
@@ -256,7 +256,7 @@ version.</p></div>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu">recover_exchangeable_covariance</span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Exchangeable residual covariance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Recovered exchangeable member-level covariance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pair `pair_1`</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Shared:     us(1 | coupleID)</span>

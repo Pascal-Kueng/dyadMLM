@@ -1,11 +1,11 @@
-# Print recovered exchangeable residual covariance
+# Print recovered exchangeable member-level covariance
 
-Print recovered exchangeable residual covariance
+Print recovered exchangeable member-level covariance
 
 ## Usage
 
 ``` r
-# S3 method for class 'exchangeable_rescov'
+# S3 method for class 'exchangeable_covariance'
 print(x, representation = c("both", "varcov", "sdcor"), digits = 3L, ...)
 ```
 

@@ -401,7 +401,7 @@ backtransformed <- dyadMLM::recover_exchangeable_covariance(apim_exchangeable_mo
 
 # residual variance-covariance and SD-correlation representations
 print(backtransformed)
-#> Exchangeable residual covariance
+#> Recovered exchangeable member-level covariance
 #> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
@@ -889,7 +889,7 @@ recovered_covariance <- dyadMLM::recover_exchangeable_covariance(
 )
 
 print(recovered_covariance)
-#> Exchangeable residual covariances (2 block pairs)
+#> Recovered exchangeable member-level covariances (2 block pairs)
 #> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID)
@@ -960,7 +960,7 @@ random_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
 )
 
 print(random_slope_covariance)
-#> Exchangeable residual covariances (2 block pairs)
+#> Recovered exchangeable member-level covariances (2 block pairs)
 #> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID:diaryday)
@@ -1065,7 +1065,7 @@ no_contrast_slope_covariance <- dyadMLM::recover_exchangeable_covariance(
 )
 
 print(no_contrast_slope_covariance, representation = "sdcor")
-#> Exchangeable residual covariance
+#> Recovered exchangeable member-level covariance
 #> 
 #> Pair `dyad`
 #> Shared:     us(1 + .provided_support_cwp_actor | coupleID)
@@ -1134,7 +1134,7 @@ no_contrast_block_covariance <- dyadMLM::recover_exchangeable_covariance(
 )
 
 print(no_contrast_block_covariance, representation = "sdcor")
-#> Exchangeable residual covariance
+#> Recovered exchangeable member-level covariance
 #> 
 #> Pair `dyad`
 #> Shared:     us(1 + .provided_support_cwp_actor | coupleID)

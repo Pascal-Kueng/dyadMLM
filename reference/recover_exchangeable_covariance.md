@@ -49,7 +49,7 @@ recover_exchangeable_covariance(model, block_pairings = NULL)
 
 ## Value
 
-An `exchangeable_rescov` object: a named list with one element per
+An `exchangeable_covariance` object: a named list with one element per
 matched block pairing. Each element contains `shared_term` and
 `difference_term` (each a fitted term string or `NULL`), plus the
 member-level variance-covariance matrix in `varcov` and its
@@ -224,7 +224,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 
   recover_exchangeable_covariance(model)
 }
-#> Exchangeable residual covariance
+#> Recovered exchangeable member-level covariance
 #> 
 #> Pair `pair_1`
 #> Shared:     us(1 | coupleID)

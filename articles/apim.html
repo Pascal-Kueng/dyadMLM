@@ -430,7 +430,7 @@ recover the interpretable variance-covariance matrix:</p>
 <span></span>
 <span><span class="co"># residual variance-covariance and SD-correlation representations</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">backtransformed</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exchangeable residual covariance</span></span>
+<span><span class="co">#&gt; Recovered exchangeable member-level covariance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Pair `pair_1`</span></span>
 <span><span class="co">#&gt; Shared:     us(1 | coupleID)</span></span>
@@ -889,7 +889,7 @@ dependence. The two matched block pairs are returned separately:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">recovered_covariance</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exchangeable residual covariances (2 block pairs)</span></span>
+<span><span class="co">#&gt; Recovered exchangeable member-level covariances (2 block pairs)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Pair `pair_1`</span></span>
 <span><span class="co">#&gt; Shared:     us(1 | coupleID)</span></span>
@@ -958,7 +958,7 @@ simulation.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">random_slope_covariance</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exchangeable residual covariances (2 block pairs)</span></span>
+<span><span class="co">#&gt; Recovered exchangeable member-level covariances (2 block pairs)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Pair `pair_1`</span></span>
 <span><span class="co">#&gt; Shared:     us(1 | coupleID:diaryday)</span></span>
@@ -1054,7 +1054,7 @@ what blocks belong together.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">no_contrast_slope_covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exchangeable residual covariance</span></span>
+<span><span class="co">#&gt; Recovered exchangeable member-level covariance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Pair `dyad`</span></span>
 <span><span class="co">#&gt; Shared:     us(1 + .provided_support_cwp_actor | coupleID)</span></span>
@@ -1115,7 +1115,7 @@ is absent, we specify it as <code>NULL</code>:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">no_contrast_block_covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exchangeable residual covariance</span></span>
+<span><span class="co">#&gt; Recovered exchangeable member-level covariance</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Pair `dyad`</span></span>
 <span><span class="co">#&gt; Shared:     us(1 + .provided_support_cwp_actor | coupleID)</span></span>
