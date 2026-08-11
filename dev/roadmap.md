@@ -949,6 +949,17 @@ accepted rather than treating every item below as one release commitment.
   principles, but the initial function must reject them rather than return an
   apparently complete decomposition under unstated conventions.
 
+### Version 0.3.1 candidate: additional covariance components
+
+- Revisit whether `recover_exchangeable_covariance()` should support paired
+  shared/difference random effects in `glmmTMB` zero-inflation and dispersion
+  components.
+- Keep conditional, zero-inflation, and dispersion results separate and label
+  each result with its model component and parameter scale.
+- Extend support only with end-to-end extraction and transformation tests and
+  clear documentation of the component-specific interpretation. Evaluate
+  `brms` distributional and nonlinear parameters separately.
+
 ### Multiple-imputation integration
 
 - Start with an engine-independent contract for externally imputed, two-member
