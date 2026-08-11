@@ -42,7 +42,7 @@ test_that("the public API and metadata use only the cleaned names", {
   expect_true("block_pairings" %in% covariance_arguments)
   expect_false("pairs" %in% covariance_arguments)
 
-  print_arguments <- names(formals(print.exchangeable_rescov))
+  print_arguments <- names(formals(print.exchangeable_covariance))
   expect_true("representation" %in% print_arguments)
   expect_false("what" %in% print_arguments)
 

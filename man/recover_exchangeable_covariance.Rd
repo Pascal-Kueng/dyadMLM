@@ -30,7 +30,7 @@ an ordinary intercept is the shared intercept coordinate.
 }}
 }
 \value{
-An \code{exchangeable_rescov} object: a named list with one element per
+An \code{exchangeable_covariance} object: a named list with one element per
 matched block pairing. Each element contains \code{shared_term} and
 \code{difference_term} (each a fitted term string or \code{NULL}), plus the member-level
 variance-covariance matrix in \code{varcov} and its standard-deviation/correlation

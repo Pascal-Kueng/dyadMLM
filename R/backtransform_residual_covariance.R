@@ -156,7 +156,7 @@
 #' higher-level random effects and can represent latent link-scale covariance
 #' in non-Gaussian models.
 #'
-#' @return An `exchangeable_rescov` object: a named list with one element per
+#' @return An `exchangeable_covariance` object: a named list with one element per
 #'   matched block pairing. Each element contains `shared_term` and
 #'   `difference_term` (each a fitted term string or `NULL`), plus the member-level
 #'   variance-covariance matrix in `varcov` and its standard-deviation/correlation
@@ -308,11 +308,11 @@ recover_exchangeable_covariance <- function(model, block_pairings = NULL) {
       call. = FALSE
     )
   }
-  class(results) <- c("exchangeable_rescov", "list")
+  class(results) <- c("exchangeable_covariance", "list")
   return(results)
 }
 
-#' Print recovered exchangeable residual covariance
+#' Print recovered exchangeable member-level covariance
 #'
 #' @param x An object returned by [recover_exchangeable_covariance()].
 #' @param representation Which representation to print: `"both"` (default), `"varcov"`,
@@ -325,7 +325,7 @@ recover_exchangeable_covariance <- function(model, block_pairings = NULL) {
 #' @keywords internal
 #'
 #' @export
-print.exchangeable_rescov <- function(
+print.exchangeable_covariance <- function(
   x,
   representation = c("both", "varcov", "sdcor"),
   digits = 3L,
@@ -348,9 +348,13 @@ print.exchangeable_rescov <- function(
   }
 
   title <- if (length(x) == 1L) {
-    "Exchangeable residual covariance"
+    "Recovered exchangeable member-level covariance"
   } else {
-    paste0("Exchangeable residual covariances (", length(x), " block pairs)")
+    paste0(
+      "Recovered exchangeable member-level covariances (",
+      length(x),
+      " block pairs)"
+    )
   }
   cat(title, "\n", sep = "")
 

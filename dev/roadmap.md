@@ -688,15 +688,13 @@ another routine breaking CRAN update shortly afterward.
     significant, and retain the warning that this does not establish equal fit.
   - Keep the shorter function name, but state consistently that the current
     backend is `glmmTMB` only.
-- [ ] Use covariance terminology that covers residual and higher-level random
+- [x] Use covariance terminology that covers residual and higher-level random
   effects.
-  - Recommended direct rename before the API freeze: class
+  - Use class
     `exchangeable_covariance` and print heading "Recovered exchangeable
     member-level covariance". The public function name
     `recover_exchangeable_covariance()` already has the right scope.
-  - Preserve the backend, grouping factor, underlying coefficient names,
-    selected shared/difference terms, and indicator names in each returned block
-    pairing so results are self-describing.
+  - Keep the existing result structure and covariance calculations unchanged.
 
 ### Required 0.2.0 documentation alignment
 
@@ -823,8 +821,8 @@ the release scope or shipping unvalidated guidance.
    do not add a separate concise mode.
 6. Keep model-comparison conclusions neutral and configurable through `alpha`;
    this is implemented with focused comparison tests.
-7. Rename and enrich the covariance result class and printing on a dedicated
-   branch without changing covariance calculations.
+7. Rename the covariance result class and clarify its member-level print
+   heading without changing covariance calculations; this is implemented.
 8. Complete the negative-binomial APIM workflow and cross-vignette consistency
    review after the preceding behavior and names are stable.
 9. Attempt the experimental cross-sectional DHARMa guidance last. Defer it if
