@@ -10,7 +10,7 @@ parameters is shown first in the result.
 ## Usage
 
 ``` r
-compare_nested_models(model1, model2)
+compare_nested_models(model1, model2, alpha = 0.05)
 ```
 
 ## Arguments
@@ -19,12 +19,17 @@ compare_nested_models(model1, model2)
 
   Two fitted `glmmTMB` models to compare.
 
+- alpha:
+
+  Significance level used for the printed conclusion. Must be one number
+  between 0 and 1.
+
 ## Value
 
 An `anova`-style data frame containing model degrees of freedom,
 information criteria, log-likelihoods, the likelihood-ratio statistic,
 and its chi-squared p-value. When printed, a short conclusion interprets
-the test at the 5% significance level.
+the test at the selected significance level.
 
 ## Details
 
@@ -44,6 +49,7 @@ cannot establish that one model is mathematically nested within the
 other. The caller remains responsible for supplying genuinely nested
 models. The usual chi-squared reference distribution may also be
 inappropriate when tested variance parameters are on the boundary.
+`alpha` affects only the printed conclusion, not the test results.
 
 ## Examples
 
