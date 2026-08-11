@@ -209,7 +209,8 @@ and predictor metadata such as `temporal_decompositions`,
 `lag1_predictors`, `apim_predictors`, and `dim_predictors`, as well as
 `dsm_predictors` and `dsm_role_order` when applicable. The
 `generated_columns` table records each package-generated column retained
-in the returned data.
+in the returned data. Modifying prepared data does not automatically
+regenerate package-generated columns.
 
 ## Details
 

@@ -22,6 +22,9 @@
 - Added a [`summary()`](https://rdrr.io/r/base/summary.html) method for
   prepared data that prints the dyadic structure followed by standard
   summaries of all columns.
+- Printing prepared data now uses current dyad and composition counts.
+  If a required column has been removed, the unavailable summary is
+  identified instead of displaying its preparation-time count.
 - Generated-column tracking now records all retained composition and
   modeling columns. Printing and model comparison use these records
   rather than inferring column ownership from a prefix, and generated
