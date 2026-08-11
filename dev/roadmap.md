@@ -98,7 +98,9 @@ The engine-independent covariance-array back-transformation and final named
 `varcov`/`sdcor` results are implemented for `glmmTMB` point estimates and
 draw-wise `brms` results, including partial and wholly omitted components.
 
-The getting-started and DIM vignettes have completed detailed review.
+The Gaussian package-vignette improvements planned for version 0.2.0 have
+completed detailed review. Generalized-outcome and diagnostic vignettes remain
+development work for the later milestones below.
 
 ## Vignette Architecture
 
@@ -126,7 +128,9 @@ Target vignette structure:
   - a brief comparison of manifest raw outcome lags and separately estimated
     within-/between-person outcome-lag components, with their different
     interpretations and small-T cautions
-- `generalized-apim.Rmd`
+- `dev/vignettes/generalized-apim.Rmd`
+  - development draft planned for version 0.3.0, omitted from the public
+    vignette index until its supported outcome families are validated
   - one focused, runnable negative-binomial APIM workflow using the shipped
     count-outcome data
   - distinguishable and exchangeable examples with interpretation on the
@@ -533,7 +537,8 @@ outside this collapsed section.
   - `dev/backtransform.md` records the matching contract, mathematical
     transformation, backend boundaries, and remaining implementation sequence.
 - The bounded `glmmTMB`/DHARMa diagnostics work considered after the first
-  release is now the priority additive 0.2.0 target below.
+  release is assigned to the staged 0.2.1 cross-sectional and 0.2.2 ILD
+  milestones below rather than the 0.2.0 stabilization release.
 - Historical release-check sequence after vignette/doc cleanup
   - release checks have already been run during development, but must be run
     again after building and polishing the vignettes
@@ -698,101 +703,12 @@ another routine breaking CRAN update shortly afterward.
 
 ### Required 0.2.0 documentation alignment
 
-- [ ] Publish one focused cross-sectional negative-binomial APIM workflow.
-  - Promote and finish the usable count-outcome material in
-    `dev/vignettes/generalized-apim.Rmd`, covering distinguishable and
-    exchangeable examples with `dyads_nbinom_cross`.
-  - Remove the empty dichotomous, ordinal, and categorical sections and defer
-    those outcome families explicitly rather than implying that they are
-    documented.
-  - Execute both fits during local validation, check convergence and coefficient
-    interpretation on the log-mean scale and as conditional expected counts or
-    multiplicative mean ratios. Keep normal CRAN rendering bounded through
-    guarded or precomputed output if necessary.
-  - Link the published workflow from `apim.Rmd`, the package overview, and the
-    pkgdown vignette index; remove statements that a generalized vignette is
-    merely planned.
-- [ ] Complete the APIM, mixed-APIM, DIM, and DSM consistency review.
+- [x] Complete the Gaussian APIM, mixed-APIM, DIM, and DSM consistency review.
   - Ensure examples use the final 0.2.0 names, defaults, and prepared-object
     contract and distinguish implemented workflows from methodological limits.
   - Simplify or explicitly label mixed-composition ILD fits that remain
     convergence-sensitive rather than presenting optimizer changes as a
     universal solution.
-
-### Priority additive feature after stabilization: bounded DHARMa guidance
-
-Begin this work only after the release-blocking correctness fixes are complete,
-the 0.2.0 API decisions are settled, and the full test suite is green. This is
-the highest-priority additive feature for 0.2.0. Keep the first deliverable
-documentation-first: one focused package-vignette section backed by a
-reproducible calibration script and results under `dev/`, without an exported
-diagnostic helper or plotting API. If the bounded workflow does not meet the
-acceptance criteria below, record the findings and defer it rather than widening
-the release scope or shipping unvalidated guidance.
-
-- [ ] Calibrate and document a cross-sectional `glmmTMB`/DHARMa workflow.
-  - Scope the first workflow to two-member Gaussian identity-link `glmmTMB`
-    models with dyad random effects and `dispformula = ~ 0`. Exclude generalized
-    families, ILD/EMA models, temporal-dependence tests, and the experimental
-    block-whitening helper.
-  - Start with convergence, a positive-definite Hessian, finite estimates and
-    standard errors, and boundary covariance estimates. Use
-    `glmmTMB::diagnose()` as supporting evidence rather than a pass/fail verdict.
-  - Request unconditional simulation explicitly because conditioning on the
-    fitted dyad random effects can make simulations nearly degenerate when
-    `dispformula = ~ 0`. Use `refit = FALSE` for DHARMa's inner simulations and
-    calibrate their count rather than treating the workshop's `n = 10000` or an
-    initial smaller value as a universal default.
-  - Evaluate the two existing candidate summaries separately:
-    1. The workshop workflow uses `rotation = "estimated"` for the joint residual
-       vector, then fitted-row-aligned role selections with `rotation = NULL`.
-    2. The earlier audit workflow uses complete fitted dyads to recalculate a
-       dyad mean and a consistently ordered signed member difference.
-  - Do not present rotation, role-specific checks, and dyad mean/difference
-    checks as interchangeable. Select the primary presentation from calibration
-    results and state the distinct question answered by every retained check.
-  - Derive dyad, member, and role indexes from fitted model rows. Report the
-    number of complete fitted dyads used by paired summaries and never infer a
-    signed difference from source row numbers or accidental row order.
-  - Preserve ordinary DHARMa objects and functions. Do not rewrite DHARMa object
-    internals or produce a package-specific one-number adequacy verdict.
-  - Label the vignette workflow as experimental and not yet independently
-    reviewed. Because users call ordinary DHARMa functions rather than a new
-    `dyadMLM` diagnostic API, use a visible documentation callout instead of a
-    runtime warning.
-  - State clearly that these checks do not by themselves establish the
-    correctness of dyadic covariance, exchangeability, or temporal dependence.
-  - Defer package guidance for ILD/EMA models until serial dependence and any
-    required block-whitening strategy have been calibrated and independently
-    reviewed. ILD diagnostics may remain in workshop or development material,
-    but are not part of the supported 0.2.0 package workflow.
-
-#### DHARMa calibration and acceptance criteria
-
-- [ ] In every outer calibration replicate, generate a new dataset and refit the
-  model before running the DHARMa checks. Cover correctly specified
-  distinguishable and exchangeable models, weak, moderate, and strong admissible
-  partner covariance, unequal member variances for distinguishable dyads, and
-  workshop-relevant sample sizes.
-- [ ] Predefine the diagnostic tests and assess empirical false-positive rates
-  against Monte Carlo uncertainty; one reassuring dataset or p-value is not
-  sufficient.
-- [ ] Include consequential mean-structure misspecification, including one
-  role-specific case, and record each candidate workflow's sensitivity and
-  localization. Treat covariance-misspecification results as a documented limit
-  unless separate calibration supports a stronger claim.
-- [ ] Verify correct fitted-row alignment with reordered input and nonsequential
-  row names and require conclusions to remain stable within calibrated Monte
-  Carlo variability rather than requiring identical p-values. Check asymmetric
-  outcome missingness and exclude incomplete fitted dyads deterministically from
-  paired summaries.
-- [ ] Check stability across seeds and candidate simulation counts, then choose
-  the smallest count with stable conclusions and acceptable vignette runtime.
-- [ ] Verify supported DHARMa and `glmmTMB` versions and that simulation does not
-  leave altered `glmmTMB` state behind. Add a versioned DHARMa `Suggests` entry
-  if the vignette executes the workflow; otherwise guard or precompute it.
-- [ ] Require clean package-vignette, CI/pkgdown, and exact-tarball renders before
-  including the guidance in 0.2.0.
 
 ### Additional tests and optional polish
 
@@ -823,11 +739,9 @@ the release scope or shipping unvalidated guidance.
    this is implemented with focused comparison tests.
 7. Rename the covariance result class and clarify its member-level print
    heading without changing covariance calculations; this is implemented.
-8. Complete the negative-binomial APIM workflow and cross-vignette consistency
-   review after the preceding behavior and names are stable.
-9. Attempt the experimental cross-sectional DHARMa guidance last. Defer it if
-   calibration or runtime would delay the release.
-10. Freeze one release candidate and run the complete 0.2.0 CRAN checklist.
+8. Treat the reviewed Gaussian package vignettes as content-complete for 0.2.0;
+   perform only the final consistency, render, and release-artifact checks.
+9. Freeze one release candidate and run the complete 0.2.0 CRAN checklist.
 
 ### CRAN release checklist
 
@@ -849,16 +763,13 @@ the release scope or shipping unvalidated guidance.
   DOI.
 - [ ] Run `devtools::document()`, render `README.Rmd`, and rebuild every package
   vignette affected by the API or numerical changes. Render and inspect the
-  generalized APIM workflow and every source affected by the final summary,
-  model-comparison, or covariance-output contracts; check examples and package
-  help for stale names and defaults.
-- [ ] If the DHARMa guidance passes calibration and is included, verify its
-  declared dependency, build-time behavior, runtime, fitted-row alignment, and
-  simulation state in the exact release tarball.
+  Gaussian APIM, DIM, and DSM workflows and every source affected by the final
+  summary, model-comparison, or covariance-output contracts; check examples and
+  package help for stale names and defaults.
 - [ ] Run the complete test suite with all suggested modeling packages installed,
   including asymmetric-missingness, current-object printing, random-assignment,
-  fitted DSM-equivalence, covariance recovery, and generalized-APIM validation
-  tests, with no failures, warnings, or unexpected skips.
+  fitted DSM-equivalence, covariance recovery, and existing generalized-family
+  regression tests, with no failures, warnings, or unexpected skips.
 - [ ] Build the exact source tarball and run `R CMD check --as-cran` on that
   tarball, including the manual. Treat ordinary GitHub Actions checks as ongoing
   CI rather than a substitute for this release artifact.
@@ -872,24 +783,78 @@ the release scope or shipping unvalidated guidance.
   Zenodo, and verify the version-specific DOI while continuing to cite the
   concept DOI in package-facing materials.
 
-### Explicitly deferred beyond 0.2.0
+The planned development sequence after 0.2.0 is cross-sectional Gaussian
+diagnostics (0.2.1), Gaussian ILD diagnostics (0.2.2), APIM covariance
+decomposition (0.2.5), generalized APIM workflows (0.3.0), generalized
+diagnostics (0.3.1), `glmmTMB` model syntax (0.4.0), expanded `brms` workflows
+(0.4.5), and reporting and visualization (0.5.0). These are development
+milestones; closely spaced milestones may be bundled into a worthwhile CRAN
+update rather than submitted separately.
 
-Candidate work beyond 0.2.0 is organized below:
+## Proposed Version 0.2.1 Scope - Cross-Sectional Gaussian Diagnostics
 
-- The intended core of version 0.3.0 is the APIM outcome-covariance
-  decomposition and its accompanying methods paper. Other 0.3.0 candidates are
-  multiple-imputation integration, additional dyadic post-processing and
-  reporting, advanced diagnostics, Bayesian comparison design, and advanced
-  ILD/EMA preparation.
-- Version 0.4.0 and later: fitting/syntax helpers, wider reshaping and
-  composition infrastructure, broader DSM and covariance methods, a custom Stan
-  track, and additional preprints or methods notes.
+Status: proposed. Begin only after version 0.2.0 is accepted. Keep the first
+deliverable documentation-first and experimental: one focused package-vignette
+section backed by a reproducible calibration script and results under `dev/`,
+without an exported diagnostic helper or plotting API.
 
-## Proposed Version 0.3.0 Scope
+- Calibrate and document a cross-sectional `glmmTMB`/DHARMa workflow for
+  two-member Gaussian identity-link models with dyad random effects and
+  `dispformula = ~ 0`.
+- Start with convergence, a positive-definite Hessian, finite estimates and
+  standard errors, and boundary covariance estimates. Use
+  `glmmTMB::diagnose()` as supporting evidence rather than a pass/fail verdict.
+- Request unconditional simulation explicitly because conditioning on the
+  fitted dyad random effects can make simulations nearly degenerate when
+  `dispformula = ~ 0`. Use `refit = FALSE` for DHARMa's inner simulations and
+  calibrate their count rather than treating a workshop value as universal.
+- Evaluate the two existing candidate summaries separately:
+  1. joint-residual rotation followed by fitted-row-aligned role selections;
+  2. complete fitted dyads summarized by dyad means and consistently ordered
+     signed member differences.
+- Do not present rotation, role-specific checks, and dyad mean/difference checks
+  as interchangeable. State the distinct question answered by every retained
+  check.
+- Derive dyad, member, and role indexes from fitted model rows. Report the number
+  of complete fitted dyads and never infer a signed difference from source row
+  numbers or accidental row order.
+- Preserve ordinary DHARMa objects and functions. Do not rewrite DHARMa object
+  internals or produce a package-specific one-number adequacy verdict.
+- State clearly that these checks do not by themselves establish the correctness
+  of dyadic covariance, exchangeability, or temporal dependence.
 
-Status: proposed. The APIM covariance decomposition below is the intended core
-feature. Select only a small subset of the remaining candidates after 0.2.0 is
-accepted rather than treating every item below as one release commitment.
+Acceptance requires repeated simulation and refitting under correctly specified
+and meaningfully misspecified distinguishable and exchangeable models, empirical
+false-positive assessment, row-order and asymmetric-missingness checks, stability
+across seeds and simulation counts, supported dependency versions, restored
+`glmmTMB` simulation state, and clean package-vignette, CI/pkgdown, and
+exact-tarball renders.
+
+## Proposed Version 0.2.2 Scope - Gaussian ILD Diagnostics
+
+Status: proposed. Build on the accepted cross-sectional diagnostic contract;
+do not treat repeated observations as a direct extension of independent dyads.
+
+- Calibrate DHARMa workflows for Gaussian two-member ILD models with explicit
+  serial dependence, irregular gaps, reordered rows, and incomplete fitted
+  dyad-occasions.
+- Evaluate within-member lag diagnostics against unconditional full-model
+  simulations while respecting series boundaries and exact observed time gaps.
+- Determine whether joint rotation is sufficient or whether a validated
+  block-whitening step is required. Do not publish the experimental whitening
+  approach until its false-positive behavior has been calibrated and
+  independently reviewed.
+- Validate distinguishable and exchangeable role-specific AR processes and
+  clearly separate checks of mean structure, partner covariance, and temporal
+  dependence.
+- Keep the workflow documentation-first and experimental. Do not export a
+  diagnostic helper until each reported check has a stable, tested meaning.
+
+## Proposed Version 0.2.5 Scope - APIM Covariance Decomposition
+
+Status: proposed. This is the next focused post-estimation feature after the
+Gaussian diagnostic milestones. Development may proceed in parallel with the
+diagnostic branches, but integration should use the current accepted mainline.
 
 ### Core feature and methods paper: explaining APIM interdependence
 
@@ -924,10 +889,11 @@ accepted rather than treating every item below as one release commitment.
   agreement of component sums with the model-implied covariance within
   prespecified numerical tolerances.
 - Add the exchangeable special case only after member-label invariance is tested
-  and the two arbitrary member-driven terms are combined. Add `brms` support
-  afterward while preserving posterior draws. Keep `lme4`, generalized links,
-  mixed compositions, and automatic formula-wide classification outside the
-  first contract.
+  and the two arbitrary member-driven terms are combined. Defer the `brms`
+  implementation to version 0.4.5, where posterior draws can be preserved as
+  part of a coherent backend expansion. Keep `lme4`, generalized links, mixed
+  compositions, and automatic formula-wide classification outside the first
+  contract.
 - Develop dyad-bootstrap intervals as a separately validated refitting workflow.
   Resample complete dyads, recompute predictor moments, document the interval
   type and nonconvergence policy, and do not imply frequentist uncertainty for
@@ -938,7 +904,7 @@ accepted rather than treating every item below as one release commitment.
   review before making a novelty claim, then evaluate finite-sample bias and
   interval coverage through simulation and include one substantive empirical
   example with reproducible tables and signed waterfall figures.
-- Publish the function and its documentation in version 0.3.0, freeze the
+- Publish the function and its documentation in version 0.2.5, freeze the
   supported estimand and output contract, archive the reproducible paper code
   and results, and then submit the methods paper. Cite the package's Zenodo
   concept DOI for the implementation and record the paper citation in package
@@ -949,16 +915,53 @@ accepted rather than treating every item below as one release commitment.
   principles, but the initial function must reject them rather than return an
   apparently complete decomposition under unstated conventions.
 
-### Version 0.3.1 candidate: additional covariance components
+## Proposed Version 0.3.0 Scope - Generalized APIM Workflows
 
+Status: proposed. Publish generalized-outcome workflows only after the Gaussian
+preparation, diagnostics, and interpretation contracts are stable.
+
+- Promote and finish the usable material in
+  `dev/vignettes/generalized-apim.Rmd`, beginning with focused, runnable
+  negative-binomial examples using the shipped count-outcome data.
+- Add Poisson or binomial workflows only when their preparation, model
+  specification, convergence, and interpretation have separate end-to-end
+  validation. Defer ordinal and categorical outcomes until complete supported
+  examples exist.
+- Cover distinguishable and exchangeable APIMs without repeating the general
+  preparation material in the Gaussian APIM vignette.
+- Explain coefficients on their link scale and through appropriate conditional
+  expected outcomes or multiplicative mean ratios. Distinguish observed-scale
+  quantities from latent Gaussian covariance on a link scale.
+- Link the finalized vignette from the package overview, APIM vignette, and
+  pkgdown index only when its supported scope is ready for normal package builds.
+- Keep nonlinear outcome-covariance decomposition outside the first generalized
+  release unless a separate estimand and validation plan is completed.
+
+## Proposed Version 0.3.1 Scope - Generalized Diagnostics
+
+Status: proposed. Generalized DHARMa guidance follows, rather than precedes, the
+validated generalized APIM workflows.
+
+- Calibrate DHARMa separately for every supported family and model component;
+  do not infer generalized-family behavior from the Gaussian calibration.
+- Cover distributional misspecification, zero inflation where supported,
+  dispersion behavior, boundary estimates, and the relevant response- and
+  link-scale interpretations.
 - Revisit whether `recover_exchangeable_covariance()` should support paired
   shared/difference random effects in `glmmTMB` zero-inflation and dispersion
   components.
-- Keep conditional, zero-inflation, and dispersion results separate and label
-  each result with its model component and parameter scale.
-- Extend support only with end-to-end extraction and transformation tests and
-  clear documentation of the component-specific interpretation. Evaluate
-  `brms` distributional and nonlinear parameters separately.
+- Keep conditional, zero-inflation, and dispersion covariance results separate
+  and label each result with its model component and parameter scale.
+- Extend covariance recovery only with end-to-end extraction and transformation
+  tests and clear component-specific documentation. Evaluate `brms`
+  distributional and nonlinear parameters separately in version 0.4.5.
+- Keep generalized diagnostic automation experimental until empirical
+  false-positive behavior and the meaning of every reported check are clear.
+
+## Later Candidates Not Yet Assigned to a Release
+
+Select these only after the preceding milestones are stable rather than treating
+them as one release commitment.
 
 ### Multiple-imputation integration
 
@@ -995,33 +998,10 @@ accepted rather than treating every item below as one release commitment.
   identifiers or completely unobserved members, MNAR sensitivity models, and
   pooling nonlinear covariance summaries until separately validated.
 
-### Dyadic post-processing and reporting
-
-- Add `summary.exchangeable_covariance()` and
-  `as.data.frame.exchangeable_covariance()` only after the 0.2.0 class contract
-  is final. Provide point summaries for `glmmTMB`; add posterior summaries and
-  intervals for retained `brms` draws while preserving access to the full draw
-  arrays. Do not imply frequentist uncertainty for `glmmTMB` until a bootstrap
-  or delta-method workflow is validated.
-- Consider `plot.exchangeable_covariance()` only as a thin view of that stable
-  summary table, with explicit member-level variance, covariance, correlation,
-  and uncertainty labels.
-- Evaluate a backend-neutral dyadic-effects table for actor, partner,
-  role-specific, CWP/CBP, APIM, DIM, and DSM terms. Build a coefficient plot only
-  after the table can classify supported formulas reliably; do not package
-  generic wrappers around `report`, `parameters`, or `see`.
-- Evaluate Bayesian model comparison as a separate workflow rather than an LRT
-  branch inside `compare_nested_models()`. Define the predictive target and the
-  observation-versus-dyad holdout unit before choosing LOO, WAIC, or another
-  criterion.
-- Consider splitting covariance extraction, block matching, validation,
-  transformation, summaries, and printing into separate implementation files
-  when doing so reduces review and maintenance risk.
-
 ### Advanced diagnostics
 
-- Build on the calibrated 0.2.0 cross-sectional guidance before considering any
-  exported helper.
+- Build on the calibrated 0.2.1 cross-sectional and 0.2.2 ILD guidance before
+  considering any exported helper.
 - Evaluate a within-member lag-1 statistic against unconditional full-model
   simulations while respecting gaps and repeated series.
 - Validate joint covariance rotation and mixed/ILD behavior before adding
@@ -1052,12 +1032,15 @@ accepted rather than treating every item below as one release commitment.
   current partner row, but latent-state imputation remains outside the core
   preparation API until a modeling layer needs it.
 
-## Longer-Term Roadmap: Version 0.4.0 and Later
+## Proposed Version 0.4.0 Scope - glmmTMB Model Syntax
 
-### Model syntax and wider preparation
+Status: proposed. Extend the package from model-ready data preparation to
+transparent model specifications without replacing the underlying fitting
+engine.
 
-- Write static model syntax for cross-sectional and ILD models, starting with
-  `glmmTMB`; add `brms` syntax and priors only after the first path is stable.
+- Write static `glmmTMB` model syntax for supported cross-sectional and ILD
+  models. Return inspectable formulas and arguments before considering any
+  convenience fitting wrapper.
 - Add tests that generated syntax matches intended estimands and model
   structures. Consider `dynamite` or another MLSEM/DSEM framework only after the
   established-engine paths are clear.
@@ -1066,6 +1049,55 @@ accepted rather than treating every item below as one release commitment.
 - Extend composition controls only for concrete applied needs, such as richer
   pooling diagnostics or raw-to-analysis mapping helpers. Do not give
   `pool_compositions` partial-pooling semantics.
+
+## Proposed Version 0.4.5 Scope - brms Expansion
+
+Status: proposed. Add a second model-engine path only after the `glmmTMB`
+specification contract is stable.
+
+- Generate transparent `brms` formulas and priors for the supported model
+  structures rather than promising immediate backend parity for every feature.
+- Integrate the existing draw-wise exchangeable covariance recovery with
+  posterior summaries while preserving access to the full posterior arrays.
+- Add `brms` support for APIM covariance decomposition only with validated term
+  mapping and draw-wise agreement with the backend-neutral algebra.
+- Evaluate distributional and nonlinear parameters separately from conditional
+  model components; do not infer their interpretation from `glmmTMB` parameter
+  blocks.
+- Evaluate Bayesian model comparison as a separate workflow rather than an LRT
+  branch inside `compare_nested_models()`. Define the predictive target and the
+  observation-versus-dyad holdout unit before choosing LOO, WAIC, or another
+  criterion.
+
+## Proposed Version 0.5.0 Scope - Reporting and Visualization
+
+Status: proposed. Build stable, inspectable reporting tables before adding
+plots and diagrams that depend on them.
+
+- Add `summary.exchangeable_covariance()` and
+  `as.data.frame.exchangeable_covariance()`. Provide point summaries for
+  `glmmTMB` and posterior summaries for retained `brms` draws without implying
+  frequentist uncertainty until a bootstrap or delta-method workflow is
+  validated.
+- Keep `plot.exchangeable_covariance()` a thin view of the stable summary table,
+  with explicit member-level variance, covariance, correlation, and uncertainty
+  labels.
+- Evaluate a backend-neutral dyadic-effects table for actor, partner,
+  role-specific, CWP/CBP, APIM, DIM, and DSM terms. Build coefficient plots only
+  after that table can classify supported formulas reliably.
+- Consider a `report_table()`-style interface for supported dyadic results, but
+  return ordinary documented data frames and do not package a generic wrapper
+  around `report`, `parameters`, or `see`.
+- Separate data/preparation diagrams, model-structure diagrams, and fitted-result
+  plots so each visualization has a clear input contract.
+- Add decomposition-specific tables and signed waterfall figures as thin views
+  of the validated 0.2.5 result rather than recomputing its estimand in plotting
+  code.
+- Split covariance extraction, block matching, validation, transformation,
+  summaries, and printing into separate implementation files when doing so
+  reduces review and maintenance risk.
+
+## Later Method Development
 
 ### Broader method development
 
