@@ -1,11 +1,15 @@
 # Changelog
 
-## dyadMLM (development version)
+## dyadMLM 0.2.0
+
+- This early API-stabilization release intentionally makes a few direct,
+  breaking changes from 0.1.0. Compatibility wrappers are not retained.
 
 - Retained generated columns now use a single leading dot instead of
   `.dy_` for more readable model formulas. For example, `.dy_x_actor`
   becomes `.x_actor`. The `.dy_` prefix is reserved for temporary
   implementation columns.
+
 - [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   now uses compact composition-column names when the final data contain
   one composition, such as `.is_female` and
@@ -13,28 +17,34 @@
   composition-qualified names.
   [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
   recognizes both forms.
+
 - `prepare_dyad_data(include_arbitrary_member_contrast = TRUE)` can now
   add arbitrary member contrasts for distinguishable compositions
   without changing their metadata or role indicators. This supports full
   and exchangeability-constrained APIMs from the same prepared data.
   `set_exchangeable_compositions` still performs reclassification for
   pooling and DIM preparation.
+
 - Added a [`summary()`](https://rdrr.io/r/base/summary.html) method for
   prepared data that prints the dyadic structure followed by standard
   summaries of all columns.
+
 - Printing prepared data now uses current dyad and composition counts.
   If a required column has been removed, the unavailable summary is
   identified instead of displaying its preparation-time count.
+
 - Generated-column tracking now records all retained composition and
   modeling columns. Printing and model comparison use these records
   rather than inferring column ownership from a prefix, and generated
   names are checked for collisions and valid R syntax before they are
   written.
+
 - `prepare_dyad_data(add_apim_gmc_predictors = TRUE)` now adds GMC
   source, actor, and partner columns alongside raw APIM columns, plus
   lagged variants when requested. It uses one mean over retained
   non-missing values, warns about skipped non-numeric predictors in
   mixed selections, and leaves DIM/DSM centering unchanged.
+
 - For longitudinal data,
   [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.md)
   now temporarily adds an all-missing partner row when only one member
@@ -43,24 +53,28 @@
   rows are removed before the prepared data are returned. This is
   structural completion for column construction, not imputation or the
   addition of analysis rows.
+
 - Numeric structural columns and numeric predictors selected for
   preparation now reject `Inf` and `-Inf` before model-ready columns are
   generated. Errors identify the affected columns and input rows; `NA`
   and `NaN` remain supported as missing predictor values.
+
 - Renamed `compare_nested_glmmTMB_models()` to
   [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.md).
   Its printed conclusion now uses a configurable `alpha` level and no
   longer recommends a model solely because the likelihood-ratio test is
   not significant.
+
 - [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
-  now returns an `exchangeable_covariance` object with a clearer
-  member-level print heading.
-- Naming changes in this development version are intentionally breaking:
-  names from 0.1.0 are not retained.
+  now returns an `exchangeable_covariance` object instead of an
+  `exchangeable_rescov` object, with a clearer member-level print
+  heading.
+
 - Added package-level help at
   [`?dyadMLM`](https://pascal-kueng.github.io/dyadMLM/reference/dyadMLM-package.md),
   with links to the main functions, example datasets, and
   getting-started documentation.
+
 - Example datasets no longer include the redundant `dyad_composition`
   column. Instead, `dyads_ild` now includes member-specific AR(1)
   residual processes.

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,29 +36,25 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/release-0.2.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="dyadmlm-development-version">dyadMLM (development version)<a class="anchor" aria-label="anchor" href="#dyadmlm-development-version"></a></h2>
-<ul><li>Retained generated columns now use a single leading dot instead of <code>.dy_</code> for more readable model formulas. For example, <code>.dy_x_actor</code> becomes <code>.x_actor</code>. The <code>.dy_</code> prefix is reserved for temporary implementation columns.</li>
-<li>
-<code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now uses compact composition-column names when the final data contain one composition, such as <code>.is_female</code> and <code>.member_contrast_arbitrary</code>. Set <code>short_colnames = FALSE</code> to retain composition-qualified names. <code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code> recognizes both forms.</li>
-<li>
-<code>prepare_dyad_data(include_arbitrary_member_contrast = TRUE)</code> can now add arbitrary member contrasts for distinguishable compositions without changing their metadata or role indicators. This supports full and exchangeability-constrained APIMs from the same prepared data. <code>set_exchangeable_compositions</code> still performs reclassification for pooling and DIM preparation.</li>
-<li>Added a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> method for prepared data that prints the dyadic structure followed by standard summaries of all columns.</li>
-<li>Printing prepared data now uses current dyad and composition counts. If a required column has been removed, the unavailable summary is identified instead of displaying its preparation-time count.</li>
-<li>Generated-column tracking now records all retained composition and modeling columns. Printing and model comparison use these records rather than inferring column ownership from a prefix, and generated names are checked for collisions and valid R syntax before they are written.</li>
-<li>
-<code>prepare_dyad_data(add_apim_gmc_predictors = TRUE)</code> now adds GMC source, actor, and partner columns alongside raw APIM columns, plus lagged variants when requested. It uses one mean over retained non-missing values, warns about skipped non-numeric predictors in mixed selections, and leaves DIM/DSM centering unchanged.</li>
-<li>For longitudinal data, <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now temporarily adds an all-missing partner row when only one member is present at an observed dyad-occasion. This preserves partner CBP values and exact source-occasion APIM, DIM, and DSM lags. Temporary rows are removed before the prepared data are returned. This is structural completion for column construction, not imputation or the addition of analysis rows.</li>
-<li>Numeric structural columns and numeric predictors selected for preparation now reject <code>Inf</code> and <code>-Inf</code> before model-ready columns are generated. Errors identify the affected columns and input rows; <code>NA</code> and <code>NaN</code> remain supported as missing predictor values.</li>
-<li>Renamed <code>compare_nested_glmmTMB_models()</code> to <code><a href="../reference/compare_nested_models.html">compare_nested_models()</a></code>. Its printed conclusion now uses a configurable <code>alpha</code> level and no longer recommends a model solely because the likelihood-ratio test is not significant.</li>
-<li>
-<code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code> now returns an <code>exchangeable_covariance</code> object with a clearer member-level print heading.</li>
-<li>Naming changes in this development version are intentionally breaking: names from 0.1.0 are not retained.</li>
-<li>Added package-level help at <code><a href="../reference/dyadMLM-package.html">?dyadMLM</a></code>, with links to the main functions, example datasets, and getting-started documentation.</li>
-<li>Example datasets no longer include the redundant <code>dyad_composition</code> column. Instead, <code>dyads_ild</code> now includes member-specific AR(1) residual processes.</li>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="dyadmlm-020">dyadMLM 0.2.0<a class="anchor" aria-label="anchor" href="#dyadmlm-020"></a></h2>
+<ul><li><p>This early API-stabilization release intentionally makes a few direct, breaking changes from 0.1.0. Compatibility wrappers are not retained.</p></li>
+<li><p>Retained generated columns now use a single leading dot instead of <code>.dy_</code> for more readable model formulas. For example, <code>.dy_x_actor</code> becomes <code>.x_actor</code>. The <code>.dy_</code> prefix is reserved for temporary implementation columns.</p></li>
+<li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now uses compact composition-column names when the final data contain one composition, such as <code>.is_female</code> and <code>.member_contrast_arbitrary</code>. Set <code>short_colnames = FALSE</code> to retain composition-qualified names. <code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code> recognizes both forms.</p></li>
+<li><p><code>prepare_dyad_data(include_arbitrary_member_contrast = TRUE)</code> can now add arbitrary member contrasts for distinguishable compositions without changing their metadata or role indicators. This supports full and exchangeability-constrained APIMs from the same prepared data. <code>set_exchangeable_compositions</code> still performs reclassification for pooling and DIM preparation.</p></li>
+<li><p>Added a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> method for prepared data that prints the dyadic structure followed by standard summaries of all columns.</p></li>
+<li><p>Printing prepared data now uses current dyad and composition counts. If a required column has been removed, the unavailable summary is identified instead of displaying its preparation-time count.</p></li>
+<li><p>Generated-column tracking now records all retained composition and modeling columns. Printing and model comparison use these records rather than inferring column ownership from a prefix, and generated names are checked for collisions and valid R syntax before they are written.</p></li>
+<li><p><code>prepare_dyad_data(add_apim_gmc_predictors = TRUE)</code> now adds GMC source, actor, and partner columns alongside raw APIM columns, plus lagged variants when requested. It uses one mean over retained non-missing values, warns about skipped non-numeric predictors in mixed selections, and leaves DIM/DSM centering unchanged.</p></li>
+<li><p>For longitudinal data, <code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now temporarily adds an all-missing partner row when only one member is present at an observed dyad-occasion. This preserves partner CBP values and exact source-occasion APIM, DIM, and DSM lags. Temporary rows are removed before the prepared data are returned. This is structural completion for column construction, not imputation or the addition of analysis rows.</p></li>
+<li><p>Numeric structural columns and numeric predictors selected for preparation now reject <code>Inf</code> and <code>-Inf</code> before model-ready columns are generated. Errors identify the affected columns and input rows; <code>NA</code> and <code>NaN</code> remain supported as missing predictor values.</p></li>
+<li><p>Renamed <code>compare_nested_glmmTMB_models()</code> to <code><a href="../reference/compare_nested_models.html">compare_nested_models()</a></code>. Its printed conclusion now uses a configurable <code>alpha</code> level and no longer recommends a model solely because the likelihood-ratio test is not significant.</p></li>
+<li><p><code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code> now returns an <code>exchangeable_covariance</code> object instead of an <code>exchangeable_rescov</code> object, with a clearer member-level print heading.</p></li>
+<li><p>Added package-level help at <code><a href="../reference/dyadMLM-package.html">?dyadMLM</a></code>, with links to the main functions, example datasets, and getting-started documentation.</p></li>
+<li><p>Example datasets no longer include the redundant <code>dyad_composition</code> column. Instead, <code>dyads_ild</code> now includes member-specific AR(1) residual processes.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="dyadmlm-010">dyadMLM 0.1.0<a class="anchor" aria-label="anchor" href="#dyadmlm-010"></a></h2><p class="text-muted">CRAN release: 2026-07-30</p>
