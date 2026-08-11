@@ -87,10 +87,11 @@ Post-release sequence:
    verify its metadata and checksum, and publish it.
 3. [x] Complete and deploy the post-release documentation currently on `main`,
    then verify the pkgdown and stable workshop URLs.
-4. [ ] Rebase and integrate, or explicitly abandon, the remaining
-   `post-workshop-slide-updates` branch. Preserve the current deployment and ZIP
-   contracts, render and inspect both decks, and close
-   [GitHub issue #6](https://github.com/Pascal-Kueng/dyadMLM/issues/6).
+4. [ ] Keep the remaining `post-workshop-slide-updates` branch parked until the
+   workshop publication and synthetic-data transition are ready for review.
+   Track its rebase, deck renders, deployment, and ZIP contract separately in
+   [GitHub issue #6](https://github.com/Pascal-Kueng/dyadMLM/issues/6); this does
+   not block the package-only version 0.2.0 CRAN release.
 5. [ ] Complete the 0.2.0 stabilization milestone below, run the exact release
    checks, and submit one bundled update to CRAN.
 
@@ -724,9 +725,8 @@ another routine breaking CRAN update shortly afterward.
 
 ### Recommended implementation order
 
-1. Resolve or explicitly abandon `post-workshop-slide-updates` so the workshop
-   deployment and download contract is settled before package documentation is
-   rendered again.
+1. Keep `post-workshop-slide-updates` parked and track its publication contract
+   under issue #6; do not merge it as part of the package-only 0.2.0 release.
 2. Make prepared-data printing use the current object and add focused regression
    tests on a small branch.
 3. Complete the model-level DSM equivalence verification on a dedicated branch;
@@ -775,9 +775,10 @@ another routine breaking CRAN update shortly afterward.
   CI rather than a substitute for this release artifact.
 - [ ] Run Win-builder or an equivalent current Windows submission check and
   review all CRAN-check platforms for the current release candidate.
-- [ ] Build and inspect pkgdown, deploy from `main`, and verify the stable
-  package, vignette, workshop-slide, exercise-source, PDF, and ZIP URLs. Confirm
-  that the workshop ZIP still contains only the intended synthetic datasets.
+- [ ] Build and inspect pkgdown, deploy from `main`, and verify the stable package
+  and vignette URLs. Confirm that the separately maintained workshop deployment
+  remains accessible, but handle its synthetic-data transition and final ZIP
+  contents under issue #6 rather than blocking the CRAN submission.
 - [ ] Submit one frozen 0.2.0 candidate to CRAN. After acceptance, tag the exact
   accepted commit as `v0.2.0`, create the GitHub Release, archive the release on
   Zenodo, and verify the version-specific DOI while continuing to cite the
