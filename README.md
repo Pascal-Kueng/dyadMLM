@@ -12,7 +12,7 @@ coverage](https://codecov.io/gh/Pascal-Kueng/dyadMLM/graph/badge.svg)](https://a
 status](https://www.r-pkg.org/badges/version/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
 [![CRAN
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.R-project.org/package=dyadMLM)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21481720-blue.svg)](https://doi.org/10.5281/zenodo.21481720)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21481720.svg)](https://doi.org/10.5281/zenodo.21481720)
 <!-- badges: end -->
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
@@ -166,8 +166,7 @@ simple_apim <- glmmTMB::glmmTMB(
 
 ## Citation
 
-If you use `dyadMLM`, please cite the version of the package you use.
-Obtain the citation via:
+If you use `dyadMLM`, please cite the installed package version. Run:
 
 ``` r
 citation("dyadMLM")
@@ -175,8 +174,8 @@ citation("dyadMLM")
 #>
 #>   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.
 #>   doi:10.5281/zenodo.21481720
-#>   <https://doi.org/10.5281/zenodo.21481720>. R package version
-#>   0.1.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
+#>   <https://doi.org/10.5281/zenodo.21481720>. R package version 0.2.0,
+#>   <https://pascal-kueng.github.io/dyadMLM/>.
 #>
 #> A BibTeX entry for LaTeX users is
 #>
@@ -184,7 +183,7 @@ citation("dyadMLM")
 #>     title = {dyadMLM: Tools for Dyadic Multilevel Models},
 #>     author = {Pascal Küng},
 #>     year = {2026},
-#>     note = {R package version 0.1.0.9000},
+#>     note = {R package version 0.2.0},
 #>     url = {https://pascal-kueng.github.io/dyadMLM/},
 #>     doi = {10.5281/zenodo.21481720},
 #>   }

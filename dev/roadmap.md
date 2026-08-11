@@ -30,10 +30,10 @@ helpers, and eventually model syntax explicit and reproducible.
 ## Current State
 
 Version 0.1.0 has been accepted by CRAN, tagged as `v0.1.0`, archived on
-Zenodo, and published as a GitHub Release. Development now continues as version
-0.1.0.9000 and contains intentionally breaking changes. The next CRAN release
-is planned as version 0.2.0: a focused correctness and API-stabilization release
-before broader adoption, not a large model-fitting feature release.
+Zenodo, and published as a GitHub Release. Version 0.2.0 is now prepared as a
+focused correctness and API-stabilization release before broader adoption, not
+a large model-fitting feature release. Its local exact-tarball CRAN check is
+clean; external checks and submission remain.
 
 The core data-preparation API is implemented and covered by tests, the README
 links to the pkgdown site, and GitHub Actions are configured for R CMD check,
@@ -562,11 +562,11 @@ outside this collapsed section.
 
 ## Version 0.2.0 - CRAN API-Stabilization Release
 
-Status: in progress. Checked items are implemented in the development version;
-unchecked items remain proposed until they have been reviewed, implemented, and
-verified. Because development already contains intentionally breaking names and
-defaults, this release should be version 0.2.0 rather than 0.1.1. Keep the
-direct-migration policy: do not add deprecated wrappers for the 0.1.0 API.
+Status: release candidate prepared. Checked items are implemented and locally
+verified; unchecked items remain before submission or acceptance. Because the
+release contains intentionally breaking names and defaults, it is version 0.2.0
+rather than 0.1.1. Keep the direct-migration policy: do not add deprecated
+wrappers for the 0.1.0 API.
 
 Goal: correct the model-ready longitudinal columns, settle the small public API
 while changes are still inexpensive, and submit one bundled early-stabilization
@@ -745,11 +745,11 @@ another routine breaking CRAN update shortly afterward.
 
 ### CRAN release checklist
 
-- [ ] Resolve every release-blocking correctness item, every API decision, and
+- [x] Resolve every release-blocking correctness item, every API decision, and
   every required 0.2.0 documentation-alignment item above; update this roadmap
   with the chosen contracts rather than leaving alternatives documented as if
   implemented.
-- [ ] Update `NEWS.md` before freezing the release candidate.
+- [x] Update `NEWS.md` before freezing the release candidate.
   - Record temporary structural dyad-occasion completion and the resulting
     partner CBP/lag behavior change; do not call it imputation.
   - Record the robust prepared-data printing behavior and every changed S3-class
@@ -757,20 +757,20 @@ another routine breaking CRAN update shortly afterward.
     retained random assignment, `seed`, or `short_colnames` defaults as
     migrations because those interfaces remain unchanged.
   - Include concise 0.1.0-to-0.2.0 migration examples and no deprecated wrappers.
-- [ ] Update `DESCRIPTION` to version 0.2.0 and the release date; update
+- [x] Update `DESCRIPTION` to version 0.2.0 and the release date; update
   `CITATION.cff` to the same version and date. Verify that
   `citation("dyadMLM")` reports version 0.2.0 while retaining the Zenodo concept
   DOI.
-- [ ] Run `devtools::document()`, render `README.Rmd`, and rebuild every package
+- [x] Run `devtools::document()`, render `README.Rmd`, and rebuild every package
   vignette affected by the API or numerical changes. Render and inspect the
   Gaussian APIM, DIM, and DSM workflows and every source affected by the final
   summary, model-comparison, or covariance-output contracts; check examples and
   package help for stale names and defaults.
-- [ ] Run the complete test suite with all suggested modeling packages installed,
+- [x] Run the complete test suite with all suggested modeling packages installed,
   including asymmetric-missingness, current-object printing, random-assignment,
   fitted DSM-equivalence, covariance recovery, and existing generalized-family
   regression tests, with no failures, warnings, or unexpected skips.
-- [ ] Build the exact source tarball and run `R CMD check --as-cran` on that
+- [x] Build the exact source tarball and run `R CMD check --as-cran` on that
   tarball, including the manual. Treat ordinary GitHub Actions checks as ongoing
   CI rather than a substitute for this release artifact.
 - [ ] Run Win-builder or an equivalent current Windows submission check and
