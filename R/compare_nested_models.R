@@ -7,6 +7,8 @@
 #' shown first in the result.
 #'
 #' @param model1,model2 Two fitted `glmmTMB` models to compare.
+#' @param alpha Significance level used for the printed conclusion. Must be one
+#'   number between 0 and 1.
 #'
 #' @details
 #' Both model calls must use named data-frame objects that remain available when
@@ -25,11 +27,12 @@
 #' The caller remains responsible for supplying genuinely nested models. The
 #' usual chi-squared reference distribution may also be inappropriate when
 #' tested variance parameters are on the boundary.
+#' `alpha` affects only the printed conclusion, not the test results.
 #'
 #' @return An `anova`-style data frame containing model degrees of freedom,
 #'   information criteria, log-likelihoods, the likelihood-ratio statistic, and
 #'   its chi-squared p-value. When printed, a short conclusion interprets the
-#'   test at the 5% significance level.
+#'   test at the selected significance level.
 #'
 #' @examples
 #' if (requireNamespace("glmmTMB", quietly = TRUE)) {
@@ -58,7 +61,12 @@
 #' }
 #'
 #' @export
-compare_nested_models <- function(model1, model2) {
+compare_nested_models <- function(model1, model2, alpha = 0.05) {
+  if (!is.numeric(alpha) || length(alpha) != 1L ||
+      !is.finite(alpha) || alpha <= 0 || alpha >= 1) {
+    stop("`alpha` must be one finite number between 0 and 1.", call. = FALSE)
+  }
+
   validate_comparison_model(model1, "model1")
   validate_comparison_model(model2, "model2")
 
@@ -78,7 +86,7 @@ compare_nested_models <- function(model1, model2) {
     deparse1(substitute(model1)),
     deparse1(substitute(model2))
   )
-  return(likelihood_ratio_comparison(model1, model2, labels))
+  return(likelihood_ratio_comparison(model1, model2, labels, alpha))
 }
 
 # Model and data checks -----------------------------------------------------
@@ -338,7 +346,7 @@ validate_comparison_data <- function(model1, model2,
 
 # Likelihood-ratio test and output -----------------------------------------
 
-likelihood_ratio_comparison <- function(model1, model2, labels) {
+likelihood_ratio_comparison <- function(model1, model2, labels, alpha) {
   model1_log_lik <- stats::logLik(model1)
   model2_log_lik <- stats::logLik(model2)
   model1_df <- attr(model1_log_lik, "df")
@@ -402,22 +410,22 @@ likelihood_ratio_comparison <- function(model1, model2, labels) {
     p_text <- paste("p =", formatted_p)
   }
 
-  if (p_value < 0.05) {
+  level_text <- paste0(format(100 * alpha, trim = TRUE), "%")
+  if (p_value < alpha) {
     conclusion <- sprintf(
       paste0(
-        "Conclusion (5%% level): The likelihood-ratio test provides evidence ",
+        "Conclusion (%s level): The likelihood-ratio test provides evidence ",
         "that `%s` fits better than `%s` (%s)."
       ),
-      labels[2], labels[1], p_text
+      level_text, labels[2], labels[1], p_text
     )
   } else {
     conclusion <- sprintf(
       paste0(
-        "Conclusion (5%% level): The likelihood-ratio test finds no clear ",
-        "improvement from `%s` to `%s` (%s). Based on this test, prefer `%s` ",
-        "for parsimony. This does not establish equal fit."
+        "Conclusion (%s level): The likelihood-ratio test finds no clear ",
+        "improvement from `%s` to `%s` (%s). This does not establish equal fit."
       ),
-      labels[1], labels[2], p_text, labels[1]
+      level_text, labels[1], labels[2], p_text
     )
   }
 
@@ -441,6 +449,7 @@ likelihood_ratio_comparison <- function(model1, model2, labels) {
     ""
   )
   attr(out, "conclusion") <- conclusion
+  attr(out, "alpha") <- alpha
   class(out) <- c("dyadMLM_model_comparison", "anova", "data.frame")
   out
 }
