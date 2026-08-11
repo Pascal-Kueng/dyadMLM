@@ -4,16 +4,19 @@
 \alias{compare_nested_models}
 \title{Compare nested glmmTMB models fitted to equivalent data}
 \usage{
-compare_nested_models(model1, model2)
+compare_nested_models(model1, model2, alpha = 0.05)
 }
 \arguments{
 \item{model1, model2}{Two fitted \code{glmmTMB} models to compare.}
+
+\item{alpha}{Significance level used for the printed conclusion. Must be one
+number between 0 and 1.}
 }
 \value{
 An \code{anova}-style data frame containing model degrees of freedom,
 information criteria, log-likelihoods, the likelihood-ratio statistic, and
 its chi-squared p-value. When printed, a short conclusion interprets the
-test at the 5\% significance level.
+test at the selected significance level.
 }
 \description{
 Performs a likelihood-ratio test for two nested \code{glmmTMB} models. The models
@@ -39,6 +42,7 @@ cannot establish that one model is mathematically nested within the other.
 The caller remains responsible for supplying genuinely nested models. The
 usual chi-squared reference distribution may also be inappropriate when
 tested variance parameters are on the boundary.
+\code{alpha} affects only the printed conclusion, not the test results.
 }
 \examples{
 if (requireNamespace("glmmTMB", quietly = TRUE)) {

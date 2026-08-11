@@ -40,6 +40,9 @@
   identify the affected columns and input rows; `NA` and `NaN` remain supported
   as missing predictor values.
 * Renamed `compare_nested_glmmTMB_models()` to `compare_nested_models()`.
+  Its printed conclusion now uses a configurable `alpha` level and no longer
+  recommends a model solely because the likelihood-ratio test is not
+  significant.
 * Naming changes in this development version are intentionally breaking:
   names from 0.1.0 are not retained.
 * Added package-level help at `?dyadMLM`, with links to the main functions,

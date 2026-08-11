@@ -555,9 +555,16 @@ test_that("compare_nested_models sorts models and agrees with anova.glmmTMB", {
     "This does not establish equal fit",
     fixed = TRUE
   )
+  expect_false(
+    grepl(
+      "prefer `smaller_model` for parsimony",
+      tail(printed, 1L),
+      fixed = TRUE
+    )
+  )
   expect_match(
     tail(printed, 1L),
-    "prefer `smaller_model` for parsimony",
+    "Conclusion (5% level)",
     fixed = TRUE
   )
   expect_match(
@@ -569,6 +576,41 @@ test_that("compare_nested_models sorts models and agrees with anova.glmmTMB", {
     ),
     fixed = TRUE
   )
+
+  p_value <- no_clear_improvement$`Pr(>Chisq)`[2]
+  higher_alpha <- (p_value + 1) / 2
+  comparison_at_higher_alpha <- compare_nested_models(
+    smaller_model,
+    larger_model,
+    alpha = higher_alpha
+  )
+
+  expect_equal(attr(comparison_at_higher_alpha, "alpha"), higher_alpha)
+  expect_match(
+    tail(capture.output(print(comparison_at_higher_alpha)), 1L),
+    "provides evidence that `larger_model` fits better than `smaller_model`",
+    fixed = TRUE
+  )
+})
+
+test_that("compare_nested_models validates alpha", {
+  invalid_alpha_values <- list(
+    NULL,
+    NA_real_,
+    Inf,
+    0,
+    1,
+    c(0.01, 0.05),
+    "0.05"
+  )
+
+  for (invalid_alpha in invalid_alpha_values) {
+    expect_error(
+      compare_nested_models(NULL, NULL, alpha = invalid_alpha),
+      "`alpha` must be one finite number between 0 and 1",
+      fixed = TRUE
+    )
+  }
 })
 
 test_that("compare_nested_models supports fits without standard errors", {

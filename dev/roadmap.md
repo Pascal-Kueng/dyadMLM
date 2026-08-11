@@ -676,21 +676,12 @@ another routine breaking CRAN update shortly afterward.
     final compositions remain.
   - Reusable pipelines that require qualified names even for one composition
     can request `short_colnames = FALSE` explicitly.
-- [ ] Make prepared-data summaries concise by default.
+- [x] Retain standard summaries of all currently present columns.
+  - Generated actor, partner, centered, lagged, indicator, and contrast columns
+    are often the reason users inspect a prepared object with `summary()`.
+  - Keep the current behavior rather than adding a separate concise mode.
+- [x] Keep model-comparison conclusions neutral and configurable.
   - Use the interface:
-    `summary(x, include_generated = FALSE)` and
-    `summary(x, include_generated = TRUE)` for the full table.
-  - The default should show the structural/composition header followed by
-    standard summaries for the currently present columns that were not generated
-    by `dyadMLM`. This retains outcomes, identifiers, predictors, and user-added
-    variables while avoiding a very wide table of actor, partner, centered,
-    lagged, indicator, and contrast columns.
-  - State briefly that `include_generated = TRUE` includes all currently
-    present package-generated columns. Use the generated-column registry
-    intersected with current column names, so removed generated columns are not
-    advertised or summarized.
-- [ ] Keep model-comparison conclusions neutral and configurable.
-  - Recommended interface:
     `compare_nested_models(model1, model2, alpha = 0.05)`.
   - Report evidence or no clear evidence of improvement at `alpha`; do not tell
     users to prefer the restricted model solely because the test is not
