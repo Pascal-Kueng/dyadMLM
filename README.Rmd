@@ -143,8 +143,7 @@ simple_apim <- glmmTMB::glmmTMB(
 
 ## Citation
 
-If you use `dyadMLM`, please cite the version of the package you use. Obtain the
-citation via:
+If you use `dyadMLM`, please cite the installed package version. Run:
 
 ```{r eval = TRUE}
 citation("dyadMLM")
