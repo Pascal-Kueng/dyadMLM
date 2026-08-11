@@ -609,39 +609,30 @@ another routine breaking CRAN update shortly afterward.
     construction. Regression tests cover numeric structural columns, multiple
     selected predictors, supported predictor missingness, and unselected
     columns.
-- [ ] Track post-preparation modifications while keeping prepared data usable.
+- [x] Make prepared-data printing reflect the current object.
   - Current problem: base and dplyr operations can preserve the
-    `dyadMLM_data` class and frozen metadata after rows or columns change;
-    source-variable mutation can also leave generated columns stale.
-  - Keep the `dyadMLM_data` class and metadata after ordinary filtering,
-    transformation, reordering, and column selection. Record
-    `attr(data, "dyadMLM")$modified = TRUE` when supported base or tidyverse
-    reconstruction methods change the prepared object, with a short reason when
-    practical. Set it to `FALSE` after successful preparation.
-  - Treat the flag as a conservative warning state, not as proof that every
-    possible third-party or manual attribute operation has been intercepted.
-    Never silently re-center, re-lag, or regenerate columns after a modification.
-  - Recompute current row and dyad counts when printing. Recompute composition
-    counts from the current dyad and composition columns when they remain
-    internally usable; otherwise omit that summary with a brief explanation.
-    Continue to list only recorded generated columns that are still present.
-  - When `modified = TRUE`, print a concise warning that stored preparation
-    metadata and generated columns may describe the pre-modification data.
-    Downstream package functions may continue when their required columns and
-    structure are present, but must check those requirements and warn before
-    relying on potentially stale preparation metadata. Missing or incompatible
-    required columns should produce a targeted error.
-  - This supports ordinary sensitivity workflows. Filtering a prepared object
-    intentionally retains centering and lag definitions from the original
-    preparation sample; filtering raw data and preparing again intentionally
-    recomputes them for the sensitivity sample. Document this distinction.
-  - `compare_nested_models()` may still compare nested fits made from the same
-    modified analysis data. Fits from full and outlier-removed samples remain
-    descriptive sensitivity analyses rather than valid likelihood-ratio tests,
-    because they use different observations.
-  - Test common base and dplyr filtering, mutation, selection, reordering, and
-    row-binding paths; the modification warning; live print counts; missing
-    structural or generated columns; and unchanged print/summary inputs.
+    `dyadMLM_data` class after rows or columns change, while the print header
+    still uses dyad and composition counts recorded during preparation.
+  - Compute current row, dyad, and composition counts when printing if the
+    required columns remain available. Otherwise omit the unavailable
+    summary with a brief explanation. Continue to list only recorded generated
+    columns that are still present.
+  - Do not track modifications or silently re-center, re-lag, or regenerate
+    columns. Researchers remain responsible for keeping derived columns
+    consistent after modifying prepared data; state this briefly in the
+    documentation.
+  - Downstream functions should validate the columns and structure they require
+    directly rather than relying on a general modification flag.
+  - Filtering a prepared object intentionally retains centering and lag
+    definitions from the original preparation sample. Filtering raw data and
+    preparing again intentionally recomputes them for the sensitivity sample.
+  - `compare_nested_models()` may compare nested fits made from the same
+    analysis data. Fits from full and outlier-removed samples remain descriptive
+    sensitivity analyses rather than valid likelihood-ratio tests because they
+    use different observations.
+  - Test current counts after common base and dplyr row changes, missing
+    structural or generated columns, and that printing leaves its input
+    unchanged.
 - [x] Complete the remaining model-level DSM verification in [`dsm.md`](dsm.md).
   - Use a direct multivariate linear model for `YLevel` and `YDiff` on one row
     per dyad, confirm it independently with `lavaan`, and compare both with the
@@ -831,8 +822,8 @@ the release scope or shipping unvalidated guidance.
 1. Resolve or explicitly abandon `post-workshop-slide-updates` so the workshop
    deployment and download contract is settled before package documentation is
    rendered again.
-2. Implement the prepared-data modification state, live print checks, and
-   focused regression tests on a dedicated branch.
+2. Make prepared-data printing use the current object and add focused regression
+   tests on a small branch.
 3. Complete the model-level DSM equivalence verification on a dedicated branch;
    treat any discrepancy as a correctness blocker.
 4. Add the small arbitrary-assignment ordering regression test directly on
@@ -857,9 +848,9 @@ the release scope or shipping unvalidated guidance.
 - [ ] Update `NEWS.md` before freezing the release candidate.
   - Record temporary structural dyad-occasion completion and the resulting
     partner CBP/lag behavior change; do not call it imputation.
-  - Record the prepared-object modification-state contract and every changed
-    S3-class name, summary interface, and model-comparison conclusion. Do not
-    describe retained random assignment, `seed`, or `short_colnames` defaults as
+  - Record the robust prepared-data printing behavior and every changed S3-class
+    name, summary interface, and model-comparison conclusion. Do not describe
+    retained random assignment, `seed`, or `short_colnames` defaults as
     migrations because those interfaces remain unchanged.
   - Include concise 0.1.0-to-0.2.0 migration examples and no deprecated wrappers.
 - [ ] Update `DESCRIPTION` to version 0.2.0 and the release date; update
@@ -875,7 +866,7 @@ the release scope or shipping unvalidated guidance.
   declared dependency, build-time behavior, runtime, fitted-row alignment, and
   simulation state in the exact release tarball.
 - [ ] Run the complete test suite with all suggested modeling packages installed,
-  including asymmetric-missingness, modification-state, random-assignment,
+  including asymmetric-missingness, current-object printing, random-assignment,
   fitted DSM-equivalence, covariance recovery, and generalized-APIM validation
   tests, with no failures, warnings, or unexpected skips.
 - [ ] Build the exact source tarball and run `R CMD check --as-cran` on that
