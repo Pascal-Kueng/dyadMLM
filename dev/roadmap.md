@@ -819,9 +819,10 @@ the release scope or shipping unvalidated guidance.
    treat any discrepancy as a correctness blocker.
 4. Add the small arbitrary-assignment ordering regression test directly on
    `main` when it is otherwise clean.
-5. Implement the concise prepared-data summary default on a small API branch.
-6. Make model-comparison conclusions neutral and configurable on a dedicated
-   branch, including focused comparison-data tests.
+5. Retain standard summaries of all currently present prepared-data columns;
+   do not add a separate concise mode.
+6. Keep model-comparison conclusions neutral and configurable through `alpha`;
+   this is implemented with focused comparison tests.
 7. Rename and enrich the covariance result class and printing on a dedicated
    branch without changing covariance calculations.
 8. Complete the negative-binomial APIM workflow and cross-vignette consistency
