@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/Pascal-Kueng/dyadMLM/blob/release-0.2.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/Pascal-Kueng/dyadMLM/blob/main/inst/CITATION)
 
 Küng P (2026). *dyadMLM: Tools for Dyadic Multilevel Models*.
 [doi:10.5281/zenodo.21481720](https://doi.org/10.5281/zenodo.21481720).
