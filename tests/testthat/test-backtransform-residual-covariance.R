@@ -1749,7 +1749,7 @@ test_that("the public function returns member-level glmmTMB matrices", {
   member_variance <- shared_variance + difference_variance
   member_covariance <- shared_variance - difference_variance
 
-  expect_s3_class(result, "exchangeable_rescov")
+  expect_s3_class(result, "exchangeable_covariance")
   expect_length(result, 1L)
   expect_named(
     result[[1L]],
@@ -1778,6 +1778,49 @@ test_that("the public function returns member-level glmmTMB matrices", {
   expect_named(result, "pair_1")
   expect_identical(result[[1L]]$shared_term, extracted$blocks[[1L]]$term)
   expect_identical(result[[1L]]$difference_term, extracted$blocks[[2L]]$term)
+})
+
+test_that("the public function returns fitted link-scale covariance for Poisson models", {
+  skip_if_not_installed("glmmTMB")
+
+  marker <- ".member_contrast_assumed_exchangeable_arbitrary"
+  n_dyads <- 300L
+  data <- expand.grid(member = c(-1, 1), coupleID = seq_len(n_dyads))
+  data$coupleID <- factor(data$coupleID)
+  data[[marker]] <- data$member
+
+  set.seed(20260811)
+  shared_effect <- rep(stats::rnorm(n_dyads, sd = 0.45), each = 2L)
+  difference_effect <- rep(stats::rnorm(n_dyads, sd = 0.25), each = 2L)
+  linear_predictor <- 1.4 + shared_effect + data[[marker]] * difference_effect
+  data$count <- stats::rpois(nrow(data), lambda = exp(linear_predictor))
+
+  model <- glmmTMB::glmmTMB(
+    count ~ 1 + (1 | coupleID) +
+      (0 + .member_contrast_assumed_exchangeable_arbitrary || coupleID),
+    family = poisson(),
+    data = data
+  )
+
+  expect_identical(model$fit$convergence, 0L)
+  expect_true(model$sdr$pdHess)
+
+  result <- recover_exchangeable_covariance(model)
+  extracted <- glmmTMB_extract_exchangeable_residual_blocks(model)
+  shared_variance <- extracted$blocks[[1L]]$covariance[1L, 1L, 1L]
+  difference_variance <- extracted$blocks[[2L]]$covariance[1L, 1L, 1L]
+  expected_varcov <- matrix(
+    c(
+      shared_variance + difference_variance,
+      shared_variance - difference_variance,
+      shared_variance - difference_variance,
+      shared_variance + difference_variance
+    ),
+    2L
+  )
+
+  expect_s3_class(result, "exchangeable_covariance")
+  expect_equal(unname(result[[1L]]$varcov), expected_varcov)
 })
 
 test_that("fitted covariance recovery allows some one-sided groups", {
@@ -1821,7 +1864,7 @@ test_that("fitted covariance recovery allows some one-sided groups", {
     fixed = TRUE
   )
 
-  expect_s3_class(result, "exchangeable_rescov")
+  expect_s3_class(result, "exchangeable_covariance")
   expect_true(all(is.finite(result[["dyad"]]$varcov)))
 })
 
@@ -1872,7 +1915,7 @@ test_that("the public function retains brms draws and labels omitted blocks", {
     fixed = TRUE
   )
 
-  expect_s3_class(result, "exchangeable_rescov")
+  expect_s3_class(result, "exchangeable_covariance")
   expect_length(result, 2L)
   expect_equal(dim(result[[1L]]$varcov), c(2L, 2L, 2L))
   expect_equal(dim(result[[1L]]$sdcor), c(2L, 2L, 2L))
@@ -1913,11 +1956,16 @@ test_that("exchangeable covariance results print structured pairings", {
       varcov = varcov,
       sdcor = sdcor
     )),
-    class = c("exchangeable_rescov", "list")
+    class = c("exchangeable_covariance", "list")
   )
 
   printed <- capture.output(returned <- print(result))
   expect_identical(returned, result)
+  expect_true(any(grepl(
+    "Recovered exchangeable member-level covariance",
+    printed,
+    fixed = TRUE
+  )))
   expect_true(any(grepl("Shared:     us(1 | coupleID)", printed, fixed = TRUE)))
   expect_true(any(grepl(
     "Difference: us(0 + IDIFF | coupleID)",
@@ -1960,7 +2008,7 @@ test_that("exchangeable covariance results print structured pairings", {
 
   multiple <- structure(
     c(unclass(result), unclass(result)),
-    class = c("exchangeable_rescov", "list")
+    class = c("exchangeable_covariance", "list")
   )
   names(multiple) <- c(
     "dyad",
@@ -1970,7 +2018,7 @@ test_that("exchangeable covariance results print structured pairings", {
   multiple[[2L]]$difference_term <- "us(0 + IDIFF | familyID)"
   multiple_printed <- capture.output(print(multiple, representation = "varcov"))
   expect_true(any(grepl(
-    "Exchangeable residual covariances (2 block pairs)",
+    "Recovered exchangeable member-level covariances (2 block pairs)",
     multiple_printed,
     fixed = TRUE
   )))
@@ -1993,7 +2041,7 @@ test_that("printing brms results does not dump posterior draw arrays", {
         sdcor = draws
       )
     ),
-    class = c("exchangeable_rescov", "list")
+    class = c("exchangeable_covariance", "list")
   )
 
   printed <- capture.output(print(result, representation = "sdcor"))

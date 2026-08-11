@@ -18,7 +18,7 @@ Extraction, matching, structural-zero alignment, and the numerical
 back-transformation are implemented for `glmmTMB` and single-response
 `brmsfit` models. `recover_exchangeable_covariance()` returns one named
 member-level covariance result per matched shared/difference block pair; its
-returned S3 class remains `exchangeable_rescov`.
+returned S3 class is `exchangeable_covariance`.
 
 ## Purpose
 

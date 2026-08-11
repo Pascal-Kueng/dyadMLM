@@ -145,7 +145,7 @@ test_that("one prepared object supports both distinguishability models", {
 
   expect_s3_class(comparison, "anova")
   expect_equal(comparison$`Chi Df`[2], 4)
-  expect_s3_class(recovered, "exchangeable_rescov")
+  expect_s3_class(recovered, "exchangeable_covariance")
   expect_equal(
     as.numeric(stats::logLik(restricted_model)),
     as.numeric(stats::logLik(re_prepared_model)),

@@ -688,15 +688,13 @@ another routine breaking CRAN update shortly afterward.
     significant, and retain the warning that this does not establish equal fit.
   - Keep the shorter function name, but state consistently that the current
     backend is `glmmTMB` only.
-- [ ] Use covariance terminology that covers residual and higher-level random
+- [x] Use covariance terminology that covers residual and higher-level random
   effects.
-  - Recommended direct rename before the API freeze: class
+  - Use class
     `exchangeable_covariance` and print heading "Recovered exchangeable
     member-level covariance". The public function name
     `recover_exchangeable_covariance()` already has the right scope.
-  - Preserve the backend, grouping factor, underlying coefficient names,
-    selected shared/difference terms, and indicator names in each returned block
-    pairing so results are self-describing.
+  - Keep the existing result structure and covariance calculations unchanged.
 
 ### Required 0.2.0 documentation alignment
 
@@ -823,8 +821,8 @@ the release scope or shipping unvalidated guidance.
    do not add a separate concise mode.
 6. Keep model-comparison conclusions neutral and configurable through `alpha`;
    this is implemented with focused comparison tests.
-7. Rename and enrich the covariance result class and printing on a dedicated
-   branch without changing covariance calculations.
+7. Rename the covariance result class and clarify its member-level print
+   heading without changing covariance calculations; this is implemented.
 8. Complete the negative-binomial APIM workflow and cross-vignette consistency
    review after the preceding behavior and names are stable.
 9. Attempt the experimental cross-sectional DHARMa guidance last. Defer it if
@@ -950,6 +948,17 @@ accepted rather than treating every item below as one release commitment.
   explicitly deferred extensions. The manuscript may state their governing
   principles, but the initial function must reject them rather than return an
   apparently complete decomposition under unstated conventions.
+
+### Version 0.3.1 candidate: additional covariance components
+
+- Revisit whether `recover_exchangeable_covariance()` should support paired
+  shared/difference random effects in `glmmTMB` zero-inflation and dispersion
+  components.
+- Keep conditional, zero-inflation, and dispersion results separate and label
+  each result with its model component and parameter scale.
+- Extend support only with end-to-end extraction and transformation tests and
+  clear documentation of the component-specific interpretation. Evaluate
+  `brms` distributional and nonlinear parameters separately.
 
 ### Multiple-imputation integration
 
