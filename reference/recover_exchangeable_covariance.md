@@ -12,7 +12,11 @@ vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable
 ## Usage
 
 ``` r
-recover_exchangeable_covariance(model, block_pairings = NULL)
+recover_exchangeable_covariance(
+  model,
+  block_pairings = NULL,
+  posterior = c("mean", "median", "draws")
+)
 ```
 
 ## Arguments
@@ -47,6 +51,12 @@ recover_exchangeable_covariance(model, block_pairings = NULL)
     defaults to `"1"`, meaning that every fitted row belongs to the pair
     and an ordinary intercept is the shared intercept coordinate.
 
+- posterior:
+
+  For `brms` models, return posterior `"mean"` matrices (default),
+  `"median"` matrices, or full posterior `"draws"`. Ignored for
+  `glmmTMB` models.
+
 ## Value
 
 An `exchangeable_covariance` object: a named list with one element per
@@ -58,9 +68,10 @@ deviations on the diagonal and correlations off the diagonal. Covariance
 dimension labels `member_1` and `member_2` denote arbitrary exchangeable
 positions, not substantive roles or encodings. Caller-supplied outer
 names are preserved; unnamed pairings receive stable names `pair_1`,
-`pair_2`, and so on in resolved order. For `glmmTMB`, `varcov` and
-`sdcor` are matrices. For `brms`, they are posterior-draw by coefficient
-by coefficient arrays.
+`pair_2`, and so on in resolved order. `varcov` and `sdcor` are
+matrices, except when `posterior = "draws"` for a `brms` model, where
+they are draw by coefficient by coefficient arrays. `brms` quantities
+are transformed draw by draw before summarizing.
 
 ## Details
 

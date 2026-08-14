@@ -64,7 +64,11 @@ derivation, and interpretation, see the
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">recover_exchangeable_covariance</span><span class="op">(</span><span class="va">model</span>, block_pairings <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">recover_exchangeable_covariance</span><span class="op">(</span></span>
+<span>  <span class="va">model</span>,</span>
+<span>  block_pairings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  posterior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"median"</span>, <span class="st">"draws"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -94,6 +98,12 @@ defaults to <code>"1"</code>, meaning that every fitted row belongs to the pair 
 an ordinary intercept is the shared intercept coordinate.</p></li>
 </ul></dd>
 
+
+<dt id="arg-posterior">posterior<a class="anchor" aria-label="anchor" href="#arg-posterior"></a></dt>
+<dd><p>For <code>brms</code> models, return posterior <code>"mean"</code> matrices
+(default), <code>"median"</code> matrices, or full posterior <code>"draws"</code>. Ignored for
+<code>glmmTMB</code> models.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -106,8 +116,9 @@ correlations off the diagonal. Covariance dimension labels <code>member_1</code>
 <code>member_2</code> denote arbitrary exchangeable positions, not substantive roles
 or encodings. Caller-supplied outer names are preserved; unnamed pairings
 receive stable names <code>pair_1</code>, <code>pair_2</code>, and so on in resolved order.
-For <code>glmmTMB</code>, <code>varcov</code> and <code>sdcor</code> are matrices. For <code>brms</code>, they
-are posterior-draw by coefficient by coefficient arrays.</p>
+<code>varcov</code> and <code>sdcor</code> are matrices, except when <code>posterior = "draws"</code> for a
+<code>brms</code> model, where they are draw by coefficient by coefficient arrays.
+<code>brms</code> quantities are transformed draw by draw before summarizing.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

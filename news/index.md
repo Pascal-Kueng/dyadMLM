@@ -70,6 +70,12 @@
   `exchangeable_rescov` object, with a clearer member-level print
   heading.
 
+- For `brms` models,
+  [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
+  now returns posterior- mean matrices by default. Use
+  `posterior = "median"` or `"draws"` for the corresponding
+  alternatives.
+
 - Added package-level help at
   [`?dyadMLM`](https://pascal-kueng.github.io/dyadMLM/reference/dyadMLM-package.md),
   with links to the main functions, example datasets, and
