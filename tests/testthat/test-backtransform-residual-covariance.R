@@ -1868,7 +1868,7 @@ test_that("fitted covariance recovery allows some one-sided groups", {
   expect_true(all(is.finite(result[["dyad"]]$varcov)))
 })
 
-test_that("the public function retains brms draws and labels omitted blocks", {
+test_that("the public function can retain brms draws and labels omitted blocks", {
   data <- data.frame(outcome = 1:4, IDIFF = rep(c(-1, 1), 2L))
   model <- stats::lm(outcome ~ IDIFF, data = data)
   shared_draws <- array(c(1.2, 0), dim = c(2, 1, 1))
@@ -1895,6 +1895,7 @@ test_that("the public function retains brms draws and labels omitted blocks", {
     result <- testthat::with_mocked_bindings(
       recover_exchangeable_covariance(
         model,
+        posterior = "draws",
         block_pairings = list(
           shared_only = list(
             shared_block = "(1 | coupleID)",
@@ -1933,6 +1934,63 @@ test_that("the public function retains brms draws and labels omitted blocks", {
   expect_named(result, c("shared_only", "difference_only"))
   expect_null(result[[1L]]$difference_term)
   expect_null(result[[2L]]$shared_term)
+})
+
+test_that("brms results return point-estimate matrices by default", {
+  data <- data.frame(outcome = 1:4, IDIFF = rep(c(-1, 1), 2L))
+  model <- stats::lm(outcome ~ IDIFF, data = data)
+  shared_draws <- array(c(1, 4, 9), dim = c(3, 1, 1))
+  extracted <- list(
+    backend = "brms",
+    blocks = list(rescov_test_block(
+      "coupleID",
+      "(Intercept)",
+      "(1 | coupleID)",
+      shared_draws
+    ))
+  )
+  pairing <- list(
+    shared_block = "(1 | coupleID)",
+    difference_block = NULL,
+    difference_indicator = "IDIFF"
+  )
+
+  result <- testthat::with_mocked_bindings(
+    recover_exchangeable_covariance(
+      model,
+      block_pairings = pairing
+    ),
+    extract_exchangeable_residual_blocks = function(model) extracted,
+    .package = "dyadMLM"
+  )
+  median_result <- testthat::with_mocked_bindings(
+    recover_exchangeable_covariance(
+      model,
+      block_pairings = pairing,
+      posterior = "median"
+    ),
+    extract_exchangeable_residual_blocks = function(model) extracted,
+    .package = "dyadMLM"
+  )
+
+  expect_true(is.matrix(result[[1L]]$varcov))
+  expect_true(is.matrix(result[[1L]]$sdcor))
+  expect_equal(
+    unname(result[[1L]]$varcov),
+    matrix(mean(c(1, 4, 9)), 2L, 2L)
+  )
+  expect_equal(
+    unname(result[[1L]]$sdcor),
+    matrix(c(2, 1, 1, 2), 2L)
+  )
+  expect_equal(
+    unname(median_result[[1L]]$varcov),
+    matrix(4, 2L, 2L)
+  )
+  expect_equal(
+    unname(median_result[[1L]]$sdcor),
+    matrix(c(2, 1, 1, 2), 2L)
+  )
 })
 
 test_that("exchangeable covariance results print structured pairings", {

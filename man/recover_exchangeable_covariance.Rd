@@ -4,7 +4,11 @@
 \alias{recover_exchangeable_covariance}
 \title{Recover member-level residual covariance from exchangeable random-effect blocks}
 \usage{
-recover_exchangeable_covariance(model, block_pairings = NULL)
+recover_exchangeable_covariance(
+  model,
+  block_pairings = NULL,
+  posterior = c("mean", "median", "draws")
+)
 }
 \arguments{
 \item{model}{A fitted \code{glmmTMB} or single-response \code{brmsfit} model. For
@@ -28,6 +32,10 @@ needed only for composition-specific blocks in mixed-dyad models. It
 defaults to \code{"1"}, meaning that every fitted row belongs to the pair and
 an ordinary intercept is the shared intercept coordinate.
 }}
+
+\item{posterior}{For \code{brms} models, return posterior \code{"mean"} matrices
+(default), \code{"median"} matrices, or full posterior \code{"draws"}. Ignored for
+\code{glmmTMB} models.}
 }
 \value{
 An \code{exchangeable_covariance} object: a named list with one element per
@@ -39,8 +47,9 @@ correlations off the diagonal. Covariance dimension labels \code{member_1} and
 \code{member_2} denote arbitrary exchangeable positions, not substantive roles
 or encodings. Caller-supplied outer names are preserved; unnamed pairings
 receive stable names \code{pair_1}, \code{pair_2}, and so on in resolved order.
-For \code{glmmTMB}, \code{varcov} and \code{sdcor} are matrices. For \code{brms}, they
-are posterior-draw by coefficient by coefficient arrays.
+\code{varcov} and \code{sdcor} are matrices, except when \code{posterior = "draws"} for a
+\code{brms} model, where they are draw by coefficient by coefficient arrays.
+\code{brms} quantities are transformed draw by draw before summarizing.
 }
 \description{
 Back-transforms covariance matrices from paired shared and member-difference

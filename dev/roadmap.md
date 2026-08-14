@@ -529,8 +529,8 @@ outside this collapsed section.
       the difference indicator or claim that the rows are verified member
       pairs; it highlights
       `brms` residual structures, omitted components, and non-intercept terms.
-  - A posterior summary beside the retained draw-wise `brms` results was left
-    for post-0.2 evaluation.
+  - `brms` returns draw-wise transformed posterior-mean matrices by default;
+    posterior medians and draws are optional.
   - Keep model discovery, matching, matrix algebra, and output formatting
     separate. Do not introduce `reformulas`: both fitted backends already store
     the normalized structures used by the adapters.
@@ -701,7 +701,8 @@ another routine breaking CRAN update shortly afterward.
     `exchangeable_covariance` and print heading "Recovered exchangeable
     member-level covariance". The public function name
     `recover_exchangeable_covariance()` already has the right scope.
-  - Keep the existing result structure and covariance calculations unchanged.
+  - Keep covariance calculations draw-wise. For `brms`, default to posterior-
+    mean matrices and allow posterior-median matrices or draws.
 
 ### Required 0.2.0 documentation alignment
 
@@ -1060,8 +1061,8 @@ specification contract is stable.
 
 - Generate transparent `brms` formulas and priors for the supported model
   structures rather than promising immediate backend parity for every feature.
-- Integrate the existing draw-wise exchangeable covariance recovery with
-  posterior summaries while preserving access to the full posterior arrays.
+- Extend draw-wise covariance recovery with additional posterior summaries only
+  when later `brms` workflows require them.
 - Add `brms` support for APIM covariance decomposition only with validated term
   mapping and draw-wise agreement with the backend-neutral algebra.
 - Evaluate distributional and nonlinear parameters separately from conditional
