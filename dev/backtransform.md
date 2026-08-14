@@ -345,15 +345,14 @@ Each element contains:
 - `sdcor`: the same result represented by standard deviations and
   correlations.
 
-For `glmmTMB`, both fields are point-estimate matrices. For `brms`, both are
-posterior-draw by coefficient by coefficient arrays. The transformation is
-applied to every posterior draw; raw draw-wise transformations must not be
-replaced by transforming posterior means.
+For `glmmTMB`, both fields are point-estimate matrices. For `brms`, the
+transformation is applied draw by draw and posterior-mean matrices are returned
+by default. Use `posterior = "median"` for median matrices or `"draws"` for the
+full transformed arrays.
 
-The print method shows both representations by default. Users can request one
-with `print(x, what = "varcov")` or `print(x, what = "sdcor")`. For `brms`, it
-reports the retained draw-array dimensions rather than dumping every posterior
-matrix; posterior summaries remain a separate future concern.
+The print method shows both matrices by default, or one with
+`representation = "varcov"` or `"sdcor"`. For posterior draws, it reports the
+array dimensions rather than printing every matrix.
 
 Use arbitrary `member_1`/`member_2` labels, never female/male labels. With
 random slopes, names must also retain the underlying coefficient term.

@@ -49,6 +49,9 @@
 * `recover_exchangeable_covariance()` now returns an
   `exchangeable_covariance` object instead of an `exchangeable_rescov` object,
   with a clearer member-level print heading.
+* For `brms` models, `recover_exchangeable_covariance()` now returns posterior-
+  mean matrices by default. Use `posterior = "median"` or `"draws"` for the
+  corresponding alternatives.
 * Added package-level help at `?dyadMLM`, with links to the main functions,
   example datasets, and getting-started documentation.
 * Example datasets no longer include the redundant `dyad_composition` column.

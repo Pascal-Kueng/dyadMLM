@@ -29,6 +29,9 @@
 #'     needed only for composition-specific blocks in mixed-dyad models. It
 #'     defaults to `"1"`, meaning that every fitted row belongs to the pair and
 #'     an ordinary intercept is the shared intercept coordinate.
+#' @param posterior For `brms` models, return posterior `"mean"` matrices
+#'   (default), `"median"` matrices, or full posterior `"draws"`. Ignored for
+#'   `glmmTMB` models.
 #'
 #' @details
 #' Automatic matching recognizes the compact `.member_contrast_arbitrary` and
@@ -165,8 +168,9 @@
 #'   `member_2` denote arbitrary exchangeable positions, not substantive roles
 #'   or encodings. Caller-supplied outer names are preserved; unnamed pairings
 #'   receive stable names `pair_1`, `pair_2`, and so on in resolved order.
-#'   For `glmmTMB`, `varcov` and `sdcor` are matrices. For `brms`, they
-#'   are posterior-draw by coefficient by coefficient arrays.
+#'   `varcov` and `sdcor` are matrices, except when `posterior = "draws"` for a
+#'   `brms` model, where they are draw by coefficient by coefficient arrays.
+#'   `brms` quantities are transformed draw by draw before summarizing.
 #'
 #' @seealso The
 #'   [exchangeable APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html#exchangeable-residual-structure)
@@ -201,7 +205,13 @@
 #' }
 #'
 #' @export
-recover_exchangeable_covariance <- function(model, block_pairings = NULL) {
+recover_exchangeable_covariance <- function(
+  model,
+  block_pairings = NULL,
+  posterior = c("mean", "median", "draws")
+) {
+  posterior <- match.arg(posterior)
+
   # 1. Normalize backend-specific random-effect blocks and covariance estimates.
   extracted <- extract_exchangeable_residual_blocks(model)
 
@@ -262,11 +272,20 @@ recover_exchangeable_covariance <- function(model, block_pairings = NULL) {
     # if ANY loop finds one, this turns TRUE and stays TRUE
     has_undefined_correlations <- has_undefined_correlations || anyNA(sdcor)
 
-    # glmmTMB contributes one point estimate. brms keeps the leading posterior-
-    # draw dimension so its uncertainty is not discarded.
+    # glmmTMB contributes one point estimate. brms transformations are always
+    # draw-wise, then summarized unless the caller requests the draws.
     if (identical(extracted$backend, "glmmTMB")) {
       varcov <- varcov[1L, , , drop = TRUE]
       sdcor <- sdcor[1L, , , drop = TRUE]
+    } else if (!identical(posterior, "draws")) {
+      point_summary <- if (identical(posterior, "median")) {
+        stats::median
+      } else {
+        mean
+      }
+      varcov <- apply(varcov, c(2L, 3L), point_summary, na.rm = TRUE)
+      sdcor <- apply(sdcor, c(2L, 3L), point_summary, na.rm = TRUE)
+      sdcor[is.nan(sdcor)] <- NA_real_
     }
     shared_term <- if (is.na(pair$shared_block_index)) {
       NULL
@@ -398,8 +417,8 @@ print.exchangeable_covariance <- function(
         formatted_value <- formatC(value, format = "f", digits = digits)
         print(noquote(formatted_value), ...)
       } else {
-        # brms results retain every posterior draw. Avoid printing thousands of
-        # matrices; users can extract this array or summarize it explicitly.
+        # With posterior = "draws", brms results retain every posterior draw.
+        # Avoid printing thousands of matrices.
         dimensions <- dim(value)
         cat(
           "<", dimensions[[1L]], " posterior draws x ",
