@@ -3,15 +3,6 @@
 ``` r
 
 library(dyadMLM)
-has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
-#> Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: 
-#> glmmTMB was built with TMB package version 1.9.21
-#> Current TMB package version is 1.9.23
-#> Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
-apim_distinguishable_fitted_alt <-
-  "Fitted distinguishable APIM diagram unavailable."
-apim_exchangeable_fitted_alt <-
-  "Fitted exchangeable APIM diagram unavailable."
 ```
 
 This vignette focuses on Gaussian cross-sectional and intensive

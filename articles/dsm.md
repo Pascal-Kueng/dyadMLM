@@ -3,12 +3,6 @@
 ``` r
 
 library(dyadMLM)
-has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
-#> Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: 
-#> glmmTMB was built with TMB package version 1.9.21
-#> Current TMB package version is 1.9.23
-#> Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
-dsm_fitted_alt <- "Fitted DSM diagram unavailable."
 ```
 
 This vignette focuses on the Dyadic Score Model (DSM) for
