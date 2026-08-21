@@ -29,12 +29,11 @@ helpers, and eventually model syntax explicit and reproducible.
 
 ## Current State
 
-Version 0.1.0 has been accepted by CRAN, tagged as `v0.1.0`, archived on
-Zenodo, and published as a GitHub Release. Version 0.2.0 is now prepared as a
-focused correctness and API-stabilization release before broader adoption, not
-a large model-fitting feature release. Its local exact-tarball CRAN check,
-five-platform CI matrix, pkgdown build, and live deployment checks are clean;
-submission remains.
+Version 0.2.0 was accepted by CRAN on 2026-08-21, tagged as `v0.2.0` at the
+exact accepted commit, published as a GitHub Release, and archived on Zenodo as
+[10.5281/zenodo.22043563](https://doi.org/10.5281/zenodo.22043563). The package
+has returned to development as version 0.2.0.9000, with cross-sectional
+Gaussian diagnostics planned next.
 
 The core data-preparation API is implemented and covered by tests, the README
 links to the pkgdown site, and GitHub Actions are configured for R CMD check,
@@ -42,8 +41,9 @@ coverage, pkgdown publishing, and workshop-material deployment. A four-pass
 API, edge-case, and general review identified longitudinal missingness,
 validation, and prepared-object integrity issues. Temporary structural
 completion now addresses the identified unpaired-occasion CBP and lagging
-problems; remaining correctness and API work is tracked in the
-[active 0.2.0 milestone](#version-020---cran-api-stabilization-release).
+problems. The completed fixes are recorded in the
+[0.2.0 milestone](#version-020---cran-api-stabilization-release), with follow-up
+work assigned to the later versioned milestones.
 
 Recently completed cleanup:
 
@@ -93,7 +93,7 @@ Post-release sequence:
    Track its rebase, deck renders, deployment, and ZIP contract separately in
    [GitHub issue #6](https://github.com/Pascal-Kueng/dyadMLM/issues/6); this does
    not block the package-only version 0.2.0 CRAN release.
-5. [ ] Complete the 0.2.0 stabilization milestone below, run the exact release
+5. [x] Complete the 0.2.0 stabilization milestone below, run the exact release
    checks, and submit one bundled update to CRAN.
 
 The engine-independent covariance-array back-transformation and final named
@@ -563,18 +563,17 @@ outside this collapsed section.
 
 ## Version 0.2.0 - CRAN API-Stabilization Release
 
-Status: release candidate prepared. Checked items are implemented and locally
-verified; unchecked items remain before submission or acceptance. Because the
-release contains intentionally breaking names and defaults, it is version 0.2.0
-rather than 0.1.1. Keep the direct-migration policy: do not add deprecated
-wrappers for the 0.1.0 API.
+Status: released on CRAN on 2026-08-21. Because the release contains
+intentionally breaking names and defaults, it is version 0.2.0 rather than
+0.1.1. Keep the direct-migration policy: do not add deprecated wrappers for the
+0.1.0 API.
 
 Goal: correct the model-ready longitudinal columns, settle the small public API
 while changes are still inexpensive, and submit one bundled early-stabilization
 release before many users adopt the 0.1.0 interface. Do not follow 0.2.0 with
 another routine breaking CRAN update shortly afterward.
 
-### Implemented in the development version and requiring final revalidation
+### Released in version 0.2.0
 
 - [x] Use a single leading dot for retained generated columns while reserving
   `.dy_` for temporary implementation columns.
@@ -782,10 +781,11 @@ another routine breaking CRAN update shortly afterward.
   workshop deployment remains accessible, but handle its synthetic-data
   transition and final ZIP contents under issue #6 rather than blocking the
   CRAN submission.
-- [ ] Submit one frozen 0.2.0 candidate to CRAN. After acceptance, tag the exact
-  accepted commit as `v0.2.0`, create the GitHub Release, archive the release on
-  Zenodo, and verify the version-specific DOI while continuing to cite the
-  concept DOI in package-facing materials.
+- [x] Submit one frozen 0.2.0 candidate to CRAN. The accepted commit is tagged
+  as `v0.2.0`, the GitHub Release contains the official CRAN tarball, and the
+  Zenodo archive has version DOI
+  [10.5281/zenodo.22043563](https://doi.org/10.5281/zenodo.22043563). Continue
+  using the concept DOI in package-facing materials.
 
 The planned development sequence after 0.2.0 is cross-sectional Gaussian
 diagnostics (0.2.1), Gaussian ILD diagnostics (0.2.2), APIM covariance
