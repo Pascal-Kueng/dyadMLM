@@ -127,66 +127,50 @@ test_that("fitted responses stay aligned when source rows were omitted", {
 })
 
 
-test_that("response simulation is unconditional and restores model settings", {
+test_that("response simulation is unconditional without modifying the model", {
   skip_if_not_installed("glmmTMB")
 
   model <- predictive_check_test_model(
     dispformula = ~1 + (1 | dyad)
   )
-  original_codes <- get_glmmTMB_simulation_codes(model)
-  on.exit(set_glmmTMB_simulation_codes(model, original_codes), add = TRUE)
+  simulation_components <- c("terms", "termszi", "termsdisp")
+  read_simulation_codes <- function() {
+    lapply(
+      model$obj$env$data[simulation_components],
+      function(component_terms) {
+        vapply(
+          component_terms,
+          function(term) as.numeric(term$simCode),
+          numeric(1)
+        )
+      }
+    )
+  }
 
-  caller_codes <- original_codes
-  caller_codes$terms[] <- rep(
-    c(0, 1),
-    length.out = length(caller_codes$terms)
-  )
-  caller_codes$termsdisp[] <- 1
-  set_glmmTMB_simulation_codes(model, caller_codes)
+  # Mimic a model whose simulation settings were changed by another package.
+  for (component in simulation_components) {
+    component_terms <- model$obj$env$data[[component]]
+    for (term_index in seq_along(component_terms)) {
+      component_terms[[term_index]]$simCode <- 1
+    }
+    model$obj$env$data[[component]] <- component_terms
+  }
+  caller_codes <- read_simulation_codes()
+
   simulations <- simulate_dyad_responses(model, nsim = 5, seed = 789)
-  expect_identical(get_glmmTMB_simulation_codes(model), caller_codes)
+  expect_identical(read_simulation_codes(), caller_codes)
 
-  random_simulation_codes <- lapply(
-    original_codes,
-    function(codes) rep(2, length(codes))
-  )
-  set_glmmTMB_simulation_codes(model, random_simulation_codes)
+  # Compare against direct simulation with newly drawn random effects.
+  for (component in simulation_components) {
+    component_terms <- model$obj$env$data[[component]]
+    for (term_index in seq_along(component_terms)) {
+      component_terms[[term_index]]$simCode <- 2
+    }
+    model$obj$env$data[[component]] <- component_terms
+  }
   expected <- t(as.matrix(stats::simulate(model, nsim = 5, seed = 789)))
-  set_glmmTMB_simulation_codes(model, caller_codes)
 
   expect_identical(simulations$simulated_responses, expected)
-})
-
-
-test_that("model simulation settings are restored after an error", {
-  skip_if_not_installed("glmmTMB")
-
-  model <- predictive_check_test_model(
-    dispformula = ~1 + (1 | dyad)
-  )
-  original_codes <- get_glmmTMB_simulation_codes(model)
-  on.exit(set_glmmTMB_simulation_codes(model, original_codes), add = TRUE)
-  caller_codes <- original_codes
-  caller_codes$terms[] <- rep(
-    c(0, 1),
-    length.out = length(caller_codes$terms)
-  )
-  caller_codes$termsdisp[] <- 1
-  set_glmmTMB_simulation_codes(model, caller_codes)
-
-  testthat::local_mocked_bindings(
-    simulate_complete_glmmTMB_responses = function(...) {
-      stop("forced simulation failure", call. = FALSE)
-    },
-    .package = "dyadMLM"
-  )
-
-  expect_error(
-    simulate_dyad_responses(model, nsim = 5, seed = 101),
-    "forced simulation failure",
-    fixed = TRUE
-  )
-  expect_identical(get_glmmTMB_simulation_codes(model), caller_codes)
 })
 
 

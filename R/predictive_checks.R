@@ -13,12 +13,14 @@
 #' @param seed `NULL` or one nonnegative whole number used to reproduce the
 #'   simulations.
 #'
-#' @return A `dyadMLM_response_simulations` object containing the observed
-#'   response, complete simulated responses, fitted response-scale center, and
-#'   fitted-row metadata.
+#' @return A `dyadMLM_response_simulations` object containing the observed and
+#'   simulated response datasets used by predictive checks.
 #'
 #' @keywords internal
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
+
+  #### Validation checks
+
   simulation_call <- match.call()
 
   if (!inherits(model, "glmmTMB")) {
@@ -27,13 +29,17 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   if (!requireNamespace("glmmTMB", quietly = TRUE)) {
     stop("Package `glmmTMB` is required to simulate responses.", call. = FALSE)
   }
-  if (!is_one_whole_number(nsim) || nsim < 1) {
+  if (!is.numeric(nsim) || length(nsim) != 1L ||
+      !is.finite(nsim) || nsim < 1 || nsim %% 1 != 0 ||
+      nsim > .Machine$integer.max) {
     stop("`nsim` must be one positive whole number.", call. = FALSE)
   }
   nsim <- as.integer(nsim)
 
   if (!is.null(seed)) {
-    if (!is_one_whole_number(seed) || seed < 0) {
+    if (!is.numeric(seed) || length(seed) != 1L ||
+        !is.finite(seed) || seed < 0 || seed %% 1 != 0 ||
+        seed > .Machine$integer.max) {
       stop("`seed` must be `NULL` or one nonnegative whole number.", call. = FALSE)
     }
     seed <- as.integer(seed)
@@ -47,6 +53,9 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
       call. = FALSE
     )
   }
+
+
+  #### Extract fitted data / observed response
 
   model_frame <- stats::model.frame(model)
   observed_response <- stats::model.response(model_frame)
@@ -73,6 +82,8 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
   }
 
+  # Obtain deterministic prediction response from fixed effects only
+  # This is later used for centering.
   fitted_response <- as.numeric(stats::predict(
     model,
     newdata = NULL,
@@ -82,31 +93,37 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   if (length(fitted_response) != nrow(model_frame) ||
       any(!is.finite(fitted_response))) {
     stop(
-      "Population-level fitted responses could not be aligned with the fitted rows.",
+      "Could not obtain one finite fixed-effects prediction for each fitted row.",
       call. = FALSE
     )
   }
 
-  # glmmTMB stores simulation settings in the fitted object's mutable TMB
-  # environment. A previous diagnostic may have changed them, so force new
-  # random effects only for this call and then restore the exact prior settings.
-  original_simulation_codes <- get_glmmTMB_simulation_codes(model)
-  on.exit(
-    set_glmmTMB_simulation_codes(model, original_simulation_codes),
-    add = TRUE
-  )
-  # glmmTMB uses 2 for newly simulated random effects.
-  random_simulation_codes <- lapply(
-    original_simulation_codes,
-    function(codes) rep(2, length(codes))
-  )
-  set_glmmTMB_simulation_codes(model, random_simulation_codes)
+  # glmmTMB stores simulation settings in mutable environments. A regular
+  # assignment would share them, so make an independent working copy.
+  simulation_model <- unserialize(serialize(model, NULL))
 
-  simulated_responses <- simulate_complete_glmmTMB_responses(
-    model,
-    nsim = nsim,
-    seed = seed
-  )
+  simulation_components <- c("terms", "termszi", "termsdisp")
+  if (!all(
+    simulation_components %in% names(simulation_model$obj$env$data)
+  )) {
+    stop(
+      "The fitted model has an unsupported simulation structure.",
+      call. = FALSE
+    )
+  }
+
+  # glmmTMB uses 2 to draw new random effects during simulation.
+  for (component in simulation_components) {
+    component_terms <- simulation_model$obj$env$data[[component]]
+    for (term_index in seq_along(component_terms)) {
+      component_terms[[term_index]]$simCode <- 2
+    }
+    simulation_model$obj$env$data[[component]] <- component_terms
+  }
+
+  simulated_responses <- t(as.matrix(
+    stats::simulate(simulation_model, nsim = nsim, seed = seed)
+  ))
   if (!is.numeric(simulated_responses) ||
       !identical(dim(simulated_responses), c(nsim, nrow(model_frame))) ||
       any(!is.finite(simulated_responses))) {
@@ -133,54 +150,4 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     ),
     class = c("dyadMLM_response_simulations", "list")
   )
-}
-
-
-# Shared validation for the integer-valued simulation arguments.
-is_one_whole_number <- function(x) {
-  is.numeric(x) &&
-    length(x) == 1L &&
-    is.finite(x) &&
-    x %% 1 == 0 &&
-    x <= .Machine$integer.max
-}
-
-
-# Simulate and immediately normalize to simulation x fitted row.
-simulate_complete_glmmTMB_responses <- function(model, nsim, seed) {
-  t(as.matrix(stats::simulate(model, nsim = nsim, seed = seed)))
-}
-
-
-# Read every component because glmmTMB::set_simcodes() currently changes only
-# conditional terms, while dispersion terms can also contain random effects.
-get_glmmTMB_simulation_codes <- function(model) {
-  simulation_components <- c("terms", "termszi", "termsdisp")
-  if (!all(simulation_components %in% names(model$obj$env$data))) {
-    stop("The fitted model has an unsupported simulation structure.", call. = FALSE)
-  }
-
-  lapply(
-    model$obj$env$data[simulation_components],
-    function(component_terms) {
-      vapply(
-        component_terms,
-        function(term) as.numeric(term$simCode),
-        numeric(1)
-      )
-    }
-  )
-}
-
-
-# Set or restore the exact term-specific codes in every model component.
-set_glmmTMB_simulation_codes <- function(model, simulation_codes) {
-  for (component in names(simulation_codes)) {
-    component_terms <- model$obj$env$data[[component]]
-    for (i in seq_along(component_terms)) {
-      component_terms[[i]]$simCode <- simulation_codes[[component]][[i]]
-    }
-    model$obj$env$data[[component]] <- component_terms
-  }
-  invisible(model)
 }
