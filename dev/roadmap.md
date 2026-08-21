@@ -790,9 +790,10 @@ another routine breaking CRAN update shortly afterward.
 After CRAN publishes a version, create the GitHub Release as a draft, attach the
 exact CRAN tarball, and publish the GitHub Release. Keep Zenodo's native GitHub
 integration disabled; the trusted publishing workflow is the sole publisher and
-uses the encrypted `ZENODO_API_TOKEN` repository secret. It verifies the tag,
-package version, publication date, and checksums before adding a version under
-the existing Zenodo concept DOI.
+uses the encrypted `ZENODO_API_TOKEN` secret in the main-only
+`zenodo-production` environment. It verifies the tag, package version,
+publication date, and checksums before adding a version under the existing
+Zenodo concept DOI.
 
 The planned development sequence after 0.2.0 is cross-sectional Gaussian
 diagnostics (0.2.1), Gaussian ILD diagnostics (0.2.2), APIM covariance
