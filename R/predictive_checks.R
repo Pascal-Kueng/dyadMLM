@@ -10,7 +10,7 @@
 #' @param model A fitted `glmmTMB` model.
 #' @param nsim Number of complete response datasets to simulate. The default
 #' is 1000.
-#' @param seed `NULL` or one nonnegative whole number used to reproduce the
+#' @param seed `NULL` or one non-negative whole number used to reproduce the
 #'   simulations.
 #'
 #' @return A `dyadMLM_response_simulations` object containing the observed and
@@ -40,7 +40,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     if (!is.numeric(seed) || length(seed) != 1L ||
         !is.finite(seed) || seed < 0 || seed %% 1 != 0 ||
         seed > .Machine$integer.max) {
-      stop("`seed` must be `NULL` or one nonnegative whole number.", call. = FALSE)
+      stop("`seed` must be `NULL` or one non-negative whole number.", call. = FALSE)
     }
     seed <- as.integer(seed)
   }
@@ -72,9 +72,9 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require unit case weights.", call. = FALSE)
   }
 
-  zero_inflation_terms <- stats::terms(
-    stats::formula(model, component = "zi")
-  )
+  zero_inflation_terms <- model |>
+    stats::formula(component = "zi") |>
+    stats::terms()
   has_zero_inflation <- attr(zero_inflation_terms, "intercept") != 0L ||
     length(attr(zero_inflation_terms, "term.labels")) != 0L ||
     length(attr(zero_inflation_terms, "offset")) != 0L
@@ -82,14 +82,18 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
   }
 
+
+  #### Simulation prep
+
   # Obtain deterministic prediction response from fixed effects only
   # This is later used for centering.
-  fitted_response <- as.numeric(stats::predict(
-    model,
-    newdata = NULL,
-    type = "response",
-    re.form = NA
-  ))
+  fitted_response <- model |>
+    stats::predict(
+      newdata = NULL,
+      type = "response",
+      re.form = NA
+    ) |>
+    as.numeric()
   if (length(fitted_response) != nrow(model_frame) ||
       any(!is.finite(fitted_response))) {
     stop(
@@ -99,9 +103,13 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
 
   # glmmTMB stores simulation settings in mutable environments. A regular
-  # assignment would share them, so make an independent working copy.
-  simulation_model <- unserialize(serialize(model, NULL))
+  # assignment would modify the object! So, instead, we make an independent
+  # working copy.
+  simulation_model <- model |>
+    serialize(NULL) |>
+    unserialize()
 
+  # Safeguard to not silently omit term if update changes glmmTMB internals.
   simulation_components <- c("terms", "termszi", "termsdisp")
   if (!all(
     simulation_components %in% names(simulation_model$obj$env$data)
@@ -112,18 +120,22 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     )
   }
 
-  # glmmTMB uses 2 to draw new random effects during simulation.
+  # glmmTMB uses `2` to draw new random effects during simulation.
   for (component in simulation_components) {
-    component_terms <- simulation_model$obj$env$data[[component]]
-    for (term_index in seq_along(component_terms)) {
-      component_terms[[term_index]]$simCode <- 2
+    for (term_index in seq_along(simulation_model$obj$env$data[[component]])) {
+      simulation_model$obj$env$data[[component]][[term_index]]$simCode <- 2
     }
-    simulation_model$obj$env$data[[component]] <- component_terms
   }
 
-  simulated_responses <- t(as.matrix(
-    stats::simulate(simulation_model, nsim = nsim, seed = seed)
-  ))
+
+  #### Simulate
+
+  simulated_responses <- simulation_model |>
+    stats::simulate(nsim = nsim, seed = seed) |>
+    # glmmTMB returns fitted rows x simulations
+    # but we need simulations x fitted rows.
+    t()
+
   if (!is.numeric(simulated_responses) ||
       !identical(dim(simulated_responses), c(nsim, nrow(model_frame))) ||
       any(!is.finite(simulated_responses))) {
