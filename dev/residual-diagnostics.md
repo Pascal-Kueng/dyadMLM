@@ -10,10 +10,10 @@ implementing an earlier milestone.
 Provide visual predictive checks for questions that ordinary residual
 diagnostics do not answer reliably when observations remain dependent:
 
-- Does the fitted model reproduce important features of the observed response
-  distribution?
+- Does the fitted model reproduce the observed same-occasion partner
+  dependence?
 - For ILD data, does it reproduce the observed temporal dependence?
-- Does it reproduce the observed same-occasion partner dependence?
+- Does it reproduce important features of the observed response distribution?
 
 The checks compare the same statistic or curve in the observed data and in
 complete response datasets simulated from the fitted model:
@@ -52,9 +52,9 @@ partner_check
    reference/evaluation split and no PIT-rank transformation. Such a split
    would be needed only if a future diagnostic first estimated a rowwise
    transform from simulations and then tested that transform.
-3. A check may use either the raw response or a fixed model-centered response,
-   but it must apply exactly the same operation to the observed data and every
-   complete replicate.
+3. A check may use either the raw response or a model-centered response. Apply
+   the same center to each observed-versus-replicated comparison: one fixed
+   center for `glmmTMB`, or matching posterior-draw centers for `brms`.
 4. Do not reconstruct or whiten with a dense fitted covariance matrix. The
    model engine already generates the joint response datasets needed here.
 5. Keep the computational core independent of DHARMa. Do not add a DHARMa
@@ -75,6 +75,38 @@ partner_check
    dyadic and are handled by model engines or separate workflows.
 10. Document the feature as experimental. Do not emit a warning merely because
     it is experimental; warnings are reserved for a concrete unsafe condition.
+
+## Implementation order and file boundaries
+
+Build one complete check before expanding the diagnostic surface:
+
+1. finish the Gaussian `glmmTMB` simulation constructor and the complete
+   cross-sectional partner-dependence check;
+2. add the `brms` simulation and draw-matched centering path for that same
+   partner check, keeping the statistic code shared;
+3. add the Gaussian temporal-dependence curve for both supported backends; and
+4. add response-distribution checks and validate generalized families one at a
+   time.
+
+Keep three implementation modules:
+
+```text
+R/simulate_dyad_responses.R
+R/predictive_checks_dependence.R
+R/predictive_checks_response.R
+```
+
+`simulate_dyad_responses.R` owns backend-specific simulation, fitted-row
+alignment, centering inputs, and predictive-reference metadata for `glmmTMB`
+and `brms`. `predictive_checks_dependence.R` owns the shared partner and
+temporal statistics and their result, print, and plot methods.
+`predictive_checks_response.R` owns response-scale quantile, distribution,
+spread, zero-frequency, tail, and fitted-pattern checks. These are analogous in
+purpose to familiar residual displays, but they are complete-replicate
+predictive checks rather than DHARMa residuals.
+
+Tests mirror these three modules. Do not split files further unless one module
+becomes difficult to navigate.
 
 ## What these checks answer
 
@@ -130,9 +162,9 @@ only through the family-by-family validation milestones below.
 
 Never leave persistent simulation settings changed on the fitted model.
 
-## Shared simulation object
+## Response-simulation layer
 
-### Shared constructor
+### Constructor
 
 ```r
 simulate_dyad_responses(model, nsim = 1000, seed = NULL)
@@ -140,6 +172,9 @@ simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 
 Keep this constructor internal while the first checks are being reviewed. It
 can become public once its output contract is exercised by a complete check.
+The first object contract below is specific to `glmmTMB`. Add the `brms` path
+only after the complete `glmmTMB` partner check establishes which fields the
+shared check code actually needs.
 
 `nsim` is the number of complete simulated datasets. Require one positive whole
 number and recommend 1000 for ordinary plots. Smaller values remain useful for
@@ -191,7 +226,7 @@ replicated_statistic[b] <- statistic(simulated_responses[b, ])
 These are appropriate for observable features such as zero frequency,
 rootograms, response quantiles, spread, and tail counts.
 
-Dependence and conditional-pattern checks use:
+For `glmmTMB`, dependence and conditional-pattern checks use:
 
 ```r
 observed_centered <- observed_response - fitted_response
@@ -254,6 +289,24 @@ T_{partner} =
      {\sum_d(e_{d1}^2 + e_{d2}^2)}.
 \]
 
+This is exactly equivalent to the mean and half-difference representation
+
+\[
+M_d = \frac{e_{d1}+e_{d2}}{2}, \qquad
+D_d = \frac{e_{d1}-e_{d2}}{2},
+\]
+
+\[
+T_{partner} =
+\frac{\sum_d M_d^2-\sum_d D_d^2}
+     {\sum_d M_d^2+\sum_d D_d^2}.
+\]
+
+Use the direct member-level formula in production code. A package regression
+test must verify its equivalence to the mean/half-difference expression and its
+invariance when member positions are exchanged independently within dyads. Use
+sums of squares, not separately centered sample variances.
+
 This value is unchanged if the two members are swapped within any dyad. Call it
 a **symmetric partner-dependence coefficient**, not a latent Gaussian
 correlation. Require a finite positive denominator.
@@ -263,7 +316,7 @@ once for every complete simulated dataset, using one shared internal statistic
 helper. If any replicated statistic is non-finite, stop clearly in the initial
 Gaussian milestone rather than silently dropping simulations.
 
-Return class `dyadMLM_partner_check` with:
+For `glmmTMB`, return class `dyadMLM_partner_check` with:
 
 ```text
 statistic                  descriptive statistic name
@@ -317,6 +370,10 @@ Same-occasion partner checks for ILD data require an explicit occasion
 identifier and are **deferred**. The first function accepts one pair per dyad.
 
 ## Version 0.2.2: Gaussian ILD temporal dependence
+
+Begin this phase only after the `glmmTMB` and `brms` partner-check paths have
+established the shared interface. Validate the temporal implementation first
+with `glmmTMB`, then with paired posterior-predictive `brms` curves.
 
 ### Public check
 
@@ -393,13 +450,15 @@ The exact-gap construction and within-series centering in
 [`workshop/helpers.R`](workshop/helpers.R) are useful development references.
 Do not copy that helper's DHARMa mutation, p-value output, or dense whitening.
 
-## Versions 0.2.3-0.2.4: generalized validation
+## Versions 0.2.3-0.2.4: response checks and generalized validation
 
 The complete-replicate architecture is family-neutral, but support is not
-claimed merely because `simulate()` runs. Validate scalar-response families one
-at a time, beginning with negative binomial and then the applied Tweedie case.
+claimed merely because `simulate()` runs. First define the direct response-scale
+checks for the supported Gaussian backends. Then validate scalar-response
+families one at a time, beginning with negative binomial and then the applied
+Tweedie case.
 
-Start generalized validation with direct response-scale checks:
+Start with:
 
 - zero frequency when scientifically meaningful;
 - spread and tail behavior;
@@ -426,14 +485,17 @@ statistic and its behavior for ties, zero variance, and non-finite replicated
 values. Never silently discard a discrete replicate for which a correlation is
 undefined.
 
-Version 0.2.3 covers generalized cross-sectional marginal and partner checks.
-Version 0.2.4 combines only those validated families with the temporal edge
-construction accepted in 0.2.2.
+Version 0.2.3 covers Gaussian response checks followed by generalized
+cross-sectional response and partner checks. Version 0.2.4 combines only those
+validated families with the temporal edge construction accepted in 0.2.2.
 
-## Later `brms` backend
+## `brms` path after the first partner-check vertical slice
 
-Keep the downstream statistics, result objects, and plots backend-neutral.
-Only replicate generation, centering, and predictive-reference metadata differ.
+Implement this path after the Gaussian `glmmTMB` partner check works end to end
+and before beginning the temporal check. The public check names, fitted-row
+pairing, and statistic helpers remain shared. Replicate generation, centering,
+predictive-reference metadata, comparison summaries, and plot details may
+differ where posterior uncertainty requires it.
 
 ### Raw-response checks
 
@@ -522,6 +584,8 @@ whether one random dataset crosses a percentile threshold:
   values;
 - direct agreement with manually calculated observed and replicated statistics;
 - identical observed/replicated statistic code paths;
+- exact equivalence of the symmetric statistic to its mean/half-difference
+  expression;
 - invariance of the exchangeable statistic to member swapping;
 - role validation for distinguishable dyads;
 - missing identifiers, incomplete pairs, excess rows, too few pairs, and
@@ -531,8 +595,13 @@ whether one random dataset crosses a percentile threshold:
 - intervals and observed-percentile calculations;
 - `print()` and `plot()` return the documented object invisibly.
 
-Use `skip_if_not_installed("glmmTMB")`. Never assert that a predictive
-percentile must cross a significance cutoff for one seed.
+Before temporal implementation, add optional `brms` tests for posterior draw
+pairing, fitted-row alignment, group-effect target metadata, and the paired
+observed-versus-replicated discrepancy calculation.
+
+Use `skip_if_not_installed("glmmTMB")` and the corresponding guard for optional
+`brms` tests. Never assert that a predictive percentile must cross a
+significance cutoff for one seed.
 
 ### Development calibration
 
@@ -559,9 +628,10 @@ show the intended discrepancy often enough to make the plot useful. If they do
 not, report that limitation before export rather than inventing a favorable
 threshold.
 
-The first implementation task ends with internal functions, passing regression
-tests, calibration output, and inspected plots. Export is a separate review
-decision followed by a clean `R CMD check --as-cran` run.
+The first `glmmTMB` vertical slice ends with internal functions, passing
+regression tests, calibration output, and inspected plots. Review that slice
+before adding `brms`. Export is a separate decision after the supported backend
+paths are validated, followed by a clean `R CMD check --as-cran` run.
 
 ## Formal calibration is deferred
 
@@ -602,15 +672,22 @@ historical teaching workflows, not package requirements.
 
 ## Keep the implementation small
 
-Planned first files:
+Planned module layout:
 
 ```text
-R/predictive_checks.R
-R/check_partner_dependence.R
-tests/testthat/test-predictive-checks.R
-tests/testthat/test-check-partner-dependence.R
+R/simulate_dyad_responses.R
+R/predictive_checks_dependence.R
+R/predictive_checks_response.R
+
+tests/testthat/test-simulate-dyad-responses.R
+tests/testthat/test-predictive-checks-dependence.R
+tests/testthat/test-predictive-checks-response.R
+
 dev/diagnostics/calibrate-partner-dependence.R
 ```
+
+The response-check source and test files belong to the later response-scale
+phase; do not create placeholders before that work begins.
 
 Keep the public functions internal until their calibration is reviewed. Then
 export only the constructor and accepted checks. Register compact print and plot
@@ -618,6 +695,7 @@ S3 methods; users call the base generics. Prefer a few explicit helpers and
 loops over dense functional code when they make replicated statistics or curves
 easier to audit.
 
-Do not add DHARMa, ggplot2, bayesplot, Matrix, or brms as a runtime dependency
-for version 0.2.1. Do not optimize simulation storage or add chunking until ILD
+Do not add DHARMa, ggplot2, bayesplot, Matrix, or brms to `Imports` for version
+0.2.1. Add `brms` to `Suggests` only when its optional backend and tests are
+implemented. Do not optimize simulation storage or add chunking until ILD
 benchmarks demonstrate a real memory problem.
