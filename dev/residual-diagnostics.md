@@ -369,11 +369,77 @@ does not prove the latent covariance structure correct.
 Same-occasion partner checks for ILD data require an explicit occasion
 identifier and are **deferred**. The first function accepts one pair per dyad.
 
+## `brms` path after the first partner-check vertical slice
+
+Implement this path after the Gaussian `glmmTMB` partner check works end to end
+and before beginning the temporal check. The public check names, fitted-row
+pairing, and statistic helpers remain shared. Replicate generation, centering,
+predictive-reference metadata, comparison summaries, and plot details may
+differ where posterior uncertainty requires it.
+
+When centering is needed, pair each posterior-predictive draw with the expected
+response from the same posterior draw:
+
+\[
+e_{obs,s} = y - \mu_s, \qquad
+e_{rep,s} = y^{rep}_s - \mu_s.
+\]
+
+Obtain `y_rep` and `mu` from matching `posterior_predict()` and
+`posterior_epred()` draw IDs. The observed centered statistic is then
+draw-specific; do not present one fixed observed red line as if it were the
+`glmmTMB` plug-in target.
+
+For a scalar statistic, store the paired vectors `observed_statistics` and
+`replicated_statistics` and calculate
+
+\[
+D_s = T(y^{rep}_s - \mu_s) - T(y - \mu_s).
+\]
+
+Summarize and plot the distribution of `D` against zero. For curve-valued
+checks, store and display the corresponding paired difference curves. Do not
+compare the two marginal statistic distributions independently. The statistic
+and curve helpers remain backend-neutral even though the compact comparison
+object differs from the single-observed-value `glmmTMB` object.
+
+Expose the predictive target explicitly:
+
+- `group_effects = "existing"`: retain posterior effects for the fitted group
+  levels and use the matching conditional expected response as `mu`. This
+  checks remaining dependence conditional on the learned group effects, not
+  whether those effects reproduce total population dependence;
+- `group_effects = "new"`: relabel all grouping factors while preserving their
+  nesting and crossing, then use `allow_new_levels = TRUE` and
+  `sample_new_levels = "gaussian"` to generate fresh effects. Center both the
+  observed and replicated response on the matching posterior draw's
+  random-effects-excluded expectation (`re_formula = NA`), so newly generated
+  group effects remain part of the dependence being checked.
+
+The new-group target most closely matches unconditional `glmmTMB` simulation.
+Do not subtract a newly sampled group effect from the observed response because
+that effect does not belong to the observed group. Nested, crossed,
+multi-membership, and special grouping structures require dedicated validation;
+unsupported structures must fail clearly.
+
+An existing-group raw predictive check can assess total response reproduction,
+but it may be forgiving because those group effects were learned from the same
+groups. State the chosen target in every result and plot.
+
+Label `brms` results **posterior predictive**, not plug-in predictive.
+Posterior-predictive tail areas remain discrepancies, not frequentist p-values.
+Do not refit a Bayesian model separately for every posterior-predictive draw.
+
 ## Version 0.2.2: Gaussian ILD temporal dependence
 
 Begin this phase only after the `glmmTMB` and `brms` partner-check paths have
 established the shared interface. Validate the temporal implementation first
 with `glmmTMB`, then with paired posterior-predictive `brms` curves.
+For `brms`, include fitted autocorrelation in predictions
+(`incl_autocor = TRUE`) and validate covariance-form AR models first.
+Response-dependent regression-form AR/ARMA and any required out-of-sample
+handling remain **deferred** until end-to-end tests establish that complete
+recursive replication is correct.
 
 ### Public check
 
@@ -465,6 +531,12 @@ Start with:
 - response quantile, ECDF, or rootogram envelopes;
 - model-centered response patterns over fitted values.
 
+For `brms`, use every complete dataset returned by
+`brms::posterior_predict()`. Never replace posterior-predictive draws with their
+means or medians before calculating a statistic. Use `bayesplot` for mature
+generic posterior-predictive displays when it removes code. `dyadMLM` still
+owns fitted-row alignment and every dyadic or temporal statistic.
+
 Each display must compare the identical statistic or curve in the observed and
 complete replicated datasets. A predictive quantile envelope is not an iid
 normal or uniform QQ plot. Bernoulli zeros represent prevalence, not a separate
@@ -488,87 +560,6 @@ undefined.
 Version 0.2.3 covers Gaussian response checks followed by generalized
 cross-sectional response and partner checks. Version 0.2.4 combines only those
 validated families with the temporal edge construction accepted in 0.2.2.
-
-## `brms` path after the first partner-check vertical slice
-
-Implement this path after the Gaussian `glmmTMB` partner check works end to end
-and before beginning the temporal check. The public check names, fitted-row
-pairing, and statistic helpers remain shared. Replicate generation, centering,
-predictive-reference metadata, comparison summaries, and plot details may
-differ where posterior uncertainty requires it.
-
-### Raw-response checks
-
-Use every complete dataset returned by `brms::posterior_predict()`. Never replace
-posterior-predictive draws with their means or medians before calculating a
-statistic. Raw response-distribution checks can then use the shared comparison
-code. The frozen partner and temporal checks use the model-centered path below.
-
-### Model-centered checks
-
-When centering is needed, pair each posterior-predictive draw with the expected
-response from the same posterior draw:
-
-\[
-e_{obs,s} = y - \mu_s, \qquad
-e_{rep,s} = y^{rep}_s - \mu_s.
-\]
-
-Obtain `y_rep` and `mu` from matching `posterior_predict()` and
-`posterior_epred()` draw IDs. The observed centered statistic is then
-draw-specific; do not present one fixed observed red line as if it were the
-`glmmTMB` plug-in target.
-
-For a scalar statistic, store the paired vectors `observed_statistics` and
-`replicated_statistics` and calculate
-
-\[
-D_s = T(y^{rep}_s - \mu_s) - T(y - \mu_s).
-\]
-
-Summarize and plot the distribution of `D` against zero. For curve-valued
-checks, store and display the corresponding paired difference curves. Do not
-compare the two marginal statistic distributions independently. The statistic
-and curve helpers remain backend-neutral even though the compact comparison
-object differs from the single-observed-value `glmmTMB` object.
-
-### Group-effect target
-
-Expose the predictive target explicitly:
-
-- `group_effects = "existing"`: retain posterior effects for the fitted group
-  levels and use the matching conditional expected response as `mu`. This
-  checks remaining dependence conditional on the learned group effects, not
-  whether those effects reproduce total population dependence;
-- `group_effects = "new"`: relabel all grouping factors while preserving their
-  nesting and crossing, then use `allow_new_levels = TRUE` and
-  `sample_new_levels = "gaussian"` to generate fresh effects. Center both the
-  observed and replicated response on the matching posterior draw's
-  random-effects-excluded expectation (`re_formula = NA`), so newly generated
-  group effects remain part of the dependence being checked.
-
-The new-group target most closely matches unconditional `glmmTMB` simulation.
-Do not subtract a newly sampled group effect from the observed response because
-that effect does not belong to the observed group. Nested, crossed,
-multi-membership, and special grouping structures require dedicated validation;
-unsupported structures must fail clearly.
-
-An existing-group raw predictive check can assess total response reproduction,
-but it may be forgiving because those group effects were learned from the same
-groups. State the chosen target in every result and plot.
-
-Include fitted autocorrelation in predictions (`incl_autocor = TRUE`). Validate
-covariance-form AR models first. Response-dependent regression-form AR/ARMA and
-any required out-of-sample handling remain **deferred** until end-to-end tests
-establish that complete recursive replication is correct.
-
-Label `brms` results **posterior predictive**, not plug-in predictive.
-Posterior-predictive tail areas remain discrepancies, not frequentist p-values.
-Do not refit a Bayesian model separately for every posterior-predictive draw.
-
-Use `bayesplot` for mature generic posterior-predictive displays when it removes
-code. `dyadMLM` still owns fitted-row alignment, dyad pairs, temporal edges,
-dyadic statistics, and their interpretation.
 
 ## Validation before export
 
@@ -695,7 +686,8 @@ S3 methods; users call the base generics. Prefer a few explicit helpers and
 loops over dense functional code when they make replicated statistics or curves
 easier to audit.
 
-Do not add DHARMa, ggplot2, bayesplot, Matrix, or brms to `Imports` for version
-0.2.1. Add `brms` to `Suggests` only when its optional backend and tests are
+Do not add `DHARMa` to `Imports` or `Suggests`. Do not add `ggplot2`, `bayesplot`,
+`Matrix`, or `brms` to `Imports` for version 0.2.1. Add optional packages to
+`Suggests` only when the corresponding backend, display, or tests are
 implemented. Do not optimize simulation storage or add chunking until ILD
 benchmarks demonstrate a real memory problem.
