@@ -28,6 +28,9 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 
 ```{r setup}
 library(dyadMLM)
+```
+
+```{r internal-setup, include=FALSE}
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 apim_distinguishable_fitted_alt <-
   "Fitted distinguishable APIM diagram unavailable."

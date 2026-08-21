@@ -39,6 +39,9 @@ knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
 
 ```{r setup}
 library(dyadMLM)
+```
+
+```{r internal-setup, include=FALSE}
 has_glmmTMB <- requireNamespace("glmmTMB", quietly = TRUE)
 has_htmltools <- requireNamespace("htmltools", quietly = TRUE)
 dim_fitted_alt <- "Fitted DIM diagram unavailable."
