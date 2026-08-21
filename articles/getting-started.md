@@ -860,8 +860,8 @@ citation("dyadMLM")
 #> 
 #>   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.
 #>   doi:10.5281/zenodo.21481720
-#>   <https://doi.org/10.5281/zenodo.21481720>. R package version 0.2.0,
-#>   <https://pascal-kueng.github.io/dyadMLM/>.
+#>   <https://doi.org/10.5281/zenodo.21481720>. R package version
+#>   0.2.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
@@ -869,7 +869,7 @@ citation("dyadMLM")
 #>     title = {dyadMLM: Tools for Dyadic Multilevel Models},
 #>     author = {Pascal Küng},
 #>     year = {2026},
-#>     note = {R package version 0.2.0},
+#>     note = {R package version 0.2.0.9000},
 #>     url = {https://pascal-kueng.github.io/dyadMLM/},
 #>     doi = {10.5281/zenodo.21481720},
 #>   }

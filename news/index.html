@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dyadMLM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,10 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.0" id="dyadmlm-020">dyadMLM 0.2.0<a class="anchor" aria-label="anchor" href="#dyadmlm-020"></a></h2>
+<h2 class="pkg-version" data-toc-text="development version" id="dyadmlm-development-version">dyadMLM (development version)<a class="anchor" aria-label="anchor" href="#dyadmlm-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="dyadmlm-020">dyadMLM 0.2.0<a class="anchor" aria-label="anchor" href="#dyadmlm-020"></a></h2><p class="text-muted">CRAN release: 2026-08-21</p>
 <ul><li><p>This early API-stabilization release intentionally makes a few direct, breaking changes from 0.1.0. Compatibility wrappers are not retained.</p></li>
 <li><p>Retained generated columns now use a single leading dot instead of <code>.dy_</code> for more readable model formulas. For example, <code>.dy_x_actor</code> becomes <code>.x_actor</code>. The <code>.dy_</code> prefix is reserved for temporary implementation columns.</p></li>
 <li><p><code><a href="../reference/prepare_dyad_data.html">prepare_dyad_data()</a></code> now uses compact composition-column names when the final data contain one composition, such as <code>.is_female</code> and <code>.member_contrast_arbitrary</code>. Set <code>short_colnames = FALSE</code> to retain composition-qualified names. <code><a href="../reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance()</a></code> recognizes both forms.</p></li>

@@ -1,6 +1,10 @@
 # Changelog
 
+## dyadMLM (development version)
+
 ## dyadMLM 0.2.0
+
+CRAN release: 2026-08-21
 
 - This early API-stabilization release intentionally makes a few direct,
   breaking changes from 0.1.0. Compatibility wrappers are not retained.
