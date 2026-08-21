@@ -195,7 +195,7 @@ test_that("unsupported predictive-check inputs fail clearly", {
   )
   expect_error(
     simulate_dyad_responses(gaussian_model, seed = -1),
-    "nonnegative whole number",
+    "non-negative whole number",
     fixed = TRUE
   )
 

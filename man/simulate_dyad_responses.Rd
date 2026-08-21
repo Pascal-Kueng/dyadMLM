@@ -12,7 +12,7 @@ simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 \item{nsim}{Number of complete response datasets to simulate. The default
 is 1000.}
 
-\item{seed}{\code{NULL} or one nonnegative whole number used to reproduce the
+\item{seed}{\code{NULL} or one non-negative whole number used to reproduce the
 simulations.}
 }
 \value{
