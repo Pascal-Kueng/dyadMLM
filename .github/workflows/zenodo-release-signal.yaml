@@ -2,14 +2,13 @@ name: Signal Zenodo release
 
 on:
   release:
-    types: [published]
+    types: [released]
 
 # This tag-associated workflow receives neither repository permissions nor secrets.
 permissions: {}
 
 jobs:
   signal:
-    if: ${{ !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     steps:
       - name: Hand release to the trusted default-branch workflow
