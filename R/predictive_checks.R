@@ -102,35 +102,25 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     )
   }
 
-  # glmmTMB stores simulation settings in mutable environments. A regular
-  # assignment would modify the object! So, instead, we make an independent
-  # working copy.
-  simulation_model <- model |>
-    serialize(NULL) |>
-    unserialize()
-
-  # Safeguard to not silently omit term if update changes glmmTMB internals.
-  simulation_components <- c("terms", "termszi", "termsdisp")
-  if (!all(
-    simulation_components %in% names(simulation_model$obj$env$data)
-  )) {
-    stop(
-      "The fitted model has an unsupported simulation structure.",
-      call. = FALSE
-    )
-  }
+  # glmmTMB stores simulation settings in mutable environments. Temporarily
+  # change them, then restore the caller's exact settings on success or error.
+  original_simulation_codes <- get_glmmTMB_simulation_codes(model)
+  on.exit(
+    set_glmmTMB_simulation_codes(model, original_simulation_codes),
+    add = TRUE
+  )
 
   # glmmTMB uses `2` to draw new random effects during simulation.
-  for (component in simulation_components) {
-    for (term_index in seq_along(simulation_model$obj$env$data[[component]])) {
-      simulation_model$obj$env$data[[component]][[term_index]]$simCode <- 2
-    }
-  }
+  unconditional_simulation_codes <- lapply(
+    original_simulation_codes,
+    function(codes) rep(2, length(codes))
+  )
+  set_glmmTMB_simulation_codes(model, unconditional_simulation_codes)
 
 
   #### Simulate
 
-  simulated_responses <- simulation_model |>
+  simulated_responses <- model |>
     stats::simulate(nsim = nsim, seed = seed) |>
     # glmmTMB returns fitted rows x simulations
     # but we need simulations x fitted rows.
@@ -145,21 +135,60 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     )
   }
 
-  structure(
-    list(
-      observed_response = as.numeric(observed_response),
-      simulated_responses = simulated_responses,
-      fitted_response = fitted_response,
-      model_frame = model_frame,
-      backend = "glmmTMB",
-      family = model_family$family,
-      link = model_family$link,
-      reference = "plug-in predictive",
-      random_effects = "new",
-      nsim = nsim,
-      seed = seed,
-      call = simulation_call
-    ),
-    class = c("dyadMLM_response_simulations", "list")
+  # Attach metadata
+  simulation_results <- list(
+    observed_response = as.numeric(observed_response),
+    simulated_responses = simulated_responses,
+    fitted_response = fitted_response,
+    model_frame = model_frame,
+    backend = "glmmTMB",
+    family = model_family$family,
+    link = model_family$link,
+    reference = "plug-in predictive",
+    random_effects = "new",
+    nsim = nsim,
+    seed = seed,
+    call = simulation_call
   )
+  class(simulation_results) <- c("dyadMLM_response_simulations", "list")
+
+  return(simulation_results)
+}
+
+
+# Read every currently supported glmmTMB random-effect component.
+get_glmmTMB_simulation_codes <- function(model) {
+  simulation_components <- c("terms", "termszi", "termsdisp")
+  if (!all(simulation_components %in% names(model$obj$env$data))) {
+    stop(
+      "The fitted model has an unsupported simulation structure.",
+      call. = FALSE
+    )
+  }
+
+  lapply(
+    model$obj$env$data[simulation_components],
+    function(component_terms) {
+      vapply(
+        component_terms,
+        function(term) as.numeric(term$simCode),
+        numeric(1)
+      )
+    }
+  )
+}
+
+
+# Set or restore the exact term-specific codes in every model component.
+set_glmmTMB_simulation_codes <- function(model, simulation_codes) {
+  for (component in names(simulation_codes)) {
+    component_terms <- model$obj$env$data[[component]]
+    for (term_index in seq_along(component_terms)) {
+      component_terms[[term_index]]$simCode <-
+        simulation_codes[[component]][[term_index]]
+    }
+    model$obj$env$data[[component]] <- component_terms
+  }
+
+  invisible(model)
 }
