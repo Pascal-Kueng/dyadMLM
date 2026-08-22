@@ -1,9 +1,13 @@
 ---
-title: "Test_residual_diagnostics"
+title: "Partner-dependence diagnostics (exploratory vignette draft)"
 output: html_document
 ---
 
-# Distinguishable
+This exploratory note keeps the fuller model sequence as a possible future
+vignette draft. See the shorter
+[development review](partner-dependence-review.Rmd) for the current feature.
+
+# Distinguishable dyads
 
 ## Prep data
 
@@ -16,7 +20,8 @@ diagnostic_data <- prepare_dyad_data(
     member = personID,
     role = gender,
     model_types = "none",
-    keep_compositions = "female-male"
+    keep_compositions = "female-male",
+    seed = 13000L
 )
 ```
 
@@ -34,14 +39,14 @@ m_c <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(m_c, nsim = 5000) |>
+simulate_dyad_responses(m_c, nsim = 5000, seed = 13001L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID, 
     role = diagnostic_data$gender)
 ```
 
 
-## Incorrect Models
+## Constrained models
 
 ```{r}
 m_w1 <- glmmTMB::glmmTMB(
@@ -54,7 +59,7 @@ m_w1 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(m_w1, nsim = 5000) |>
+simulate_dyad_responses(m_w1, nsim = 5000, seed = 13002L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID, 
     role = diagnostic_data$gender)
@@ -73,7 +78,7 @@ m_w2 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(m_w2, nsim = 5000) |>
+simulate_dyad_responses(m_w2, nsim = 5000, seed = 13003L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID, 
     role = diagnostic_data$gender)
@@ -91,7 +96,7 @@ m_w3 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(m_w3, nsim = 5000) |>
+simulate_dyad_responses(m_w3, nsim = 5000, seed = 13004L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID, 
     role = diagnostic_data$gender)
@@ -99,31 +104,34 @@ simulate_dyad_responses(m_w3, nsim = 5000) |>
 
 ```{r}
 compare_nested_models(
-  m_c, 
-  m_w3
+  m_w3,
+  m_c
 )
 ```
 
-## Exchangeable 
+# Exchangeability sensitivity
+
+Here, the female-male data are deliberately treated as exchangeable. The
+pooled check assesses the imposed covariance structure; the gender-aware check
+asks whether that pooling hides role-specific differences.
 
 ## Prep data
 
 ```{r}
-library(dyadMLM)
-
 diagnostic_data <- prepare_dyad_data(
     dyads_cross,
     dyad = coupleID,
     member = personID,
     role = gender,
     model_types = "none",
-    keep_compositions = "female-male", 
-    set_exchangeable_compositions = 'female-male'
+    keep_compositions = "female-male",
+    set_exchangeable_compositions = "female-male",
+    seed = 13000L
 )
 ```
 
 
-## Correct exchangeable model
+## Exchangeability-constrained model
 
 ```{r}
 e_c <- glmmTMB::glmmTMB(
@@ -140,22 +148,28 @@ e_c <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(e_c, nsim = 5000) |>
+e_c_simulations <- simulate_dyad_responses(
+  e_c,
+  nsim = 5000,
+  seed = 13005L
+)
+
+e_c_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID) 
 ```
 
-## Quick test whether the model could explain distinguishable Gender dependence struct
+## Inspect the same model by gender
 
 ```{r}
-simulate_dyad_responses(e_c, nsim = 5000) |>
+e_c_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID,
     role = diagnostic_data$gender) 
 ```
 
 
-## Incorrect Models
+## Additional constrained models
 
 ```{r}
 e_w1 <- glmmTMB::glmmTMB(
@@ -168,7 +182,7 @@ e_w1 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(e_w1, nsim = 5000) |>
+simulate_dyad_responses(e_w1, nsim = 5000, seed = 13006L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID) 
 ```
@@ -186,7 +200,7 @@ e_w2 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(e_w2, nsim = 5000) |>
+simulate_dyad_responses(e_w2, nsim = 5000, seed = 13007L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID) 
 ```
@@ -203,18 +217,14 @@ e_w3 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(e_w3, nsim = 5000) |>
+simulate_dyad_responses(e_w3, nsim = 5000, seed = 13008L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID)
 ```
 
 ```{r}
 compare_nested_models(
-  m_c, 
-  m_w3
+  e_w2,
+  e_c
 )
 ```
-
-## Exchangeable 
-
-

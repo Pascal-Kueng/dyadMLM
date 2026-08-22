@@ -1,0 +1,257 @@
+---
+title: "Development review: partner-dependence diagnostics"
+output:
+  html_document:
+    toc: true
+---
+
+This note reviews the cross-sectional Gaussian partner check using the fixed
+simulated data shipped with `dyadMLM`. It is an end-to-end development review,
+not a formal hypothesis-test calibration.
+
+```{r setup, include=FALSE}
+package_root <- normalizePath(file.path("..", ".."))
+devtools::load_all(package_root, quiet = TRUE)
+
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  message = FALSE,
+  warning = FALSE
+)
+
+nsim <- 1000L
+
+run_partner_check <- function(model, data, seed, role = NULL) {
+  simulate_dyad_responses(model, nsim = nsim, seed = seed) |>
+    check_partner_dependence(
+      dyad = data$coupleID,
+      role = role,
+      plot = FALSE
+    )
+}
+```
+
+# Distinguishable dyads
+
+The female-male composition has distinguishable roles. The intended model
+allows separate role-specific spreads and their covariance. Two constrained
+models then omit the partner correlation or impose an exchangeable covariance
+structure.
+
+```{r prepare-distinguishable}
+distinguishable_data <- prepare_dyad_data(
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  model_types = "none",
+  keep_compositions = "female-male",
+  include_arbitrary_member_contrast = TRUE,
+  seed = 12000L
+)
+```
+
+```{r fit-distinguishable-models}
+distinguishable_unstructured_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 + .is_female + .is_male +
+    (0 + .is_female + .is_male | coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = distinguishable_data
+)
+
+distinguishable_no_correlation_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 + .is_female + .is_male +
+    (0 + .is_female + .is_male || coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = distinguishable_data
+)
+
+distinguishable_exchangeable_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 + .is_female + .is_male +
+    (1 | coupleID) +
+    (0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = distinguishable_data
+)
+```
+
+```{r check-distinguishable-models, include=FALSE}
+distinguishable_unstructured_check <- run_partner_check(
+  distinguishable_unstructured_model,
+  distinguishable_data,
+  seed = 12001L,
+  role = distinguishable_data$gender
+)
+
+distinguishable_no_correlation_check <- run_partner_check(
+  distinguishable_no_correlation_model,
+  distinguishable_data,
+  seed = 12002L,
+  role = distinguishable_data$gender
+)
+
+distinguishable_exchangeable_simulations <- simulate_dyad_responses(
+  distinguishable_exchangeable_model,
+  nsim = nsim,
+  seed = 12003L
+)
+
+distinguishable_exchangeable_pooled_check <- check_partner_dependence(
+  distinguishable_exchangeable_simulations,
+  dyad = distinguishable_data$coupleID,
+  plot = FALSE
+)
+
+distinguishable_exchangeable_gender_check <- check_partner_dependence(
+  distinguishable_exchangeable_simulations,
+  dyad = distinguishable_data$coupleID,
+  role = distinguishable_data$gender,
+  plot = FALSE
+)
+```
+
+## Intended covariance model
+
+```{r plot-distinguishable-unstructured, echo=FALSE}
+plot(distinguishable_unstructured_check, ask = FALSE)
+```
+
+## Partner correlation omitted
+
+```{r plot-distinguishable-no-correlation, echo=FALSE}
+plot(distinguishable_no_correlation_check, ask = FALSE)
+```
+
+## Exchangeable covariance constraint
+
+The pooled view asks whether the constrained model reproduces the overall
+partner covariance. The gender-aware view asks whether pooling hides
+role-specific differences. Both views use exactly the same simulations.
+
+### Pooled view
+
+```{r plot-distinguishable-exchangeable-pooled, echo=FALSE}
+plot(distinguishable_exchangeable_pooled_check, ask = FALSE)
+```
+
+### Gender-aware view
+
+```{r plot-distinguishable-exchangeable-gender, echo=FALSE}
+plot(distinguishable_exchangeable_gender_check, ask = FALSE)
+```
+
+# Exchangeable dyads
+
+The female-female composition was generated as exchangeable. Its intended
+shared/difference model is compared with a model that omits all partner
+dependence while retaining the marginal response spread.
+
+```{r prepare-exchangeable}
+exchangeable_data <- prepare_dyad_data(
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  model_types = "none",
+  keep_compositions = "female-female",
+  seed = 12000L
+)
+```
+
+```{r fit-exchangeable-models}
+exchangeable_model <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+    (1 | coupleID) +
+    (0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = exchangeable_data
+)
+
+exchangeable_independent_model <- glmmTMB::glmmTMB(
+  closeness ~ 1,
+  family = gaussian(),
+  data = exchangeable_data
+)
+```
+
+```{r check-exchangeable-models, include=FALSE}
+exchangeable_check <- run_partner_check(
+  exchangeable_model,
+  exchangeable_data,
+  seed = 12004L
+)
+
+exchangeable_independent_check <- run_partner_check(
+  exchangeable_independent_model,
+  exchangeable_data,
+  seed = 12005L
+)
+```
+
+## Intended covariance model
+
+```{r plot-exchangeable, echo=FALSE}
+plot(exchangeable_check, ask = FALSE)
+```
+
+## Partner dependence omitted
+
+```{r plot-exchangeable-independent, echo=FALSE}
+plot(exchangeable_independent_check, ask = FALSE)
+```
+
+# Findings
+
+The table identifies which observed summaries fall outside the central 95%
+interval of the corresponding replicated summaries. These intervals are
+descriptive and are not hypothesis tests.
+
+```{r summarize-findings, echo=FALSE}
+partner_checks <- list(
+  distinguishable_unstructured = distinguishable_unstructured_check,
+  distinguishable_no_correlation = distinguishable_no_correlation_check,
+  distinguishable_exchangeable_pooled =
+    distinguishable_exchangeable_pooled_check,
+  distinguishable_exchangeable_gender =
+    distinguishable_exchangeable_gender_check,
+  exchangeable_correct = exchangeable_check,
+  exchangeable_independent = exchangeable_independent_check
+)
+
+findings <- do.call(
+  rbind,
+  lapply(names(partner_checks), function(check_name) {
+    statistics <- partner_checks[[check_name]]$statistics_table
+    outside_interval <-
+      statistics$observed_value < statistics$replicated_lower |
+      statistics$observed_value > statistics$replicated_upper
+
+    data.frame(
+      check = check_name,
+      summaries_outside_interval = if (any(outside_interval)) {
+        paste(statistics$label[outside_interval], collapse = "; ")
+      } else {
+        "None"
+      },
+      row.names = NULL
+    )
+  })
+)
+
+knitr::kable(findings)
+```
+
+The expected pattern is that the intended models remain compatible with the
+observed summaries. Omitting partner correlation should affect the partner
+correlation and its mean/difference representation. The gender-aware view of
+the exchangeable constraint can reveal role asymmetry that is not apparent in
+the pooled view.

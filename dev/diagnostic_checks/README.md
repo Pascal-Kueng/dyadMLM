@@ -82,15 +82,24 @@ plot(partner_check, parameterization = "member")
 
 ## Implementation order and file boundaries
 
-Build one complete check before expanding the diagnostic surface:
+Complete one diagnostic question before adding the next:
 
-1. finish the Gaussian `glmmTMB` simulation constructor and the complete
+1. finish and review the Gaussian `glmmTMB` simulation constructor and
    cross-sectional partner-dependence check;
-2. add the `brms` simulation and draw-matched centering path for that same
-   partner check, keeping the statistic code shared;
-3. add the Gaussian temporal-dependence curve for both supported backends; and
-4. add response-distribution checks and validate generalized families one at a
-   time.
+2. validate that same cross-sectional check for negative-binomial and then
+   Tweedie `glmmTMB` models;
+3. extend the partner check to same-occasion ILD pairs, first for Gaussian and
+   then for the generalized families already accepted cross-sectionally;
+4. add the `brms` simulation and draw-matched centering path for the completed
+   partner check, keeping pairing and statistic code shared;
+5. add temporal-dependence curves, validating Gaussian `glmmTMB`, accepted
+   generalized `glmmTMB` families, and then `brms` in that order;
+6. add broader response-distribution checks; and
+7. add mixed-composition support only after the single-composition partner,
+   temporal, and response checks are stable.
+
+This order changes one dimension at a time: family, repeated-pair structure,
+backend, and finally diagnostic question.
 
 Keep three implementation modules:
 
@@ -157,6 +166,19 @@ weights, and any nonzero zero-inflation formula clearly in this first
 milestone. Treat absent weights as unit weights. Generalized families are added
 only through the family-by-family validation milestones below.
 
+After Gaussian cross-sectional review, relax family validation one family
+at a time: `nbinom2(link = "log")` first and `tweedie(link = "log")` second.
+Initially retain scalar responses, unit case weights, `ziformula = ~0`, and an
+intercept-only dispersion model. Validate nonconstant dispersion separately
+before accepting it. Reuse the model engine's complete unconditional
+simulations; do not reproduce its link, dispersion, zero-mass, or random-effect
+calculations. For each family, verify fitted-row alignment, finite simulations,
+correct and omitted dependence scenarios, and clear handling of replicates
+with insufficient response variation. Inspect the marginal response
+distribution separately until the package-native response checks are
+implemented. Supporting one family must not imply support for every family
+handled by `simulate.glmmTMB()`.
+
 `glmmTMB` simulation codes are mutable. Before simulation:
 
 1. save the current codes;
@@ -177,8 +199,8 @@ simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 The constructor is public because the complete `glmmTMB` partner check now
 exercises its output contract. Keep the interface experimental while the
 diagnostic suite expands. The first object contract below is specific to
-`glmmTMB`; add the `brms` path only after this implementation establishes which
-fields the shared check code actually needs.
+`glmmTMB`; add the `brms` path only after the complete `glmmTMB` partner feature
+establishes which fields the shared check code actually needs.
 
 `nsim` is the number of complete simulated datasets. Require one positive whole
 number and recommend 1000 for ordinary plots. Smaller values remain useful for
@@ -193,8 +215,8 @@ simulated_responses      numeric matrix: simulation x fitted row
 fixed_effect_prediction  random-effects-excluded response-scale prediction
 model_frame              fitted model frame in the same row order
 backend                  "glmmTMB"
-family                   "gaussian"
-link                     "identity"
+family                   fitted family name
+link                     fitted link name
 reference                "plug-in predictive"
 random_effects           "new"
 nsim                     number of complete simulations
@@ -342,8 +364,8 @@ member positions are exchanged independently within dyads.
 
 Calculate every applicable summary once for the observed centered response and
 once for every complete simulated dataset, using one shared internal helper. If
-any observed or replicated summary is non-finite, stop clearly in the initial
-Gaussian milestone rather than silently dropping simulations.
+any observed or replicated summary is non-finite, stop clearly rather than
+silently dropping simulations.
 
 For `glmmTMB`, return class `dyadMLM_partner_check` with:
 
@@ -394,9 +416,9 @@ response-scale feature. Looking across the spread and dependence summaries can
 localize the mismatch within the fitted covariance structure, but it does not
 by itself identify whether the mean, marginal distribution, dispersion, random
 effects, or partner covariance is responsible.
-For version 0.2.1, inspect the response distribution and ordinary model-engine
-diagnostics separately before assigning the discrepancy to partner dependence;
-package-native marginal predictive checks arrive in 0.2.3. Do not interpret
+Until the package-native response checks arrive in 0.2.4, inspect the response
+distribution and ordinary model-engine diagnostics separately before assigning
+a discrepancy to partner dependence. Do not interpret
 ordinary rowwise residual tests as calibrated dyadic tests. For generalized
 models, never interpret the partner statistic as the fitted latent correlation.
 
@@ -404,16 +426,50 @@ Use model comparison to decide whether a covariance term is needed or whether
 exchangeability constraints are supported. A typical predictive value alone
 does not prove the latent covariance structure correct.
 
-Same-occasion partner checks for ILD data require an explicit occasion
-identifier and are **deferred**. The first function accepts one pair per dyad.
+## Version 0.2.2: complete the partner-dependence feature
 
-### Staged mixed-dyad-type expansion
+After generalized cross-sectional validation, extend the existing check rather
+than create another function:
 
-Add mixed dyad types only after the corresponding single-composition check is
-calibrated and reviewed. They do not require another simulation backend. Reuse
-the same complete response datasets, but calculate the observed and replicated
-statistics separately for every final analysis composition. Never pool
-distinct compositions into one dependence statistic.
+```r
+check_partner_dependence(
+  simulations,
+  dyad,
+  role = NULL,
+  occasion = NULL,
+  plot = TRUE
+)
+```
+
+With `occasion = NULL`, retain the cross-sectional contract of one pair per
+dyad. When `occasion` is supplied, pair rows by dyad and occasion, allow dyads
+to contribute repeated occasions, and calculate the same frozen statistics
+across complete dyad-occasion pairs. Each complete pair contributes once.
+Resolve `occasion` through the same fitted-row argument resolver as `dyad` and
+`role`.
+
+Exclude and report rows with missing occasion identifiers. Count incomplete
+dyad-occasion pairs separately, error when a dyad-occasion contains more than
+two fitted responses, and apply the existing role checks within every usable
+pair. In ILD results, `n_pairs` means complete dyad-occasion pairs; also record
+the numbers of missing-occasion rows and incomplete dyad-occasion pairs.
+
+Validate repeated-pair handling for Gaussian `glmmTMB` models first, followed
+by only the generalized families accepted in the cross-sectional phase.
+Complete simulations already retain fitted temporal and higher-level
+dependence, so the replicated reference remains valid. The statistic is
+pair-weighted and evaluates the complete model's response-scale
+same-occasion dependence; it is not a pure level-1 residual correlation. A
+discrepancy may partly reflect temporal misspecification, which the later
+temporal check helps localize.
+
+### Mixed-dyad-type expansion after the core diagnostics
+
+Add mixed dyad types only after the 0.2.4 single-composition partner, temporal,
+and response-check milestones are stable. They do not require another
+simulation backend. Reuse the same complete response datasets, but calculate
+the observed and replicated statistics separately for every final analysis
+composition. Never pool distinct compositions into one dependence statistic.
 
 For each composition, provide two equivalent diagnostic views:
 
@@ -433,16 +489,18 @@ equivalent reparameterizations, not independent tests.
 Freeze the composition-identification arguments only when implementing this
 stage. They must respect final analysis-composition and exchangeability
 decisions and also accept fitted-row-aligned identifiers when preparation
-metadata are no longer attached to the model frame. Extend temporal checks to
-mixed compositions only after the single-composition 0.2.2 implementation is
-accepted, and extend generalized mixed-composition checks only for families
-already validated in 0.2.3 or 0.2.4.
+metadata are no longer attached to the model frame. Within this final expansion,
+add cross-sectional partner checks first, repeated same-occasion partner checks
+second, and temporal checks last. Limit generalized mixed-composition support
+to families already validated in the corresponding single-composition phase.
 
-## `brms` path after the first partner-check vertical slice
+## `brms` path after the `glmmTMB` partner feature
 
-Implement this path after the Gaussian `glmmTMB` partner check works end to end
-and before beginning the temporal check. The public check names, fitted-row
-pairing, and statistic helpers remain shared. Replicate generation, centering,
+Implement this path after the `glmmTMB` partner check works for cross-sectional
+and repeated same-occasion data across the accepted families, and before
+beginning the temporal check. Validate Gaussian models first and then each
+accepted generalized family. The public check names, fitted-row pairing, and
+statistic helpers remain shared. Replicate generation, centering,
 predictive-reference metadata, comparison summaries, and plot details may
 differ where posterior uncertainty requires it.
 
@@ -499,11 +557,12 @@ Label `brms` results **posterior predictive**, not plug-in predictive.
 Posterior-predictive tail areas remain discrepancies, not frequentist p-values.
 Do not refit a Bayesian model separately for every posterior-predictive draw.
 
-## Version 0.2.2: Gaussian ILD temporal dependence
+## Version 0.2.3: temporal dependence
 
 Begin this phase only after the `glmmTMB` and `brms` partner-check paths have
 established the shared interface. Validate the temporal implementation first
-with `glmmTMB`, then with paired posterior-predictive `brms` curves.
+with Gaussian `glmmTMB`, then with the accepted generalized `glmmTMB` families,
+and finally with paired posterior-predictive `brms` curves.
 For `brms`, include fitted autocorrelation in predictions
 (`incl_autocor = TRUE`) and validate covariance-form AR models first.
 Response-dependent regression-form AR/ARMA and any required out-of-sample
@@ -576,22 +635,22 @@ Do not report a single global tail probability in the first implementation. A
 global numerical check requires a separately frozen whole-curve discrepancy
 and calibrated reference and belongs with the deferred formal-testing work.
 
-The first temporal curve addresses own-member persistence only. Same-occasion
-partner dependence, cross-partner lead/lag dependence, role-specific curves,
-and couple-mean/member-difference curves are separate questions and are
-**deferred**.
+The first temporal curve addresses own-member persistence only.
+Same-occasion partner dependence is handled by
+`check_partner_dependence(..., occasion = ...)`. Cross-partner lead/lag
+dependence, role-specific curves, and couple-mean/member-difference curves are
+separate questions and are **deferred**.
 
 The exact-gap construction and within-series centering in
-[`workshop/helpers.R`](workshop/helpers.R) are useful development references.
+[`workshop/helpers.R`](../workshop/helpers.R) are useful development references.
 Do not copy that helper's DHARMa mutation, p-value output, or dense whitening.
 
-## Versions 0.2.3-0.2.4: response checks and generalized validation
+## Version 0.2.4: response-distribution checks
 
-The complete-replicate architecture is family-neutral, but support is not
-claimed merely because `simulate()` runs. First define the direct response-scale
-checks for the supported Gaussian backends. Then validate scalar-response
-families one at a time, beginning with negative binomial and then the applied
-Tweedie case.
+Add broader direct response-scale checks after the partner and temporal
+features are complete. Implement them first for Gaussian models and then for
+the families already accepted by the dependence checks. Do not infer support
+for another family merely because `simulate()` runs.
 
 Start with:
 
@@ -611,26 +670,22 @@ complete replicated datasets. A predictive quantile envelope is not an iid
 normal or uniform QQ plot. Bernoulli zeros represent prevalence, not a separate
 zero-inflation process.
 
-Then validate the same partner and temporal statistics. Their interpretation is
-response-scale adequacy: a simplified generalized random-effects structure may
-be acceptable if its complete replicates reproduce the observed dependence.
-Failure does not identify which latent component should be added.
+Use these displays to help interpret dependence discrepancies. A simplified
+generalized random-effects structure may be acceptable if its complete
+replicates reproduce the observed dependence and relevant marginal response
+features. Failure still does not identify which latent component should be
+added.
 
 Individual observation-level PIT outlier flags are **deferred**. They would need
 a separately specified predictive reference or analytical CDF and must not be
 smuggled back in through the removed simulation split.
 
-The items in this generalized section are roadmap targets, not yet frozen
-implementation specifications. Before supporting a family, define each exact
-statistic and its behavior for ties, zero variance, and non-finite replicated
-values. Never silently discard a discrete replicate for which a correlation is
-undefined.
+The items in this section are roadmap targets, not yet frozen implementation
+specifications. Before adding a display, define its exact statistic and its
+behavior for ties, zero variance, and non-finite replicated values. Never
+silently discard a replicate for which a displayed summary is undefined.
 
-Version 0.2.3 covers Gaussian response checks followed by generalized
-cross-sectional response and partner checks. Version 0.2.4 combines only those
-validated families with the temporal edge construction accepted in 0.2.2.
-
-## Validation before export
+## Validation before release
 
 ### Package regression tests
 
@@ -648,8 +703,12 @@ whether one random dataset crosses a predictive-quantile threshold:
   zero-centered half-difference SD;
 - invariance of every exchangeable summary to independent member swapping;
 - stable role orientation and the exact distinguishable correlation mapping;
-- missing identifiers, incomplete pairs, excess rows, too few pairs, and
-  non-finite values;
+- missing identifiers, incomplete pairs, repeated dyad occasions, excess rows,
+  too few pairs, and non-finite values;
+- identical cross-sectional and ILD pairing behavior when each dyad has one
+  occasion;
+- family-specific support and clear handling of zero-variation generalized
+  replicates;
 - exact temporal gaps, series boundaries, missing occasions, lag support, and
   pair-weighted calculations;
 - intervals and observed-quantile calculations;
@@ -664,35 +723,35 @@ Use `skip_if_not_installed("glmmTMB")` and the corresponding guard for optional
 `brms` tests. Never assert that a predictive quantile must cross a
 significance cutoff for one seed.
 
-### Development calibration
+### Development review
 
-Use fixed multi-seed simulations and keep them outside CRAN tests. For partner
-dependence include:
+Use [`partner-dependence-review.Rmd`](partner-dependence-review.Rmd)
+for a short end-to-end review with the package's fixed simulated
+`dyads_cross` data. It compares:
 
-1. a correct distinguishable Gaussian covariance;
-2. a correct exchangeable Gaussian covariance;
-3. positive dependence omitted from the fitted model;
-4. negative dependence fitted with a structure that can generate only
-   nonnegative dependence;
-5. missing members and randomly reordered rows;
-6. an additional higher-level random intercept.
+- an unstructured distinguishable model with no-correlation and exchangeable
+  constraints on the same female-male dyads; and
+- the intended shared/difference model with an independent model on genuinely
+  exchangeable female-female dyads.
 
-For temporal dependence include correct AR(1), omitted AR(1), and a deliberately
-misspecified decay shape, with fixed missing scheduled occasions. Inspect the
-complete multi-lag curve rather than only lag 1.
+Use fixed preparation and predictive-simulation seeds. Correct models should
+place the observed summaries in the replicated bulk, while each constrained
+model should reveal the response-scale feature it cannot reproduce. Inspect
+the plots and the concise interval-inclusion summary; do not turn either into a
+pass/fail hypothesis test.
 
-Record convergence, observed and replicated summaries, interval inclusion, and
-runtime over all predetermined seeds. Do not select a convenient seed or change
-the statistic after viewing one result. Correct scenarios should not show a
-systematic directional discrepancy; deliberately inadequate scenarios should
-show the intended discrepancy often enough to make the plot useful. If they do
-not, report that limitation before export rather than inventing a favorable
-threshold.
+This review verifies the public workflow on a transparent, shipped dataset. It
+does not estimate repeated-sampling operating characteristics. Add narrowly
+targeted synthetic studies only when generalized, repeated-pair, or temporal
+checks are implemented and the package data cannot represent the required
+edge case.
 
-The first `glmmTMB` vertical slice ends with internal functions, passing
-regression tests, calibration output, and inspected plots. Review that slice
-before adding `brms`. Export is a separate decision after the supported backend
-paths are validated, followed by a clean `R CMD check --as-cran` run.
+The first `glmmTMB` vertical slice ends with passing regression tests and
+inspected development plots. Review the Gaussian cross-sectional
+slice before relaxing family validation, and review the complete `glmmTMB`
+partner feature before adding `brms`. Keep the exported API experimental until
+the supported paths are validated, followed by a clean `R CMD check --as-cran`
+run.
 
 ## Formal calibration is deferred
 
@@ -716,14 +775,14 @@ testing belongs in the first implementation.
 
 The following files remain useful and are not competing diagnostics plans:
 
-- [`dyadic-ild-ar1-var-tutorial.md`](dyadic-ild-ar1-var-tutorial.md) distinguishes
+- [`dyadic-ild-ar1-var-tutorial.md`](../dyadic-ild-ar1-var-tutorial.md) distinguishes
   residual AR covariance from substantive own- and partner-outcome carryover;
-- [`dyadic-ild-current-options.md`](dyadic-ild-current-options.md) records the
+- [`dyadic-ild-current-options.md`](../dyadic-ild-current-options.md) records the
   covariance structures available in released `glmmTMB` and `brms` versions;
-- [`ild-nonindependence.md`](ild-nonindependence.md) separates stable dyad,
+- [`ild-nonindependence.md`](../ild-nonindependence.md) separates stable dyad,
   same-occasion partner, within-member serial, and cross-partner serial
   dependence;
-- [`stan.md`](stan.md) is the separate long-term residual-VAR model roadmap;
+- [`stan.md`](../stan.md) is the separate long-term residual-VAR model roadmap;
 - `workshop/` contains the preserved teaching implementation and must remain
   runnable until deliberately revised.
 
@@ -744,13 +803,13 @@ tests/testthat/test-simulate-dyad-responses.R
 tests/testthat/test-predictive-checks-dependence.R
 tests/testthat/test-predictive-checks-response.R
 
-dev/diagnostics/calibrate-partner-dependence.R
+dev/diagnostic_checks/partner-dependence-review.Rmd
 ```
 
 The response-check source and test files belong to the later response-scale
 phase; do not create placeholders before that work begins.
 
-Export only the constructor and checks whose calibration has been reviewed.
+Export only the constructor and checks whose behavior has been reviewed.
 Register compact print and plot S3 methods; users call the base generics.
 Prefer a few explicit helpers and loops over dense functional code when they
 make replicated statistics or curves easier to audit.
