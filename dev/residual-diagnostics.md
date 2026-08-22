@@ -26,21 +26,25 @@ Each replicated dataset must preserve the fitted model's complete dependence
 structure. The observations within one dataset are therefore allowed to remain
 correlated; the dataset, not an individual row, is the simulation unit.
 
-Plots are the primary output. Printed numbers describe a plot and must not turn
-it into a binary adequacy test.
+Plots are the primary output. Checks draw them by default and return their
+structured results invisibly; they must not become binary adequacy tests.
 
 The eventual workflow should be:
 
 ```r
 simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
 
-partner_check <- check_partner_dependence(
+check_partner_dependence(
   simulations,
   dyad = "couple_id"
 )
 
-plot(partner_check)
-partner_check
+partner_check <- check_partner_dependence(
+  simulations,
+  dyad = "couple_id",
+  plot = FALSE
+)
+plot(partner_check, parameterization = "member")
 ```
 
 ## Fixed design decisions
@@ -170,11 +174,11 @@ Never leave persistent simulation settings changed on the fitted model.
 simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 ```
 
-Keep this constructor internal while the first checks are being reviewed. It
-can become public once its output contract is exercised by a complete check.
-The first object contract below is specific to `glmmTMB`. Add the `brms` path
-only after the complete `glmmTMB` partner check establishes which fields the
-shared check code actually needs.
+The constructor is public because the complete `glmmTMB` partner check now
+exercises its output contract. Keep the interface experimental while the
+diagnostic suite expands. The first object contract below is specific to
+`glmmTMB`; add the `brms` path only after this implementation establishes which
+fields the shared check code actually needs.
 
 `nsim` is the number of complete simulated datasets. Require one positive whole
 number and recommend 1000 for ordinary plots. Smaller values remain useful for
@@ -186,7 +190,7 @@ Return class `dyadMLM_response_simulations` with these fields:
 ```text
 observed_response        numeric vector in fitted-model row order
 simulated_responses      numeric matrix: simulation x fitted row
-fitted_response          deterministic random-effects-excluded response center
+fixed_effect_prediction  random-effects-excluded response-scale prediction
 model_frame              fitted model frame in the same row order
 backend                  "glmmTMB"
 family                   "gaussian"
@@ -202,7 +206,7 @@ Extract the response and model frame from the fitted model, not from an object
 in the calling environment. Verify finite observed values, simulated values,
 and fitted means. A supplied seed must reproduce the complete object.
 
-For `glmmTMB`, calculate `fitted_response` with
+For `glmmTMB`, calculate `fixed_effect_prediction` with
 `predict(model, newdata = NULL, type = "response", re.form = NA)`. Explicit
 `newdata = NULL` keeps the result in fitted-row order when `na.exclude` was used.
 It is the same deterministic response-scale center for the observed data and
@@ -229,11 +233,11 @@ rootograms, response quantiles, spread, and tail counts.
 For `glmmTMB`, dependence and conditional-pattern checks use:
 
 ```r
-observed_centered <- observed_response - fitted_response
+observed_centered <- observed_response - fixed_effect_prediction
 simulated_centered <- sweep(
   simulated_responses,
   MARGIN = 2,
-  STATS = fitted_response,
+  STATS = fixed_effect_prediction,
   FUN = "-"
 )
 ```
@@ -247,17 +251,20 @@ replicated reference distribution.
 ### Public check
 
 ```r
-check_partner_dependence(simulations, dyad, role = NULL)
+check_partner_dependence(simulations, dyad, role = NULL, plot = TRUE)
 ```
 
-Resolve `dyad` and optional `role` as either:
+Draw all diagnostic plots by default, then return the structured check object
+invisibly. `plot = FALSE` suppresses the plots for scripts, tests, or a later
+custom call to `plot()`. Keep the explicit print method concise so that typing
+an assigned object does not dump its replicated-statistics matrix.
 
-- one character column name in `simulations$model_frame`; or
-- an explicit vector whose length equals the number of fitted rows.
-
-Do not use tidy evaluation and do not guess how a source-data vector maps
-through model omissions. The explicit-vector route lets users supply an
-identifier that was not in the model formula.
+Resolve `dyad` and optional `role` through the shared fitted-row argument
+resolver. Each argument may be an unquoted or quoted model-frame column, or an
+explicit vector whose length equals the number of fitted rows. Prefer a bare
+model-frame column to an inherited object such as `stats::time()`, while a
+same-named object defined directly by the caller is an explicit vector. Do not
+guess how a source-data vector maps through model omissions.
 
 For the initial cross-sectional check:
 
@@ -277,57 +284,78 @@ exactly one row of each of the two role values.
 Let `e` be the fixed-model-centered response.
 
 When `role` is supplied, require exactly two role values and exactly one row of
-each role in every usable dyad. Orient every pair by those values and calculate
-the Pearson correlation between the two role-specific centered responses
-across dyads.
+each role in every usable dyad. Orient every pair by factor-level order for a
+factor and otherwise by sorted unique values. With role-specific centered
+responses \(e_{d1}\) and \(e_{d2}\), report the **member parameterization**:
 
-When `role = NULL`, use the label-invariant symmetric coefficient
+- the SD of \(e_{d1}\);
+- the SD of \(e_{d2}\); and
+- their Pearson correlation.
 
-\[
-T_{partner} =
-\frac{2\sum_d e_{d1}e_{d2}}
-     {\sum_d(e_{d1}^2 + e_{d2}^2)}.
-\]
-
-This is exactly equivalent to the mean and half-difference representation
+Also report the equivalent **mean-difference parameterization**, using
 
 \[
 M_d = \frac{e_{d1}+e_{d2}}{2}, \qquad
-D_d = \frac{e_{d1}-e_{d2}}{2},
+D_d = \frac{e_{d1}-e_{d2}}{2}.
 \]
+
+- the SD of \(M_d\);
+- the SD of \(D_d\); and
+- the correlation of \(M_d\) and \(D_d\).
+
+The two views must satisfy
 
 \[
-T_{partner} =
-\frac{\sum_d M_d^2-\sum_d D_d^2}
-     {\sum_d M_d^2+\sum_d D_d^2}.
+\operatorname{Var}(M)=\frac{v_1+v_2+2c}{4}, \quad
+\operatorname{Var}(D)=\frac{v_1+v_2-2c}{4}, \quad
+\operatorname{Cov}(M,D)=\frac{v_1-v_2}{4},
 \]
 
-Use the direct member-level formula in production code. A package regression
-test must verify its equivalence to the mean/half-difference expression and its
-invariance when member positions are exchanged independently within dyads. Use
-sums of squares, not separately centered sample variances.
+where \(v_1\) and \(v_2\) are the role-specific variances and \(c\) is their
+covariance. The reported mean-difference correlation retains the covariance as
+\(\operatorname{Cor}(M,D)\operatorname{SD}(M)\operatorname{SD}(D)\).
+Regression tests must verify this mapping and invariance to fitted row order.
 
-This value is unchanged if the two members are swapped within any dyad. Call it
-a **symmetric partner-dependence coefficient**, not a latent Gaussian
-correlation. Require a finite positive denominator.
+When `role = NULL`, member positions are arbitrary. Report the **member
+parameterization**:
 
-Calculate the selected statistic once for the observed centered response and
-once for every complete simulated dataset, using one shared internal statistic
-helper. If any replicated statistic is non-finite, stop clearly in the initial
+- pooled residual SD; and
+- partner correlation under the exchangeable common-mean and common-variance
+  constraint. With \(\bar e\) denoting the pooled residual mean, calculate
+
+\[
+\rho_{partner} =
+\frac{2\sum_d(e_{d1}-\bar e)(e_{d2}-\bar e)}
+     {\sum_d\{(e_{d1}-\bar e)^2+(e_{d2}-\bar e)^2\}}.
+\]
+
+Report the equivalent **mean-difference parameterization**:
+
+- SD of the dyad means \(M_d=(e_{d1}+e_{d2})/2\); and
+- SD of the half-differences \(D_d=(e_{d1}-e_{d2})/2\).
+
+Exchangeability fixes the signed half-difference mean at zero. Calculate its SD
+as \(\sqrt{\operatorname{mean}(D_d^2)}\), which is invariant to arbitrary
+member swaps. Do not report a mean-difference correlation without roles.
+Regression tests must verify all four summaries and their invariance when
+member positions are exchanged independently within dyads.
+
+Calculate every applicable summary once for the observed centered response and
+once for every complete simulated dataset, using one shared internal helper. If
+any observed or replicated summary is non-finite, stop clearly in the initial
 Gaussian milestone rather than silently dropping simulations.
 
 For `glmmTMB`, return class `dyadMLM_partner_check` with:
 
 ```text
-statistic                  descriptive statistic name
-observed_statistic         scalar
-replicated_statistics      numeric vector of length nsim
-replicated_median          scalar
-replicated_interval        named 2.5% and 97.5% limits
-observed_percentile        (1 + sum(replicated <= observed)) / (nsim + 1)
+statistics_table           one row per statistic, with statistic name,
+                           parameterization, label, observed value, replicated
+                           median and 95% limits, and observed quantile
+replicated_statistics      numeric matrix: simulation x statistic
+role_order                 stable role order, or character(0)
 n_pairs                    complete fitted dyads used
-n_incomplete_dyads         one-row dyads omitted
-n_missing_id_rows          rows omitted for missing dyad ID
+n_incomplete_dyads         dyads with fewer than two usable rows omitted
+n_missing_dyad_rows        rows omitted for missing dyad ID
 n_missing_role_rows        rows omitted for missing role, or zero
 reference                  copied from simulations
 random_effects             copied from simulations
@@ -336,26 +364,36 @@ seed                       copied from simulations
 call                       check call
 ```
 
-`observed_percentile` describes the observed value's position among the
-replicates. It is not a p-value and has no automatic cutoff.
+Each `observed_quantile` describes the observed value's position from 0 to 1
+among the replicates. It is not a p-value and has no automatic cutoff.
 
 ### Plot and interpretation
 
-Implement `plot.dyadMLM_partner_check()` with base R:
+Implement `plot.dyadMLM_partner_check()` with base R. Draw each summary as a
+separate full-size histogram rather than a multipanel figure. Show both
+parameterizations by default and allow `parameterization = "member"` or
+`"mean_difference"` to select one view. For each plot:
 
-- a histogram of replicated statistics;
-- a solid neutral line for the observed statistic;
-- dashed lines for the central replicated 95% interval;
-- an x-axis containing the observed and all replicated values;
-- the number of usable pairs and predictive-reference type;
-- no red/green significance coding.
+- use all replicates and between 20 and 100 histogram bins;
+- draw the observed value as a clearly visible, thicker red line;
+- draw the central replicated 95% limits as grey dashed lines;
+- keep the x-axis wide enough for the observed and all replicated values;
+- reserve blank space at the top for one horizontal legend and stop the
+  observed and interval lines below it; and
+- show the parameterization and number of usable pairs.
+
+The red line highlights the observed value; it is not red/green significance
+coding. The parameterizations are equivalent views of the same covariance
+structure, not independent checks.
 
 The intended reading is: "Does the fitted model generate datasets with
 same-occasion partner dependence like the observed data?"
 
-A surprising value means the complete model does not reproduce this selected
-response-scale feature. It does not identify whether the mean, marginal
-distribution, dispersion, random effects, or partner covariance is responsible.
+A surprising value means the complete model does not reproduce that selected
+response-scale feature. Looking across the spread and dependence summaries can
+localize the mismatch within the fitted covariance structure, but it does not
+by itself identify whether the mean, marginal distribution, dispersion, random
+effects, or partner covariance is responsible.
 For version 0.2.1, inspect the response distribution and ordinary model-engine
 diagnostics separately before assigning the discrepancy to partner dependence;
 package-native marginal predictive checks arrive in 0.2.3. Do not interpret
@@ -368,6 +406,37 @@ does not prove the latent covariance structure correct.
 
 Same-occasion partner checks for ILD data require an explicit occasion
 identifier and are **deferred**. The first function accepts one pair per dyad.
+
+### Staged mixed-dyad-type expansion
+
+Add mixed dyad types only after the corresponding single-composition check is
+calibrated and reviewed. They do not require another simulation backend. Reuse
+the same complete response datasets, but calculate the observed and replicated
+statistics separately for every final analysis composition. Never pool
+distinct compositions into one dependence statistic.
+
+For each composition, provide two equivalent diagnostic views:
+
+- The **member parameterization** reports one pooled residual SD and the
+  exchangeability-constrained partner correlation for an exchangeable
+  composition. For a distinguishable composition, it reports both
+  role-specific SDs and their correlation.
+- The **mean-difference parameterization** reports the spread of dyad means and
+  half-differences. For a distinguishable composition, it also reports their
+  correlation using a stable role order. Do not report this
+  orientation-dependent correlation for an exchangeable composition.
+
+Show both parameterizations as clearly labelled, separate full-size plots by
+default, while allowing either view to be requested alone. The two views are
+equivalent reparameterizations, not independent tests.
+
+Freeze the composition-identification arguments only when implementing this
+stage. They must respect final analysis-composition and exchangeability
+decisions and also accept fitted-row-aligned identifiers when preparation
+metadata are no longer attached to the model frame. Extend temporal checks to
+mixed compositions only after the single-composition 0.2.2 implementation is
+accepted, and extend generalized mixed-composition checks only for families
+already validated in 0.2.3 or 0.2.4.
 
 ## `brms` path after the first partner-check vertical slice
 
@@ -566,7 +635,7 @@ validated families with the temporal edge construction accepted in 0.2.2.
 ### Package regression tests
 
 Keep CRAN tests small and deterministic. Test code correctness rather than
-whether one random dataset crosses a percentile threshold:
+whether one random dataset crosses a predictive-quantile threshold:
 
 - class, fields, dimensions, orientation, row order, and seed reproducibility;
 - model-class, family, link, weight, and response validation;
@@ -575,15 +644,16 @@ whether one random dataset crosses a percentile threshold:
   values;
 - direct agreement with manually calculated observed and replicated statistics;
 - identical observed/replicated statistic code paths;
-- exact equivalence of the symmetric statistic to its mean/half-difference
-  expression;
-- invariance of the exchangeable statistic to member swapping;
-- role validation for distinguishable dyads;
+- direct agreement with the exchangeability-constrained correlation and
+  zero-centered half-difference SD;
+- invariance of every exchangeable summary to independent member swapping;
+- stable role orientation and the exact distinguishable correlation mapping;
 - missing identifiers, incomplete pairs, excess rows, too few pairs, and
   non-finite values;
 - exact temporal gaps, series boundaries, missing occasions, lag support, and
   pair-weighted calculations;
-- intervals and observed-percentile calculations;
+- intervals and observed-quantile calculations;
+- both plot views and their selection argument; and
 - `print()` and `plot()` return the documented object invisibly.
 
 Before temporal implementation, add optional `brms` tests for posterior draw
@@ -591,7 +661,7 @@ pairing, fitted-row alignment, group-effect target metadata, and the paired
 observed-versus-replicated discrepancy calculation.
 
 Use `skip_if_not_installed("glmmTMB")` and the corresponding guard for optional
-`brms` tests. Never assert that a predictive percentile must cross a
+`brms` tests. Never assert that a predictive quantile must cross a
 significance cutoff for one seed.
 
 ### Development calibration
@@ -680,11 +750,10 @@ dev/diagnostics/calibrate-partner-dependence.R
 The response-check source and test files belong to the later response-scale
 phase; do not create placeholders before that work begins.
 
-Keep the public functions internal until their calibration is reviewed. Then
-export only the constructor and accepted checks. Register compact print and plot
-S3 methods; users call the base generics. Prefer a few explicit helpers and
-loops over dense functional code when they make replicated statistics or curves
-easier to audit.
+Export only the constructor and checks whose calibration has been reviewed.
+Register compact print and plot S3 methods; users call the base generics.
+Prefer a few explicit helpers and loops over dense functional code when they
+make replicated statistics or curves easier to audit.
 
 Do not add `DHARMa` to `Imports` or `Suggests`. Do not add `ggplot2`, `bayesplot`,
 `Matrix`, or `brms` to `Imports` for version 0.2.1. Add optional packages to

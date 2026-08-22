@@ -67,3 +67,77 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 
   names(selected_columns)
 }
+
+
+# Resolve a quosure to a fitted-row column or an aligned external vector.
+resolve_fitted_row_argument <- function(
+  argument_quo,
+  argument_name,
+  model_frame,
+  allow_null = FALSE
+) {
+  argument_expression <- rlang::quo_get_expr(argument_quo)
+  calling_environment <- rlang::quo_get_env(argument_quo)
+  unquoted_name <- if (rlang::is_symbol(argument_expression)) {
+    rlang::as_name(argument_expression)
+  } else {
+    NULL
+  }
+
+  # Prefer a fitted column to an inherited object such as stats::time(). A
+  # name defined directly by the caller is instead treated as an external
+  # vector, which also preserves argument forwarding through wrappers.
+  if (!is.null(unquoted_name) &&
+      !exists(unquoted_name, envir = calling_environment, inherits = FALSE) &&
+      unquoted_name %in% names(model_frame)) {
+    return(model_frame[[unquoted_name]])
+  }
+
+  resolved_value <- tryCatch(
+    rlang::eval_tidy(argument_quo),
+    error = function(error) {
+      stop(
+        sprintf(
+          "`%s` could not be evaluated: %s",
+          argument_name,
+          conditionMessage(error)
+        ),
+        call. = FALSE
+      )
+    }
+  )
+
+  if (allow_null && is.null(resolved_value)) {
+    return(NULL)
+  }
+
+  if (rlang::is_string(resolved_value)) {
+    if (!resolved_value %in% names(model_frame)) {
+      stop(
+        sprintf(
+          "`%s` does not name a column in the fitted model frame.",
+          resolved_value
+        ),
+        call. = FALSE
+      )
+    }
+    return(model_frame[[resolved_value]])
+  }
+
+  if (!is.atomic(resolved_value) || !is.null(dim(resolved_value)) ||
+      length(resolved_value) != nrow(model_frame)) {
+    stop(
+      sprintf(
+        paste0(
+          "`%s` must name a column in the fitted model frame or evaluate ",
+          "to a vector of length %d."
+        ),
+        argument_name,
+        nrow(model_frame)
+      ),
+      call. = FALSE
+    )
+  }
+
+  return(resolved_value)
+}

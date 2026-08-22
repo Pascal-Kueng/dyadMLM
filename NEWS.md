@@ -1,5 +1,8 @@
 # dyadMLM (development version)
 
+* Added experimental simulation-based partner-dependence checks for
+  cross-sectional Gaussian `glmmTMB` models.
+
 # dyadMLM 0.2.0
 
 * This early API-stabilization release intentionally makes a few direct,

@@ -4,7 +4,7 @@
 \alias{check_partner_dependence}
 \title{Check whether a fitted model reproduces partner interdependence}
 \usage{
-check_partner_dependence(simulations, dyad, role = NULL)
+check_partner_dependence(simulations, dyad, role = NULL, plot = TRUE)
 }
 \arguments{
 \item{simulations}{A \code{dyadMLM_response_simulations} object returned by
@@ -15,20 +15,41 @@ a vector aligned with the fitted rows.}
 
 \item{role}{An optional unquoted or quoted column name in the fitted model
 frame, or a vector aligned with the fitted rows. Defaults to \code{NULL}.}
+
+\item{plot}{Logical. If \code{TRUE}, the default, draw the diagnostic plots.}
 }
 \value{
-A \code{dyadMLM_partner_check} object containing the observed and
-replicated partner-dependence statistics.
+Invisibly, a \code{dyadMLM_partner_check} object containing
+\code{statistics_table}, with one row per summary, and the complete
+\code{replicated_statistics} matrix. The observed quantile gives the observed
+statistic's position from 0 to 1 among the replicated values; it is
+descriptive and is not a p-value.
 }
 \description{
-Compares same-occasion partner interdependence in the observed fitted responses
-with the same statistic calculated from complete simulated response datasets.
+Compares spread and interdependence in observed cross-sectional partner
+responses with the same summaries calculated from complete simulated
+response datasets.
 }
 \details{
 This function supports cross-sectional Gaussian \code{glmmTMB}
 simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
+The interface is experimental and may change as predictive checks expand.
+With roles, it reports role-specific residual SDs and partner correlation,
+plus the equivalent dyad-mean and half-difference summaries. Without roles,
+it reports a pooled residual SD and exchangeability-constrained partner
+correlation. Exchangeability fixes the signed half-difference mean at zero,
+so its SD is calculated around zero and remains invariant to member swaps.
+Observed and simulated responses are centered on the same
+random-effects-excluded prediction. Modeled random-effect and residual
+dependence therefore remains in both.
 
 An unquoted name defined directly in the calling environment is treated as
 an external vector; otherwise, a matching fitted-model-frame column is used.
 A quoted name always selects the model-frame column directly.
+}
+\references{
+Woody, E., & Sadler, P. (2005). Structural equation models for
+interchangeable dyads: Being the same makes a difference. \emph{Psychological
+Methods, 10}(2), 139-158.
+\href{https://doi.org/10.1037/1082-989X.10.2.139}{doi:10.1037/1082-989X.10.2.139}.
 }

@@ -46,7 +46,7 @@ test_that("complete response simulations retain fitted-row alignment", {
   expect_named(
     simulations,
     c(
-      "observed_response", "simulated_responses", "fitted_response",
+      "observed_response", "simulated_responses", "fixed_effect_prediction",
       "model_frame", "backend", "family", "link", "reference",
       "random_effects", "nsim", "seed", "call"
     )
@@ -57,7 +57,7 @@ test_that("complete response simulations retain fitted-row alignment", {
     as.numeric(stats::model.response(stats::model.frame(model)))
   )
   expect_equal(
-    simulations$fitted_response,
+    simulations$fixed_effect_prediction,
     as.numeric(stats::predict(
       model,
       newdata = NULL,
@@ -93,7 +93,7 @@ test_that("seeded response simulations are reproducible", {
 })
 
 
-test_that("fitted responses stay aligned when source rows were omitted", {
+test_that("fixed-effect predictions stay aligned after row omission", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(8102)
@@ -117,13 +117,16 @@ test_that("fitted responses stay aligned when source rows were omitted", {
     stats::simulate(model, nsim = 5, seed = 321)
   ))
   expect_identical(simulations$simulated_responses, expected_simulations)
-  expect_length(simulations$fitted_response, 38L)
-  expect_false(anyNA(simulations$fitted_response))
-  expected_center <- drop(
+  expect_length(simulations$fixed_effect_prediction, 38L)
+  expect_false(anyNA(simulations$fixed_effect_prediction))
+  expected_fixed_effect_prediction <- drop(
     stats::model.matrix(model, component = "cond") %*%
       glmmTMB::fixef(model)$cond
   )
-  expect_equal(simulations$fitted_response, unname(expected_center))
+  expect_equal(
+    simulations$fixed_effect_prediction,
+    unname(expected_fixed_effect_prediction)
+  )
 })
 
 

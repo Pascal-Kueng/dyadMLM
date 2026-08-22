@@ -807,6 +807,9 @@ partner-dependence diagnostics (0.2.1), Gaussian ILD temporal diagnostics
 expanded `brms` workflows (0.4.5), and reporting and visualization (0.5.0).
 These are development milestones; closely spaced milestones may be bundled
 into a worthwhile CRAN update rather than submitted separately.
+Mixed-dyad-type diagnostics are staged after each corresponding
+single-composition check is stable rather than assigned a separate backend or
+release line.
 
 The diagnostic implementation has three modules: backend-specific complete
 response simulation, shared partner and temporal dependence checks, and shared
@@ -866,6 +869,17 @@ with only those scalar-response families accepted in 0.2.3.
 Combine only the family-specific support accepted in 0.2.3 with the temporal
 edge and centering rules accepted in 0.2.2. Keep partner, temporal, and marginal
 checks separate and stop when calibration or sensitivity is inadequate. See
+[`residual-diagnostics.md`](residual-diagnostics.md).
+
+## Mixed-Dyad-Type Diagnostic Expansion
+
+Status: planned after each corresponding single-composition check is stable.
+The cross-sectional expansion follows the calibrated 0.2.1 partner check;
+mixed-composition temporal checks follow the accepted 0.2.2 implementation;
+and generalized mixed-composition checks are added only for families validated
+in 0.2.3 or 0.2.4. Reuse each backend's complete response simulations and
+calculate diagnostics separately by final analysis composition. The detailed
+statistics, plot views, and API boundary are recorded in
 [`residual-diagnostics.md`](residual-diagnostics.md).
 
 ## Proposed Version 0.2.5 Scope - APIM Covariance Decomposition

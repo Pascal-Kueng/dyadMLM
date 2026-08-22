@@ -27,4 +27,5 @@ various predictive checks.
 \details{
 The initial implementation supports scalar Gaussian identity-link
 \code{glmmTMB} models only.
+The interface is experimental and may change as predictive checks expand.
 }

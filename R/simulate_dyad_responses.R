@@ -6,6 +6,7 @@
 #'
 #' The initial implementation supports scalar Gaussian identity-link
 #' `glmmTMB` models only.
+#' The interface is experimental and may change as predictive checks expand.
 #'
 #' @param model A fitted `glmmTMB` model.
 #' @param nsim Number of complete response datasets to simulate. The default
@@ -18,11 +19,9 @@
 #'
 #' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
-
-  #### Validation checks
-
   simulation_call <- match.call()
 
+  # Validate the fitted model and simulation arguments.
   if (!inherits(model, "glmmTMB")) {
     stop("`model` must be a fitted `glmmTMB` model.", call. = FALSE)
   }
@@ -54,14 +53,15 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     )
   }
 
-
-  #### Extract fitted data / observed response
-
+  # Extract the fitted rows and observed response from the model itself.
   model_frame <- stats::model.frame(model)
   observed_response <- stats::model.response(model_frame)
   if (!is.numeric(observed_response) ||
       length(observed_response) != nrow(model_frame)) {
-    stop("Predictive checks currently require one numeric response per fitted row.", call. = FALSE)
+    stop(
+      "Predictive checks currently require one numeric response per fitted row.",
+      call. = FALSE
+    )
   }
   if (any(!is.finite(observed_response))) {
     stop("The fitted response contains non-finite values.", call. = FALSE)
@@ -82,22 +82,19 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
   }
 
-
-  #### Simulation prep
-
-  # Obtain deterministic prediction response from fixed effects only
-  # This is later used for centering.
-  fitted_response <- model |>
+  # Obtain one random-effects-excluded response-scale prediction per fitted
+  # row. This is a deterministic center, not another simulated response.
+  fixed_effect_prediction <- model |>
     stats::predict(
       newdata = NULL,
       type = "response",
       re.form = NA
     ) |>
     as.numeric()
-  if (length(fitted_response) != nrow(model_frame) ||
-      any(!is.finite(fitted_response))) {
+  if (length(fixed_effect_prediction) != nrow(model_frame) ||
+      any(!is.finite(fixed_effect_prediction))) {
     stop(
-      "Could not obtain one finite fixed-effects prediction for each fitted row.",
+      "Could not obtain one finite fixed-effect prediction for each fitted row.",
       call. = FALSE
     )
   }
@@ -117,9 +114,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   )
   set_glmmTMB_simulation_codes(model, unconditional_simulation_codes)
 
-
-  #### Simulate
-
+  # Simulate complete response datasets with newly drawn random effects.
   simulated_responses <- model |>
     stats::simulate(nsim = nsim, seed = seed) |>
     # glmmTMB returns fitted rows x simulations
@@ -130,16 +125,18 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
       !identical(dim(simulated_responses), c(nsim, nrow(model_frame))) ||
       any(!is.finite(simulated_responses))) {
     stop(
-      "Simulated responses were not returned as a finite simulation-by-fitted-row matrix.",
+      paste0(
+        "Simulated responses were not returned as a finite ",
+        "simulation-by-fitted-row matrix."
+      ),
       call. = FALSE
     )
   }
 
-  # Attach metadata
-  simulation_results <- list(
+  response_simulations <- list(
     observed_response = as.numeric(observed_response),
     simulated_responses = simulated_responses,
-    fitted_response = fitted_response,
+    fixed_effect_prediction = fixed_effect_prediction,
     model_frame = model_frame,
     backend = "glmmTMB",
     family = model_family$family,
@@ -150,9 +147,9 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     seed = seed,
     call = simulation_call
   )
-  class(simulation_results) <- c("dyadMLM_response_simulations", "list")
+  class(response_simulations) <- c("dyadMLM_response_simulations", "list")
 
-  return(simulation_results)
+  return(response_simulations)
 }
 
 
