@@ -1,20 +1,23 @@
-#' Simulate plug-in predictive response replicates
+#' Simulate response datasets for predictive checks
 #'
-#' Draws complete response vectors for the rows used to fit a supported model.
-#' Coefficients and variance-covariance estimates are held fixed, while all
-#' modeled random effects and Gaussian observation errors are redrawn for each
-#' replicate. The result is a plug-in predictive reference, not a full
-#' posterior-predictive distribution or a parametric bootstrap that refits the
-#' model.
+#' Simulates new response datasets from a fitted model. Each simulation keeps
+#' the fitted rows, covariates, and parameter estimates fixed, but draws new
+#' random effects and Gaussian observation errors. When the model contains
+#' dyad-level random effects, the simulations can be interpreted as hypothetical
+#' new dyads observed under the same design.
 #'
-#' Simulation is unconditional with respect to the fitted random-effect
-#' realizations, but remains conditional on the fitted parameters and fitted-row
-#' design. The returned object also stores one random-effect-excluded,
-#' response-scale prediction per fitted row. Downstream checks use this same
-#' deterministic vector to center the observed response and every replicate.
+#' **Statistical details.** This produces a plug-in predictive reference: the
+#' model is not refitted and parameter uncertainty is not propagated.
+#' Simulation is unconditional on the fitted random-effect values but
+#' conditional on the fitted parameters and fitted-row design.
 #'
-#' The initial implementation supports scalar Gaussian identity-link
-#' `glmmTMB` models only.
+#' The result also stores one model prediction for each fitted row, with random
+#' effects set to zero. Downstream checks subtract these same predictions from
+#' both observed and simulated responses.
+#'
+#' The initial implementation supports unweighted Gaussian identity-link
+#' `glmmTMB` models without zero inflation and with one numeric response per
+#' fitted row.
 #' The interface is experimental and may change as predictive checks expand.
 #'
 #' @param model A fitted `glmmTMB` model.

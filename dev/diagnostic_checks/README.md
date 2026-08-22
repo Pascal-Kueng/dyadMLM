@@ -75,10 +75,15 @@ plot(partner_check, parameterization = "member")
    is not a simultaneous 95% test. Exact frequentist-style calibration is a
    separate, deferred feature.
 9. Keep convergence, optimizer, Hessian, sampling, influence, missingness, and
-   model-comparison diagnostics outside this feature. They are not specifically
-   dyadic and are handled by model engines or separate workflows.
+   generic model-comparison diagnostics outside the predictive-check
+   implementation. They are not specifically dyadic and are handled by model
+   engines or separate workflows.
 10. Document the feature as experimental. Do not emit a warning merely because
     it is experimental; warnings are reserved for a concrete unsafe condition.
+11. Treat leave-one-dyad-out cross-validation as a separate predictive-
+    validation workflow. Hold out both members and every occasion from a dyad
+    together. Ordinary rowwise leave-one-out is not a substitute when the
+    target is prediction for a genuinely new dyad.
 
 ## Implementation order and file boundaries
 
@@ -94,14 +99,17 @@ Complete one diagnostic question before adding the next:
    partner check, keeping pairing and statistic code shared;
 5. add temporal-dependence curves, validating Gaussian `glmmTMB`, accepted
    generalized `glmmTMB` families, and then `brms` in that order;
-6. add broader response-distribution checks; and
+6. add broader response-distribution checks;
 7. add mixed-composition support only after the single-composition partner,
-   temporal, and response checks are stable.
+   temporal, and response checks are stable; and
+8. add leave-one-dyad-out cross-validation, first for cross-sectional Gaussian
+   `glmmTMB`, then Gaussian `brms`, and extend it only to model paths already
+   validated by the predictive-check workflow.
 
 This order changes one dimension at a time: family, repeated-pair structure,
-backend, and finally diagnostic question.
+backend, diagnostic question, and finally the prediction target.
 
-Keep three implementation modules:
+Keep the predictive checks in three implementation modules:
 
 ```text
 R/simulate_dyad_responses.R
@@ -118,8 +126,11 @@ spread, zero-frequency, tail, and fitted-pattern checks. These are analogous in
 purpose to familiar residual displays, but they are complete-replicate
 predictive checks rather than DHARMa residuals.
 
-Tests mirror these three modules. Do not split files further unless one module
-becomes difficult to navigate.
+Tests mirror these three modules. When the cross-validation phase begins, add a
+separate `R/cross_validate_dyad_models.R` module and matching test file rather
+than mixing fold-wise refitting and scoring into the predictive-check modules.
+Do not create placeholders before that work begins, and do not split files
+further unless one module becomes difficult to navigate.
 
 ## What these checks answer
 
@@ -132,6 +143,8 @@ Predictive checks and model comparison are complementary:
 
 - a predictive check asks whether the retained model reproduces an observed
   feature;
+- leave-one-dyad-out cross-validation asks how well it predicts a completely
+  unseen dyad; and
 - model comparison asks whether adding, removing, or constraining a covariance
   component improves relative fit.
 
@@ -709,6 +722,78 @@ specifications. Before adding a display, define its exact statistic and its
 behavior for ties, zero variance, and non-finite replicated values. Never
 silently discard a replicate for which a displayed summary is undefined.
 
+## Later roadmap: leave-one-dyad-out cross-validation
+
+Add cross-validation as a separate predictive-validation workflow after the
+simulation-based checks are stable. Its default question is: how well does the
+model predict a dyad that was not used to fit it? For dyad \(d\), target
+
+\[
+p(y_d \mid y_{-d}, X_d),
+\]
+
+where every response from dyad \(d\), including both members and all occasions,
+is excluded from model fitting. Treat dyad- and member-specific grouping levels
+unique to the held-out dyad as new and integrate or simulate their effects from
+the fitted population distribution. Do not estimate held-out random effects
+from the held-out outcomes.
+
+Ordinary observation-level LOO answers a different, easier question because
+the partner or other occasions from the same dyad remain in the training data.
+Adding those rowwise scores by dyad afterward does not remove that information
+leakage. Predicting a future occasion within an already observed dyad is also a
+different target and would require a separate, time-respecting split. The
+[LOO cross-validation FAQ](https://mc-stan.org/loo/articles/online-only/faq.html)
+similarly emphasizes that the omitted unit must match the intended prediction
+task.
+
+Use exact leave-one-dyad-out refits as the validation reference. When that is
+too expensive, allow grouped \(K\)-fold cross-validation that assigns complete
+dyads, never rows, to folds. It retains the new-dyad target but trains each fold
+on less data than exact leave-one-dyad-out. Learn any data-dependent centering,
+scaling, or other preprocessing within the training fold unless it is
+explicitly defined as fixed external information.
+
+For `glmmTMB`, implement an explicit fold-wise refitting loop. Predict each
+held-out dyad as a new grouping level and preserve its joint modeled variation.
+For the initial Gaussian identity-link path, validate the joint predictive
+distribution obtained by integrating the new random effects over their fitted
+population distribution. A population-level call such as
+`predict(..., re.form = NA)` supplies a mean, not the complete joint predictive
+distribution needed for scoring. See the
+[`glmmTMB` prediction documentation](https://glmmtmb.github.io/glmmTMB/reference/predict.glmmTMB.html)
+for the distinction between population-level and new-level predictions. Label
+this a plug-in cross-validated prediction because each fold is refitted but
+uncertainty in its parameter estimates is not propagated.
+
+For `brms`, use exact grouped refits for the first implementation. With no fold
+vector, `brms::kfold()` can leave out one complete grouping level at a time;
+use the dyad identifier as `group` and `joint = "group"` so that the dyad is
+also the scoring unit. Save the fold fits when out-of-fold draws are needed,
+then obtain held-out posterior-predictive draws with `brms::kfold_predict()`.
+For a cheaper approximation, use grouped \(K\)-fold assignments that keep each
+dyad intact. Ordinary `loo(fit)` is pointwise PSIS-LOO and is not
+leave-one-dyad-out. See the official
+[`brms::kfold()`](https://paulbuerkner.com/brms/reference/kfold.brmsfit.html),
+[`brms::kfold_predict()`](https://paulbuerkner.com/brms/reference/kfold_predict.html),
+and [grouped-fold helper](https://mc-stan.org/loo/reference/kfold-helpers.html)
+documentation.
+
+Score and report the complete held-out dyad as the primary validation unit.
+Begin with a joint log predictive score for the Gaussian path so predicted
+partner dependence is retained; marginal RMSE, MAE, interval coverage, and
+role-specific summaries may be secondary. Return per-dyad contributions and
+aggregate them with uncertainty. Compare candidate models only on identical
+held-out dyads and folds, using paired score differences. Preserve fold
+assignments, training sizes, prediction-target metadata, backend details, and
+all convergence or prediction failures; never silently omit a failed fold.
+
+This workflow complements rather than replaces the checks above. Predictive
+checks diagnose specific features that a full-data fit does or does not
+reproduce. Cross-validation evaluates out-of-sample performance but does not by
+itself explain why a model predicts poorly. It is also distinct from the
+refit-based calibration of a diagnostic statistic described below.
+
 ## Validation before release
 
 ### Package regression tests
@@ -822,16 +907,18 @@ Planned module layout:
 R/simulate_dyad_responses.R
 R/predictive_checks_dependence.R
 R/predictive_checks_response.R
+R/cross_validate_dyad_models.R
 
 tests/testthat/test-simulate-dyad-responses.R
 tests/testthat/test-predictive-checks-dependence.R
 tests/testthat/test-predictive-checks-response.R
+tests/testthat/test-cross-validate-dyad-models.R
 
 dev/diagnostic_checks/partner-dependence-review.Rmd
 ```
 
-The response-check source and test files belong to the later response-scale
-phase; do not create placeholders before that work begins.
+The response-check and cross-validation source and test files belong to their
+later roadmap phases; do not create placeholders before that work begins.
 
 Export only the constructor and checks whose behavior has been reviewed.
 Register compact print and plot S3 methods; users call the base generics.

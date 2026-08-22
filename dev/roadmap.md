@@ -812,6 +812,8 @@ These are development milestones; closely spaced milestones may be bundled
 into a worthwhile CRAN update rather than submitted separately.
 Mixed-dyad-type diagnostics follow the 0.2.4 single-composition milestones
 rather than being interleaved with them or assigned a separate backend line.
+Leave-one-dyad-out cross-validation for `glmmTMB` and `brms` is a later
+candidate not yet assigned to a release.
 
 The diagnostic implementation has three modules: backend-specific complete
 response simulation, shared partner and temporal dependence checks, and shared
@@ -821,6 +823,9 @@ Gaussian same-occasion ILD models, and generalized same-occasion ILD models.
 The `brms` path is then added to that same partner check before new check types
 are introduced. The later expanded `brms` milestone concerns broader modeling
 workflows, not this bounded diagnostics adapter.
+Cross-validation is a separate future module because it changes the data used
+for fitting and the prediction target rather than adding another full-data
+predictive check.
 
 ## Proposed Version 0.2.1 Scope - Cross-Sectional Partner Dependence
 
@@ -979,6 +984,31 @@ preparation, diagnostics, and interpretation contracts are stable.
 
 Select these only after the preceding milestones are stable rather than treating
 them as one release commitment.
+
+### Leave-one-dyad-out cross-validation
+
+- Evaluate prediction for a genuinely unseen dyad by holding out both members
+  and every occasion together. Do not present ordinary rowwise LOO, or rowwise
+  scores summed after fitting, as dyad-level cross-validation.
+- Use exact dyad-wise refits as the validation reference and grouped \(K\)-fold
+  splits that keep dyads intact as the cheaper option. Predicting a future
+  occasion within a known dyad is a different target and needs a separate,
+  time-respecting design.
+- For `glmmTMB`, implement explicit fold-wise refits and validate prediction
+  for new grouping levels, including the complete joint predictive variation
+  rather than only a population-level fitted mean. Start with Gaussian models.
+- For `brms`, start with grouped `brms::kfold()` refits, use the dyad as both
+  the holdout and joint scoring unit, and retain posterior-predictive draws for
+  held-out dyads when needed. Ordinary pointwise `loo(fit)` does not answer the
+  new-dyad question.
+- Score complete dyads, report dyad-level contributions and paired model
+  differences on identical folds, and preserve refit or prediction failures.
+  Keep this workflow distinct from both the feature-specific predictive checks
+  and their deferred frequentist calibration.
+- Freeze the exact scoring and public API only after the initial Gaussian
+  implementations agree with transparent reference calculations. The detailed
+  statistical and backend plan is in
+  [`diagnostic_checks/README.md`](diagnostic_checks/README.md#later-roadmap-leave-one-dyad-out-cross-validation).
 
 ### Multiple-imputation integration
 

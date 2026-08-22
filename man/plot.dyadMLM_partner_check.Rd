@@ -14,8 +14,9 @@
 \arguments{
 \item{x}{A \code{dyadMLM_partner_check} object.}
 
-\item{parameterization}{Which diagnostic view to show: \code{"both"},
-\code{"member"}, or \code{"mean_difference"}.}
+\item{parameterization}{Which diagnostic view to show: \code{"both"}, partner-
+level summaries (\code{"member"}), or dyad mean/difference summaries
+(\code{"mean_difference"}).}
 
 \item{ask}{\code{NULL} uses interactive, one-plot-at-a-time behavior when more
 than one statistic is shown. Supply \code{TRUE} or \code{FALSE} to override it.}
@@ -28,6 +29,6 @@ method.}
 Invisibly, \code{x}.
 }
 \description{
-Draws each selected statistic as a separate full-size plot. Both equivalent
-parameterizations are shown by default.
+Draws each selected summary as a separate full-size plot. By default, it
+shows both the partner-level and equivalent dyad mean/difference summaries.
 }

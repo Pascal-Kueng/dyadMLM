@@ -658,6 +658,23 @@ test_that("partner check has concise print and both plot views", {
     ),
     3L
   )
+  expect_identical(
+    exchangeable_result$statistics_table$label,
+    c(
+      "Common model-centered SD (exchangeable)",
+      "Partner correlation (exchangeable)",
+      "Dyad-average SD",
+      "Half-difference RMS (about zero)"
+    )
+  )
+  expect_identical(
+    distinguishable_result$statistics_table$label[4:6],
+    c(
+      "Dyad-average SD",
+      "Half-difference SD (female minus male)",
+      "Dyad-average/role-difference correlation (female minus male)"
+    )
+  )
 
   printed_output <- capture.output(
     printed_result <- withVisible(print(distinguishable_result))
@@ -669,12 +686,12 @@ test_that("partner check has concise print and both plot views", {
   )
   expect_match(
     paste(printed_output, collapse = "\n"),
-    "6 statistics from 5 complete pairs",
+    "6 statistics using 5 complete pairs",
     fixed = TRUE
   )
   expect_match(
     paste(printed_output, collapse = "\n"),
-    "Replicated reference: median and central 95% interval",
+    "Simulated datasets: median and middle 95% of values",
     fixed = TRUE
   )
   expect_match(
@@ -689,7 +706,7 @@ test_that("partner check has concise print and both plot views", {
   )
   expect_match(
     paste(printed_output, collapse = "\n"),
-    " | Obs. quantile ",
+    " | Observed position ",
     fixed = TRUE
   )
   expect_match(
