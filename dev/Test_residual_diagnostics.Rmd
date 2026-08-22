@@ -1,0 +1,220 @@
+---
+title: "Test_residual_diagnostics"
+output: html_document
+---
+
+# Distinguishable
+
+## Prep data
+
+```{r}
+library(dyadMLM)
+
+diagnostic_data <- prepare_dyad_data(
+    dyads_cross,
+    dyad = coupleID,
+    member = personID,
+    role = gender,
+    model_types = "none",
+    keep_compositions = "female-male"
+)
+```
+
+
+## Correct distinguishable model
+
+```{r}
+m_c <- glmmTMB::glmmTMB(
+    closeness ~
+        0 + .is_female + .is_male + (0 + .is_female + .is_male | coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(m_c, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID, 
+    role = diagnostic_data$gender)
+```
+
+
+## Incorrect Models
+
+```{r}
+m_w1 <- glmmTMB::glmmTMB(
+    closeness ~
+        0 + .is_female + .is_male + (1 | coupleID),
+    dispformula = ~ 1,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(m_w1, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID, 
+    role = diagnostic_data$gender)
+```
+
+
+
+```{r}
+m_w2 <- glmmTMB::glmmTMB(
+    closeness ~
+        0 + .is_female + .is_male + (1 | coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(m_w2, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID, 
+    role = diagnostic_data$gender)
+```
+
+
+```{r}
+m_w3 <- glmmTMB::glmmTMB(
+    closeness ~
+        0 + .is_female + .is_male + (0 + .is_female + .is_male || coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(m_w3, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID, 
+    role = diagnostic_data$gender)
+```
+
+```{r}
+compare_nested_models(
+  m_c, 
+  m_w3
+)
+```
+
+## Exchangeable 
+
+## Prep data
+
+```{r}
+library(dyadMLM)
+
+diagnostic_data <- prepare_dyad_data(
+    dyads_cross,
+    dyad = coupleID,
+    member = personID,
+    role = gender,
+    model_types = "none",
+    keep_compositions = "female-male", 
+    set_exchangeable_compositions = 'female-male'
+)
+```
+
+
+## Correct exchangeable model
+
+```{r}
+e_c <- glmmTMB::glmmTMB(
+    closeness ~
+        1 + 
+      
+      (1 | coupleID) + 
+      (0 + .member_contrast_arbitrary | coupleID),
+    
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(e_c, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID) 
+```
+
+## Quick test whether the model could explain distinguishable Gender dependence struct
+
+```{r}
+simulate_dyad_responses(e_c, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender) 
+```
+
+
+## Incorrect Models
+
+```{r}
+e_w1 <- glmmTMB::glmmTMB(
+    closeness ~
+        1,
+    dispformula = ~ 1,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(e_w1, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID) 
+```
+
+
+
+```{r}
+e_w2 <- glmmTMB::glmmTMB(
+    closeness ~
+        1 + (1 | coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(e_w2, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID) 
+```
+
+
+```{r}
+e_w3 <- glmmTMB::glmmTMB(
+    closeness ~
+        1 + (1 | coupleID/personID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+simulate_dyad_responses(e_w3, nsim = 5000) |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID)
+```
+
+```{r}
+compare_nested_models(
+  m_c, 
+  m_w3
+)
+```
+
+## Exchangeable 
+
+
