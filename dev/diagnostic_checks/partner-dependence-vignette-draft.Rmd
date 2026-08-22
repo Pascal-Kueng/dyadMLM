@@ -168,6 +168,8 @@ e_c_simulations |>
     role = diagnostic_data$gender)
 ```
 
+This is a hint that treating the dyads as exchangeable might be inappropriate 
+and does not represent partner interdpendence sufficiently. 
 
 ## Additional constrained models
 
@@ -220,6 +222,10 @@ e_w3 <- glmmTMB::glmmTMB(
 simulate_dyad_responses(e_w3, nsim = 5000, seed = 13008L) |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID)
+```
+
+```{r}
+print(a)
 ```
 
 ```{r}
