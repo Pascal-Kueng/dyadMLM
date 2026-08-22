@@ -6,13 +6,16 @@
 #' This function supports cross-sectional Gaussian `glmmTMB`
 #' simulations created by [simulate_dyad_responses()].
 #'
+#' An unquoted name defined directly in the calling environment is treated as
+#' an external vector; otherwise, a matching fitted-model-frame column is used.
+#' A quoted name always selects the model-frame column directly.
+#'
 #' @param simulations A `dyadMLM_response_simulations` object returned by
 #'   [simulate_dyad_responses()].
-#' @param dyad One character string naming the dyad identifier in the fitted
-#'   model frame, or a vector aligned with the fitted rows.
-#' @param role An optional character string naming the role variable
-#'   in the fitted model frame, or a vector aligned with the fitted rows. Defaults
-#'   to `NULL`.
+#' @param dyad An unquoted or quoted column name in the fitted model frame, or
+#'   a vector aligned with the fitted rows.
+#' @param role An optional unquoted or quoted column name in the fitted model
+#'   frame, or a vector aligned with the fitted rows. Defaults to `NULL`.
 #'
 #' @return A `dyadMLM_partner_check` object containing the observed and
 #'   replicated partner-dependence statistics.
@@ -20,6 +23,7 @@
 #' @export
 check_partner_dependence <- function(simulations, dyad, role = NULL) {
   check_call <- match.call()
+  caller_environment <- parent.frame()
 
   if (!inherits(simulations, "dyadMLM_response_simulations")) {
     stop(
@@ -52,18 +56,19 @@ check_partner_dependence <- function(simulations, dyad, role = NULL) {
   }
 
   dyad_values <- resolve_fitted_row_values(
-    dyad,
+    expression = substitute(dyad),
     argument = "dyad",
-    model_frame = simulations$model_frame
+    model_frame = simulations$model_frame,
+    caller_environment = caller_environment
   )
-  role_supplied <- !is.null(role)
-  if (role_supplied) {
-    role_values <- resolve_fitted_row_values(
-      role,
-      argument = "role",
-      model_frame = simulations$model_frame
-    )
-  }
+  role_values <- resolve_fitted_row_values(
+    expression = substitute(role),
+    argument = "role",
+    model_frame = simulations$model_frame,
+    caller_environment = caller_environment,
+    allow_null = TRUE
+  )
+  role_supplied <- !is.null(role_values)
 
   # Omit missing identifiers before building one pair map that is reused for
   # the observed response and every complete simulated dataset.
@@ -209,8 +214,47 @@ check_partner_dependence <- function(simulations, dyad, role = NULL) {
 }
 
 
-# Resolve either a fitted-model-frame column name or an aligned explicit vector.
-resolve_fitted_row_values <- function(value, argument, model_frame) {
+# Resolve a bare or quoted fitted-row column, or an aligned external vector.
+resolve_fitted_row_values <- function(
+  expression,
+  argument,
+  model_frame,
+  caller_environment,
+  allow_null = FALSE
+) {
+  bare_name <- if (is.symbol(expression)) {
+    as.character(expression)
+  } else {
+    NULL
+  }
+  caller_has_bare_name <- !is.null(bare_name) &&
+    exists(bare_name, envir = caller_environment, inherits = FALSE)
+
+  # Model-frame lookup precedes inherited caller objects. This keeps common
+  # bare column names such as `time` from resolving to an R function instead.
+  if (!caller_has_bare_name && !is.null(bare_name) &&
+      bare_name %in% names(model_frame)) {
+    return(model_frame[[bare_name]])
+  }
+
+  value <- tryCatch(
+    eval(expression, envir = caller_environment),
+    error = function(error) {
+      stop(
+        sprintf(
+          "`%s` could not be evaluated: %s",
+          argument,
+          conditionMessage(error)
+        ),
+        call. = FALSE
+      )
+    }
+  )
+
+  if (allow_null && is.null(value)) {
+    return(NULL)
+  }
+
   if (is.character(value) && length(value) == 1L) {
     if (!value %in% names(model_frame)) {
       stop(
@@ -225,7 +269,10 @@ resolve_fitted_row_values <- function(value, argument, model_frame) {
       length(value) != nrow(model_frame)) {
     stop(
       sprintf(
-        "`%s` must be one fitted-model-frame column name or a vector of length %d.",
+        paste0(
+          "`%s` must name a column in the fitted model frame or evaluate ",
+          "to a vector of length %d."
+        ),
         argument,
         nrow(model_frame)
       ),

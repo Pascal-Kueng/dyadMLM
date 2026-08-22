@@ -112,6 +112,96 @@ test_that("symmetric partner dependence uses aligned centered pairs", {
 })
 
 
+test_that("fitted-row identifiers accept bare, quoted, and external forms", {
+  simulations <- partner_check_test_simulations()
+  external_dyad_vector <- simulations$model_frame$dyad
+  external_role_vector <- simulations$model_frame$role
+
+  bare_result <- check_partner_dependence(
+    simulations,
+    dyad = dyad,
+    role = role
+  )
+  quoted_result <- check_partner_dependence(
+    simulations,
+    dyad = "dyad",
+    role = "role"
+  )
+  external_result <- check_partner_dependence(
+    simulations,
+    dyad = external_dyad_vector,
+    role = external_role_vector
+  )
+
+  comparison_fields <- c(
+    "observed_statistic",
+    "replicated_statistics",
+    "n_pairs"
+  )
+  expect_equal(bare_result[comparison_fields], quoted_result[comparison_fields])
+  expect_equal(
+    external_result[comparison_fields],
+    quoted_result[comparison_fields]
+  )
+
+  # The future temporal argument must prefer a fitted `time` column over the
+  # inherited stats::time() generic.
+  temporal_model_frame <- data.frame(time = seq_len(5))
+  expect_identical(
+    resolve_fitted_row_values(
+      expression = quote(time),
+      argument = "time",
+      model_frame = temporal_model_frame,
+      caller_environment = environment()
+    ),
+    temporal_model_frame$time
+  )
+})
+
+
+test_that("fitted-row identifiers can be forwarded through wrappers", {
+  simulations <- partner_check_test_simulations()
+  external_dyad_vector <- simulations$model_frame$dyad
+  external_dyad_vector[[1L]] <- NA
+
+  check_from_wrapper <- function(simulations, dyad, role = NULL) {
+    check_partner_dependence(simulations, dyad = dyad, role = role)
+  }
+
+  direct_result <- check_partner_dependence(
+    simulations,
+    dyad = external_dyad_vector
+  )
+  wrapped_result <- check_from_wrapper(simulations, external_dyad_vector)
+
+  comparison_fields <- c(
+    "statistic",
+    "observed_statistic",
+    "replicated_statistics",
+    "n_pairs",
+    "n_missing_id_rows",
+    "n_missing_role_rows"
+  )
+  expect_equal(
+    wrapped_result[comparison_fields],
+    direct_result[comparison_fields]
+  )
+  expect_identical(wrapped_result$n_missing_id_rows, 1L)
+  expect_identical(
+    wrapped_result$statistic,
+    "symmetric partner-dependence coefficient"
+  )
+
+  # A broken wrapper argument must not silently fall back to a model-frame
+  # column that happens to have the same name as the wrapper formal.
+  expect_error(
+    check_from_wrapper(simulations, does_not_exist),
+    "`dyad` could not be evaluated",
+    fixed = TRUE
+  )
+})
+
+
 test_that("symmetric coefficient equals the mean-difference representation", {
   member_1 <- c(-2.0, -0.7, 0.4, 1.3, 2.1)
   member_2 <- c(-1.4, -0.2, 0.8, 0.5, 1.7)
@@ -213,13 +303,21 @@ test_that("role-specific partner dependence is oriented by role", {
 
 test_that("missing and incomplete pairs are reported", {
   simulations <- partner_check_test_simulations()
-  dyad <- simulations$model_frame$dyad
-  role <- simulations$model_frame$role
+  external_dyad_vector <- simulations$model_frame$dyad
+  external_role_vector <- simulations$model_frame$role
 
-  dyad[which(dyad == "5")[[1L]]] <- NA
-  role[which(dyad == "4")[[1L]]] <- NA
+  external_dyad_vector[
+    which(external_dyad_vector == "5")[[1L]]
+  ] <- NA
+  external_role_vector[
+    which(external_dyad_vector == "4")[[1L]]
+  ] <- NA
 
-  result <- check_partner_dependence(simulations, dyad = dyad, role = role)
+  result <- check_partner_dependence(
+    simulations,
+    dyad = external_dyad_vector,
+    role = external_role_vector
+  )
 
   expect_identical(result$n_pairs, 3L)
   expect_identical(result$n_missing_id_rows, 1L)
@@ -314,14 +412,18 @@ test_that("invalid partner structures fail clearly", {
 
 test_that("pre-existing incomplete dyads remain counted after role omission", {
   simulations <- partner_check_test_simulations()
-  dyad <- simulations$model_frame$dyad
-  role <- simulations$model_frame$role
+  external_dyad_vector <- simulations$model_frame$dyad
+  external_role_vector <- simulations$model_frame$role
 
-  fourth_dyad_rows <- which(dyad == "4")
-  dyad[fourth_dyad_rows[[1L]]] <- NA
-  role[fourth_dyad_rows[[2L]]] <- NA
+  fourth_dyad_rows <- which(external_dyad_vector == "4")
+  external_dyad_vector[fourth_dyad_rows[[1L]]] <- NA
+  external_role_vector[fourth_dyad_rows[[2L]]] <- NA
 
-  result <- check_partner_dependence(simulations, dyad = dyad, role = role)
+  result <- check_partner_dependence(
+    simulations,
+    dyad = external_dyad_vector,
+    role = external_role_vector
+  )
 
   expect_identical(result$n_pairs, 4L)
   expect_identical(result$n_incomplete_dyads, 1L)

@@ -10,12 +10,11 @@ check_partner_dependence(simulations, dyad, role = NULL)
 \item{simulations}{A \code{dyadMLM_response_simulations} object returned by
 \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.}
 
-\item{dyad}{One character string naming the dyad identifier in the fitted
-model frame, or a vector aligned with the fitted rows.}
+\item{dyad}{An unquoted or quoted column name in the fitted model frame, or
+a vector aligned with the fitted rows.}
 
-\item{role}{An optional character string naming the role variable
-in the fitted model frame, or a vector aligned with the fitted rows. Defaults
-to \code{NULL}.}
+\item{role}{An optional unquoted or quoted column name in the fitted model
+frame, or a vector aligned with the fitted rows. Defaults to \code{NULL}.}
 }
 \value{
 A \code{dyadMLM_partner_check} object containing the observed and
@@ -28,4 +27,8 @@ with the same statistic calculated from complete simulated response datasets.
 \details{
 This function supports cross-sectional Gaussian \code{glmmTMB}
 simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
+
+An unquoted name defined directly in the calling environment is treated as
+an external vector; otherwise, a matching fitted-model-frame column is used.
+A quoted name always selects the model-frame column directly.
 }
