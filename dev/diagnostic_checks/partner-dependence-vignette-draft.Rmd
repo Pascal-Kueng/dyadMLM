@@ -41,7 +41,7 @@ m_c <- glmmTMB::glmmTMB(
 ```{r}
 simulate_dyad_responses(m_c, nsim = 5000, seed = 13001L) |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID, 
+    dyad = diagnostic_data$coupleID,
     role = diagnostic_data$gender)
 ```
 
@@ -61,7 +61,7 @@ m_w1 <- glmmTMB::glmmTMB(
 ```{r}
 simulate_dyad_responses(m_w1, nsim = 5000, seed = 13002L) |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID, 
+    dyad = diagnostic_data$coupleID,
     role = diagnostic_data$gender)
 ```
 
@@ -80,7 +80,7 @@ m_w2 <- glmmTMB::glmmTMB(
 ```{r}
 simulate_dyad_responses(m_w2, nsim = 5000, seed = 13003L) |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID, 
+    dyad = diagnostic_data$coupleID,
     role = diagnostic_data$gender)
 ```
 
@@ -98,7 +98,7 @@ m_w3 <- glmmTMB::glmmTMB(
 ```{r}
 simulate_dyad_responses(m_w3, nsim = 5000, seed = 13004L) |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID, 
+    dyad = diagnostic_data$coupleID,
     role = diagnostic_data$gender)
 ```
 
@@ -136,11 +136,11 @@ diagnostic_data <- prepare_dyad_data(
 ```{r}
 e_c <- glmmTMB::glmmTMB(
     closeness ~
-        1 + 
-      
-      (1 | coupleID) + 
+        1 +
+
+      (1 | coupleID) +
       (0 + .member_contrast_arbitrary | coupleID),
-    
+
     dispformula = ~ 0,
     family = gaussian(),
     data = diagnostic_data
@@ -156,7 +156,7 @@ e_c_simulations <- simulate_dyad_responses(
 
 e_c_simulations |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID) 
+    dyad = diagnostic_data$coupleID)
 ```
 
 ## Inspect the same model by gender
@@ -165,7 +165,7 @@ e_c_simulations |>
 e_c_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID,
-    role = diagnostic_data$gender) 
+    role = diagnostic_data$gender)
 ```
 
 
@@ -184,7 +184,7 @@ e_w1 <- glmmTMB::glmmTMB(
 ```{r}
 simulate_dyad_responses(e_w1, nsim = 5000, seed = 13006L) |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID) 
+    dyad = diagnostic_data$coupleID)
 ```
 
 
@@ -202,7 +202,7 @@ e_w2 <- glmmTMB::glmmTMB(
 ```{r}
 simulate_dyad_responses(e_w2, nsim = 5000, seed = 13007L) |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID) 
+    dyad = diagnostic_data$coupleID)
 ```
 
 
