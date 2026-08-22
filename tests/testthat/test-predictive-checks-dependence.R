@@ -268,19 +268,20 @@ test_that("exchangeable summaries are member-order invariant", {
   dyad_mean <- (first_member_residual + second_member_residual) / 2
   dyad_half_difference <-
     (first_member_residual - second_member_residual) / 2
-  pooled_residual_mean <- mean(c(
-    first_member_residual,
-    second_member_residual
-  ))
-  first_member_deviation <- first_member_residual - pooled_residual_mean
-  second_member_deviation <- second_member_residual - pooled_residual_mean
+  woody_between_moment <- 2 * stats::var(dyad_mean)
+  woody_within_moment <-
+    sum((first_member_residual - second_member_residual)^2) /
+    (2 * length(first_member_residual))
+  expected_member_variance <-
+    (woody_between_moment + woody_within_moment) / 2
+  expected_partner_covariance <-
+    (woody_between_moment - woody_within_moment) / 2
   expected_partner_correlation <-
-    2 * sum(first_member_deviation * second_member_deviation) /
-    sum(first_member_deviation^2 + second_member_deviation^2)
+    expected_partner_covariance / expected_member_variance
 
   expect_equal(
-    statistics[["pooled_residual_sd"]],
-    stats::sd(c(first_member_residual, second_member_residual))
+    statistics[["exchangeable_member_sd"]],
+    sqrt(expected_member_variance)
   )
   expect_equal(
     statistics[["exchangeable_partner_correlation"]],
@@ -288,11 +289,22 @@ test_that("exchangeable summaries are member-order invariant", {
   )
   expect_equal(
     statistics[["dyad_mean_sd"]],
-    stats::sd(dyad_mean)
+    sqrt(woody_between_moment / 2)
   )
   expect_equal(
-    statistics[["half_difference_sd"]],
-    sqrt(mean(dyad_half_difference^2))
+    statistics[["half_difference_rms"]],
+    sqrt(woody_within_moment / 2)
+  )
+  expect_equal(
+    statistics[["exchangeable_member_sd"]]^2,
+    statistics[["dyad_mean_sd"]]^2 +
+      statistics[["half_difference_rms"]]^2
+  )
+  expect_equal(
+    statistics[["exchangeable_partner_correlation"]] *
+      statistics[["exchangeable_member_sd"]]^2,
+    statistics[["dyad_mean_sd"]]^2 -
+      statistics[["half_difference_rms"]]^2
   )
 
   # Independently exchanging member positions changes difference signs but

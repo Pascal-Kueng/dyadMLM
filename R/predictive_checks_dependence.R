@@ -1,20 +1,37 @@
 #' Check whether a fitted model reproduces partner interdependence
 #'
-#' Compares spread and interdependence in observed cross-sectional partner
-#' responses with the same summaries calculated from complete simulated
-#' response datasets.
+#' Compares partner spread and association in the observed data with identical
+#' summaries calculated from every complete plug-in predictive replicate.
 #'
 #' This function supports cross-sectional Gaussian `glmmTMB`
 #' simulations created by [simulate_dyad_responses()].
 #' The interface is experimental and may change as predictive checks expand.
-#' With roles, it reports role-specific residual SDs and partner correlation,
-#' plus the equivalent dyad-mean and half-difference summaries. Without roles,
-#' it reports a pooled residual SD and exchangeability-constrained partner
-#' correlation. Exchangeability fixes the signed half-difference mean at zero,
-#' so its SD is calculated around zero and remains invariant to member swaps.
-#' Observed and simulated responses are centered on the same
-#' random-effects-excluded prediction. Modeled random-effect and residual
-#' dependence therefore remains in both.
+#'
+#' Let the model center be the response-scale prediction with all random effects
+#' excluded. The function subtracts the same deterministic center from the
+#' observed response and every replicate. The resulting quantities are
+#' model-centered response deviations, not conditional or PIT residuals;
+#' modeled random-effect and residual dependence remains in both.
+#'
+#' With roles, the member SDs and partner correlation are accompanied by their
+#' exact dyad-mean and half-difference re-expression. Without roles, for
+#' substantively interchangeable members, the exchangeable common member SD and
+#' partner correlation are reconstructed from the dyad-mean variance and the
+#' half-difference mean square. Exchangeability
+#' implies a population half-difference mean of zero, although its realized
+#' sample mean need not be zero. The function therefore uses the
+#' half-difference RMS about zero, making all four summaries invariant to
+#' arbitrary member swaps. This no-role construction uses the scalar variance
+#' entries of Woody and Sadler's (2005) between-dyad covariance and within-dyad
+#' cross-products matrices, expressed on a half-sum/half-difference scale. Their
+#' paper supports this moment decomposition, not the predictive check. Kenny and
+#' Ackerman (2023), and del Rosario and West (2025), use the related
+#' sum-difference basis to specify random effects.
+#'
+#' Applying the same summary to observed and replicated data follows Gelman,
+#' Meng, and Stern (1996) and Gelman (2004). Hartig (2026) documents the closest
+#' same-center custom-summary pattern, while Hoff (2015) provides a dyadic
+#' precedent for checking within-dyad association in replicated datasets.
 #'
 #' An unquoted name defined directly in the calling environment is treated as
 #' an external vector; otherwise, a matching fitted-model-frame column is used.
@@ -25,7 +42,9 @@
 #' @param dyad An unquoted or quoted column name in the fitted model frame, or
 #'   a vector aligned with the fitted rows.
 #' @param role An optional unquoted or quoted column name in the fitted model
-#'   frame, or a vector aligned with the fitted rows. Defaults to `NULL`.
+#'   frame, or a vector aligned with the fitted rows. Supply this whenever a
+#'   member distinction is substantively meaningful. Use the default `NULL`
+#'   only when members are substantively interchangeable.
 #' @param plot Logical. If `TRUE`, the default, draw the diagnostic plots.
 #'
 #' @return Invisibly, a `dyadMLM_partner_check` object containing
@@ -38,6 +57,30 @@
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
 #'   Methods, 10*(2), 139-158.
 #'   [doi:10.1037/1082-989X.10.2.139](https://doi.org/10.1037/1082-989X.10.2.139).
+#'
+#' Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
+#' assessment of model fitness via realized discrepancies. *Statistica Sinica,
+#' 6*, 733-807.
+#'
+#' Gelman, A. (2004). Exploratory data analysis for complex models. *Journal of
+#' Computational and Graphical Statistics, 13*(4), 755-779.
+#' [doi:10.1198/106186004X11435](https://doi.org/10.1198/106186004X11435).
+#'
+#' Hoff, P. D. (2015). Dyadic data analysis with `amen`. *arXiv:1506.08237*.
+#' [doi:10.48550/arXiv.1506.08237](https://doi.org/10.48550/arXiv.1506.08237).
+#'
+#' Hartig, F. (2026). *DHARMa: Residual Diagnostics for Hierarchical
+#' (Multi-Level / Mixed) Regression Models*, version 0.5.0.
+#' [CRAN manual](https://cran.r-project.org/package=DHARMa).
+#'
+#' Kenny, D. A., & Ackerman, R. A. (2023). *Estimation of random effects in
+#' over-time dyadic data using multilevel modeling: The sum and difference
+#' method*. [OSF preprint](https://osf.io/fju72/).
+#'
+#' del Rosario, K. S., & West, T. V. (2025). A practical guide to specifying
+#' random effects in longitudinal dyadic multilevel modeling. *Advances in
+#' Methods and Practices in Psychological Science, 8*(3), 1-36.
+#' [doi:10.1177/25152459251351286](https://doi.org/10.1177/25152459251351286).
 #'
 #' @export
 check_partner_dependence <- function(
@@ -225,8 +268,8 @@ check_partner_dependence <- function(
       statistic_name = names(observed_statistics),
       parameterization = rep(c("member", "mean_difference"), each = 3L),
       label = c(
-        paste0("Residual SD (", role_order[[1L]], ")"),
-        paste0("Residual SD (", role_order[[2L]], ")"),
+        paste0("Model-centered SD (", role_order[[1L]], ")"),
+        paste0("Model-centered SD (", role_order[[2L]], ")"),
         paste0(
           "Partner correlation (",
           role_order[[1L]], " and ", role_order[[2L]],
@@ -246,10 +289,10 @@ check_partner_dependence <- function(
       statistic_name = names(observed_statistics),
       parameterization = rep(c("member", "mean_difference"), each = 2L),
       label = c(
-        "Pooled residual SD",
+        "Common model-centered SD (exchangeable)",
         "Partner correlation (exchangeable)",
         "Dyad-mean SD",
-        "Half-difference SD"
+        "Half-difference RMS (about zero)"
       )
     )
   }
@@ -336,27 +379,22 @@ calculate_partner_residual_statistics <- function(
     ))
   }
 
-  # Exchangeable members share one mean and variance. Centering both members
-  # on their pooled mean gives a correlation invariant to arbitrary swaps.
-  pooled_member_residuals <- c(
-    first_member_residual,
-    second_member_residual
-  )
-  pooled_residual_mean <- mean(pooled_member_residuals)
-  first_member_deviation <- first_member_residual - pooled_residual_mean
-  second_member_deviation <- second_member_residual - pooled_residual_mean
-  pooled_deviation_sum_of_squares <- sum(
-    first_member_deviation^2 + second_member_deviation^2
-  )
+  # Under exchangeability, the mean and difference modes recover the common
+  # member variance and covariance. The mean mode loses one degree of freedom
+  # when its mean is estimated; exchangeability sets E(difference) to zero.
+  dyad_mean_variance <- stats::var(dyad_mean_residual)
+  half_difference_mean_square <- mean(half_difference_residual^2)
+  exchangeable_member_variance <-
+    dyad_mean_variance + half_difference_mean_square
+  exchangeable_partner_covariance <-
+    dyad_mean_variance - half_difference_mean_square
 
   c(
-    pooled_residual_sd = stats::sd(pooled_member_residuals),
+    exchangeable_member_sd = sqrt(exchangeable_member_variance),
     exchangeable_partner_correlation =
-      2 * sum(first_member_deviation * second_member_deviation) /
-      pooled_deviation_sum_of_squares,
-    dyad_mean_sd = stats::sd(dyad_mean_residual),
-    # Exchangeability fixes the signed half-difference mean at zero.
-    half_difference_sd = sqrt(mean(half_difference_residual^2))
+      exchangeable_partner_covariance / exchangeable_member_variance,
+    dyad_mean_sd = sqrt(dyad_mean_variance),
+    half_difference_rms = sqrt(half_difference_mean_square)
   )
 }
 

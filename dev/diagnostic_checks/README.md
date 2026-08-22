@@ -338,29 +338,53 @@ covariance. The reported mean-difference correlation retains the covariance as
 \(\operatorname{Cor}(M,D)\operatorname{SD}(M)\operatorname{SD}(D)\).
 Regression tests must verify this mapping and invariance to fitted row order.
 
-When `role = NULL`, member positions are arbitrary. Report the **member
-parameterization**:
+Use `role = NULL` only when members are substantively interchangeable for the
+analysis; the absence of a recorded role variable is not sufficient. In that
+case member positions are arbitrary. Report the **member parameterization**:
 
-- pooled residual SD; and
+- common model-centered SD; and
 - partner correlation under the exchangeable common-mean and common-variance
-  constraint. With \(\bar e\) denoting the pooled residual mean, calculate
+  constraint.
+
+First calculate the **mean-difference parameterization**:
+
+- the sample SD of the dyad means \(M_d=(e_{d1}+e_{d2})/2\); and
+- the root mean square of the half-differences
+  \(D_d=(e_{d1}-e_{d2})/2\).
+
+Exchangeability implies the population expectation \(E(D)=0\); it does not
+force the realized sample mean difference to equal zero. Thus define
 
 \[
-\rho_{partner} =
-\frac{2\sum_d(e_{d1}-\bar e)(e_{d2}-\bar e)}
-     {\sum_d\{(e_{d1}-\bar e)^2+(e_{d2}-\bar e)^2\}}.
+s_M^2 = \frac{\sum_d(M_d-\bar M)^2}{n-1}, \qquad
+s_{D0}^2 = \frac{\sum_d D_d^2}{n}.
 \]
 
-Report the equivalent **mean-difference parameterization**:
+The different denominators follow Woody and Sadler's (2005, p. 142) sample
+recipe: the centered dyad-mean matrix uses an effective sample size of
+\(n-1\), whereas the uncentered difference cross-products use \(n\). On the
+present half-sum/half-difference scale, their matrices are
 
-- SD of the dyad means \(M_d=(e_{d1}+e_{d2})/2\); and
-- SD of the half-differences \(D_d=(e_{d1}-e_{d2})/2\).
+\[
+B=2s_M^2, \qquad W=2s_{D0}^2.
+\]
 
-Exchangeability fixes the signed half-difference mean at zero. Calculate its SD
-as \(\sqrt{\operatorname{mean}(D_d^2)}\), which is invariant to arbitrary
-member swaps. Do not report a mean-difference correlation without roles.
-Regression tests must verify all four summaries and their invariance when
-member positions are exchanged independently within dyads.
+Reconstruct the exchangeable member parameters as
+
+\[
+\widehat v = s_M^2+s_{D0}^2, \qquad
+\widehat c = s_M^2-s_{D0}^2, \qquad
+\widehat\rho_{partner}=\frac{\widehat c}{\widehat v}.
+\]
+
+Their Appendix (p. 158) gives the corresponding population identities
+\(B=v+c\) and \(W=v-c\); the \(n-1\) versus \(n\) distinction comes from the
+sample recipe rather than those population equations.
+
+Report \(\sqrt{\widehat v}\), \(\widehat\rho_{partner}\), \(s_M\), and
+\(s_{D0}\). Do not report a mean-difference correlation without roles.
+All four summaries are invariant to arbitrary member swaps. Regression tests
+must verify that invariance and both reconstruction identities above.
 
 Calculate every applicable summary once for the observed centered response and
 once for every complete simulated dataset, using one shared internal helper. If
@@ -473,10 +497,10 @@ composition. Never pool distinct compositions into one dependence statistic.
 
 For each composition, provide two equivalent diagnostic views:
 
-- The **member parameterization** reports one pooled residual SD and the
-  exchangeability-constrained partner correlation for an exchangeable
-  composition. For a distinguishable composition, it reports both
-  role-specific SDs and their correlation.
+- The **member parameterization** reports one reconstructed common
+  model-centered SD and the exchangeability-constrained partner correlation
+  for an exchangeable composition. For a distinguishable composition, it
+  reports both role-specific SDs and their correlation.
 - The **mean-difference parameterization** reports the spread of dyad means and
   half-differences. For a distinguishable composition, it also reports their
   correlation using a stable role order. Do not report this
@@ -700,7 +724,7 @@ whether one random dataset crosses a predictive-quantile threshold:
 - direct agreement with manually calculated observed and replicated statistics;
 - identical observed/replicated statistic code paths;
 - direct agreement with the exchangeability-constrained correlation and
-  zero-centered half-difference SD;
+  half-difference RMS about zero;
 - invariance of every exchangeable summary to independent member swapping;
 - stable role orientation and the exact distinguishable correlation mapping;
 - missing identifiers, incomplete pairs, repeated dyad occasions, excess rows,

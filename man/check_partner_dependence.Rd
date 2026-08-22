@@ -26,22 +26,34 @@ statistic's position from 0 to 1 among the replicated values; it is
 descriptive and is not a p-value.
 }
 \description{
-Compares spread and interdependence in observed cross-sectional partner
-responses with the same summaries calculated from complete simulated
-response datasets.
+Compares partner spread and association in the observed data with identical
+summaries calculated from every complete plug-in predictive replicate.
 }
 \details{
 This function supports cross-sectional Gaussian \code{glmmTMB}
 simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 The interface is experimental and may change as predictive checks expand.
-With roles, it reports role-specific residual SDs and partner correlation,
-plus the equivalent dyad-mean and half-difference summaries. Without roles,
-it reports a pooled residual SD and exchangeability-constrained partner
-correlation. Exchangeability fixes the signed half-difference mean at zero,
-so its SD is calculated around zero and remains invariant to member swaps.
-Observed and simulated responses are centered on the same
-random-effects-excluded prediction. Modeled random-effect and residual
-dependence therefore remains in both.
+
+Let the model center be the response-scale prediction with all random effects
+excluded. The function subtracts the same deterministic center from the
+observed response and every replicate. The resulting quantities are
+model-centered response deviations, not conditional or PIT residuals;
+modeled random-effect and residual dependence remains in both.
+
+With roles, the member SDs and partner correlation are accompanied by their
+exact dyad-mean and half-difference re-expression. Without roles, the
+exchangeable common member SD and partner correlation are reconstructed from
+the dyad-mean variance and the half-difference mean square. The latter is
+calculated around zero, making all four summaries invariant to arbitrary
+member swaps. These moments are a scaled re-expression of Woody and Sadler's
+(2005) between- and within-dyad moment matrices. Kenny and Ackerman (2023),
+and del Rosario and West (2025), use the related sum-difference basis to
+specify random effects; they do not describe this predictive check.
+
+Applying the same summary to observed and replicated data follows Gelman,
+Meng, and Stern (1996) and Gelman (2004). Hartig (2026) documents the closest
+same-center custom-summary pattern, while Hoff (2015) provides a dyadic
+precedent for checking within-dyad association in replicated datasets.
 
 An unquoted name defined directly in the calling environment is treated as
 an external vector; otherwise, a matching fitted-model-frame column is used.
@@ -52,4 +64,28 @@ Woody, E., & Sadler, P. (2005). Structural equation models for
 interchangeable dyads: Being the same makes a difference. \emph{Psychological
 Methods, 10}(2), 139-158.
 \href{https://doi.org/10.1037/1082-989X.10.2.139}{doi:10.1037/1082-989X.10.2.139}.
+
+Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
+assessment of model fitness via realized discrepancies. \emph{Statistica Sinica,
+6}, 733-807.
+
+Gelman, A. (2004). Exploratory data analysis for complex models. \emph{Journal of
+Computational and Graphical Statistics, 13}(4), 755-779.
+\href{https://doi.org/10.1198/106186004X11435}{doi:10.1198/106186004X11435}.
+
+Hoff, P. D. (2015). Dyadic data analysis with \code{amen}. \emph{arXiv:1506.08237}.
+\href{https://doi.org/10.48550/arXiv.1506.08237}{doi:10.48550/arXiv.1506.08237}.
+
+Hartig, F. (2026). \emph{DHARMa: Residual Diagnostics for Hierarchical
+(Multi-Level / Mixed) Regression Models}, version 0.5.0.
+\href{https://cran.r-project.org/package=DHARMa}{CRAN manual}.
+
+Kenny, D. A., & Ackerman, R. A. (2023). \emph{Estimation of random effects in
+over-time dyadic data using multilevel modeling: The sum and difference
+method}. \href{https://osf.io/fju72/}{OSF preprint}.
+
+del Rosario, K. S., & West, T. V. (2025). A practical guide to specifying
+random effects in longitudinal dyadic multilevel modeling. \emph{Advances in
+Methods and Practices in Psychological Science, 8}(3), 1-36.
+\href{https://doi.org/10.1177/25152459251351286}{doi:10.1177/25152459251351286}.
 }

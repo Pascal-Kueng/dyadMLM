@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate_dyad_responses.R
 \name{simulate_dyad_responses}
 \alias{simulate_dyad_responses}
-\title{Simulate complete response datasets for dyadic predictive checks}
+\title{Simulate plug-in predictive response replicates}
 \usage{
 simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 }
@@ -20,12 +20,38 @@ A \code{dyadMLM_response_simulations} object containing the observed and
 simulated response datasets used by predictive checks.
 }
 \description{
-Generates complete response datasets from a fitted model while preserving
-its random-effect and covariance structure. The result can be used for
-various predictive checks.
+Draws complete response vectors for the rows used to fit a supported model.
+Coefficients and variance-covariance estimates are held fixed, while all
+modeled random effects and Gaussian observation errors are redrawn for each
+replicate. The result is a plug-in predictive reference, not a full
+posterior-predictive distribution or a parametric bootstrap that refits the
+model.
 }
 \details{
+Simulation is unconditional with respect to the fitted random-effect
+realizations, but remains conditional on the fitted parameters and fitted-row
+design. The returned object also stores one random-effect-excluded,
+response-scale prediction per fitted row. Downstream checks use this same
+deterministic vector to center the observed response and every replicate.
+
 The initial implementation supports scalar Gaussian identity-link
 \code{glmmTMB} models only.
 The interface is experimental and may change as predictive checks expand.
+}
+\references{
+Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
+assessment of model fitness via realized discrepancies. \emph{Statistica Sinica,
+6}, 733-807.
+
+Gelman, A. (2004). Exploratory data analysis for complex models. \emph{Journal of
+Computational and Graphical Statistics, 13}(4), 755-779.
+\href{https://doi.org/10.1198/106186004X11435}{doi:10.1198/106186004X11435}.
+
+Gelman, A. (2007). Comment: Bayesian checking of the second levels of
+hierarchical models. \emph{Statistical Science, 22}(3), 349-352.
+\href{https://doi.org/10.1214/07-STS235A}{doi:10.1214/07-STS235A}.
+
+Hartig, F. (2026). \emph{DHARMa: Residual Diagnostics for Hierarchical
+(Multi-Level / Mixed) Regression Models}, version 0.5.0.
+\href{https://cran.r-project.org/package=DHARMa}{CRAN manual}.
 }

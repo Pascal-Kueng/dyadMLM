@@ -1,8 +1,17 @@
-#' Simulate complete response datasets for dyadic predictive checks
+#' Simulate plug-in predictive response replicates
 #'
-#' Generates complete response datasets from a fitted model while preserving
-#' its random-effect and covariance structure. The result can be used for
-#' various predictive checks.
+#' Draws complete response vectors for the rows used to fit a supported model.
+#' Coefficients and variance-covariance estimates are held fixed, while all
+#' modeled random effects and Gaussian observation errors are redrawn for each
+#' replicate. The result is a plug-in predictive reference, not a full
+#' posterior-predictive distribution or a parametric bootstrap that refits the
+#' model.
+#'
+#' Simulation is unconditional with respect to the fitted random-effect
+#' realizations, but remains conditional on the fitted parameters and fitted-row
+#' design. The returned object also stores one random-effect-excluded,
+#' response-scale prediction per fitted row. Downstream checks use this same
+#' deterministic vector to center the observed response and every replicate.
 #'
 #' The initial implementation supports scalar Gaussian identity-link
 #' `glmmTMB` models only.
@@ -16,6 +25,23 @@
 #'
 #' @return A `dyadMLM_response_simulations` object containing the observed and
 #'   simulated response datasets used by predictive checks.
+#'
+#' @references
+#' Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
+#' assessment of model fitness via realized discrepancies. *Statistica Sinica,
+#' 6*, 733-807.
+#'
+#' Gelman, A. (2004). Exploratory data analysis for complex models. *Journal of
+#' Computational and Graphical Statistics, 13*(4), 755-779.
+#' [doi:10.1198/106186004X11435](https://doi.org/10.1198/106186004X11435).
+#'
+#' Gelman, A. (2007). Comment: Bayesian checking of the second levels of
+#' hierarchical models. *Statistical Science, 22*(3), 349-352.
+#' [doi:10.1214/07-STS235A](https://doi.org/10.1214/07-STS235A).
+#'
+#' Hartig, F. (2026). *DHARMa: Residual Diagnostics for Hierarchical
+#' (Multi-Level / Mixed) Regression Models*, version 0.5.0.
+#' [CRAN manual](https://cran.r-project.org/package=DHARMa).
 #'
 #' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
