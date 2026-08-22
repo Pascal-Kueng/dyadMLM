@@ -14,7 +14,9 @@ check_partner_dependence(simulations, dyad, role = NULL, plot = TRUE)
 a vector aligned with the fitted rows.}
 
 \item{role}{An optional unquoted or quoted column name in the fitted model
-frame, or a vector aligned with the fitted rows. Defaults to \code{NULL}.}
+frame, or a vector aligned with the fitted rows. Supply this whenever a
+member distinction is substantively meaningful. Use the default \code{NULL}
+only when members are substantively interchangeable.}
 
 \item{plot}{Logical. If \code{TRUE}, the default, draw the diagnostic plots.}
 }
@@ -41,14 +43,19 @@ model-centered response deviations, not conditional or PIT residuals;
 modeled random-effect and residual dependence remains in both.
 
 With roles, the member SDs and partner correlation are accompanied by their
-exact dyad-mean and half-difference re-expression. Without roles, the
-exchangeable common member SD and partner correlation are reconstructed from
-the dyad-mean variance and the half-difference mean square. The latter is
-calculated around zero, making all four summaries invariant to arbitrary
-member swaps. These moments are a scaled re-expression of Woody and Sadler's
-(2005) between- and within-dyad moment matrices. Kenny and Ackerman (2023),
-and del Rosario and West (2025), use the related sum-difference basis to
-specify random effects; they do not describe this predictive check.
+exact dyad-mean and half-difference re-expression. Without roles, for
+substantively interchangeable members, the exchangeable common member SD and
+partner correlation are reconstructed from the dyad-mean variance and the
+half-difference mean square. Exchangeability
+implies a population half-difference mean of zero, although its realized
+sample mean need not be zero. The function therefore uses the
+half-difference RMS about zero, making all four summaries invariant to
+arbitrary member swaps. This no-role construction uses the scalar variance
+entries of Woody and Sadler's (2005) between-dyad covariance and within-dyad
+cross-products matrices, expressed on a half-sum/half-difference scale. Their
+paper supports this moment decomposition, not the predictive check. Kenny
+and Ackerman (2023), and del Rosario and West (2025), use the related
+sum-difference basis to specify random effects.
 
 Applying the same summary to observed and replicated data follows Gelman,
 Meng, and Stern (1996) and Gelman (2004). Hartig (2026) documents the closest
