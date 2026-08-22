@@ -1,22 +1,23 @@
-#' Check whether a fitted model reproduces partner dependence
+#' Check whether a fitted model reproduces partner interdependence
 #'
-#' Compares same-occasion partner dependence in the observed fitted responses
+#' Compares same-occasion partner interdependence in the observed fitted responses
 #' with the same statistic calculated from complete simulated response datasets.
 #'
-#' The initial implementation supports cross-sectional Gaussian `glmmTMB`
+#' This function supports cross-sectional Gaussian `glmmTMB`
 #' simulations created by [simulate_dyad_responses()].
 #'
 #' @param simulations A `dyadMLM_response_simulations` object returned by
 #'   [simulate_dyad_responses()].
 #' @param dyad One character string naming the dyad identifier in the fitted
 #'   model frame, or a vector aligned with the fitted rows.
-#' @param role `NULL` (default), one character string naming the role variable
-#'   in the fitted model frame, or a vector aligned with the fitted rows.
+#' @param role An optional character string naming the role variable
+#'   in the fitted model frame, or a vector aligned with the fitted rows. Defaults
+#'   to `NULL`.
 #'
 #' @return A `dyadMLM_partner_check` object containing the observed and
 #'   replicated partner-dependence statistics.
 #'
-#' @keywords internal
+#' @export
 check_partner_dependence <- function(simulations, dyad, role = NULL) {
   check_call <- match.call()
 
@@ -75,39 +76,46 @@ check_partner_dependence <- function(simulations, dyad, role = NULL) {
     missing_role_rows <- !missing_dyad_rows & is.na(role_values)
   }
   n_missing_role_rows <- sum(missing_role_rows)
-  usable_rows <- !missing_dyad_rows & !missing_role_rows
 
-  dyad_levels <- unique(dyad_values[!missing_dyad_rows])
-  dyad_index <- match(dyad_values, dyad_levels)
-  rows_per_dyad <- tabulate(
-    dyad_index[usable_rows],
-    nbins = length(dyad_levels)
+  # First check the fitted cross-sectional structure. Missing roles must not
+  # hide a dyad that actually has more than one pair of fitted responses.
+  rows_by_dyad <- split(
+    which(!missing_dyad_rows),
+    dyad_values[!missing_dyad_rows],
+    drop = TRUE
   )
+  fitted_rows_per_dyad <- lengths(rows_by_dyad)
 
-  if (any(rows_per_dyad > 2L)) {
+  if (any(fitted_rows_per_dyad > 2L)) {
     stop(
       paste0(
         "Each dyad must have at most two fitted responses after rows with ",
-        "missing identifiers are omitted."
+        "missing dyad IDs are omitted."
       ),
       call. = FALSE
     )
   }
 
-  complete_dyads <- which(rows_per_dyad == 2L)
-  n_incomplete_dyads <- sum(rows_per_dyad == 1L)
-  if (length(complete_dyads) < 3L) {
+  # Missing roles can make an otherwise complete pair unusable. Keep the
+  # original fitted-row indices so the same map applies to every response.
+  usable_rows_by_dyad <- lapply(
+    rows_by_dyad,
+    function(rows) rows[!missing_role_rows[rows]]
+  )
+  usable_rows_per_dyad <- lengths(usable_rows_by_dyad)
+  complete_pairs <- usable_rows_by_dyad[usable_rows_per_dyad == 2L]
+  n_incomplete_dyads <- sum(
+    fitted_rows_per_dyad == 1L |
+      (fitted_rows_per_dyad == 2L & usable_rows_per_dyad == 1L)
+  )
+  if (length(complete_pairs) < 3L) {
     stop(
       "At least three complete dyads are required to check partner dependence.",
       call. = FALSE
     )
   }
 
-  rows_by_dyad <- split(
-    which(usable_rows),
-    factor(dyad_index[usable_rows], levels = seq_along(dyad_levels))
-  )
-  pair_rows <- rows_by_dyad[complete_dyads] |>
+  pair_rows <- complete_pairs |>
     unlist(use.names = FALSE) |>
     matrix(ncol = 2L, byrow = TRUE)
 
@@ -165,9 +173,12 @@ check_partner_dependence <- function(simulations, dyad, role = NULL) {
     )
   }
 
-  replicated_interval <- replicated_statistics |>
-    stats::quantile(probs = c(0.025, 0.975), names = FALSE) |>
-    setNames(c("2.5%", "97.5%"))
+  replicated_interval <- stats::quantile(
+    replicated_statistics,
+    probs = c(0.025, 0.975),
+    names = FALSE
+  )
+  names(replicated_interval) <- c("2.5%", "97.5%")
 
   check_results <- list(
     statistic = if (role_supplied) {
@@ -296,8 +307,6 @@ plot.dyadMLM_partner_check <- function(x, ...) {
     main = "Partner-dependence predictive check",
     sub = paste(x$n_pairs, "complete pairs;", x$reference),
     xlab = x$statistic,
-    col = "grey85",
-    border = "white",
     ...
   )
   graphics::abline(

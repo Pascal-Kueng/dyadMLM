@@ -28,4 +28,3 @@ various predictive checks.
 The initial implementation supports scalar Gaussian identity-link
 \code{glmmTMB} models only.
 }
-\keyword{internal}

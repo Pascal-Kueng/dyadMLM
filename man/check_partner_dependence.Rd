@@ -2,7 +2,7 @@
 % Please edit documentation in R/predictive_checks_dependence.R
 \name{check_partner_dependence}
 \alias{check_partner_dependence}
-\title{Check whether a fitted model reproduces partner dependence}
+\title{Check whether a fitted model reproduces partner interdependence}
 \usage{
 check_partner_dependence(simulations, dyad, role = NULL)
 }
@@ -13,19 +13,19 @@ check_partner_dependence(simulations, dyad, role = NULL)
 \item{dyad}{One character string naming the dyad identifier in the fitted
 model frame, or a vector aligned with the fitted rows.}
 
-\item{role}{\code{NULL} (default), one character string naming the role variable
-in the fitted model frame, or a vector aligned with the fitted rows.}
+\item{role}{An optional character string naming the role variable
+in the fitted model frame, or a vector aligned with the fitted rows. Defaults
+to \code{NULL}.}
 }
 \value{
 A \code{dyadMLM_partner_check} object containing the observed and
 replicated partner-dependence statistics.
 }
 \description{
-Compares same-occasion partner dependence in the observed fitted responses
+Compares same-occasion partner interdependence in the observed fitted responses
 with the same statistic calculated from complete simulated response datasets.
 }
 \details{
-The initial implementation supports cross-sectional Gaussian \code{glmmTMB}
+This function supports cross-sectional Gaussian \code{glmmTMB}
 simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.
 }
-\keyword{internal}

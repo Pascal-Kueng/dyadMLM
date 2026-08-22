@@ -184,9 +184,14 @@ test_that("role-specific partner dependence is oriented by role", {
   )
   expect_identical(result$statistic, "Pearson correlation between roles")
 
-  # Row order cannot determine the result when roles are available.
+  # Independently reverse selected dyads, rather than swapping every pair in
+  # the same way. Row order still cannot determine the role-specific result.
   reordered <- simulations
-  reordered_rows <- rev(seq_len(nrow(simulations$model_frame)))
+  reordered_rows <- seq_len(nrow(simulations$model_frame))
+  for (dyad in c("2", "4")) {
+    dyad_rows <- which(simulations$model_frame$dyad == dyad)
+    reordered_rows[dyad_rows] <- rev(reordered_rows[dyad_rows])
+  }
   reordered$model_frame <- reordered$model_frame[reordered_rows, , drop = FALSE]
   reordered$observed_response <- reordered$observed_response[reordered_rows]
   reordered$fitted_response <- reordered$fitted_response[reordered_rows]
@@ -250,6 +255,22 @@ test_that("invalid partner structures fail clearly", {
     fixed = TRUE
   )
 
+  # A missing role must not hide a third fitted response in a dyad.
+  three_row_dyad <- as.character(simulations$model_frame$dyad)
+  extra_dyad_row <- which(three_row_dyad == "5")[[1L]]
+  three_row_dyad[[extra_dyad_row]] <- "1"
+  extra_row_missing_role <- as.character(simulations$model_frame$role)
+  extra_row_missing_role[[extra_dyad_row]] <- NA_character_
+  expect_error(
+    check_partner_dependence(
+      simulations,
+      dyad = three_row_dyad,
+      role = extra_row_missing_role
+    ),
+    "at most two fitted responses",
+    fixed = TRUE
+  )
+
   too_few_pairs <- simulations$model_frame$dyad
   for (dyad in c("3", "4", "5")) {
     too_few_pairs[which(too_few_pairs == dyad)[[1L]]] <- NA
@@ -288,6 +309,24 @@ test_that("invalid partner structures fail clearly", {
     "insufficient variation",
     fixed = TRUE
   )
+})
+
+
+test_that("pre-existing incomplete dyads remain counted after role omission", {
+  simulations <- partner_check_test_simulations()
+  dyad <- simulations$model_frame$dyad
+  role <- simulations$model_frame$role
+
+  fourth_dyad_rows <- which(dyad == "4")
+  dyad[fourth_dyad_rows[[1L]]] <- NA
+  role[fourth_dyad_rows[[2L]]] <- NA
+
+  result <- check_partner_dependence(simulations, dyad = dyad, role = role)
+
+  expect_identical(result$n_pairs, 4L)
+  expect_identical(result$n_incomplete_dyads, 1L)
+  expect_identical(result$n_missing_id_rows, 1L)
+  expect_identical(result$n_missing_role_rows, 1L)
 })
 
 

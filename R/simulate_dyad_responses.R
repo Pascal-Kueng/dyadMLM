@@ -16,7 +16,7 @@
 #' @return A `dyadMLM_response_simulations` object containing the observed and
 #'   simulated response datasets used by predictive checks.
 #'
-#' @keywords internal
+#' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
 
   #### Validation checks
