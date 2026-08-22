@@ -72,8 +72,26 @@ test_that("complete response simulations retain fitted-row alignment", {
   expect_identical(simulations$nsim, 5L)
   expect_identical(simulations$seed, 123L)
 
+  printed_output <- capture.output(
+    printed_result <- withVisible(print(simulations))
+  )
+  expect_identical(
+    printed_output,
+    c(
+      "<dyadMLM response simulations>",
+      "5 complete gaussian response datasets from glmmTMB for 40 fitted rows"
+    )
+  )
+  expect_false(printed_result$visible)
+  expect_identical(printed_result$value, simulations)
+
   single_simulation <- simulate_dyad_responses(model, nsim = 1, seed = 124)
   expect_identical(dim(single_simulation$simulated_responses), c(1L, 40L))
+  expect_output(
+    print(single_simulation),
+    "1 complete gaussian response dataset from glmmTMB for 40 fitted rows",
+    fixed = TRUE
+  )
 })
 
 

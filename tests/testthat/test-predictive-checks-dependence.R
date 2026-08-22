@@ -461,6 +461,16 @@ test_that("missing and incomplete pairs are reported", {
   expect_identical(result$n_missing_dyad_rows, 1L)
   expect_identical(result$n_missing_role_rows, 2L)
   expect_identical(result$n_incomplete_dyads, 2L)
+
+  printed_output <- paste(capture.output(print(result)), collapse = "\n")
+  expect_match(
+    printed_output,
+    paste0(
+      "Omitted: incomplete dyads: 2; rows with missing dyad IDs: 1; ",
+      "rows with missing roles: 2"
+    ),
+    fixed = TRUE
+  )
 })
 
 
@@ -648,6 +658,34 @@ test_that("partner check has concise print and both plot views", {
   expect_match(
     paste(printed_output, collapse = "\n"),
     "6 statistics from 5 complete pairs",
+    fixed = TRUE
+  )
+  expect_match(
+    paste(printed_output, collapse = "\n"),
+    "Replicated reference: median and central 95% interval",
+    fixed = TRUE
+  )
+  expect_match(
+    paste(printed_output, collapse = "\n"),
+    "Observed ",
+    fixed = TRUE
+  )
+  expect_match(
+    paste(printed_output, collapse = "\n"),
+    " | Median ",
+    fixed = TRUE
+  )
+  expect_match(
+    paste(printed_output, collapse = "\n"),
+    " | Obs. quantile ",
+    fixed = TRUE
+  )
+  expect_match(
+    paste(printed_output, collapse = "\n"),
+    sprintf(
+      "%.3f",
+      distinguishable_result$statistics_table$observed_value[[1L]]
+    ),
     fixed = TRUE
   )
   expect_false(printed_result$visible)

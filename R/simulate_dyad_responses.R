@@ -153,6 +153,20 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
 }
 
 
+#' @export
+print.dyadMLM_response_simulations <- function(x, ...) {
+  cat("<dyadMLM response simulations>\n")
+  cat(
+    x$nsim,
+    "complete", x$family, "response",
+    if (x$nsim == 1L) "dataset" else "datasets",
+    "from", x$backend,
+    "for", length(x$observed_response), "fitted rows\n"
+  )
+  invisible(x)
+}
+
+
 # Read every currently supported glmmTMB random-effect component.
 get_glmmTMB_simulation_codes <- function(model) {
   simulation_components <- c("terms", "termszi", "termsdisp")

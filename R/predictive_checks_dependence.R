@@ -362,7 +362,7 @@ calculate_partner_residual_statistics <- function(
 
 
 #' @export
-print.dyadMLM_partner_check <- function(x, ...) {
+print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
   cat("<dyadMLM partner-dependence check>\n")
   cat(
     nrow(x$statistics_table),
@@ -370,6 +370,38 @@ print.dyadMLM_partner_check <- function(x, ...) {
     x$n_pairs,
     "complete pairs\n"
   )
+
+  omitted_counts <- c(
+    "incomplete dyads" = x$n_incomplete_dyads,
+    "rows with missing dyad IDs" = x$n_missing_dyad_rows,
+    "rows with missing roles" = x$n_missing_role_rows
+  )
+  omitted_counts <- omitted_counts[omitted_counts > 0L]
+  if (length(omitted_counts) > 0L) {
+    cat(
+      "Omitted: ",
+      paste0(names(omitted_counts), ": ", omitted_counts, collapse = "; "),
+      "\n",
+      sep = ""
+    )
+  }
+
+  number_format <- paste0("%.", digits, "f")
+  cat("Replicated reference: median and central 95% interval\n")
+  for (statistic_index in seq_len(nrow(x$statistics_table))) {
+    statistic <- x$statistics_table[statistic_index, ]
+    cat(
+      statistic$label,
+      "\n  Observed ", sprintf(number_format, statistic$observed_value),
+      " | Median ", sprintf(number_format, statistic$replicated_median),
+      " | 95% [", sprintf(number_format, statistic$replicated_lower),
+      ", ", sprintf(number_format, statistic$replicated_upper), "]",
+      " | Obs. quantile ",
+      sprintf(number_format, statistic$observed_quantile),
+      "\n",
+      sep = ""
+    )
+  }
   invisible(x)
 }
 
