@@ -16,7 +16,8 @@ helpers, and eventually model syntax explicit and reproducible.
   revisit that boundary only for a concrete user-facing need.
 - Long-term custom Stan / dyadic residual VAR planning: [`stan.md`](stan.md)
   - the note is provisional and must be revised against the methodological
-    papers in [`References/`](References/) before implementation
+    literature cited there before implementation; available local copies are
+    indexed in [`references/`](references/README.md)
 - Directional DSM derivation and implementation record: [`dsm.md`](dsm.md)
 - Covariance back-transformation mathematics and design history:
   [`backtransform.md`](backtransform.md)
@@ -549,8 +550,8 @@ outside this collapsed section.
   release is assigned to the staged 0.2.1--0.2.4 milestones below rather than
   the 0.2.0 stabilization release. Complete the `glmmTMB` partner check across
   cross-sectional and same-occasion ILD data and the accepted families, add the
-  `brms` path for that completed feature, and only then expand to temporal and
-  response-distribution checks.
+  `brms` path for that completed feature, and only then add the unified ILD
+  dependence profile and response-distribution checks.
 - Historical release-check sequence after vignette/doc cleanup
   - release checks have already been run during development, but must be run
     again after building and polishing the vignettes
@@ -799,15 +800,15 @@ another routine breaking CRAN update shortly afterward.
   [10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083) in
   package-facing materials; future GitHub Releases are archived automatically.
 
-The planned development sequence after 0.2.0 completes partner-dependence
-diagnostics before adding temporal diagnostics: cross-sectional Gaussian,
-negative-binomial, and Tweedie partner checks (0.2.1); same-occasion ILD
-`glmmTMB` checks followed by `brms` parity for the completed cross-sectional and
-ILD partner feature (0.2.2); temporal checks across the accepted families and
-backends (0.2.3); broader response-distribution checks (0.2.4); APIM covariance
-decomposition (0.2.5); generalized APIM workflows (0.3.0); `glmmTMB` model
-syntax (0.4.0); expanded `brms` workflows (0.4.5); and reporting and
-visualization (0.5.0).
+The planned diagnostics sequence after 0.2.0 is: finish the Gaussian
+cross-sectional `glmmTMB` check; add Gaussian same-occasion ILD pairing; then
+either add generalized raw checks family by family or first validate a
+nonlinear marginal-centering algorithm. Gaussian `brms` parity follows after
+canonical dyadic covariance structures have been validated. The corrected ILD
+profile and broader response-distribution checks come afterward. Later package
+milestones remain APIM covariance decomposition (0.2.5), generalized APIM
+workflows (0.3.0), `glmmTMB` model syntax (0.4.0), expanded `brms` workflows
+(0.4.5), and reporting and visualization (0.5.0).
 These are development milestones; closely spaced milestones may be bundled
 into a worthwhile CRAN update rather than submitted separately.
 Mixed-dyad-type diagnostics follow the 0.2.4 single-composition milestones
@@ -816,13 +817,20 @@ Leave-one-dyad-out cross-validation for `glmmTMB` and `brms` is a later
 candidate not yet assigned to a release.
 
 The diagnostic implementation has three modules: backend-specific complete
-response simulation, shared partner and temporal dependence checks, and shared
-response-distribution checks. `glmmTMB` supplies the first complete partner
-feature: Gaussian cross-sectional models, generalized cross-sectional models,
-Gaussian same-occasion ILD models, and generalized same-occasion ILD models.
-The `brms` path is then added to that same partner check before new check types
-are introduced. The later expanded `brms` milestone concerns broader modeling
-workflows, not this bounded diagnostics adapter.
+response simulation, shared partner and ILD-profile dependence checks, and
+shared response-distribution checks. `glmmTMB` supplies the first complete
+Gaussian partner feature across cross-sectional and same-occasion ILD data.
+Generalized and `brms` paths are separate validated increments, not implied by
+that Gaussian feature. The later expanded `brms` milestone concerns broader
+modeling workflows, not this bounded diagnostics adapter.
+A narrow, development-only Gaussian `brms` prototype now tests new-dyad
+posterior-predictive simulation, fixed posterior-mean new-dyad centering, raw
+and centred response representations. It now emits the shared simulation
+contract and delegates pairing, statistics, result summaries, printing, and
+plots to the same package machinery as `glmmTMB`. Under its Gaussian identity
+model, the centre is both the random-effects-excluded expectation and the
+marginal new-dyad response mean. The prototype confirms the common-core design
+but does not change the release order or yet constitute package support.
 Cross-validation is a separate future module because it changes the data used
 for fitting and the prediction target rather than adding another full-data
 predictive check.
@@ -832,10 +840,16 @@ predictive check.
 Status: in development on `residual-diagnostics`. Finish and review the
 Gaussian `glmmTMB` complete-response simulation object, role-aware and
 exchangeable partner statistics, compact printed result, and
-simulation-reference plots. Then validate the unchanged cross-sectional check
-for negative-binomial and Tweedie models, one family at a time. Do not infer
-universal family support from a successful call to `simulate()`. Keep marginal
-response checks separate during this review. Do not add DHARMa, PIT-rank
+simulation-reference plots. Offer raw and model-centred response
+representations, with the centred covariance-focused check as the default.
+The immediate next slice is Gaussian same-occasion ILD pairing. For subsequent
+negative-binomial and Tweedie models, start with raw checks one family at a time
+unless a concrete nonlinear marginal-centering algorithm has first been frozen
+and validated. Do not infer universal family support from a successful call to
+`simulate()`. Treat correlations as observable response-scale discrepancies
+whose sensitivity and rate of undefined values must be validated for each
+family. Bernoulli, ordinal, categorical, hurdle, and zero-inflated paths remain
+unsupported until that validation succeeds. Do not add DHARMa, PIT-rank
 residuals, dense covariance whitening, p-values, or a general adequacy score.
 The complete API, statistics, development review, tests, and acceptance
 boundary are specified in
@@ -843,42 +857,71 @@ boundary are specified in
 
 ## Proposed Version 0.2.2 Scope - Complete Partner-Dependence Diagnostics
 
-Status: proposed. Complete the partner-dependence feature before implementing a
-temporal diagnostic.
+Status: proposed. Complete the marginal partner-dependence feature before
+implementing the ILD dependence profile.
 
 Extend `check_partner_dependence()` with an optional occasion identifier and
-pair members within dyad-occasion. Validate Gaussian `glmmTMB` first, followed
-by only the generalized families accepted cross-sectionally. The check remains
+pair members within dyad-occasion. Validate Gaussian `glmmTMB` first. A
+generalized family follows only after its raw statistic or marginal centre has
+been validated cross-sectionally. The check remains
 a complete-model response-scale predictive check, not a level-specific
-residual-correlation estimate. Then add the `brms` complete-response and
-draw-matched centering path for the completed cross-sectional and ILD partner
-feature. Keep pairing and statistics shared while allowing backend-specific
-comparison summaries. See
-[`diagnostic_checks/README.md`](diagnostic_checks/README.md).
+residual-correlation estimate. Here, complete-model describes the replicated
+datasets, not the identifying power of one statistic. A compatible pooled
+partner statistic does not establish that stable dyad, same-occasion, and
+serial covariance have been assigned to the correct levels, and it does not by
+itself validate model-based standard errors. Then validate Gaussian `brms`
+parity for the role-specific distinguishable, exchangeable shared/difference,
+and repeated-pair structures taught by the package. Keep pairing, statistics,
+and the histogram comparison structure shared while allowing backend-specific
+simulation metadata. Retain this check as the broad response-scale
+same-occasion view for ILD; the level-focused profile complements rather than
+replaces it. See
+[`diagnostic_checks/brms-partner-prototype.md`](diagnostic_checks/brms-partner-prototype.md)
+for the exploratory backend path and
+[`diagnostic_checks/README.md`](diagnostic_checks/README.md) for the shared
+partner-check contract.
 
-## Proposed Version 0.2.3 Scope - Temporal-Dependence Diagnostics
+## Proposed Version 0.2.3 Scope - Unified ILD Dependence Profile
 
-Status: proposed. Add the second diagnostic question only after the partner
-feature is complete.
+Status: proposed. Add one level-focused ILD check only after the complete
+partner feature is stable for both backends.
 
-Add an observed pooled lag-correlation curve with pointwise simulation
-envelopes, using exact scheduled gaps and the same fixed-model and within-series
-centering for observed and replicated responses. Validate Gaussian `glmmTMB`
-first, then the accepted generalized `glmmTMB` families, and finally the paired
-posterior-predictive `brms` path. Irregular-time, role-specific, and
-cross-partner curves remain deferred. See
-[`diagnostic_checks/README.md`](diagnostic_checks/README.md).
+Implement one `check_ild_dependence()` function based on a single decomposition
+of model-centred responses into member-series means and within-series
+deviations. Its two default panels show stable partner association and a
+within-dyad lag profile. With roles, show a separate own-member curve for each
+role and both directed cross-partner curves. Without roles, pool own-member
+edges and both cross-partner directions; calculate stable and lag-zero partner
+association with the swap-invariant exchangeable mean/half-difference
+reconstruction rather than correlating arbitrary member-position columns.
+
+Automatic lags are exact observed integer gaps from 1 through 5, not filled-in
+intermediate values. Gaussian validation must freeze minimum contributing-dyad
+and edge counts before implementation. Return both counts for every curve point
+and error with curve-specific counts when an explicitly requested lag is
+unsupported. Apply the identical decomposition, edge construction, and
+statistics to every complete simulated dataset.
+
+Validate Gaussian `glmmTMB` first. Extend only to generalized or `brms` paths
+with a validated centre and informative statistic. Do not create
+separate public checks for each dependence level. A Levy-style conditional
+check has no current milestone or implementation requirement and remains only a
+possible advanced extension. Irregular-time bins and a calibrated global curve
+test remain deferred. Validation must include covariance components
+compensating for omitted components and must assess diagnostic sensitivity,
+model-based SEs, and interval coverage. See
+[`diagnostic_checks/ild-dependence-plan.md`](diagnostic_checks/ild-dependence-plan.md).
 
 ## Proposed Version 0.2.4 Scope - Response-Distribution Checks
 
 Status: proposed. Add broader direct response-scale checks after the partner
-and temporal features are complete.
+and ILD-profile features are complete.
 
 Add complete-replicate displays for distinct observable questions such as
 spread, zeros, tails, response quantiles or distributions, and patterns over
 fitted values. Implement Gaussian models first and then the families already
 accepted by the dependence checks. These are not DHARMa residuals or ordinary
-independent-residual QQ tests. Keep partner, temporal, and marginal checks
+independent-residual QQ tests. Keep partner, ILD-profile, and marginal checks
 separate and stop when calibration or sensitivity is inadequate. See
 [`diagnostic_checks/README.md`](diagnostic_checks/README.md).
 
@@ -886,8 +929,8 @@ separate and stop when calibration or sensitivity is inadequate. See
 
 Status: planned after the 0.2.4 single-composition milestones are stable. Add
 cross-sectional partner checks first, repeated same-occasion partner checks
-second, and temporal checks last. Generalized mixed-composition support is
-limited to families already validated at the corresponding
+second, and ILD dependence profiles last. Generalized mixed-composition support
+is limited to families already validated at the corresponding
 single-composition stage. Reuse each backend's complete response simulations
 and calculate diagnostics separately by final analysis composition. The
 detailed statistics, plot views, and API boundary are recorded in
@@ -1006,9 +1049,9 @@ them as one release commitment.
   Keep this workflow distinct from both the feature-specific predictive checks
   and their deferred frequentist calibration.
 - Freeze the exact scoring and public API only after the initial Gaussian
-  implementations agree with transparent reference calculations. The detailed
-  statistical and backend plan is in
-  [`diagnostic_checks/README.md`](diagnostic_checks/README.md#later-roadmap-leave-one-dyad-out-cross-validation).
+  implementations agree with transparent reference calculations. Keep the
+  detailed design in this separate candidate section rather than adding it to
+  the diagnostics specification.
 
 ### Multiple-imputation integration
 
@@ -1190,7 +1233,9 @@ plots and diagrams that depend on them.
     missingness, and latent centering out of the first Stan implementation.
   - Preserve package-wide composition metadata and exchangeability constraints
     rather than introducing a parallel dyad registry.
-  - Reconcile the plan with papers under [`References/`](References/), including
+  - Reconcile the plan with the literature cited in [`stan.md`](stan.md);
+    available local copies are indexed under
+    [`references/`](references/README.md). Include
     structural versus residual DSEM, manifest versus latent centering, initial
     conditions, unequal intervals, and Kalman-style missing-data handling.
 

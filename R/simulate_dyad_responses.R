@@ -2,18 +2,24 @@
 #'
 #' Simulates new response datasets from a fitted model. Each simulation keeps
 #' the fitted rows, covariates, and parameter estimates fixed, but draws new
-#' random effects and Gaussian observation errors. When the model contains
-#' dyad-level random effects, the simulations can be interpreted as hypothetical
-#' new dyads observed under the same design.
+#' random effects and Gaussian observation errors. Effects are regenerated at
+#' every modeled grouping level. When dyads are the only grouping factor, the
+#' simulations represent hypothetical new dyads observed under the same design;
+#' models with additional grouping factors also receive new effects at those
+#' levels.
 #'
 #' **Statistical details.** This produces a plug-in predictive reference: the
 #' model is not refitted and parameter uncertainty is not propagated.
-#' Simulation is unconditional on the fitted random-effect values but
+#' Simulation is unconditional on every fitted random-effect value but
 #' conditional on the fitted parameters and fitted-row design.
 #'
-#' The result also stores one model prediction for each fitted row, with random
-#' effects set to zero. Downstream checks subtract these same predictions from
-#' both observed and simulated responses.
+#' The result also stores one fixed response centre for each fitted row.
+#' Downstream checks may either use responses unchanged or subtract this same
+#' centre from the observed response and every simulated response. For the
+#' currently supported Gaussian identity model, the centre is the prediction
+#' with random effects set to zero. It is also the expected response after
+#' averaging over newly generated zero-mean random effects under the fitted
+#' parameter estimates.
 #'
 #' The initial implementation supports unweighted Gaussian identity-link
 #' `glmmTMB` models without zero inflation and with one numeric response per
@@ -36,11 +42,11 @@
 #'
 #' Gelman, A. (2004). Exploratory data analysis for complex models. *Journal of
 #' Computational and Graphical Statistics, 13*(4), 755-779.
-#' [doi:10.1198/106186004X11435](https://doi.org/10.1198/106186004X11435).
+#' \doi{10.1198/106186004X11435}.
 #'
 #' Gelman, A. (2007). Comment: Bayesian checking of the second levels of
 #' hierarchical models. *Statistical Science, 22*(3), 349-352.
-#' [doi:10.1214/07-STS235A](https://doi.org/10.1214/07-STS235A).
+#' \doi{10.1214/07-STS235A}.
 #'
 #' Hartig, F. (2026). *DHARMa: Residual Diagnostics for Hierarchical
 #' (Multi-Level / Mixed) Regression Models*, version 0.5.0.
@@ -111,19 +117,20 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
   }
 
-  # Obtain one random-effects-excluded response-scale prediction per fitted
-  # row. This is a deterministic center, not another simulated response.
-  fixed_effect_prediction <- model |>
+  # Obtain one fixed response centre per fitted row. For a Gaussian identity
+  # model, the random-effects-zero prediction is exactly the marginal expected
+  # response after averaging over newly drawn zero-mean effects at every level.
+  response_center <- model |>
     stats::predict(
       newdata = NULL,
       type = "response",
       re.form = NA
     ) |>
     as.numeric()
-  if (length(fixed_effect_prediction) != nrow(model_frame) ||
-      any(!is.finite(fixed_effect_prediction))) {
+  if (length(response_center) != nrow(model_frame) ||
+      any(!is.finite(response_center))) {
     stop(
-      "Could not obtain one finite fixed-effect prediction for each fitted row.",
+      "Could not obtain one finite response centre for each fitted row.",
       call. = FALSE
     )
   }
@@ -165,13 +172,24 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   response_simulations <- list(
     observed_response = as.numeric(observed_response),
     simulated_responses = simulated_responses,
-    fixed_effect_prediction = fixed_effect_prediction,
+    response_center = response_center,
     model_frame = model_frame,
     backend = "glmmTMB",
     family = model_family$family,
     link = model_family$link,
     reference = "plug-in predictive",
     random_effects = "new",
+    parameter_uncertainty = "excluded",
+    center = "random-effects-zero expected response",
+    center_target = paste0(
+      "marginal response mean over new random effects ",
+      "(Gaussian identity)"
+    ),
+    center_draws = NA_integer_,
+    target = paste0(
+      "unconditional plug-in replication under the fitted-row design, ",
+      "with all random effects newly generated"
+    ),
     nsim = nsim,
     seed = seed,
     call = simulation_call

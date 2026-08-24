@@ -9,19 +9,19 @@ independent `lavaan` fit.
 ## Purpose
 
 This document records how the directional Dyadic Score Model (DSM) described
-by Iida et al. (2017) can be represented in `dyadMLM`'s long, one-row-per-member
+by Iida et al. (2018) can be represented in `dyadMLM`'s long, one-row-per-member
 data structure. It also distinguishes that model from the package's current
 Dyad-Individual Model (DIM), explains why the reduced label-invariant DSM is
 DIM-equivalent, and records the package implementation.
 
 The relevant source is:
 
-> Iida, M., Seidman, G., Shrout, P. E., Fujita, K., & Bolger, N. (2017).
+> Iida, M., Seidman, G., & Shrout, P. E. (2018).
 > Models of interdependent individuals versus dyadic processes in relationship
 > research. *Journal of Social and Personal Relationships, 35*(1), 59-88.
 
-A local ignored copy of the paper is stored in
-`dev/References/iida-et-al-2017-models-of-interdependent-individuals-versus-dyadic-processes-in-relationship-research.pdf`.
+The article is available from its
+[publisher page](https://doi.org/10.1177/0265407517725407).
 
 ## What Iida's DSM estimates
 

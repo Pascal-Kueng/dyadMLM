@@ -19,30 +19,63 @@ diagnostic_data <- prepare_dyad_data(
     dyad = coupleID,
     member = personID,
     role = gender,
-    model_types = "none",
+    predictors = provided_support,
+    model_types = "apim",
+    add_apim_gmc_predictors = TRUE,
     keep_compositions = "female-male",
     seed = 13000L
 )
 ```
 
 
-## Correct distinguishable model
+## Flexible role-specific covariance model
 
 ```{r}
 m_c <- glmmTMB::glmmTMB(
     closeness ~
-        0 + .is_female + .is_male + (0 + .is_female + .is_male | coupleID),
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (0 + .is_female + .is_male | coupleID),
     dispformula = ~ 0,
     family = gaussian(),
     data = diagnostic_data
 )
 ```
 
+The actor and partner fixed effects make the fitted means vary across
+observations. The centred check removes this fitted pattern, whereas the raw
+check retains it. Both checks use the same simulated datasets.
+
+### Model-centred responses
+
 ```{r}
-simulate_dyad_responses(m_c, nsim = 5000, seed = 13001L) |>
+m_c_simulations <- simulate_dyad_responses(
+  m_c,
+  nsim = 5000,
+  seed = 13001L
+)
+
+m_c_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID,
-    role = diagnostic_data$gender)
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+### Raw responses
+
+```{r}
+m_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
 ```
 
 
@@ -51,7 +84,14 @@ simulate_dyad_responses(m_c, nsim = 5000, seed = 13001L) |>
 ```{r}
 m_w1 <- glmmTMB::glmmTMB(
     closeness ~
-        0 + .is_female + .is_male + (1 | coupleID),
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (1 | coupleID),
     dispformula = ~ 1,
     family = gaussian(),
     data = diagnostic_data
@@ -59,18 +99,59 @@ m_w1 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(m_w1, nsim = 5000, seed = 13002L) |>
+m_w1_simulations <- simulate_dyad_responses(
+  m_w1,
+  nsim = 5000,
+  seed = 13002L
+)
+
+# Model-centred responses
+m_w1_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID,
-    role = diagnostic_data$gender)
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
 ```
 
+
+```{r}
+# Raw responses
+m_w1_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
+```
+
+The diagnostics are compatible with this simpler covariance structure. It
+retains the role-specific fixed effects but constrains the remaining covariance
+to equal marginal variances and nonnegative compound symmetry. In these data,
+the simpler model has slightly lower AIC, and the likelihood-ratio comparison
+below provides no clear evidence that the more flexible role-specific
+covariance improves fit. This is not evidence that partners are interchangeable
+or that the two covariance structures are equivalent.
+
+```{r}
+compare_nested_models(
+  m_w1,
+  m_c
+)
+```
 
 
 ```{r}
 m_w2 <- glmmTMB::glmmTMB(
     closeness ~
-        0 + .is_female + .is_male + (1 | coupleID),
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (1 | coupleID),
     dispformula = ~ 0,
     family = gaussian(),
     data = diagnostic_data
@@ -78,17 +159,44 @@ m_w2 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(m_w2, nsim = 5000, seed = 13003L) |>
+m_w2_simulations <- simulate_dyad_responses(
+  m_w2,
+  nsim = 5000,
+  seed = 13003L
+)
+
+# Model-centred responses
+m_w2_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID,
-    role = diagnostic_data$gender)
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+m_w2_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
 ```
 
 
 ```{r}
 m_w3 <- glmmTMB::glmmTMB(
     closeness ~
-        0 + .is_female + .is_male + (0 + .is_female + .is_male || coupleID),
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (0 + .is_female + .is_male || coupleID),
     dispformula = ~ 0,
     family = gaussian(),
     data = diagnostic_data
@@ -96,24 +204,39 @@ m_w3 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(m_w3, nsim = 5000, seed = 13004L) |>
+m_w3_simulations <- simulate_dyad_responses(
+  m_w3,
+  nsim = 5000,
+  seed = 13004L
+)
+
+# Model-centred responses
+m_w3_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID,
-    role = diagnostic_data$gender)
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
 ```
+
 
 ```{r}
-compare_nested_models(
-  m_w3,
-  m_c
-)
+# Raw responses
+m_w3_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
 ```
-
-# Exchangeability sensitivity
+# Sensitivity analysis: treating partners as exchangeable
 
 Here, the female-male data are deliberately treated as exchangeable. The
 pooled check assesses the imposed covariance structure; the gender-aware check
 asks whether that pooling hides role-specific differences.
+
+These models have only a constant fixed-effect prediction. Their raw and
+centred checks should therefore match; both are shown for completeness.
 
 ## Prep data
 
@@ -131,7 +254,7 @@ diagnostic_data <- prepare_dyad_data(
 ```
 
 
-## Exchangeability-constrained model
+## Exchangeable mean/difference model
 
 ```{r}
 e_c <- glmmTMB::glmmTMB(
@@ -154,24 +277,53 @@ e_c_simulations <- simulate_dyad_responses(
   seed = 13005L
 )
 
-e_c_simulations |>
-  check_partner_dependence(
-    dyad = diagnostic_data$coupleID)
-```
-
-## Inspect the same model by gender
-
-```{r}
+# Model-centred responses
 e_c_simulations |>
   check_partner_dependence(
     dyad = diagnostic_data$coupleID,
-    role = diagnostic_data$gender)
+    response = "model-centred"
+  )
 ```
 
-This is a hint that treating the dyads as exchangeable might be inappropriate 
-and does not represent partner interdpendence sufficiently. 
 
-## Additional constrained models
+```{r}
+# Raw responses
+e_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
+```
+
+## Check the same model with gender labels
+
+```{r}
+# Model-centred responses
+e_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
+```
+
+The pooled check can look adequate while the gender-aware check reveals omitted
+role differences. However, this sensitivity model also removes role-specific
+fixed effects, so a discrepancy cannot be attributed to the covariance
+structure alone.
+
+## More restrictive exchangeable models
 
 ```{r}
 e_w1 <- glmmTMB::glmmTMB(
@@ -184,12 +336,29 @@ e_w1 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(e_w1, nsim = 5000, seed = 13006L) |>
+e_w1_simulations <- simulate_dyad_responses(
+  e_w1,
+  nsim = 5000,
+  seed = 13006L
+)
+
+# Model-centred responses
+e_w1_simulations |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID)
+    dyad = diagnostic_data$coupleID,
+    response = "model-centred"
+  )
 ```
 
 
+```{r}
+# Raw responses
+e_w1_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
+```
 
 ```{r}
 e_w2 <- glmmTMB::glmmTMB(
@@ -202,9 +371,28 @@ e_w2 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(e_w2, nsim = 5000, seed = 13007L) |>
+e_w2_simulations <- simulate_dyad_responses(
+  e_w2,
+  nsim = 5000,
+  seed = 13007L
+)
+
+# Model-centred responses
+e_w2_simulations |>
   check_partner_dependence(
-    dyad = diagnostic_data$coupleID)
+    dyad = diagnostic_data$coupleID,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_w2_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
 ```
 
 
@@ -219,18 +407,26 @@ e_w3 <- glmmTMB::glmmTMB(
 ```
 
 ```{r}
-simulate_dyad_responses(e_w3, nsim = 5000, seed = 13008L) |>
-  check_partner_dependence(
-    dyad = diagnostic_data$coupleID)
-```
-
-```{r}
-print(a)
-```
-
-```{r}
-compare_nested_models(
-  e_w2,
-  e_c
+e_w3_simulations <- simulate_dyad_responses(
+  e_w3,
+  nsim = 5000,
+  seed = 13008L
 )
+
+# Model-centred responses
+e_w3_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_w3_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
 ```

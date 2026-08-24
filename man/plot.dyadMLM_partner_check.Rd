@@ -31,4 +31,6 @@ Invisibly, \code{x}.
 \description{
 Draws each selected summary as a separate full-size plot. By default, it
 shows both the partner-level and equivalent dyad mean/difference summaries.
+The subtitle identifies whether the check uses model-centred or raw
+responses.
 }

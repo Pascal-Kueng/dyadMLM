@@ -3,7 +3,7 @@ partner_check_test_simulations <- function() {
     dyad = factor(rep(seq_len(5), each = 2)),
     role = factor(rep(c("female", "male"), times = 5))
   )
-  fixed_effect_prediction <- seq(0.5, 5, length.out = nrow(model_frame))
+  response_center <- seq(0.5, 5, length.out = nrow(model_frame))
   observed_residuals <- c(
     -2, -1.5,
     -1, -0.4,
@@ -21,25 +21,36 @@ partner_check_test_simulations <- function() {
   # Mix dyads and role order while preserving fitted-row alignment.
   row_order <- c(1, 4, 6, 3, 8, 2, 9, 5, 10, 7)
   model_frame <- model_frame[row_order, , drop = FALSE]
-  fixed_effect_prediction <- fixed_effect_prediction[row_order]
+  response_center <- response_center[row_order]
   observed_residuals <- observed_residuals[row_order]
   simulated_residuals <- simulated_residuals[, row_order, drop = FALSE]
 
   simulations <- list(
-    observed_response = fixed_effect_prediction + observed_residuals,
+    observed_response = response_center + observed_residuals,
     simulated_responses = sweep(
       simulated_residuals,
       MARGIN = 2,
-      STATS = fixed_effect_prediction,
+      STATS = response_center,
       FUN = "+"
     ),
-    fixed_effect_prediction = fixed_effect_prediction,
+    response_center = response_center,
     model_frame = model_frame,
     backend = "glmmTMB",
     family = "gaussian",
     link = "identity",
     reference = "plug-in predictive",
     random_effects = "new",
+    parameter_uncertainty = "excluded",
+    center = "random-effects-zero expected response",
+    center_target = paste0(
+      "marginal response mean over new random effects ",
+      "(Gaussian identity)"
+    ),
+    center_draws = NA_integer_,
+    target = paste0(
+      "unconditional plug-in replication under the fitted-row design, ",
+      "with all random effects newly generated"
+    ),
     nsim = nrow(simulated_residuals),
     seed = 123L,
     call = quote(simulate_dyad_responses(model))
@@ -50,7 +61,7 @@ partner_check_test_simulations <- function() {
 }
 
 
-test_that("exchangeable summaries use aligned centered pairs", {
+test_that("model-centred summaries use aligned pairs", {
   simulations <- partner_check_test_simulations()
   result <- check_partner_dependence(
     simulations,
@@ -66,21 +77,21 @@ test_that("exchangeable summaries use aligned centered pairs", {
     unlist(use.names = FALSE) |>
     matrix(ncol = 2L, byrow = TRUE)
 
-  centered_responses <- rbind(
-    simulations$observed_response - simulations$fixed_effect_prediction,
+  centred_response_datasets <- rbind(
+    simulations$observed_response - simulations$response_center,
     sweep(
       simulations$simulated_responses,
       MARGIN = 2,
-      STATS = simulations$fixed_effect_prediction,
+      STATS = simulations$response_center,
       FUN = "-"
     )
   )
   expected_statistics <- t(apply(
-    centered_responses,
+    centred_response_datasets,
     MARGIN = 1,
-    FUN = calculate_partner_residual_statistics,
+    FUN = calculate_partner_response_statistics,
     paired_row_indices = paired_row_indices,
-    role_specific = FALSE
+    use_role_specific_statistics = FALSE
   ))
 
   expect_s3_class(result, "dyadMLM_partner_check")
@@ -89,7 +100,8 @@ test_that("exchangeable summaries use aligned centered pairs", {
     c(
       "statistics_table", "replicated_statistics", "role_order", "n_pairs",
       "n_incomplete_dyads", "n_missing_dyad_rows", "n_missing_role_rows",
-      "reference", "random_effects", "nsim", "seed", "call"
+      "response", "backend", "family", "link", "reference", "random_effects",
+      "parameter_uncertainty", "nsim", "seed", "call"
     )
   )
   expect_named(
@@ -134,7 +146,7 @@ test_that("exchangeable summaries use aligned centered pairs", {
       (1 + sum(
         expected_statistics[-1L, statistic_index] <=
           expected_statistics[1L, statistic_index]
-      )) / nrow(centered_responses)
+      )) / nrow(centred_response_datasets)
     },
     numeric(1)
   )
@@ -145,8 +157,125 @@ test_that("exchangeable summaries use aligned centered pairs", {
   expect_identical(result$role_order, character())
   expect_identical(result$n_pairs, 5L)
   expect_identical(result$n_incomplete_dyads, 0L)
+  expect_identical(result$response, "model-centred")
   expect_identical(result$reference, simulations$reference)
   expect_identical(result$random_effects, simulations$random_effects)
+})
+
+
+test_that("raw summaries use the observed and simulated responses unchanged", {
+  simulations <- partner_check_test_simulations()
+  default_result <- check_partner_dependence(
+    simulations,
+    dyad = "dyad",
+    role = "role",
+    plot = FALSE
+  )
+  centred_result <- check_partner_dependence(
+    simulations,
+    dyad = "dyad",
+    role = "role",
+    response = "model-centred",
+    plot = FALSE
+  )
+  raw_result <- check_partner_dependence(
+    simulations,
+    dyad = "dyad",
+    role = "role",
+    response = "raw",
+    plot = FALSE
+  )
+
+  dyad_levels <- levels(simulations$model_frame$dyad)
+  female_rows <- vapply(
+    dyad_levels,
+    function(dyad) {
+      which(
+        simulations$model_frame$dyad == dyad &
+          simulations$model_frame$role == "female"
+      )
+    },
+    integer(1)
+  )
+  male_rows <- vapply(
+    dyad_levels,
+    function(dyad) {
+      which(
+        simulations$model_frame$dyad == dyad &
+          simulations$model_frame$role == "male"
+      )
+    },
+    integer(1)
+  )
+  paired_row_indices <- cbind(female_rows, male_rows)
+  raw_responses <- rbind(
+    simulations$observed_response,
+    simulations$simulated_responses
+  )
+  expected_raw_statistics <- t(apply(
+    raw_responses,
+    MARGIN = 1,
+    FUN = calculate_partner_response_statistics,
+    paired_row_indices = paired_row_indices,
+    use_role_specific_statistics = TRUE
+  ))
+
+  expect_equal(default_result$statistics_table, centred_result$statistics_table)
+  expect_equal(
+    default_result$replicated_statistics,
+    centred_result$replicated_statistics
+  )
+  expect_identical(raw_result$response, "raw")
+  expect_equal(
+    raw_result$statistics_table$observed_value,
+    unname(expected_raw_statistics[1L, ])
+  )
+  expect_equal(
+    unname(raw_result$replicated_statistics),
+    unname(expected_raw_statistics[-1L, , drop = FALSE])
+  )
+  expect_false(isTRUE(all.equal(
+    raw_result$statistics_table$observed_value,
+    centred_result$statistics_table$observed_value
+  )))
+})
+
+
+test_that("normalized backends use the same partner-check machinery", {
+  glmm_simulations <- partner_check_test_simulations()
+  posterior_simulations <- glmm_simulations
+  posterior_simulations$backend <- "brms"
+  posterior_simulations$reference <- "posterior predictive"
+  posterior_simulations$parameter_uncertainty <- "included"
+  posterior_simulations$center <-
+    "posterior mean population-level expected response"
+  posterior_simulations$target <-
+    "new-dyad posterior replication under the fitted covariate design"
+
+  glmm_result <- check_partner_dependence(
+    glmm_simulations,
+    dyad = "dyad",
+    role = "role",
+    plot = FALSE
+  )
+  posterior_result <- check_partner_dependence(
+    posterior_simulations,
+    dyad = "dyad",
+    role = "role",
+    plot = FALSE
+  )
+
+  expect_equal(
+    posterior_result$statistics_table,
+    glmm_result$statistics_table
+  )
+  expect_equal(
+    posterior_result$replicated_statistics,
+    glmm_result$replicated_statistics
+  )
+  expect_identical(posterior_result$backend, "brms")
+  expect_identical(posterior_result$reference, "posterior predictive")
+  expect_identical(posterior_result$parameter_uncertainty, "included")
 })
 
 
@@ -248,30 +377,29 @@ test_that("fitted-row identifiers can be forwarded through wrappers", {
 
 
 test_that("exchangeable summaries are member-order invariant", {
-  first_member_residual <- c(-2.0, -0.7, 0.4, 1.3, 2.1)
-  second_member_residual <- c(-1.4, -0.2, 0.8, 0.5, 1.7)
-  centered_response <- as.vector(rbind(
-    first_member_residual,
-    second_member_residual
+  first_member_values <- c(-2.0, -0.7, 0.4, 1.3, 2.1)
+  second_member_values <- c(-1.4, -0.2, 0.8, 0.5, 1.7)
+  response_values <- as.vector(rbind(
+    first_member_values,
+    second_member_values
   ))
   paired_row_indices <- matrix(
-    seq_along(centered_response),
+    seq_along(response_values),
     ncol = 2L,
     byrow = TRUE
   )
 
-  statistics <- calculate_partner_residual_statistics(
-    centered_response,
+  statistics <- calculate_partner_response_statistics(
+    response_values,
     paired_row_indices,
-    role_specific = FALSE
+    use_role_specific_statistics = FALSE
   )
-  dyad_mean <- (first_member_residual + second_member_residual) / 2
-  dyad_half_difference <-
-    (first_member_residual - second_member_residual) / 2
-  woody_between_moment <- 2 * stats::var(dyad_mean)
+  dyad_average_values <-
+    (first_member_values + second_member_values) / 2
+  woody_between_moment <- 2 * stats::var(dyad_average_values)
   woody_within_moment <-
-    sum((first_member_residual - second_member_residual)^2) /
-    (2 * length(first_member_residual))
+    sum((first_member_values - second_member_values)^2) /
+    (2 * length(first_member_values))
   expected_member_variance <-
     (woody_between_moment + woody_within_moment) / 2
   expected_partner_covariance <-
@@ -312,10 +440,10 @@ test_that("exchangeable summaries are member-order invariant", {
   swapped_row_indices <- paired_row_indices
   swapped_row_indices[c(2, 5), ] <- swapped_row_indices[c(2, 5), 2:1]
   expect_equal(
-    calculate_partner_residual_statistics(
-      centered_response,
+    calculate_partner_response_statistics(
+      response_values,
       swapped_row_indices,
-      role_specific = FALSE
+      use_role_specific_statistics = FALSE
     ),
     statistics
   )
@@ -331,8 +459,8 @@ test_that("role-specific partner dependence is oriented by role", {
     plot = FALSE
   )
 
-  observed_residuals <-
-    simulations$observed_response - simulations$fixed_effect_prediction
+  observed_centred_responses <-
+    simulations$observed_response - simulations$response_center
   dyad_levels <- levels(simulations$model_frame$dyad)
   female_rows <- vapply(
     dyad_levels,
@@ -359,54 +487,56 @@ test_that("role-specific partner dependence is oriented by role", {
     result$statistics_table$observed_value,
     result$statistics_table$statistic_name
   )
-  female_residuals <- observed_residuals[female_rows]
-  male_residuals <- observed_residuals[male_rows]
-  dyad_mean <- (female_residuals + male_residuals) / 2
-  half_difference <- (female_residuals - male_residuals) / 2
+  female_centred_responses <- observed_centred_responses[female_rows]
+  male_centred_responses <- observed_centred_responses[male_rows]
+  dyad_average_responses <-
+    (female_centred_responses + male_centred_responses) / 2
+  half_difference_responses <-
+    (female_centred_responses - male_centred_responses) / 2
 
   expect_identical(result$role_order, c("female", "male"))
   expect_equal(
-    observed_statistics[["role_1_residual_sd"]],
-    stats::sd(female_residuals)
+    observed_statistics[["role_1_sd"]],
+    stats::sd(female_centred_responses)
   )
   expect_equal(
-    observed_statistics[["role_2_residual_sd"]],
-    stats::sd(male_residuals)
+    observed_statistics[["role_2_sd"]],
+    stats::sd(male_centred_responses)
   )
   expect_equal(
     observed_statistics[["partner_correlation"]],
-    stats::cor(female_residuals, male_residuals)
+    stats::cor(female_centred_responses, male_centred_responses)
   )
   expect_equal(
     observed_statistics[["dyad_mean_sd"]],
-    stats::sd(dyad_mean)
+    stats::sd(dyad_average_responses)
   )
   expect_equal(
     observed_statistics[["half_difference_sd"]],
-    stats::sd(half_difference)
+    stats::sd(half_difference_responses)
   )
   expect_equal(
     observed_statistics[["dyad_mean_half_difference_correlation"]],
-    stats::cor(dyad_mean, half_difference)
+    stats::cor(dyad_average_responses, half_difference_responses)
   )
 
   member_covariance <-
     observed_statistics[["partner_correlation"]] *
-    observed_statistics[["role_1_residual_sd"]] *
-    observed_statistics[["role_2_residual_sd"]]
+    observed_statistics[["role_1_sd"]] *
+    observed_statistics[["role_2_sd"]]
   expect_equal(
     observed_statistics[["dyad_mean_sd"]]^2,
     (
-      observed_statistics[["role_1_residual_sd"]]^2 +
-        observed_statistics[["role_2_residual_sd"]]^2 +
+      observed_statistics[["role_1_sd"]]^2 +
+        observed_statistics[["role_2_sd"]]^2 +
         2 * member_covariance
     ) / 4
   )
   expect_equal(
     observed_statistics[["half_difference_sd"]]^2,
     (
-      observed_statistics[["role_1_residual_sd"]]^2 +
-        observed_statistics[["role_2_residual_sd"]]^2 -
+      observed_statistics[["role_1_sd"]]^2 +
+        observed_statistics[["role_2_sd"]]^2 -
         2 * member_covariance
     ) / 4
   )
@@ -417,8 +547,8 @@ test_that("role-specific partner dependence is oriented by role", {
   expect_equal(
     mean_difference_covariance,
     (
-      observed_statistics[["role_1_residual_sd"]]^2 -
-        observed_statistics[["role_2_residual_sd"]]^2
+      observed_statistics[["role_1_sd"]]^2 -
+        observed_statistics[["role_2_sd"]]^2
     ) / 4
   )
 
@@ -432,8 +562,8 @@ test_that("role-specific partner dependence is oriented by role", {
   }
   reordered$model_frame <- reordered$model_frame[reordered_rows, , drop = FALSE]
   reordered$observed_response <- reordered$observed_response[reordered_rows]
-  reordered$fixed_effect_prediction <-
-    reordered$fixed_effect_prediction[reordered_rows]
+  reordered$response_center <-
+    reordered$response_center[reordered_rows]
   reordered$simulated_responses <-
     reordered$simulated_responses[, reordered_rows, drop = FALSE]
 
@@ -504,6 +634,15 @@ test_that("invalid partner structures fail clearly", {
     "vector of length 10",
     fixed = TRUE
   )
+  expect_error(
+    check_partner_dependence(
+      simulations,
+      dyad = "dyad",
+      response = "unknown"
+    ),
+    "should be one of",
+    fixed = TRUE
+  )
 
   too_many_rows <- as.character(simulations$model_frame$dyad)
   too_many_rows[too_many_rows == "5"] <- "1"
@@ -562,9 +701,21 @@ test_that("invalid partner structures fail clearly", {
 
   no_variation <- simulations
   no_variation$simulated_responses[1L, ] <-
-    no_variation$fixed_effect_prediction
+    no_variation$response_center
   expect_error(
     check_partner_dependence(no_variation, dyad = "dyad"),
+    "insufficient variation",
+    fixed = TRUE
+  )
+
+  raw_no_variation <- simulations
+  raw_no_variation$simulated_responses[1L, ] <- 1
+  expect_error(
+    check_partner_dependence(
+      raw_no_variation,
+      dyad = "dyad",
+      response = "raw"
+    ),
     "insufficient variation",
     fixed = TRUE
   )
@@ -620,6 +771,20 @@ test_that("partner check plots by default and returns invisibly", {
   expect_false(hidden_result$visible)
   expect_s3_class(hidden_result$value, "dyadMLM_partner_check")
   expect_identical(plot_calls, 1L)
+
+  # Keep the original fourth-position `plot` argument working.
+  positional_hidden_result <- withVisible(check_partner_dependence(
+    partner_check_test_simulations(),
+    "dyad",
+    NULL,
+    FALSE
+  ))
+  expect_false(positional_hidden_result$visible)
+  expect_s3_class(
+    positional_hidden_result$value,
+    "dyadMLM_partner_check"
+  )
+  expect_identical(plot_calls, 1L)
 })
 
 
@@ -661,7 +826,7 @@ test_that("partner check has concise print and both plot views", {
   expect_identical(
     exchangeable_result$statistics_table$label,
     c(
-      "Common model-centered SD (exchangeable)",
+      "Common member SD (exchangeable)",
       "Partner correlation (exchangeable)",
       "Dyad-average SD",
       "Half-difference RMS (about zero)"
@@ -687,6 +852,11 @@ test_that("partner check has concise print and both plot views", {
   expect_match(
     paste(printed_output, collapse = "\n"),
     "6 statistics using 5 complete pairs",
+    fixed = TRUE
+  )
+  expect_match(
+    paste(printed_output, collapse = "\n"),
+    "Response: model-centred",
     fixed = TRUE
   )
   expect_match(
