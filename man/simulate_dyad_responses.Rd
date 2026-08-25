@@ -42,9 +42,9 @@ with random effects set to zero. It is also the expected response after
 averaging over newly generated zero-mean random effects under the fitted
 parameter estimates.
 
-The initial implementation supports unweighted Gaussian identity-link
-\code{glmmTMB} models without zero inflation and with one numeric response per
-fitted row.
+The initial implementation has been validated for unweighted cross-sectional
+Gaussian identity-link \code{glmmTMB} models without zero inflation and with one
+numeric response per fitted row.
 The interface is experimental and may change as predictive checks expand.
 }
 \references{

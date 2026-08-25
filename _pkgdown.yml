@@ -48,7 +48,7 @@ reference:
   - recover_exchangeable_covariance
 
 - title: Predictive diagnostics
-  desc: Experimental simulation-based checks for fitted dyadic models.
+  desc: Experimental checks for cross-sectional Gaussian glmmTMB models.
   contents:
   - simulate_dyad_responses
   - check_partner_dependence

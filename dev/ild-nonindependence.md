@@ -698,5 +698,4 @@ to the practical multilevel implications.
 - Bolger, N., & Laurenceau, J.-P. (2013). *Intensive longitudinal methods: An
   introduction to diary and experience sampling research*. Guilford Press.
 
-Available local paper copies and their locations are indexed in the
-[development reference library](references/README.md).
+Local paper copies used for this note are stored in `dev/References/`.

@@ -49,7 +49,7 @@ test_that("complete response simulations retain fitted-row alignment", {
       "observed_response", "simulated_responses", "response_center",
       "model_frame", "backend", "family", "link", "reference",
       "random_effects", "parameter_uncertainty", "center", "center_target",
-      "center_draws", "target", "nsim", "seed", "call"
+      "target", "nsim", "seed", "call"
     )
   )
   expect_identical(dim(simulations$simulated_responses), c(5L, 40L))

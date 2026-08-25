@@ -21,9 +21,9 @@
 #' averaging over newly generated zero-mean random effects under the fitted
 #' parameter estimates.
 #'
-#' The initial implementation supports unweighted Gaussian identity-link
-#' `glmmTMB` models without zero inflation and with one numeric response per
-#' fitted row.
+#' The initial implementation has been validated for unweighted cross-sectional
+#' Gaussian identity-link `glmmTMB` models without zero inflation and with one
+#' numeric response per fitted row.
 #' The interface is experimental and may change as predictive checks expand.
 #'
 #' @param model A fitted `glmmTMB` model.
@@ -185,7 +185,6 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
       "marginal response mean over new random effects ",
       "(Gaussian identity)"
     ),
-    center_draws = NA_integer_,
     target = paste0(
       "unconditional plug-in replication under the fitted-row design, ",
       "with all random effects newly generated"

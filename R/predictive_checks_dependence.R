@@ -40,10 +40,8 @@
 #' This function adapts that comparison to paired unconditional plug-in
 #' simulations.
 #'
-#' The package constructor currently supports cross-sectional Gaussian
-#' `glmmTMB` models. Checks use a backend-neutral simulation contract so that a
-#' validated `brms` adapter can reuse the same pairing, statistics, and plots.
-#' The interface is experimental.
+#' This function currently supports response simulations from cross-sectional
+#' Gaussian identity-link `glmmTMB` models. The interface is experimental.
 #'
 #' `dyad` and `role` may be fitted-model-frame columns or vectors aligned with
 #' the fitted rows. Quote a name to force selection from the model frame.
@@ -114,6 +112,19 @@ check_partner_dependence <- function(
   }
   if (missing(dyad)) {
     stop("`dyad` must identify the dyad for each fitted row.", call. = FALSE)
+  }
+  supported_simulation <-
+    identical(simulations$backend, "glmmTMB") &&
+    identical(simulations$family, "gaussian") &&
+    identical(simulations$link, "identity")
+  if (!supported_simulation) {
+    stop(
+      paste0(
+        "Partner-dependence checks currently require cross-sectional ",
+        "Gaussian identity-link `glmmTMB` simulations."
+      ),
+      call. = FALSE
+    )
   }
   n_fitted_rows <- nrow(simulations$model_frame)
   responses_are_aligned <-

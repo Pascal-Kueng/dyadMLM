@@ -78,10 +78,8 @@ Hoff-style: Hoff (2015) compares observed and simulated dyadic association.
 This function adapts that comparison to paired unconditional plug-in
 simulations.
 
-The package constructor currently supports cross-sectional Gaussian
-\code{glmmTMB} models. Checks use a backend-neutral simulation contract so that a
-validated \code{brms} adapter can reuse the same pairing, statistics, and plots.
-The interface is experimental.
+This function currently supports response simulations from cross-sectional
+Gaussian identity-link \code{glmmTMB} models. The interface is experimental.
 
 \code{dyad} and \code{role} may be fitted-model-frame columns or vectors aligned with
 the fitted rows. Quote a name to force selection from the model frame.
