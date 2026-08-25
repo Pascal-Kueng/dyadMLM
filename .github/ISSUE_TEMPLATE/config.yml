@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ask a usage or modeling question
+    url: https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/q-a
+    about: Questions about package use and interpretation are welcome here.
+  - name: Discuss an early feature or method idea
+    url: https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/ideas
+    about: Talk through an idea before deciding whether it needs an issue.
