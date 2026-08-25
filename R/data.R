@@ -22,8 +22,8 @@
 #' @source Simulated for `dyadMLM`; design adapted from
 #'   \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}. See Küng,
 #'   P. M. (2026). \emph{Distinguishable and Exchangeable Dyads: Bayesian
-#'   Multilevel Modelling} (Version 2.0.11). Zenodo.
-#'   \doi{10.5281/zenodo.17400655}.
+#'   Multilevel Modelling} (v2.0.9). Zenodo.
+#'   \doi{10.5281/zenodo.20720321}.
 "dyads_cross"
 
 #' Example Gaussian intensive longitudinal dyadic data
@@ -56,8 +56,8 @@
 #' @source Simulated for `dyadMLM`; design adapted from
 #'   \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}. See Küng,
 #'   P. M. (2026). \emph{Distinguishable and Exchangeable Dyads: Bayesian
-#'   Multilevel Modelling} (Version 2.0.11). Zenodo.
-#'   \doi{10.5281/zenodo.17400655}.
+#'   Multilevel Modelling} (v2.0.9). Zenodo.
+#'   \doi{10.5281/zenodo.20720321}.
 "dyads_ild"
 
 #' Example negative-binomial cross-sectional dyadic data
@@ -85,8 +85,8 @@
 #' @source Simulated for `dyadMLM`; design adapted from
 #'   \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}. See Küng,
 #'   P. M. (2026). \emph{Distinguishable and Exchangeable Dyads: Bayesian
-#'   Multilevel Modelling} (Version 2.0.11). Zenodo.
-#'   \doi{10.5281/zenodo.17400655}.
+#'   Multilevel Modelling} (v2.0.9). Zenodo.
+#'   \doi{10.5281/zenodo.20720321}.
 "dyads_nbinom_cross"
 
 #' Example negative-binomial intensive longitudinal dyadic data
@@ -114,6 +114,6 @@
 #' @source Simulated for `dyadMLM`; design adapted from
 #'   \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}. See Küng,
 #'   P. M. (2026). \emph{Distinguishable and Exchangeable Dyads: Bayesian
-#'   Multilevel Modelling} (Version 2.0.11). Zenodo.
-#'   \doi{10.5281/zenodo.17400655}.
+#'   Multilevel Modelling} (v2.0.9). Zenodo.
+#'   \doi{10.5281/zenodo.20720321}.
 "dyads_nbinom_ild"

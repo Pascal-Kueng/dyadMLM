@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
-  <title id="title">dyadMLM social preview card</title>
+  <title id="title">dyadMLM: Tools for Dyadic Multilevel Models</title>
   <desc id="desc">The dyadMLM package logo centered over three lines describing its dyad types, data structures, and model families, with a subtle honeycomb background.</desc>
 
   <defs>

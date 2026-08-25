@@ -1,6 +1,9 @@
 ---
 title: "Actor-Partner Interdependence Model (APIM)"
 author: "Pascal Küng"
+description: >
+  Specification and interpretation of Gaussian APIMs for distinguishable and
+  exchangeable dyads in cross-sectional and intensive longitudinal data.
 bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
@@ -39,7 +42,7 @@ apim_exchangeable_fitted_alt <-
 ```
 
 This vignette focuses on Gaussian cross-sectional and intensive longitudinal
-Actor-Partner Interdependence models for distinguishable and exchangeable
+Actor-Partner Interdependence Models for distinguishable and exchangeable
 dyads. The intensive longitudinal examples cover concurrent associations,
 member-specific residual persistence, and a brief lagged-outcome extension.
 
@@ -49,7 +52,7 @@ model-specific vignettes, including the
 [Dyadic Score Model](dsm.html), see the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
-A vignette for non-Gaussian generalized models is planned.
+A vignette with non-Gaussian APIM examples is planned.
 
 
 # Cross-sectional APIMs
@@ -254,9 +257,9 @@ shared dyad random intercept and a random coefficient for this difference
 column. Additional random slopes can be included in both blocks without
 changing this logic.
 
-We will now fit a simple exchangeable APIM and then use the `dyadMLM::recover_exchangeable_covariance()`
-function that back-transforms the structure to the often more interpretable
-member-level residual covariance matrix.
+We fit a simple exchangeable APIM and then use
+`dyadMLM::recover_exchangeable_covariance()` to back-transform its
+shared/difference representation into a member-level residual covariance matrix.
 
 
 ### Fitting the restricted exchangeable APIM with glmmTMB
@@ -292,7 +295,7 @@ apim_exchangeable_model <- glmmTMB::glmmTMB(
 summary(apim_exchangeable_model)
 ```
 
-We use the `dyadMLM::recover_exchangeable_covariance()` to recover the interpretable
+We use `dyadMLM::recover_exchangeable_covariance()` to recover the interpretable
 variance-covariance matrix:
 
 ```{r backtransform-cross-exchangeable, eval = has_glmmTMB}
@@ -924,8 +927,6 @@ question:
 
 Or return to the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
-
-A vignette with non-Gaussian generalized APIM examples is planned. 
 
 
 ## References

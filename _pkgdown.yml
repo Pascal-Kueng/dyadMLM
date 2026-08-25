@@ -1,5 +1,8 @@
 url: https://pascal-kueng.github.io/dyadMLM/
 
+home:
+  title: "dyadMLM: Tools for Dyadic Multilevel Models"
+
 template:
   bootstrap: 5
 

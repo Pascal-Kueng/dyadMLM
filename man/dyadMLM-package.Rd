@@ -17,8 +17,9 @@ APIMs, DIMs, and DSMs and provides supporting post-estimation tools.
 model-ready variables.
 \item \code{\link[=compare_nested_models]{compare_nested_models()}} compares compatible nested \code{glmmTMB}
 models fitted to equivalent data.
-\item \code{\link[=recover_exchangeable_covariance]{recover_exchangeable_covariance()}} converts exchangeable
-shared/difference covariance structures to member-level quantities.
+\item \code{\link[=recover_exchangeable_covariance]{recover_exchangeable_covariance()}} back-transforms exchangeable
+shared/difference random-effect covariance structures into member-level
+quantities.
 }
 }
 

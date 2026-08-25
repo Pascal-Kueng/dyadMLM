@@ -1,6 +1,9 @@
 ---
 title: "Dyadic Score Model (DSM)"
 author: "Pascal Küng"
+description: >
+  Construction and interpretation of DSM predictor scores and contrasts,
+  including their relationship to APIM effects for distinguishable dyads.
 bibliography: references.bib
 output: rmarkdown::html_vignette
 vignette: >
