@@ -1,28 +1,19 @@
 ---
-title: "Extended cross-sectional Gaussian partner-dependence example"
+title: "Partner-dependence diagnostics (exploratory vignette draft)"
 output: html_document
 ---
 
-This extended development example exercises the cross-sectional Gaussian
-`glmmTMB` feature across a fuller model sequence. See the shorter
-[development review](partner-dependence-review.Rmd) for the primary review
-artifact.
-
-```{r setup, include=FALSE}
-package_root <- normalizePath(file.path("..", ".."))
-devtools::load_all(package_root, quiet = TRUE)
-
-knitr::opts_chunk$set(
-  message = FALSE,
-  warning = FALSE
-)
-```
+This exploratory note keeps the fuller model sequence as a possible future
+vignette draft. See the shorter
+[development review](partner-dependence-review.Rmd) for the current feature.
 
 # Distinguishable dyads
 
 ## Prep data
 
 ```{r}
+library(dyadMLM)
+
 diagnostic_data <- prepare_dyad_data(
     dyads_cross,
     dyad = coupleID,

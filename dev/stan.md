@@ -167,10 +167,11 @@ expanding the first Stan implementation:
   stronger identifying assumptions justify a causal interpretation.
 
 This note has not yet been systematically reconciled with the methodological
-papers stored in [`References/`](References/). Before any Stan implementation,
-revise the plan against that local collection, especially the work on DSEM and
-RDSEM, latent centering, small-`T` autoregressive bias, dyadic longitudinal
-models, and random-effect specification. The McNeish and Hamaker DSEM primer,
+literature listed below. Available local copies are indexed in
+[`references/`](references/README.md). Before any Stan implementation, revise
+the plan against those sources, especially the work on DSEM and RDSEM, latent
+centering, small-`T` autoregressive bias, dyadic longitudinal models, and
+random-effect specification. The McNeish and Hamaker DSEM primer,
 the Asparouhov papers, the Hamaker and Grasman centering paper, the Gistelinck
 papers, Nickell, and del Rosario and West should be treated as required starting
 points rather than relying on this roadmap alone.

@@ -46,6 +46,7 @@ partner_check_test_simulations <- function() {
       "marginal response mean over new random effects ",
       "(Gaussian identity)"
     ),
+    center_draws = NA_integer_,
     target = paste0(
       "unconditional plug-in replication under the fitted-row design, ",
       "with all random effects newly generated"
@@ -240,44 +241,41 @@ test_that("raw summaries use the observed and simulated responses unchanged", {
 })
 
 
-test_that("partner checks reject unsupported simulation metadata", {
-  simulations <- partner_check_test_simulations()
+test_that("normalized backends use the same partner-check machinery", {
+  glmm_simulations <- partner_check_test_simulations()
+  posterior_simulations <- glmm_simulations
+  posterior_simulations$backend <- "brms"
+  posterior_simulations$reference <- "posterior predictive"
+  posterior_simulations$parameter_uncertainty <- "included"
+  posterior_simulations$center <-
+    "posterior mean population-level expected response"
+  posterior_simulations$target <-
+    "new-dyad posterior replication under the fitted covariate design"
 
-  unsupported_backend <- simulations
-  unsupported_backend$backend <- "other"
-  expect_error(
-    check_partner_dependence(
-      unsupported_backend,
-      dyad = "dyad",
-      plot = FALSE
-    ),
-    "Gaussian identity-link `glmmTMB` simulations",
-    fixed = TRUE
+  glmm_result <- check_partner_dependence(
+    glmm_simulations,
+    dyad = "dyad",
+    role = "role",
+    plot = FALSE
+  )
+  posterior_result <- check_partner_dependence(
+    posterior_simulations,
+    dyad = "dyad",
+    role = "role",
+    plot = FALSE
   )
 
-  unsupported_family <- simulations
-  unsupported_family$family <- "poisson"
-  expect_error(
-    check_partner_dependence(
-      unsupported_family,
-      dyad = "dyad",
-      plot = FALSE
-    ),
-    "Gaussian identity-link `glmmTMB` simulations",
-    fixed = TRUE
+  expect_equal(
+    posterior_result$statistics_table,
+    glmm_result$statistics_table
   )
-
-  unsupported_link <- simulations
-  unsupported_link$link <- "log"
-  expect_error(
-    check_partner_dependence(
-      unsupported_link,
-      dyad = "dyad",
-      plot = FALSE
-    ),
-    "Gaussian identity-link `glmmTMB` simulations",
-    fixed = TRUE
+  expect_equal(
+    posterior_result$replicated_statistics,
+    glmm_result$replicated_statistics
   )
+  expect_identical(posterior_result$backend, "brms")
+  expect_identical(posterior_result$reference, "posterior predictive")
+  expect_identical(posterior_result$parameter_uncertainty, "included")
 })
 
 
@@ -316,8 +314,8 @@ test_that("fitted-row identifiers accept bare, quoted, and external forms", {
     quoted_result[comparison_fields]
   )
 
-  # A fitted column must take precedence over an inherited function with the
-  # same name.
+  # The future temporal argument must prefer a fitted `time` column over the
+  # inherited stats::time() generic.
   temporal_model_frame <- data.frame(time = seq_len(5))
   expect_identical(
     resolve_fitted_row_argument(
