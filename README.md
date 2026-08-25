@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# dyadMLM <img src="man/figures/logo.png" align="right" height="139" alt="dyadMLM package logo" />
+# dyadMLM: Tools for Dyadic Multilevel Models <img src="man/figures/logo.png" align="right" height="139" alt="dyadMLM package logo" />
 
 <!-- badges: start -->
 
@@ -17,6 +17,11 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
 generalized linear mixed-effects models.
+
+Developed by [Pascal Küng](https://pascalkueng.com/), Postdoctoral
+Researcher at the [University of
+Zurich](https://www.psychology.uzh.ch/en/areas/sob/angsoz/team/kueng.html).
+[OSF profile](https://osf.io/r2qdg/).
 
 It provides supporting functions for:
 
@@ -173,7 +178,7 @@ citation("dyadMLM")
 #> To cite package 'dyadMLM' in publications use:
 #>
 #>   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.
-#>   doi:10.5281/zenodo.22047083
+#>   University of Zurich. doi:10.5281/zenodo.22047083
 #>   <https://doi.org/10.5281/zenodo.22047083>. R package version
 #>   0.2.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
 #>
@@ -186,6 +191,7 @@ citation("dyadMLM")
 #>     note = {R package version 0.2.0.9000},
 #>     url = {https://pascal-kueng.github.io/dyadMLM/},
 #>     doi = {10.5281/zenodo.22047083},
+#>     organization = {University of Zurich},
 #>   }
 ```
 

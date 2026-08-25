@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# dyadMLM <img src="man/figures/logo.png" align="right" height="139" alt="dyadMLM package logo" />
+# dyadMLM: Tools for Dyadic Multilevel Models <img src="man/figures/logo.png" align="right" height="139" alt="dyadMLM package logo" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pascal-Kueng/dyadMLM/actions/workflows/R-CMD-check.yaml)
@@ -25,6 +25,10 @@ knitr::opts_chunk$set(
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
 generalized linear mixed-effects models.
+
+Developed by [Pascal Küng](https://pascalkueng.com/), Postdoctoral Researcher
+at the [University of Zurich](https://www.psychology.uzh.ch/en/areas/sob/angsoz/team/kueng.html).
+[OSF profile](https://osf.io/r2qdg/).
 
 It provides supporting functions for:
 
