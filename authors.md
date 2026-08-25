@@ -2,8 +2,8 @@
 
 ## Authors
 
-- **Pascal Küng**. Author, maintainer, copyright holder.
-  [](https://orcid.org/0000-0001-7346-9414)
+- **[Pascal Küng](https://pascalkueng.com/)**. Author, maintainer,
+  copyright holder. [](https://orcid.org/0000-0001-7346-9414)
 
 ## Citation
 
