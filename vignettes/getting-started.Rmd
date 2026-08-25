@@ -25,15 +25,27 @@ library(dyadMLM)
 
 ## Installation
 
-You can install the development version with:
+Install the stable release from CRAN:
 
-```{r installation, eval=FALSE}
-install.packages("dyadMLM", repos = c(
-  "https://pascal-kueng.r-universe.dev",
-  "https://cloud.r-project.org"
+```{r installation-cran, eval=FALSE}
+install.packages("dyadMLM")
+```
+
+To try the latest changes and help test upcoming features, install the
+development version from R-universe:
+
+```{r installation-development, eval=FALSE}
+install.packages(
+  "dyadMLM",
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
   )
 )
 ```
+
+Development versions may change more frequently. Feedback is welcome through
+[GitHub issues](https://github.com/Pascal-Kueng/dyadMLM/issues).
 
 ## About this vignette
 

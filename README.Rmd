@@ -35,15 +35,29 @@ It provides supporting functions for:
 1. [Data preparation and validation of dyadic data](#1-data-preparation-and-validation)
 2. [Post-estimation tools](#2-post-estimation-tools)
 
-You can install the development version with:
+## Installation
+
+Install the stable release from CRAN:
 
 ```{r eval = FALSE}
-install.packages("dyadMLM", repos = c(
-  "https://pascal-kueng.r-universe.dev",
-  "https://cloud.r-project.org"
+install.packages("dyadMLM")
+```
+
+To try the latest changes and help test upcoming features, install the
+development version from R-universe:
+
+```{r eval = FALSE}
+install.packages(
+  "dyadMLM",
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
   )
 )
 ```
+
+Development versions may change more frequently. Feedback is welcome through
+[GitHub issues](https://github.com/Pascal-Kueng/dyadMLM/issues).
 
 ## 1. Data preparation and validation
 
