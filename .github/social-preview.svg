@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">dyadMLM social preview card</title>
+  <desc id="desc">The dyadMLM package logo centered over three lines describing its dyad types, data structures, and model families, with a subtle honeycomb background.</desc>
+
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FAF9F5" />
+      <stop offset="0.52" stop-color="#F8F6F1" />
+      <stop offset="1" stop-color="#F5F4F0" />
+    </linearGradient>
+
+    <path
+      id="background-hex"
+      d="M0 -45 L39 -22.5 L39 22.5 L0 45 L-39 22.5 L-39 -22.5 Z"
+      fill="none"
+      stroke="#CFCDC7"
+      stroke-width="2.1"
+      stroke-linejoin="round"
+    />
+
+    <pattern id="hex-grid" width="156" height="135" patternUnits="userSpaceOnUse">
+      <use href="#background-hex" transform="translate(39 45)" />
+      <use href="#background-hex" transform="translate(117 45)" />
+      <use href="#background-hex" transform="translate(0 112.5)" />
+      <use href="#background-hex" transform="translate(78 112.5)" />
+      <use href="#background-hex" transform="translate(156 112.5)" />
+    </pattern>
+
+    <radialGradient id="center-fade" cx="0.5" cy="0.375" r="0.40">
+      <stop offset="0" stop-color="white" />
+      <stop offset="0.06" stop-color="white" />
+      <stop offset="0.18" stop-color="white" stop-opacity="0.98" />
+      <stop offset="0.32" stop-color="white" stop-opacity="0.91" />
+      <stop offset="0.46" stop-color="white" stop-opacity="0.78" />
+      <stop offset="0.59" stop-color="white" stop-opacity="0.60" />
+      <stop offset="0.70" stop-color="white" stop-opacity="0.40" />
+      <stop offset="0.78" stop-color="white" stop-opacity="0.22" />
+      <stop offset="0.83" stop-color="white" stop-opacity="0.07" />
+      <stop offset="0.86" stop-color="black" />
+      <stop offset="1" stop-color="black" />
+    </radialGradient>
+    <mask id="center-mask">
+      <rect width="1280" height="640" fill="url(#center-fade)" />
+    </mask>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#background)" />
+  <rect x="1" y="1" width="1278" height="638" fill="none" stroke="#E2E0DB" stroke-width="2" />
+
+  <rect
+    width="1280"
+    height="640"
+    fill="url(#hex-grid)"
+    opacity="0.60"
+    mask="url(#center-mask)"
+  />
+
+  <!-- Terminal-style package label. -->
+  <g fill="none" stroke="#568D90" stroke-width="3.6" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M68 66 L78 77 L68 88" />
+    <line x1="82" y1="89" x2="96" y2="89" />
+  </g>
+  <text
+    x="108"
+    y="88"
+    fill="#123B63"
+    font-family="Noto Sans, Arial, sans-serif"
+    font-size="34"
+    font-weight="400"
+  >R package</text>
+
+  <!-- Canonical dyadMLM logo. -->
+  <g transform="translate(492.4 55) scale(1.23)">
+    <path
+      d="M120 8 L232 72 L232 206 L120 270 L8 206 L8 72 Z"
+      fill="#FAF7F0"
+      stroke="#123B63"
+      stroke-width="8"
+      stroke-linejoin="round"
+    />
+
+    <g
+      fill="none"
+      stroke="#2C8C91"
+      stroke-width="7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      shape-rendering="geometricPrecision"
+    >
+      <line x1="75" y1="88" x2="75" y2="155" />
+      <line x1="165" y1="88" x2="165" y2="155" />
+      <path d="M75 88 C101 104 139 139 165 155" />
+      <path d="M165 88 C139 104 101 139 75 155" />
+    </g>
+
+    <g fill="#D16143">
+      <circle cx="75" cy="88" r="10" />
+      <circle cx="165" cy="88" r="10" />
+      <circle cx="75" cy="155" r="10" />
+      <circle cx="165" cy="155" r="10" />
+    </g>
+
+    <text
+      x="120"
+      y="216"
+      fill="#123B63"
+      font-family="Noto Sans, Arial, sans-serif"
+      font-size="31"
+      font-weight="800"
+      letter-spacing="-1.1"
+      text-anchor="middle"
+    >dyadMLM</text>
+  </g>
+
+  <!-- Reference typography and spacing. -->
+  <g font-family="Noto Sans, Arial, sans-serif" text-anchor="middle">
+    <text x="640" y="472" fill="#568D90" font-size="42" font-weight="800">Tools for Dyadic Multilevel Models</text>
+    <text x="640" y="523" fill="#45423E" font-size="42" font-weight="700">Distinguishable &amp; exchangeable dyads</text>
+    <text x="640" y="572" fill="#6E6A66" font-size="27" font-weight="400">Cross-sectional &amp; longitudinal | APIM · DIM · DSM</text>
+  </g>
+</svg>
