@@ -43,8 +43,8 @@ A data frame with 10,080 rows and 6 variables:
 Simulated for `dyadMLM`; design adapted from
 <https://github.com/Pascal-Kueng/05DyadicDataAnalysis>. See Küng, P. M.
 (2026). *Distinguishable and Exchangeable Dyads: Bayesian Multilevel
-Modelling* (Version 2.0.11). Zenodo.
-[doi:10.5281/zenodo.17400655](https://doi.org/10.5281/zenodo.17400655) .
+Modelling* (v2.0.9). Zenodo.
+[doi:10.5281/zenodo.20720321](https://doi.org/10.5281/zenodo.20720321) .
 
 ## Details
 

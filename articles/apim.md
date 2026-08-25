@@ -6,7 +6,7 @@ library(dyadMLM)
 ```
 
 This vignette focuses on Gaussian cross-sectional and intensive
-longitudinal Actor-Partner Interdependence models for distinguishable
+longitudinal Actor-Partner Interdependence Models for distinguishable
 and exchangeable dyads. The intensive longitudinal examples cover
 concurrent associations, member-specific residual persistence, and a
 brief lagged-outcome extension.
@@ -18,7 +18,7 @@ Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) and
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md), see the
 [online package overview](https://pascal-kueng.github.io/dyadMLM/).
 
-A vignette for non-Gaussian generalized models is planned.
+A vignette with non-Gaussian APIM examples is planned.
 
 ## Cross-sectional APIMs
 
@@ -317,10 +317,10 @@ separate random-effects terms: a shared dyad random intercept and a
 random coefficient for this difference column. Additional random slopes
 can be included in both blocks without changing this logic.
 
-We will now fit a simple exchangeable APIM and then use the
+We fit a simple exchangeable APIM and then use
 [`dyadMLM::recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
-function that back-transforms the structure to the often more
-interpretable member-level residual covariance matrix.
+to back-transform its shared/difference representation into a
+member-level residual covariance matrix.
 
 #### Fitting the restricted exchangeable APIM with glmmTMB
 
@@ -382,7 +382,7 @@ summary(apim_exchangeable_model)
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-We use the
+We use
 [`dyadMLM::recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
 to recover the interpretable variance-covariance matrix:
 
@@ -1250,8 +1250,6 @@ question:
 
 Or return to the [online package
 overview](https://pascal-kueng.github.io/dyadMLM/).
-
-A vignette with non-Gaussian generalized APIM examples is planned.
 
 ### References
 

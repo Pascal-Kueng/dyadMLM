@@ -1,7 +1,12 @@
-# dyadMLM
+# dyadMLM: Tools for Dyadic Multilevel Models
 
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
 generalized linear mixed-effects models.
+
+Developed by [Pascal Küng](https://pascalkueng.com/), Postdoctoral
+Researcher at the [University of
+Zurich](https://www.psychology.uzh.ch/en/areas/sob/angsoz/team/kueng.html).
+[OSF profile](https://osf.io/r2qdg/).
 
 It provides supporting functions for:
 
@@ -9,16 +14,31 @@ It provides supporting functions for:
     data](#id_1-data-preparation-and-validation)
 2.  [Post-estimation tools](#id_2-post-estimation-tools)
 
-You can install the development version with:
+## Installation
+
+Install the stable release from CRAN:
 
 ``` r
 
-install.packages("dyadMLM", repos = c(
-  "https://pascal-kueng.r-universe.dev",
-  "https://cloud.r-project.org"
+install.packages("dyadMLM")
+```
+
+To try the latest changes and help test upcoming features, install the
+development version from R-universe:
+
+``` r
+
+install.packages(
+  "dyadMLM",
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
   )
 )
 ```
+
+Development versions may change more frequently. Feedback is welcome
+through [GitHub issues](https://github.com/Pascal-Kueng/dyadMLM/issues).
 
 ## 1. Data preparation and validation
 
@@ -162,7 +182,7 @@ citation("dyadMLM")
 #> To cite package 'dyadMLM' in publications use:
 #>
 #>   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.
-#>   doi:10.5281/zenodo.22047083
+#>   University of Zurich. doi:10.5281/zenodo.22047083
 #>   <https://doi.org/10.5281/zenodo.22047083>. R package version
 #>   0.2.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
 #>
@@ -175,6 +195,7 @@ citation("dyadMLM")
 #>     note = {R package version 0.2.0.9000},
 #>     url = {https://pascal-kueng.github.io/dyadMLM/},
 #>     doi = {10.5281/zenodo.22047083},
+#>     organization = {University of Zurich},
 #>   }
 ```
 

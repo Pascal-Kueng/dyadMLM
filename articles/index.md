@@ -18,6 +18,10 @@ Details for specific dyadic model parameterizations.
 - [Actor-Partner Interdependence Model
   (APIM)](https://pascal-kueng.github.io/dyadMLM/articles/apim.md):
 
+  Specification and interpretation of Gaussian APIMs for distinguishable
+  and exchangeable dyads in cross-sectional and intensive longitudinal
+  data.
+
 - [Dyad-Individual
   Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md):
 
@@ -27,3 +31,7 @@ Details for specific dyadic model parameterizations.
 
 - [Dyadic Score Model
   (DSM)](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md):
+
+  Construction and interpretation of DSM predictor scores and contrasts,
+  including their relationship to APIM effects for distinguishable
+  dyads.

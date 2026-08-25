@@ -14,8 +14,8 @@ post-estimation tools.
   compares compatible nested `glmmTMB` models fitted to equivalent data.
 
 - [`recover_exchangeable_covariance()`](https://pascal-kueng.github.io/dyadMLM/reference/recover_exchangeable_covariance.md)
-  converts exchangeable shared/difference covariance structures to
-  member-level quantities.
+  back-transforms exchangeable shared/difference random-effect
+  covariance structures into member-level quantities.
 
 ## Example data
 

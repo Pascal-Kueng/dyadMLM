@@ -84,13 +84,22 @@ Küng</h4>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version with:</p>
+<p>Install the stable release from CRAN:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"https://pascal-kueng.r-universe.dev"</span>,</span>
-<span>  <span class="st">"https://cloud.r-project.org"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
+<p>To try the latest changes and help test upcoming features, install
+the development version from R-universe:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"dyadMLM"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"https://pascal-kueng.r-universe.dev"</span>,</span>
+<span>    <span class="st">"https://cloud.r-project.org"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>Development versions may change more frequently. Feedback is welcome
+through <a href="https://github.com/Pascal-Kueng/dyadMLM/issues" class="external-link">GitHub
+issues</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="about-this-vignette">About this vignette<a class="anchor" aria-label="anchor" href="#about-this-vignette"></a>
@@ -103,15 +112,15 @@ multilevel models (MLMs).</strong> For a comparison of MLM and
 structural equation modeling (SEM) approaches to dyadic data, see <span class="citation">Ledermann and Kenny (2017)</span>.</p>
 <p>The model-fitting examples in the model-specific vignettes use the
 <code>glmmTMB</code> package.</p>
-<p>Post-processing functions in <code>dyadMLM</code>, including model
+<p>Post-estimation functions in <code>dyadMLM</code>, including model
 comparison and back-transformation of exchangeable random-effect
 covariance structures, are described in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">Actor-Partner
 Interdependence Model vignette</a>.</p>
 <p>Other vignettes cover the <a href="dim.html">Dyad-Individual
-Model</a> and its equivalence and back-transformation to the
-<em>exchangeable APIM</em>, and the <a href="dsm.html">Dyadic Score
-Model</a> with its equivalence and back-transformation to the
-<em>distinguishable APIM</em>.</p>
+Model</a> and its equivalence to the <em>exchangeable APIM</em>, and the
+<a href="dsm.html">Dyadic Score Model</a> and its equivalence to the
+<em>distinguishable APIM</em>. They also describe the corresponding
+coefficient and covariance transformations.</p>
 <p>The <a href="https://pascal-kueng.github.io/dyadMLM/">online package
 overview</a> provides the current online versions of these vignettes and
 the complete function reference.</p>
@@ -233,7 +242,7 @@ composition.</p>
 <span><span class="co">#&gt; 6        6        3   male  4.366967         5.029079</span></span></code></pre>
 <p>We validate and prepare the data with the function
 <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_distinguishable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -298,7 +307,7 @@ Cook 1999)</span>.</p>
 <p>For this example, we pretend that we have a dataset with no
 distinguishable variable (e.g., same-sex friend dyads). Then, we simply
 omit the <code>role</code> argument:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -369,7 +378,7 @@ variance-covariance structure with <a href="https://pascal-kueng.github.io/dyadM
 composition</strong>. This can be achieved by omitting
 <code>role</code>. For more control over compositions, see <a href="#working-with-multiple-dyad-compositions">Working with multiple
 dyad compositions</a>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dim_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -417,7 +426,7 @@ composition</strong>. To compute these columns, an explicit role order
 is required. The role order defines the direction of all DSM predictor
 differences and the DSM role contrast <span class="citation">(Iida et
 al. 2018)</span>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cross_dsm_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -485,7 +494,7 @@ with one row per person-day.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        2        1        2 male        3.44             4.99</span></span></code></pre>
 <p>To prepare intensive longitudinal data, pass the <code>time</code>
 variable to <code><a href="../reference/prepare_dyad_data.html">dyadMLM::prepare_dyad_data()</a></code>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -566,7 +575,7 @@ through the <code>lag1_predictors</code> argument.</p>
 <p>Lagging respects the dyad and member structure, matches observations
 at exactly <code>time - 1</code>, and does not bridge missing occasions
 when rows are missing in the dataset.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ild_apim_data_dynamic</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_ild</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -658,7 +667,7 @@ distinguishable female-male dyads and exchangeable female-female and
 male-male dyads <span class="citation">(Bolger et al. 2025)</span>.</p>
 <p>Let’s have <code>dyadMLM</code> infer the compositions
 automatically:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -715,7 +724,7 @@ labels. The filtering happens before exchangeability constraints and
 pooling, so <code>set_exchangeable_compositions</code> and
 <code>pool_compositions</code> (described later) can only refer to
 retained dyad compositions.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_included</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -770,7 +779,7 @@ labels. By contrast, omitting <code>role</code> indicates that no
 distinguishing variable is available, so all dyads are treated as one
 exchangeable composition with a single global arbitrary-member
 contrast.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_exchangeable_data</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -826,7 +835,7 @@ in the APIM vignette</a> for the model-comparison workflow.</p>
 <p>For instance, let’s pool <code>male-male</code> and
 <code>female-female</code> dyads and name them <code>same-sex</code>
 dyads:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -879,7 +888,7 @@ dyads:</p>
 <p>Note that you cannot pool distinguishable dyads. If we wanted to pool
 <code>female-male</code> with <code>male-male</code>, we would first
 have to treat <code>female-male</code> as exchangeable:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mixed_cross_data_pooled_constrained</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
@@ -938,12 +947,12 @@ have to treat <code>female-male</code> as exchangeable:</p>
 </h2>
 <p>If you use <code>dyadMLM</code>, please cite the version of the
 package you use. Obtain the citation via:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; To cite package 'dyadMLM' in publications use:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.</span></span>
-<span><span class="co">#&gt;   doi:10.5281/zenodo.22047083</span></span>
+<span><span class="co">#&gt;   University of Zurich. doi:10.5281/zenodo.22047083</span></span>
 <span><span class="co">#&gt;   &lt;https://doi.org/10.5281/zenodo.22047083&gt;. R package version</span></span>
 <span><span class="co">#&gt;   0.2.0.9000, &lt;https://pascal-kueng.github.io/dyadMLM/&gt;.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -956,6 +965,7 @@ package you use. Obtain the citation via:</p>
 <span><span class="co">#&gt;     note = {R package version 0.2.0.9000},</span></span>
 <span><span class="co">#&gt;     url = {https://pascal-kueng.github.io/dyadMLM/},</span></span>
 <span><span class="co">#&gt;     doi = {10.5281/zenodo.22047083},</span></span>
+<span><span class="co">#&gt;     organization = {University of Zurich},</span></span>
 <span><span class="co">#&gt;   }</span></span></code></pre></div>
 <hr>
 <p><strong>Continue</strong> with the <a href="apim.html">Actor-Partner

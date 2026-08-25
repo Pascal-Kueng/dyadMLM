@@ -7,16 +7,29 @@ library(dyadMLM)
 
 ## Installation
 
-You can install the development version with:
+Install the stable release from CRAN:
 
 ``` r
 
-install.packages("dyadMLM", repos = c(
-  "https://pascal-kueng.r-universe.dev",
-  "https://cloud.r-project.org"
+install.packages("dyadMLM")
+```
+
+To try the latest changes and help test upcoming features, install the
+development version from R-universe:
+
+``` r
+
+install.packages(
+  "dyadMLM",
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
   )
 )
 ```
+
+Development versions may change more frequently. Feedback is welcome
+through [GitHub issues](https://github.com/Pascal-Kueng/dyadMLM/issues).
 
 ## About this vignette
 
@@ -31,17 +44,17 @@ modeling (SEM) approaches to dyadic data, see Ledermann and Kenny
 The model-fitting examples in the model-specific vignettes use the
 `glmmTMB` package.
 
-Post-processing functions in `dyadMLM`, including model comparison and
+Post-estimation functions in `dyadMLM`, including model comparison and
 back-transformation of exchangeable random-effect covariance structures,
 are described in the [Actor-Partner Interdependence Model
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
 
 Other vignettes cover the [Dyad-Individual
 Model](https://pascal-kueng.github.io/dyadMLM/articles/dim.md) and its
-equivalence and back-transformation to the *exchangeable APIM*, and the
-[Dyadic Score
-Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md) with its
-equivalence and back-transformation to the *distinguishable APIM*.
+equivalence to the *exchangeable APIM*, and the [Dyadic Score
+Model](https://pascal-kueng.github.io/dyadMLM/articles/dsm.md) and its
+equivalence to the *distinguishable APIM*. They also describe the
+corresponding coefficient and covariance transformations.
 
 The [online package overview](https://pascal-kueng.github.io/dyadMLM/)
 provides the current online versions of these vignettes and the complete
@@ -859,7 +872,7 @@ citation("dyadMLM")
 #> To cite package 'dyadMLM' in publications use:
 #> 
 #>   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.
-#>   doi:10.5281/zenodo.22047083
+#>   University of Zurich. doi:10.5281/zenodo.22047083
 #>   <https://doi.org/10.5281/zenodo.22047083>. R package version
 #>   0.2.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
 #> 
@@ -872,6 +885,7 @@ citation("dyadMLM")
 #>     note = {R package version 0.2.0.9000},
 #>     url = {https://pascal-kueng.github.io/dyadMLM/},
 #>     doi = {10.5281/zenodo.22047083},
+#>     organization = {University of Zurich},
 #>   }
 ```
 

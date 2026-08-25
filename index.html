@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Tools for Dyadic Multilevel Models • dyadMLM</title>
+<title>dyadMLM: Tools for Dyadic Multilevel Models • dyadMLM</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,9 +15,9 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Tools for Dyadic Multilevel Models">
-<meta name="description" content="Provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models. It validates and prepares long-format cross-sectional and intensive longitudinal data, including ecological momentary assessment designs, for distinguishable and exchangeable dyads. It also supports datasets containing multiple observed dyad compositions. It constructs composition-aware, model-ready variables for Actor-Partner Interdependence Models (APIMs), Dyadic Score Models (DSMs), and Dyad-Individual Models (DIMs). Prepared data can be used with model engines such as glmmTMB and brms for Gaussian and non-Gaussian outcomes, including counts, proportions, and skewed continuous responses. Post-estimation tools compare compatible fitted models and back-transform exchangeable sum-and-difference random-effect covariance structures into member-level quantities. The APIM and DSM specifications and their relationships follow Iida et al. (2018) &lt;doi:10.1177/0265407517725407&gt;; the multilevel sum-and-difference random-effects implementation for exchangeable dyads adapts del Rosario and West (2025) &lt;doi:10.1177/25152459251351286&gt;.">
-<meta property="og:description" content="Provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models. It validates and prepares long-format cross-sectional and intensive longitudinal data, including ecological momentary assessment designs, for distinguishable and exchangeable dyads. It also supports datasets containing multiple observed dyad compositions. It constructs composition-aware, model-ready variables for Actor-Partner Interdependence Models (APIMs), Dyadic Score Models (DSMs), and Dyad-Individual Models (DIMs). Prepared data can be used with model engines such as glmmTMB and brms for Gaussian and non-Gaussian outcomes, including counts, proportions, and skewed continuous responses. Post-estimation tools compare compatible fitted models and back-transform exchangeable sum-and-difference random-effect covariance structures into member-level quantities. The APIM and DSM specifications and their relationships follow Iida et al. (2018) &lt;doi:10.1177/0265407517725407&gt;; the multilevel sum-and-difference random-effects implementation for exchangeable dyads adapts del Rosario and West (2025) &lt;doi:10.1177/25152459251351286&gt;.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="dyadMLM: Tools for Dyadic Multilevel Models">
+<meta name="description" content="Provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models. It validates and prepares long-format cross-sectional and intensive longitudinal data, including ecological momentary assessment designs, for distinguishable and exchangeable dyads. It also supports datasets containing multiple observed dyad compositions. It constructs composition-aware, model-ready variables for Actor-Partner Interdependence Models (APIMs), Dyad-Individual Models (DIMs), and Dyadic Score Models (DSMs). Prepared data can be used with model engines such as glmmTMB and brms for Gaussian and non-Gaussian outcomes, including counts, proportions, and skewed continuous responses. Post-estimation tools compare compatible fitted models and back-transform exchangeable sum-and-difference random-effect covariance structures into member-level quantities. The APIM and DSM specifications and their relationships follow Iida et al. (2018) &lt;doi:10.1177/0265407517725407&gt;; the multilevel sum-and-difference random-effects implementation for exchangeable dyads adapts del Rosario and West (2025) &lt;doi:10.1177/25152459251351286&gt;.">
+<meta property="og:description" content="Provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models. It validates and prepares long-format cross-sectional and intensive longitudinal data, including ecological momentary assessment designs, for distinguishable and exchangeable dyads. It also supports datasets containing multiple observed dyad compositions. It constructs composition-aware, model-ready variables for Actor-Partner Interdependence Models (APIMs), Dyad-Individual Models (DIMs), and Dyadic Score Models (DSMs). Prepared data can be used with model engines such as glmmTMB and brms for Gaussian and non-Gaussian outcomes, including counts, proportions, and skewed continuous responses. Post-estimation tools compare compatible fitted models and back-transform exchangeable sum-and-difference random-effect covariance structures into member-level quantities. The APIM and DSM specifications and their relationships follow Iida et al. (2018) &lt;doi:10.1177/0265407517725407&gt;; the multilevel sum-and-difference random-effects implementation for exchangeable dyads adapts del Rosario and West (2025) &lt;doi:10.1177/25152459251351286&gt;.">
 <meta property="og:image" content="https://pascal-kueng.github.io/dyadMLM/logo.svg">
 </head>
 <body>
@@ -63,24 +63,35 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="dyadmlm-">dyadMLM <a class="anchor" aria-label="anchor" href="#dyadmlm-"></a>
+<img src="logo.svg" class="logo" alt=""><h1 id="dyadmlm-tools-for-dyadic-multilevel-models-">dyadMLM: Tools for Dyadic Multilevel Models <a class="anchor" aria-label="anchor" href="#dyadmlm-tools-for-dyadic-multilevel-models-"></a>
 </h1>
 </div>
 <!-- badges: start -->
 
 <p><code>dyadMLM</code> provides tools for dyadic multilevel modeling with linear and generalized linear mixed-effects models.</p>
+<p>Developed by <a href="https://pascalkueng.com/" class="external-link">Pascal Küng</a>, Postdoctoral Researcher at the <a href="https://www.psychology.uzh.ch/en/areas/sob/angsoz/team/kueng.html" class="external-link">University of Zurich</a>. <a href="https://osf.io/r2qdg/" class="external-link">OSF profile</a>.</p>
 <p>It provides supporting functions for:</p>
 <ol style="list-style-type: decimal">
 <li><a href="#id_1-data-preparation-and-validation">Data preparation and validation of dyadic data</a></li>
 <li><a href="#id_2-post-estimation-tools">Post-estimation tools</a></li>
 </ol>
-<p>You can install the development version with:</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>Install the stable release from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"https://pascal-kueng.r-universe.dev"</span>,</span>
-<span>  <span class="st">"https://cloud.r-project.org"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
+<p>To try the latest changes and help test upcoming features, install the development version from R-universe:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"dyadMLM"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"https://pascal-kueng.r-universe.dev"</span>,</span>
+<span>    <span class="st">"https://cloud.r-project.org"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>Development versions may change more frequently. Feedback is welcome through <a href="https://github.com/Pascal-Kueng/dyadMLM/issues" class="external-link">GitHub issues</a>.</p>
+</div>
 <div class="section level2">
 <h2 id="id_1-data-preparation-and-validation">1. Data preparation and validation<a class="anchor" aria-label="anchor" href="#id_1-data-preparation-and-validation"></a>
 </h2>
@@ -140,7 +151,7 @@
 <h3 id="simple-cross-sectional-example">Simple Cross-Sectional Example<a class="anchor" aria-label="anchor" href="#simple-cross-sectional-example"></a>
 </h3>
 <p>Prepare distinguishable dyads for a cross-sectional APIM:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">prepared_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
@@ -185,7 +196,7 @@
 <span><span class="co">#&gt; #   .provided_support_partner &lt;dbl&gt;</span></span></code></pre></div>
 <p>The prepared data contains the composition indicators and APIM actor/partner predictor columns used in the model formulas below.</p>
 <p>One simple distinguishable APIM formula is:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simple_apim</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
 <span></span>
@@ -216,12 +227,12 @@
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use <code>dyadMLM</code>, please cite the installed package version. Run:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; To cite package 'dyadMLM' in publications use:</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt;   Küng P (2026). _dyadMLM: Tools for Dyadic Multilevel Models_.</span></span>
-<span><span class="co">#&gt;   doi:10.5281/zenodo.22047083</span></span>
+<span><span class="co">#&gt;   University of Zurich. doi:10.5281/zenodo.22047083</span></span>
 <span><span class="co">#&gt;   &lt;https://doi.org/10.5281/zenodo.22047083&gt;. R package version</span></span>
 <span><span class="co">#&gt;   0.2.0.9000, &lt;https://pascal-kueng.github.io/dyadMLM/&gt;.</span></span>
 <span><span class="co">#&gt;</span></span>
@@ -234,6 +245,7 @@
 <span><span class="co">#&gt;     note = {R package version 0.2.0.9000},</span></span>
 <span><span class="co">#&gt;     url = {https://pascal-kueng.github.io/dyadMLM/},</span></span>
 <span><span class="co">#&gt;     doi = {10.5281/zenodo.22047083},</span></span>
+<span><span class="co">#&gt;     organization = {University of Zurich},</span></span>
 <span><span class="co">#&gt;   }</span></span></code></pre></div>
 <hr>
 <p><strong>Continue</strong> with the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started Vignette</a>.</p>
