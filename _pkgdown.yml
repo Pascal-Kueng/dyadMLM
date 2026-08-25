@@ -3,13 +3,18 @@ url: https://pascal-kueng.github.io/dyadMLM/
 home:
   title: "dyadMLM: Tools for Dyadic Multilevel Models"
 
+authors:
+  Pascal Küng:
+    href: https://pascalkueng.com/
+
 template:
   bootstrap: 5
+  light-switch: true
 
 navbar:
   structure:
-    left: [reference, articles, workshop]
-    right: [search, github]
+    left: [reference, articles, workshop, news]
+    right: [search, github, lightswitch]
   components:
     articles:
       text: Vignettes

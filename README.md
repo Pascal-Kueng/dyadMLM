@@ -50,8 +50,23 @@ install.packages(
 )
 ```
 
-Development versions may change more frequently. Feedback is welcome
-through [GitHub issues](https://github.com/Pascal-Kueng/dyadMLM/issues).
+Development versions may change more frequently.
+
+## Questions and contributing
+
+Questions about using `dyadMLM`, specifying models, or interpreting
+output are welcome in [Q&A
+Discussions](https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/q-a).
+Early feature or method ideas can start in
+[Ideas](https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/ideas),
+while bugs and concrete improvements can be shared through
+[Issues](https://github.com/Pascal-Kueng/dyadMLM/issues/new/choose).
+
+Documentation, examples, tests, reviews, and code contributions are all
+welcome; see the [contribution
+guide](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md).
+Please only share data you are permitted to make public. Never upload
+identifiable or confidential research data.
 
 ## 1. Data preparation and validation
 
