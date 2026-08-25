@@ -3,17 +3,11 @@
   <desc id="desc">The dyadMLM package logo centered over three lines describing its dyad types, data structures, and model families, with a subtle honeycomb background.</desc>
 
   <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#FDFCF9" />
-      <stop offset="0.52" stop-color="#FBFAF7" />
-      <stop offset="1" stop-color="#F8F7F3" />
-    </linearGradient>
-
     <path
       id="background-hex"
       d="M0 -45 L39 -22.5 L39 22.5 L0 45 L-39 22.5 L-39 -22.5 Z"
       fill="none"
-      stroke="#CFCDC7"
+      stroke="#D2D6D8"
       stroke-width="2.1"
       stroke-linejoin="round"
     />
@@ -44,8 +38,8 @@
     </mask>
   </defs>
 
-  <rect width="1280" height="640" fill="url(#background)" />
-  <rect x="1" y="1" width="1278" height="638" fill="none" stroke="#E2E0DB" stroke-width="2" />
+  <rect width="1280" height="640" fill="#FFFFFF" />
+  <rect x="1" y="1" width="1278" height="638" fill="none" stroke="#E3E6E8" stroke-width="2" />
 
   <rect
     width="1280"
