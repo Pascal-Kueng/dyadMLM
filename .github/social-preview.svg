@@ -4,9 +4,9 @@
 
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#FAF9F5" />
-      <stop offset="0.52" stop-color="#F8F6F1" />
-      <stop offset="1" stop-color="#F5F4F0" />
+      <stop offset="0" stop-color="#FDFCF9" />
+      <stop offset="0.52" stop-color="#FBFAF7" />
+      <stop offset="1" stop-color="#F8F7F3" />
     </linearGradient>
 
     <path
