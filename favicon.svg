@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 278" role="img" aria-labelledby="title desc" width="240" height="278"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><title id="title">dyadMLM package logo</title><desc id="desc">Four nodes connected by actor and partner paths in an M-like simplified APIM.</desc><path d="M120 8 L232 72 L232 206 L120 270 L8 206 L8 72 Z" fill="#FAF7F0" stroke="#123B63" stroke-width="8" stroke-linejoin="round"></path><g fill="none" stroke="#2C8C91" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision">
+    <!-- Actor paths -->
+    <line x1="75" y1="88" x2="75" y2="155"></line>
+    <line x1="165" y1="88" x2="165" y2="155"></line>
+
+    <!-- Partner paths -->
+    <path d="M75 88 C101 104 139 139 165 155"></path>
+    <path d="M165 88 C139 104 101 139 75 155"></path>
+  </g><g fill="#D16143">
+    <circle cx="75" cy="88" r="10"></circle>
+    <circle cx="165" cy="88" r="10"></circle>
+    <circle cx="75" cy="155" r="10"></circle>
+    <circle cx="165" cy="155" r="10"></circle>
+  </g><text x="120" y="216" fill="#123B63" font-family="Noto Sans, sans-serif" font-size="31" font-weight="800" letter-spacing="-1.1" text-anchor="middle">dyadMLM</text></svg>
