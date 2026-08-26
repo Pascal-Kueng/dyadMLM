@@ -18,6 +18,15 @@ partner relationship freely from the data, a close match is expected. It mainly
 shows that the model can reproduce what it already learned; it provides little
 new evidence that the model describes the data well.
 
+The [repeated simulation study](partner-dependence-outer-simulation-study.Rmd)
+gave encouraging initial results. For the deliberately large problems studied,
+the observed pattern stood out from the model's simulations in 84--97% of
+datasets with 50 dyads and in every dataset with 200 dyads. All 7,000
+fitted-model runs completed successfully. However, flexible models that had
+already learned the same pattern nearly always looked reassuring. A close
+match therefore does not by itself show that the model fits well, and smaller
+problems have not yet been studied.
+
 Similar checks may become useful when a generalized model needs simpler
 assumptions about the partner pattern or models response variation separately.
 These are future use cases: the implementation shown here currently supports
