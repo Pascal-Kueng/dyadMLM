@@ -34,7 +34,11 @@ dim_grid_helper <- if (file.exists("dim-grid.Rinc")) {
 sys.source(dim_grid_helper, envir = knitr::knit_global())
 
 diagram_device <- .vignette_diagram_device()
-knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
+knitr::opts_chunk$set(
+  dev = diagram_device,
+  fig.ext = diagram_device,
+  dev.args = list(bg = "transparent")
+)
 ```
 
 ```{r setup}

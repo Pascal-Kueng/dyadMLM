@@ -25,15 +25,27 @@ library(dyadMLM)
 
 ## Installation
 
-You can install the development version with:
+Install the stable release from CRAN:
 
-```{r installation, eval=FALSE}
-install.packages("dyadMLM", repos = c(
-  "https://pascal-kueng.r-universe.dev",
-  "https://cloud.r-project.org"
+```{r installation-cran, eval=FALSE}
+install.packages("dyadMLM")
+```
+
+To try the latest changes and help test upcoming features, install the
+development version from R-universe:
+
+```{r installation-development, eval=FALSE}
+install.packages(
+  "dyadMLM",
+  repos = c(
+    "https://pascal-kueng.r-universe.dev",
+    "https://cloud.r-project.org"
   )
 )
 ```
+
+Development versions may change more frequently. Feedback is welcome through
+[GitHub issues](https://github.com/Pascal-Kueng/dyadMLM/issues).
 
 ## About this vignette
 
@@ -47,14 +59,14 @@ approaches to dyadic data, see @ledermannAnalyzingDyadicData2017.
 The model-fitting examples in the model-specific vignettes use the
 `glmmTMB` package.
 
-Post-processing functions in `dyadMLM`, including model comparison and
+Post-estimation functions in `dyadMLM`, including model comparison and
 back-transformation of exchangeable random-effect covariance structures, are
 described in the [Actor-Partner Interdependence Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
 
 Other vignettes cover the [Dyad-Individual Model](dim.html) and its equivalence
-and back-transformation to the *exchangeable APIM*, and the
-[Dyadic Score Model](dsm.html) with its equivalence and back-transformation
-to the *distinguishable APIM*.
+to the *exchangeable APIM*, and the [Dyadic Score Model](dsm.html) and its
+equivalence to the *distinguishable APIM*. They also describe the corresponding
+coefficient and covariance transformations.
 
 The [online package overview](https://pascal-kueng.github.io/dyadMLM/)
 provides the current online versions of these vignettes and the complete

@@ -1029,7 +1029,6 @@ draw_apim_diagram <- function(
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   predictor_subtitle <- if (predictors_centered) "GM-centered" else NULL
   draw_node(0.17, 0.72, node_labels$x_top, predictor_subtitle)
@@ -1307,7 +1306,6 @@ draw_apim_member_diagram <- function(
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   draw_node(0.15, 0.79, labels$actor_x_top, labels$actor_subtitle)
   draw_node(0.15, 0.60, labels$partner_x_top, "Partner predictor")
@@ -1601,7 +1599,6 @@ draw_dsm_diagram <- function(
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   node_labels <- if (is.null(labels)) {
     list(
@@ -1828,7 +1825,6 @@ draw_dsm_member_diagram <- function() {
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(-0.03, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   mean_label <- expression(frac(X[plain(F)] + X[plain(M)], 2) - mu[X])
   difference_label <- expression(X[plain(F)] - X[plain(M)])
@@ -2116,7 +2112,6 @@ draw_dim_diagram <- function(
   deviation_label <- parameter_label("b_dev", "plain(dev)")
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   unit_title <- paste0(
     toupper(substr(effect_unit, 1, 1)),
@@ -2316,7 +2311,6 @@ draw_dim_member_diagram <- function() {
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   # Each member has the same dyad-level predictor and their own deviation.
   draw_node(
@@ -2639,7 +2633,6 @@ draw_mixed_apim_diagram <- function(model = NULL, terms = NULL) {
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   grid::grid.roundrect(
     x = native(0.5), y = native(0.50),
@@ -3158,7 +3151,6 @@ draw_cfm_diagram <- function(
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
-  grid::grid.rect(gp = grid::gpar(fill = "white", col = NA))
 
   indicator_x <- c(0.135, 0.36, 0.64, 0.865)
   draw_observed(

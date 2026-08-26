@@ -11,8 +11,9 @@
 #'   model-ready variables.
 #' - [compare_nested_models()] compares compatible nested `glmmTMB`
 #'   models fitted to equivalent data.
-#' - [recover_exchangeable_covariance()] converts exchangeable
-#'   shared/difference covariance structures to member-level quantities.
+#' - [recover_exchangeable_covariance()] back-transforms exchangeable
+#'   shared/difference random-effect covariance structures into member-level
+#'   quantities.
 #'
 #' @section Example data:
 #' See [dyads_cross] and [dyads_ild] for Gaussian examples, and

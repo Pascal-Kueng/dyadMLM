@@ -6,14 +6,17 @@ authors:
   - family-names: "Küng"
     given-names: "Pascal"
     orcid: "https://orcid.org/0000-0001-7346-9414"
+    affiliation: "University of Zurich"
 repository-code: "https://github.com/Pascal-Kueng/dyadMLM"
-url: "https://github.com/Pascal-Kueng/dyadMLM"
+url: "https://pascal-kueng.github.io/dyadMLM/"
 doi: "10.5281/zenodo.22047083"
 abstract: >-
   dyadMLM provides tools for dyadic multilevel modeling with linear and
-  generalized linear mixed-effects models. It prepares cross-sectional and
-  intensive longitudinal data for APIM, DSM, and DIM parameterizations and
-  provides selected model-comparison and covariance back-transformation tools.
+  generalized linear mixed-effects models. It validates and prepares
+  cross-sectional and intensive longitudinal dyadic data for Actor-Partner
+  Interdependence Model (APIM), Dyad-Individual Model (DIM), and Dyadic Score
+  Model (DSM) parameterizations. It also provides selected tools for model
+  comparison and covariance back-transformation.
 keywords:
   - dyadic data
   - multilevel models
