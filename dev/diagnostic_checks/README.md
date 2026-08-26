@@ -9,7 +9,7 @@ and tests are authoritative when they differ from this development note.
 
 ## Purpose and supported scope
 
-The feature asks whether a fitted model reproduces the observed spread and
+The feature asks whether a fitted model reproduces the observed variation and
 same-dyad association of two partner responses. It consists of:
 
 - `simulate_dyad_responses()`, which creates complete model-generated response
@@ -195,6 +195,11 @@ role-distinguishable and interchangeable dyads. The extended
 exercises the same public workflow across a fuller cross-sectional model
 sequence.
 
+The independent
+[`partner-dependence-reference-validation.Rmd`](partner-dependence-reference-validation.Rmd)
+reconstructs the Woody--Sadler exchangeable-dyad calculation and records the
+supplementary Dingy software cross-check.
+
 Before review or merge, regenerate the Rd files, run the focused and full test
 suites, render both development documents, run the package check, and verify CI
 on the exact PR head.
@@ -221,10 +226,13 @@ Those are separate features and should be developed and reviewed independently.
 R/simulate_dyad_responses.R
 R/predictive_checks_dependence.R
 man/simulate_dyad_responses.Rd
+man/print.dyadMLM_response_simulations.Rd
 man/check_partner_dependence.Rd
+man/print.dyadMLM_partner_check.Rd
 man/plot.dyadMLM_partner_check.Rd
 tests/testthat/test-simulate-dyad-responses.R
 tests/testthat/test-predictive-checks-dependence.R
 dev/diagnostic_checks/partner-dependence-review.Rmd
+dev/diagnostic_checks/partner-dependence-reference-validation.Rmd
 dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd
 ```

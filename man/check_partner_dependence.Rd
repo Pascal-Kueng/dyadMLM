@@ -27,35 +27,45 @@ only when members are substantively interchangeable.}
 \item{plot}{Logical. If \code{TRUE}, the default, draw the diagnostic plots.}
 
 \item{response}{Which values to summarize. \code{"model-centred"} (the default)
-subtracts the stored fixed marginal response centre. \code{"raw"} leaves
-responses unchanged. The same choice is applied to observed and simulated
-responses.}
+removes the fitted mean pattern. \code{"raw"} leaves responses unchanged. The
+same choice is applied to observed and simulated responses.}
 }
 \value{
 Invisibly, a \code{dyadMLM_partner_check} object containing the summary
 table, all replicated statistics, and the selected \code{response}. In the
-table, \code{observed_quantile} stores the observed position described above.
+table, \code{observed_quantile} stores the observed position: the proportion of
+simulated values at or below the observed value, with a finite-simulation
+correction.
 }
 \description{
-Compares the spread and association of partner responses in the observed data
-with the same summaries in datasets simulated from the fitted model.
+Checks whether a fitted model reproduces how much partners' responses vary
+and how strongly they are related. It compares the observed data with
+datasets generated from the fitted model.
 }
 \details{
-\code{response} controls which values are summarized. \code{"model-centred"} (the
-default) subtracts the same fixed expected response over new random effects
-from the observed response and every simulation. Random-effect and
-observation-level variation remain. \code{"raw"} leaves responses unchanged, so
-fitted mean patterns also contribute. Both options reuse the same simulations.
+For each summary, the result shows the observed value, the median and middle
+95\% of the simulated values, and the observed position among the simulations.
+A position near 0 or 1 means that the observation is near one edge of what
+the model generated. This position is descriptive; it is not a p-value.
 
-If \code{role} is supplied, results are shown separately by role and as equivalent
-dyad mean/difference summaries. If \code{role = NULL}, the function assumes that
-members are substantively interchangeable and uses summaries that are
-unchanged by swapping arbitrary member labels.
+Supply \code{role} when the two members have meaningful roles. The results then
+describe each role separately and also show dyad mean/difference summaries.
+With \code{role = NULL}, the members are treated as interchangeable, and the
+summaries do not depend on which member is listed first.
 
-The observed position shows where each observed summary falls among its
-simulated values, from 0 to 1. It is descriptive and is not a p-value.
+By default, \code{response = "model-centred"} removes the same fitted mean pattern
+from the observed and simulated responses. This focuses the check on the
+remaining variation and partner dependence. Use \code{response = "raw"} to keep
+the responses unchanged.
 
-\strong{Statistical details.} Model-centred values equal
+Currently, the function supports cross-sectional Gaussian identity-link
+\code{glmmTMB} simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Each dyad may
+have at most two fitted responses, and at least three complete dyads are
+required. With \code{role}, each complete dyad must contain one member in each of
+exactly two roles. Missing identifiers and incomplete dyads are omitted and
+counted in the result. The interface is experimental.
+
+\strong{Technical details.} Model-centred values equal
 \code{response - response_center}. The centre is fixed across the observed and
 simulated datasets, so newly generated random effects remain. These are
 model-centred response deviations, not conditional or PIT residuals. With
@@ -64,25 +74,32 @@ same covariance information. Without roles, the exchangeable calculation
 uses a half-difference root mean square about zero to recover the common
 member variance and covariance.
 
-With \code{role = NULL}, the exchangeable calculation follows Woody and Sadler's
-(2005) between-/within-dyad moment decomposition, expressed using dyad means
-and half-differences. Their paper supports this decomposition, not model
-centering or the predictive check. Kenny and Ackerman (2023), and del
-Rosario and West (2025), apply related sum-difference formulations to dyadic
-random effects.
+For interchangeable members, the calculation follows Woody and Sadler's
+(2005) between-/within-dyad decomposition. That paper supports the dyadic
+summary, not the model centring or predictive comparison. This function
+adapts the replicated-data comparison principle from Gelman, Meng, and Stern
+(1996). Here, the replicated data form a fixed-estimate plug-in reference,
+not a posterior predictive distribution.
+}
+\examples{
+if (requireNamespace("glmmTMB", quietly = TRUE)) {
+  example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+  model <- glmmTMB::glmmTMB(
+    closeness ~ gender + (1 | coupleID),
+    data = example_data
+  )
 
-Applying the same summary to observed and simulated data follows Gelman,
-Meng, and Stern (1996) and Gelman (2004). Hartig (2026) documents the closest
-same-centre custom-summary pattern. The raw partner-association comparison is
-Hoff-style: Hoff (2015) compares observed and simulated dyadic association.
-This function adapts that comparison to paired unconditional plug-in
-simulations.
+  simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
+  check <- check_partner_dependence(
+    simulations,
+    dyad = coupleID,
+    role = gender,
+    plot = FALSE
+  )
+  check
+  plot(check, parameterization = "member", ask = FALSE)
+}
 
-This function currently supports response simulations from cross-sectional
-Gaussian identity-link \code{glmmTMB} models. The interface is experimental.
-
-\code{dyad} and \code{role} may be fitted-model-frame columns or vectors aligned with
-the fitted rows. Quote a name to force selection from the model frame.
 }
 \references{
 Woody, E., & Sadler, P. (2005). Structural equation models for
@@ -93,24 +110,4 @@ Methods, 10}(2), 139-158.
 Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
 assessment of model fitness via realized discrepancies. \emph{Statistica Sinica,
 6}, 733-807.
-
-Gelman, A. (2004). Exploratory data analysis for complex models. \emph{Journal of
-Computational and Graphical Statistics, 13}(4), 755-779.
-\doi{10.1198/106186004X11435}.
-
-Hoff, P. D. (2015). Dyadic data analysis with \code{amen}. \emph{arXiv:1506.08237}.
-\doi{10.48550/arXiv.1506.08237}.
-
-Hartig, F. (2026). \emph{DHARMa: Residual Diagnostics for Hierarchical
-(Multi-Level / Mixed) Regression Models}, version 0.5.0.
-\href{https://cran.r-project.org/package=DHARMa}{CRAN manual}.
-
-Kenny, D. A., & Ackerman, R. A. (2023). \emph{Estimation of random effects in
-over-time dyadic data using multilevel modeling: The sum and difference
-method}. \href{https://osf.io/fju72/}{OSF preprint}.
-
-del Rosario, K. S., & West, T. V. (2025). A practical guide to specifying
-random effects in longitudinal dyadic multilevel modeling. \emph{Advances in
-Methods and Practices in Psychological Science, 8}(3), 1-36.
-\doi{10.1177/25152459251351286}.
 }

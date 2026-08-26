@@ -364,11 +364,13 @@ knitr::kable(results, digits = 9)
    the independent Woody--Sadler calculation within numerical tolerance.
 2. **Member order does not matter.** Swapping arbitrary member labels changes
    the direction of some half-differences, but none of the four results.
-3. **Dingy supports the same decomposition.** Its displayed partner
-   correlation is 0.50, compared with 0.504 for `dyadMLM`. The small difference
-   is fully explained by Dingy's ML division by \(n\) instead of \(n-1\); it is
-   not a problem in `dyadMLM`. The half-difference result is the same because
-   both methods measure it about zero and divide by \(n\).
+3. **The Dingy result is consistent with the same decomposition.** The live
+   output is a supplementary software cross-check under lavaan's ML scaling,
+   not the source of the method. Its displayed partner correlation is 0.50,
+   compared with 0.504 for `dyadMLM`. The small difference is fully explained
+   by Dingy's division by \(n\) instead of \(n-1\); it is not a problem in
+   `dyadMLM`. The half-difference result is the same because both methods
+   measure it about zero and divide by \(n\).
 
 These conclusions apply only to this deterministic summary calculation, not
 to the larger simulation-based diagnostic in which it is used.

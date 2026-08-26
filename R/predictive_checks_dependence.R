@@ -1,23 +1,32 @@
 #' Check whether a fitted model reproduces partner dependence
 #'
-#' Compares the spread and association of partner responses in the observed data
-#' with the same summaries in datasets simulated from the fitted model.
+#' Checks whether a fitted model reproduces how much partners' responses vary
+#' and how strongly they are related. It compares the observed data with
+#' datasets generated from the fitted model.
 #'
-#' `response` controls which values are summarized. `"model-centred"` (the
-#' default) subtracts the same fixed expected response over new random effects
-#' from the observed response and every simulation. Random-effect and
-#' observation-level variation remain. `"raw"` leaves responses unchanged, so
-#' fitted mean patterns also contribute. Both options reuse the same simulations.
+#' For each summary, the result shows the observed value, the median and middle
+#' 95% of the simulated values, and the observed position among the simulations.
+#' A position near 0 or 1 means that the observation is near one edge of what
+#' the model generated. This position is descriptive; it is not a p-value.
 #'
-#' If `role` is supplied, results are shown separately by role and as equivalent
-#' dyad mean/difference summaries. If `role = NULL`, the function assumes that
-#' members are substantively interchangeable and uses summaries that are
-#' unchanged by swapping arbitrary member labels.
+#' Supply `role` when the two members have meaningful roles. The results then
+#' describe each role separately and also show dyad mean/difference summaries.
+#' With `role = NULL`, the members are treated as interchangeable, and the
+#' summaries do not depend on which member is listed first.
 #'
-#' The observed position shows where each observed summary falls among its
-#' simulated values, from 0 to 1. It is descriptive and is not a p-value.
+#' By default, `response = "model-centred"` removes the same fitted mean pattern
+#' from the observed and simulated responses. This focuses the check on the
+#' remaining variation and partner dependence. Use `response = "raw"` to keep
+#' the responses unchanged.
 #'
-#' **Statistical details.** Model-centred values equal
+#' Currently, the function supports cross-sectional Gaussian identity-link
+#' `glmmTMB` simulations created by [simulate_dyad_responses()]. Each dyad may
+#' have at most two fitted responses, and at least three complete dyads are
+#' required. With `role`, each complete dyad must contain one member in each of
+#' exactly two roles. Missing identifiers and incomplete dyads are omitted and
+#' counted in the result. The interface is experimental.
+#'
+#' **Technical details.** Model-centred values equal
 #' `response - response_center`. The centre is fixed across the observed and
 #' simulated datasets, so newly generated random effects remain. These are
 #' model-centred response deviations, not conditional or PIT residuals. With
@@ -26,25 +35,12 @@
 #' uses a half-difference root mean square about zero to recover the common
 #' member variance and covariance.
 #'
-#' With `role = NULL`, the exchangeable calculation follows Woody and Sadler's
-#' (2005) between-/within-dyad moment decomposition, expressed using dyad means
-#' and half-differences. Their paper supports this decomposition, not model
-#' centering or the predictive check. Kenny and Ackerman (2023), and del
-#' Rosario and West (2025), apply related sum-difference formulations to dyadic
-#' random effects.
-#'
-#' Applying the same summary to observed and simulated data follows Gelman,
-#' Meng, and Stern (1996) and Gelman (2004). Hartig (2026) documents the closest
-#' same-centre custom-summary pattern. The raw partner-association comparison is
-#' Hoff-style: Hoff (2015) compares observed and simulated dyadic association.
-#' This function adapts that comparison to paired unconditional plug-in
-#' simulations.
-#'
-#' This function currently supports response simulations from cross-sectional
-#' Gaussian identity-link `glmmTMB` models. The interface is experimental.
-#'
-#' `dyad` and `role` may be fitted-model-frame columns or vectors aligned with
-#' the fitted rows. Quote a name to force selection from the model frame.
+#' For interchangeable members, the calculation follows Woody and Sadler's
+#' (2005) between-/within-dyad decomposition. That paper supports the dyadic
+#' summary, not the model centring or predictive comparison. This function
+#' adapts the replicated-data comparison principle from Gelman, Meng, and Stern
+#' (1996). Here, the replicated data form a fixed-estimate plug-in reference,
+#' not a posterior predictive distribution.
 #'
 #' @param simulations A `dyadMLM_response_simulations` object returned by
 #'   [simulate_dyad_responses()].
@@ -56,13 +52,33 @@
 #'   only when members are substantively interchangeable.
 #' @param plot Logical. If `TRUE`, the default, draw the diagnostic plots.
 #' @param response Which values to summarize. `"model-centred"` (the default)
-#'   subtracts the stored fixed marginal response centre. `"raw"` leaves
-#'   responses unchanged. The same choice is applied to observed and simulated
-#'   responses.
+#'   removes the fitted mean pattern. `"raw"` leaves responses unchanged. The
+#'   same choice is applied to observed and simulated responses.
 #'
 #' @return Invisibly, a `dyadMLM_partner_check` object containing the summary
 #'   table, all replicated statistics, and the selected `response`. In the
-#'   table, `observed_quantile` stores the observed position described above.
+#'   table, `observed_quantile` stores the observed position: the proportion of
+#'   simulated values at or below the observed value, with a finite-simulation
+#'   correction.
+#'
+#' @examples
+#' if (requireNamespace("glmmTMB", quietly = TRUE)) {
+#'   example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+#'   model <- glmmTMB::glmmTMB(
+#'     closeness ~ gender + (1 | coupleID),
+#'     data = example_data
+#'   )
+#'
+#'   simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
+#'   check <- check_partner_dependence(
+#'     simulations,
+#'     dyad = coupleID,
+#'     role = gender,
+#'     plot = FALSE
+#'   )
+#'   check
+#'   plot(check, parameterization = "member", ask = FALSE)
+#' }
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
@@ -72,26 +88,6 @@
 #' Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
 #' assessment of model fitness via realized discrepancies. *Statistica Sinica,
 #' 6*, 733-807.
-#'
-#' Gelman, A. (2004). Exploratory data analysis for complex models. *Journal of
-#' Computational and Graphical Statistics, 13*(4), 755-779.
-#' \doi{10.1198/106186004X11435}.
-#'
-#' Hoff, P. D. (2015). Dyadic data analysis with `amen`. *arXiv:1506.08237*.
-#' \doi{10.48550/arXiv.1506.08237}.
-#'
-#' Hartig, F. (2026). *DHARMa: Residual Diagnostics for Hierarchical
-#' (Multi-Level / Mixed) Regression Models*, version 0.5.0.
-#' [CRAN manual](https://cran.r-project.org/package=DHARMa).
-#'
-#' Kenny, D. A., & Ackerman, R. A. (2023). *Estimation of random effects in
-#' over-time dyadic data using multilevel modeling: The sum and difference
-#' method*. [OSF preprint](https://osf.io/fju72/).
-#'
-#' del Rosario, K. S., & West, T. V. (2025). A practical guide to specifying
-#' random effects in longitudinal dyadic multilevel modeling. *Advances in
-#' Methods and Practices in Psychological Science, 8*(3), 1-36.
-#' \doi{10.1177/25152459251351286}.
 #'
 #' @export
 check_partner_dependence <- function(
@@ -441,6 +437,19 @@ calculate_partner_response_statistics <- function(
 }
 
 
+#' Print a partner-dependence predictive check
+#'
+#' Prints each observed summary alongside the simulated median, middle 95%,
+#' and observed position.
+#'
+#' @param x An object returned by [check_partner_dependence()].
+#' @param digits Number of decimal places to print.
+#' @param ... Not used.
+#'
+#' @return `x`, invisibly.
+#'
+#' @keywords internal
+#'
 #' @export
 print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
   cat("<dyadMLM partner-dependence check>\n")
@@ -493,17 +502,24 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
 
 #' Plot partner-dependence predictive checks
 #'
-#' Draws each selected summary as a separate full-size plot. By default, it
-#' shows both the partner-level and equivalent dyad mean/difference summaries.
-#' The subtitle identifies whether the check uses model-centred or raw
-#' responses.
+#' Shows each observed summary as a red line against the values generated by
+#' the fitted model. Dashed lines mark the middle 95% of the simulated values.
+#' An observed value near or beyond these limits may indicate that the model
+#' does not reproduce that aspect of partner dependence well.
+#' The limits are descriptive reference values, not a pass/fail rule.
+#'
+#' By default, the method shows both the partner-level and equivalent dyad
+#' mean/difference summaries. The subtitle identifies whether the check uses
+#' model-centred or raw responses. These are two views of the same dependence
+#' information, not independent checks.
 #'
 #' @param x A `dyadMLM_partner_check` object.
 #' @param parameterization Which diagnostic view to show: `"both"`, partner-
 #'   level summaries (`"member"`), or dyad mean/difference summaries
 #'   (`"mean_difference"`).
-#' @param ask `NULL` uses interactive, one-plot-at-a-time behavior when more
-#'   than one statistic is shown. Supply `TRUE` or `FALSE` to override it.
+#' @param ask Whether to pause before drawing the next plot. `NULL` chooses
+#'   automatically in interactive sessions. Supply `TRUE` or `FALSE` to
+#'   override it.
 #' @param ... Additional graphical arguments passed to [graphics::plot()].
 #'   `freq`, `xlim`, `ylim`, `main`, `sub`, and `xlab` are controlled by this
 #'   method.
@@ -545,7 +561,7 @@ plot.dyadMLM_partner_check <- function(
     mean_difference = "Dyad mean/difference summaries"
   )
   response_subtitle <- if (x$response == "model-centred") {
-    "Marginal expected response removed; dependence retained"
+    "Fitted row-specific mean removed; remaining dependence retained"
   } else {
     "Raw responses; fitted mean pattern retained"
   }

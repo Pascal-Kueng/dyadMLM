@@ -1,7 +1,8 @@
 # dyadMLM (development version)
 
-* Added experimental simulation-based partner-dependence checks for
-  cross-sectional Gaussian `glmmTMB` models.
+* Added experimental `simulate_dyad_responses()` and
+  `check_partner_dependence()` functions for cross-sectional Gaussian
+  `glmmTMB` models.
 
 # dyadMLM 0.2.0
 

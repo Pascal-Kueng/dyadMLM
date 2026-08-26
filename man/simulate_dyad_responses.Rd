@@ -17,51 +17,31 @@ simulations. When supplied, the caller's random-number state is restored
 after the function returns, including after an error.}
 }
 \value{
-A \code{dyadMLM_response_simulations} object containing the observed and
-simulated response datasets used by predictive checks.
+A \code{dyadMLM_response_simulations} object for use with
+\code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 \description{
-Simulates new response datasets from a fitted model. Each simulation keeps
-the fitted rows, covariates, and parameter estimates fixed, but draws new
-random effects and Gaussian observation errors. Effects are regenerated at
-every modeled grouping level. When dyads are the only grouping factor, the
-simulations represent hypothetical new dyads observed under the same design;
-models with additional grouping factors also receive new effects at those
-levels.
+Creates response datasets from a fitted model for comparison with the
+observed data. They show what the model would generate for the same fitted
+rows and covariates.
 }
 \details{
-\strong{Statistical details.} This produces a plug-in predictive reference: the
-model is not refitted and parameter uncertainty is not propagated.
-Simulation is unconditional on every fitted random-effect value but
-conditional on the fitted parameters and fitted-row design.
+Each simulation keeps the fitted parameter estimates fixed and draws new
+random effects and Gaussian observation errors. When dyads are the only
+grouping factor, this represents hypothetical new dyads observed under the
+same design. Effects for any other modeled grouping levels are also redrawn.
 
-The result also stores one fixed response centre for each fitted row.
-Downstream checks may either use responses unchanged or subtract this same
-centre from the observed response and every simulated response. For the
-currently supported Gaussian identity model, the centre is the prediction
-with random effects set to zero. It is also the expected response after
-averaging over newly generated zero-mean random effects under the fitted
-parameter estimates.
+Currently, the function supports unweighted cross-sectional Gaussian
+identity-link \code{glmmTMB} models without zero inflation and with one numeric
+response per fitted row. The interface is experimental.
 
-The initial implementation has been validated for unweighted cross-sectional
-Gaussian identity-link \code{glmmTMB} models without zero inflation and with one
-numeric response per fitted row.
-The interface is experimental and may change as predictive checks expand.
-}
-\references{
-Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
-assessment of model fitness via realized discrepancies. \emph{Statistica Sinica,
-6}, 733-807.
+\strong{Technical details.} This is a plug-in predictive reference: the model is
+not refitted and uncertainty in the fitted parameters is not included. The
+simulation is conditional on those estimates and the fitted-row design, but
+not on the fitted random-effect values.
 
-Gelman, A. (2004). Exploratory data analysis for complex models. \emph{Journal of
-Computational and Graphical Statistics, 13}(4), 755-779.
-\doi{10.1198/106186004X11435}.
-
-Gelman, A. (2007). Comment: Bayesian checking of the second levels of
-hierarchical models. \emph{Statistical Science, 22}(3), 349-352.
-\doi{10.1214/07-STS235A}.
-
-Hartig, F. (2026). \emph{DHARMa: Residual Diagnostics for Hierarchical
-(Multi-Level / Mixed) Regression Models}, version 0.5.0.
-\href{https://cran.r-project.org/package=DHARMa}{CRAN manual}.
+The result stores one expected response for each fitted row. Downstream
+checks can use the responses unchanged or remove this same fitted mean
+pattern from the observed and simulated responses. For the supported model,
+this centre is the response prediction with random effects set to zero.
 }
