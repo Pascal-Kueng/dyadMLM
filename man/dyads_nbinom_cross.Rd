@@ -19,8 +19,7 @@ by a member.}
 Simulated for \code{dyadMLM}; design adapted from
 \url{https://github.com/Pascal-Kueng/05DyadicDataAnalysis}. See Küng,
 P. M. (2026). \emph{Distinguishable and Exchangeable Dyads: Bayesian
-Multilevel Modelling} (v2.0.9). Zenodo.
-\doi{10.5281/zenodo.20720321}.
+Multilevel Modelling}. Zenodo. \doi{10.5281/zenodo.17400655}.
 }
 \usage{
 dyads_nbinom_cross
