@@ -78,66 +78,63 @@ resolve_fitted_row_argument <- function(
 ) {
   argument_expression <- rlang::quo_get_expr(argument_quo)
   calling_environment <- rlang::quo_get_env(argument_quo)
-  unquoted_name <- if (rlang::is_symbol(argument_expression)) {
-    rlang::as_name(argument_expression)
-  } else {
-    NULL
-  }
 
   # Prefer a fitted column to an inherited object such as stats::time(). A
   # name defined directly by the caller is instead treated as an external
   # vector, which also preserves argument forwarding through wrappers.
-  if (!is.null(unquoted_name) &&
-      !exists(unquoted_name, envir = calling_environment, inherits = FALSE) &&
-      unquoted_name %in% names(model_frame)) {
-    return(model_frame[[unquoted_name]])
+  if (rlang::is_symbol(argument_expression)) {
+    column_name <- rlang::as_name(argument_expression)
+    if (column_name %in% names(model_frame) &&
+        !exists(column_name, envir = calling_environment, inherits = FALSE)) {
+      return(model_frame[[column_name]])
+    }
   }
 
-  resolved_value <- tryCatch(
+  value <- tryCatch(
     rlang::eval_tidy(argument_quo),
     error = function(error) {
       stop(
         sprintf(
           "`%s` could not be evaluated: %s",
-          argument_name,
-          conditionMessage(error)
+          argument_name, conditionMessage(error)
         ),
         call. = FALSE
       )
     }
   )
 
-  if (allow_null && is.null(resolved_value)) {
+  if (is.null(value) && allow_null) {
     return(NULL)
   }
 
-  if (rlang::is_string(resolved_value)) {
-    if (!resolved_value %in% names(model_frame)) {
+  if (rlang::is_string(value)) {
+    if (!value %in% names(model_frame)) {
       stop(
         sprintf(
-          "`%s` does not name a column in the fitted model frame.",
-          resolved_value
+          "`%s` does not name a column in the fitted model frame.", value
         ),
         call. = FALSE
       )
     }
-    return(model_frame[[resolved_value]])
+    return(model_frame[[value]])
   }
 
-  if (!is.atomic(resolved_value) || !is.null(dim(resolved_value)) ||
-      length(resolved_value) != nrow(model_frame)) {
+  valid_vector <- is.atomic(value) &&
+    is.null(dim(value)) &&
+    length(value) == nrow(model_frame)
+
+  if (!valid_vector) {
     stop(
       sprintf(
         paste0(
           "`%s` must name a column in the fitted model frame or evaluate ",
           "to a vector of length %d."
         ),
-        argument_name,
-        nrow(model_frame)
+        argument_name, nrow(model_frame)
       ),
       call. = FALSE
     )
   }
 
-  return(resolved_value)
+  value
 }
