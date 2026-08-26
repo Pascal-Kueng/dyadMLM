@@ -26,7 +26,11 @@ diagram_helper <- if (file.exists("diagram-helpers.Rinc")) {
 sys.source(diagram_helper, envir = knitr::knit_global())
 
 diagram_device <- .vignette_diagram_device()
-knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
+knitr::opts_chunk$set(
+  dev = diagram_device,
+  fig.ext = diagram_device,
+  dev.args = list(bg = "transparent")
+)
 ```
 
 ```{r setup}

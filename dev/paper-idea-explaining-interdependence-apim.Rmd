@@ -36,7 +36,11 @@ if (!is.na(helper_file)) {
   effect_colours <- c(actor = "#1769AA", partner = "#7B3FA1")
 }
 
-knitr::opts_chunk$set(dev = diagram_device, fig.ext = diagram_device)
+knitr::opts_chunk$set(
+  dev = diagram_device,
+  fig.ext = diagram_device,
+  dev.args = list(bg = "transparent")
+)
 
 colours <- c(
   actor = unname(effect_colours[["actor"]]),
