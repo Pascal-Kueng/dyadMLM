@@ -60,29 +60,9 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     }
     seed <- as.integer(seed)
 
-    # A supplied seed must not alter the caller's random-number state. Remember
-    # both its value and whether it existed before this function was called.
-    had_random_seed <- exists(
-      ".Random.seed",
-      envir = .GlobalEnv,
-      inherits = FALSE
-    )
-    saved_random_seed <- if (had_random_seed) {
-      get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-    } else {
-      NULL
-    }
-    on.exit({
-      if (had_random_seed) {
-        assign(".Random.seed", saved_random_seed, envir = .GlobalEnv)
-      } else if (exists(
-        ".Random.seed",
-        envir = .GlobalEnv,
-        inherits = FALSE
-      )) {
-        rm(".Random.seed", envir = .GlobalEnv)
-      }
-    }, add = TRUE)
+    # Use this seed only inside the function. On exit, restore the caller's
+    # previous random-number state (including the absence of one).
+    withr::local_seed(seed)
   }
 
   model_family <- stats::family(model)
@@ -164,7 +144,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
 
   # glmmTMB returns a data frame with fitted rows down and simulations across:
   # `n_fitted_rows` rows by `nsim` columns.
-  simulations_by_column <- stats::simulate(model, nsim = nsim, seed = seed)
+  simulations_by_column <- stats::simulate(model, nsim = nsim)
 
   # Store the result the other way around: one complete dataset per matrix row
   # and one fitted row per column (`nsim` by `n_fitted_rows`).

@@ -165,85 +165,11 @@ check_partner_dependence <- function(
   )
   role_was_supplied <- !is.null(role_values)
 
-  # Omit missing identifiers before building one pair map that is reused for
-  # the observed response and every complete simulated dataset.
-  missing_dyad_rows <- is.na(dyad_values)
-  n_missing_dyad_rows <- sum(missing_dyad_rows)
-
-  missing_role_rows <- rep(FALSE, n_fitted_rows)
-  if (role_was_supplied) {
-    # Rows already missing a dyad ID are counted only as missing dyad rows.
-    missing_role_rows <- !missing_dyad_rows & is.na(role_values)
-  }
-  n_missing_role_rows <- sum(missing_role_rows)
-
-  # First check the fitted cross-sectional structure. Missing roles must not
-  # hide a dyad with more than two fitted responses.
-  rows_by_dyad <- split(
-    which(!missing_dyad_rows),
-    dyad_values[!missing_dyad_rows],
-    drop = TRUE
-  )
-  fitted_rows_per_dyad <- lengths(rows_by_dyad)
-
-  if (any(fitted_rows_per_dyad > 2L)) {
-    stop(
-      paste0(
-        "Each dyad must have at most two fitted responses after rows with ",
-        "missing dyad IDs are omitted."
-      ),
-      call. = FALSE
-    )
-  }
-
-  # Missing roles can make an otherwise complete pair unusable. Keep the
-  # original fitted-row indices so the same map applies to every response.
-  usable_rows_by_dyad <- lapply(
-    rows_by_dyad,
-    function(rows) rows[!missing_role_rows[rows]]
-  )
-  usable_rows_per_dyad <- lengths(usable_rows_by_dyad)
-  complete_rows_by_dyad <- usable_rows_by_dyad[usable_rows_per_dyad == 2L]
-  n_incomplete_dyads <- sum(usable_rows_per_dyad < 2L)
-  if (length(complete_rows_by_dyad) < 3L) {
-    stop(
-      "At least three complete dyads are required to check partner dependence.",
-      call. = FALSE
-    )
-  }
-
-  paired_row_indices <- complete_rows_by_dyad |>
-    unlist(use.names = FALSE) |>
-    matrix(ncol = 2L, byrow = TRUE)
-
-  role_order <- NULL
-  if (role_was_supplied) {
-    role_order <- if (is.factor(role_values)) {
-      levels(droplevels(role_values[paired_row_indices]))
-    } else {
-      sort(unique(role_values[paired_row_indices]), na.last = NA)
-    }
-    if (length(role_order) != 2L) {
-      stop(
-        "Exactly two role values are required among the complete dyads.",
-        call. = FALSE
-      )
-    }
-
-    # Orient every pair by role rather than by its order in the fitted data.
-    for (pair_index in seq_len(nrow(paired_row_indices))) {
-      pair_roles <- role_values[paired_row_indices[pair_index, ]]
-      role_positions <- match(role_order, pair_roles)
-      if (anyNA(role_positions) || length(unique(pair_roles)) != 2L) {
-        stop(
-          "Each complete dyad must contain exactly one row for each role value.",
-          call. = FALSE
-        )
-      }
-      paired_row_indices[pair_index, ] <-
-        paired_row_indices[pair_index, role_positions]
-    }
-  }
+  # Build one pair map, oriented by role when supplied, and reuse it unchanged
+  # for the observed response and every simulation.
+  pair_info <- prepare_partner_pairs(dyad_values, role_values)
+  paired_row_indices <- pair_info$paired_row_indices
+  role_order <- pair_info$role_order
 
   # Use the same row-specific subtraction for observed and simulated responses.
   # Subtracting zero leaves raw responses unchanged.
@@ -253,7 +179,7 @@ check_partner_dependence <- function(
     rep(0, n_fitted_rows)
   }
 
-  # Apply exactly the same statistic code to the data and every simulation.
+  # Observed data: one response value for every fitted row.
   observed_response_values <-
     simulations$observed_response - response_values_to_subtract
   observed_statistics <- calculate_partner_response_statistics(
@@ -268,6 +194,9 @@ check_partner_dependence <- function(
     ncol = length(observed_statistics),
     dimnames = list(NULL, names(observed_statistics))
   )
+
+  # Simulated data: one generated dataset per row, with the same fitted-row
+  # order as the observed response. Apply exactly the same summaries to each.
   for (simulation_index in seq_len(simulations$nsim)) {
     simulated_response_values <-
       simulations$simulated_responses[simulation_index, ] -
@@ -292,88 +221,20 @@ check_partner_dependence <- function(
     )
   }
 
-  # Map statistic names to parameterizations and display labels.
-  statistics_table <- if (role_was_supplied) {
-    half_difference_direction <- paste(
-      role_order[[1L]],
-      "minus",
-      role_order[[2L]]
-    )
-    data.frame(
-      statistic_name = names(observed_statistics),
-      parameterization = rep(c("member", "mean_difference"), each = 3L),
-      label = c(
-        paste0("SD (", role_order[[1L]], ")"),
-        paste0("SD (", role_order[[2L]], ")"),
-        paste0(
-          "Partner correlation (",
-          role_order[[1L]], " and ", role_order[[2L]],
-          ")"
-        ),
-        "Dyad-average SD",
-        paste0(
-          "Half-difference SD (",
-          half_difference_direction,
-          ")"
-        ),
-        paste0(
-          "Dyad-average/role-difference correlation (",
-          half_difference_direction,
-          ")"
-        )
-      )
-    )
-  } else {
-    data.frame(
-      statistic_name = names(observed_statistics),
-      parameterization = rep(c("member", "mean_difference"), each = 2L),
-      label = c(
-        "Common member SD (exchangeable)",
-        "Partner correlation (exchangeable)",
-        "Dyad-average SD",
-        "Half-difference RMS (about zero)"
-      )
-    )
-  }
-
-  statistics_table$observed_value <- unname(observed_statistics)
-  statistics_table$replicated_median <- NA_real_
-  statistics_table$replicated_lower <- NA_real_
-  statistics_table$replicated_upper <- NA_real_
-  statistics_table$observed_quantile <- NA_real_
-
-  # Summarize each replicated reference distribution.
-  for (statistic_index in seq_len(nrow(statistics_table))) {
-    replicated_statistic_values <- replicated_statistics[, statistic_index]
-    replicated_95_percent_interval <- stats::quantile(
-      replicated_statistic_values,
-      probs = c(0.025, 0.975),
-      names = FALSE
-    )
-
-    statistics_table$replicated_median[[statistic_index]] <-
-      stats::median(replicated_statistic_values)
-    statistics_table$replicated_lower[[statistic_index]] <-
-      replicated_95_percent_interval[[1L]]
-    statistics_table$replicated_upper[[statistic_index]] <-
-      replicated_95_percent_interval[[2L]]
-
-    # This finite-simulation rank is descriptive; it is not a p-value.
-    statistics_table$observed_quantile[[statistic_index]] <-
-      (1 + sum(
-        replicated_statistic_values <= observed_statistics[[statistic_index]]
-      )) /
-      (simulations$nsim + 1)
-  }
+  statistics_table <- summarize_partner_statistics(
+    observed_statistics = observed_statistics,
+    replicated_statistics = replicated_statistics,
+    role_order = role_order
+  )
 
   partner_check_result <- list(
     statistics_table = statistics_table,
     replicated_statistics = replicated_statistics,
     role_order = as.character(role_order),
     n_pairs = nrow(paired_row_indices),
-    n_incomplete_dyads = n_incomplete_dyads,
-    n_missing_dyad_rows = n_missing_dyad_rows,
-    n_missing_role_rows = n_missing_role_rows,
+    n_incomplete_dyads = pair_info$n_incomplete_dyads,
+    n_missing_dyad_rows = pair_info$n_missing_dyad_rows,
+    n_missing_role_rows = pair_info$n_missing_role_rows,
     response = response,
     backend = simulations$backend,
     family = simulations$family,
@@ -392,6 +253,102 @@ check_partner_dependence <- function(
   }
 
   invisible(partner_check_result)
+}
+
+
+# Find complete dyads and store both partners' fitted-row positions.
+prepare_partner_pairs <- function(dyad_values, role_values = NULL) {
+  n_fitted_rows <- length(dyad_values)
+  role_was_supplied <- !is.null(role_values)
+
+  missing_dyad_rows <- is.na(dyad_values)
+  n_missing_dyad_rows <- sum(missing_dyad_rows)
+
+  missing_role_rows <- rep(FALSE, n_fitted_rows)
+  if (role_was_supplied) {
+    # A row missing both identifiers is counted only as missing its dyad ID.
+    missing_role_rows <- !missing_dyad_rows & is.na(role_values)
+  }
+  n_missing_role_rows <- sum(missing_role_rows)
+
+  rows_by_dyad <- split(
+    which(!missing_dyad_rows),
+    dyad_values[!missing_dyad_rows],
+    drop = TRUE
+  )
+
+  # Check this before omitting missing roles, so a missing role cannot hide a
+  # dyad with more than two fitted responses.
+  if (any(lengths(rows_by_dyad) > 2L)) {
+    stop(
+      paste0(
+        "Each dyad must have at most two fitted responses after rows with ",
+        "missing dyad IDs are omitted."
+      ),
+      call. = FALSE
+    )
+  }
+
+  usable_rows_by_dyad <- lapply(
+    rows_by_dyad,
+    function(rows) rows[!missing_role_rows[rows]]
+  )
+
+  # After missing roles are removed, exactly two usable rows form a complete
+  # dyad. Every other identifiable dyad is counted once as incomplete.
+  usable_rows_per_dyad <- lengths(usable_rows_by_dyad)
+  complete_rows_by_dyad <- usable_rows_by_dyad[usable_rows_per_dyad == 2L]
+  n_incomplete_dyads <- sum(usable_rows_per_dyad < 2L)
+
+  if (length(complete_rows_by_dyad) < 3L) {
+    stop(
+      "At least three complete dyads are required to check partner dependence.",
+      call. = FALSE
+    )
+  }
+
+  paired_row_indices <- complete_rows_by_dyad |>
+    unlist(use.names = FALSE) |>
+    matrix(ncol = 2L, byrow = TRUE)
+
+  # Each row now represents one complete dyad. The columns contain positions
+  # in the fitted data and therefore index every observed or simulated response.
+  role_order <- NULL
+  if (role_was_supplied) {
+    role_order <- if (is.factor(role_values)) {
+      levels(droplevels(role_values[paired_row_indices]))
+    } else {
+      sort(unique(role_values[paired_row_indices]), na.last = NA)
+    }
+    if (length(role_order) != 2L) {
+      stop(
+        "Exactly two role values are required among the complete dyads.",
+        call. = FALSE
+      )
+    }
+
+    # Give both columns a stable meaning: role 1, then role 2.
+    for (pair_index in seq_len(nrow(paired_row_indices))) {
+      pair_roles <- role_values[paired_row_indices[pair_index, ]]
+      role_positions <- match(role_order, pair_roles)
+      if (anyNA(role_positions) || length(unique(pair_roles)) != 2L) {
+        stop(
+          "Each complete dyad must contain exactly one row for each role value.",
+          call. = FALSE
+        )
+      }
+      paired_row_indices[pair_index, ] <-
+        paired_row_indices[pair_index, role_positions]
+    }
+  }
+
+  list(
+    paired_row_indices = paired_row_indices,
+    role_order = role_order,
+    n_incomplete_dyads = n_incomplete_dyads,
+    n_missing_dyad_rows = n_missing_dyad_rows,
+    n_missing_role_rows = n_missing_role_rows
+  )
 }
 
 
@@ -445,6 +402,102 @@ calculate_partner_response_statistics <- function(
     dyad_mean_sd = sqrt(dyad_average_variance),
     half_difference_rms = sqrt(half_difference_mean_square)
   )
+}
+
+
+# Combine the observed summaries with their simulated reference distributions.
+summarize_partner_statistics <- function(
+  observed_statistics,
+  replicated_statistics,
+  role_order = NULL
+) {
+  statistic_names <- names(observed_statistics)
+
+  if (!is.null(role_order)) {
+    half_difference_direction <- paste(
+      role_order[[1L]],
+      "minus",
+      role_order[[2L]]
+    )
+    statistic_parameterizations <- c(
+      role_1_sd = "member",
+      role_2_sd = "member",
+      partner_correlation = "member",
+      dyad_mean_sd = "mean_difference",
+      half_difference_sd = "mean_difference",
+      dyad_mean_half_difference_correlation = "mean_difference"
+    )
+    statistic_labels <- c(
+      role_1_sd = paste0("SD (", role_order[[1L]], ")"),
+      role_2_sd = paste0("SD (", role_order[[2L]], ")"),
+      partner_correlation = paste0(
+        "Partner correlation (",
+        role_order[[1L]], " and ", role_order[[2L]],
+        ")"
+      ),
+      dyad_mean_sd = "Dyad-average SD",
+      half_difference_sd = paste0(
+        "Half-difference SD (",
+        half_difference_direction,
+        ")"
+      ),
+      dyad_mean_half_difference_correlation = paste0(
+        "Dyad-average/role-difference correlation (",
+        half_difference_direction,
+        ")"
+      )
+    )
+  } else {
+    statistic_parameterizations <- c(
+      exchangeable_member_sd = "member",
+      exchangeable_partner_correlation = "member",
+      dyad_mean_sd = "mean_difference",
+      half_difference_rms = "mean_difference"
+    )
+    statistic_labels <- c(
+      exchangeable_member_sd = "Common member SD (exchangeable)",
+      exchangeable_partner_correlation =
+        "Partner correlation (exchangeable)",
+      dyad_mean_sd = "Dyad-average SD",
+      half_difference_rms = "Half-difference RMS (about zero)"
+    )
+  }
+
+  # Each column is one statistic across all simulated datasets. These rows are
+  # the lower limit, median, and upper limit of its simulated distribution.
+  replicated_reference_points <- apply(
+    replicated_statistics,
+    MARGIN = 2L,
+    FUN = stats::quantile,
+    probs = c(0.025, 0.5, 0.975),
+    names = FALSE
+  )
+
+  # This finite-simulation rank is descriptive; it is not a p-value.
+  observed_positions <- vapply(
+    seq_along(observed_statistics),
+    function(statistic_index) {
+      replicated_statistic_values <-
+        replicated_statistics[, statistic_index]
+      (1 + sum(
+        replicated_statistic_values <= observed_statistics[[statistic_index]]
+      )) / (nrow(replicated_statistics) + 1)
+    },
+    numeric(1)
+  )
+
+  statistics_table <- data.frame(
+    statistic_name = statistic_names,
+    parameterization = unname(statistic_parameterizations[statistic_names]),
+    label = unname(statistic_labels[statistic_names]),
+    observed_value = unname(observed_statistics),
+    replicated_median = unname(replicated_reference_points[2L, ]),
+    replicated_lower = unname(replicated_reference_points[1L, ]),
+    replicated_upper = unname(replicated_reference_points[3L, ]),
+    observed_quantile = unname(observed_positions)
+  )
+
+  statistics_table
 }
 
 
@@ -586,8 +639,13 @@ plot.dyadMLM_partner_check <- function(
     statistic_row <- selected_statistics_table[statistic_index, ]
     replicated_statistic_values <-
       x$replicated_statistics[, statistic_row$statistic_name, drop = TRUE]
+    reference_limits <- c(
+      statistic_row$replicated_lower,
+      statistic_row$replicated_upper
+    )
     x_axis_range <- range(
-      c(statistic_row$observed_value, replicated_statistic_values),
+      statistic_row$observed_value,
+      replicated_statistic_values,
       finite = TRUE
     )
     replicated_histogram <- graphics::hist(
@@ -618,15 +676,9 @@ plot.dyadMLM_partner_check <- function(
       ...
     )
     graphics::segments(
-      x0 = c(
-        statistic_row$replicated_lower,
-        statistic_row$replicated_upper
-      ),
+      x0 = reference_limits,
       y0 = 0,
-      x1 = c(
-        statistic_row$replicated_lower,
-        statistic_row$replicated_upper
-      ),
+      x1 = reference_limits,
       y1 = highest_histogram_count,
       lty = 2,
       col = "grey40"

@@ -44,7 +44,8 @@ Imports:
     pillar,
     rlang (>= 0.4.0),
     tidyselect,
-    tibble (>= 3.0.0)
+    tibble (>= 3.0.0),
+    withr (>= 3.0.3)
 VignetteBuilder: knitr, rmarkdown
 Depends: 
     R (>= 4.1)
