@@ -21,6 +21,7 @@ A \code{dyadMLM_response_simulations} object for use with
 \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Creates response datasets from a fitted model for comparison with the
 observed data. They show what the model would generate for the same fitted
 rows and covariates.

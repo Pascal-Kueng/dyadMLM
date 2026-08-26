@@ -38,6 +38,7 @@ simulated values at or below the observed value, with a finite-simulation
 correction.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 Checks whether a fitted model reproduces how much partners' responses vary
 and how strongly they are related. It compares the observed data with
 datasets generated from the fitted model.

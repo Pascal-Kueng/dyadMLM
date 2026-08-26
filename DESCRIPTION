@@ -33,6 +33,7 @@ Suggests:
     htmltools,
     knitr,
     lavaan,
+    lifecycle,
     marginaleffects,
     rmarkdown,
     spelling,
