@@ -30,7 +30,8 @@
 #' @param nsim Number of complete response datasets to simulate. The default
 #' is 1000.
 #' @param seed `NULL` or one non-negative whole number used to reproduce the
-#'   simulations.
+#'   simulations. When supplied, the caller's random-number state is restored
+#'   after the function returns, including after an error.
 #'
 #' @return A `dyadMLM_response_simulations` object containing the observed and
 #'   simulated response datasets used by predictive checks.
@@ -77,6 +78,29 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
       stop("`seed` must be `NULL` or one non-negative whole number.", call. = FALSE)
     }
     seed <- as.integer(seed)
+
+    # Restore both the value and the prior existence of the caller's RNG state.
+    random_seed_existed <- exists(
+      ".Random.seed",
+      envir = .GlobalEnv,
+      inherits = FALSE
+    )
+    original_random_seed <- if (random_seed_existed) {
+      get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+    } else {
+      NULL
+    }
+    on.exit({
+      if (random_seed_existed) {
+        assign(".Random.seed", original_random_seed, envir = .GlobalEnv)
+      } else if (exists(
+        ".Random.seed",
+        envir = .GlobalEnv,
+        inherits = FALSE
+      )) {
+        rm(".Random.seed", envir = .GlobalEnv)
+      }
+    }, add = TRUE)
   }
 
   model_family <- stats::family(model)

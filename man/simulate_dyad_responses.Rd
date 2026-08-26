@@ -13,7 +13,8 @@ simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 is 1000.}
 
 \item{seed}{\code{NULL} or one non-negative whole number used to reproduce the
-simulations.}
+simulations. When supplied, the caller's random-number state is restored
+after the function returns, including after an error.}
 }
 \value{
 A \code{dyadMLM_response_simulations} object containing the observed and

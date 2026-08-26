@@ -124,6 +124,26 @@ test_that("seeded response simulations are reproducible", {
 
   expect_identical(first$simulated_responses, second$simulated_responses)
   expect_false(identical(first$simulated_responses, third$simulated_responses))
+
+  # A supplied seed also restores the absence of a global RNG state.
+  on.exit(
+    assign(".Random.seed", rng_state, envir = .GlobalEnv),
+    add = TRUE
+  )
+  rm(".Random.seed", envir = .GlobalEnv)
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+
+  without_existing_state <- simulate_dyad_responses(
+    model,
+    nsim = 5,
+    seed = 456
+  )
+
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+  expect_identical(
+    without_existing_state$simulated_responses,
+    first$simulated_responses
+  )
 })
 
 
@@ -218,11 +238,20 @@ test_that("model simulation settings are restored after an error", {
     stop("forced simulation failure", call. = FALSE)
   }
 
+  rng_state <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  on.exit(
+    assign(".Random.seed", rng_state, envir = .GlobalEnv),
+    add = TRUE
+  )
+  rm(".Random.seed", envir = .GlobalEnv)
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+
   expect_error(
     simulate_dyad_responses(model, nsim = 5, seed = 101),
     "forced simulation failure",
     fixed = TRUE
   )
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
   expect_identical(get_glmmTMB_simulation_codes(model), caller_codes)
 })
 
