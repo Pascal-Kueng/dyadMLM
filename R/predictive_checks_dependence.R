@@ -4,10 +4,20 @@
 #' and how strongly they are related. It compares the observed data with
 #' datasets generated from the fitted model.
 #'
+#' **When is this useful?** This check is most useful when the model makes a
+#' clear simplifying assumption about the partner pattern. Examples are that
+#' there is no remaining relationship between partners' responses, that both
+#' roles vary by the same amount. A model that was allowed to learn the same
+#' pattern freely from the data will usually reproduce it in simulated data. In
+#' that case, close agreement mainly shows that the simulation matches what the
+#' model learned; it does not by itself show that the model describes the data
+#' well.
+#'
 #' For each summary, the result shows the observed value, the median and middle
-#' 95% of the simulated values, and the observed position among the simulations.
-#' A position near 0 or 1 means that the observation is near one edge of what
-#' the model generated. This position is descriptive; it is not a p-value.
+#' 95% of the simulated values, and where the observed value falls among the
+#' simulations. A position near 0 or 1 means that the observation is near one
+#' edge of what the model generated. This position is a descriptive guide; it
+#' is not a p-value.
 #'
 #' Supply `role` when the two members have meaningful roles. The results then
 #' describe each role separately and also show dyad mean/difference summaries.
@@ -507,6 +517,11 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
 #' An observed value near or beyond these limits may indicate that the model
 #' does not reproduce that aspect of partner dependence well.
 #' The limits are descriptive reference values, not a pass/fail rule.
+#'
+#' A value near the middle is not automatically evidence of a good model. If
+#' the model estimated that same feature from these data, close agreement is
+#' expected. These plots add the most information when the model fixes or
+#' simplifies the feature shown.
 #'
 #' By default, the method shows both the partner-level and equivalent dyad
 #' mean/difference summaries. The subtitle identifies whether the check uses

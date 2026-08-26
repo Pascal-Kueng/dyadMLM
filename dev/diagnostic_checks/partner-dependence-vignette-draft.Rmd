@@ -8,6 +8,21 @@ This extended development example exercises the cross-sectional Gaussian
 [development review](partner-dependence-review.Rmd) for the primary review
 artifact.
 
+# When is this check most informative?
+
+The check is most useful when a model makes a clear simplifying assumption
+that could be wrong. For example, it can show whether assuming that two
+different roles vary by the same amount hides an important role difference. If
+the model was allowed to learn the same amount of variation and the same
+partner relationship freely from the data, a close match is expected. It mainly
+shows that the model can reproduce what it already learned; it provides little
+new evidence that the model describes the data well.
+
+Similar checks may become useful when a generalized model needs simpler
+assumptions about the partner pattern or models response variation separately.
+These are future use cases: the implementation shown here currently supports
+only cross-sectional Gaussian identity-link models.
+
 ```{r setup, include=FALSE}
 package_root <- normalizePath(file.path("..", ".."))
 devtools::load_all(package_root, quiet = TRUE)
@@ -76,6 +91,7 @@ m_c_simulations |>
     response = "model-centred"
   )
 ```
+
 ### Raw responses
 
 ```{r}
@@ -134,13 +150,13 @@ m_w1_simulations |>
   )
 ```
 
-The diagnostics are compatible with this simpler covariance structure. It
-retains the role-specific fixed effects but constrains the remaining covariance
-to equal marginal variances and nonnegative compound symmetry. In these data,
-the simpler model has slightly lower AIC, and the likelihood-ratio comparison
-below provides no clear evidence that the more flexible role-specific
-covariance improves fit. This is not evidence that partners are interchangeable
-or that the two covariance structures are equivalent.
+In these data, the check did not show a clear mismatch for this simpler
+covariance structure. It retains the role-specific fixed effects but constrains
+the remaining covariance to equal marginal variances and nonnegative compound
+symmetry. The simpler model has slightly lower AIC, and the likelihood-ratio
+comparison below provides no clear evidence that the more flexible
+role-specific covariance improves fit. This is not evidence that partners are
+interchangeable or that the two covariance structures are equivalent.
 
 ```{r}
 compare_nested_models(
@@ -238,6 +254,7 @@ m_w3_simulations |>
     response = "raw"
   )
 ```
+
 # Sensitivity analysis: treating partners as exchangeable
 
 Here, the female-male data are deliberately treated as exchangeable. The

@@ -37,6 +37,11 @@ does not reproduce that aspect of partner dependence well.
 The limits are descriptive reference values, not a pass/fail rule.
 }
 \details{
+A value near the middle is not automatically evidence of a good model. If
+the model estimated that same feature from these data, close agreement is
+expected. These plots add the most information when the model fixes or
+simplifies the feature shown.
+
 By default, the method shows both the partner-level and equivalent dyad
 mean/difference summaries. The subtitle identifies whether the check uses
 model-centred or raw responses. These are two views of the same dependence

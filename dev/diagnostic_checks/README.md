@@ -162,6 +162,14 @@ the complete replicated-statistic matrix, and for every summary:
 The observed position is descriptive and is not a p-value. The middle 95%
 interval is a predictive-reference summary, not a calibrated acceptance region.
 
+This check is most useful when the model makes a clear simplifying assumption
+that could be wrong. If the model was allowed to learn the same pattern freely
+from the data, a close match is expected and mostly repeats what the model
+already learned. For example, when a model assumes no remaining relationship
+between partners' responses, the correlation result can reveal a problem,
+while the amount-of-variation results may mainly repeat values the model was
+allowed to estimate.
+
 Plots show a histogram of each simulated summary, the observed value, and the
 middle 95% interval. The subtitle states whether raw or model-centred responses
 were used and reports the number of complete pairs.
@@ -200,8 +208,14 @@ The independent
 reconstructs the Woody--Sadler exchangeable-dyad calculation and records the
 supplementary Dingy software cross-check.
 
+The self-contained
+[`partner-dependence-outer-simulation-study.Rmd`](partner-dependence-outer-simulation-study.Rmd)
+repeatedly generates data from known Gaussian populations, refits correct and
+restricted models, and records how the complete check behaves. It is a
+development validation report and is not run in CI.
+
 Before review or merge, regenerate the Rd files, run the focused and full test
-suites, render both development documents, run the package check, and verify CI
+suites, render the development documents, run the package check, and verify CI
 on the exact PR head.
 
 ## Explicit exclusions
@@ -234,5 +248,6 @@ tests/testthat/test-simulate-dyad-responses.R
 tests/testthat/test-predictive-checks-dependence.R
 dev/diagnostic_checks/partner-dependence-review.Rmd
 dev/diagnostic_checks/partner-dependence-reference-validation.Rmd
+dev/diagnostic_checks/partner-dependence-outer-simulation-study.Rmd
 dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd
 ```

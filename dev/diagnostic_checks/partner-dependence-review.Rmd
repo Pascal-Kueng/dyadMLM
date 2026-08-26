@@ -250,8 +250,9 @@ findings <- do.call(
 knitr::kable(findings)
 ```
 
-The expected pattern is that the intended models remain compatible with the
-observed summaries. Omitting partner correlation should affect the partner
-correlation and its mean/difference representation. The gender-aware view of
-the exchangeable constraint can reveal role asymmetry that is not apparent in
-the pooled view.
+The flexible model is expected to reproduce features that it learned from the
+same data. A close match there therefore adds little new evidence about model
+fit. The deliberately simpler models provide the more informative comparisons:
+leaving out partner correlation should make the correlation summaries stand
+out, while forcing both roles to vary equally can reveal a role difference that
+the pooled view hides.
