@@ -1,0 +1,374 @@
+---
+title: "Reference validation: exchangeable partner-dependence summaries"
+output:
+  html_document:
+    toc: true
+---
+
+This report answers one narrow question: does
+`calculate_partner_response_statistics()` correctly summarize partner
+dependence for exchangeable dyads?
+
+It checks the calculation against the equations in Woody and Sadler (2005)
+and against David Kenny's Dingy application. It does **not** validate the
+simulation-based predictive comparison, model centring, or calibration used
+elsewhere in `dyadMLM`.
+
+```{r setup, include=FALSE}
+package_root <- normalizePath(file.path("..", ".."))
+devtools::load_all(package_root, quiet = TRUE)
+
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+
+tolerance <- 1e-12
+```
+
+# What is being checked?
+
+For each dyad, the two member values are rewritten as:
+
+\[
+M_i = \frac{Y_{i1} + Y_{i2}}{2}, \qquad
+D_i = \frac{Y_{i1} - Y_{i2}}{2}.
+\]
+
+In plain language, \(M_i\) is the dyad average and \(D_i\) is half of the gap
+between the two members. When members are interchangeable, it is arbitrary
+which member is written first. The sign of \(D_i\) is therefore arbitrary, and
+its size is measured relative to zero rather than relative to its sample mean.
+
+The reference calculation was written independently of the `dyadMLM`
+implementation, directly from the published equations in Woody and Sadler
+(2005), *Structural Equation Models for Interchangeable Dyads:
+Being the Same Makes a Difference*, *Psychological Methods, 10*(2), 139--158
+([article](https://doi.org/10.1037/1082-989X.10.2.139);
+[APA supplement](https://supp.apa.org/psycarticles/supplemental/1082-989X.10.2.139/1082-989X.10.2.139_supp.html)).
+No code or data were copied from the supplement.
+The external comparison uses Kenny's
+[Dingy application and documentation](https://davidakenny.net/DyadR/DyadRweb.htm).
+
+# Make a small reproducible dataset
+
+The data contain 48 complete dyads. They are built from a dyad average and a
+half-difference so that both parts of the calculation are easy to see.
+
+```{r validation-data}
+set.seed(20260826L)
+
+n_dyads <- 48L
+generated_means <- rnorm(n_dyads, mean = 2, sd = 1.1)
+generated_half_differences <- rnorm(n_dyads, mean = 0, sd = 0.55)
+
+validation_data <- data.frame(
+  dyad = seq_len(n_dyads),
+  member_1 = generated_means + generated_half_differences,
+  member_2 = generated_means - generated_half_differences
+)
+
+stopifnot(
+  nrow(validation_data) >= 40L,
+  all(complete.cases(validation_data))
+)
+
+dingy_csv <- file.path(
+  tempdir(),
+  "dyadMLM-partner-dependence-validation.csv"
+)
+write.csv(validation_data, dingy_csv, row.names = FALSE)
+
+cat("Optional Dingy upload file:", dingy_csv, "\n")
+head(validation_data)
+```
+
+The CSV is temporary and is not saved in the repository.
+
+# Run the current dyadMLM calculation
+
+The helper expects the member values in two stacked blocks and an index showing
+which two rows belong to the same dyad.
+
+```{r dyadmlm-calculation}
+response_values <- c(
+  validation_data$member_1,
+  validation_data$member_2
+)
+
+paired_rows <- cbind(
+  seq_len(n_dyads),
+  n_dyads + seq_len(n_dyads)
+)
+
+dyadmlm_result <-
+  dyadMLM:::calculate_partner_response_statistics(
+    response_values,
+    paired_rows,
+    use_role_specific_statistics = FALSE
+  )
+
+dyadmlm_result
+```
+
+# Recalculate the same quantities from the published equations
+
+This small function is independent of `dyadMLM`. Each calculation is written
+out directly.
+
+```{r woody-sadler-reference}
+woody_sadler_reference <- function(member_1, member_2) {
+  n <- length(member_1)
+  stopifnot(n == length(member_2), n >= 2L)
+
+  M <- (member_1 + member_2) / 2
+  D <- (member_1 - member_2) / 2
+
+  MS_between <- 2 * var(M)
+  MS_within <- sum((member_1 - member_2)^2) / (2 * n)
+
+  member_variance <- (MS_between + MS_within) / 2
+  partner_covariance <- (MS_between - MS_within) / 2
+
+  c(
+    MS_between = MS_between,
+    MS_within = MS_within,
+    exchangeable_member_sd = sqrt(member_variance),
+    exchangeable_partner_correlation =
+      partner_covariance / member_variance,
+    dyad_mean_sd = sqrt(MS_between / 2),
+    half_difference_rms = sqrt(MS_within / 2)
+  )
+}
+
+reference_calculation <- woody_sadler_reference(
+  validation_data$member_1,
+  validation_data$member_2
+)
+
+reference_result <- reference_calculation[names(dyadmlm_result)]
+
+absolute_difference <- abs(dyadmlm_result - reference_result)
+stopifnot(max(absolute_difference) <= tolerance)
+
+cat("Largest absolute difference:", max(absolute_difference), "\n")
+```
+
+The following direct check makes the two key identities explicit.
+
+```{r moment-identities}
+M <- (validation_data$member_1 + validation_data$member_2) / 2
+D <- (validation_data$member_1 - validation_data$member_2) / 2
+
+identity_check <- data.frame(
+  quantity = c("MS_between", "MS_within"),
+  reference_value = unname(reference_calculation[c(
+    "MS_between", "MS_within"
+  )]),
+  direct_value = c(
+    2 * var(M),
+    2 * mean(D^2)
+  )
+)
+
+stopifnot(
+  max(abs(identity_check$reference_value - identity_check$direct_value)) <=
+    tolerance
+)
+
+identity_check
+```
+
+Thus, \(MS_{between}=2\operatorname{var}(M)\) and
+\(MS_{within}=2\operatorname{mean}(D^2)\). There is one intentional
+finite-sample difference between them: `var(M)` divides by \(n-1\), while
+`mean(D^2)` divides by \(n\) and measures the half-differences about zero.
+
+# Check that member order does not matter
+
+We now swap the two member columns for the same reproducible set of 16 dyads.
+
+```{r member-order-invariance}
+set.seed(20260827L)
+rows_to_swap <- sort(sample(seq_len(n_dyads), size = 16L))
+
+swapped_data <- validation_data
+old_member_1 <- swapped_data$member_1[rows_to_swap]
+swapped_data$member_1[rows_to_swap] <-
+  swapped_data$member_2[rows_to_swap]
+swapped_data$member_2[rows_to_swap] <- old_member_1
+
+swapped_D <- (swapped_data$member_1 - swapped_data$member_2) / 2
+
+swapped_dyadmlm_result <-
+  dyadMLM:::calculate_partner_response_statistics(
+    c(swapped_data$member_1, swapped_data$member_2),
+    paired_rows,
+    use_role_specific_statistics = FALSE
+  )
+
+swapped_reference <- woody_sadler_reference(
+  swapped_data$member_1,
+  swapped_data$member_2
+)[names(dyadmlm_result)]
+
+stopifnot(
+  max(abs(swapped_dyadmlm_result - dyadmlm_result)) <= tolerance,
+  max(abs(swapped_reference - reference_result)) <= tolerance,
+  max(abs(swapped_D[rows_to_swap] + D[rows_to_swap])) <= tolerance,
+  max(abs(swapped_D^2 - D^2)) <= tolerance
+)
+
+data.frame(
+  statistic = names(dyadmlm_result),
+  before_swap = unname(dyadmlm_result),
+  after_swap = unname(swapped_dyadmlm_result),
+  absolute_difference = unname(abs(
+    swapped_dyadmlm_result - dyadmlm_result
+  ))
+)
+```
+
+The swaps reverse the sign of \(D\) for those dyads but leave \(D^2\), and
+therefore all four summaries, unchanged.
+
+# Compare with Dingy
+
+To repeat the external check in Dingy:
+
+1. Upload the temporary CSV printed above.
+2. Use `member_1` and `member_2` as the two versions of one mixed variable.
+3. Treat the two positions as indistinguishable and request the
+   nonindependence analysis.
+4. Retain the tables and computer/lavaan output.
+
+The following values were transcribed from the live Dingy run on 2026-08-26.
+Dingy displayed lavaan 0.6-19. Its parameter estimates were rounded to two
+decimal places and its chi-square statistic to three decimal places.
+
+```{r dingy-values}
+# Source: live Dingy web run with the generated CSV on 2026-08-26.
+dingy_values <- c(
+  common_member_variance = 1.36,
+  cross_member_covariance = 0.67,
+  partner_correlation = 0.50,
+  nonindependence_chisq = 13.566,
+  nonindependence_df = 1,
+  nonindependence_p_upper_bound = 0.001
+)
+
+dingy_values
+```
+
+Dingy uses maximum-likelihood (ML) estimation. For this model, its moment
+calculation can be reproduced directly in R. The important difference is that
+ML divides the centred dyad-mean sum of squares by \(n\), whereas the
+Woody--Sadler calculation above uses the usual sample variance and divides by
+\(n-1\).
+
+```{r reproduce-dingy-convention}
+ml_variance_of_M <- mean((M - mean(M))^2)
+mean_squared_D_about_zero <- mean(D^2)
+
+dingy_reconstruction <- c(
+  common_member_variance =
+    ml_variance_of_M + mean_squared_D_about_zero,
+  cross_member_covariance =
+    ml_variance_of_M - mean_squared_D_about_zero
+)
+
+dingy_reconstruction <- c(
+  dingy_reconstruction,
+  partner_correlation =
+    dingy_reconstruction[["cross_member_covariance"]] /
+      dingy_reconstruction[["common_member_variance"]]
+)
+
+displayed_names <- c(
+  "common_member_variance",
+  "cross_member_covariance",
+  "partner_correlation"
+)
+
+stopifnot(
+  max(abs(
+    round(dingy_reconstruction[displayed_names], 2) -
+      dingy_values[displayed_names]
+  )) <= tolerance
+)
+
+data.frame(
+  quantity = displayed_names,
+  Dingy_displayed = unname(dingy_values[displayed_names]),
+  R_reconstruction = unname(dingy_reconstruction[displayed_names])
+)
+```
+
+The nonindependence test is recorded for context only; it is not one of the
+four `dyadMLM` summary statistics. Dingy also detected a difference between
+the two sample position means in this random dataset. Because the positions
+were assigned arbitrarily, that chance imbalance has no substantive meaning
+for this validation.
+
+# Results
+
+For the table below, the Dingy column uses the full-precision R reconstruction
+of Dingy's ML convention. This avoids treating Dingy's displayed rounding as a
+real difference.
+
+```{r final-results}
+dingy_result <- c(
+  exchangeable_member_sd =
+    sqrt(dingy_reconstruction[["common_member_variance"]]),
+  exchangeable_partner_correlation =
+    dingy_reconstruction[["partner_correlation"]],
+  dyad_mean_sd = sqrt(
+    (
+      dingy_reconstruction[["common_member_variance"]] +
+        dingy_reconstruction[["cross_member_covariance"]]
+    ) / 2
+  ),
+  half_difference_rms = sqrt(
+    (
+      dingy_reconstruction[["common_member_variance"]] -
+        dingy_reconstruction[["cross_member_covariance"]]
+    ) / 2
+  )
+)
+
+interpretation <- c(
+  "Exact; Dingy uses ML scaling.",
+  "Exact; Dingy uses ML-scaled moments.",
+  "Exact; Dingy divides by n rather than n - 1.",
+  "Exact; Dingy uses the same about-zero calculation."
+)
+
+results <- data.frame(
+  statistic = names(dyadmlm_result),
+  dyadMLM = unname(dyadmlm_result),
+  Woody_Sadler = unname(reference_result),
+  Dingy_ML_reconstruction = unname(dingy_result),
+  absolute_difference = unname(absolute_difference),
+  interpretation = interpretation,
+  check.names = FALSE
+)
+
+knitr::kable(results, digits = 9)
+```
+
+# Conclusion
+
+1. **The dyadMLM calculation is correct.** All four results exactly reproduce
+   the independent Woody--Sadler calculation within numerical tolerance.
+2. **Member order does not matter.** Swapping arbitrary member labels changes
+   the direction of some half-differences, but none of the four results.
+3. **Dingy supports the same decomposition.** Its displayed partner
+   correlation is 0.50, compared with 0.504 for `dyadMLM`. The small difference
+   is fully explained by Dingy's ML division by \(n\) instead of \(n-1\); it is
+   not a problem in `dyadMLM`. The half-difference result is the same because
+   both methods measure it about zero and divide by \(n\).
+
+These conclusions apply only to this deterministic summary calculation, not
+to the larger simulation-based diagnostic in which it is used.
