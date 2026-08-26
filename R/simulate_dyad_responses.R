@@ -60,20 +60,21 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     }
     seed <- as.integer(seed)
 
-    # Restore both the value and the prior existence of the caller's RNG state.
-    random_seed_existed <- exists(
+    # A supplied seed must not alter the caller's random-number state. Remember
+    # both its value and whether it existed before this function was called.
+    had_random_seed <- exists(
       ".Random.seed",
       envir = .GlobalEnv,
       inherits = FALSE
     )
-    original_random_seed <- if (random_seed_existed) {
+    saved_random_seed <- if (had_random_seed) {
       get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     } else {
       NULL
     }
     on.exit({
-      if (random_seed_existed) {
-        assign(".Random.seed", original_random_seed, envir = .GlobalEnv)
+      if (had_random_seed) {
+        assign(".Random.seed", saved_random_seed, envir = .GlobalEnv)
       } else if (exists(
         ".Random.seed",
         envir = .GlobalEnv,
@@ -93,11 +94,15 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     )
   }
 
-  # Extract the fitted rows and observed response from the model itself.
+  # The model frame contains the rows actually used for fitting. Rows omitted
+  # during fitting are already gone, and every object below keeps this order.
   model_frame <- stats::model.frame(model)
+  n_fitted_rows <- nrow(model_frame)
+
+  # One observed response value for each fitted row.
   observed_response <- stats::model.response(model_frame)
   if (!is.numeric(observed_response) ||
-      length(observed_response) != nrow(model_frame)) {
+      length(observed_response) != n_fitted_rows) {
     stop(
       "Predictive checks currently require one numeric response per fitted row.",
       call. = FALSE
@@ -112,9 +117,10 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require unit case weights.", call. = FALSE)
   }
 
-  zero_inflation_terms <- model |>
-    stats::formula(component = "zi") |>
-    stats::terms()
+  # With `ziformula = ~ 0`, there is no intercept, named term, or offset.
+  zero_inflation_terms <- stats::terms(
+    stats::formula(model, component = "zi")
+  )
   has_zero_inflation <- attr(zero_inflation_terms, "intercept") != 0L ||
     length(attr(zero_inflation_terms, "term.labels")) != 0L ||
     length(attr(zero_inflation_terms, "offset")) != 0L
@@ -125,14 +131,13 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   # Obtain one fixed response centre per fitted row. For a Gaussian identity
   # model, the random-effects-zero prediction is exactly the marginal expected
   # response after averaging over newly drawn zero-mean effects at every level.
-  response_center <- model |>
-    stats::predict(
-      newdata = NULL,
-      type = "response",
-      re.form = NA
-    ) |>
-    as.numeric()
-  if (length(response_center) != nrow(model_frame) ||
+  response_center <- as.numeric(stats::predict(
+    model,
+    newdata = NULL,
+    type = "response",
+    re.form = NA
+  ))
+  if (length(response_center) != n_fitted_rows ||
       any(!is.finite(response_center))) {
     stop(
       "Could not obtain one finite response centre for each fitted row.",
@@ -140,30 +145,33 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     )
   }
 
-  # glmmTMB stores simulation settings in mutable environments. Temporarily
-  # change them, then restore the caller's exact settings on success or error.
+  # These settings live inside the caller's fitted model: changing them here
+  # also changes that original object. Save them and always restore them,
+  # including when simulation fails.
   original_simulation_codes <- get_glmmTMB_simulation_codes(model)
   on.exit(
     set_glmmTMB_simulation_codes(model, original_simulation_codes),
     add = TRUE
   )
 
-  # glmmTMB uses `2` to draw new random effects during simulation.
+  # Code `2` tells glmmTMB to draw a new value for a random-effect term. Keep
+  # the same list shape as the saved settings, but replace every code with `2`.
   unconditional_simulation_codes <- lapply(
     original_simulation_codes,
     function(codes) rep(2, length(codes))
   )
   set_glmmTMB_simulation_codes(model, unconditional_simulation_codes)
 
-  # Simulate complete response datasets with newly drawn random effects.
-  simulated_responses <- model |>
-    stats::simulate(nsim = nsim, seed = seed) |>
-    # glmmTMB returns fitted rows x simulations
-    # but we need simulations x fitted rows.
-    t()
+  # glmmTMB returns a data frame with fitted rows down and simulations across:
+  # `n_fitted_rows` rows by `nsim` columns.
+  simulations_by_column <- stats::simulate(model, nsim = nsim, seed = seed)
+
+  # Store the result the other way around: one complete dataset per matrix row
+  # and one fitted row per column (`nsim` by `n_fitted_rows`).
+  simulated_responses <- t(as.matrix(simulations_by_column))
 
   if (!is.numeric(simulated_responses) ||
-      !identical(dim(simulated_responses), c(nsim, nrow(model_frame))) ||
+      !identical(dim(simulated_responses), c(nsim, n_fitted_rows)) ||
       any(!is.finite(simulated_responses))) {
     stop(
       paste0(
@@ -174,6 +182,12 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     )
   }
 
+  # All row-level pieces now line up. For fitted row `i`:
+  # - `model_frame[i, ]` contains the variables used in the fit;
+  # - `observed_response[i]` is its observed value;
+  # - `response_center[i]` is its expected value with random effects set to
+  #   zero; and
+  # - `simulated_responses[, i]` holds its value in every generated dataset.
   response_simulations <- list(
     observed_response = as.numeric(observed_response),
     simulated_responses = simulated_responses,
@@ -239,6 +253,9 @@ get_glmmTMB_simulation_codes <- function(model) {
     )
   }
 
+  # The result is a named list with one numeric vector for the response mean,
+  # zero-inflation, and dispersion parts. Each number belongs to one random-
+  # effect term; a vector is empty when that model part has no such terms.
   lapply(
     model$obj$env$data[simulation_components],
     function(component_terms) {
@@ -255,6 +272,8 @@ get_glmmTMB_simulation_codes <- function(model) {
 # Set or restore the exact term-specific codes in every model component.
 set_glmmTMB_simulation_codes <- function(model, simulation_codes) {
   for (component in names(simulation_codes)) {
+    # Update one component's term list, then write the whole list back into
+    # glmmTMB's mutable model environment.
     component_terms <- model$obj$env$data[[component]]
     for (term_index in seq_along(component_terms)) {
       component_terms[[term_index]]$simCode <-
