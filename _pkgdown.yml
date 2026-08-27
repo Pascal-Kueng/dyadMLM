@@ -10,6 +10,10 @@ authors:
 template:
   bootstrap: 5
   light-switch: true
+  opengraph:
+    image:
+      src: social-preview.png
+      alt: "dyadMLM R package: tools for dyadic multilevel models for distinguishable and exchangeable dyads"
 
 navbar:
   structure:
