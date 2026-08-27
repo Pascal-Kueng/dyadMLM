@@ -1,9 +1,13 @@
 # dyadMLM: Tools for Dyadic Multilevel Models
 
-`dyadMLM` provides tools for dyadic multilevel modeling with linear and
-generalized linear mixed-effects models.
+`dyadMLM` is an R package for preparing and checking cross-sectional and
+intensive longitudinal dyadic data for linear and generalized linear
+mixed-effects models. It supports the Actor–Partner Interdependence
+Model, Dyad–Individual Model, and Dyadic Score Model parameterizations
+and includes selected post-estimation tools. Models are fitted using
+packages such as `glmmTMB` or `brms`.
 
-It provides supporting functions for:
+Start here:
 
 1.  [Data preparation and validation of dyadic
     data](#id_1-data-preparation-and-validation)
