@@ -4,6 +4,12 @@
   `glmmTMB` models. `simulate_dyad_responses()` generates datasets from a fitted
   model, and `check_partner_dependence()` compares their partner variation and
   dependence with the observed data.
+* Added a separate experimental Gaussian ILD prototype to
+  `check_partner_dependence()`. Supplying member and factor-valued time
+  identifiers adds stable, concurrent, own-member lag, and cross-member lag
+  summaries with exact scheduled-time gaps and explicit role directions when
+  roles are supplied (both directions are pooled otherwise), plus explicit
+  dyad- or edge-weighting.
 
 # dyadMLM 0.2.0
 

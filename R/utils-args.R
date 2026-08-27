@@ -138,3 +138,22 @@ resolve_fitted_row_argument <- function(
 
   value
 }
+
+
+# Factors can encode an explicit missing-value level for which anyNA() on the
+# factor codes is false. Identifier validation therefore also inspects the
+# represented labels. Scheduled-time validation may additionally reject an
+# unused missing level because every declared level is treated as substantive.
+has_missing_identifier_values <- function(
+  values,
+  include_unused_factor_levels = FALSE
+) {
+  missing_values <- anyNA(values)
+  if (is.factor(values)) {
+    missing_values <- missing_values || anyNA(as.character(values))
+    if (include_unused_factor_levels) {
+      missing_values <- missing_values || anyNA(levels(values))
+    }
+  }
+  missing_values
+}

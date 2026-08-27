@@ -26,8 +26,11 @@ helpers, and eventually model syntax explicit and reproducible.
   [`ild-nonindependence.md`](ild-nonindependence.md)
 - Data-preparation debugging scratch helpers:
   [`debug-data-preparation.R`](debug-data-preparation.R)
-- Gaussian cross-sectional partner-dependence diagnostics:
-  [`diagnostic_checks/README.md`](diagnostic_checks/README.md)
+- Gaussian partner-dependence diagnostics:
+  - cross-sectional baseline:
+    [`diagnostic_checks/README.md`](diagnostic_checks/README.md)
+  - intensive-longitudinal prototype:
+    [`diagnostic_checks/gaussian-ild/README.md`](diagnostic_checks/gaussian-ild/README.md)
 
 ## Current State
 
@@ -39,7 +42,8 @@ series uses the concept DOI
 [10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083). The official
 CRAN tarball remains attached to the GitHub Release. The package has returned
 to development as version 0.2.0.9000, with cross-sectional Gaussian
-partner-dependence diagnostics in development. The former manually curated
+partner-dependence diagnostics under review and a separately validated
+Gaussian ILD prototype in development. The former manually curated
 Zenodo series remains available as a historical archive and now points readers
 to the continuing native series.
 
@@ -546,8 +550,8 @@ outside this collapsed section.
     transformed covariance of exchangeable dyads.
   - `dev/backtransform.md` records the matching contract, mathematical
     transformation, backend boundaries, and remaining implementation sequence.
-- The bounded `glmmTMB`/DHARMa diagnostics work considered after the first
-  release is assigned to the staged 0.2.1 cross-sectional and 0.2.2 ILD
+- The bounded Gaussian plug-in partner-dependence work considered after the
+  first release is assigned to the staged 0.2.1 cross-sectional and 0.2.2 ILD
   milestones below rather than the 0.2.0 stabilization release.
 - Historical release-check sequence after vignette/doc cleanup
   - release checks have already been run during development, but must be run
@@ -830,25 +834,37 @@ and green CI on the exact reviewed head. The complete current contract is
 recorded in
 [`diagnostic_checks/README.md`](diagnostic_checks/README.md).
 
-## Proposed Version 0.2.2 Scope - Gaussian ILD Diagnostics
+## Proposed Version 0.2.2 Scope - Gaussian ILD Partner Dependence
 
-Status: proposed. Build on the accepted cross-sectional diagnostic contract;
-do not treat repeated observations as a direct extension of independent dyads.
+Status: experimental prototype implemented; estimand, API, and integration
+review pending. Build on the cross-sectional plug-in predictive contract
+rather than introduce a second residual framework.
 
-- Calibrate DHARMa workflows for Gaussian two-member ILD models with explicit
-  serial dependence, irregular gaps, reordered rows, and incomplete fitted
-  dyad-occasions.
-- Evaluate within-member lag diagnostics against unconditional full-model
-  simulations while respecting series boundaries and exact observed time gaps.
-- Determine whether joint rotation is sufficient or whether a validated
-  block-whitening step is required. Do not publish the experimental whitening
-  approach until its false-positive behavior has been calibrated and
-  independently reviewed.
-- Validate distinguishable and exchangeable role-specific AR processes and
-  clearly separate checks of mean structure, partner covariance, and temporal
-  dependence.
-- Keep the workflow documentation-first and experimental. Do not export a
-  diagnostic helper until each reported check has a stable, tested meaning.
+- Recompute available-series member means and within-member deviations
+  independently for the observed response and every simulated dataset.
+- Report member-mean dependence, exact same-occasion dependence, and exact
+  own- and cross-member lag profiles through the shared pair-statistics kernel.
+- Define lags by positions in an equally spaced scheduled factor grid, not by
+  adjacency of surviving rows or arbitrary elapsed-time differences.
+- Preserve role directions for distinguishable dyads and pool both directions
+  for exchangeable dyads.
+- Give each eligible dyad total weight one within each reported statistic by
+  default; retain equal-edge weighting as an explicit sensitivity estimand.
+- Return one statistics table, the replicated-statistic matrix, and auditable
+  row/edge maps rather than parallel component-specific result structures.
+- Describe the summaries as correlated, finite-series predictive features.
+  They are not mutually exclusive covariance-component estimates.
+- Keep non-Gaussian residuals, recursive VAR simulation, arbitrary irregular
+  time, parameter uncertainty, formal calibration, and DHARMa
+  rotation/whitening outside this milestone.
+
+Acceptance requires exact-map and hand-calculation tests, equality of the
+member-mean summaries with the cross-sectional path, fitted-backend and state-
+restoration tests, the shipped-data benchmark, exact finite-series covariance
+controls, analytic DGP benchmarks for the fitted study, smoke/pilot integration
+runs, package checks, and a documented weighting decision. A larger calibration
+study should be designed only if a formal calibration estimand is first
+specified; more repetitions cannot resolve conceptual choices.
 
 ## Proposed Version 0.2.5 Scope - APIM Covariance Decomposition
 
@@ -943,7 +959,8 @@ Status: proposed. Generalized DHARMa guidance follows, rather than precedes, the
 validated generalized APIM workflows.
 
 - Calibrate DHARMa separately for every supported family and model component;
-  do not infer generalized-family behavior from the Gaussian calibration.
+  do not infer generalized-family behavior from Gaussian predictive-check
+  validation.
 - Cover distributional misspecification, zero inflation where supported,
   dispersion behavior, boundary estimates, and the relevant response- and
   link-scale interpretations.
@@ -1000,15 +1017,15 @@ them as one release commitment.
 
 ### Advanced diagnostics
 
-- Build on the calibrated 0.2.1 cross-sectional and 0.2.2 ILD guidance before
-  considering any exported helper.
-- Evaluate a within-member lag-1 statistic against unconditional full-model
-  simulations while respecting gaps and repeated series.
-- Validate joint covariance rotation and mixed/ILD behavior before adding
-  generalized-family diagnostics or a narrow `check_dyad_fit()` for convergence,
+- Keep DHARMa rotation, block whitening, and generalized-family residual
+  diagnostics as a separate future track; they are not prerequisites for the
+  Gaussian plug-in predictive summaries in versions 0.2.1 and 0.2.2.
+- Validate joint covariance rotation and mixed/ILD behavior before adding a
+  generalized-family helper or a narrow `check_dyad_fit()` for convergence,
   design rank, boundary covariance estimates, and row alignment.
-- Do not export diagnostic automation until false-positive behavior and the
-  interpretation of every reported check are understood for supported models.
+- Do not export residual-based diagnostic automation until its calibration and
+  the interpretation of every reported check are understood for supported
+  models.
 
 ### Advanced ILD/EMA data infrastructure
 

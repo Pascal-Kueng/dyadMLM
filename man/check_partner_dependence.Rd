@@ -9,7 +9,11 @@ check_partner_dependence(
   dyad,
   role = NULL,
   plot = TRUE,
-  response = c("model-centred", "raw")
+  response = c("model-centred", "raw"),
+  member = NULL,
+  time = NULL,
+  lags = NULL,
+  weighting = c("dyad", "edge")
 )
 }
 \arguments{
@@ -29,10 +33,36 @@ only when members are substantively interchangeable.}
 \item{response}{Which values to summarize. \code{"model-centred"} (the default)
 removes the fitted mean pattern. \code{"raw"} leaves responses unchanged. The
 same choice is applied to observed and simulated responses.}
+
+\item{member}{For an ILD check, an unquoted or quoted member-identifier
+column in the fitted model frame, or a vector aligned with fitted rows.
+It is required when \code{time} is supplied. Cross-sectionally it may be
+supplied to verify that each pair contains two distinct members.}
+
+\item{time}{\code{NULL} for the established cross-sectional check, or a factor
+aligned with fitted rows for the ILD prototype. Its complete level
+sequence defines equally spaced scheduled occasions. An aligned external
+factor may retain a globally unobserved level for the diagnostic map, but
+cannot restore a time state already dropped while fitting an AR(1) model.
+For AR(1) references, every scheduled level must therefore be represented
+in the fitted structure; use a genuinely gap-aware structure such as
+\code{ou()} with \code{numFactor()} when appropriate.}
+
+\item{lags}{\code{NULL} or distinct positive whole-number lags. On the ILD path,
+\code{NULL} uses lags 1 through 5. Lags are differences in factor-level
+position.}
+
+\item{weighting}{How repeated same-occasion pairs and lag edges contribute:
+\code{"dyad"} gives every eligible dyad total weight one within each reported
+statistic; pooled exchangeable directions share that total weight.
+\code{"edge"} gives every eligible pair or lag edge equal weight. Stable
+member-mean summaries always contain one pair per dyad.}
 }
 \value{
 Invisibly, a \code{dyadMLM_partner_check} object containing the summary
-table, all replicated statistics, and the selected \code{response}. In the
+table, all replicated statistics, and the selected \code{response}. ILD calls
+add the subclass \code{dyadMLM_ild_partner_check}, support and reasons directly
+to the statistics table, and auditable row and edge maps in \code{maps}. In the
 table, \code{observed_quantile} stores the observed position: the proportion of
 simulated values at or below the observed value, with a finite-simulation
 correction.
@@ -69,12 +99,23 @@ from the observed and simulated responses. This focuses the check on the
 remaining variation and partner dependence. Use \code{response = "raw"} to keep
 the responses unchanged.
 
-Currently, the function supports cross-sectional Gaussian identity-link
-\code{glmmTMB} simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Each dyad may
-have at most two fitted responses, and at least three complete dyads are
-required. With \code{role}, each complete dyad must contain one member in each of
-exactly two roles. Missing identifiers and incomplete dyads are omitted and
-counted in the result. The interface is experimental.
+Supplying both \code{member} and factor-valued \code{time} activates the
+intensive-longitudinal prototype. It separates stable member means,
+same-occasion within-member partner dependence, own-member lag profiles,
+and cross-member lag profiles. Cross-member profiles are role-directed when
+\code{role} is supplied and pool both directions otherwise. Lag edges use
+differences in the complete factor-level sequence, never adjacency between
+observed rows.
+
+Currently, the function supports Gaussian identity-link \code{glmmTMB}
+simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Cross-sectional dyads
+may have at most two fitted responses. The ILD prototype requires exactly
+two stable members per dyad, at least three dyads, unique dyad-member-time
+keys, a regular scheduled occasion scale stored as a factor, and one
+substantively coherent dyad composition per call. Composition is not
+inferred when \code{role = NULL}, so mixed data must be subset by the caller.
+With \code{role}, every dyad must contain one stable member in each of
+exactly two roles. The interface is experimental.
 
 \strong{Technical details.} Model-centred values equal
 \code{response - response_center}. The centre is fixed across the observed and
@@ -85,6 +126,13 @@ same covariance information. Without roles, the exchangeable calculation
 uses a half-difference root mean square about zero to recover the common
 member variance and covariance.
 
+The ILD decomposition and every lag statistic are recalculated separately
+for the observed response and every simulated dataset. An ILD reference
+interval is shown only when at least 20 and at least 95 percent of the
+requested simulated statistics are defined. Unsupported lags and undefined
+correlations remain in the returned statistics table with their support and
+reason for being undefined.
+
 For interchangeable members, the calculation follows Woody and Sadler's
 (2005) between-/within-dyad decomposition. That paper supports the dyadic
 summary, not the model centring or predictive comparison. This function
@@ -94,13 +142,13 @@ not a posterior predictive distribution.
 }
 \examples{
 if (requireNamespace("glmmTMB", quietly = TRUE)) {
-  example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+  example_data <- dyads_cross[dyads_cross$coupleID <= 20, ]
   model <- glmmTMB::glmmTMB(
     closeness ~ gender + (1 | coupleID),
     data = example_data
   )
 
-  simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
+  simulations <- simulate_dyad_responses(model, nsim = 20, seed = 123)
   check <- check_partner_dependence(
     simulations,
     dyad = coupleID,
@@ -109,6 +157,37 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
   )
   check
   plot(check, parameterization = "member", ask = FALSE)
+
+  # Intensive-longitudinal prototype for one dyad composition.
+  ild_data <- dyads_ild[dyads_ild$coupleID <= 6, ]
+  ild_data$time_f <- factor(ild_data$diaryday, levels = 0:13)
+  ild_data$series <- interaction(
+    ild_data$coupleID,
+    ild_data$personID,
+    drop = TRUE
+  )
+  ild_model <- glmmTMB::glmmTMB(
+    closeness ~
+      gender +
+      (1 | coupleID) +
+      ar1(0 + time_f | series),
+    data = ild_data
+  )
+  ild_simulations <- simulate_dyad_responses(
+    ild_model,
+    nsim = 20,
+    seed = 124
+  )
+  ild_check <- check_partner_dependence(
+    ild_simulations,
+    dyad = ild_data$coupleID,
+    role = ild_data$gender,
+    member = ild_data$personID,
+    time = ild_data$time_f,
+    lags = 1,
+    plot = FALSE
+  )
+  ild_check
 }
 
 }
