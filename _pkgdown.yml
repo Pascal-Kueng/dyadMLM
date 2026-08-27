@@ -2,6 +2,7 @@ url: https://pascal-kueng.github.io/dyadMLM/
 
 home:
   title: "dyadMLM: Tools for Dyadic Multilevel Models"
+  description: "Prepare and analyze distinguishable and exchangeable dyadic data for APIM, DIM, and DSM multilevel models in R."
 
 authors:
   Pascal Küng:
