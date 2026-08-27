@@ -15,15 +15,12 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/dyadMLM)](https://CRAN.
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22047083-blue.svg)](https://doi.org/10.5281/zenodo.22047083)
 <!-- badges: end -->
 
-`dyadMLM` is an R package for preparing and validating cross-sectional
-and intensive longitudinal dyadic data for analysis with linear and
-generalized linear mixed-effects models. It supports Actor–Partner
-Interdependence Model (APIM), Dyad–Individual Model (DIM), and Dyadic
-Score Model (DSM) parameterizations and provides selected
-post-estimation tools.
-
-Models can then be fitted with established R packages such as `glmmTMB`
-and `brms`.
+`dyadMLM` is an R package for preparing and checking cross-sectional and
+intensive longitudinal dyadic data for linear and generalized linear
+mixed-effects models. It supports the Actor–Partner Interdependence
+Model, Dyad–Individual Model, and Dyadic Score Model parameterizations
+and includes selected post-estimation tools. Models are fitted using
+packages such as `glmmTMB` or `brms`.
 
 Start here:
 
