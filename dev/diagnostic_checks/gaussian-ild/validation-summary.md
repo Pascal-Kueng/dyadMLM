@@ -4,8 +4,8 @@ Date: 2026-08-27
 
 Branch baseline: pull-request head `b3857749c2741f3458c668d97223a71ad6d5b979`.
 
-The validated prototype is an uncommitted working-tree diff on that baseline;
-there is not yet a commit SHA for the implementation itself.
+The prototype was developed and validated as a working-tree diff on that
+baseline, then committed on the dedicated `gaussian-ild-prototype` branch.
 
 Environment: R 4.6.1, `glmmTMB` 1.1.14,
 `dyadMLM` 0.2.0.9000, x86_64 Fedora Linux.
