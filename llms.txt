@@ -3,11 +3,6 @@
 `dyadMLM` provides tools for dyadic multilevel modeling with linear and
 generalized linear mixed-effects models.
 
-Developed by [Pascal Küng](https://pascalkueng.com/), Postdoctoral
-Researcher at the [University of
-Zurich](https://www.psychology.uzh.ch/en/areas/sob/angsoz/team/kueng.html).
-[OSF profile](https://osf.io/r2qdg/).
-
 It provides supporting functions for:
 
 1.  [Data preparation and validation of dyadic
