@@ -1,0 +1,1285 @@
+---
+title: "Prototype simulation study: Gaussian ILD partner-dependence checks"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    code_folding: hide
+params:
+  profile: "smoke"
+  outer_repetitions: 0
+  inner_simulations: 0
+  n_dyads: 0
+  n_times: 0
+---
+
+This development study exercises the Gaussian intensive-longitudinal (ILD)
+partner-dependence prototype. It repeats the fitted workflow for stable,
+concurrent, and own-member lag dependence, then uses a known-parameter control
+to exercise the joint finite-series consequences of shared/difference process
+persistence. Final deterministic sections check exact gaps and the distinction
+between equal-dyad and equal-edge weighting.
+
+The predictive reference is plug-in and conditional on the fitted-row design.
+Observed positions and middle intervals are descriptive; they are not
+calibrated tests, p-values, or estimates of power or type-I error.
+
+```{r setup, include=FALSE}
+package_root <- normalizePath(file.path("..", "..", ".."))
+devtools::load_all(package_root, quiet = TRUE)
+
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 5,
+  message = FALSE,
+  warning = FALSE
+)
+
+profiles <- list(
+  smoke = list(
+    outer_repetitions = 3L,
+    inner_simulations = 49L,
+    n_dyads = 40L,
+    n_times = 12L
+  ),
+  pilot = list(
+    outer_repetitions = 20L,
+    inner_simulations = 199L,
+    n_dyads = 60L,
+    n_times = 16L
+  )
+)
+
+profile_name <- as.character(params$profile)
+if (!profile_name %in% names(profiles)) {
+  stop("profile must be one of: smoke or pilot.", call. = FALSE)
+}
+settings <- profiles[[profile_name]]
+
+apply_positive_override <- function(value, current, name) {
+  if (
+    length(value) != 1L ||
+      !is.numeric(value) ||
+      is.na(value) ||
+      !is.finite(value) ||
+      value < 0 ||
+      value != floor(value) ||
+      value > .Machine$integer.max
+  ) {
+    stop(name, " must be zero or a positive whole number.", call. = FALSE)
+  }
+  value <- as.integer(value)
+  if (value == 0L) current else value
+}
+
+n_outer <- apply_positive_override(
+  params$outer_repetitions,
+  settings$outer_repetitions,
+  "outer_repetitions"
+)
+n_inner <- apply_positive_override(
+  params$inner_simulations,
+  settings$inner_simulations,
+  "inner_simulations"
+)
+n_dyads <- apply_positive_override(
+  params$n_dyads,
+  settings$n_dyads,
+  "n_dyads"
+)
+n_times <- apply_positive_override(
+  params$n_times,
+  settings$n_times,
+  "n_times"
+)
+
+stopifnot(
+  n_outer >= 1L,
+  n_inner >= 20L,
+  n_dyads >= 12L,
+  n_times >= 6L
+)
+
+base_seed <- 20260827L
+demonstration_lags <- 1:min(3L, n_times - 1L)
+```
+
+# Study profiles
+
+The selected profile is `r profile_name`: `r n_outer` outer repetitions,
+`r n_inner` complete response simulations per fitted model, `r n_dyads` dyads,
+and `r n_times` scheduled occasions. The intended profiles are:
+
+```{r profile-table, echo=FALSE}
+profile_table <- do.call(
+  rbind,
+  lapply(names(profiles), function(profile) {
+    data.frame(profile = profile, profiles[[profile]], row.names = NULL)
+  })
+)
+knitr::kable(profile_table)
+```
+
+The smoke profile checks execution only. The pilot profile checks runtime,
+convergence, and qualitative scenario behavior against exact finite-series
+targets. Neither profile estimates power or error rates. A larger calibration
+study should be designed only if a formal calibration estimand is first
+specified.
+
+# Distinguishable core population
+
+The fitted study uses three targeted distinguishable populations rather than
+one large omnibus covariance model. This keeps the restrictions transparent
+and avoids making successful estimation of ten covariance parameters a
+prerequisite for validating the diagnostic calculations.
+
+The stable population generates
+
+\[
+y_{dmt}=\mu_{dmt}+b_{dm}+\epsilon_{dmt},
+\]
+
+where \(b_d\) is a stable bivariate dyad effect with
+
+\[
+B=\begin{pmatrix}.64&.48\\.48&1.00\end{pmatrix},
+\]
+
+and \(\epsilon_{dmt}\) is independent Gaussian noise with variance .25.
+The concurrent population instead generates
+
+\[
+y_{dmt}=\mu_{dmt}+e_{dmt},
+\]
+
+where the bivariate same-occasion shock has
+
+\[
+W=\begin{pmatrix}.49&.294\\.294&.49\end{pmatrix}.
+\]
+
+The separate temporal population generates
+
+\[
+y_{dmt}=\mu_{dmt}+a_{dmt},
+\]
+
+where each \(a_{dm,t}\) is a role-specific stationary AR(1) process with
+variance .64 and \((\phi_1,\phi_2)=(.80,.20)\). The fixed mean in all three
+populations contains role-specific intercepts and trends plus a time-varying
+predictor. It is held fixed across outer repetitions, matching the
+diagnostic's conditional-on-design target.
+
+```{r distinguishable-dgp}
+draw_multivariate_normal <- function(n, covariance) {
+  standard_normal <- matrix(
+    stats::rnorm(n * ncol(covariance)),
+    nrow = n,
+    ncol = ncol(covariance)
+  )
+  standard_normal %*% chol(covariance)
+}
+
+draw_stationary_ar <- function(n_series, n_times, variance, phi) {
+  values <- matrix(NA_real_, nrow = n_series, ncol = n_times)
+  values[, 1L] <- stats::rnorm(n_series, sd = sqrt(variance))
+  innovation_sd <- sqrt(variance * (1 - phi^2))
+  if (n_times >= 2L) {
+    for (time_index in 2:n_times) {
+      values[, time_index] <-
+        phi * values[, time_index - 1L] +
+        stats::rnorm(n_series, sd = innovation_sd)
+    }
+  }
+  values
+}
+
+make_distinguishable_design <- function(n_dyads, n_times, seed) {
+  design <- expand.grid(
+    dyad_number = seq_len(n_dyads),
+    time_number = seq_len(n_times),
+    role_number = 1:2,
+    KEEP.OUT.ATTRS = FALSE
+  )
+  design <- design[
+    order(design$dyad_number, design$time_number, design$role_number),
+  ]
+  rownames(design) <- NULL
+
+  design$dyad <- factor(design$dyad_number)
+  design$member <- factor(
+    paste(design$dyad_number, design$role_number, sep = "_")
+  )
+  design$role <- factor(
+    paste0("member_", design$role_number),
+    levels = c("member_1", "member_2")
+  )
+  design$role_1 <- as.numeric(design$role_number == 1L)
+  design$role_2 <- as.numeric(design$role_number == 2L)
+  design$member_sign <- ifelse(design$role_number == 1L, -1, 1)
+  design$time_f <- factor(
+    design$time_number,
+    levels = seq_len(n_times)
+  )
+  design$time_c <-
+    (design$time_number - (n_times + 1) / 2) / (n_times - 1)
+  design$member_series <- interaction(
+    design$dyad,
+    design$member,
+    drop = TRUE
+  )
+
+  set.seed(seed)
+  shared_x <- stats::rnorm(n_dyads * n_times, sd = 0.5)
+  shared_index <-
+    (design$dyad_number - 1L) * n_times + design$time_number
+  design$x <- shared_x[shared_index] + stats::rnorm(nrow(design), sd = 0.5)
+  design$expected_mean <-
+    -0.20 * design$role_1 +
+    0.20 * design$role_2 +
+    0.30 * design$role_1 * design$time_c -
+    0.15 * design$role_2 * design$time_c +
+    0.40 * design$x
+  design
+}
+
+draw_stable_distinguishable_data <- function(design, seed) {
+  set.seed(seed)
+  n_dyads <- nlevels(design$dyad)
+
+  stable_covariance <- matrix(
+    c(0.64, 0.48, 0.48, 1.00),
+    nrow = 2L,
+    byrow = TRUE
+  )
+  stable_effects <- draw_multivariate_normal(
+    n_dyads,
+    stable_covariance
+  )
+  dyad_index <- design$dyad_number
+  role_index <- design$role_number
+  stable_value <- stable_effects[cbind(dyad_index, role_index)]
+
+  data <- design
+  data$y <-
+    data$expected_mean + stable_value + stats::rnorm(nrow(data), sd = 0.5)
+  data
+}
+
+draw_concurrent_distinguishable_data <- function(design, seed) {
+  set.seed(seed)
+  n_dyads <- nlevels(design$dyad)
+  n_times <- nlevels(design$time_f)
+  concurrent_covariance <- matrix(
+    c(0.49, 0.294, 0.294, 0.49),
+    nrow = 2L,
+    byrow = TRUE
+  )
+  concurrent_effects <- draw_multivariate_normal(
+    n_dyads * n_times,
+    concurrent_covariance
+  )
+
+  dyad_index <- design$dyad_number
+  time_index <- design$time_number
+  role_index <- design$role_number
+  occasion_index <- (dyad_index - 1L) * n_times + time_index
+  concurrent_value <- concurrent_effects[cbind(occasion_index, role_index)]
+
+  data <- design
+  data$y <- data$expected_mean + concurrent_value
+  data
+}
+
+draw_temporal_distinguishable_data <- function(design, seed) {
+  set.seed(seed)
+  n_dyads <- nlevels(design$dyad)
+  n_times <- nlevels(design$time_f)
+  ar_role_1 <- draw_stationary_ar(n_dyads, n_times, 0.64, 0.80)
+  ar_role_2 <- draw_stationary_ar(n_dyads, n_times, 0.64, 0.20)
+  dyad_index <- design$dyad_number
+  time_index <- design$time_number
+  role_index <- design$role_number
+  ar_value <- ifelse(
+    role_index == 1L,
+    ar_role_1[cbind(dyad_index, time_index)],
+    ar_role_2[cbind(dyad_index, time_index)]
+  )
+
+  data <- design
+  data$y <- data$expected_mean + ar_value
+  data
+}
+
+distinguishable_design <- make_distinguishable_design(
+  n_dyads = n_dyads,
+  n_times = n_times,
+  seed = base_seed + 1000L
+)
+```
+
+# Fitted structures and targeted restrictions
+
+The stable population is fitted with or without its stable role covariance.
+The concurrent population is fitted with or without its same-occasion partner
+covariance. The temporal population is fitted with either separate role-
+specific AR processes or one pooled member-series AR process. In each
+comparison, the correct and restricted model use the same generated response
+data.
+
+```{r fitted-model-functions}
+fit_distinguishable_model <- function(data, model_name) {
+  fixed_formula <-
+    y ~ 0 + role_1 + role_2 + role_1:time_c + role_2:time_c + x
+
+  formula <- switch(
+    model_name,
+    stable_correct = stats::update.formula(
+      fixed_formula,
+      . ~ . +
+        us(0 + role_1 + role_2 | dyad)
+    ),
+    stable_omitted = stats::update.formula(
+      fixed_formula,
+      . ~ .
+    ),
+    concurrent_correct = stats::update.formula(
+      fixed_formula,
+      . ~ . +
+        (1 | dyad:time_f) +
+        (0 + member_sign | dyad:time_f)
+    ),
+    concurrent_independent = stats::update.formula(
+      fixed_formula,
+      . ~ .
+    ),
+    ar_correct = stats::update.formula(
+      fixed_formula,
+      . ~ . +
+        ar1(0 + role_1:time_f | dyad) +
+        ar1(0 + role_2:time_f | dyad)
+    ),
+    pooled_ar = stats::update.formula(
+      fixed_formula,
+      . ~ . +
+        ar1(0 + time_f | member_series)
+    ),
+    stop("Unknown fitted model: ", model_name, call. = FALSE)
+  )
+  dispersion_formula <- if (model_name %in% c(
+    "stable_correct",
+    "stable_omitted",
+    "concurrent_independent"
+  )) {
+    ~1
+  } else {
+    ~0
+  }
+  fit_control <- glmmTMB::glmmTMBControl(profile = FALSE)
+
+  glmmTMB::glmmTMB(
+    formula,
+    dispformula = dispersion_formula,
+    family = stats::gaussian(),
+    control = fit_control,
+    data = data
+  )
+}
+
+extract_ild_results <- function(
+  check,
+  scenario,
+  outer_rep,
+  method,
+  n_dyads,
+  n_times
+) {
+  check$statistics_table |>
+    dplyr::filter(.data$parameterization %in% c("member", "profile")) |>
+    dplyr::mutate(
+      outside_95 = dplyr::case_when(
+        !is.finite(.data$observed_value) |
+          !is.finite(.data$replicated_lower) |
+          !is.finite(.data$replicated_upper) ~ NA,
+        .data$observed_value < .data$replicated_lower |
+          .data$observed_value > .data$replicated_upper ~ TRUE,
+        TRUE ~ FALSE
+      ),
+      direction = dplyr::case_when(
+        !is.finite(.data$observed_value) |
+          !is.finite(.data$replicated_lower) |
+          !is.finite(.data$replicated_upper) ~ "undefined",
+        .data$observed_value < .data$replicated_lower ~ "below",
+        .data$observed_value > .data$replicated_upper ~ "above",
+        TRUE ~ "inside"
+      ),
+      scenario = scenario,
+      outer_rep = outer_rep,
+      method = method,
+      design_n_dyads = n_dyads,
+      design_n_times = n_times
+    ) |>
+    dplyr::select(
+      .data$scenario,
+      .data$outer_rep,
+      .data$method,
+      .data$design_n_dyads,
+      .data$design_n_times,
+      .data$statistic_id,
+      .data$component,
+      .data$curve,
+      .data$lag,
+      .data$statistic,
+      .data$label,
+      .data$observed_value,
+      .data$replicated_median,
+      .data$replicated_lower,
+      .data$replicated_upper,
+      .data$observed_quantile,
+      .data$n_defined_simulations,
+      .data$n_dyads,
+      .data$n_edges,
+      .data$outside_95,
+      .data$direction
+    )
+}
+
+run_fitted_check <- function(
+  data,
+  scenario,
+  outer_rep,
+  nsim,
+  seed
+) {
+  fit_warnings <- character()
+  fit_start <- proc.time()[["elapsed"]]
+  fit <- tryCatch(
+    withCallingHandlers(
+      fit_distinguishable_model(data, scenario),
+      warning = function(warning) {
+        fit_warnings <<- c(fit_warnings, conditionMessage(warning))
+        invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(error) error
+  )
+  fit_seconds <- proc.time()[["elapsed"]] - fit_start
+
+  status <- tibble::tibble(
+    scenario = scenario,
+    outer_rep = outer_rep,
+    status = NA_character_,
+    convergence = NA_integer_,
+    pd_hess = NA,
+    fit_seconds = fit_seconds,
+    check_seconds = NA_real_,
+    warnings = paste(unique(fit_warnings), collapse = " | "),
+    error = NA_character_
+  )
+
+  if (inherits(fit, "error")) {
+    status$status <- "fit_error"
+    status$error <- conditionMessage(fit)
+    return(list(status = status, statistics = NULL))
+  }
+
+  status$convergence <- fit$fit$convergence
+  status$pd_hess <- fit$sdr$pdHess
+  if (!isTRUE(status$convergence == 0L) || !isTRUE(status$pd_hess)) {
+    status$status <- "fit_problem"
+    return(list(status = status, statistics = NULL))
+  }
+
+  check_warnings <- character()
+  check_start <- proc.time()[["elapsed"]]
+  check <- tryCatch(
+    withCallingHandlers({
+      simulations <- simulate_dyad_responses(
+        fit,
+        nsim = nsim,
+        seed = seed
+      )
+      check_partner_dependence(
+        simulations,
+        dyad = data$dyad,
+        role = data$role,
+        plot = FALSE,
+        response = "model-centred",
+        member = data$member,
+        time = data$time_f,
+        lags = 1L,
+        weighting = "dyad"
+      )
+    }, warning = function(warning) {
+      check_warnings <<- c(check_warnings, conditionMessage(warning))
+      invokeRestart("muffleWarning")
+    }),
+    error = function(error) error
+  )
+  status$check_seconds <- proc.time()[["elapsed"]] - check_start
+  status$warnings <- paste(
+    unique(c(fit_warnings, check_warnings)),
+    collapse = " | "
+  )
+
+  if (inherits(check, "error")) {
+    status$status <- "check_error"
+    status$error <- conditionMessage(check)
+    return(list(status = status, statistics = NULL))
+  }
+
+  status$status <- "success"
+  list(
+    status = status,
+    statistics = extract_ild_results(
+      check = check,
+      scenario = scenario,
+      outer_rep = outer_rep,
+      method = "fitted plug-in",
+      n_dyads = n_dyads,
+      n_times = n_times
+    )
+  )
+}
+```
+
+The prespecified expected movements are:
+
+```{r target-table}
+primary_targets <- tibble::tribble(
+  ~scenario, ~component, ~curve, ~lag, ~statistic, ~expected,
+  "stable_omitted", "stable", "partner", NA_integer_,
+    "partner_correlation", "above",
+  "concurrent_independent", "concurrent", "partner", NA_integer_,
+    "partner_correlation", "above",
+  "pooled_ar", "own_lag", "member_1", 1L,
+    "correlation", "above",
+  "pooled_ar", "own_lag", "member_2", 1L,
+    "correlation", "below"
+)
+
+knitr::kable(primary_targets)
+```
+
+# Outer loop
+
+Every outer repetition generates one response vector from each targeted
+population. It fits the correct and restricted model to each corresponding
+response vector. Fit errors, convergence failures, non-positive-definite
+Hessians, warnings, and check errors are recorded without retries.
+
+```{r run-fitted-study}
+statuses <- list()
+statistics <- list()
+status_index <- 0L
+statistics_index <- 0L
+model_names <- c(
+  "stable_correct",
+  "stable_omitted",
+  "concurrent_correct",
+  "concurrent_independent",
+  "ar_correct",
+  "pooled_ar"
+)
+
+for (outer_rep in seq_len(n_outer)) {
+  stable_data <- draw_stable_distinguishable_data(
+    distinguishable_design,
+    seed = base_seed + 100000L + outer_rep
+  )
+  concurrent_data <- draw_concurrent_distinguishable_data(
+    distinguishable_design,
+    seed = base_seed + 200000L + outer_rep
+  )
+  temporal_data <- draw_temporal_distinguishable_data(
+    distinguishable_design,
+    seed = base_seed + 300000L + outer_rep
+  )
+
+  for (model_index in seq_along(model_names)) {
+    scenario <- model_names[[model_index]]
+    generated_data <- if (scenario %in% c(
+      "stable_correct",
+      "stable_omitted"
+    )) {
+      stable_data
+    } else if (scenario %in% c(
+      "concurrent_correct",
+      "concurrent_independent"
+    )) {
+      concurrent_data
+    } else {
+      temporal_data
+    }
+    check_seed <-
+      base_seed + 10000000L + 10000L * model_index + outer_rep
+    result <- run_fitted_check(
+      data = generated_data,
+      scenario = scenario,
+      outer_rep = outer_rep,
+      nsim = n_inner,
+      seed = check_seed
+    )
+
+    status_index <- status_index + 1L
+    statuses[[status_index]] <- result$status
+    if (!is.null(result$statistics)) {
+      statistics_index <- statistics_index + 1L
+      statistics[[statistics_index]] <- result$statistics
+    }
+  }
+}
+
+run_status <- dplyr::bind_rows(statuses)
+outer_results <- dplyr::bind_rows(statistics)
+```
+
+# Fitted-study results
+
+## Completion
+
+```{r completion-table, echo=FALSE}
+completion <- run_status |>
+  dplyr::group_by(.data$scenario) |>
+  dplyr::summarise(
+    attempted = dplyr::n(),
+    successful = sum(.data$status == "success"),
+    success_rate = mean(.data$status == "success"),
+    warning_runs = sum(nzchar(.data$warnings)),
+    fit_problems = sum(.data$status == "fit_problem"),
+    fit_errors = sum(.data$status == "fit_error"),
+    check_errors = sum(.data$status == "check_error"),
+    median_fit_seconds = stats::median(.data$fit_seconds),
+    median_check_seconds = stats::median(
+      .data$check_seconds,
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+
+knitr::kable(completion, digits = 3)
+```
+
+All summaries below are conditional on a successful fit and check. The status
+table above remains part of the evidence; failed runs are not silently removed
+or replaced.
+
+```{r failure-details, echo=FALSE}
+failure_details <- run_status |>
+  dplyr::filter(.data$status != "success" | nzchar(.data$warnings)) |>
+  dplyr::select(
+    .data$scenario,
+    .data$outer_rep,
+    .data$status,
+    .data$convergence,
+    .data$pd_hess,
+    .data$warnings,
+    .data$error
+  )
+
+if (nrow(failure_details) > 0L) {
+  knitr::kable(failure_details)
+} else {
+  cat("No fit/check failures or warnings were recorded.\n")
+}
+```
+
+## Correct fitted model
+
+Flexible fitted-model positions may cluster near the middle because the model
+estimated the same dependence features from the observed dataset. This section
+is a compatibility check, not a calibration analysis.
+
+```{r correct-summary, echo=FALSE}
+if (nrow(outer_results) > 0L) {
+  correct_summary <- outer_results |>
+    dplyr::filter(
+      .data$scenario %in% c(
+        "stable_correct",
+        "concurrent_correct",
+        "ar_correct"
+      ),
+      .data$statistic %in% c("partner_correlation", "correlation"),
+      is.na(.data$lag) | .data$lag == 1L
+    ) |>
+    dplyr::group_by(
+      .data$scenario,
+      .data$component,
+      .data$curve,
+      .data$lag,
+      .data$statistic
+    ) |>
+    dplyr::summarise(
+      repetitions = dplyr::n(),
+      median_position = stats::median(.data$observed_quantile, na.rm = TRUE),
+      outside_rate = mean(.data$outside_95, na.rm = TRUE),
+      minimum_defined = min(.data$n_defined_simulations),
+      .groups = "drop"
+    )
+  knitr::kable(correct_summary, digits = 3)
+} else {
+  cat("No fitted checks completed successfully.\n")
+}
+```
+
+## Targeted restrictions
+
+```{r targeted-summary, echo=FALSE}
+if (nrow(outer_results) > 0L) {
+  targeted_results <- primary_targets |>
+    dplyr::inner_join(
+      outer_results,
+      by = c("scenario", "component", "curve", "lag", "statistic")
+    )
+
+  targeted_summary <- targeted_results |>
+    dplyr::group_by(
+      .data$scenario,
+      .data$component,
+      .data$curve,
+      .data$lag,
+      .data$expected
+    ) |>
+    dplyr::summarise(
+      repetitions = dplyr::n(),
+      median_observed = stats::median(.data$observed_value, na.rm = TRUE),
+      median_reference = stats::median(
+        .data$replicated_median,
+        na.rm = TRUE
+      ),
+      median_position = stats::median(
+        .data$observed_quantile,
+        na.rm = TRUE
+      ),
+      expected_direction_rate = mean(
+        .data$direction == .data$expected,
+        na.rm = TRUE
+      ),
+      .groups = "drop"
+    )
+  knitr::kable(targeted_summary, digits = 3)
+} else {
+  cat("No targeted fitted checks completed successfully.\n")
+}
+```
+
+# Known-parameter shared/difference persistence contrast
+
+The fitted study above targets member-mean, same-occasion, and role-specific
+own-member persistence. This known-parameter comparison exercises the
+exchangeable cross-lag calculation without requiring a directional VAR
+implementation in `glmmTMB`.
+
+Let \(c_{dt}\) be a shared dyad-mean AR process and \(q_{dt}\) a member-
+difference AR process:
+
+\[
+W_{d1t}=c_{dt}-q_{dt},\qquad W_{d2t}=c_{dt}+q_{dt}.
+\]
+
+Both modes have variance .50, but \(\phi_+=.80\) and \(\phi_-=.20\). Before
+member demeaning, their lag-zero partner covariance is zero, their lag-1 own-
+member correlation is .50, and their lag-1 cross-member correlation is .30.
+Those are not the diagnostic-scale targets: finite-series member demeaning
+changes all three summaries. A restricted reference with both persistence
+parameters fixed to .50 therefore provides a joint shared/difference process
+contrast, not an isolated cross-lag perturbation.
+
+The exact diagnostic-scale targets follow from applying the same centring
+matrix used conceptually by the diagnostic to the finite-series covariance
+matrices. This oracle is independent of the diagnostic implementation.
+
+```{r finite-series-oracle}
+ar_covariance <- function(phi, n_times, variance = 1) {
+  variance * phi^abs(outer(seq_len(n_times), seq_len(n_times), `-`))
+}
+
+centre_covariance <- function(covariance) {
+  n_times <- nrow(covariance)
+  centre <- diag(n_times) - matrix(1 / n_times, n_times, n_times)
+  centre %*% covariance %*% centre
+}
+
+edge_moments <- function(
+  cross_covariance,
+  source_covariance,
+  target_covariance,
+  lag
+) {
+  source <- seq_len(nrow(source_covariance) - lag)
+  target <- source + lag
+  c(
+    covariance = mean(cross_covariance[cbind(source, target)]),
+    variance_x = mean(diag(source_covariance)[source]),
+    variance_y = mean(diag(target_covariance)[target]),
+    n_edges = length(source)
+  )
+}
+
+moment_correlation <- function(moments) {
+  moments[["covariance"]] /
+    sqrt(moments[["variance_x"]] * moments[["variance_y"]])
+}
+
+exchangeable_targets <- function(phi_plus, phi_minus, reference) {
+  plus <- centre_covariance(ar_covariance(phi_plus, n_times, 0.50))
+  minus <- centre_covariance(ar_covariance(phi_minus, n_times, 0.50))
+  own_covariance <- plus + minus
+  cross_covariance <- plus - minus
+
+  targets <- list(data.frame(
+    reference = reference,
+    component = "concurrent",
+    lag = NA_integer_,
+    exact_target = moment_correlation(edge_moments(
+      cross_covariance,
+      own_covariance,
+      own_covariance,
+      lag = 0L
+    ))
+  ))
+  for (lag in demonstration_lags) {
+    targets[[length(targets) + 1L]] <- data.frame(
+      reference = reference,
+      component = c("own_lag", "cross_lag"),
+      lag = lag,
+      exact_target = c(
+        moment_correlation(edge_moments(
+          own_covariance,
+          own_covariance,
+          own_covariance,
+          lag
+        )),
+        moment_correlation(edge_moments(
+          cross_covariance,
+          own_covariance,
+          own_covariance,
+          lag
+        ))
+      )
+    )
+  }
+  dplyr::bind_rows(targets)
+}
+
+finite_cross_lag_targets <- dplyr::bind_rows(
+  exchangeable_targets(0.80, 0.20, "correct"),
+  exchangeable_targets(0.50, 0.50, "restricted")
+)
+```
+
+The same oracle gives known-mean finite-schedule DGP benchmarks for the fitted
+study. They are comparison targets, not exact expectations after estimating
+the fixed-effect centre and calculating a finite-dyad sample statistic.
+
+```{r core-target-table, echo=FALSE}
+finite_ar_target <- function(phi) {
+  covariance <- centre_covariance(ar_covariance(phi, n_times))
+  moment_correlation(edge_moments(
+    covariance,
+    covariance,
+    covariance,
+    lag = 1L
+  ))
+}
+
+core_target_table <- data.frame(
+  summary = c(
+    "Stable-population member means",
+    "Concurrent-population within-member responses",
+    "Temporal member 1, lag 1",
+    "Temporal member 2, lag 1",
+    "Restricted pooled temporal reference, lag 1"
+  ),
+  analytic_dgp_target = c(
+    0.48 / sqrt(
+      (0.64 + 0.25 / n_times) * (1.00 + 0.25 / n_times)
+    ),
+    0.60,
+    finite_ar_target(0.80),
+    finite_ar_target(0.20),
+    finite_ar_target(0.50)
+  )
+)
+knitr::kable(core_target_table, digits = 3)
+```
+
+```{r cross-lag-functions}
+draw_exchangeable_response <- function(
+  design,
+  seed,
+  phi_plus,
+  phi_minus
+) {
+  set.seed(seed)
+  n_dyads <- nlevels(design$dyad)
+  n_times <- nlevels(design$time_f)
+  stable_plus <- stats::rnorm(n_dyads, sd = sqrt(0.45))
+  stable_minus <- stats::rnorm(n_dyads, sd = sqrt(0.15))
+  dynamic_plus <- draw_stationary_ar(n_dyads, n_times, 0.50, phi_plus)
+  dynamic_minus <- draw_stationary_ar(n_dyads, n_times, 0.50, phi_minus)
+
+  dyad_index <- design$dyad_number
+  time_index <- design$time_number
+  sign <- design$member_sign
+  design$expected_mean +
+    stable_plus[dyad_index] +
+    sign * stable_minus[dyad_index] +
+    dynamic_plus[cbind(dyad_index, time_index)] +
+    sign * dynamic_minus[cbind(dyad_index, time_index)]
+}
+
+make_manual_simulations <- function(
+  observed,
+  simulated,
+  response_center,
+  reference,
+  seed
+) {
+  result <- list(
+    observed_response = as.numeric(observed),
+    simulated_responses = simulated,
+    response_center = as.numeric(response_center),
+    model_frame = data.frame(y = as.numeric(observed)),
+    backend = "glmmTMB",
+    family = "gaussian",
+    link = "identity",
+    reference = reference,
+    random_effects = "known population draws",
+    parameter_uncertainty = "not applicable",
+    center = "known fixed expected response",
+    center_target = paste0(
+      "population response mean over zero-mean random effects ",
+      "(Gaussian identity)"
+    ),
+    target = paste0(
+      "unconditional known-parameter replication under the fixed design, ",
+      "with all random effects newly generated"
+    ),
+    nsim = nrow(simulated),
+    seed = as.integer(seed),
+    call = match.call()
+  )
+  class(result) <- c("dyadMLM_response_simulations", "list")
+  result
+}
+
+simulate_exchangeable_reference <- function(
+  design,
+  nsim,
+  seed,
+  phi_plus,
+  phi_minus
+) {
+  simulated <- vapply(
+    seq_len(nsim),
+    function(simulation_index) {
+      draw_exchangeable_response(
+        design = design,
+        seed = seed + simulation_index,
+        phi_plus = phi_plus,
+        phi_minus = phi_minus
+      )
+    },
+    numeric(nrow(design))
+  )
+  t(simulated)
+}
+```
+
+```{r run-cross-lag-demonstration}
+cross_lag_observed <- draw_exchangeable_response(
+  distinguishable_design,
+  seed = base_seed + 30000000L,
+  phi_plus = 0.80,
+  phi_minus = 0.20
+)
+cross_lag_correct_matrix <- simulate_exchangeable_reference(
+  distinguishable_design,
+  nsim = n_inner,
+  seed = base_seed + 31000000L,
+  phi_plus = 0.80,
+  phi_minus = 0.20
+)
+cross_lag_restricted_matrix <- simulate_exchangeable_reference(
+  distinguishable_design,
+  nsim = n_inner,
+  seed = base_seed + 32000000L,
+  phi_plus = 0.50,
+  phi_minus = 0.50
+)
+
+cross_lag_correct_simulations <- make_manual_simulations(
+  observed = cross_lag_observed,
+  simulated = cross_lag_correct_matrix,
+  response_center = distinguishable_design$expected_mean,
+  reference = "known-parameter correct reference",
+  seed = base_seed + 31000000L
+)
+cross_lag_restricted_simulations <- make_manual_simulations(
+  observed = cross_lag_observed,
+  simulated = cross_lag_restricted_matrix,
+  response_center = distinguishable_design$expected_mean,
+  reference = "known-parameter restricted reference",
+  seed = base_seed + 32000000L
+)
+
+run_exchangeable_check <- function(simulations) {
+  check_partner_dependence(
+    simulations,
+    dyad = distinguishable_design$dyad,
+    plot = FALSE,
+    response = "model-centred",
+    member = distinguishable_design$member,
+    time = distinguishable_design$time_f,
+    lags = demonstration_lags,
+    weighting = "dyad"
+  )
+}
+
+cross_lag_correct_check <- run_exchangeable_check(
+  cross_lag_correct_simulations
+)
+cross_lag_restricted_check <- run_exchangeable_check(
+  cross_lag_restricted_simulations
+)
+```
+
+```{r cross-lag-table, echo=FALSE}
+extract_cross_lag_demo <- function(check, reference) {
+  check$statistics_table |>
+    dplyr::filter(
+      .data$component %in% c("concurrent", "own_lag", "cross_lag"),
+      .data$statistic %in% c(
+        "exchangeable_partner_correlation",
+        "correlation"
+      ),
+      is.na(.data$lag) | .data$lag <= 3L
+    ) |>
+    dplyr::mutate(reference = reference) |>
+    dplyr::select(
+      .data$reference,
+      .data$component,
+      .data$curve,
+      .data$lag,
+      .data$observed_value,
+      .data$replicated_median,
+      .data$replicated_lower,
+      .data$replicated_upper,
+      .data$observed_quantile
+    )
+}
+
+cross_lag_table <- dplyr::bind_rows(
+  extract_cross_lag_demo(cross_lag_correct_check, "correct"),
+  extract_cross_lag_demo(cross_lag_restricted_check, "restricted")
+) |>
+  dplyr::left_join(
+    finite_cross_lag_targets,
+    by = c("reference", "component", "lag")
+  )
+knitr::kable(cross_lag_table, digits = 3)
+```
+
+The restricted comparison is a known-parameter diagnostic control, not a
+claim that a fitted directional VAR is currently supported. Compare each
+replicated median with its exact finite-series target. Because member demeaning
+couples the summaries, the concurrent, own-lag, and cross-lag differences must
+be interpreted jointly.
+
+# Exact gaps
+
+The diagnostic defines lags by factor-level distance, never by adjacency of
+the remaining rows. In this fixture, member 1 lacks scheduled occasion 2 but
+retains occasions 1 and 3. The pair from 1 to 3 is therefore a lag-2 edge, not
+a lag-1 edge.
+
+```{r gap-illustration}
+gap_data <- expand.grid(
+  dyad_number = 1:4,
+  time_number = 1:4,
+  member_number = 1:2,
+  KEEP.OUT.ATTRS = FALSE
+)
+gap_data <- gap_data[
+  order(
+    gap_data$dyad_number,
+    gap_data$time_number,
+    gap_data$member_number
+  ),
+]
+gap_data <- gap_data[
+  !(gap_data$member_number == 1L & gap_data$time_number == 2L),
+]
+rownames(gap_data) <- NULL
+gap_data$dyad <- factor(gap_data$dyad_number)
+gap_data$member <- factor(
+  paste(gap_data$dyad_number, gap_data$member_number, sep = "_")
+)
+gap_data$role <- factor(
+  paste0("member_", gap_data$member_number),
+  levels = c("member_1", "member_2")
+)
+gap_data$time_f <- factor(gap_data$time_number, levels = 1:4)
+gap_data$y <-
+  sin(gap_data$time_number) +
+  0.2 * gap_data$member_number +
+  0.1 * gap_data$dyad_number
+
+set.seed(base_seed + 40000000L)
+gap_simulated <- t(vapply(
+  seq_len(20L),
+  function(index) gap_data$y + stats::rnorm(nrow(gap_data), sd = 0.2),
+  numeric(nrow(gap_data))
+))
+gap_simulations <- make_manual_simulations(
+  observed = gap_data$y,
+  simulated = gap_simulated,
+  response_center = rep(0, nrow(gap_data)),
+  reference = "deterministic gap illustration",
+  seed = base_seed + 40000000L
+)
+gap_check <- check_partner_dependence(
+  gap_simulations,
+  dyad = gap_data$dyad,
+  role = gap_data$role,
+  plot = FALSE,
+  response = "raw",
+  member = gap_data$member,
+  time = gap_data$time_f,
+  lags = 1:2,
+  weighting = "dyad"
+)
+
+gap_support <- gap_check$statistics_table |>
+  dplyr::filter(.data$component %in% c("own_lag", "cross_lag")) |>
+  dplyr::select(
+    .data$component,
+    .data$curve,
+    .data$lag,
+    .data$weighting,
+    .data$n_dyads,
+    .data$n_edges,
+    .data$structural_reason
+  )
+knitr::kable(gap_support)
+```
+
+# Dyad versus edge weighting
+
+For a deliberately heterogeneous schedule, half the dyads contribute two
+12-occasion member series with \(\phi=.80\); the other half contribute two
+5-occasion series with \(\phi=.20\). Equal-dyad weighting gives each dyad the
+same total influence. Equal-edge weighting emphasizes the longer, more
+persistent series. The exact covariance oracle above makes this contrast
+visible without another 99--199 Monte Carlo datasets. The deterministic
+package tests separately verify that the implementation reproduces the
+prespecified weighted moments.
+
+```{r weighting-oracle, echo=FALSE}
+ar_pair_moments <- function(phi, n_times) {
+  covariance <- centre_covariance(ar_covariance(phi, n_times))
+  edge_moments(covariance, covariance, covariance, lag = 1L)
+}
+
+combine_pair_moments <- function(first, second, first_weight) {
+  combined <- first_weight * first[c(
+    "covariance", "variance_x", "variance_y"
+  )] + (1 - first_weight) * second[c(
+    "covariance", "variance_x", "variance_y"
+  )]
+  moment_correlation(combined)
+}
+
+long_moments <- ar_pair_moments(0.80, 12L)
+short_moments <- ar_pair_moments(0.20, 5L)
+long_edge_weight <- long_moments[["n_edges"]] /
+  (long_moments[["n_edges"]] + short_moments[["n_edges"]])
+
+weighting_table <- data.frame(
+  weighting = c("dyad", "edge"),
+  long_series_weight = c(0.50, long_edge_weight),
+  exact_lag_1_target = c(
+    combine_pair_moments(long_moments, short_moments, 0.50),
+    combine_pair_moments(
+      long_moments,
+      short_moments,
+      long_edge_weight
+    )
+  ),
+  n_dyads = 80L,
+  n_edges = 1200L
+)
+knitr::kable(weighting_table, digits = 3)
+```
+
+After member demeaning, the exact long- and short-series lag-1 correlations
+are `r round(moment_correlation(long_moments), 3)` and
+`r round(moment_correlation(short_moments), 3)`. The resulting dyad- and
+edge-weighted targets differ because correlation is calculated from the pooled
+weighted moments, not by averaging the two series-specific correlations.
+
+# Interpretation and promotion boundary
+
+The prototype is behaving in the intended qualitative direction when:
+
+1. the correct fitted model completes reliably without systematic tail
+   movement;
+2. removing stable or same-occasion covariance moves its prespecified summary
+   in the expected direction;
+3. pooling the .80/.20 AR processes moves the two role-specific own-lag curves
+   in opposite directions;
+4. the shared/difference persistence control reproduces the exact joint
+   finite-series concurrent, own-lag, and cross-lag targets;
+5. exact gaps retain the intended factor-level lag; and
+6. the two weighting rules agree for balanced schedules but target visibly
+   different summaries when series length and persistence are associated.
+
+Promotion should additionally require deterministic package tests, explicit
+ILD simulation-backend tests, at least 95% fit/check completion in the core
+cells, and expert review of the finite-series decomposition and weighting
+estimand. The fitted restrictions are deliberately strong engineering checks;
+their observed positions must not be described as power or specificity
+estimates. The member-mean, same-occasion, and lagged summaries are correlated,
+so movement outside the prespecified target is expected and should remain
+visible during review.
+
+```{r run-conclusion, echo=FALSE, results='asis'}
+minimum_success <- min(completion$success_rate)
+cat(sprintf(
+  paste0(
+    "This is a **%s run**. It recorded a minimum cell-specific completion ",
+    "rate of %.1f%%. Interpret the fitted tables as integration evidence and ",
+    "the covariance-oracle tables as the statistical targets.\n"
+  ),
+  profile_name,
+  100 * minimum_success
+))
+```
+
+# Reproducibility
+
+All data and simulation seeds are deterministic functions of `r base_seed`.
+The fixed design is generated once, while every outer response dataset and
+every fitted-model reference uses its own explicit seed. Failures are never
+retried.
+
+A very small execution check can override the selected profile without editing
+this file:
+
+```r
+rmarkdown::render(
+  "dev/diagnostic_checks/gaussian-ild/outer-simulation-study.Rmd",
+  params = list(
+    profile = "smoke",
+    outer_repetitions = 1,
+    inner_simulations = 20,
+    n_dyads = 24,
+    n_times = 8
+  )
+)
+```
+
+```{r session-info}
+sessionInfo()
+```

@@ -34,9 +34,12 @@ while random effects in either component are redrawn for each simulated
 dataset. When dyads are the only grouping factor, this represents
 hypothetical new dyads observed under the same design.
 
-Currently, the function supports unweighted cross-sectional Gaussian
-identity-link \code{glmmTMB} models without zero inflation and with one numeric
-response per fitted row. The interface is experimental.
+Currently, the function supports unweighted Gaussian identity-link
+\code{glmmTMB} models without zero inflation and with one numeric response per
+fitted row. The ILD prototype has specifically exercised AR(1),
+dyad-occasion, and shared/difference Gaussian random-effect structures; this
+is not a blanket validation of every \code{glmmTMB} covariance structure. The
+interface is experimental.
 
 \strong{Technical details.} This is a plug-in predictive reference: the model is
 not refitted and uncertainty in the fitted parameters is not included. The

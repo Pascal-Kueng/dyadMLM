@@ -1,4 +1,4 @@
-# Cross-Sectional Gaussian Partner-Dependence Checks
+# Cross-Sectional Gaussian Partner-Dependence Baseline
 
 This document is the implementation and review specification for the current
 partner-dependence feature. The supported workflow is deliberately narrow:
@@ -6,6 +6,12 @@ cross-sectional Gaussian identity-link models fitted with `glmmTMB`.
 
 The public interface is experimental. The source code, generated documentation,
 and tests are authoritative when they differ from this development note.
+
+The separate [Gaussian ILD prototype](gaussian-ild/README.md) extends this
+foundation in its own development sub-folder. The cross-sectional contract
+below remains the baseline. A non-Gaussian extension should likewise use a
+separate branch and sibling sub-folder so that its family-specific residual
+target is reviewed independently.
 
 ## Purpose and supported scope
 
@@ -220,10 +226,9 @@ on the exact PR head.
 
 ## Explicit exclusions
 
-This PR does not implement or define a contract for:
+The cross-sectional baseline does not implement or define a contract for:
 
 - `brms`;
-- intensive longitudinal or repeated dyad-occasion data;
 - non-Gaussian families or non-identity links;
 - response-distribution or temporal-dependence checks;
 - leave-one-dyad-out cross-validation;
@@ -232,7 +237,9 @@ This PR does not implement or define a contract for:
 - dense covariance whitening; or
 - a DHARMa wrapper, generic adequacy score, or pass/fail verdict.
 
-Those are separate features and should be developed and reviewed independently.
+The Gaussian ILD prototype covers repeated dyad-occasion data only within the
+scope documented in its sub-folder. The remaining items are separate features
+and should be developed and reviewed independently.
 
 ## File map
 
@@ -250,4 +257,8 @@ dev/diagnostic_checks/partner-dependence-review.Rmd
 dev/diagnostic_checks/partner-dependence-reference-validation.Rmd
 dev/diagnostic_checks/partner-dependence-outer-simulation-study.Rmd
 dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd
+dev/diagnostic_checks/gaussian-ild/README.md
+dev/diagnostic_checks/gaussian-ild/validation-summary.md
+dev/diagnostic_checks/gaussian-ild/benchmark-shipped-data.R
+dev/diagnostic_checks/gaussian-ild/outer-simulation-study.Rmd
 ```
