@@ -6,9 +6,11 @@
 #' rows and covariates.
 #'
 #' Each simulation keeps the fitted parameter estimates fixed and draws new
-#' random effects and Gaussian observation errors. When dyads are the only
-#' grouping factor, this represents hypothetical new dyads observed under the
-#' same design. Effects for any other modeled grouping levels are also redrawn.
+#' random effects and Gaussian observation errors. The fitted conditional and
+#' dispersion formulas are retained: their fixed-effect estimates stay fixed,
+#' while random effects in either component are redrawn for each simulated
+#' dataset. When dyads are the only grouping factor, this represents
+#' hypothetical new dyads observed under the same design.
 #'
 #' Currently, the function supports unweighted cross-sectional Gaussian
 #' identity-link `glmmTMB` models without zero inflation and with one numeric

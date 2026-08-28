@@ -184,6 +184,51 @@ test_that("response centres stay aligned after row omission", {
 })
 
 
+test_that("dispersion-only omissions retain Gaussian fitted-row alignment", {
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(8104)
+  test_data <- data.frame(
+    dyad = factor(rep(seq_len(20), each = 2L)),
+    predictor = stats::rnorm(40),
+    dispersion_predictor = stats::rnorm(40)
+  )
+  dyad_effect <- stats::rnorm(20, sd = 0.5)
+  test_data$outcome <-
+    1 +
+    0.3 * test_data$predictor +
+    dyad_effect[as.integer(test_data$dyad)] +
+    stats::rnorm(
+      nrow(test_data),
+      sd = exp(0.2 + 0.15 * test_data$dispersion_predictor)
+    )
+  omitted_row <- 17L
+  test_data$dispersion_predictor[[omitted_row]] <- NA_real_
+  model <- glmmTMB::glmmTMB(
+    outcome ~ predictor + (1 | dyad),
+    dispformula = ~ dispersion_predictor,
+    family = stats::gaussian(),
+    ziformula = ~0,
+    data = test_data,
+    na.action = stats::na.exclude
+  )
+
+  simulations <- simulate_dyad_responses(model, nsim = 5, seed = 322)
+
+  expect_identical(nrow(simulations$model_frame), 39L)
+  expect_identical(dim(simulations$simulated_responses), c(5L, 39L))
+  expect_true("dispersion_predictor" %in% names(simulations$model_frame))
+  expect_identical(
+    simulations$model_frame$dispersion_predictor,
+    test_data$dispersion_predictor[-omitted_row]
+  )
+  expect_identical(
+    simulations$observed_response,
+    test_data$outcome[-omitted_row]
+  )
+})
+
+
 test_that("response simulation is unconditional without modifying the model", {
   skip_if_not_installed("glmmTMB")
 
