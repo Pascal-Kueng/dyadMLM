@@ -27,8 +27,9 @@ only when members are substantively interchangeable.}
 \item{plot}{Logical. If \code{TRUE}, the default, draw the diagnostic plots.}
 
 \item{response}{Which values to summarize. \code{"model-centred"} (the default)
-removes the fitted mean pattern. \code{"raw"} leaves responses unchanged. The
-same choice is applied to observed and simulated responses.}
+removes the row-specific response-prediction pattern. \code{"raw"} leaves
+responses unchanged. The same choice is applied to observed and simulated
+responses.}
 }
 \value{
 Invisibly, a \code{dyadMLM_partner_check} object containing the summary
@@ -64,26 +65,35 @@ describe each role separately and also show dyad mean/difference summaries.
 With \code{role = NULL}, the members are treated as interchangeable, and the
 summaries do not depend on which member is listed first.
 
-By default, \code{response = "model-centred"} removes the same fitted mean pattern
-from the observed and simulated responses. This focuses the check on the
-remaining variation and partner dependence. Use \code{response = "raw"} to keep
-the responses unchanged.
+By default, \code{response = "model-centred"} removes the same row-specific
+response-prediction pattern from the observed and simulated responses. This
+focuses the check on the remaining variation and partner dependence. Use
+\code{response = "raw"} to keep the responses unchanged.
 
-Currently, the function supports cross-sectional Gaussian identity-link
-\code{glmmTMB} simulations created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Each dyad may
-have at most two fitted responses, and at least three complete dyads are
-required. With \code{role}, each complete dyad must contain one member in each of
-exactly two roles. Missing identifiers and incomplete dyads are omitted and
-counted in the result. The interface is experimental.
+Currently, the function supports cross-sectional \code{glmmTMB} simulations
+created by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Each dyad may have at most two fitted
+responses, and at least three complete dyads are required. With \code{role}, each
+complete dyad must contain one member in each of exactly two roles. Missing
+identifiers and incomplete dyads are omitted and counted in the result. The
+interface is experimental.
 
 \strong{Technical details.} Model-centred values equal
 \code{response - response_center}. The centre is fixed across the observed and
-simulated datasets, so newly generated random effects remain. These are
-model-centred response deviations, not conditional or PIT residuals. With
-roles, the partner-level and dyad mean/half-difference summaries express the
-same covariance information. Without roles, the exchangeable calculation
-uses a half-difference root mean square about zero to recover the common
-member variance and covariance.
+simulated datasets, so newly generated random effects remain. The centre is
+the response prediction returned by \code{predict(..., re.form = NA)}. These are
+model-centred response deviations, not conditional or PIT residuals, and the
+subtraction is not an orthogonal variance decomposition for non-Gaussian
+families. With roles, the partner-level and dyad mean/half-difference
+summaries express the same sample covariance information. Without roles,
+the exchangeable calculation uses a half-difference root mean square about
+zero to recover the common sample member variance and covariance.
+
+An undefined observed statistic cannot be compared with the simulations and
+causes an error. Undefined simulated values are omitted only from that
+statistic's reference. One warning reports their counts and proportions;
+summaries and plots use the defined values only. If a statistic is undefined
+in every simulation, its reference cannot be calculated and the function
+causes an error.
 
 For interchangeable members, the calculation follows Woody and Sadler's
 (2005) between-/within-dyad decomposition. That paper supports the dyadic

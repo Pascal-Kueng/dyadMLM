@@ -6,23 +6,29 @@
 #' rows and covariates.
 #'
 #' Each simulation keeps the fitted parameter estimates fixed and draws new
-#' random effects and Gaussian observation errors. When dyads are the only
-#' grouping factor, this represents hypothetical new dyads observed under the
-#' same design. Effects for any other modeled grouping levels are also redrawn.
+#' random effects and responses from the fitted conditional distribution. When
+#' dyads are the only grouping factor, this represents hypothetical new dyads
+#' observed under the same design. Effects for any other modeled grouping
+#' levels are also redrawn.
 #'
 #' Currently, the function supports unweighted cross-sectional Gaussian
-#' identity-link `glmmTMB` models without zero inflation and with one numeric
-#' response per fitted row. The interface is experimental.
+#' identity-link, Poisson log-link, NB1 log-link, NB2 log-link, Tweedie
+#' log-link, Gamma log-link, and beta logit-link `glmmTMB` models without zero
+#' inflation and with one finite numeric observed and simulated response per
+#' fitted row. Their fitted conditional and dispersion formulas are retained.
+#' Other family/link pairs, including response formats that require an adapter,
+#' are not yet supported. The interface is experimental.
 #'
 #' **Technical details.** This is a plug-in predictive reference: the model is
 #' not refitted and uncertainty in the fitted parameters is not included. The
 #' simulation is conditional on those estimates and the fitted-row design, but
 #' not on the fitted random-effect values.
 #'
-#' The result stores one expected response for each fitted row. Downstream
-#' checks can use the responses unchanged or remove this same fitted mean
-#' pattern from the observed and simulated responses. For the supported model,
-#' this centre is the response prediction with random effects set to zero.
+#' The result stores one response prediction for each fitted row, obtained with
+#' `predict(..., type = "response", re.form = NA)`. Downstream checks can use
+#' the responses unchanged or subtract this same prediction from the observed
+#' and simulated responses. This common transformation is available for every
+#' supported family; it is not a family-specific residual definition.
 #'
 #' @param model A fitted `glmmTMB` model.
 #' @param nsim Number of complete response datasets to simulate. The default
@@ -66,13 +72,33 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
 
   model_family <- stats::family(model)
-  if (!identical(model_family$family, "gaussian") ||
-      !identical(model_family$link, "identity")) {
+  if (model_family$family %in% c("binomial", "betabinomial")) {
     stop(
-      "Predictive checks currently support only Gaussian identity-link models.",
+      paste0(
+        "Predictive checks do not yet support binomial or beta-binomial ",
+        "response formats; these require a response adapter."
+      ),
       call. = FALSE
     )
   }
+  supported_family_links <- c(
+    "gaussian:identity", "poisson:log", "nbinom1:log", "nbinom2:log",
+    "tweedie:log", "Gamma:log", "beta:logit"
+  )
+  model_family_link <- paste(model_family$family, model_family$link, sep = ":")
+  if (!model_family_link %in% supported_family_links) {
+    stop(
+      paste0(
+        "Predictive checks currently support only these validated family/link ",
+        "pairs: Gaussian identity, Poisson log, NB1 log, NB2 log, Tweedie ",
+        "log, Gamma log, and beta logit."
+      ),
+      call. = FALSE
+    )
+  }
+  is_gaussian_identity <-
+    identical(model_family$family, "gaussian") &&
+    identical(model_family$link, "identity")
 
   # The model frame contains the rows actually used for fitting. Rows omitted
   # during fitting are already gone, and every object below keeps this order.
@@ -108,9 +134,10 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
   }
 
-  # Obtain one fixed response centre per fitted row. For a Gaussian identity
-  # model, the random-effects-zero prediction is exactly the marginal expected
-  # response after averaging over newly drawn zero-mean effects at every level.
+  # Obtain one fixed response centre per fitted row. The same prediction is
+  # subtracted from observed and simulated responses downstream, regardless of
+  # family. For Gaussian identity models it is also the marginal expected
+  # response after averaging over newly drawn zero-mean effects.
   response_center <- as.numeric(stats::predict(
     model,
     newdata = NULL,
@@ -156,7 +183,8 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop(
       paste0(
         "Simulated responses were not returned as a finite ",
-        "simulation-by-fitted-row matrix."
+        "simulation-by-fitted-row matrix. Response formats that return more ",
+        "than one value per fitted row require an adapter."
       ),
       call. = FALSE
     )
@@ -165,8 +193,8 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   # All row-level pieces now line up. For fitted row `i`:
   # - `model_frame[i, ]` contains the variables used in the fit;
   # - `observed_response[i]` is its observed value;
-  # - `response_center[i]` is its expected value with random effects set to
-  #   zero; and
+  # - `response_center[i]` is its response prediction from
+  #   `predict(..., re.form = NA)`; and
   # - `simulated_responses[, i]` holds its value in every generated dataset.
   response_simulations <- list(
     observed_response = as.numeric(observed_response),
@@ -179,11 +207,19 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     reference = "plug-in predictive",
     random_effects = "new",
     parameter_uncertainty = "excluded",
-    center = "random-effects-zero expected response",
-    center_target = paste0(
-      "marginal response mean over new random effects ",
-      "(Gaussian identity)"
-    ),
+    center = if (is_gaussian_identity) {
+      "random-effects-zero expected response"
+    } else {
+      "row-specific response prediction with re.form = NA"
+    },
+    center_target = if (is_gaussian_identity) {
+      paste0(
+        "marginal response mean over new random effects ",
+        "(Gaussian identity)"
+      )
+    } else {
+      "row-specific response prediction with re.form = NA"
+    },
     target = paste0(
       "unconditional plug-in replication under the fitted-row design, ",
       "with all random effects newly generated"

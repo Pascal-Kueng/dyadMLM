@@ -25,26 +25,35 @@
 #' With `role = NULL`, the members are treated as interchangeable, and the
 #' summaries do not depend on which member is listed first.
 #'
-#' By default, `response = "model-centred"` removes the same fitted mean pattern
-#' from the observed and simulated responses. This focuses the check on the
-#' remaining variation and partner dependence. Use `response = "raw"` to keep
-#' the responses unchanged.
+#' By default, `response = "model-centred"` removes the same row-specific
+#' response-prediction pattern from the observed and simulated responses. This
+#' focuses the check on the remaining variation and partner dependence. Use
+#' `response = "raw"` to keep the responses unchanged.
 #'
-#' Currently, the function supports cross-sectional Gaussian identity-link
-#' `glmmTMB` simulations created by [simulate_dyad_responses()]. Each dyad may
-#' have at most two fitted responses, and at least three complete dyads are
-#' required. With `role`, each complete dyad must contain one member in each of
-#' exactly two roles. Missing identifiers and incomplete dyads are omitted and
-#' counted in the result. The interface is experimental.
+#' Currently, the function supports cross-sectional `glmmTMB` simulations
+#' created by [simulate_dyad_responses()]. Each dyad may have at most two fitted
+#' responses, and at least three complete dyads are required. With `role`, each
+#' complete dyad must contain one member in each of exactly two roles. Missing
+#' identifiers and incomplete dyads are omitted and counted in the result. The
+#' interface is experimental.
 #'
 #' **Technical details.** Model-centred values equal
 #' `response - response_center`. The centre is fixed across the observed and
-#' simulated datasets, so newly generated random effects remain. These are
-#' model-centred response deviations, not conditional or PIT residuals. With
-#' roles, the partner-level and dyad mean/half-difference summaries express the
-#' same covariance information. Without roles, the exchangeable calculation
-#' uses a half-difference root mean square about zero to recover the common
-#' member variance and covariance.
+#' simulated datasets, so newly generated random effects remain. The centre is
+#' the response prediction returned by `predict(..., re.form = NA)`. These are
+#' model-centred response deviations, not conditional or PIT residuals, and the
+#' subtraction is not an orthogonal variance decomposition for non-Gaussian
+#' families. With roles, the partner-level and dyad mean/half-difference
+#' summaries express the same sample covariance information. Without roles,
+#' the exchangeable calculation uses a half-difference root mean square about
+#' zero to recover the common sample member variance and covariance.
+#'
+#' An undefined observed statistic cannot be compared with the simulations and
+#' causes an error. Undefined simulated values are omitted only from that
+#' statistic's reference. One warning reports their counts and proportions;
+#' summaries and plots use the defined values only. If a statistic is undefined
+#' in every simulation, its reference cannot be calculated and the function
+#' causes an error.
 #'
 #' For interchangeable members, the calculation follows Woody and Sadler's
 #' (2005) between-/within-dyad decomposition. That paper supports the dyadic
@@ -63,8 +72,9 @@
 #'   only when members are substantively interchangeable.
 #' @param plot Logical. If `TRUE`, the default, draw the diagnostic plots.
 #' @param response Which values to summarize. `"model-centred"` (the default)
-#'   removes the fitted mean pattern. `"raw"` leaves responses unchanged. The
-#'   same choice is applied to observed and simulated responses.
+#'   removes the row-specific response-prediction pattern. `"raw"` leaves
+#'   responses unchanged. The same choice is applied to observed and simulated
+#'   responses.
 #'
 #' @return Invisibly, a `dyadMLM_partner_check` object containing the summary
 #'   table, all replicated statistics, and the selected `response`. In the
@@ -121,14 +131,12 @@ check_partner_dependence <- function(
     stop("`dyad` must identify the dyad for each fitted row.", call. = FALSE)
   }
   supported_simulation <-
-    identical(simulations$backend, "glmmTMB") &&
-    identical(simulations$family, "gaussian") &&
-    identical(simulations$link, "identity")
+    identical(simulations$backend, "glmmTMB")
   if (!supported_simulation) {
     stop(
       paste0(
         "Partner-dependence checks currently require cross-sectional ",
-        "Gaussian identity-link `glmmTMB` simulations."
+        "`glmmTMB` simulations."
       ),
       call. = FALSE
     )
@@ -210,12 +218,30 @@ check_partner_dependence <- function(
       )
   }
 
-  if (any(!is.finite(c(observed_statistics, replicated_statistics)))) {
+  undefined_observed_statistics <- names(observed_statistics)[
+    !is.finite(observed_statistics)
+  ]
+  if (length(undefined_observed_statistics) > 0L) {
     stop(
       paste0(
-        "One or more partner-dependence summaries are undefined because the ",
-        "observed response or at least one simulated response has ",
-        "insufficient variation."
+        "Observed partner-dependence summaries are undefined: ",
+        paste(undefined_observed_statistics, collapse = ", "), ". ",
+        "The observed response has insufficient variation."
+      ),
+      call. = FALSE
+    )
+  }
+
+  n_defined_simulations <- colSums(is.finite(replicated_statistics))
+  all_undefined_statistics <- names(n_defined_simulations)[
+    n_defined_simulations == 0L
+  ]
+  if (length(all_undefined_statistics) > 0L) {
+    stop(
+      paste0(
+        "Every simulated value is undefined for: ",
+        paste(all_undefined_statistics, collapse = ", "), ". ",
+        "A predictive reference cannot be calculated."
       ),
       call. = FALSE
     )
@@ -247,6 +273,38 @@ check_partner_dependence <- function(
     call = check_call
   )
   class(partner_check_result) <- c("dyadMLM_partner_check", "list")
+
+  n_undefined_simulations <- simulations$nsim - n_defined_simulations
+  if (any(n_undefined_simulations > 0L)) {
+    affected_statistics <- which(n_undefined_simulations > 0L)
+    n_affected_datasets <- sum(rowSums(!is.finite(replicated_statistics)) > 0L)
+    count_and_percentage <- function(count) {
+      paste0(
+        count, " of ", simulations$nsim, " (",
+        sprintf("%.1f", 100 * count / simulations$nsim), "%)"
+      )
+    }
+    affected_statistic_details <- paste0(
+      statistics_table$label[affected_statistics], ": ",
+      vapply(
+        n_undefined_simulations[affected_statistics],
+        count_and_percentage,
+        character(1)
+      )
+    )
+    warning(
+      paste0(
+        count_and_percentage(n_affected_datasets),
+        " simulated datasets produced at least one undefined ",
+        "partner-dependence summary. By statistic: ",
+        paste(affected_statistic_details, collapse = "; "), ". ",
+        "Reference summaries and plots use only the defined values for each ",
+        "statistic. The undefined proportion is itself model-predictive ",
+        "information."
+      ),
+      call. = FALSE
+    )
+  }
 
   if (plot) {
     graphics::plot(partner_check_result)
@@ -373,13 +431,13 @@ calculate_partner_response_statistics <- function(
     return(c(
       role_1_sd = stats::sd(first_member_values),
       role_2_sd = stats::sd(second_member_values),
-      partner_correlation = stats::cor(
+      partner_correlation = safe_partner_correlation(
         first_member_values,
         second_member_values
       ),
       dyad_mean_sd = stats::sd(dyad_average_values),
       half_difference_sd = stats::sd(half_difference_values),
-      dyad_mean_half_difference_correlation = stats::cor(
+      dyad_mean_half_difference_correlation = safe_partner_correlation(
         dyad_average_values,
         half_difference_values
       )
@@ -402,6 +460,18 @@ calculate_partner_response_statistics <- function(
     dyad_mean_sd = sqrt(dyad_average_variance),
     half_difference_rms = sqrt(half_difference_mean_square)
   )
+}
+
+
+# Calculate a correlation without warning when either vector has zero spread.
+safe_partner_correlation <- function(x, y) {
+  x_sd <- stats::sd(x)
+  y_sd <- stats::sd(y)
+  if (!is.finite(x_sd) || !is.finite(y_sd) || x_sd <= 0 || y_sd <= 0) {
+    return(NA_real_)
+  }
+
+  stats::cor(x, y)
 }
 
 
@@ -463,14 +533,20 @@ summarize_partner_statistics <- function(
     )
   }
 
-  # Each column is one statistic across all simulated datasets. These rows are
-  # the lower limit, median, and upper limit of its simulated distribution.
-  replicated_reference_points <- apply(
-    replicated_statistics,
-    MARGIN = 2L,
-    FUN = stats::quantile,
-    probs = c(0.025, 0.5, 0.975),
-    names = FALSE
+  # Each column is one statistic across all simulated datasets. Omit occasional
+  # undefined values independently for that statistic.
+  replicated_reference_points <- vapply(
+    seq_along(observed_statistics),
+    function(statistic_index) {
+      replicated_statistic_values <-
+        replicated_statistics[, statistic_index]
+      stats::quantile(
+        replicated_statistic_values[is.finite(replicated_statistic_values)],
+        probs = c(0.025, 0.5, 0.975),
+        names = FALSE
+      )
+    },
+    numeric(3)
   )
 
   # This finite-simulation rank is descriptive; it is not a p-value.
@@ -479,9 +555,11 @@ summarize_partner_statistics <- function(
     function(statistic_index) {
       replicated_statistic_values <-
         replicated_statistics[, statistic_index]
+      replicated_statistic_values <-
+        replicated_statistic_values[is.finite(replicated_statistic_values)]
       (1 + sum(
         replicated_statistic_values <= observed_statistics[[statistic_index]]
-      )) / (nrow(replicated_statistics) + 1)
+      )) / (length(replicated_statistic_values) + 1)
     },
     numeric(1)
   )
@@ -548,6 +626,16 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
   cat("Simulated datasets: median and middle 95% of values\n")
   for (statistic_index in seq_len(nrow(x$statistics_table))) {
     statistic <- x$statistics_table[statistic_index, ]
+    n_defined_simulations <- sum(is.finite(
+      x$replicated_statistics[, statistic$statistic_name, drop = TRUE]
+    ))
+    defined_simulations_suffix <- if (n_defined_simulations < x$nsim) {
+      paste0(
+        " | Defined simulations ", n_defined_simulations, "/", x$nsim
+      )
+    } else {
+      ""
+    }
     cat(
       statistic$label,
       "\n  Observed ", sprintf(number_format, statistic$observed_value),
@@ -556,6 +644,7 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
       ", ", sprintf(number_format, statistic$replicated_upper), "]",
       " | Observed position ",
       sprintf(number_format, statistic$observed_quantile),
+      defined_simulations_suffix,
       "\n",
       sep = ""
     )
@@ -631,14 +720,26 @@ plot.dyadMLM_partner_check <- function(
     mean_difference = "Dyad mean/difference summaries"
   )
   response_subtitle <- if (x$response == "model-centred") {
-    "Fitted row-specific mean removed; remaining dependence retained"
+    "Row-specific response prediction removed; dependence retained"
   } else {
-    "Raw responses; fitted mean pattern retained"
+    "Raw responses; row-specific prediction pattern retained"
   }
   for (statistic_index in seq_len(nrow(selected_statistics_table))) {
     statistic_row <- selected_statistics_table[statistic_index, ]
     replicated_statistic_values <-
       x$replicated_statistics[, statistic_row$statistic_name, drop = TRUE]
+    replicated_statistic_values <-
+      replicated_statistic_values[is.finite(replicated_statistic_values)]
+    reference_dataset_label <- if (
+      length(replicated_statistic_values) < x$nsim
+    ) {
+      paste0(
+        length(replicated_statistic_values), "/", x$nsim,
+        " defined datasets"
+      )
+    } else {
+      paste0(x$nsim, " datasets")
+    }
     reference_limits <- c(
       statistic_row$replicated_lower,
       statistic_row$replicated_upper
@@ -670,7 +771,7 @@ plot.dyadMLM_partner_check <- function(
         x$n_pairs,
         " complete pairs; ",
         x$reference,
-        " reference (", x$nsim, " datasets)"
+        " reference (", reference_dataset_label, ")"
       ),
       xlab = "Summary value",
       ...

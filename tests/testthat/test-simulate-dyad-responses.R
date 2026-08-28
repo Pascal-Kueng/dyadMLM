@@ -8,7 +8,8 @@ predictive_check_test_model <- function(
   test_data <- data.frame(
     dyad = factor(rep(seq_len(20), each = 2)),
     study = factor(rep(seq_len(5), each = 8)),
-    predictor = rep(c(-0.5, 0.5), times = 20)
+    predictor = rep(c(-0.5, 0.5), times = 20),
+    role = factor(rep(c("female", "male"), times = 20))
   )
   dyad_effect <- stats::rnorm(20, sd = 0.8)
   study_effect <- stats::rnorm(5, sd = 0.4)
@@ -22,6 +23,13 @@ predictive_check_test_model <- function(
     test_data$outcome <- stats::rpois(
       nrow(test_data),
       lambda = exp(0.2 + 0.3 * test_data$predictor)
+    )
+  }
+  if (identical(family$family, "binomial")) {
+    test_data$outcome <- stats::rbinom(
+      nrow(test_data),
+      size = 1,
+      prob = stats::plogis(0.2 + 0.3 * test_data$predictor)
     )
   }
 
@@ -144,6 +152,69 @@ test_that("seeded response simulations are reproducible", {
     without_existing_state$simulated_responses,
     first$simulated_responses
   )
+})
+
+
+test_that("scalar generalized families use the same simulation path", {
+  skip_if_not_installed("glmmTMB")
+
+  families <- list(
+    stats::poisson(link = "log"),
+    glmmTMB::nbinom1(link = "log"),
+    glmmTMB::nbinom2(link = "log"),
+    glmmTMB::tweedie(link = "log"),
+    stats::Gamma(link = "log"),
+    glmmTMB::beta_family(link = "logit")
+  )
+
+  for (family in families) {
+    model <- scalar_generalized_test_model(family = family)
+    simulations <- simulate_dyad_responses(model, nsim = 5, seed = 458)
+
+    expect_identical(
+      dim(simulations$simulated_responses),
+      c(5L, nrow(stats::model.frame(model)))
+    )
+    expect_identical(simulations$family, family$family)
+    expect_identical(simulations$link, family$link)
+    expect_equal(
+      simulations$response_center,
+      as.numeric(stats::predict(
+        model,
+        newdata = NULL,
+        type = "response",
+        re.form = NA
+      ))
+    )
+    expect_identical(
+      simulations$center_target,
+      "row-specific response prediction with re.form = NA"
+    )
+  }
+})
+
+
+test_that("generalized dispersion formulas are retained", {
+  skip_if_not_installed("glmmTMB")
+
+  model <- scalar_generalized_test_model(
+    family = glmmTMB::nbinom2(link = "log"),
+    dispformula = ~0 + role + (1 | batch)
+  )
+  original_codes <- get_glmmTMB_simulation_codes(model)
+  on.exit(set_glmmTMB_simulation_codes(model, original_codes), add = TRUE)
+
+  simulations <- simulate_dyad_responses(model, nsim = 5, seed = 459)
+  unconditional_codes <- lapply(
+    original_codes,
+    function(codes) rep(2, length(codes))
+  )
+  set_glmmTMB_simulation_codes(model, unconditional_codes)
+  expected <- t(as.matrix(stats::simulate(model, nsim = 5, seed = 459)))
+  set_glmmTMB_simulation_codes(model, original_codes)
+
+  expect_identical(simulations$simulated_responses, expected)
+  expect_length(original_codes$termsdisp, 1L)
 })
 
 
@@ -281,18 +352,18 @@ test_that("unsupported predictive-check inputs fail clearly", {
     fixed = TRUE
   )
 
-  poisson_model <- predictive_check_test_model(family = stats::poisson())
+  binomial_model <- predictive_check_test_model(family = stats::binomial())
   expect_error(
-    simulate_dyad_responses(poisson_model),
-    "Gaussian identity-link models",
+    simulate_dyad_responses(binomial_model),
+    "require a response adapter",
     fixed = TRUE
   )
 
-  log_link_model <- gaussian_model
-  log_link_model$modelInfo$family <- stats::gaussian(link = "log")
+  unvalidated_link_model <- gaussian_model
+  unvalidated_link_model$modelInfo$family <- stats::gaussian(link = "log")
   expect_error(
-    simulate_dyad_responses(log_link_model),
-    "Gaussian identity-link models",
+    simulate_dyad_responses(unvalidated_link_model),
+    "validated family/link pairs",
     fixed = TRUE
   )
 

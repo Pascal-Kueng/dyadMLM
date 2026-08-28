@@ -1,0 +1,3 @@
+"family","convergence","positive_definite_hessian","dispersion_random_terms","center_matches_predict","raw_check","centred_check","warning","error"
+"nbinom2",0,TRUE,1,TRUE,TRUE,TRUE,"",""
+"tweedie",0,TRUE,1,TRUE,TRUE,TRUE,"",""

@@ -28,21 +28,27 @@ rows and covariates.
 }
 \details{
 Each simulation keeps the fitted parameter estimates fixed and draws new
-random effects and Gaussian observation errors. When dyads are the only
-grouping factor, this represents hypothetical new dyads observed under the
-same design. Effects for any other modeled grouping levels are also redrawn.
+random effects and responses from the fitted conditional distribution. When
+dyads are the only grouping factor, this represents hypothetical new dyads
+observed under the same design. Effects for any other modeled grouping
+levels are also redrawn.
 
 Currently, the function supports unweighted cross-sectional Gaussian
-identity-link \code{glmmTMB} models without zero inflation and with one numeric
-response per fitted row. The interface is experimental.
+identity-link, Poisson log-link, NB1 log-link, NB2 log-link, Tweedie
+log-link, Gamma log-link, and beta logit-link \code{glmmTMB} models without zero
+inflation and with one finite numeric observed and simulated response per
+fitted row. Their fitted conditional and dispersion formulas are retained.
+Other family/link pairs, including response formats that require an adapter,
+are not yet supported. The interface is experimental.
 
 \strong{Technical details.} This is a plug-in predictive reference: the model is
 not refitted and uncertainty in the fitted parameters is not included. The
 simulation is conditional on those estimates and the fitted-row design, but
 not on the fitted random-effect values.
 
-The result stores one expected response for each fitted row. Downstream
-checks can use the responses unchanged or remove this same fitted mean
-pattern from the observed and simulated responses. For the supported model,
-this centre is the response prediction with random effects set to zero.
+The result stores one response prediction for each fitted row, obtained with
+\code{predict(..., type = "response", re.form = NA)}. Downstream checks can use
+the responses unchanged or subtract this same prediction from the observed
+and simulated responses. This common transformation is available for every
+supported family; it is not a family-specific residual definition.
 }

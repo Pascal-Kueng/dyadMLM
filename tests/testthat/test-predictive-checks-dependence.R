@@ -251,31 +251,83 @@ test_that("partner checks reject unsupported simulation metadata", {
       dyad = "dyad",
       plot = FALSE
     ),
-    "Gaussian identity-link `glmmTMB` simulations",
+    "cross-sectional `glmmTMB` simulations",
     fixed = TRUE
   )
 
-  unsupported_family <- simulations
-  unsupported_family$family <- "poisson"
-  expect_error(
+  generalized_metadata <- simulations
+  generalized_metadata$family <- "poisson"
+  generalized_metadata$link <- "log"
+  generalized_result <- expect_silent(
     check_partner_dependence(
-      unsupported_family,
+      generalized_metadata,
       dyad = "dyad",
       plot = FALSE
-    ),
-    "Gaussian identity-link `glmmTMB` simulations",
-    fixed = TRUE
+    )
+  )
+  expect_identical(generalized_result$family, "poisson")
+  expect_identical(generalized_result$link, "log")
+})
+
+
+test_that("undefined simulated correlations produce one informative warning", {
+  simulations <- partner_check_test_simulations()
+  simulations$simulated_responses <- simulations$simulated_responses[
+    rep(seq_len(simulations$nsim), length.out = 21L),
+    ,
+    drop = FALSE
+  ]
+  simulations$nsim <- 21L
+  simulations$simulated_responses[1:2, ] <- matrix(
+    rep(simulations$response_center, times = 2L),
+    nrow = 2L,
+    byrow = TRUE
   )
 
-  unsupported_link <- simulations
-  unsupported_link$link <- "log"
-  expect_error(
+  warning_messages <- character()
+  result <- withCallingHandlers(
     check_partner_dependence(
-      unsupported_link,
+      simulations,
       dyad = "dyad",
+      role = "role",
       plot = FALSE
     ),
-    "Gaussian identity-link `glmmTMB` simulations",
+    warning = function(condition) {
+      warning_messages <<- c(warning_messages, conditionMessage(condition))
+      invokeRestart("muffleWarning")
+    }
+  )
+  correlation_names <- c(
+    "partner_correlation",
+    "dyad_mean_half_difference_correlation"
+  )
+  expect_true(all(is.na(
+    result$replicated_statistics[1:2, correlation_names]
+  )))
+  expect_true(all(is.finite(
+    result$statistics_table$replicated_median[
+      result$statistics_table$statistic_name %in% correlation_names
+    ]
+  )))
+  expect_match(
+    paste(capture.output(print(result)), collapse = "\n"),
+    "Defined simulations 19/21",
+    fixed = TRUE
+  )
+  expect_length(warning_messages, 1L)
+  expect_match(
+    warning_messages,
+    "2 of 21 (9.5%) simulated datasets",
+    fixed = TRUE
+  )
+  expect_match(
+    warning_messages,
+    "Partner correlation (female and male): 2 of 21 (9.5%)",
+    fixed = TRUE
+  )
+  expect_match(
+    warning_messages,
+    "plots use only the defined values",
     fixed = TRUE
   )
 })
@@ -701,24 +753,36 @@ test_that("invalid partner structures fail clearly", {
     fixed = TRUE
   )
 
+  observed_no_variation <- simulations
+  observed_no_variation$observed_response <-
+    observed_no_variation$response_center
+  expect_error(
+    check_partner_dependence(observed_no_variation, dyad = "dyad"),
+    "Observed partner-dependence summaries are undefined",
+    fixed = TRUE
+  )
+
   no_variation <- simulations
-  no_variation$simulated_responses[1L, ] <-
-    no_variation$response_center
+  no_variation$simulated_responses <- matrix(
+    rep(no_variation$response_center, times = no_variation$nsim),
+    nrow = no_variation$nsim,
+    byrow = TRUE
+  )
   expect_error(
     check_partner_dependence(no_variation, dyad = "dyad"),
-    "insufficient variation",
+    "Every simulated value is undefined for",
     fixed = TRUE
   )
 
   raw_no_variation <- simulations
-  raw_no_variation$simulated_responses[1L, ] <- 1
+  raw_no_variation$simulated_responses[,] <- 1
   expect_error(
     check_partner_dependence(
       raw_no_variation,
       dyad = "dyad",
       response = "raw"
     ),
-    "insufficient variation",
+    "Every simulated value is undefined for",
     fixed = TRUE
   )
 })
@@ -967,4 +1031,60 @@ test_that("partner check works with simulated glmmTMB responses", {
   expect_identical(result$n_pairs, 20L)
   expect_identical(dim(result$replicated_statistics), c(20L, 6L))
   expect_true(all(is.finite(result$replicated_statistics)))
+})
+
+
+test_that("raw and model-centred checks work for generalized responses", {
+  skip_if_not_installed("glmmTMB")
+
+  model <- scalar_generalized_test_model(
+    family = glmmTMB::nbinom2(link = "log")
+  )
+  simulations <- simulate_dyad_responses(model, nsim = 20, seed = 9126)
+  raw_result <- check_partner_dependence(
+    simulations,
+    dyad = "dyad",
+    role = "role",
+    response = "raw",
+    plot = FALSE
+  )
+  centred_result <- check_partner_dependence(
+    simulations,
+    dyad = "dyad",
+    role = "role",
+    response = "model-centred",
+    plot = FALSE
+  )
+
+  paired_rows <- matrix(seq_len(nrow(simulations$model_frame)), ncol = 2L,
+                        byrow = TRUE)
+  expected_observed <- calculate_partner_response_statistics(
+    simulations$observed_response - simulations$response_center,
+    paired_rows,
+    use_role_specific_statistics = TRUE
+  )
+  expected_first_simulation <- calculate_partner_response_statistics(
+    simulations$simulated_responses[1L, ] - simulations$response_center,
+    paired_rows,
+    use_role_specific_statistics = TRUE
+  )
+
+  expect_equal(
+    centred_result$statistics_table$observed_value,
+    unname(expected_observed)
+  )
+  expect_equal(
+    unname(centred_result$replicated_statistics[1L, ]),
+    unname(expected_first_simulation)
+  )
+  expect_identical(
+    raw_result$replicated_statistics,
+    check_partner_dependence(
+      simulations,
+      dyad = "dyad",
+      role = "role",
+      response = "raw",
+      plot = FALSE
+    )$replicated_statistics
+  )
 })

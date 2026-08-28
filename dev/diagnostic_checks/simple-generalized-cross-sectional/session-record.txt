@@ -1,0 +1,10 @@
+date=2026-08-28
+R=4.6.1
+dyadMLM_sha=b3857749c2741f3458c668d97223a71ad6d5b979
+glmmTMB=1.1.14
+outer_repetitions=6
+n_dyads=120
+nsim=199
+source_md5[R/simulate_dyad_responses.R]=3402b5bdf805de7dc4c42902460948b4
+source_md5[R/predictive_checks_dependence.R]=7da8634e405409b25327914f1121d2c1
+source_md5[dev/diagnostic_checks/simple-generalized-cross-sectional/simulation-study.R]=68291e7177034aa0c4c8720e9f367b89

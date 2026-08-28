@@ -1,8 +1,9 @@
-# Cross-Sectional Gaussian Partner-Dependence Checks
+# Cross-Sectional Partner-Dependence Checks
 
 This document is the implementation and review specification for the current
 partner-dependence feature. The supported workflow is deliberately narrow:
-cross-sectional Gaussian identity-link models fitted with `glmmTMB`.
+validated cross-sectional `glmmTMB` family/link pairs with one finite numeric
+response per fitted row.
 
 The public interface is experimental. The source code, generated documentation,
 and tests are authoritative when they differ from this development note.
@@ -24,9 +25,15 @@ The validated workflow is:
 
 - one numeric response per fitted row;
 - cross-sectional data with at most two fitted rows per supplied dyad;
-- a Gaussian identity-link `glmmTMB` model;
+- Gaussian identity, Poisson log, NB1 log, NB2 log, Tweedie log, Gamma log, or
+  beta logit family/link;
 - unit case weights; and
 - no zero-inflation component.
+
+Binomial and beta-binomial response formats are deferred until a response
+adapter is available. Other family/link pairs require separate backend
+validation. Conditional formulas and fixed or random dispersion formulas are
+otherwise passed through to `glmmTMB`.
 
 The check requires at least three complete dyads. A supplied role variable must
 contain exactly two role values among complete dyads, with one row for each role
@@ -43,10 +50,10 @@ simulated statistic:  T(y_rep)
 ```
 
 The fitted parameters and design remain fixed. Random effects at every modeled
-grouping level and Gaussian observation errors are newly generated for every
-replicate. When dyads are the only grouping factor, the simulations can be
-interpreted as hypothetical model-generated new dyads observed under the same
-design.
+grouping level and responses from the fitted conditional distribution are
+newly generated for every replicate. When dyads are the only grouping factor,
+the simulations can be interpreted as hypothetical model-generated new dyads
+observed under the same design.
 
 This is a full-data plug-in predictive reference. The model is not refitted,
 parameter uncertainty is not propagated, and no observations are held out. It
@@ -89,13 +96,15 @@ not source-data row order.
   response.
 - `response = "raw"` leaves the observed and simulated responses unchanged.
 
-For the supported Gaussian identity-link model, the centre is the prediction
-with random effects set to zero. It is also the expected response after
-averaging over newly generated zero-mean random effects under the fitted
-parameter estimates. Subtracting it removes the fitted marginal mean pattern
-while retaining newly generated random-effect and observation-level variation.
+The centre is the row-specific response prediction returned by
+`predict(..., type = "response", re.form = NA)`. Subtracting exactly the same
+vector from observed and simulated responses is a common transformation for
+all supported families. For Gaussian identity-link models it also removes the
+fitted marginal mean pattern. For non-Gaussian models it should not be read as
+an orthogonal decomposition of explained and unexplained variance.
 
-Raw summaries retain both the fitted mean pattern and dependence. Both
+Raw summaries retain both the fitted response-prediction pattern and
+dependence. Both
 representations reuse the same complete simulations.
 
 ## Pairing and omitted rows
@@ -161,6 +170,10 @@ the complete replicated-statistic matrix, and for every summary:
 
 The observed position is descriptive and is not a p-value. The middle 95%
 interval is a predictive-reference summary, not a calibrated acceptance region.
+Undefined simulated values are omitted only for that statistic. One warning
+reports the affected counts and proportions, and summaries and plots use only
+the defined values. The function stops if an observed statistic or its entire
+simulated reference is undefined.
 
 This check is most useful when the model makes a clear simplifying assumption
 that could be wrong. If the model was allowed to learn the same pattern freely
@@ -177,13 +190,15 @@ were used and reports the number of complete pairs.
 A check asks whether the fitted model reproduces a selected observed feature. It
 does not test whether partner correlation is zero, prove that every covariance
 component is correctly assigned, or validate model-based standard errors.
+Response-scale SDs and Pearson correlations are selected summaries; they do not
+characterize every form of non-Gaussian dependence.
 
 ## Validation and review
 
 Deterministic package tests cover:
 
-- supported and unsupported model classes, families, links, weights, and
-  zero-inflation structures;
+- supported and unsupported model classes, scalar response formats, weights,
+  and zero-inflation structures;
 - response dimensions, fitted-row alignment, and seeded reproducibility;
 - unconditional simulation and restoration of model simulation settings after
   success and error;
@@ -214,6 +229,12 @@ repeatedly generates data from known Gaussian populations, refits correct and
 restricted models, and records how the complete check behaves. It is a
 development validation report and is not run in CI.
 
+The compact generalized validation is in
+[`simple-generalized-cross-sectional/`](simple-generalized-cross-sectional/).
+It records exact PR regression, parity with the more complex NB1/NB2/Tweedie
+prototype, a six-family directional study, random-dispersion checks, and a
+sparse Poisson check.
+
 Before review or merge, regenerate the Rd files, run the focused and full test
 suites, render the development documents, run the package check, and verify CI
 on the exact PR head.
@@ -224,7 +245,7 @@ This PR does not implement or define a contract for:
 
 - `brms`;
 - intensive longitudinal or repeated dyad-occasion data;
-- non-Gaussian families or non-identity links;
+- response formats requiring an adapter, including binomial and beta-binomial;
 - response-distribution or temporal-dependence checks;
 - leave-one-dyad-out cross-validation;
 - refit-based calibration or formal hypothesis tests;
@@ -250,4 +271,5 @@ dev/diagnostic_checks/partner-dependence-review.Rmd
 dev/diagnostic_checks/partner-dependence-reference-validation.Rmd
 dev/diagnostic_checks/partner-dependence-outer-simulation-study.Rmd
 dev/diagnostic_checks/partner-dependence-vignette-draft.Rmd
+dev/diagnostic_checks/simple-generalized-cross-sectional/
 ```

@@ -1,0 +1,23 @@
+"comparison","family","item","exact"
+"PR18","gaussian","observed_response",TRUE
+"PR18","gaussian","simulated_responses",TRUE
+"PR18","gaussian","response_center",TRUE
+"PR18","gaussian","raw_statistics",TRUE
+"PR18","gaussian","raw_summary",TRUE
+"PR18","gaussian","model-centred_statistics",TRUE
+"PR18","gaussian","model-centred_summary",TRUE
+"complex prototype","nbinom1","simulated_responses",TRUE
+"complex prototype","nbinom1","raw_statistics",TRUE
+"complex prototype","nbinom1","raw_summary",TRUE
+"complex prototype","nbinom1","centred_observed_manual",TRUE
+"complex prototype","nbinom1","centred_simulated_manual",TRUE
+"complex prototype","nbinom2","simulated_responses",TRUE
+"complex prototype","nbinom2","raw_statistics",TRUE
+"complex prototype","nbinom2","raw_summary",TRUE
+"complex prototype","nbinom2","centred_observed_manual",TRUE
+"complex prototype","nbinom2","centred_simulated_manual",TRUE
+"complex prototype","tweedie","simulated_responses",TRUE
+"complex prototype","tweedie","raw_statistics",TRUE
+"complex prototype","tweedie","raw_summary",TRUE
+"complex prototype","tweedie","centred_observed_manual",TRUE
+"complex prototype","tweedie","centred_simulated_manual",TRUE
