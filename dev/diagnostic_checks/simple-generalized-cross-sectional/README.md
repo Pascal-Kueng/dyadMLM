@@ -1,7 +1,9 @@
 # Simple generalized cross-sectional validation
 
-This folder validates the deliberately small generalization of the
-cross-sectional partner-dependence check. The production algorithm remains:
+This folder is the compact, self-contained validation record for the selected
+generalized partner-dependence implementation.
+
+The production algorithm is the same for every admitted family:
 
 ```text
 raw:             T(y)       versus T(y_rep)
@@ -10,30 +12,39 @@ model-centred:   T(y - c)   versus T(y_rep - c)
 c = predict(model, type = "response", re.form = NA)
 ```
 
-The same simulated response bank and the same statistic are used on both sides.
-There is no family-specific residual definition, analytic integration, or
-family-specific implementation. The public spike is allow-listed to the seven
-family/link pairs exercised by package or development validation.
+The same response bank, centre, and statistic are used for the observed and
+simulated data. There is no family-specific residual definition.
 
-`simulation-study.R` performs four checks:
+## Files
 
-1. exact numerical regression against PR #18 for Gaussian identity models;
-2. exact raw-response parity with the more elaborate NB1/NB2/Tweedie
-   prototype, plus an independent hand calculation of model-centred results;
-3. a paired outer study for Poisson, NB1, NB2, Tweedie, Gamma, and beta models,
-   comparing correctly modeled with omitted shared dyad dependence; and
-4. mechanical fixed/random dispersion-formula and sparse-reference checks.
+- `simulation-study.R` runs the six-family correct-versus-omitted-dependence
+  study and asserts the random-dispersion and sparse-reference checks.
+- `outer-study-results.csv` retains every fitted-model result from the recorded
+  run, including convergence information.
+- `validation-summary.md` records the environment, conclusions, historical
+  prototype comparison, and interpretation limits.
+- This `README.md` defines the validation contract and rerun command.
 
-Run from the worktree root:
+The executable study validates only the chosen implementation. It does not load
+or depend on an abandoned prototype branch.
+
+## Run
+
+From the package root:
 
 ```r
 source("dev/diagnostic_checks/simple-generalized-cross-sectional/simulation-study.R")
 ```
 
-The defaults use 6 outer repetitions, 120 dyads, and 199 simulations per fit.
-For a quick smoke run, set `DYADMLM_OUTER_REPS=2` and `DYADMLM_NSIM=39`.
-`DYADMLM_COMPLEX_PROTOTYPE` may point to a different checkout of the elaborate
-prototype.
+The recorded run used 6 outer repetitions, 120 dyads, and 199 simulations per
+fit. For a shorter smoke run:
 
-Generated CSV files contain the complete numerical record. The concise
-`validation-summary.md` reports the executed configuration and conclusions.
+```sh
+DYADMLM_OUTER_REPS=2 DYADMLM_NSIM=39 Rscript \
+  dev/diagnostic_checks/simple-generalized-cross-sectional/simulation-study.R
+```
+
+The default recorded configuration overwrites only `outer-study-results.csv`.
+Non-default smoke runs leave that file unchanged. Mechanical checks stop with
+an error when random-dispersion integration, sparse-reference handling, or
+completion of every requested outer diagnostic fails.

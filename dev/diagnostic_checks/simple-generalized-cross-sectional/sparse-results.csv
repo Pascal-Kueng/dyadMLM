@@ -1,2 +1,0 @@
-"family","mean","defined_correlations","simulations","check_completed","warning","error"
-"poisson",0.175,198,199,TRUE,"1 of 199 (0.5%) simulated datasets produced at least one undefined partner-dependence summary. By statistic: Partner correlation (female and male): 1 of 199 (0.5%). Reference summaries and plots use only the defined values for each statistic. The undefined proportion is itself model-predictive information.",""

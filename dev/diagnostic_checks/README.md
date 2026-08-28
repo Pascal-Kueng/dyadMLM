@@ -231,9 +231,10 @@ development validation report and is not run in CI.
 
 The compact generalized validation is in
 [`simple-generalized-cross-sectional/`](simple-generalized-cross-sectional/).
-It records exact PR regression, parity with the more complex NB1/NB2/Tweedie
-prototype, a six-family directional study, random-dispersion checks, and a
-sparse Poisson check.
+Its self-contained study covers six families, random-dispersion integration,
+and sparse Poisson references. Its summary also retains the exact historical
+PR regression and complex-prototype comparison that motivated the simpler
+implementation.
 
 Before review or merge, regenerate the Rd files, run the focused and full test
 suites, render the development documents, run the package check, and verify CI

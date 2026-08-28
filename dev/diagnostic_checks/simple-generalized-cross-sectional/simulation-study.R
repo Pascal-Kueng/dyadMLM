@@ -10,16 +10,11 @@ devtools::load_all(source_dir, quiet = TRUE)
 outer_repetitions <- as.integer(Sys.getenv("DYADMLM_OUTER_REPS", unset = "6"))
 nsim <- as.integer(Sys.getenv("DYADMLM_NSIM", unset = "199"))
 n_dyads <- as.integer(Sys.getenv("DYADMLM_N_DYADS", unset = "120"))
-prototype_dir <- Sys.getenv(
-  "DYADMLM_COMPLEX_PROTOTYPE",
-  unset = file.path(dirname(source_dir), "dyadMLM-nbinom2-partner-prototype")
-)
 stopifnot(outer_repetitions >= 1L, nsim >= 20L, n_dyads >= 40L)
 
 family_object <- function(family_name) {
   switch(
     family_name,
-    gaussian = stats::gaussian(link = "identity"),
     poisson = stats::poisson(link = "log"),
     nbinom1 = glmmTMB::nbinom1(link = "log"),
     nbinom2 = glmmTMB::nbinom2(link = "log"),
@@ -69,8 +64,6 @@ generate_dyad_data <- function(
   }
   response_mean <- if (family_name == "beta") {
     stats::plogis(linear_predictor)
-  } else if (family_name == "gaussian") {
-    linear_predictor
   } else {
     exp(linear_predictor)
   }
@@ -85,7 +78,6 @@ generate_dyad_data <- function(
   dispersion_multiplier <- role_multiplier * exp(batch_effect)
   data$outcome <- switch(
     family_name,
-    gaussian = stats::rnorm(n_rows, response_mean, 0.55),
     poisson = stats::rpois(n_rows, response_mean),
     nbinom1 = stats::rnbinom(
       n_rows,
@@ -133,7 +125,7 @@ fit_model <- function(data, family_name, include_dyad, random_dispersion) {
   } else {
     outcome ~ predictor + role
   }
-  dispersion_formula <- if (family_name %in% c("gaussian", "poisson")) {
+  dispersion_formula <- if (family_name == "poisson") {
     ~1
   } else if (random_dispersion) {
     ~0 + role + (1 | batch)
@@ -256,223 +248,6 @@ run_one_fit <- function(
     row_context$response <- c("raw", "model-centred")[[index]]
     extract_partner_row(checks[[index]], row_context)
   }))
-}
-
-manual_role_statistics <- function(values, data) {
-  row_order <- order(data$dyad, data$role)
-  ordered_values <- values[row_order]
-  first <- ordered_values[seq(1L, length(ordered_values), by = 2L)]
-  second <- ordered_values[seq(2L, length(ordered_values), by = 2L)]
-  average <- (first + second) / 2
-  difference <- (first - second) / 2
-  c(
-    role_1_sd = stats::sd(first),
-    role_2_sd = stats::sd(second),
-    partner_correlation = stats::cor(first, second),
-    dyad_mean_sd = stats::sd(average),
-    half_difference_sd = stats::sd(difference),
-    dyad_mean_half_difference_correlation = stats::cor(average, difference)
-  )
-}
-
-load_git_version <- function(reference) {
-  environment <- new.env(parent = asNamespace("dyadMLM"))
-  for (path in c(
-    "R/simulate_dyad_responses.R",
-    "R/predictive_checks_dependence.R"
-  )) {
-    source_text <- system2(
-      "git",
-      c("-C", source_dir, "show", paste0(reference, ":", path)),
-      stdout = TRUE
-    )
-    eval(parse(text = paste(source_text, collapse = "\n")), envir = environment)
-  }
-  environment
-}
-
-load_prototype <- function(path) {
-  environment <- new.env(parent = asNamespace("dyadMLM"))
-  for (file in c(
-    "R/predictive-check-family-capabilities.R",
-    "R/simulate_dyad_responses.R",
-    "R/predictive_checks_dependence.R"
-  )) {
-    sys.source(file.path(path, file), envir = environment)
-  }
-  environment
-}
-
-run_parity_checks <- function() {
-  baseline <- load_git_version("b3857749c2741f3458c668d97223a71ad6d5b979")
-  gaussian_data <- generate_dyad_data("gaussian", 41001L, 80L)
-  gaussian_fit <- fit_model(
-    gaussian_data,
-    "gaussian",
-    include_dyad = TRUE,
-    random_dispersion = FALSE
-  )
-  simple_simulations <- simulate_dyad_responses(
-    gaussian_fit,
-    nsim = 59L,
-    seed = 41002L
-  )
-  baseline_simulations <- baseline$simulate_dyad_responses(
-    gaussian_fit,
-    nsim = 59L,
-    seed = 41002L
-  )
-  parity <- data.frame(
-    comparison = "PR18",
-    family = "gaussian",
-    item = c("observed_response", "simulated_responses", "response_center"),
-    exact = c(
-      identical(
-        simple_simulations$observed_response,
-        baseline_simulations$observed_response
-      ),
-      identical(
-        simple_simulations$simulated_responses,
-        baseline_simulations$simulated_responses
-      ),
-      identical(
-        simple_simulations$response_center,
-        baseline_simulations$response_center
-      )
-    ),
-    stringsAsFactors = FALSE
-  )
-  for (response_type in c("raw", "model-centred")) {
-    simple_check <- check_partner_dependence(
-      simple_simulations,
-      dyad = "dyad",
-      role = "role",
-      response = response_type,
-      plot = FALSE
-    )
-    baseline_check <- baseline$check_partner_dependence(
-      baseline_simulations,
-      dyad = "dyad",
-      role = "role",
-      response = response_type,
-      plot = FALSE
-    )
-    parity <- rbind(parity, data.frame(
-      comparison = "PR18",
-      family = "gaussian",
-      item = paste0(response_type, c("_statistics", "_summary")),
-      exact = c(
-        identical(
-          simple_check$replicated_statistics,
-          baseline_check$replicated_statistics
-        ),
-        identical(simple_check$statistics_table, baseline_check$statistics_table)
-      ),
-      stringsAsFactors = FALSE
-    ))
-  }
-
-  if (!dir.exists(prototype_dir)) {
-    return(parity)
-  }
-  prototype <- load_prototype(prototype_dir)
-  prototype_families <- c("nbinom1", "nbinom2", "tweedie")
-  for (family_name in prototype_families) {
-    data <- generate_dyad_data(
-      family_name,
-      seed = 42000L + match(family_name, prototype_families),
-      n_dyads = 80L
-    )
-    fit <- fit_model(
-      data,
-      family_name,
-      include_dyad = TRUE,
-      random_dispersion = FALSE
-    )
-    simple_simulations <- simulate_dyad_responses(
-      fit,
-      nsim = 59L,
-      seed = 42010L
-    )
-    prototype_simulations <- prototype$simulate_dyad_responses(
-      fit,
-      nsim = 59L,
-      seed = 42010L
-    )
-    simple_raw <- check_partner_dependence(
-      simple_simulations,
-      dyad = "dyad",
-      role = "role",
-      response = "raw",
-      plot = FALSE
-    )
-    prototype_raw <- prototype$check_partner_dependence(
-      prototype_simulations,
-      dyad = "dyad",
-      role = "role",
-      response = "raw",
-      plot = FALSE
-    )
-    simple_centred <- check_partner_dependence(
-      simple_simulations,
-      dyad = "dyad",
-      role = "role",
-      response = "model-centred",
-      plot = FALSE
-    )
-    manual_observed <- manual_role_statistics(
-      simple_simulations$observed_response - simple_simulations$response_center,
-      data
-    )
-    manual_simulated <- t(vapply(
-      seq_len(simple_simulations$nsim),
-      function(index) manual_role_statistics(
-        simple_simulations$simulated_responses[index, ] -
-          simple_simulations$response_center,
-        data
-      ),
-      numeric(6)
-    ))
-    common_columns <- c(
-      "statistic_name", "parameterization", "label", "observed_value",
-      "replicated_median", "replicated_lower", "replicated_upper",
-      "observed_quantile"
-    )
-    parity <- rbind(parity, data.frame(
-      comparison = "complex prototype",
-      family = family_name,
-      item = c(
-        "simulated_responses", "raw_statistics", "raw_summary",
-        "centred_observed_manual", "centred_simulated_manual"
-      ),
-      exact = c(
-        identical(
-          simple_simulations$simulated_responses,
-          prototype_simulations$simulated_responses
-        ),
-        identical(
-          simple_raw$replicated_statistics,
-          prototype_raw$replicated_statistics
-        ),
-        identical(
-          simple_raw$statistics_table[, common_columns],
-          prototype_raw$statistics_table[, common_columns]
-        ),
-        isTRUE(all.equal(
-          simple_centred$statistics_table$observed_value,
-          unname(manual_observed),
-          tolerance = 0
-        )),
-        isTRUE(all.equal(
-          unname(simple_centred$replicated_statistics),
-          unname(manual_simulated),
-          tolerance = 0
-        ))
-      ),
-      stringsAsFactors = FALSE
-    ))
-  }
-  parity
 }
 
 run_dispersion_checks <- function() {
@@ -626,51 +401,72 @@ for (outer_index in seq_len(outer_repetitions)) {
 }
 
 study_results <- do.call(rbind, study_results)
-message("Exact regression and prototype parity checks")
-parity_results <- run_parity_checks()
+expected_result_rows <-
+  outer_repetitions * length(family_names) * 2L * 2L
+if (nrow(study_results) != expected_result_rows ||
+    any(is.na(study_results$response)) ||
+    any(nzchar(study_results$error))) {
+  stop("The outer study did not complete every requested diagnostic.", call. = FALSE)
+}
+
 message("Random-dispersion checks")
 dispersion_results <- run_dispersion_checks()
+dispersion_checks_passed <- with(
+  dispersion_results,
+  family %in% c("nbinom2", "tweedie") &
+    convergence == 0L &
+    positive_definite_hessian &
+    dispersion_random_terms == 1L &
+    center_matches_predict &
+    raw_check &
+    centred_check &
+    !nzchar(warning) &
+    !nzchar(error)
+)
+if (!isTRUE(all(dispersion_checks_passed))) {
+  stop("Random-dispersion validation failed.", call. = FALSE)
+}
+message(
+  "Random-dispersion checks passed for ",
+  paste(dispersion_results$family, collapse = ", ")
+)
+
 message("Sparse-reference check")
 sparse_results <- run_sparse_check()
-
-utils::write.csv(
-  study_results,
-  file.path(output_dir, "outer-study-results.csv"),
-  row.names = FALSE
-)
-utils::write.csv(
-  parity_results,
-  file.path(output_dir, "parity-results.csv"),
-  row.names = FALSE
-)
-utils::write.csv(
-  dispersion_results,
-  file.path(output_dir, "random-dispersion-results.csv"),
-  row.names = FALSE
-)
-utils::write.csv(
+sparse_check_passed <- with(
   sparse_results,
-  file.path(output_dir, "sparse-results.csv"),
-  row.names = FALSE
+    check_completed &
+    !nzchar(error) &
+    grepl(
+      "undefined partner-dependence summary",
+      warning,
+      fixed = TRUE
+    ) &
+    defined_correlations > 0L &
+    defined_correlations < simulations
 )
-validation_sources <- c(
-  "R/simulate_dyad_responses.R",
-  "R/predictive_checks_dependence.R",
-  "dev/diagnostic_checks/simple-generalized-cross-sectional/simulation-study.R"
+if (!isTRUE(sparse_check_passed)) {
+  stop("Sparse-reference validation failed.", call. = FALSE)
+}
+message(
+  "Sparse-reference check passed with ",
+  sparse_results$defined_correlations, "/",
+  sparse_results$simulations,
+  " defined partner correlations"
 )
-source_hashes <- tools::md5sum(file.path(source_dir, validation_sources))
-session_record <- c(
-  paste0("date=", Sys.Date()),
-  paste0("R=", getRversion()),
-  paste0(
-    "dyadMLM_sha=",
-    system2("git", c("-C", source_dir, "rev-parse", "HEAD"), stdout = TRUE)
-  ),
-  paste0("glmmTMB=", utils::packageVersion("glmmTMB")),
-  paste0("outer_repetitions=", outer_repetitions),
-  paste0("n_dyads=", n_dyads),
-  paste0("nsim=", nsim),
-  paste0("source_md5[", validation_sources, "]=", unname(source_hashes))
-)
-writeLines(session_record, file.path(output_dir, "session-record.txt"))
-message("Validation outputs written to ", output_dir)
+
+recorded_configuration <-
+  outer_repetitions == 6L && nsim == 199L && n_dyads == 120L
+if (recorded_configuration) {
+  output_file <- file.path(output_dir, "outer-study-results.csv")
+  utils::write.csv(study_results, output_file, row.names = FALSE)
+  message(
+    "Validation complete; outer-study results written to ",
+    output_file
+  )
+} else {
+  message(
+    "Validation complete; recorded outer-study results were not overwritten ",
+    "because this was a non-default run"
+  )
+}
