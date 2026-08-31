@@ -1,0 +1,77 @@
+---
+title: "APIM covariance decomposition"
+subtitle: "Figures and paper structure"
+output:
+  html_document:
+    math_method: mathml
+    fig_caption: true
+    self_contained: true
+---
+
+```{r load-figure-code, include=FALSE}
+# Reuse the detailed draft's figure code; do not render its prose or tables.
+figure_code <- knitr::purl(
+  "paper-idea.Rmd",
+  output = tempfile(fileext = ".R"), quiet = TRUE
+)
+knitr::read_chunk(figure_code)
+knitr::opts_chunk$set(echo = FALSE, out.width = "100%")
+```
+
+```{r prepare-figures, ref.label=c("setup", "calculate-example", "same-total-calculation"), include=FALSE}
+```
+
+## Complete APIM
+
+```{r overview-apim, ref.label="complete-apim", fig.width=9, fig.height=4.8, fig.cap="The complete APIM. Curved paths represent predictor and residual covariances, not covariance between slopes.", fig.alt="Left-to-right APIM with two predictors, two outcomes, blue actor paths, purple partner paths, and predictor and residual covariance curves."}
+```
+
+## Five covariance-carrying routes
+
+```{r overview-routes, ref.label="path-components", fig.width=12, fig.height=9.9, fig.cap="Five routes and their exact sum. Pale paths remain in the model but are not part of the highlighted component.", fig.alt="Six APIM panels highlighting actor-actor, actor-partner, partner-actor, partner-partner, residual, and all routes, with their component formulas."}
+```
+
+## Waterfall decomposition
+
+```{r overview-waterfall, ref.label="example-contributions", fig.width=9.4, fig.height=5.4, fig.cap="Illustrative model: the five contributions add to the model-implied outcome correlation.", fig.alt="Waterfall chart accumulating five correlation-point contributions to the total outcome correlation."}
+```
+
+## Same total, different contributions
+
+```{r overview-profiles, ref.label="same-total-figure", fig.width=10, fig.height=5.2, fig.cap="Two illustrative APIMs: identical total outcome correlation, different route contributions.", fig.alt="Two horizontal stacked bars with equal totals but different actor, partner, and residual contributions."}
+```
+
+## Paper structure — argument in order
+
+Working outline: see the [literature review](literature-review.md) for direct
+precedents. Inference, simulations, and extensions are still open decisions.
+
+- **Introduction:** Ask what accounts for total outcome interdependence;
+  similar correlations can conceal different route profiles. Treat dependence
+  as substantive information ([Laurenceau & Bolger, 2005](https://doi.org/10.1037/0893-3200.19.1.86)).
+- **Model and routes:** Introduce one distinguishable APIM, the complete diagram,
+  and five highlighted routes; place the paired APIM equations here
+  (Kenny, Kashy, & Cook, 2006).
+- **Exact decomposition:** State the linear, cross-sectional, fixed-slope,
+  independent-dyad and exogeneity assumptions, then show the five-term identity. Apply
+  established path tracing, not new algebra ([Boker et al., 2002](https://doi.org/10.1207/S15328007SEM0902_2)).
+- **Reporting scale:** Give the model-implied variances and common-denominator
+  formula, then the waterfall and equal-total comparison. Contributions are
+  signed correlation points, not percentages or residual correlations
+  ([Jones & West, 2005](https://doi.org/10.1093/biomet/92.4.779), related undirected-model precedent).
+- **Estimation and software:** Use fitted paired-sample moments and plug-in
+  estimates; explain dyad-bootstrap intervals and the proposed `dyadMLM`
+  implementation ([Ledermann et al., 2011](https://doi.org/10.1080/10705511.2011.607099), compound-effect inference precedent).
+- **Simulation:** Evaluate bias, interval coverage, cancellation and near-zero
+  totals; assess estimation performance, not the validity of the algebra.
+- **Empirical example:** Report observed and model-implied totals, all five
+  contributions and uncertainty; explain what the route profile adds to the
+  conventional APIM results.
+- **Extensions and limits:** Briefly address exchangeability and several
+  predictors; defer random slopes, longitudinal and nonlinear models.
+  Distinguish descriptive attribution from causal explanation.
+- **Discussion:** Return to the opening question and recommend reporting totals,
+  signed contributions, uncertainty and assumptions. Emphasize the APIM-specific
+  interpretation and reporting workflow as the contribution.
+- **Supplement:** Put full derivations, matrix extensions, bootstrap details,
+  simulation specifications and reproducible code here.

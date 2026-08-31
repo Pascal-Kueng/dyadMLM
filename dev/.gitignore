@@ -2,3 +2,6 @@
 *.html
 !workshop/branding.html
 References
+
+# Third-party papers, chapters, slides, and supplements stay local.
+/references/

@@ -3,14 +3,24 @@ title: "Explaining Interdependence in the Actor–Partner Interdependence Model"
 subtitle: "A visual paper outline and covariance-decomposition prototype"
 author: "Pascal Küng"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
+bibliography: ../../vignettes/references.bib
+link-citations: true
 output:
   html_document:
+    math_method: mathml
     toc: true
     toc_float: true
     number_sections: true
     fig_caption: true
     self_contained: true
 ---
+
+<style>
+math[display="block"] {
+  font-size: 1.15em;
+  margin: 1.1em 0;
+}
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -21,20 +31,18 @@ knitr::opts_chunk$set(
 )
 
 helper_candidates <- c(
+  "../../vignettes/diagram-helpers.Rinc",
   "../vignettes/diagram-helpers.Rinc",
-  "vignettes/diagram-helpers.Rinc",
-  "../../vignettes/diagram-helpers.Rinc"
+  "vignettes/diagram-helpers.Rinc"
 )
 helper_file <- helper_candidates[file.exists(helper_candidates)][1]
 
-if (!is.na(helper_file)) {
-  sys.source(helper_file, envir = knitr::knit_global())
-  diagram_device <- .vignette_diagram_device()
-  effect_colours <- .interdep_effect_colors(c("actor", "partner"))
-} else {
-  diagram_device <- "png"
-  effect_colours <- c(actor = "#1769AA", partner = "#7B3FA1")
+if (is.na(helper_file)) {
+  stop("The shared vignette diagram helpers could not be found.")
 }
+sys.source(helper_file, envir = knitr::knit_global())
+diagram_device <- .vignette_diagram_device()
+effect_colours <- .interdep_effect_colors(c("actor", "partner"))
 
 knitr::opts_chunk$set(
   dev = diagram_device,
@@ -51,99 +59,13 @@ colours <- c(
   covariance = "#334155",
   ink = "#263238",
   muted = "#64748B",
-  faint = "#DCE3EA",
+  faint = "#C6CFD8",
   surface = "#F8FAFC",
   white = "#FFFFFF"
 )
 
 fade <- function(colour, alpha = 0.22) {
   grDevices::adjustcolor(colour, alpha.f = alpha)
-}
-
-.paper_math_label <- function(label) {
-  symbols <- c("X", "Y", "a", "p", "sigma", "psi", "epsilon")
-
-  format_node <- function(node) {
-    if (is.name(node) && as.character(node) %in% symbols) {
-      return(call("italic", node))
-    }
-    if (!is.call(node)) {
-      return(node)
-    }
-
-    head <- as.character(node[[1L]])
-    if (head %in% c("italic", "plain")) {
-      return(node)
-    }
-
-    as.call(lapply(node, format_node))
-  }
-
-  if (is.expression(label)) {
-    return(as.expression(lapply(as.list(label), format_node)))
-  }
-  if (is.language(label)) {
-    return(format_node(label))
-  }
-  label
-}
-
-draw_box <- function(x, y, label, width = 0.18, height = 0.105,
-                     fill = colours[["white"]], border = colours[["ink"]],
-                     cex = 1.2, lwd = 2) {
-  graphics::rect(
-    x - width / 2, y - height / 2,
-    x + width / 2, y + height / 2,
-    col = fill, border = border, lwd = lwd
-  )
-  graphics::text(
-    x, y, .paper_math_label(label), cex = cex, col = colours[["ink"]]
-  )
-}
-
-draw_circle <- function(x, y, label, radius = 0.043,
-                        fill = colours[["white"]],
-                        border = colours[["ink"]], cex = 1.05, lwd = 2) {
-  theta <- seq(0, 2 * pi, length.out = 100)
-  graphics::polygon(
-    x + radius * cos(theta), y + radius * sin(theta),
-    col = fill, border = border, lwd = lwd
-  )
-  graphics::text(
-    x, y, .paper_math_label(label), cex = cex, col = colours[["ink"]]
-  )
-}
-
-draw_path <- function(x0, y0, x1, y1, label = NULL,
-                      colour = colours[["faint"]], lwd = 2.3,
-                      label_x = mean(c(x0, x1)),
-                      label_y = mean(c(y0, y1)),
-                      label_cex = 0.9) {
-  graphics::arrows(
-    x0, y0, x1, y1,
-    length = 0.075, angle = 18, lwd = lwd, col = colour
-  )
-  if (!is.null(label)) {
-    graphics::text(
-      label_x, label_y, .paper_math_label(label),
-      cex = label_cex, col = colour, font = 2
-    )
-  }
-}
-
-draw_covariance <- function(x0, y0, x1, y1, label = NULL,
-                            colour = colours[["faint"]], lwd = 2.1,
-                            label_y = y0 + 0.045, label_cex = 0.82) {
-  graphics::arrows(
-    x0, y0, x1, y1,
-    code = 3, length = 0.06, angle = 18, lwd = lwd, col = colour
-  )
-  if (!is.null(label)) {
-    graphics::text(
-      mean(c(x0, x1)), label_y, .paper_math_label(label),
-      cex = label_cex, col = colour
-    )
-  }
 }
 
 component_state <- function(component) {
@@ -163,79 +85,178 @@ on_colour <- function(on, colour) {
 }
 
 draw_apim_paths <- function(component = "TOTAL", panel_title = NULL,
-                            show_formula = FALSE) {
+                            show_formula = FALSE, newpage = TRUE,
+                            text_scale = 1) {
+  component <- match.arg(component, c("TOTAL", "AA", "AP", "PA", "PP", "R"))
   state <- component_state(component)
-
-  graphics::plot.new()
-  graphics::plot.window(xlim = c(0, 1), ylim = c(0, 1), asp = 1)
-  graphics::rect(0.01, 0.01, 0.99, 0.99,
-                 col = colours[["surface"]], border = NA)
-
-  # Predictor covariance and the four directed APIM paths.
-  draw_covariance(
-    0.29, 0.84, 0.71, 0.84,
-    expression(sigma[X[12]]),
-    on_colour(state[["predictor_covariance"]], colours[["covariance"]]),
-    label_y = 0.905
+  native <- function(value) grid::unit(value, "native")
+  arrow_head <- grid::arrow(
+    angle = 28, length = grid::unit(0.13 * text_scale, "inches"),
+    type = "closed"
+  )
+  covariance_arrow <- grid::arrow(
+    angle = 26, length = grid::unit(0.09 * text_scale, "inches"),
+    ends = "both", type = "closed"
   )
 
-  draw_path(
-    0.20, 0.735, 0.20, 0.365, expression(a[1]),
-    on_colour(state[["actor_1"]], colours[["actor"]]),
-    label_x = 0.155, label_y = 0.55
-  )
-  draw_path(
-    0.80, 0.735, 0.80, 0.365, expression(a[2]),
-    on_colour(state[["actor_2"]], colours[["actor"]]),
-    label_x = 0.845, label_y = 0.55
-  )
-  draw_path(
-    0.73, 0.755, 0.27, 0.345, expression(p[1]),
-    on_colour(state[["partner_1"]], colours[["partner"]]),
-    label_x = 0.57, label_y = 0.53
-  )
-  draw_path(
-    0.27, 0.755, 0.73, 0.345, expression(p[2]),
-    on_colour(state[["partner_2"]], colours[["partner"]]),
-    label_x = 0.43, label_y = 0.43
-  )
+  # Reuse the vignette palette, math labels, annotations, and rounded-node
+  # layout. This paper-specific adaptation adds predictor covariance and
+  # route highlighting without changing the vignette diagrams.
+  draw_node <- function(x, y, label, active = TRUE, residual = FALSE) {
+    node_colour <- on_colour(active, colours[["ink"]])
+    node_gp <- grid::gpar(
+      fill = if (residual) "white" else colours[["surface"]],
+      col = node_colour, lwd = 1.8 * text_scale
+    )
+    if (residual) {
+      grid::grid.circle(
+        x = native(x), y = native(y), r = grid::unit(0.055, "snpc"),
+        gp = node_gp
+      )
+    } else {
+      grid::grid.roundrect(
+        x = native(x), y = native(y),
+        width = native(0.17), height = native(0.19),
+        r = grid::unit(0.04, "snpc"), gp = node_gp
+      )
+    }
+    grid::grid.text(
+      .diagram_math_label(label), x = native(x), y = native(y),
+      gp = grid::gpar(
+        col = node_colour, fontsize = (if (residual) 17 else 21) * text_scale
+      )
+    )
+  }
 
-  # Residual paths and residual covariance.
-  residual_node_colour <- on_colour(
-    state[["residual_covariance"]], colours[["residual"]]
-  )
-  draw_path(0.20, 0.115, 0.20, 0.245, NULL, residual_node_colour, lwd = 2)
-  draw_path(0.80, 0.115, 0.80, 0.245, NULL, residual_node_colour, lwd = 2)
-  draw_covariance(
-    0.245, 0.09, 0.755, 0.09, expression(psi[12]),
-    residual_node_colour, label_y = 0.035
-  )
+  draw_path <- function(x0, y0, x1, y1, active, colour) {
+    path_colour <- on_colour(active, colour)
+    grid::grid.segments(
+      x0 = native(x0), y0 = native(y0),
+      x1 = native(x1), y1 = native(y1), arrow = arrow_head,
+      gp = grid::gpar(
+        col = path_colour, fill = path_colour,
+        lwd = if (active) 2.4 * text_scale else 1.2 * text_scale
+      )
+    )
+  }
 
-  # Nodes are drawn last, so crossing paths disappear behind them.
-  draw_box(0.20, 0.79, expression(X[1]))
-  draw_box(0.80, 0.79, expression(X[2]))
-  draw_box(0.20, 0.31, expression(Y[1]))
-  draw_box(0.80, 0.31, expression(Y[2]))
-  draw_circle(0.20, 0.09, expression(epsilon[1]), border = residual_node_colour)
-  draw_circle(0.80, 0.09, expression(epsilon[2]), border = residual_node_colour)
+  path_label <- function(label, x, y, active, colour) {
+    .draw_residual_annotation(
+      label, x, y, fontsize = 15 * text_scale,
+      colour = on_colour(active, colour)
+    )
+  }
+
+  if (isTRUE(newpage)) grid::grid.newpage()
+  grid::pushViewport(grid::viewport(xscale = c(0, 1), yscale = c(0, 1)))
+  on.exit(grid::popViewport(), add = TRUE)
 
   if (!is.null(panel_title)) {
-    graphics::mtext(panel_title, side = 3, line = -1.2,
-                    cex = 1.05, font = 2, col = colours[["ink"]])
+    grid::grid.text(
+      panel_title, x = native(0.06), y = native(0.91), just = "left",
+      gp = grid::gpar(
+        col = colours[["ink"]], fontsize = 16 * text_scale, fontface = "bold"
+      )
+    )
+  } else {
+    grid::grid.text(
+      c("Predictor", "Outcome", "Residual"),
+      x = native(c(0.24, 0.65, 0.875)), y = native(0.89),
+      gp = grid::gpar(col = colours[["muted"]], fontsize = 11 * text_scale)
+    )
   }
 
-  if (isTRUE(show_formula)) {
-    formulas <- c(
-      AA = "a1 a2 Cov(X1, X2)",
-      AP = "a1 p2 Var(X1)",
-      PA = "p1 a2 Var(X2)",
-      PP = "p1 p2 Cov(X1, X2)",
-      R = "Cov(e1, e2)",
-      TOTAL = "all five paths"
+  # Predictors on the left; actor and partner paths flow into outcomes on the
+  # right. Partner subscripts always identify the outcome member.
+  draw_path(0.325, 0.70, 0.565 - .diagram_arrow_clearance, 0.70,
+            state[["actor_1"]], colours[["actor"]])
+  draw_path(0.325, 0.30, 0.565 - .diagram_arrow_clearance, 0.30,
+            state[["actor_2"]], colours[["actor"]])
+  draw_path(0.325, 0.67, 0.565 - .diagram_arrow_clearance, 0.34,
+            state[["partner_2"]], colours[["partner"]])
+  draw_path(0.325, 0.33, 0.565 - .diagram_arrow_clearance, 0.66,
+            state[["partner_1"]], colours[["partner"]])
+
+  predictor_colour <- on_colour(
+    state[["predictor_covariance"]], colours[["covariance"]]
+  )
+  grid::grid.curve(
+    x1 = native(0.153), y1 = native(0.67),
+    x2 = native(0.153), y2 = native(0.33),
+    curvature = 0.32, angle = 90, ncp = 12, square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(
+      col = predictor_colour, fill = predictor_colour, lwd = 1.8 * text_scale
     )
-    graphics::mtext(formulas[[component]], side = 1, line = -1.3,
-                    cex = 0.82, col = colours[["muted"]])
+  )
+  path_label(expression(sigma[X[12]]), 0.11, 0.50,
+             state[["predictor_covariance"]], colours[["covariance"]])
+
+  # Residual arrows still point into Y. The double-headed curve is covariance
+  # psi_12, not the residual correlation shown in fitted vignette diagrams.
+  residual_colour <- on_colour(
+    state[["residual_covariance"]], colours[["residual"]]
+  )
+  for (y in c(0.70, 0.30)) {
+    draw_path(0.840, y, 0.735 + .diagram_arrow_clearance, y,
+              state[["residual_covariance"]], colours[["residual"]])
   }
+  grid::grid.curve(
+    x1 = native(0.905), y1 = native(0.66),
+    x2 = native(0.905), y2 = native(0.34),
+    curvature = -0.28, angle = 90, ncp = 12, square = FALSE,
+    arrow = covariance_arrow,
+    gp = grid::gpar(
+      col = residual_colour, fill = residual_colour, lwd = 1.8 * text_scale
+    )
+  )
+  path_label(expression(italic("\u03c8")[12]), 0.92, 0.50,
+             state[["residual_covariance"]], colours[["residual"]])
+
+  draw_node(0.24, 0.70, expression(X[1]),
+            component %in% c("TOTAL", "AA", "AP", "PP"))
+  draw_node(0.24, 0.30, expression(X[2]),
+            component %in% c("TOTAL", "AA", "PA", "PP"))
+  draw_node(0.65, 0.70, expression(Y[1]))
+  draw_node(0.65, 0.30, expression(Y[2]))
+  draw_node(0.875, 0.70, expression(epsilon[1]),
+            state[["residual_covariance"]], residual = TRUE)
+  draw_node(0.875, 0.30, expression(epsilon[2]),
+            state[["residual_covariance"]], residual = TRUE)
+
+  path_label(expression(a[1]), 0.44, 0.70,
+             state[["actor_1"]], colours[["actor"]])
+  path_label(expression(a[2]), 0.44, 0.30,
+             state[["actor_2"]], colours[["actor"]])
+  path_label(expression(p[2]), 0.40, 0.56,
+             state[["partner_2"]], colours[["partner"]])
+  path_label(expression(p[1]), 0.40, 0.44,
+             state[["partner_1"]], colours[["partner"]])
+
+  if (isTRUE(show_formula)) {
+    formulas <- list(
+      AA = expression(italic(C)[plain(AA)] == a[1] * a[2] * sigma[X[12]]),
+      AP = expression(italic(C)[plain(AP)] == a[1] * p[2] * sigma[X[1]]^2),
+      PA = expression(italic(C)[plain(PA)] == p[1] * a[2] * sigma[X[2]]^2),
+      PP = expression(italic(C)[plain(PP)] == p[1] * p[2] * sigma[X[12]]),
+      R = expression(italic(C)[plain(R)] == italic("\u03c8")[12]),
+      TOTAL = expression(sum(italic(C)[italic(k)], italic(k)) ==
+                           Cov(Y[1], Y[2]))
+    )
+    grid::grid.text(
+      .diagram_math_label(formulas[[component]]),
+      x = native(0.50), y = native(0.08),
+      gp = grid::gpar(col = colours[["ink"]], fontsize = 15 * text_scale)
+    )
+  } else {
+    .draw_diagram_legend(
+      labels = c("Actor path", "Partner path"),
+      colours = unname(effect_colours), y = 0.08,
+      segment_starts = c(0.26, 0.53), text_x = c(0.40, 0.68),
+      fontsize = 11 * text_scale
+    )
+  }
+  invisible(NULL)
 }
 
 component_colours <- c(
@@ -247,8 +268,17 @@ component_colours <- c(
 )
 ```
 
+> **Draft status (31 August 2026).** The [literature review](literature-review.md)
+> records direct APIM precedents found after this outline was drafted. Its
+> evidence and caveats take precedence over the novelty framing below. The
+> inference, simulation, and extension plans remain proposals for discussion.
+
 > **Working claim.** An APIM should not only *account for* interdependence. It
-> can also explain where the covariance between partners' outcomes comes from.
+> can also provide a model-based, descriptive explanation of where the
+> covariance between partners' outcomes comes from.
+
+Here and throughout, *explain* means attribute statistically within the fitted
+model. It does not mean that the routes are automatically causal mechanisms.
 
 This document first develops the argument as it could appear in the paper and
 checks the underlying path tracing visually and numerically. The final section
@@ -258,31 +288,45 @@ questions, and next steps.
 # The idea in one paragraph
 
 The APIM is commonly introduced through actor effects, partner effects, and a
-residual correlation. That presentation says how predictors relate to each
-person's outcome, but it does not by itself answer a natural dyadic question:
+residual correlation [@kenny2006dyadic]. Work on dyadic patterns and compound
+APIM processes has shown the value of turning individual coefficients into
+interpretable derived quantities [@kennyDetectingMeasuringTesting2010;
+@ledermannAssessingMediationDyadic2011]. That presentation nevertheless does
+not by itself answer a natural dyadic question:
 
 > Why are the two partners' outcomes correlated, and how much of that
 > interdependence is associated with each modeled route?
 
-For one predictor construct measured on both partners, standard path tracing
-gives an exact additive answer under the usual APIM assumption that predictors
-are uncorrelated with the outcome residuals. Outcome covariance can travel through four
-predictor-side path pairs: actor–actor, actor–partner, partner–actor, and
-partner–partner. A fifth component is the remaining residual covariance. These
-five signed quantities sum exactly to the outcome covariance implied by the
-model. Dividing every component by the same two model-implied outcome standard
-deviations makes them sum to the model-implied outcome correlation.
+Dyadic dependence can itself contain substantive information that is lost when
+members are analyzed separately [@laurenceauUsingDiaryMethods2005]. Bolger and
+Shrout [-@bolgerAccountingStatisticalDependency2007] treated covariance
+structure as a starting point for studying shared events and interpersonal
+influence. The present proposal asks a narrower question: within one fitted
+cross-sectional APIM, which modeled routes carry the outcome covariance?
+
+For one predictor construct measured on both partners, established path-tracing
+and covariance-component algebra gives an exact additive answer under the usual
+APIM assumption that predictors are uncorrelated with the outcome residuals
+[@bokerAlgorithmHierarchicalOrganization2002]. Outcome covariance can travel
+through four predictor-side path pairs: actor–actor, actor–partner,
+partner–actor, and partner–partner. A fifth component is the remaining residual
+covariance. These five signed quantities sum exactly to the outcome covariance
+implied by the model. Dividing every component by the same two model-implied
+outcome standard deviations makes them sum to the model-implied outcome
+correlation. Related signed path-weight decompositions on covariance and
+correlation scales exist for undirected Gaussian graphical models
+[@jonesCovarianceDecompositionUndirected2005]; the proposed contribution is the
+APIM-specific estimand and workflow, not a new general tracing rule.
 
 # The complete one-construct APIM
 
 For distinguishable members 1 and 2, write
 
 $$
-Y_1=a_1X_1+p_1X_2+\varepsilon_1,
-$$
-
-$$
-Y_2=a_2X_2+p_2X_1+\varepsilon_2.
+\begin{aligned}
+Y_1&=a_1X_1+p_1X_2+\varepsilon_1,\\
+Y_2&=a_2X_2+p_2X_1+\varepsilon_2.
+\end{aligned}
 $$
 
 Intercepts are omitted because they do not affect variances or covariances.
@@ -296,7 +340,7 @@ standardized presentation is possible, but coefficients, predictor moments,
 residual covariance, and the outcome denominator must then be transformed
 consistently.
 
-```{r complete-apim, echo=FALSE, fig.width=8.8, fig.height=6.2, out.width="82%", fig.cap="Complete distinguishable APIM used for the decomposition. Blue paths are actor effects, purple paths are partner effects, the upper double-headed arrow is predictor covariance, and the lower double-headed arrow is residual outcome covariance.", fig.alt="Path diagram with predictors X1 and X2, outcomes Y1 and Y2, blue actor paths, purple crossed partner paths, covariance between predictors, and covariance between outcome residuals."}
+```{r complete-apim, echo=FALSE, fig.width=9, fig.height=4.8, out.width="100%", fig.cap="Complete distinguishable APIM used for the decomposition, using the vignette's left-to-right layout and blue/purple path palette. Predictors are on the left and outcomes on the right. Curved double-headed paths show predictor covariance on the left and residual outcome covariance on the right; residual arrows point into the outcomes.", fig.alt="Left-to-right APIM with X1 above X2 on the left and Y1 above Y2 on the right. Blue actor paths are horizontal; purple partner paths cross diagonally. A curved path connects the predictors, and another connects the two residuals, which point into the outcomes."}
 draw_apim_paths("TOTAL")
 ```
 
@@ -372,21 +416,32 @@ the diagram.
 
 # The five covariance-carrying routes
 
-```{r path-components, echo=FALSE, fig.width=12, fig.height=8.1, out.width="100%", fig.cap="The five covariance-carrying routes in a distinguishable APIM with one predictor construct measured on both partners. Pale paths are present in the APIM but do not belong to the highlighted component. The final panel restores all paths.", fig.alt="Six small APIM path diagrams. Five panels separately highlight actor-actor, actor-partner, partner-actor, partner-partner, and residual covariance routes. A sixth panel shows their sum."}
-old_par <- graphics::par(
-  mfrow = c(2, 3),
-  mar = c(0.8, 0.5, 1.5, 0.5),
-  oma = c(0, 0, 0.4, 0),
-  xpd = NA
+```{r path-components, echo=FALSE, fig.width=12, fig.height=9.9, out.width="100%", fig.cap="The five covariance-carrying routes, arranged in three rows of two left-to-right APIMs. Pale paths remain part of the model but do not belong to the highlighted component. The member-driven routes use one predictor's variance, not the covariance between predictors. The final panel restores all paths.", fig.alt="Six left-to-right APIM panels in three rows of two. In reading order, they highlight actor-actor, actor-partner from X1, partner-actor from X2, partner-partner, residual covariance, and all five components. Each panel includes its component formula."}
+components <- c("AA", "AP", "PA", "PP", "R", "TOTAL")
+panel_titles <- c(
+  "1. Actor–actor", "2. Actor–partner",
+  "3. Partner–actor", "4. Partner–partner",
+  "5. Residual", "Their exact sum"
 )
-draw_apim_paths("AA", "1. Actor–actor", show_formula = TRUE)
-draw_apim_paths("AP", "2. Actor–partner", show_formula = TRUE)
-draw_apim_paths("PA", "3. Partner–actor", show_formula = TRUE)
-draw_apim_paths("PP", "4. Partner–partner", show_formula = TRUE)
-draw_apim_paths("R", "5. Residual", show_formula = TRUE)
-draw_apim_paths("TOTAL", "Their exact sum", show_formula = TRUE)
-graphics::par(old_par)
+grid::grid.newpage()
+grid::pushViewport(grid::viewport(layout = grid::grid.layout(3, 2)))
+for (index in seq_along(components)) {
+  grid::pushViewport(grid::viewport(
+    layout.pos.row = (index - 1L) %/% 2L + 1L,
+    layout.pos.col = (index - 1L) %% 2L + 1L
+  ))
+  draw_apim_paths(
+    components[[index]], panel_titles[[index]], show_formula = TRUE,
+    newpage = FALSE, text_scale = 0.95
+  )
+  grid::popViewport()
+}
+grid::popViewport()
 ```
+
+In the diagrams, $\sigma_{X_{12}}=\operatorname{Cov}(X_1,X_2)$,
+$\sigma_{X_j}^2=\operatorname{Var}(X_j)$, and
+$\psi_{12}=\operatorname{Cov}(\varepsilon_1,\varepsilon_2)$.
 
 The four predictor-side combinations form a useful $2\times2$ table:
 
@@ -1019,6 +1074,14 @@ The paper should contribute the following package:
 
 ## Planned software contribution
 
+Existing tools already make APIMs more accessible and generic SEM path
+components traceable [@stasGivingDyadicData2018;
+@zhangUsingRPackageRAMpath2015]. The proposed software contribution is more
+specific: a validated APIM post-estimation workflow that reconstructs the
+fitted dyad sample, maps model terms to the five substantively named routes,
+quantifies uncertainty, and produces a transparent result that can be checked
+against the model-implied covariance.
+
 The package contribution should be deliberately narrower than a universal
 variance-partitioning function. The proposed public function is
 `decompose_apim_covariance()`, not the broader `decompose_apim()`. Its first
@@ -1060,18 +1123,30 @@ after its refitting and nonconvergence behavior have been validated.
 
 ## Novelty boundary and literature work
 
-The covariance identity follows from standard path tracing and covariance
-algebra; it should not be claimed as a newly discovered theorem. Existing APIM
-teaching material contains versions of the standardized expression, and prior
-dyadic work, including work by Bolger and Shrout, treats observed dyadic
-covariance as potentially arising from interpersonal influence or shared
-events.
+The five-term identity is a direct specialization of established SEM
+path-tracing and covariance-component algebra
+[@bokerAlgorithmHierarchicalOrganization2002]. Related work has decomposed
+covariance into signed path weights and rescaled those weights to the
+correlation scale in undirected Gaussian graphical models
+[@jonesCovarianceDecompositionUndirected2005]. The `RAMpath` package can also
+enumerate covariance components generically in SEMs
+[@zhangUsingRPackageRAMpath2015]. The paper should therefore not claim a new
+theorem, a new general tracing rule, a new generic correlation rescaling, or
+the first software implementation of covariance path decomposition.
 
-The potentially publishable contribution is the coherent framework around the
-identity: treating total interdependence as an estimand to explain, naming all
-routes, placing them on one additive scale, quantifying uncertainty, providing
+Prior dyadic work treats covariance as potentially arising from interpersonal
+influence or shared events [@bolgerAccountingStatisticalDependency2007], and
+recent random-covariance work treats the sign and magnitude of interdependence
+as a dyad-varying estimand [@lawsRandomDyadicInterdependence2026]. Neither,
+however, provides the proposed fixed-path decomposition of model-implied
+cross-sectional APIM outcome covariance.
+
+The potentially publishable contribution is the coherent APIM-specific
+framework around the identity: defining the estimand, mapping fitted model
+terms to named routes, handling the fitted dyad sample correctly, distinguishing
+total from residual interdependence, quantifying uncertainty, providing
 visualizations and software, and showing why equal total correlations need not
-have equal explanations.
+have equal model-implied explanations.
 
 Before making a novelty claim, the literature review should establish:
 
@@ -1147,35 +1222,279 @@ The strongest example would compare two outcomes, predictors, or substantively
 meaningful groups with similar total interdependence but different route
 profiles.
 
-## Planned manuscript structure
+## Broad manuscript structure
 
-1. **The missing question:** APIMs quantify actor and partner paths, but what
-   explains the covariance between the two outcomes?
-2. **One picture, five routes:** introduce the full distinguishable APIM and
-   the visual path tracing.
-3. **Exact decomposition:** state assumptions, show the short derivation, and
-   interpret female-driven, male-driven, predictor-covariance, and residual
-   routes.
-4. **A common reporting scale:** introduce signed correlation-point
-   contributions and distinguish them from residual correlation.
-5. **Estimation and uncertainty:** define plug-in estimates and the dyad
-   bootstrap.
-6. **Simulation:** assess finite-sample behavior and interval coverage.
-7. **Empirical example:** show how similar total interdependence can have
-   different route profiles.
-8. **Extensions and limits:** several predictors, the brief exchangeable
-   special case, software scope, and causal caution.
-9. **Discussion:** reporting recommendations, substantive uses, and future
-   longitudinal work.
+The target is a question-led methods paper of approximately 20--25 manuscript
+pages, excluding references and supplement. The prose should introduce the
+substantive problem and one running APIM before notation. Each displayed
+formula should be followed immediately by a plain-language interpretation.
+
+### Abstract: the complete argument in 200--250 words
+
+- Begin with the missing question: APIMs estimate actor and partner paths, but
+  researchers rarely ask what produces the model-implied covariance between
+  the two outcomes.
+- State the method: an exact five-route decomposition for a linear
+  distinguishable APIM.
+- State the reporting innovation narrowly: an APIM-specific table of signed
+  covariance and outcome-correlation-point contributions.
+- Mention the plug-in estimator, dyad-bootstrap intervals, simulation, one
+  empirical demonstration, visualization, and `dyadMLM` implementation.
+- End with the substantive payoff: equal total interdependence can conceal
+  different model-implied route profiles.
+- **Formulas:** none.
+- **References:** normally none in the abstract.
+
+### Manuscript section 1 — Introduction: the missing dyadic question (2--3 pages)
+
+- Introduce interdependence as substantive information, not only a violation of
+  independent errors [@laurenceauUsingDiaryMethods2005;
+  @bolgerAccountingStatisticalDependency2007].
+- Briefly review what a conventional APIM reports: actor effects, partner
+  effects, and residual covariance or correlation [@kenny2006dyadic].
+- Show that APIM methodology already derives interpretable combinations of
+  paths, such as dyadic patterns and mediated effects
+  [@kennyDetectingMeasuringTesting2010;
+  @ledermannAssessingMediationDyadic2011].
+- State the unresolved question: what explains the *total model-implied outcome
+  covariance*, rather than only the remaining residual association?
+- Give one motivating contrast: two dyads or fitted models can have the same
+  outcome correlation but different route profiles.
+- End with three concise contributions:
+  - an APIM-specific five-route estimand and interpretation;
+  - estimation, dyad-bootstrap uncertainty, and transparent software;
+  - simulation and empirical evidence showing when the decomposition is useful.
+- Define *explain* as descriptive, within-model attribution rather than causal
+  explanation.
+- **Formulas:** none. At most show the five route names in words.
+- **Primary references:** Kenny et al.; Kenny and Ledermann; Ledermann et al.;
+  Laurenceau and Bolger; Bolger and Shrout.
+
+### Manuscript section 2 — One APIM, five covariance-carrying routes (about 2 pages)
+
+- Introduce one running distinguishable APIM with the same predictor construct
+  measured on both members.
+- Present the complete path diagram before expanding the algebra.
+- Define actor and partner coefficients by the outcome member so that the
+  crossed paths cannot be confused.
+- Explain visually how covariance reaches both outcomes through:
+  - actor--actor;
+  - actor--partner;
+  - partner--actor;
+  - partner--partner; and
+  - residual covariance.
+- Establish provenance: additive expected-covariance components follow standard
+  SEM path tracing [@bokerAlgorithmHierarchicalOrganization2002].
+- Contrast the proposed APIM mapping with generic covariance bridges and with
+  compound dyadic effects [@zhangUsingRPackageRAMpath2015;
+  @ledermannAssessingMediationDyadic2011].
+- **Formula 1:** place the two APIM outcome equations together in one aligned
+  display immediately after the path diagram.
+- **Display:** Figure 1, a complete APIM with five highlighted route families.
+
+### Manuscript section 3 — Exact decomposition and interpretation (about 3 pages)
+
+- State the scope before deriving anything: independent dyads, linear Gaussian
+  outcomes, fixed slopes, finite second moments, and predictors exogenous to
+  the outcome residuals.
+- Distinguish model-implied marginal outcome covariance from conditional
+  residual covariance.
+- Show the short covariance expansion and collect its five terms.
+- Interpret each term twice:
+  - as a product of model parameters and predictor moments; and
+  - as a covariance-carrying route in substantive language.
+- Introduce female-driven and male-driven contributions only for substantively
+  distinguishable female--male dyads; otherwise retain neutral member labels.
+- Show the grouped predictor-transmission and predictor-covariance summaries as
+  optional secondary descriptions, not new estimands.
+- Note the analogy to signed covariance path weights in graphical models while
+  keeping the directed APIM derivation distinct
+  [@jonesCovarianceDecompositionUndirected2005].
+- **Formula 2:** exogeneity and residual covariance assumptions.
+- **Formula 3:** the five-term covariance identity, displayed as the central
+  equation of the paper.
+- **Formulas 3a--3e or Table 1:** define the five named component symbols. Prefer
+  a table over five separate displayed equations.
+- **Display:** Table 1 with component name, formula, path, sign interpretation,
+  and grouped route family.
+
+### Manuscript section 4 — A common signed reporting scale (1.5--2 pages)
+
+- Explain why raw covariance contributions are exact but scale-dependent.
+- Derive both model-implied outcome variances using the same fitted predictor
+  moments and residual variances.
+- Divide every component by one common outcome-standard-deviation product.
+- Emphasize that the resulting quantities:
+  - sum exactly to the model-implied outcome correlation;
+  - can be positive or negative;
+  - can cancel one another;
+  - are not percentages, bounded shares, or five separate correlations.
+- Explain carefully why residual correlation differs from the residual
+  contribution to total outcome correlation.
+- Acknowledge that generic correlation-scale path weighting is not new; the
+  contribution is its APIM-specific definition, naming, and reporting workflow
+  [@jonesCovarianceDecompositionUndirected2005].
+- **Formula 4:** the two model-implied outcome variances, preferably in one
+  aligned display.
+- **Formula 5:** component contribution
+  $r_k=C_k/\sqrt{\operatorname{Var}(Y_1)\operatorname{Var}(Y_2)}$ and
+  $\sum_k r_k=\rho_{Y_1Y_2}$.
+- **Displays:** Figure 2, a signed waterfall; Figure 3, equal total
+  interdependence with different route profiles.
+
+### Manuscript section 5 — Estimation, uncertainty, and software (2--3 pages)
+
+- Define plug-in estimates from a fitted APIM and explain exactly which fitted
+  quantities are required.
+- Reconstruct complete member pairs from the fitted analysis sample before
+  estimating predictor moments.
+- Require an explicit term map when role, predictor, or covariance terms are
+  ambiguous.
+- Describe the dyad bootstrap as a short algorithm:
+  - resample complete dyads;
+  - refit the APIM;
+  - recompute predictor moments and all components;
+  - record convergence failures under a prespecified rule;
+  - form and report the chosen interval type.
+- Cite bootstrap estimation of compound APIM effects as a nearby precedent,
+  without implying that it estimated this decomposition
+  [@ledermannAssessingMediationDyadic2011].
+- Introduce `dyadMLM::decompose_apim_covariance()` as a focused post-estimation
+  implementation, not a new fitting engine [@KungI2026DyadMLM]. The first
+  backend uses APIMs fitted with `glmmTMB`
+  [@brooksGlmmTMBBalancesSpeed2017].
+- Position it relative to user-facing APIM software and generic SEM path
+  tracing [@stasGivingDyadicData2018; @zhangUsingRPackageRAMpath2015].
+- **Formula 6:** one compact plug-in notation statement, if needed. Do not give
+  separate hatted versions of all five terms.
+- **Algorithm box:** dyad-bootstrap workflow; no additional bootstrap formulas
+  in the main text.
+
+### Manuscript section 6 — Simulation study (3--4 pages)
+
+- State explicitly that simulation evaluates estimation and interval behavior,
+  not the truth of the algebraic identity.
+- Organize the simulation around four questions:
+  - Are the plug-in route estimates approximately unbiased?
+  - Do dyad-bootstrap intervals attain useful coverage?
+  - What happens when positive and negative routes cancel?
+  - What happens when the total covariance is close to zero?
+- Vary a focused set of design factors:
+  - number of dyads;
+  - predictor covariance and unequal predictor variances;
+  - equal versus unequal role-specific coefficients;
+  - positive, mixed-sign, and near-cancelling paths;
+  - residual covariance.
+- Prespecify primary outcomes: bias, empirical standard error, interval width,
+  coverage, convergence rate, and component-sum reconstruction error.
+- Use a small factorial core plus targeted edge cases rather than an exhaustive
+  grid.
+- Follow the question-to-simulation-to-recommendation style used in closely
+  related APIM methods work [@gistelinckIndistinguishabilityTests2018].
+- **Formulas:** none in the main simulation section. Put the data-generating
+  equations and parameter grid in the supplement.
+- **Display:** Figure 4 for coverage/bias in the most informative scenarios;
+  Table 2 for the design and compact primary results.
+
+### Manuscript section 7 — Empirical demonstration (about 3 pages)
+
+- Use one substantively clear predictor and outcome measured on both partners.
+- Explain why the example is useful for the decomposition, rather than merely
+  convenient data availability.
+- Report in a fixed sequence:
+  - observed outcome covariance and correlation;
+  - model-implied outcome covariance and correlation;
+  - five contributions in covariance units;
+  - five signed correlation-point contributions;
+  - female-driven versus male-driven contributions when appropriate;
+  - grouped predictor-transmission and predictor-covariance summaries;
+  - dyad-bootstrap intervals and convergence information.
+- Lead interpretation with the route profile, not a list of coefficients.
+- If possible, compare two outcomes, predictors, or groups with similar total
+  interdependence but different profiles.
+- **Formulas:** none; refer back to Formulas 3 and 5.
+- **Display:** Table 3 with estimates and intervals plus one empirical signed
+  waterfall, either as a panel of Figure 2 or a separate figure.
+
+### Manuscript section 8 — Extensions, boundaries, and assumptions (1.5--2 pages)
+
+- Give the exchangeable special case as the only developed extension.
+- Clarify that equality constraints within distinguishable dyads do not by
+  themselves make member labels exchangeable
+  [@gistelinckIndistinguishabilityTests2018].
+- Briefly explain why several predictors require a visible allocation rule for
+  cross-predictor covariance.
+- Defer interactions, nonlinear links, intensive longitudinal data, random
+  slopes, and generic variance shares to separately defined estimands.
+- Use recent random-covariance work to motivate, but not claim to solve,
+  heterogeneity of interdependence across dyads
+  [@lawsRandomDyadicInterdependence2026].
+- Reiterate that statistical route attribution is not causal mediation or
+  interpersonal influence without additional assumptions and design.
+- **Formula 7, optional:** the compact exchangeable identity. Move it to the
+  supplement if the main text is already dense.
+
+### Manuscript section 9 — Discussion and reporting recommendations (about 2 pages)
+
+- Answer the opening question directly: APIM outcome interdependence can be
+  represented as five signed, model-implied route contributions under stated
+  assumptions.
+- Summarize what the decomposition adds beyond actor effects, partner effects,
+  and residual correlation.
+- Give a minimum reporting recommendation:
+  - model-implied total covariance and correlation;
+  - all five signed contributions;
+  - the common denominator;
+  - uncertainty intervals;
+  - fitted-dyad count and model assumptions.
+- Reiterate the novelty boundary: APIM-specific estimand, interpretation,
+  fitted-sample reconstruction, uncertainty, visualization, and software--not
+  new general path algebra.
+- End with the substantive message that similar total interdependence can arise
+  through different modeled dyadic processes.
+- **Formulas:** none.
+
+### Supplement and reproducibility materials
+
+- **Supplement A:** full scalar derivation, omitted predictor--residual
+  cross-terms, and assumption checks.
+- **Supplement B:** matrix formulation, several-predictor identity, and the
+  exchangeable derivation if omitted from the main text.
+- **Supplement C:** complete bootstrap algorithm, interval choice, failed-fit
+  policy, and additional interval diagnostics.
+- **Supplement D:** simulation data-generating equations, full parameter grid,
+  Monte Carlo error, and secondary results.
+- **Supplement E:** reproducible empirical code, model objects, component
+  checks, and software session information.
+- **Software tests:** verify that the five components reconstruct the
+  model-implied covariance to numerical tolerance for every supported fit.
+
+### Main-text formula budget
+
+- **Formula 1:** paired APIM equations.
+- **Formula 2:** exogeneity and residual covariance assumptions.
+- **Formula 3:** central five-term covariance decomposition.
+- **Formula 4:** paired model-implied outcome variances.
+- **Formula 5:** correlation-point contribution and exact sum.
+- **Formula 6:** optional compact plug-in notation.
+- **Formula 7:** optional exchangeable special case.
+- Keep the main text to approximately six displayed equation groups; Formula 7
+  can move to the supplement. Use Table 1 instead of separate displays for the
+  five component definitions.
 
 ## Planned displays
 
-- **Figure 1:** complete distinguishable APIM.
-- **Figure 2:** the five covariance-carrying routes plus their exact sum.
-- **Figure 3:** signed waterfall decomposition of one outcome correlation.
-- **Figure 4:** equal total interdependence with different route profiles.
-- **Table 1:** formulas, substantive interpretations, and grouped route family.
-- **Table 2:** empirical estimates with dyad-bootstrap intervals.
+- **Figure 1:** complete distinguishable APIM with the five route families shown
+  as coordinated panels or highlights.
+- **Figure 2:** signed waterfall decomposition of one outcome correlation.
+- **Figure 3:** equal total interdependence with different route profiles.
+- **Figure 4:** focused simulation results for bias, coverage, cancellation, and
+  the near-zero-total case.
+- **Table 1:** component formulas, path interpretation, expected sign behavior,
+  and grouped route family.
+- **Table 2:** simulation design and compact primary performance results.
+- **Table 3:** empirical estimates in covariance and correlation-point units,
+  with dyad-bootstrap intervals.
 
 ## Candidate titles
 
@@ -1192,37 +1511,31 @@ Alternatives:
 - *From Actor and Partner Paths to Dyadic Interdependence*
 - *Partitioning Interdependence in the Actor–Partner Interdependence Model*
 
-## What to verify with Niall
+## Questions to resolve before drafting
 
-The remembered scope is a cross-sectional APIM for distinguishable partners,
-with particular interest in female-driven and male-driven interdependence. A
-concise check would be:
-
-> I reconstructed five sources of model-implied APIM outcome covariance:
-> actor–actor and partner–partner routes carried by predictor covariance;
-> actor–partner and partner–actor routes carried by each member's predictor
-> variance; and residual covariance. For female–male dyads, the actor–partner
-> term is female-driven and the partner–actor term is male-driven. Putting all
-> five over the same model-implied outcome standard deviations makes them sum
-> exactly to the model-implied outcome correlation. Is this the set of
-> combinations you had in mind?
-
-Further questions:
-
-- Did he intend all four predictor-side components or mainly the female-driven
-  and male-driven terms?
-- Was covariance, correlation, or reduction in residual covariance his primary
-  reporting target?
-- Does he know an earlier derivation that should be the acknowledged starting
-  point?
-- Does he have a preferred empirical example or dataset?
+- Confirm whether the substantive emphasis should remain on all five route
+  components or foreground the two member-driven contributions.
+- Decide whether the primary reporting target is covariance units, signed
+  correlation-point contributions, or both. Reduction in residual covariance
+  between separately fitted models should not be the primary identity.
+- Complete a focused audit of applied APIM papers to establish how often total
+  model-implied outcome interdependence is reported or decomposed.
+- Ask relevant collaborators about any additional intellectual provenance,
+  route terminology, or empirical examples without implying collaboration or
+  authorship before those roles are agreed.
+- Choose an example for which the five-route profile answers a real substantive
+  question, ideally with a useful same-total/different-profile comparison.
+- Choose the bootstrap interval type and failed-refit policy before finalizing
+  the simulation design.
 
 ## Immediate next steps
 
-1. Show Niall the six-panel path figure and the concise question above.
-2. Confirm intellectual provenance and naming before presenting a novelty
-   claim.
-3. Conduct the focused literature review described above.
+1. Circulate the six-panel path figure and broad manuscript structure for
+   conceptual feedback.
+2. Complete the focused APIM application audit described above; the general
+   path-tracing and covariance-decomposition provenance is now identified.
+3. Draft manuscript Sections 1--4 around one running example and the six-formula
+   main-text budget.
 4. Prototype an internal `decompose_apim_covariance()` function that separates
    the algebraic core from `glmmTMB` extraction and explicit APIM term mapping.
 5. Test the decomposition and extraction logic on the workshop APIM example.
@@ -1265,3 +1578,5 @@ These extensions can motivate later methodological work. The first paper and
 software release should establish a small result that is exact under stated
 assumptions, reproducible from supported fitted models, and difficult for users
 to misinterpret.
+
+# References {-}

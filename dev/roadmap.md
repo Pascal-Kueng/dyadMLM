@@ -910,7 +910,7 @@ diagnostic branches, but integration should use the current accepted mainline.
   type and nonconvergence policy, and do not imply frequentist uncertainty for
   `glmmTMB` point estimates before this workflow is available.
 - Use
-  [`paper-idea-explaining-interdependence-apim.Rmd`](paper-idea-explaining-interdependence-apim.Rmd)
+  [`paper-idea.Rmd`](paper-explaining-interdependence-apim/paper-idea.Rmd)
   as the manuscript and software-design source. Complete the focused literature
   review before making a novelty claim, then evaluate finite-sample bias and
   interval coverage through simulation and include one substantive empirical
