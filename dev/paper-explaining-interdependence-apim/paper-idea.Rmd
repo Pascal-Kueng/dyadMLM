@@ -1,9 +1,11 @@
 ---
 title: "Explaining Interdependence in the Actor–Partner Interdependence Model"
-subtitle: "A visual paper outline and covariance-decomposition prototype"
+subtitle: "Technical notes, worked examples, and reusable figures"
 author: "Pascal Küng"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
-bibliography: ../../vignettes/references.bib
+bibliography:
+  - ../../vignettes/references.bib
+  - references.bib
 link-citations: true
 output:
   html_document:
@@ -268,10 +270,12 @@ component_colours <- c(
 )
 ```
 
-> **Draft status (31 August 2026).** The [literature review](literature-review.md)
-> records direct APIM precedents found after this outline was drafted. Its
-> evidence and caveats take precedence over the novelty framing below. The
-> inference, simulation, and extension plans remain proposals for discussion.
+> **Technical notes (1 September 2026).** These notes develop the equations,
+> worked examples, and figures. The current scope, manuscript structure, and
+> validation decisions belong in [plan.md](plan.md); the
+> [literature review](literature-review.md) records the evidence and remaining
+> source-access gaps. Inference methods and simulation settings are not yet
+> finalized.
 
 > **Working claim.** An APIM should not only *account for* interdependence. It
 > can also provide a model-based, descriptive explanation of where the
@@ -280,10 +284,9 @@ component_colours <- c(
 Here and throughout, *explain* means attribute statistically within the fitted
 model. It does not mean that the routes are automatically causal mechanisms.
 
-This document first develops the argument as it could appear in the paper and
-checks the underlying path tracing visually and numerically. The final section
-collects the proposed contribution, study plan, manuscript structure, open
-questions, and next steps.
+The one-predictor example provides the teaching core. Covariates, multiple
+predictors, and exchangeable dyads are also within Paper 1; later sections
+record the corresponding algebra. These notes are not a second manuscript plan.
 
 # The idea in one paragraph
 
@@ -304,19 +307,27 @@ structure as a starting point for studying shared events and interpersonal
 influence. The present proposal asks a narrower question: within one fitted
 cross-sectional APIM, which modeled routes carry the outcome covariance?
 
-For one predictor construct measured on both partners, established path-tracing
-and covariance-component algebra gives an exact additive answer under the usual
-APIM assumption that predictors are uncorrelated with the outcome residuals
-[@bokerAlgorithmHierarchicalOrganization2002]. Outcome covariance can travel
-through four predictor-side path pairs: actor–actor, actor–partner,
-partner–actor, and partner–partner. A fifth component is the remaining residual
-covariance. These five signed quantities sum exactly to the outcome covariance
-implied by the model. Dividing every component by the same two model-implied
-outcome standard deviations makes them sum to the model-implied outcome
-correlation. Related signed path-weight decompositions on covariance and
-correlation scales exist for undirected Gaussian graphical models
-[@jonesCovarianceDecompositionUndirected2005]; the proposed contribution is the
-APIM-specific estimand and workflow, not a new general tracing rule.
+This is an existing APIM application of path tracing, not a newly discovered
+decomposition. Dwyer and colleagues [-@dwyerAutonomousMotivationDyads2017]
+applied the predictor-route decomposition, and the Bolger–Laurenceau webinar
+[-@bolgerLaurenceauDyadicWebinar2016] teaches it with a numerical example.
+Kenny's handout and APIM_MM documentation explicitly describe the partition
+and signed contributions [@kennyExplainedNonindependence; @kennyAPIMMM2019];
+Ferraris and colleagues [-@ferrarisDyadicSocialSupport2022] provide another
+direct applied precedent with formulas. Paper 1 must build on these sources
+through clarification, validation, and transparent implementation.
+
+For one predictor construct measured on both partners, the familiar
+path-tracing algebra gives an exact additive answer when predictors are
+uncorrelated with outcome residuals [@bokerAlgorithmHierarchicalOrganization2002].
+The four predictor-side path pairs are actor–actor, actor–partner,
+partner–actor, and partner–partner. Together with residual covariance, these
+five signed quantities sum to model-implied outcome covariance. Dividing every
+component by the same two model-implied outcome standard deviations makes them
+sum to model-implied outcome correlation. Signed path-weight decompositions
+also exist for undirected Gaussian graphical models
+[@jonesCovarianceDecompositionUndirected2005], but the direct APIM precedents
+above govern the paper's novelty claims.
 
 # The complete one-construct APIM
 
@@ -858,23 +869,52 @@ by a shared dyad effect, a covariance between member-specific random effects,
 a residual covariance, or a sum of such components. It should not be replaced
 uncritically by whichever single variance component is easiest to extract.
 
-## Uncertainty without complicated mathematics
+## Inference for estimated contributions
 
-A dyad bootstrap provides a direct uncertainty procedure and avoids deriving a
-large delta-method covariance matrix:
+Compare a joint delta method with a whole-dyad bootstrap; neither is selected
+in advance as the universally preferable method. Let
+$\boldsymbol c=g(\boldsymbol\theta)$ collect the contributions, where
+$\boldsymbol\theta$ includes the fitted paths, predictor and covariate moments,
+and residual covariance parameters. The outcome-standardization denominator
+is also a function of these parameters. A first-order delta approximation is
 
-1. Resample whole dyads with replacement, keeping both partners together and
-   preserving their role labels.
-2. Refit the APIM in the bootstrap sample.
-3. Recompute the predictor moments, all five covariance components, the
-   model-implied outcome variances, and the correlation-point contributions.
-4. Repeat and form intervals from the bootstrap distribution of each signed
-   component.
+$$
+\widehat{\operatorname{Var}}(\widehat{\boldsymbol c})
+\approx
+\boldsymbol J(\widehat{\boldsymbol\theta})
+\widehat{\operatorname{Var}}(\widehat{\boldsymbol\theta})
+\boldsymbol J(\widehat{\boldsymbol\theta})^{\mathsf T},
+\qquad
+\boldsymbol J(\boldsymbol\theta)
+=\frac{\partial g(\boldsymbol\theta)}{\partial\boldsymbol\theta^{\mathsf T}}.
+$$
 
-Resampling whole dyads preserves the dependence that the model is designed to
-represent. Recomputing both the fitted paths and predictor moments carries both
-sources of sampling uncertainty forward. The analysis plan should prespecify
-the interval type and how nonconverged bootstrap fits are handled.
+For the population-marginal target, this requires the **joint** uncertainty of
+all estimated inputs, including their cross-covariances. Propagating only slope
+standard errors is insufficient. Treating predictor moments as fixed targets
+conditional-on-design rather than population-marginal uncertainty; even then,
+propagate the joint uncertainty of all fitted parameters entering a contribution
+and its denominator. Defined-parameter delta and bootstrap inference already
+exist in SEM software; see the
+[lavaan documentation](https://lavaan.ugent.be/tutorial/mediation.html).
+Their availability is not a new methodological contribution.
+
+A whole-dyad bootstrap instead resamples paired rows with replacement,
+preserves role labels, refits the APIM, and recomputes every moment, component,
+and outcome denominator. Prespecify the interval construction and failed-refit
+policy. Complete paired observations are the initial validation case; an
+extension to incomplete dyads must explicitly align the estimation and
+predictor-moment samples.
+
+Products can have zero gradients when multiple constituent parameters are
+zero, and covariance boundaries create additional difficulties. Ordinary
+first-order delta intervals can then degenerate, and a conventional bootstrap
+is not automatically reliable either. The focused simulation should evaluate
+bias, coverage, interval width, and fit failures, including weak or zero paths
+and cancellation. Prioritize intervals and a small set of prespecified
+scientific contrasts over automatic significance tests for every route.
+
+## Within-model attribution versus covariance reduction
 
 Within the fitted predictor model, the exact identity is
 
@@ -945,22 +985,74 @@ Thus, for a linear APIM with exogenous predictors, every contribution combines
 one coefficient into $Y_1$, one predictor variance or covariance, and one
 coefficient into $Y_2$.
 
-However, several predictors introduce cross-predictor covariance terms. Their
-allocation to a named construct may depend on how predictors are grouped or
-parameterized. The first paper should therefore make the single dyadic
-predictor pair the transparent core result, then present the matrix expression
-and a prespecified grouping rule as the extension.
+Here $\boldsymbol B$ is a matrix of fixed regression coefficients, not a
+covariance matrix of actor and partner effects. Correlated predictors and
+residuals are represented by $\boldsymbol\Sigma_X$ and $\boldsymbol\Psi$;
+sampling covariances between estimated coefficients belong in the separate
+inference calculation above. Random-coefficient covariances belong to Paper 2.
 
-# Brief closing extension: exchangeable dyads
+## Covariates and cross-predictor terms
 
-The paper's main case is cross-sectional and distinguishable: member 1 is the
-female partner and member 2 is the male partner, so the female-driven and
-male-driven components can differ. A short closing section can show that the
-same logic also applies to exchangeable dyads without turning exchangeability
-into a second focus of the paper.
+Multiple predictors and covariates are part of Paper 1. With focal predictor
+vector $\boldsymbol X$ and covariate vector $\boldsymbol Z$, write
 
-For exchangeable dyads, the member labels are arbitrary. The
-covariance-relevant constraints are
+$$
+\boldsymbol Y=\boldsymbol\alpha+
+\boldsymbol B\boldsymbol X+\boldsymbol\Gamma\boldsymbol Z+
+\boldsymbol\varepsilon,
+\qquad
+\operatorname{Cov}\!\left(\boldsymbol\varepsilon,
+\begin{pmatrix}\boldsymbol X\\\boldsymbol Z\end{pmatrix}\right)
+=\boldsymbol 0.
+$$
+
+The full marginal covariance matrix is
+
+$$
+\begin{aligned}
+\boldsymbol\Sigma_Y
+={}&\boldsymbol B\boldsymbol\Sigma_{XX}\boldsymbol B^{\mathsf T}
++\boldsymbol\Gamma\boldsymbol\Sigma_{ZZ}\boldsymbol\Gamma^{\mathsf T}
++\boldsymbol\Psi\\
+&+\boldsymbol B\boldsymbol\Sigma_{XZ}\boldsymbol\Gamma^{\mathsf T}
++\boldsymbol\Gamma\boldsymbol\Sigma_{ZX}\boldsymbol B^{\mathsf T}.
+\end{aligned}
+$$
+
+Its $(1,2)$ element gives the outcome covariance. Report focal-predictor,
+covariate, cross-block, and residual terms explicitly; correlated constructs
+within either block also generate cross-construct terms. Allocating a cross
+term to one named construct requires a stated convention and is not a unique
+share of covariance explained by that construct. Grouping and parameterization
+therefore matter. For correlation-point reporting, use the common outcome
+standard deviations implied by this full model.
+
+Covariate-adjusted slopes do not by themselves make the target conditional on
+the covariates. If $\operatorname{E}(\boldsymbol\varepsilon\mid
+\boldsymbol X,\boldsymbol Z)=\boldsymbol 0$, then
+
+$$
+\operatorname{Cov}(\boldsymbol Y\mid\boldsymbol Z=\boldsymbol z)
+=\boldsymbol B\operatorname{Cov}(\boldsymbol X\mid
+\boldsymbol Z=\boldsymbol z)\boldsymbol B^{\mathsf T}
++\operatorname{Cov}(\boldsymbol\varepsilon\mid
+\boldsymbol Z=\boldsymbol z).
+$$
+
+Using a constant $\boldsymbol\Psi$ for the last term requires an additional
+homoscedasticity assumption. A conditional target needs the corresponding
+conditional moments and denominator; linear residualization alone is not
+generally equivalent to conditioning. Keep this target distinct from the
+primary marginal decomposition.
+
+# Exchangeable dyads
+
+Paper 1 also includes exchangeable dyads. The one-construct case below shows
+how label symmetry changes the interpretation and grouping of contributions
+without changing the path-tracing rule.
+
+In an exchangeable APIM parameterization, the member labels are arbitrary.
+The covariance-relevant constraints are
 
 $$
 a_1=a_2=a,
@@ -999,7 +1091,7 @@ The two member-driven contributions are now necessarily equal. Because
 substantive identity. They should be combined:
 
 $$
-\underbrace{ap\sigma_X^2+ap\sigma_X^2}_{\text{member-driven transmission}}
+\underbrace{ap\sigma_X^2+ap\sigma_X^2}_{\text{member-driven contribution}}
 =2ap\sigma_X^2.
 $$
 
@@ -1007,7 +1099,7 @@ The complete compact form is therefore
 
 $$
 \operatorname{Cov}(Y_1,Y_2)
-=\underbrace{2ap\sigma_X^2}_{\text{member-driven transmission}}
+=\underbrace{2ap\sigma_X^2}_{\text{member-driven contribution}}
 +\underbrace{(a^2+p^2)\sigma_{X12}}_{\text{cross-member predictor covariance}}
 +\underbrace{\psi_{12}}_{\text{residual interdependence}}.
 $$
@@ -1022,561 +1114,11 @@ exchangeable. Under the full exchangeability constraints above, equality of
 the two member-driven components follows from the model structure rather than
 from evidence favoring one label assignment over another.
 
-# Plan for the paper
-
-The sections above form a teaching-oriented prototype of the paper's argument.
-This final section records the intended scope, contribution, evidence, and
-remaining work.
-
-## Working scope
-
-The first paper should focus on:
-
-- cross-sectional, independent, distinguishable dyads;
-- female and male partners as the motivating distinguishable roles;
-- one predictor construct measured on both partners;
-- continuous outcomes and a linear, fixed-slope APIM;
-- marginal, model-implied outcome covariance and correlation;
-- descriptive statistical attribution rather than automatic causal claims.
-
-Several predictors and exchangeable dyads can appear as compact extensions.
-Longitudinal paths, random slopes, nonlinear outcome models, and formal causal
-identification should remain outside the first paper.
-
-## Central claim and contributions
-
-The central claim is that dyadic interdependence need not be treated only as a
-nuisance to accommodate. Within a fitted APIM, the model-implied covariance
-between partners' outcomes can be decomposed into interpretable, signed route
-contributions.
-
-The paper should contribute the following package:
-
-1. Present the exact five-part decomposition for a distinguishable APIM in one
-   diagram, one table, and a short covariance expansion.
-2. Name and interpret the female-driven and male-driven components while
-   retaining the complete actor–actor, actor–partner, partner–actor,
-   partner–partner, and residual breakdown.
-3. Distinguish predictor-transmission routes from cross-member
-   predictor-covariance routes, without treating either label as automatically
-   causal.
-4. Put all five components on a common signed correlation-point scale and show
-   why they are not percentages or separate correlations.
-5. Explain why the residual correlation is not the residual contribution to
-   the total outcome correlation.
-6. Provide a plug-in estimator, dyad-bootstrap uncertainty intervals, a
-   focused `dyadMLM::decompose_apim_covariance()` implementation, and a
-   reproducible table plus waterfall visualization.
-7. Demonstrate that the same total interdependence can have different
-   model-implied route profiles.
-8. End with the compact exchangeable special case, where the two member-driven
-   terms become equal and lose their role-specific interpretation.
-
-## Planned software contribution
-
-Existing tools already make APIMs more accessible and generic SEM path
-components traceable [@stasGivingDyadicData2018;
-@zhangUsingRPackageRAMpath2015]. The proposed software contribution is more
-specific: a validated APIM post-estimation workflow that reconstructs the
-fitted dyad sample, maps model terms to the five substantively named routes,
-quantifies uncertainty, and produces a transparent result that can be checked
-against the model-implied covariance.
-
-The package contribution should be deliberately narrower than a universal
-variance-partitioning function. The proposed public function is
-`decompose_apim_covariance()`, not the broader `decompose_apim()`. Its first
-supported contract should cover cross-sectional, two-member, linear Gaussian
-APIMs with one dyadic predictor construct and fixed slopes.
-
-The function should return:
-
-1. the actor--actor, actor--partner, partner--actor, partner--partner, and
-   residual covariance contributions;
-2. the same five contributions in signed outcome-correlation points;
-3. the two model-implied outcome variances, total outcome covariance, and
-   total outcome correlation used to verify and scale the decomposition; and
-4. the fitted sample, predictor moments, resolved coefficient names, residual
-   covariance source, model backend, and assumptions needed to interpret the
-   result.
-
-The outcome variances are required for the common denominator, but the first
-function should not relabel their correlated-predictor cross-products as
-bounded actor, partner, overlap, or interaction shares. The decomposition is
-signed and additive; it is not a percentage-of-covariance or percentage-of-
-variance calculation.
-
-Implementation should separate a small backend-neutral algebraic core from
-model-specific extraction and APIM term mapping. Begin with the cross-sectional
-distinguishable `glmmTMB` specification used in the package vignette. Add the
-exchangeable special case by reusing the validated member-level covariance
-recovery machinery. Add `brms` only after the point-estimate contract is stable,
-retaining posterior draws rather than discarding their uncertainty. Require an
-explicit term map whenever the actor, partner, role, predictor, or residual
-covariance terms cannot be classified uniquely.
-
-Predictor moments must be computed from the fitted paired analysis sample, not
-naively from duplicated long-format design-matrix rows. The function should
-report the number of complete fitted dyads used and reject unsupported or
-ambiguous covariance structures rather than silently selecting one random-
-effect block. A separate dyad-bootstrap workflow can add frequentist intervals
-after its refitting and nonconvergence behavior have been validated.
-
-## Novelty boundary and literature work
-
-The five-term identity is a direct specialization of established SEM
-path-tracing and covariance-component algebra
-[@bokerAlgorithmHierarchicalOrganization2002]. Related work has decomposed
-covariance into signed path weights and rescaled those weights to the
-correlation scale in undirected Gaussian graphical models
-[@jonesCovarianceDecompositionUndirected2005]. The `RAMpath` package can also
-enumerate covariance components generically in SEMs
-[@zhangUsingRPackageRAMpath2015]. The paper should therefore not claim a new
-theorem, a new general tracing rule, a new generic correlation rescaling, or
-the first software implementation of covariance path decomposition.
-
-Prior dyadic work treats covariance as potentially arising from interpersonal
-influence or shared events [@bolgerAccountingStatisticalDependency2007], and
-recent random-covariance work treats the sign and magnitude of interdependence
-as a dyad-varying estimand [@lawsRandomDyadicInterdependence2026]. Neither,
-however, provides the proposed fixed-path decomposition of model-implied
-cross-sectional APIM outcome covariance.
-
-The potentially publishable contribution is the coherent APIM-specific
-framework around the identity: defining the estimand, mapping fitted model
-terms to named routes, handling the fitted dyad sample correctly, distinguishing
-total from residual interdependence, quantifying uncertainty, providing
-visualizations and software, and showing why equal total correlations need not
-have equal model-implied explanations.
-
-Before making a novelty claim, the literature review should establish:
-
-- where the full distinguishable five-term expression has appeared;
-- whether anyone has already estimated uncertainty for the individual terms;
-- whether outcome-correlation-point contributions have been proposed;
-- whether female-driven and male-driven interdependence have been named or
-  compared explicitly;
-- how previous work distinguishes residual covariance, explained covariance,
-  and total interdependence.
-
-The literature review should also establish how commonly APIM applications
-report or decompose total outcome interdependence rather than only individual
-paths and residual correlation.
-
-## Mathematics in the manuscript
-
-The main text needs only:
-
-1. the two APIM equations;
-2. the exogeneity and constant-residual-covariance assumptions;
-3. the short covariance expansion producing the five terms;
-4. the model-implied outcome-variance denominator;
-5. the plug-in estimates and dyad-bootstrap recipe.
-
-The expanded predictor–residual cross-terms, matrix generalization, and full
-bootstrap implementation can go in an appendix or supplement. Delta-method
-gradients, asymptotic proofs, elaborate matrix calculus, and longitudinal
-derivations are not needed for the first paper.
-
-## Proposed evidence
-
-### Analytical and visual demonstration
-
-- Derive the five components directly and by path tracing.
-- Show how female-driven and male-driven covariance arise because one member's
-  predictor reaches both outcomes.
-- Contrast covariance contributions, correlation-point contributions,
-  residual covariance, and residual correlation.
-- Use the waterfall and same-total/different-profile figures as the primary
-  intuitive demonstrations.
-
-### Simulation study
-
-The algebraic identity does not need simulation. Simulation is useful only to
-study estimation and uncertainty. Vary sample size, predictor covariance,
-unequal predictor variances, female–male coefficient differences, path signs,
-and residual covariance. Evaluate:
-
-- finite-sample bias of each plug-in component;
-- coverage and width of dyad-bootstrap intervals;
-- behavior when positive and negative components cancel;
-- stability when total covariance is near zero;
-- convergence and interval behavior in smaller samples.
-
-Signed covariance and correlation-point contributions should be the primary
-estimands. Percentage shares should not be a primary analysis.
-
-### Empirical demonstration
-
-Use one substantively clear predictor construct and outcome. Report:
-
-1. raw partner outcome covariance and correlation;
-2. the fitted model-implied covariance and correlation;
-3. all five route contributions in covariance units;
-4. all five correlation-point contributions;
-5. the female-driven and male-driven comparison;
-6. grouped predictor-transmission and predictor-covariance routes;
-7. dyad-bootstrap uncertainty intervals;
-8. one path diagram, one results table, and one signed waterfall plot.
-
-The strongest example would compare two outcomes, predictors, or substantively
-meaningful groups with similar total interdependence but different route
-profiles.
-
-## Broad manuscript structure
-
-The target is a question-led methods paper of approximately 20--25 manuscript
-pages, excluding references and supplement. The prose should introduce the
-substantive problem and one running APIM before notation. Each displayed
-formula should be followed immediately by a plain-language interpretation.
-
-### Abstract: the complete argument in 200--250 words
-
-- Begin with the missing question: APIMs estimate actor and partner paths, but
-  researchers rarely ask what produces the model-implied covariance between
-  the two outcomes.
-- State the method: an exact five-route decomposition for a linear
-  distinguishable APIM.
-- State the reporting innovation narrowly: an APIM-specific table of signed
-  covariance and outcome-correlation-point contributions.
-- Mention the plug-in estimator, dyad-bootstrap intervals, simulation, one
-  empirical demonstration, visualization, and `dyadMLM` implementation.
-- End with the substantive payoff: equal total interdependence can conceal
-  different model-implied route profiles.
-- **Formulas:** none.
-- **References:** normally none in the abstract.
-
-### Manuscript section 1 — Introduction: the missing dyadic question (2--3 pages)
-
-- Introduce interdependence as substantive information, not only a violation of
-  independent errors [@laurenceauUsingDiaryMethods2005;
-  @bolgerAccountingStatisticalDependency2007].
-- Briefly review what a conventional APIM reports: actor effects, partner
-  effects, and residual covariance or correlation [@kenny2006dyadic].
-- Show that APIM methodology already derives interpretable combinations of
-  paths, such as dyadic patterns and mediated effects
-  [@kennyDetectingMeasuringTesting2010;
-  @ledermannAssessingMediationDyadic2011].
-- State the unresolved question: what explains the *total model-implied outcome
-  covariance*, rather than only the remaining residual association?
-- Give one motivating contrast: two dyads or fitted models can have the same
-  outcome correlation but different route profiles.
-- End with three concise contributions:
-  - an APIM-specific five-route estimand and interpretation;
-  - estimation, dyad-bootstrap uncertainty, and transparent software;
-  - simulation and empirical evidence showing when the decomposition is useful.
-- Define *explain* as descriptive, within-model attribution rather than causal
-  explanation.
-- **Formulas:** none. At most show the five route names in words.
-- **Primary references:** Kenny et al.; Kenny and Ledermann; Ledermann et al.;
-  Laurenceau and Bolger; Bolger and Shrout.
-
-### Manuscript section 2 — One APIM, five covariance-carrying routes (about 2 pages)
-
-- Introduce one running distinguishable APIM with the same predictor construct
-  measured on both members.
-- Present the complete path diagram before expanding the algebra.
-- Define actor and partner coefficients by the outcome member so that the
-  crossed paths cannot be confused.
-- Explain visually how covariance reaches both outcomes through:
-  - actor--actor;
-  - actor--partner;
-  - partner--actor;
-  - partner--partner; and
-  - residual covariance.
-- Establish provenance: additive expected-covariance components follow standard
-  SEM path tracing [@bokerAlgorithmHierarchicalOrganization2002].
-- Contrast the proposed APIM mapping with generic covariance bridges and with
-  compound dyadic effects [@zhangUsingRPackageRAMpath2015;
-  @ledermannAssessingMediationDyadic2011].
-- **Formula 1:** place the two APIM outcome equations together in one aligned
-  display immediately after the path diagram.
-- **Display:** Figure 1, a complete APIM with five highlighted route families.
-
-### Manuscript section 3 — Exact decomposition and interpretation (about 3 pages)
-
-- State the scope before deriving anything: independent dyads, linear Gaussian
-  outcomes, fixed slopes, finite second moments, and predictors exogenous to
-  the outcome residuals.
-- Distinguish model-implied marginal outcome covariance from conditional
-  residual covariance.
-- Show the short covariance expansion and collect its five terms.
-- Interpret each term twice:
-  - as a product of model parameters and predictor moments; and
-  - as a covariance-carrying route in substantive language.
-- Introduce female-driven and male-driven contributions only for substantively
-  distinguishable female--male dyads; otherwise retain neutral member labels.
-- Show the grouped predictor-transmission and predictor-covariance summaries as
-  optional secondary descriptions, not new estimands.
-- Note the analogy to signed covariance path weights in graphical models while
-  keeping the directed APIM derivation distinct
-  [@jonesCovarianceDecompositionUndirected2005].
-- **Formula 2:** exogeneity and residual covariance assumptions.
-- **Formula 3:** the five-term covariance identity, displayed as the central
-  equation of the paper.
-- **Formulas 3a--3e or Table 1:** define the five named component symbols. Prefer
-  a table over five separate displayed equations.
-- **Display:** Table 1 with component name, formula, path, sign interpretation,
-  and grouped route family.
-
-### Manuscript section 4 — A common signed reporting scale (1.5--2 pages)
-
-- Explain why raw covariance contributions are exact but scale-dependent.
-- Derive both model-implied outcome variances using the same fitted predictor
-  moments and residual variances.
-- Divide every component by one common outcome-standard-deviation product.
-- Emphasize that the resulting quantities:
-  - sum exactly to the model-implied outcome correlation;
-  - can be positive or negative;
-  - can cancel one another;
-  - are not percentages, bounded shares, or five separate correlations.
-- Explain carefully why residual correlation differs from the residual
-  contribution to total outcome correlation.
-- Acknowledge that generic correlation-scale path weighting is not new; the
-  contribution is its APIM-specific definition, naming, and reporting workflow
-  [@jonesCovarianceDecompositionUndirected2005].
-- **Formula 4:** the two model-implied outcome variances, preferably in one
-  aligned display.
-- **Formula 5:** component contribution
-  $r_k=C_k/\sqrt{\operatorname{Var}(Y_1)\operatorname{Var}(Y_2)}$ and
-  $\sum_k r_k=\rho_{Y_1Y_2}$.
-- **Displays:** Figure 2, a signed waterfall; Figure 3, equal total
-  interdependence with different route profiles.
-
-### Manuscript section 5 — Estimation, uncertainty, and software (2--3 pages)
-
-- Define plug-in estimates from a fitted APIM and explain exactly which fitted
-  quantities are required.
-- Reconstruct complete member pairs from the fitted analysis sample before
-  estimating predictor moments.
-- Require an explicit term map when role, predictor, or covariance terms are
-  ambiguous.
-- Describe the dyad bootstrap as a short algorithm:
-  - resample complete dyads;
-  - refit the APIM;
-  - recompute predictor moments and all components;
-  - record convergence failures under a prespecified rule;
-  - form and report the chosen interval type.
-- Cite bootstrap estimation of compound APIM effects as a nearby precedent,
-  without implying that it estimated this decomposition
-  [@ledermannAssessingMediationDyadic2011].
-- Introduce `dyadMLM::decompose_apim_covariance()` as a focused post-estimation
-  implementation, not a new fitting engine [@KungI2026DyadMLM]. The first
-  backend uses APIMs fitted with `glmmTMB`
-  [@brooksGlmmTMBBalancesSpeed2017].
-- Position it relative to user-facing APIM software and generic SEM path
-  tracing [@stasGivingDyadicData2018; @zhangUsingRPackageRAMpath2015].
-- **Formula 6:** one compact plug-in notation statement, if needed. Do not give
-  separate hatted versions of all five terms.
-- **Algorithm box:** dyad-bootstrap workflow; no additional bootstrap formulas
-  in the main text.
-
-### Manuscript section 6 — Simulation study (3--4 pages)
-
-- State explicitly that simulation evaluates estimation and interval behavior,
-  not the truth of the algebraic identity.
-- Organize the simulation around four questions:
-  - Are the plug-in route estimates approximately unbiased?
-  - Do dyad-bootstrap intervals attain useful coverage?
-  - What happens when positive and negative routes cancel?
-  - What happens when the total covariance is close to zero?
-- Vary a focused set of design factors:
-  - number of dyads;
-  - predictor covariance and unequal predictor variances;
-  - equal versus unequal role-specific coefficients;
-  - positive, mixed-sign, and near-cancelling paths;
-  - residual covariance.
-- Prespecify primary outcomes: bias, empirical standard error, interval width,
-  coverage, convergence rate, and component-sum reconstruction error.
-- Use a small factorial core plus targeted edge cases rather than an exhaustive
-  grid.
-- Follow the question-to-simulation-to-recommendation style used in closely
-  related APIM methods work [@gistelinckIndistinguishabilityTests2018].
-- **Formulas:** none in the main simulation section. Put the data-generating
-  equations and parameter grid in the supplement.
-- **Display:** Figure 4 for coverage/bias in the most informative scenarios;
-  Table 2 for the design and compact primary results.
-
-### Manuscript section 7 — Empirical demonstration (about 3 pages)
-
-- Use one substantively clear predictor and outcome measured on both partners.
-- Explain why the example is useful for the decomposition, rather than merely
-  convenient data availability.
-- Report in a fixed sequence:
-  - observed outcome covariance and correlation;
-  - model-implied outcome covariance and correlation;
-  - five contributions in covariance units;
-  - five signed correlation-point contributions;
-  - female-driven versus male-driven contributions when appropriate;
-  - grouped predictor-transmission and predictor-covariance summaries;
-  - dyad-bootstrap intervals and convergence information.
-- Lead interpretation with the route profile, not a list of coefficients.
-- If possible, compare two outcomes, predictors, or groups with similar total
-  interdependence but different profiles.
-- **Formulas:** none; refer back to Formulas 3 and 5.
-- **Display:** Table 3 with estimates and intervals plus one empirical signed
-  waterfall, either as a panel of Figure 2 or a separate figure.
-
-### Manuscript section 8 — Extensions, boundaries, and assumptions (1.5--2 pages)
-
-- Give the exchangeable special case as the only developed extension.
-- Clarify that equality constraints within distinguishable dyads do not by
-  themselves make member labels exchangeable
-  [@gistelinckIndistinguishabilityTests2018].
-- Briefly explain why several predictors require a visible allocation rule for
-  cross-predictor covariance.
-- Defer interactions, nonlinear links, intensive longitudinal data, random
-  slopes, and generic variance shares to separately defined estimands.
-- Use recent random-covariance work to motivate, but not claim to solve,
-  heterogeneity of interdependence across dyads
-  [@lawsRandomDyadicInterdependence2026].
-- Reiterate that statistical route attribution is not causal mediation or
-  interpersonal influence without additional assumptions and design.
-- **Formula 7, optional:** the compact exchangeable identity. Move it to the
-  supplement if the main text is already dense.
-
-### Manuscript section 9 — Discussion and reporting recommendations (about 2 pages)
-
-- Answer the opening question directly: APIM outcome interdependence can be
-  represented as five signed, model-implied route contributions under stated
-  assumptions.
-- Summarize what the decomposition adds beyond actor effects, partner effects,
-  and residual correlation.
-- Give a minimum reporting recommendation:
-  - model-implied total covariance and correlation;
-  - all five signed contributions;
-  - the common denominator;
-  - uncertainty intervals;
-  - fitted-dyad count and model assumptions.
-- Reiterate the novelty boundary: APIM-specific estimand, interpretation,
-  fitted-sample reconstruction, uncertainty, visualization, and software--not
-  new general path algebra.
-- End with the substantive message that similar total interdependence can arise
-  through different modeled dyadic processes.
-- **Formulas:** none.
-
-### Supplement and reproducibility materials
-
-- **Supplement A:** full scalar derivation, omitted predictor--residual
-  cross-terms, and assumption checks.
-- **Supplement B:** matrix formulation, several-predictor identity, and the
-  exchangeable derivation if omitted from the main text.
-- **Supplement C:** complete bootstrap algorithm, interval choice, failed-fit
-  policy, and additional interval diagnostics.
-- **Supplement D:** simulation data-generating equations, full parameter grid,
-  Monte Carlo error, and secondary results.
-- **Supplement E:** reproducible empirical code, model objects, component
-  checks, and software session information.
-- **Software tests:** verify that the five components reconstruct the
-  model-implied covariance to numerical tolerance for every supported fit.
-
-### Main-text formula budget
-
-- **Formula 1:** paired APIM equations.
-- **Formula 2:** exogeneity and residual covariance assumptions.
-- **Formula 3:** central five-term covariance decomposition.
-- **Formula 4:** paired model-implied outcome variances.
-- **Formula 5:** correlation-point contribution and exact sum.
-- **Formula 6:** optional compact plug-in notation.
-- **Formula 7:** optional exchangeable special case.
-- Keep the main text to approximately six displayed equation groups; Formula 7
-  can move to the supplement. Use Table 1 instead of separate displays for the
-  five component definitions.
-
-## Planned displays
-
-- **Figure 1:** complete distinguishable APIM with the five route families shown
-  as coordinated panels or highlights.
-- **Figure 2:** signed waterfall decomposition of one outcome correlation.
-- **Figure 3:** equal total interdependence with different route profiles.
-- **Figure 4:** focused simulation results for bias, coverage, cancellation, and
-  the near-zero-total case.
-- **Table 1:** component formulas, path interpretation, expected sign behavior,
-  and grouped route family.
-- **Table 2:** simulation design and compact primary performance results.
-- **Table 3:** empirical estimates in covariance and correlation-point units,
-  with dyad-bootstrap intervals.
-
-## Candidate titles
-
-**Preferred**
-
-> Explaining Interdependence in the Actor–Partner Interdependence Model:  
-> Decomposing Dyadic Outcome Covariance
-
-Alternatives:
-
-- *Where Does Dyadic Interdependence Come From? A Covariance Decomposition for
-  the APIM*
-- *Beyond the Residual Correlation: Explaining Interdependence in the APIM*
-- *From Actor and Partner Paths to Dyadic Interdependence*
-- *Partitioning Interdependence in the Actor–Partner Interdependence Model*
-
-## Questions to resolve before drafting
-
-- Confirm whether the substantive emphasis should remain on all five route
-  components or foreground the two member-driven contributions.
-- Decide whether the primary reporting target is covariance units, signed
-  correlation-point contributions, or both. Reduction in residual covariance
-  between separately fitted models should not be the primary identity.
-- Complete a focused audit of applied APIM papers to establish how often total
-  model-implied outcome interdependence is reported or decomposed.
-- Ask relevant collaborators about any additional intellectual provenance,
-  route terminology, or empirical examples without implying collaboration or
-  authorship before those roles are agreed.
-- Choose an example for which the five-route profile answers a real substantive
-  question, ideally with a useful same-total/different-profile comparison.
-- Choose the bootstrap interval type and failed-refit policy before finalizing
-  the simulation design.
-
-## Immediate next steps
-
-1. Circulate the six-panel path figure and broad manuscript structure for
-   conceptual feedback.
-2. Complete the focused APIM application audit described above; the general
-   path-tracing and covariance-decomposition provenance is now identified.
-3. Draft manuscript Sections 1--4 around one running example and the six-formula
-   main-text budget.
-4. Prototype an internal `decompose_apim_covariance()` function that separates
-   the algebraic core from `glmmTMB` extraction and explicit APIM term mapping.
-5. Test the decomposition and extraction logic on the workshop APIM example.
-6. Choose an empirical example with a clear substantive story.
-7. Run a small bootstrap prototype before designing the full simulation.
-
-## Deferred extensions and governing principles
-
-The following extensions are worthwhile, but they should not enlarge the first
-paper or the initial package function before the five-route estimand and its
-uncertainty are stable:
-
-- **Several predictors:** the matrix identity
-  $\boldsymbol B\boldsymbol\Sigma_X\boldsymbol B^\mathsf{T}$ remains exact, but
-  cross-predictor covariance terms require a prespecified, visible grouping or
-  allocation rule. Results will depend on the chosen predictor basis and must
-  not be presented as uniquely determined construct shares.
-- **Interactions and nonlinear terms:** an interaction can be treated as an
-  additional design-matrix column, but centering its constituent predictors
-  does not generally make it orthogonal to their main effects. Do not create an
-  automatic "synergistic" compartment without assumptions and a validated
-  allocation rule; nonlinear links also require a separately defined response-
-  or link-scale estimand.
-- **Intensive longitudinal data:** within-person and between-person predictors
-  suggest useful level-specific questions, but the package models may contain
-  stable dyad effects, same-occasion covariance, random slopes, and serial
-  residual processes. Define the target occasion weighting, fitted-pair sample,
-  and marginalization level before calling any component Level 1 or Level 2.
-- **Random slopes:** terms such as a fixed slope squared plus a random-slope
-  variance are sufficient only under restrictive independence and centering
-  conditions. A general extension must include intercept--slope and cross-member
-  slope covariances and show how contributions change with predictor values.
-- **Variance decompositions:** model-implied outcome variances should remain
-  available as transparent checks and denominators. Any later actor/partner
-  variance allocation with correlated predictors must name and justify its
-  convention rather than implying that path tracing supplies unique bounded
-  proportions.
-
-These extensions can motivate later methodological work. The first paper and
-software release should establish a small result that is exact under stated
-assumptions, reproducible from supported fitted models, and difficult for users
-to misinterpret.
+# Manuscript planning
+
+The current scope, argument order, inference and validation plan, software
+milestones, and later-paper programme are maintained in [plan.md](plan.md).
+See the [literature review](literature-review.md) for source-level evidence,
+applied examples, and remaining access gaps.
 
 # References {-}

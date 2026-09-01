@@ -1,21 +1,24 @@
 # Explaining interdependence in the APIM
 
-Working materials for the covariance/path-tracing methods paper.
+Working materials for the covariance/path-tracing methods programme.
 
 ## Start here
 
+- [Current plan](plan.md): Paper 1's scope, argument, inference/validation,
+  software, open decisions, and the two possible follow-up papers.
 - [Literature review](literature-review.md): annotated references, direct
   applications, writing examples, verification gaps, and the local-file inventory.
 - [Figures and short outline](paper-outline.Rmd): the complete APIM, highlighted
   routes, waterfall, equal-total comparison, and the argument in section bullets.
-- [Detailed paper idea](paper-idea.Rmd): equations, worked examples, figure code,
-  proposed design, and the longer manuscript blueprint.
+- [Technical notes](paper-idea.Rmd): equations, worked examples, covariate and
+  exchangeable identities, and the reusable figure code.
 
-The literature review was assembled on **31 August 2026**. The drafts predate
-parts of that search: direct APIM decomposition, correlation-unit reporting,
-diagrams, and software already have precedents. Read the review before reusing
-the drafts' novelty language. Inference, simulations, extensions, target journal,
-and collaboration workflow remain decisions to agree, not a finalized protocol.
+The plan and notes were reconciled with the literature review on **1 September
+2026**. Direct APIM decomposition, signed reporting, diagrams, and software have
+precedents. Paper 1 now includes covariates/multiple predictors, exchangeability,
+and evaluation of contribution-specific inference; the interval method and study
+protocol remain to be selected. Keep planning decisions in `plan.md`, source
+evidence in the review, and derivations in the technical notes.
 
 ## Public material and local reference copies
 
@@ -25,6 +28,7 @@ and collaboration workflow remain decisions to agree, not a finalized protocol.
 | This folder's `.html` outputs | Locally rendered drafts | Ignored by `dev/.gitignore` |
 | `../references/explaining-interdependence-apim/` | Third-party papers, chapters, slides, and supplements for this manuscript | Entire directory ignored |
 | Other folders under `../references/` | Existing shared reference copies | Entire directory ignored; left in place |
+| `references.bib` | Manuscript-specific bibliographic metadata | Trackable |
 | `../../vignettes/references.bib` | Shared bibliographic metadata | Kept in its original location |
 | `../../vignettes/diagram-helpers.Rinc` | Shared, project-authored diagram helpers | Kept in its original location |
 
@@ -57,15 +61,8 @@ rmarkdown::render("dev/paper-explaining-interdependence-apim/paper-idea.Rmd")
 rmarkdown::render("dev/paper-explaining-interdependence-apim/paper-outline.Rmd")
 ```
 
-Both outputs are self-contained HTML. The short outline reuses the detailed
-draft's figure chunks; edit the figures there rather than maintaining duplicates.
+Both outputs are self-contained HTML. The short outline reuses the technical
+notes' figure chunks; edit the figures there rather than maintaining duplicates.
 Display equations retain `$$` delimiters and render as MathML.
-
-## Before developing the manuscript further
-
-- Resolve the contribution against the direct precedents in the literature review.
-- Obtain the Dwyer calculation supplement and the full 2024 handbook chapter.
-- Agree on descriptive reporting versus contribution-specific inference, and
-  select validation studies to match those claims.
-- Update the draft and its citations together; the literature review currently
-  contains sources not yet incorporated into the shared BibTeX file.
+The technical notes use both bibliography files; keep manuscript-only additions
+in this folder. Source access does not imply permission to redistribute full text.

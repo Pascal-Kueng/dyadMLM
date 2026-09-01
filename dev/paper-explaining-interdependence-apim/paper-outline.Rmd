@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r load-figure-code, include=FALSE}
-# Reuse the detailed draft's figure code; do not render its prose or tables.
+# Reuse the technical notes' figure code; do not render their prose or tables.
 figure_code <- knitr::purl(
   "paper-idea.Rmd",
   output = tempfile(fileext = ".R"), quiet = TRUE
@@ -43,12 +43,15 @@ knitr::opts_chunk$set(echo = FALSE, out.width = "100%")
 
 ## Paper structure — argument in order
 
-Working outline: see the [literature review](literature-review.md) for direct
-precedents. Inference, simulations, and extensions are still open decisions.
+Brief companion to the [current plan](plan.md); source details are in the
+[literature review](literature-review.md). Paper 1 includes inference validation;
+the recommended interval method has not yet been selected.
 
-- **Introduction:** Ask what accounts for total outcome interdependence;
-  similar correlations can conceal different route profiles. Treat dependence
-  as substantive information ([Laurenceau & Bolger, 2005](https://doi.org/10.1037/0893-3200.19.1.86)).
+- **Introduction and prior work:** Ask what accounts for total interdependence;
+  similar totals can conceal different route profiles. Build on the existing
+  decomposition, signed reporting, and APIM software
+  ([Dwyer et al., 2017](https://doi.org/10.1016/j.amepre.2017.01.011),
+  [Kenny's handout](https://davidakenny.net/kkc/c7/Explained_Nonindependence.docx)).
 - **Model and routes:** Introduce one distinguishable APIM, the complete diagram,
   and five highlighted routes; place the paired APIM equations here
   (Kenny, Kashy, & Cook, 2006).
@@ -58,20 +61,26 @@ precedents. Inference, simulations, and extensions are still open decisions.
 - **Reporting scale:** Give the model-implied variances and common-denominator
   formula, then the waterfall and equal-total comparison. Contributions are
   signed correlation points, not percentages or residual correlations
-  ([Jones & West, 2005](https://doi.org/10.1093/biomet/92.4.779), related undirected-model precedent).
-- **Estimation and software:** Use fitted paired-sample moments and plug-in
-  estimates; explain dyad-bootstrap intervals and the proposed `dyadMLM`
-  implementation ([Ledermann et al., 2011](https://doi.org/10.1080/10705511.2011.607099), compound-effect inference precedent).
-- **Simulation:** Evaluate bias, interval coverage, cancellation and near-zero
-  totals; assess estimation performance, not the validity of the algebra.
-- **Empirical example:** Report observed and model-implied totals, all five
+  ([APIM_MM](https://davidakenny.net/doc/APIM_MM.pdf), direct reporting precedent).
+- **Covariates, multiple predictors, and exchangeability:** Show the compact
+  matrix identity, keep cross-block terms explicit, and group arbitrary
+  member-driven terms under exchangeability. Distinguish marginal from
+  conditional/adjusted covariance targets.
+- **Estimation and software:** Define fitted-sample moments; compare joint
+  delta-method and whole-dyad-bootstrap inference. Include the proposed
+  `dyadMLM` functionality and transparent R/Mplus examples
+  ([lavaan defined parameters](https://lavaan.ugent.be/tutorial/mediation.html)).
+- **Simulation:** Evaluate bias, coverage, weak/zero products, correlated
+  predictors, cancellation, and near-zero totals. Check joint uncertainty and
+  failed fits; neither interval procedure is assumed to work everywhere.
+- **Empirical example:** Report observed and model-implied totals, route
   contributions and uncertainty; explain what the route profile adds to the
   conventional APIM results.
-- **Extensions and limits:** Briefly address exchangeability and several
-  predictors; defer random slopes, longitudinal and nonlinear models.
-  Distinguish descriptive attribution from causal explanation.
+- **Extensions and limits:** Motivate Paper 2 on Gaussian ILD levels/random
+  slopes and a conditional Paper 3 on generalized observed-scale dependence.
+  Keep those outside Paper 1; inference does not establish causal explanation.
 - **Discussion:** Return to the opening question and recommend reporting totals,
-  signed contributions, uncertainty and assumptions. Emphasize the APIM-specific
-  interpretation and reporting workflow as the contribution.
-- **Supplement:** Put full derivations, matrix extensions, bootstrap details,
+  signed contributions, uncertainty and assumptions. State the clarification
+  and validation achieved without claiming the first APIM decomposition.
+- **Supplement:** Put full derivations, joint gradients, inference algorithms,
   simulation specifications and reproducible code here.

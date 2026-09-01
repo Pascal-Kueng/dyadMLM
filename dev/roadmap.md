@@ -869,62 +869,41 @@ diagnostic branches, but integration should use the current accepted mainline.
 
 ### Core feature and methods paper: explaining APIM interdependence
 
-- Develop `decompose_apim_covariance()` as a focused post-estimation function
-  for the five signed sources of model-implied APIM outcome covariance:
-  actor--actor, actor--partner, partner--actor, partner--partner, and residual.
-- Keep the first public contract deliberately narrow:
-  - cross-sectional, independent two-member dyads;
-  - continuous outcomes and a linear Gaussian APIM;
-  - one dyadic predictor construct with fixed slopes;
-  - distinguishable `glmmTMB` models first, followed by the exchangeable special
-    case through the validated member-level covariance recovery machinery;
-  - an explicit term map whenever formula terms or covariance blocks cannot be
-    classified uniquely.
-- Separate the implementation into a backend-neutral algebraic core, backend
-  extraction adapters, APIM semantic mapping and validation, and small output
-  methods. Reuse existing `glmmTMB`/`brms` covariance-array infrastructure where
-  it is semantically appropriate rather than coupling the calculation to one
-  printed `VarCorr()` layout.
-- Return one transparent component table in covariance units and signed
-  outcome-correlation points, plus the model-implied outcome variances, total
-  covariance, total correlation, predictor moments, fitted-dyad count, backend,
-  resolved terms, and covariance source. Do not label components as bounded
-  proportions or force them to sum to the observed sample correlation.
-- Compute predictor moments from complete paired rows in the fitted analysis
-  sample with an explicit role/member reconstruction. Do not calculate them
-  naively from duplicated actor/partner columns in the long model matrix.
-- Validate the first implementation against hand calculations, simulated data,
-  coefficient reordering, changed row order, asymmetric outcome missingness,
-  alternative valid term orderings, boundary covariance estimates, and the
-  package workshop's cross-sectional distinguishable APIM. Require exact
-  agreement of component sums with the model-implied covariance within
-  prespecified numerical tolerances.
-- Add the exchangeable special case only after member-label invariance is tested
-  and the two arbitrary member-driven terms are combined. Defer the `brms`
-  implementation to version 0.4.5, where posterior draws can be preserved as
-  part of a coherent backend expansion. Keep `lme4`, generalized links, mixed
-  compositions, and automatic formula-wide classification outside the first
-  contract.
-- Develop dyad-bootstrap intervals as a separately validated refitting workflow.
-  Resample complete dyads, recompute predictor moments, document the interval
-  type and nonconvergence policy, and do not imply frequentist uncertainty for
-  `glmmTMB` point estimates before this workflow is available.
-- Use
-  [`paper-idea.Rmd`](paper-explaining-interdependence-apim/paper-idea.Rmd)
-  as the manuscript and software-design source. Complete the focused literature
-  review before making a novelty claim, then evaluate finite-sample bias and
-  interval coverage through simulation and include one substantive empirical
-  example with reproducible tables and signed waterfall figures.
-- Publish the function and its documentation in version 0.2.5, freeze the
-  supported estimand and output contract, archive the reproducible paper code
-  and results, and then submit the methods paper. Cite the package's Zenodo
-  concept DOI for the implementation and record the paper citation in package
-  metadata after acceptance.
-- Treat multiple predictors, interactions, ILD level-specific decompositions,
-  random slopes, nonlinear outcomes, and generic variance-share allocations as
-  explicitly deferred extensions. The manuscript may state their governing
-  principles, but the initial function must reject them rather than return an
-  apparently complete decomposition under unstated conventions.
+- Use the [current manuscript plan](paper-explaining-interdependence-apim/plan.md)
+  for scope and study decisions, and the
+  [literature review](paper-explaining-interdependence-apim/literature-review.md)
+  for prior art. The review establishes direct APIM precedents; the proposed
+  contribution is clarification, validation, and implementation.
+- Develop `decompose_apim_covariance()` within `dyadMLM`; it is proposed, not a
+  shipped function. Paper 1 covers cross-sectional, fixed-slope linear APIMs,
+  including covariates, multiple predictors, and exchangeable dyads. Begin
+  inference validation with Gaussian models.
+- Start with a one-predictor `glmmTMB` prototype and an independent joint-SEM
+  calculation, then validate the broader Paper 1 cases. Advertise only the
+  subset actually supported by a release. Keep the separate version 0.4.5
+  `brms` expansion; it is not a prerequisite for Paper 1.
+- Separate the algebraic core, explicit term mapping, backend adapters,
+  inference, and presentation. Reject ambiguous or unsupported models.
+  Return signed covariance and correlation-point contributions, common
+  denominators, model-implied totals, predictor moments, and fitted-sample and
+  extraction metadata—not bounded percentages or a forced observed correlation.
+- Compare full-joint delta-method inference with whole-dyad bootstrap inference.
+  Validate bias, coverage, interval width, and fit failures, including weak or
+  zero paths, cancellation, correlated predictors, and covariance boundaries.
+  Prespecify interval construction and failed-fit handling before the full study.
+- Test numerical identities, independent SEM agreement under matched estimation
+  conventions, term and row ordering, role reconstruction, exchangeable label
+  invariance, and explicit covariate cross-terms. Begin with complete pairs;
+  incomplete-dyad support must align fitted samples and predictor moments.
+- Include reproducible R and Mplus examples and one empirical application.
+  Freeze the validated estimand and output contract before release, archive
+  paper code and results, and cite the implementation. Keep third-party
+  full texts in the ignored reference archive.
+- Paper 2 addresses Gaussian ILD, level-specific targets, and random-slope
+  covariances. A third paper on selected generalized outcomes is conditional on
+  resolving a distinct observed-scale attribution problem. These are research
+  plans, not promises of support in version 0.2.5; interactions and generic
+  variance-share allocation also remain outside its initial contract.
 
 ## Proposed Version 0.3.0 Scope - Generalized APIM Workflows
 

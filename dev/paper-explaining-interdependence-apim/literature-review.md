@@ -388,6 +388,24 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
 
 ## 6. Foundations, extension context, and screened leads
 
+- **Johnson (2014).** *Extension of Nakagawa and Schielzeth's R-squared GLMM
+  to random slopes models*. *Methods in Ecology and Evolution, 5*(9), 944-946.
+  [DOI](https://doi.org/10.1111/2041-210X.12225)
+  | [Institutional record](https://eprints.gla.ac.uk/94906/).
+  Extends a mixed-model variance summary to random-slope structures. Useful
+  extension context for defining how random-effect variation enters a summary;
+  not an APIM covariance-route decomposition or evidence for component inference.
+  Bibliography and abstract verified for this annotation.
+- **Leckie, Browne, Goldstein, Merlo, and Austin (2020).** *Partitioning
+  variation in multilevel models for count data*. *Psychological Methods,
+  25*(6), 787-801. [DOI](https://doi.org/10.1037/met0000265)
+  | [Institutional record](https://portal.research.lu.se/en/publications/partitioning-variation-in-multilevel-models-for-count-data/).
+  Derives exact variance-partition/intraclass-correlation expressions for
+  negative-binomial models and three-level/random-coefficient extensions,
+  illustrated with student absenteeism. Supports treating count-outcome
+  dependence as a model- and scale-specific problem, not automatic reuse of
+  linear APIM slope products. Bibliography and abstract verified for this
+  annotation; not a direct APIM route-inference precedent.
 - **Kenny (1996).** *Models of non-independence in dyadic research*.
   *Journal of Social and Personal Relationships, 13*, 279-294.
   [DOI](https://doi.org/10.1177/0265407596132007).
@@ -475,24 +493,12 @@ interdependence models*. *Personal Relationships, 25*, 103-119.
 
 ## 7. Implications for this manuscript
 
-- **Do not claim first decomposition, first correlation-scale partition, first
-  signed presentation, first route diagrams, or first APIM implementation.**
-  Direct precedents already address these; the generic tracing literature is
-  not the only novelty constraint.
-- **Define the estimand and denominator explicitly.** A within-model marginal
-  covariance identity differs from residual-covariance reduction across models,
-  percentage of a baseline covariance, and covariance of fixed-only predictions.
-  State which total each contribution adds to.
-- **Treat contribution-specific inference as an open research question.**
-  Establish what existing implementations actually do before positioning a gap.
-  Delta-method and bootstrap choices, product-null behavior, and finite-sample
-  validation need their own review if retained as contributions.
-- **Keep extensions honest.** Several predictors require cross-predictor terms;
-  random slopes, ILD levels, and nonlinear links require a carefully defined
-  target, not automatic reuse of a cross-sectional fixed-slope identity.
-- **Potential contribution, not yet a demonstrated gap:** an integrated,
-  auditable explanation of the estimand, reporting choices, inference,
-  limitations, and reproducible implementation, justified against these sources.
+The [manuscript plan](plan.md) consolidates the proposed contribution,
+estimand and denominator choices, inference-validation work, and staged
+extensions. The evidence above constrains novelty: decomposition, signed
+correlation-scale reporting, diagrams, and APIM software already have direct
+precedents. Contribution-specific inference remains a bounded evidence gap,
+not an established claim of priority.
 
 ## 8. Local reference copies and remaining retrieval
 
