@@ -1,13 +1,21 @@
 ---
-title: "Development review: partner-dependence diagnostics"
+title: "Worked example: checking partner dependence"
 output:
   html_document:
     toc: true
 ---
 
-This note reviews the cross-sectional Gaussian partner check using the fixed
-simulated data shipped with `dyadMLM`. It is an end-to-end development review,
-not a formal hypothesis-test calibration.
+Does a model reproduce how much partners' responses vary and how strongly they
+are related? This example compares flexible and restricted Gaussian models
+using the simulated cross-sectional data shipped with `dyadMLM`. See the
+[quick start](README.md#quick-start) to run a check on your own fitted model.
+
+Each histogram shows a summary across datasets created by
+`simulate_dyad_responses()`, with the observed value marked by
+`check_partner_dependence()`. The checks below remove the fitted mean pattern
+from observed and simulated responses in the same way. Values near an edge of
+the simulated range suggest a feature to investigate. The middle 95% intervals
+and observed positions are descriptive, not formal tests or p-values.
 
 ```{r setup, include=FALSE}
 package_root <- normalizePath(file.path("..", ".."))
@@ -34,10 +42,10 @@ run_partner_check <- function(model, data, seed, role = NULL) {
 
 # Distinguishable dyads
 
-The female-male composition has distinguishable roles. The intended model
-allows separate role-specific spreads and their covariance. Two constrained
-models then omit the partner correlation or impose an exchangeable covariance
-structure.
+The female-male dyads have meaningful member roles. The flexible model allows
+each role's responses to vary by a different amount and estimates the partner
+correlation. Two restricted models either omit that correlation or require
+equal variation for both roles.
 
 ```{r prepare-distinguishable}
 distinguishable_data <- prepare_dyad_data(
@@ -117,7 +125,7 @@ distinguishable_exchangeable_gender_check <- check_partner_dependence(
 )
 ```
 
-## Intended covariance model
+## Flexible partner variation and correlation
 
 ```{r plot-distinguishable-unstructured, echo=FALSE}
 plot(distinguishable_unstructured_check, ask = FALSE)
@@ -129,11 +137,11 @@ plot(distinguishable_unstructured_check, ask = FALSE)
 plot(distinguishable_no_correlation_check, ask = FALSE)
 ```
 
-## Exchangeable covariance constraint
+## Equal variation for both roles
 
-The pooled view asks whether the constrained model reproduces the overall
-partner covariance. The gender-aware view asks whether pooling hides
-role-specific differences. Both views use exactly the same simulations.
+The pooled view treats members as interchangeable and reports their common
+variation and partner correlation. The gender-aware view asks whether pooling
+hides role differences. Both views use exactly the same simulations.
 
 ### Pooled view
 
@@ -149,9 +157,10 @@ plot(distinguishable_exchangeable_gender_check, ask = FALSE)
 
 # Exchangeable dyads
 
-The female-female composition was generated as exchangeable. Its intended
-shared/difference model is compared with a model that omits all partner
-dependence while retaining the marginal response spread.
+The female-female dyads were generated with interchangeable members. Their
+model allows partner correlation and a common amount of response variation.
+The comparison model retains response variation but assumes no partner
+correlation.
 
 ```{r prepare-exchangeable}
 exchangeable_data <- prepare_dyad_data(
@@ -197,7 +206,7 @@ exchangeable_independent_check <- run_partner_check(
 )
 ```
 
-## Intended covariance model
+## Flexible partner variation and correlation
 
 ```{r plot-exchangeable, echo=FALSE}
 plot(exchangeable_check, ask = FALSE)
@@ -211,9 +220,8 @@ plot(exchangeable_independent_check, ask = FALSE)
 
 # Findings
 
-The table identifies which observed summaries fall outside the central 95%
-interval of the corresponding replicated summaries. These intervals are
-descriptive and are not hypothesis tests.
+The table lists observed summaries outside the middle 95% of simulated values.
+These are prompts for investigation, not failed hypothesis tests.
 
 ```{r summarize-findings, echo=FALSE}
 partner_checks <- list(
@@ -256,3 +264,12 @@ fit. The deliberately simpler models provide the more informative comparisons:
 leaving out partner correlation should make the correlation summaries stand
 out, while forcing both roles to vary equally can reveal a role difference that
 the pooled view hides.
+
+# Technical and development notes
+
+Each check uses 1,000 simulated datasets, keeping the fitted parameters fixed
+while drawing new random effects and observation errors. The model is not
+refitted, and parameter uncertainty is excluded. This document is a worked
+development review, not a calibration study. See the
+[technical guide](README.md#technical-details) for implementation details and
+links to the separate validation studies.

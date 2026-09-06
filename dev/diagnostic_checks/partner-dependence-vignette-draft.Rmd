@@ -3,34 +3,30 @@ title: "Extended cross-sectional Gaussian partner-dependence example"
 output: html_document
 ---
 
-This extended development example exercises the cross-sectional Gaussian
-`glmmTMB` feature across a fuller model sequence. See the shorter
-[development review](partner-dependence-review.Rmd) for the primary review
-artifact.
+This example asks whether fitted models reproduce how much partners' responses
+vary and how strongly they are related. It walks through flexible and
+restricted models using the same cross-sectional data. For a shorter worked
+comparison, see the [development review](partner-dependence-review.Rmd).
+The current feature supports Gaussian identity-link `glmmTMB` models.
 
-# When is this check most informative?
+# How to read the checks
 
-The check is most useful when a model makes a clear simplifying assumption
-that could be wrong. For example, it can show whether assuming that two
-different roles vary by the same amount hides an important role difference. If
-the model was allowed to learn the same amount of variation and the same
-partner relationship freely from the data, a close match is expected. It mainly
-shows that the model can reproduce what it already learned; it provides little
-new evidence that the model describes the data well.
+`simulate_dyad_responses()` creates reusable datasets from a fitted model.
+`check_partner_dependence()` then compares the observed partner summaries with
+the same summaries in those datasets. Each histogram shows what the model
+generated, with the observed value and middle 95% interval marked. An observed
+value near an edge is a reason to investigate; the interval and observed
+position are descriptive, not formal tests or p-values.
 
-The [repeated simulation study](partner-dependence-outer-simulation-study.Rmd)
-gave encouraging initial results. For the deliberately large problems studied,
-the observed pattern stood out from the model's simulations in 84--97% of
-datasets with 50 dyads and in every dataset with 200 dyads. All 7,000
-fitted-model runs completed successfully. However, flexible models that had
-already learned the same pattern nearly always looked reassuring. A close
-match therefore does not by itself show that the model fits well, and smaller
-problems have not yet been studied.
+By default, the check removes the same fitted mean pattern from observed and
+simulated responses. The raw view retains that pattern. Supply `role` for
+meaningful member roles; omit it only when treating members as interchangeable.
+Both choices are illustrated below.
 
-Similar checks may become useful when a generalized model needs simpler
-assumptions about the partner pattern or models response variation separately.
-These are future use cases: the implementation shown here currently supports
-only cross-sectional Gaussian identity-link models.
+The check is most informative when examining a simplifying assumption, such
+as equal variation for both roles. A model that freely estimated the same
+pattern will usually reproduce it. A close match therefore provides little
+new evidence that such a model describes the data well.
 
 ```{r setup, include=FALSE}
 package_root <- normalizePath(file.path("..", ".."))
@@ -465,3 +461,17 @@ e_w3_simulations |>
     response = "raw"
   )
 ```
+
+# Development validation
+
+The [repeated simulation study](partner-dependence-outer-simulation-study.Rmd)
+gave encouraging initial results. For the deliberately large problems studied,
+the observed pattern stood out from the model's simulations in 84--97% of
+datasets with 50 dyads and in every dataset with 200 dyads. All 7,000
+fitted-model runs completed successfully. Flexible models that had already
+learned the same pattern nearly always looked reassuring; smaller problems
+have not yet been studied.
+
+Non-Gaussian models and further diagnostics are future work. See the
+[technical and development guide](README.md#technical-details) for simulation
+details, object shapes, validation reports, and the follow-up plan.

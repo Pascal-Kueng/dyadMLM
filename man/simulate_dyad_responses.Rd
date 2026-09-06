@@ -9,8 +9,7 @@ simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 \arguments{
 \item{model}{A fitted \code{glmmTMB} model.}
 
-\item{nsim}{Number of complete response datasets to simulate. The default
-is 1000.}
+\item{nsim}{Number of complete response datasets to simulate. Default: 1000.}
 
 \item{seed}{\code{NULL} or one non-negative whole number used to reproduce the
 simulations. When supplied, the caller's random-number state is restored
@@ -22,29 +21,47 @@ A \code{dyadMLM_response_simulations} object for use with
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Creates response datasets from a fitted model for comparison with the
-observed data. They show what the model would generate for the same fitted
-rows and covariates.
+Creates a reusable set of simulated response datasets: what the fitted
+model would generate for the same observations and predictors. Use these
+datasets to check whether the model reproduces features of the observed
+data. Fitted parameter estimates stay fixed; the model is not refitted.
 }
-\details{
-Each simulation keeps the fitted parameter estimates fixed and draws new
-random effects and Gaussian observation errors. The fitted conditional and
-dispersion formulas are retained: their fixed-effect estimates stay fixed,
-while random effects in either component are redrawn for each simulated
-dataset. When dyads are the only grouping factor, this represents
-hypothetical new dyads observed under the same design.
+\section{Quick start}{
+With a supported fitted model called \code{model}:
+\preformatted{
+simulations <- simulate_dyad_responses(model, seed = 123)
+}
+Keep \code{simulations} to reuse the same draws in later checks. For a complete
+example that fits a model and checks it, see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+}
 
-Currently, the function supports unweighted cross-sectional Gaussian
-identity-link \code{glmmTMB} models without zero inflation and with one numeric
-response per fitted row. The interface is experimental.
+\section{Supported models}{
+Currently supports unweighted cross-sectional Gaussian identity-link
+\code{glmmTMB} models without zero inflation and with one numeric response per
+fitted row. Each draw includes new random effects and observation errors.
+When dyads are the only grouping factor, this represents hypothetical new
+dyads under the same study design.
+}
 
-\strong{Technical details.} This is a plug-in predictive reference: the model is
-not refitted and uncertainty in the fitted parameters is not included. The
-simulation is conditional on those estimates and the fitted-row design, but
-not on the fitted random-effect values.
+\section{Technical details}{
+This is a plug-in predictive reference: uncertainty in the fitted parameters
+is excluded. Fixed-effect estimates in the conditional and dispersion
+formulas stay fixed; random effects in either component are redrawn. The
+simulations are conditional on the estimates and design, but not on the
+fitted random-effect values.
 
-The result stores one expected response for each fitted row. Downstream
-checks can use the responses unchanged or remove this same fitted mean
-pattern from the observed and simulated responses. For the supported model,
-this centre is the response prediction with random effects set to zero.
+The result keeps all components in fitted-row order (after missing-data
+exclusions):
+
+\itemize{
+\item \code{simulated_responses}: a matrix with \code{nsim} rows and one column per fitted
+observation. Each row is a complete simulated dataset.
+\item \code{observed_response} and \code{response_center}: numeric vectors with one value
+per fitted observation.
+\item \code{model_frame}: the data frame used for fitting, in the same row order.
+}
+
+\code{response_center} is the response prediction with random effects set to
+zero. Later checks can subtract this same fitted mean from observed and
+simulated responses. This leaves random-effect variation in the deviations.
 }
