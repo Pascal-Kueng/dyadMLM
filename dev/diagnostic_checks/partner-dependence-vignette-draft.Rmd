@@ -1,0 +1,477 @@
+---
+title: "Extended cross-sectional Gaussian partner-dependence example"
+output: html_document
+---
+
+This example asks whether fitted models reproduce how much partners' responses
+vary and how strongly they are related. It walks through flexible and
+restricted models using the same cross-sectional data. For a shorter worked
+comparison, see the [development review](partner-dependence-review.Rmd).
+The current feature supports Gaussian identity-link `glmmTMB` models.
+
+# How to read the checks
+
+`simulate_dyad_responses()` creates reusable datasets from a fitted model.
+`check_partner_dependence()` then compares the observed partner summaries with
+the same summaries in those datasets. Each histogram shows what the model
+generated, with the observed value and middle 95% interval marked. An observed
+value near an edge is a reason to investigate; the interval and observed
+position are descriptive, not formal tests or p-values.
+
+By default, the check removes the same fitted mean pattern from observed and
+simulated responses. The raw view retains that pattern. Supply `role` for
+meaningful member roles; omit it only when treating members as interchangeable.
+Both choices are illustrated below.
+
+The check is most informative when examining a simplifying assumption, such
+as equal variation for both roles. A model that freely estimated the same
+pattern will usually reproduce it. A close match therefore provides little
+new evidence that such a model describes the data well.
+
+```{r setup, include=FALSE}
+package_root <- normalizePath(file.path("..", ".."))
+devtools::load_all(package_root, quiet = TRUE)
+
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+# Distinguishable dyads
+
+## Prep data
+
+```{r}
+diagnostic_data <- prepare_dyad_data(
+    dyads_cross,
+    dyad = coupleID,
+    member = personID,
+    role = gender,
+    predictors = provided_support,
+    model_types = "apim",
+    add_apim_gmc_predictors = TRUE,
+    keep_compositions = "female-male",
+    seed = 13000L
+)
+```
+
+
+## Flexible role-specific covariance model
+
+```{r}
+m_c <- glmmTMB::glmmTMB(
+    closeness ~
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (0 + .is_female + .is_male | coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+The actor and partner fixed effects make the fitted means vary across
+observations. The centred check removes this fitted pattern, whereas the raw
+check retains it. Both checks use the same simulated datasets.
+
+### Model-centred responses
+
+```{r}
+m_c_simulations <- simulate_dyad_responses(
+  m_c,
+  nsim = 5000,
+  seed = 13001L
+)
+
+m_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+
+### Raw responses
+
+```{r}
+m_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
+```
+
+
+## Constrained models
+
+```{r}
+m_w1 <- glmmTMB::glmmTMB(
+    closeness ~
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (1 | coupleID),
+    dispformula = ~ 1,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+m_w1_simulations <- simulate_dyad_responses(
+  m_w1,
+  nsim = 5000,
+  seed = 13002L
+)
+
+# Model-centred responses
+m_w1_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+m_w1_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
+```
+
+In these data, the check did not show a clear mismatch for this simpler
+covariance structure. It retains the role-specific fixed effects but constrains
+the remaining covariance to equal marginal variances and nonnegative compound
+symmetry. The simpler model has slightly lower AIC, and the likelihood-ratio
+comparison below provides no clear evidence that the more flexible
+role-specific covariance improves fit. This is not evidence that partners are
+interchangeable or that the two covariance structures are equivalent.
+
+```{r}
+compare_nested_models(
+  m_w1,
+  m_c
+)
+```
+
+
+```{r}
+m_w2 <- glmmTMB::glmmTMB(
+    closeness ~
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (1 | coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+m_w2_simulations <- simulate_dyad_responses(
+  m_w2,
+  nsim = 5000,
+  seed = 13003L
+)
+
+# Model-centred responses
+m_w2_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+m_w2_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
+```
+
+
+```{r}
+m_w3 <- glmmTMB::glmmTMB(
+    closeness ~
+        0 +
+        .is_female +
+        .is_male +
+        .is_female:.provided_support_gmc_actor +
+        .is_male:.provided_support_gmc_actor +
+        .is_female:.provided_support_gmc_partner +
+        .is_male:.provided_support_gmc_partner +
+        (0 + .is_female + .is_male || coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+m_w3_simulations <- simulate_dyad_responses(
+  m_w3,
+  nsim = 5000,
+  seed = 13004L
+)
+
+# Model-centred responses
+m_w3_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+m_w3_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
+```
+
+# Sensitivity analysis: treating partners as exchangeable
+
+Here, the female-male data are deliberately treated as exchangeable. The
+pooled check assesses the imposed covariance structure; the gender-aware check
+asks whether that pooling hides role-specific differences.
+
+These models have only a constant fixed-effect prediction. Their raw and
+centred checks should therefore match; both are shown for completeness.
+
+## Prep data
+
+```{r}
+diagnostic_data <- prepare_dyad_data(
+    dyads_cross,
+    dyad = coupleID,
+    member = personID,
+    role = gender,
+    model_types = "none",
+    keep_compositions = "female-male",
+    set_exchangeable_compositions = "female-male",
+    seed = 13000L
+)
+```
+
+
+## Exchangeable mean/difference model
+
+```{r}
+e_c <- glmmTMB::glmmTMB(
+    closeness ~
+        1 +
+
+      (1 | coupleID) +
+      (0 + .member_contrast_arbitrary | coupleID),
+
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+e_c_simulations <- simulate_dyad_responses(
+  e_c,
+  nsim = 5000,
+  seed = 13005L
+)
+
+# Model-centred responses
+e_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
+```
+
+## Check the same model with gender labels
+
+```{r}
+# Model-centred responses
+e_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_c_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    role = diagnostic_data$gender,
+    response = "raw"
+  )
+```
+
+The pooled check can look adequate while the gender-aware check reveals omitted
+role differences. However, this sensitivity model also removes role-specific
+fixed effects, so a discrepancy cannot be attributed to the covariance
+structure alone.
+
+## More restrictive exchangeable models
+
+```{r}
+e_w1 <- glmmTMB::glmmTMB(
+    closeness ~
+        1,
+    dispformula = ~ 1,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+e_w1_simulations <- simulate_dyad_responses(
+  e_w1,
+  nsim = 5000,
+  seed = 13006L
+)
+
+# Model-centred responses
+e_w1_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_w1_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
+```
+
+```{r}
+e_w2 <- glmmTMB::glmmTMB(
+    closeness ~
+        1 + (1 | coupleID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+e_w2_simulations <- simulate_dyad_responses(
+  e_w2,
+  nsim = 5000,
+  seed = 13007L
+)
+
+# Model-centred responses
+e_w2_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_w2_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
+```
+
+
+```{r}
+e_w3 <- glmmTMB::glmmTMB(
+    closeness ~
+        1 + (1 | coupleID/personID),
+    dispformula = ~ 0,
+    family = gaussian(),
+    data = diagnostic_data
+)
+```
+
+```{r}
+e_w3_simulations <- simulate_dyad_responses(
+  e_w3,
+  nsim = 5000,
+  seed = 13008L
+)
+
+# Model-centred responses
+e_w3_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "model-centred"
+  )
+```
+
+
+```{r}
+# Raw responses
+e_w3_simulations |>
+  check_partner_dependence(
+    dyad = diagnostic_data$coupleID,
+    response = "raw"
+  )
+```
+
+# Development validation
+
+The [repeated simulation study](partner-dependence-outer-simulation-study.Rmd)
+gave encouraging initial results. For the deliberately large problems studied,
+the observed pattern stood out from the model's simulations in 84--97% of
+datasets with 50 dyads and in every dataset with 200 dyads. All 7,000
+fitted-model runs completed successfully. Flexible models that had already
+learned the same pattern nearly always looked reassuring; smaller problems
+have not yet been studied.
+
+Non-Gaussian models and further diagnostics are future work. See the
+[technical and development guide](README.md#technical-details) for simulation
+details, object shapes, validation reports, and the follow-up plan.

@@ -1,0 +1,275 @@
+---
+title: "Worked example: checking partner dependence"
+output:
+  html_document:
+    toc: true
+---
+
+Does a model reproduce how much partners' responses vary and how strongly they
+are related? This example compares flexible and restricted Gaussian models
+using the simulated cross-sectional data shipped with `dyadMLM`. See the
+[quick start](README.md#quick-start) to run a check on your own fitted model.
+
+Each histogram shows a summary across datasets created by
+`simulate_dyad_responses()`, with the observed value marked by
+`check_partner_dependence()`. The checks below remove the fitted mean pattern
+from observed and simulated responses in the same way. Values near an edge of
+the simulated range suggest a feature to investigate. The middle 95% intervals
+and observed positions are descriptive, not formal tests or p-values.
+
+```{r setup, include=FALSE}
+package_root <- normalizePath(file.path("..", ".."))
+devtools::load_all(package_root, quiet = TRUE)
+
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  message = FALSE,
+  warning = FALSE
+)
+
+nsim <- 1000L
+
+run_partner_check <- function(model, data, seed, role = NULL) {
+  simulate_dyad_responses(model, nsim = nsim, seed = seed) |>
+    check_partner_dependence(
+      dyad = data$coupleID,
+      role = role,
+      plot = FALSE
+    )
+}
+```
+
+# Distinguishable dyads
+
+The female-male dyads have meaningful member roles. The flexible model allows
+each role's responses to vary by a different amount and estimates the partner
+correlation. Two restricted models either omit that correlation or require
+equal variation for both roles.
+
+```{r prepare-distinguishable}
+distinguishable_data <- prepare_dyad_data(
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  model_types = "none",
+  keep_compositions = "female-male",
+  include_arbitrary_member_contrast = TRUE,
+  seed = 12000L
+)
+```
+
+```{r fit-distinguishable-models}
+distinguishable_unstructured_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 + .is_female + .is_male +
+    (0 + .is_female + .is_male | coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = distinguishable_data
+)
+
+distinguishable_no_correlation_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 + .is_female + .is_male +
+    (0 + .is_female + .is_male || coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = distinguishable_data
+)
+
+distinguishable_exchangeable_model <- glmmTMB::glmmTMB(
+  closeness ~
+    0 + .is_female + .is_male +
+    (1 | coupleID) +
+    (0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = distinguishable_data
+)
+```
+
+```{r check-distinguishable-models, include=FALSE}
+distinguishable_unstructured_check <- run_partner_check(
+  distinguishable_unstructured_model,
+  distinguishable_data,
+  seed = 12001L,
+  role = distinguishable_data$gender
+)
+
+distinguishable_no_correlation_check <- run_partner_check(
+  distinguishable_no_correlation_model,
+  distinguishable_data,
+  seed = 12002L,
+  role = distinguishable_data$gender
+)
+
+distinguishable_exchangeable_simulations <- simulate_dyad_responses(
+  distinguishable_exchangeable_model,
+  nsim = nsim,
+  seed = 12003L
+)
+
+distinguishable_exchangeable_pooled_check <- check_partner_dependence(
+  distinguishable_exchangeable_simulations,
+  dyad = distinguishable_data$coupleID,
+  plot = FALSE
+)
+
+distinguishable_exchangeable_gender_check <- check_partner_dependence(
+  distinguishable_exchangeable_simulations,
+  dyad = distinguishable_data$coupleID,
+  role = distinguishable_data$gender,
+  plot = FALSE
+)
+```
+
+## Flexible partner variation and correlation
+
+```{r plot-distinguishable-unstructured, echo=FALSE}
+plot(distinguishable_unstructured_check, ask = FALSE)
+```
+
+## Partner correlation omitted
+
+```{r plot-distinguishable-no-correlation, echo=FALSE}
+plot(distinguishable_no_correlation_check, ask = FALSE)
+```
+
+## Equal variation for both roles
+
+The pooled view treats members as interchangeable and reports their common
+variation and partner correlation. The gender-aware view asks whether pooling
+hides role differences. Both views use exactly the same simulations.
+
+### Pooled view
+
+```{r plot-distinguishable-exchangeable-pooled, echo=FALSE}
+plot(distinguishable_exchangeable_pooled_check, ask = FALSE)
+```
+
+### Gender-aware view
+
+```{r plot-distinguishable-exchangeable-gender, echo=FALSE}
+plot(distinguishable_exchangeable_gender_check, ask = FALSE)
+```
+
+# Exchangeable dyads
+
+The female-female dyads were generated with interchangeable members. Their
+model allows partner correlation and a common amount of response variation.
+The comparison model retains response variation but assumes no partner
+correlation.
+
+```{r prepare-exchangeable}
+exchangeable_data <- prepare_dyad_data(
+  dyads_cross,
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  model_types = "none",
+  keep_compositions = "female-female",
+  seed = 12000L
+)
+```
+
+```{r fit-exchangeable-models}
+exchangeable_model <- glmmTMB::glmmTMB(
+  closeness ~
+    1 +
+    (1 | coupleID) +
+    (0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~0,
+  family = gaussian(),
+  data = exchangeable_data
+)
+
+exchangeable_independent_model <- glmmTMB::glmmTMB(
+  closeness ~ 1,
+  family = gaussian(),
+  data = exchangeable_data
+)
+```
+
+```{r check-exchangeable-models, include=FALSE}
+exchangeable_check <- run_partner_check(
+  exchangeable_model,
+  exchangeable_data,
+  seed = 12004L
+)
+
+exchangeable_independent_check <- run_partner_check(
+  exchangeable_independent_model,
+  exchangeable_data,
+  seed = 12005L
+)
+```
+
+## Flexible partner variation and correlation
+
+```{r plot-exchangeable, echo=FALSE}
+plot(exchangeable_check, ask = FALSE)
+```
+
+## Partner dependence omitted
+
+```{r plot-exchangeable-independent, echo=FALSE}
+plot(exchangeable_independent_check, ask = FALSE)
+```
+
+# Findings
+
+The table lists observed summaries outside the middle 95% of simulated values.
+These are prompts for investigation, not failed hypothesis tests.
+
+```{r summarize-findings, echo=FALSE}
+partner_checks <- list(
+  distinguishable_unstructured = distinguishable_unstructured_check,
+  distinguishable_no_correlation = distinguishable_no_correlation_check,
+  distinguishable_exchangeable_pooled =
+    distinguishable_exchangeable_pooled_check,
+  distinguishable_exchangeable_gender =
+    distinguishable_exchangeable_gender_check,
+  exchangeable_correct = exchangeable_check,
+  exchangeable_independent = exchangeable_independent_check
+)
+
+findings <- do.call(
+  rbind,
+  lapply(names(partner_checks), function(check_name) {
+    statistics <- partner_checks[[check_name]]$statistics_table
+    outside_interval <-
+      statistics$observed_value < statistics$replicated_lower |
+      statistics$observed_value > statistics$replicated_upper
+
+    data.frame(
+      check = check_name,
+      summaries_outside_interval = if (any(outside_interval)) {
+        paste(statistics$label[outside_interval], collapse = "; ")
+      } else {
+        "None"
+      },
+      row.names = NULL
+    )
+  })
+)
+
+knitr::kable(findings)
+```
+
+The flexible model is expected to reproduce features that it learned from the
+same data. A close match there therefore adds little new evidence about model
+fit. The deliberately simpler models provide the more informative comparisons:
+leaving out partner correlation should make the correlation summaries stand
+out, while forcing both roles to vary equally can reveal a role difference that
+the pooled view hides.
+
+# Technical and development notes
+
+Each check uses 1,000 simulated datasets, keeping the fitted parameters fixed
+while drawing new random effects and observation errors. The model is not
+refitted, and parameter uncertainty is excluded. This document is a worked
+development review, not a calibration study. See the
+[technical guide](README.md#technical-details) for implementation details and
+links to the separate validation studies.

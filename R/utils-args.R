@@ -67,3 +67,70 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 
   names(selected_columns)
 }
+
+
+# Turn a dyad or role argument into one vector with a value per fitted row
+# (or NULL when allowed). `argument_quo` is a quosure: the user's expression
+# together with the environment where it was written. Keeping both allows
+# wrappers to forward arguments with `{{ }}` without losing their meaning.
+resolve_fitted_row_argument <- function(
+  argument_quo,
+  argument_name,
+  model_frame,
+  allow_null = FALSE
+) {
+  # Bare names look in the fitted data first, then in the caller's environment.
+  # `.data$dyad` explicitly selects a fitted column; `.env$dyad` explicitly
+  # selects the caller's vector, even if a fitted column has the same name.
+  value <- tryCatch(
+    rlang::eval_tidy(argument_quo, data = model_frame),
+    error = function(error) {
+      stop(
+        sprintf(
+          "`%s` could not be evaluated: %s",
+          argument_name, conditionMessage(error)
+        ),
+        call. = FALSE
+      )
+    }
+  )
+
+  if (is.null(value) && allow_null) {
+    return(NULL)
+  }
+
+  # A single string is also accepted as a column name, e.g. dyad = "coupleID".
+  if (rlang::is_string(value)) {
+    if (!value %in% names(model_frame)) {
+      stop(
+        sprintf(
+          "`%s` does not name a column in the fitted model frame.", value
+        ),
+        call. = FALSE
+      )
+    }
+    value <- model_frame[[value]]
+  }
+
+  # Require a vector of length n, where n is the number of fitted rows.
+  # External vectors must already follow fitted-row order: length alone cannot
+  # tell us which observation each value belongs to or restore omitted rows.
+  valid_vector <- is.atomic(value) &&
+    is.null(dim(value)) &&
+    length(value) == nrow(model_frame)
+
+  if (!valid_vector) {
+    stop(
+      sprintf(
+        paste0(
+          "`%s` must name a column in the fitted model frame or evaluate ",
+          "to a vector of length %d."
+        ),
+        argument_name, nrow(model_frame)
+      ),
+      call. = FALSE
+    )
+  }
+
+  value
+}
