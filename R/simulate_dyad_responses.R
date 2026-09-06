@@ -38,6 +38,10 @@
 #'
 #' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
+  # Create a reusable collection of complete response datasets representing
+  # what this fitted model would generate under the observed design. Later
+  # checks can compare several features of the data using these same draws,
+  # without simulating again. These are response values, not residual scores.
   simulation_call <- match.call()
 
   # Validate the fitted model and simulation arguments.
@@ -113,6 +117,8 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   # Obtain one fixed response centre per fitted row. For a Gaussian identity
   # model, the random-effects-zero prediction is exactly the marginal expected
   # response after averaging over newly drawn zero-mean effects at every level.
+  # Explicit `newdata = NULL` keeps predictions on those fitted rows, without
+  # reinserting omitted rows as missing values when the fit used `na.exclude`.
   response_center <- as.numeric(stats::predict(
     model,
     newdata = NULL,
@@ -138,6 +144,8 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
 
   # Code `2` tells glmmTMB to draw a new value for a random-effect term. Keep
   # the same list shape as the saved settings, but replace every code with `2`.
+  # This matters when random effects represent partner residual covariance:
+  # redrawing them lets the model generate that dependence in each dataset.
   unconditional_simulation_codes <- lapply(
     original_simulation_codes,
     function(codes) rep(2, length(codes))

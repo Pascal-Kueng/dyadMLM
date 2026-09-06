@@ -69,13 +69,19 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 }
 
 
-# Resolve columns first, with explicit .data/.env access for ambiguous names.
+# Turn a dyad or role argument into one vector with a value per fitted row
+# (or NULL when allowed). `argument_quo` is a quosure: the user's expression
+# together with the environment where it was written. Keeping both allows
+# wrappers to forward arguments with `{{ }}` without losing their meaning.
 resolve_fitted_row_argument <- function(
   argument_quo,
   argument_name,
   model_frame,
   allow_null = FALSE
 ) {
+  # Bare names look in the fitted data first, then in the caller's environment.
+  # `.data$dyad` explicitly selects a fitted column; `.env$dyad` explicitly
+  # selects the caller's vector, even if a fitted column has the same name.
   value <- tryCatch(
     rlang::eval_tidy(argument_quo, data = model_frame),
     error = function(error) {
@@ -93,6 +99,7 @@ resolve_fitted_row_argument <- function(
     return(NULL)
   }
 
+  # A single string is also accepted as a column name, e.g. dyad = "coupleID".
   if (rlang::is_string(value)) {
     if (!value %in% names(model_frame)) {
       stop(
@@ -105,6 +112,9 @@ resolve_fitted_row_argument <- function(
     value <- model_frame[[value]]
   }
 
+  # Require a vector of length n, where n is the number of fitted rows.
+  # External vectors must already follow fitted-row order: length alone cannot
+  # tell us which observation each value belongs to or restore omitted rows.
   valid_vector <- is.atomic(value) &&
     is.null(dim(value)) &&
     length(value) == nrow(model_frame)

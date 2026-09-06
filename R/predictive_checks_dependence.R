@@ -112,6 +112,9 @@ check_partner_dependence <- function(
   plot = TRUE,
   response = c("model-centred", "raw")
 ) {
+  # Turn the supplied response datasets into a reusable comparison result.
+  # The result keeps both the summary table and the simulated statistics, so
+  # print() and plot() can use the same check without generating new responses.
   check_call <- match.call()
   response <- match.arg(response)
 
@@ -156,6 +159,8 @@ check_partner_dependence <- function(
     )
   }
 
+  # Resolve each identifier to one value per fitted row, in the same order as
+  # the observed-response vector and the columns of the simulation matrix.
   dyad_values <- resolve_fitted_row_argument(
     argument_quo = rlang::enquo(dyad),
     argument_name = "dyad",
@@ -169,8 +174,10 @@ check_partner_dependence <- function(
   )
   role_was_supplied <- !is.null(role_values)
 
-  # Build one pair map, oriented by role when supplied, and reuse it unchanged
-  # for the observed response and every simulation.
+  # Build one reusable pair map: a matrix with one row per complete dyad and
+  # two columns containing its partners' fitted-row positions. When roles are
+  # supplied, column 1 always represents role 1 and column 2 represents role 2.
+  # Reusing this map keeps the same people paired in every response dataset.
   pair_info <- prepare_partner_pairs(dyad_values, role_values)
   paired_row_indices <- pair_info$paired_row_indices
   role_order <- pair_info$role_order
@@ -183,7 +190,10 @@ check_partner_dependence <- function(
     rep(0, n_fitted_rows)
   }
 
-  # Apply one calculation to the observed data and each complete simulation.
+  # This local function takes a response vector of length n_fitted_rows and
+  # returns one named vector: six statistics with roles, four without roles.
+  # It remembers the chosen centre and pairs, so both kinds of dataset get
+  # exactly the same subtraction and calculation.
   pair_statistics <- function(values) {
     calculate_partner_response_statistics(
       values - response_values_to_subtract,
@@ -192,6 +202,8 @@ check_partner_dependence <- function(
     )
   }
   observed_statistics <- pair_statistics(simulations$observed_response)
+  # vapply() puts each simulation's vector in a column; t() turns the result
+  # into nsim rows and one column per statistic, keeping the statistic names.
   replicated_statistics <- t(vapply(
     seq_len(simulations$nsim),
     function(i) pair_statistics(simulations$simulated_responses[i, ]),
@@ -215,6 +227,10 @@ check_partner_dependence <- function(
     role_order = role_order
   )
 
+  # Package the check for later inspection. statistics_table has one row per
+  # statistic and eight columns: three labels/identifiers and five numbers.
+  # replicated_statistics keeps every simulated value (nsim rows, one column
+  # per statistic); print() also uses the omission counts and reference details.
   partner_check_result <- list(
     statistics_table = statistics_table,
     replicated_statistics = replicated_statistics,
@@ -244,7 +260,11 @@ check_partner_dependence <- function(
 }
 
 
-# Find complete dyads and store both partners' fitted-row positions.
+# Create a reusable description of which fitted rows belong together.
+# The returned list contains the pair matrix (one row per complete dyad, two
+# columns), role labels (or NULL), and omission counts. Matrix entries point to
+# fitted rows, so later calculations can look up the corresponding responses
+# in the observed data or any simulated dataset.
 prepare_partner_pairs <- function(dyad_values, role_values = NULL) {
   n_fitted_rows <- length(dyad_values)
   role_was_supplied <- !is.null(role_values)
@@ -259,6 +279,7 @@ prepare_partner_pairs <- function(dyad_values, role_values = NULL) {
   }
   n_missing_role_rows <- sum(missing_role_rows)
 
+  # A named list: each dyad's entry contains the positions of its fitted rows.
   rows_by_dyad <- split(
     which(!missing_dyad_rows),
     dyad_values[!missing_dyad_rows],
@@ -340,7 +361,9 @@ prepare_partner_pairs <- function(dyad_values, role_values = NULL) {
 }
 
 
-# Calculate summaries from one selected response representation.
+# Use the pair map to extract two equally long numeric vectors, one per member.
+# Keeping this row lookup separate lets other checks reuse the paired-value
+# calculation below without depending on cross-sectional data layout.
 calculate_partner_response_statistics <- function(
   selected_response_values,
   paired_row_indices,
@@ -354,7 +377,10 @@ calculate_partner_response_statistics <- function(
 }
 
 
-# Summarize paired values independently of their source rows or model backend.
+# Calculate unweighted summaries from two numeric vectors of paired values.
+# first[i] and second[i] belong to the same pair. The return value is a named
+# numeric vector: six statistics with meaningful roles, four for exchangeable
+# members. These names connect the numbers to their later table/plot labels.
 calculate_partner_pair_statistics <- function(first, second, role_specific) {
   # Re-express each pair as an average and half-difference. With roles, rows
   # have already been ordered by `role_order`.
@@ -378,6 +404,7 @@ calculate_partner_pair_statistics <- function(first, second, role_specific) {
 
   # Exchangeability sets the expected half-difference to zero, so use its mean
   # square about zero. Dyad averages use the usual sample variance.
+  # Squaring each difference makes arbitrary within-dyad member swaps irrelevant.
   dyad_average_variance <- stats::var(dyad_average_values)
   half_difference_mean_square <- mean(half_difference_values^2)
   exchangeable_member_variance <-
@@ -395,7 +422,10 @@ calculate_partner_pair_statistics <- function(first, second, role_specific) {
 }
 
 
-# Labels shared by partner summaries in each response representation.
+# Create a reusable data frame describing the statistics, without calculating them.
+# There are four or six rows and three columns: statistic_name is the stable
+# lookup key, parameterization selects the member or mean/difference view, and
+# label supplies the wording used by print() and plot().
 partner_statistic_schema <- function(role_order = NULL) {
   labels <- if (is.null(role_order)) {
     c(
@@ -430,12 +460,18 @@ partner_statistic_schema <- function(role_order = NULL) {
 }
 
 
-# Numeric reference summaries, independent of statistic labels.
+# Summarize the simulated reference without needing to know what each statistic
+# represents. observed_statistics is a named vector; replicated_statistics is
+# a matrix with nsim rows and one column per statistic in that same order.
+# Return a data frame with one row per statistic and five numeric columns:
+# observed value, simulated median, two interval limits, and observed position.
 # The calling check validates that observed and simulated statistics are finite.
 summarize_simulation_reference <- function(
   observed_statistics,
   replicated_statistics
 ) {
+  # A matrix with three rows (lower limit, median, upper limit) and one column
+  # per statistic. These become separate columns in the returned data frame.
   reference_points <- apply(
     replicated_statistics, 2L, stats::quantile,
     probs = c(0.025, 0.5, 0.975), names = FALSE
@@ -460,7 +496,9 @@ summarize_simulation_reference <- function(
 }
 
 
-# Attach partner labels without changing the numeric reference calculation.
+# Join the reusable label table and numeric reference into the final table.
+# Match by statistic name so labels still line up if statistics are reordered;
+# the result has one row per statistic and eight columns for print() and plot().
 summarize_partner_statistics <- function(
   observed_statistics,
   replicated_statistics,
@@ -611,6 +649,8 @@ plot.dyadMLM_partner_check <- function(
     "Raw responses; fitted mean pattern retained"
   }
   for (statistic_index in seq_len(nrow(selected_statistics_table))) {
+    # This table row names one statistic. The matching matrix column contains
+    # its nsim simulated values, which form the histogram for this panel.
     statistic_row <- selected_statistics_table[statistic_index, ]
     replicated_statistic_values <-
       x$replicated_statistics[, statistic_row$statistic_name, drop = TRUE]
