@@ -330,7 +330,47 @@ test_that("fitted-row identifiers accept bare, quoted, and external forms", {
 })
 
 
-test_that("fitted-row identifiers can be forwarded through wrappers", {
+test_that("fitted columns win over caller names unless .env is explicit", {
+  simulations <- partner_check_test_simulations()
+  dyad <- simulations$model_frame$dyad
+  role <- simulations$model_frame$role
+  dyad[[1L]] <- NA
+  role[[4L]] <- NA
+
+  expected <- check_partner_dependence(
+    simulations, dyad = "dyad", role = "role", plot = FALSE
+  )
+  bare <- check_partner_dependence(
+    simulations, dyad = dyad, role = role, plot = FALSE
+  )
+  explicit_columns <- check_partner_dependence(
+    simulations, dyad = .data$dyad, role = .data$role, plot = FALSE
+  )
+  dyad_column <- "dyad"
+  role_column <- "role"
+  named_columns <- check_partner_dependence(
+    simulations,
+    dyad = .data[[dyad_column]],
+    role = .data[[role_column]],
+    plot = FALSE
+  )
+  for (result in list(bare, explicit_columns, named_columns)) {
+    expect_equal(result$statistics_table, expected$statistics_table)
+    expect_identical(result$n_pairs, 5L)
+    expect_identical(result$n_missing_dyad_rows, 0L)
+    expect_identical(result$n_missing_role_rows, 0L)
+  }
+
+  external <- check_partner_dependence(
+    simulations, dyad = .env$dyad, role = .env$role, plot = FALSE
+  )
+  expect_identical(external$n_pairs, 3L)
+  expect_identical(external$n_missing_dyad_rows, 1L)
+  expect_identical(external$n_missing_role_rows, 1L)
+})
+
+
+test_that("fitted-row identifiers can be embraced through wrappers", {
   simulations <- partner_check_test_simulations()
   external_dyad_vector <- simulations$model_frame$dyad
   external_dyad_vector[[1L]] <- NA
@@ -338,8 +378,8 @@ test_that("fitted-row identifiers can be forwarded through wrappers", {
   check_from_wrapper <- function(simulations, dyad, role = NULL) {
     check_partner_dependence(
       simulations,
-      dyad = dyad,
-      role = role,
+      dyad = {{ dyad }},
+      role = {{ role }},
       plot = FALSE
     )
   }
@@ -366,6 +406,18 @@ test_that("fitted-row identifiers can be forwarded through wrappers", {
   expect_true(
     "exchangeable_partner_correlation" %in%
       wrapped_result$statistics_table$statistic_name
+  )
+
+  role_result <- check_partner_dependence(
+    simulations, dyad = "dyad", role = "role", plot = FALSE
+  )
+  expect_equal(
+    check_from_wrapper(simulations, dyad, role)$statistics_table,
+    role_result$statistics_table
+  )
+  expect_equal(
+    check_from_wrapper(simulations, "dyad", "role")$statistics_table,
+    role_result$statistics_table
   )
 
   # A broken wrapper argument must not silently fall back to a model-frame
@@ -744,6 +796,31 @@ test_that("pre-existing incomplete dyads remain counted after role omission", {
   expect_identical(result$n_incomplete_dyads, 1L)
   expect_identical(result$n_missing_dyad_rows, 1L)
   expect_identical(result$n_missing_role_rows, 1L)
+})
+
+
+test_that("one simulation retains a complete reference row for each statistic", {
+  simulations <- partner_check_test_simulations()
+  simulations$simulated_responses <-
+    simulations$simulated_responses[1L, , drop = FALSE]
+  simulations$nsim <- 1L
+
+  for (role in list(NULL, "role")) {
+    result <- check_partner_dependence(
+      simulations, dyad = "dyad", role = .env$role, plot = FALSE
+    )
+    expected_names <- result$statistics_table$statistic_name
+    expect_identical(
+      dim(result$replicated_statistics), c(1L, length(expected_names))
+    )
+    expect_identical(colnames(result$replicated_statistics), expected_names)
+    for (column in c("replicated_lower", "replicated_median", "replicated_upper")) {
+      expect_equal(
+        result$statistics_table[[column]],
+        unname(result$replicated_statistics[1L, ])
+      )
+    }
+  }
 })
 
 

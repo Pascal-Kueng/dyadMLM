@@ -76,9 +76,22 @@ print(partner_check)
 plot(partner_check)
 ```
 
-`dyad` and `role` may be unquoted or quoted fitted-model-frame column names,
-or vectors aligned with the fitted rows. Pairing always uses fitted-row indices,
-not source-data row order.
+`dyad` and `role` use column-first tidy evaluation in the fitted model frame.
+An unquoted name selects a fitted column before an equally named external
+object. Quoted column names remain supported. Use `.data$column` or
+`.data[[column_name]]` to select a column explicitly, and `.env$vector` to
+select an external vector. External vectors must already align with the fitted
+rows; pairing uses fitted-row indices, not source-data row order.
+
+Forward arguments through a wrapper with embracing:
+
+```r
+check_partners <- function(simulations, dyad, role = NULL) {
+  check_partner_dependence(
+    simulations, dyad = {{ dyad }}, role = {{ role }}, plot = FALSE
+  )
+}
+```
 
 ## Response representations
 
@@ -187,7 +200,8 @@ Deterministic package tests cover:
 - response dimensions, fitted-row alignment, and seeded reproducibility;
 - unconditional simulation and restoration of model simulation settings after
   success and error;
-- bare, quoted, and externally supplied dyad and role identifiers;
+- column-first bare names, quoted names, `.data`/`.env` selection, and
+  wrapper-forwarded dyad and role identifiers;
 - row reordering, member swapping, missing identifiers, incomplete pairs, and
   invalid role structures;
 - direct agreement with manually calculated raw and model-centred summaries;
@@ -233,6 +247,21 @@ This PR does not implement or define a contract for:
 - a DHARMa wrapper, generic adequacy score, or pass/fail verdict.
 
 Those are separate features and should be developed and reviewed independently.
+
+## Follow-up development
+
+Preserve `simple-generalized-checks`, `gaussian-ild-prototype`, and
+`diagnostic-prototypes` as reference branches. Create fresh work from the
+accepted foundation: non-Gaussian cross-sectional checks first, then Gaussian
+ILD checks. Reuse the response bank, paired summaries, reference summarizer,
+and plotting helpers; retain an explicit Gaussian identity-link restriction
+for the ILD path until generalized ILD has its own validation.
+
+Before extending support, reconcile undefined-statistic behavior in one shared
+summarizer with explicit policies and defined-simulation counts. The current
+Gaussian check retains its finite-statistic requirement. Distribution and
+correlation-aware QQ/PIT displays are a separate follow-up described in
+[`../roadmap.md`](../roadmap.md).
 
 ## File map
 

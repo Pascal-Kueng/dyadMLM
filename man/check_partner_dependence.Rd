@@ -17,12 +17,16 @@ check_partner_dependence(
 \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.}
 
 \item{dyad}{An unquoted or quoted column name in the fitted model frame, or
-a vector aligned with the fitted rows.}
+a vector aligned with the fitted rows. Bare names select fitted columns
+before objects in the calling environment. Use \code{.data$column} or
+\code{.data[[column_name]]} for explicit column selection, and \code{.env$vector}
+for an external vector. Forward wrapper arguments with \code{\{\{ dyad \}\}}.}
 
 \item{role}{An optional unquoted or quoted column name in the fitted model
 frame, or a vector aligned with the fitted rows. Supply this whenever a
 member distinction is substantively meaningful. Use the default \code{NULL}
-only when members are substantively interchangeable.}
+only when members are substantively interchangeable. Uses the same tidy
+evaluation as \code{dyad}; forward wrapper arguments with \code{\{\{ role \}\}}.}
 
 \item{plot}{Logical. If \code{TRUE}, the default, draw the diagnostic plots.}
 

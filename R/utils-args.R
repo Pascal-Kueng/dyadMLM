@@ -69,29 +69,15 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 }
 
 
-# Resolve a quosure to a fitted-row column or an aligned external vector.
+# Resolve columns first, with explicit .data/.env access for ambiguous names.
 resolve_fitted_row_argument <- function(
   argument_quo,
   argument_name,
   model_frame,
   allow_null = FALSE
 ) {
-  argument_expression <- rlang::quo_get_expr(argument_quo)
-  calling_environment <- rlang::quo_get_env(argument_quo)
-
-  # Prefer a fitted column to an inherited object such as stats::time(). A
-  # name defined directly by the caller is instead treated as an external
-  # vector, which also preserves argument forwarding through wrappers.
-  if (rlang::is_symbol(argument_expression)) {
-    column_name <- rlang::as_name(argument_expression)
-    if (column_name %in% names(model_frame) &&
-        !exists(column_name, envir = calling_environment, inherits = FALSE)) {
-      return(model_frame[[column_name]])
-    }
-  }
-
   value <- tryCatch(
-    rlang::eval_tidy(argument_quo),
+    rlang::eval_tidy(argument_quo, data = model_frame),
     error = function(error) {
       stop(
         sprintf(
@@ -116,7 +102,7 @@ resolve_fitted_row_argument <- function(
         call. = FALSE
       )
     }
-    return(model_frame[[value]])
+    value <- model_frame[[value]]
   }
 
   valid_vector <- is.atomic(value) &&

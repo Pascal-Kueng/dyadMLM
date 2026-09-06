@@ -56,11 +56,15 @@
 #' @param simulations A `dyadMLM_response_simulations` object returned by
 #'   [simulate_dyad_responses()].
 #' @param dyad An unquoted or quoted column name in the fitted model frame, or
-#'   a vector aligned with the fitted rows.
+#'   a vector aligned with the fitted rows. Bare names select fitted columns
+#'   before objects in the calling environment. Use `.data$column` or
+#'   `.data[[column_name]]` for explicit column selection, and `.env$vector`
+#'   for an external vector. Forward wrapper arguments with `{{ dyad }}`.
 #' @param role An optional unquoted or quoted column name in the fitted model
 #'   frame, or a vector aligned with the fitted rows. Supply this whenever a
 #'   member distinction is substantively meaningful. Use the default `NULL`
-#'   only when members are substantively interchangeable.
+#'   only when members are substantively interchangeable. Uses the same tidy
+#'   evaluation as `dyad`; forward wrapper arguments with `{{ role }}`.
 #' @param plot Logical. If `TRUE`, the default, draw the diagnostic plots.
 #' @param response Which values to summarize. `"model-centred"` (the default)
 #'   removes the fitted mean pattern. `"raw"` leaves responses unchanged. The
@@ -179,36 +183,20 @@ check_partner_dependence <- function(
     rep(0, n_fitted_rows)
   }
 
-  # Observed data: one response value for every fitted row.
-  observed_response_values <-
-    simulations$observed_response - response_values_to_subtract
-  observed_statistics <- calculate_partner_response_statistics(
-    observed_response_values,
-    paired_row_indices,
-    use_role_specific_statistics = role_was_supplied
-  )
-
-  replicated_statistics <- matrix(
-    NA_real_,
-    nrow = simulations$nsim,
-    ncol = length(observed_statistics),
-    dimnames = list(NULL, names(observed_statistics))
-  )
-
-  # Simulated data: one generated dataset per row, with the same fitted-row
-  # order as the observed response. Apply exactly the same summaries to each.
-  for (simulation_index in seq_len(simulations$nsim)) {
-    simulated_response_values <-
-      simulations$simulated_responses[simulation_index, ] -
-      response_values_to_subtract
-
-    replicated_statistics[simulation_index, ] <-
-      calculate_partner_response_statistics(
-        simulated_response_values,
-        paired_row_indices,
-        use_role_specific_statistics = role_was_supplied
-      )
+  # Apply one calculation to the observed data and each complete simulation.
+  pair_statistics <- function(values) {
+    calculate_partner_response_statistics(
+      values - response_values_to_subtract,
+      paired_row_indices,
+      use_role_specific_statistics = role_was_supplied
+    )
   }
+  observed_statistics <- pair_statistics(simulations$observed_response)
+  replicated_statistics <- t(vapply(
+    seq_len(simulations$nsim),
+    function(i) pair_statistics(simulations$simulated_responses[i, ]),
+    observed_statistics
+  ))
 
   if (any(!is.finite(c(observed_statistics, replicated_statistics)))) {
     stop(
@@ -358,25 +346,27 @@ calculate_partner_response_statistics <- function(
   paired_row_indices,
   use_role_specific_statistics
 ) {
-  first_member_values <-
-    selected_response_values[paired_row_indices[, 1L]]
-  second_member_values <-
-    selected_response_values[paired_row_indices[, 2L]]
+  calculate_partner_pair_statistics(
+    first = selected_response_values[paired_row_indices[, 1L]],
+    second = selected_response_values[paired_row_indices[, 2L]],
+    role_specific = use_role_specific_statistics
+  )
+}
 
+
+# Summarize paired values independently of their source rows or model backend.
+calculate_partner_pair_statistics <- function(first, second, role_specific) {
   # Re-express each pair as an average and half-difference. With roles, rows
   # have already been ordered by `role_order`.
-  dyad_average_values <- (first_member_values + second_member_values) / 2
-  half_difference_values <- (first_member_values - second_member_values) / 2
+  dyad_average_values <- (first + second) / 2
+  half_difference_values <- (first - second) / 2
 
-  if (use_role_specific_statistics) {
+  if (role_specific) {
     # Keep member spreads separate when the two roles are meaningful.
     return(c(
-      role_1_sd = stats::sd(first_member_values),
-      role_2_sd = stats::sd(second_member_values),
-      partner_correlation = stats::cor(
-        first_member_values,
-        second_member_values
-      ),
+      role_1_sd = stats::sd(first),
+      role_2_sd = stats::sd(second),
+      partner_correlation = stats::cor(first, second),
       dyad_mean_sd = stats::sd(dyad_average_values),
       half_difference_sd = stats::sd(half_difference_values),
       dyad_mean_half_difference_correlation = stats::cor(
@@ -405,99 +395,84 @@ calculate_partner_response_statistics <- function(
 }
 
 
-# Combine the observed summaries with their simulated reference distributions.
+# Labels shared by partner summaries in each response representation.
+partner_statistic_schema <- function(role_order = NULL) {
+  labels <- if (is.null(role_order)) {
+    c(
+      exchangeable_member_sd = "Common member SD (exchangeable)",
+      exchangeable_partner_correlation = "Partner correlation (exchangeable)",
+      dyad_mean_sd = "Dyad-average SD",
+      half_difference_rms = "Half-difference RMS (about zero)"
+    )
+  } else {
+    difference <- paste(role_order[[1L]], "minus", role_order[[2L]])
+    c(
+      role_1_sd = paste0("SD (", role_order[[1L]], ")"),
+      role_2_sd = paste0("SD (", role_order[[2L]], ")"),
+      partner_correlation = paste0(
+        "Partner correlation (", role_order[[1L]], " and ", role_order[[2L]], ")"
+      ),
+      dyad_mean_sd = "Dyad-average SD",
+      half_difference_sd = paste0("Half-difference SD (", difference, ")"),
+      dyad_mean_half_difference_correlation = paste0(
+        "Dyad-average/role-difference correlation (", difference, ")"
+      )
+    )
+  }
+
+  data.frame(
+    statistic_name = names(labels),
+    parameterization = rep(
+      c("member", "mean_difference"), each = length(labels) / 2L
+    ),
+    label = unname(labels)
+  )
+}
+
+
+# Numeric reference summaries, independent of statistic labels.
+# The calling check validates that observed and simulated statistics are finite.
+summarize_simulation_reference <- function(
+  observed_statistics,
+  replicated_statistics
+) {
+  reference_points <- apply(
+    replicated_statistics, 2L, stats::quantile,
+    probs = c(0.025, 0.5, 0.975), names = FALSE
+  )
+  # The finite-simulation rank is descriptive, not a p-value.
+  observed_positions <- vapply(
+    seq_along(observed_statistics),
+    function(i) {
+      (1 + sum(replicated_statistics[, i] <= observed_statistics[[i]])) /
+        (nrow(replicated_statistics) + 1)
+    },
+    numeric(1)
+  )
+
+  data.frame(
+    observed_value = unname(observed_statistics),
+    replicated_median = unname(reference_points[2L, ]),
+    replicated_lower = unname(reference_points[1L, ]),
+    replicated_upper = unname(reference_points[3L, ]),
+    observed_quantile = unname(observed_positions)
+  )
+}
+
+
+# Attach partner labels without changing the numeric reference calculation.
 summarize_partner_statistics <- function(
   observed_statistics,
   replicated_statistics,
   role_order = NULL
 ) {
-  statistic_names <- names(observed_statistics)
-
-  if (!is.null(role_order)) {
-    half_difference_direction <- paste(
-      role_order[[1L]],
-      "minus",
-      role_order[[2L]]
-    )
-    statistic_parameterizations <- c(
-      role_1_sd = "member",
-      role_2_sd = "member",
-      partner_correlation = "member",
-      dyad_mean_sd = "mean_difference",
-      half_difference_sd = "mean_difference",
-      dyad_mean_half_difference_correlation = "mean_difference"
-    )
-    statistic_labels <- c(
-      role_1_sd = paste0("SD (", role_order[[1L]], ")"),
-      role_2_sd = paste0("SD (", role_order[[2L]], ")"),
-      partner_correlation = paste0(
-        "Partner correlation (",
-        role_order[[1L]], " and ", role_order[[2L]],
-        ")"
-      ),
-      dyad_mean_sd = "Dyad-average SD",
-      half_difference_sd = paste0(
-        "Half-difference SD (",
-        half_difference_direction,
-        ")"
-      ),
-      dyad_mean_half_difference_correlation = paste0(
-        "Dyad-average/role-difference correlation (",
-        half_difference_direction,
-        ")"
-      )
-    )
-  } else {
-    statistic_parameterizations <- c(
-      exchangeable_member_sd = "member",
-      exchangeable_partner_correlation = "member",
-      dyad_mean_sd = "mean_difference",
-      half_difference_rms = "mean_difference"
-    )
-    statistic_labels <- c(
-      exchangeable_member_sd = "Common member SD (exchangeable)",
-      exchangeable_partner_correlation =
-        "Partner correlation (exchangeable)",
-      dyad_mean_sd = "Dyad-average SD",
-      half_difference_rms = "Half-difference RMS (about zero)"
-    )
-  }
-
-  # Each column is one statistic across all simulated datasets. These rows are
-  # the lower limit, median, and upper limit of its simulated distribution.
-  replicated_reference_points <- apply(
-    replicated_statistics,
-    MARGIN = 2L,
-    FUN = stats::quantile,
-    probs = c(0.025, 0.5, 0.975),
-    names = FALSE
+  schema <- partner_statistic_schema(role_order)
+  schema <- schema[match(names(observed_statistics), schema$statistic_name), ]
+  rownames(schema) <- NULL
+  cbind(
+    schema,
+    summarize_simulation_reference(observed_statistics, replicated_statistics)
   )
-
-  # This finite-simulation rank is descriptive; it is not a p-value.
-  observed_positions <- vapply(
-    seq_along(observed_statistics),
-    function(statistic_index) {
-      replicated_statistic_values <-
-        replicated_statistics[, statistic_index]
-      (1 + sum(
-        replicated_statistic_values <= observed_statistics[[statistic_index]]
-      )) / (nrow(replicated_statistics) + 1)
-    },
-    numeric(1)
-  )
-
-  statistics_table <- data.frame(
-    statistic_name = statistic_names,
-    parameterization = unname(statistic_parameterizations[statistic_names]),
-    label = unname(statistic_labels[statistic_names]),
-    observed_value = unname(observed_statistics),
-    replicated_median = unname(replicated_reference_points[2L, ]),
-    replicated_lower = unname(replicated_reference_points[1L, ]),
-    replicated_upper = unname(replicated_reference_points[3L, ]),
-    observed_quantile = unname(observed_positions)
-  )
-
-  statistics_table
 }
 
 
