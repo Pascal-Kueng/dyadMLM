@@ -1,0 +1,10 @@
+.workshop-package-link {
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+}
+
+.workshop-package-link:hover,
+.workshop-package-link:focus-visible {
+  color: var(--bs-body-color);
+  text-decoration: underline;
+}
