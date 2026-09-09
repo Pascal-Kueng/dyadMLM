@@ -1,10 +1,12 @@
 .workshop-package-link {
-  color: var(--bs-secondary-color);
+  color: var(--bs-link-color);
+  font-size: 1.125rem;
+  font-weight: 600;
   text-decoration: none;
 }
 
 .workshop-package-link:hover,
 .workshop-package-link:focus-visible {
-  color: var(--bs-body-color);
+  color: var(--bs-link-hover-color);
   text-decoration: underline;
 }
