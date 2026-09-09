@@ -38,13 +38,21 @@ jobs:
         with:
           r-version: release
 
+      # Override the backend without installing all of its optional dependencies.
+      - name: Select development backend
+        shell: Rscript {0}
+        run: |
+          cat("\nRemotes: ${{ matrix.package }}\n", file = "DESCRIPTION", append = TRUE)
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
             any::rcmdcheck
-            ${{ matrix.package }}
             local::.
           needs: check
+
+      - name: Restore package metadata
+        run: git restore DESCRIPTION
 
       # These runs report upstream breakage but are not required merge checks.
       - name: Check package with development dependency
