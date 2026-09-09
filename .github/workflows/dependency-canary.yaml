@@ -42,7 +42,7 @@ jobs:
       - name: Select development backend
         shell: Rscript {0}
         run: |
-          cat("\nRemotes: ${{ matrix.package }}\n", file = "DESCRIPTION", append = TRUE)
+          cat("Remotes: ${{ matrix.package }}\n", file = "DESCRIPTION", append = TRUE)
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
