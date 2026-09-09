@@ -14,7 +14,7 @@ format:
     embed-resources: true
     css: workshop.css
     include-after-body: branding.html
-    footer: "Dyadic Data Analysis"
+    footer: 'Dyadic Data Analysis · [dyadMLM R package](https://pascal-kueng.github.io/dyadMLM/){data-preview-link="false"}'
     slide-number: true
     chalkboard: false
     preview-links: auto
