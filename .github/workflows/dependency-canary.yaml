@@ -1,0 +1,68 @@
+name: Development dependencies
+
+on:
+  schedule:
+    - cron: "23 7 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/dependency-canary.yaml
+      - .github/scripts/check-development-backend.R
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-canary:
+    name: Development ${{ matrix.backend }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - backend: glmmTMB
+            package: glmmTMB/glmmTMB/glmmTMB
+          - backend: brms
+            package: paul-buerkner/brms
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+
+      # Override the backend without installing all of its optional dependencies.
+      - name: Select development backend
+        shell: Rscript {0}
+        run: |
+          cat("Remotes: ${{ matrix.package }}\n", file = "DESCRIPTION", append = TRUE)
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::BH
+            any::RcppEigen
+            any::rcmdcheck
+            local::.
+          needs: check
+
+      - name: Restore package metadata
+        run: git restore DESCRIPTION
+
+      # RStan needs BH and RcppEigen headers even when installed as a binary.
+      - name: Fit model and verify covariance recovery
+        run: Rscript .github/scripts/check-development-backend.R ${{ matrix.backend }}
+
+      # These runs report upstream breakage but are not required merge checks.
+      - name: Check package with development dependency
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
