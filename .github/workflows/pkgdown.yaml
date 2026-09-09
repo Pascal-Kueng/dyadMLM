@@ -43,6 +43,7 @@ jobs:
             any::report
             any::RSA
             any::see
+            any::svglite
             any::tidyr
             any::wbCorr
             local::.
