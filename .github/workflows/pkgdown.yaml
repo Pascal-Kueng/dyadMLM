@@ -31,11 +31,14 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          cache-version: 2
           extra-packages: |
+            any::correlation
             any::DHARMa
             any::digest
             any::ggplot2
             any::gridExtra
+            any::insight
             any::modelbased
             any::parameters
             any::patchwork
