@@ -47,6 +47,8 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
+            any::BH
+            any::RcppEigen
             any::rcmdcheck
             local::.
           needs: check
@@ -54,12 +56,13 @@ jobs:
       - name: Restore package metadata
         run: git restore DESCRIPTION
 
+      # RStan needs BH and RcppEigen headers even when installed as a binary.
+      - name: Fit model and verify covariance recovery
+        run: Rscript .github/scripts/check-development-backend.R ${{ matrix.backend }}
+
       # These runs report upstream breakage but are not required merge checks.
       - name: Check package with development dependency
         uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
-
-      - name: Fit model and verify covariance recovery
-        run: Rscript .github/scripts/check-development-backend.R ${{ matrix.backend }}
