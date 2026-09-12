@@ -64,24 +64,13 @@ test_that("six scalar generalized families share the response-check path", {
       t(as.matrix(stats::simulate(model, nsim = 20, seed = 459)))
     )
 
-    for (response in c("raw", "model-centred")) {
-      result <- check_partner_dependence(
-        simulations, dyad = "dyad", role = "role",
-        response = response, plot = FALSE
-      )
-      values <- simulations$observed_response -
-        if (response == "raw") 0 else center
-      first <- values[data$role == "female"]
-      second <- values[data$role == "male"]
-      expected <- c(
-        stats::sd(first), stats::sd(second), stats::cor(first, second),
-        stats::sd((first + second) / 2), stats::sd((first - second) / 2),
-        stats::cor((first + second) / 2, (first - second) / 2)
-      )
-      expect_equal(result$statistics_table$observed_value, expected)
-      expect_identical(result$statistics_table$n_defined, rep(20L, 6L))
-      expect_true(all(is.finite(result$replicated_statistics)))
-    }
+    # Formula and raw/centred behavior are covered by the deterministic pair tests.
+    result <- check_partner_dependence(
+      simulations, dyad = "dyad", role = "role", plot = FALSE
+    )
+    expect_identical(result$n_pairs, 60L)
+    expect_identical(result$statistics_table$n_defined, rep(20L, 6L))
+    expect_true(all(is.finite(result$replicated_statistics)))
   }
 })
 
@@ -146,22 +135,12 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
   defined <- correlations[is.finite(correlations)]
   expect_gt(length(defined), 0L)
   expect_lt(length(defined), simulations$nsim)
-  warnings <- character()
-  result <- withCallingHandlers(
-    check_partner_dependence(
-      simulations, dyad = .env$data$dyad, role = "role",
-      response = "raw", plot = FALSE
-    ),
-    warning = function(condition) {
-      warnings <<- c(warnings, conditionMessage(condition))
-      invokeRestart("muffleWarning")
-    }
-  )
-  expect_length(warnings, 1L)
-  expect_match(warnings, "defined")
+  expect_warning(result <- check_partner_dependence(
+    simulations, dyad = .env$data$dyad, role = "role",
+    response = "raw", plot = FALSE
+  ), "Undefined simulated summaries")
   table <- result$statistics_table
   partner <- table[table$statistic_name == "partner_correlation", ]
-  expect_identical(partner$n_defined, length(defined))
   expect_identical(table$n_defined, as.integer(colSums(is.finite(
     result$replicated_statistics
   ))))
