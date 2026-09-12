@@ -41,15 +41,6 @@ partner_check_test_simulations <- function() {
     reference = "plug-in predictive",
     random_effects = "new",
     parameter_uncertainty = "excluded",
-    center = "random-effects-zero expected response",
-    center_target = paste0(
-      "marginal response mean over new random effects ",
-      "(Gaussian identity)"
-    ),
-    target = paste0(
-      "unconditional plug-in replication under the fitted-row design, ",
-      "with all random effects newly generated"
-    ),
     nsim = nrow(simulated_residuals),
     seed = 123L,
     call = quote(simulate_dyad_responses(model))
@@ -88,9 +79,9 @@ test_that("model-centred summaries use aligned pairs", {
   expected_statistics <- t(apply(
     centred_response_datasets,
     MARGIN = 1,
-    FUN = calculate_partner_response_statistics,
-    paired_row_indices = paired_row_indices,
-    use_role_specific_statistics = FALSE
+    FUN = function(y) calculate_partner_pair_statistics(
+      y[paired_row_indices[, 1]], y[paired_row_indices[, 2]], FALSE
+    )
   ))
 
   expect_s3_class(result, "dyadMLM_partner_check")
@@ -108,7 +99,7 @@ test_that("model-centred summaries use aligned pairs", {
     c(
       "statistic_name", "parameterization", "label", "observed_value",
       "replicated_median", "replicated_lower", "replicated_upper",
-      "observed_quantile"
+      "observed_quantile", "n_defined"
     )
   )
   expect_equal(
@@ -214,9 +205,9 @@ test_that("raw summaries use the observed and simulated responses unchanged", {
   expected_raw_statistics <- t(apply(
     raw_responses,
     MARGIN = 1,
-    FUN = calculate_partner_response_statistics,
-    paired_row_indices = paired_row_indices,
-    use_role_specific_statistics = TRUE
+    FUN = function(y) calculate_partner_pair_statistics(
+      y[paired_row_indices[, 1]], y[paired_row_indices[, 2]], TRUE
+    )
   ))
 
   expect_equal(default_result$statistics_table, centred_result$statistics_table)
@@ -240,44 +231,9 @@ test_that("raw summaries use the observed and simulated responses unchanged", {
 })
 
 
-test_that("partner checks reject unsupported simulation metadata", {
-  simulations <- partner_check_test_simulations()
-
-  unsupported_backend <- simulations
-  unsupported_backend$backend <- "other"
-  expect_error(
-    check_partner_dependence(
-      unsupported_backend,
-      dyad = "dyad",
-      plot = FALSE
-    ),
-    "Gaussian identity-link `glmmTMB` simulations",
-    fixed = TRUE
-  )
-
-  unsupported_family <- simulations
-  unsupported_family$family <- "poisson"
-  expect_error(
-    check_partner_dependence(
-      unsupported_family,
-      dyad = "dyad",
-      plot = FALSE
-    ),
-    "Gaussian identity-link `glmmTMB` simulations",
-    fixed = TRUE
-  )
-
-  unsupported_link <- simulations
-  unsupported_link$link <- "log"
-  expect_error(
-    check_partner_dependence(
-      unsupported_link,
-      dyad = "dyad",
-      plot = FALSE
-    ),
-    "Gaussian identity-link `glmmTMB` simulations",
-    fixed = TRUE
-  )
+test_that("partner checks require a simulation object", {
+  expect_error(check_partner_dependence(list(), dyad = "dyad", plot = FALSE),
+               "must be created by `simulate_dyad_responses()`", fixed = TRUE)
 })
 
 
@@ -424,7 +380,7 @@ test_that("fitted-row identifiers can be embraced through wrappers", {
   # column that happens to have the same name as the wrapper formal.
   expect_error(
     check_from_wrapper(simulations, does_not_exist),
-    "`dyad` could not be evaluated",
+    "does_not_exist",
     fixed = TRUE
   )
 })
@@ -443,10 +399,9 @@ test_that("exchangeable summaries are member-order invariant", {
     byrow = TRUE
   )
 
-  statistics <- calculate_partner_response_statistics(
-    response_values,
-    paired_row_indices,
-    use_role_specific_statistics = FALSE
+  statistics <- calculate_partner_pair_statistics(
+    response_values[paired_row_indices[, 1]],
+    response_values[paired_row_indices[, 2]], FALSE
   )
   dyad_average_values <-
     (first_member_values + second_member_values) / 2
@@ -494,10 +449,9 @@ test_that("exchangeable summaries are member-order invariant", {
   swapped_row_indices <- paired_row_indices
   swapped_row_indices[c(2, 5), ] <- swapped_row_indices[c(2, 5), 2:1]
   expect_equal(
-    calculate_partner_response_statistics(
-      response_values,
-      swapped_row_indices,
-      use_role_specific_statistics = FALSE
+    calculate_partner_pair_statistics(
+      response_values[swapped_row_indices[, 1]],
+      response_values[swapped_row_indices[, 2]], FALSE
     ),
     statistics
   )
@@ -756,21 +710,21 @@ test_that("invalid partner structures fail clearly", {
   no_variation <- simulations
   no_variation$simulated_responses[1L, ] <-
     no_variation$response_center
-  expect_error(
-    check_partner_dependence(no_variation, dyad = "dyad"),
-    "insufficient variation",
+  expect_warning(
+    check_partner_dependence(no_variation, dyad = "dyad", plot = FALSE),
+    "Undefined simulated summaries",
     fixed = TRUE
   )
 
   raw_no_variation <- simulations
   raw_no_variation$simulated_responses[1L, ] <- 1
-  expect_error(
+  expect_warning(
     check_partner_dependence(
       raw_no_variation,
       dyad = "dyad",
-      response = "raw"
+      response = "raw", plot = FALSE
     ),
-    "insufficient variation",
+    "Undefined simulated summaries",
     fixed = TRUE
   )
 })
@@ -1044,4 +998,56 @@ test_that("partner check works with simulated glmmTMB responses", {
   expect_identical(result$n_pairs, 20L)
   expect_identical(dim(result$replicated_statistics), c(20L, 6L))
   expect_true(all(is.finite(result$replicated_statistics)))
+})
+
+
+test_that("explicit NA factor levels are missing dyad IDs and roles", {
+  simulations <- partner_check_test_simulations()
+  ids <- as.character(simulations$model_frame$dyad)
+  roles <- as.character(simulations$model_frame$role)
+  roles[ids == "4" & roles == "female"] <- NA_character_
+  ids[ids == "5"] <- NA_character_
+  result <- check_partner_dependence(
+    simulations, dyad = factor(ids, exclude = NULL),
+    role = factor(roles, exclude = NULL), plot = FALSE
+  )
+  expect_identical(result$n_missing_dyad_rows, 2L)
+  expect_identical(result$n_missing_role_rows, 1L)
+  expect_identical(result$n_incomplete_dyads, 1L)
+  expect_identical(result$n_pairs, 3L)
+  expect_identical(result$role_order, c("female", "male"))
+})
+
+
+test_that("distinct numeric dyad IDs remain separate despite rounded labels", {
+  simulations <- partner_check_test_simulations()
+  expected <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
+  simulations$model_frame$dyad <- 1e15 + as.integer(simulations$model_frame$dyad)
+  result <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
+  expect_identical(result$n_pairs, 5L)
+  expect_equal(result$statistics_table, expected$statistics_table)
+  expect_equal(result$replicated_statistics, expected$replicated_statistics)
+})
+
+
+test_that("predictive histograms show the full outer bars", {
+  # Every pair has half-difference 1; its RMS equals the dataset's scale.
+  values <- as.vector(rbind(c(-1, 0, 1), c(-3, -2, -1)))
+  scales <- seq(0.300099, 0.301001, length.out = 25)
+  simulations <- partner_check_test_simulations()
+  simulations$model_frame <- data.frame(dyad = rep(1:3, each = 2))
+  simulations$observed_response <- values * 0.30055
+  simulations$response_center <- rep(0, 6)
+  simulations$simulated_responses <- scales %o% values
+  simulations$nsim <- length(scales)
+  result <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
+
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  plot(result, parameterization = "mean_difference", ask = FALSE)
+  # The last panel shows half-difference RMS, with breaks beyond data extrema.
+  histogram <- graphics::hist(scales, breaks = 20, plot = FALSE)
+  visible <- graphics::par("usr")[1:2]
+  expect_lte(visible[1], min(histogram$breaks))
+  expect_gte(visible[2], max(histogram$breaks))
 })

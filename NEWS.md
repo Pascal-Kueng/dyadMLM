@@ -1,11 +1,13 @@
 # dyadMLM (development version)
 
-* Added experimental descriptive predictive checks for cross-sectional Gaussian
-  `glmmTMB` models. `simulate_dyad_responses()` generates datasets from a fitted
-  model, and `check_partner_dependence()` compares their partner variation and
-  dependence with the observed data.
-  Identifier arguments use column-first tidy evaluation; use `.env` for
-  external vectors and `{{ }}` when forwarding arguments through wrappers.
+* Added experimental checks of whether cross-sectional `glmmTMB` models
+  reproduce partners' variation and relationship, for Gaussian and selected
+  non-Gaussian responses. `simulate_dyad_responses()` generates datasets;
+  `check_partner_dependence()` compares observed and simulated summaries.
+  Undefined simulated statistics are omitted from their individual references
+  with a warning; `n_defined` records how many draws contribute.
+  Identifier arguments accept fitted columns or aligned external vectors.
+  See the function help for examples, model support, and technical details.
 
 # dyadMLM 0.2.0
 

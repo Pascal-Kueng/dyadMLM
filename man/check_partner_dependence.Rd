@@ -13,27 +13,24 @@ check_partner_dependence(
 )
 }
 \arguments{
-\item{simulations}{A \code{dyadMLM_response_simulations} object returned by
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.}
+\item{simulations}{An object returned by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.}
 
-\item{dyad}{An unquoted or quoted column name in the fitted model frame, or
-vector identifying the dyad for each fitted row. Columns take precedence
-over objects in the calling environment; see Technical details.}
+\item{dyad}{An unquoted or quoted column name in the fitted data, or a
+vector identifying the dyad for each fitted row. See Technical details.}
 
-\item{role}{Member roles, supplied in the same way as \code{dyad}. Supply this
-whenever the member distinction is meaningful. Use \code{NULL} (the default)
-only when members can be treated as interchangeable.}
+\item{role}{Member roles, supplied in the same way as \code{dyad}. Use \code{NULL}
+(the default) only when members can be treated as interchangeable.}
 
-\item{plot}{Logical. If \code{TRUE}, the default, draw the diagnostic plots.}
+\item{plot}{Logical. If \code{TRUE} (the default), draw the diagnostic plots.}
 
-\item{response}{Which values to summarize. \code{"model-centred"} (the default)
-removes the fitted mean pattern. \code{"raw"} leaves responses unchanged. The
-same choice is applied to observed and simulated responses.}
+\item{response}{\code{"model-centred"} (the default) subtracts the model's
+prediction with random effects set to zero. \code{"raw"} uses responses
+unchanged. The same choice applies to observed and simulated data.}
 }
 \value{
-A reusable \code{dyadMLM_partner_check} object, returned invisibly. Assign
-it to a variable, print it for the summary table, or use \code{plot()} to draw
-the plots again without repeating the simulations.
+A \code{dyadMLM_partner_check} object, returned invisibly. Assign it to
+a variable, print it for numeric summaries, or plot it again without
+repeating the simulations.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -42,77 +39,87 @@ and how strongly they are related. It compares the observed data with
 datasets generated from the fitted model.
 }
 \section{Quick start}{
-With a supported fitted model containing \code{coupleID} and \code{gender} columns:
+
+For a fitted model containing \code{coupleID} and \code{gender} columns:
 \preformatted{
 simulations <- simulate_dyad_responses(model, seed = 123)
 check <- check_partner_dependence(simulations, dyad = coupleID, role = gender)
 check
 }
-This draws the plots and prints the comparison. Set \code{plot = FALSE} to get
-only the result object. A complete model-fitting example appears below.
+This draws the plots and prints the comparison. Set \code{plot = FALSE} to save
+the result without plotting. A complete fitting example appears below.
 }
 
 \section{Reading the result}{
-Each plot shows simulated summary values as a histogram, the observed value
-as a red line, and the middle 95\% of simulated values between dashed lines.
-The printed table also gives the simulated median and the observed position
-among the simulations. A position near 0 or 1 flags a feature the model may
-reproduce poorly. These positions and ranges are descriptive: they are not
-p-values or confidence intervals.
 
-The check is most useful for examining simplifying assumptions, such as
-equal variation in both roles or no remaining partner relationship. If the
-model freely estimated the same feature from these data, close agreement
-is expected and does not by itself establish good fit.
+The histogram shows simulated values, the red line marks the observed value,
+and dashed lines enclose the middle 95\% of simulations. The printed table
+also gives the observed position among simulations on a 0–1 scale.
+A position near either end may flag poor agreement, but ties can also give
+a position near 1. Read it alongside the histogram. These comparisons are
+descriptive, not p-values, confidence intervals, or a pass/fail test.
+
+The check is most useful for assumptions such as equal variation in both
+roles or no remaining partner relationship. If the model freely estimated
+a feature from these data, close agreement is expected and alone provides
+little evidence of fit.
 }
 
-\section{Choosing roles and responses}{
-With meaningful \code{role} labels, summaries describe each role separately.
-Without them, summaries treat members as interchangeable and do not depend
-on which member is listed first. Both options also provide an equivalent
-view using dyad means and half-differences.
+\section{Roles and data}{
 
-The default \code{response = "model-centred"} removes the same fitted mean pattern
-from observed and simulated responses to focus on the remaining variation
-and partner dependence. Use \code{response = "raw"} to include that mean pattern.
-}
+Supply \code{role} when the member distinction is meaningful. Without it,
+summaries treat members as interchangeable and are unchanged by swapping
+their positions within any dyad.
 
-\section{Requirements}{
-Use cross-sectional Gaussian identity-link \code{glmmTMB} simulations from
-\code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}. Each dyad may have at most two fitted responses;
-at least three complete dyads are required. With \code{role}, there must be
-exactly two roles and one member of each role per complete dyad. Missing
-identifiers and incomplete dyads are omitted and counted in the result.
-The check stops if any observed or simulated summary is undefined, for
-example a correlation with zero variation.
+Use cross-sectional simulations from \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}, with at
+most two fitted rows per dyad and at least three complete dyads. With roles,
+each complete dyad must contain one member of each of exactly two roles.
+Missing identifiers and incomplete dyads are omitted and counted.
 }
 
 \section{Technical details}{
-The reference holds fitted parameters fixed, draws new random effects and
-errors, and excludes parameter uncertainty and refitting. It is a plug-in
-predictive reference, not a posterior predictive distribution.
-Model-centred values equal \code{response - response_center}, using a fixed
-centre across datasets. Random-effect variation remains; these values are
-not conditional or PIT residuals.
 
-The result stores \code{statistics_table} (one row per summary),
-\code{replicated_statistics} (a matrix with \code{nsim} rows and one column per
-summary), and the selected \code{response}. There are six summaries with roles
-and four without. In the table, \code{observed_quantile} is calculated as
-\code{(1 + sum(simulated <= observed)) / (nsim + 1)} for each summary.
+\strong{Reference and centring.} Fitted parameters and predictors stay fixed;
+every simulation redraws random effects and responses. The model is not
+refitted and parameter uncertainty is excluded (a plug-in predictive
+reference). Model-centred values are \code{response - response_center}, using the
+same zero-random-effect prediction in every dataset. Random-effect variation
+remains. These are not conditional or PIT residuals. With nonlinear links,
+the centre is generally not the mean averaged over random effects, and the
+subtraction does not provide a residual covariance decomposition.
 
-Partner-level and dyad mean/half-difference summaries express the same
-covariance information, so they are not independent checks. For
-interchangeable members, the calculation combines the dyad-mean variance
-with the half-difference mean square about zero to recover the common member
-variance and covariance. This follows Woody and Sadler's (2005) dyadic
-decomposition; the predictive comparison adapts the
-replicated-data principle of Gelman, Meng, and Stern (1996).
+\strong{Summaries.} With roles, the six summaries are each role's SD, their
+correlation, the SDs of dyad means and half-differences, and the
+mean/half-difference correlation. The half-difference is \code{(role1 - role2) / 2}.
+Roles follow factor-level order, or sorted values otherwise; reversing them
+reverses the last correlation.
 
-For explicit column selection, use \code{.data$column} or \code{.data[[column_name]]}.
-Use \code{.env$vector} for an external vector, already aligned with fitted rows
-after missing-data exclusions. Wrapper functions can forward arguments with
-\code{\{\{ dyad \}\}} and \code{\{\{ role \}\}}. Both arguments use column-first tidy evaluation.
+Without roles, the four summaries are common member SD, partner correlation,
+dyad-mean SD, and half-difference RMS about zero. For dyad means \code{M} and
+half-differences \code{D}, the common variance is \code{var(M) + mean(D^2)} and partner
+covariance is \code{var(M) - mean(D^2)}. Covariance divided by variance gives
+partner correlation.
+This follows Woody and Sadler (2005). Both views express the same covariance
+information and are not independent checks. The predictive comparison
+follows the replicated-data principle of Gelman, Meng, and Stern (1996).
+
+\strong{Output and undefined values.} \code{statistics_table} contains one row per
+summary; \code{replicated_statistics} is a matrix with \code{nsim} rows and one column
+per summary. Each table row gives the observed value, simulated median and
+middle 95\% limits, the count \code{n_defined}, and \code{observed_quantile}:
+\code{(1 + sum(defined_simulations <= observed)) / (n_defined + 1)}.
+Undefined simulated values remain in the matrix. Partially undefined
+summaries produce one warning and use only defined draws for each reference.
+This occurs with sparse responses; interpret the reference alongside its
+count. An undefined observed summary or entirely undefined reference causes
+an error. The object also records roles, pair and omission counts, the
+response choice, model metadata, and seed.
+
+\strong{Identifier arguments.} Columns in the fitted model frame take precedence
+over names in the calling environment. Use \code{.data$column} or
+\code{.data[[column_name]]} for explicit column selection, and \code{.env$vector} for
+an external vector already aligned with retained fitted rows. Wrappers can
+forward arguments with \code{{{ dyad }}} and \code{{{ role }}}.
 }
 
 \examples{
@@ -131,7 +138,7 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
     role = gender,
     plot = FALSE
   )
-  check
+  print(check)
   plot(check, parameterization = "member", ask = FALSE)
 }
 

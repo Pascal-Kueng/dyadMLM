@@ -26,7 +26,7 @@ helpers, and eventually model syntax explicit and reproducible.
   [`ild-nonindependence.md`](ild-nonindependence.md)
 - Data-preparation debugging scratch helpers:
   [`debug-data-preparation.R`](debug-data-preparation.R)
-- Gaussian cross-sectional partner-dependence diagnostics:
+- Cross-sectional partner-dependence checks:
   [`diagnostic_checks/README.md`](diagnostic_checks/README.md)
 
 ## Current State
@@ -38,8 +38,8 @@ Zenodo's native GitHub integration as
 series uses the concept DOI
 [10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083). The official
 CRAN tarball remains attached to the GitHub Release. The package has returned
-to development as version 0.2.0.9000, with cross-sectional Gaussian
-partner-dependence diagnostics in development. The former manually curated
+to development as version 0.2.0.9000, with cross-sectional
+partner-dependence checks in development. The former manually curated
 Zenodo series remains available as a historical archive and now points readers
 to the continuing native series.
 
@@ -797,65 +797,29 @@ another routine breaking CRAN update shortly afterward.
   [10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083) in
   package-facing materials; future GitHub Releases are archived automatically.
 
-The immediate diagnostic sequence after 0.2.0 is cross-sectional Gaussian
-partner dependence (0.2.1), non-Gaussian cross-sectional partner checks, then
-Gaussian ILD partner dependence. Follow-up version assignments are provisional.
+The immediate diagnostic sequence after 0.2.0 is cross-sectional Gaussian and
+compatible non-Gaussian partner checks (0.2.1), then Gaussian ILD partner
+dependence. Follow-up version assignments are provisional.
 Later milestones remain APIM covariance decomposition (0.2.5), generalized
 APIM workflows (0.3.0), broader generalized diagnostics (0.3.1), `glmmTMB`
 model syntax (0.4.0), expanded `brms` workflows (0.4.5), and reporting and
 visualization (0.5.0). Closely spaced milestones may be bundled into a
 worthwhile CRAN update rather than submitted separately.
 
-## Version 0.2.1 Scope - Cross-Sectional Gaussian Partner Dependence
+## Version 0.2.1 Scope - Cross-Sectional Partner Dependence
 
-Status: in development. The first diagnostic slice exports
-`simulate_dyad_responses()` and `check_partner_dependence()` for unweighted
-cross-sectional Gaussian identity-link `glmmTMB` models without zero
-inflation.
+Status: in development. `simulate_dyad_responses()` and
+`check_partner_dependence()` support Gaussian and compatible scalar
+non-Gaussian `glmmTMB` responses. Keep the implementation direct: simulate,
+apply the same centred or raw statistic, and compare. References are
+descriptive, with undefined-statistic counts made explicit.
 
-- Build an unconditional plug-in predictive reference while keeping the fitted
-  parameters and fitted-row design fixed and drawing new random effects and
-  Gaussian errors.
-- Offer model-centred responses by default and raw responses as an alternative.
-- Report role-specific summaries for distinguishable dyads and swap-invariant
-  member and mean/half-difference summaries for interchangeable dyads.
-- Return descriptive observed values, simulated medians, middle 95% intervals,
-  observed positions, omission counts, and predictive-reference histograms.
-- Use column-first tidy evaluation for fitted-row identifiers, with explicit
-  `.data`/`.env` selection and `{{ }}` forwarding in wrappers. Extract reusable
-  paired-summary, label, and reference-summary helpers without broadening
-  the current supported models or changing their numerical results.
-- Keep `brms`, ILD, generalized families, cross-validation, refitting, formal
-  calibration, and parameter-uncertainty propagation outside this slice.
+See the [development guide](diagnostic_checks/README.md) for scope, examples,
+and validation. Acceptance requires passing tests, rendered examples, a built
+package check, and green CI on the proposed commit.
 
-Acceptance requires focused and full tests, restored `glmmTMB` simulation
-state after success and error, regenerated documentation, rendered development
-review material, a package check with no errors or unexpected warnings or notes,
-and green CI on the exact reviewed head. The complete current contract is
-recorded in
-[`diagnostic_checks/README.md`](diagnostic_checks/README.md).
-
-### Next integration steps
-
-Preserve `simple-generalized-checks`, `gaussian-ild-prototype`, and
-`diagnostic-prototypes` as reference branches. After the cross-sectional
-foundation is accepted, create a fresh non-Gaussian cross-sectional branch,
-then a fresh Gaussian ILD branch on the accepted combined foundation. Port
-validated behavior and useful tests selectively rather than merging the older
-implementations wholesale.
-
-Keep the simple generalized comparison `T(y - c)` versus `T(y_rep - c)`, with
-the same fixed `predict(..., type = "response", re.form = NA)` centre. Under
-nonlinear links this is a response prediction, not generally the marginal
-response mean; the resulting deviations are not standardized residuals.
-Validate each admitted family/link and response format, including
-dispersion-only row omissions.
-
-Reconcile undefined summaries explicitly: record defined-simulation counts,
-retain useful supported statistics, and distinguish an absent reference from a
-reference conditional on a statistic being defined. Set and document the
-minimum reference support before carrying over either prototype's policy.
-Generalized cross-sectional support must not implicitly enable generalized ILD.
+Build future ILD work on this foundation. Preserve the generalized and ILD
+prototype branches as references; port validated behavior selectively.
 
 ## Proposed Version 0.2.2 Scope - Gaussian ILD Partner Dependence
 

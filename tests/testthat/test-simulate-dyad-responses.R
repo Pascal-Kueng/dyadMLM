@@ -48,8 +48,7 @@ test_that("complete response simulations retain fitted-row alignment", {
     c(
       "observed_response", "simulated_responses", "response_center",
       "model_frame", "backend", "family", "link", "reference",
-      "random_effects", "parameter_uncertainty", "center", "center_target",
-      "target", "nsim", "seed", "call"
+      "random_effects", "parameter_uncertainty", "nsim", "seed", "call"
     )
   )
   expect_identical(dim(simulations$simulated_responses), c(5L, 40L))
@@ -71,20 +70,6 @@ test_that("complete response simulations retain fitted-row alignment", {
   expect_identical(simulations$reference, "plug-in predictive")
   expect_identical(simulations$random_effects, "new")
   expect_identical(simulations$parameter_uncertainty, "excluded")
-  expect_identical(
-    simulations$center_target,
-    paste0(
-      "marginal response mean over new random effects ",
-      "(Gaussian identity)"
-    )
-  )
-  expect_identical(
-    simulations$target,
-    paste0(
-      "unconditional plug-in replication under the fitted-row design, ",
-      "with all random effects newly generated"
-    )
-  )
   expect_identical(simulations$nsim, 5L)
   expect_identical(simulations$seed, 123L)
 
@@ -231,73 +216,37 @@ test_that("dispersion-only omissions retain Gaussian fitted-row alignment", {
 
 test_that("response simulation is unconditional without modifying the model", {
   skip_if_not_installed("glmmTMB")
-
-  model <- predictive_check_test_model(
-    dispformula = ~1 + (1 | dyad)
-  )
-  original_codes <- get_glmmTMB_simulation_codes(model)
-  on.exit(set_glmmTMB_simulation_codes(model, original_codes), add = TRUE)
-
-  # Mimic a model whose simulation settings were changed by another package.
-  caller_codes <- original_codes
-  caller_codes$terms[] <- rep(
-    c(0, 1),
-    length.out = length(caller_codes$terms)
-  )
-  caller_codes$termsdisp[] <- 1
-  set_glmmTMB_simulation_codes(model, caller_codes)
-
+  model <- predictive_check_test_model(dispformula = ~1 + (1 | dyad))
+  # Mixed caller settings, including dispersion REs, must not affect the draws.
+  model$obj$env$data$terms[[1]]$simCode <- 0
+  model$obj$env$data$terms[[2]]$simCode <- 1
+  model$obj$env$data$termsdisp[[1]]$simCode <- 1
+  caller_data <- model$obj$env$data
   simulations <- simulate_dyad_responses(model, nsim = 5, seed = 789)
-  expect_identical(get_glmmTMB_simulation_codes(model), caller_codes)
+  expect_identical(model$obj$env$data, caller_data)
 
-  # Compare against direct simulation with newly drawn random effects.
-  unconditional_codes <- lapply(
-    original_codes,
-    function(codes) rep(2, length(codes))
-  )
-  set_glmmTMB_simulation_codes(model, unconditional_codes)
+  glmmTMB::set_simcodes(model$obj, "random")
+  model$obj$env$data$termsdisp[[1]]$simCode <- 2
   expected <- t(as.matrix(stats::simulate(model, nsim = 5, seed = 789)))
-  set_glmmTMB_simulation_codes(model, caller_codes)
-
   expect_identical(simulations$simulated_responses, expected)
 })
 
 
-test_that("model simulation settings are restored after an error", {
+test_that("model simulation settings and RNG are restored after an error", {
   skip_if_not_installed("glmmTMB")
+  model <- predictive_check_test_model(dispformula = ~1 + (1 | dyad))
+  glmmTMB::set_simcodes(model$obj, "fix")
+  model$obj$env$data$termsdisp[[1]]$simCode <- 1
+  caller_data <- model$obj$env$data
+  model$obj$simulate <- function(...) stop("forced simulation failure", call. = FALSE)
 
-  model <- predictive_check_test_model(
-    dispformula = ~1 + (1 | dyad)
-  )
-  original_codes <- get_glmmTMB_simulation_codes(model)
-  on.exit(set_glmmTMB_simulation_codes(model, original_codes), add = TRUE)
-
-  caller_codes <- original_codes
-  caller_codes$terms[] <- 1
-  caller_codes$termsdisp[] <- 1
-  set_glmmTMB_simulation_codes(model, caller_codes)
-
-  original_simulate <- model$obj$simulate
-  on.exit(model$obj$simulate <- original_simulate, add = TRUE)
-  model$obj$simulate <- function(...) {
-    stop("forced simulation failure", call. = FALSE)
-  }
-
-  rng_state <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-  on.exit(
-    assign(".Random.seed", rng_state, envir = .GlobalEnv),
-    add = TRUE
-  )
+  rng_state <- .Random.seed
+  on.exit(assign(".Random.seed", rng_state, envir = .GlobalEnv), add = TRUE)
   rm(".Random.seed", envir = .GlobalEnv)
+  expect_error(simulate_dyad_responses(model, nsim = 5, seed = 101),
+               "forced simulation failure", fixed = TRUE)
   expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-
-  expect_error(
-    simulate_dyad_responses(model, nsim = 5, seed = 101),
-    "forced simulation failure",
-    fixed = TRUE
-  )
-  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-  expect_identical(get_glmmTMB_simulation_codes(model), caller_codes)
+  expect_identical(model$obj$env$data, caller_data)
 })
 
 
@@ -315,21 +264,19 @@ test_that("unsupported predictive-check inputs fail clearly", {
     "positive whole number",
     fixed = TRUE
   )
-  expect_error(
-    simulate_dyad_responses(gaussian_model, nsim = 1.5),
-    "positive whole number",
-    fixed = TRUE
+  invalid_numbers <- list(
+    NA_real_, Inf, 1.5, numeric(), c(1, 2), TRUE, "1", factor("1"),
+    as.Date("2026-01-01"), 1 + 1i, .Machine$integer.max + 1
   )
+  for (value in invalid_numbers) {
+    expect_error(simulate_dyad_responses(gaussian_model, nsim = value),
+                 "positive whole number", fixed = TRUE)
+    expect_error(simulate_dyad_responses(gaussian_model, seed = value),
+                 "non-negative whole number", fixed = TRUE)
+  }
   expect_error(
     simulate_dyad_responses(gaussian_model, seed = -1),
     "non-negative whole number",
-    fixed = TRUE
-  )
-
-  poisson_model <- predictive_check_test_model(family = stats::poisson())
-  expect_error(
-    simulate_dyad_responses(poisson_model),
-    "Gaussian identity-link models",
     fixed = TRUE
   )
 
@@ -337,7 +284,7 @@ test_that("unsupported predictive-check inputs fail clearly", {
   log_link_model$modelInfo$family <- stats::gaussian(link = "log")
   expect_error(
     simulate_dyad_responses(log_link_model),
-    "Gaussian identity-link models",
+    "Unsupported family/link",
     fixed = TRUE
   )
 

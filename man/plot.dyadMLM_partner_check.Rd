@@ -36,6 +36,7 @@ simulated summary values; the red line marks the observed value and dashed
 lines mark the middle 95\% of simulations.
 }
 \section{Quick start}{
+
 With a result saved as \code{check}:
 \preformatted{
 plot(check, parameterization = "member", ask = FALSE)
@@ -46,14 +47,15 @@ responses. Set \code{ask = FALSE} to draw without pausing between plots.
 }
 
 \section{Interpretation}{
-An observed value near or beyond the dashed lines may flag a feature the
-model reproduces poorly. These are descriptive ranges, not a pass/fail
-rule. Close agreement is expected if the model freely estimated that same
-feature from the data. See \code{\link[=check_partner_dependence]{check_partner_dependence()}} for interpretation
-and a complete example.
+
+Values near or beyond the dashed lines may flag poor agreement. This is a
+descriptive comparison, not a pass/fail test. Close agreement is expected
+for features the model freely estimated. See \code{\link[=check_partner_dependence]{check_partner_dependence()}}
+for interpretation and a complete example.
 }
 
 \section{Technical details}{
+
 Plots use stored summary values; they do not simulate or refit the model.
 The two views express the same covariance information, so they are not
 independent checks.

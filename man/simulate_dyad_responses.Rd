@@ -21,12 +21,12 @@ A \code{dyadMLM_response_simulations} object for use with
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Creates a reusable set of simulated response datasets: what the fitted
-model would generate for the same observations and predictors. Use these
-datasets to check whether the model reproduces features of the observed
-data. Fitted parameter estimates stay fixed; the model is not refitted.
+Generates new response datasets for the same observations and predictors.
+Reuse them to check whether a fitted model reproduces features of the
+observed data.
 }
 \section{Quick start}{
+
 With a supported fitted model called \code{model}:
 \preformatted{
 simulations <- simulate_dyad_responses(model, seed = 123)
@@ -36,23 +36,26 @@ example that fits a model and checks it, see \code{\link[=check_partner_dependen
 }
 
 \section{Supported models}{
-Currently supports unweighted cross-sectional Gaussian identity-link
-\code{glmmTMB} models without zero inflation and with one numeric response per
-fitted row. Each draw includes new random effects and observation errors.
-When dyads are the only grouping factor, this represents hypothetical new
-dyads under the same study design.
+
+Supports unweighted \code{glmmTMB} models without zero inflation: Gaussian with
+identity link; Poisson, NB1, NB2, Tweedie, and Gamma with log link; and beta
+with logit link. Each must return one numeric observed and simulated response
+per fitted row. Binomial and beta-binomial formats need a response adapter
+and are not supported. \code{\link[=check_partner_dependence]{check_partner_dependence()}} currently requires
+cross-sectional dyads.
 }
 
 \section{Technical details}{
-This is a plug-in predictive reference: uncertainty in the fitted parameters
-is excluded. Fixed-effect estimates in the conditional and dispersion
-formulas stay fixed; random effects in either component are redrawn. The
-simulations are conditional on the estimates and design, but not on the
-fitted random-effect values.
+
+This is a plug-in predictive reference: fitted parameters and predictors
+stay fixed, without refitting or parameter uncertainty. Each simulation
+redraws full random-effect blocks in the conditional and dispersion
+components, then draws responses from the fitted conditional distribution.
+When dyads are the only grouping factor, the draws represent hypothetical
+new dyads under the same study design.
 
 The result keeps all components in fitted-row order (after missing-data
 exclusions):
-
 \itemize{
 \item \code{simulated_responses}: a matrix with \code{nsim} rows and one column per fitted
 observation. Each row is a complete simulated dataset.
@@ -62,6 +65,9 @@ per fitted observation.
 }
 
 \code{response_center} is the response prediction with random effects set to
-zero. Later checks can subtract this same fitted mean from observed and
-simulated responses. This leaves random-effect variation in the deviations.
+zero. Later checks subtract it from observed and simulated responses alike;
+random-effect variation remains. With nonlinear links, this prediction is
+generally not the mean averaged over random effects. The fitted-row design
+stays fixed, including any lagged outcomes used as predictors; simulations
+do not recursively generate those predictors.
 }
