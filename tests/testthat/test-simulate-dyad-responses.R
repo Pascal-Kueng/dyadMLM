@@ -25,15 +25,20 @@ test_that("complete response simulations retain fitted-row alignment", {
   simulations <- simulate_dyad_responses(model, nsim = 5, seed = 123)
 
   expect_s3_class(simulations, "dyadMLM_response_simulations")
+  expect_named(simulations, c("observed_response", "simulated_responses",
+                             "predicted_response", "model_frame"))
   expect_identical(dim(simulations$simulated_responses), c(5L, 40L))
   expect_equal(simulations$observed_response,
                as.numeric(stats::model.response(stats::model.frame(model))))
-  expect_equal(simulations$response_center, as.numeric(stats::predict(
+  expect_equal(simulations$predicted_response, as.numeric(stats::predict(
     model, newdata = NULL, type = "response", re.form = NA
   )))
   expect_identical(simulations$model_frame, stats::model.frame(model))
-  expect_identical(simulations$nsim, 5L)
-  expect_identical(simulations$seed, 123L)
+  expect_identical(attr(simulations, "dyadMLM"), list(
+    backend = "glmmTMB", family = "gaussian", link = "identity",
+    reference = "plug-in predictive", random_effects = "new",
+    parameter_uncertainty = "excluded", seed = 123L
+  ))
 
   result <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
   expect_s3_class(result, "dyadMLM_partner_check")
@@ -61,7 +66,7 @@ test_that("seeded simulations are reproducible and preserve the caller's RNG", {
   # Seeds follow R's integer conversion, including negative and fractional values.
   second <- simulate_dyad_responses(model, nsim = 5, seed = -456.9)
   third <- simulate_dyad_responses(model, nsim = 5, seed = -457)
-  expect_identical(second$seed, -456L)
+  expect_identical(attr(second, "dyadMLM")$seed, -456L)
   expect_identical(first$simulated_responses, second$simulated_responses)
   expect_false(identical(first$simulated_responses, third$simulated_responses))
 
@@ -104,7 +109,7 @@ test_that("transformed predictors and dispersion omissions retain fitted rows", 
   # The fitted design matrix independently checks centring after scale() and omissions.
   expected_center <- stats::model.matrix(model, component = "cond") %*%
     glmmTMB::fixef(model)$cond
-  expect_equal(simulations$response_center, as.numeric(expected_center))
+  expect_equal(simulations$predicted_response, as.numeric(expected_center))
 })
 
 
@@ -141,6 +146,13 @@ test_that("model simulation settings and RNG are restored after an error", {
                "forced simulation failure", fixed = TRUE)
   expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
   expect_identical(model$obj$env$data, caller_data)
+
+  model$obj$simulate <- function(...) list(yobs = rep(Inf, nrow(model$frame)))
+  expect_error(simulate_dyad_responses(model, nsim = 5, seed = 101),
+               "Expected finite predictions and one simulated response per fitted row.",
+               fixed = TRUE)
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+  expect_identical(model$obj$env$data, caller_data)
 })
 
 
@@ -160,10 +172,6 @@ test_that("unsupported predictive-check inputs fail clearly", {
   }
   expect_error(simulate_dyad_responses(model, seed = NA_real_),
                "supplied seed is not a valid integer")
-
-  log_link_model <- model
-  log_link_model$modelInfo$family <- stats::gaussian(link = "log")
-  expect_error(simulate_dyad_responses(log_link_model), "Unsupported family/link")
 
   matrix_response_model <- model
   matrix_response_model$frame[[1L]] <- cbind(model$frame[[1L]], model$frame[[1L]])

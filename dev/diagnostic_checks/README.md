@@ -21,8 +21,8 @@ them in each development document.
 ## Scope and extension
 
 Current checks cover unweighted cross-sectional `glmmTMB` models without zero
-inflation: Gaussian with an identity link; Poisson, NB1, NB2, Tweedie, and Gamma
-with log links; and beta with a logit link. Binomial and beta-binomial response
+inflation: Gaussian, Poisson, NB1, NB2, Tweedie, Gamma, and beta. The model's
+fitted link is used for prediction and simulation. Binomial and beta-binomial response
 formats need adapters. Nonlinear-link centring is not a residual covariance
 decomposition.
 

@@ -82,7 +82,7 @@ Missing identifiers and incomplete dyads are omitted and counted.
 \strong{Reference and centring.} Fitted parameters and predictors stay fixed;
 every simulation redraws random effects and responses. The model is not
 refitted and parameter uncertainty is excluded (a plug-in predictive
-reference). Model-centred values are \code{response - response_center}, using the
+reference). Model-centred values are \code{response - predicted_response}, using the
 same zero-random-effect prediction in every dataset. Random-effect variation
 remains. These are not conditional or PIT residuals. With nonlinear links,
 the centre is generally not the mean averaged over random effects, and the
@@ -112,8 +112,9 @@ Undefined simulated values remain in the matrix. Partially undefined
 summaries produce one warning and use only defined draws for each reference.
 This occurs with sparse responses; interpret the reference alongside its
 count. An undefined observed summary or entirely undefined reference causes
-an error. The object also records roles, pair and omission counts, the
-response choice, model metadata, and seed.
+an error. The object also records roles, pair and omission counts, and the
+response choice. Model and simulation settings, including the seed, are
+stored in its \code{dyadMLM} attribute.
 
 \strong{Identifier arguments.} Columns in the fitted model frame take precedence
 over names in the calling environment. Use \code{.data$column} or

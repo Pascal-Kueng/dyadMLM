@@ -20,20 +20,26 @@
 #'
 #' - `simulated_responses`: a matrix with `nsim` rows and one column per fitted
 #'   observation. Each row is a complete simulated dataset.
-#' - `observed_response` and `response_center`: numeric vectors with one value
+#' - `observed_response` and `predicted_response`: numeric vectors with one value
 #'   per fitted observation.
 #' - `model_frame`: the data frame used for fitting, in the same row order.
+#'
+#' The `dyadMLM` attribute records the model and simulation settings, including
+#' the seed.
 #'
 #' @section Supported models:
 #' Currently supports unweighted `glmmTMB` models without zero inflation for
 #' the following families:
-#' - `gaussian(link = "identity")`
-#' - `poisson(link = "log")`
-#' - `glmmTMB::nbinom1(link = "log")`
-#' - `glmmTMB::nbinom2(link = "log")`
-#' - `glmmTMB::tweedie(link = "log")`
-#' - `Gamma(link = "log")`
-#' - `glmmTMB::beta_family(link = "logit")`
+#' - `gaussian()`
+#' - `poisson()`
+#' - `glmmTMB::nbinom1()`
+#' - `glmmTMB::nbinom2()`
+#' - `glmmTMB::tweedie()`
+#' - `Gamma()`
+#' - `glmmTMB::beta_family()`
+#'
+#' The model's fitted link is used for prediction and simulation. Predictions
+#' and simulated responses must be finite.
 #'
 #' [check_partner_dependence()] currently requires cross-sectional dyads.
 #'
@@ -48,7 +54,8 @@
 #' predictive reference*. If dyads are the only grouping factor, the simulations
 #' represent hypothetical new dyads under the same study design.
 #'
-#' `response_center` contains predictions with random effects set to zero.
+#' `predicted_response` contains predicted mean responses with random effects
+#' in the conditional model set to zero.
 #' By default, later checks subtract these same predictions from observed and
 #' simulated responses. Both random-effect and observation-level variation
 #' remain. With nonlinear links, setting random effects to zero generally
@@ -77,10 +84,10 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   }
 
   family <- stats::family(model)
-  supported <- c("gaussian:identity", "poisson:log", "nbinom1:log",
-                 "nbinom2:log", "tweedie:log", "Gamma:log", "beta:logit")
-  if (!paste(family$family, family$link, sep = ":") %in% supported) {
-    stop("Unsupported family/link. ",
+  supported <- c("gaussian", "poisson", "nbinom1", "nbinom2",
+                 "tweedie", "Gamma", "beta")
+  if (!family$family %in% supported) {
+    stop("Unsupported family. ",
          "See the supported models in ?simulate_dyad_responses.", call. = FALSE)
   }
   if (any(stats::weights(model) != 1)) {
@@ -92,51 +99,69 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
   }
 
-  # frame contains retained fitting rows. Observed and center are vectors that match those.
-  # newdata = NULL below prevents na.exclude from padding omitted rows back in.
   frame <- stats::model.frame(model)
-  observed <- stats::model.response(frame)
+  observed <- stats::model.response(frame) # response variable from frame (vector)
   if (!is.numeric(observed) || !is.null(dim(observed)) ||
       any(!is.finite(observed))) {
-    stop("Expected one numeric response per fitted row; other formats need an adapter.",
+    stop("Expected one numeric response per fitted row.",
          call. = FALSE)
   }
-  center <- as.numeric(stats::predict(model, newdata = NULL,
-                                     type = "response", re.form = NA))
 
-  # glmmTMB simCode = 2 redraws whole blocks; always restore the prior settings.
+  # Predicted mean responses (one per fitted row), with random effects in the
+  # conditional model set to zero.
+  # newdata = NULL below prevents na.exclude from padding omitted rows back in.
+  predicted <- as.numeric(stats::predict(model, newdata = NULL,
+                                        type = "response", re.form = NA))
+
+  # Select components whose random effects should be redrawn.
   components <- c("terms", "termszi", "termsdisp")
-  # original is a component -> term list of settings, not random-effect draws.
-  # The model environment is shared with the caller, hence the on.exit restoration.
+  # Store current simulation settings.
   original <- model$obj$env$data[components]
   if (any(vapply(original, is.null, logical(1)))) {
     stop("The fitted model has an unsupported simulation structure.", call. = FALSE)
   }
+  # Restore original settings on exit, including after an error.
   on.exit(model$obj$env$data[components] <- original, add = TRUE)
+
+  # Tell simulate() to draw new random effects for every block.
   for (component in components) {
     for (i in seq_along(original[[component]])) {
-      model$obj$env$data[[component]][[i]]$simCode <- 2
+      model$obj$env$data[[component]][[i]]$simCode <- 2 # Redraws whole re-blocks.
     }
   }
+
+
   # simulate() returns a data frame with one column per draw. Transpose to an
-  # nsim x nrow(frame) matrix: later checks process one complete dataset per row.
+  # nsim x nrow(frame) matrix.
   simulated <- t(as.matrix(stats::simulate(model, nsim = nsim)))
-  if (length(center) != nrow(frame) || any(!is.finite(center)) ||
+
+  if (length(predicted) != nrow(frame) || any(!is.finite(predicted)) ||
       !is.numeric(simulated) || any(!is.finite(simulated)) ||
       !identical(dim(simulated), c(nsim, nrow(frame)))) {
-    stop("Expected finite predictions and one simulated response per fitted row; ",
-         "other response formats need an adapter.", call. = FALSE)
+    stop("Expected finite predictions and one simulated response per fitted row.", call. = FALSE)
   }
 
   # Keep the frame with the draws so later checks resolve IDs in the same row order.
-  structure(list(
-    observed_response = as.numeric(observed), simulated_responses = simulated,
-    response_center = center, model_frame = frame,
-    backend = "glmmTMB", family = family$family, link = family$link,
-    reference = "plug-in predictive", random_effects = "new",
-    parameter_uncertainty = "excluded", nsim = nsim, seed = seed,
-    call = match.call()
-  ), class = c("dyadMLM_response_simulations", "list"))
+  out <- list(
+    observed_response = as.numeric(observed),
+    simulated_responses = simulated,
+    predicted_response = predicted,
+    model_frame = frame
+  )
+
+  attr(out, "dyadMLM") <- list(
+    backend = "glmmTMB",
+    family = family$family,
+    link = family$link,
+    reference = "plug-in predictive",
+    random_effects = "new",
+    parameter_uncertainty = "excluded",
+    seed = seed
+  )
+
+  class(out) <- c("dyadMLM_response_simulations", "list")
+
+  return(out)
 }
 
 
@@ -147,18 +172,20 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
 #' @param x An object returned by [simulate_dyad_responses()].
 #' @param ... Not used.
 #'
-#' @return `x`, invisibly.
+#' @return `x`, invisible.
 #'
 #' @keywords internal
 #'
 #' @export
 print.dyadMLM_response_simulations <- function(x, ...) {
+  meta <- attr(x, "dyadMLM")
+  nsim <- nrow(x$simulated_responses)
   cat("<dyadMLM response simulations>\n")
   cat(
-    x$nsim,
-    "complete", x$family, "response",
-    if (x$nsim == 1L) "dataset" else "datasets",
-    "from", x$backend,
+    nsim,
+    "complete", meta$family, "response",
+    if (nsim == 1L) "dataset" else "datasets",
+    "from", meta$backend,
     "for", length(x$observed_response), "fitted rows\n"
   )
   invisible(x)

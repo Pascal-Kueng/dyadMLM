@@ -24,10 +24,13 @@ exclusions):
 \itemize{
 \item \code{simulated_responses}: a matrix with \code{nsim} rows and one column per fitted
 observation. Each row is a complete simulated dataset.
-\item \code{observed_response} and \code{response_center}: numeric vectors with one value
+\item \code{observed_response} and \code{predicted_response}: numeric vectors with one value
 per fitted observation.
 \item \code{model_frame}: the data frame used for fitting, in the same row order.
 }
+
+The \code{dyadMLM} attribute records the model and simulation settings, including
+the seed.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -41,14 +44,17 @@ see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
 Currently supports unweighted \code{glmmTMB} models without zero inflation for
 the following families:
 \itemize{
-\item \code{gaussian(link = "identity")}
-\item \code{poisson(link = "log")}
-\item \code{glmmTMB::nbinom1(link = "log")}
-\item \code{glmmTMB::nbinom2(link = "log")}
-\item \code{glmmTMB::tweedie(link = "log")}
-\item \code{Gamma(link = "log")}
-\item \code{glmmTMB::beta_family(link = "logit")}
+\item \code{gaussian()}
+\item \code{poisson()}
+\item \code{glmmTMB::nbinom1()}
+\item \code{glmmTMB::nbinom2()}
+\item \code{glmmTMB::tweedie()}
+\item \code{Gamma()}
+\item \code{glmmTMB::beta_family()}
 }
+
+The model's fitted link is used for prediction and simulation. Predictions
+and simulated responses must be finite.
 
 \code{\link[=check_partner_dependence]{check_partner_dependence()}} currently requires cross-sectional dyads.
 }
@@ -65,7 +71,8 @@ uncertainty in parameter estimates is not included. This is a \emph{plug-in
 predictive reference}. If dyads are the only grouping factor, the simulations
 represent hypothetical new dyads under the same study design.
 
-\code{response_center} contains predictions with random effects set to zero.
+\code{predicted_response} contains predicted mean responses with random effects
+in the conditional model set to zero.
 By default, later checks subtract these same predictions from observed and
 simulated responses. Both random-effect and observation-level variation
 remain. With nonlinear links, setting random effects to zero generally

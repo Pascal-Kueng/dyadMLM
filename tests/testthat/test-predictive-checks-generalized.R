@@ -10,10 +10,11 @@ generalized_check_test_data <- function(family) {
   )
   eta <- 1 + 0.25 * data$predictor + 0.15 * (data$role == "male") +
     stats::rnorm(n_dyads, sd = 0.35)[as.integer(data$dyad)]
-  mu <- if (family$family == "beta") stats::plogis(eta - 1) else exp(eta)
+  mu <- family$linkinv(if (family$family == "beta") eta - 1 else eta)
   n <- nrow(data)
   data$outcome <- switch(
     family$family,
+    gaussian = stats::rnorm(n, mean = mu, sd = 0.3),
     poisson = stats::rpois(n, mu),
     nbinom1 = stats::rnbinom(n, mu = mu, size = mu / 0.8),
     nbinom2 = stats::rnbinom(n, mu = mu, size = 2.5),
@@ -35,15 +36,18 @@ generalized_check_test_data <- function(family) {
 }
 
 
-test_that("six scalar generalized families share the response-check path", {
+test_that("supported scalar families and alternative links share the response-check path", {
   skip_if_not_installed("glmmTMB")
   families <- list(
+    stats::gaussian(link = "log"),
     stats::poisson(link = "log"),
+    stats::poisson(link = "sqrt"),
     glmmTMB::nbinom1(link = "log"),
     glmmTMB::nbinom2(link = "log"),
     glmmTMB::tweedie(link = "log"),
     stats::Gamma(link = "log"),
-    glmmTMB::beta_family(link = "logit")
+    glmmTMB::beta_family(link = "logit"),
+    glmmTMB::beta_family(link = "probit")
   )
 
   for (family in families) {
@@ -51,14 +55,15 @@ test_that("six scalar generalized families share the response-check path", {
     model <- glmmTMB::glmmTMB(
       outcome ~ predictor + role + (1 | dyad), data = data, family = family
     )
-    expect_identical(model$fit$convergence, 0L, info = family$family)
-    expect_true(model$sdr$pdHess, info = family$family)
+    expect_identical(model$fit$convergence, 0L,
+                     info = paste(family$family, family$link))
+    expect_true(model$sdr$pdHess, info = paste(family$family, family$link))
     simulations <- simulate_dyad_responses(model, nsim = 20, seed = 459)
     center <- as.numeric(stats::predict(
       model, newdata = NULL, type = "response", re.form = NA
     ))
     expect_identical(dim(simulations$simulated_responses), c(20L, 120L))
-    expect_identical(simulations$response_center, center)
+    expect_identical(simulations$predicted_response, center)
     expect_identical(
       simulations$simulated_responses,
       t(as.matrix(stats::simulate(model, nsim = 20, seed = 459)))
@@ -101,7 +106,7 @@ test_that("NB2 offsets and dispersion-only missing values preserve fitted rows",
   expect_identical(simulations$model_frame, stats::model.frame(model))
   expect_identical(simulations$observed_response, data$outcome[-c(2L, 5L)])
   expect_identical(dim(simulations$simulated_responses), c(10L, 118L))
-  expect_identical(simulations$response_center, as.numeric(stats::predict(
+  expect_identical(simulations$predicted_response, as.numeric(stats::predict(
     model, newdata = NULL, type = "response", re.form = NA
   )))
   expect_identical(
@@ -134,7 +139,7 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
   })
   defined <- correlations[is.finite(correlations)]
   expect_gt(length(defined), 0L)
-  expect_lt(length(defined), simulations$nsim)
+  expect_lt(length(defined), nrow(simulations$simulated_responses))
   expect_warning(result <- check_partner_dependence(
     simulations, dyad = .env$data$dyad, role = "role",
     response = "raw", plot = FALSE
@@ -156,7 +161,7 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
     partner$observed_quantile,
     (1 + sum(defined <= partner$observed_value)) / (length(defined) + 1)
   )
-  count <- paste0(length(defined), "/", simulations$nsim)
+  count <- paste0(length(defined), "/", nrow(simulations$simulated_responses))
   expect_match(paste(capture.output(print(result)), collapse = "\n"), count,
                fixed = TRUE)
 
@@ -195,5 +200,9 @@ test_that("grouped binomial responses are not supported", {
   model <- glmmTMB::glmmTMB(
     cbind(successes, trials - successes) ~ 1, data = data, family = stats::binomial()
   )
-  expect_error(simulate_dyad_responses(model, nsim = 2), "Unsupported family/link")
+  expect_error(
+    simulate_dyad_responses(model, nsim = 2),
+    "Unsupported family. See the supported models in ?simulate_dyad_responses.",
+    fixed = TRUE
+  )
 })

@@ -56,7 +56,7 @@
 #' **Reference and centring.** Fitted parameters and predictors stay fixed;
 #' every simulation redraws random effects and responses. The model is not
 #' refitted and parameter uncertainty is excluded (a plug-in predictive
-#' reference). Model-centred values are `response - response_center`, using the
+#' reference). Model-centred values are `response - predicted_response`, using the
 #' same zero-random-effect prediction in every dataset. Random-effect variation
 #' remains. These are not conditional or PIT residuals. With nonlinear links,
 #' the centre is generally not the mean averaged over random effects, and the
@@ -86,8 +86,9 @@
 #' summaries produce one warning and use only defined draws for each reference.
 #' This occurs with sparse responses; interpret the reference alongside its
 #' count. An undefined observed summary or entirely undefined reference causes
-#' an error. The object also records roles, pair and omission counts, the
-#' response choice, model metadata, and seed.
+#' an error. The object also records roles, pair and omission counts, and the
+#' response choice. Model and simulation settings, including the seed, are
+#' stored in its `dyadMLM` attribute.
 #'
 #' **Identifier arguments.** Columns in the fitted model frame take precedence
 #' over names in the calling environment. Use `.data$column` or
@@ -144,7 +145,7 @@ check_partner_dependence <- function(
 
   # center is a fitted-row vector, or scalar 0 for raw responses. This closure
   # applies the same subtraction and fixed pair map to every response dataset.
-  center <- if (response == "model-centred") simulations$response_center else 0
+  center <- if (response == "model-centred") simulations$predicted_response else 0
   statistic <- function(y) {
     y <- y - center
     calculate_partner_pair_statistics(
@@ -155,13 +156,13 @@ check_partner_dependence <- function(
   # observed is a named vector of 4 (exchangeable) or 6 (role-specific) summaries.
   # replicated has nsim rows and matching summary columns, including undefined values.
   observed <- statistic(simulations$observed_response)
-  replicated <- t(vapply(seq_len(simulations$nsim), function(i) {
+  replicated <- t(vapply(seq_len(nrow(simulations$simulated_responses)), function(i) {
     statistic(simulations$simulated_responses[i, ])
   }, observed))
 
   # cbind() matches by position: labels and numerical summaries must share an order.
   # The table supplies plot labels/limits; replicated columns supply the plotted draws.
-  result <- structure(list(
+  result <- list(
     statistics_table = cbind(partner_statistic_schema(pairs$role_order),
                              summarize_simulation_reference(observed, replicated)),
     replicated_statistics = replicated, role_order = as.character(pairs$role_order),
@@ -169,12 +170,10 @@ check_partner_dependence <- function(
     n_incomplete_dyads = pairs$n_incomplete_dyads,
     n_missing_dyad_rows = pairs$n_missing_dyad_rows,
     n_missing_role_rows = pairs$n_missing_role_rows,
-    response = response, backend = simulations$backend,
-    family = simulations$family, link = simulations$link,
-    reference = simulations$reference, random_effects = simulations$random_effects,
-    parameter_uncertainty = simulations$parameter_uncertainty,
-    nsim = simulations$nsim, seed = simulations$seed, call = match.call()
-  ), class = c("dyadMLM_partner_check", "list"))
+    response = response
+  )
+  attr(result, "dyadMLM") <- attr(simulations, "dyadMLM")
+  class(result) <- c("dyadMLM_partner_check", "list")
   if (plot) graphics::plot(result)
   invisible(result)
 }
@@ -357,6 +356,8 @@ summarize_simulation_reference <- function(observed_statistics, replicated_stati
 #'
 #' @export
 print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
+  meta <- attr(x, "dyadMLM")
+  nsim <- nrow(x$replicated_statistics)
   cat("<dyadMLM partner-dependence check>\n")
   cat(
     nrow(x$statistics_table), "statistics using",
@@ -365,8 +366,8 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
   )
   cat("Response: ", x$response, "\n", sep = "")
   cat(
-    "Reference: ", x$nsim, " ", x$reference,
-    " datasets with ", x$random_effects, " random effects\n",
+    "Reference: ", nsim, " ", meta$reference,
+    " datasets with ", meta$random_effects, " random effects\n",
     sep = ""
   )
 
@@ -397,7 +398,7 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
       ", ", sprintf(number_format, statistic$replicated_upper), "]",
       " | Observed position ",
       sprintf(number_format, statistic$observed_quantile),
-      " | Defined simulations ", statistic$n_defined, "/", x$nsim,
+      " | Defined simulations ", statistic$n_defined, "/", nsim,
       "\n",
       sep = ""
     )
@@ -458,7 +459,8 @@ plot.dyadMLM_partner_check <- function(
   }
   previous_ask <- grDevices::devAskNewPage(ask)
   on.exit(grDevices::devAskNewPage(previous_ask), add = TRUE)
-  breaks <- min(100L, max(20L, round(nrow(x$replicated_statistics) / 5)))
+  nsim <- nrow(x$replicated_statistics)
+  breaks <- min(100L, max(20L, round(nsim / 5)))
 
   # Each table row names a replicated_statistics column: one scalar per simulation.
   for (i in rows) {
@@ -474,7 +476,7 @@ plot.dyadMLM_partner_check <- function(
       xlim = range(statistic$observed_value, histogram$breaks),
       ylim = c(0, height * 1.25), main = statistic$label,
       sub = paste0(x$response, "; ", x$n_pairs, " pairs; ",
-                   statistic$n_defined, "/", x$nsim, " defined simulations"),
+                   statistic$n_defined, "/", nsim, " defined simulations"),
       xlab = "Summary value", ...
     )
     graphics::segments(

@@ -12,7 +12,7 @@
 \item{...}{Not used.}
 }
 \value{
-\code{x}, invisibly.
+\code{x}, invisible.
 }
 \description{
 Prints the number and type of simulated datasets.

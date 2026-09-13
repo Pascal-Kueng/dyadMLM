@@ -97,9 +97,9 @@ and a partner correlation unchanged by arbitrary within-dyad member swaps.
 
 ## Requirements and technical details
 
-The simulation and check calls also support Poisson, NB1, NB2, Tweedie, and
-Gamma models with log links, and beta models with a logit link. Use an
-appropriate fitted model for each outcome.
+The simulation and check calls also support Poisson, NB1, NB2, Tweedie, Gamma,
+and beta models. They use the model's fitted link for prediction and simulation.
+Use an appropriate fitted model that produces finite predictions and responses.
 
 In the Gaussian examples, `diag()` models separate role variances; `us()` also
 allows partner covariance. `dispformula = ~0` fixes observation-level residual

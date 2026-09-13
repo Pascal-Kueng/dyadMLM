@@ -16,22 +16,25 @@ partner_check_test_simulations <- function() {
   structure(list(
     observed_response = (center + observed)[rows],
     simulated_responses = sweep(replicated, 2, center, "+")[, rows],
-    response_center = center[rows], model_frame = frame[rows, ],
+    predicted_response = center[rows], model_frame = frame[rows, ]
+  ), class = c("dyadMLM_response_simulations", "list"), dyadMLM = list(
     backend = "glmmTMB", family = "gaussian", link = "identity",
     reference = "plug-in predictive", random_effects = "new",
-    parameter_uncertainty = "excluded", nsim = nrow(replicated), seed = 123L,
-    call = quote(simulate_dyad_responses(model))
-  ), class = c("dyadMLM_response_simulations", "list"))
+    parameter_uncertainty = "excluded", seed = 123L
+  ))
 }
 
 
 test_that("model-centred summaries use aligned pairs and empirical references", {
   simulations <- partner_check_test_simulations()
+  attr(simulations, "dyadMLM")$reference <- "known-parameter oracle"
+  attr(simulations, "dyadMLM")$random_effects <- "known covariance"
+  attr(simulations, "dyadMLM")$parameter_uncertainty <- "not applicable"
   result <- check_partner_dependence(simulations, dyad = "dyad", plot = FALSE)
   pairs <- matrix(order(simulations$model_frame$dyad), ncol = 2, byrow = TRUE)
   responses <- sweep(rbind(simulations$observed_response,
                           simulations$simulated_responses),
-                     2, simulations$response_center, "-")
+                     2, simulations$predicted_response, "-")
   expected <- t(apply(responses, 1, function(y) {
     calculate_partner_pair_statistics(y[pairs[, 1]], y[pairs[, 2]], FALSE)
   }))
@@ -39,6 +42,9 @@ test_that("model-centred summaries use aligned pairs and empirical references", 
   draws <- expected[-1, , drop = FALSE]
 
   expect_s3_class(result, "dyadMLM_partner_check")
+  expect_named(result, c("statistics_table", "replicated_statistics", "role_order",
+                        "n_pairs", "n_incomplete_dyads", "n_missing_dyad_rows",
+                        "n_missing_role_rows", "response"))
   expect_equal(table$observed_value, unname(expected[1, ]))
   expect_equal(result$replicated_statistics, draws)
   expect_identical(table$statistic_name, colnames(draws))
@@ -53,8 +59,8 @@ test_that("model-centred summaries use aligned pairs and empirical references", 
   expect_identical(result$role_order, character())
   expect_identical(result$n_pairs, 5L)
   expect_identical(result$response, "model-centred")
-  expect_identical(result$reference, simulations$reference)
-  expect_identical(result$random_effects, simulations$random_effects)
+  expect_identical(attr(result, "dyadMLM"), attr(simulations, "dyadMLM"))
+  expect_output(print(result), "Reference: 4 known-parameter oracle", fixed = TRUE)
 })
 
 
@@ -69,7 +75,7 @@ test_that("role-specific summaries use the requested responses and orientation",
       simulations, dyad = "dyad", role = "role", response = response, plot = FALSE
     )
     values <- if (response == "raw") responses else
-      sweep(responses, 2, simulations$response_center, "-")
+      sweep(responses, 2, simulations$predicted_response, "-")
     # Independent formulas check all six summaries for observed and simulated data.
     expected <- t(apply(values, 1, function(y) {
       first <- y[pairs[, 1]]
@@ -244,7 +250,7 @@ test_that("zero-spread draws warn for centred and raw exchangeable checks", {
   for (response in c("model-centred", "raw")) {
     simulations <- partner_check_test_simulations()
     simulations$simulated_responses[1, ] <- if (response == "raw") 1 else
-      simulations$response_center
+      simulations$predicted_response
     expect_warning(check_partner_dependence(simulations, "dyad", response = response,
                                               plot = FALSE), "Undefined simulated summaries")
   }
@@ -254,12 +260,13 @@ test_that("zero-spread draws warn for centred and raw exchangeable checks", {
 test_that("one simulation retains every statistic and its reference limits", {
   simulations <- partner_check_test_simulations()
   simulations$simulated_responses <- simulations$simulated_responses[1, , drop = FALSE]
-  simulations$nsim <- 1L
+  expect_output(print(simulations), "1 complete gaussian response dataset", fixed = TRUE)
   for (role in list(NULL, "role")) {
     result <- check_partner_dependence(simulations, "dyad", .env$role, plot = FALSE)
     table <- result$statistics_table
     expect_identical(dim(result$replicated_statistics), c(1L, nrow(table)))
     expect_identical(colnames(result$replicated_statistics), table$statistic_name)
+    expect_output(print(result), "Reference: 1 plug-in predictive", fixed = TRUE)
     for (column in c("replicated_lower", "replicated_median", "replicated_upper")) {
       expect_equal(table[[column]], unname(result$replicated_statistics[1, ]))
     }
@@ -362,9 +369,8 @@ test_that("predictive histograms show the full outer bars", {
   simulations <- partner_check_test_simulations()
   simulations$model_frame <- data.frame(dyad = rep(1:3, each = 2))
   simulations$observed_response <- values * 0.30055
-  simulations$response_center <- rep(0, 6)
+  simulations$predicted_response <- rep(0, 6)
   simulations$simulated_responses <- scales %o% values
-  simulations$nsim <- length(scales)
   result <- check_partner_dependence(simulations, "dyad", plot = FALSE)
 
   grDevices::pdf(NULL)
