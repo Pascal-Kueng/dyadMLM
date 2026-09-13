@@ -1,6 +1,7 @@
 # APIM covariance decomposition: current paper plan
 
-Updated **1 September 2026**. This is the working plan, not a finalized protocol.
+Updated **13 September 2026** after checking J-P's supplied source materials.
+This is the working plan, not a finalized protocol.
 It replaces the duplicated planning sections previously embedded in the
 [technical notes](paper-idea.Rmd). The [literature review](literature-review.md)
 records source evidence and access gaps; the [short outline](paper-outline.Rmd)
@@ -25,6 +26,12 @@ provides the figures and a meeting-ready summary.
   the [Bolger-Laurenceau webinar (2016)](https://cancercontrol.cancer.gov/sites/default/files/2020-06/flashe-webinar-2.5.2016.pdf),
   [Kenny's handout](https://davidakenny.net/kkc/c7/Explained_Nonindependence.docx), and
   [APIM_MM](https://davidakenny.net/doc/APIM_MM.pdf). Do not claim priority for these.
+- **Kenny, Ackerman, and Kashy (2024), Section 23.5, pp. 577-580**, is now
+  verified direct published methodology, including multiple predictors and
+  covariates. Its separate ILD section does not partition predictor routes at
+  both temporal levels. J-P's 2025 workshop/files provide a matched self-efficacy
+  example for potential initial replication; the scripts do not supply
+  four-product contribution intervals. See the [source assessment](jp-materials-review-2026-09-13.md).
 - Paper 1's intended contribution is a clear, auditable synthesis with validated
   inferential/reporting recommendations. If it only reproduces existing
   calculations, position it as a tutorial/consolidation rather than a new
@@ -199,8 +206,9 @@ and Gistelinck et al. (2018) for simulation-to-recommendation structure; see the
 
 - [x] Assemble the broad APIM scoping review and distinguish six confirmed applied
   uses from total-only explanations, adjacent models, and unverified sources.
-- [ ] Obtain Dwyer's calculation supplement and the full 2024 Kenny-Ackerman-Kashy
-  chapter; complete the targeted contribution-inference and extension searches.
+- [x] Obtain and inspect the full 2024 Kenny-Ackerman-Kashy chapter (supplied by J-P).
+- [ ] Obtain Dwyer's calculation supplement; inspect the chapter-linked OSF
+  examples and complete the targeted contribution-inference and extension searches.
 - [ ] Agree with collaborators on Paper 1's target journal, substantive example,
   scope, division of work, feedback cadence, and authorship responsibilities.
 - [ ] Use outline + figures -> feedback -> revised outline -> rough draft as the
