@@ -1,125 +1,99 @@
+### Checking partner dependence -----------------------------------------------
+
 #' Check whether a fitted model reproduces partner dependence
 #'
 #' `r lifecycle::badge("experimental")`
-#' Checks whether a fitted model reproduces how much partners' responses vary
-#' and how strongly they are related. It compares the observed data with
-#' datasets generated from the fitted model.
+#' Calculates the same summaries of partner variation and correlation in the
+#' observed data and every simulated dataset, then plots their comparison.
 #'
 #' @param simulations An object returned by [simulate_dyad_responses()].
 #' @param dyad An unquoted or quoted column name in the fitted data, or a
 #'   vector identifying the dyad for each fitted row. See Technical details.
-#' @param role Member roles, supplied in the same way as `dyad`. Use `NULL`
-#'   (the default) only when members can be treated as interchangeable.
+#' @param role Member roles, supplied like `dyad`. Use `NULL` (the default)
+#'   only when members can be treated as interchangeable.
 #' @param plot Logical. If `TRUE` (the default), draw the diagnostic plots.
-#' @param response `"model-centred"` (the default) subtracts the model's
-#'   prediction with random effects set to zero. `"raw"` uses responses
+#' @param response `"model-centred"` (the default) subtracts predictions with
+#'   random effects in the conditional model set to zero; `"raw"` leaves responses
 #'   unchanged. The same choice applies to observed and simulated data.
 #'
-#' @return A `dyadMLM_partner_check` object, returned invisibly. Assign it to
-#'   a variable, print it for numeric summaries, or plot it again without
-#'   repeating the simulations.
-#'
-#' @section Quick start:
-#' For a fitted model containing `coupleID` and `gender` columns:
-#' \preformatted{
-#' simulations <- simulate_dyad_responses(model, seed = 123)
-#' check <- check_partner_dependence(simulations, dyad = coupleID, role = gender)
-#' check
-#' }
-#' This draws the plots and prints the comparison. Set `plot = FALSE` to save
-#' the result without plotting. A complete fitting example appears below.
+#' @return A `dyadMLM_partner_check` object, invisibly. Save it to print numeric
+#'   summaries or plot the comparison again without repeating simulations.
 #'
 #' @section Reading the result:
-#' The histogram shows simulated values, the red line marks the observed value,
-#' and dashed lines enclose the middle 95% of simulations. The printed table
-#' also gives the observed position among simulations on a 0–1 scale.
-#' A position near either end may flag poor agreement, but ties can also give
-#' a position near 1. Read it alongside the histogram. These comparisons are
-#' descriptive, not p-values, confidence intervals, or a pass/fail test.
-#'
-#' The check is most useful for assumptions such as equal variation in both
-#' roles or no remaining partner relationship. If the model freely estimated
-#' a feature from these data, close agreement is expected and alone provides
-#' little evidence of fit.
+#' Histograms show simulated summaries, red lines mark observed values, and
+#' dashed lines enclose the middle 95% of simulations. The printed position
+#' on a 0 to 1 scale indicates where the observed value falls among simulations.
+#' Positions near either end may flag poor agreement; ties can also give a
+#' position near 1, so read this alongside the histogram. These are descriptive
+#' comparisons, not p-values, confidence intervals, or pass/fail tests.
+#' They are most useful for assumptions such as equal variation across roles.
+#' Close agreement for a feature freely estimated from these data is expected
+#' and alone provides little evidence of fit.
 #'
 #' @section Roles and data:
-#' Supply `role` when the member distinction is meaningful. Without it,
-#' summaries treat members as interchangeable and are unchanged by swapping
-#' their positions within any dyad.
-#'
-#' Use cross-sectional simulations from [simulate_dyad_responses()], with at
-#' most two fitted rows per dyad and at least three complete dyads. With roles,
-#' each complete dyad must contain one member of each of exactly two roles.
-#' Missing identifiers and incomplete dyads are omitted and counted.
+#' Use cross-sectional data with at most two fitted rows per dyad and at least
+#' three complete dyads. With `role`, each complete dyad must contain one
+#' member of each of exactly two roles. Without it, summaries are unchanged
+#' by swapping members within any dyad. Missing identifiers and incomplete
+#' dyads are omitted and counted.
 #'
 #' @section Technical details:
-#' **Reference and centring.** Fitted parameters and predictors stay fixed;
-#' every simulation redraws random effects and responses. The model is not
-#' refitted and parameter uncertainty is excluded (a plug-in predictive
-#' reference). Model-centred values are `response - predicted_response`, using the
-#' same zero-random-effect prediction in every dataset. Random-effect variation
-#' remains. These are not conditional or PIT residuals. With nonlinear links,
-#' the centre is generally not the mean averaged over random effects, and the
-#' subtraction does not provide a residual covariance decomposition.
+#' **Reference and centring.** Simulations redraw random effects and responses,
+#' keeping fitted parameters and predictors fixed (a plug-in predictive
+#' reference). The model is not refitted, and uncertainty in estimated parameters
+#' is not included. Model-centred values subtract the same `predicted_response`
+#' vector from every dataset.
+#' Random-effect variation remains; these are not conditional or PIT residuals.
+#' With nonlinear links, these predictions generally differ from means averaged
+#' over random effects, and subtraction does not provide a residual covariance
+#' decomposition.
 #'
-#' **Summaries.** With roles, the six summaries are each role's SD, their
-#' correlation, the SDs of dyad means and half-differences, and the
-#' mean/half-difference correlation. The half-difference is `(role1 - role2) / 2`.
-#' Roles follow factor-level order, or sorted values otherwise; reversing them
-#' reverses the last correlation.
-#'
+#' **Summaries.** With roles, the six summaries are each role's SD, partner
+#' correlation, SDs of dyad means and half-differences, and the
+#' mean/half-difference correlation.
+#' Half-differences are `(role1 - role2) / 2`. Roles follow factor-level order
+#' or sorted values otherwise; reversing them reverses the last correlation.
 #' Without roles, the four summaries are common member SD, partner correlation,
 #' dyad-mean SD, and half-difference RMS about zero. For dyad means `M` and
-#' half-differences `D`, the common variance is `var(M) + mean(D^2)` and partner
+#' half-differences `D`, common variance is `var(M) + mean(D^2)` and partner
 #' covariance is `var(M) - mean(D^2)`. Covariance divided by variance gives
-#' partner correlation.
-#' This follows Woody and Sadler (2005). Both views express the same covariance
-#' information and are not independent checks. The predictive comparison
-#' follows the replicated-data principle of Gelman, Meng, and Stern (1996).
+#' partner correlation (Woody and Sadler, 2005). Both views express the same
+#' covariance information, so are not independent checks. Comparing observed
+#' and replicated summaries follows Gelman, Meng, and Stern (1996).
 #'
-#' **Output and undefined values.** `statistics_table` contains one row per
-#' summary; `replicated_statistics` is a matrix with `nsim` rows and one column
-#' per summary. Each table row gives the observed value, simulated median and
-#' middle 95% limits, the count `n_defined`, and `observed_quantile`:
+#' **Output and undefined values.** `replicated_statistics` has one row per
+#' simulation and one column per summary. `statistics_table` has one row per
+#' summary: observed value, simulated median and middle 95% limits, `n_defined`,
+#' and `observed_quantile`:
 #' `(1 + sum(defined_simulations <= observed)) / (n_defined + 1)`.
-#' Undefined simulated values remain in the matrix. Partially undefined
-#' summaries produce one warning and use only defined draws for each reference.
-#' This occurs with sparse responses; interpret the reference alongside its
-#' count. An undefined observed summary or entirely undefined reference causes
-#' an error. The object also records roles, pair and omission counts, and the
-#' response choice. Model and simulation settings, including the seed, are
-#' stored in its `dyadMLM` attribute.
+#' Undefined simulated summaries remain in the matrix; each reference uses only
+#' defined values. Partly undefined summaries produce one warning. Inspect
+#' `n_defined`, especially for sparse responses. An undefined observed summary
+#' or entirely undefined reference causes an error. The result also records
+#' roles, pair and omission counts, and the response choice. Model and simulation
+#' settings, including the seed, are stored in its `dyadMLM` attribute.
 #'
-#' **Identifier arguments.** Columns in the fitted model frame take precedence
-#' over names in the calling environment. Use `.data$column` or
-#' `.data[[column_name]]` for explicit column selection, and `.env$vector` for
-#' an external vector already aligned with retained fitted rows. Wrappers can
-#' forward arguments with `{{ dyad }}` and `{{ role }}`.
+#' **Identifiers.** Fitted model-frame columns take precedence over names in the
+#' calling environment. Use `.data$column` or `.data[[column_name]]` to select a
+#' column explicitly, or `.env$vector` for an external vector already aligned
+#' with retained fitted rows. Wrappers can use `{{ dyad }}` and `{{ role }}`.
 #'
 #' @examples
 #' if (requireNamespace("glmmTMB", quietly = TRUE)) {
 #'   example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
-#'   model <- glmmTMB::glmmTMB(
-#'     closeness ~ gender + (1 | coupleID),
-#'     data = example_data
-#'   )
-#'
-#'   # Use fewer simulations for a quick example; the default is 1000.
+#'   model <- glmmTMB::glmmTMB(closeness ~ gender + (1 | coupleID),
+#'                            data = example_data)
+#'   # Fewer simulations for a quick example; the default is 1000.
 #'   simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
-#'   check <- check_partner_dependence(
-#'     simulations,
-#'     dyad = coupleID,
-#'     role = gender,
-#'     plot = FALSE
-#'   )
+#'   check <- check_partner_dependence(simulations, dyad = coupleID,
+#'                                      role = gender, plot = FALSE)
 #'   print(check)
 #'   plot(check, parameterization = "member", ask = FALSE)
 #' }
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
-#'   Methods, 10*(2), 139-158.
-#'   \doi{10.1037/1082-989X.10.2.139}.
+#'   Methods, 10*(2), 139-158. \doi{10.1037/1082-989X.10.2.139}.
 #'
 #' Gelman, A., Meng, X.-L., & Stern, H. S. (1996). Posterior predictive
 #' assessment of model fitness via realized discrepancies. *Statistica Sinica,
@@ -143,30 +117,28 @@ check_partner_dependence <- function(
     resolve_fitted_row_argument(rlang::enquo(role), "role", frame, allow_null = TRUE)
   )
 
-  # center is a fitted-row vector, or scalar 0 for raw responses. This closure
-  # applies the same subtraction and fixed pair map to every response dataset.
+  # pairs$rows has one row per complete dyad and one column per partner.
+  # Subtract the same fitted-row predictions from every dataset (or 0 for raw).
   center <- if (response == "model-centred") simulations$predicted_response else 0
   statistic <- function(y) {
     y <- y - center
-    calculate_partner_pair_statistics(
-      y[pairs$paired_row_indices[, 1]], y[pairs$paired_row_indices[, 2]],
-      role_specific = length(pairs$role_order) > 0L
-    )
+    return(calculate_partner_pair_statistics(
+      y[pairs$rows[, 1]], y[pairs$rows[, 2]],
+      role_specific = !is.null(pairs$role_order)
+    ))
   }
-  # observed is a named vector of 4 (exchangeable) or 6 (role-specific) summaries.
-  # replicated has nsim rows and matching summary columns, including undefined values.
+  # Apply the same statistic to observed responses and each simulation.
+  # observed has 4 or 6 named values; replicated has one row per simulation.
   observed <- statistic(simulations$observed_response)
-  replicated <- t(vapply(seq_len(nrow(simulations$simulated_responses)), function(i) {
-    statistic(simulations$simulated_responses[i, ])
-  }, observed))
+  replicated <- t(apply(unname(simulations$simulated_responses), 1, statistic))
 
-  # cbind() matches by position: labels and numerical summaries must share an order.
-  # The table supplies plot labels/limits; replicated columns supply the plotted draws.
+  # Table rows and simulation columns use the same statistic order.
+  # Keep both: the table supplies labels/limits, the matrix supplies histograms.
   result <- list(
-    statistics_table = cbind(partner_statistic_schema(pairs$role_order),
+    statistics_table = cbind(partner_statistic_info(pairs$role_order),
                              summarize_simulation_reference(observed, replicated)),
     replicated_statistics = replicated, role_order = as.character(pairs$role_order),
-    n_pairs = nrow(pairs$paired_row_indices),
+    n_pairs = nrow(pairs$rows),
     n_incomplete_dyads = pairs$n_incomplete_dyads,
     n_missing_dyad_rows = pairs$n_missing_dyad_rows,
     n_missing_role_rows = pairs$n_missing_role_rows,
@@ -175,9 +147,11 @@ check_partner_dependence <- function(
   attr(result, "dyadMLM") <- attr(simulations, "dyadMLM")
   class(result) <- c("dyadMLM_partner_check", "list")
   if (plot) graphics::plot(result)
-  invisible(result)
+  return(invisible(result))
 }
 
+
+### Matching partners ---------------------------------------------------------
 
 # Build the pair map once; reuse it for observed and simulated responses.
 prepare_partner_pairs <- function(dyad_values, role_values = NULL) {
@@ -201,8 +175,7 @@ prepare_partner_pairs <- function(dyad_values, role_values = NULL) {
     stop("At least three complete dyads are required to check partner dependence.",
          call. = FALSE)
   }
-  # pairs is n_pairs x 2, indexing retained responses, not original-data row numbers.
-  # When roles are supplied, the loop below aligns its columns with role_order.
+  # pairs indexes retained fitting rows, not row numbers in the original data.
   pairs <- matrix(unlist(rows, use.names = FALSE), ncol = 2L, byrow = TRUE)
 
   role_order <- NULL
@@ -215,20 +188,23 @@ prepare_partner_pairs <- function(dyad_values, role_values = NULL) {
     if (length(role_order) != 2L) {
       stop("Exactly two role values are required among the complete dyads.", call. = FALSE)
     }
-    for (i in seq_len(nrow(pairs))) {
-      order <- match(role_order, role_values[pairs[i, ]])
-      if (anyNA(order)) {
-        stop("Each complete dyad must contain exactly one row for each role value.",
-             call. = FALSE)
-      }
-      pairs[i, ] <- pairs[i, order]
+    if (any(role_values[pairs[, 1]] == role_values[pairs[, 2]])) {
+      stop("Each complete dyad must contain exactly one row for each role value.",
+           call. = FALSE)
     }
+    # Each pair has both roles; put the first role in column 1.
+    reverse <- role_values[pairs[, 1]] != role_order[1]
+    pairs[reverse, ] <- pairs[reverse, 2:1, drop = FALSE]
   }
-  list(paired_row_indices = pairs, role_order = role_order,
-       n_incomplete_dyads = n_incomplete, n_missing_dyad_rows = sum(missing_dyad),
-       n_missing_role_rows = sum(missing_role))
+  return(list(
+    rows = pairs, role_order = role_order,
+    n_incomplete_dyads = n_incomplete, n_missing_dyad_rows = sum(missing_dyad),
+    n_missing_role_rows = sum(missing_role)
+  ))
 }
 
+
+### Calculating paired statistics ---------------------------------------------
 
 # first and second are paired numeric vectors: one value per complete dyad.
 # Returned names identify table rows and replicated-statistic columns.
@@ -254,19 +230,21 @@ calculate_partner_pair_statistics <- function(first, second, role_specific) {
   dyad_mean_variance <- stats::var(dyad_mean)
   half_difference_mean_square <- mean(half_difference^2)
   member_variance <- dyad_mean_variance + half_difference_mean_square
-  c(
+  return(c(
     exchangeable_member_sd = sqrt(member_variance),
     exchangeable_partner_correlation =
       (dyad_mean_variance - half_difference_mean_square) / member_variance,
     dyad_mean_sd = sqrt(dyad_mean_variance),
     half_difference_rms = sqrt(half_difference_mean_square)
-  )
+  ))
 }
 
 
+### Statistic labels ----------------------------------------------------------
+
 # One table row per summary, in calculate_partner_pair_statistics() order.
 # The first half belongs to the member view; the second to the mean/difference view.
-partner_statistic_schema <- function(role_order = NULL) {
+partner_statistic_info <- function(role_order = NULL) {
   labels <- if (is.null(role_order)) {
     c(
       exchangeable_member_sd = "Common member SD (exchangeable)",
@@ -290,56 +268,63 @@ partner_statistic_schema <- function(role_order = NULL) {
     )
   }
 
-  data.frame(
+  return(data.frame(
     statistic_name = names(labels),
     parameterization = rep(
       c("member", "mean_difference"), each = length(labels) / 2L
     ),
     label = unname(labels)
-  )
+  ))
 }
 
 
-# observed_statistics is a named length-K vector; replicated_statistics is nsim x K.
-# Their statistic order agrees; each returned table row summarizes one reference.
-summarize_simulation_reference <- function(observed_statistics, replicated_statistics) {
-  if (any(!is.finite(observed_statistics))) {
+### Summarizing the simulation reference ---------------------------------------
+
+# Finite responses can still give undefined correlations (e.g. constant counts).
+# Summarize each statistic using its defined draws, and report how many remain.
+summarize_simulation_reference <- function(observed, replicated) {
+  if (any(!is.finite(observed))) {
     stop("Observed partner-dependence summaries are undefined: ",
-         paste(names(observed_statistics)[!is.finite(observed_statistics)], collapse = ", "),
+         paste(names(observed)[!is.finite(observed)], collapse = ", "),
          ". The observed response has insufficient variation.", call. = FALSE)
   }
-  # A length-K list of finite draws; elements may differ in length. Filtering
-  # separately keeps usable draws for other statistics when one is undefined.
-  defined <- lapply(seq_along(observed_statistics), function(i) {
-    values <- replicated_statistics[, i]
-    values[is.finite(values)]
+  # One vector per statistic; lengths can differ when some draws are undefined.
+  defined <- lapply(seq_along(observed), function(i) {
+    values <- replicated[, i]
+    return(values[is.finite(values)])
   })
   n_defined <- lengths(defined)
   if (any(n_defined == 0L)) {
     stop("Every simulated value is undefined for: ",
-         paste(names(observed_statistics)[n_defined == 0L], collapse = ", "),
+         paste(names(observed)[n_defined == 0L], collapse = ", "),
          ". A predictive reference cannot be calculated.", call. = FALSE)
   }
-  n_undefined <- nrow(replicated_statistics) - n_defined
+  n_undefined <- nrow(replicated) - n_defined
   if (any(n_undefined > 0L)) {
-    warning("Undefined simulated summaries (counts out of ", nrow(replicated_statistics),
-            "): ", paste(names(observed_statistics)[n_undefined > 0L],
+    warning("Undefined simulated summaries (counts out of ", nrow(replicated),
+            "): ", paste(names(observed)[n_undefined > 0L],
                          n_undefined[n_undefined > 0L],
                          sep = " = ", collapse = "; "),
             ". References use defined values only; inspect their counts.", call. = FALSE)
   }
-  # quantiles is 3 x K (lower, median, upper); positions is a length-K vector.
-  quantiles <- vapply(defined, stats::quantile, numeric(3),
-                   probs = c(0.025, 0.5, 0.975), names = FALSE)
-  positions <- vapply(seq_along(defined), function(i) {
-    (1 + sum(defined[[i]] <= observed_statistics[[i]])) / (n_defined[[i]] + 1)
-  }, numeric(1))
-  data.frame(observed_value = unname(observed_statistics),
-             replicated_median = quantiles[2, ], replicated_lower = quantiles[1, ],
-             replicated_upper = quantiles[3, ], observed_quantile = positions,
-             n_defined = n_defined)
+  # Each quantiles column contains lower, median, upper for one statistic.
+  quantiles <- matrix(NA_real_, nrow = 3, ncol = length(defined))
+  positions <- numeric(length(defined))
+  for (i in seq_along(defined)) {
+    values <- defined[[i]]
+    quantiles[, i] <- stats::quantile(values, probs = c(0.025, 0.5, 0.975), names = FALSE)
+    positions[i] <- (1 + sum(values <= observed[i])) / (n_defined[i] + 1)
+  }
+  return(data.frame(
+    observed_value = unname(observed),
+    replicated_median = quantiles[2, ], replicated_lower = quantiles[1, ],
+    replicated_upper = quantiles[3, ], observed_quantile = positions,
+    n_defined = n_defined
+  ))
 }
 
+
+### Printing results ----------------------------------------------------------
 
 #' Print a partner-dependence predictive check
 #'
@@ -358,18 +343,12 @@ summarize_simulation_reference <- function(observed_statistics, replicated_stati
 print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
   meta <- attr(x, "dyadMLM")
   nsim <- nrow(x$replicated_statistics)
+  table <- x$statistics_table
   cat("<dyadMLM partner-dependence check>\n")
-  cat(
-    nrow(x$statistics_table), "statistics using",
-    x$n_pairs,
-    "complete pairs\n"
-  )
+  cat(nrow(table), "statistics using", x$n_pairs, "complete pairs\n")
   cat("Response: ", x$response, "\n", sep = "")
-  cat(
-    "Reference: ", nsim, " ", meta$reference,
-    " datasets with ", meta$random_effects, " random effects\n",
-    sep = ""
-  )
+  cat("Reference: ", nsim, " ", meta$reference, " datasets with ",
+      meta$random_effects, " random effects\n", sep = "")
 
   omitted_counts <- c(
     "incomplete dyads" = x$n_incomplete_dyads,
@@ -378,34 +357,29 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
   )
   omitted_counts <- omitted_counts[omitted_counts > 0L]
   if (length(omitted_counts) > 0L) {
-    cat(
-      "Omitted: ",
-      paste0(names(omitted_counts), ": ", omitted_counts, collapse = "; "),
-      "\n",
-      sep = ""
-    )
+    cat("Omitted: ", paste0(names(omitted_counts), ": ", omitted_counts,
+                           collapse = "; "), "\n", sep = "")
   }
 
   number_format <- paste0("%.", digits, "f")
   cat("Simulated datasets: median and middle 95% of values\n")
-  for (statistic_index in seq_len(nrow(x$statistics_table))) {
-    statistic <- x$statistics_table[statistic_index, ]
+  for (i in seq_len(nrow(table))) {
+    statistic <- table[i, ]
     cat(
-      statistic$label,
-      "\n  Observed ", sprintf(number_format, statistic$observed_value),
+      statistic$label, "\n  Observed ", sprintf(number_format, statistic$observed_value),
       " | Median ", sprintf(number_format, statistic$replicated_median),
       " | Middle 95% [", sprintf(number_format, statistic$replicated_lower),
       ", ", sprintf(number_format, statistic$replicated_upper), "]",
-      " | Observed position ",
-      sprintf(number_format, statistic$observed_quantile),
+      " | Observed position ", sprintf(number_format, statistic$observed_quantile),
       " | Defined simulations ", statistic$n_defined, "/", nsim,
-      "\n",
-      sep = ""
+      "\n", sep = ""
     )
   }
   invisible(x)
 }
 
+
+### Plotting results ----------------------------------------------------------
 
 #' Plot partner-dependence predictive checks
 #'
@@ -479,13 +453,9 @@ plot.dyadMLM_partner_check <- function(
                    statistic$n_defined, "/", nsim, " defined simulations"),
       xlab = "Summary value", ...
     )
-    graphics::segments(
-      x0 = limits, y0 = 0, x1 = limits, y1 = height, lty = 2, col = "grey40"
-    )
-    graphics::segments(
-      x0 = statistic$observed_value, y0 = 0,
-      x1 = statistic$observed_value, y1 = height, lwd = 2.5, col = "red"
-    )
+    graphics::segments(limits, 0, limits, height, lty = 2, col = "grey40")
+    graphics::segments(statistic$observed_value, 0, statistic$observed_value,
+                       height, lwd = 2.5, col = "red")
     graphics::legend(
       "top", legend = c("Observed", "Middle 95% of simulations"),
       lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
