@@ -15,90 +15,70 @@ check_partner_dependence(
 \arguments{
 \item{simulations}{An object returned by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.}
 
-\item{dyad}{An unquoted or quoted column name in the fitted data, or a
-vector identifying the dyad for each fitted row. See Technical details.}
+\item{dyad}{A column name in the fitted data (quoted or unquoted), or a vector
+of dyad IDs in the same row order. Columns take precedence over external
+names; use \code{.env$ids} to select an external vector explicitly.}
 
-\item{role}{Member roles, supplied like \code{dyad}. Use \code{NULL} (the default)
-only when members can be treated as interchangeable.}
+\item{role}{Member roles, supplied like \code{dyad}. Use \code{NULL} (default) when
+members can be treated as interchangeable.}
 
-\item{plot}{Logical. If \code{TRUE} (the default), draw the diagnostic plots.}
+\item{plot}{If \code{TRUE} (default), draw the comparison plots.}
 
-\item{response}{\code{"model-centred"} (the default) subtracts predictions with
-random effects in the conditional model set to zero; \code{"raw"} leaves responses
-unchanged. The same choice applies to observed and simulated data.}
+\item{response}{\code{"model-centred"} (default) subtracts the same model predictions
+from observed and simulated responses. \code{"raw"} leaves responses unchanged.
+See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how these predictions are defined.}
 }
 \value{
-A \code{dyadMLM_partner_check} object, invisibly. Save it to print numeric
-summaries or plot the comparison again without repeating simulations.
+A \code{dyadMLM_partner_check} object, invisibly, with \code{statistics_table}
+(one row per summary), \code{replicated_statistics} (one row per simulation),
+and pair and omission counts. Settings are stored in its \code{dyadMLM} attribute.
+Save the result to print or plot it again without repeating simulations.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Calculates the same summaries of partner variation and correlation in the
-observed data and every simulated dataset, then plots their comparison.
+A dyadic model should reproduce how much responses vary and how strongly
+partners' responses are related. Getting the average response right does not
+guarantee either. This check compares observed and simulated variation and
+partner correlations to help identify mismatches in the model's assumptions.
 }
-\section{Reading the result}{
+\section{Data requirements}{
 
-Histograms show simulated summaries, red lines mark observed values, and
-dashed lines enclose the middle 95\% of simulations. The printed position
-on a 0 to 1 scale indicates where the observed value falls among simulations.
-Positions near either end may flag poor agreement; ties can also give a
-position near 1, so read this alongside the histogram. These are descriptive
-comparisons, not p-values, confidence intervals, or pass/fail tests.
-They are most useful for assumptions such as equal variation across roles.
-Close agreement for a feature freely estimated from these data is expected
-and alone provides little evidence of fit.
+Requires at least three complete cross-sectional dyads and at most two fitted
+rows per dyad. With \code{role}, each complete dyad must have one member of each
+of exactly two roles. Rows with missing IDs or roles, and incomplete dyads,
+are omitted and counted.
 }
 
-\section{Roles and data}{
+\section{Reading the plots}{
 
-Use cross-sectional data with at most two fitted rows per dyad and at least
-three complete dyads. With \code{role}, each complete dyad must contain one
-member of each of exactly two roles. Without it, summaries are unchanged
-by swapping members within any dyad. Missing identifiers and incomplete
-dyads are omitted and counted.
+Histograms show simulated summaries; red lines mark observed values and
+dashed lines enclose the middle 95\% of simulations. An observed value far
+from most simulations may indicate poor model fit. These comparisons are
+descriptive, not p-values or confidence intervals. Agreement is expected for
+features freely estimated from the data and alone provides little evidence
+of fit.
 }
 
 \section{Technical details}{
 
-\strong{Reference and centring.} Simulations redraw random effects and responses,
-keeping fitted parameters and predictors fixed (a plug-in predictive
-reference). The model is not refitted, and uncertainty in estimated parameters
-is not included. Model-centred values subtract the same \code{predicted_response}
-vector from every dataset.
-Random-effect variation remains; these are not conditional or PIT residuals.
-With nonlinear links, these predictions generally differ from means averaged
-over random effects, and subtraction does not provide a residual covariance
-decomposition.
+After any centring, let \code{M = (a + b) / 2} and \code{D = (a - b) / 2} for paired
+responses \code{a} and \code{b}. With roles, summaries are each role's SD, partner
+correlation, \code{sd(M)}, \code{sd(D)}, and \code{cor(M, D)}. Roles follow factor levels or
+sorted values; reversing their order reverses \code{cor(M, D)}.
 
-\strong{Summaries.} With roles, the six summaries are each role's SD, partner
-correlation, SDs of dyad means and half-differences, and the
-mean/half-difference correlation.
-Half-differences are \code{(role1 - role2) / 2}. Roles follow factor-level order
-or sorted values otherwise; reversing them reverses the last correlation.
-Without roles, the four summaries are common member SD, partner correlation,
-dyad-mean SD, and half-difference RMS about zero. For dyad means \code{M} and
-half-differences \code{D}, common variance is \code{var(M) + mean(D^2)} and partner
-covariance is \code{var(M) - mean(D^2)}. Covariance divided by variance gives
-partner correlation (Woody and Sadler, 2005). Both views express the same
-covariance information, so are not independent checks. Comparing observed
-and replicated summaries follows Gelman, Meng, and Stern (1996).
+Without roles, common member variance is \code{var(M) + mean(D^2)} and partner
+covariance is \code{var(M) - mean(D^2)}. Summaries are common member SD, partner
+correlation (covariance divided by variance), \code{sd(M)}, and \code{sqrt(mean(D^2))}.
+These are unchanged by swapping partners. Both plot views express the same
+covariance information. Centring retains random-effect variation.
 
-\strong{Output and undefined values.} \code{replicated_statistics} has one row per
-simulation and one column per summary. \code{statistics_table} has one row per
-summary: observed value, simulated median and middle 95\% limits, \code{n_defined},
-and \code{observed_quantile}:
+The table gives observed values, simulated medians and middle 95\% limits,
+\code{n_defined} (usable values per summary), and \code{observed_quantile} (observed position):
 \code{(1 + sum(defined_simulations <= observed)) / (n_defined + 1)}.
-Undefined simulated summaries remain in the matrix; each reference uses only
-defined values. Partly undefined summaries produce one warning. Inspect
-\code{n_defined}, especially for sparse responses. An undefined observed summary
-or entirely undefined reference causes an error. The result also records
-roles, pair and omission counts, and the response choice. Model and simulation
-settings, including the seed, are stored in its \code{dyadMLM} attribute.
-
-\strong{Identifiers.} Fitted model-frame columns take precedence over names in the
-calling environment. Use \code{.data$column} or \code{.data[[column_name]]} to select a
-column explicitly, or \code{.env$vector} for an external vector already aligned
-with retained fitted rows. Wrappers can use \code{{{ dyad }}} and \code{{{ role }}}.
+Ties can put this near 1 even with good agreement. Undefined simulated
+summaries remain in the matrix but are excluded from their reference, with
+a warning. An undefined observed summary, or no usable simulated values for
+any one summary, causes an error.
 }
 
 \examples{
