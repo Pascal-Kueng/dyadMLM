@@ -69,21 +69,15 @@ select_dyad_columns <- function(data, cols_quo, arg) {
 }
 
 
-# argument_quo carries the user expression and environment, also through {{ }}.
-# Resolve names in model_frame first; external vectors must already follow its rows.
+# Look up identifiers in the fitted data first.
+# External vectors must match the retained fitting rows and their order.
 resolve_fitted_row_argument <- function(argument_quo, argument_name, model_frame,
                                        allow_null = FALSE) {
   value <- rlang::eval_tidy(argument_quo, data = model_frame)
   if (is.null(value) && allow_null) return(NULL)
 
   # A single string names a column, e.g. dyad = "coupleID".
-  if (rlang::is_string(value)) {
-    if (!value %in% names(model_frame)) {
-      stop("`", value, "` does not name a column in the fitted model frame.",
-           call. = FALSE)
-    }
-    value <- model_frame[[value]]
-  }
+  if (rlang::is_string(value)) value <- model_frame[[value]]
   if (!is.atomic(value) || !is.null(dim(value)) || length(value) != nrow(model_frame)) {
     stop("`", argument_name, "` must name a column in the fitted model frame or evaluate ",
          "to a vector of length ", nrow(model_frame), ".", call. = FALSE)

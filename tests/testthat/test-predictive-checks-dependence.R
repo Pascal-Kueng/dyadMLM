@@ -212,7 +212,9 @@ test_that("invalid simulation objects, identifiers, and pair structures fail cle
   simulations <- partner_check_test_simulations()
   expect_error(check_partner_dependence(list(), "dyad"), "must be created by")
   expect_error(check_partner_dependence(simulations), "must identify")
-  expect_error(check_partner_dependence(simulations, "unknown"), "does not name a column")
+  expect_error(check_partner_dependence(simulations, "unknown"), "`dyad` must name a column")
+  expect_error(check_partner_dependence(simulations, "dyad", "unknown"),
+               "`role` must name a column")
   expect_error(check_partner_dependence(simulations, 1:3), "vector of length 10")
 
   ids <- as.character(simulations$model_frame$dyad)
