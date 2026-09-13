@@ -19,7 +19,9 @@ test_that("the public API and metadata use only the cleaned names", {
     c(
       "prepare_dyad_data",
       "compare_nested_models",
-      "recover_exchangeable_covariance"
+      "recover_exchangeable_covariance",
+      "simulate_dyad_responses",
+      "check_partner_dependence"
     )
   )
   expect_false(exists(

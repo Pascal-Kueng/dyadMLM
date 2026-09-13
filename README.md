@@ -94,6 +94,16 @@ Selected post-estimation tools currently include:
   structures into interpretable member-level quantities, as described in
   the [APIM
   vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)
+- experimental predictive checks for cross-sectional `glmmTMB` models
+  with Gaussian, Poisson, negative-binomial, Tweedie, Gamma, or beta
+  responses (development version)
+
+These checks ask whether a model reproduces how much partners’ responses
+vary and how they relate. Use `simulate_dyad_responses()` to generate
+new datasets and `check_partner_dependence()` to compare them with the
+observed data. The comparisons are descriptive; close agreement alone
+does not establish good fit. See `?check_partner_dependence` for a
+complete example and supported models.
 
 ## Vignettes and examples
 
