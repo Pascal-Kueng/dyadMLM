@@ -56,17 +56,19 @@ test_that("seeded simulations are reproducible and preserve the caller's RNG", {
   model <- predictive_check_test_model()
   set.seed(8103)
   rng_state <- .Random.seed
-  first <- simulate_dyad_responses(model, nsim = 5, seed = 456)
+  first <- simulate_dyad_responses(model, nsim = 5, seed = -456)
   expect_identical(.Random.seed, rng_state)
-  second <- simulate_dyad_responses(model, nsim = 5, seed = 456)
-  third <- simulate_dyad_responses(model, nsim = 5, seed = 457)
+  # Seeds follow R's integer conversion, including negative and fractional values.
+  second <- simulate_dyad_responses(model, nsim = 5, seed = -456.9)
+  third <- simulate_dyad_responses(model, nsim = 5, seed = -457)
+  expect_identical(second$seed, -456L)
   expect_identical(first$simulated_responses, second$simulated_responses)
   expect_false(identical(first$simulated_responses, third$simulated_responses))
 
   # Restoration also preserves the absence of a global RNG state.
   on.exit(assign(".Random.seed", rng_state, envir = .GlobalEnv), add = TRUE)
   rm(".Random.seed", envir = .GlobalEnv)
-  without_state <- simulate_dyad_responses(model, nsim = 5, seed = 456)
+  without_state <- simulate_dyad_responses(model, nsim = 5, seed = -456)
   expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
   expect_identical(without_state$simulated_responses, first$simulated_responses)
 })
@@ -148,17 +150,16 @@ test_that("unsupported predictive-check inputs fail clearly", {
   expect_error(simulate_dyad_responses(stats::lm(mpg ~ wt, data = mtcars)),
                "fitted `glmmTMB` model", fixed = TRUE)
   expect_error(simulate_dyad_responses(model, nsim = 0), "positive whole number")
-  invalid_numbers <- list(
+  invalid_nsim <- list(
     NA_real_, Inf, 1.5, numeric(), c(1, 2), TRUE, "1", factor("1"),
     as.Date("2026-01-01"), 1 + 1i, .Machine$integer.max + 1
   )
-  for (value in invalid_numbers) {
+  for (value in invalid_nsim) {
     expect_error(simulate_dyad_responses(model, nsim = value),
                  "positive whole number")
-    expect_error(simulate_dyad_responses(model, seed = value),
-                 "non-negative whole number")
   }
-  expect_error(simulate_dyad_responses(model, seed = -1), "non-negative whole number")
+  expect_error(simulate_dyad_responses(model, seed = NA_real_),
+               "supplied seed is not a valid integer")
 
   log_link_model <- model
   log_link_model$modelInfo$family <- stats::gaussian(link = "log")
@@ -170,7 +171,7 @@ test_that("unsupported predictive-check inputs fail clearly", {
                "one numeric response per fitted row")
 
   weighted_model <- predictive_check_test_model(weights = rep(c(1, 2), 20))
-  expect_error(simulate_dyad_responses(weighted_model), "unit case weights")
+  expect_error(simulate_dyad_responses(weighted_model), "unweighted models")
   zero_inflated_model <- predictive_check_test_model(ziformula = ~1)
   expect_error(simulate_dyad_responses(zero_inflated_model),
                "`ziformula = ~ 0`", fixed = TRUE)

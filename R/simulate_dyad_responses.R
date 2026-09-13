@@ -2,41 +2,18 @@
 #'
 #' `r lifecycle::badge("experimental")`
 #' Generates new response datasets for the same observations and predictors.
-#' Reuse them to check whether a fitted model reproduces features of the
-#' observed data.
+#' Reuse them with [check_partner_dependence()] to check whether a fitted
+#' model reproduces features of the observed data. For a complete example
+#' see [check_partner_dependence()].
 #'
 #' @param model A fitted `glmmTMB` model.
 #' @param nsim Number of complete response datasets to simulate. Default: 1000.
-#' @param seed `NULL` or one non-negative whole number used to reproduce the
-#'   simulations. When supplied, the caller's random-number state is restored
-#'   after the function returns, including after an error.
+#' @param seed Optional seed for reproducible simulations, interpreted as an
+#'   integer (see [set.seed()]). When supplied, the random-number state is restored
+#'   after the function returns, or when it stops after an error.
 #'
 #' @return A `dyadMLM_response_simulations` object for use with
 #'   [check_partner_dependence()].
-#'
-#' @section Quick start:
-#' With a supported fitted model called `model`:
-#' \preformatted{
-#' simulations <- simulate_dyad_responses(model, seed = 123)
-#' }
-#' Keep `simulations` to reuse the same draws in later checks. For a complete
-#' example that fits a model and checks it, see [check_partner_dependence()].
-#'
-#' @section Supported models:
-#' Supports unweighted `glmmTMB` models without zero inflation: Gaussian with
-#' identity link; Poisson, NB1, NB2, Tweedie, and Gamma with log link; and beta
-#' with logit link. Each must return one numeric observed and simulated response
-#' per fitted row. Binomial and beta-binomial formats need a response adapter
-#' and are not supported. [check_partner_dependence()] currently requires
-#' cross-sectional dyads.
-#'
-#' @section Technical details:
-#' This is a plug-in predictive reference: fitted parameters and predictors
-#' stay fixed, without refitting or parameter uncertainty. Each simulation
-#' redraws full random-effect blocks in the conditional and dispersion
-#' components, then draws responses from the fitted conditional distribution.
-#' When dyads are the only grouping factor, the draws represent hypothetical
-#' new dyads under the same study design.
 #'
 #' The result keeps all components in fitted-row order (after missing-data
 #' exclusions):
@@ -47,12 +24,38 @@
 #'   per fitted observation.
 #' - `model_frame`: the data frame used for fitting, in the same row order.
 #'
-#' `response_center` is the response prediction with random effects set to
-#' zero. Later checks subtract it from observed and simulated responses alike;
-#' random-effect variation remains. With nonlinear links, this prediction is
-#' generally not the mean averaged over random effects. The fitted-row design
-#' stays fixed, including any lagged outcomes used as predictors; simulations
-#' do not recursively generate those predictors.
+#' @section Supported models:
+#' Currently supports unweighted `glmmTMB` models without zero inflation for
+#' the following families:
+#' - `gaussian(link = "identity")`
+#' - `poisson(link = "log")`
+#' - `glmmTMB::nbinom1(link = "log")`
+#' - `glmmTMB::nbinom2(link = "log")`
+#' - `glmmTMB::tweedie(link = "log")`
+#' - `Gamma(link = "log")`
+#' - `glmmTMB::beta_family(link = "logit")`
+#'
+#' [check_partner_dependence()] currently requires cross-sectional dyads.
+#'
+#' @section Technical details:
+#' Each simulation draws new random effects and then new responses from the
+#' fitted model. Random effects within each block are drawn together using
+#' their fitted variances and correlations. This also applies to random effects
+#' in the dispersion model, if present.
+#'
+#' Fitted parameters and predictors stay fixed. The model is not refitted, and
+#' uncertainty in parameter estimates is not included. This is a *plug-in
+#' predictive reference*. If dyads are the only grouping factor, the simulations
+#' represent hypothetical new dyads under the same study design.
+#'
+#' `response_center` contains predictions with random effects set to zero.
+#' By default, later checks subtract these same predictions from observed and
+#' simulated responses. Both random-effect and observation-level variation
+#' remain. With nonlinear links, setting random effects to zero generally
+#' differs from averaging predictions over them.
+#'
+#' Predictor values remain unchanged, including any lagged responses used as
+#' predictors.
 #'
 #' @export
 simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
@@ -67,11 +70,8 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("`nsim` must be one positive whole number.", call. = FALSE)
   }
   nsim <- as.integer(nsim)
+
   if (!is.null(seed)) {
-    if (!is.numeric(seed) || !rlang::is_scalar_integerish(seed, finite = TRUE) ||
-        seed < 0 || seed > .Machine$integer.max) {
-      stop("`seed` must be `NULL` or one non-negative whole number.", call. = FALSE)
-    }
     seed <- as.integer(seed)
     withr::local_seed(seed)
   }
@@ -80,11 +80,11 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
   supported <- c("gaussian:identity", "poisson:log", "nbinom1:log",
                  "nbinom2:log", "tweedie:log", "Gamma:log", "beta:logit")
   if (!paste(family$family, family$link, sep = ":") %in% supported) {
-    stop("Unsupported family/link. Binomial response formats need an adapter; ",
-         "see the supported models in ?simulate_dyad_responses.", call. = FALSE)
+    stop("Unsupported family/link. ",
+         "See the supported models in ?simulate_dyad_responses.", call. = FALSE)
   }
   if (any(stats::weights(model) != 1)) {
-    stop("Predictive checks currently require unit case weights.", call. = FALSE)
+    stop("Predictive checks currently only support unweighted models.", call. = FALSE)
   }
   zi <- stats::terms(stats::formula(model, component = "zi"))
   if (attr(zi, "intercept") != 0L || length(attr(zi, "term.labels")) ||
@@ -92,7 +92,7 @@ simulate_dyad_responses <- function(model, nsim = 1000, seed = NULL) {
     stop("Predictive checks currently require `ziformula = ~ 0`.", call. = FALSE)
   }
 
-  # frame contains retained fitting rows; observed and center are matching vectors.
+  # frame contains retained fitting rows. Observed and center are vectors that match those.
   # newdata = NULL below prevents na.exclude from padding omitted rows back in.
   frame <- stats::model.frame(model)
   observed <- stats::model.response(frame)

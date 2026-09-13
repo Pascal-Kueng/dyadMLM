@@ -11,48 +11,13 @@ simulate_dyad_responses(model, nsim = 1000, seed = NULL)
 
 \item{nsim}{Number of complete response datasets to simulate. Default: 1000.}
 
-\item{seed}{\code{NULL} or one non-negative whole number used to reproduce the
-simulations. When supplied, the caller's random-number state is restored
-after the function returns, including after an error.}
+\item{seed}{Optional seed for reproducible simulations, interpreted as an
+integer (see \code{\link[=set.seed]{set.seed()}}). When supplied, the random-number state is restored
+after the function returns, or when it stops after an error.}
 }
 \value{
 A \code{dyadMLM_response_simulations} object for use with
 \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
-}
-\description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Generates new response datasets for the same observations and predictors.
-Reuse them to check whether a fitted model reproduces features of the
-observed data.
-}
-\section{Quick start}{
-
-With a supported fitted model called \code{model}:
-\preformatted{
-simulations <- simulate_dyad_responses(model, seed = 123)
-}
-Keep \code{simulations} to reuse the same draws in later checks. For a complete
-example that fits a model and checks it, see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
-}
-
-\section{Supported models}{
-
-Supports unweighted \code{glmmTMB} models without zero inflation: Gaussian with
-identity link; Poisson, NB1, NB2, Tweedie, and Gamma with log link; and beta
-with logit link. Each must return one numeric observed and simulated response
-per fitted row. Binomial and beta-binomial formats need a response adapter
-and are not supported. \code{\link[=check_partner_dependence]{check_partner_dependence()}} currently requires
-cross-sectional dyads.
-}
-
-\section{Technical details}{
-
-This is a plug-in predictive reference: fitted parameters and predictors
-stay fixed, without refitting or parameter uncertainty. Each simulation
-redraws full random-effect blocks in the conditional and dispersion
-components, then draws responses from the fitted conditional distribution.
-When dyads are the only grouping factor, the draws represent hypothetical
-new dyads under the same study design.
 
 The result keeps all components in fitted-row order (after missing-data
 exclusions):
@@ -63,11 +28,49 @@ observation. Each row is a complete simulated dataset.
 per fitted observation.
 \item \code{model_frame}: the data frame used for fitting, in the same row order.
 }
+}
+\description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+Generates new response datasets for the same observations and predictors.
+Reuse them with \code{\link[=check_partner_dependence]{check_partner_dependence()}} to check whether a fitted
+model reproduces features of the observed data. For a complete example
+see \code{\link[=check_partner_dependence]{check_partner_dependence()}}.
+}
+\section{Supported models}{
 
-\code{response_center} is the response prediction with random effects set to
-zero. Later checks subtract it from observed and simulated responses alike;
-random-effect variation remains. With nonlinear links, this prediction is
-generally not the mean averaged over random effects. The fitted-row design
-stays fixed, including any lagged outcomes used as predictors; simulations
-do not recursively generate those predictors.
+Currently supports unweighted \code{glmmTMB} models without zero inflation for
+the following families:
+\itemize{
+\item \code{gaussian(link = "identity")}
+\item \code{poisson(link = "log")}
+\item \code{glmmTMB::nbinom1(link = "log")}
+\item \code{glmmTMB::nbinom2(link = "log")}
+\item \code{glmmTMB::tweedie(link = "log")}
+\item \code{Gamma(link = "log")}
+\item \code{glmmTMB::beta_family(link = "logit")}
+}
+
+\code{\link[=check_partner_dependence]{check_partner_dependence()}} currently requires cross-sectional dyads.
+}
+
+\section{Technical details}{
+
+Each simulation draws new random effects and then new responses from the
+fitted model. Random effects within each block are drawn together using
+their fitted variances and correlations. This also applies to random effects
+in the dispersion model, if present.
+
+Fitted parameters and predictors stay fixed. The model is not refitted, and
+uncertainty in parameter estimates is not included. This is a \emph{plug-in
+predictive reference}. If dyads are the only grouping factor, the simulations
+represent hypothetical new dyads under the same study design.
+
+\code{response_center} contains predictions with random effects set to zero.
+By default, later checks subtract these same predictions from observed and
+simulated responses. Both random-effect and observation-level variation
+remain. With nonlinear links, setting random effects to zero generally
+differs from averaging predictions over them.
+
+Predictor values remain unchanged, including any lagged responses used as
+predictors.
 }

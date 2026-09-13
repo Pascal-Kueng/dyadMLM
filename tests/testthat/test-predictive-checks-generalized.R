@@ -189,11 +189,11 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
 })
 
 
-test_that("grouped binomial responses require an explicit response adapter", {
+test_that("grouped binomial responses are not supported", {
   skip_if_not_installed("glmmTMB")
   data <- data.frame(successes = c(1, 3, 2, 5, 4, 7), trials = rep(10, 6))
   model <- glmmTMB::glmmTMB(
     cbind(successes, trials - successes) ~ 1, data = data, family = stats::binomial()
   )
-  expect_error(simulate_dyad_responses(model, nsim = 2), "adapter")
+  expect_error(simulate_dyad_responses(model, nsim = 2), "Unsupported family/link")
 })
