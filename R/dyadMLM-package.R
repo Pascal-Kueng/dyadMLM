@@ -15,7 +15,8 @@
 #'   shared/difference random-effect covariance structures into member-level
 #'   quantities.
 #' - [simulate_dyad_responses()] and [check_partner_dependence()] provide
-#'   experimental predictive comparisons of partner variation and dependence.
+#'   experimental predictive comparisons of response variances and partner
+#'   correlations.
 #'
 #' @section Example data:
 #' See [dyads_cross] and [dyads_ild] for Gaussian examples, and

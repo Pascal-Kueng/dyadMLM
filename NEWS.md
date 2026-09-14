@@ -1,7 +1,7 @@
 # dyadMLM (development version)
 
 * Added experimental checks of whether cross-sectional `glmmTMB` models
-  reproduce partners' variation and relationship, for Gaussian and selected
+  reproduce response variances and partner correlations, for Gaussian and selected
   non-Gaussian responses. `simulate_dyad_responses()` generates datasets;
   `check_partner_dependence()` compares observed and simulated summaries.
   Undefined simulated statistics are omitted from their individual references

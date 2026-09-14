@@ -15,85 +15,116 @@ check_partner_dependence(
 \arguments{
 \item{simulations}{An object returned by \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}}.}
 
-\item{dyad}{A column name in the fitted data (quoted or unquoted), or a vector
-of dyad IDs in the same row order. Columns take precedence over external
-names; use \code{.env$ids} to select an external vector explicitly.}
+\item{dyad}{A column name in the fitted data, or a vector
+of dyad IDs in the same row order. Columns take precedence. You may use
+\code{.env$ids} to select an external vector explicitly.}
 
-\item{role}{Member roles, supplied like \code{dyad}. Use \code{NULL} (default) when
-members can be treated as interchangeable.}
+\item{role}{A column name in the fitted data, or a vector of roles in the
+same row order. Use \code{NULL} (default) when members should be treated as
+exchangeable. Roles can be supplied even if they were not included
+in the model, to check for mismatches in each role's variance and
+the partner correlation.}
 
-\item{plot}{If \code{TRUE} (default), draw the comparison plots.}
+\item{plot}{If \code{TRUE} (default), draw the comparison plots for visual checks.}
 
 \item{response}{\code{"model-centred"} (default) subtracts the same model predictions
-from observed and simulated responses. \code{"raw"} leaves responses unchanged.
-See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how these predictions are defined.}
+from observed and simulated responses. The predictive check then assesses
+whether the model reproduces the variance and partner correlations remaining
+after accounting for its fixed-effect predictions. This includes random
+effects and observation-level noise. With \code{"raw"}, the predictive check
+assesses whether the full model, including fixed effects, reproduces the
+overall response variances and partner correlations.
+See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how predictions are defined.}
 }
 \value{
-A \code{dyadMLM_partner_check} object, invisibly, with \code{statistics_table}
-(one row per summary), \code{replicated_statistics} (one row per simulation),
-and pair and omission counts. Settings are stored in its \code{dyadMLM} attribute.
-Save the result to print or plot it again without repeating simulations.
+The comparison plots (shown by default) are the main output. The
+function invisibly returns a \code{dyadMLM_partner_check} object containing the
+statistics, pair and omission counts, and settings. The returned object
+can be stored and plotted again later.
+See \code{\link[=print.dyadMLM_partner_check]{print.dyadMLM_partner_check()}} for details of the numerical output.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 A dyadic model should reproduce how much responses vary and how strongly
-partners' responses are related. Getting the average response right does not
-guarantee either. This check compares observed and simulated variation and
-partner correlations to help identify mismatches in the model's assumptions.
+partners' responses are related. This check computes variances and correlations
+of simulated responses based on the model and compares them to the observed
+response variances and correlations from the data.
+This helps identify mismatches in the model's assumptions.
 }
-\section{Data requirements}{
-
-Requires at least three complete cross-sectional dyads and at most two fitted
-rows per dyad. With \code{role}, each complete dyad must have one member of each
-of exactly two roles. Rows with missing IDs or roles, and incomplete dyads,
-are omitted and counted.
-}
-
 \section{Reading the plots}{
 
-Histograms show simulated summaries; red lines mark observed values and
-dashed lines enclose the middle 95\% of simulations. An observed value far
-from most simulations may indicate poor model fit. These comparisons are
-descriptive, not p-values or confidence intervals. Agreement is expected for
-features freely estimated from the data and alone provides little evidence
-of fit.
+Histograms show simulated summaries. Red lines mark observed values.
+Dashed lines enclose the middle 95\% of simulations (no formal confidence
+intervals).
+
+An observed value far from most simulated values may indicate that the
+model does not reproduce that feature of the data well.
+
+The first set of plots compares:
+\itemize{
+\item \strong{Response SDs:} one for each role, or one common SD for exchangeable members.
+\item \strong{Partner correlation:} how strongly partners' responses are related.
+}
+
+The second set shows \emph{the same information} using dyad averages and partner
+differences:
+\itemize{
+\item \strong{Dyad-average SD:} how much dyads differ in their average response.
+\item \strong{Half-difference SD or RMS:} each partner difference is divided by two.
+With roles, the SD shows how much these signed differences vary across
+dyads. Without roles, the RMS shows their typical size, regardless of
+partner order.
+\item \strong{Mean/difference correlation:} plotted only when roles are supplied,
+because it depends on how partners are ordered. Positive values indicate
+greater variance for the first named role. Negative values indicate greater
+variance for the second.
+}
+
+These checks are particularly useful when a simpler model is needed and a
+less restricted model does not converge and can't be
+used for model comparison. It shows how well the simpler model
+reproduces the observed variances and partner correlations.
+
+Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
+Their counts are shown when printing the result.
 }
 
 \section{Technical details}{
 
-After any centring, let \code{M = (a + b) / 2} and \code{D = (a - b) / 2} for paired
-responses \code{a} and \code{b}. With roles, summaries are each role's SD, partner
-correlation, \code{sd(M)}, \code{sd(D)}, and \code{cor(M, D)}. Roles follow factor levels or
-sorted values; reversing their order reverses \code{cor(M, D)}.
+After any centring, paired responses \code{a} and \code{b} are used to compute
+dyad averages \code{M = (a + b) / 2} and half-differences \code{D = (a - b) / 2}.
+Roles follow factor levels or sorted values.
 
-Without roles, common member variance is \code{var(M) + mean(D^2)} and partner
-covariance is \code{var(M) - mean(D^2)}. Summaries are common member SD, partner
-correlation (covariance divided by variance), \code{sd(M)}, and \code{sqrt(mean(D^2))}.
-These are unchanged by swapping partners. Both plot views express the same
-covariance information. Centring retains random-effect variation.
+Without roles, common member variance is \code{var(M) + mean(D^2)} and
+partner covariance is \code{var(M) - mean(D^2)}. Partner correlation is
+covariance divided by variance. Half-difference RMS is \code{sqrt(mean(D^2))}.
 
-The table gives observed values, simulated medians and middle 95\% limits,
-\code{n_defined} (usable values per summary), and \code{observed_quantile} (observed position):
-\code{(1 + sum(defined_simulations <= observed)) / (n_defined + 1)}.
-Ties can put this near 1 even with good agreement. Undefined simulated
-summaries remain in the matrix but are excluded from their reference, with
-a warning. An undefined observed summary, or no usable simulated values for
-any one summary, causes an error.
+The variance and covariance calculations for exchangeable dyads follow
+Woody and Sadler (2005).
 }
 
 \examples{
-if (requireNamespace("glmmTMB", quietly = TRUE)) {
-  example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
-  model <- glmmTMB::glmmTMB(closeness ~ gender + (1 | coupleID),
-                           data = example_data)
-  # Fewer simulations for a quick example; the default is 1000.
-  simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
-  check <- check_partner_dependence(simulations, dyad = coupleID,
-                                     role = gender, plot = FALSE)
-  print(check)
-  plot(check, parameterization = "member", ask = FALSE)
-}
+\dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
 
+model <- glmmTMB::glmmTMB(
+closeness ~ 1 + gender + (1 | coupleID),
+  data = example_data
+)
+
+# Fewer simulations for a quick example (the default is 1000).
+simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
+
+check <- check_partner_dependence(
+  simulations,
+  dyad = coupleID,
+  role = gender,
+  plot = FALSE
+)
+
+print(check)
+plot(check, ask = FALSE)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Woody, E., & Sadler, P. (2005). Structural equation models for

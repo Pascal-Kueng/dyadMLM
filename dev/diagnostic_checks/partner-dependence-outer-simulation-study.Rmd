@@ -59,7 +59,7 @@ knitr::kable(left_join(scenarios, truths, by = "truth"))
 # Generate, fit, check
 
 Data come directly from a bivariate Gaussian distribution, independently of
-`glmmTMB`. The predictor combines shared and member-specific variation; its
+`glmmTMB`. The predictor combines shared and member-specific components; its
 population slope is 0.6. Shared and member-sign random effects allow either sign
 of correlation with equal role variances. The unstructured model allows unequal
 role variances. Role means are estimated separately for distinguishable dyads.
@@ -240,7 +240,7 @@ knitr::kable(completion, digits = 3)
 The oracle should put about 2.5% in each tail, with position SD near
 `r sprintf("%.3f", 1 / sqrt(12))`. Flexible fitted models can cluster near the
 middle because they estimated the same features being checked. Independence
-fits estimate variation but fix correlation, leaving correlation informative.
+fits estimate variance but fix correlation, leaving correlation informative.
 
 ```{r rates, echo=FALSE}
 rates <- outer_results |>
@@ -274,7 +274,7 @@ par(old_par)
 ## Wrong restrictions: paired comparisons
 
 Directions are specified in advance: omitting positive/negative correlation
-should put it above/below the reference; imposing equal role spreads should put
+should put it above/below the reference; imposing equal role variances should put
 the smaller/larger SD below/above it. Each paired gain compares both fits on the
 same dataset, conditional on both succeeding.
 

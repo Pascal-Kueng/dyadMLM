@@ -149,7 +149,9 @@ test_that("identifiers accept columns, external vectors, and data-mask selectors
   role <- roles
   dyad[1] <- NA
   role[4] <- NA
-  external <- check_partner_dependence(simulations, .env$dyad, .env$role, plot = FALSE)
+  expect_warning(external <- check_partner_dependence(
+    simulations, .env$dyad, .env$role, plot = FALSE
+  ), "were omitted")
   expect_identical(external$n_pairs, 3L)
   expect_identical(external$n_missing_dyad_rows, 1L)
   expect_identical(external$n_missing_role_rows, 1L)
@@ -163,8 +165,9 @@ test_that("wrappers preserve identifier expressions and an omitted role", {
   }
   ids <- simulations$model_frame$dyad
   ids[1] <- NA
-  expected <- check_partner_dependence(simulations, ids, plot = FALSE)
-  wrapped <- check_from_wrapper(simulations, ids)
+  expect_warning(expected <- check_partner_dependence(simulations, ids, plot = FALSE),
+                 "were omitted")
+  expect_warning(wrapped <- check_from_wrapper(simulations, ids), "were omitted")
   fields <- c("statistics_table", "replicated_statistics", "n_pairs",
               "n_missing_dyad_rows", "n_missing_role_rows")
   expect_equal(wrapped[fields], expected[fields])
@@ -181,13 +184,14 @@ test_that("wrappers preserve identifier expressions and an omitted role", {
 })
 
 
-test_that("missing identifiers and incomplete dyads are counted", {
+test_that("missing identifiers and incomplete dyads warn and are counted", {
   simulations <- partner_check_test_simulations()
   ids <- simulations$model_frame$dyad
   roles <- simulations$model_frame$role
   ids[which(ids == "5")[1]] <- NA
   roles[ids == "4"] <- NA
-  result <- check_partner_dependence(simulations, ids, roles, plot = FALSE)
+  expect_warning(result <- check_partner_dependence(simulations, ids, roles, plot = FALSE),
+                 "were omitted. Print the result for counts.", fixed = TRUE)
   expect_identical(result$n_pairs, 3L)
   expect_identical(result$n_missing_dyad_rows, 1L)
   expect_identical(result$n_missing_role_rows, 2L)
@@ -206,7 +210,8 @@ test_that("role omission does not lose an already incomplete dyad", {
   rows <- which(ids == "4")
   ids[rows[1]] <- NA
   roles[rows[2]] <- NA
-  result <- check_partner_dependence(simulations, ids, roles, plot = FALSE)
+  expect_warning(result <- check_partner_dependence(simulations, ids, roles, plot = FALSE),
+                 "were omitted")
   expect_identical(result$n_pairs, 4L)
   expect_identical(result$n_incomplete_dyads, 1L)
   expect_identical(result$n_missing_dyad_rows, 1L)
@@ -246,7 +251,7 @@ test_that("invalid simulation objects, identifiers, and pair structures fail cle
 })
 
 
-test_that("zero-spread draws warn for centred and raw exchangeable checks", {
+test_that("zero-variance draws warn for centred and raw exchangeable checks", {
   for (response in c("model-centred", "raw")) {
     simulations <- partner_check_test_simulations()
     simulations$simulated_responses[1, ] <- if (response == "raw") 1 else
@@ -293,7 +298,7 @@ test_that("checks plot by default, accept positional plot, and return invisibly"
 })
 
 
-test_that("printing shows the result and both plot views preserve graphics settings", {
+test_that("printing shows the result and all panels preserve graphics settings", {
   simulations <- partner_check_test_simulations()
   exchangeable <- check_partner_dependence(simulations, "dyad", plot = FALSE)
   distinguishable <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
@@ -305,8 +310,8 @@ test_that("printing shows the result and both plot views preserve graphics setti
                    collapse = "\n")
   expect_match(printed, "6 statistics using 5 complete pairs", fixed = TRUE)
   expect_match(printed, "model-centred", fixed = TRUE)
-  expect_match(printed, "Observed position", fixed = TRUE)
-  expect_match(printed, sprintf("%.3f", distinguishable$statistics_table$observed_value[1]),
+  expect_match(printed, "Position", fixed = TRUE)
+  expect_match(printed, as.character(round(distinguishable$statistics_table$observed_value[1], 3)),
                fixed = TRUE)
   expect_false(visible$visible)
   expect_identical(visible$value, distinguishable)
@@ -315,20 +320,25 @@ test_that("printing shows the result and both plot views preserve graphics setti
   on.exit(grDevices::dev.off(), add = TRUE)
   graphics::par(plt = c(0.2, 0.8, 0.2, 0.8))
   settings <- graphics::par(c("mar", "plt"))
-  plotted <- withVisible(plot(exchangeable, ask = FALSE))
-  expect_false(plotted$visible)
-  expect_identical(plotted$value, exchangeable)
-  expect_equal(graphics::par(c("mar", "plt")), settings)
-  for (view in c("member", "mean_difference")) {
-    expect_identical(plot(distinguishable, parameterization = view, ask = FALSE),
-                     distinguishable)
+  original_title <- graphics::title
+  local_mocked_bindings(title = function(main = NULL, ...) {
+    titles <<- c(titles, main)
+    original_title(main = main, ...)
+  }, .package = "graphics")
+  for (result in list(exchangeable, distinguishable)) {
+    titles <- character()
+    plotted <- withVisible(plot(result, ask = FALSE))
+    expect_false(plotted$visible)
+    expect_identical(plotted$value, result)
+    expect_identical(titles, result$statistics_table$label)
+    expect_equal(graphics::par(c("mar", "plt")), settings)
   }
   ask_values <- logical()
   local_mocked_bindings(devAskNewPage = function(ask = NULL) {
     ask_values <<- c(ask_values, ask)
     TRUE
   }, .package = "grDevices")
-  plot(exchangeable, parameterization = "member", ask = FALSE)
+  plot(exchangeable, ask = FALSE)
   expect_identical(ask_values, c(FALSE, TRUE))
 })
 
@@ -339,10 +349,10 @@ test_that("explicit NA factor levels are missing dyad IDs and roles", {
   roles <- as.character(simulations$model_frame$role)
   roles[ids == "4" & roles == "female"] <- NA_character_
   ids[ids == "5"] <- NA_character_
-  result <- check_partner_dependence(
+  expect_warning(result <- check_partner_dependence(
     simulations, dyad = factor(ids, exclude = NULL),
     role = factor(roles, exclude = NULL), plot = FALSE
-  )
+  ), "were omitted")
   expect_identical(result$n_missing_dyad_rows, 2L)
   expect_identical(result$n_missing_role_rows, 1L)
   expect_identical(result$n_incomplete_dyads, 1L)
@@ -375,7 +385,7 @@ test_that("predictive histograms show the full outer bars", {
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
-  plot(result, parameterization = "mean_difference", ask = FALSE)
+  plot(result, ask = FALSE)
   # The last panel shows half-difference RMS, with breaks beyond data extrema.
   histogram <- graphics::hist(scales, breaks = 20, plot = FALSE)
   visible <- graphics::par("usr")[1:2]

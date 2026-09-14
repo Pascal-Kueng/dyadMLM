@@ -21,7 +21,8 @@ models fitted to equivalent data.
 shared/difference random-effect covariance structures into member-level
 quantities.
 \item \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} and \code{\link[=check_partner_dependence]{check_partner_dependence()}} provide
-experimental predictive comparisons of partner variation and dependence.
+experimental predictive comparisons of response variances and partner
+correlations.
 }
 }
 

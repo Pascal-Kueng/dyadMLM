@@ -15,8 +15,8 @@ knitr::opts_chunk$set(message = FALSE, fig.width = 7, fig.height = 4.5)
 ## Fit a model
 
 Prepare actor and partner predictors for the female-male dyads. Fit an APIM
-that allows different effects and response variability for women and men,
-but assumes no remaining relationship between partners.
+that allows different effects and response variances for women and men,
+but assumes no remaining correlation between partners.
 
 ```{r fit}
 data <- prepare_dyad_data(
@@ -42,11 +42,11 @@ simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
 check <- check_partner_dependence(
   simulations, dyad = coupleID, role = gender, plot = FALSE
 )
-plot(check, parameterization = "member", ask = FALSE)
+plot(check, ask = FALSE)
 ```
 
 The red line is the observed value; dashed lines mark the middle 95% of
-simulated values. Here, the SDs are within their ranges, but the correlation
+simulated values. Here, the role SDs are within their ranges, but the partner correlation
 exceeds its upper limit. These ranges and observed positions are descriptive, not
 confidence intervals or p-values. Use `print(check)` for the numeric summaries.
 
@@ -81,14 +81,14 @@ knitr::kable(table[c("label", "observed_value", "replicated_median",
 ## Reuse the simulations
 
 Use `response = "raw"` to compare responses without subtracting predictions.
-The alternative plot shows dyad means and half-differences, which express the
-same covariance information as the member view.
+Each call shows both member summaries and dyad means and half-differences,
+which express the same covariance information.
 
 ```{r other-views, eval=FALSE}
 raw_check <- check_partner_dependence(
   simulations, dyad = coupleID, role = gender, response = "raw", plot = FALSE
 )
-plot(raw_check, parameterization = "mean_difference", ask = FALSE)
+plot(raw_check, ask = FALSE)
 ```
 
 Supply `role` whenever the member distinction is meaningful. For substantively

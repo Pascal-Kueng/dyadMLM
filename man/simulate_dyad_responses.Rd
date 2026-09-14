@@ -74,9 +74,9 @@ represent hypothetical new dyads under the same study design.
 \code{predicted_response} contains predicted mean responses with random effects
 in the conditional model set to zero.
 By default, later checks subtract these same predictions from observed and
-simulated responses. Both random-effect and observation-level variation
-remain. With nonlinear links, setting random effects to zero generally
-differs from averaging predictions over them.
+simulated responses. Both random effects and observation-level noise still
+contribute to response variance. With nonlinear links, setting random effects
+to zero generally differs from averaging predictions over them.
 
 Predictor values remain unchanged, including any lagged responses used as
 predictors.

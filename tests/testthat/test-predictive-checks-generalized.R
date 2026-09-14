@@ -113,9 +113,9 @@ test_that("NB2 offsets and dispersion-only missing values preserve fitted rows",
     simulations$simulated_responses,
     t(as.matrix(stats::simulate(model, nsim = 10, seed = 8121)))
   )
-  result <- check_partner_dependence(
+  expect_warning(result <- check_partner_dependence(
     simulations, dyad = "dyad", role = "role", plot = FALSE
-  )
+  ), "were omitted")
   expect_identical(result$n_pairs, 58L)
   expect_identical(result$n_incomplete_dyads, 2L)
 })
@@ -162,8 +162,7 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
     (1 + sum(defined <= partner$observed_value)) / (length(defined) + 1)
   )
   count <- paste0(length(defined), "/", nrow(simulations$simulated_responses))
-  expect_match(paste(capture.output(print(result)), collapse = "\n"), count,
-               fixed = TRUE)
+  expect_output(print(result), "Defined", fixed = TRUE)
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -176,7 +175,7 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
     },
     .package = "graphics"
   )
-  plot(result, parameterization = "member", ask = FALSE)
+  plot(result, ask = FALSE)
   expect_true(any(grepl(count, subtitles, fixed = TRUE)))
 
   undefined_observed <- simulations

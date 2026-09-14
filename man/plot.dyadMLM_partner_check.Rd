@@ -4,19 +4,10 @@
 \alias{plot.dyadMLM_partner_check}
 \title{Plot partner-dependence predictive checks}
 \usage{
-\method{plot}{dyadMLM_partner_check}(
-  x,
-  parameterization = c("both", "member", "mean_difference"),
-  ask = NULL,
-  ...
-)
+\method{plot}{dyadMLM_partner_check}(x, ask = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{dyadMLM_partner_check} object.}
-
-\item{parameterization}{Which diagnostic view to show: \code{"both"}, partner-
-level summaries (\code{"member"}), or dyad mean/difference summaries
-(\code{"mean_difference"}).}
 
 \item{ask}{Whether to pause before drawing the next plot. \code{NULL} chooses
 automatically in interactive sessions. Supply \code{TRUE} or \code{FALSE} to
@@ -31,18 +22,17 @@ Invisibly, \code{x}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Plots a saved \code{\link[=check_partner_dependence]{check_partner_dependence()}} result. Each histogram shows
-simulated summary values; the red line marks the observed value and dashed
-lines mark the middle 95\% of simulations.
+Plots all summaries in a saved \code{\link[=check_partner_dependence]{check_partner_dependence()}} result.
+Each histogram shows simulated summary values; the red line marks the
+observed value and dashed lines mark the middle 95\% of simulations.
 }
 \section{Quick start}{
 
 With a result saved as \code{check}:
 \preformatted{
-plot(check, parameterization = "member", ask = FALSE)
+plot(check, ask = FALSE)
 }
-Use \code{"mean_difference"} for dyad mean/difference summaries or \code{"both"} (the
-default) for both views. The subtitle identifies model-centred or raw
+Both views are shown. The subtitle identifies model-centred or raw
 responses. Set \code{ask = FALSE} to draw without pausing between plots.
 }
 
