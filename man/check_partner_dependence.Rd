@@ -44,9 +44,8 @@ Ignored when \code{plot = FALSE}.}
 \value{
 The comparison plots (shown by default) are the main output. The
 function invisibly returns a \code{dyadMLM_partner_check} object containing the
-named vector \code{observed_statistics}, the matrix \code{replicated_statistics}
-(one row per simulation), pair and omission counts, and settings.
-Save the result to plot it again later; printing shows a short description.
+observed and simulated statistics (one row per simulation), pair and
+omission counts, and settings. Can be saved to plot later.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -91,7 +90,8 @@ used for model comparison. It shows how well the simpler model
 reproduces the observed variances and partner correlations.
 
 Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-Their counts are shown when printing the result.
+The warning lists affected dyad IDs and row positions in the fitted data.
+Long lists are shortened; counts are also shown when printing the result.
 }
 
 \section{Technical details}{

@@ -115,7 +115,7 @@ test_that("NB2 offsets and dispersion-only missing values preserve fitted rows",
   )
   expect_warning(result <- check_partner_dependence(
     simulations, dyad = "dyad", role = "role", plot = FALSE
-  ), "Omitted:")
+  ), "Omitted: 2 incomplete dyads, with IDs: 1, 3.", fixed = TRUE)
   expect_identical(result$n_pairs, 58L)
   expect_identical(result$n_incomplete_dyads, 2L)
 })

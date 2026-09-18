@@ -66,7 +66,8 @@
 #' reproduces the observed variances and partner correlations.
 #'
 #' Rows with missing IDs or roles and incomplete dyads are omitted with a warning.
-#' Their counts are shown when printing the result.
+#' The warning lists affected dyad IDs and row positions in the fitted data.
+#' Long lists are shortened; counts are also shown when printing the result.
 #'
 #' @section Technical details:
 #' After any centring, paired responses `a` and `b` are used to compute
@@ -210,9 +211,9 @@ check_partner_dependence <- function(
     observed_statistics = observed_statistics, # vector of observed stats
     replicated_statistics = simulated_statistics, # matrix: rows = simulations, columns = statistics
     n_pairs = nrow(partner_row_map$rows),
-    n_incomplete_dyads = partner_row_map$n_incomplete_dyads,
-    n_missing_dyad_rows = partner_row_map$n_missing_dyad_rows,
-    n_missing_role_rows = partner_row_map$n_missing_role_rows,
+    n_incomplete_dyads = length(partner_row_map$incomplete_dyad_ids),
+    n_missing_dyad_rows = length(partner_row_map$missing_dyad_rows),
+    n_missing_role_rows = length(partner_row_map$missing_role_rows),
     response = response
   )
 
@@ -222,14 +223,23 @@ check_partner_dependence <- function(
   # Assign custom class
   class(check_result) <- c("dyadMLM_partner_check", "list")
 
-  if (any(c(check_result$n_incomplete_dyads, check_result$n_missing_dyad_rows,
-            check_result$n_missing_role_rows) > 0)) {
-    warning(
-      "Omitted: ", check_result$n_incomplete_dyads, " incomplete dyads; ",
-      check_result$n_missing_dyad_rows, " rows with missing dyad IDs; ",
-      check_result$n_missing_role_rows, " rows with missing roles.",
-      call. = FALSE
+  # List affected dyads and fitted-row numbers, leaving out empty categories.
+  omission_details <- c(
+    if (check_result$n_incomplete_dyads > 0L) format_group_count(
+      partner_row_map$incomplete_dyad_ids,
+      singular = "incomplete dyad", plural = "incomplete dyads"
+    ),
+    if (check_result$n_missing_dyad_rows > 0L) paste0(
+      "fitted rows with missing dyad IDs (n = ", check_result$n_missing_dyad_rows,
+      "): ", format_group_list(partner_row_map$missing_dyad_rows)
+    ),
+    if (check_result$n_missing_role_rows > 0L) paste0(
+      "fitted rows with missing roles (n = ", check_result$n_missing_role_rows,
+      "): ", format_group_list(partner_row_map$missing_role_rows)
     )
+  )
+  if (length(omission_details) > 0L) {
+    warning("Omitted: ", paste(omission_details, collapse = "; "), ".", call. = FALSE)
   }
   if (missing(role)) {
     message("No role supplied: summaries pool partners. Supply `role` to check ",
@@ -304,13 +314,16 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
   #[1,]    1    3
   #[2,]    4    2
 
-  # Compare dyad counts before and after filtering, including dyads losing both rows.
+  # Keep omitted IDs and fitted-row numbers for the warning and omission counts.
+  # Include known dyads that lost both rows when missing roles were removed.
   return(list(
     rows = partner_row_indices, role_order = role_order,
-    n_incomplete_dyads = length(original_dyad_sizes) - nrow(partner_row_indices),
-    n_missing_dyad_rows = sum(is_dyad_id_missing),
-    # Count missing roles only on rows with a known dyad ID.
-    n_missing_role_rows = sum(is_role_missing & !is_dyad_id_missing)
+    incomplete_dyad_ids = unique(dyad_ids[
+      !is_dyad_id_missing & !dyad_ids %in% dyad_ids[partner_row_indices]
+    ]),
+    missing_dyad_rows = which(is_dyad_id_missing),
+    # Report missing roles only on rows with a known dyad ID.
+    missing_role_rows = which(is_role_missing & !is_dyad_id_missing)
   ))
 }
 

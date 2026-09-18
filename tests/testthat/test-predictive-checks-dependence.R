@@ -188,14 +188,26 @@ test_that("wrappers preserve identifier expressions and an omitted role", {
 })
 
 
-test_that("missing identifiers and incomplete dyads warn and are counted", {
+test_that("missing identifiers and incomplete dyads are listed in one warning", {
   simulations <- partner_check_test_simulations()
   ids <- simulations$model_frame$dyad
   roles <- simulations$model_frame$role
   ids[which(ids == "5")[1]] <- NA
   roles[ids == "4"] <- NA
-  expect_warning(result <- check_partner_dependence(simulations, ids, roles, plot = FALSE),
-                 "Omitted: 2 incomplete dyads; 1 rows with missing dyad IDs; 2 rows with missing roles.", fixed = TRUE)
+  warnings <- character()
+  withCallingHandlers(
+    result <- check_partner_dependence(simulations, ids, roles, plot = FALSE),
+    warning = function(warning) {
+      warnings <<- c(warnings, conditionMessage(warning))
+      invokeRestart("muffleWarning")
+    }
+  )
+  # These are positions in the fitted frame, whose row labels were shuffled.
+  expect_identical(warnings, paste0(
+    "Omitted: 2 incomplete dyads, with IDs: 4, 5; ",
+    "fitted rows with missing dyad IDs (n = 1): 7; ",
+    "fitted rows with missing roles (n = 2): 5, 10."
+  ))
   expect_identical(result$n_pairs, 3L)
   expect_identical(result$n_missing_dyad_rows, 1L)
   expect_identical(result$n_missing_role_rows, 2L)
@@ -213,9 +225,14 @@ test_that("role omission does not lose an already incomplete dyad", {
   roles <- simulations$model_frame$role
   rows <- which(ids == "4")
   ids[rows[1]] <- NA
-  roles[rows[2]] <- NA
+  roles[rows] <- NA
+  # The first row is counted only as a missing ID, even though its role is missing too.
   expect_warning(result <- check_partner_dependence(simulations, ids, roles, plot = FALSE),
-                 "Omitted:")
+                 paste0(
+                   "Omitted: 1 incomplete dyad, with ID: 4; ",
+                   "fitted rows with missing dyad IDs (n = 1): 5; ",
+                   "fitted rows with missing roles (n = 1): 10."
+                 ), fixed = TRUE)
   expect_identical(result$n_pairs, 4L)
   expect_identical(result$n_incomplete_dyads, 1L)
   expect_identical(result$n_missing_dyad_rows, 1L)
@@ -393,7 +410,11 @@ test_that("explicit NA factor levels are missing dyad IDs and roles", {
   expect_warning(result <- check_partner_dependence(
     simulations, dyad = factor(ids, exclude = NULL),
     role = factor(roles, exclude = NULL), plot = FALSE
-  ), "Omitted:")
+  ), paste0(
+    "Omitted: 1 incomplete dyad, with ID: 4; ",
+    "fitted rows with missing dyad IDs (n = 2): 7, 9; ",
+    "fitted rows with missing roles (n = 1): 10."
+  ), fixed = TRUE)
   expect_identical(result$n_missing_dyad_rows, 2L)
   expect_identical(result$n_missing_role_rows, 1L)
   expect_identical(result$n_incomplete_dyads, 1L)
