@@ -65,7 +65,8 @@ validation_data <- data.frame(
 )
 stopifnot(nrow(validation_data) >= 40L, all(complete.cases(validation_data)))
 actual <- dyadMLM:::calculate_partner_pair_statistics(
-  validation_data$member_1, validation_data$member_2, role_specific = FALSE
+  validation_data$member_1, validation_data$member_2,
+  compute_role_specific_statistics = FALSE
 )
 reference <- woody_sadler_reference(
   validation_data$member_1, validation_data$member_2
@@ -89,7 +90,7 @@ swapped[rows_to_swap, c("member_1", "member_2")] <-
   swapped[rows_to_swap, c("member_2", "member_1")]
 swapped_D <- (swapped$member_1 - swapped$member_2) / 2
 swapped_actual <- dyadMLM:::calculate_partner_pair_statistics(
-  swapped$member_1, swapped$member_2, role_specific = FALSE
+  swapped$member_1, swapped$member_2, compute_role_specific_statistics = FALSE
 )
 swapped_reference <- woody_sadler_reference(swapped$member_1, swapped$member_2)
 stopifnot(

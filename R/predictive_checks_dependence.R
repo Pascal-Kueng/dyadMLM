@@ -135,27 +135,33 @@ check_partner_dependence <- function(
     resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
                                 allow_null = TRUE)
   )
+  has_role <- !is.null(partner_row_map$role_order)
 
-  # Each row is a dataset: observed first, then one row per simulation.
-  # Columns follow the fitted-row order used by partner_row_map.
+  # Combine the observed and simulated response vectors into one large matrix.
   responses_by_dataset <- rbind(
     simulations$observed_response, unname(simulations$simulated_responses)
   )
 
+  # For each response vector we need to compute the test statistic.
+  # First, we reserve one list entry for each response vector for efficiency.
   statistics_by_dataset <- vector("list", nrow(responses_by_dataset))
   for (dataset_index in seq_len(nrow(responses_by_dataset))) {
     dataset_responses <- responses_by_dataset[dataset_index, ]
     if (response == "model-centred") {
-      # Use the same predictions (conditional random effects set to zero) each time.
       dataset_responses <- dataset_responses - simulations$predicted_response
     }
+
     first_partner_responses <- dataset_responses[partner_row_map$rows[, 1]]
     second_partner_responses <- dataset_responses[partner_row_map$rows[, 2]]
+
+    #### continue review here!
     statistics_by_dataset[[dataset_index]] <- calculate_partner_pair_statistics(
-      first_partner_responses, second_partner_responses,
-      role_specific = !is.null(partner_row_map$role_order)
+      first_partner_responses,
+      second_partner_responses,
+      compute_role_specific_statistics = has_role
     )
   }
+
   # Each list entry contains 4 or 6 named statistics. Keep the observed vector;
   # stack the remaining entries into a matrix with one row per simulation.
   observed_statistics <- statistics_by_dataset[[1]]
@@ -272,19 +278,21 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
 # Partner responses are paired numeric vectors: one value per complete dyad.
 # They already use the selected response mode (raw or model-centred).
 # Returned names identify table rows and replicated-statistic columns.
-# Correlations are undefined with zero variance; the reference summary reports
-# them once.
 calculate_partner_pair_statistics <- function(
-  first_partner_responses, second_partner_responses, role_specific
+  first_partner_responses,
+  second_partner_responses,
+  compute_role_specific_statistics
 ) {
   dyad_mean_responses <- (first_partner_responses + second_partner_responses) / 2
   half_partner_differences <- (first_partner_responses - second_partner_responses) / 2
-  if (role_specific) {
+  if (compute_role_specific_statistics) {
     return(c(
       role_1_sd = stats::sd(first_partner_responses),
       role_2_sd = stats::sd(second_partner_responses),
       partner_correlation = suppressWarnings(stats::cor(
         first_partner_responses, second_partner_responses
+        # Undefined correlations are reported together after processing all simulations.
+        # To avoid repetitive warnings they are suppressed here.
       )),
       dyad_mean_sd = stats::sd(dyad_mean_responses),
       half_difference_sd = stats::sd(half_partner_differences),
@@ -299,6 +307,12 @@ calculate_partner_pair_statistics <- function(
   dyad_mean_variance <- stats::var(dyad_mean_responses)
   half_difference_mean_square <- mean(half_partner_differences^2)
   common_member_variance <- dyad_mean_variance + half_difference_mean_square
+  # common_member_variance here is then equivalent to computing:
+  # var(c(member1, member2)) + partner_covariance / (2 * n - 1)
+  # so finite sample correction is "built in".
+  # Here n is the number of dyads, and partner_covariance is
+  # dyad_mean_variance - half_difference_mean_square.
+
   return(c(
     exchangeable_member_sd = sqrt(common_member_variance),
     exchangeable_partner_correlation =
@@ -359,7 +373,7 @@ summarize_simulation_reference <- function(observed_statistics, simulated_statis
          ". This can occur with zero variance.", call. = FALSE)
   }
   n_statistics <- length(observed_statistics)
-  n_defined_simulations <- integer(n_statistics)
+  n_defined_values_by_statistic <- integer(n_statistics)
   observed_statistic_positions <- numeric(n_statistics)
   # Each column holds one statistic's simulated 2.5%, 50%, and 97.5% quantiles.
   simulated_statistic_quantiles <- matrix(
@@ -369,27 +383,29 @@ summarize_simulation_reference <- function(observed_statistics, simulated_statis
     simulated_statistic_values <- simulated_statistics[, statistic_index]
     simulated_statistic_values <-
       simulated_statistic_values[is.finite(simulated_statistic_values)]
-    n_defined_simulations[statistic_index] <- length(simulated_statistic_values)
+    n_defined_values_by_statistic[statistic_index] <- length(simulated_statistic_values)
     # Collect all counts before reporting any empty simulation references below.
-    if (n_defined_simulations[statistic_index] == 0L) next
+    if (n_defined_values_by_statistic[statistic_index] == 0L) next
 
     simulated_statistic_quantiles[, statistic_index] <- stats::quantile(
       simulated_statistic_values, probs = c(0.025, 0.5, 0.975), names = FALSE
     )
     observed_statistic_positions[statistic_index] <-
       (1 + sum(simulated_statistic_values <= observed_statistics[statistic_index])) /
-      (n_defined_simulations[statistic_index] + 1)
+      (n_defined_values_by_statistic[statistic_index] + 1)
   }
-  if (any(n_defined_simulations == 0L)) {
+  if (any(n_defined_values_by_statistic == 0L)) {
     stop("Every simulated value is undefined for: ",
-         paste(names(observed_statistics)[n_defined_simulations == 0L], collapse = ", "),
+         paste(names(observed_statistics)[n_defined_values_by_statistic == 0L],
+               collapse = ", "),
          ". A predictive reference cannot be calculated.", call. = FALSE)
   }
-  n_undefined_simulations <- nrow(simulated_statistics) - n_defined_simulations
-  if (any(n_undefined_simulations > 0L)) {
+  n_undefined_values_by_statistic <-
+    nrow(simulated_statistics) - n_defined_values_by_statistic
+  if (any(n_undefined_values_by_statistic > 0L)) {
     warning("Undefined simulated summaries (counts out of ", nrow(simulated_statistics),
-            "): ", paste(names(observed_statistics)[n_undefined_simulations > 0L],
-                         n_undefined_simulations[n_undefined_simulations > 0L],
+            "): ", paste(names(observed_statistics)[n_undefined_values_by_statistic > 0L],
+                         n_undefined_values_by_statistic[n_undefined_values_by_statistic > 0L],
                          sep = " = ", collapse = "; "),
             ". References use defined values only; inspect their counts.", call. = FALSE)
   }
@@ -399,7 +415,7 @@ summarize_simulation_reference <- function(observed_statistics, simulated_statis
     replicated_lower = simulated_statistic_quantiles[1, ],
     replicated_upper = simulated_statistic_quantiles[3, ],
     observed_quantile = observed_statistic_positions,
-    n_defined = n_defined_simulations
+    n_defined = n_defined_values_by_statistic
   ))
 }
 
@@ -507,8 +523,8 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
   if (is.null(ask)) {
     ask <- nrow(x$statistics_table) > 1L && grDevices::dev.interactive()
   }
-  previous_ask <- grDevices::devAskNewPage(ask)
-  on.exit(grDevices::devAskNewPage(previous_ask), add = TRUE)
+  previous_plot_pause_setting <- grDevices::devAskNewPage(ask)
+  on.exit(grDevices::devAskNewPage(previous_plot_pause_setting), add = TRUE)
   n_simulations <- nrow(x$replicated_statistics)
   suggested_histogram_bins <- min(100L, max(20L, round(n_simulations / 5)))
 
@@ -517,26 +533,26 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
     statistic_summary <- x$statistics_table[statistic_index, ]
     simulated_statistic_values <-
       x$replicated_statistics[, statistic_summary$statistic_name]
-    histogram <- graphics::hist(
+    simulated_statistic_histogram <- graphics::hist(
       simulated_statistic_values[is.finite(simulated_statistic_values)],
       breaks = suggested_histogram_bins, plot = FALSE
     )
-    maximum_bin_count <- max(histogram$counts)
-    middle_95_limits <- c(statistic_summary$replicated_lower,
-                          statistic_summary$replicated_upper)
+    maximum_bin_count <- max(simulated_statistic_histogram$counts)
+    middle_95_simulation_limits <- c(statistic_summary$replicated_lower,
+                                     statistic_summary$replicated_upper)
 
     # Keep complete bars visible and reserve a band above them for the legend.
     graphics::plot(
-      histogram, freq = TRUE,
-      xlim = range(statistic_summary$observed_value, histogram$breaks),
+      simulated_statistic_histogram, freq = TRUE,
+      xlim = range(statistic_summary$observed_value, simulated_statistic_histogram$breaks),
       ylim = c(0, maximum_bin_count * 1.25), main = statistic_summary$label,
       sub = paste0(x$response, "; ", x$n_pairs, " pairs; ",
                    statistic_summary$n_defined, "/", n_simulations,
                    " defined simulations"),
       xlab = "Summary value", ...
     )
-    graphics::segments(middle_95_limits, 0, middle_95_limits, maximum_bin_count,
-                       lty = 2, col = "grey40")
+    graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
+                       maximum_bin_count, lty = 2, col = "grey40")
     graphics::segments(statistic_summary$observed_value, 0,
                        statistic_summary$observed_value, maximum_bin_count,
                        lwd = 2.5, col = "red")
