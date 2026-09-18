@@ -154,7 +154,6 @@ check_partner_dependence <- function(
     first_partner_responses <- dataset_responses[partner_row_map$rows[, 1]]
     second_partner_responses <- dataset_responses[partner_row_map$rows[, 2]]
 
-    #### continue review here!
     statistics_by_dataset[[dataset_index]] <- calculate_partner_pair_statistics(
       first_partner_responses,
       second_partner_responses,
@@ -162,18 +161,38 @@ check_partner_dependence <- function(
     )
   }
 
-  # Each list entry contains 4 or 6 named statistics. Keep the observed vector;
-  # stack the remaining entries into a matrix with one row per simulation.
+  # Object is currently:
+  # statistics_by_dataset object is currently a list of 1,001 vectors
+  # [[1]]                     6 observed statistics
+  # [[2]]                     6 statistics from simulation 1
+  # ...
+  # [[1001]]                  6 statistics from simulation 1,000
+
   observed_statistics <- statistics_by_dataset[[1]]
   simulated_statistics <- do.call(rbind, statistics_by_dataset[-1])
+
+  # now, the object is:
+  # observed_statistics         numeric vector of length 6
+  #
+  # simulated_statistics        numeric matrix: 1,000 rows × 6 columns
+  # rows = simulations
+  # 6 or 4 columns = 6 or 4 statistics
+
+  # Depending on whether role was supplied or not, we return a different
+  # mapping of statistic descriptions
+  statistic_information <- partner_statistic_info(partner_row_map$role_order)
+
+  statistic_summaries <- summarize_simulation_reference(
+    observed_statistics, simulated_statistics
+  )
+
+  # Combine labels and numerical summaries: one row per statistic.
+  statistics_table <- cbind(statistic_information, statistic_summaries)
 
   # Table rows and simulation columns use the same statistic order.
   # Keep both: the table supplies labels/limits, the matrix supplies histograms.
   check_result <- list(
-    statistics_table = cbind(
-      partner_statistic_info(partner_row_map$role_order),
-      summarize_simulation_reference(observed_statistics, simulated_statistics)
-    ),
+    statistics_table = statistics_table,
     replicated_statistics = simulated_statistics,
     role_order = as.character(partner_row_map$role_order),
     n_pairs = nrow(partner_row_map$rows),
@@ -182,6 +201,7 @@ check_partner_dependence <- function(
     n_missing_role_rows = partner_row_map$n_missing_role_rows,
     response = response
   )
+
   attr(check_result, "dyadMLM") <- attr(simulations, "dyadMLM")
   class(check_result) <- c("dyadMLM_partner_check", "list")
   if (any(c(check_result$n_incomplete_dyads, check_result$n_missing_dyad_rows,
@@ -372,36 +392,39 @@ summarize_simulation_reference <- function(observed_statistics, simulated_statis
                collapse = ", "),
          ". This can occur with zero variance.", call. = FALSE)
   }
-  n_statistics <- length(observed_statistics)
-  n_defined_values_by_statistic <- integer(n_statistics)
-  observed_statistic_positions <- numeric(n_statistics)
-  # Each column holds one statistic's simulated 2.5%, 50%, and 97.5% quantiles.
-  simulated_statistic_quantiles <- matrix(
-    NA_real_, nrow = 3, ncol = n_statistics
+
+  # One row per statistic. Fill the simulation summaries in the loop below.
+  statistics_table <- data.frame(
+    observed_value = unname(observed_statistics),
+    replicated_median = NA_real_, replicated_lower = NA_real_,
+    replicated_upper = NA_real_, observed_quantile = NA_real_, n_defined = 0L
   )
-  for (statistic_index in seq_len(n_statistics)) {
+  for (statistic_index in seq_along(observed_statistics)) {
     simulated_statistic_values <- simulated_statistics[, statistic_index]
     simulated_statistic_values <-
       simulated_statistic_values[is.finite(simulated_statistic_values)]
-    n_defined_values_by_statistic[statistic_index] <- length(simulated_statistic_values)
+    statistics_table$n_defined[statistic_index] <- length(simulated_statistic_values)
     # Collect all counts before reporting any empty simulation references below.
-    if (n_defined_values_by_statistic[statistic_index] == 0L) next
+    if (statistics_table$n_defined[statistic_index] == 0L) next
 
-    simulated_statistic_quantiles[, statistic_index] <- stats::quantile(
+    simulated_statistic_quantiles <- stats::quantile(
       simulated_statistic_values, probs = c(0.025, 0.5, 0.975), names = FALSE
     )
-    observed_statistic_positions[statistic_index] <-
+    statistics_table$replicated_lower[statistic_index] <- simulated_statistic_quantiles[1]
+    statistics_table$replicated_median[statistic_index] <- simulated_statistic_quantiles[2]
+    statistics_table$replicated_upper[statistic_index] <- simulated_statistic_quantiles[3]
+    statistics_table$observed_quantile[statistic_index] <-
       (1 + sum(simulated_statistic_values <= observed_statistics[statistic_index])) /
-      (n_defined_values_by_statistic[statistic_index] + 1)
+      (statistics_table$n_defined[statistic_index] + 1)
   }
-  if (any(n_defined_values_by_statistic == 0L)) {
+  if (any(statistics_table$n_defined == 0L)) {
     stop("Every simulated value is undefined for: ",
-         paste(names(observed_statistics)[n_defined_values_by_statistic == 0L],
+         paste(names(observed_statistics)[statistics_table$n_defined == 0L],
                collapse = ", "),
          ". A predictive reference cannot be calculated.", call. = FALSE)
   }
   n_undefined_values_by_statistic <-
-    nrow(simulated_statistics) - n_defined_values_by_statistic
+    nrow(simulated_statistics) - statistics_table$n_defined
   if (any(n_undefined_values_by_statistic > 0L)) {
     warning("Undefined simulated summaries (counts out of ", nrow(simulated_statistics),
             "): ", paste(names(observed_statistics)[n_undefined_values_by_statistic > 0L],
@@ -409,14 +432,7 @@ summarize_simulation_reference <- function(observed_statistics, simulated_statis
                          sep = " = ", collapse = "; "),
             ". References use defined values only; inspect their counts.", call. = FALSE)
   }
-  return(data.frame(
-    observed_value = unname(observed_statistics),
-    replicated_median = simulated_statistic_quantiles[2, ],
-    replicated_lower = simulated_statistic_quantiles[1, ],
-    replicated_upper = simulated_statistic_quantiles[3, ],
-    observed_quantile = observed_statistic_positions,
-    n_defined = n_defined_values_by_statistic
-  ))
+  return(statistics_table)
 }
 
 
