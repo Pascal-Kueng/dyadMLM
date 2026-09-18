@@ -131,11 +131,13 @@ test_that("identifiers accept columns, external vectors, and data-mask selectors
   expected <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   dyad_column <- "dyad"
   role_column <- "role"
+  named_roles <- stats::setNames(roles, rep(NA_character_, length(roles)))
   # Conflicting caller names must not override fitted columns.
   dyad <- role <- rep(NA, 10)
   results <- list(
     check_partner_dependence(simulations, dyad, role, plot = FALSE),
     check_partner_dependence(simulations, ids, roles, plot = FALSE),
+    check_partner_dependence(simulations, ids, named_roles, plot = FALSE),
     check_partner_dependence(simulations, .data$dyad, .data$role, plot = FALSE),
     check_partner_dependence(simulations, .data[[dyad_column]],
                              .data[[role_column]], plot = FALSE)
@@ -247,7 +249,7 @@ test_that("invalid simulation objects, identifiers, and pair structures fail cle
   expect_error(check_partner_dependence(simulations, "dyad", roles),
                "exactly one row for each role")
   roles[first_dyad[1]] <- "other"
-  expect_error(check_partner_dependence(simulations, "dyad", roles), "Exactly two role values")
+  expect_error(check_partner_dependence(simulations, "dyad", roles), "exactly two role values")
 })
 
 
@@ -279,22 +281,38 @@ test_that("one simulation retains every statistic and its reference limits", {
 })
 
 
-test_that("checks plot by default, accept positional plot, and return invisibly", {
+test_that("checks plot by default, forward ask, and return invisibly", {
   simulations <- partner_check_test_simulations()
-  plot_calls <- 0L
-  local_mocked_bindings(plot.dyadMLM_partner_check = function(x, ...) {
-    plot_calls <<- plot_calls + 1L
+  plot_calls <- list()
+  local_mocked_bindings(plot.dyadMLM_partner_check = function(x, ask, ...) {
+    plot_calls[length(plot_calls) + 1L] <<- list(ask)
     invisible(x)
   }, .package = "dyadMLM")
-  default <- withVisible(check_partner_dependence(simulations, "dyad"))
+  expect_message(default <- withVisible(check_partner_dependence(simulations, "dyad")),
+                 "No role supplied: summaries pool partners.", fixed = TRUE)
   expect_false(default$visible)
   expect_s3_class(default$value, "dyadMLM_partner_check")
-  expect_identical(plot_calls, 1L)
-  for (result in list(
-    withVisible(check_partner_dependence(simulations, "dyad", plot = FALSE)),
-    withVisible(check_partner_dependence(simulations, "dyad", NULL, FALSE))
-  )) expect_false(result$visible)
-  expect_identical(plot_calls, 1L)
+  expect_identical(plot_calls, list(NULL))
+  expect_message(no_plot <- withVisible(check_partner_dependence(
+    simulations, "dyad", plot = FALSE, ask = TRUE
+  )), "Use `role = NULL` to pool without this message.", fixed = TRUE)
+  expect_message(pooled <- withVisible(check_partner_dependence(
+    simulations, "dyad", NULL, FALSE
+  )), NA)
+  expect_message(roles <- withVisible(check_partner_dependence(
+    simulations, "dyad", role = "role", plot = FALSE
+  )), NA)
+  for (result in list(no_plot, pooled, roles)) expect_false(result$visible)
+  expect_identical(no_plot$value, pooled$value)
+  expect_identical(plot_calls, list(NULL))
+  for (ask in c(FALSE, TRUE)) {
+    plotted <- withVisible(check_partner_dependence(
+      simulations, "dyad", NULL, TRUE, "raw", ask = ask
+    ))
+    expect_false(plotted$visible)
+    expect_identical(plotted$value$response, "raw")
+  }
+  expect_identical(plot_calls, list(NULL, FALSE, TRUE))
 })
 
 

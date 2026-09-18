@@ -9,7 +9,8 @@ check_partner_dependence(
   dyad,
   role = NULL,
   plot = TRUE,
-  response = c("model-centred", "raw")
+  response = c("model-centred", "raw"),
+  ask = NULL
 )
 }
 \arguments{
@@ -35,6 +36,10 @@ effects and observation-level noise. With \code{"raw"}, the predictive check
 assesses whether the full model, including fixed effects, reproduces the
 overall response variances and partner correlations.
 See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how predictions are defined.}
+
+\item{ask}{Whether to pause between plots. \code{NULL} (default) chooses
+automatically; \code{TRUE} pauses and \code{FALSE} draws without pausing.
+Ignored when \code{plot = FALSE}.}
 }
 \value{
 The comparison plots (shown by default) are the main output. The
