@@ -2,16 +2,15 @@
 % Please edit documentation in R/predictive_checks_dependence.R
 \name{plot.dyadMLM_partner_check}
 \alias{plot.dyadMLM_partner_check}
-\title{Plot partner-dependence predictive checks}
+\title{Plot a saved partner-dependence check}
 \usage{
 \method{plot}{dyadMLM_partner_check}(x, ask = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{dyadMLM_partner_check} object.}
 
-\item{ask}{Whether to pause before drawing the next plot. \code{NULL} chooses
-automatically in interactive sessions. Supply \code{TRUE} or \code{FALSE} to
-override it.}
+\item{ask}{\code{TRUE} pauses before the next plot. \code{FALSE} draws all plots
+without pausing. \code{NULL} (default) chooses automatically.}
 
 \item{...}{Additional graphical arguments passed to \code{\link[graphics:plot]{graphics::plot()}}.
 \code{freq}, \code{xlim}, \code{ylim}, \code{main}, \code{sub}, and \code{xlab} are controlled by this
@@ -22,31 +21,34 @@ Invisibly, \code{x}.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-Plots all summaries in a saved \code{\link[=check_partner_dependence]{check_partner_dependence()}} result.
-Each histogram shows simulated summary values; the red line marks the
-observed value and dashed lines mark the middle 95\% of simulations.
+Draws the comparison plots without repeating simulations.
 }
-\section{Quick start}{
+\details{
+See \code{\link[=check_partner_dependence]{check_partner_dependence()}} for how to interpret the plots
+and for technical details.
+}
+\examples{
+\dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
 
-With a result saved as \code{check}:
-\preformatted{
+model <- glmmTMB::glmmTMB(
+  closeness ~ 1 + gender + (1 | coupleID),
+  data = example_data
+)
+
+simulations <- simulate_dyad_responses(
+  model,
+  nsim = 50,
+  seed = 123
+)
+
+check <- check_partner_dependence(
+  simulations,
+  dyad = coupleID,
+  role = gender,
+  plot = FALSE
+)
+
 plot(check, ask = FALSE)
-}
-Both views are shown. The subtitle identifies model-centred or raw
-responses. Set \code{ask = FALSE} to draw without pausing between plots.
-}
-
-\section{Interpretation}{
-
-Values near or beyond the dashed lines may flag poor agreement. This is a
-descriptive comparison, not a pass/fail test. Close agreement is expected
-for features the model freely estimated. See \code{\link[=check_partner_dependence]{check_partner_dependence()}}
-for interpretation and a complete example.
-}
-
-\section{Technical details}{
-
-Plots use stored summary values; they do not simulate or refit the model.
-The two views express the same covariance information, so they are not
-independent checks.
+\dontshow{\}) # examplesIf}
 }

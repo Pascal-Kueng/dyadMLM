@@ -2,7 +2,7 @@
 % Please edit documentation in R/predictive_checks_dependence.R
 \name{print.dyadMLM_partner_check}
 \alias{print.dyadMLM_partner_check}
-\title{Print a partner-dependence predictive check}
+\title{Print a summary of the partner-dependence predictive check object.}
 \usage{
 \method{print}{dyadMLM_partner_check}(x, ...)
 }
@@ -15,7 +15,6 @@
 \code{x}, invisibly.
 }
 \description{
-Prints the number of pairs and simulations, response mode, and any omissions.
 Use \code{\link[=plot.dyadMLM_partner_check]{plot.dyadMLM_partner_check()}} to view the comparisons.
 }
 \keyword{internal}

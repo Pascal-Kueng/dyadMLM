@@ -85,13 +85,24 @@
 #' example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
 #'
 #' model <- glmmTMB::glmmTMB(
-#' closeness ~ 1 + gender + (1 | coupleID),
+#'   closeness ~ 1 + gender + (1 | coupleID),
 #'   data = example_data
 #' )
 #'
 #' # Fewer simulations for a quick example (the default is 1000).
-#' simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
+#' simulations <- simulate_dyad_responses(
+#'   model,
+#'   nsim = 50,
+#'   seed = 123
+#' )
 #'
+#' check_partner_dependence(
+#'   simulations,
+#'   dyad = coupleID,
+#'   role = gender
+#' )
+#'
+#' # Optionally, suppress plot, store object, and plot later.
 #' check <- check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
@@ -99,8 +110,8 @@
 #'   plot = FALSE
 #' )
 #'
-#' print(check)
 #' plot(check, ask = FALSE)
+#' print(check)
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
@@ -393,9 +404,8 @@ calculate_partner_pair_statistics <- function(
 
 ### Printing results ----------------------------------------------------------
 
-#' Print a partner-dependence predictive check
+#' Print a summary of the partner-dependence predictive check object.
 #'
-#' Prints the number of pairs and simulations, response mode, and any omissions.
 #' Use [plot.dyadMLM_partner_check()] to view the comparisons.
 #'
 #' @param x An object returned by [check_partner_dependence()].
@@ -433,41 +443,45 @@ print.dyadMLM_partner_check <- function(x, ...) {
 
 ### Plotting results ----------------------------------------------------------
 
-#' Plot partner-dependence predictive checks
+#' Plot a saved partner-dependence check
 #'
 #' `r lifecycle::badge("experimental")`
-#' Plots all summaries in a saved [check_partner_dependence()] result.
-#' Each histogram shows simulated summary values; the red line marks the
-#' observed value and dashed lines mark the middle 95% of simulations.
+#' Draws the comparison plots without repeating simulations.
+#'
+#' See [check_partner_dependence()] for how to interpret the plots
+#' and for technical details.
 #'
 #' @param x A `dyadMLM_partner_check` object.
-#' @param ask Whether to pause before drawing the next plot. `NULL` chooses
-#'   automatically in interactive sessions. Supply `TRUE` or `FALSE` to
-#'   override it.
+#' @param ask `TRUE` pauses before the next plot. `FALSE` draws all plots
+#'   without pausing. `NULL` (default) chooses automatically.
 #' @param ... Additional graphical arguments passed to [graphics::plot()].
 #'   `freq`, `xlim`, `ylim`, `main`, `sub`, and `xlab` are controlled by this
 #'   method.
 #'
 #' @return Invisibly, `x`.
 #'
-#' @section Quick start:
-#' With a result saved as `check`:
-#' \preformatted{
+#' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
+#' example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+#'
+#' model <- glmmTMB::glmmTMB(
+#'   closeness ~ 1 + gender + (1 | coupleID),
+#'   data = example_data
+#' )
+#'
+#' simulations <- simulate_dyad_responses(
+#'   model,
+#'   nsim = 50,
+#'   seed = 123
+#' )
+#'
+#' check <- check_partner_dependence(
+#'   simulations,
+#'   dyad = coupleID,
+#'   role = gender,
+#'   plot = FALSE
+#' )
+#'
 #' plot(check, ask = FALSE)
-#' }
-#' Both views are shown. The subtitle identifies model-centred or raw
-#' responses. Set `ask = FALSE` to draw without pausing between plots.
-#'
-#' @section Interpretation:
-#' Values near or beyond the dashed lines may flag poor agreement. This is a
-#' descriptive comparison, not a pass/fail test. Close agreement is expected
-#' for features the model freely estimated. See [check_partner_dependence()]
-#' for interpretation and a complete example.
-#'
-#' @section Technical details:
-#' Plots use stored summary values; they do not simulate or refit the model.
-#' The two views express the same covariance information, so they are not
-#' independent checks.
 #'
 #' @export
 plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
