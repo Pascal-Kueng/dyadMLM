@@ -493,11 +493,12 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
   n_simulations <- nrow(x$replicated_statistics)
   suggested_histogram_bins <- min(100L, max(20L, round(n_simulations / 5)))
 
-  # Compare each observed statistic with its simulation column, using defined values.
-  for (statistic_name in names(x$observed_statistics)) {
-    observed_statistic_value <- x$observed_statistics[[statistic_name]]
+  # Match observed values and simulation columns by position; names are plot labels.
+  for (statistic_index in seq_along(x$observed_statistics)) {
+    statistic_name <- names(x$observed_statistics)[[statistic_index]]
+    observed_statistic_value <- x$observed_statistics[[statistic_index]]
     simulated_statistic_values <-
-      x$replicated_statistics[, statistic_name]
+      x$replicated_statistics[, statistic_index]
     simulated_statistic_values <-
       simulated_statistic_values[is.finite(simulated_statistic_values)]
     middle_95_simulation_limits <- stats::quantile(

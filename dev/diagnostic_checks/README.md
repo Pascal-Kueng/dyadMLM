@@ -10,7 +10,6 @@ parameters fixed; close agreement alone does not establish good fit.
 | Document | Purpose |
 | --- | --- |
 | [Vignette candidate](partner-dependence-vignette-draft.Rmd) | One complete workflow and interpretation |
-| [Review checklist](partner-dependence-review.Rmd) | Questions for reviewing changes |
 | [Reference validation](partner-dependence-reference-validation.Rmd) | Independent Woody–Sadler calculations and Dingy cross-check |
 | [Outer simulation study](partner-dependence-outer-simulation-study.Rmd) | Known Gaussian populations, fitted models, and repeated-sample behavior |
 

@@ -365,6 +365,14 @@ test_that("printing describes the check and plots show empirical limits", {
   expect_false(visible$visible)
   expect_identical(visible$value, distinguishable)
 
+  # Distinct numeric roles can have identical rounded labels. Plot both SDs.
+  simulations$model_frame$role <- 1e15 + as.integer(simulations$model_frame$role)
+  numeric_roles_check <- check_partner_dependence(
+    simulations, "dyad", "role", plot = FALSE
+  )
+  expect_identical(names(numeric_roles_check$observed_statistics)[1],
+                   names(numeric_roles_check$observed_statistics)[2])
+
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   graphics::par(plt = c(0.2, 0.8, 0.2, 0.8))
@@ -377,15 +385,18 @@ test_that("printing describes the check and plots show empirical limits", {
   original_segments <- graphics::segments
   local_mocked_bindings(segments = function(x0, y0, x1, y1, ...) {
     if (identical(list(...)$lty, 2)) limits[[length(limits) + 1L]] <<- x0
+    if (identical(list(...)$col, "red")) observed_lines <<- c(observed_lines, x0)
     original_segments(x0, y0, x1, y1, ...)
   }, .package = "graphics")
-  for (result in list(exchangeable, distinguishable)) {
+  for (result in list(exchangeable, distinguishable, numeric_roles_check)) {
     titles <- character()
     limits <- list()
+    observed_lines <- numeric()
     plotted <- withVisible(plot(result, ask = FALSE))
     expect_false(plotted$visible)
     expect_identical(plotted$value, result)
     expect_identical(titles, names(result$observed_statistics))
+    expect_equal(observed_lines, unname(result$observed_statistics))
     expect_equal(unname(do.call(cbind, limits)), unname(apply(
       result$replicated_statistics, 2, stats::quantile, probs = c(0.025, 0.975)
     )))

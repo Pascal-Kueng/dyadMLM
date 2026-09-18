@@ -40,7 +40,7 @@ install.packages("dyadMLM")
 ```
 
 To try the latest changes and help test upcoming features, install the
-development version from R-universe:
+development version:
 
 ```{r eval = FALSE}
 install.packages(
@@ -58,21 +58,20 @@ Development versions may change more frequently.
 
 Questions about using `dyadMLM`, specifying models, or interpreting output are
 welcome in [Q&A Discussions](https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/q-a).
-Early feature or method ideas can start in
-[Ideas](https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/ideas),
-while bugs and concrete improvements can be shared through
-[Issues](https://github.com/Pascal-Kueng/dyadMLM/issues/new/choose).
+
+Feature or method ideas can be proposed in
+[Ideas](https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/ideas).
+
+Please report any bugs you find or any concrete improvement suggestions
+through [Issues](https://github.com/Pascal-Kueng/dyadMLM/issues/new/choose).
 
 Documentation, examples, tests, reviews, and code contributions are all
-welcome; see the
+welcome. See the
 [contribution guide](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md).
-Please only share data you are permitted to make public. Never upload
-identifiable or confidential research data.
 
 ## 1. Data preparation and validation
 
-The core feature of this package is data preparation and validation for various
-types of dyadic data. It creates model-ready columns for dyadic multilevel
+This package can prepare model-ready data structures for dyadic multilevel
 models, including the Actor-Partner Interdependence Model (APIM),
 Dyad-Individual Model (DIM), and the Dyadic Score Model (DSM).
 

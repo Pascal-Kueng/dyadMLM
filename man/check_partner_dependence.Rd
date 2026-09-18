@@ -113,13 +113,24 @@ Woody and Sadler (2005).
 example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
 
 model <- glmmTMB::glmmTMB(
-closeness ~ 1 + gender + (1 | coupleID),
+  closeness ~ 1 + gender + (1 | coupleID),
   data = example_data
 )
 
 # Fewer simulations for a quick example (the default is 1000).
-simulations <- simulate_dyad_responses(model, nsim = 50, seed = 123)
+simulations <- simulate_dyad_responses(
+  model,
+  nsim = 50,
+  seed = 123
+)
 
+check_partner_dependence(
+  simulations,
+  dyad = coupleID,
+  role = gender
+)
+
+# Optionally, suppress plot, store object, and plot later.
 check <- check_partner_dependence(
   simulations,
   dyad = coupleID,
@@ -127,8 +138,8 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
-print(check)
 plot(check, ask = FALSE)
+print(check)
 \dontshow{\}) # examplesIf}
 }
 \references{
