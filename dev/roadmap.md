@@ -33,15 +33,16 @@ documentation, tables, and plots.
 | **WP5 — Advanced data preparation** | Support additional designs with explicit preparation rules. | Later, when concrete analyses require them. |
 | **WP6 — Multiple-imputation integration** | Prepare externally imputed datasets consistently. | Later; depends on stable preparation, not covariance decomposition. |
 | **WP7 — Reporting and visualization** | Turn stable results into useful tables and figures. | Deliver method-specific outputs with their methods; broader integration follows. |
+| **WP8 — Documentation and discoverability** | Make current and new workflows easy to learn and find. | Improve current pages now; publish feature guides with each release and update discoverability after page changes. |
 
 These targets replace the earlier version assignments. They are provisional;
 only the next release should have a frozen scope. No dates are promised.
 
 | Target | Required scope | Optional additions |
 | --- | --- | --- |
-| **0.2.1** | WP1A: current cross-sectional partner checks. | Ready correctness and documentation fixes. |
+| **0.2.1** | WP1A: current cross-sectional partner checks. | Ready correctness fixes and WP8A improvements. |
 | **0.3.0** | First useful WP1B and WP1C increments: validated ILD dependence checks and an initial set of broader dyadic assessment plots/checks, with essential WP7 output. | Additional families or formal tests that pass their own validation. |
-| **Further assessment releases** | Extend WP1B–WP1D by supported family, design, and check. | Ready reporting improvements. |
+| **Further assessment releases** | Extend WP1B–WP1D by supported family, design, and check. | Ready reporting and WP8A improvements. |
 | **0.4.0** | Initial WP2 APIM covariance decomposition and its essential WP7 output. | Separately validated uncertainty or covariance-recovery extensions. |
 | **0.5.0** | WP3 expanded workflows and transparent `glmmTMB` specifications. | Ready cross-method reporting. |
 | **Later, unassigned** | Select bounded WP4–WP6 and remaining WP7 increments. | Research candidates only after separate scope and validation decisions. |
@@ -56,6 +57,34 @@ bundle nearby increments when that makes a worthwhile CRAN update.
 
 For each release, record required deliverables, optional additions, and acceptance
 criteria. Use small PRs; each should implement a reviewable part of one WP.
+WP8C documentation is required alongside every feature increment. WP8A and WP8B
+can also publish improvements to existing pages between package releases.
+
+## Current issues
+
+The following issues were open on 2026-09-18; none had a GitHub milestone.
+Timing below is proposed roadmap placement, not an assigned GitHub release.
+Keep detailed checklists in the linked issues and update this index as work closes.
+
+| Issue | Home | Timing |
+| --- | --- | --- |
+| [#23 — Make the dyadMLM website and vignettes easier to find](https://github.com/Pascal-Kueng/dyadMLM/issues/23) | WP8B | After #25 settles the page structure. |
+| [#24 — Extend partner-dependence checks to intensive longitudinal data](https://github.com/Pascal-Kueng/dyadMLM/issues/24) | WP1B | After #18; initial scope targets 0.3.0. |
+| [#25 — Simplify vignette structure and clarify glmmTMB and brms support](https://github.com/Pascal-Kueng/dyadMLM/issues/25) | WP8A, with scientific content from WP3 | Start now; current-page improvements do not wait for 0.5.0. |
+| [#26 — Make help pages and examples clear and practical](https://github.com/Pascal-Kueng/dyadMLM/issues/26) | WP8A | Small PRs now; optional-engine example cleanup follows #18. |
+| [#27 — Prevent renamed predictor selections from silently using another column](https://github.com/Pascal-Kueng/dyadMLM/issues/27) | Core maintenance: preparation | Next correctness work; before related refactoring. |
+| [#28 — Reject glmmTMB models fitted with priors in likelihood-ratio tests](https://github.com/Pascal-Kueng/dyadMLM/issues/28) | Core maintenance: model comparison | Next correctness work. |
+| [#29 — Check that fitted groups contain both partner positions](https://github.com/Pascal-Kueng/dyadMLM/issues/29) | Core maintenance: covariance recovery | Before related recovery refactoring or extensions. |
+| [#30 — Keep dyad, member, and time columns when used as APIM predictors](https://github.com/Pascal-Kueng/dyadMLM/issues/30) | Core maintenance: preparation | Next correctness work. |
+| [#31 — Avoid overwriting dyad IDs named n_members during incomplete-dyad checks](https://github.com/Pascal-Kueng/dyadMLM/issues/31) | Core maintenance: preparation | Next correctness work; before related refactoring. |
+| [#32 — Require dplyr 1.1.1 for the join relationship argument](https://github.com/Pascal-Kueng/dyadMLM/issues/32) | Core maintenance: dependencies | Next compatibility fix. |
+| [#33 — Make covariance recovery easier to maintain and test](https://github.com/Pascal-Kueng/dyadMLM/issues/33) | Core maintenance: recovery and internal metadata | After #27–#32; covers existing `glmmTMB`/`brms` support, without waiting for WP2/WP4 extensions. |
+
+Correctness fixes target the earliest suitable release once validated. They are
+not deferred to WP5's advanced preparation or the later Bayesian expansion.
+WP1C/WP1D and most later features do not yet have dedicated issues; open bounded
+implementation issues when selecting their scope. #24 covers ILD partner checks,
+not the full assessment suite.
 
 ## WP1 — Model assessment
 
@@ -200,10 +229,13 @@ to package metadata.
 
 ## WP3 — Supported workflows and model specifications
 
-- Maintain one main APIM, DIM, and DSM vignette, with clear cross-sectional and
-  ILD sections. Preserve preparation, fitting, interpretation, assumptions,
+WP3 owns scientific model specifications and their validation. WP8 owns page
+organization, help editing, navigation, and publication. Improving existing
+documentation under #25 does not wait for the proposed 0.5.0 feature release.
+
+- Supply one main APIM, DIM, and DSM workflow, with clear cross-sectional and
+  ILD paths. Preserve preparation, fitting, interpretation, assumptions,
   covariance recovery, distinguishability checks, and validated transformations.
-  Put long derivations and advanced examples later.
 - APIM: retain within-/between-person actor/partner effects, generated indicators
   and contrasts, and the distinction between manifest raw outcome lags and
   separately estimated within-/between-person lag effects, including small-T
@@ -211,10 +243,9 @@ to package metadata.
   random slopes, and ILD limitations. DSM: retain role order, signed differences,
   interaction-model interpretations, role reversal, and APIM/DIM transformations;
   outcomes remain unchanged during preparation.
-- Rework the development mixed-APIM vignette into **Preparing and Modeling
-  Multiple Dyad Compositions in R**: preparation, validation, retaining,
-  reclassifying and pooling compositions, a brief APIM example, and links to
-  compatible DIM/DSM workflows. Simplify or label convergence-sensitive ILD fits;
+- Provide validated content for the mixed-composition guide in WP8A: preparation,
+  validation, retaining, reclassifying and pooling compositions, a brief APIM
+  example, and compatible DIM/DSM workflows. Simplify or label convergence-sensitive ILD fits;
   do not present optimizer changes as a universal remedy.
 - Finish `dev/vignettes/generalized-apim.Rmd`, starting with runnable
   negative-binomial examples using shipped count data. Validate Poisson and
@@ -307,36 +338,72 @@ to package metadata.
   distinct input contracts. Decomposition tables and signed waterfall plots
   should display WP2 results without recomputing the estimand.
 
-## Continuous maintenance, documentation, and releases
+## WP8 — Documentation and discoverability
 
-- Address correctness issues [#27](https://github.com/Pascal-Kueng/dyadMLM/issues/27)–[#32](https://github.com/Pascal-Kueng/dyadMLM/issues/32),
-  especially silent wrong results, before related refactors: renamed predictor
-  selections, MAP fits in likelihood-ratio tests, fitted groups lacking both
-  partner positions, predictor/identifier overlap, overwritten dyad IDs, and the
-  minimum `dplyr` version.
+Use one WP with stages that can overlap. Existing-page cleanup can start now;
+new feature guides ship with their features. Scientific scope and validation stay
+with the relevant method WP.
+
+### WP8A: Improve current documentation
+
+- Under [#25](https://github.com/Pascal-Kueng/dyadMLM/issues/25), make README the
+  entry point, including the raw-data → prepared-columns workflow and links to
+  APIM, DIM, and DSM. Give each topic one main page, with clear cross-sectional/ILD
+  sections; retain useful diagrams and move lengthy derivations later.
+- Move useful Getting Started material before removing its index entry; redirect
+  its URL and update navigation. Rework the existing mixed-APIM draft into
+  **Preparing and Modeling Multiple Dyad Compositions in R**, using WP3's validated
+  content and links to compatible DIM/DSM workflows.
+- Add model-engine support tables using the statuses **documented**, **compatible
+  but undocumented**, **experimental**, **not implemented**, **unavailable**, and
+  **not applicable**. Link documented workflows and record checked `dyadMLM` and
+  engine versions.
+- Under [#26](https://github.com/Pascal-Kueng/dyadMLM/issues/26), make help practical:
+  purpose, workflow, useful output, choices, then technical details. Keep assumptions,
+  missingness, roles, covariance scales, and model-comparison limits visible.
+  Start with the `compare_nested_models()` help and generated Rd file, retaining
+  its example in that first small PR; revise examples separately.
+- Use bundled simulated datasets throughout. Smaller examples retain whole dyads
+  and required occasions; `coupleID <= 40` in `dyads_cross` contains only female–male
+  dyads, so choose IDs for the required composition. After #18, use `@examplesIf`
+  for optional engines and verify execution with and without them.
+- Explain supported external-vector arguments and fitted-row alignment. Add brief
+  contributor guidance on plain language, useful output, and links to one main
+  explanation. Keep short pages short; the internal metadata reference stays in #33.
+
+### WP8B: Make documentation easier to find
+
+- After #25 establishes the pages, complete
+  [#23](https://github.com/Pascal-Kueng/dyadMLM/issues/23): descriptive titles and
+  links, metadata, canonical URLs, sitemap coverage, and indexing. Verify the live
+  site after publication, record search results, and review them after 6–8 weeks.
+- Maintain accessible workshop materials and synthetic downloads. Track release
+  posts, R Weekly, MixedModels Task View outreach, and teaching materials separately
+  from feature acceptance. Recheck discoverability when later releases change pages.
+
+### WP8C: Document each feature release
+
+- Include runnable help/examples and an interpretation guide with each new
+  capability: model assessment in 0.3.0 and follow-ups, decomposition in 0.4.0,
+  expanded workflows/specifications in 0.5.0, and Bayesian/preparation/imputation
+  guides with their later increments. WP7 reporting needs examples alongside its
+  tables and plots. WP1A's initial documentation still ships in 0.2.1.
+- Explain supported designs, outcomes, model engines, statistical targets, and
+  limitations. Link existing preparation material rather than repeat it. Update
+  support tables and navigation, run examples, inspect rendered pages, and verify
+  links and redirects. Feature documentation is required even when other WP8 work
+  remains unfinished.
+
+## Continuous maintenance and release checks
+
+- Address #27–#32 before related refactors, prioritizing silent wrong results.
+  Keep existing preparation, model-comparison, and covariance-recovery fixes on
+  the current maintenance track.
 - Under [#33](https://github.com/Pascal-Kueng/dyadMLM/issues/33), separate covariance
   extraction, matching/validation, algebra, and output where this improves clarity.
   Keep file moves separate from behavior changes. Validate actual fitted `glmmTMB`
   and `brms` results against independent calculations; retain fast supplied-result
   tests and document metadata fields, types, shapes, and stage guarantees.
-- Follow [#25](https://github.com/Pascal-Kueng/dyadMLM/issues/25) for README,
-  vignette structure, navigation, and model-engine support tables. Make README
-  the entry point, including the raw-data → prepared-columns workflow. Move useful
-  Getting Started material before removing its index entry; redirect its URL.
-  Preserve clear cross-sectional/ILD links and label supported, experimental,
-  undocumented, unavailable, and unimplemented capabilities accurately.
-- Follow [#26](https://github.com/Pascal-Kueng/dyadMLM/issues/26) for practical help,
-  contributor guidance, and examples. Explain purpose, show a workflow and output,
-  then give details. Use bundled simulated datasets throughout; smaller examples
-  must retain whole dyads and required occasions. `coupleID <= 40` in `dyads_cross`
-  contains only female–male dyads, so select suitable IDs for each composition.
-  Use `@examplesIf` for optional engines and explain supported external-vector
-  arguments and fitted-row alignment. Keep short help pages short.
-- Follow [#23](https://github.com/Pascal-Kueng/dyadMLM/issues/23) for discoverability
-  after page structure settles: descriptive titles/links, metadata, canonical
-  URLs, sitemap, and indexing. Maintain accessible workshop materials and synthetic
-  downloads. Track release posts, R Weekly, MixedModels Task View outreach, and
-  teaching materials separately from feature acceptance.
 - Each increment requires meaningful numerical checks, runnable examples,
   inspected rendered output, generated help/links, a built-package check, and
   green CI on the proposed commit. Run expensive simulation studies separately
