@@ -417,7 +417,9 @@ calculate_partner_pair_statistics <- function(
 #'
 #' @export
 print.dyadMLM_partner_check <- function(x, ...) {
+  # Read saved settings; printing does not rerun the check.
   simulation_settings <- attr(x, "dyadMLM")
+  # replicated_statistics is a matrix with one row per simulation.
   n_simulations <- nrow(x$replicated_statistics)
   cat("<dyadMLM partner-dependence check>\n")
   cat(length(x$observed_statistics), "statistics using", x$n_pairs, "complete pairs\n")
@@ -425,18 +427,22 @@ print.dyadMLM_partner_check <- function(x, ...) {
   cat("Reference: ", n_simulations, " ", simulation_settings$reference, " datasets with ",
       simulation_settings$random_effects, " random effects\n", sep = "")
 
+  # A named vector of counts: dyads for the first entry, rows for the others.
   omitted_counts <- c(
     "incomplete dyads" = x$n_incomplete_dyads,
     "rows with missing dyad IDs" = x$n_missing_dyad_rows,
     "rows with missing roles" = x$n_missing_role_rows
   )
+  # Keep only nonzero counts, retaining their names for the printed labels.
   omitted_counts <- omitted_counts[omitted_counts > 0L]
   if (length(omitted_counts) > 0L) {
+    # Join the entries into one line, e.g. "incomplete dyads: 2; rows with missing roles: 1".
     cat("Omitted: ", paste0(names(omitted_counts), ": ", omitted_counts,
                            collapse = "; "), "\n", sep = "")
   }
 
   cat("Use plot(x) to view the comparisons.\n")
+  # Return the same check object without displaying the full list.
   return(invisible(x))
 }
 
@@ -485,29 +491,37 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #'
 #' @export
 plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
+
   if (is.null(ask)) {
     ask <- length(x$observed_statistics) > 1L && grDevices::dev.interactive()
   }
+
   previous_plot_pause_setting <- grDevices::devAskNewPage(ask)
+
   on.exit(grDevices::devAskNewPage(previous_plot_pause_setting), add = TRUE)
+
   n_simulations <- nrow(x$replicated_statistics)
   suggested_histogram_bins <- min(100L, max(20L, round(n_simulations / 5)))
 
-  # Match observed values and simulation columns by position; names are plot labels.
+  # Match observed values and simulation columns by position. Names are plot labels.
   for (statistic_index in seq_along(x$observed_statistics)) {
     statistic_name <- names(x$observed_statistics)[[statistic_index]]
     observed_statistic_value <- x$observed_statistics[[statistic_index]]
+
     simulated_statistic_values <-
       x$replicated_statistics[, statistic_index]
     simulated_statistic_values <-
       simulated_statistic_values[is.finite(simulated_statistic_values)]
+
     middle_95_simulation_limits <- stats::quantile(
       simulated_statistic_values, c(0.025, 0.975), names = FALSE
     )
+
     simulated_statistic_histogram <- graphics::hist(
       simulated_statistic_values,
       breaks = suggested_histogram_bins, plot = FALSE
     )
+
     maximum_bin_count <- max(simulated_statistic_histogram$counts)
 
     # Keep complete bars visible and reserve a band above them for the legend.
@@ -520,11 +534,14 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
                    " defined simulations"),
       xlab = "Summary value", ...
     )
+
     graphics::segments(middle_95_simulation_limits, 0, middle_95_simulation_limits,
                        maximum_bin_count, lty = 2, col = "grey40")
+
     graphics::segments(observed_statistic_value, 0,
                        observed_statistic_value, maximum_bin_count,
                        lwd = 2.5, col = "red")
+
     graphics::legend(
       "top", legend = c("Observed", "Middle 95% of simulations"),
       lty = c(1, 2), lwd = c(2.5, 1), col = c("red", "grey40"),
