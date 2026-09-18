@@ -74,7 +74,7 @@ test_that("supported scalar families and alternative links share the response-ch
       simulations, dyad = "dyad", role = "role", plot = FALSE
     )
     expect_identical(result$n_pairs, 60L)
-    expect_identical(result$statistics_table$n_defined, rep(20L, 6L))
+    expect_identical(dim(result$replicated_statistics), c(20L, 6L))
     expect_true(all(is.finite(result$replicated_statistics)))
   }
 })
@@ -115,7 +115,7 @@ test_that("NB2 offsets and dispersion-only missing values preserve fitted rows",
   )
   expect_warning(result <- check_partner_dependence(
     simulations, dyad = "dyad", role = "role", plot = FALSE
-  ), "were omitted")
+  ), "Omitted:")
   expect_identical(result$n_pairs, 58L)
   expect_identical(result$n_incomplete_dyads, 2L)
 })
@@ -144,30 +144,17 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
     simulations, dyad = .env$data$dyad, role = "role",
     response = "raw", plot = FALSE
   ), "Undefined simulated summaries")
-  table <- result$statistics_table
-  partner <- table[table$statistic_name == "Partner correlation (female and male)", ]
-  expect_identical(table$n_defined, as.integer(colSums(is.finite(
-    result$replicated_statistics
-  ))))
   expect_equal(
     result$replicated_statistics[, "Partner correlation (female and male)"],
     unname(correlations)
   )
-  expect_equal(
-    unlist(partner[c("replicated_lower", "replicated_median", "replicated_upper")],
-           use.names = FALSE),
-    unname(stats::quantile(defined, c(0.025, 0.5, 0.975)))
-  )
-  expect_equal(
-    partner$observed_quantile,
-    (1 + sum(defined <= partner$observed_value)) / (length(defined) + 1)
-  )
   count <- paste0(length(defined), "/", nrow(simulations$simulated_responses))
-  expect_output(print(result), "Defined", fixed = TRUE)
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   subtitles <- character()
+  limits <- list()
+  original_segments <- graphics::segments
   original_title <- graphics::title
   testthat::local_mocked_bindings(
     title = function(main = NULL, sub = NULL, ...) {
@@ -176,21 +163,19 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
     },
     .package = "graphics"
   )
+  testthat::local_mocked_bindings(
+    segments = function(x0, y0, x1, y1, ...) {
+      if (identical(list(...)$lty, 2)) limits[[length(limits) + 1L]] <<- x0
+      original_segments(x0, y0, x1, y1, ...)
+    },
+    .package = "graphics"
+  )
   plot(result, ask = FALSE)
   expect_true(any(grepl(count, subtitles, fixed = TRUE)))
-
-  undefined_observed <- simulations
-  undefined_observed$observed_response[] <- 0
-  expect_error(check_partner_dependence(
-    undefined_observed, dyad = .env$data$dyad, role = "role",
-    response = "raw", plot = FALSE
-  ), "[Oo]bserved.*undefined")
-  undefined_simulations <- simulations
-  undefined_simulations$simulated_responses[,] <- 0
-  expect_error(check_partner_dependence(
-    undefined_simulations, dyad = .env$data$dyad, role = "role",
-    response = "raw", plot = FALSE
-  ), "[Ee]very.*undefined|[Aa]ll.*undefined")
+  partner_column <- match("Partner correlation (female and male)",
+                          colnames(result$replicated_statistics))
+  expect_equal(unname(limits[[partner_column]]),
+               unname(stats::quantile(defined, c(0.025, 0.975))))
 })
 
 

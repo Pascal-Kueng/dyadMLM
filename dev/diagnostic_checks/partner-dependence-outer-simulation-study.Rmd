@@ -102,20 +102,26 @@ fit_model <- function(data, model_name) {
 }
 
 extract_results <- function(check, scenario, truth, n_dyads, outer_rep, method) {
-  check$statistics_table |>
-    filter(statistic_name %in% c(
-      "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
-      "SD (member_1)", "SD (member_2)", "Partner correlation (member_1 and member_2)"
-    )) |>
-    transmute(
+  statistic_names <- intersect(names(check$observed_statistics), c(
+    "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
+    "SD (member_1)", "SD (member_2)", "Partner correlation (member_1 and member_2)"
+  ))
+  # This study needs tail directions and observed positions across repetitions.
+  bind_rows(lapply(statistic_names, function(statistic_name) {
+    observed_value <- check$observed_statistics[[statistic_name]]
+    simulated_values <- check$replicated_statistics[, statistic_name]
+    simulated_values <- simulated_values[is.finite(simulated_values)]
+    limits <- quantile(simulated_values, c(0.025, 0.975), names = FALSE)
+    direction <- if (observed_value < limits[1]) "below" else
+      if (observed_value > limits[2]) "above" else "inside"
+    tibble::tibble(
       scenario = scenario, truth = truth, n_dyads = n_dyads,
       outer_rep = outer_rep, method = method, statistic_name,
-      observed_value, replicated_median, replicated_lower, replicated_upper,
-      observed_quantile,
-      outside_95 = observed_value < replicated_lower | observed_value > replicated_upper,
-      direction = case_when(observed_value < replicated_lower ~ "below",
-                            observed_value > replicated_upper ~ "above", TRUE ~ "inside")
+      observed_quantile = (1 + sum(simulated_values <= observed_value)) /
+        (length(simulated_values) + 1),
+      outside_95 = direction != "inside", direction = direction
     )
+  }))
 }
 
 run_oracle <- function(data, truth, n_dyads, outer_rep, nsim, seed) {
@@ -165,7 +171,9 @@ run_fitted_check <- function(data, scenario, role_aware, n_dyads, outer_rep, nsi
         role = if (role_aware) data$role else NULL, plot = FALSE
       )
       stopifnot(check$n_pairs == n_dyads)
-      if (role_aware) stopifnot(identical(check$role_order, c("member_1", "member_2")))
+      if (role_aware) stopifnot(identical(
+        names(check$observed_statistics)[1:2], c("SD (member_1)", "SD (member_2)")
+      ))
       result <- extract_results(check, scenario$scenario, scenario$truth,
                                 n_dyads, outer_rep, "fitted plug-in")
       status$status <- "success"

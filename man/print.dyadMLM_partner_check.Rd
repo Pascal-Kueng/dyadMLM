@@ -4,12 +4,10 @@
 \alias{print.dyadMLM_partner_check}
 \title{Print a partner-dependence predictive check}
 \usage{
-\method{print}{dyadMLM_partner_check}(x, digits = 3, ...)
+\method{print}{dyadMLM_partner_check}(x, ...)
 }
 \arguments{
 \item{x}{An object returned by \code{\link[=check_partner_dependence]{check_partner_dependence()}}.}
-
-\item{digits}{Number of decimal places used for rounding.}
 
 \item{...}{Not used.}
 }
@@ -17,16 +15,7 @@
 \code{x}, invisibly.
 }
 \description{
-Prints a named list of summaries, each showing the observed value,
-simulated median, middle 95\% limits, observed position, and simulation count.
+Prints the number of pairs and simulations, response mode, and any omissions.
+Use \code{\link[=plot.dyadMLM_partner_check]{plot.dyadMLM_partner_check()}} to view the comparisons.
 }
-\section{Observed position}{
-
-\code{observed_quantile} describes the observed value's position among the defined
-simulated values for each summary. It is calculated as
-\code{(1 + sum(simulated <= observed)) / (n_defined + 1)}, where \code{n_defined}
-counts these simulated values. This is not a p-value. Ties can give high
-positions even with good agreement.
-}
-
 \keyword{internal}

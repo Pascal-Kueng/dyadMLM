@@ -44,9 +44,9 @@ Ignored when \code{plot = FALSE}.}
 \value{
 The comparison plots (shown by default) are the main output. The
 function invisibly returns a \code{dyadMLM_partner_check} object containing the
-statistics, pair and omission counts, and settings. The returned object
-can be stored and plotted again later.
-See \code{\link[=print.dyadMLM_partner_check]{print.dyadMLM_partner_check()}} for details of the numerical output.
+named vector \code{observed_statistics}, the matrix \code{replicated_statistics}
+(one row per simulation), pair and omission counts, and settings.
+Save the result to plot it again later; printing shows a short description.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

@@ -40,15 +40,15 @@ is subtracted from every dataset before comparison; details follow below.
 ```{r check}
 simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
 check <- check_partner_dependence(
-  simulations, dyad = coupleID, role = gender, plot = FALSE
+  simulations, dyad = coupleID, role = gender, ask = FALSE
 )
-plot(check, ask = FALSE)
 ```
 
 The red line is the observed value; dashed lines mark the middle 95% of
 simulated values. Here, the role SDs are within their ranges, but the partner correlation
 exceeds its upper limit. These ranges and observed positions are descriptive, not
-confidence intervals or p-values. Use `print(check)` for the numeric summaries.
+confidence intervals or p-values. Use `plot(check, ask = FALSE)` to show the
+plots again without repeating simulations.
 
 The check is most useful for examining restrictions such as the omitted
 partner correlation above. A flexible covariance model will usually reproduce
@@ -67,17 +67,8 @@ flexible <- update(model, formula =
 )
 flexible_simulations <- simulate_dyad_responses(flexible, seed = 123)
 flexible_check <- check_partner_dependence(
-  flexible_simulations, dyad = coupleID, role = gender, plot = FALSE
+  flexible_simulations, dyad = coupleID, role = gender, ask = FALSE
 )
-```
-
-```{r flexible-summary, echo=FALSE}
-table <- subset(flexible_check$statistics_table, statistic_name %in% c(
-  "SD (female)", "SD (male)", "Partner correlation (female and male)"
-))
-knitr::kable(table[c("statistic_name", "observed_value", "replicated_median",
-                     "replicated_lower", "replicated_upper")], digits = 2,
-             col.names = c("Summary", "Observed", "Median", "2.5%", "97.5%"))
 ```
 
 ## Reuse the simulations
@@ -88,9 +79,8 @@ which express the same covariance information.
 
 ```{r other-views, eval=FALSE}
 raw_check <- check_partner_dependence(
-  simulations, dyad = coupleID, role = gender, response = "raw", plot = FALSE
+  simulations, dyad = coupleID, role = gender, response = "raw", ask = FALSE
 )
-plot(raw_check, ask = FALSE)
 ```
 
 Supply `role` whenever the member distinction is meaningful. For substantively
@@ -119,8 +109,8 @@ and incomplete pairs are omitted and counted. Identifier columns must be in
 the fitted model frame; external vectors must match its retained row order.
 
 Sparse outcomes can produce undefined correlations. The check warns and uses
-only defined simulations for each reference, reporting `n_defined`. Interpret
-these conditional references alongside the counts. An undefined observed
+only defined simulations for each reference; plot labels show their counts.
+Interpret these conditional references alongside the counts. An undefined observed
 statistic or entirely undefined reference causes an error.
 
 See `?simulate_dyad_responses` and `?check_partner_dependence` for the full

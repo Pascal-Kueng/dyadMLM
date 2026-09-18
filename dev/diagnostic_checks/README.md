@@ -33,8 +33,8 @@ to observed and simulated responses. Undefined observed statistics or entirely
 undefined references cause errors; partial undefined draws are reported and
 counted, with references conditional on defined values.
 
-Future ILD work can reuse simulation and reference summaries, with its own
-statistic and exact scheduled-time pair maps. Recompute member demeaning for
+Future ILD work can reuse simulation and paired statistics, with exact
+scheduled-time pair maps. Recompute member demeaning for
 every dataset. Lagged outcomes used as fixed predictors are not recursively
 simulated. Preserve the prototype branches as references; weighting and
 minimum-reference rules need separate decisions.
