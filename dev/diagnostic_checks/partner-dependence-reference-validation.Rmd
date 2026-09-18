@@ -40,10 +40,10 @@ woody_sadler_reference <- function(member_1, member_2) {
   c(
     MS_between = MS_between,
     MS_within = MS_within,
-    exchangeable_member_sd = sqrt(member_variance),
-    exchangeable_partner_correlation = partner_covariance / member_variance,
-    dyad_mean_sd = sqrt(MS_between / 2),
-    half_difference_rms = sqrt(MS_within / 2)
+    "Common member SD (exchangeable)" = sqrt(member_variance),
+    "Partner correlation (exchangeable)" = partner_covariance / member_variance,
+    "Dyad-average SD" = sqrt(MS_between / 2),
+    "Half-difference RMS (about zero)" = sqrt(MS_within / 2)
   )
 }
 ```
@@ -65,16 +65,15 @@ validation_data <- data.frame(
 )
 stopifnot(nrow(validation_data) >= 40L, all(complete.cases(validation_data)))
 actual <- dyadMLM:::calculate_partner_pair_statistics(
-  validation_data$member_1, validation_data$member_2,
-  compute_role_specific_statistics = FALSE
+  validation_data$member_1, validation_data$member_2
 )
 reference <- woody_sadler_reference(
   validation_data$member_1, validation_data$member_2
 )
 M <- (validation_data$member_1 + validation_data$member_2) / 2
 D <- (validation_data$member_1 - validation_data$member_2) / 2
-member_variance <- actual[["exchangeable_member_sd"]]^2
-partner_covariance <- actual[["exchangeable_partner_correlation"]] * member_variance
+member_variance <- actual[["Common member SD (exchangeable)"]]^2
+partner_covariance <- actual[["Partner correlation (exchangeable)"]] * member_variance
 stopifnot(
   max(abs(actual - reference[names(actual)])) <= tolerance,
   abs(reference[["MS_between"]] - 2 * var(M)) <= tolerance,
@@ -90,7 +89,7 @@ swapped[rows_to_swap, c("member_1", "member_2")] <-
   swapped[rows_to_swap, c("member_2", "member_1")]
 swapped_D <- (swapped$member_1 - swapped$member_2) / 2
 swapped_actual <- dyadMLM:::calculate_partner_pair_statistics(
-  swapped$member_1, swapped$member_2, compute_role_specific_statistics = FALSE
+  swapped$member_1, swapped$member_2
 )
 swapped_reference <- woody_sadler_reference(swapped$member_1, swapped$member_2)
 stopifnot(

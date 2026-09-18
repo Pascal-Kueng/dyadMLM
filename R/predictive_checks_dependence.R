@@ -135,7 +135,6 @@ check_partner_dependence <- function(
     resolve_fitted_row_argument(rlang::enquo(role), "role", fitted_model_frame,
                                 allow_null = TRUE)
   )
-  has_role <- !is.null(partner_row_map$role_order)
 
   # Combine the observed and simulated response vectors into one large matrix.
   responses_by_dataset <- rbind(
@@ -157,12 +156,12 @@ check_partner_dependence <- function(
     statistics_by_dataset[[dataset_index]] <- calculate_partner_pair_statistics(
       first_partner_responses,
       second_partner_responses,
-      compute_role_specific_statistics = has_role
+      role_order = partner_row_map$role_order
     )
   }
 
   # Object is currently:
-  # statistics_by_dataset object is currently a list of 1,001 vectors
+  # statistics_by_dataset object is currently a list of 1,001 named vectors
   # [[1]]                     6 observed statistics
   # [[2]]                     6 statistics from simulation 1
   # ...
@@ -178,16 +177,10 @@ check_partner_dependence <- function(
   # rows = simulations
   # 6 or 4 columns = 6 or 4 statistics
 
-  # Depending on whether role was supplied or not, we return a different
-  # mapping of statistic descriptions
-  statistic_information <- partner_statistic_info(partner_row_map$role_order)
-
-  statistic_summaries <- summarize_simulation_reference(
+  # Summarizing to one row per statistic, using the same names as the simulation columns.
+  statistics_table <- summarize_simulation_reference(
     observed_statistics, simulated_statistics
   )
-
-  # Combine labels and numerical summaries: one row per statistic.
-  statistics_table <- cbind(statistic_information, statistic_summaries)
 
   # Table rows and simulation columns use the same statistic order.
   # Keep both: the table supplies labels/limits, the matrix supplies histograms.
@@ -301,26 +294,39 @@ prepare_partner_pairs <- function(dyad_ids, role_values = NULL) {
 calculate_partner_pair_statistics <- function(
   first_partner_responses,
   second_partner_responses,
-  compute_role_specific_statistics
+  role_order = NULL
 ) {
   dyad_mean_responses <- (first_partner_responses + second_partner_responses) / 2
   half_partner_differences <- (first_partner_responses - second_partner_responses) / 2
-  if (compute_role_specific_statistics) {
-    return(c(
-      role_1_sd = stats::sd(first_partner_responses),
-      role_2_sd = stats::sd(second_partner_responses),
-      partner_correlation = suppressWarnings(stats::cor(
+  if (!is.null(role_order)) {
+    statistics <- c(
+      stats::sd(first_partner_responses),
+      stats::sd(second_partner_responses),
+      suppressWarnings(stats::cor(
         first_partner_responses, second_partner_responses
         # Undefined correlations are reported together after processing all simulations.
         # To avoid repetitive warnings they are suppressed here.
       )),
-      dyad_mean_sd = stats::sd(dyad_mean_responses),
-      half_difference_sd = stats::sd(half_partner_differences),
-      dyad_mean_half_difference_correlation = suppressWarnings(stats::cor(
+      stats::sd(dyad_mean_responses),
+      stats::sd(half_partner_differences),
+      suppressWarnings(stats::cor(
         dyad_mean_responses, half_partner_differences
       ))
-    ))
+    )
+
+    # Assign meaningful names to be used by simulation columns, printed summaries, and plot titles.
+    role_difference_label <- paste(role_order[[1L]], "minus", role_order[[2L]])
+    names(statistics) <- c(
+      paste0("SD (", role_order, ")"),
+      paste0("Partner correlation (", role_order[[1L]], " and ", role_order[[2L]], ")"),
+      "Dyad-average SD",
+      paste0("Half-difference SD (", role_difference_label, ")"),
+      paste0("Dyad-average/role-difference correlation (", role_difference_label, ")")
+    )
+    return(statistics)
   }
+
+  # In case there is no role provided:
 
   # Exchangeability sets the expected half-difference to zero. Its mean square
   # about zero is unchanged by arbitrary within-dyad member swaps.
@@ -334,49 +340,11 @@ calculate_partner_pair_statistics <- function(
   # dyad_mean_variance - half_difference_mean_square.
 
   return(c(
-    exchangeable_member_sd = sqrt(common_member_variance),
-    exchangeable_partner_correlation =
+    "Common member SD (exchangeable)" = sqrt(common_member_variance),
+    "Partner correlation (exchangeable)" =
       (dyad_mean_variance - half_difference_mean_square) / common_member_variance,
-    dyad_mean_sd = sqrt(dyad_mean_variance),
-    half_difference_rms = sqrt(half_difference_mean_square)
-  ))
-}
-
-
-### Statistic labels ----------------------------------------------------------
-
-# One table row per summary, in calculate_partner_pair_statistics() order.
-# The first half belongs to the member view; the second to the mean/difference view.
-partner_statistic_info <- function(role_order = NULL) {
-  statistic_labels <- if (is.null(role_order)) {
-    c(
-      exchangeable_member_sd = "Common member SD (exchangeable)",
-      exchangeable_partner_correlation = "Partner correlation (exchangeable)",
-      dyad_mean_sd = "Dyad-average SD",
-      half_difference_rms = "Half-difference RMS (about zero)"
-    )
-  } else {
-    role_difference_label <- paste(role_order[[1L]], "minus", role_order[[2L]])
-    c(
-      role_1_sd = paste0("SD (", role_order[[1L]], ")"),
-      role_2_sd = paste0("SD (", role_order[[2L]], ")"),
-      partner_correlation = paste0(
-        "Partner correlation (", role_order[[1L]], " and ", role_order[[2L]], ")"
-      ),
-      dyad_mean_sd = "Dyad-average SD",
-      half_difference_sd = paste0("Half-difference SD (", role_difference_label, ")"),
-      dyad_mean_half_difference_correlation = paste0(
-        "Dyad-average/role-difference correlation (", role_difference_label, ")"
-      )
-    )
-  }
-
-  return(data.frame(
-    statistic_name = names(statistic_labels),
-    parameterization = rep(
-      c("member", "mean_difference"), each = length(statistic_labels) / 2L
-    ),
-    label = unname(statistic_labels)
+    "Dyad-average SD" = sqrt(dyad_mean_variance),
+    "Half-difference RMS (about zero)" = sqrt(half_difference_mean_square)
   ))
 }
 
@@ -395,6 +363,7 @@ summarize_simulation_reference <- function(observed_statistics, simulated_statis
 
   # One row per statistic. Fill the simulation summaries in the loop below.
   statistics_table <- data.frame(
+    statistic_name = names(observed_statistics),
     observed_value = unname(observed_statistics),
     replicated_median = NA_real_, replicated_lower = NA_real_,
     replicated_upper = NA_real_, observed_quantile = NA_real_, n_defined = 0L
@@ -490,7 +459,7 @@ print.dyadMLM_partner_check <- function(x, digits = 3, ...) {
   # One small table per statistic keeps long labels out of the numeric columns.
   statistic_print_tables <- split(round(statistics_to_print, digits),
                                    seq_len(nrow(statistics_to_print)))
-  names(statistic_print_tables) <- statistics_table$label
+  names(statistic_print_tables) <- statistics_table$statistic_name
   print(statistic_print_tables)
   return(invisible(x))
 }
@@ -561,7 +530,7 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
     graphics::plot(
       simulated_statistic_histogram, freq = TRUE,
       xlim = range(statistic_summary$observed_value, simulated_statistic_histogram$breaks),
-      ylim = c(0, maximum_bin_count * 1.25), main = statistic_summary$label,
+      ylim = c(0, maximum_bin_count * 1.25), main = statistic_summary$statistic_name,
       sub = paste0(x$response, "; ", x$n_pairs, " pairs; ",
                    statistic_summary$n_defined, "/", n_simulations,
                    " defined simulations"),

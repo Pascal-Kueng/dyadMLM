@@ -145,12 +145,13 @@ test_that("sparse Poisson references retain each statistic's defined draws", {
     response = "raw", plot = FALSE
   ), "Undefined simulated summaries")
   table <- result$statistics_table
-  partner <- table[table$statistic_name == "partner_correlation", ]
+  partner <- table[table$statistic_name == "Partner correlation (female and male)", ]
   expect_identical(table$n_defined, as.integer(colSums(is.finite(
     result$replicated_statistics
   ))))
   expect_equal(
-    result$replicated_statistics[, "partner_correlation"], unname(correlations)
+    result$replicated_statistics[, "Partner correlation (female and male)"],
+    unname(correlations)
   )
   expect_equal(
     unlist(partner[c("replicated_lower", "replicated_median", "replicated_upper")],

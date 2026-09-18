@@ -103,7 +103,10 @@ fit_model <- function(data, model_name) {
 
 extract_results <- function(check, scenario, truth, n_dyads, outer_rep, method) {
   check$statistics_table |>
-    filter(parameterization == "member") |>
+    filter(statistic_name %in% c(
+      "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
+      "SD (member_1)", "SD (member_2)", "Partner correlation (member_1 and member_2)"
+    )) |>
     transmute(
       scenario = scenario, truth = truth, n_dyads = n_dyads,
       outer_rep = outer_rep, method = method, statistic_name,
@@ -259,7 +262,7 @@ knitr::kable(correct_rates, digits = 3)
 
 ```{r position-plot, echo=FALSE}
 plot_data <- filter(outer_results, n_dyads == max(sample_sizes),
-                    statistic_name == "exchangeable_partner_correlation")
+                    statistic_name == "Partner correlation (exchangeable)")
 old_par <- par(mfrow = c(1, 2))
 for (shown in c("positive_oracle", "positive_correct")) {
   plot(ecdf(plot_data$observed_quantile[plot_data$scenario == shown]),
@@ -281,10 +284,10 @@ same dataset, conditional on both succeeding.
 ```{r paired-comparisons, echo=FALSE}
 targets <- tibble::tribble(
   ~constrained, ~correct, ~statistic_name, ~expected,
-  "positive_independent", "positive_correct", "exchangeable_partner_correlation", "above",
-  "negative_independent", "negative_correct", "exchangeable_partner_correlation", "below",
-  "distinguishable_exchangeable", "distinguishable_correct", "role_1_sd", "below",
-  "distinguishable_exchangeable", "distinguishable_correct", "role_2_sd", "above"
+  "positive_independent", "positive_correct", "Partner correlation (exchangeable)", "above",
+  "negative_independent", "negative_correct", "Partner correlation (exchangeable)", "below",
+  "distinguishable_exchangeable", "distinguishable_correct", "SD (member_1)", "below",
+  "distinguishable_exchangeable", "distinguishable_correct", "SD (member_2)", "above"
 )
 fitted_results <- outer_results |>
   filter(method == "fitted plug-in") |>

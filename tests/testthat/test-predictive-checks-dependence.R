@@ -36,7 +36,7 @@ test_that("model-centred summaries use aligned pairs and empirical references", 
                           simulations$simulated_responses),
                      2, simulations$predicted_response, "-")
   expected <- t(apply(responses, 1, function(y) {
-    calculate_partner_pair_statistics(y[pairs[, 1]], y[pairs[, 2]], FALSE)
+    calculate_partner_pair_statistics(y[pairs[, 1]], y[pairs[, 2]])
   }))
   table <- result$statistics_table
   draws <- expected[-1, , drop = FALSE]
@@ -47,6 +47,10 @@ test_that("model-centred summaries use aligned pairs and empirical references", 
                         "n_missing_role_rows", "response"))
   expect_equal(table$observed_value, unname(expected[1, ]))
   expect_equal(result$replicated_statistics, draws)
+  expect_identical(colnames(draws), c(
+    "Common member SD (exchangeable)", "Partner correlation (exchangeable)",
+    "Dyad-average SD", "Half-difference RMS (about zero)"
+  ))
   expect_identical(table$statistic_name, colnames(draws))
   expect_identical(table$n_defined, rep(4L, ncol(draws)))
   expect_equal(
@@ -87,6 +91,13 @@ test_that("role-specific summaries use the requested responses and orientation",
     }))
     expect_equal(result$statistics_table$observed_value, expected[1, ])
     expect_equal(unname(result$replicated_statistics), expected[-1, ])
+    expect_identical(colnames(result$replicated_statistics), c(
+      "SD (female)", "SD (male)", "Partner correlation (female and male)",
+      "Dyad-average SD", "Half-difference SD (female minus male)",
+      "Dyad-average/role-difference correlation (female minus male)"
+    ))
+    expect_identical(result$statistics_table$statistic_name,
+                     colnames(result$replicated_statistics))
     expect_identical(result$response, response)
     expect_identical(result$role_order, c("female", "male"))
   }
@@ -102,14 +113,18 @@ test_that("role-specific summaries use the requested responses and orientation",
                original$statistics_table$observed_value[permutation] * signs)
   expect_equal(unname(reversed$replicated_statistics),
                unname(sweep(original$replicated_statistics[, permutation], 2, signs, "*")))
-  expect_match(reversed$statistics_table$label[5], "male minus female", fixed = TRUE)
+  expect_identical(reversed$statistics_table$statistic_name, c(
+    "SD (male)", "SD (female)", "Partner correlation (male and female)",
+    "Dyad-average SD", "Half-difference SD (male minus female)",
+    "Dyad-average/role-difference correlation (male minus female)"
+  ))
 })
 
 
 test_that("exchangeable moments are unchanged by independent member swaps", {
   first <- c(-2, -0.7, 0.4, 1.3, 2.1)
   second <- c(-1.4, -0.2, 0.8, 0.5, 1.7)
-  statistics <- calculate_partner_pair_statistics(first, second, FALSE)
+  statistics <- calculate_partner_pair_statistics(first, second)
   # Woody and Sadler's between/within moments give an independent reference.
   between <- 2 * var((first + second) / 2)
   within <- sum((first - second)^2) / (2 * length(first))
@@ -119,7 +134,7 @@ test_that("exchangeable moments are unchanged by independent member swaps", {
   ))
   pairs <- cbind(first, second)
   pairs[c(2, 5), ] <- pairs[c(2, 5), 2:1]
-  expect_equal(calculate_partner_pair_statistics(pairs[, 1], pairs[, 2], FALSE),
+  expect_equal(calculate_partner_pair_statistics(pairs[, 1], pairs[, 2]),
                statistics)
 })
 
@@ -321,8 +336,10 @@ test_that("printing shows the result and all panels preserve graphics settings",
   exchangeable <- check_partner_dependence(simulations, "dyad", plot = FALSE)
   distinguishable <- check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
   for (result in list(exchangeable, distinguishable)) {
-    expect_identical(result$statistics_table$parameterization,
-                     rep(c("member", "mean_difference"), each = nrow(result$statistics_table) / 2))
+    expect_named(result$statistics_table, c(
+      "statistic_name", "observed_value", "replicated_median", "replicated_lower",
+      "replicated_upper", "observed_quantile", "n_defined"
+    ))
   }
   printed <- paste(capture.output(visible <- withVisible(print(distinguishable))),
                    collapse = "\n")
@@ -348,7 +365,7 @@ test_that("printing shows the result and all panels preserve graphics settings",
     plotted <- withVisible(plot(result, ask = FALSE))
     expect_false(plotted$visible)
     expect_identical(plotted$value, result)
-    expect_identical(titles, result$statistics_table$label)
+    expect_identical(titles, result$statistics_table$statistic_name)
     expect_equal(graphics::par(c("mar", "plt")), settings)
   }
   ask_values <- logical()

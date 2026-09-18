@@ -72,8 +72,10 @@ flexible_check <- check_partner_dependence(
 ```
 
 ```{r flexible-summary, echo=FALSE}
-table <- subset(flexible_check$statistics_table, parameterization == "member")
-knitr::kable(table[c("label", "observed_value", "replicated_median",
+table <- subset(flexible_check$statistics_table, statistic_name %in% c(
+  "SD (female)", "SD (male)", "Partner correlation (female and male)"
+))
+knitr::kable(table[c("statistic_name", "observed_value", "replicated_median",
                      "replicated_lower", "replicated_upper")], digits = 2,
              col.names = c("Summary", "Observed", "Median", "2.5%", "97.5%"))
 ```
