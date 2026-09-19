@@ -92,8 +92,9 @@ Preparation options include selecting and pooling compositions, treating
 selected compositions as exchangeable, centering predictors, and
 creating within-/between-person components and lagged predictors.
 
-Prepared data can be used with **glmmTMB** or **brms**. See the [Getting
-Started
+Prepared data can be used with **glmmTMB**, **brms**, and other
+multilevel modelling packages that support the required model structure.
+See the [Getting Started
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html)
 for data requirements and examples.
 
