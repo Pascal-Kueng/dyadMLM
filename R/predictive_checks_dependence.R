@@ -506,8 +506,8 @@ plot.dyadMLM_partner_check <- function(x, ask = NULL, panel = FALSE, ...) {
     previous_graphics_settings <- graphics::par(no.readonly = TRUE)
     on.exit({
       graphics::par(previous_graphics_settings)
-      # Restoring the layout resets these scaling factors.
-      graphics::par(previous_graphics_settings[c("cex", "mex")])
+      # Restoring the layout resets scaling; scaling changes the plot region.
+      graphics::par(previous_graphics_settings[c("cex", "mex", "plt")])
     }, add = TRUE)
     graphics::par(mfcol = c(ceiling(length(x$observed_statistics) / 2), 2),
                   mar = c(5.1, 4.1, 2.5, 1), cex.main = 0.9,

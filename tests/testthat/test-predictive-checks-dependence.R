@@ -424,8 +424,8 @@ test_that("panels arrange all checks and restore graphics even after errors", {
   grDevices::pdf(NULL, width = 8, height = 9)
   on.exit(grDevices::dev.off(), add = TRUE)
   graphics::par(mfcol = c(1, 2), mar = c(4, 3, 2, 1),
-                cex = 0.85, cex.main = 1.1, mex = 1.2)
-  settings <- graphics::par(c("mfcol", "mar", "cex", "cex.main", "mex"))
+                cex = 0.85, cex.main = 1.1, mex = 1.2, plt = c(0.2, 0.8, 0.2, 0.8))
+  settings <- graphics::par(c("mfcol", "mar", "cex", "cex.main", "mex", "plt"))
 
   original_title <- graphics::title
   local_mocked_bindings(title = function(...) {
