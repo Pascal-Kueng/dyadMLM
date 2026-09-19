@@ -7,7 +7,7 @@ simulations.
 
 ``` r
 # S3 method for class 'dyadMLM_partner_check'
-plot(x, ask = NULL, ...)
+plot(x, ask = NULL, panel = FALSE, ...)
 ```
 
 ## Arguments
@@ -20,6 +20,12 @@ plot(x, ask = NULL, ...)
 
   `TRUE` pauses before the next plot. `FALSE` draws all plots without
   pausing. `NULL` (default) chooses automatically.
+
+- panel:
+
+  If `FALSE` (default), draw plots one after another, with pausing
+  controlled by `ask`. If `TRUE`, show all plots together in a
+  two-column panel. Graphics settings are restored afterwards.
 
 - ...:
 
@@ -61,9 +67,5 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
-previous_graphics_settings <- par(no.readonly = TRUE)
-par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
-plot(check, ask = FALSE)
-
-par(previous_graphics_settings)
+plot(check, panel = TRUE)
 ```

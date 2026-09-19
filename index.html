@@ -180,59 +180,124 @@ BibTeX (without version)
 <div class="section level2">
 <h2 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h2>
-<p>In this example, we prepare the simulated data included in <code>dyadMLM</code>, fit a cross-sectional APIM, and visually check how well the model reproduces observed partner dependence. The predictive check requires the development version.</p>
-<p>The example also requires <strong>glmmTMB</strong>. Install it with <code>install.packages("glmmTMB")</code>.</p>
+<p>Using the bundled simulated data, we select female–male dyads and, for illustration, fit an APIM that treats partners as exchangeable. We then check whether it reproduces gender-specific variation and partner dependence.</p>
+<p>This example requires the development version of <strong>dyadMLM</strong>. It also uses <strong>glmmTMB</strong>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dyads_cross"</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">prepared_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_dyad_data.html">prepare_dyad_data</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dyads_cross</span>,</span>
+<span>  <span class="va">dyads_cross</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  member <span class="op">=</span> <span class="va">personID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">gender</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">provided_support</span>,</span>
 <span>  model_types <span class="op">=</span> <span class="st">"apim"</span>,</span>
+<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span>,</span>
 <span>  add_apim_gmc_predictors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  keep_compositions <span class="op">=</span> <span class="st">"female-male"</span></span>
+<span>  include_arbitrary_member_contrast <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>This creates grand-mean-centred actor and partner predictors and a member contrast for the exchangeable model. Inspect the prepared data with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
+<span>  <span class="va">prepared_data</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Fit the distinguishable Gaussian APIM from the vignette.</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
+<span><span class="co">#&gt; # dyadMLM data</span></span>
+<span><span class="co">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span>
+<span><span class="co">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # Dyad compositions:</span></span>
+<span><span class="co">#&gt; # female_x_male distinguishable 120 dyads</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # Added columns:</span></span>
+<span><span class="co">#&gt; #   .composition                inferred dyad composition</span></span>
+<span><span class="co">#&gt; #   .composition_role           composition-specific member role</span></span>
+<span><span class="co">#&gt; #   .is_{role}                  composition-role indicator columns</span></span>
+<span><span class="co">#&gt; #   .member_contrast_arbitrary  composition-specific member contrasts coded</span></span>
+<span><span class="co">#&gt; #                               -1/+1 in arbitrary direction for</span></span>
+<span><span class="co">#&gt; #                               exchangeability-constrained random effects.</span></span>
+<span><span class="co">#&gt; #                               Values are 0 for other compositions</span></span>
+<span><span class="co">#&gt; #   .{pred}_actor               APIM actor predictor: actor's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_partner             APIM partner predictor: partner's original</span></span>
+<span><span class="co">#&gt; #                               predictor values</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc                 APIM grand-mean-centered predictor source:</span></span>
+<span><span class="co">#&gt; #                               original values minus the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_actor           APIM grand-mean-centered actor predictor:</span></span>
+<span><span class="co">#&gt; #                               actor's value relative to the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
+<span><span class="co">#&gt; #   .{pred}_gmc_partner         APIM grand-mean-centered partner predictor:</span></span>
+<span><span class="co">#&gt; #                               partner's value relative to the mean across all</span></span>
+<span><span class="co">#&gt; #                               retained non-missing observations</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # A tibble: 240 × 15</span></span>
+<span><span class="co">#&gt;   personID coupleID gender closeness provided_support .composition</span></span>
+<span><span class="co">#&gt;      &lt;int&gt;    &lt;int&gt; &lt;fct&gt;      &lt;dbl&gt;            &lt;dbl&gt; &lt;fct&gt;</span></span>
+<span><span class="co">#&gt; 1        1        1 female      4.71             4.49 female_x_male</span></span>
+<span><span class="co">#&gt; 2        2        1 male        4.61             4.76 female_x_male</span></span>
+<span><span class="co">#&gt; 3        3        2 female      6.69             4.09 female_x_male</span></span>
+<span><span class="co">#&gt; 4        4        2 male        5.98             6.20 female_x_male</span></span>
+<span><span class="co">#&gt; # ℹ 236 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 9 more variables: .composition_role &lt;fct&gt;, .is_female &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   .is_male &lt;dbl&gt;, .member_contrast_arbitrary &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   .provided_support_gmc &lt;dbl&gt;, .provided_support_actor &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   .provided_support_partner &lt;dbl&gt;, .provided_support_gmc_actor &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   .provided_support_gmc_partner &lt;dbl&gt;</span></span></code></pre></div>
+<p>Fit the exchangeable APIM:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">glmmTMB</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">closeness</span> <span class="op">~</span></span>
+<span>    <span class="co"># Pooled intercept</span></span>
+<span>    <span class="fl">1</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="co"># Gender-specific intercepts</span></span>
-<span>    <span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">+</span></span>
+<span>    <span class="co"># Pooled actor and partner effects</span></span>
+<span>    <span class="va">.provided_support_gmc_actor</span> <span class="op">+</span></span>
+<span>    <span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
 <span></span>
-<span>    <span class="co"># Gender-specific actor effects</span></span>
-<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_gmc_actor</span> <span class="op">+</span></span>
-<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_gmc_actor</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Gender-specific partner effects</span></span>
-<span>    <span class="va">.is_female</span><span class="op">:</span><span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
-<span>    <span class="va">.is_male</span><span class="op">:</span><span class="va">.provided_support_gmc_partner</span> <span class="op">+</span></span>
-<span></span>
-<span>    <span class="co"># Each role's residual variance and the covariance between partners</span></span>
-<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.is_female</span> <span class="op">+</span> <span class="va">.is_male</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span>    <span class="co"># Mean/half-difference parametrization:</span></span>
+<span>    <span class="co"># common member variance and positive or negative partner correlation</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>, <span class="co"># Fix the additional Gaussian residual variance near zero</span></span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Recover the member-level SDs and partner correlation:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">covariance</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
+<span>  <span class="va">covariance</span>,</span>
+<span>  representation <span class="op">=</span> <span class="st">"sdcor"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Recovered exchangeable member-level covariance</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; Pair `pair_1`</span></span>
+<span><span class="co">#&gt; Shared:     us(1 | coupleID)</span></span>
+<span><span class="co">#&gt; Difference: us(0 + .member_contrast_arbitrary | coupleID)</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; Standard deviations and correlations:</span></span>
+<span><span class="co">#&gt;                        1      2</span></span>
+<span><span class="co">#&gt; 1 member1: (Intercept) 1.089  -0.039</span></span>
+<span><span class="co">#&gt; 2 member2: (Intercept) -0.039 1.089</span></span></code></pre></div>
+<p>Simulate responses and check partner dependence, using gender to distinguish partners:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span></span>
+<span>  <span class="va">model</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Simulate responses and visually check partner dependence.</span></span>
-<span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">model</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfcol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">2.5</span>, <span class="fl">1</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.66</span>, cex.main <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">simulations</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">prepared_data</span><span class="op">$</span><span class="va">gender</span>,</span>
-<span>  ask <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  panel <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-cross-sectional-prep-1.png" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
-<p>The left column shows role-specific SDs and partner correlation. The right column shows summaries of dyad averages and half the differences between partners. Histograms show simulated values and red lines mark observed values.</p>
-<p>Continue with the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a> for details on the model specification and interpretation.</p>
+<p><img src="reference/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
+<p>Here, simulations produce weaker partner correlations and larger SDs of partner half-differences than observed (red lines), suggesting <strong>misfit</strong>.</p>
+<p>A next step is to fit a distinguishable APIM, as shown in the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a>. Use <a href="https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html"><code>compare_nested_models()</code></a> to compare the two nested models.</p>
 </div>
 <div class="section level2">
 <h2 id="vignettes-and-examples">Vignettes and examples<a class="anchor" aria-label="anchor" href="#vignettes-and-examples"></a>

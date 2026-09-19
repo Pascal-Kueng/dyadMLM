@@ -73,7 +73,8 @@ This helps identify mismatches in the model's assumptions.</p>
 <span>  role <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model-centred"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
-<span>  ask <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  ask <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  panel <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -119,6 +120,12 @@ See <code><a href="simulate_dyad_responses.html">simulate_dyad_responses()</a></
 automatically; <code>TRUE</code> pauses and <code>FALSE</code> draws without pausing.
 Ignored when <code>plot = FALSE</code>.</p></dd>
 
+
+<dt id="arg-panel">panel<a class="anchor" aria-label="anchor" href="#arg-panel"></a></dt>
+<dd><p>If <code>FALSE</code> (default), draw plots one after another, with pausing
+controlled by <code>ask</code>. If <code>TRUE</code>, show all plots together in a two-column
+panel. Graphics settings are restored afterwards.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -134,8 +141,7 @@ omission counts, and settings. Can be saved to plot later.</p>
 <p>Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95% of simulations (no formal confidence
 intervals).</p>
-<p>To display all plots together, use <code>par(mfcol = c(3, 2))</code> when supplying
-roles, or <code>par(mfcol = c(2, 2))</code> for exchangeable members.</p>
+<p>Use <code>panel = TRUE</code> to display all plots together: six with roles, four without.</p>
 <p>An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.</p>
 <p>The first set of plots compares:</p><ul><li><p><strong>Response SDs:</strong> one for each role, or one common SD for exchangeable members.</p></li>
@@ -199,13 +205,11 @@ assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Arrange all six checks in one panel.</span></span></span>
-<span class="r-in"><span><span class="va">previous_graphics_settings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>no.readonly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfcol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">2.5</span>, <span class="fl">1</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.5</span>, cex.main <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">check_partner_dependence</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">simulations</span>,</span></span>
 <span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span></span>
 <span class="r-in"><span>  role <span class="op">=</span> <span class="va">gender</span>,</span></span>
-<span class="r-in"><span>  ask <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>  panel <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="check_partner_dependence-1.png" alt="" width="768" height="864"></span>
 <span class="r-in"><span></span></span>
@@ -217,8 +221,7 @@ assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
 <span class="r-in"><span>  plot <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">check</span>, ask <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">previous_graphics_settings</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">check</span>, panel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">check</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;dyadMLM partner-dependence check&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 statistics using 40 complete pairs</span>

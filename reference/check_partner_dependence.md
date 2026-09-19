@@ -16,7 +16,8 @@ check_partner_dependence(
   role = NULL,
   plot = TRUE,
   response = c("model-centred", "raw"),
-  ask = NULL
+  ask = NULL,
+  panel = FALSE
 )
 ```
 
@@ -64,6 +65,12 @@ check_partner_dependence(
   automatically; `TRUE` pauses and `FALSE` draws without pausing.
   Ignored when `plot = FALSE`.
 
+- panel:
+
+  If `FALSE` (default), draw plots one after another, with pausing
+  controlled by `ask`. If `TRUE`, show all plots together in a
+  two-column panel. Graphics settings are restored afterwards.
+
 ## Value
 
 The comparison plots (shown by default) are the main output. The
@@ -77,8 +84,8 @@ Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95% of simulations (no formal confidence
 intervals).
 
-To display all plots together, use `par(mfcol = c(3, 2))` when supplying
-roles, or `par(mfcol = c(2, 2))` for exchangeable members.
+Use `panel = TRUE` to display all plots together: six with roles, four
+without.
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
@@ -159,13 +166,11 @@ simulations <- simulate_dyad_responses(
 )
 
 # Arrange all six checks in one panel.
-previous_graphics_settings <- par(no.readonly = TRUE)
-par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = gender,
-  ask = FALSE
+  panel = TRUE
 )
 
 
@@ -177,8 +182,7 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
-plot(check, ask = FALSE)
-par(previous_graphics_settings)
+plot(check, panel = TRUE)
 print(check)
 #> <dyadMLM partner-dependence check>
 #> 6 statistics using 40 complete pairs

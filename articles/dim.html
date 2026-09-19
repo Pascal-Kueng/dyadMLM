@@ -606,13 +606,12 @@ and back-transformation to the member-level covariance matrix.</p>
 and partner correlation by comparing observed and simulated data. Use
 <code>role = NULL</code> here because the members are exchangeable.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfcol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">2.5</span>, <span class="fl">1</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.66</span>, cex.main <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span>
-<span><span class="va">dim_simulations</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">dim_1</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">dim_simulations</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">dim_1</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">dim_simulations</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  role <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ask <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  panel <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="dim_files/figure-html/check-cross-dim-1.svg" class="r-plt" alt="Four predictive-check histograms for exchangeable dyads: common member SD, partner correlation, dyad-average SD, and half-difference RMS. Red lines mark observed values." width="100%"></p>
 <p>The left column shows the common member SD and partner correlation.
