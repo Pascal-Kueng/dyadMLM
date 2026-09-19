@@ -95,52 +95,86 @@ for supported models and interpretation.
 
 ## Quick example
 
-In this example, we prepare the simulated data included in `dyadMLM`, fit a
-cross-sectional APIM, and visually check how well the model reproduces observed
-partner dependence. The predictive check requires the development version.
+Using the bundled simulated data, we select female–male dyads and, for
+illustration, fit an APIM that treats partners as exchangeable. We then check
+whether it reproduces gender-specific variation and partner dependence.
 
-The example also requires **glmmTMB**. Install it with `install.packages("glmmTMB")`.
+This example requires the development version of **dyadMLM**. It also uses
+**glmmTMB**.
 
-```{r cross-sectional-prep, fig.width = 8, fig.height = 9, fig.alt = "Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations."}
+```{r cross-sectional-prep}
 library(dyadMLM)
 
-data("dyads_cross")
-
 prepared_data <- prepare_dyad_data(
-  data = dyads_cross,
+  dyads_cross,
   dyad = coupleID,
   member = personID,
   role = gender,
   predictors = provided_support,
   model_types = "apim",
+  keep_compositions = "female-male",
   add_apim_gmc_predictors = TRUE,
-  keep_compositions = "female-male"
+  include_arbitrary_member_contrast = TRUE,
+  seed = 123
 )
+```
 
-# Fit the distinguishable Gaussian APIM from the vignette.
+This creates grand-mean-centred actor and partner predictors and a member
+contrast for the exchangeable model. Inspect the prepared data with `print()`:
+
+<details>
+<summary>Show prepared data</summary>
+
+```{r prepared-data-preview}
+print(
+  prepared_data,
+  n = 4
+)
+```
+
+</details>
+
+Fit the exchangeable APIM:
+
+```{r cross-sectional-model}
 model <- glmmTMB::glmmTMB(
   closeness ~
+    # Pooled intercept
+    1 +
 
-    # Gender-specific intercepts
-    0 + .is_female + .is_male +
+    # Pooled actor and partner effects
+    .provided_support_gmc_actor +
+    .provided_support_gmc_partner +
 
-    # Gender-specific actor effects
-    .is_female:.provided_support_gmc_actor +
-    .is_male:.provided_support_gmc_actor +
-
-    # Gender-specific partner effects
-    .is_female:.provided_support_gmc_partner +
-    .is_male:.provided_support_gmc_partner +
-
-    # Each role's residual variance and the covariance between partners
-    us(0 + .is_female + .is_male | coupleID),
+    # Mean/half-difference parametrization:
+    # common member variance and positive or negative partner correlation
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID),
   dispformula = ~ 0, # Fix the additional Gaussian residual variance near zero
   family = gaussian(),
   data = prepared_data
 )
+```
 
-# Simulate responses and visually check partner dependence.
-simulations <- simulate_dyad_responses(model, seed = 123)
+Recover the member-level SDs and partner correlation:
+
+```{r cross-sectional-covariance}
+covariance <- recover_exchangeable_covariance(model)
+
+print(
+  covariance,
+  representation = "sdcor"
+)
+```
+
+Simulate responses and check partner dependence, using gender to distinguish
+partners:
+
+```{r cross-sectional-check, fig.width = 8, fig.height = 9, fig.alt = "Six predictive-check histograms. Gender-specific SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations."}
+simulations <- simulate_dyad_responses(
+  model,
+  seed = 123
+)
 
 check_partner_dependence(
   simulations,
@@ -150,13 +184,13 @@ check_partner_dependence(
 )
 ```
 
-The left column shows role-specific SDs and partner correlation. The right
-column shows summaries of dyad averages and half the differences between
-partners. Histograms show simulated values and red lines mark observed values.
+Here, simulations produce weaker partner correlations and larger SDs of partner
+half-differences than observed (red lines), suggesting **misfit**.
 
-Continue with the
-[APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)
-for details on the model specification and interpretation.
+A next step is to fit a distinguishable APIM, as shown in the
+[APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html).
+Use [`compare_nested_models()`](https://pascal-kueng.github.io/dyadMLM/reference/compare_nested_models.html)
+to compare the two nested models.
 
 ## Vignettes and examples
 
