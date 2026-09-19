@@ -9,7 +9,9 @@ data with the same features in datasets simulated from the model.
 
 ```{r setup, include=FALSE}
 devtools::load_all(file.path("..", ".."), quiet = TRUE)
-knitr::opts_chunk$set(message = FALSE, fig.width = 7, fig.height = 4.5)
+knitr::opts_chunk$set(
+  message = FALSE, fig.width = 8, fig.height = 9, out.width = "100%"
+)
 ```
 
 ## Fit a model
@@ -38,6 +40,7 @@ correlations with the observed values. By default, the same model prediction
 is subtracted from every dataset before comparison; details follow below.
 
 ```{r check}
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 simulations <- simulate_dyad_responses(model, nsim = 1000, seed = 123)
 check <- check_partner_dependence(
   simulations, dyad = coupleID, role = gender, ask = FALSE
@@ -47,8 +50,8 @@ check <- check_partner_dependence(
 The red line is the observed value; dashed lines mark the middle 95% of
 simulated values. Here, the role SDs are within their ranges, but the partner correlation
 exceeds its upper limit. These ranges and observed positions are descriptive, not
-confidence intervals or p-values. Use `plot(check, ask = FALSE)` to show the
-plots again without repeating simulations.
+confidence intervals or p-values. Reuse the same `par()` layout before calling
+`plot(check, ask = FALSE)` to show the panel again without repeating simulations.
 
 The check is most useful for examining restrictions such as the omitted
 partner correlation above. A flexible covariance model will usually reproduce
@@ -61,6 +64,7 @@ Replace the diagonal block with an unstructured block, keeping the fixed
 effects unchanged. The same checking steps apply.
 
 ```{r flexible-model}
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 flexible <- update(model, formula =
   closeness ~ gender * (.provided_support_actor + .provided_support_partner) +
     us(0 + gender | coupleID)
@@ -78,6 +82,7 @@ Each call shows both member summaries and dyad means and half-differences,
 which express the same covariance information.
 
 ```{r other-views, eval=FALSE}
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 raw_check <- check_partner_dependence(
   simulations, dyad = coupleID, role = gender, response = "raw", ask = FALSE
 )
@@ -86,6 +91,7 @@ raw_check <- check_partner_dependence(
 Supply `role` whenever the member distinction is meaningful. For substantively
 interchangeable members, omit it: the check then reports a common member SD
 and a partner correlation unchanged by arbitrary within-dyad member swaps.
+Use `par(mfcol = c(2, 2))` to arrange its four plots in a panel.
 
 ## Requirements and technical details
 

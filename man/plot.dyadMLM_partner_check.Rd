@@ -24,8 +24,8 @@ Invisibly, \code{x}.
 Draws the comparison plots without repeating simulations.
 }
 \details{
-See \code{\link[=check_partner_dependence]{check_partner_dependence()}} for how to interpret the plots
-and for technical details.
+See \code{\link[=check_partner_dependence]{check_partner_dependence()}} for interpretation, panel layouts, and
+technical details.
 }
 \examples{
 \dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -49,6 +49,9 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
+previous_graphics_settings <- par(no.readonly = TRUE)
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 plot(check, ask = FALSE)
+par(previous_graphics_settings)
 \dontshow{\}) # examplesIf}
 }
