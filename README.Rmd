@@ -198,4 +198,7 @@ welcome. See the
 
 ```{r full-citation, echo = FALSE, results = 'asis'}
 print(citation("dyadMLM"), style = "md")
+cat("\n```bibtex\n")
+print(toBibtex(citation("dyadMLM")))
+cat("```\n")
 ```
