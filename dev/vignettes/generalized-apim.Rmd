@@ -1,6 +1,8 @@
 ---
 title: "Generalized Non-Gaussian Actor-Partner Interdependence Models"
 output: rmarkdown::html_vignette
+bibliography: ../../vignettes/references.bib
+link-citations: true
 vignette: >
   %\VignetteIndexEntry{Generalized Non-Gaussian Actor-Partner Interdependence Models}
   %\VignetteEngine{knitr::rmarkdown}
@@ -14,39 +16,39 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, include = FALSE}
 library(dyadMLM)
 ```
 
+## Scope
 
-## Dichotomous outcomes
+This development vignette covers two non-Gaussian APIMs fitted with
+`glmmTMB`: a cross-sectional negative-binomial count model and a longitudinal
+Tweedie model for an outcome with exact zeros and positive continuous values
+[@brooksGlmmTMBBalancesSpeed2017]. Dichotomous, ordinal, and unordered
+categorical outcomes require family-specific guidance and are deferred.
 
-## Ordinal outcomes
+For a non-Gaussian response, a random effect is not an observed-scale residual.
+Fixed and random effects act on the link scale, and the conditional response
+distribution still has its own variance. This distinction is especially
+important in the longitudinal Tweedie example below.
 
-## Categorical outcomes
 
-## Poisson and negative-binomial outcomes
+## Cross-sectional negative-binomial APIM
 
 `dyads_nbinom_cross` has the same dyadic structure as `dyads_cross`, but its
 `conflict_count` outcome is a non-negative count with greater variance than a
 Poisson model allows. The data were generated from a negative-binomial model
-with a log link. Dyad compositions are selected below through
-`keep_compositions`, so that `prepare_dyad_data()` performs the filtering at
-the dyad level.
+with a log link.
 
 ```{r nbinom-raw}
 print(head(dyads_nbinom_cross))
 hist(dyads_nbinom_cross$conflict_count, breaks = 20)
 ```
 
-Validation and preparation work in the same way as for a Gaussian outcome
-because the dyadic structure is unchanged. The interpretation of the fitted
-model differs: fixed and random effects act on the log-mean scale, while the
-observation-level negative-binomial variance remains part of the model.
-
-These examples use `add_apim_gmc_predictors = TRUE`, which retains raw APIM
-columns and adds stress variants centered over all retained non-missing values.
-Using raw columns instead changes only the intercept reference.
+The examples use `add_apim_gmc_predictors = TRUE`, which retains the raw APIM
+columns and adds stress variables centered over all retained non-missing
+values. Using the raw columns instead changes the intercept reference.
 
 ### Distinguishable negative-binomial APIM
 
@@ -58,17 +60,12 @@ nbinom_distinguishable_data <- dyadMLM::prepare_dyad_data(
   role = gender,
   predictors = stress,
   add_apim_gmc_predictors = TRUE,
-  # All three observed compositions in `dyads_nbinom_cross` are detected and
-  # retained by default. This example focuses on `female-male` dyads, so we
-  # restrict the analysis here.
   keep_compositions = "female-male",
   seed = 123
 )
 
 print(nbinom_distinguishable_data)
-summary(nbinom_distinguishable_data)
 ```
-
 
 ```{r fit-nbinom-distinguishable, eval = FALSE}
 nbinom_distinguishable_model <- glmmTMB::glmmTMB(
@@ -94,15 +91,15 @@ nbinom_distinguishable_model <- glmmTMB::glmmTMB(
 summary(nbinom_distinguishable_model)
 ```
 
-This shared random intercept is deliberately simple. It can induce only
-positive partner dependence on the latent log-mean scale; more flexible
-role-specific covariance structures require enough repeated information to
-support their additional parameters.
+The fixed coefficients are conditional log-mean effects. Exponentiating a
+coefficient gives the corresponding conditional mean ratio. The shared random
+intercept is deliberately simple: it can induce only positive partner
+dependence on the latent log-mean scale.
 
 ### Exchangeable negative-binomial APIM
 
-Here we retain male-male dyads, which are exchangeable based on their
-observed roles.
+Here we retain male-male dyads, which are exchangeable based on their observed
+roles.
 
 ```{r prepare-nbinom-exchangeable}
 nbinom_exchangeable_data <- dyadMLM::prepare_dyad_data(
@@ -117,7 +114,6 @@ nbinom_exchangeable_data <- dyadMLM::prepare_dyad_data(
 )
 
 print(nbinom_exchangeable_data)
-summary(nbinom_exchangeable_data)
 ```
 
 ```{r fit-nbinom-exchangeable, eval = FALSE}
@@ -137,3 +133,762 @@ nbinom_exchangeable_model <- glmmTMB::glmmTMB(
 
 summary(nbinom_exchangeable_model)
 ```
+
+
+## Longitudinal Tweedie APIM
+
+For \(1 < p < 2\), the Tweedie family is a compound Poisson-gamma distribution:
+it has a point mass at zero and a continuous, right-skewed positive part. We
+write the conditional model as
+
+\[
+Y_{ijt} \mid b_{ij}, u_{ijt}
+  \sim \operatorname{Tweedie}(\mu_{ijt}, \phi_{r(i)}, p),
+\qquad
+\operatorname{Var}(Y_{ijt}\mid b_{ij},u_{ijt})
+  = \phi_{r(i)}\mu_{ijt}^{p},
+\]
+
+\[
+\log(\mu_{ijt}) = x_{ijt}^{\mathsf T}\beta + b_{ij} + u_{ijt}.
+\]
+
+Here, \(b_{ij}\) represents stable member-specific heterogeneity within dyad
+\(j\). The pair \((u_{1jt},u_{2jt})\) is a Gaussian dyad-occasion effect. It
+represents same-occasion partner dependence on the log-mean scale; it is not an
+observed-scale residual. The Tweedie dispersion \(\phi\) remains in the model.
+
+Consequently, `dispformula = ~ 0` is not the Gaussian trick used elsewhere in
+this package. For Tweedie models:
+
+- `dispformula = ~ 1` estimates one common conditional dispersion;
+- `dispformula = ~ 0 + .is_female + .is_male` estimates two positive,
+  role-specific dispersions on `glmmTMB`'s log-dispersion scale. The `0` removes
+  the formula intercept; it does **not** set dispersion to zero.
+
+### What identifies latent occasion covariance and dispersion?
+
+After integrating over one Gaussian latent layer with variance \(q\), let
+\(m = E(Y)\) denote the marginal mean. Under a log link,
+
+\[
+\operatorname{Var}(Y)
+  = \phi m^p \exp\{p(p-1)q/2\}
+    + m^2\{\exp(q)-1\}.
+\]
+
+The two variance sources therefore have different mean-variance scaling. If
+the two partners' latent occasion effects have covariance \(c\), then
+
+\[
+\operatorname{Cov}(Y_{1jt},Y_{2jt})
+  = m_{1jt}m_{2jt}\{\exp(c)-1\}.
+\]
+
+Conditional Tweedie dispersion cannot by itself produce this cross-partner
+covariance. Repeated complete partner occasions, variation in the conditional
+mean, the positive outcome distribution, and the zero mass all help separate
+the parameters.
+
+Thus, both of the following are *generically* identified in an adequately
+repeated design:
+
+- distinguishable dyads with a two-member occasion covariance, two
+  role-specific dispersions, and an estimated Tweedie power;
+- exchangeable dyads with an exchangeable occasion covariance, one common
+  dispersion, and an estimated Tweedie power.
+
+This is not guaranteed by parameter counting. At the occasion layer alone, the
+first model adds six nuisance parameters (three covariance, two dispersion, one
+power), whereas the second adds four (two exchangeable covariance, one
+dispersion, one power). Stable intercepts and random slopes add further
+parameters. Counts describe burden, not whether distinct parameters enter the
+likelihood differently.
+
+An important exact exception occurs when every dyad has only one occasion: a
+stable member-intercept covariance block and a dyad-occasion intercept
+covariance block then have the same design, so only their covariance sum is
+identified. With repeated occasions, the stable block also induces
+across-occasion covariance and the occasion block does not.
+
+
+## Reproducible Tweedie teaching data
+
+No Tweedie outcome is shipped with the package. The next hidden chunk uses the
+structure and stress predictor in `dyads_nbinom_ild` as a shell and generates a
+compound Poisson-gamma outcome. The simulation includes a focal within-person
+actor random slope, stable partner covariance, and same-occasion partner
+covariance. This is a teaching simulation, not evidence that every design will
+identify the same model.
+
+```{r simulate-tweedie-data, include = FALSE}
+simulate_tweedie <- function(mean, dispersion, power) {
+  poisson_mean <-
+    mean^(2 - power) / (dispersion * (2 - power))
+  gamma_shape <- (2 - power) / (power - 1)
+  gamma_scale <-
+    dispersion * (power - 1) * mean^(power - 1)
+
+  component_count <- stats::rpois(length(mean), poisson_mean)
+  response <- numeric(length(mean))
+  positive <- component_count > 0
+  response[positive] <- stats::rgamma(
+    sum(positive),
+    shape = component_count[positive] * gamma_shape,
+    scale = gamma_scale[positive]
+  )
+  response
+}
+
+set.seed(20260811)
+tweedie_distinguishable_data <- dyadMLM::prepare_dyad_data(
+  dyads_nbinom_ild,
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  time = diaryday,
+  predictors = stress,
+  model_types = "apim",
+  keep_compositions = "female-male",
+  include_arbitrary_member_contrast = TRUE,
+  seed = 123
+)
+
+distinguishable_dyad_ids <-
+  unique(tweedie_distinguishable_data$coupleID)
+distinguishable_stable_sds <- c(0.35, 0.50, 0.12, 0.15)
+distinguishable_stable_correlation <- matrix(
+  c(
+    1.00, 0.35, 0.20, 0.05,
+    0.35, 1.00, 0.05, 0.20,
+    0.20, 0.05, 1.00, 0.20,
+    0.05, 0.20, 0.20, 1.00
+  ),
+  nrow = 4,
+  byrow = TRUE
+)
+distinguishable_stable_covariance <-
+  diag(distinguishable_stable_sds) %*%
+  distinguishable_stable_correlation %*%
+  diag(distinguishable_stable_sds)
+distinguishable_stable_effects <- matrix(
+  stats::rnorm(length(distinguishable_dyad_ids) * 4),
+  ncol = 4
+) %*% chol(distinguishable_stable_covariance)
+distinguishable_stable_index <- match(
+  tweedie_distinguishable_data$coupleID,
+  distinguishable_dyad_ids
+)
+
+distinguishable_occasion_keys <- unique(
+  tweedie_distinguishable_data[c("coupleID", "diaryday")]
+)
+distinguishable_occasion_sds <- c(0.25, 0.35)
+distinguishable_occasion_correlation <- 0.35
+distinguishable_occasion_covariance <-
+  diag(distinguishable_occasion_sds) %*%
+  matrix(
+    c(
+      1, distinguishable_occasion_correlation,
+      distinguishable_occasion_correlation, 1
+    ),
+    nrow = 2
+  ) %*%
+  diag(distinguishable_occasion_sds)
+distinguishable_occasion_effects <- matrix(
+  stats::rnorm(nrow(distinguishable_occasion_keys) * 2),
+  ncol = 2
+) %*% chol(distinguishable_occasion_covariance)
+distinguishable_occasion_index <- match(
+  paste(
+    tweedie_distinguishable_data$coupleID,
+    tweedie_distinguishable_data$diaryday,
+    sep = "-"
+  ),
+  paste(
+    distinguishable_occasion_keys$coupleID,
+    distinguishable_occasion_keys$diaryday,
+    sep = "-"
+  )
+)
+
+female <- tweedie_distinguishable_data$.is_female
+male <- tweedie_distinguishable_data$.is_male
+distinguishable_time_centered <-
+  tweedie_distinguishable_data$diaryday -
+  mean(tweedie_distinguishable_data$diaryday)
+
+distinguishable_linear_predictor <-
+  female * 1.00 + male * 1.20 +
+  female * -0.010 * distinguishable_time_centered +
+  male * -0.005 * distinguishable_time_centered +
+  female * 0.25 * tweedie_distinguishable_data$.stress_cwp_actor +
+  male * 0.20 * tweedie_distinguishable_data$.stress_cwp_actor +
+  female * 0.10 * tweedie_distinguishable_data$.stress_cwp_partner +
+  male * 0.08 * tweedie_distinguishable_data$.stress_cwp_partner +
+  female * 0.18 * tweedie_distinguishable_data$.stress_cbp_actor +
+  male * 0.15 * tweedie_distinguishable_data$.stress_cbp_actor +
+  female * 0.08 * tweedie_distinguishable_data$.stress_cbp_partner +
+  male * 0.06 * tweedie_distinguishable_data$.stress_cbp_partner +
+  female * distinguishable_stable_effects[
+    distinguishable_stable_index, 1
+  ] +
+  male * distinguishable_stable_effects[
+    distinguishable_stable_index, 2
+  ] +
+  female * distinguishable_stable_effects[
+    distinguishable_stable_index, 3
+  ] * tweedie_distinguishable_data$.stress_cwp_actor +
+  male * distinguishable_stable_effects[
+    distinguishable_stable_index, 4
+  ] * tweedie_distinguishable_data$.stress_cwp_actor +
+  female * distinguishable_occasion_effects[
+    distinguishable_occasion_index, 1
+  ] +
+  male * distinguishable_occasion_effects[
+    distinguishable_occasion_index, 2
+  ]
+
+tweedie_distinguishable_data$time_centered <-
+  distinguishable_time_centered
+tweedie_distinguishable_data$tweedie_amount <- simulate_tweedie(
+  mean = exp(distinguishable_linear_predictor),
+  dispersion = female * 0.55 + male * 0.85,
+  power = 1.50
+)
+
+set.seed(20260812)
+tweedie_exchangeable_data <- dyadMLM::prepare_dyad_data(
+  dyads_nbinom_ild,
+  dyad = coupleID,
+  member = personID,
+  role = gender,
+  time = diaryday,
+  predictors = stress,
+  model_types = "apim",
+  keep_compositions = "female-female",
+  seed = 123
+)
+
+exchangeable_dyad_ids <- unique(tweedie_exchangeable_data$coupleID)
+exchangeable_shared_covariance <- matrix(
+  c(
+    0.38^2, 0.20 * 0.38 * 0.12,
+    0.20 * 0.38 * 0.12, 0.12^2
+  ),
+  nrow = 2
+)
+exchangeable_difference_covariance <- matrix(
+  c(
+    0.22^2, -0.10 * 0.22 * 0.08,
+    -0.10 * 0.22 * 0.08, 0.08^2
+  ),
+  nrow = 2
+)
+exchangeable_shared_effects <- matrix(
+  stats::rnorm(length(exchangeable_dyad_ids) * 2),
+  ncol = 2
+) %*% chol(exchangeable_shared_covariance)
+exchangeable_difference_effects <- matrix(
+  stats::rnorm(length(exchangeable_dyad_ids) * 2),
+  ncol = 2
+) %*% chol(exchangeable_difference_covariance)
+exchangeable_stable_index <- match(
+  tweedie_exchangeable_data$coupleID,
+  exchangeable_dyad_ids
+)
+
+exchangeable_occasion_keys <- unique(
+  tweedie_exchangeable_data[c("coupleID", "diaryday")]
+)
+exchangeable_occasion_shared <- stats::rnorm(
+  nrow(exchangeable_occasion_keys),
+  0,
+  0.22
+)
+exchangeable_occasion_difference <- stats::rnorm(
+  nrow(exchangeable_occasion_keys),
+  0,
+  0.14
+)
+exchangeable_occasion_index <- match(
+  paste(
+    tweedie_exchangeable_data$coupleID,
+    tweedie_exchangeable_data$diaryday,
+    sep = "-"
+  ),
+  paste(
+    exchangeable_occasion_keys$coupleID,
+    exchangeable_occasion_keys$diaryday,
+    sep = "-"
+  )
+)
+
+exchangeable_contrast <-
+  tweedie_exchangeable_data$.member_contrast_arbitrary
+exchangeable_time_centered <-
+  tweedie_exchangeable_data$diaryday -
+  mean(tweedie_exchangeable_data$diaryday)
+exchangeable_linear_predictor <-
+  1.05 - 0.008 * exchangeable_time_centered +
+  0.22 * tweedie_exchangeable_data$.stress_cwp_actor +
+  0.09 * tweedie_exchangeable_data$.stress_cwp_partner +
+  0.16 * tweedie_exchangeable_data$.stress_cbp_actor +
+  0.07 * tweedie_exchangeable_data$.stress_cbp_partner +
+  exchangeable_shared_effects[exchangeable_stable_index, 1] +
+  exchangeable_contrast *
+    exchangeable_difference_effects[exchangeable_stable_index, 1] +
+  exchangeable_shared_effects[exchangeable_stable_index, 2] *
+    tweedie_exchangeable_data$.stress_cwp_actor +
+  exchangeable_contrast *
+    exchangeable_difference_effects[exchangeable_stable_index, 2] *
+    tweedie_exchangeable_data$.stress_cwp_actor +
+  exchangeable_occasion_shared[exchangeable_occasion_index] +
+  exchangeable_contrast *
+    exchangeable_occasion_difference[exchangeable_occasion_index]
+
+tweedie_exchangeable_data$time_centered <- exchangeable_time_centered
+tweedie_exchangeable_data$tweedie_amount <- simulate_tweedie(
+  mean = exp(exchangeable_linear_predictor),
+  dispersion = rep(0.65, nrow(tweedie_exchangeable_data)),
+  power = 1.50
+)
+```
+
+```{r inspect-tweedie-data}
+c(
+  distinguishable_zero_proportion = mean(
+    tweedie_distinguishable_data$tweedie_amount == 0
+  ),
+  exchangeable_zero_proportion = mean(
+    tweedie_exchangeable_data$tweedie_amount == 0
+  )
+)
+
+hist(
+  tweedie_distinguishable_data$tweedie_amount,
+  breaks = 30,
+  main = "Simulated Tweedie outcome",
+  xlab = "Amount"
+)
+```
+
+
+### Distinguishable Tweedie APIM
+
+The focused candidate below allows the stable intercepts and the focal
+within-person actor slopes to vary and covary across both roles. It is maximal
+only for those selected stable coefficients. If heterogeneity in time trends or
+partner effects is scientifically relevant, their slope variances also belong
+in the starting candidate. This follows the general random-effects workflow of
+@delrosarioPracticalGuideSpecifying2025. Their fitted examples are Gaussian,
+however; the same-occasion Tweedie block below is this vignette's link-scale
+extension, not a structure evaluated in their paper.
+
+The primary model starts with a common dispersion because the research question
+concerns fixed actor and partner effects, not role differences in conditional
+variability. For illustration, the within-person actor effect is designated as
+the focal heterogeneous slope. The partner fixed effect remains in the mean
+model; add its random slope to the starting candidate if heterogeneity in that
+effect is also scientifically important.
+
+```{r fit-tweedie-distinguishable, eval = FALSE}
+tweedie_distinguishable_model <- glmmTMB::glmmTMB(
+  tweedie_amount ~ 0 +
+    # Role-specific fixed means and time trends
+    .is_female +
+    .is_male +
+    .is_female:time_centered +
+    .is_male:time_centered +
+
+    # Role-specific within-person actor and partner effects
+    .is_female:.stress_cwp_actor +
+    .is_male:.stress_cwp_actor +
+    .is_female:.stress_cwp_partner +
+    .is_male:.stress_cwp_partner +
+
+    # Role-specific between-person actor and partner effects
+    .is_female:.stress_cbp_actor +
+    .is_male:.stress_cbp_actor +
+    .is_female:.stress_cbp_partner +
+    .is_male:.stress_cbp_partner +
+
+    # Stable role-specific intercepts and focal actor slopes
+    us(
+      0 +
+        .is_female +
+        .is_male +
+        .is_female:.stress_cwp_actor +
+        .is_male:.stress_cwp_actor |
+        coupleID
+    ) +
+
+    # Same-occasion latent Gaussian covariance on the log scale
+    us(
+      0 + .is_female + .is_male |
+        coupleID:diaryday
+    ),
+  dispformula = ~ 1,
+  family = glmmTMB::tweedie(link = "log"),
+  data = tweedie_distinguishable_data,
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
+)
+
+summary(tweedie_distinguishable_model)
+```
+
+If role-specific conditional dispersion is scientifically motivated, fit it as
+a prespecified extension while leaving the mean and random-effects structure
+unchanged:
+
+```{r fit-tweedie-distinguishable-role-dispersion, eval = FALSE}
+tweedie_distinguishable_role_dispersion_model <- update(
+  tweedie_distinguishable_model,
+  dispformula = ~ 0 + .is_female + .is_male
+)
+```
+
+This extension is generically identified, but it asks the likelihood to
+separate two role-specific latent occasion variances, two role-specific
+Tweedie dispersions, and the Tweedie power. It may therefore be much more
+weakly identified than the common-dispersion model.
+
+#### Pooling the random covariance while retaining role fixed effects
+
+For distinguishable dyads, pooling random effects does not require pooling the
+fixed effects. When partner-swap symmetry is substantively defensible for the
+random covariance - including equal corresponding role variances and mirrored
+cross-coefficient covariances - the shared/difference specification below
+imposes that exchangeable covariance while retaining every role-specific
+coefficient in the mean model [@delrosarioPracticalGuideSpecifying2025].
+
+```{r fit-tweedie-distinguishable-pooled-covariance, eval = FALSE}
+tweedie_distinguishable_pooled_covariance_model <- glmmTMB::glmmTMB(
+  tweedie_amount ~ 0 +
+    .is_female +
+    .is_male +
+    .is_female:time_centered +
+    .is_male:time_centered +
+    .is_female:.stress_cwp_actor +
+    .is_male:.stress_cwp_actor +
+    .is_female:.stress_cwp_partner +
+    .is_male:.stress_cwp_partner +
+    .is_female:.stress_cbp_actor +
+    .is_male:.stress_cbp_actor +
+    .is_female:.stress_cbp_partner +
+    .is_male:.stress_cbp_partner +
+
+    # Exchangeable stable covariance; fixed effects remain distinguishable
+    us(1 + .stress_cwp_actor | coupleID) +
+    us(
+      0 +
+        .member_contrast_arbitrary +
+        .member_contrast_arbitrary:.stress_cwp_actor |
+        coupleID
+    ) +
+
+    # Exchangeable same-occasion covariance
+    us(1 | coupleID:diaryday) +
+    us(
+      0 + .member_contrast_arbitrary |
+        coupleID:diaryday
+    ),
+  dispformula = ~ 1,
+  family = glmmTMB::tweedie(link = "log"),
+  data = tweedie_distinguishable_data,
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
+)
+```
+
+This is one possible simplification rung, not an automatic destination. If the
+roles are fundamentally different in their heterogeneity, a defensible
+alternative is to preserve role-specific variances while removing only the
+higher-order random-coefficient correlations:
+
+```{r distinguishable-diagonal-random-slopes, eval = FALSE}
+# Replace the stable four-coefficient `us()` block by these two blocks:
+us(0 + .is_female + .is_male | coupleID) +
+diag(
+  0 +
+    .is_female:.stress_cwp_actor +
+    .is_male:.stress_cwp_actor |
+    coupleID
+)
+```
+
+The focal slope variances remain. The `diag()` block removes intercept-slope,
+slope-slope, and cross-role slope correlations; it does not remove the stable
+partner-intercept covariance or the dyad-occasion covariance.
+
+If equal role-specific slope variances are also defensible, pool those two
+variances without removing the slopes:
+
+```{r distinguishable-pooled-random-slopes, eval = FALSE}
+homdiag(
+  0 +
+    .is_female:.stress_cwp_actor +
+    .is_male:.stress_cwp_actor |
+    coupleID
+)
+```
+
+
+### Exchangeable Tweedie APIM
+
+For exchangeable dyads, role-specific mean distinctions are absent and the
+random covariance is pooled from the outset. Separate shared and
+arbitrary-difference blocks impose those exchangeable covariance constraints
+[@delrosarioPracticalGuideSpecifying2025]. The common Tweedie dispersion used
+here is an additional family-specific constraint; it is not discussed in their
+Gaussian examples.
+
+```{r fit-tweedie-exchangeable, eval = FALSE}
+tweedie_exchangeable_model <- glmmTMB::glmmTMB(
+  tweedie_amount ~
+    1 +
+    time_centered +
+    .stress_cwp_actor +
+    .stress_cwp_partner +
+    .stress_cbp_actor +
+    .stress_cbp_partner +
+
+    # Stable shared and difference intercepts and focal actor slopes
+    us(1 + .stress_cwp_actor | coupleID) +
+    us(
+      0 +
+        .member_contrast_arbitrary +
+        .member_contrast_arbitrary:.stress_cwp_actor |
+        coupleID
+    ) +
+
+    # Same-occasion shared and difference effects
+    us(1 | coupleID:diaryday) +
+    us(
+      0 + .member_contrast_arbitrary |
+        coupleID:diaryday
+    ),
+  dispformula = ~ 1,
+  family = glmmTMB::tweedie(link = "log"),
+  data = tweedie_exchangeable_data,
+  control = glmmTMB::glmmTMBControl(profile = TRUE)
+)
+
+summary(tweedie_exchangeable_model)
+
+dyadMLM::recover_exchangeable_covariance(
+  tweedie_exchangeable_model
+)
+```
+
+The shared and difference blocks are independent. This is part of the
+exchangeability constraint: freely correlating shared and difference effects
+would generally reintroduce unequal member variances. If the intercept-slope
+correlations are unsupported, split each two-coefficient stable block into
+separate one-coefficient blocks while retaining both intercept and focal slope
+variances.
+
+### Formula validation
+
+The complete formulas were run separately because the full fits take roughly
+two to three minutes each on the development machine. In one simulation with
+120 dyads and 14 occasions, both models had convergence code zero, a
+positive-definite Hessian, and no correlation at a boundary:
+
+| Model | Tweedie power: truth, estimate | Dispersion: truth, estimate | Informative weak-identification signal |
+|:--|:--|:--|:--|
+| Distinguishable, role-specific dispersion | 1.50, 1.511 | female: 0.55, 0.548; male: 0.85, 0.829 | occasion correlation was 0.579 rather than 0.35 |
+| Exchangeable, common dispersion | 1.50, 1.499 | 0.65, 0.663 | occasion difference SD was 0.080 rather than 0.14 |
+
+For the exchangeable fit, the underestimated difference variance produced a
+recovered member-level occasion correlation of 0.777 rather than the simulated
+0.424. The covariance recovery algebra was correct; the fitted variance
+decomposition was imprecise. This is exactly why convergence and a
+positive-definite Hessian are not enough to establish strong identification.
+One favorable simulation also does not establish repeated-sampling bias or
+coverage.
+
+A second simulation made the simplification decision more concrete. With 300
+distinguishable dyads and eight occasions, the model with a correlated
+intercept block and a separate `diag()` focal-slope block converged with a
+positive-definite Hessian; its same-occasion correlation was 0.383 rather than
+the simulated 0.40. Replacing those blocks with one four-coefficient `us()`
+block failed to converge and estimated a slope correlation of 0.982 even though
+the simulated correlation was 0.20. The near-boundary correlation was therefore
+a symptom of the unsupported covariance decomposition, not evidence of a
+nearly perfect population relationship.
+
+In the same design, common- and role-specific-dispersion core models both
+converged. Their four focal actor and partner estimates differed by less than
+0.001, as did their standard errors, even though the role-specific dispersion
+model detected the simulated dispersion difference. This supports common
+dispersion as a practical first model when the research question concerns fixed
+mean effects, followed by the role-specific model as a planned extension or
+sensitivity analysis.
+
+
+## A fixed-effect-first specification strategy
+
+@delrosarioPracticalGuideSpecifying2025 recommend starting with all relevant
+random variances and covariances, holding the fixed-effects model constant,
+changing one random component at a time, and pooling equality-related
+parameters before setting them to zero. Their worked examples are Gaussian;
+the following adapts that workflow to a Tweedie APIM.
+
+1. **Fix the scientific mean model first.** Prespecify centering, time, actor
+   and partner effects, role interactions, family, and link. Do not select the
+   covariance structure according to whether a focal fixed effect becomes
+   significant.
+
+2. **Start with the scientifically relevant heterogeneity.** Include stable
+   intercepts, the focal within-person random slope when its effect could vary
+   across dyads, and a minimal same-occasion partner covariance. More elaborate
+   serial structure is a separate question.
+
+3. **Pool before trimming, where equality is defensible.** For distinguishable
+   dyads, first consider a common Tweedie dispersion and equality constraints
+   on specific role-dependent nuisance parameters, such as the two focal slope
+   variances. This need not mean imposing exchangeability on the complete
+   covariance block. Pooling part or all of the random covariance does not
+   require pooling role-specific fixed effects. Do not pool fundamentally
+   different roles merely to obtain convergence.
+
+4. **Trim covariance parameters before scientifically important variances, in
+   a theory-based order.** Do not assume that every intercept-slope covariance
+   is small: the paper treats within-person covariances as potentially among
+   the largest. In its physiological example, cross-person,
+   cross-variable covariances were expected to be smallest and were simplified
+   before within-person covariances. For this APIM, simplify unsupported
+   higher-order coefficient covariances before deleting their associated
+   variances. Removing one of those covariances is not the same as deleting the
+   same-occasion partner covariance, which represents the dyadic pairing at
+   Level 1 [@delrosarioPracticalGuideSpecifying2025].
+
+5. **Remove nonfocal random slopes before the focal slope.** This is the
+   fixed-effect-priority recommendation adopted in this vignette, not an order
+   tested by the paper. A random slope for a within-person predictor protects
+   fixed-effect inference against genuine effect heterogeneity. Remove the
+   focal slope only when its variance is consistently negligible and profiles,
+   multistarts, and fixed-effect sensitivity checks are reassuring.
+
+6. **Do not mechanically delete intercepts last.** Stable random intercepts and
+   same-occasion covariance represent different clustering features. Remove a
+   particular component only if the design and diagnostics support a value near
+   zero. The most reduced model in the paper's worked sequence removes the
+   G-matrix covariances but retains pooled intercept, stability-slope, and
+   influence-slope variances as well as its Gaussian repeated partner structure.
+   It therefore does not motivate automatically deleting slopes and then
+   intercepts. If a minimally defensible model remains unstable, the design may
+   not support the intended decomposition
+   [@delrosarioPracticalGuideSpecifying2025].
+
+An alternative build-up strategy reaches the same decisions from the other
+direction: begin with all relevant variances, add the pooled covariances
+expected to be largest or most important first, and, for distinguishable dyads,
+relax those equality constraints one at a time while support remains adequate.
+Whichever direction is used should be chosen in advance and applied one
+component at a time [@delrosarioPracticalGuideSpecifying2025].
+
+
+## Diagnosing weak identification
+
+A zero convergence code and a positive-definite Hessian are necessary checks,
+not proof of strong identification.
+
+```{r tweedie-fit-checks, eval = FALSE}
+tweedie_distinguishable_model$fit$convergence
+tweedie_distinguishable_model$sdr$pdHess
+glmmTMB::VarCorr(tweedie_distinguishable_model)
+glmmTMB::fixef(tweedie_distinguishable_model)$disp
+glmmTMB::diagnose(tweedie_distinguishable_model)
+```
+
+Weak identification often creates a flat likelihood ridge. For example, the
+data may estimate a total marginal variance well while allowing latent
+occasion variance and Tweedie dispersion to trade off. The inverse Hessian is
+then large along that ridge, producing large standard errors and parameter
+estimator correlations near ±1. A fitted random-effect correlation near ±1
+can likewise indicate a nearly rank-deficient covariance matrix rather than a
+truly perfect population relationship.
+
+There is also a computational reason to calibrate these models: each member
+coordinate of a dyad-occasion random effect is informed by one response, and
+`glmmTMB` integrates over the many latent effects using a Laplace approximation.
+Generic likelihood identification therefore does not guarantee accurate
+finite-sample approximation or stable optimization.
+
+Useful checks include:
+
+- inspect standard deviations, covariances, correlations, and covariance-matrix
+  eigenvalues rather than correlations alone;
+- inspect the strongest correlations among all estimated parameters;
+- profile important variance and dispersion parameters;
+- refit from materially different starting values and check whether the same
+  likelihood is reached with different variance decompositions;
+- refit prespecified pooled, diagonal, and full structures and compare the
+  focal fixed estimate, standard error, and interval;
+- use repeated design-matched simulation to assess bias, interval coverage,
+  boundary frequency, and convergence.
+
+```{r tweedie-estimator-correlations, eval = FALSE}
+full_vcov <- vcov(tweedie_distinguishable_model, full = TRUE)
+estimator_correlations <- stats::cov2cor(as.matrix(full_vcov))
+
+sort(
+  abs(estimator_correlations[upper.tri(estimator_correlations)]),
+  decreasing = TRUE
+)[1:10]
+
+conditional_covariance <-
+  glmmTMB::VarCorr(tweedie_distinguishable_model)$cond
+occasion_covariance <- as.matrix(
+  conditional_covariance[["coupleID:diaryday"]]
+)
+eigen(occasion_covariance, symmetric = TRUE)$values
+```
+
+Large estimates that persist across parameterizations, have bounded profiles,
+recover under repeated simulation, and become more precise with more dyads and
+complete paired occasions are more credible as real heterogeneity. Estimates
+that move along a ridge, hit boundaries, or change drastically across nearly
+equivalent parameterizations are more consistent with weak identification.
+
+Simulation should match the intended number of dyads and occasions, mean range,
+zero proportion, Tweedie power and dispersion, role imbalance, missingness, and
+number of complete partner occasions. It should vary those features rather than
+validate only one favorable parameter setting. Using simulation during design
+and preregistering the specification path are also central recommendations of
+@delrosarioPracticalGuideSpecifying2025.
+
+
+## Takeaway
+
+An occasion-level Gaussian random-effect pair is a valid way to model
+same-occasion partner dependence in a non-Gaussian APIM, but it is latent
+covariance on the link scale. Tweedie dispersion remains conditional response
+variation. Both role-specific distinguishable and pooled exchangeable
+dispersion/covariance models can be identified with adequate repeated data;
+the distinguishable model is simply more demanding and more likely to be
+weakly identified.
+
+For fixed-effect research questions, retain the focal mean structure, focal
+random-slope variance, stable clustering, and minimal same-occasion partner
+covariance as priorities. Simplify equality-related nuisance parameters and
+higher-order random-coefficient correlations first, and treat boundary
+estimates as prompts for profiles and sensitivity analyses rather than as an
+automatic deletion rule.
+
+---
+
+Return to the
+[Actor-Partner Interdependence Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html),
+see the
+[Dyad-Individual Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/dim.html)
+or the
+[Dyadic Score Model vignette](https://pascal-kueng.github.io/dyadMLM/articles/dsm.html)
+for alternative parameterizations, or return to the
+[online package overview](https://pascal-kueng.github.io/dyadMLM/).
+
+## References
+
+::: {#refs}
+:::
