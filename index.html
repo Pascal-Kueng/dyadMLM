@@ -199,10 +199,8 @@ BibTeX (without version)
 <span><span class="op">)</span></span></code></pre></div>
 <p>This creates grand-mean-centred actor and partner predictors and a member contrast for the exchangeable model. Inspect the prepared data with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
-<span>  <span class="va">prepared_data</span>,</span>
-<span>  n <span class="op">=</span> <span class="fl">4</span></span>
-<span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prepared_data</span>, n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co">#&gt; # dyadMLM data</span></span>
 <span><span class="co">#&gt; # Rows: 240 | Dyads: 120 | Intensive longitudinal: no</span></span>
 <span><span class="co">#&gt; # Structure: dyad = coupleID, member = personID, role = gender</span></span>
@@ -260,6 +258,7 @@ BibTeX (without version)
 <span>    <span class="co"># common member variance and positive or negative partner correlation</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">us</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">.member_contrast_arbitrary</span> <span class="op">|</span> <span class="va">coupleID</span><span class="op">)</span>,</span>
+<span></span>
 <span>  dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span>, <span class="co"># Fix the additional Gaussian residual variance near zero</span></span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">prepared_data</span></span>
@@ -268,10 +267,7 @@ BibTeX (without version)
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">covariance</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/recover_exchangeable_covariance.html">recover_exchangeable_covariance</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
-<span>  <span class="va">covariance</span>,</span>
-<span>  representation <span class="op">=</span> <span class="st">"sdcor"</span></span>
-<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">covariance</span>, representation <span class="op">=</span> <span class="st">"sdcor"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Recovered exchangeable member-level covariance</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Pair `pair_1`</span></span>
@@ -284,10 +280,7 @@ BibTeX (without version)
 <span><span class="co">#&gt; 2 member2: (Intercept) -0.039 1.089</span></span></code></pre></div>
 <p>Simulate responses and check partner dependence, using gender to distinguish partners:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span></span>
-<span>  <span class="va">model</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
-<span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">model</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">simulations</span>,</span>

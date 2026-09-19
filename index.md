@@ -126,10 +126,8 @@ with [`print()`](https://rdrr.io/r/base/print.html):
 
 ``` r
 
-print(
-  prepared_data,
-  n = 4
-)
+print(prepared_data, n = 4)
+
 #> # dyadMLM data
 #> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
@@ -191,6 +189,7 @@ model <- glmmTMB::glmmTMB(
     # common member variance and positive or negative partner correlation
     us(1 | coupleID) +
     us(0 + .member_contrast_arbitrary | coupleID),
+
   dispformula = ~ 0, # Fix the additional Gaussian residual variance near zero
   family = gaussian(),
   data = prepared_data
@@ -203,10 +202,7 @@ Recover the member-level SDs and partner correlation:
 
 covariance <- recover_exchangeable_covariance(model)
 
-print(
-  covariance,
-  representation = "sdcor"
-)
+print(covariance, representation = "sdcor")
 #> Recovered exchangeable member-level covariance
 #>
 #> Pair `pair_1`
@@ -224,10 +220,7 @@ distinguish partners:
 
 ``` r
 
-simulations <- simulate_dyad_responses(
-  model,
-  seed = 123
-)
+simulations <- simulate_dyad_responses(model, seed = 123)
 
 check_partner_dependence(
   simulations,
