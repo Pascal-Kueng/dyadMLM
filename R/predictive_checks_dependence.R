@@ -41,11 +41,16 @@
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
 #'   observed and simulated statistics (one row per simulation), pair and
 #'   omission counts, and settings. The `compositions` table lists the dyad
+#'   compositions and their pair counts. The object can be saved and plotted later.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
+#' The heading shows the dyad composition, its number of usable dyads, and the
+#' total across all compositions. The top row shows member SDs and partner
+#' correlation. The bottom row shows the same information using dyad averages
+#' and partner differences.
 #'
 #' An observed value far from most simulated values may indicate that the
 #' model does not reproduce that feature of the data well.
