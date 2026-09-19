@@ -122,7 +122,7 @@ with `print()`:
 
 <summary>
 
-Show prepared data
+Click to show prepared data
 </summary>
 
 ``` r
