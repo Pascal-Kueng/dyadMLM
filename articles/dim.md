@@ -542,11 +542,13 @@ partner correlation by comparing observed and simulated data. Use
 
 ``` r
 
+par(mfcol = c(2, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 dim_simulations <- dyadMLM::simulate_dyad_responses(dim_1, seed = 123)
 dyadMLM::check_partner_dependence(
   dim_simulations,
   dyad = coupleID,
-  role = NULL
+  role = NULL,
+  ask = FALSE
 )
 ```
 

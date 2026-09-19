@@ -212,14 +212,15 @@
 <span><span class="co"># Simulate responses and visually check partner dependence.</span></span>
 <span><span class="va">simulations</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span><span class="va">model</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfcol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">2.5</span>, <span class="fl">1</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.66</span>, cex.main <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">simulations</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
 <span>  role <span class="op">=</span> <span class="va">prepared_data</span><span class="op">$</span><span class="va">gender</span>,</span>
 <span>  ask <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-cross-sectional-prep-1.png" alt="Histogram of simulated partner correlations with the observed correlation marked in red and the middle 95 percent of simulations marked by dashed lines." width="100%"></p>
-<p>The function draws six plots. Only the partner-correlation plot is shown here.</p>
+<p><img src="reference/figures/README-cross-sectional-prep-1.png" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%"></p>
+<p>The left column shows role-specific SDs and partner correlation. The right column shows summaries of dyad averages and half the differences between partners. Histograms show simulated values and red lines mark observed values.</p>
 <p>Continue with the <a href="https://pascal-kueng.github.io/dyadMLM/articles/apim.html">APIM vignette</a> for details on the model specification and interpretation.</p>
 </div>
 <div class="section level2">
@@ -268,6 +269,15 @@
 <h2 id="full-citation">Full citation<a class="anchor" aria-label="anchor" href="#full-citation"></a>
 </h2>
 <p>Küng P (2026). <em>dyadMLM: Tools for Dyadic Multilevel Models</em>. University of Zurich. <a href="https://doi.org/10.5281/zenodo.22047083" class="external-link">doi:10.5281/zenodo.22047083</a>. R package version 0.2.0.9000, <a href="https://pascal-kueng.github.io/dyadMLM/" class="uri">https://pascal-kueng.github.io/dyadMLM/</a>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">@Manual</span>{,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="dt">title</span> = {dyadMLM: Tools for Dyadic Multilevel Models},</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="dt">author</span> = {Pascal Küng},</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="dt">year</span> = {2026},</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="dt">note</span> = {R package version 0.2.0.9000},</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="dt">url</span> = {https://pascal-kueng.github.io/dyadMLM/},</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="dt">doi</span> = {10.5281/zenodo.22047083},</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="dt">organization</span> = {University of Zurich},</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

@@ -536,13 +536,15 @@ checks show whether the restricted model reproduces each role’s variance
 and the partner correlation. We supply the original roles to examine
 their variances separately.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">apim_simulations</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfcol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">2.5</span>, <span class="fl">1</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.66</span>, cex.main <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span>
+<span><span class="va">apim_simulations</span> <span class="op">&lt;-</span> <span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/simulate_dyad_responses.html">simulate_dyad_responses</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_exchangeable_model</span>, seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">dyadMLM</span><span class="fu">::</span><span class="fu"><a href="../reference/check_partner_dependence.html">check_partner_dependence</a></span><span class="op">(</span></span>
 <span>  <span class="va">apim_simulations</span>,</span>
 <span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span>
-<span>  role <span class="op">=</span> <span class="va">apim_distinguishable_data</span><span class="op">$</span><span class="va">gender</span></span>
+<span>  role <span class="op">=</span> <span class="va">apim_distinguishable_data</span><span class="op">$</span><span class="va">gender</span>,</span>
+<span>  ask <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="apim_files/figure-html/check-cross-apim-1.svg" class="r-plt" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values." width="100%"></p>
 <p>The left column shows role-specific SDs and partner correlation. The

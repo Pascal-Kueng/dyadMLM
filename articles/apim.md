@@ -495,13 +495,15 @@ variances separately.
 
 ``` r
 
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 apim_simulations <- dyadMLM::simulate_dyad_responses(
   apim_exchangeable_model, seed = 123
 )
 dyadMLM::check_partner_dependence(
   apim_simulations,
   dyad = coupleID,
-  role = apim_distinguishable_data$gender
+  role = apim_distinguishable_data$gender,
+  ask = FALSE
 )
 ```
 

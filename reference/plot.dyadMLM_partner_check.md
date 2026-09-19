@@ -36,7 +36,7 @@ Invisibly, `x`.
 
 See
 [`check_partner_dependence()`](https://pascal-kueng.github.io/dyadMLM/reference/check_partner_dependence.md)
-for how to interpret the plots and for technical details.
+for interpretation, panel layouts, and technical details.
 
 ## Examples
 
@@ -61,10 +61,9 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
+previous_graphics_settings <- par(no.readonly = TRUE)
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 plot(check, ask = FALSE)
 
-
-
-
-
+par(previous_graphics_settings)
 ```

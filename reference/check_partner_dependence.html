@@ -134,6 +134,8 @@ omission counts, and settings. Can be saved to plot later.</p>
 <p>Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95% of simulations (no formal confidence
 intervals).</p>
+<p>To display all plots together, use <code>par(mfcol = c(3, 2))</code> when supplying
+roles, or <code>par(mfcol = c(2, 2))</code> for exchangeable members.</p>
 <p>An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.</p>
 <p>The first set of plots compares:</p><ul><li><p><strong>Response SDs:</strong> one for each role, or one common SD for exchangeable members.</p></li>
@@ -196,17 +198,16 @@ assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
 <span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">123</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Arrange all six checks in one panel.</span></span></span>
+<span class="r-in"><span><span class="va">previous_graphics_settings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>no.readonly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfcol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">2.5</span>, <span class="fl">1</span><span class="op">)</span>, cex <span class="op">=</span> <span class="fl">0.5</span>, cex.main <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">check_partner_dependence</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">simulations</span>,</span></span>
 <span class="r-in"><span>  dyad <span class="op">=</span> <span class="va">coupleID</span>,</span></span>
-<span class="r-in"><span>  role <span class="op">=</span> <span class="va">gender</span></span></span>
+<span class="r-in"><span>  role <span class="op">=</span> <span class="va">gender</span>,</span></span>
+<span class="r-in"><span>  ask <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="check_partner_dependence-1.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-2.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-3.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-4.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-5.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-6.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="check_partner_dependence-1.png" alt="" width="768" height="864"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Optionally, suppress plot, store object, and plot later.</span></span></span>
 <span class="r-in"><span><span class="va">check</span> <span class="op">&lt;-</span> <span class="fu">check_partner_dependence</span><span class="op">(</span></span></span>
@@ -217,12 +218,7 @@ assessment of model fitness via realized discrepancies. <em>Statistica Sinica,
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">check</span>, ask <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="check_partner_dependence-7.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-8.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-9.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-10.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-11.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="check_partner_dependence-12.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">previous_graphics_settings</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">check</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;dyadMLM partner-dependence check&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 statistics using 40 complete pairs</span>

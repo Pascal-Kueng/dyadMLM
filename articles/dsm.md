@@ -641,11 +641,13 @@ contrast instead of `gender`.
 
 ``` r
 
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 dsm_simulations <- dyadMLM::simulate_dyad_responses(dsm_model, seed = 123)
 dyadMLM::check_partner_dependence(
   dsm_simulations,
   dyad = coupleID,
-  role = cross_dsm_data$gender
+  role = cross_dsm_data$gender,
+  ask = FALSE
 )
 ```
 
