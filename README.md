@@ -146,7 +146,7 @@ check_partner_dependence(
 )
 ```
 
-<img src="man/figures/README-cross-sectional-prep-1.png" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
+<img src="man/figures/README-cross-sectional-prep-1.svg" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
 
 The left column shows role-specific SDs and partner correlation. The
 right column shows summaries of dyad averages and half the differences
