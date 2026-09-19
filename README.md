@@ -118,13 +118,6 @@ This creates grand-mean-centred actor and partner predictors and a
 member contrast for the exchangeable model. Inspect the prepared data
 with `print()`:
 
-<details>
-
-<summary>
-
-Click to show prepared data
-</summary>
-
 ``` r
 print(
   prepared_data,
@@ -173,8 +166,6 @@ print(
 #> #   .provided_support_partner <dbl>, .provided_support_gmc_actor <dbl>,
 #> #   .provided_support_gmc_partner <dbl>
 ```
-
-</details>
 
 Fit the exchangeable APIM:
 

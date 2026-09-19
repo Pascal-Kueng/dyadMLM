@@ -122,17 +122,12 @@ prepared_data <- prepare_dyad_data(
 This creates grand-mean-centred actor and partner predictors and a member
 contrast for the exchangeable model. Inspect the prepared data with `print()`:
 
-<details>
-<summary>Click to show prepared data</summary>
-
 ```{r prepared-data-preview}
 print(
   prepared_data,
   n = 4
 )
 ```
-
-</details>
 
 Fit the exchangeable APIM:
 
