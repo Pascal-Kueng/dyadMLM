@@ -40,12 +40,12 @@
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
 #'   observed and simulated statistics (one row per simulation), pair and
+#'   omission counts, and settings. The `compositions` table lists the dyad
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
-#' Use `panel = TRUE` to display all plots together: six with roles, four without.
 #'
 #' An observed value far from most simulated values may indicate that the
 #' model does not reproduce that feature of the data well.
@@ -58,8 +58,10 @@
 #' differences:
 #' - **Dyad-average SD:** how much dyads differ in their average response.
 #' - **Half-difference SD or RMS:** each partner difference is divided by two.
-#'   dyads. Without roles, the RMS shows their typical size, regardless of
+#'   With distinct roles, the SD shows how much signed differences vary
+#'   across dyads. For exchangeable members, the RMS shows their typical size, regardless of
 #'   partner order.
+#' - **Mean/difference correlation:** plotted only for distinct roles,
 #'   because it depends on how partners are ordered. Positive values indicate
 #'   greater variance for the first named role. Negative values indicate greater
 #'   variance for the second.
@@ -78,6 +80,7 @@
 #' dyad averages `M = (a + b) / 2` and half-differences `D = (a - b) / 2`.
 #' Roles follow factor levels or sorted values.
 #'
+#' For exchangeable members, common member variance is `var(M) + mean(D^2)` and
 #' partner covariance is `var(M) - mean(D^2)`. Partner correlation is
 #' covariance divided by variance. Half-difference RMS is `sqrt(mean(D^2))`.
 #'
@@ -85,32 +88,50 @@
 #' Woody and Sadler (2005).
 #'
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
+#' # Data contains three compositions: female-female, female-male, and male-male.
+#' example_data <- prepare_dyad_data(
+#'   dyads_cross,
+#'   dyad = coupleID,
+#'   member = personID,
+#'   model_types = "none",
+#'   seed = 123
+#' )
 #'
 #' # This model pools all compositions and treats every dyad as exchangeable.
 #' model <- glmmTMB::glmmTMB(
+#'   closeness ~ 1 +
+#'     us(1 | coupleID) +
+#'     us(0 + .member_contrast_arbitrary | coupleID),
+#'   dispformula = ~ 0,
 #'   data = example_data
 #' )
 #'
 #' # Fewer simulations for a quick example (the default is 1000).
 #' simulations <- simulate_dyad_responses(
 #'   model,
+#'   nsim = 100,
 #'   seed = 123
 #' )
 #'
 #' check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   panel = TRUE
+#'   role = example_data$gender
 #' )
 #'
 #' # Optionally, suppress plot, store object, and plot later.
 #' check <- check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
+#'   role = example_data$gender,
 #'   plot = FALSE
 #' )
 #'
+#' # Check how well the model reproduces variances and partner correlations
+#' # within each dyad composition.
+#' plot(check, ask = FALSE)
 #' print(check)
+#'
 #'
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
@@ -129,7 +150,7 @@ check_partner_dependence <- function(
   plot = TRUE,
   response = c("model-centred", "raw"),
   ask = NULL,
-  panel = FALSE
+  panels = TRUE
 ) {
   if (!inherits(simulations, "dyadMLM_response_simulations")) {
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
