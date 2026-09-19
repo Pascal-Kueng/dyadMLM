@@ -51,6 +51,29 @@ If you use `dyadMLM`, please cite the installed package version. Run:
 citation("dyadMLM")
 ```
 
+Or cite the package without specifying a version:
+
+Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
+\[Computer software\]. <https://doi.org/10.5281/zenodo.22047083>
+
+<details>
+
+<summary>
+
+BibTeX (without version)
+</summary>
+
+``` bibtex
+@Manual{dyadMLM,
+  title = {dyadMLM: Tools for dyadic multilevel models},
+  author = {Pascal Küng},
+  year = {2026},
+  doi = {10.5281/zenodo.22047083},
+}
+```
+
+</details>
+
 ## Data preparation and validation
 
 [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html)
@@ -197,22 +220,3 @@ through
 Documentation, examples, tests, reviews, and code contributions are all
 welcome. See the [contribution
 guide](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md).
-
-## Full citation
-
-Küng P (2026). *dyadMLM: Tools for Dyadic Multilevel Models*. University
-of Zurich.
-[doi:10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083).
-R package version 0.2.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
-
-``` bibtex
-@Manual{,
-  title = {dyadMLM: Tools for Dyadic Multilevel Models},
-  author = {Pascal Küng},
-  year = {2026},
-  note = {R package version 0.2.0.9000},
-  url = {https://pascal-kueng.github.io/dyadMLM/},
-  doi = {10.5281/zenodo.22047083},
-  organization = {University of Zurich},
-}
-```
