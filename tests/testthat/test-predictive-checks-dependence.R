@@ -319,20 +319,20 @@ test_that("one simulation retains every statistic as a matrix column", {
 })
 
 
-test_that("checks plot by default, forward ask, and return invisibly", {
+test_that("checks plot by default, forward plot settings, and return invisibly", {
   simulations <- partner_check_test_simulations()
   plot_calls <- list()
-  local_mocked_bindings(plot.dyadMLM_partner_check = function(x, ask, ...) {
-    plot_calls[length(plot_calls) + 1L] <<- list(ask)
+  local_mocked_bindings(plot.dyadMLM_partner_check = function(x, ask, panel, ...) {
+    plot_calls[[length(plot_calls) + 1L]] <<- list(ask = ask, panel = panel)
     invisible(x)
   }, .package = "dyadMLM")
   expect_message(default <- withVisible(check_partner_dependence(simulations, "dyad")),
                  "No role supplied: summaries pool partners.", fixed = TRUE)
   expect_false(default$visible)
   expect_s3_class(default$value, "dyadMLM_partner_check")
-  expect_identical(plot_calls, list(NULL))
+  expect_identical(plot_calls, list(list(ask = NULL, panel = FALSE)))
   expect_message(no_plot <- withVisible(check_partner_dependence(
-    simulations, "dyad", plot = FALSE, ask = TRUE
+    simulations, "dyad", plot = FALSE, ask = TRUE, panel = TRUE
   )), "Use `role = NULL` to pool without this message.", fixed = TRUE)
   expect_message(pooled <- withVisible(check_partner_dependence(
     simulations, "dyad", NULL, FALSE
@@ -342,15 +342,18 @@ test_that("checks plot by default, forward ask, and return invisibly", {
   )), NA)
   for (result in list(no_plot, pooled, roles)) expect_false(result$visible)
   expect_identical(no_plot$value, pooled$value)
-  expect_identical(plot_calls, list(NULL))
+  expect_identical(plot_calls, list(list(ask = NULL, panel = FALSE)))
   for (ask in c(FALSE, TRUE)) {
     plotted <- withVisible(check_partner_dependence(
-      simulations, "dyad", NULL, TRUE, "raw", ask = ask
+      simulations, "dyad", NULL, TRUE, "raw", ask = ask, panel = TRUE
     ))
     expect_false(plotted$visible)
     expect_identical(plotted$value$response, "raw")
   }
-  expect_identical(plot_calls, list(NULL, FALSE, TRUE))
+  expect_identical(plot_calls, list(
+    list(ask = NULL, panel = FALSE), list(ask = FALSE, panel = TRUE),
+    list(ask = TRUE, panel = TRUE)
+  ))
 })
 
 
@@ -375,8 +378,8 @@ test_that("printing describes the check and plots show empirical limits", {
 
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
-  graphics::par(plt = c(0.2, 0.8, 0.2, 0.8))
-  settings <- graphics::par(c("mar", "plt"))
+  graphics::par(mfcol = c(1, 2), plt = c(0.2, 0.8, 0.2, 0.8))
+  settings <- graphics::par(c("mfcol", "mar", "plt"))
   original_title <- graphics::title
   local_mocked_bindings(title = function(main = NULL, ...) {
     titles <<- c(titles, main)
@@ -400,7 +403,7 @@ test_that("printing describes the check and plots show empirical limits", {
     expect_equal(unname(do.call(cbind, limits)), unname(apply(
       result$replicated_statistics, 2, stats::quantile, probs = c(0.025, 0.975)
     )))
-    expect_equal(graphics::par(c("mar", "plt")), settings)
+    expect_equal(graphics::par(names(settings)), settings)
   }
   ask_values <- logical()
   local_mocked_bindings(devAskNewPage = function(ask = NULL) {
@@ -408,6 +411,54 @@ test_that("printing describes the check and plots show empirical limits", {
     TRUE
   }, .package = "grDevices")
   plot(exchangeable, ask = FALSE)
+  expect_identical(ask_values, c(FALSE, TRUE))
+})
+
+
+test_that("panels arrange all checks and restore graphics even after errors", {
+  simulations <- partner_check_test_simulations()
+  checks <- list(
+    check_partner_dependence(simulations, "dyad", NULL, plot = FALSE),
+    check_partner_dependence(simulations, "dyad", "role", plot = FALSE)
+  )
+  grDevices::pdf(NULL, width = 8, height = 9)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  graphics::par(mfcol = c(1, 2), mar = c(4, 3, 2, 1),
+                cex = 0.85, cex.main = 1.1, mex = 1.2, plt = c(0.2, 0.8, 0.2, 0.8))
+  settings <- graphics::par(c("mfcol", "mar", "cex", "cex.main", "mex", "plt"))
+
+  original_title <- graphics::title
+  local_mocked_bindings(title = function(...) {
+    layouts[[length(layouts) + 1L]] <<- graphics::par("mfcol")
+    original_title(...)
+  }, .package = "graphics")
+  local_mocked_bindings(
+    dev.interactive = function(...) TRUE,
+    devAskNewPage = function(ask = NULL) {
+      ask_values <<- c(ask_values, ask)
+      TRUE
+    }, .package = "grDevices"
+  )
+  expected_layouts <- list(c(2L, 2L), c(3L, 2L))
+  for (i in seq_along(checks)) {
+    layouts <- list()
+    ask_values <- logical()
+    plotted <- withVisible(plot(checks[[i]], panel = TRUE))
+    expect_false(plotted$visible)
+    expect_identical(plotted$value, checks[[i]])
+    expect_identical(layouts, rep(expected_layouts[i], c(4L, 6L)[i]))
+    expect_identical(ask_values, c(FALSE, TRUE))
+    expect_equal(graphics::par(names(settings)), settings)
+  }
+
+  ask_values <- logical()
+  plot(checks[[1]], panel = TRUE, ask = TRUE)
+  expect_identical(ask_values, c(TRUE, TRUE))
+
+  local_mocked_bindings(title = function(...) stop("plot failed"), .package = "graphics")
+  ask_values <- logical()
+  expect_error(plot(checks[[1]], panel = TRUE), "plot failed", fixed = TRUE)
+  expect_equal(graphics::par(names(settings)), settings)
   expect_identical(ask_values, c(FALSE, TRUE))
 })
 
