@@ -10,7 +10,8 @@ check_partner_dependence(
   role = NULL,
   plot = TRUE,
   response = c("model-centred", "raw"),
-  ask = NULL
+  ask = NULL,
+  panel = FALSE
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how pr
 \item{ask}{Whether to pause between plots. \code{NULL} (default) chooses
 automatically; \code{TRUE} pauses and \code{FALSE} draws without pausing.
 Ignored when \code{plot = FALSE}.}
+
+\item{panel}{If \code{TRUE}, arrange all plots in two columns without pausing by
+default. Graphics settings are restored afterwards. Default: \code{FALSE}.}
 }
 \value{
 The comparison plots (shown by default) are the main output. The
@@ -61,8 +65,7 @@ Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
 
-To display all plots together, use \code{par(mfcol = c(3, 2))} when supplying
-roles, or \code{par(mfcol = c(2, 2))} for exchangeable members.
+Use \code{panel = TRUE} to display all plots together: six with roles, four without.
 
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
@@ -128,13 +131,11 @@ simulations <- simulate_dyad_responses(
 )
 
 # Arrange all six checks in one panel.
-previous_graphics_settings <- par(no.readonly = TRUE)
-par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = gender,
-  ask = FALSE
+  panel = TRUE
 )
 
 # Optionally, suppress plot, store object, and plot later.
@@ -145,8 +146,7 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
-plot(check, ask = FALSE)
-par(previous_graphics_settings)
+plot(check, panel = TRUE)
 print(check)
 \dontshow{\}) # examplesIf}
 }

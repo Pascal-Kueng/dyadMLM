@@ -4,13 +4,16 @@
 \alias{plot.dyadMLM_partner_check}
 \title{Plot a saved partner-dependence check}
 \usage{
-\method{plot}{dyadMLM_partner_check}(x, ask = NULL, ...)
+\method{plot}{dyadMLM_partner_check}(x, ask = NULL, panel = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{dyadMLM_partner_check} object.}
 
 \item{ask}{\code{TRUE} pauses before the next plot. \code{FALSE} draws all plots
 without pausing. \code{NULL} (default) chooses automatically.}
+
+\item{panel}{If \code{TRUE}, arrange all plots in two columns without pausing by
+default. Graphics settings are restored afterwards. Default: \code{FALSE}.}
 
 \item{...}{Additional graphical arguments passed to \code{\link[graphics:plot]{graphics::plot()}}.
 \code{freq}, \code{xlim}, \code{ylim}, \code{main}, \code{sub}, and \code{xlab} are controlled by this
@@ -49,10 +52,7 @@ check <- check_partner_dependence(
   plot = FALSE
 )
 
-previous_graphics_settings <- par(no.readonly = TRUE)
-par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
-plot(check, ask = FALSE)
-par(previous_graphics_settings)
+plot(check, panel = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \keyword{internal}

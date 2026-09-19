@@ -138,12 +138,11 @@ model <- glmmTMB::glmmTMB(
 # Simulate responses and visually check partner dependence.
 simulations <- simulate_dyad_responses(model, seed = 123)
 
-par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = prepared_data$gender,
-  ask = FALSE
+  panel = TRUE
 )
 ```
 

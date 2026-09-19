@@ -30,6 +30,8 @@
 #' @param ask Whether to pause between plots. `NULL` (default) chooses
 #'   automatically; `TRUE` pauses and `FALSE` draws without pausing.
 #'   Ignored when `plot = FALSE`.
+#' @param panel If `TRUE`, arrange all plots in two columns without pausing by
+#'   default. Graphics settings are restored afterwards. Default: `FALSE`.
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
@@ -41,8 +43,7 @@
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
 #'
-#' To display all plots together, use `par(mfcol = c(3, 2))` when supplying
-#' roles, or `par(mfcol = c(2, 2))` for exchangeable members.
+#' Use `panel = TRUE` to display all plots together: six with roles, four without.
 #'
 #' An observed value far from most simulated values may indicate that the
 #' model does not reproduce that feature of the data well.
@@ -100,13 +101,11 @@
 #' )
 #'
 #' # Arrange all six checks in one panel.
-#' previous_graphics_settings <- par(no.readonly = TRUE)
-#' par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 #' check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
 #'   role = gender,
-#'   ask = FALSE
+#'   panel = TRUE
 #' )
 #'
 #' # Optionally, suppress plot, store object, and plot later.
@@ -117,8 +116,7 @@
 #'   plot = FALSE
 #' )
 #'
-#' plot(check, ask = FALSE)
-#' par(previous_graphics_settings)
+#' plot(check, panel = TRUE)
 #' print(check)
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
@@ -136,7 +134,8 @@ check_partner_dependence <- function(
   role = NULL,
   plot = TRUE,
   response = c("model-centred", "raw"),
-  ask = NULL
+  ask = NULL,
+  panel = FALSE
 ) {
   if (!inherits(simulations, "dyadMLM_response_simulations")) {
     stop("`simulations` must be created by `simulate_dyad_responses()`.", call. = FALSE)
@@ -265,7 +264,7 @@ check_partner_dependence <- function(
             "each role's variance separately, even if the model did not include it. ",
             "Use `role = NULL` to pool without this message.")
   }
-  if (plot) graphics::plot(check_result, ask = ask)
+  if (plot) graphics::plot(check_result, ask = ask, panel = panel)
   return(invisible(check_result))
 }
 
@@ -470,6 +469,7 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #' @param x A `dyadMLM_partner_check` object.
 #' @param ask `TRUE` pauses before the next plot. `FALSE` draws all plots
 #'   without pausing. `NULL` (default) chooses automatically.
+#' @inheritParams check_partner_dependence
 #' @param ... Additional graphical arguments passed to [graphics::plot()].
 #'   `freq`, `xlim`, `ylim`, `main`, `sub`, and `xlab` are controlled by this
 #'   method.
@@ -497,16 +497,25 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #'   plot = FALSE
 #' )
 #'
-#' previous_graphics_settings <- par(no.readonly = TRUE)
-#' par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
-#' plot(check, ask = FALSE)
-#' par(previous_graphics_settings)
+#' plot(check, panel = TRUE)
 #'
 #' @export
-plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {
+plot.dyadMLM_partner_check <- function(x, ask = NULL, panel = FALSE, ...) {
+
+  if (panel) {
+    previous_graphics_settings <- graphics::par(no.readonly = TRUE)
+    on.exit({
+      graphics::par(previous_graphics_settings)
+      # Restoring the layout resets these scaling factors.
+      graphics::par(previous_graphics_settings[c("cex", "mex")])
+    }, add = TRUE)
+    graphics::par(mfcol = c(ceiling(length(x$observed_statistics) / 2), 2),
+                  mar = c(5.1, 4.1, 2.5, 1), cex.main = 0.9,
+                  cex = min(0.66, grDevices::dev.size("in")[1] / 12))
+  }
 
   if (is.null(ask)) {
-    ask <- length(x$observed_statistics) > 1L && grDevices::dev.interactive()
+    ask <- !panel && length(x$observed_statistics) > 1L && grDevices::dev.interactive()
   }
 
   previous_plot_pause_setting <- grDevices::devAskNewPage(ask)
