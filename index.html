@@ -116,6 +116,17 @@
 <p>If you use <code>dyadMLM</code>, please cite the installed package version. Run:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"dyadMLM"</span><span class="op">)</span></span></code></pre></div>
+<p>Or cite the package without specifying a version:</p>
+<p>Küng, P. (2026). <em>dyadMLM: Tools for dyadic multilevel models</em> [Computer software]. <a href="https://doi.org/10.5281/zenodo.22047083" class="external-link uri">https://doi.org/10.5281/zenodo.22047083</a></p>
+<details><summary>
+BibTeX (without version)
+</summary><div class="sourceCode" id="cb4"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">@Manual</span>{<span class="ot">dyadMLM</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="dt">title</span> = {dyadMLM: Tools for dyadic multilevel models},</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dt">author</span> = {Pascal Küng},</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dt">year</span> = {2026},</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="dt">doi</span> = {10.5281/zenodo.22047083},</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>}</span></code></pre></div>
+</details>
 </div>
 <div class="section level2">
 <h2 id="data-preparation-and-validation">Data preparation and validation<a class="anchor" aria-label="anchor" href="#data-preparation-and-validation"></a>
@@ -128,7 +139,7 @@
 </ul>
 <p>It supports cross-sectional and intensive longitudinal dyadic data (e.g., daily diary data). The package also supports datasets containing multiple dyad compositions.</p>
 <p>Preparation options include selecting and pooling compositions, treating selected compositions as exchangeable, centering predictors, and creating within-/between-person components and lagged predictors.</p>
-<p>Prepared data can be used with <strong>glmmTMB</strong> or <strong>brms</strong>. See the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started vignette</a> for data requirements and examples.</p>
+<p>Prepared data can be used with <strong>glmmTMB</strong>, <strong>brms</strong>, and other multilevel modelling packages that support the required model structure. See the <a href="https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html">Getting Started vignette</a> for data requirements and examples.</p>
 </div>
 <div class="section level2">
 <h2 id="post-estimation-tools">Post-estimation tools<a class="anchor" aria-label="anchor" href="#post-estimation-tools"></a>
@@ -171,7 +182,7 @@
 </h2>
 <p>In this example, we prepare the simulated data included in <code>dyadMLM</code>, fit a cross-sectional APIM, and visually check how well the model reproduces observed partner dependence. The predictive check requires the development version.</p>
 <p>The example also requires <strong>glmmTMB</strong>. Install it with <code>install.packages("glmmTMB")</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pascal-kueng.github.io/dyadMLM/">dyadMLM</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dyads_cross"</span><span class="op">)</span></span>
@@ -264,20 +275,6 @@
 <p>Feature or method ideas can be proposed in <a href="https://github.com/Pascal-Kueng/dyadMLM/discussions/categories/ideas" class="external-link">Ideas</a>.</p>
 <p>Please report any bugs you find or any concrete improvement suggestions through <a href="https://github.com/Pascal-Kueng/dyadMLM/issues/new/choose" class="external-link">Issues</a>.</p>
 <p>Documentation, examples, tests, reviews, and code contributions are all welcome. See the <a href="https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md" class="external-link">contribution guide</a>.</p>
-</div>
-<div class="section level2">
-<h2 id="full-citation">Full citation<a class="anchor" aria-label="anchor" href="#full-citation"></a>
-</h2>
-<p>Küng P (2026). <em>dyadMLM: Tools for Dyadic Multilevel Models</em>. University of Zurich. <a href="https://doi.org/10.5281/zenodo.22047083" class="external-link">doi:10.5281/zenodo.22047083</a>. R package version 0.2.0.9000, <a href="https://pascal-kueng.github.io/dyadMLM/" class="uri">https://pascal-kueng.github.io/dyadMLM/</a>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">@Manual</span>{,</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="dt">title</span> = {dyadMLM: Tools for Dyadic Multilevel Models},</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="dt">author</span> = {Pascal Küng},</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="dt">year</span> = {2026},</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="dt">note</span> = {R package version 0.2.0.9000},</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="dt">url</span> = {https://pascal-kueng.github.io/dyadMLM/},</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="dt">doi</span> = {10.5281/zenodo.22047083},</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="dt">organization</span> = {University of Zurich},</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

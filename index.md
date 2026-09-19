@@ -39,6 +39,22 @@ If you use `dyadMLM`, please cite the installed package version. Run:
 citation("dyadMLM")
 ```
 
+Or cite the package without specifying a version:
+
+Küng, P. (2026). *dyadMLM: Tools for dyadic multilevel models*
+\[Computer software\]. <https://doi.org/10.5281/zenodo.22047083>
+
+BibTeX (without version)
+
+``` bibtex
+@Manual{dyadMLM,
+  title = {dyadMLM: Tools for dyadic multilevel models},
+  author = {Pascal Küng},
+  year = {2026},
+  doi = {10.5281/zenodo.22047083},
+}
+```
+
 ## Data preparation and validation
 
 [`prepare_dyad_data()`](https://pascal-kueng.github.io/dyadMLM/reference/prepare_dyad_data.html)
@@ -57,8 +73,9 @@ Preparation options include selecting and pooling compositions, treating
 selected compositions as exchangeable, centering predictors, and
 creating within-/between-person components and lagged predictors.
 
-Prepared data can be used with **glmmTMB** or **brms**. See the [Getting
-Started
+Prepared data can be used with **glmmTMB**, **brms**, and other
+multilevel modelling packages that support the required model structure.
+See the [Getting Started
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/getting-started.html)
 for data requirements and examples.
 
@@ -190,22 +207,3 @@ through
 Documentation, examples, tests, reviews, and code contributions are all
 welcome. See the [contribution
 guide](https://github.com/Pascal-Kueng/dyadMLM/blob/main/.github/CONTRIBUTING.md).
-
-## Full citation
-
-Küng P (2026). *dyadMLM: Tools for Dyadic Multilevel Models*. University
-of Zurich.
-[doi:10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083).
-R package version 0.2.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
-
-``` bibtex
-@Manual{,
-  title = {dyadMLM: Tools for Dyadic Multilevel Models},
-  author = {Pascal Küng},
-  year = {2026},
-  note = {R package version 0.2.0.9000},
-  url = {https://pascal-kueng.github.io/dyadMLM/},
-  doi = {10.5281/zenodo.22047083},
-  organization = {University of Zurich},
-}
-```
