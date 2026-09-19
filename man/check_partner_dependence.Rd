@@ -61,6 +61,9 @@ Histograms show simulated summaries. Red lines mark observed values.
 Dashed lines enclose the middle 95\% of simulations (no formal confidence
 intervals).
 
+To display all plots together, use \code{par(mfcol = c(3, 2))} when supplying
+roles, or \code{par(mfcol = c(2, 2))} for exchangeable members.
+
 An observed value far from most simulated values may indicate that the
 model does not reproduce that feature of the data well.
 
@@ -124,10 +127,14 @@ simulations <- simulate_dyad_responses(
   seed = 123
 )
 
+# Arrange all six checks in one panel.
+previous_graphics_settings <- par(no.readonly = TRUE)
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
-  role = gender
+  role = gender,
+  ask = FALSE
 )
 
 # Optionally, suppress plot, store object, and plot later.
@@ -139,6 +146,7 @@ check <- check_partner_dependence(
 )
 
 plot(check, ask = FALSE)
+par(previous_graphics_settings)
 print(check)
 \dontshow{\}) # examplesIf}
 }

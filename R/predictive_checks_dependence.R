@@ -41,6 +41,9 @@
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
 #'
+#' To display all plots together, use `par(mfcol = c(3, 2))` when supplying
+#' roles, or `par(mfcol = c(2, 2))` for exchangeable members.
+#'
 #' An observed value far from most simulated values may indicate that the
 #' model does not reproduce that feature of the data well.
 #'
@@ -96,10 +99,14 @@
 #'   seed = 123
 #' )
 #'
+#' # Arrange all six checks in one panel.
+#' previous_graphics_settings <- par(no.readonly = TRUE)
+#' par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 #' check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   role = gender
+#'   role = gender,
+#'   ask = FALSE
 #' )
 #'
 #' # Optionally, suppress plot, store object, and plot later.
@@ -111,6 +118,7 @@
 #' )
 #'
 #' plot(check, ask = FALSE)
+#' par(previous_graphics_settings)
 #' print(check)
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
@@ -454,8 +462,10 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #' `r lifecycle::badge("experimental")`
 #' Draws the comparison plots without repeating simulations.
 #'
-#' See [check_partner_dependence()] for how to interpret the plots
-#' and for technical details.
+#' See [check_partner_dependence()] for interpretation, panel layouts, and
+#' technical details.
+#'
+#' @keywords internal
 #'
 #' @param x A `dyadMLM_partner_check` object.
 #' @param ask `TRUE` pauses before the next plot. `FALSE` draws all plots
@@ -487,7 +497,10 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #'   plot = FALSE
 #' )
 #'
+#' previous_graphics_settings <- par(no.readonly = TRUE)
+#' par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.5, cex.main = 0.9)
 #' plot(check, ask = FALSE)
+#' par(previous_graphics_settings)
 #'
 #' @export
 plot.dyadMLM_partner_check <- function(x, ask = NULL, ...) {

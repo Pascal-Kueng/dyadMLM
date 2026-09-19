@@ -138,6 +138,7 @@ model <- glmmTMB::glmmTMB(
 # Simulate responses and visually check partner dependence.
 simulations <- simulate_dyad_responses(model, seed = 123)
 
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
@@ -146,10 +147,12 @@ check_partner_dependence(
 )
 ```
 
-<img src="man/figures/README-cross-sectional-prep-1.png" alt="Histogram of simulated partner correlations with the observed correlation marked in red and the middle 95 percent of simulations marked by dashed lines." width="100%" />
+<img src="man/figures/README-cross-sectional-prep-1.png" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
 
-The function draws six plots. Only the partner-correlation plot is shown
-here.
+The left column shows role-specific SDs and partner correlation. The
+right column shows summaries of dyad averages and half the differences
+between partners. Histograms show simulated values and red lines mark
+observed values.
 
 Continue with the [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) for
@@ -201,3 +204,15 @@ Küng P (2026). *dyadMLM: Tools for Dyadic Multilevel Models*. University
 of Zurich.
 [doi:10.5281/zenodo.22047083](https://doi.org/10.5281/zenodo.22047083).
 R package version 0.2.0.9000, <https://pascal-kueng.github.io/dyadMLM/>.
+
+``` bibtex
+@Manual{,
+  title = {dyadMLM: Tools for Dyadic Multilevel Models},
+  author = {Pascal Küng},
+  year = {2026},
+  note = {R package version 0.2.0.9000},
+  url = {https://pascal-kueng.github.io/dyadMLM/},
+  doi = {10.5281/zenodo.22047083},
+  organization = {University of Zurich},
+}
+```
