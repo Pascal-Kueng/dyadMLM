@@ -144,7 +144,6 @@ with `print()`:
 
 ``` r
 print(prepared_data, n = 4)
-
 #> # dyadMLM data
 #> # Rows: 240 | Dyads: 120 | Intensive longitudinal: no
 #> # Structure: dyad = coupleID, member = personID, role = gender
@@ -240,11 +239,14 @@ check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = prepared_data$gender,
-  panel = TRUE
+  panels = TRUE
 )
 ```
 
-<img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
+<img src="man/figures/README-cross-sectional-check-1.svg" alt="Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
+
+The function groups the six plots in one figure. Use `panels = FALSE` to
+show them separately.
 
 Here, simulations produce weaker partner correlations and larger SDs of
 partner half-differences than observed (red lines), suggesting

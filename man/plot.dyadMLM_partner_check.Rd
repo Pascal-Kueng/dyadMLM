@@ -4,17 +4,19 @@
 \alias{plot.dyadMLM_partner_check}
 \title{Plot a saved partner-dependence check}
 \usage{
-\method{plot}{dyadMLM_partner_check}(x, ask = NULL, panel = FALSE, ...)
+\method{plot}{dyadMLM_partner_check}(x, ask = NULL, panels = TRUE, ...)
 }
 \arguments{
 \item{x}{A \code{dyadMLM_partner_check} object.}
 
-\item{ask}{\code{TRUE} pauses before the next plot. \code{FALSE} draws all plots
-without pausing. \code{NULL} (default) chooses automatically.}
+\item{ask}{Whether to pause between figures on an interactive device.
+\code{NULL} (default) pauses when there is more than one figure; \code{TRUE} pauses
+and \code{FALSE} draws without pausing. In panel mode, each composition is one
+figure. File devices never pause.}
 
-\item{panel}{If \code{FALSE} (default), draw plots one after another, with pausing
-controlled by \code{ask}. If \code{TRUE}, show all plots together in a two-column
-panel. Graphics settings are restored afterwards.}
+\item{panels}{If \code{TRUE} (default), show each composition in one figure, with
+two rows and up to three columns. If \code{FALSE}, draw each statistic separately.
+Graphics settings are restored afterwards.}
 
 \item{...}{Additional graphical arguments passed to \code{\link[graphics:plot]{graphics::plot()}}.
 \code{freq}, \code{xlim}, \code{ylim}, \code{main}, \code{sub}, and \code{xlab} are controlled by this
@@ -33,10 +35,19 @@ technical details.
 }
 \examples{
 \dontshow{if (requireNamespace("glmmTMB", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
+example_data <- prepare_dyad_data(
+  dyads_cross[dyads_cross$coupleID <= 40, ],
+  dyad = coupleID,
+  member = personID,
+  model_types = "none",
+  seed = 123
+)
 
 model <- glmmTMB::glmmTMB(
-  closeness ~ 1 + gender + (1 | coupleID),
+  closeness ~ 1 +
+    us(1 | coupleID) +
+    us(0 + .member_contrast_arbitrary | coupleID),
+  dispformula = ~ 0,
   data = example_data
 )
 
@@ -49,11 +60,11 @@ simulations <- simulate_dyad_responses(
 check <- check_partner_dependence(
   simulations,
   dyad = coupleID,
-  role = gender,
+  role = example_data$gender,
   plot = FALSE
 )
 
-plot(check, panel = TRUE)
+plot(check, ask = FALSE)
 \dontshow{\}) # examplesIf}
 }
 \keyword{internal}

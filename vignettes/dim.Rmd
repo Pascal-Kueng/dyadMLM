@@ -441,12 +441,12 @@ dyadMLM::check_partner_dependence(
   dim_simulations,
   dyad = coupleID,
   role = NULL,
-  panel = TRUE
+  panels = TRUE
 )
 ```
 
-The left column shows the common member SD and partner correlation. The right
-column shows the same information using dyad averages and half the differences
+The top row shows the common member SD and partner correlation. The bottom
+row shows the same information using dyad averages and half the differences
 between partners. Histograms show simulated values and red lines mark observed
 values. A red line far from most simulations suggests a mismatch.
 

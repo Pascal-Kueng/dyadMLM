@@ -148,10 +148,7 @@ This creates grand-mean-centred actor and partner predictors and a member
 contrast for the exchangeable model. Inspect the prepared data with `print()`:
 
 ```{r prepared-data-preview}
-print(
-  prepared_data,
-  n = 4
-)
+print(prepared_data, n = 4)
 ```
 
 Fit the exchangeable APIM:
@@ -170,6 +167,7 @@ model <- glmmTMB::glmmTMB(
     # common member variance and positive or negative partner correlation
     us(1 | coupleID) +
     us(0 + .member_contrast_arbitrary | coupleID),
+
   dispformula = ~ 0, # Fix the additional Gaussian residual variance near zero
   family = gaussian(),
   data = prepared_data
@@ -181,28 +179,25 @@ Recover the member-level SDs and partner correlation:
 ```{r cross-sectional-covariance}
 covariance <- recover_exchangeable_covariance(model)
 
-print(
-  covariance,
-  representation = "sdcor"
-)
+print(covariance, representation = "sdcor")
 ```
 
 Simulate responses and check partner dependence, using gender to distinguish
 partners:
 
-```{r cross-sectional-check, fig.width = 8, fig.height = 9, fig.alt = "Six predictive-check histograms. Gender-specific SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations."}
-simulations <- simulate_dyad_responses(
-  model,
-  seed = 123
-)
+```{r cross-sectional-check, fig.width = 10, fig.height = 6.5, fig.alt = "Six predictive-check histograms. Gender-specific SDs and partner correlation are in the top row; dyad-average and half-difference summaries are in the bottom row. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations."}
+simulations <- simulate_dyad_responses(model, seed = 123)
 
 check_partner_dependence(
   simulations,
   dyad = coupleID,
   role = prepared_data$gender,
-  panel = TRUE
+  panels = TRUE
 )
 ```
+
+The function groups the six plots in one figure. Use `panels = FALSE` to show
+them separately.
 
 Here, simulations produce weaker partner correlations and larger SDs of partner
 half-differences than observed (red lines), suggesting **misfit**.
