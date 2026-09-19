@@ -100,7 +100,7 @@ partner dependence. The predictive check requires the development version.
 
 The example also requires **glmmTMB**. Install it with `install.packages("glmmTMB")`.
 
-```{r cross-sectional-prep, fig.keep = 3, fig.width = 7, fig.height = 4.5, fig.alt = "Histogram of simulated partner correlations with the observed correlation marked in red and the middle 95 percent of simulations marked by dashed lines."}
+```{r cross-sectional-prep, fig.width = 8, fig.height = 9, fig.alt = "Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations."}
 library(dyadMLM)
 
 data("dyads_cross")
@@ -141,6 +141,7 @@ model <- glmmTMB::glmmTMB(
 # Simulate responses and visually check partner dependence.
 simulations <- simulate_dyad_responses(model, seed = 123)
 
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
@@ -149,7 +150,9 @@ check_partner_dependence(
 )
 ```
 
-The function draws six plots. Only the partner-correlation plot is shown here.
+The left column shows role-specific SDs and partner correlation. The right
+column shows summaries of dyad averages and half the differences between
+partners. Histograms show simulated values and red lines mark observed values.
 
 Continue with the
 [APIM vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html)

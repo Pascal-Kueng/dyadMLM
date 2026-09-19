@@ -138,6 +138,7 @@ model <- glmmTMB::glmmTMB(
 # Simulate responses and visually check partner dependence.
 simulations <- simulate_dyad_responses(model, seed = 123)
 
+par(mfcol = c(3, 2), mar = c(5.1, 4.1, 2.5, 1), cex = 0.66, cex.main = 0.9)
 check_partner_dependence(
   simulations,
   dyad = coupleID,
@@ -146,10 +147,12 @@ check_partner_dependence(
 )
 ```
 
-<img src="man/figures/README-cross-sectional-prep-1.png" alt="Histogram of simulated partner correlations with the observed correlation marked in red and the middle 95 percent of simulations marked by dashed lines." width="100%" />
+<img src="man/figures/README-cross-sectional-prep-1.png" alt="Six predictive-check histograms. Member SDs and partner correlation are on the left; dyad-average and half-difference summaries are on the right. Red lines mark observed values and dashed lines mark the middle 95 percent of simulations." width="100%" />
 
-The function draws six plots. Only the partner-correlation plot is shown
-here.
+The left column shows role-specific SDs and partner correlation. The
+right column shows summaries of dyad averages and half the differences
+between partners. Histograms show simulated values and red lines mark
+observed values.
 
 Continue with the [APIM
 vignette](https://pascal-kueng.github.io/dyadMLM/articles/apim.html) for
