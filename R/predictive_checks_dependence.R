@@ -13,12 +13,14 @@
 #' @param dyad A column name in the fitted data, or a vector
 #'   of dyad IDs in the same row order. Columns take precedence. You may use
 #'   `.env$ids` to select an external vector explicitly.
-#' @param role A column name in the fitted data, or a vector of roles in the
-#'   same row order. Use `NULL` (default) when members should be treated as
-#'   exchangeable. Roles can be supplied even if they were not included
-#'   in the model, to check for mismatches in each role's variance and
-#'   the partner correlation.
+#' @param role A column name in the fitted data, or a role vector in the same
+#'   row order. `NULL` (default) pools all dyads as exchangeable. Supply roles
+#'   even for an exchangeable model to reveal variance or partner-correlation
+#'   mismatches that pooling may hide. Each role pair is checked separately,
+#'   using exchangeable summaries for same-role pairs and role-specific
+#'   summaries otherwise.
 #' @param plot If `TRUE` (default), draw the comparison plots for visual checks.
+#'   If `FALSE`, `ask` and `panels` are ignored.
 #' @param response `"model-centred"` (default) subtracts the same model predictions
 #'   from observed and simulated responses. The predictive check then assesses
 #'   whether the model reproduces the variance and partner correlations remaining
@@ -27,23 +29,22 @@
 #'   assesses whether the full model, including fixed effects, reproduces the
 #'   overall response variances and partner correlations.
 #'   See [simulate_dyad_responses()] for how predictions are defined.
-#' @param ask Whether to pause between plots. `NULL` (default) chooses
-#'   automatically; `TRUE` pauses and `FALSE` draws without pausing.
-#'   Ignored when `plot = FALSE`.
-#' @param panel If `FALSE` (default), draw plots one after another, with pausing
-#'   controlled by `ask`. If `TRUE`, show all plots together in a two-column
-#'   panel. Graphics settings are restored afterwards.
+#' @param ask Whether to pause between figures on an interactive device.
+#'   `NULL` (default) pauses when there is more than one figure; `TRUE` pauses
+#'   and `FALSE` draws without pausing. In panel mode, each composition is one
+#'   figure. File devices never pause.
+#' @param panels If `TRUE` (default), show each composition in one figure, with
+#'   two rows and up to three columns. If `FALSE`, draw each statistic separately.
+#'   Graphics settings are restored afterwards.
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the
 #'   observed and simulated statistics (one row per simulation), pair and
-#'   omission counts, and settings. Can be saved to plot later.
 #'
 #' @section Reading the plots:
 #' Histograms show simulated summaries. Red lines mark observed values.
 #' Dashed lines enclose the middle 95% of simulations (no formal confidence
 #' intervals).
-#'
 #' Use `panel = TRUE` to display all plots together: six with roles, four without.
 #'
 #' An observed value far from most simulated values may indicate that the
@@ -57,10 +58,8 @@
 #' differences:
 #' - **Dyad-average SD:** how much dyads differ in their average response.
 #' - **Half-difference SD or RMS:** each partner difference is divided by two.
-#'   With roles, the SD shows how much these signed differences vary across
 #'   dyads. Without roles, the RMS shows their typical size, regardless of
 #'   partner order.
-#' - **Mean/difference correlation:** plotted only when roles are supplied,
 #'   because it depends on how partners are ordered. Positive values indicate
 #'   greater variance for the first named role. Negative values indicate greater
 #'   variance for the second.
@@ -79,7 +78,6 @@
 #' dyad averages `M = (a + b) / 2` and half-differences `D = (a - b) / 2`.
 #' Roles follow factor levels or sorted values.
 #'
-#' Without roles, common member variance is `var(M) + mean(D^2)` and
 #' partner covariance is `var(M) - mean(D^2)`. Partner correlation is
 #' covariance divided by variance. Half-difference RMS is `sqrt(mean(D^2))`.
 #'
@@ -87,25 +85,21 @@
 #' Woody and Sadler (2005).
 #'
 #' @examplesIf requireNamespace("glmmTMB", quietly = TRUE)
-#' example_data <- dyads_cross[dyads_cross$coupleID <= 40, ]
 #'
+#' # This model pools all compositions and treats every dyad as exchangeable.
 #' model <- glmmTMB::glmmTMB(
-#'   closeness ~ 1 + gender + (1 | coupleID),
 #'   data = example_data
 #' )
 #'
 #' # Fewer simulations for a quick example (the default is 1000).
 #' simulations <- simulate_dyad_responses(
 #'   model,
-#'   nsim = 50,
 #'   seed = 123
 #' )
 #'
-#' # Arrange all six checks in one panel.
 #' check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   role = gender,
 #'   panel = TRUE
 #' )
 #'
@@ -113,12 +107,11 @@
 #' check <- check_partner_dependence(
 #'   simulations,
 #'   dyad = coupleID,
-#'   role = gender,
 #'   plot = FALSE
 #' )
 #'
-#' plot(check, panel = TRUE)
 #' print(check)
+#'
 #'
 #' @references Woody, E., & Sadler, P. (2005). Structural equation models for
 #'   interchangeable dyads: Being the same makes a difference. *Psychological
