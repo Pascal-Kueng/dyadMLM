@@ -7,6 +7,8 @@
 #'
 #' @return Invisibly, the standard summary of all columns.
 #'
+#' @keywords internal
+#'
 #' @export
 summary.dyadMLM_data <- function(object, ...) {
   print_dyadMLM_header(object, title = "Summary of dyadMLM data")

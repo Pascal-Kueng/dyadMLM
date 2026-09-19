@@ -55,3 +55,4 @@ plot(check, ask = FALSE)
 par(previous_graphics_settings)
 \dontshow{\}) # examplesIf}
 }
+\keyword{internal}

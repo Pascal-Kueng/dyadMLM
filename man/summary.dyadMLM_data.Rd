@@ -17,3 +17,4 @@ Invisibly, the standard summary of all columns.
 \description{
 Prints the dyadic structure followed by standard summaries for all columns.
 }
+\keyword{internal}

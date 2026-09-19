@@ -465,6 +465,8 @@ print.dyadMLM_partner_check <- function(x, ...) {
 #' See [check_partner_dependence()] for interpretation, panel layouts, and
 #' technical details.
 #'
+#' @keywords internal
+#'
 #' @param x A `dyadMLM_partner_check` object.
 #' @param ask `TRUE` pauses before the next plot. `FALSE` draws all plots
 #'   without pausing. `NULL` (default) chooses automatically.

@@ -61,7 +61,6 @@ reference:
 - title: Main functions
   contents:
   - prepare_dyad_data
-  - summary.dyadMLM_data
   - compare_nested_models
   - recover_exchangeable_covariance
 
@@ -70,7 +69,6 @@ reference:
   contents:
   - simulate_dyad_responses
   - check_partner_dependence
-  - plot.dyadMLM_partner_check
 
 - title: Example data
   contents:
