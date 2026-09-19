@@ -12,8 +12,9 @@
 \item{ask}{\code{TRUE} pauses before the next plot. \code{FALSE} draws all plots
 without pausing. \code{NULL} (default) chooses automatically.}
 
-\item{panel}{If \code{TRUE}, arrange all plots in two columns without pausing by
-default. Graphics settings are restored afterwards. Default: \code{FALSE}.}
+\item{panel}{If \code{FALSE} (default), draw plots one after another, with pausing
+controlled by \code{ask}. If \code{TRUE}, show all plots together in a two-column
+panel. Graphics settings are restored afterwards.}
 
 \item{...}{Additional graphical arguments passed to \code{\link[graphics:plot]{graphics::plot()}}.
 \code{freq}, \code{xlim}, \code{ylim}, \code{main}, \code{sub}, and \code{xlab} are controlled by this

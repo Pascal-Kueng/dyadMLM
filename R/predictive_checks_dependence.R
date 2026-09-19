@@ -30,8 +30,9 @@
 #' @param ask Whether to pause between plots. `NULL` (default) chooses
 #'   automatically; `TRUE` pauses and `FALSE` draws without pausing.
 #'   Ignored when `plot = FALSE`.
-#' @param panel If `TRUE`, arrange all plots in two columns without pausing by
-#'   default. Graphics settings are restored afterwards. Default: `FALSE`.
+#' @param panel If `FALSE` (default), draw plots one after another, with pausing
+#'   controlled by `ask`. If `TRUE`, show all plots together in a two-column
+#'   panel. Graphics settings are restored afterwards.
 #'
 #' @return The comparison plots (shown by default) are the main output. The
 #'   function invisibly returns a `dyadMLM_partner_check` object containing the

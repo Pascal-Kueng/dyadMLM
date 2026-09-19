@@ -42,8 +42,9 @@ See \code{\link[=simulate_dyad_responses]{simulate_dyad_responses()}} for how pr
 automatically; \code{TRUE} pauses and \code{FALSE} draws without pausing.
 Ignored when \code{plot = FALSE}.}
 
-\item{panel}{If \code{TRUE}, arrange all plots in two columns without pausing by
-default. Graphics settings are restored afterwards. Default: \code{FALSE}.}
+\item{panel}{If \code{FALSE} (default), draw plots one after another, with pausing
+controlled by \code{ask}. If \code{TRUE}, show all plots together in a two-column
+panel. Graphics settings are restored afterwards.}
 }
 \value{
 The comparison plots (shown by default) are the main output. The
