@@ -8,6 +8,8 @@
   with a warning; plot labels show how many draws contribute.
   Identifier arguments accept fitted columns or aligned external vectors.
   See the function help for examples, model support, and technical details.
+* Added `panel = TRUE` to `check_partner_dependence()` and its `plot()` method
+  to show all checks together. The default remains separate plots.
 
 # dyadMLM 0.2.0
 
